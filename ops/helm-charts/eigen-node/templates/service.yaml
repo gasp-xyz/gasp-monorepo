@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "node.name" . }}
+  labels: {{- include "node.labels" . | nindent 4 }}
+    service: {{ include "node.name" . }}
+    isP2P: 'false'
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.rpcPort }}
+      name: rpc
+    {{- if .Values.prometheus.enabled }}
+    - port: {{ .Values.prometheus.port }}
+      name: prometheus
+    {{- end }}
+  selector:
+    {{- include "node.selectorLabels" . | nindent 4 }}
+    service: {{ include "node.name" . }}

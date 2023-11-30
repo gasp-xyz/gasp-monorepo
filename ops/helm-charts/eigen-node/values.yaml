@@ -1,0 +1,65 @@
+# Default values eigen-node.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+environment: local
+domainZone: mangata.online
+remoteCluster: false
+ingressClassName: nginx
+storageClass: standard-rwo
+command: /aggregator
+nodeNameOverride: ''
+extraArgs: []
+
+rpcPort: 9010
+
+## Additional args to use
+env:
+  LOG_LEVEL: "info"
+
+nameOverride: ''
+
+image:
+  repository: mangatasolutions/eigen-aggregator
+  pullPolicy: IfNotPresent
+  ## Overrides the image tag whose default is the chart appVersion.
+  tag: latest
+
+enableStartupProbe: true
+
+data:
+  storageSize: 10Gi
+  # -- (string) If set, create a clone of the volume (using volumeClaimTemplates.dataSource.VolumeSnapshot) and use it to store chain data
+  # kubernetesVolumeSnapshot:
+  # -- (string) If set, create a clone of the volume (using volumeClaimTemplates.dataSource.PersistentVolumeClaim) and use it to store chain data
+  # kubernetesVolumeToClone:
+
+enableServiceMonitorCollectors: false
+prometheus:
+  enabled: false
+  port: 9090
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 1Gi
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+
+# -- Define which Nodes the Pods are scheduled on
+nodeSelector: {}
+# -- Grace termination period of the Pod
+terminationGracePeriodSeconds: 60
+# -- Tolerations for use with node taints
+tolerations: []
+# -- Assign custom affinity rules
+affinity: {}
+
+podAnnotations: {}
+  # 'fluentbit.io/parser': 'substrate'
+
+# -- Additional containers to run in the pod
+extraContainers: []
+
+# -- Additional init containers to run in the pod
+extraInitContainers: []

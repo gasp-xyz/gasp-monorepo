@@ -1,0 +1,17 @@
+{{- if .Values.enableServiceMonitorCollectors }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "node.name" . }}
+  labels: {{- include "node.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "node.selectorLabels" . | nindent 6 }}
+      service: {{ include "node.name" . }}
+      isP2P: 'false'
+  endpoints:
+  - targetPort: prometheus
+    path: /metrics
+    honorLabels: true
+    interval: 30s
+{{- end }}
