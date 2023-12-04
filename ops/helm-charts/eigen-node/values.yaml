@@ -9,6 +9,7 @@ storageClass: standard
 command: /aggregator
 nodeNameOverride: ''
 extraArgs: []
+rpcPort: 8090
 
 # ecdsaPrivateKey: '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6'
 configFiles:
@@ -42,8 +43,6 @@ configFiles:
         "blsOperatorStateRetriever": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
         "blsPublicKeyCompendium": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44"
       }
-
-rpcPort: 9010
 
 ## Additional args to use
 env:
