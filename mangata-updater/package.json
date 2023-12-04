@@ -1,0 +1,35 @@
+{
+  "name": "mangata-updater",
+  "version": "1.0.0",
+  "description": "Mangata Updater",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "rimraf ./build && npx tsc",
+    "lint": "eslint . --ext .ts",
+    "lint-and-fix": "eslint . --ext .ts --fix",
+    "prettier:format": "prettier --config .prettierrc 'src/**/*.ts' --write",
+    "prettier-watch": "onchange 'src/**/*.ts' -- prettier --write {{changed}}",
+    "start": "npm run lint && npm run build && node build/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "20.10.3",
+    "@typescript-eslint/eslint-plugin": "6.13.1",
+    "@typescript-eslint/parser": "6.13.1",
+    "eslint": "8.55.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-prettier": "5.0.1",
+    "onchange": "7.1.0",
+    "prettier": "3.1.0",
+    "rimraf": "5.0.5",
+    "typescript": "5.3.2"
+  },
+  "dependencies": {
+    "@mangata-finance/sdk": "^2.1.2-rc-sdk.2",
+    "@mangata-finance/types": "^2.0.1-feature-3rdparty-rewards-merge.13",
+    "viem": "^1.19.11"
+  }
+}
