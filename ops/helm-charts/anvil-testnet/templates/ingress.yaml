@@ -1,0 +1,27 @@
+{{- if .Values.remoteCluster -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: anvil-ingress
+  labels: {{- include "anvil.labels" . | nindent 4 }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: "anvil-{{ .Values.env }}.{{ .Values.domainZone }}"
+    kubernetes.io/tls-acme: 'true'
+spec:
+  ingressClassName: {{ .Values.ingressClassName }}
+  rules:
+    - host: "anvil-{{ .Values.env }}.{{ .Values.domainZone }}"
+      http:
+        paths:
+        - pathType: Prefix
+          path: /
+          backend:
+            service:
+              name: anvil-service
+              port:
+                number: 8545
+  tls:
+    - hosts:
+        - "anvil-{{ .Values.env }}.{{ .Values.domainZone }}"
+      secretName: anvil-tls
+{{- end }}

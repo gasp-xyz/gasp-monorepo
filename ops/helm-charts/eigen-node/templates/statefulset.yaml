@@ -23,7 +23,7 @@ spec:
         {{- include "node.labels" . | nindent 8 }}
         service: {{ include "node.name" . }}
     spec:
-      {{ if .Values.extraInitContainers}}
+      {{- if .Values.extraInitContainers }}
       initContainers:
         {{- with .Values.extraInitContainers }}
         {{- toYaml . | nindent 8 }}
@@ -35,7 +35,7 @@ spec:
           imagePullPolicy: Always
           command:
             - {{ .Values.command }}
-            {{- range .Values.relaychain.extraArgs }}
+            {{- range .Values.extraArgs }}
             - {{ . }}
             {{- end }}
           ports:
@@ -54,7 +54,10 @@ spec:
           {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - mountPath: /data
-              name: data            
+              name: data
+            - name: config
+              mountPath: /config
+              readOnly: true 
           {{- if .Values.enableStartupProbe }}
           startupProbe:
             failureThreshold: 30
@@ -66,6 +69,10 @@ spec:
         {{- with .Values.extraContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "node.name" . }}-configmap
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
