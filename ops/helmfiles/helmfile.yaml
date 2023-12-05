@@ -17,8 +17,7 @@ releases:
       - image:
           repository: mangatasolutions/aggregator
           tag: latest
-        command: {{ .Values.aggregatorCommand }}
-        extraArgs: {{ toYaml .Values.aggregatorExtraArgs | nindent 8 }}
+        args: {{ toYaml .Values.aggregatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
   - name: eigen-operator
     namespace: eigen
@@ -27,8 +26,7 @@ releases:
       - image:
           repository: mangatasolutions/operator
           tag: latest
-        command: {{ .Values.operatorCommand }}
-        extraArgs: {{ toYaml .Values.operatorExtraArgs | nindent 8 }}
+        args: {{ toYaml .Values.operatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.operatorConfigFiles | nindent 8 }}
         rpcPort: 9010
         prometheus:

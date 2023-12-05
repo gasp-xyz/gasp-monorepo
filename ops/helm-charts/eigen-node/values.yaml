@@ -5,13 +5,11 @@ environment: local
 domainZone: mangata.online
 remoteCluster: false
 ingressClassName: nginx
-storageClass: standard
-command: /aggregator
+command: []
+args: []
 nodeNameOverride: ''
-extraArgs: []
 rpcPort: 8090
 
-# ecdsaPrivateKey: '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6'
 configFiles:
   - name: aggregator.yaml
     content: |
@@ -59,6 +57,9 @@ image:
 enableStartupProbe: false
 
 data:
+  storageEnabled: false
+  storageClass: standard
+  mountPath: /data
   storageSize: 10Gi
   # -- (string) If set, create a clone of the volume (using volumeClaimTemplates.dataSource.VolumeSnapshot) and use it to store chain data
   # kubernetesVolumeSnapshot:
