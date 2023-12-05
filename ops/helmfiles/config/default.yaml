@@ -1,4 +1,4 @@
-
+remoteCluster: true
 
 # aggregatorCommand: /aggregator
 aggregatorArgs:

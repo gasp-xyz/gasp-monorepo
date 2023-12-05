@@ -17,7 +17,7 @@ spec:
           path: /
           backend:
             service:
-              name: anvil-service
+              name: anvil
               port:
                 number: 8545
   tls:

@@ -10,22 +10,28 @@ releases:
   - name: anvil
     namespace: eigen
     chart: ../helm-charts/anvil-testnet
+    values:
+      - remoteCluster: {{ .Values.remoteCluster }}
   - name: eigen-aggregator
+    installed: true
     namespace: eigen
     chart: ../helm-charts/eigen-node
     values:
       - image:
           repository: mangatasolutions/aggregator
           tag: latest
+        remoteCluster: {{ .Values.remoteCluster }}
         args: {{ toYaml .Values.aggregatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
   - name: eigen-operator
+    installed: true
     namespace: eigen
     chart: ../helm-charts/eigen-node
     values:
       - image:
           repository: mangatasolutions/operator
           tag: latest
+        remoteCluster: {{ .Values.remoteCluster }}
         args: {{ toYaml .Values.operatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.operatorConfigFiles | nindent 8 }}
         rpcPort: 9010
