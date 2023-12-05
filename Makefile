@@ -36,8 +36,8 @@ bindings: ## generates contract bindings
 
 ___DOCKER___: ## 
 docker-build-and-publish-images: ## builds and publishes operator and aggregator docker images using Ko
-	docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/aggregator:local -f aggregator/Dockerfile .
-	docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/operator:local -f operator/Dockerfile .
+	docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/aggregator:latest -f aggregator/Dockerfile .
+	docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/operator:latest -f operator/Dockerfile .
 	# KO_DOCKER_REPO=mangatasolutions/aggregator ko build --bare aggregator/cmd/main.go --platform=linux/arm64,linux/amd64
 	# KO_DOCKER_REPO=mangatasolutions/operator ko build --bare operator/cmd/main.go --platform=linux/arm64,linux/amd64
 docker-start-everything: docker-build-and-publish-images ## starts aggregator and operator docker containers
