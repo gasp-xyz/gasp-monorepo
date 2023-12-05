@@ -21,6 +21,9 @@ services:
     build:
       context: .
       dockerfile: aggregator/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     depends_on:
       anvil:
         condition: service_healthy
@@ -44,6 +47,9 @@ services:
     build:
       context: .
       dockerfile: operator/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     depends_on: ['anvil', 'aggregator']
     ports:
       - 9010:9010
