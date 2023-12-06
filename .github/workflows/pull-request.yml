@@ -4,10 +4,10 @@ on:
     types: [opened, synchronize, closed]
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
+  deployments: write
   checks: write
-  pull-requests: write
 
 jobs:
   init:
