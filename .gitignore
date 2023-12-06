@@ -23,3 +23,8 @@ coverage.html
 
 # log files
 logs.txt
+
+# Ignore generated kubeconfig from google-github-actions/get-gke-credentials
+gha-kubeconfig-*
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json

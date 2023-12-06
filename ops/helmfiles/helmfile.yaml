@@ -2,6 +2,9 @@ environments:
   default:
     values:
      - config/default.yaml
+  fungible:
+    values:
+     - config/default.yaml
 ---
 helmDefaults:
   wait: true
