@@ -5,6 +5,7 @@ environments:
   fungible:
     values:
      - config/default.yaml
+     - config/fungible.yaml
 ---
 helmDefaults:
   wait: true
