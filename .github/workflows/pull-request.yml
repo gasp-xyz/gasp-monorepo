@@ -22,7 +22,7 @@ jobs:
         run: echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
   
   build-aggregator:
-    name: Build aggregator and operator images
+    name: Build aggregator Docker image
     needs: init
     runs-on: ubuntu-latest
     steps:
@@ -32,7 +32,7 @@ jobs:
           docker buildx create --use
           docker buildx build --platform linux/amd64,linux/arm64 -t mangatasolutions/aggregator:latest -f aggregator/Dockerfile .
   build-operator:
-    name: Build operator and operator images
+    name: Build operator Docker image
     needs: init
     runs-on: ubuntu-latest
     steps:
@@ -62,7 +62,7 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Set up GKE credentials
-        uses: google-github-actions/get-gke-credentials@v1.0.2
+        uses: google-github-actions/get-gke-credentials@v0.8.2
         with:
           cluster_name: mangata-dev-alpha
           location: europe-west1

@@ -8,14 +8,14 @@ helmDefaults:
 
 releases:
   - name: anvil
-    namespace: '{{ requiredEnv "ENVIRONMENT" }}'
+    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
     chart: ../helm-charts/anvil-testnet
     values:
       - environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
 
   - name: eigen-aggregator
-    namespace: '{{ requiredEnv "ENVIRONMENT" }}'
+    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
     chart: ../helm-charts/eigen-node
     values:
       - image:
@@ -26,7 +26,7 @@ releases:
         args: {{ toYaml .Values.aggregatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
   - name: eigen-operator
-    namespace: '{{ requiredEnv "ENVIRONMENT" }}'
+    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
     chart: ../helm-charts/eigen-node
     values:
       - image:
