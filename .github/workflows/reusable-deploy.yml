@@ -70,6 +70,10 @@ jobs:
           env: ${{ env.ENV_REF }}
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
 
+      - name: Delete the fungible env deployment before new one to allow operator to register and not fail
+        if: inputs.env == 'fungible'
+        run: export ENVIRONMENT=${{ env.ENV_REF }} && helmfile destroy -e fungible
+      
       - run: |
           export ENVIRONMENT=${{ env.ENV_REF }}
           export IMAGE_TAG=${{ inputs.version }}
