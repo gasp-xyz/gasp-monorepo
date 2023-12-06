@@ -73,6 +73,7 @@ jobs:
       - name: Delete the fungible env deployment before new one to allow operator to register and not fail
         if: inputs.env == 'fungible'
         run: export ENVIRONMENT=${{ env.ENV_REF }} && helmfile destroy -e fungible
+        working-directory: ops/helmfiles
       
       - run: |
           export ENVIRONMENT=${{ env.ENV_REF }}
