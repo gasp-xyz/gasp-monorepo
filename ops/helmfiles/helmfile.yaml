@@ -28,7 +28,7 @@ releases:
         remoteCluster: {{ .Values.remoteCluster }}
         args: {{ toYaml .Values.aggregatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
-  - name: eigen-operator
+  - name: eigen-operator  
     namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
     chart: ../helm-charts/eigen-node
     values:
@@ -40,5 +40,6 @@ releases:
         args: {{ toYaml .Values.operatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.operatorConfigFiles | nindent 8 }}
         rpcPort: 9010
+        enableServiceMonitorCollectors: {{ .Values.operatorEnableServiceMonitorCollectors }}
         prometheus:
           enabled: true

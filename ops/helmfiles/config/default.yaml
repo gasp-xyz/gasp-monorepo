@@ -1,6 +1,5 @@
 remoteCluster: true
 
-# aggregatorCommand: /aggregator
 aggregatorArgs:
   - --config 
   - /config/aggregator.yaml
@@ -42,7 +41,7 @@ aggregatorConfigFiles:
         "blsPublicKeyCompendium": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44"
       }
 
-# operatorCommand: /operator
+operatorEnableServiceMonitorCollectors: false
 operatorArgs:
   - --config 
   - /config/operator.yaml
