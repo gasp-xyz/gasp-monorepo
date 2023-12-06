@@ -19,7 +19,7 @@ on:
   workflow_call:
     inputs:
       env:
-        description: "Target environment for deployment"
+        description: "Target environment for the deployment"
         required: true
         type: string
       version:
