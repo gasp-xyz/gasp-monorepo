@@ -21,9 +21,6 @@ services:
     build:
       context: .
       dockerfile: aggregator/Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     depends_on:
       anvil:
         condition: service_healthy
@@ -33,7 +30,6 @@ services:
       - ./:/app
     command:
       - --config 
-      # - config-files/aggregator.yaml
       - config-files/aggregator-docker-compose.yaml
       - --credible-squaring-deployment 
       - contracts/script/output/31337/credible_squaring_avs_deployment_output.json
@@ -47,9 +43,6 @@ services:
     build:
       context: .
       dockerfile: operator/Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
     depends_on: ['anvil', 'aggregator']
     ports:
       - 9010:9010
