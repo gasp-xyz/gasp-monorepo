@@ -1,0 +1,28 @@
+name: Pull Request
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write
+  checks: write
+  pull-requests: write
+
+jobs:
+  init:
+    name: Set global version
+    runs-on: ubuntu-latest
+    outputs:
+      GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
+    steps:
+      - name: Set global version
+        id: set_vars
+        run: echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
+  
+  build:
+    name: Build aggregator and operator images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mxschmitt/action-tmate@v3
+
