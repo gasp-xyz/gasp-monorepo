@@ -8,29 +8,31 @@ helmDefaults:
 
 releases:
   - name: anvil
-    namespace: eigen
+    namespace: '{{ requiredEnv "ENVIRONMENT" }}'
     chart: ../helm-charts/anvil-testnet
     values:
-      - remoteCluster: {{ .Values.remoteCluster }}
+      - environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        remoteCluster: {{ .Values.remoteCluster }}
+
   - name: eigen-aggregator
-    installed: true
-    namespace: eigen
+    namespace: '{{ requiredEnv "ENVIRONMENT" }}'
     chart: ../helm-charts/eigen-node
     values:
       - image:
           repository: mangatasolutions/aggregator
-          tag: latest
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         args: {{ toYaml .Values.aggregatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
   - name: eigen-operator
-    installed: true
-    namespace: eigen
+    namespace: '{{ requiredEnv "ENVIRONMENT" }}'
     chart: ../helm-charts/eigen-node
     values:
       - image:
           repository: mangatasolutions/operator
-          tag: latest
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         args: {{ toYaml .Values.operatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.operatorConfigFiles | nindent 8 }}

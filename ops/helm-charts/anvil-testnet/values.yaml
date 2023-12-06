@@ -1,7 +1,7 @@
 # Default values for mangata-node.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-env: local
+environment: local
 domainZone: mangata.online
 nameOverride: ''
 

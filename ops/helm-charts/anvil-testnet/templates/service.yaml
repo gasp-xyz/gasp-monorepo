@@ -5,7 +5,7 @@ metadata:
   name: {{ $name }}
   {{- if .Values.remoteCluster }}
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: "{{ $name }}-{{ .Values.env }}.{{ .Values.domainZone }}"
+    external-dns.alpha.kubernetes.io/hostname: "{{ $name }}-{{ .Values.environment }}.{{ .Values.domainZone }}"
   {{- end }}
   labels: {{- include "anvil.labels" . | nindent 4 }}
     service: {{ $name }}

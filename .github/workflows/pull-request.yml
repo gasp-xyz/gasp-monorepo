@@ -1,6 +1,7 @@
 name: Pull Request
 on:
   pull_request:
+    types: [opened, synchronize, closed]
 
 permissions:
   contents: read
@@ -11,6 +12,7 @@ permissions:
 jobs:
   init:
     name: Set global version
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     outputs:
       GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
@@ -39,4 +41,40 @@ jobs:
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
           docker buildx build --platform linux/amd64,linux/arm64 -t mangatasolutions/operator:latest -f operator/Dockerfile .
+  
+  deploy-fungible:
+    name: Deploy fungible environment
+    needs: [init, build-aggregator, build-operator]
+    uses: ./.github/workflows/reusable-deploy.yml
+    secrets: inherit
+    with:
+      env: fungible
+      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+
+  clean-up-fungible:
+    name: Delete fungible environment
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Set up GKE credentials
+        uses: google-github-actions/get-gke-credentials@v1.0.2
+        with:
+          cluster_name: mangata-dev-alpha
+          location: europe-west1
+
+      - name: Delete Kubernetes namespace with resources for fungible environment
+        run: kubectl delete namespace pr-${{ github.event.number }}
+      
+      - name: Delete GitHub Deployment environment
+        if: always()
+        uses: bobheadxi/deployments@v1.4.0
+        with:
+          step: delete-env
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: pr-${{ github.event.number }}
 
