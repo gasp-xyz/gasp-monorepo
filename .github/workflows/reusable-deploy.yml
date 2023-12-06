@@ -72,7 +72,7 @@ jobs:
 
       - name: Delete the fungible env deployment before new one to allow operator to register and not fail
         if: inputs.env == 'fungible'
-        run: export ENVIRONMENT=${{ env.ENV_REF }} && helmfile destroy -e fungible
+        run: export IMAGE_TAG=${{ inputs.version }} && export ENVIRONMENT=${{ env.ENV_REF }} && helmfile destroy -e fungible
         working-directory: ops/helmfiles
       
       - run: |
@@ -80,6 +80,7 @@ jobs:
           export IMAGE_TAG=${{ inputs.version }}
           
           # https://dev.to/derlin/helmfile-difference-between-sync-and-apply-helm-3-28o1
+          
           export HELM_DIFF_THREE_WAY_MERGE=true
           helmfile apply -e ${{ inputs.env }}
         working-directory: ops/helmfiles
