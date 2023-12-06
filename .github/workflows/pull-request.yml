@@ -24,5 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: mxschmitt/action-tmate@v3
+      # - uses: mxschmitt/action-tmate@v3
+      - run: |
+          docker buildx create --use
+          docker buildx build --platform linux/amd64,linux/arm64 -t mangatasolutions/aggregator:latest -f aggregator/Dockerfile .
+          docker buildx build --platform linux/amd64,linux/arm64 -t mangatasolutions/operator:latest -f operator/Dockerfile .
 
