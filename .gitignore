@@ -12,6 +12,7 @@
 *.test
 mangata-updater/node_modules
 mangata-updater/build
+mangata-updater/.env
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
