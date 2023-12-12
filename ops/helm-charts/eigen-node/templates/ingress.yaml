@@ -5,12 +5,12 @@ metadata:
   name: {{ include "node.name" . }}
   labels: {{- include "node.labels" . | nindent 4 }}
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: {{ include "node.name" . }}-ws-{{ .Values.environment }}.{{ .Values.domainZone }}
+    external-dns.alpha.kubernetes.io/hostname: {{ include "node.name" . }}-{{ .Values.environment }}.{{ .Values.domainZone }}
     kubernetes.io/tls-acme: 'true'
 spec:
   ingressClassName: {{ .Values.ingressClassName }}
   rules:
-    - host: {{ include "node.name" . }}-ws-{{ .Values.environment }}.{{ .Values.domainZone }}
+    - host: {{ include "node.name" . }}-{{ .Values.environment }}.{{ .Values.domainZone }}
       http:
         paths:
         - pathType: Prefix
@@ -19,9 +19,9 @@ spec:
             service:
               name: {{ include "node.name" . }}
               port:
-                number: 9944
+                number: {{ .Values.rpcPort }}
   tls:
     - hosts:
-        - {{ include "node.name" . }}-ws-{{ .Values.environment }}.{{ .Values.domainZone }}
+        - {{ include "node.name" . }}-{{ .Values.environment }}.{{ .Values.domainZone }}
       secretName: {{ include "node.name" . }}-tls
 {{- end }}

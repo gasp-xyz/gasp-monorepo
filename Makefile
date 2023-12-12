@@ -36,9 +36,10 @@ bindings: ## generates contract bindings
 
 ___DOCKER___: ## 
 docker-build-and-publish-images: ## builds and publishes operator and aggregator docker images using Ko
-	# Temporarily set `-L` flag to not publish built images to dockerhub
-	KO_DOCKER_REPO=mangatasolutions/eigen-aggregator ko build aggregator/cmd/main.go --preserve-import-paths -L
-	KO_DOCKER_REPO=mangatasolutions/eigen-operator ko build operator/cmd/main.go --preserve-import-paths -L
+	docker buildx build --load --platform linux/amd64,linux/arm64 -t mangatasolutions/aggregator:latest -f aggregator/Dockerfile .
+	docker buildx build --load --platform linux/amd64,linux/arm64 -t mangatasolutions/operator:latest -f operator/Dockerfile .
+	# KO_DOCKER_REPO=mangatasolutions/aggregator ko build --bare aggregator/cmd/main.go --platform=linux/arm64,linux/amd64
+	# KO_DOCKER_REPO=mangatasolutions/operator ko build --bare operator/cmd/main.go --platform=linux/arm64,linux/amd64
 docker-start-everything: docker-build-and-publish-images ## starts aggregator and operator docker containers
 	docker compose pull && docker compose up
 

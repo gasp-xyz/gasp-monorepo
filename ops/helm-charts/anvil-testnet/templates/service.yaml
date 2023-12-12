@@ -1,0 +1,19 @@
+{{ $name :=  "anvil" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  {{- if .Values.remoteCluster }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: "{{ $name }}-{{ .Values.environment }}.{{ .Values.domainZone }}"
+  {{- end }}
+  labels: {{- include "anvil.labels" . | nindent 4 }}
+    service: {{ $name }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8545
+      name: rpc
+  selector:
+    {{- include "anvil.selectorLabels" . | nindent 4 }}
+    service: {{ $name }}

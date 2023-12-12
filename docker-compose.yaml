@@ -30,7 +30,6 @@ services:
       - ./:/app
     command:
       - --config 
-      # - config-files/aggregator.yaml
       - config-files/aggregator-docker-compose.yaml
       - --credible-squaring-deployment 
       - contracts/script/output/31337/credible_squaring_avs_deployment_output.json

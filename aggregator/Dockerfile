@@ -1,4 +1,6 @@
-FROM golang:1.21 as build
+FROM --platform=$BUILDPLATFORM golang:1.21 as build
+ARG TARGETOS 
+ARG TARGETARCH
 
 WORKDIR /app
 
@@ -7,9 +9,9 @@ RUN go mod download && go mod tidy && go mod verify
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /aggregator aggregator/cmd/main.go
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /aggregator aggregator/cmd/main.go
 
-FROM debian:buster-slim
+FROM debian:stable-slim
 WORKDIR /app
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /aggregator /aggregator

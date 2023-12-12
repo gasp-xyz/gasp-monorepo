@@ -23,7 +23,7 @@ spec:
         {{- include "node.labels" . | nindent 8 }}
         service: {{ include "node.name" . }}
     spec:
-      {{ if .Values.extraInitContainers}}
+      {{- if .Values.extraInitContainers }}
       initContainers:
         {{- with .Values.extraInitContainers }}
         {{- toYaml . | nindent 8 }}
@@ -33,11 +33,18 @@ spec:
         - name: node
           image: "{{ .Values.image.repository}}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
+          {{- if .Values.command }}
           command:
-            - {{ .Values.command }}
-            {{- range .Values.relaychain.extraArgs }}
+            {{- range .Values.command }}
             - {{ . }}
             {{- end }}
+          {{- end }}
+          {{- if .Values.args }}
+          args:
+            {{- range .Values.args }}
+            - {{ . }}
+            {{- end }}
+          {{- end }}
           ports:
             - containerPort: {{ .Values.rpcPort }}
               name: rpc
@@ -45,16 +52,23 @@ spec:
             - containerPort: {{ .Values.prometheus.port }}
               name: prometheus
           {{- end }}
+          {{- if .Values.env }}
           env:
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}
               value: {{ $val }}
             {{- end }}
+          {{- end }}
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - mountPath: /data
-              name: data            
+            - name: config
+              mountPath: /config
+              readOnly: true 
+            {{- if .Values.data.storageEnabled }}
+            - mountPath: {{ .Values.data.mountPath }}
+              name: data
+            {{- end }}
           {{- if .Values.enableStartupProbe }}
           startupProbe:
             failureThreshold: 30
@@ -66,6 +80,10 @@ spec:
         {{- with .Values.extraContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "node.name" . }}-configmap
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -79,11 +97,12 @@ spec:
       tolerations:
       {{- toYaml . | nindent 8 }}
       {{- end }}
+  {{- if .Values.data.storageEnabled }}
   volumeClaimTemplates:
     - metadata:
         name: data
       spec:
-        storageClassName: {{ .Values.storageClass }}
+        storageClassName: {{ .Values.data.storageClass }}
         accessModes: ["ReadWriteOnce"]
         {{- if or .Values.data.kubernetesVolumeSnapshot .Values.data.kubernetesVolumeToClone }}
         dataSource:
@@ -99,3 +118,4 @@ spec:
         resources:
           requests:
             storage: {{ .Values.data.storageSize }}
+  {{- end }}

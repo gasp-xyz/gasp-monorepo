@@ -1,0 +1,19 @@
+# Default values for mangata-node.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+environment: local
+domainZone: mangata.online
+nameOverride: ''
+
+remoteCluster: false
+ingressClassName: nginx
+
+image: ghcr.io/foundry-rs/foundry:nightly-d4e6b43ea694f31ef2915e75d81c3308479ef8fd
+
+resources: {}
+  # requests:
+  #   cpu: 200m
+  #   memory: 1Gi
+  # limits:
+  #   cpu: 1000m
+  #   memory: 2Gi
