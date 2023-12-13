@@ -1,0 +1,46 @@
+remoteCluster: true
+
+anvilEnabled: false
+aggregatorEnabled: true
+operatorEnabled: false
+
+aggregatorArgs:
+  - --config 
+  - /config/aggregator.yaml
+  - --credible-squaring-deployment 
+  - /config/credible_squaring_avs_deployment_output.json
+  - --shared-avs-contracts-deployment 
+  - /config/shared_avs_contracts_deployment_output.json
+  - --ecdsa-private-key 
+  - "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6"
+aggregatorConfigFiles:
+  - name: aggregator.yaml
+    content: |
+      # production only prints info and above. development also prints debug
+      environment: production
+      eth_rpc_url: http://anvil:8545
+      eth_ws_url: ws://anvil:8545
+      # address which the aggregator listens on for operator signed messages
+      aggregator_server_ip_port_address: 0.0.0.0:8090
+      bls_public_key_compendium_address: 0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44
+      substrate_rpc_url: wss://kusama-archive.mangata.online
+  - name: credible_squaring_avs_deployment_output.json
+    content: |
+      {
+        "addresses": {
+          "credibleSquaringServiceManager": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
+          "credibleSquaringServiceManagerImplementation": "0x9d4454B023096f34B160D6B654540c56A1F81688",
+          "credibleSquaringTaskManager": "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
+          "credibleSquaringTaskManagerImplementation": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
+          "erc20Mock": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+          "erc20MockStrategy": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
+          "registryCoordinator": "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
+          "registryCoordinatorImplementation": "0x998abeb3E57409262aE5b751f60747921B33613E"
+        }
+      }
+  - name: shared_avs_contracts_deployment_output.json
+    content: |
+      {
+        "blsOperatorStateRetriever": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+        "blsPublicKeyCompendium": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44"
+      }
