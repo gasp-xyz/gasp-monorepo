@@ -1,5 +1,9 @@
 remoteCluster: true
 
+anvilEnabled: true
+aggregatorEnabled: true
+operatorEnabled: true
+
 aggregatorArgs:
   - --config 
   - /config/aggregator.yaml

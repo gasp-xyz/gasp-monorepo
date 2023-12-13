@@ -6,13 +6,19 @@ environments:
     values:
      - config/default.yaml
      - config/fungible.yaml
+  goerli:
+    values:
+     - config/default.yaml
+     - config/goerli.yaml
 ---
 helmDefaults:
-  wait: true
+  kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
+  wait: false
 
 releases:
   - name: anvil
     namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.anvilEnabled }}
     chart: ../helm-charts/anvil-testnet
     values:
       - environment: {{ requiredEnv "ENVIRONMENT" | quote }}
@@ -20,6 +26,7 @@ releases:
 
   - name: eigen-aggregator
     namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.aggregatorEnabled }}
     chart: ../helm-charts/eigen-node
     values:
       - image:
@@ -31,6 +38,7 @@ releases:
         configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
   - name: eigen-operator  
     namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.operatorEnabled }}
     chart: ../helm-charts/eigen-node
     values:
       - image:
