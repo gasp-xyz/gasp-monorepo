@@ -12,7 +12,7 @@ const QUORUM_THRESHOLD_DENOMINATOR = uint32(100)
 
 const QUERY_FILTER_FROM_BLOCK = uint64(1)
 
-// we only use a single quorum (quorum 0) for incredible squaring
+// we only use a single quorum (quorum 0)
 var QUORUM_NUMBERS = []byte{0}
 
 type BlockNumber = uint32

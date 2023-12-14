@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.12;
 
-import "../src/IncredibleSquaringServiceManager.sol" as incsqsm;
-import {IncredibleSquaringTaskManager} from "../src/IncredibleSquaringTaskManager.sol";
+import "../src/MangataServiceManager.sol" as msm;
+import {MangataTaskManager} from "../src/MangataTaskManager.sol";
 import {BLSMockAVSDeployer} from "@eigenlayer-middleware/test/utils/BLSMockAVSDeployer.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-contract IncredibleSquaringTaskManagerTest is BLSMockAVSDeployer {
-    incsqsm.IncredibleSquaringServiceManager sm;
-    incsqsm.IncredibleSquaringServiceManager smImplementation;
-    IncredibleSquaringTaskManager tm;
-    IncredibleSquaringTaskManager tmImplementation;
+contract MangataTaskManagerTest is BLSMockAVSDeployer {
+    msm.MangataServiceManager sm;
+    msm.MangataServiceManager smImplementation;
+    MangataTaskManager tm;
+    MangataTaskManager tmImplementation;
 
     uint32 public constant TASK_RESPONSE_WINDOW_BLOCK = 30;
     address aggregator =
@@ -21,15 +21,15 @@ contract IncredibleSquaringTaskManagerTest is BLSMockAVSDeployer {
     function setUp() public {
         _setUpBLSMockAVSDeployer();
 
-        tmImplementation = new IncredibleSquaringTaskManager(
-            incsqsm.IBLSRegistryCoordinatorWithIndices(
+        tmImplementation = new MangataTaskManager(
+            msm.IBLSRegistryCoordinatorWithIndices(
                 address(registryCoordinator)
             ),
             TASK_RESPONSE_WINDOW_BLOCK
         );
 
         // Third, upgrade the proxy contracts to use the correct implementation contracts and initialize them.
-        tm = IncredibleSquaringTaskManager(
+        tm = MangataTaskManager(
             address(
                 new TransparentUpgradeableProxy(
                     address(tmImplementation),

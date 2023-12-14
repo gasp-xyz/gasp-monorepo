@@ -2,15 +2,13 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/urfave/cli"
 
-	"github.com/Layr-Labs/incredible-squaring-avs/aggregator"
-	"github.com/Layr-Labs/incredible-squaring-avs/core/config"
+	"github.com/mangata-finance/eigen-layer-monorepo/aggregator"
 )
 
 var (
@@ -23,11 +21,11 @@ var (
 func main() {
 
 	app := cli.NewApp()
-	app.Flags = config.Flags
+	app.Flags = aggregator.Flags
 	app.Version = fmt.Sprintf("%s-%s-%s", Version, GitCommit, GitDate)
-	app.Name = "credible-squaring-aggregator"
-	app.Usage = "Credible Squaring Aggregator"
-	app.Description = "Service that sends number to be credibly squared by operator nodes."
+	app.Name = "mangata-finalizer-aggregator"
+	app.Usage = "Mangata Finalizer Aggregator"
+	app.Description = "Service that sends block number to be finalized by operator nodes."
 
 	app.Action = aggregatorMain
 	err := app.Run(os.Args)
@@ -39,15 +37,10 @@ func main() {
 func aggregatorMain(ctx *cli.Context) error {
 
 	log.Println("Initializing Aggregator")
-	config, err := config.NewConfig(ctx)
+	config, err := aggregator.NewConfig(ctx)
 	if err != nil {
 		return err
 	}
-	configJson, err := json.MarshalIndent(config, "", "  ")
-	if err != nil {
-		config.Logger.Fatalf(err.Error())
-	}
-	fmt.Println("Config:", string(configJson))
 
 	agg, err := aggregator.NewAggregator(config)
 	if err != nil {

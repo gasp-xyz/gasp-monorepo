@@ -1,4 +1,4 @@
-module github.com/Layr-Labs/incredible-squaring-avs
+module github.com/mangata-finance/eigen-layer-monorepo
 
 go 1.21
 

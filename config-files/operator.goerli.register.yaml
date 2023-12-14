@@ -1,0 +1,44 @@
+# All the below fields are required for successful operator registration.
+
+# To learn more about operator fields
+# https://github.com/Layr-Labs/eigenlayer-contracts/blob/92ccacc868785350973afc15e90a18dcd39fbc0b/src/contracts/interfaces/IDelegationManager.sol#L21:
+operator:
+  # This is the standard Ethereum address format (ex: 0x6a8c0D554a694899041E52a91B4EC3Ff23d8aBD5) of your operator
+  # which is the ecdsa key you created or imported using EigenLayer CLI
+  address: 0x7CD2ceD87E776f8bC71Cd2e39E046dB298709f71
+  # This is the standard Ethereum address format (ex: 0x6a8c0D554a694899041E52a91B4EC3Ff23d8aBD5)
+  # This is the address where your operator will receive earnings. This could be same as operator address
+  earnings_receiver_address: 0x7CD2ceD87E776f8bC71Cd2e39E046dB298709f71
+  # This is the standard Ethereum address format (0x...)
+  # This is the address which operator will use to approve delegation requests from stakers.
+  # if set, this address must sign and approve new delegation from Stakers to this Operator
+  # This is optional, so you can leave it  with the default value for un-gated delegation requests
+  delegation_approver_address: 0x0000000000000000000000000000000000000000
+  # Please refer to this link for more details on this field https://github.com/Layr-Labs/eigenlayer-contracts/blob/92ccacc868785350973afc15e90a18dcd39fbc0b/src/contracts/interfaces/IDelegationManager.sol#L33:
+  # Please keep this field to 0, and it can be updated later using EigenLayer CLI
+  staker_opt_out_window_blocks: 0
+  metadata_url: https://api.jsonbin.io/v3/b/65733dcf12a5d37659a4fc85?meta=false
+
+# EigenLayer Slasher contract address
+# This will be provided by EigenLayer team
+el_slasher_address: 0xD11d60b669Ecf7bE10329726043B3ac07B380C22
+
+# Address of BLS Public Key Compendium contract
+# This will be provided by EigenLayer team
+bls_public_key_compendium_address: 0xc81d3963087Fe09316cd1E032457989C7aC91b19
+
+# ETH RPC URL to the ethereum node you are using for on-chain operations
+eth_rpc_url: https://eth-goerli.g.alchemy.com/v2/slHhquJDTBbdx25NdPLAx_nqoUNu-RqJ
+
+# Signer Type to use
+# Supported values: local_keystore
+signer_type: local_keystore
+
+# Full path to local ecdsa private key store file
+private_key_store_path: /root/.eigenlayer/operator_keys/op.ecdsa.key.json
+
+# Full path to local bls private key store file
+bls_private_key_store_path: /root/.eigenlayer/operator_keys/op.bls.key.json
+
+# Chain ID: 1 for mainnet, 5 for Goerli, 31337 for local
+chain_id: 5

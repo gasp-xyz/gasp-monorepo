@@ -17,9 +17,9 @@ import {IndexRegistry, IIndexRegistry} from "@eigenlayer-middleware/src/IndexReg
 import {StakeRegistry, IStakeRegistry} from "@eigenlayer-middleware/src/StakeRegistry.sol";
 import {IVoteWeigher} from "@eigenlayer-middleware/src/interfaces/IVoteWeigher.sol";
 
-import {IncredibleSquaringServiceManager, IServiceManager} from "../src/IncredibleSquaringServiceManager.sol";
-import {IncredibleSquaringTaskManager} from "../src/IncredibleSquaringTaskManager.sol";
-import {IIncredibleSquaringTaskManager} from "../src/IIncredibleSquaringTaskManager.sol";
+import {MangataServiceManager, IServiceManager} from "../src/MangataServiceManager.sol";
+import {MangataTaskManager} from "../src/MangataTaskManager.sol";
+import {IMangataTaskManager} from "../src/IMangataTaskManager.sol";
 import "../src/ERC20Mock.sol";
 
 import {Utils} from "./utils/Utils.sol";
@@ -30,8 +30,8 @@ import "forge-std/StdJson.sol";
 import "forge-std/console.sol";
 
 // # To deploy and verify our contract
-// forge script script/CredibleSquaringDeployer.s.sol:CredibleSquaringDeployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
-contract CredibleSquaringDeployer is Script, Utils {
+// forge script script/Deployer.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
+contract Deployer is Script, Utils {
     // DEPLOYMENT CONSTANTS
     uint256 public constant QUORUM_THRESHOLD_PERCENTAGE = 100;
     uint32 public constant TASK_RESPONSE_WINDOW_BLOCK = 30;
@@ -47,9 +47,9 @@ contract CredibleSquaringDeployer is Script, Utils {
     ERC20Mock public erc20Mock;
     StrategyBaseTVLLimits public erc20MockStrategy;
 
-    // Credible Squaring contracts
-    ProxyAdmin public credibleSquaringProxyAdmin;
-    PauserRegistry public credibleSquaringPauserReg;
+    // Mangata contracts
+    ProxyAdmin public mangataProxyAdmin;
+    PauserRegistry public mangataPauserReg;
 
     blsregcoord.BLSRegistryCoordinatorWithIndices public registryCoordinator;
     blsregcoord.IBLSRegistryCoordinatorWithIndices
@@ -64,19 +64,19 @@ contract CredibleSquaringDeployer is Script, Utils {
     IStakeRegistry public stakeRegistry;
     IStakeRegistry public stakeRegistryImplementation;
 
-    IncredibleSquaringServiceManager public credibleSquaringServiceManager;
-    IServiceManager public credibleSquaringServiceManagerImplementation;
+    MangataServiceManager public serviceManager;
+    IServiceManager public serviceManagerImplementation;
 
-    IncredibleSquaringTaskManager public credibleSquaringTaskManager;
-    IIncredibleSquaringTaskManager
-        public credibleSquaringTaskManagerImplementation;
+    MangataTaskManager public taskManager;
+    IMangataTaskManager
+        public taskManagerImplementation;
 
     function run() external {
         // Eigenlayer contracts
-        string memory eigenlayerDeployedContracts = readOutput(
+        string memory eigenlayerDeployedContracts = readInput(
             "eigenlayer_deployment_output"
         );
-        string memory sharedAvsDeployedContracts = readOutput(
+        string memory sharedAvsDeployedContracts = readInput(
             "shared_avs_contracts_deployment_output"
         );
         IStrategyManager strategyManager = IStrategyManager(
@@ -122,8 +122,8 @@ contract CredibleSquaringDeployer is Script, Utils {
                 )
             );
 
-        address credibleSquaringCommunityMultisig = msg.sender;
-        address credibleSquaringPauser = msg.sender;
+        address mangataCommunityMultisig = msg.sender;
+        address mangataPauser = msg.sender;
 
         vm.startBroadcast();
         _deployErc20AndStrategyAndWhitelistStrategy(
@@ -132,14 +132,14 @@ contract CredibleSquaringDeployer is Script, Utils {
             baseStrategyImplementation,
             strategyManager
         );
-        _deployCredibleSquaringContracts(
+        _deployMangataContracts(
             strategyManager,
             delegationManager,
             slasher,
             erc20MockStrategy,
             pubkeyCompendium,
-            credibleSquaringCommunityMultisig,
-            credibleSquaringPauser
+            mangataCommunityMultisig,
+            mangataPauser
         );
         vm.stopBroadcast();
     }
@@ -173,14 +173,14 @@ contract CredibleSquaringDeployer is Script, Utils {
         strategyManager.addStrategiesToDepositWhitelist(strats);
     }
 
-    function _deployCredibleSquaringContracts(
+    function _deployMangataContracts(
         IStrategyManager strategyManager,
         IDelegationManager delegationManager,
         ISlasher slasher,
         IStrategy strat,
         BLSPublicKeyCompendium pubkeyCompendium,
-        address credibleSquaringCommunityMultisig,
-        address credibleSquaringPauser
+        address mangataCommunityMultisig,
+        address mangataPauser
     ) internal {
         // Adding this as a temporary fix to make the rest of the script work with a single strategy
         // since it was originally written to work with an array of strategies
@@ -188,16 +188,16 @@ contract CredibleSquaringDeployer is Script, Utils {
         uint numStrategies = deployedStrategyArray.length;
 
         // deploy proxy admin for ability to upgrade proxy contracts
-        credibleSquaringProxyAdmin = new ProxyAdmin();
+        mangataProxyAdmin = new ProxyAdmin();
 
         // deploy pauser registry
         {
             address[] memory pausers = new address[](2);
-            pausers[0] = credibleSquaringPauser;
-            pausers[1] = credibleSquaringCommunityMultisig;
-            credibleSquaringPauserReg = new PauserRegistry(
+            pausers[0] = mangataPauser;
+            pausers[1] = mangataCommunityMultisig;
+            mangataPauserReg = new PauserRegistry(
                 pausers,
-                credibleSquaringCommunityMultisig
+                mangataCommunityMultisig
             );
         }
 
@@ -209,20 +209,20 @@ contract CredibleSquaringDeployer is Script, Utils {
          * First, deploy upgradeable proxy contracts that **will point** to the implementations. Since the implementation contracts are
          * not yet deployed, we give these proxies an empty contract as the initial implementation, to act as if they have no code.
          */
-        credibleSquaringServiceManager = IncredibleSquaringServiceManager(
+        serviceManager = MangataServiceManager(
             address(
                 new TransparentUpgradeableProxy(
                     address(emptyContract),
-                    address(credibleSquaringProxyAdmin),
+                    address(mangataProxyAdmin),
                     ""
                 )
             )
         );
-        credibleSquaringTaskManager = IncredibleSquaringTaskManager(
+        taskManager = MangataTaskManager(
             address(
                 new TransparentUpgradeableProxy(
                     address(emptyContract),
-                    address(credibleSquaringProxyAdmin),
+                    address(mangataProxyAdmin),
                     ""
                 )
             )
@@ -231,7 +231,7 @@ contract CredibleSquaringDeployer is Script, Utils {
             address(
                 new TransparentUpgradeableProxy(
                     address(emptyContract),
-                    address(credibleSquaringProxyAdmin),
+                    address(mangataProxyAdmin),
                     ""
                 )
             )
@@ -240,7 +240,7 @@ contract CredibleSquaringDeployer is Script, Utils {
             address(
                 new TransparentUpgradeableProxy(
                     address(emptyContract),
-                    address(credibleSquaringProxyAdmin),
+                    address(mangataProxyAdmin),
                     ""
                 )
             )
@@ -249,7 +249,7 @@ contract CredibleSquaringDeployer is Script, Utils {
             address(
                 new TransparentUpgradeableProxy(
                     address(emptyContract),
-                    address(credibleSquaringProxyAdmin),
+                    address(mangataProxyAdmin),
                     ""
                 )
             )
@@ -258,7 +258,7 @@ contract CredibleSquaringDeployer is Script, Utils {
             address(
                 new TransparentUpgradeableProxy(
                     address(emptyContract),
-                    address(credibleSquaringProxyAdmin),
+                    address(mangataProxyAdmin),
                     ""
                 )
             )
@@ -269,7 +269,7 @@ contract CredibleSquaringDeployer is Script, Utils {
             stakeRegistryImplementation = new StakeRegistry(
                 registryCoordinator,
                 strategyManager,
-                credibleSquaringServiceManager
+                serviceManager
             );
 
             // set up a quorum with each strategy that needs to be set up
@@ -293,7 +293,7 @@ contract CredibleSquaringDeployer is Script, Utils {
                     });
             }
 
-            credibleSquaringProxyAdmin.upgradeAndCall(
+            mangataProxyAdmin.upgradeAndCall(
                 TransparentUpgradeableProxy(payable(address(stakeRegistry))),
                 address(stakeRegistryImplementation),
                 abi.encodeWithSelector(
@@ -306,7 +306,7 @@ contract CredibleSquaringDeployer is Script, Utils {
 
         registryCoordinatorImplementation = new blsregcoord.BLSRegistryCoordinatorWithIndices(
             slasher,
-            credibleSquaringServiceManager,
+            serviceManager,
             blsregcoord.IStakeRegistry(address(stakeRegistry)),
             blsregcoord.IBLSPubkeyRegistry(address(blsPubkeyRegistry)),
             blsregcoord.IIndexRegistry(address(indexRegistry))
@@ -327,7 +327,7 @@ contract CredibleSquaringDeployer is Script, Utils {
                         kickBIPsOfTotalStake: 100
                     });
             }
-            credibleSquaringProxyAdmin.upgradeAndCall(
+            mangataProxyAdmin.upgradeAndCall(
                 TransparentUpgradeableProxy(
                     payable(address(registryCoordinator))
                 ),
@@ -338,10 +338,10 @@ contract CredibleSquaringDeployer is Script, Utils {
                         .initialize
                         .selector,
                     // we set churnApprover and ejector to communityMultisig because we don't need them
-                    credibleSquaringCommunityMultisig,
-                    credibleSquaringCommunityMultisig,
+                    mangataCommunityMultisig,
+                    mangataCommunityMultisig,
                     operatorSetParams,
-                    credibleSquaringPauserReg,
+                    mangataPauserReg,
                     // 0 initialPausedStatus means everything unpaused
                     0
                 )
@@ -353,51 +353,51 @@ contract CredibleSquaringDeployer is Script, Utils {
             pubkeyCompendium
         );
 
-        credibleSquaringProxyAdmin.upgrade(
+        mangataProxyAdmin.upgrade(
             TransparentUpgradeableProxy(payable(address(blsPubkeyRegistry))),
             address(blsPubkeyRegistryImplementation)
         );
 
         indexRegistryImplementation = new IndexRegistry(registryCoordinator);
 
-        credibleSquaringProxyAdmin.upgrade(
+        mangataProxyAdmin.upgrade(
             TransparentUpgradeableProxy(payable(address(indexRegistry))),
             address(indexRegistryImplementation)
         );
 
-        credibleSquaringServiceManagerImplementation = new IncredibleSquaringServiceManager(
+        serviceManagerImplementation = new MangataServiceManager(
             registryCoordinator,
             slasher,
-            credibleSquaringTaskManager
+            taskManager
         );
         // Third, upgrade the proxy contracts to use the correct implementation contracts and initialize them.
-        credibleSquaringProxyAdmin.upgradeAndCall(
+        mangataProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(
-                payable(address(credibleSquaringServiceManager))
+                payable(address(serviceManager))
             ),
-            address(credibleSquaringServiceManagerImplementation),
+            address(serviceManagerImplementation),
             abi.encodeWithSelector(
-                credibleSquaringServiceManager.initialize.selector,
-                credibleSquaringPauserReg,
-                credibleSquaringCommunityMultisig
+                serviceManager.initialize.selector,
+                mangataPauserReg,
+                mangataCommunityMultisig
             )
         );
 
-        credibleSquaringTaskManagerImplementation = new IncredibleSquaringTaskManager(
+        taskManagerImplementation = new MangataTaskManager(
             registryCoordinator,
             TASK_RESPONSE_WINDOW_BLOCK
         );
 
         // Third, upgrade the proxy contracts to use the correct implementation contracts and initialize them.
-        credibleSquaringProxyAdmin.upgradeAndCall(
+        mangataProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(
-                payable(address(credibleSquaringTaskManager))
+                payable(address(taskManager))
             ),
-            address(credibleSquaringTaskManagerImplementation),
+            address(taskManagerImplementation),
             abi.encodeWithSelector(
-                credibleSquaringTaskManager.initialize.selector,
-                credibleSquaringPauserReg,
-                credibleSquaringCommunityMultisig,
+                taskManager.initialize.selector,
+                mangataPauserReg,
+                mangataCommunityMultisig,
                 AGGREGATOR_ADDR,
                 TASK_GENERATOR_ADDR,
                 QUORUM_THRESHOLD_PERCENTAGE
@@ -420,23 +420,23 @@ contract CredibleSquaringDeployer is Script, Utils {
         );
         vm.serializeAddress(
             deployed_addresses,
-            "credibleSquaringServiceManager",
-            address(credibleSquaringServiceManager)
+            "serviceManager",
+            address(serviceManager)
         );
         vm.serializeAddress(
             deployed_addresses,
-            "credibleSquaringServiceManagerImplementation",
-            address(credibleSquaringServiceManagerImplementation)
+            "serviceManagerImplementation",
+            address(serviceManagerImplementation)
         );
         vm.serializeAddress(
             deployed_addresses,
-            "credibleSquaringTaskManager",
-            address(credibleSquaringTaskManager)
+            "taskManager",
+            address(taskManager)
         );
         vm.serializeAddress(
             deployed_addresses,
-            "credibleSquaringTaskManagerImplementation",
-            address(credibleSquaringTaskManagerImplementation)
+            "taskManagerImplementation",
+            address(taskManagerImplementation)
         );
         vm.serializeAddress(
             deployed_addresses,
@@ -456,6 +456,6 @@ contract CredibleSquaringDeployer is Script, Utils {
             deployed_addresses_output
         );
 
-        writeOutput(finalJson, "credible_squaring_avs_deployment_output");
+        writeOutput(finalJson, "mangata_finalizer_avs_deployment_output");
     }
 }

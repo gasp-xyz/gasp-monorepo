@@ -2,24 +2,24 @@
 pragma solidity ^0.8.9;
 
 import "@eigenlayer/contracts/libraries/BytesLib.sol";
-import "./IIncredibleSquaringTaskManager.sol";
+import "./IMangataTaskManager.sol";
 import "@eigenlayer-middleware/src/ServiceManagerBase.sol";
 
 /**
- * @title Primary entrypoint for procuring services from IncredibleSquaring.
+ * @title Primary entrypoint for procuring services from Mangata.
  * @author Layr Labs, Inc.
  */
-contract IncredibleSquaringServiceManager is ServiceManagerBase {
+contract MangataServiceManager is ServiceManagerBase {
     using BytesLib for bytes;
 
-    IIncredibleSquaringTaskManager
-        public immutable incredibleSquaringTaskManager;
+    IMangataTaskManager
+        public immutable taskManager;
 
-    /// @notice when applied to a function, ensures that the function is only callable by the `registryCoordinator`.
-    modifier onlyIncredibleSquaringTaskManager() {
+    /// @notice when applied to a function, ensures that the function is only callable by the `taskManager`.
+    modifier onlyTaskManager() {
         require(
-            msg.sender == address(incredibleSquaringTaskManager),
-            "onlyIncredibleSquaringTaskManager: not from credible squaring task manager"
+            msg.sender == address(taskManager),
+            "onlyTaskManager: not from mangata task manager"
         );
         _;
     }
@@ -27,9 +27,9 @@ contract IncredibleSquaringServiceManager is ServiceManagerBase {
     constructor(
         IBLSRegistryCoordinatorWithIndices _registryCoordinator,
         ISlasher _slasher,
-        IIncredibleSquaringTaskManager _incredibleSquaringTaskManager
+        IMangataTaskManager _taskManager
     ) ServiceManagerBase(_registryCoordinator, _slasher) {
-        incredibleSquaringTaskManager = _incredibleSquaringTaskManager;
+        taskManager = _taskManager;
     }
 
     /// @notice Called in the event of challenge resolution, in order to forward a call to the Slasher, which 'freezes' the `operator`.
@@ -37,7 +37,7 @@ contract IncredibleSquaringServiceManager is ServiceManagerBase {
     ///      We recommend writing slashing logic without integrating with the Slasher at this point in time.
     function freezeOperator(
         address operatorAddr
-    ) external override onlyIncredibleSquaringTaskManager {
+    ) external override onlyTaskManager {
         // slasher.freezeOperator(operatorAddr);
     }
 }

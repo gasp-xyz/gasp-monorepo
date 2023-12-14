@@ -5,8 +5,8 @@ import (
 
 	opstateretriever "github.com/Layr-Labs/eigensdk-go/contracts/bindings/BLSOperatorStateRetriever"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
-	"github.com/Layr-Labs/incredible-squaring-avs/aggregator/types"
-	cstaskmanager "github.com/Layr-Labs/incredible-squaring-avs/contracts/bindings/IncredibleSquaringTaskManager"
+	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/types"
+	cstaskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/IncredibleSquaringTaskManager"
 )
 
 // ====== TaskManager Mocks ======

@@ -9,16 +9,16 @@ import {BLSPubkeyRegistry} from "@eigenlayer-middleware/src/BLSPubkeyRegistry.so
 import {BLSRegistryCoordinatorWithIndices} from "@eigenlayer-middleware/src/BLSRegistryCoordinatorWithIndices.sol";
 import {BLSSignatureChecker, IBLSRegistryCoordinatorWithIndices} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
 import {BLSOperatorStateRetriever} from "@eigenlayer-middleware/src/BLSOperatorStateRetriever.sol";
-import "@eigenlayer/contracts/libraries/BN254.sol";
-import "./IIncredibleSquaringTaskManager.sol";
+import {BN254} from "@eigenlayer-middleware/src/ServiceManagerBase.sol";
+import "./IMangataTaskManager.sol";
 
-contract IncredibleSquaringTaskManager is
+contract MangataTaskManager is
     Initializable,
     OwnableUpgradeable,
     Pausable,
     BLSSignatureChecker,
     BLSOperatorStateRetriever,
-    IIncredibleSquaringTaskManager
+    IMangataTaskManager
 {
     using BN254 for BN254.G1Point;
 
@@ -317,5 +317,9 @@ contract IncredibleSquaringTaskManager is
 
     function getTaskResponseWindowBlock() external view returns (uint32) {
         return TASK_RESPONSE_WINDOW_BLOCK;
+    }
+
+    function getTaskChallangeWindowBlock() external view returns (uint32) {
+        return TASK_CHALLENGE_WINDOW_BLOCK;
     }
 }

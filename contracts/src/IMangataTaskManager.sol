@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "@eigenlayer/contracts/libraries/BN254.sol";
+import {BN254} from "@eigenlayer-middleware/src/ServiceManagerBase.sol";
 
-interface IIncredibleSquaringTaskManager {
+interface IMangataTaskManager {
     // EVENTS
     event NewTaskCreated(uint32 indexed taskIndex, Task task);
 
@@ -43,8 +43,8 @@ interface IIncredibleSquaringTaskManager {
     struct TaskResponse {
         // Can be obtained by the operator from the event NewTaskCreated.
         uint32 referenceTaskIndex;
-        // This is just the response that the operator has to compute by itself.
-        bytes32 storageRoot;
+        // This is the response that the operator has to provide for a finalized block.
+        bytes32 blockHash;
     }
 
     // Extra information related to taskResponse, which is filled inside the contract.
