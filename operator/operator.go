@@ -136,6 +136,13 @@ func NewOperatorFromConfig(c Config) (*Operator, error) {
 
 	operator.PrintOperatorStatus()
 
+	// logger.Info("Dialing aggregator rpc client")
+	// err = aggregatorRpcClient.dialAggregatorRpcClient()
+	// if err != nil {
+	// 	logger.Error("Could not dial aggregator rpc client. Not sending signed task response header to aggregator. Is aggregator running?", "err", err)
+	// 	return nil, err
+	// }
+
 	return operator, nil
 }
 

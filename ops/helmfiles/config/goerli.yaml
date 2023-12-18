@@ -22,25 +22,24 @@ operatorEnabled: false
 # 2>&1 | zap-pretty
 
 aggregatorArgs:
-  - --eth-rpc-url
-  - https://eth-goerli.g.alchemy.com/v2/slHhquJDTBbdx25NdPLAx_nqoUNu-RqJ \
-  - --eth-ws-url
-  - wss://eth-goerli.g.alchemy.com/v2/slHhquJDTBbdx25NdPLAx_nqoUNu-RqJ \
-  - --substrate-rpc-url
-  - wss://kusama-archive.mangata.online \
-  - --chain-id
-  - 5 \
-  - --bls-public-key-compendium
-  - 0xc81d3963087Fe09316cd1E032457989C7aC91b19 \
-  - --bls-operator-state-retriever
-  - 0x737Dd62816a9392e84Fa21C531aF77C00816A3a3 \
-  - --avs-service-manager
-  - 0xD2333E11ea617E30fb97900f6ac9782A85f233e7 \
-  - --ecdsa-key-file
-  - ecdsa.key.json \
-  - --avs-server-ip-port-address
-  - localhost:8090 \
-
+  - --eth-rpc-url 
+  - https://eth-goerli.g.alchemy.com/v2/slHhquJDTBbdx25NdPLAx_nqoUNu-RqJ
+  - --eth-ws-url 
+  - wss://eth-goerli.g.alchemy.com/v2/slHhquJDTBbdx25NdPLAx_nqoUNu-RqJ
+  - --substrate-rpc-url 
+  - wss://kusama-archive.mangata.online
+  - --chain-id 
+  - '"5"'
+  - --bls-public-key-compendium 
+  - 0xc81d3963087Fe09316cd1E032457989C7aC91b19
+  - --bls-operator-state-retriever 
+  - 0x737Dd62816a9392e84Fa21C531aF77C00816A3a3
+  - --avs-service-manager 
+  - 0xD2333E11ea617E30fb97900f6ac9782A85f233e7
+  - --ecdsa-key-file 
+  - /config/ecdsa.key.json
+  - --avs-server-ip-port-address 
+  - 0.0.0.0:8090
 aggregatorConfigFiles:
   - name: ecdsa.key.json
     content: |

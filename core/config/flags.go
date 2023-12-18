@@ -85,7 +85,7 @@ var (
 		Name:     "bls-operator-state-retriever",
 		Usage:    "Address of the BLS Operator State Retriever",
 		Required: true,
-		EnvVar:   "BLS_OPERATOR_STATE_RETRIVER",
+		EnvVar:   "BLS_OPERATOR_STATE_RETRIEVER",
 	}
 	BlsCompendiumFlag = cli.StringFlag{
 		Name:     "bls-public-key-compendium",
@@ -103,14 +103,16 @@ var (
 	// The files for encrypted private keys.
 	BlsKeyFileFlag = cli.StringFlag{
 		Name:     "bls-key-file",
-		Required: true,
+		Required: false,
 		Usage:    "Path to the encrypted bls private key",
+		Value:    "/app/operator_keys/bls_key.json",
 		EnvVar:   "BLS_KEY_FILE",
 	}
 	EcdsaKeyFileFlag = cli.StringFlag{
 		Name:     "ecdsa-key-file",
-		Required: true,
+		Required: false,
 		Usage:    "Path to the encrypted ecdsa private key",
+		Value:    "/app/operator_keys/ecdsa_key.json",
 		EnvVar:   "ECDSA_KEY_FILE",
 	}
 	// Passwords to decrypt the private keys.
