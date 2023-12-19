@@ -5,6 +5,7 @@ import { goerli } from 'viem/chains';
 import { Mangata } from '@mangata-finance/sdk';
 
 import { eigenContractAbi } from './eigenAbi.js';
+import { mangataContractAbi } from './mangataAbi.js';
 
 type ContractAddress = `0x${string}`;
 
@@ -69,10 +70,10 @@ async function main() {
         // TODO: Here we need to write to mangata contract
         const storageHash = await walletClient.writeContract({
           chain: goerli, // TODO: this needs the chain in order to work properly
-          abi: eigenContractAbi, // TODO: Mangata contract ABI
+          abi: mangataContractAbi,
           address: mangataContractAddress,
-          functionName: 'pause', // TODO: Function name will be from Mangata contract
-          args: [BigInt(123666666666)]
+          functionName: 'update_l1_from_l2',
+          args: [[BigInt(123666666666)]]
         });
 
         await publicClient.waitForTransactionReceipt({ hash: storageHash });
