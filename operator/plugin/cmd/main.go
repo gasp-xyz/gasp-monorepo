@@ -21,6 +21,11 @@ func main() {
 			Action:  actions.RegisterOperatorWithAvs,
 		},
 		{
+			Name:    "register-operator-with-eigen",
+			Usage:   "registers operator with eigenLayer contracts",
+			Action:  actions.RegisterOperatorWithEigen,
+		},
+		{
 			Name:    "deregister-operator-with-avs",
 			Aliases: []string{"d"},
 			Usage:   "deregisters operator with avs registry",

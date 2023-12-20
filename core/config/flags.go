@@ -5,7 +5,6 @@ import (
 )
 
 var (
-	/* Required Flags */
 	EnvironmentFlag = cli.StringFlag{
 		Name:     "environment",
 		Usage:    "log level, 'production' only prints info and above. 'development' also prints debug",
@@ -42,6 +41,14 @@ var (
 		Usage:    "aggregator RPC url",
 		Required: true,
 		EnvVar:   "AGGREGATOR_RPC_URL",
+	}
+
+	// Operator
+	RegisterAtStratupFlag = cli.StringFlag{
+		Name:     "register-at-startup",
+		Usage:    "run register plugin at operator startup",
+		Required: false,
+		EnvVar:   "REGISTER_AT_STARTUP",
 	}
 
 	// AVS

@@ -74,13 +74,13 @@ type Aggregator struct {
 	serverIpPortAddr string
 	avsWriter        chainio.AvsWriterer
 	// aggregation related fields
-	blsAggregationService    blsagg.BlsAggregationService
-	tasks                    map[types.TaskIndex]taskmanager.IMangataTaskManagerTask
-	tasksMu                  sync.RWMutex
-	taskResponses            map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse
-	taskResponsesMu          sync.RWMutex
-	substrateClient          gsrpc.SubstrateAPI
-	taskChallengeWindowBlock uint32
+	blsAggregationService   blsagg.BlsAggregationService
+	tasks                   map[types.TaskIndex]taskmanager.IMangataTaskManagerTask
+	tasksMu                 sync.RWMutex
+	taskResponses           map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse
+	taskResponsesMu         sync.RWMutex
+	substrateClient         gsrpc.SubstrateAPI
+	taskResponseWindowBlock uint32
 }
 
 // NewAggregator creates a new Aggregator with the provided config.
@@ -156,7 +156,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	taskChallengeWindowBlock, err := avsReader.AvsServiceBindings.TaskManager.TASKCHALLENGEWINDOWBLOCK(&bind.CallOpts{})
+	taskResponseWindowBlock, err := avsReader.AvsServiceBindings.TaskManager.GetTaskResponseWindowBlock(&bind.CallOpts{})
 	if err != nil {
 		logger.Error("Cannot get taskChallengeWindowBlock from TaskManager contract", "err", err)
 		return nil, err
@@ -173,14 +173,14 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 	}
 
 	return &Aggregator{
-		logger:                   logger,
-		serverIpPortAddr:         c.ServerAddressPort,
-		avsWriter:                avsWriter,
-		blsAggregationService:    blsAggregationService,
-		tasks:                    make(map[types.TaskIndex]taskmanager.IMangataTaskManagerTask),
-		taskResponses:            make(map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse),
-		substrateClient:          *substrateRpc,
-		taskChallengeWindowBlock: taskChallengeWindowBlock,
+		logger:                  logger,
+		serverIpPortAddr:        c.ServerAddressPort,
+		avsWriter:               avsWriter,
+		blsAggregationService:   blsAggregationService,
+		tasks:                   make(map[types.TaskIndex]taskmanager.IMangataTaskManagerTask),
+		taskResponses:           make(map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse),
+		substrateClient:         *substrateRpc,
+		taskResponseWindowBlock: taskResponseWindowBlock,
 	}, nil
 }
 
@@ -218,6 +218,7 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		agg.logger.Warn("Task expired", "err", blsAggServiceResp.Err)
 		// panicing to help with debugging (fail fast), but we shouldn't panic if we run this in production
 		// panic(blsAggServiceResp.Err)
+		return
 	}
 	nonSignerPubkeys := []taskmanager.BN254G1Point{}
 	for _, nonSignerPubkey := range blsAggServiceResp.NonSignersPubkeysG1 {
@@ -279,8 +280,8 @@ func (agg *Aggregator) sendNewTask(header gsrpc_types.Header) error {
 	}
 	// TODO(samlaf): we use seconds for now, but we should ideally pass a blocknumber to the blsAggregationService
 	// and it should monitor the chain and only expire the task aggregation once the chain has reached that block number.
-	taskTimeToExpiry := time.Duration(agg.taskChallengeWindowBlock) * blockTimeSeconds
+	taskTimeToExpiry := time.Duration(agg.taskResponseWindowBlock) * blockTimeSeconds
 	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, newTask.QuorumNumbers, quorumThresholdPercentages, taskTimeToExpiry)
-	agg.logger.Info("Aggregator initialized new task", "block number", blockNumber, "task index", taskIndex)
+	agg.logger.Info("Aggregator initialized new task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
 	return nil
 }

@@ -6,8 +6,8 @@ import (
 )
 
 // TODO: Hardcoded for now
-// all operators in quorum0 must sign the task response in order for it to be accepted
-const QUORUM_THRESHOLD_NUMERATOR = uint32(100)
+// 66% operators in quorum0 must sign the task response in order for it to be accepted
+const QUORUM_THRESHOLD_NUMERATOR = uint32(66)
 const QUORUM_THRESHOLD_DENOMINATOR = uint32(100)
 
 const QUERY_FILTER_FROM_BLOCK = uint64(1)

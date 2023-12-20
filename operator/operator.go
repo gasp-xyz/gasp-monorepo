@@ -117,7 +117,7 @@ func NewOperatorFromConfig(c Config) (*Operator, error) {
 	operatorId, err := ethRpc.AvsReader.AvsRegistryReader.GetOperatorId(context.Background(), operatorAddr)
 	if err != nil {
 		logger.Error("Cannot get operator id", "err", err)
-		return nil, fmt.Errorf("operator is not registered. Registering operator using the operator-cli before starting operator")
+		return nil, err
 	}
 
 	operator := &Operator{
@@ -136,18 +136,33 @@ func NewOperatorFromConfig(c Config) (*Operator, error) {
 
 	operator.PrintOperatorStatus()
 
-	// logger.Info("Dialing aggregator rpc client")
-	// err = aggregatorRpcClient.dialAggregatorRpcClient()
-	// if err != nil {
-	// 	logger.Error("Could not dial aggregator rpc client. Not sending signed task response header to aggregator. Is aggregator running?", "err", err)
-	// 	return nil, err
-	// }
+	// used for local CI deploy
+	if c.RegisterAtStartup && operatorId == [32]byte{} {
+		operator.RegisterAtStartup()
+		
+		operatorId, err := ethRpc.AvsReader.AvsRegistryReader.GetOperatorId(context.Background(), operatorAddr)
+		if err != nil {
+			logger.Error("Cannot get operator id", "err", err)
+			return nil, err
+		}
+		operator.operatorId = operatorId
+
+		err = operator.PrintOperatorStatus()
+		if err != nil {
+			operator.logger.Error("Error while printing operator status")
+		}
+	}
 
 	return operator, nil
 }
 
 func (o *Operator) Start(ctx context.Context) error {
 	o.logger.Infof("Starting operator.")
+
+	operatorIsRegistered := o.operatorId != [32]byte{}
+	if !operatorIsRegistered {
+		return fmt.Errorf("operator is not registered. Registering operator using the operator-cli before starting operator")
+	}
 
 	if o.config.EnableNodeApi {
 		o.nodeApi.Start()

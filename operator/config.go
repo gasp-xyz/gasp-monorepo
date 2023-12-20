@@ -30,6 +30,8 @@ type Config struct {
 
 	BlsKeyPair  *bls.KeyPair  `json:"-"`
 	EcdsaSigner signer.Signer `json:"-"`
+
+	RegisterAtStartup bool
 }
 
 // NewConfig parses the Config from the provided flags or environment variables and
@@ -75,6 +77,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		ServiceManagerAddr:            common.HexToAddress(ctx.GlobalString(config.AvsServiceManagerFlag.Name)),
 		BlsKeyPair:                    blsKeypair,
 		EcdsaSigner:                   signer,
+		RegisterAtStartup:             ctx.GlobalBool(config.RegisterAtStratupFlag.Name),
 	}, nil
 }
 
@@ -92,4 +95,5 @@ var Flags = []cli.Flag{
 	config.BlsKeyPasswordFlag,
 	config.EcdsaKeyFileFlag,
 	config.EcdsaKeyPasswordFlag,
+	config.RegisterAtStratupFlag,
 }

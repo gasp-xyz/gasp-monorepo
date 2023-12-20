@@ -28,12 +28,12 @@ import "forge-std/StdJson.sol";
 import "forge-std/console.sol";
 
 // # To deploy and verify our contract
-// forge script script/MangataAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
+// forge script script/1_MangataAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
 contract Deployer is Script, Utils, Test {
-    string public eigenDeploymentPath = "eigenlayer_deployment_output";
-    string public sharedAvsDeploymentPath = "shared_avs_contracts_deployment_output";
-    string public configPath = "deploy.config";
-    string public outputPath = "mangata_avs_deployment_output_";
+    string constant EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
+    string constant SHARED_AVS_DEPLOYMENT_PATH = "shared_avs_contracts_deployment_output";
+    string constant CONFIG_PATH = "deploy.config";
+    string constant OUTPUT_PATH = "mangata_avs_deployment_output_";
 
     ProxyAdmin public mangataProxyAdmin;
     PauserRegistry public mangataPauserReg;
@@ -65,20 +65,20 @@ contract Deployer is Script, Utils, Test {
 
     function run() external {
         // Eigenlayer contracts
-        string memory eigenlayerDeployedContracts = readInput(eigenDeploymentPath);
+        string memory eigenlayerDeployedContracts = readInput(EIGEN_DEPLOYMENT_PATH);
         strategyManager =
             StrategyManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.strategyManager"));
         slasher = Slasher(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.slasher"));
         delegation = DelegationManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.delegation"));
 
-        string memory sharedAvsDeployedContracts = readInput(sharedAvsDeploymentPath);
+        string memory sharedAvsDeployedContracts = readInput(SHARED_AVS_DEPLOYMENT_PATH);
         pubkeyCompendium =
             BLSPublicKeyCompendium(stdJson.readAddress(sharedAvsDeployedContracts, ".blsPublicKeyCompendium"));
         blsOperatorStateRetriever =
             BLSOperatorStateRetriever(stdJson.readAddress(sharedAvsDeployedContracts, ".blsOperatorStateRetriever"));
 
         // READ JSON CONFIG DATA
-        string memory configData = readConfig(configPath);
+        string memory configData = readConfig(CONFIG_PATH);
 
         // check that the chainID matches the one in the config
         uint256 currentChainId = block.chainid;
@@ -101,7 +101,7 @@ contract Deployer is Script, Utils, Test {
         uint32 taskResponseWindowBlocks = uint32(stdJson.readUint(configData, ".taskManagerParams.taskResponseWindowBlocks"));
 
         (
-            uint96[] memory minimumStakeForQuourm,
+            uint96[] memory minimumStakeForQuorum,
             IVoteWeigher.StrategyAndWeightingMultiplier[][] memory strategyAndWeightingMultipliers
         ) = _parseStakeRegistryParams(configData);
 
@@ -197,7 +197,7 @@ contract Deployer is Script, Utils, Test {
             TransparentUpgradeableProxy(payable(address(stakeRegistry))),
             address(stakeRegistryImplementation),
             abi.encodeWithSelector(
-                StakeRegistry.initialize.selector, minimumStakeForQuourm, strategyAndWeightingMultipliers
+                StakeRegistry.initialize.selector, minimumStakeForQuorum, strategyAndWeightingMultipliers
             )
         );
 
@@ -290,7 +290,7 @@ contract Deployer is Script, Utils, Test {
 
         _verifyImplementations();
         _verifyInitalizations(
-            churner, ejector, operatorSetParams, minimumStakeForQuourm, strategyAndWeightingMultipliers
+            churner, ejector, operatorSetParams, minimumStakeForQuorum, strategyAndWeightingMultipliers
         );
 
         //write output
@@ -301,12 +301,12 @@ contract Deployer is Script, Utils, Test {
         internal
         pure
         returns (
-            uint96[] memory minimumStakeForQuourm,
+            uint96[] memory minimumStakeForQuorum,
             IVoteWeigher.StrategyAndWeightingMultiplier[][] memory strategyAndWeightingMultipliers
         )
     {
         bytes memory stakesConfigsRaw = stdJson.parseRaw(config_data, ".minimumStakes");
-        minimumStakeForQuourm = abi.decode(stakesConfigsRaw, (uint96[]));
+        minimumStakeForQuorum = abi.decode(stakesConfigsRaw, (uint96[]));
 
         bytes memory strategyConfigsRaw = stdJson.parseRaw(config_data, ".strategyWeights");
         strategyAndWeightingMultipliers =
@@ -404,7 +404,7 @@ contract Deployer is Script, Utils, Test {
         address churner,
         address ejector,
         IBLSRegistryCoordinatorWithIndices.OperatorSetParam[] memory operatorSetParams,
-        uint96[] memory minimumStakeForQuourm,
+        uint96[] memory minimumStakeForQuorum,
         IVoteWeigher.StrategyAndWeightingMultiplier[][] memory strategyAndWeightingMultipliers
     ) internal view {
         require(serviceManager.owner() == mangataOwner, "serviceManager.owner() != mangataOwner");
@@ -429,10 +429,10 @@ contract Deployer is Script, Utils, Test {
             );
         }
 
-        for (uint256 i = 0; i < minimumStakeForQuourm.length; ++i) {
+        for (uint256 i = 0; i < minimumStakeForQuorum.length; ++i) {
             require(
-                stakeRegistry.minimumStakeForQuorum(i) == minimumStakeForQuourm[i],
-                "stakeRegistry.minimumStakeForQuourm != minimumStakeForQuourm"
+                stakeRegistry.minimumStakeForQuorum(i) == minimumStakeForQuorum[i],
+                "stakeRegistry.minimumStakeForQuorum != minimumStakeForQuorum"
             );
         }
 
@@ -452,8 +452,8 @@ contract Deployer is Script, Utils, Test {
 
         require(
             operatorSetParams.length == strategyAndWeightingMultipliers.length
-                && operatorSetParams.length == minimumStakeForQuourm.length,
-            "operatorSetParams, strategyAndWeightingMultipliers, and minimumStakeForQuourm must be the same length"
+                && operatorSetParams.length == minimumStakeForQuorum.length,
+            "operatorSetParams, strategyAndWeightingMultipliers, and minimumStakeForQuorum must be the same length"
         );
     }
 
@@ -499,6 +499,6 @@ contract Deployer is Script, Utils, Test {
         vm.serializeString(parent_object, chain_info, chain_info_output);
         vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
         string memory finalJson = vm.serializeString(parent_object, permissions, permissions_output);
-        writeOutput(finalJson, string.concat(outputPath, stdJson.readString(finalJson, ".chainInfo.deploymentBlock")));
+        writeOutput(finalJson, string.concat(OUTPUT_PATH, stdJson.readString(finalJson, ".chainInfo.deploymentBlock")));
     }
 }

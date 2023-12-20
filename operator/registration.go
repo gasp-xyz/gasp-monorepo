@@ -18,6 +18,59 @@ import (
 	eigenSdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 )
 
+func (o *Operator) RegisterAtStartup() {
+	err := o.RegisterOperatorWithEigen()
+	if err != nil {
+		o.logger.Error("Error while registering operator into eigen")
+	}
+
+	err = o.RegisterOperatorWithAvs()
+	if err != nil {
+		o.logger.Error("Error while registering operator into AVS")
+	}
+	o.logger.Info("Operator succesfully registered!")
+}
+
+func (o *Operator) RegisterOperatorWithEigen() error {
+	op := eigenSdkTypes.Operator{
+		Address:                 o.operatorAddr.String(),
+		EarningsReceiverAddress: o.operatorAddr.String(),
+	}
+
+	status, err := o.ethRpc.ElReader.IsOperatorRegistered(context.Background(), op)
+	if err != nil {
+		return err
+	}
+
+	if !status {
+		receipt, err := o.ethRpc.ElWriter.RegisterAsOperator(context.Background(), op)
+		if err != nil {
+			o.logger.Info("Error while registering operator")
+			return err
+		}
+		o.logger.Infof(
+			"Operator registration transaction at: %s",
+			receipt.TxHash.String(),
+		)
+
+	} else {
+		o.logger.Info("Operator is already registered on EigenLayer")
+	}
+
+	receipt, err := o.ethRpc.ElWriter.RegisterBLSPublicKey(context.Background(), o.config.BlsKeyPair, op)
+	if err != nil {
+		o.logger.Info("Error while registering BLS public key")
+		return err
+	}
+	o.logger.Infof(
+		"Operator bls key added transaction at: %s",
+		receipt.TxHash.String(),
+	)
+
+	o.logger.Info("Operator is registered and bls key added successfully")
+	return nil
+}
+
 func (o *Operator) RegisterOperatorWithAvs() error {
 	quorumNumbers := []byte{0}
 	socket := "Not Needed"

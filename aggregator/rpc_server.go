@@ -16,6 +16,7 @@ import (
 var (
 	TaskNotFoundError400                     = errors.New("400. Task not found")
 	OperatorNotPartOfTaskQuorum400           = errors.New("400. Operator not part of quorum")
+	OperatorNotRegistered400                 = errors.New("400. Operator not registered in AVS")
 	TaskResponseDigestNotFoundError500       = errors.New("500. Failed to get task response digest")
 	UnknownErrorWhileVerifyingSignature400   = errors.New("400. Failed to verify signature")
 	SignatureVerificationFailed400           = errors.New("400. Signature verification failed")
@@ -53,6 +54,10 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 	if err != nil {
 		agg.logger.Error("Failed to get task response digest", "err", err)
 		return TaskResponseDigestNotFoundError500
+	}
+	if signedTaskResponse.OperatorId == [32]byte{} {
+		agg.logger.Error("Operator not registered", "err", err)
+		return OperatorNotRegistered400
 	}
 	agg.taskResponsesMu.Lock()
 	if _, ok := agg.taskResponses[taskIndex]; !ok {
