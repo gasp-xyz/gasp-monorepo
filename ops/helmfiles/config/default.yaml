@@ -50,6 +50,8 @@ operatorArgs:
   - /config/ecdsa.key.json
   - --bls-key-file 
   - /config/bls.key.json
+  - --register-at-startup 
+  - true
 operatorConfigFiles:
   - name: ecdsa.key.json
     content: |
