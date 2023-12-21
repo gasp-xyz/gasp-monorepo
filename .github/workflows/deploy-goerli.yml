@@ -2,9 +2,6 @@ name: Deploy to Goerli
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - feature/automate-goerli-deployment-MGX-820
 
 permissions:
   contents: read
@@ -68,7 +65,7 @@ jobs:
           # https://dev.to/derlin/helmfile-difference-between-sync-and-apply-helm-3-28o1
           
           export HELM_DIFF_THREE_WAY_MERGE=true
-          helmfile diff -e goerli
+          helmfile apply -e goerli
         working-directory: ops/helmfiles
       
       - name: Update the GitHub Deployment status
