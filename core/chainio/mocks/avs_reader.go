@@ -14,8 +14,8 @@ import (
 	reflect "reflect"
 
 	contractBLSOperatorStateRetriever "github.com/Layr-Labs/eigensdk-go/contracts/bindings/BLSOperatorStateRetriever"
-	contractMangataIncredibleSquaringTaskManager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/IncredibleSquaringTaskManager"
 	common "github.com/ethereum/go-ethereum/common"
+	contractMangataTaskManager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -43,10 +43,10 @@ func (m *MockAvsReaderer) EXPECT() *MockAvsReadererMockRecorder {
 }
 
 // CheckSignatures mocks base method.
-func (m *MockAvsReaderer) CheckSignatures(arg0 context.Context, arg1 [32]byte, arg2 []byte, arg3 uint32, arg4 contractIncredibleSquaringTaskManager.IBLSSignatureCheckerNonSignerStakesAndSignature) (contractIncredibleSquaringTaskManager.IBLSSignatureCheckerQuorumStakeTotals, error) {
+func (m *MockAvsReaderer) CheckSignatures(arg0 context.Context, arg1 [32]byte, arg2 []byte, arg3 uint32, arg4 contractMangataTaskManager.IBLSSignatureCheckerNonSignerStakesAndSignature) (contractMangataTaskManager.IBLSSignatureCheckerQuorumStakeTotals, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CheckSignatures", arg0, arg1, arg2, arg3, arg4)
-	ret0, _ := ret[0].(contractIncredibleSquaringTaskManager.IBLSSignatureCheckerQuorumStakeTotals)
+	ret0, _ := ret[0].(contractMangataTaskManager.IBLSSignatureCheckerQuorumStakeTotals)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -70,21 +70,6 @@ func (m *MockAvsReaderer) GetCheckSignaturesIndices(arg0 context.Context, arg1 u
 func (mr *MockAvsReadererMockRecorder) GetCheckSignaturesIndices(arg0, arg1, arg2, arg3 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCheckSignaturesIndices", reflect.TypeOf((*MockAvsReaderer)(nil).GetCheckSignaturesIndices), arg0, arg1, arg2, arg3)
-}
-
-// GetErc20Mock mocks base method.
-func (m *MockAvsReaderer) GetErc20Mock(arg0 context.Context, arg1 common.Address) (*contractERC20Mock.ContractERC20Mock, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetErc20Mock", arg0, arg1)
-	ret0, _ := ret[0].(*contractERC20Mock.ContractERC20Mock)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetErc20Mock indicates an expected call of GetErc20Mock.
-func (mr *MockAvsReadererMockRecorder) GetErc20Mock(arg0, arg1 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetErc20Mock", reflect.TypeOf((*MockAvsReaderer)(nil).GetErc20Mock), arg0, arg1)
 }
 
 // GetOperatorId mocks base method.

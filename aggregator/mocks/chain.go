@@ -6,14 +6,14 @@ import (
 	opstateretriever "github.com/Layr-Labs/eigensdk-go/contracts/bindings/BLSOperatorStateRetriever"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/types"
-	cstaskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/IncredibleSquaringTaskManager"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
 )
 
 // ====== TaskManager Mocks ======
 
-func MockSendNewTaskNumberToSquareCall(blockNum, taskNum, numberToSquare uint32) (cstaskmanager.IIncredibleSquaringTaskManagerTask, uint32, error) {
-	task := cstaskmanager.IIncredibleSquaringTaskManagerTask{
-		NumberToBeSquared:         big.NewInt(int64(numberToSquare)),
+func MockSendNewTaskNumberToSquareCall(blockNum, taskNum, block uint32) (taskmanager.IMangataTaskManagerTask, uint32, error) {
+	task := taskmanager.IMangataTaskManagerTask{
+		BlockNumber:               big.NewInt(int64(block)),
 		TaskCreatedBlock:          blockNum,
 		QuorumNumbers:             types.QUORUM_NUMBERS,
 		QuorumThresholdPercentage: types.QUORUM_THRESHOLD_NUMERATOR,
