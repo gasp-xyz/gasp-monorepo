@@ -1,0 +1,40 @@
+{
+  "chainInfo": {
+    "chainId": 5
+  },
+
+  "permissions": {
+    "owner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "upgrader": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "churner": "0x0000000000000000000000000000000000000000",
+    "ejector": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "aggregator": "0x5331FB44A5D16225AE8d804252e90C331CB2Cb17"
+  },
+
+  "minimumStakes": [32000000000000000000],
+
+  "strategyWeights": [
+    [
+      {
+        "0_strategy": "0xB613E78E2068d7489bb66419fB1cfa11275d14da",
+        "1_multiplier": 1070136092289993178
+      },
+      {
+        "0_strategy": "0x879944A8cB437a5f8061361f82A6d4EED59070b5",
+        "1_multiplier": 1071364636818145808
+      }
+    ]
+  ],
+
+  "operatorSetParams": [
+    {
+      "0_maxOperatorCount": 30,
+      "1_kickBIPsOfOperatorStake": 11000,
+      "2_kickBIPsOfTotalStake": 50
+    }
+  ],
+
+  "taskManagerParams": {
+    "taskResponseWindowBlocks": 30
+  }
+}

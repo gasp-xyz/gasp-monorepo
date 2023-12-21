@@ -1,0 +1,33 @@
+{
+  "addresses": {
+    "blsOperatorStateRetriever": "0x737Dd62816a9392e84Fa21C531aF77C00816A3a3",
+    "blsPubKeyCompendium": "0xc81d3963087Fe09316cd1E032457989C7aC91b19",
+    "blsPubkeyRegistry": "0x109e8d2637449F651666f2F528EC9a699693cF47",
+    "blsPubkeyRegistryImplementation": "0x72fB284429F4088aD38E7Bc229A218FEefe62a3E",
+    "indexRegistry": "0x110b8bFE9778CF983ffB8CE716D095E7B860f052",
+    "indexRegistryImplementation": "0xF3Ea59D71Ae8e2648226C9806E8e401907862507",
+    "mangataPauseReg": "0xA0584055562be83e176AD834077e521c93b0E602",
+    "mangataProxyAdmin": "0xdFC848742eceB4B5e245D316d909B842466988a3",
+    "registryCoordinator": "0x2a1B7d69017D14dAf08D24911596e8C244c9E2a8",
+    "registryCoordinatorImplementation": "0x3287D5077e05e0b0bcF7103C8340a5d6cc992fF1",
+    "serviceManager": "0xD2333E11ea617E30fb97900f6ac9782A85f233e7",
+    "serviceManagerImplementation": "0xbEda179754b802bd5cF4850047331b4b4FAd9F59",
+    "slasher": "0xD11d60b669Ecf7bE10329726043B3ac07B380C22",
+    "stakeRegistry": "0x5A6D53351ccBdF8e1D9816Ed9C534f452F1F2Ee1",
+    "stakeRegistryImplementation": "0x1C0F1dF3C3d760d1f471fac487b842571ca35F76",
+    "taksManagerImplementation": "0x839De8D21F4762D791efbC0bA70C1Af0c442Ef98",
+    "taskManager": "0xcFA9C7DCFa34D37ED775E5d7aAF64Ce66223E31A"
+  },
+  "chainInfo": {
+    "chainId": 5,
+    "deploymentBlock": 10167674
+  },
+  "permissions": {
+    "aggregator": "0x5331FB44A5D16225AE8d804252e90C331CB2Cb17",
+    "mangataChurner": "0x0000000000000000000000000000000000000000",
+    "mangataEjector": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "mangataMultisig": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "mangataOwner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "mangataUpgrader": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337"
+  }
+}

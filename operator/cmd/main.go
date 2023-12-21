@@ -2,25 +2,20 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"os"
 
 	"github.com/urfave/cli"
 
-	"github.com/Layr-Labs/incredible-squaring-avs/core/config"
-	"github.com/Layr-Labs/incredible-squaring-avs/operator"
-	"github.com/Layr-Labs/incredible-squaring-avs/types"
-
-	sdkutils "github.com/Layr-Labs/eigensdk-go/utils"
+	"github.com/mangata-finance/eigen-layer-monorepo/operator"
 )
 
 func main() {
 	app := cli.NewApp()
-	app.Flags = []cli.Flag{config.ConfigFileFlag}
-	app.Name = "credible-squaring-operator"
-	app.Usage = "Credible Squaring Operator"
-	app.Description = "Service that reads numbers onchain, squares, signs, and sends them to the aggregator."
+	app.Flags = operator.Flags
+	app.Name = "mangata-finalizer-operator"
+	app.Usage = "Mangata Finalizer Operator"
+	app.Description = "Service that reads block number onchain, finalizes the block, signs, and sends them to the aggregator."
 
 	app.Action = operatorMain
 	err := app.Run(os.Args)
@@ -32,20 +27,12 @@ func main() {
 func operatorMain(ctx *cli.Context) error {
 
 	log.Println("Initializing Operator")
-	configPath := ctx.GlobalString(config.ConfigFileFlag.Name)
-	nodeConfig := types.NodeConfig{}
-	err := sdkutils.ReadYamlConfig(configPath, &nodeConfig)
+	config, err := operator.NewConfig(ctx)
 	if err != nil {
 		return err
 	}
-	configJson, err := json.MarshalIndent(nodeConfig, "", "  ")
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	log.Println("Config:", string(configJson))
 
-	log.Println("initializing operator")
-	operator, err := operator.NewOperatorFromConfig(nodeConfig)
+	operator, err := operator.NewOperatorFromConfig(*config)
 	if err != nil {
 		return err
 	}

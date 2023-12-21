@@ -5,8 +5,8 @@ import (
 	"net/rpc"
 	"time"
 
-	"github.com/Layr-Labs/incredible-squaring-avs/aggregator"
-	"github.com/Layr-Labs/incredible-squaring-avs/metrics"
+	"github.com/mangata-finance/eigen-layer-monorepo/aggregator"
+	"github.com/mangata-finance/eigen-layer-monorepo/metrics"
 
 	"github.com/Layr-Labs/eigensdk-go/logging"
 )

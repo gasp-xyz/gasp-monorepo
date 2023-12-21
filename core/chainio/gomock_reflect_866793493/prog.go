@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -11,7 +10,7 @@ import (
 
 	"go.uber.org/mock/mockgen/model"
 
-	pkg_ "github.com/Layr-Labs/incredible-squaring-avs/core/chainio"
+	pkg_ "github.com/mangata-finance/eigen-layer-monorepo/core/chainio"
 )
 
 var output = flag.String("output", "", "The output file name, or empty to use stdout.")
@@ -19,19 +18,18 @@ var output = flag.String("output", "", "The output file name, or empty to use st
 func main() {
 	flag.Parse()
 
-	its := []struct{
+	its := []struct {
 		sym string
 		typ reflect.Type
 	}{
-		
-		{ "AvsSubscriberer", reflect.TypeOf((*pkg_.AvsSubscriberer)(nil)).Elem()},
-		
+
+		{"AvsSubscriberer", reflect.TypeOf((*pkg_.AvsSubscriberer)(nil)).Elem()},
 	}
 	pkg := &model.Package{
 		// NOTE: This behaves contrary to documented behaviour if the
 		// package name is not the final component of the import path.
 		// The reflect package doesn't expose the package name, though.
-		Name: path.Base("github.com/Layr-Labs/incredible-squaring-avs/core/chainio"),
+		Name: path.Base("github.com/mangata-finance/eigen-layer-monorepo/core/chainio"),
 	}
 
 	for _, it := range its {

@@ -4,43 +4,43 @@ anvilEnabled: false
 aggregatorEnabled: true
 operatorEnabled: false
 
+# it is possible to pass args as ENV vars instead, same name as cmd flag but SNAKE_UPPERCASED
+# see core/config/flags.go
+#
+# go run aggregator/cmd/main.go \
+# --eth-rpc-url $ETH_RPC_URL \
+# --eth-ws-url $ETH_WS_URL \
+# ^^ above are secret, contains personal API key to connect to a ETH node
+# --substrate-rpc-url $SUBSTRATE_RPC_URL \
+# --chain-id $CHAIN_ID \
+# --bls-public-key-compendium $BLS_PUBLIC_KEY_COMPENDIUM \
+# --bls-operator-state-retriever $BLS_OPERATOR_STATE_RETRIEVER \
+# --avs-service-manager $AVS_SERVICE_MANAGER \
+# --ecdsa-key-file ~/.eigenlayer/operator_keys/agro.ecdsa.key.json \
+# ^^ this is an encrytped key, password is passed with EcdsaKeyPasswordFlag that should be secret, currently empty string
+# --avs-server-ip-port-address $AGRO_HOST \
+# 2>&1 | zap-pretty
+
 aggregatorArgs:
-  - --config 
-  - /config/aggregator.yaml
-  - --credible-squaring-deployment 
-  - /config/credible_squaring_avs_deployment_output.json
-  - --shared-avs-contracts-deployment 
-  - /config/shared_avs_contracts_deployment_output.json
-  - --ecdsa-private-key 
-  - "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6"
+  - --eth-rpc-url 
+  - https://eth-goerli.g.alchemy.com/v2/slHhquJDTBbdx25NdPLAx_nqoUNu-RqJ
+  - --eth-ws-url 
+  - wss://eth-goerli.g.alchemy.com/v2/slHhquJDTBbdx25NdPLAx_nqoUNu-RqJ
+  - --substrate-rpc-url 
+  - wss://kusama-archive.mangata.online
+  - --chain-id 
+  - '"5"'
+  - --bls-public-key-compendium 
+  - 0xc81d3963087Fe09316cd1E032457989C7aC91b19
+  - --bls-operator-state-retriever 
+  - 0x737Dd62816a9392e84Fa21C531aF77C00816A3a3
+  - --avs-service-manager 
+  - 0xD2333E11ea617E30fb97900f6ac9782A85f233e7
+  - --ecdsa-key-file 
+  - /config/ecdsa.key.json
+  - --avs-server-ip-port-address 
+  - 0.0.0.0:8090
 aggregatorConfigFiles:
-  - name: aggregator.yaml
+  - name: ecdsa.key.json
     content: |
-      # production only prints info and above. development also prints debug
-      environment: production
-      eth_rpc_url: http://anvil:8545
-      eth_ws_url: ws://anvil:8545
-      # address which the aggregator listens on for operator signed messages
-      aggregator_server_ip_port_address: 0.0.0.0:8090
-      bls_public_key_compendium_address: 0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44
-      substrate_rpc_url: wss://kusama-archive.mangata.online
-  - name: credible_squaring_avs_deployment_output.json
-    content: |
-      {
-        "addresses": {
-          "credibleSquaringServiceManager": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
-          "credibleSquaringServiceManagerImplementation": "0x9d4454B023096f34B160D6B654540c56A1F81688",
-          "credibleSquaringTaskManager": "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
-          "credibleSquaringTaskManagerImplementation": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
-          "erc20Mock": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
-          "erc20MockStrategy": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
-          "registryCoordinator": "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
-          "registryCoordinatorImplementation": "0x998abeb3E57409262aE5b751f60747921B33613E"
-        }
-      }
-  - name: shared_avs_contracts_deployment_output.json
-    content: |
-      {
-        "blsOperatorStateRetriever": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
-        "blsPublicKeyCompendium": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44"
-      }
+      {"address":"5331fb44a5d16225ae8d804252e90c331cb2cb17","crypto":{"cipher":"aes-128-ctr","ciphertext":"7143fc3658f6ca5d985206f288f8b7f7372e0fa4c65f284c2528f52a1c9fbbf2","cipherparams":{"iv":"3eb290e9979a63c8abe379fe023e4de4"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"d0a5df5124867b34ea91a392236feca78a7f372603cf04fe9afbb59d4e74cab2"},"mac":"ece318e2000afb2e110dc1d367f9182a8d59af287aa895308c34e6d10b2bb2df"},"id":"07956b55-33b1-4f93-b874-a6ee83e59a87","version":3}

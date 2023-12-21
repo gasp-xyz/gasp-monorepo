@@ -4,25 +4,22 @@ import (
 	"context"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common"
 
 	sdkavsregistry "github.com/Layr-Labs/eigensdk-go/chainio/avsregistry"
 	sdkclients "github.com/Layr-Labs/eigensdk-go/chainio/clients"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	logging "github.com/Layr-Labs/eigensdk-go/logging"
 
-	erc20mock "github.com/Layr-Labs/incredible-squaring-avs/contracts/bindings/ERC20Mock"
-	cstaskmanager "github.com/Layr-Labs/incredible-squaring-avs/contracts/bindings/IncredibleSquaringTaskManager"
-	"github.com/Layr-Labs/incredible-squaring-avs/core/config"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
 )
 
 type AvsReaderer interface {
 	sdkavsregistry.AvsRegistryReader
 
 	CheckSignatures(
-		ctx context.Context, msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, nonSignerStakesAndSignature cstaskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
-	) (cstaskmanager.IBLSSignatureCheckerQuorumStakeTotals, error)
-	GetErc20Mock(ctx context.Context, tokenAddr gethcommon.Address) (*erc20mock.ContractERC20Mock, error)
+		ctx context.Context, msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
+	) (taskmanager.IBLSSignatureCheckerQuorumStakeTotals, error)
 }
 
 type AvsReader struct {
@@ -33,9 +30,14 @@ type AvsReader struct {
 
 var _ AvsReaderer = (*AvsReader)(nil)
 
-func NewAvsReaderFromConfig(c *config.Config) (*AvsReader, error) {
+func NewAvsReaderFromConfig(
+	serviceManager common.Address,
+	blsOperatorStateRetriever common.Address,
+	ethClient eth.EthClient,
+	logger logging.Logger,
+) (*AvsReader, error) {
 
-	avsContractBindings, err := NewAvsServiceBindings(c.IncredibleSquaringServiceManagerAddr, c.BlsOperatorStateRetrieverAddr, c.EthHttpClient, c.Logger)
+	avsContractBindings, err := NewAvsServiceBindings(serviceManager, blsOperatorStateRetriever, ethClient, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -51,25 +53,21 @@ func NewAvsReaderFromConfig(c *config.Config) (*AvsReader, error) {
 	if err != nil {
 		return nil, err
 	}
-	ethClient, err := eth.NewClient(c.EthRpcUrl)
-	if err != nil {
-		return nil, err
-	}
-	avsRegistryContractClient, err := sdkclients.NewAvsRegistryContractsChainClient(blsRegistryCoordinatorAddr, c.BlsOperatorStateRetrieverAddr, stakeRegistryAddr, blsPubkeyRegistryAddr, ethClient, c.Logger)
+	avsRegistryContractClient, err := sdkclients.NewAvsRegistryContractsChainClient(blsRegistryCoordinatorAddr, blsOperatorStateRetriever, stakeRegistryAddr, blsPubkeyRegistryAddr, ethClient, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	avsRegistryReader, err := sdkavsregistry.NewAvsRegistryReader(avsRegistryContractClient, c.Logger, ethClient)
+	avsRegistryReader, err := sdkavsregistry.NewAvsRegistryReader(avsRegistryContractClient, logger, ethClient)
 	if err != nil {
 		return nil, err
 	}
-	avsServiceBindings, err := NewAvsServiceBindings(c.IncredibleSquaringServiceManagerAddr, c.BlsOperatorStateRetrieverAddr, c.EthHttpClient, c.Logger)
+	avsServiceBindings, err := NewAvsServiceBindings(serviceManager, blsOperatorStateRetriever, ethClient, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewAvsReader(avsRegistryReader, avsServiceBindings, c.Logger)
+	return NewAvsReader(avsRegistryReader, avsServiceBindings, logger)
 }
 
 func NewAvsReader(avsRegistryReader sdkavsregistry.AvsRegistryReader, avsServiceBindings *AvsServiceBindings, logger logging.Logger) (*AvsReader, error) {
@@ -81,22 +79,13 @@ func NewAvsReader(avsRegistryReader sdkavsregistry.AvsRegistryReader, avsService
 }
 
 func (r *AvsReader) CheckSignatures(
-	ctx context.Context, msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, nonSignerStakesAndSignature cstaskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
-) (cstaskmanager.IBLSSignatureCheckerQuorumStakeTotals, error) {
+	ctx context.Context, msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
+) (taskmanager.IBLSSignatureCheckerQuorumStakeTotals, error) {
 	stakeTotalsPerQuorum, _, err := r.AvsServiceBindings.TaskManager.CheckSignatures(
 		&bind.CallOpts{}, msgHash, quorumNumbers, referenceBlockNumber, nonSignerStakesAndSignature,
 	)
 	if err != nil {
-		return cstaskmanager.IBLSSignatureCheckerQuorumStakeTotals{}, err
+		return taskmanager.IBLSSignatureCheckerQuorumStakeTotals{}, err
 	}
 	return stakeTotalsPerQuorum, nil
-}
-
-func (r *AvsReader) GetErc20Mock(ctx context.Context, tokenAddr gethcommon.Address) (*erc20mock.ContractERC20Mock, error) {
-	erc20Mock, err := r.AvsServiceBindings.GetErc20Mock(tokenAddr)
-	if err != nil {
-		r.logger.Error("Failed to fetch ERC20Mock contract", "err", err)
-		return nil, err
-	}
-	return erc20Mock, nil
 }
