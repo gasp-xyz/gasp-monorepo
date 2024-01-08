@@ -1,0 +1,42 @@
+name: Build and test
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version to be assigned to the built image
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-aggregator-image:
+    name: Build aggregator Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+          docker buildx create --use
+          docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/aggregator:${{ inputs.version }} -f aggregator/cmd/Dockerfile .
+  build-operator-image:
+    name: Build operator Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+          docker buildx create --use
+          docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/operator:${{ inputs.version }} -f operator/cmd/Dockerfile .
+  build-avs-cli-image:
+    name: Build AVS CLI Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+          docker buildx create --use
+          docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/avs-cli:${{ inputs.version }} -f operator/plugin/cmd/Dockerfile .

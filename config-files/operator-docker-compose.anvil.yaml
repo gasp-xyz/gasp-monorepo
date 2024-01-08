@@ -45,3 +45,5 @@ enable_node_api: true
 # the registered operator, it's blspubkey registering event with the compendium is not present anymore,
 # and so the aggregator can't find it.... very annoying
 register_operator_on_startup: true
+
+substrate_rpc_url: wss://kusama-archive.mangata.online

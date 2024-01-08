@@ -14,8 +14,7 @@ import (
 	logging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/signer"
 
-	cstaskmanager "github.com/Layr-Labs/incredible-squaring-avs/contracts/bindings/IncredibleSquaringTaskManager"
-	"github.com/Layr-Labs/incredible-squaring-avs/core/config"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
 )
 
 type AvsWriterer interface {
@@ -26,18 +25,18 @@ type AvsWriterer interface {
 		blockNumber *big.Int,
 		quorumThresholdPercentage uint32,
 		quorumNumbers []byte,
-	) (cstaskmanager.IIncredibleSquaringTaskManagerTask, uint32, error)
+	) (taskmanager.IMangataTaskManagerTask, uint32, error)
 	RaiseChallenge(
 		ctx context.Context,
-		task cstaskmanager.IIncredibleSquaringTaskManagerTask,
-		taskResponse cstaskmanager.IIncredibleSquaringTaskManagerTaskResponse,
-		taskResponseMetadata cstaskmanager.IIncredibleSquaringTaskManagerTaskResponseMetadata,
-		pubkeysOfNonSigningOperators []cstaskmanager.BN254G1Point,
+		task taskmanager.IMangataTaskManagerTask,
+		taskResponse taskmanager.IMangataTaskManagerTaskResponse,
+		taskResponseMetadata taskmanager.IMangataTaskManagerTaskResponseMetadata,
+		pubkeysOfNonSigningOperators []taskmanager.BN254G1Point,
 	) (*types.Receipt, error)
 	SendAggregatedResponse(ctx context.Context,
-		task cstaskmanager.IIncredibleSquaringTaskManagerTask,
-		taskResponse cstaskmanager.IIncredibleSquaringTaskManagerTaskResponse,
-		nonSignerStakesAndSignature cstaskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
+		task taskmanager.IMangataTaskManagerTask,
+		taskResponse taskmanager.IMangataTaskManagerTaskResponse,
+		nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
 	) (*types.Receipt, error)
 }
 
@@ -50,10 +49,6 @@ type AvsWriter struct {
 }
 
 var _ AvsWriterer = (*AvsWriter)(nil)
-
-func NewAvsWriterFromConfig(c *config.Config) (*AvsWriter, error) {
-	return NewAvsWriter(c.Signer, c.IncredibleSquaringServiceManagerAddr, c.BlsOperatorStateRetrieverAddr, c.EthHttpClient, c.Logger)
-}
 
 func NewAvsWriter(signer signer.Signer, serviceManagerAddr, blsOperatorStateRetrieverAddr gethcommon.Address, ethHttpClient eth.EthClient, logger logging.Logger) (*AvsWriter, error) {
 	avsServiceBindings, err := NewAvsServiceBindings(serviceManagerAddr, blsOperatorStateRetrieverAddr, ethHttpClient, logger)
@@ -94,23 +89,23 @@ func NewAvsWriter(signer signer.Signer, serviceManagerAddr, blsOperatorStateRetr
 }
 
 // returns the tx receipt, as well as the task index (which it gets from parsing the tx receipt logs)
-func (w *AvsWriter) SendNewTaskVerifyBlock(ctx context.Context, blockNumber *big.Int, quorumThresholdPercentage uint32, quorumNumbers []byte) (cstaskmanager.IIncredibleSquaringTaskManagerTask, uint32, error) {
+func (w *AvsWriter) SendNewTaskVerifyBlock(ctx context.Context, blockNumber *big.Int, quorumThresholdPercentage uint32, quorumNumbers []byte) (taskmanager.IMangataTaskManagerTask, uint32, error) {
 	txOpts := w.Signer.GetTxOpts()
 	tx, err := w.AvsContractBindings.TaskManager.CreateNewTask(txOpts, blockNumber, quorumThresholdPercentage, quorumNumbers)
 	if err != nil {
 		w.logger.Errorf("Error assembling CreateNewTask tx")
-		return cstaskmanager.IIncredibleSquaringTaskManagerTask{}, 0, err
+		return taskmanager.IMangataTaskManagerTask{}, 0, err
 	}
 	receipt := w.client.WaitForTransactionReceipt(ctx, tx.Hash())
-	newTaskCreatedEvent, err := w.AvsContractBindings.TaskManager.ContractIncredibleSquaringTaskManagerFilterer.ParseNewTaskCreated(*receipt.Logs[0])
+	newTaskCreatedEvent, err := w.AvsContractBindings.TaskManager.ContractMangataTaskManagerFilterer.ParseNewTaskCreated(*receipt.Logs[0])
 	if err != nil {
 		w.logger.Error("Aggregator failed to parse new task created event", "err", err)
-		return cstaskmanager.IIncredibleSquaringTaskManagerTask{}, 0, err
+		return taskmanager.IMangataTaskManagerTask{}, 0, err
 	}
 	return newTaskCreatedEvent.Task, newTaskCreatedEvent.TaskIndex, nil
 }
 
-func (w *AvsWriter) SendAggregatedResponse(ctx context.Context, task cstaskmanager.IIncredibleSquaringTaskManagerTask, taskResponse cstaskmanager.IIncredibleSquaringTaskManagerTaskResponse, nonSignerStakesAndSignature cstaskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error) {
+func (w *AvsWriter) SendAggregatedResponse(ctx context.Context, task taskmanager.IMangataTaskManagerTask, taskResponse taskmanager.IMangataTaskManagerTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error) {
 	txOpts := w.Signer.GetTxOpts()
 	tx, err := w.AvsContractBindings.TaskManager.RespondToTask(txOpts, task, taskResponse, nonSignerStakesAndSignature)
 	if err != nil {
@@ -123,10 +118,10 @@ func (w *AvsWriter) SendAggregatedResponse(ctx context.Context, task cstaskmanag
 
 func (w *AvsWriter) RaiseChallenge(
 	ctx context.Context,
-	task cstaskmanager.IIncredibleSquaringTaskManagerTask,
-	taskResponse cstaskmanager.IIncredibleSquaringTaskManagerTaskResponse,
-	taskResponseMetadata cstaskmanager.IIncredibleSquaringTaskManagerTaskResponseMetadata,
-	pubkeysOfNonSigningOperators []cstaskmanager.BN254G1Point,
+	task taskmanager.IMangataTaskManagerTask,
+	taskResponse taskmanager.IMangataTaskManagerTaskResponse,
+	taskResponseMetadata taskmanager.IMangataTaskManagerTaskResponseMetadata,
+	pubkeysOfNonSigningOperators []taskmanager.BN254G1Point,
 ) (*types.Receipt, error) {
 	txOpts := w.Signer.GetTxOpts()
 	tx, err := w.AvsContractBindings.TaskManager.RaiseAndResolveChallenge(txOpts, task, taskResponse, taskResponseMetadata, pubkeysOfNonSigningOperators)

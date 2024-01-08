@@ -1,0 +1,46 @@
+remoteCluster: true
+
+anvilEnabled: false
+aggregatorEnabled: true
+operatorEnabled: false
+
+# it is possible to pass args as ENV vars instead, same name as cmd flag but SNAKE_UPPERCASED
+# see core/config/flags.go
+#
+# go run aggregator/cmd/main.go \
+# --eth-rpc-url $ETH_RPC_URL \
+# --eth-ws-url $ETH_WS_URL \
+# ^^ above are secret, contains personal API key to connect to a ETH node
+# --substrate-rpc-url $SUBSTRATE_RPC_URL \
+# --chain-id $CHAIN_ID \
+# --bls-public-key-compendium $BLS_PUBLIC_KEY_COMPENDIUM \
+# --bls-operator-state-retriever $BLS_OPERATOR_STATE_RETRIEVER \
+# --avs-service-manager $AVS_SERVICE_MANAGER \
+# --ecdsa-key-file ~/.eigenlayer/operator_keys/agro.ecdsa.key.json \
+# ^^ this is an encrytped key, password is passed with EcdsaKeyPasswordFlag that should be secret, currently empty string
+# --avs-server-ip-port-address $AGRO_HOST \
+# 2>&1 | zap-pretty
+
+aggregatorArgs:
+  - --eth-rpc-url 
+  - https://eth-goerli.g.alchemy.com/v2/slHhquJDTBbdx25NdPLAx_nqoUNu-RqJ
+  - --eth-ws-url 
+  - wss://eth-goerli.g.alchemy.com/v2/slHhquJDTBbdx25NdPLAx_nqoUNu-RqJ
+  - --substrate-rpc-url 
+  - wss://kusama-archive.mangata.online
+  - --chain-id 
+  - '"5"'
+  - --bls-public-key-compendium 
+  - 0xc81d3963087Fe09316cd1E032457989C7aC91b19
+  - --bls-operator-state-retriever 
+  - 0x737Dd62816a9392e84Fa21C531aF77C00816A3a3
+  - --avs-service-manager 
+  - 0xD2333E11ea617E30fb97900f6ac9782A85f233e7
+  - --ecdsa-key-file 
+  - /config/ecdsa.key.json
+  - --avs-server-ip-port-address 
+  - 0.0.0.0:8090
+aggregatorConfigFiles:
+  - name: ecdsa.key.json
+    content: |
+      {"address":"5331fb44a5d16225ae8d804252e90c331cb2cb17","crypto":{"cipher":"aes-128-ctr","ciphertext":"7143fc3658f6ca5d985206f288f8b7f7372e0fa4c65f284c2528f52a1c9fbbf2","cipherparams":{"iv":"3eb290e9979a63c8abe379fe023e4de4"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"d0a5df5124867b34ea91a392236feca78a7f372603cf04fe9afbb59d4e74cab2"},"mac":"ece318e2000afb2e110dc1d367f9182a8d59af287aa895308c34e6d10b2bb2df"},"id":"07956b55-33b1-4f93-b874-a6ee83e59a87","version":3}

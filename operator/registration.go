@@ -12,137 +12,96 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-
+	blspubkeyregistry "github.com/Layr-Labs/eigensdk-go/contracts/bindings/BLSPubkeyRegistry"
+	regcoord "github.com/Layr-Labs/eigensdk-go/contracts/bindings/BLSRegistryCoordinatorWithIndices"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	eigenSdkTypes "github.com/Layr-Labs/eigensdk-go/types"
-
-	regcoord "github.com/Layr-Labs/eigensdk-go/contracts/bindings/BLSRegistryCoordinatorWithIndices"
 )
 
-func (o *Operator) registerOperatorOnStartup(blsPubkeyCompendiumAddr common.Address) {
-	err := o.RegisterOperatorWithEigenlayer()
+func (o *Operator) RegisterAtStartup() {
+	err := o.RegisterOperatorWithEigen()
 	if err != nil {
-		// This error might only be that the operator was already registered with eigenlayer, so we don't want to fatal
-		o.logger.Error("Error registering operator with eigenlayer", "err", err)
-	} else {
-		o.logger.Infof("Registered operator with eigenlayer")
+		o.logger.Error("Error while registering operator into eigen")
 	}
-
-	err = o.RegisterBLSPublicKey()
-	if err != nil {
-		// This error might only be that the operator has already registered its bls pubkeys, so we don't want to fatal
-		o.logger.Error("Error registering BLS public key with eigenlayer", "err", err)
-	} else {
-		o.logger.Infof("Registered BLS public key with eigenlayer")
-	}
-
-	// TODO(samlaf): these shouldn't be hardcoded
-	mockTokenStrategyAddr := common.HexToAddress("0x7a2088a1bFc9d81c55368AE168C2C02570cB814F")
-	amount := big.NewInt(1000)
-	err = o.DepositIntoStrategy(mockTokenStrategyAddr, amount)
-	if err != nil {
-		o.logger.Fatal("Error depositing into strategy", "err", err)
-	}
-	o.logger.Infof("Deposited %s into strategy %s", amount, mockTokenStrategyAddr)
 
 	err = o.RegisterOperatorWithAvs()
 	if err != nil {
-		o.logger.Fatal("Error registering operator with avs", "err", err)
+		o.logger.Error("Error while registering operator into AVS")
 	}
-	o.logger.Infof("Registered operator with avs")
+	o.logger.Info("Operator succesfully registered!")
 }
 
-func (o *Operator) optOperatorIntoSlashing() error {
-	_, err := o.eigenlayerWriter.OptOperatorIntoSlashing(context.Background(), o.credibleSquaringServiceManagerAddr)
-	if err != nil {
-		o.logger.Errorf("Error opting operator into slashing")
-		return err
-	}
-	return nil
-}
-
-func (o *Operator) RegisterOperatorWithEigenlayer() error {
+func (o *Operator) RegisterOperatorWithEigen() error {
 	op := eigenSdkTypes.Operator{
 		Address:                 o.operatorAddr.String(),
 		EarningsReceiverAddress: o.operatorAddr.String(),
 	}
-	_, err := o.eigenlayerWriter.RegisterAsOperator(context.Background(), op)
+
+	status, err := o.ethRpc.ElReader.IsOperatorRegistered(context.Background(), op)
 	if err != nil {
-		o.logger.Errorf("Error registering operator with eigenlayer")
 		return err
 	}
+
+	if !status {
+		receipt, err := o.ethRpc.ElWriter.RegisterAsOperator(context.Background(), op)
+		if err != nil {
+			o.logger.Info("Error while registering operator")
+			return err
+		}
+		o.logger.Infof(
+			"Operator registration transaction at: %s",
+			receipt.TxHash.String(),
+		)
+
+	} else {
+		o.logger.Info("Operator is already registered on EigenLayer")
+	}
+
+	receipt, err := o.ethRpc.ElWriter.RegisterBLSPublicKey(context.Background(), o.config.BlsKeyPair, op)
+	if err != nil {
+		o.logger.Info("Error while registering BLS public key")
+		return err
+	}
+	o.logger.Infof(
+		"Operator bls key added transaction at: %s",
+		receipt.TxHash.String(),
+	)
+
+	o.logger.Info("Operator is registered and bls key added successfully")
 	return nil
 }
 
-func (o *Operator) DepositIntoStrategy(strategyAddr common.Address, amount *big.Int) error {
-	_, tokenAddr, err := o.eigenlayerReader.GetStrategyAndUnderlyingToken(context.Background(), strategyAddr)
-	if err != nil {
-		o.logger.Error("Failed to fetch strategy contract", "err", err)
-		return err
-	}
-	contractErc20Mock, err := o.avsReader.GetErc20Mock(context.Background(), tokenAddr)
-	if err != nil {
-		o.logger.Error("Failed to fetch ERC20Mock contract", "err", err)
-		return err
-	}
-	txOpts := o.avsWriter.Signer.GetTxOpts()
-	tx, err := contractErc20Mock.Mint(txOpts, o.operatorAddr, amount)
-	if err != nil {
-		o.logger.Errorf("Error assembling Mint tx")
-		return err
-	}
-	o.ethClient.WaitForTransactionReceipt(context.Background(), tx.Hash())
-
-	_, err = o.eigenlayerWriter.DepositERC20IntoStrategy(context.Background(), strategyAddr, amount)
-	if err != nil {
-		o.logger.Errorf("Error depositing into strategy")
-		return err
-	}
-	return nil
-}
-
-// TODO(samlaf): this should eventually be moved to eigensdk, since pubkey compendium should be a shared contract
-// between all AVS teams. However it currently is not in that state (not included as part of canonical eigenlayer deployment)
-// so for now we just deploy it as part of avs registries and make the call here.
-func (o *Operator) RegisterBLSPublicKey() error {
-	o.logger.Debugf("registering BLS public keys G1(%s) and G2(%s) with EigenLayer", o.blsKeypair.GetPubKeyG1(), o.blsKeypair.GetPubKeyG2())
-
-	_, err := o.eigenlayerWriter.RegisterBLSPublicKey(context.Background(), o.blsKeypair, eigenSdkTypes.Operator{Address: o.operatorAddr.String()})
-	if err != nil {
-		return fmt.Errorf("failed to register bls pubkey with compendium: %v", err)
-	}
-
-	o.logger.Debugf("registered BLS public keys G1(%s) and G2(%s) with EigenLayer", o.blsKeypair.GetPubKeyG1(), o.blsKeypair.GetPubKeyG2())
-	return nil
-}
-
-// Registration specific functions
 func (o *Operator) RegisterOperatorWithAvs() error {
-
-	// 1. opt operator into getting slashed by credible squaring service manager
-	err := o.optOperatorIntoSlashing()
-	if err != nil {
-		return err
-	}
-
-	// 2. register operator with avs coordinator contract
-
 	quorumNumbers := []byte{0}
 	socket := "Not Needed"
 
-	pubkey := pubKeyG1ToBN254G1Point(o.blsKeypair.GetPubKeyG1())
-	g1Point := regcoord.BN254G1Point{
-		X: pubkey.X,
-		Y: pubkey.Y,
-	}
+	pubkey := pubKeyG1ToBN254G1Point(o.config.BlsKeyPair.GetPubKeyG1())
 
-	_, err = o.avsWriter.RegisterOperatorWithAVSRegistryCoordinator(context.Background(), quorumNumbers, g1Point, socket)
+	_, err := o.ethRpc.AvsWriter.RegisterOperatorWithAVSRegistryCoordinator(context.Background(), quorumNumbers, pubkey, socket)
 	if err != nil {
 		o.logger.Errorf("Unable to register operator with avs registry coordinator")
 		return err
 	}
 	o.logger.Infof("Registered operator with avs registry coordinator.")
+
+	return nil
+}
+
+func (o *Operator) DeregisterOperatorWithAvs() error {
+	quorumNumbers := []byte{0}
+
+	p := pubKeyG1ToBN254G1Point(o.config.BlsKeyPair.GetPubKeyG1())
+	pubkey := blspubkeyregistry.BN254G1Point{
+		X: p.X,
+		Y: p.Y,
+	}
+
+	_, err := o.ethRpc.AvsWriter.DeregisterOperator(context.Background(), o.operatorAddr, quorumNumbers, pubkey)
+	if err != nil {
+		o.logger.Errorf("Unable to deregister operator with avs registry coordinator")
+		return err
+	}
+	o.logger.Infof("Deregistered operator with avs registry coordinator.")
 
 	return nil
 }
@@ -175,32 +134,33 @@ type OperatorStatus struct {
 
 func (o *Operator) PrintOperatorStatus() error {
 	fmt.Println("Printing operator status")
-	pubkeyhash, err := o.eigenlayerReader.GetOperatorPubkeyHash(context.Background(), eigenSdkTypes.Operator{Address: o.operatorAddr.String()})
+	pubkeyhash, err := o.ethRpc.ElReader.GetOperatorPubkeyHash(context.Background(), eigenSdkTypes.Operator{Address: o.operatorAddr.String()})
 	if err != nil {
 		return err
 	}
 	pubkeysRegistered := pubkeyhash != [32]byte{}
-	serviceManagerCanSlashOperatorUntilBlock, err := o.eigenlayerReader.ServiceManagerCanSlashOperatorUntilBlock(
-		context.Background(), o.operatorAddr, o.credibleSquaringServiceManagerAddr,
+	serviceManagerCanSlashOperatorUntilBlock, err := o.ethRpc.ElReader.ServiceManagerCanSlashOperatorUntilBlock(
+		context.Background(), o.operatorAddr, o.config.ServiceManagerAddr,
 	)
 	if err != nil {
 		return err
 	}
-	curBlockNumber, err := o.ethClient.BlockNumber(context.Background())
+	curBlockNumber, err := o.ethRpc.Client.BlockNumber(context.Background())
 	if err != nil {
 		return err
 	}
 	optedIntoSlashingByAvs := curBlockNumber < uint64(serviceManagerCanSlashOperatorUntilBlock)
 	registeredWithAvs := o.operatorId != [32]byte{}
-	isFrozen, err := o.eigenlayerReader.OperatorIsFrozen(context.Background(), o.operatorAddr)
+	isFrozen, err := o.ethRpc.ElReader.OperatorIsFrozen(context.Background(), o.operatorAddr)
 	if err != nil {
 		return err
 	}
+
 	operatorStatus := OperatorStatus{
 		EcdsaAddress:           o.operatorAddr.String(),
 		PubkeysRegistered:      pubkeysRegistered,
-		G1Pubkey:               o.blsKeypair.GetPubKeyG1().String(),
-		G2Pubkey:               o.blsKeypair.GetPubKeyG2().String(),
+		G1Pubkey:               o.config.BlsKeyPair.GetPubKeyG1().String(),
+		G2Pubkey:               o.config.BlsKeyPair.GetPubKeyG2().String(),
 		OptedIntoSlashingByAvs: optedIntoSlashingByAvs,
 		RegisteredWithAvs:      registeredWithAvs,
 		OperatorId:             hex.EncodeToString(o.operatorId[:]),

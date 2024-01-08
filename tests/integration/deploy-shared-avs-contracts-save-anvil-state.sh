@@ -13,7 +13,7 @@ anvil --load-state eigenlayer-deployed-anvil-state.json --dump-state eigenlayer-
 
 cd ../../contracts/lib/eigenlayer-middleware
 forge script script/DeploySharedContracts.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
-mv script/output/31337/shared_contracts_deployment_data.json ../../script/output/31337/shared_avs_contracts_deployment_output.json
+mv script/output/31337/shared_contracts_deployment_data.json ../../script/input/31337/shared_avs_contracts_deployment_output.json
 
 # # kill anvil to save its state
 pkill anvil

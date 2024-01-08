@@ -76,15 +76,15 @@ contract Utils is Script {
         return vm.readFile(string.concat(inputDir, chainDir, file));
     }
 
-    function readOutput(
-        string memory outputFileName
+    function readConfig(
+        string memory inputFileName
     ) internal view returns (string memory) {
         string memory inputDir = string.concat(
             vm.projectRoot(),
-            "/script/output/"
+            "/script/config/"
         );
         string memory chainDir = string.concat(vm.toString(block.chainid), "/");
-        string memory file = string.concat(outputFileName, ".json");
+        string memory file = string.concat(inputFileName, ".json");
         return vm.readFile(string.concat(inputDir, chainDir, file));
     }
 

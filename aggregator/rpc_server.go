@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/rpc"
 
-	cstaskmanager "github.com/Layr-Labs/incredible-squaring-avs/contracts/bindings/IncredibleSquaringTaskManager"
-	"github.com/Layr-Labs/incredible-squaring-avs/core"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
+	"github.com/mangata-finance/eigen-layer-monorepo/core"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
@@ -16,6 +16,7 @@ import (
 var (
 	TaskNotFoundError400                     = errors.New("400. Task not found")
 	OperatorNotPartOfTaskQuorum400           = errors.New("400. Operator not part of quorum")
+	OperatorNotRegistered400                 = errors.New("400. Operator not registered in AVS")
 	TaskResponseDigestNotFoundError500       = errors.New("500. Failed to get task response digest")
 	UnknownErrorWhileVerifyingSignature400   = errors.New("400. Failed to verify signature")
 	SignatureVerificationFailed400           = errors.New("400. Signature verification failed")
@@ -38,7 +39,7 @@ func (agg *Aggregator) startServer(ctx context.Context) error {
 }
 
 type SignedTaskResponse struct {
-	TaskResponse cstaskmanager.IIncredibleSquaringTaskManagerTaskResponse
+	TaskResponse taskmanager.IMangataTaskManagerTaskResponse
 	BlsSignature bls.Signature
 	OperatorId   bls.OperatorId
 }
@@ -47,16 +48,20 @@ type SignedTaskResponse struct {
 // reply doesn't need to be checked. If there are no errors, the task response is accepted
 // rpc framework forces a reply type to exist, so we put bool as a placeholder
 func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskResponse, reply *bool) error {
-	agg.logger.Infof("Received signed task response: %#v", signedTaskResponse)
+	agg.logger.Info("Received signed task response", "response", signedTaskResponse)
 	taskIndex := signedTaskResponse.TaskResponse.ReferenceTaskIndex
 	taskResponseDigest, err := core.GetTaskResponseDigest(&signedTaskResponse.TaskResponse)
 	if err != nil {
 		agg.logger.Error("Failed to get task response digest", "err", err)
 		return TaskResponseDigestNotFoundError500
 	}
+	if signedTaskResponse.OperatorId == [32]byte{} {
+		agg.logger.Error("Operator not registered", "err", err)
+		return OperatorNotRegistered400
+	}
 	agg.taskResponsesMu.Lock()
 	if _, ok := agg.taskResponses[taskIndex]; !ok {
-		agg.taskResponses[taskIndex] = make(map[sdktypes.TaskResponseDigest]cstaskmanager.IIncredibleSquaringTaskManagerTaskResponse)
+		agg.taskResponses[taskIndex] = make(map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse)
 	}
 	if _, ok := agg.taskResponses[taskIndex][taskResponseDigest]; !ok {
 		agg.taskResponses[taskIndex][taskResponseDigest] = signedTaskResponse.TaskResponse
