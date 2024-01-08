@@ -17,7 +17,7 @@ const mangataContractAddress = process.env
 	.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
 
 async function main() {
-	const api = await Mangata.instance([process.env.MANGATA_URL!]).api();
+	const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
 	console.log("api", api.isConnected);
 
 	// Ethereum private key
