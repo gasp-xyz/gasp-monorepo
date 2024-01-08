@@ -1,0 +1,72 @@
+name: Mangata Updater
+
+on:
+  push:
+    branches:
+      - '*'
+    paths:
+      - mangata-updater/**
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+env:
+  SERVICE_NAME: "mangata-updater"
+  PROJECT_NAME: 'Mangata Updater - DEV'
+  APP_ENV: 'dev'
+  GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+  MANGATA_NODE_URL: 'wss://collator-01-ws-rococo.mangata.online'
+  WALLET_PRIVATE_KEY: ${{ secrets.WALLET_KEY }}
+  ETH_CHAIN_URL: ${{ secrets.ETH_CHAIN_URL }}
+  EIGEN_CONTRACT_ADDRESS: '0x839De8D21F4762D791efbC0bA70C1Af0c442Ef98'
+  MANGATA_CONTRACT_ADDRESS: '0x839De8D21F4762D791efbC0bA70C1Af0c442Ef98'
+
+permissions:
+  contents: write
+  id-token: write
+  deployments: write
+  checks: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node version and cache dependencies
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        working-directory: mangata-updater
+        run: npm ci
+
+      - name: Build service
+        working-directory: mangata-updater
+        run: npm start
+
+      - name: Inject ENV
+        uses: gaspb/app-yaml-env-compiler@master
+        env:
+          APP_ENV: ${{ env.APP_ENV }}
+          SERVICE_NAME: ${{ env.SERVICE_NAME }}
+          MANGATA_NODE_URL: ${{ env.MANGATA_NODE_URL }}
+          WALLET_PRIVATE_KEY: ${{ env.WALLET_PRIVATE_KEY }}
+          EIGEN_CONTRACT_ADDRESS: ${{ env.EIGEN_CONTRACT_ADDRESS }}
+          MANGATA_CONTRACT_ADDRESS: ${{ env.MANGATA_CONTRACT_ADDRESS }}
+          ETH_CHAIN_URL: ${{ env.ETH_CHAIN_URL }}
+        with:
+          appyamlpath: "./app-${{ env.APP_ENV }}.yaml"
+
+      - id: deploy
+        uses: google-github-actions/deploy-appengine@v0
+        with:
+          credentials: ${{ env.GCP_SA_KEY }}
+          deliverables: "app-${{ env.APP_ENV }}.yaml"
+
+      - id: smoke-test
+        shell: bash
+        run: |
+          curl "${{ steps.deploy.outputs.url }}"
+          echo "Deployed to ${{ steps.deploy.outputs.url }}"
