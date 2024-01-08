@@ -7,7 +7,7 @@
   "scripts": {
     "build": "npm run lint && rimraf ./build && npx tsc",
     "lint": "npx @biomejs/biome check --apply src/",
-    "start": "npm run lint && npm run build && node build/index.js"
+    "start": "npm run build && node build/index.js"
   },
   "keywords": [],
   "author": "",

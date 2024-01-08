@@ -2,8 +2,7 @@ import { Mangata } from "@mangata-finance/sdk";
 import "dotenv/config";
 import { createPublicClient, createWalletClient, webSocket } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { goerli } from "viem/chains"
-
+import { goerli } from "viem/chains";
 
 import { eigenContractAbi } from "./eigenAbi.js";
 import { mangataContractAbi } from "./mangataAbi.js";
@@ -39,15 +38,16 @@ async function main() {
 		transport,
 	});
 
-
 	const unwatch = publicClient.watchContractEvent({
 		address: eigenContractAddress,
 		abi: eigenContractAbi,
 		eventName: "TaskResponded",
 		onLogs: async (logs) => {
 			for (const log of logs) {
-
-				const pendingUpdates = await api.query.rolldown.pendingUpdatesU256Array(log.blockNumber) as unknown as bigint[]
+				const pendingUpdates =
+					(await api.query.rolldown.pendingUpdatesU256Array(
+						log.blockNumber,
+					)) as unknown as bigint[];
 
 				// Executes TX on ETH with all pending_updates with hashes
 				// Here we need to write to mangata contract
