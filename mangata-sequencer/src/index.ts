@@ -1,9 +1,16 @@
-import { Mangata } from "@mangata-finance/sdk";
+import { Mangata, signTx } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
+import { Keyring } from "@polkadot/api";
 import "dotenv/config";
 import { createPublicClient, webSocket } from "viem";
 
+import * as fs from "fs";
+import path from "node:path";
+import { fileURLToPath } from "url";
 import { mangataContractAbi } from "./mangataAbi.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 type ContractAddress = `0x${string}`;
 
@@ -14,19 +21,26 @@ async function main() {
 	const api = await Mangata.instance([process.env.MANGATA_URL!]).api();
 	console.log("api", api.isConnected);
 
-	const transport = webSocket(process.env.ETH_CHAIN_URL, {
-		retryCount: 5,
-	});
+	// ----------------KEYPAIR for Secret KEY--------------------------
+	// TODO: We need to think about how to add secret key in order to make transaction
+	const file = fs.readFileSync(path.resolve(__dirname, "./polkadot.json"));
+	const keyring = new Keyring({ type: "sr25519" });
+	// @ts-ignore
+	const user = keyring.createFromJson(JSON.parse(file));
+	keyring.addPair(user);
+	keyring.pairs[0].decodePkcs8(process.env.ACCOUNT_SECRET_PASSWORD!);
+	// ----------------------------------------------------------------
 
-	// We need public client in order to read contract
+	/*
+	* Public client - for reading the contract
+	* */
 	const publicClient = createPublicClient({
-		transport,
+		transport: webSocket(process.env.ETH_CHAIN_URL, {
+			retryCount: 5,
+		}),
 	});
-
-	// subscription for new heads
 	await api.derive.chain.subscribeNewHeads(async (header) => {
 		console.log(`Block author: #${header.author}`);
-		console.log(`Chain is at block hash: #${header.hash}`);
 
 		// TODO: we need to get somehow the collator address which is running this sequencer
 		// TODO: and we read contract only when the collator is building the block
@@ -38,9 +52,7 @@ async function main() {
 				functionName: "getUpdateForL2",
 			});
 
-			console.log("data", data);
-
-			// TODO: we need to send TX to magnata with those data
+			await signTx(api, api.tx.rolldown.updateL2FromL1(data), user);
 		}
 	});
 }
