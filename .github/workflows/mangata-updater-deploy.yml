@@ -54,13 +54,13 @@ jobs:
           MANGATA_CONTRACT_ADDRESS: ${{ env.MANGATA_CONTRACT_ADDRESS }}
           ETH_CHAIN_URL: ${{ env.ETH_CHAIN_URL }}
         with:
-          appyamlpath: "./app-${{ env.APP_ENV }}.yaml"
+          appyamlpath: "mangata-updater/app-${{ env.APP_ENV }}.yaml"
 
       - id: deploy
         uses: google-github-actions/deploy-appengine@v0
         with:
           credentials: ${{ env.GCP_SA_KEY }}
-          deliverables: "app-${{ env.APP_ENV }}.yaml"
+          deliverables: "mangata-updater/app-${{ env.APP_ENV }}.yaml"
 
       - id: smoke-test
         shell: bash
