@@ -41,7 +41,7 @@ jobs:
 
       - name: Build service
         working-directory: mangata-updater
-        run: npm start
+        run: npm run build
 
       - name: Inject ENV
         uses: gaspb/app-yaml-env-compiler@master
