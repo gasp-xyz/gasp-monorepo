@@ -1,11 +1,7 @@
 name: Mangata Updater
 
 on:
-  push:
-    branches:
-      - '*'
-    paths:
-      - mangata-updater/**
+  push: 
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
