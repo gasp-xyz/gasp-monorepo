@@ -61,3 +61,4 @@ releases:
           repository: mangatasolutions/mangata-updater
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        walletPrivateKey: 15cb3150921ee606d71b9def1b6392c9df1d4fea399cbcca2047d9cf84f44f06

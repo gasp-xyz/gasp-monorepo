@@ -13,11 +13,10 @@ spec:
   serviceName: {{ include "mangata-updater.name" . }}
   template:
     metadata:
-      {{- if .Values.podAnnotations }}
       annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
       {{- end }}
       labels:
         {{- include "mangata-updater.labels" . | nindent 8 }}
@@ -39,13 +38,16 @@ spec:
             - {{ . }}
             {{- end }}
           {{- end }}
-          {{- if .Values.env }}
           env:
+            - name: WALLET_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "mangata-updater.name" . }}-secret"
+                  key: WALLET_PRIVATE_KEY
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}
               value: {{ $val }}
             {{- end }}
-          {{- end }}
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
 
