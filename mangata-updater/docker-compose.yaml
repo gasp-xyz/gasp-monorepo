@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   updater:
-    image: mangatasolutions/updater:latest
+    image: mangatasolutions/mangata-updater:test
     build: .
     environment:
       MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online

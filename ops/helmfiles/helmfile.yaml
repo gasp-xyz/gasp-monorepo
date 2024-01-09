@@ -52,3 +52,12 @@ releases:
         enableServiceMonitorCollectors: {{ .Values.operatorEnableServiceMonitorCollectors }}
         prometheus:
           enabled: true
+  - name: mangata-updater
+    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.updaterEnabled }}
+    chart: ../helm-charts/mangata-updater
+    values:
+      - image:
+          repository: mangatasolutions/mangata-updater
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mangata-updater.name" . }}
+  labels: {{- include "mangata-updater.labels" . | nindent 4 }}
+    service: {{ include "mangata-updater.name" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "mangata-updater.selectorLabels" . | nindent 6 }}
+      service: {{ include "mangata-updater.name" . }}
+  serviceName: {{ include "mangata-updater.name" . }}
+  template:
+    metadata:
+      {{- if .Values.podAnnotations }}
+      annotations:
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      labels:
+        {{- include "mangata-updater.labels" . | nindent 8 }}
+        service: {{ include "mangata-updater.name" . }}
+    spec:
+      containers:
+        - name: mangata-updater
+          image: "{{ .Values.image.repository}}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
+          {{- if .Values.command }}
+          command:
+            {{- range .Values.command }}
+            - {{ . }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.args }}
+          args:
+            {{- range .Values.args }}
+            - {{ . }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.env }}
+          env:
+            {{- range $key, $val := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $val }}
+            {{- end }}
+          {{- end }}
+          resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 10 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
