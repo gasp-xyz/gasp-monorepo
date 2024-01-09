@@ -43,27 +43,26 @@ jobs:
         working-directory: mangata-updater
         run: npm run build
 
-      - name: Inject ENV
-        uses: gaspb/app-yaml-env-compiler@master
-        env:
-          APP_ENV: ${{ env.APP_ENV }}
-          SERVICE_NAME: ${{ env.SERVICE_NAME }}
-          MANGATA_NODE_URL: ${{ env.MANGATA_NODE_URL }}
-          WALLET_PRIVATE_KEY: ${{ env.WALLET_PRIVATE_KEY }}
-          EIGEN_CONTRACT_ADDRESS: ${{ env.EIGEN_CONTRACT_ADDRESS }}
-          MANGATA_CONTRACT_ADDRESS: ${{ env.MANGATA_CONTRACT_ADDRESS }}
-          ETH_CHAIN_URL: ${{ env.ETH_CHAIN_URL }}
-        with:
-          appyamlpath: "mangata-updater/app-${{ env.APP_ENV }}.yaml"
-
-      - id: deploy
-        uses: google-github-actions/deploy-appengine@v0
-        with:
-          credentials: ${{ env.GCP_SA_KEY }}
-          deliverables: "mangata-updater/app-${{ env.APP_ENV }}.yaml"
-
-      - id: smoke-test
-        shell: bash
-        run: |
-          curl "${{ steps.deploy.outputs.url }}"
-          echo "Deployed to ${{ steps.deploy.outputs.url }}"
+#      - name: Inject ENV
+#        uses: gaspb/app-yaml-env-compiler@master
+#        env:
+#          APP_ENV: ${{ env.APP_ENV }}
+#          SERVICE_NAME: ${{ env.SERVICE_NAME }}
+#          MANGATA_NODE_URL: ${{ env.MANGATA_NODE_URL }}
+#          WALLET_PRIVATE_KEY: ${{ env.WALLET_PRIVATE_KEY }}
+#          EIGEN_CONTRACT_ADDRESS: ${{ env.EIGEN_CONTRACT_ADDRESS }}
+#          MANGATA_CONTRACT_ADDRESS: ${{ env.MANGATA_CONTRACT_ADDRESS }}
+#          ETH_CHAIN_URL: ${{ env.ETH_CHAIN_URL }}
+#        with:
+#          appyamlpath: "mangata-updater/app-${{ env.APP_ENV }}.yaml"
+#
+#      - id: deploy
+#        uses: google-github-actions/deploy-appengine@v0
+#        with:
+#          credentials: ${{ env.GCP_SA_KEY }}
+#          deliverables: "mangata-updater/app-${{ env.APP_ENV }}.yaml"
+#
+#      - id: smoke-test
+#        shell: bash
+#        run: |
+#          echo "Deployed to ${{ steps.deploy.outputs.url }}"
