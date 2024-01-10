@@ -19,6 +19,8 @@ github.com/DataDog/zstd v1.5.2/go.mod h1:g4AWEaM3yOg3HYfnJ3YIawPnVdXJh9QME85blwS
 github.com/Joker/hpp v1.0.0/go.mod h1:8x5n+M1Hp5hC0g8okX3sR3vFQwynaX/UgSOM9MeBKzY=
 github.com/Layr-Labs/eigensdk-go v0.0.8 h1:ZQF9xyKMfyftYq3RHXLKtznL6kHwZiOH5ZQZ/3ZUDXo=
 github.com/Layr-Labs/eigensdk-go v0.0.8/go.mod h1:o+n2hLtZ5zWMYwrHygkkfoNRU4ZLGMYMFaL2+cHBBVk=
+github.com/Layr-Labs/eigensdk-go v0.0.9 h1:IMtRQzEYhOHWYrwso6ko026D5/MF3YGtFCR4/b1l80s=
+github.com/Layr-Labs/eigensdk-go v0.0.9/go.mod h1:oVDbRfA2GKFyZLf61zFOA3U2pjazHIFohlW7luDWqUA=
 github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migciow=
 github.com/Microsoft/go-winio v0.6.1/go.mod h1:LRdKpFKfdobln8UmuiYcKPot9D2v6svN5+sAH+4kjUM=
 github.com/Microsoft/hcsshim v0.11.1 h1:hJ3s7GbWlGK4YVV92sO88BQSyF4ZLVy7/awqOlPxFbA=

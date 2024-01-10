@@ -7,12 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
-	sdkclients "github.com/Layr-Labs/eigensdk-go/chainio/clients"
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
-	sdkelcontracts "github.com/Layr-Labs/eigensdk-go/chainio/elcontracts"
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/services/avsregistry"
 	blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
@@ -70,7 +66,7 @@ const (
 // Upon sending a task onchain (or receiving a NewTaskCreated Event if the tasks were sent by an external task generator), the aggregator can get the list of all operators opted into each quorum at that
 // block number by calling the getOperatorState() function of the BLSOperatorStateRetriever.sol contract.
 type Aggregator struct {
-	logger           logging.Logger
+	logger           sdklogging.Logger
 	serverIpPortAddr string
 	avsWriter        chainio.AvsWriterer
 	// aggregation related fields
@@ -90,25 +86,24 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	ethRpcClient, err := eth.NewClient(c.EthRpcUrl)
+	ethRpc, err := chainio.NewEthRpc(
+		c.ServiceManagerAddr,
+		c.BlsOperatorStateRetrieverAddr,
+		c.BlsCompendiumAddr,
+		c.EthRpcUrl,
+		c.EthWsUrl,
+		c.SignerFn,
+		c.Address,
+		"mangata-finalizer",
+		"0.0.0.0:8888",
+		logger,
+	)
 	if err != nil {
-		logger.Errorf("Cannot create http ethclient", "err", err)
+		logger.Error("Failed to create EthRpc clients", "err", err)
 		return nil, err
 	}
 
-	ethWsClient, err := eth.NewClient(c.EthWsUrl)
-	if err != nil {
-		logger.Errorf("Cannot create http ethclient", "err", err)
-		return nil, err
-	}
-
-	avsReader, err := chainio.NewAvsReaderFromConfig(c.ServiceManagerAddr, c.BlsOperatorStateRetrieverAddr, ethRpcClient, logger)
-	if err != nil {
-		logger.Error("Cannot create EthReader", "err", err)
-		return nil, err
-	}
-
-	chainId, err := ethRpcClient.ChainID(context.Background())
+	chainId, err := ethRpc.Client.ChainID(context.Background())
 	if err != nil {
 		logger.Error("Cannot get chainId", "err", err)
 		return nil, err
@@ -118,52 +113,14 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, errors.New("config.chainId & ethRpcClient.chainId mismatch")
 	}
 
-	avsWriter, err := chainio.NewAvsWriter(
-		c.EcdsaSigner,
-		c.ServiceManagerAddr,
-		c.BlsOperatorStateRetrieverAddr,
-		ethRpcClient,
-		logger,
-	)
-	if err != nil {
-		logger.Errorf("Cannot create EthWriter", "err", err)
-		return nil, err
-	}
-
-	slasherAddr, err := avsReader.AvsServiceBindings.ServiceManager.Slasher(&bind.CallOpts{})
-	if err != nil {
-		return nil, err
-	}
-
-	elContractsClient, err := sdkclients.NewELContractsChainClient(
-		slasherAddr,
-		c.BlsCompendiumAddr, ethRpcClient, ethWsClient, logger)
-	if err != nil {
-		logger.Error("Cannot create ELContractsChainClient", "err", err)
-		return nil, err
-	}
-	eigenlayerReader, err := sdkelcontracts.NewELChainReader(elContractsClient, logger, ethRpcClient)
-	if err != nil {
-		logger.Error("Cannot create EigenlayerReader", "err", err)
-		return nil, err
-	}
-	eigenlayerSubscriber, err := sdkelcontracts.NewELChainSubscriber(
-		elContractsClient,
-		logger,
-	)
-	if err != nil {
-		logger.Error("Cannot create EigenlayerEthSubscriber", "err", err)
-		return nil, err
-	}
-
-	taskResponseWindowBlock, err := avsReader.AvsServiceBindings.TaskManager.GetTaskResponseWindowBlock(&bind.CallOpts{})
+	taskResponseWindowBlock, err := ethRpc.AvsWriter.AvsContractBindings.TaskManager.GetTaskResponseWindowBlock(&bind.CallOpts{})
 	if err != nil {
 		logger.Error("Cannot get taskChallengeWindowBlock from TaskManager contract", "err", err)
 		return nil, err
 	}
 
-	pubkeyCompendiumService := pubkeycompserv.NewPubkeyCompendiumInMemory(context.Background(), eigenlayerSubscriber, eigenlayerReader, logger)
-	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(avsReader, eigenlayerReader, pubkeyCompendiumService, logger)
+	pubkeyCompendiumService := pubkeycompserv.NewPubkeyCompendiumInMemory(context.Background(), ethRpc.ElClients.ElChainSubscriber, ethRpc.ElClients.ElChainReader, logger)
+	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.ElClients.AvsRegistryChainReader, ethRpc.ElClients.ElChainReader, pubkeyCompendiumService, logger)
 	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, logger)
 
 	substrateRpc, err := gsrpc.NewSubstrateAPI(c.SubstrateWsRpcUrl)
@@ -175,7 +132,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 	return &Aggregator{
 		logger:                  logger,
 		serverIpPortAddr:        c.ServerAddressPort,
-		avsWriter:               avsWriter,
+		avsWriter:               ethRpc.AvsWriter,
 		blsAggregationService:   blsAggregationService,
 		tasks:                   make(map[types.TaskIndex]taskmanager.IMangataTaskManagerTask),
 		taskResponses:           make(map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse),
@@ -259,7 +216,7 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 // with the information of operators opted into quorum 0 at the block of task creation.
 func (agg *Aggregator) sendNewTask(header gsrpc_types.Header) error {
 	blockNumber := big.NewInt(int64(header.Number))
-	if header.Number % 10 != 0 {
+	if header.Number%10 != 0 {
 		return nil
 	}
 	agg.logger.Info("Aggregator sending new task", "block number", blockNumber)

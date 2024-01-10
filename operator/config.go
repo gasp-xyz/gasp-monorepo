@@ -5,7 +5,7 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
-	"github.com/Layr-Labs/eigensdk-go/signer"
+	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mangata-finance/eigen-layer-monorepo/core/config"
 	"github.com/urfave/cli"
@@ -28,8 +28,9 @@ type Config struct {
 	BlsCompendiumAddr             common.Address
 	ServiceManagerAddr            common.Address
 
-	BlsKeyPair  *bls.KeyPair  `json:"-"`
-	EcdsaSigner signer.Signer `json:"-"`
+	BlsKeyPair *bls.KeyPair      `json:"-"`
+	SignerFn   signerv2.SignerFn `json:"-"`
+	Address    common.Address
 
 	RegisterAtStartup bool
 }
@@ -52,9 +53,10 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		return nil, err
 	}
 
-	signer, err := signer.NewPrivateKeyFromKeystoreSigner(
-		ctx.GlobalString(config.EcdsaKeyFileFlag.Name),
-		ctx.GlobalString(config.EcdsaKeyPasswordFlag.Name),
+	signer, address, err := signerv2.SignerFromConfig(signerv2.Config{
+		KeystorePath: ctx.GlobalString(config.EcdsaKeyFileFlag.Name),
+		Password:     ctx.GlobalString(config.EcdsaKeyPasswordFlag.Name),
+	},
 		chainId,
 	)
 	if err != nil {
@@ -76,7 +78,8 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		BlsCompendiumAddr:             common.HexToAddress(ctx.GlobalString(config.BlsCompendiumFlag.Name)),
 		ServiceManagerAddr:            common.HexToAddress(ctx.GlobalString(config.AvsServiceManagerFlag.Name)),
 		BlsKeyPair:                    blsKeypair,
-		EcdsaSigner:                   signer,
+		SignerFn:                      signer,
+		Address:                       address,
 		RegisterAtStartup:             ctx.GlobalBool(config.RegisterAtStratupFlag.Name),
 	}, nil
 }

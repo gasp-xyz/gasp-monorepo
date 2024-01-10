@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -14,13 +15,9 @@ import (
 	"github.com/mangata-finance/eigen-layer-monorepo/core/chainio"
 	"github.com/mangata-finance/eigen-layer-monorepo/metrics"
 
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
-	"github.com/Layr-Labs/eigensdk-go/logging"
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
-	sdkmetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 	"github.com/Layr-Labs/eigensdk-go/metrics/collectors/economic"
-	rpccalls "github.com/Layr-Labs/eigensdk-go/metrics/collectors/rpc_calls"
 	"github.com/Layr-Labs/eigensdk-go/nodeapi"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 
@@ -32,7 +29,7 @@ const SEM_VER = "0.0.1"
 
 type Operator struct {
 	config          Config
-	logger          logging.Logger
+	logger          sdklogging.Logger
 	substrateClient *gsrpc.SubstrateAPI
 	metricsReg      *prometheus.Registry
 	metrics         metrics.Metrics
@@ -52,54 +49,36 @@ func NewOperatorFromConfig(c Config) (*Operator, error) {
 		return nil, err
 	}
 
-	operatorAddr := c.EcdsaSigner.GetTxOpts().From
+	operatorAddr := c.Address
 
-	reg := prometheus.NewRegistry()
-	eigenMetrics := sdkmetrics.NewEigenMetrics(AVS_NAME, c.EigenMetricsIpPortAddress, reg, logger)
-	avsAndEigenMetrics := metrics.NewAvsAndEigenMetrics(AVS_NAME, eigenMetrics, reg)
-
-	// Setup Node Api
-	nodeApi := nodeapi.NewNodeApi(AVS_NAME, SEM_VER, c.NodeApiIpPortAddress, logger)
-
-	var ethRpcClient, ethWsClient eth.EthClient
-	if c.EnableMetrics {
-		rpcCallsCollector := rpccalls.NewCollector(AVS_NAME, reg)
-		ethRpcClient, err = eth.NewInstrumentedClient(c.EthRpcUrl, rpcCallsCollector)
-		if err != nil {
-			logger.Errorf("Cannot create http ethclient", "err", err)
-			return nil, err
-		}
-		ethWsClient, err = eth.NewInstrumentedClient(c.EthWsUrl, rpcCallsCollector)
-		if err != nil {
-			logger.Errorf("Cannot create ws ethclient", "err", err)
-			return nil, err
-		}
-	} else {
-		ethRpcClient, err = eth.NewClient(c.EthRpcUrl)
-		if err != nil {
-			logger.Errorf("Cannot create http ethclient", "err", err)
-			return nil, err
-		}
-		ethWsClient, err = eth.NewClient(c.EthWsUrl)
-		if err != nil {
-			logger.Errorf("Cannot create ws ethclient", "err", err)
-			return nil, err
-		}
-	}
-
-	ethRpc, err := chainio.NewEthRpc(c.ServiceManagerAddr, c.BlsOperatorStateRetrieverAddr, c.BlsCompendiumAddr, ethRpcClient, ethWsClient, c.EcdsaSigner, logger)
+	ethRpc, err := chainio.NewEthRpc(
+		c.ServiceManagerAddr,
+		c.BlsOperatorStateRetrieverAddr,
+		c.BlsCompendiumAddr,
+		c.EthRpcUrl,
+		c.EthWsUrl,
+		c.SignerFn,
+		c.Address,
+		AVS_NAME,
+		c.EigenMetricsIpPortAddress,
+		logger)
 	if err != nil {
 		logger.Error("Cannot create ethRpc", "err", err)
 		return nil, err
 	}
+
+	avsAndEigenMetrics := metrics.NewAvsAndEigenMetrics(AVS_NAME, ethRpc.ElClients.Metrics, ethRpc.ElClients.PrometheusRegistry)
+
+	// Setup Node Api
+	nodeApi := nodeapi.NewNodeApi(AVS_NAME, SEM_VER, c.NodeApiIpPortAddress, logger)
 
 	// We must register the economic metrics separately because they are exported metrics (from jsonrpc or subgraph calls)
 	// and not instrumented metrics: see https://prometheus.io/docs/instrumenting/writing_clientlibs/#overall-structure
 	quorumNames := map[sdktypes.QuorumNum]string{
 		0: "quorum0",
 	}
-	economicMetricsCollector := economic.NewCollector(ethRpc.ElReader, ethRpc.AvsReader.AvsRegistryReader, AVS_NAME, logger, operatorAddr, quorumNames)
-	reg.MustRegister(economicMetricsCollector)
+	economicMetricsCollector := economic.NewCollector(ethRpc.ElClients.ElChainReader, ethRpc.ElClients.AvsRegistryChainReader, AVS_NAME, logger, operatorAddr, quorumNames)
+	ethRpc.ElClients.PrometheusRegistry.MustRegister(economicMetricsCollector)
 
 	aggregatorRpcClient, err := NewAggregatorRpcClient(c.AggregatorUrl, logger, avsAndEigenMetrics)
 	if err != nil {
@@ -114,7 +93,7 @@ func NewOperatorFromConfig(c Config) (*Operator, error) {
 	}
 
 	// OperatorId is set in contract during registration so we get it after registering operator.
-	operatorId, err := ethRpc.AvsReader.AvsRegistryReader.GetOperatorId(context.Background(), operatorAddr)
+	operatorId, err := ethRpc.ElClients.AvsRegistryChainReader.GetOperatorId(&bind.CallOpts{}, operatorAddr)
 	if err != nil {
 		logger.Error("Cannot get operator id", "err", err)
 		return nil, err
@@ -123,7 +102,7 @@ func NewOperatorFromConfig(c Config) (*Operator, error) {
 	operator := &Operator{
 		config:              c,
 		logger:              logger,
-		metricsReg:          reg,
+		metricsReg:          ethRpc.ElClients.PrometheusRegistry,
 		metrics:             avsAndEigenMetrics,
 		nodeApi:             nodeApi,
 		substrateClient:     api,
@@ -139,8 +118,8 @@ func NewOperatorFromConfig(c Config) (*Operator, error) {
 	// used for local CI deploy
 	if c.RegisterAtStartup && operatorId == [32]byte{} {
 		operator.RegisterAtStartup()
-		
-		operatorId, err := ethRpc.AvsReader.AvsRegistryReader.GetOperatorId(context.Background(), operatorAddr)
+
+		operatorId, err := ethRpc.ElClients.AvsRegistryChainReader.GetOperatorId(&bind.CallOpts{}, operatorAddr)
 		if err != nil {
 			logger.Error("Cannot get operator id", "err", err)
 			return nil, err
