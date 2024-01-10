@@ -61,7 +61,7 @@ jobs:
           location: europe-west1
 
       - name: Delete Kubernetes namespace with resources for fungible environment
-        run: kubectl delete namespace pr-${{ github.event.number }}
+        run: kubectl delete namespace eigen-pr-${{ github.event.number }}
       
       - name: Delete GitHub Deployment environment
         if: always()
