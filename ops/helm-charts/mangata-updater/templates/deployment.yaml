@@ -44,6 +44,11 @@ spec:
                 secretKeyRef:
                   name: "{{ include "mangata-updater.name" . }}-secret"
                   key: WALLET_PRIVATE_KEY
+            - name: ETH_CHAIN_URL
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "mangata-updater.name" . }}-secret"
+                  key: ETH_CHAIN_URL
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}
               value: {{ $val }}
