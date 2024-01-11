@@ -11,9 +11,9 @@ import (
 
 // ====== TaskManager Mocks ======
 
-func MockSendNewTaskNumberToSquareCall(blockNum, taskNum, block uint32) (taskmanager.IMangataTaskManagerTask, uint32, error) {
+func MockSendNewTaskVerifyBlock(blockNum, taskNum uint32, block *big.Int) (taskmanager.IMangataTaskManagerTask, uint32, error) {
 	task := taskmanager.IMangataTaskManagerTask{
-		BlockNumber:               big.NewInt(int64(block)),
+		BlockNumber:               block,
 		TaskCreatedBlock:          blockNum,
 		QuorumNumbers:             types.QUORUM_NUMBERS,
 		QuorumThresholdPercentage: types.QUORUM_THRESHOLD_NUMERATOR,

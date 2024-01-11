@@ -161,7 +161,7 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 			agg.logger.Info("Received response from blsAggregationService", "blsAggServiceResp", blsAggServiceResp)
 			agg.sendAggregatedResponseToContract(blsAggServiceResp)
 		case head := <-sub.Chan():
-			err := agg.sendNewTask(head)
+			err := agg.sendNewTask(head.Number)
 			if err != nil {
 				// we log the errors inside sendNewTask() so here we just continue to the next task
 				continue
@@ -214,14 +214,13 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 
 // sendNewTask sends a new task to the task manager contract, and updates the Task dict struct
 // with the information of operators opted into quorum 0 at the block of task creation.
-func (agg *Aggregator) sendNewTask(header gsrpc_types.Header) error {
-	blockNumber := big.NewInt(int64(header.Number))
-	if header.Number%10 != 0 {
+func (agg *Aggregator) sendNewTask(blockNumber gsrpc_types.BlockNumber) error {
+	if blockNumber%10 != 0 {
 		return nil
 	}
 	agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
 	// Send number to square to the task manager contract
-	newTask, taskIndex, err := agg.avsWriter.SendNewTaskVerifyBlock(context.Background(), blockNumber, types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
+	newTask, taskIndex, err := agg.avsWriter.SendNewTaskVerifyBlock(context.Background(), big.NewInt(int64(blockNumber)), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
 		return err

@@ -2,7 +2,6 @@ package aggregator
 
 import (
 	"context"
-	"math/big"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -12,8 +11,10 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/types"
-	cstaskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/IncredibleSquaringTaskManager"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
 	"github.com/mangata-finance/eigen-layer-monorepo/core"
+
+	gsrpc_types "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 func TestProcessSignedTaskResponse(t *testing.T) {
@@ -21,8 +22,8 @@ func TestProcessSignedTaskResponse(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	var TASK_INDEX = uint32(0)
-	var BLOCK_NUMBER = uint32(100)
-	var NUMBER_TO_SQUARE = uint32(3)
+	var CREATED_BLOCK_NUMBER = uint32(100)
+	var BLOCK_TO_VERIFY = gsrpc_types.BlockNumber(3)
 
 	MOCK_OPERATOR_BLS_PRIVATE_KEY, err := bls.NewPrivateKey(MOCK_OPERATOR_BLS_PRIVATE_KEY_STRING)
 	assert.Nil(t, err)
@@ -43,9 +44,9 @@ func TestProcessSignedTaskResponse(t *testing.T) {
 	assert.Nil(t, err)
 
 	signedTaskResponse, err := createMockSignedTaskResponse(MockTask{
-		TaskNum:        TASK_INDEX,
-		BlockNumber:    BLOCK_NUMBER,
-		NumberToSquare: NUMBER_TO_SQUARE,
+		TaskNum:            TASK_INDEX,
+		CreatedBlockNumber: CREATED_BLOCK_NUMBER,
+		BlockNumber:        uint32(BLOCK_TO_VERIFY),
 	}, *MOCK_OPERATOR_KEYPAIR)
 	assert.Nil(t, err)
 	signedTaskResponseDigest, err := core.GetTaskResponseDigest(&signedTaskResponse.TaskResponse)
@@ -62,10 +63,9 @@ func TestProcessSignedTaskResponse(t *testing.T) {
 
 // mocks an operator signing on a task response
 func createMockSignedTaskResponse(mockTask MockTask, keypair bls.KeyPair) (*SignedTaskResponse, error) {
-	numberToSquareBigInt := big.NewInt(int64(mockTask.NumberToSquare))
-	taskResponse := &cstaskmanager.IIncredibleSquaringTaskManagerTaskResponse{
+	taskResponse := &taskmanager.IMangataTaskManagerTaskResponse{
 		ReferenceTaskIndex: mockTask.TaskNum,
-		NumberSquared:      numberToSquareBigInt.Mul(numberToSquareBigInt, numberToSquareBigInt),
+		BlockHash:          [32]byte{},
 	}
 	taskResponseHash, err := core.GetTaskResponseDigest(taskResponse)
 	if err != nil {
