@@ -31,3 +31,6 @@ gha-creds-*.json
 
 # local env secrets
 .secret
+
+# rust build target
+**/target
