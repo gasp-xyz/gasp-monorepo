@@ -3,6 +3,7 @@ remoteCluster: true
 anvilEnabled: true
 aggregatorEnabled: true
 operatorEnabled: true
+updaterEnabled: true
 
 aggregatorArgs:
   - --eth-rpc-url 

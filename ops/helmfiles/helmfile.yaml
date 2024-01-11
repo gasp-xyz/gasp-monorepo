@@ -52,3 +52,14 @@ releases:
         enableServiceMonitorCollectors: {{ .Values.operatorEnableServiceMonitorCollectors }}
         prometheus:
           enabled: true
+  - name: mangata-updater
+    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.updaterEnabled }}
+    chart: ../helm-charts/mangata-updater
+    values:
+      - image:
+          repository: mangatasolutions/mangata-updater
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
+        ethChainUrl: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-ethereum-rpc-url
