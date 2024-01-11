@@ -7,7 +7,7 @@
   "scripts": {
     "build": "rimraf ./build && npx tsc",
     "lint": "npx @biomejs/biome check --apply src/",
-    "start": "npm run lint && npm run build && cp src/polkadot.json build/ && node build/index.js"
+    "start": "node build/index.js"
   },
   "keywords": [],
   "author": "",
