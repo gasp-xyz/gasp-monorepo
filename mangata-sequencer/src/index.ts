@@ -12,8 +12,6 @@ const mangataContractAddress = process.env
 	.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
 
 async function main() {
-	const mnemonicIdx = process.argv.indexOf("--mnemonic");
-	const mnemonic = process.argv[mnemonicIdx + 1];
 	const api = await Mangata.instance([process.env.MANGATA_URL!]).api();
 	console.log(
 		`Connected ${api.isConnected}: Url: ${process.env.MANGATA_URL!}`,
@@ -21,7 +19,7 @@ async function main() {
 	);
 
 	const keyring = new Keyring({ type: "sr25519" });
-	const collator = keyring.addFromMnemonic(mnemonic);
+	const collator = keyring.addFromMnemonic(process.env.MNEMONIC!);
 
 	const publicClient = createPublicClient({
 		transport: webSocket(process.env.ETH_CHAIN_URL, {
