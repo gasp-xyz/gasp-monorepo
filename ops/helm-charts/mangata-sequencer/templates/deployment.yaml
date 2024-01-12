@@ -39,11 +39,11 @@ spec:
             {{- end }}
           {{- end }}
           env:
-            - name: WALLET_PRIVATE_KEY
+            - name: MNEMONIC
               valueFrom:
                 secretKeyRef:
                   name: "{{ include "mangata-sequencer.name" . }}-secret"
-                  key: WALLET_PRIVATE_KEY
+                  key: MNEMONIC
             - name: ETH_CHAIN_URL
               valueFrom:
                 secretKeyRef:
