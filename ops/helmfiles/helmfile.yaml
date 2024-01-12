@@ -63,3 +63,15 @@ releases:
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
         ethChainUrl: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-ethereum-rpc-url
+  - name: mangata-sequencer
+    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.sequencerEnabled }}
+    chart: ../helm-charts/mangata-sequencer
+    values:
+      - image:
+          repository: mangatasolutions/mangata-sequencer
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        mnemonic: 'some mnemonic'
+        # mnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
+        ethChainUrl: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-ethereum-rpc-url

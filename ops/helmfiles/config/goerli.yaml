@@ -4,6 +4,7 @@ anvilEnabled: false
 aggregatorEnabled: true
 operatorEnabled: false
 updaterEnabled: false
+sequencerEnabled: false
 
 # it is possible to pass args as ENV vars instead, same name as cmd flag but SNAKE_UPPERCASED
 # see core/config/flags.go
