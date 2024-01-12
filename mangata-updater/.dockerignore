@@ -1,0 +1,14 @@
+.git
+node_modules
+.env*
+.vscode
+.github
+**/Dockerfile
+**/build/
+**/dist/
+**/test-results/
+ops
+skaffold.yml
+README.md
+docker-compose*
+.gitignore
