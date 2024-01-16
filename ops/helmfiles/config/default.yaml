@@ -4,6 +4,7 @@ anvilEnabled: true
 aggregatorEnabled: true
 operatorEnabled: true
 updaterEnabled: true
+sequencerEnabled: true
 
 aggregatorArgs:
   - --eth-rpc-url 

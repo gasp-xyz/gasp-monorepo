@@ -51,3 +51,14 @@ jobs:
           docker buildx create --use
           # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/mangata-updater:${{ inputs.version }} ./mangata-updater
           docker buildx build --push --platform linux/amd64 -t mangatasolutions/mangata-updater:${{ inputs.version }} ./mangata-updater
+
+  build-mangata-sequencer-image:
+    name: Build mangata-sequencer Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+          docker buildx create --use
+          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/mangata-sequencer:${{ inputs.version }} ./mangata-sequencer
+          docker buildx build --push --platform linux/amd64 -t mangatasolutions/mangata-sequencer:${{ inputs.version }} ./mangata-sequencer
