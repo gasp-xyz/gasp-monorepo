@@ -2,7 +2,7 @@ name: main branch workflow
 
 on:
   push:
-    branches: [main, feat/add-mangata-sequencer-deployment-MGX-834]
+    branches: [main, feat/add-main-branch-ci-pipeline-MGX-834]
 
 permissions:
   contents: write
