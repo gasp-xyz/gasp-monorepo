@@ -6,6 +6,10 @@ environments:
     values:
      - config/default.yaml
      - config/fungible.yaml
+  dev:
+    values:
+    - config/default.yaml
+    - config/dev.yaml
   goerli:
     values:
      - config/default.yaml
