@@ -40,6 +40,9 @@ releases:
         remoteCluster: {{ .Values.remoteCluster }}
         args: {{ toYaml .Values.aggregatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
+        env:
+          ETH_RPC_URL: {{ .Values.env.ETH_RPC_URL | fetchSecretValue | quote }}
+          ETH_WS_URL: {{ .Values.env.ETH_WS_URL | fetchSecretValue | quote }}
   - name: eigen-operator  
     namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.operatorEnabled }}
@@ -56,6 +59,9 @@ releases:
         enableServiceMonitorCollectors: {{ .Values.operatorEnableServiceMonitorCollectors }}
         prometheus:
           enabled: true
+        env:
+          ETH_RPC_URL: {{ .Values.env.ETH_RPC_URL | fetchSecretValue | quote }}
+          ETH_WS_URL: {{ .Values.env.ETH_WS_URL | fetchSecretValue | quote }}
   - name: mangata-updater
     namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.updaterEnabled }}
