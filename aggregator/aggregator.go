@@ -216,7 +216,7 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 // with the information of operators opted into quorum 0 at the block of task creation.
 func (agg *Aggregator) sendNewTask(blockNumber gsrpc_types.BlockNumber) error {
 	if blockNumber%10 != 0 {
-		return nil
+		// return nil
 	}
 	agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
 	// Send number to square to the task manager contract

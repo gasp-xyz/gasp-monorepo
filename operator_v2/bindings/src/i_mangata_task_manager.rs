@@ -1,4 +1,4 @@
-pub use i_incredible_squaring_task_manager::*;
+pub use i_mangata_task_manager::*;
 /// This module was auto-generated with ethers-rs Abigen.
 /// More information at: <https://github.com/gakonst/ethers-rs>
 #[allow(
@@ -9,7 +9,7 @@ pub use i_incredible_squaring_task_manager::*;
     dead_code,
     non_camel_case_types,
 )]
-pub mod i_incredible_squaring_task_manager {
+pub mod i_mangata_task_manager {
     pub use super::super::shared_types::*;
     #[allow(deprecated)]
     fn __abi() -> ::ethers::core::abi::Abi {
@@ -96,7 +96,7 @@ pub mod i_incredible_squaring_task_manager {
                                     ),
                                     internal_type: ::core::option::Option::Some(
                                         ::std::borrow::ToOwned::to_owned(
-                                            "struct IIncredibleSquaringTaskManager.Task",
+                                            "struct IMangataTaskManager.Task",
                                         ),
                                     ),
                                 },
@@ -110,7 +110,7 @@ pub mod i_incredible_squaring_task_manager {
                                     ),
                                     internal_type: ::core::option::Option::Some(
                                         ::std::borrow::ToOwned::to_owned(
-                                            "struct IIncredibleSquaringTaskManager.TaskResponse",
+                                            "struct IMangataTaskManager.TaskResponse",
                                         ),
                                     ),
                                 },
@@ -126,7 +126,7 @@ pub mod i_incredible_squaring_task_manager {
                                     ),
                                     internal_type: ::core::option::Option::Some(
                                         ::std::borrow::ToOwned::to_owned(
-                                            "struct IIncredibleSquaringTaskManager.TaskResponseMetadata",
+                                            "struct IMangataTaskManager.TaskResponseMetadata",
                                         ),
                                     ),
                                 },
@@ -307,34 +307,34 @@ pub mod i_incredible_squaring_task_manager {
         }
     }
     ///The parsed JSON ABI of the contract.
-    pub static IINCREDIBLESQUARINGTASKMANAGER_ABI: ::ethers::contract::Lazy<
+    pub static IMANGATATASKMANAGER_ABI: ::ethers::contract::Lazy<
         ::ethers::core::abi::Abi,
     > = ::ethers::contract::Lazy::new(__abi);
-    pub struct IIncredibleSquaringTaskManager<M>(::ethers::contract::Contract<M>);
-    impl<M> ::core::clone::Clone for IIncredibleSquaringTaskManager<M> {
+    pub struct IMangataTaskManager<M>(::ethers::contract::Contract<M>);
+    impl<M> ::core::clone::Clone for IMangataTaskManager<M> {
         fn clone(&self) -> Self {
             Self(::core::clone::Clone::clone(&self.0))
         }
     }
-    impl<M> ::core::ops::Deref for IIncredibleSquaringTaskManager<M> {
+    impl<M> ::core::ops::Deref for IMangataTaskManager<M> {
         type Target = ::ethers::contract::Contract<M>;
         fn deref(&self) -> &Self::Target {
             &self.0
         }
     }
-    impl<M> ::core::ops::DerefMut for IIncredibleSquaringTaskManager<M> {
+    impl<M> ::core::ops::DerefMut for IMangataTaskManager<M> {
         fn deref_mut(&mut self) -> &mut Self::Target {
             &mut self.0
         }
     }
-    impl<M> ::core::fmt::Debug for IIncredibleSquaringTaskManager<M> {
+    impl<M> ::core::fmt::Debug for IMangataTaskManager<M> {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-            f.debug_tuple(::core::stringify!(IIncredibleSquaringTaskManager))
+            f.debug_tuple(::core::stringify!(IMangataTaskManager))
                 .field(&self.address())
                 .finish()
         }
     }
-    impl<M: ::ethers::providers::Middleware> IIncredibleSquaringTaskManager<M> {
+    impl<M: ::ethers::providers::Middleware> IMangataTaskManager<M> {
         /// Creates a new contract instance with the specified `ethers` client at
         /// `address`. The contract derefs to a `ethers::Contract` object.
         pub fn new<T: Into<::ethers::core::types::Address>>(
@@ -344,7 +344,7 @@ pub mod i_incredible_squaring_task_manager {
             Self(
                 ::ethers::contract::Contract::new(
                     address.into(),
-                    IINCREDIBLESQUARINGTASKMANAGER_ABI.clone(),
+                    IMANGATATASKMANAGER_ABI.clone(),
                     client,
                 ),
             )
@@ -453,13 +453,13 @@ pub mod i_incredible_squaring_task_manager {
         ) -> ::ethers::contract::builders::Event<
             ::std::sync::Arc<M>,
             M,
-            IIncredibleSquaringTaskManagerEvents,
+            IMangataTaskManagerEvents,
         > {
             self.0.event_with_filter(::core::default::Default::default())
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for IIncredibleSquaringTaskManager<M> {
+    for IMangataTaskManager<M> {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -577,50 +577,42 @@ pub mod i_incredible_squaring_task_manager {
         Eq,
         Hash
     )]
-    pub enum IIncredibleSquaringTaskManagerEvents {
+    pub enum IMangataTaskManagerEvents {
         NewTaskCreatedFilter(NewTaskCreatedFilter),
         TaskChallengedSuccessfullyFilter(TaskChallengedSuccessfullyFilter),
         TaskChallengedUnsuccessfullyFilter(TaskChallengedUnsuccessfullyFilter),
         TaskCompletedFilter(TaskCompletedFilter),
         TaskRespondedFilter(TaskRespondedFilter),
     }
-    impl ::ethers::contract::EthLogDecode for IIncredibleSquaringTaskManagerEvents {
+    impl ::ethers::contract::EthLogDecode for IMangataTaskManagerEvents {
         fn decode_log(
             log: &::ethers::core::abi::RawLog,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::Error> {
             if let Ok(decoded) = NewTaskCreatedFilter::decode_log(log) {
-                return Ok(
-                    IIncredibleSquaringTaskManagerEvents::NewTaskCreatedFilter(decoded),
-                );
+                return Ok(IMangataTaskManagerEvents::NewTaskCreatedFilter(decoded));
             }
             if let Ok(decoded) = TaskChallengedSuccessfullyFilter::decode_log(log) {
                 return Ok(
-                    IIncredibleSquaringTaskManagerEvents::TaskChallengedSuccessfullyFilter(
-                        decoded,
-                    ),
+                    IMangataTaskManagerEvents::TaskChallengedSuccessfullyFilter(decoded),
                 );
             }
             if let Ok(decoded) = TaskChallengedUnsuccessfullyFilter::decode_log(log) {
                 return Ok(
-                    IIncredibleSquaringTaskManagerEvents::TaskChallengedUnsuccessfullyFilter(
+                    IMangataTaskManagerEvents::TaskChallengedUnsuccessfullyFilter(
                         decoded,
                     ),
                 );
             }
             if let Ok(decoded) = TaskCompletedFilter::decode_log(log) {
-                return Ok(
-                    IIncredibleSquaringTaskManagerEvents::TaskCompletedFilter(decoded),
-                );
+                return Ok(IMangataTaskManagerEvents::TaskCompletedFilter(decoded));
             }
             if let Ok(decoded) = TaskRespondedFilter::decode_log(log) {
-                return Ok(
-                    IIncredibleSquaringTaskManagerEvents::TaskRespondedFilter(decoded),
-                );
+                return Ok(IMangataTaskManagerEvents::TaskRespondedFilter(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData)
         }
     }
-    impl ::core::fmt::Display for IIncredibleSquaringTaskManagerEvents {
+    impl ::core::fmt::Display for IMangataTaskManagerEvents {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
                 Self::NewTaskCreatedFilter(element) => {
@@ -641,32 +633,29 @@ pub mod i_incredible_squaring_task_manager {
             }
         }
     }
-    impl ::core::convert::From<NewTaskCreatedFilter>
-    for IIncredibleSquaringTaskManagerEvents {
+    impl ::core::convert::From<NewTaskCreatedFilter> for IMangataTaskManagerEvents {
         fn from(value: NewTaskCreatedFilter) -> Self {
             Self::NewTaskCreatedFilter(value)
         }
     }
     impl ::core::convert::From<TaskChallengedSuccessfullyFilter>
-    for IIncredibleSquaringTaskManagerEvents {
+    for IMangataTaskManagerEvents {
         fn from(value: TaskChallengedSuccessfullyFilter) -> Self {
             Self::TaskChallengedSuccessfullyFilter(value)
         }
     }
     impl ::core::convert::From<TaskChallengedUnsuccessfullyFilter>
-    for IIncredibleSquaringTaskManagerEvents {
+    for IMangataTaskManagerEvents {
         fn from(value: TaskChallengedUnsuccessfullyFilter) -> Self {
             Self::TaskChallengedUnsuccessfullyFilter(value)
         }
     }
-    impl ::core::convert::From<TaskCompletedFilter>
-    for IIncredibleSquaringTaskManagerEvents {
+    impl ::core::convert::From<TaskCompletedFilter> for IMangataTaskManagerEvents {
         fn from(value: TaskCompletedFilter) -> Self {
             Self::TaskCompletedFilter(value)
         }
     }
-    impl ::core::convert::From<TaskRespondedFilter>
-    for IIncredibleSquaringTaskManagerEvents {
+    impl ::core::convert::From<TaskRespondedFilter> for IMangataTaskManagerEvents {
         fn from(value: TaskRespondedFilter) -> Self {
             Self::TaskRespondedFilter(value)
         }
@@ -754,13 +743,13 @@ pub mod i_incredible_squaring_task_manager {
         Eq,
         Hash
     )]
-    pub enum IIncredibleSquaringTaskManagerCalls {
+    pub enum IMangataTaskManagerCalls {
         CreateNewTask(CreateNewTaskCall),
         GetTaskResponseWindowBlock(GetTaskResponseWindowBlockCall),
         RaiseAndResolveChallenge(RaiseAndResolveChallengeCall),
         TaskNumber(TaskNumberCall),
     }
-    impl ::ethers::core::abi::AbiDecode for IIncredibleSquaringTaskManagerCalls {
+    impl ::ethers::core::abi::AbiDecode for IMangataTaskManagerCalls {
         fn decode(
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
@@ -788,7 +777,7 @@ pub mod i_incredible_squaring_task_manager {
             Err(::ethers::core::abi::Error::InvalidData.into())
         }
     }
-    impl ::ethers::core::abi::AbiEncode for IIncredibleSquaringTaskManagerCalls {
+    impl ::ethers::core::abi::AbiEncode for IMangataTaskManagerCalls {
         fn encode(self) -> Vec<u8> {
             match self {
                 Self::CreateNewTask(element) => {
@@ -806,7 +795,7 @@ pub mod i_incredible_squaring_task_manager {
             }
         }
     }
-    impl ::core::fmt::Display for IIncredibleSquaringTaskManagerCalls {
+    impl ::core::fmt::Display for IMangataTaskManagerCalls {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
                 Self::CreateNewTask(element) => ::core::fmt::Display::fmt(element, f),
@@ -820,25 +809,24 @@ pub mod i_incredible_squaring_task_manager {
             }
         }
     }
-    impl ::core::convert::From<CreateNewTaskCall>
-    for IIncredibleSquaringTaskManagerCalls {
+    impl ::core::convert::From<CreateNewTaskCall> for IMangataTaskManagerCalls {
         fn from(value: CreateNewTaskCall) -> Self {
             Self::CreateNewTask(value)
         }
     }
     impl ::core::convert::From<GetTaskResponseWindowBlockCall>
-    for IIncredibleSquaringTaskManagerCalls {
+    for IMangataTaskManagerCalls {
         fn from(value: GetTaskResponseWindowBlockCall) -> Self {
             Self::GetTaskResponseWindowBlock(value)
         }
     }
     impl ::core::convert::From<RaiseAndResolveChallengeCall>
-    for IIncredibleSquaringTaskManagerCalls {
+    for IMangataTaskManagerCalls {
         fn from(value: RaiseAndResolveChallengeCall) -> Self {
             Self::RaiseAndResolveChallenge(value)
         }
     }
-    impl ::core::convert::From<TaskNumberCall> for IIncredibleSquaringTaskManagerCalls {
+    impl ::core::convert::From<TaskNumberCall> for IMangataTaskManagerCalls {
         fn from(value: TaskNumberCall) -> Self {
             Self::TaskNumber(value)
         }

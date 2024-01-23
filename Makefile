@@ -9,7 +9,7 @@ CHALLENGER_ECDSA_PRIV_KEY=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9
 
 ETH_RPC_URL=http://localhost:8545
 ETH_WS_URL=ws://localhost:8545
-SUBSTRATE_RPC_URL=wss://kusama-archive.mangata.online
+SUBSTRATE_RPC_URL=wss://kusama-archive.mangata.online:443
 AGGREGATOR_RPC_URL=localhost:8090
 
 CHAIN_ID=31337
@@ -22,6 +22,9 @@ AVS_SERVICE_MANAGER=0x9E545E3C0baAB3E08CdfD552C960A1050f373042
 # check in contracts/script/output/${CHAINID}/strategy_output.json
 STRATEGY_ADDRESS=0x4A679253410272dd5232B3Ff7cF5dbB88f295319
 DEPLOYMENT_FILES_DIR=contracts/script/output/${CHAINID}
+
+CONTRACTS_REGEX="MangataServiceManager|MangataTaskManager|BLSPubkeyRegistry|BLSRegistryCoordinatorWithIndices|DelegationManager|BLSPublicKeyCompendium|Slasher"
+# CONTRACTS_REGEX=".+"
 
 -----------------------------: ## 
 
@@ -41,8 +44,11 @@ deploy-all-to-anvil-and-save-state: deploy-eigenlayer-contracts-to-anvil-and-sav
 start-anvil-chain-with-el-and-avs-deployed: ## starts anvil from a saved state file (with el and avs contracts deployed)
 	anvil --load-state tests/integration/avs-and-eigenlayer-deployed-anvil-state.json
 
-bindings: ## generates contract bindings
+bindings-go: ## generates contract bindings
 	cd contracts && ./generate-go-bindings.sh
+
+bindings-rs: ## generates rust bindings
+	forge bind --bindings-path ./operator_v2/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX} 
 
 # ___DOCKER___: ## 
 # docker-build-and-publish-images: ## builds and publishes operator and aggregator docker images using Ko
@@ -133,8 +139,8 @@ start-aggregator: ##
 		--avs-server-ip-port-address ${AGGREGATOR_RPC_URL} \
 		2>&1 | zap-pretty
 
-start-operator: ## 
-	go run operator/cmd/main.go \
+start-operator-v1: ## 
+	go run operator_v1/cmd/main.go \
 		--eth-rpc-url ${ETH_RPC_URL} \
 		--eth-ws-url ${ETH_WS_URL} \
 		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
@@ -147,6 +153,19 @@ start-operator: ##
 		--bls-key-file tests/keys/test.bls.key.json \
 		--register-at-startup true
 		2>&1 | zap-pretty
+
+start-operator: ## 
+	RUST_LOG=debug,hyper=off cargo run --manifest-path=operator_v2/Cargo.toml -- \
+		--avs-service-manager-addr ${AVS_SERVICE_MANAGER} \
+		--bls-compendium-addr ${BLS_PUBLIC_KEY_COMPENDIUM} \
+		--bls-operator-state-retriever-addr ${BLS_OPERATOR_STATE_RETRIEVER} \
+		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
+		--eth-ws-url ${ETH_WS_URL} \
+		--eth-rpc-url ${ETH_RPC_URL} \
+		--chain-id ${CHAIN_ID} \
+		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
+		--bls-key-file tests/keys/test.bls.key.json \
+		--register-at-startup
 
 -----------------------------: ## 
 _____HELPER_____: ## 

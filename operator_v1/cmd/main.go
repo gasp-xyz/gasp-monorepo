@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/mangata-finance/eigen-layer-monorepo/operator"
+	"github.com/mangata-finance/eigen-layer-monorepo/operator_v1"
 )
 
 func main() {

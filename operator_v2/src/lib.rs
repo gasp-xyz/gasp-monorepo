@@ -1,24 +1,48 @@
 use cli::CliArgs;
-use config::NodeConfig;
 use operator::Operator;
+use tracing::info;
 
+mod chainio;
 mod cli;
-mod config;
+mod crypto;
 mod executor;
 mod operator;
 
-pub mod bindings {
-    pub use bindings::incredible_squaring_service_manager::IncredibleSquaringServiceManager as ServiceManager;
-    pub use bindings::incredible_squaring_task_manager::IncredibleSquaringTaskManager as TaskManager;
+pub async fn start() -> eyre::Result<()> {
+    let cli = CliArgs::build();
+    info!("Creating a new Operator from {:?}", cli);
+    let operator = Operator::from_cli(&cli).await?;
+
+    if let Some(cmd) = cli.command {
+        info!("Operator created with command '{:?}'", cmd);
+        match cmd {
+            cli::Commands::Register => register(operator).await?,
+            cli::Commands::Deregister => todo!(),
+            cli::Commands::OptInAvs => todo!(),
+            cli::Commands::OptOutAvs => todo!(),
+            cli::Commands::PrintStatus => todo!(),
+        }
+    } else {
+        info!("Operator created and starting AVS verification");
+        verify(operator, cli.register_at_startup).await?;
+    }
+
+    Ok(())
 }
 
-pub async fn subscribe_new_task() -> eyre::Result<()> {
-    let cli = CliArgs::build();
-    let config = NodeConfig::from_path(&cli.config)?;
-    let operator = Operator::from_config(&config).await?;
+pub async fn verify(operator: Operator, register: bool) -> eyre::Result<()> {
+    if register {
+        operator.register().await?;
+    }
 
-    // operator.watch_new_tasks().await?;
-    operator.execute_block().await?;
+    operator.check_registration().await?;
+    operator.watch_new_tasks().await?;
+
+    Ok(())
+}
+
+async fn register(operator: Operator) -> eyre::Result<()> {
+    operator.register().await?;
 
     Ok(())
 }

@@ -1,7 +1,8 @@
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
+    tracing_subscriber::fmt::init();
 
-    operator::subscribe_new_task().await?;
+    operator::start().await?;
 
     Ok(())
 }
