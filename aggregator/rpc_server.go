@@ -2,9 +2,9 @@ package aggregator
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
-	"net/rpc"
 
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
 	"github.com/mangata-finance/eigen-layer-monorepo/core"
@@ -24,18 +24,33 @@ var (
 )
 
 func (agg *Aggregator) startServer(ctx context.Context) error {
-
-	err := rpc.Register(agg)
-	if err != nil {
-		agg.logger.Fatal("Format of service TaskManager isn't correct. ", "err", err)
-	}
-	rpc.HandleHTTP()
-	err = http.ListenAndServe(agg.serverIpPortAddr, nil)
+	http.HandleFunc("/", agg.handler)
+	err := http.ListenAndServe(agg.serverIpPortAddr, nil)
 	if err != nil {
 		agg.logger.Fatal("ListenAndServe", "err", err)
 	}
 
 	return nil
+}
+
+func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
+	var response SignedTaskResponse
+	if err := json.NewDecoder(req.Body).Decode(&response); err != nil {
+		http.Error(w, "Error parsing request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := agg.ProcessSignedTaskResponse(&response, nil); err != nil {
+		var status int
+		switch err {
+		case TaskResponseDigestNotFoundError500, CallToGetCheckSignaturesIndicesFailed500:
+			status = http.StatusInternalServerError
+		default:
+			status = http.StatusBadRequest
+		}
+		http.Error(w, err.Error(), status)
+		return
+	}
 }
 
 type SignedTaskResponse struct {

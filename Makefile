@@ -10,7 +10,8 @@ CHALLENGER_ECDSA_PRIV_KEY=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9
 ETH_RPC_URL=http://localhost:8545
 ETH_WS_URL=ws://localhost:8545
 SUBSTRATE_RPC_URL=wss://kusama-archive.mangata.online:443
-AGGREGATOR_RPC_URL=localhost:8090
+AGGREGATOR_RPC_URL=http://localhost:8090
+AGGREGATOR_IPPORT=localhost:8090
 
 CHAIN_ID=31337
 
@@ -136,7 +137,7 @@ start-aggregator: ##
 		--bls-operator-state-retriever ${BLS_OPERATOR_STATE_RETRIEVER} \
 		--avs-service-manager ${AVS_SERVICE_MANAGER} \
 		--ecdsa-key-file ./tests/keys/aggregator.ecdsa.key.json \
-		--avs-server-ip-port-address ${AGGREGATOR_RPC_URL} \
+		--avs-server-ip-port-address ${AGGREGATOR_IPPORT} \
 		2>&1 | zap-pretty
 
 start-operator-v1: ## 
@@ -155,13 +156,14 @@ start-operator-v1: ##
 		2>&1 | zap-pretty
 
 start-operator: ## 
-	RUST_LOG=debug,hyper=off cargo run --manifest-path=operator_v2/Cargo.toml -- \
+	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=operator_v2/Cargo.toml -- \
 		--avs-service-manager-addr ${AVS_SERVICE_MANAGER} \
 		--bls-compendium-addr ${BLS_PUBLIC_KEY_COMPENDIUM} \
 		--bls-operator-state-retriever-addr ${BLS_OPERATOR_STATE_RETRIEVER} \
 		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
 		--eth-ws-url ${ETH_WS_URL} \
 		--eth-rpc-url ${ETH_RPC_URL} \
+		--avs-rpc-url ${AGGREGATOR_RPC_URL} \
 		--chain-id ${CHAIN_ID} \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
 		--bls-key-file tests/keys/test.bls.key.json \

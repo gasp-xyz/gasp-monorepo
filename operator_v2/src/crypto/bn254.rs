@@ -7,12 +7,14 @@ use ark_ff::{
 use bindings::shared_types::{G1Point, G2Point};
 use ethers::{
     core::types::{H256, U256},
-    types::Address,
+    types::{Address},
 };
+
 use sha3::{Digest, Keccak256};
 
 pub type PrivateKey = Fr;
 pub type PublicKey = G1Affine;
+pub type BlsSignature = G1Affine;
 
 #[derive(Debug)]
 pub struct BlsKeypair {
@@ -20,9 +22,9 @@ pub struct BlsKeypair {
     pub public: PublicKey,
 }
 
-impl Into<Option<G1Point>> for BlsKeypair {
-    fn into(self) -> Option<G1Point> {
-        if let Some((x, y)) = self.public.xy() {
+impl From<BlsKeypair> for Option<G1Point> {
+    fn from(val: BlsKeypair) -> Self {
+        if let Some((x, y)) = val.public.xy() {
             Some(G1Point {
                 x: U256::from_little_endian(&x.into_bigint().to_bytes_le()),
                 y: U256::from_little_endian(&y.into_bigint().to_bytes_le()),
@@ -33,9 +35,9 @@ impl Into<Option<G1Point>> for BlsKeypair {
     }
 }
 
-impl Into<Option<G2Point>> for BlsKeypair {
-    fn into(self) -> Option<G2Point> {
-        let g2 = self.public_g2();
+impl From<BlsKeypair> for Option<G2Point> {
+    fn from(val: BlsKeypair) -> Self {
+        let g2 = val.public_g2();
         if let Some((x, y)) = g2.xy() {
             Some(G2Point {
                 x: [
@@ -76,34 +78,39 @@ impl BlsKeypair {
         operator_addr: Address,
         bls_pubkey_comp_addr: Address,
         chain_id: u64,
-    ) -> eyre::Result<PublicKey> {
+    ) -> eyre::Result<BlsSignature> {
         let hash = Keccak256::new()
             .chain_update(operator_addr.as_bytes())
             .chain_update(bls_pubkey_comp_addr.as_bytes())
             // make sure chainId is 32 bytes
-            .chain_update(&[0_u8; 24])
-            .chain_update(&chain_id.to_be_bytes())
+            .chain_update([0_u8; 24])
+            .chain_update(chain_id.to_be_bytes())
             .chain_update(b"EigenLayer_BN254_Pubkey_Registration")
             .finalize();
-        let to_sign = BlsKeypair::map_to_curve(&hash)?;
-        let key = to_sign * self.private;
-        Ok(key.into_affine())
+
+        self.sign(&hash)
     }
 
+    pub fn sign(&self, msg: &[u8]) -> eyre::Result<BlsSignature> {
+        let h = Self::map_to_curve(msg)?;
+        let sig = h * self.private;
+
+        Ok(sig.into_affine())
+    }
     /// implements BN254 map to curve from
     /// contracts/lib/eigenlayer-middleware/lib/eigenlayer-contracts/src/contracts/libraries/BN254.sol
     /// for a hash, maps to a point on curve
     /// y^2 = x^3 + b
     fn map_to_curve(hash: &[u8]) -> eyre::Result<PublicKey> {
-        let mut x: Fq = Fq::from_be_bytes_mod_order(&hash);
+        let mut x: Fq = Fq::from_be_bytes_mod_order(hash);
         let b = BigInt::<4>::from(3_u32);
 
         loop {
-            let beta = x.pow(&b) + Fq::from(3_u32);
+            let beta = x.pow(b) + Fq::from(3_u32);
             if let Some(y) = beta.sqrt() {
                 return Ok(PublicKey::new(x, y));
             } else {
-                x = x + Fq::one()
+                x += Fq::one()
             }
         }
     }

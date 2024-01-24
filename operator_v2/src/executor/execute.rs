@@ -10,8 +10,13 @@ use sp_runtime::{
 };
 use std::{fmt::Debug, str::FromStr};
 use substrate_rpc_client::{ws_client, ChainApi};
+use tracing::instrument;
 
-pub async fn execute_block<Block, HostFns>(uri: &str, at: BlockNumber) -> sc_cli::Result<()>
+#[instrument(skip(uri))]
+pub async fn execute_block<Block, HostFns>(
+    uri: &str,
+    at: BlockNumber,
+) -> sc_cli::Result<Block::Hash>
 where
     Block: BlockT + serde::de::DeserializeOwned,
     <Block::Hash as FromStr>::Err: Debug,
@@ -25,9 +30,9 @@ where
 
     let execute_at_state = State::for_block_number::<Block>(uri, at).await?;
     let execute_at = execute_at_state.at::<Block>()?;
-    let prev_block_state = execute_at_state.to_prev_block_state::<Block>().await?;
+    let prev_block_state = execute_at_state.into_prev_block_state::<Block>().await?;
 
-    let ext = prev_block_state.to_ext::<Block, HostFns>().await?;
+    let ext = prev_block_state.to_ext::<Block>().await?;
 
     // Execute the desired block on top of it
     let block = ChainApi::<(), Block::Hash, Block::Header, SignedBlock<Block>>::block(
@@ -58,5 +63,5 @@ where
         None,
     )?;
 
-    Ok(())
+    Ok(block.hash())
 }

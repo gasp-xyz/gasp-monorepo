@@ -1,7 +1,7 @@
 use super::{hash_of, rpc_err_handler};
 use frame_remote_externalities::{Builder, Mode, OnlineConfig, RemoteExternalities};
 use node_primitives::BlockNumber;
-use sc_executor::sp_wasm_interface::HostFunctions;
+
 use sp_core::{storage::well_known_keys, twox_128};
 use sp_rpc::{list::ListOrValue::Value, number::NumberOrHex::Number};
 use sp_runtime::{traits::{Block as BlockT, Header}, DeserializeOwned};
@@ -48,7 +48,7 @@ impl State {
         hash_of::<Block>(self.at.as_str())
     }
 
-    pub async fn to_prev_block_state<Block: BlockT>(self) -> sc_cli::Result<State>
+    pub async fn into_prev_block_state<Block: BlockT>(self) -> sc_cli::Result<State>
     where
         <Block::Hash as FromStr>::Err: Debug,
     {
@@ -77,7 +77,7 @@ impl State {
     ///
     /// This will override the code as it sees fit based on [`Runtime`]. It will also check the
     /// spec-version and name.
-    pub async fn to_ext<Block: BlockT + DeserializeOwned, HostFns: HostFunctions>(
+    pub async fn to_ext<Block: BlockT + DeserializeOwned>(
         &self,
     ) -> sc_cli::Result<RemoteExternalities<Block>>
     where

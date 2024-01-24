@@ -1,18 +1,20 @@
-use crate::chainio::{avs::AvsContracts, build_client, eigen::ElContracts, Client};
+use crate::chainio::{avs::AvsContracts, build_eth_client, eigen::ElContracts, Client};
 use crate::cli::CliArgs;
 use crate::crypto::bn254::BlsKeypair;
 use crate::crypto::keystore::decrypt_keystore;
 use crate::executor::execute::execute_block;
+use crate::rpc::Rpc;
 
-use bindings::mangata_task_manager::NewTaskCreatedFilter;
+use bindings::{mangata_task_manager::NewTaskCreatedFilter, shared_types::TaskResponse};
 use ethers::prelude::*;
 use eyre::eyre;
 use node_executor::ExecutorDispatch;
 use node_primitives::BlockNumber;
+
 use sp_runtime::traits::BlakeTwo256;
 use sp_runtime::{generic, OpaqueExtrinsic};
 use std::sync::Arc;
-use tracing::{debug, info, instrument};
+use tracing::{debug, error, info, instrument};
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
@@ -25,17 +27,24 @@ pub struct Operator {
     bls_keypair: BlsKeypair,
     substrate_client_uri: String,
     chain_id: u64,
+    rpc: Rpc,
 }
 impl Operator {
+    #[instrument(name = "create_operator", skip_all)]
     pub async fn from_cli(cfg: &CliArgs) -> eyre::Result<Self> {
-        let client = Arc::new(build_client(&cfg.into()).await?);
+        let client = Arc::new(build_eth_client(&cfg.into()).await?);
         let avs_contracts = AvsContracts::build(&cfg.into(), client.clone()).await?;
         let slasher = avs_contracts.slasher_address().await?;
         let el_contracts = ElContracts::build(&cfg.into(), slasher, client.clone()).await?;
 
-        info!("Decryting BLS keypair at: {:?}", cfg.bls_key_file);
+        info!("Decrypting BLS keypair at: {:?}", cfg.bls_key_file);
         let bls_key = decrypt_keystore(&cfg.bls_key_file, &cfg.bls_key_password)?;
-        debug!("Bls Keypair decrytped");
+        info!(
+            "Bls Keypair decrypted with operator id: {:x}",
+            bls_key.operator_id()
+        );
+
+        let rpc = Rpc::build(cfg);
 
         Ok(Self {
             avs_contracts,
@@ -44,24 +53,42 @@ impl Operator {
             client,
             bls_keypair: bls_key,
             chain_id: cfg.chain_id,
+            rpc,
         })
     }
 
+    #[instrument(skip_all)]
     pub async fn watch_new_tasks(&self) -> eyre::Result<()> {
         let evs = self.avs_contracts.new_task_stream();
         let mut stream: stream::EventStream<'_, _, NewTaskCreatedFilter, _> =
             evs.subscribe().await?;
+
         while let Some(Ok(event)) = stream.next().await {
-            println!("{:?}", event);
-            self.execute_block(event.task.block_number.as_u32()).await?;
-            println!("executed");
+            info!("Executing a Block for task: {:?}", event);
+            let block = self.execute_block(event.task.block_number.as_u32()).await?;
+            debug!("Block executed successfully");
+
+            let payload = TaskResponse {
+                reference_task_index: event.task_index,
+                block_hash: block.as_fixed_bytes().to_owned(),
+            };
+
+            let response = self
+                .rpc
+                .send_task_response(payload, &self.bls_keypair)
+                .await?;
+
+            match response.error_for_status_ref() {
+                Err(e) => error!("{} - {}", e, response.text().await?),
+                Ok(_) => info!("Task finished successfuly and sent to AVS service"),
+            }
         }
         Ok(())
     }
 
-    pub(crate) async fn execute_block(&self, block_number: BlockNumber) -> eyre::Result<()> {
+    pub(crate) async fn execute_block(&self, block_number: BlockNumber) -> eyre::Result<H256> {
         use sc_executor::{sp_wasm_interface::ExtendedHostFunctions, NativeExecutionDispatch};
-        execute_block::<
+        let block = execute_block::<
             Block,
             ExtendedHostFunctions<
                 sp_io::SubstrateHostFunctions,
@@ -70,9 +97,10 @@ impl Operator {
         >(&self.substrate_client_uri, block_number)
         .await?;
 
-        Ok(())
+        Ok(block)
     }
 
+    #[instrument(skip_all)]
     pub(crate) async fn check_registration(&self) -> eyre::Result<()> {
         let status = self
             .el_contracts
@@ -118,8 +146,8 @@ impl Operator {
             info!("Sucessfully registered with EigenLayer")
         }
 
-        if let Some(id) = self.avs_contracts.operator_id().await? {
-            info!("Operator already registered, with id {:x}", id);
+        if self.avs_contracts.operator_id().await?.is_some() {
+            info!("Operator already registered");
         } else {
             info!("Registering Operator {:x} with AVS", self.client.address());
             self.avs_contracts

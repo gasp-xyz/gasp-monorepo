@@ -7,10 +7,14 @@ mod cli;
 mod crypto;
 mod executor;
 mod operator;
+mod rpc;
 
 pub async fn start() -> eyre::Result<()> {
     let cli = CliArgs::build();
-    info!("Creating a new Operator from {:?}", cli);
+    info!(
+        "Creating a new Operator from {}",
+        serde_json::to_string_pretty(&cli)?
+    );
     let operator = Operator::from_cli(&cli).await?;
 
     if let Some(cmd) = cli.command {

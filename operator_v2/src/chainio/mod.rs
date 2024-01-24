@@ -5,7 +5,7 @@ use ethers::{
     providers::{Http, Provider},
     signers::{LocalWallet, Signer},
 };
-use tracing::{instrument, debug, info};
+use tracing::{info, instrument};
 
 use crate::cli::CliArgs;
 
@@ -35,15 +35,14 @@ impl From<&CliArgs> for Config {
 }
 
 #[instrument(skip_all)]
-pub(crate) async fn build_client(cfg: &Config) -> eyre::Result<Client> {
+pub(crate) async fn build_eth_client(cfg: &Config) -> eyre::Result<Client> {
     let provider = MW::try_from(cfg.eth_rpc_url.clone())?;
     info!("Decrypting wallet at {:?}", cfg.keystore_path);
     let wallet =
         LocalWallet::decrypt_keystore(cfg.keystore_path.clone(), cfg.keystore_password.clone())?;
-    debug!("Eth Wallet decrytped");
+    info!("Eth Wallet decrytped with address {:x}", wallet.address());
     let nonce = NonceManagerMiddleware::new(provider, wallet.address());
-    let client =
-        Client::new_with_provider_chain(nonce, wallet.with_chain_id(cfg.chain_id)).await?;
+    let client = Client::new_with_provider_chain(nonce, wallet.with_chain_id(cfg.chain_id)).await?;
 
     Ok(client)
 }
