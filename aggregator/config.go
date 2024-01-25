@@ -18,6 +18,7 @@ type Config struct {
 	SubstrateWsRpcUrl string
 
 	ServerAddressPort string
+	BlockPeriod       int
 
 	BlsOperatorStateRetrieverAddr common.Address
 	BlsCompendiumAddr             common.Address
@@ -50,6 +51,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 	return &Config{
 		LogLevel:                      logLevel,
 		ServerAddressPort:             ctx.GlobalString(config.AvsServerPortAddressFlag.Name),
+		BlockPeriod:                   ctx.GlobalInt(config.AvsBlockValidationPeriodFlag.Name),
 		EthRpcUrl:                     ctx.GlobalString(config.EthRpcFlag.Name),
 		EthWsUrl:                      ctx.GlobalString(config.EthWsFlag.Name),
 		ChainId:                       chainId,
@@ -74,4 +76,5 @@ var Flags = []cli.Flag{
 	config.AvsServiceManagerFlag,
 	config.EcdsaKeyFileFlag,
 	config.EcdsaKeyPasswordFlag,
+	config.AvsBlockValidationPeriodFlag,
 }

@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/mangata-finance/eigen-layer-monorepo/operator"
-	"github.com/mangata-finance/eigen-layer-monorepo/operator/plugin/actions"
+	"github.com/mangata-finance/eigen-layer-monorepo/operator_v1"
+	"github.com/mangata-finance/eigen-layer-monorepo/operator_v1/plugin/actions"
 	"github.com/urfave/cli"
 )
 

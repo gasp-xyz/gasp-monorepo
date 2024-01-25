@@ -1,6 +1,7 @@
 use cli::CliArgs;
+use eyre::eyre;
 use operator::Operator;
-use tracing::info;
+use tracing::{info, instrument};
 
 mod chainio;
 mod cli;
@@ -20,11 +21,10 @@ pub async fn start() -> eyre::Result<()> {
     if let Some(cmd) = cli.command {
         info!("Operator created with command '{:?}'", cmd);
         match cmd {
-            cli::Commands::Register => register(operator).await?,
-            cli::Commands::Deregister => todo!(),
-            cli::Commands::OptInAvs => todo!(),
-            cli::Commands::OptOutAvs => todo!(),
-            cli::Commands::PrintStatus => todo!(),
+            cli::Commands::Register => operator.register().await?,
+            cli::Commands::OptInAvs => operator.opt_in_avs().await?,
+            cli::Commands::OptOutAvs => operator.opt_out_avs().await?,
+            cli::Commands::PrintStatus => print_status(&operator).await?,
         }
     } else {
         info!("Operator created and starting AVS verification");
@@ -37,16 +37,37 @@ pub async fn start() -> eyre::Result<()> {
 pub async fn verify(operator: Operator, register: bool) -> eyre::Result<()> {
     if register {
         operator.register().await?;
+        operator.opt_in_avs().await?;
     }
 
-    operator.check_registration().await?;
+    check_registration(&operator).await?;
     operator.watch_new_tasks().await?;
 
     Ok(())
 }
 
-async fn register(operator: Operator) -> eyre::Result<()> {
-    operator.register().await?;
+#[instrument(skip_all)]
+pub(crate) async fn check_registration(operator: &Operator) -> eyre::Result<()> {
+    let status = operator.get_status().await?;
+    let local_id = operator.operator_id();
 
+    info!("{:#?}", status);
+
+    match (status.registered_with_eigen, status.operator_id, local_id) {
+        (false, _, _) => Err(eyre!("Operator not registered with EigenLayer")),
+        (true, None, _) => Err(eyre!("Operator not registered with AVS")),
+        (true, Some(id), local) if id == local => Ok(()),
+        _ => Err(eyre!(
+            "Registered operator id ({:x}) & BlsKeypair.operator_id() ({:x}) mismatch",
+            status.operator_id.unwrap_or_default(),
+            local_id
+        )),
+    }
+}
+
+#[instrument(skip_all)]
+pub(crate) async fn print_status(operator: &Operator) -> eyre::Result<()> {
+    let status = operator.get_status().await?;
+    info!("{:#?}", status);
     Ok(())
 }

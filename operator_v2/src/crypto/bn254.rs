@@ -7,7 +7,7 @@ use ark_ff::{
 use bindings::shared_types::{G1Point, G2Point};
 use ethers::{
     core::types::{H256, U256},
-    types::{Address},
+    types::Address,
 };
 
 use sha3::{Digest, Keccak256};
@@ -15,6 +15,7 @@ use sha3::{Digest, Keccak256};
 pub type PrivateKey = Fr;
 pub type PublicKey = G1Affine;
 pub type BlsSignature = G1Affine;
+pub type OperatorId = H256;
 
 #[derive(Debug)]
 pub struct BlsKeypair {
@@ -60,7 +61,7 @@ impl BlsKeypair {
         (G2Affine::generator() * self.private).into_affine()
     }
 
-    pub fn operator_id(&self) -> H256 {
+    pub fn operator_id(&self) -> OperatorId {
         let xy = self.public.xy().expect("should have public");
         let hash = Keccak256::new()
             .chain_update(xy.0.into_bigint().to_bytes_be())

@@ -34,6 +34,17 @@ func (agg *Aggregator) startServer(ctx context.Context) error {
 }
 
 func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case http.MethodConnect:
+	http.Error(w, "Operator not supported, please upgrade to latest", http.StatusUpgradeRequired)
+		return
+	case http.MethodPost:
+		break
+	default:
+		http.Error(w, "Method not supported", http.StatusMethodNotAllowed)
+		return
+	}
+
 	var response SignedTaskResponse
 	if err := json.NewDecoder(req.Body).Decode(&response); err != nil {
 		http.Error(w, "Error parsing request body", http.StatusBadRequest)

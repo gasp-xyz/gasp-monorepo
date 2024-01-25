@@ -1,16 +1,20 @@
 use crate::chainio::{avs::AvsContracts, build_eth_client, eigen::ElContracts, Client};
 use crate::cli::CliArgs;
-use crate::crypto::bn254::BlsKeypair;
+use crate::crypto::bn254::{BlsKeypair, OperatorId};
 use crate::crypto::keystore::decrypt_keystore;
+use crate::crypto::EthConvert;
 use crate::executor::execute::execute_block;
 use crate::rpc::Rpc;
 
-use bindings::{mangata_task_manager::NewTaskCreatedFilter, shared_types::TaskResponse};
+use bindings::{
+    mangata_task_manager::NewTaskCreatedFilter,
+    shared_types::{G1Point, G2Point, TaskResponse},
+};
 use ethers::prelude::*;
-use eyre::eyre;
 use node_executor::ExecutorDispatch;
 use node_primitives::BlockNumber;
 
+use serde::Serialize;
 use sp_runtime::traits::BlakeTwo256;
 use sp_runtime::{generic, OpaqueExtrinsic};
 use std::sync::Arc;
@@ -18,6 +22,19 @@ use tracing::{debug, error, info, instrument};
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
+
+#[derive(Debug, Serialize)]
+pub struct OperatorStatus {
+    pub eth_address: Address,
+    pub registered_with_eigen: bool,
+    pub bls_key_registered: bool,
+    pub bls_g1: G1Point,
+    pub bls_g2: G2Point,
+    pub registered_with_avs: bool,
+    pub operator_id: Option<OperatorId>,
+    // opted_in_salshing_by_avs: bool,
+    // frozen: bool,
+}
 
 #[derive(Debug)]
 pub struct Operator {
@@ -100,26 +117,33 @@ impl Operator {
         Ok(block)
     }
 
+    pub(crate) fn operator_id(&self) -> OperatorId {
+        self.bls_keypair.operator_id()
+    }
+
     #[instrument(skip_all)]
-    pub(crate) async fn check_registration(&self) -> eyre::Result<()> {
-        let status = self
+    pub(crate) async fn get_status(&self) -> eyre::Result<OperatorStatus> {
+        let el_status = self
             .el_contracts
             .is_operator_registered(self.client.address())
             .await?;
 
-        let id = self.avs_contracts.operator_id().await?;
-        let local_id = self.bls_keypair.operator_id();
+        let pubkey_status = self
+            .el_contracts
+            .has_operator_pubkey(self.client.address())
+            .await?;
 
-        match (status, id, local_id) {
-            (false, _, _) => Err(eyre!("Operator not registered with EigenLayer")),
-            (true, None, _) => Err(eyre!("Operator not registered with AVS")),
-            (true, Some(id), local) if id == local => Ok(()),
-            _ => Err(eyre!(
-                "Registered operator id ({:x}) & BlsKeypair.operator_id() ({:x}) mismatch",
-                id.unwrap(),
-                local_id
-            )),
-        }
+        let id = self.avs_contracts.operator_id().await?;
+
+        Ok(OperatorStatus {
+            eth_address: self.client.address(),
+            registered_with_eigen: el_status,
+            bls_key_registered: pubkey_status,
+            bls_g1: EthConvert::to_g1(self.bls_keypair.public).unwrap_or_default(),
+            bls_g2: EthConvert::to_g2(self.bls_keypair.public_g2()).unwrap_or_default(),
+            operator_id: id,
+            registered_with_avs: id.is_some(),
+        })
     }
 
     #[instrument(skip_all)]
@@ -144,10 +168,17 @@ impl Operator {
                 .await?;
 
             info!("Sucessfully registered with EigenLayer")
+        } else {
+            info!("Operator already registered in EigenLayer");
         }
 
+        Ok(())
+    }
+
+    #[instrument(skip_all)]
+    pub(crate) async fn opt_in_avs(&self) -> eyre::Result<()> {
         if self.avs_contracts.operator_id().await?.is_some() {
-            info!("Operator already registered");
+            info!("Operator already opt-in AVS");
         } else {
             info!("Registering Operator {:x} with AVS", self.client.address());
             self.avs_contracts
@@ -159,6 +190,19 @@ impl Operator {
                 .await?
                 .expect("should have operator id after success trx");
             info!("Sucessfully registered with AVS with id {:x}", id);
+        }
+        Ok(())
+    }
+
+    #[instrument(skip_all)]
+    pub(crate) async fn opt_out_avs(&self) -> eyre::Result<()> {
+        if self.avs_contracts.operator_id().await?.is_some() {
+            self.avs_contracts
+                .deregister_with_avs(&self.bls_keypair)
+                .await?;
+            info!("Operator opted out with AVS sucessfully");
+        } else {
+            info!("Operator not opt in with AVS");
         }
 
         Ok(())

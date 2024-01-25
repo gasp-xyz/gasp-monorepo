@@ -65,7 +65,7 @@ bindings-rs: ## generates rust bindings
 cli-setup-operator: cli-register-operator-with-eigenlayer cli-register-operator-with-avs ## registers operator with eigenlayer and avs
 
 cli-register-operator-with-eigenlayer: ## registers operator with delegationManager
-	go run operator/plugin/cmd/main.go \
+	go run operator_v1/plugin/cmd/main.go \
 		--eth-rpc-url ${ETH_RPC_URL} \
 		--eth-ws-url ${ETH_WS_URL} \
 		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
@@ -79,7 +79,7 @@ cli-register-operator-with-eigenlayer: ## registers operator with delegationMana
 		register-operator-with-eigen
 
 cli-register-operator-with-avs: ## 
-	go run operator/plugin/cmd/main.go \
+	go run operator_v1/plugin/cmd/main.go \
 		--eth-rpc-url ${ETH_RPC_URL} \
 		--eth-ws-url ${ETH_WS_URL} \
 		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
@@ -93,7 +93,7 @@ cli-register-operator-with-avs: ##
 		register-operator-with-avs
 
 cli-deregister-operator-with-avs: ## 
-	go run operator/plugin/cmd/main.go \
+	go run operator_v1/plugin/cmd/main.go \
 		--eth-rpc-url ${ETH_RPC_URL} \
 		--eth-ws-url ${ETH_WS_URL} \
 		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
@@ -107,7 +107,7 @@ cli-deregister-operator-with-avs: ##
 		register-operator-with-avs
 
 cli-print-operator-status: ## 
-	go run operator/plugin/cmd/main.go \
+	go run operator_v1/plugin/cmd/main.go \
 		--eth-rpc-url ${ETH_RPC_URL} \
 		--eth-ws-url ${ETH_WS_URL} \
 		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
@@ -145,7 +145,7 @@ start-operator-v1: ##
 		--eth-rpc-url ${ETH_RPC_URL} \
 		--eth-ws-url ${ETH_WS_URL} \
 		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
-		--aggregator-rpc-url ${AGGREGATOR_RPC_URL} \
+		--aggregator-rpc-url ${AGGREGATOR_IPPORT} \
 		--chain-id ${CHAIN_ID} \
 		--bls-public-key-compendium ${BLS_PUBLIC_KEY_COMPENDIUM} \
 		--bls-operator-state-retriever ${BLS_OPERATOR_STATE_RETRIEVER} \

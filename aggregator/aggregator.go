@@ -21,7 +21,6 @@ import (
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
 
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
-	gsrpc_types "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 const (
@@ -68,6 +67,7 @@ const (
 type Aggregator struct {
 	logger           sdklogging.Logger
 	serverIpPortAddr string
+	blockPeriod      uint32
 	avsWriter        chainio.AvsWriterer
 	// aggregation related fields
 	blsAggregationService   blsagg.BlsAggregationService
@@ -138,6 +138,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		taskResponses:           make(map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse),
 		substrateClient:         *substrateRpc,
 		taskResponseWindowBlock: taskResponseWindowBlock,
+		blockPeriod:             uint32(c.BlockPeriod),
 	}, nil
 }
 
@@ -161,7 +162,7 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 			agg.logger.Info("Received response from blsAggregationService", "blsAggServiceResp", blsAggServiceResp)
 			agg.sendAggregatedResponseToContract(blsAggServiceResp)
 		case head := <-sub.Chan():
-			err := agg.sendNewTask(head.Number)
+			err := agg.sendNewTask(uint32(head.Number))
 			if err != nil {
 				// we log the errors inside sendNewTask() so here we just continue to the next task
 				continue
@@ -216,8 +217,8 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 
 // sendNewTask sends a new task to the task manager contract, and updates the Task dict struct
 // with the information of operators opted into quorum 0 at the block of task creation.
-func (agg *Aggregator) sendNewTask(blockNumber gsrpc_types.BlockNumber) error {
-	if blockNumber%10 != 0 {
+func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
+	if blockNumber%agg.blockPeriod != 0 {
 		return nil
 	}
 	agg.logger.Info("Aggregator sending new task", "block number", blockNumber)

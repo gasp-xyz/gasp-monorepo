@@ -67,6 +67,14 @@ impl ElContracts {
         Ok(self.delegation.is_operator(operator_address).await?)
     }
 
+    pub async fn has_operator_pubkey(&self, operator_address: Address) -> eyre::Result<bool> {
+        Ok(!self
+            .bls_pub_key
+            .operator_to_pubkey_hash(operator_address)
+            .await?
+            .is_empty())
+    }
+
     pub async fn register_as_operator_with_el(
         &self,
         operator_address: Address,

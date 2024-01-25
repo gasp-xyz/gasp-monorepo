@@ -58,6 +58,13 @@ var (
 		Required: true,
 		EnvVar:   "AVS_SERVER_IP_PORT_ADDRESS",
 	}
+	AvsBlockValidationPeriodFlag = cli.IntFlag{
+		Name:     "avs-block-validation-period",
+		Usage:    "Period of block finalization per block produced on mangata",
+		Required: false,
+		Value:    2,
+		EnvVar:   "AVS_BLOCK_VALIDATION_PERIOD",
+	}
 
 	// metrics
 	EigenMetricsIpPortAddress = cli.StringFlag{

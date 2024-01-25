@@ -48,7 +48,6 @@ pub struct CliArgs {
 #[derive(Debug, Subcommand, Serialize)]
 pub enum Commands {
     Register,
-    Deregister,
     OptInAvs,
     OptOutAvs,
     PrintStatus,
@@ -58,7 +57,7 @@ impl CliArgs {
     pub fn build() -> Self {
         let args = CliArgs::parse();
         match args.command {
-            Some(Commands::Register) | Some(Commands::Deregister) if args.chain_id != 31337 => {
+            Some(Commands::Register) if args.chain_id != 31337 => {
                 panic!("Commands only supported on local testnet")
             }
             _ => (),

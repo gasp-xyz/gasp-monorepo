@@ -115,4 +115,20 @@ impl AvsContracts {
 
         receipt.ok_or_eyre("register_with_avs trx failed")
     }
+
+    pub async fn deregister_with_avs(
+        &self,
+        keypair: &BlsKeypair,
+    ) -> eyre::Result<TransactionReceipt> {
+        let op_address =
+            EthConvert::to_g1(keypair.public).ok_or_eyre("cannot convert G1 public")?;
+        let trx = self
+            .registry
+            .deregister_operator_with_coordinator(AvsContracts::QUORUM.into(), op_address);
+
+        let pending = trx.send().await?;
+        let receipt = pending.await?;
+
+        receipt.ok_or_eyre("register_with_avs trx failed")
+    }
 }
