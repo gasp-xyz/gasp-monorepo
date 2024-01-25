@@ -23,6 +23,8 @@ aggregatorArgs:
   - /config/ecdsa.key.json
   - --avs-server-ip-port-address 
   - 0.0.0.0:8090
+  - avs-block-validation-period 
+  - '"5"'
 aggregatorConfigFiles:
   - name: ecdsa.key.json
     content: |
@@ -36,22 +38,21 @@ operatorArgs:
   - ws://anvil:8545
   - --substrate-rpc-url 
   - wss://kusama-archive.mangata.online
-  - --aggregator-rpc-url 
-  - eigen-aggregator:8090
+  - --avs-rpc-url 
+  - http://eigen-aggregator:8090
   - --chain-id 
   - '"31337"'
-  - --bls-public-key-compendium 
+  - --bls-public-key-compendium-addr 
   - 0xc5a5C42992dECbae36851359345FE25997F5C42d
-  - --bls-operator-state-retriever 
+  - --bls-operator-state-retriever-addr 
   - 0x67d269191c92Caf3cD7723F116c85e6E9bf55933
-  - --avs-service-manager 
+  - --avs-service-manager-addr 
   - 0x9E545E3C0baAB3E08CdfD552C960A1050f373042
   - --ecdsa-key-file 
   - /config/ecdsa.key.json
   - --bls-key-file 
   - /config/bls.key.json
-  - --register-at-startup 
-  - '"true"'
+  - --register-at-startup
 operatorConfigFiles:
   - name: ecdsa.key.json
     content: |

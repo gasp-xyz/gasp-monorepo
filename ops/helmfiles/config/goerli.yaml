@@ -40,6 +40,8 @@ aggregatorArgs:
   - /config/ecdsa.key.json
   - --avs-server-ip-port-address 
   - 0.0.0.0:8090
+  - avs-block-validation-period 
+  - '"10"'
 aggregatorConfigFiles:
   - name: ecdsa.key.json
     content: |
