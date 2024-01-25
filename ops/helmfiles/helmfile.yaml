@@ -6,6 +6,10 @@ environments:
     values:
      - config/default.yaml
      - config/fungible.yaml
+  dev:
+    values:
+    - config/default.yaml
+    - config/dev.yaml
   goerli:
     values:
      - config/default.yaml
@@ -36,6 +40,9 @@ releases:
         remoteCluster: {{ .Values.remoteCluster }}
         args: {{ toYaml .Values.aggregatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
+        env:
+          ETH_RPC_URL: {{ .Values.env.ETH_RPC_URL | fetchSecretValue | quote }}
+          ETH_WS_URL: {{ .Values.env.ETH_WS_URL | fetchSecretValue | quote }}
   - name: eigen-operator  
     namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.operatorEnabled }}
@@ -52,3 +59,28 @@ releases:
         enableServiceMonitorCollectors: {{ .Values.operatorEnableServiceMonitorCollectors }}
         prometheus:
           enabled: true
+        env:
+          ETH_RPC_URL: {{ .Values.env.ETH_RPC_URL | fetchSecretValue | quote }}
+          ETH_WS_URL: {{ .Values.env.ETH_WS_URL | fetchSecretValue | quote }}
+  - name: mangata-updater
+    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.updaterEnabled }}
+    chart: ../helm-charts/mangata-updater
+    values:
+      - image:
+          repository: mangatasolutions/mangata-updater
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
+        ethChainUrl: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-ethereum-rpc-url
+  - name: mangata-sequencer
+    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.sequencerEnabled }}
+    chart: ../helm-charts/mangata-sequencer
+    values:
+      - image:
+          repository: mangatasolutions/mangata-sequencer
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        mnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
+        ethChainUrl: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-ethereum-rpc-url

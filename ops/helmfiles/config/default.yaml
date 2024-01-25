@@ -3,12 +3,14 @@ remoteCluster: true
 anvilEnabled: true
 aggregatorEnabled: true
 operatorEnabled: true
+updaterEnabled: true
+sequencerEnabled: true
+
+env:
+  ETH_RPC_URL: http://anvil:8545
+  ETH_WS_URL: ws://anvil:8545
 
 aggregatorArgs:
-  - --eth-rpc-url 
-  - http://anvil:8545
-  - --eth-ws-url 
-  - ws://anvil:8545
   - --substrate-rpc-url 
   - wss://kusama-archive.mangata.online
   - --chain-id 
@@ -32,10 +34,6 @@ aggregatorConfigFiles:
 
 operatorEnableServiceMonitorCollectors: false
 operatorArgs:
-  - --eth-rpc-url 
-  - http://anvil:8545
-  - --eth-ws-url 
-  - ws://anvil:8545
   - --substrate-rpc-url 
   - wss://kusama-archive.mangata.online
   - --avs-rpc-url 

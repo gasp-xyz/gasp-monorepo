@@ -7,9 +7,19 @@
 *.dll
 *.so
 *.dylib
+*.idea
+
+.DS_Store
 
 # Test binary, built with `go test -c`
 *.test
+mangata-updater/node_modules
+mangata-updater/build
+mangata-updater/.env
+
+mangata-sequencer/node_modules
+mangata-sequencer/build
+mangata-sequencer/.env
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
@@ -34,3 +44,32 @@ gha-creds-*.json
 
 # rust build target
 **/target
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# compiled output
+dist
+build
+tmp
+
+# dependencies
+node_modules
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db

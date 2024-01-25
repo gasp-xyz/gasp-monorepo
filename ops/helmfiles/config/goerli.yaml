@@ -3,6 +3,8 @@ remoteCluster: true
 anvilEnabled: false
 aggregatorEnabled: true
 operatorEnabled: false
+updaterEnabled: false
+sequencerEnabled: false
 
 # it is possible to pass args as ENV vars instead, same name as cmd flag but SNAKE_UPPERCASED
 # see core/config/flags.go
@@ -21,11 +23,11 @@ operatorEnabled: false
 # --avs-server-ip-port-address $AGRO_HOST \
 # 2>&1 | zap-pretty
 
+env:
+  ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-rpc-url
+  ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-ws-url
+
 aggregatorArgs:
-  - --eth-rpc-url 
-  - https://eth-goerli.g.alchemy.com/v2/slHhquJDTBbdx25NdPLAx_nqoUNu-RqJ
-  - --eth-ws-url 
-  - wss://eth-goerli.g.alchemy.com/v2/slHhquJDTBbdx25NdPLAx_nqoUNu-RqJ
   - --substrate-rpc-url 
   - wss://kusama-archive.mangata.online
   - --chain-id 
