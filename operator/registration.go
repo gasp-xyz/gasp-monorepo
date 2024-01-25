@@ -12,21 +12,23 @@ import (
 	"fmt"
 	"math/big"
 
-	blspubkeyregistry "github.com/Layr-Labs/eigensdk-go/contracts/bindings/BLSPubkeyRegistry"
 	regcoord "github.com/Layr-Labs/eigensdk-go/contracts/bindings/BLSRegistryCoordinatorWithIndices"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	eigenSdkTypes "github.com/Layr-Labs/eigensdk-go/types"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
 func (o *Operator) RegisterAtStartup() {
 	err := o.RegisterOperatorWithEigen()
 	if err != nil {
-		o.logger.Error("Error while registering operator into eigen")
+		o.logger.Errorf("Error while registering operator into eigen: %s", err)
+		return
 	}
 
 	err = o.RegisterOperatorWithAvs()
 	if err != nil {
-		o.logger.Error("Error while registering operator into AVS")
+		o.logger.Errorf("Error while registering operator into AVS: %s", err)
+		return
 	}
 	o.logger.Info("Operator succesfully registered!")
 }
@@ -37,13 +39,13 @@ func (o *Operator) RegisterOperatorWithEigen() error {
 		EarningsReceiverAddress: o.operatorAddr.String(),
 	}
 
-	status, err := o.ethRpc.ElReader.IsOperatorRegistered(context.Background(), op)
+	status, err := o.ethRpc.ElClients.ElChainReader.IsOperatorRegistered(&bind.CallOpts{}, op)
 	if err != nil {
 		return err
 	}
 
 	if !status {
-		receipt, err := o.ethRpc.ElWriter.RegisterAsOperator(context.Background(), op)
+		receipt, err := o.ethRpc.ElClients.ElChainWriter.RegisterAsOperator(context.Background(), op)
 		if err != nil {
 			o.logger.Info("Error while registering operator")
 			return err
@@ -57,7 +59,7 @@ func (o *Operator) RegisterOperatorWithEigen() error {
 		o.logger.Info("Operator is already registered on EigenLayer")
 	}
 
-	receipt, err := o.ethRpc.ElWriter.RegisterBLSPublicKey(context.Background(), o.config.BlsKeyPair, op)
+	receipt, err := o.ethRpc.ElClients.ElChainWriter.RegisterBLSPublicKey(context.Background(), o.config.BlsKeyPair, op)
 	if err != nil {
 		o.logger.Info("Error while registering BLS public key")
 		return err
@@ -77,7 +79,7 @@ func (o *Operator) RegisterOperatorWithAvs() error {
 
 	pubkey := pubKeyG1ToBN254G1Point(o.config.BlsKeyPair.GetPubKeyG1())
 
-	_, err := o.ethRpc.AvsWriter.RegisterOperatorWithAVSRegistryCoordinator(context.Background(), quorumNumbers, pubkey, socket)
+	_, err := o.ethRpc.ElClients.AvsRegistryChainWriter.RegisterOperatorWithAVSRegistryCoordinator(context.Background(), quorumNumbers, pubkey, socket)
 	if err != nil {
 		o.logger.Errorf("Unable to register operator with avs registry coordinator")
 		return err
@@ -90,13 +92,9 @@ func (o *Operator) RegisterOperatorWithAvs() error {
 func (o *Operator) DeregisterOperatorWithAvs() error {
 	quorumNumbers := []byte{0}
 
-	p := pubKeyG1ToBN254G1Point(o.config.BlsKeyPair.GetPubKeyG1())
-	pubkey := blspubkeyregistry.BN254G1Point{
-		X: p.X,
-		Y: p.Y,
-	}
+	pubkey := pubKeyG1ToBN254G1Point(o.config.BlsKeyPair.GetPubKeyG1())
 
-	_, err := o.ethRpc.AvsWriter.DeregisterOperator(context.Background(), o.operatorAddr, quorumNumbers, pubkey)
+	_, err := o.ethRpc.ElClients.AvsRegistryChainWriter.DeregisterOperator(context.Background(), quorumNumbers, pubkey)
 	if err != nil {
 		o.logger.Errorf("Unable to deregister operator with avs registry coordinator")
 		return err
@@ -134,13 +132,13 @@ type OperatorStatus struct {
 
 func (o *Operator) PrintOperatorStatus() error {
 	fmt.Println("Printing operator status")
-	pubkeyhash, err := o.ethRpc.ElReader.GetOperatorPubkeyHash(context.Background(), eigenSdkTypes.Operator{Address: o.operatorAddr.String()})
+	pubkeyhash, err := o.ethRpc.ElClients.ElChainReader.GetOperatorPubkeyHash(&bind.CallOpts{}, eigenSdkTypes.Operator{Address: o.operatorAddr.String()})
 	if err != nil {
 		return err
 	}
 	pubkeysRegistered := pubkeyhash != [32]byte{}
-	serviceManagerCanSlashOperatorUntilBlock, err := o.ethRpc.ElReader.ServiceManagerCanSlashOperatorUntilBlock(
-		context.Background(), o.operatorAddr, o.config.ServiceManagerAddr,
+	serviceManagerCanSlashOperatorUntilBlock, err := o.ethRpc.ElClients.ElChainReader.ServiceManagerCanSlashOperatorUntilBlock(
+		&bind.CallOpts{}, o.operatorAddr, o.config.ServiceManagerAddr,
 	)
 	if err != nil {
 		return err
@@ -151,7 +149,7 @@ func (o *Operator) PrintOperatorStatus() error {
 	}
 	optedIntoSlashingByAvs := curBlockNumber < uint64(serviceManagerCanSlashOperatorUntilBlock)
 	registeredWithAvs := o.operatorId != [32]byte{}
-	isFrozen, err := o.ethRpc.ElReader.OperatorIsFrozen(context.Background(), o.operatorAddr)
+	isFrozen, err := o.ethRpc.ElClients.ElChainReader.OperatorIsFrozen(&bind.CallOpts{}, o.operatorAddr)
 	if err != nil {
 		return err
 	}

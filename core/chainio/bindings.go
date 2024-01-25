@@ -5,6 +5,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 
 	servicemanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataServiceManager"
@@ -12,10 +13,11 @@ import (
 )
 
 type AvsServiceBindings struct {
-	TaskManager    *taskmanager.ContractMangataTaskManager
-	ServiceManager *servicemanager.ContractMangataServiceManager
-	ethClient      eth.EthClient
-	logger         logging.Logger
+	TaskManager         *taskmanager.ContractMangataTaskManager
+	ServiceManager      *servicemanager.ContractMangataServiceManager
+	ethClient           eth.EthClient
+	logger              logging.Logger
+	RegistryCoordinator common.Address
 }
 
 func NewAvsServiceBindings(serviceManagerAddr, blsOperatorStateRetrieverAddr gethcommon.Address, ethclient eth.EthClient, logger logging.Logger) (*AvsServiceBindings, error) {
@@ -36,10 +38,17 @@ func NewAvsServiceBindings(serviceManagerAddr, blsOperatorStateRetrieverAddr get
 		return nil, err
 	}
 
+	registryCoordinatorAddr, err := contractServiceManager.RegistryCoordinator(&bind.CallOpts{})
+	if err != nil {
+		logger.Error("Failed to fetch RegistryCoordinator address", "err", err)
+		return nil, err
+	}
+
 	return &AvsServiceBindings{
-		ServiceManager: contractServiceManager,
-		TaskManager:    contractTaskManager,
-		ethClient:      ethclient,
-		logger:         logger,
+		ServiceManager:      contractServiceManager,
+		TaskManager:         contractTaskManager,
+		ethClient:           ethclient,
+		logger:              logger,
+		RegistryCoordinator: registryCoordinatorAddr,
 	}, nil
 }

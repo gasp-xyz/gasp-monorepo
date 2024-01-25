@@ -19,8 +19,10 @@ import (
 
 	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/mocks"
 	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/types"
-	cstaskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
 	chainiomocks "github.com/mangata-finance/eigen-layer-monorepo/core/chainio/mocks"
+
+	gsrpc_types "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 var MOCK_OPERATOR_ID = [32]byte{207, 73, 226, 221, 104, 100, 123, 41, 192, 3, 9, 119, 90, 83, 233, 159, 231, 151, 245, 96, 150, 48, 144, 27, 102, 253, 39, 101, 1, 26, 135, 173}
@@ -28,9 +30,9 @@ var MOCK_OPERATOR_STAKE = big.NewInt(100)
 var MOCK_OPERATOR_BLS_PRIVATE_KEY_STRING = "50"
 
 type MockTask struct {
-	TaskNum        uint32
-	BlockNumber    uint32
-	NumberToSquare uint32
+	TaskNum            uint32
+	CreatedBlockNumber uint32
+	BlockNumber        uint32
 }
 
 func TestSendNewTask(t *testing.T) {
@@ -57,22 +59,22 @@ func TestSendNewTask(t *testing.T) {
 	assert.Nil(t, err)
 
 	var TASK_INDEX = uint32(0)
-	var BLOCK_NUMBER = uint32(100)
-	var NUMBER_TO_SQUARE = uint32(3)
-	var NUMBER_TO_SQUARE_BIG_INT = big.NewInt(int64(NUMBER_TO_SQUARE))
+	var CREATED_BLOCK_NUMBER = uint32(100)
+	var BLOCK_NUMBER = gsrpc_types.BlockNumber(30)
+	var BLOCK_NUMBER_BN = big.NewInt(int64(BLOCK_NUMBER))
 
-	mockAvsWriterer.EXPECT().SendNewTaskNumberToSquare(
-		context.Background(), NUMBER_TO_SQUARE_BIG_INT, types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS,
-	).Return(mocks.MockSendNewTaskNumberToSquareCall(BLOCK_NUMBER, TASK_INDEX, NUMBER_TO_SQUARE))
+	mockAvsWriterer.EXPECT().SendNewTaskVerifyBlock(
+		context.Background(), BLOCK_NUMBER_BN, types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS,
+	).Return(mocks.MockSendNewTaskVerifyBlock(CREATED_BLOCK_NUMBER, TASK_INDEX, BLOCK_NUMBER_BN))
 
 	// 100 blocks, each takes 12 seconds. We hardcode for now since aggregator also hardcodes this value
 	taskTimeToExpiry := 100 * 12 * time.Second
 	// make sure that initializeNewTask was called on the blsAggService
 	// maybe there's a better way to do this? There's a saying "don't mock 3rd party code"
 	// see https://hynek.me/articles/what-to-mock-in-5-mins/
-	mockBlsAggService.EXPECT().InitializeNewTask(TASK_INDEX, BLOCK_NUMBER, types.QUORUM_NUMBERS, []uint32{types.QUORUM_THRESHOLD_NUMERATOR}, taskTimeToExpiry)
+	mockBlsAggService.EXPECT().InitializeNewTask(TASK_INDEX, CREATED_BLOCK_NUMBER, types.QUORUM_NUMBERS, []uint32{types.QUORUM_THRESHOLD_NUMERATOR}, taskTimeToExpiry)
 
-	err = aggregator.sendNewTask(NUMBER_TO_SQUARE_BIG_INT)
+	err = aggregator.sendNewTask(BLOCK_NUMBER)
 	assert.Nil(t, err)
 }
 
@@ -84,11 +86,12 @@ func createMockAggregator(
 	mockBlsAggregationService := blsaggservmock.NewMockBlsAggregationService(mockCtrl)
 
 	aggregator := &Aggregator{
-		logger:                logger,
-		avsWriter:             mockAvsWriter,
-		blsAggregationService: mockBlsAggregationService,
-		tasks:                 make(map[types.TaskIndex]cstaskmanager.IIncredibleSquaringTaskManagerTask),
-		taskResponses:         make(map[types.TaskIndex]map[sdktypes.TaskResponseDigest]cstaskmanager.IIncredibleSquaringTaskManagerTaskResponse),
+		logger:                  logger,
+		avsWriter:               mockAvsWriter,
+		blsAggregationService:   mockBlsAggregationService,
+		tasks:                   make(map[types.TaskIndex]taskmanager.IMangataTaskManagerTask),
+		taskResponses:           make(map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse),
+		taskResponseWindowBlock: 100,
 	}
 	return aggregator, mockAvsWriter, mockBlsAggregationService, nil
 }

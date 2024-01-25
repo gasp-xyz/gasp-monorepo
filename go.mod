@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	github.com/Layr-Labs/eigensdk-go v0.0.8
+	github.com/Layr-Labs/eigensdk-go v0.0.9
 	github.com/centrifuge/go-substrate-rpc-client/v4 v4.2.1
 	github.com/ethereum/go-ethereum v1.13.7
 	github.com/prometheus/client_golang v1.17.0
@@ -42,6 +42,7 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cpuguy83/dockercfg v0.3.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
+	github.com/crate-crypto/go-ipa v0.0.0-20231025140028-3c0104f4b233 // indirect
 	github.com/crate-crypto/go-kzg-4844 v0.7.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
@@ -56,6 +57,7 @@ require (
 	github.com/ethereum/c-kzg-4844 v0.4.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff // indirect
+	github.com/gballet/go-verkle v0.1.1-0.20231031103413-a67434b50f46 // indirect
 	github.com/getsentry/sentry-go v0.18.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect

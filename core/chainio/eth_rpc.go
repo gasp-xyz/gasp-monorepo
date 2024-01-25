@@ -1,25 +1,28 @@
 package chainio
 
 import (
+	"github.com/Layr-Labs/eigensdk-go/chainio/clients"
+	"github.com/Layr-Labs/eigensdk-go/chainio/clients/avsregistry"
+	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
-	"github.com/Layr-Labs/eigensdk-go/chainio/elcontracts"
+	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
+	"github.com/Layr-Labs/eigensdk-go/chainio/utils"
+	blspubkeycompendium "github.com/Layr-Labs/eigensdk-go/contracts/bindings/BLSPublicKeyCompendium"
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/metrics"
+	rpccalls "github.com/Layr-Labs/eigensdk-go/metrics/collectors/rpc_calls"
+	"github.com/Layr-Labs/eigensdk-go/signerv2"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-
-	sdkclients "github.com/Layr-Labs/eigensdk-go/chainio/clients"
-	"github.com/Layr-Labs/eigensdk-go/signer"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type EthRpc struct {
 	AvsReader     *AvsReader
 	AvsWriter     *AvsWriter
 	AvsSubscriber *AvsSubscriber
-	ElReader      *elcontracts.ELChainReader
-	ElWriter      *elcontracts.ELChainWriter
-	ElSubscriber  *elcontracts.ELChainSubscriber
+	ElClients     *clients.Clients
 	Client        eth.EthClient
 }
 
@@ -27,18 +30,41 @@ func NewEthRpc(
 	serviceManagerAddr common.Address,
 	blsOperatorStateRetrieverAddr common.Address,
 	blsCompendiumAddr common.Address,
-	ethRpcClient eth.EthClient,
-	ethWsClient eth.EthClient,
-	signer signer.Signer,
+	ethHttpUrl string,
+	ethWsUrl string,
+	signer signerv2.SignerFn,
+	address common.Address,
+	avsName string,
+	metricsIpPort string,
 	logger sdklogging.Logger,
 ) (*EthRpc, error) {
-	avsReader, err := NewAvsReaderFromConfig(serviceManagerAddr, blsOperatorStateRetrieverAddr, ethRpcClient, logger)
+	// Create the metrics server
+	promReg := prometheus.NewRegistry()
+	eigenMetrics := metrics.NewEigenMetrics(avsName, metricsIpPort, promReg, logger)
+
+	// creating two types of Eth clients: HTTP and WS
+	var ethHttpClient, ethWsClient eth.EthClient
+	rpcCallsCollector := rpccalls.NewCollector(avsName, promReg)
+	ethHttpClient, err := eth.NewInstrumentedClient(ethHttpUrl, rpcCallsCollector)
+	if err != nil {
+		logger.Error("Failed to create Eth Http client", "err", err)
+		return nil, err
+	}
+
+	ethWsClient, err = eth.NewInstrumentedClient(ethWsUrl, rpcCallsCollector)
+	if err != nil {
+		logger.Error("Failed to create Eth WS client", "err", err)
+		return nil, err
+	}
+
+	txMgr := txmgr.NewSimpleTxManager(ethHttpClient, logger, signer, address)
+	avsReader, err := NewAvsReaderFromConfig(serviceManagerAddr, blsOperatorStateRetrieverAddr, ethHttpClient, logger)
 	if err != nil {
 		logger.Error("Cannot create AvsReader", "err", err)
 		return nil, err
 	}
 
-	avsWriter, err := NewAvsWriter(signer, serviceManagerAddr, blsCompendiumAddr, ethRpcClient, logger)
+	avsWriter, err := NewAvsWriter(txMgr, serviceManagerAddr, blsCompendiumAddr, ethHttpClient, logger)
 	if err != nil {
 		logger.Error("Cannot create AvsWriter", "err", err)
 		return nil, err
@@ -50,29 +76,105 @@ func NewEthRpc(
 		return nil, err
 	}
 
-	slasherAddr, err := avsReader.AvsServiceBindings.ServiceManager.Slasher(&bind.CallOpts{})
+	// creating EL clients: Reader, Writer and Subscriber
+	avsRegistryContractBindings, err := utils.NewAVSRegistryContractBindings(
+		avsReader.AvsServiceBindings.RegistryCoordinator,
+		blsOperatorStateRetrieverAddr,
+		ethHttpClient,
+		logger,
+	)
 	if err != nil {
-		logger.Error("Cannot get slasher address", "err", err)
+		logger.Error("Failed to create AVSRegistryContractBindings", "err", err)
 		return nil, err
 	}
 
-	elContractsClient, err := sdkclients.NewELContractsChainClient(slasherAddr, blsCompendiumAddr, ethRpcClient, ethWsClient, logger)
+	slasherAddr, err := avsRegistryContractBindings.RegistryCoordinator.Slasher(&bind.CallOpts{})
 	if err != nil {
-		logger.Error("Cannot create ELContractsChainClient", "err", err)
+		logger.Fatal("Failed to fetch Slasher contract", "err", err)
+	}
+
+	elContractBindings, err := utils.NewEigenlayerContractBindings(
+		slasherAddr,
+		avsRegistryContractBindings.BlsPubkeyCompendiumAddr,
+		ethHttpClient,
+		logger,
+	)
+	if err != nil {
+		logger.Error("Failed to create EigenlayerContractBindings", "err", err)
 		return nil, err
 	}
 
-	eigenlayerReader, err := elcontracts.NewELChainReader(elContractsClient, logger, ethRpcClient)
+	// get the Reader for the EL contracts
+	elChainReader := elcontracts.NewELChainReader(
+		elContractBindings.Slasher,
+		elContractBindings.DelegationManager,
+		elContractBindings.StrategyManager,
+		elContractBindings.BlsPubkeyCompendium,
+		elContractBindings.BlspubkeyCompendiumAddr,
+		logger,
+		ethHttpClient,
+	)
+
+	// get the Subscriber for the EL contracts
+	contractBlsPubkeyCompendiumWs, err := blspubkeycompendium.NewContractBLSPublicKeyCompendium(
+		elContractBindings.BlspubkeyCompendiumAddr,
+		ethWsClient,
+	)
 	if err != nil {
-		logger.Error("Cannot create EigenLayerReader", "err", err)
+		logger.Fatal("Failed to fetch BLSPublicKeyCompendium contract", "err", err)
+	}
+	elChainSubscriber, err := elcontracts.NewELChainSubscriber(
+		contractBlsPubkeyCompendiumWs,
+		logger,
+	)
+	if err != nil {
+		logger.Error("Failed to create ELChainSubscriber", "err", err)
 		return nil, err
 	}
 
-	eigenlayerWriter := elcontracts.NewELChainWriter(elContractsClient, ethRpcClient, signer, logger, metrics.NewNoopMetrics())
-
-	eigenSubscriber, err := elcontracts.NewELChainSubscriber(elContractsClient, logger)
+	elChainWriter := elcontracts.NewELChainWriter(
+		elContractBindings.Slasher,
+		elContractBindings.DelegationManager,
+		elContractBindings.StrategyManager,
+		elContractBindings.StrategyManagerAddr,
+		elContractBindings.BlsPubkeyCompendium,
+		elContractBindings.BlspubkeyCompendiumAddr,
+		elChainReader,
+		ethHttpClient,
+		logger,
+		eigenMetrics,
+		txMgr,
+	)
 	if err != nil {
-		logger.Error("Cannot create EigenLayerWriter", "err", err)
+		logger.Error("Failed to create ELChainWriter", "err", err)
+		return nil, err
+	}
+
+	// creating AVS clients: Reader and Writer
+	avsRegistryChainReader, err := avsregistry.NewAvsRegistryReader(
+		avsRegistryContractBindings.RegistryCoordinatorAddr,
+		avsRegistryContractBindings.RegistryCoordinator,
+		avsRegistryContractBindings.BlsOperatorStateRetriever,
+		avsRegistryContractBindings.StakeRegistry,
+		logger,
+		ethHttpClient,
+	)
+	if err != nil {
+		logger.Error("Failed to create AVSRegistryChainReader", "err", err)
+		return nil, err
+	}
+
+	avsRegistryChainWriter, err := avsregistry.NewAvsRegistryWriter(
+		avsRegistryContractBindings.RegistryCoordinator,
+		avsRegistryContractBindings.BlsOperatorStateRetriever,
+		avsRegistryContractBindings.StakeRegistry,
+		avsRegistryContractBindings.BlsPubkeyRegistry,
+		logger,
+		ethHttpClient,
+		txMgr,
+	)
+	if err != nil {
+		logger.Error("Failed to create AVSRegistryChainWriter", "err", err)
 		return nil, err
 	}
 
@@ -80,9 +182,15 @@ func NewEthRpc(
 		AvsReader:     avsReader,
 		AvsWriter:     avsWriter,
 		AvsSubscriber: avsSubscriber,
-		ElReader:      eigenlayerReader,
-		ElWriter:      eigenlayerWriter,
-		ElSubscriber:  eigenSubscriber,
-		Client:        ethRpcClient,
+		ElClients: &clients.Clients{
+			AvsRegistryChainReader: avsRegistryChainReader,
+			AvsRegistryChainWriter: avsRegistryChainWriter,
+			ElChainReader:          elChainReader,
+			ElChainWriter:          elChainWriter,
+			ElChainSubscriber:      elChainSubscriber,
+			Metrics:                eigenMetrics,
+			PrometheusRegistry:     promReg,
+		},
+		Client: ethHttpClient,
 	}, nil
 }

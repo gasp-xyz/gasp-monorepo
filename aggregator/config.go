@@ -4,7 +4,7 @@ import (
 	"math/big"
 
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
-	"github.com/Layr-Labs/eigensdk-go/signer"
+	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mangata-finance/eigen-layer-monorepo/core/config"
 	"github.com/urfave/cli"
@@ -16,14 +16,15 @@ type Config struct {
 	EthWsUrl          string
 	ChainId           *big.Int
 	SubstrateWsRpcUrl string
-	
+
 	ServerAddressPort string
 
 	BlsOperatorStateRetrieverAddr common.Address
 	BlsCompendiumAddr             common.Address
 	ServiceManagerAddr            common.Address
 
-	EcdsaSigner signer.Signer
+	SignerFn signerv2.SignerFn
+	Address  common.Address
 }
 
 // NewConfig parses the Config from the provided flags or environment variables and
@@ -36,9 +37,10 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 
 	chainId := big.NewInt(int64(ctx.GlobalUint(config.ChainIdFlag.Name)))
 
-	signer, err := signer.NewPrivateKeyFromKeystoreSigner(
-		ctx.GlobalString(config.EcdsaKeyFileFlag.Name),
-		ctx.GlobalString(config.EcdsaKeyPasswordFlag.Name),
+	signer, address, err := signerv2.SignerFromConfig(signerv2.Config{
+		KeystorePath: ctx.GlobalString(config.EcdsaKeyFileFlag.Name),
+		Password:     ctx.GlobalString(config.EcdsaKeyPasswordFlag.Name),
+	},
 		chainId,
 	)
 	if err != nil {
@@ -55,7 +57,8 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		BlsOperatorStateRetrieverAddr: common.HexToAddress(ctx.GlobalString(config.BlsOperatorStateRetrieverFlag.Name)),
 		BlsCompendiumAddr:             common.HexToAddress(ctx.GlobalString(config.BlsCompendiumFlag.Name)),
 		ServiceManagerAddr:            common.HexToAddress(ctx.GlobalString(config.AvsServiceManagerFlag.Name)),
-		EcdsaSigner:                   signer,
+		SignerFn:                      signer,
+		Address:                       address,
 	}, nil
 }
 
