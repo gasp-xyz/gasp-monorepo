@@ -1,8 +1,8 @@
 FROM rust:latest AS builder
 
-RUN update-ca-certificates
 RUN apt update
-RUN apt install -y protobuf-compiler clang openssl
+RUN apt install -y protobuf-compiler clang
+RUN update-ca-certificates
 
 WORKDIR /app
 
