@@ -6,7 +6,7 @@ import (
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/mangata-finance/eigen-layer-monorepo/core/config"
+	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/core/config"
 	"github.com/urfave/cli"
 )
 

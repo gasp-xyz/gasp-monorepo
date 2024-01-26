@@ -15,10 +15,10 @@ import (
 	pubkeycompserv "github.com/Layr-Labs/eigensdk-go/services/pubkeycompendium"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/types"
-	"github.com/mangata-finance/eigen-layer-monorepo/core"
-	"github.com/mangata-finance/eigen-layer-monorepo/core/chainio"
+	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/core"
+	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/core/chainio"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/aggregator/bindings/MangataTaskManager"
 
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 )

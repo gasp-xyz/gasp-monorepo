@@ -6,8 +6,8 @@ import (
 	"errors"
 	"net/http"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
-	"github.com/mangata-finance/eigen-layer-monorepo/core"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/aggregator/bindings/MangataTaskManager"
+	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/core"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"

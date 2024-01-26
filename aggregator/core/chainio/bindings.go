@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 
-	servicemanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataServiceManager"
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
+	servicemanager "github.com/mangata-finance/eigen-layer-monorepo/aggregator/bindings/MangataServiceManager"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/aggregator/bindings/MangataTaskManager"
 )
 
 type AvsServiceBindings struct {

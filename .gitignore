@@ -28,7 +28,7 @@ mangata-sequencer/.env
 # vendor/
 
 # Go workspace file
-go.work
+# go.work
 coverage.html
 
 # log files

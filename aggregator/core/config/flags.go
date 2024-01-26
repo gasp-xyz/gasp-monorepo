@@ -36,20 +36,6 @@ var (
 		Required: true,
 		EnvVar:   "SUBSTRATE_RPC_URL",
 	}
-	AggregatorRpcFlag = cli.StringFlag{
-		Name:     "aggregator-rpc-url",
-		Usage:    "aggregator RPC url",
-		Required: true,
-		EnvVar:   "AGGREGATOR_RPC_URL",
-	}
-
-	// Operator
-	RegisterAtStratupFlag = cli.StringFlag{
-		Name:     "register-at-startup",
-		Usage:    "run register plugin at operator startup",
-		Required: false,
-		EnvVar:   "REGISTER_AT_STARTUP",
-	}
 
 	// AVS
 	AvsServerPortAddressFlag = cli.StringFlag{
@@ -96,22 +82,22 @@ var (
 
 	// Deployment
 	BlsOperatorStateRetrieverFlag = cli.StringFlag{
-		Name:     "bls-operator-state-retriever",
+		Name:     "bls-operator-state-retriever-addr",
 		Usage:    "Address of the BLS Operator State Retriever",
 		Required: true,
-		EnvVar:   "BLS_OPERATOR_STATE_RETRIEVER",
+		EnvVar:   "BLS_OPERATOR_STATE_RETRIEVER_ADDR",
 	}
 	BlsCompendiumFlag = cli.StringFlag{
-		Name:     "bls-public-key-compendium",
+		Name:     "bls-compendium-addr",
 		Usage:    "Address of the BLS Public Key Compendium",
 		Required: true,
-		EnvVar:   "BLS_PUBLIC_KEY_COMPENDIUM",
+		EnvVar:   "BLS_COMPENDIUM_ADDR",
 	}
 	AvsServiceManagerFlag = cli.StringFlag{
-		Name:     "avs-service-manager",
+		Name:     "avs-service-manager-addr",
 		Usage:    "Address of the AVS Service Manager",
 		Required: true,
-		EnvVar:   "AVS_SERVICE_MANAGER",
+		EnvVar:   "AVS_SERVICE_MANAGER_ADDR",
 	}
 
 	// The files for encrypted private keys.
