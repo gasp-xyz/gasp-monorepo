@@ -9,34 +9,39 @@ on:
         description: Version to be assigned to the built image
         required: true
         type: string
+      cache-version:
+        default: 0
+        description: Cache version variable to be used to invalidate cache when needed
+        required: false
+        type: number
+
+env:
+  SKIP_WASM_BUILD: 1
 
 jobs:
-  build:
+  build-docker-image:
     name: Build operator Docker image
     runs-on: ubuntu-latest
     steps:
-      - name: Check out
-        uses: actions/checkout@v4
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: ${{ inputs.rust-version }}
           override: true
           components: rustfmt, clippy
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v2
-      - name: Set up cargo cache
-        uses: actions/cache@v3
-        continue-on-error: false
+      - uses: arduino/setup-protoc@v2
+      
+      - name: Cache the Cargo dependencies
+        uses: mansagroup/gcs-cache-action@v1.0.3
         with:
+          bucket: mangata-node-ci-cache
           path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
+            ${{ github.workspace }}/target
+            /usr/local/cargo/git
+            /usr/local/cargo/registry
+          key: cargo-eigen-clippy-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
+      
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         uses: mozilla-actions/sccache-action@v0.0.3
@@ -45,9 +50,6 @@ jobs:
         run: |
           echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-      - name: Set Rust build env vars
-        run: |
-          echo "SKIP_WASM_BUILD=1" >> $GITHUB_ENV  
       - name: Lint
         working-directory: mangata-finalizer
         run: |
@@ -69,17 +71,17 @@ jobs:
           # rm -rf ~/.cargo/advisory-db
           # cargo audit
           # cargo pants
-      - name: Test
-        working-directory: mangata-finalizer
-        run: cargo test
-      - name: Run build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --manifest-path=mangata-finalizer/Cargo.toml
-      - name: dockerize
-        working-directory: mangata-finalizer
-        run: |
-          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
-          docker buildx create --use
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/operator:${{ inputs.version }} -f src/bin/Dockerfile .
+      # - name: Test
+      #   working-directory: mangata-finalizer
+      #   run: cargo test
+      # - name: Run build
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: build
+      #     args: --release --manifest-path=mangata-finalizer/Cargo.toml
+      # - name: dockerize
+      #   working-directory: mangata-finalizer
+      #   run: |
+      #     docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+      #     docker buildx create --use
+      #     docker buildx build --push --platform linux/amd64 -t mangatasolutions/operator:${{ inputs.version }} -f src/bin/Dockerfile .
