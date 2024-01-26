@@ -10,7 +10,7 @@ env:
   # rpc
   ETH_RPC_URL: http://anvil:8545
   ETH_WS_URL: ws://anvil:8545
-  SUBSTRATE_RPC_URL: wss://kusama-archive.mangata.online
+  SUBSTRATE_RPC_URL: wss://kusama-archive.mangata.online:443
   # contracts
   CHAIN_ID: 31337
   BLS_COMPENDIUM_ADDR: 0xc5a5C42992dECbae36851359345FE25997F5C42d
@@ -24,7 +24,7 @@ env:
   AVS_BLOCK_VALIDATION_PERIOD: 5
   # OP
   AVS_RPC_URL: http://eigen-aggregator:8090
-  REGISTER_AT_STARTUP: 1
+  REGISTER_AT_STARTUP: true
 
 aggregatorConfigFiles:
   - name: ecdsa.key.json

@@ -32,6 +32,7 @@ CHAIN_ID=31337
 BLS_COMPENDIUM_ADDR=0xc5a5C42992dECbae36851359345FE25997F5C42d
 BLS_OPERATOR_STATE_RETRIEVER_ADDR=0x67d269191c92Caf3cD7723F116c85e6E9bf55933
 AVS_SERVICE_MANAGER_ADDR=0x9E545E3C0baAB3E08CdfD552C960A1050f373042
+REGISTER_AT_STARTUP=true
 
 -----------------------------: ## 
 
@@ -109,8 +110,7 @@ start-aggregator: ##
 start-operator: ## 
 	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
-		--bls-key-file tests/keys/test.bls.key.json \
-		--register-at-startup
+		--bls-key-file tests/keys/test.bls.key.json
 
 -----------------------------: ## 
 _____HELPER_____: ## 
