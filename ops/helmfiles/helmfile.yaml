@@ -38,7 +38,6 @@ releases:
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
-        args: {{ toYaml .Values.aggregatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
         env:
           ETH_RPC_URL: {{ .Values.env.ETH_RPC_URL | fetchSecretValue | quote }}
@@ -53,7 +52,6 @@ releases:
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
-        args: {{ toYaml .Values.operatorArgs | nindent 8 }}
         configFiles: {{ toYaml .Values.operatorConfigFiles | nindent 8 }}
         rpcPort: 9010
         enableServiceMonitorCollectors: {{ .Values.operatorEnableServiceMonitorCollectors }}

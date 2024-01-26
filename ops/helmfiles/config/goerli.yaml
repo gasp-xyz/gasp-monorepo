@@ -22,7 +22,6 @@ env:
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_BLOCK_VALIDATION_PERIOD: 10
 
-aggregatorArgs:
 aggregatorConfigFiles:
   - name: ecdsa.key.json
     content: |

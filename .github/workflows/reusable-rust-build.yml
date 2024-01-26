@@ -1,0 +1,69 @@
+on:
+  workflow_call:
+    inputs:
+      rust-version:
+        type: string
+        required: false
+        default: stable
+      version:
+        description: Version to be assigned to the built image
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build operator Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ inputs.rust-version }}
+          override: true
+          components: rustfmt, clippy
+      - name: Run sccache-cache only on non-release runs
+        if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+        uses: mozilla-actions/sccache-action@v0.0.3
+      - name: Set Rust caching env vars only on non-release runs
+        if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+        run: |
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+      - name: Lint
+        working-directory: mangata-finalizer
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy -- -D warnings
+      - name: Install cargo check tools
+        run: |
+          cargo install --locked cargo-deny || true
+          cargo install --locked cargo-outdated || true
+          cargo install --locked cargo-udeps || true
+          cargo install --locked cargo-audit || true
+          cargo install --locked cargo-pants || true
+      - name: Check
+        working-directory: mangata-finalizer
+        run: |
+          cargo deny check
+          cargo outdated --exit-code 1
+          cargo udeps
+          rm -rf ~/.cargo/advisory-db
+          cargo audit
+          cargo pants
+      - name: Test
+        working-directory: mangata-finalizer
+        run: cargo test
+      - name: Run build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --manifest-path=mangata-finalizer/Cargo.toml
+      - name: dockerize
+        working-directory: mangata-finalizer
+        run: |
+          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+          docker buildx create --use
+          docker buildx build --push --platform linux/amd64 -t mangatasolutions/operator:${{ inputs.version }} -f src/bin/Dockerfile .
