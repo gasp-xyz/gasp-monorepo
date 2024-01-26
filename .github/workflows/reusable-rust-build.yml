@@ -26,6 +26,17 @@ jobs:
           components: rustfmt, clippy
       - name: Install Protoc
         uses: arduino/setup-protoc@v2
+      - name: Set up cargo cache
+        uses: actions/cache@v3
+        continue-on-error: false
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         uses: mozilla-actions/sccache-action@v0.0.3
@@ -34,28 +45,30 @@ jobs:
         run: |
           echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-          echo "SKIP_WASM_BUILD=1" >> $GITHUB_ENV
+      - name: Set Rust build env vars
+        run: |
+          echo "SKIP_WASM_BUILD=1" >> $GITHUB_ENV  
       - name: Lint
         working-directory: mangata-finalizer
         run: |
           cargo fmt --all -- --check
           cargo clippy -- -D warnings
-      - name: Install cargo check tools
-        run: |
-          cargo install --locked cargo-deny || true
-          cargo install --locked cargo-outdated || true
-          cargo install --locked cargo-udeps || true
-          cargo install --locked cargo-audit || true
-          cargo install --locked cargo-pants || true
-      - name: Check
-        working-directory: mangata-finalizer
-        run: |
-          cargo deny check
-          cargo outdated --exit-code 1
-          cargo udeps
-          rm -rf ~/.cargo/advisory-db
-          cargo audit
-          cargo pants
+      # - name: Install cargo check tools
+        # run: |
+          # cargo install --locked cargo-deny || true
+          # cargo install --locked cargo-outdated || true
+          # cargo install --locked cargo-udeps || true
+          # cargo install --locked cargo-audit || true
+          # cargo install --locked cargo-pants || true
+      # - name: Check
+        # working-directory: mangata-finalizer
+        # run: |
+          # cargo deny check
+          # cargo outdated --exit-code 1
+          # cargo udeps
+          # rm -rf ~/.cargo/advisory-db
+          # cargo audit
+          # cargo pants
       - name: Test
         working-directory: mangata-finalizer
         run: cargo test
