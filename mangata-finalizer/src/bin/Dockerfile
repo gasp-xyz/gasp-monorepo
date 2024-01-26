@@ -6,7 +6,7 @@ RUN update-ca-certificates
 
 WORKDIR /app
 
-COPY ./operator_v2 .
+COPY ./mangata-finalizer .
 
 ENV SKIP_WASM_BUILD=1
 RUN cargo build --release
