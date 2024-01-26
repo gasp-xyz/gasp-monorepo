@@ -19,9 +19,25 @@ env:
   SKIP_WASM_BUILD: 1
 
 jobs:
-  build-docker-image:
-    name: Build operator Docker image
+  rust-fmt-check:
+    name: Formatting check
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ inputs.rust-version }}
+          override: true
+          components: rustfmt, clippy
+      - uses: arduino/setup-protoc@v2
+      - name: Check formatting
+        working-directory: mangata-finalizer
+        run: cargo fmt --all -- --check
+  
+  clippy-check:
+    name: Clippy check
+    runs-on: compile-eigen-gke
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
@@ -41,9 +57,11 @@ jobs:
         with:
           bucket: mangata-node-ci-cache
           path: |
-            ${{ github.workspace }}/target
-            /usr/local/cargo/git
-            /usr/local/cargo/registry
+            ${{ github.workspace }}/mangata-finalizer/target
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
           key: cargo-eigen-clippy-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
       
       - name: Run sccache-cache only on non-release runs
@@ -54,11 +72,10 @@ jobs:
         run: |
           echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-      - name: Lint
+      
+      - name: Run clippy check
         working-directory: mangata-finalizer
-        run: |
-          cargo fmt --all -- --check
-          cargo clippy -- -D warnings
+        run: cargo clippy -- -D warnings
       # - name: Install cargo check tools
         # run: |
           # cargo install --locked cargo-deny || true
