@@ -175,7 +175,7 @@ jobs:
       
       - name: Run cargo build
         working-directory: mangata-finalizer
-        run: cargo build --release --manifest-path=mangata-finalizer/Cargo.toml
+        run: cargo build --release
       
       - name: Create Docker image
         working-directory: mangata-finalizer
