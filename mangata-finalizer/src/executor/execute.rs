@@ -10,7 +10,7 @@ use sp_runtime::{
 };
 use std::{fmt::Debug, str::FromStr};
 use substrate_rpc_client::{ws_client, ChainApi};
-use tracing::{instrument};
+use tracing::instrument;
 
 #[instrument(skip(uri))]
 pub async fn execute_block<Block, HostFns>(

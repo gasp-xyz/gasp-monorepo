@@ -7,7 +7,7 @@ pub use ibls_registry_coordinator_with_indices::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types,
+    non_camel_case_types
 )]
 pub mod ibls_registry_coordinator_with_indices {
     pub use super::super::shared_types::*;
@@ -18,728 +18,570 @@ pub mod ibls_registry_coordinator_with_indices {
             functions: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("blsPubkeyRegistry"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("blsPubkeyRegistry"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "contract IBLSPubkeyRegistry",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("blsPubkeyRegistry"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("contract IBLSPubkeyRegistry",),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned(
-                        "deregisterOperatorWithCoordinator",
-                    ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "deregisterOperatorWithCoordinator",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned(
-                                        "deregistrationData",
-                                    ),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                    ::std::borrow::ToOwned::to_owned("deregisterOperatorWithCoordinator"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("deregisterOperatorWithCoordinator",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("deregistrationData",),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("ejectOperatorFromCoordinator"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "ejectOperatorFromCoordinator",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("pubkey"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("struct BN254.G1Point"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("ejectOperatorFromCoordinator",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("pubkey"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                ],),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("struct BN254.G1Point"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned(
-                        "getCurrentQuorumBitmapByOperatorId",
-                    ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getCurrentQuorumBitmapByOperatorId",
+                    ::std::borrow::ToOwned::to_owned("getCurrentQuorumBitmapByOperatorId"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned(
+                            "getCurrentQuorumBitmapByOperatorId",
+                        ),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        192usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint192"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(192usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint192"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getOperator"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("getOperator"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IRegistryCoordinator.Operator",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getOperator"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("operator"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            ],),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned(
+                                    "struct IRegistryCoordinator.Operator",
+                                ),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getOperatorFromId"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("getOperatorFromId"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getOperatorFromId"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("operator"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getOperatorId"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("getOperatorId"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getOperatorId"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("operator"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getOperatorSetParams"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getOperatorSetParams",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getOperatorSetParams",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(16usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(16usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IBLSRegistryCoordinatorWithIndices.OperatorSetParam",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(16usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(16usize),
+                            ],),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned(
+                                    "struct IBLSRegistryCoordinatorWithIndices.OperatorSetParam",
+                                ),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getOperatorStatus"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("getOperatorStatus"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "enum IRegistryCoordinator.OperatorStatus",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getOperatorStatus"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("operator"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned(
+                                    "enum IRegistryCoordinator.OperatorStatus",
+                                ),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned(
                         "getQuorumBitmapByOperatorIdAtBlockNumberByIndex",
                     ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getQuorumBitmapByOperatorIdAtBlockNumberByIndex",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned(
+                            "getQuorumBitmapByOperatorIdAtBlockNumberByIndex",
+                        ),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("blockNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("index"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(192usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint192"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("blockNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("index"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        192usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint192"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned(
                         "getQuorumBitmapIndicesByOperatorIdsAtBlockNumber",
                     ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getQuorumBitmapIndicesByOperatorIdsAtBlockNumber",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned(
+                            "getQuorumBitmapIndicesByOperatorIdsAtBlockNumber",
+                        ),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("blockNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorIds"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                    ::std::boxed::Box::new(
+                                        ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                    ),
+                                ),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32[]"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                ::std::boxed::Box::new(
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("blockNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorIds"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                        ),
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32[]"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                        ),
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32[]"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint32[]"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned(
-                        "getQuorumBitmapUpdateByOperatorIdByIndex",
-                    ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getQuorumBitmapUpdateByOperatorIdByIndex",
+                    ::std::borrow::ToOwned::to_owned("getQuorumBitmapUpdateByOperatorIdByIndex"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned(
+                            "getQuorumBitmapUpdateByOperatorIdByIndex",
+                        ),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("index"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(192usize),
+                            ],),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned(
+                                    "struct IRegistryCoordinator.QuorumBitmapUpdate",
+                                ),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("index"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(192usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IRegistryCoordinator.QuorumBitmapUpdate",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned(
-                        "getQuorumBitmapUpdateByOperatorIdLength",
-                    ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getQuorumBitmapUpdateByOperatorIdLength",
+                    ::std::borrow::ToOwned::to_owned("getQuorumBitmapUpdateByOperatorIdLength"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned(
+                            "getQuorumBitmapUpdateByOperatorIdLength",
+                        ),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("indexRegistry"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("indexRegistry"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("contract IIndexRegistry"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("indexRegistry"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("contract IIndexRegistry"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("numRegistries"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("numRegistries"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("numRegistries"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("registerOperatorWithCoordinator"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "registerOperatorWithCoordinator",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("registrationData"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("registerOperatorWithCoordinator",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("registrationData"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("registries"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("registries"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("registries"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("stakeRegistry"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("stakeRegistry"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("contract IStakeRegistry"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("stakeRegistry"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("contract IStakeRegistry"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
             ]),
             events: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("ChurnApproverUpdated"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "ChurnApproverUpdated",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("prevChurnApprover"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: false,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("newChurnApprover"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("ChurnApproverUpdated",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("prevChurnApprover"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("newChurnApprover"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("EjectorUpdated"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned("EjectorUpdated"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("prevEjector"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: false,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("newEjector"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("EjectorUpdated"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("prevEjector"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("newEjector"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("OperatorDeregistered"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "OperatorDeregistered",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    indexed: true,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("OperatorDeregistered",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                indexed: true,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("OperatorRegistered"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned("OperatorRegistered"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    indexed: true,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("OperatorRegistered"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                indexed: true,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("OperatorSetParamsUpdated"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "OperatorSetParamsUpdated",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorSetParams"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(16usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(16usize),
-                                        ],
-                                    ),
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("OperatorSetParamsUpdated",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operatorSetParams"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(16usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(16usize),
+                                ],),
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
             ]),
             errors: ::std::collections::BTreeMap::new(),
@@ -782,21 +624,16 @@ pub mod ibls_registry_coordinator_with_indices {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(
-                ::ethers::contract::Contract::new(
-                    address.into(),
-                    IBLSREGISTRYCOORDINATORWITHINDICES_ABI.clone(),
-                    client,
-                ),
-            )
+            Self(::ethers::contract::Contract::new(
+                address.into(),
+                IBLSREGISTRYCOORDINATORWITHINDICES_ABI.clone(),
+                client,
+            ))
         }
         ///Calls the contract's `blsPubkeyRegistry` (0x3561deb1) function
         pub fn bls_pubkey_registry(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
             self.0
                 .method_hash([53, 97, 222, 177], ())
                 .expect("method not found (this should never happen)")
@@ -844,10 +681,7 @@ pub mod ibls_registry_coordinator_with_indices {
         pub fn get_operator_from_id(
             &self,
             operator_id: [u8; 32],
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
             self.0
                 .method_hash([41, 107, 176, 100], operator_id)
                 .expect("method not found (this should never happen)")
@@ -922,10 +756,7 @@ pub mod ibls_registry_coordinator_with_indices {
         ///Calls the contract's `indexRegistry` (0x9e9923c2) function
         pub fn index_registry(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
             self.0
                 .method_hash([158, 153, 35, 194], ())
                 .expect("method not found (this should never happen)")
@@ -952,10 +783,7 @@ pub mod ibls_registry_coordinator_with_indices {
         pub fn registries(
             &self,
             p0: ::ethers::core::types::U256,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
             self.0
                 .method_hash([99, 71, 201, 0], p0)
                 .expect("method not found (this should never happen)")
@@ -963,10 +791,7 @@ pub mod ibls_registry_coordinator_with_indices {
         ///Calls the contract's `stakeRegistry` (0x68304835) function
         pub fn stake_registry(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
             self.0
                 .method_hash([104, 48, 72, 53], ())
                 .expect("method not found (this should never happen)")
@@ -974,41 +799,29 @@ pub mod ibls_registry_coordinator_with_indices {
         ///Gets the contract's `ChurnApproverUpdated` event
         pub fn churn_approver_updated_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            ChurnApproverUpdatedFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, ChurnApproverUpdatedFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `EjectorUpdated` event
         pub fn ejector_updated_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            EjectorUpdatedFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, EjectorUpdatedFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `OperatorDeregistered` event
         pub fn operator_deregistered_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            OperatorDeregisteredFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, OperatorDeregisteredFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `OperatorRegistered` event
         pub fn operator_registered_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            OperatorRegisteredFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, OperatorRegisteredFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `OperatorSetParamsUpdated` event
@@ -1029,11 +842,13 @@ pub mod ibls_registry_coordinator_with_indices {
             M,
             IBLSRegistryCoordinatorWithIndicesEvents,
         > {
-            self.0.event_with_filter(::core::default::Default::default())
+            self.0
+                .event_with_filter(::core::default::Default::default())
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for IBLSRegistryCoordinatorWithIndices<M> {
+        for IBLSRegistryCoordinatorWithIndices<M>
+    {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -1048,7 +863,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "ChurnApproverUpdated",
@@ -1068,7 +883,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(name = "EjectorUpdated", abi = "EjectorUpdated(address,address)")]
     pub struct EjectorUpdatedFilter {
@@ -1085,7 +900,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "OperatorDeregistered",
@@ -1107,9 +922,12 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
-    #[ethevent(name = "OperatorRegistered", abi = "OperatorRegistered(address,bytes32)")]
+    #[ethevent(
+        name = "OperatorRegistered",
+        abi = "OperatorRegistered(address,bytes32)"
+    )]
     pub struct OperatorRegisteredFilter {
         #[ethevent(indexed)]
         pub operator: ::ethers::core::types::Address,
@@ -1126,7 +944,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "OperatorSetParamsUpdated",
@@ -1146,7 +964,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub enum IBLSRegistryCoordinatorWithIndicesEvents {
         ChurnApproverUpdatedFilter(ChurnApproverUpdatedFilter),
@@ -1161,30 +979,20 @@ pub mod ibls_registry_coordinator_with_indices {
         ) -> ::core::result::Result<Self, ::ethers::core::abi::Error> {
             if let Ok(decoded) = ChurnApproverUpdatedFilter::decode_log(log) {
                 return Ok(
-                    IBLSRegistryCoordinatorWithIndicesEvents::ChurnApproverUpdatedFilter(
-                        decoded,
-                    ),
+                    IBLSRegistryCoordinatorWithIndicesEvents::ChurnApproverUpdatedFilter(decoded),
                 );
             }
             if let Ok(decoded) = EjectorUpdatedFilter::decode_log(log) {
-                return Ok(
-                    IBLSRegistryCoordinatorWithIndicesEvents::EjectorUpdatedFilter(
-                        decoded,
-                    ),
-                );
+                return Ok(IBLSRegistryCoordinatorWithIndicesEvents::EjectorUpdatedFilter(decoded));
             }
             if let Ok(decoded) = OperatorDeregisteredFilter::decode_log(log) {
                 return Ok(
-                    IBLSRegistryCoordinatorWithIndicesEvents::OperatorDeregisteredFilter(
-                        decoded,
-                    ),
+                    IBLSRegistryCoordinatorWithIndicesEvents::OperatorDeregisteredFilter(decoded),
                 );
             }
             if let Ok(decoded) = OperatorRegisteredFilter::decode_log(log) {
                 return Ok(
-                    IBLSRegistryCoordinatorWithIndicesEvents::OperatorRegisteredFilter(
-                        decoded,
-                    ),
+                    IBLSRegistryCoordinatorWithIndicesEvents::OperatorRegisteredFilter(decoded),
                 );
             }
             if let Ok(decoded) = OperatorSetParamsUpdatedFilter::decode_log(log) {
@@ -1200,18 +1008,10 @@ pub mod ibls_registry_coordinator_with_indices {
     impl ::core::fmt::Display for IBLSRegistryCoordinatorWithIndicesEvents {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
-                Self::ChurnApproverUpdatedFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::EjectorUpdatedFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::OperatorDeregisteredFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::OperatorRegisteredFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::ChurnApproverUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::EjectorUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::OperatorDeregisteredFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::OperatorRegisteredFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorSetParamsUpdatedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
@@ -1219,31 +1019,32 @@ pub mod ibls_registry_coordinator_with_indices {
         }
     }
     impl ::core::convert::From<ChurnApproverUpdatedFilter>
-    for IBLSRegistryCoordinatorWithIndicesEvents {
+        for IBLSRegistryCoordinatorWithIndicesEvents
+    {
         fn from(value: ChurnApproverUpdatedFilter) -> Self {
             Self::ChurnApproverUpdatedFilter(value)
         }
     }
-    impl ::core::convert::From<EjectorUpdatedFilter>
-    for IBLSRegistryCoordinatorWithIndicesEvents {
+    impl ::core::convert::From<EjectorUpdatedFilter> for IBLSRegistryCoordinatorWithIndicesEvents {
         fn from(value: EjectorUpdatedFilter) -> Self {
             Self::EjectorUpdatedFilter(value)
         }
     }
     impl ::core::convert::From<OperatorDeregisteredFilter>
-    for IBLSRegistryCoordinatorWithIndicesEvents {
+        for IBLSRegistryCoordinatorWithIndicesEvents
+    {
         fn from(value: OperatorDeregisteredFilter) -> Self {
             Self::OperatorDeregisteredFilter(value)
         }
     }
-    impl ::core::convert::From<OperatorRegisteredFilter>
-    for IBLSRegistryCoordinatorWithIndicesEvents {
+    impl ::core::convert::From<OperatorRegisteredFilter> for IBLSRegistryCoordinatorWithIndicesEvents {
         fn from(value: OperatorRegisteredFilter) -> Self {
             Self::OperatorRegisteredFilter(value)
         }
     }
     impl ::core::convert::From<OperatorSetParamsUpdatedFilter>
-    for IBLSRegistryCoordinatorWithIndicesEvents {
+        for IBLSRegistryCoordinatorWithIndicesEvents
+    {
         fn from(value: OperatorSetParamsUpdatedFilter) -> Self {
             Self::OperatorSetParamsUpdatedFilter(value)
         }
@@ -1259,7 +1060,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "blsPubkeyRegistry", abi = "blsPubkeyRegistry()")]
     pub struct BlsPubkeyRegistryCall;
@@ -1274,7 +1075,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "deregisterOperatorWithCoordinator",
@@ -1295,7 +1096,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "ejectOperatorFromCoordinator",
@@ -1317,7 +1118,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getCurrentQuorumBitmapByOperatorId",
@@ -1337,7 +1138,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getOperator", abi = "getOperator(address)")]
     pub struct GetOperatorCall {
@@ -1354,7 +1155,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getOperatorFromId", abi = "getOperatorFromId(bytes32)")]
     pub struct GetOperatorFromIdCall {
@@ -1371,7 +1172,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getOperatorId", abi = "getOperatorId(address)")]
     pub struct GetOperatorIdCall {
@@ -1388,7 +1189,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getOperatorSetParams", abi = "getOperatorSetParams(uint8)")]
     pub struct GetOperatorSetParamsCall {
@@ -1405,7 +1206,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getOperatorStatus", abi = "getOperatorStatus(address)")]
     pub struct GetOperatorStatusCall {
@@ -1422,7 +1223,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getQuorumBitmapByOperatorIdAtBlockNumberByIndex",
@@ -1444,7 +1245,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getQuorumBitmapIndicesByOperatorIdsAtBlockNumber",
@@ -1465,7 +1266,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getQuorumBitmapUpdateByOperatorIdByIndex",
@@ -1486,7 +1287,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getQuorumBitmapUpdateByOperatorIdLength",
@@ -1506,7 +1307,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "indexRegistry", abi = "indexRegistry()")]
     pub struct IndexRegistryCall;
@@ -1521,7 +1322,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "numRegistries", abi = "numRegistries()")]
     pub struct NumRegistriesCall;
@@ -1536,7 +1337,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "registerOperatorWithCoordinator",
@@ -1557,7 +1358,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "registries", abi = "registries(uint256)")]
     pub struct RegistriesCall(pub ::ethers::core::types::U256);
@@ -1572,7 +1373,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "stakeRegistry", abi = "stakeRegistry()")]
     pub struct StakeRegistryCall;
@@ -1585,7 +1386,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub enum IBLSRegistryCoordinatorWithIndicesCalls {
         BlsPubkeyRegistry(BlsPubkeyRegistryCall),
@@ -1603,12 +1404,8 @@ pub mod ibls_registry_coordinator_with_indices {
         GetQuorumBitmapIndicesByOperatorIdsAtBlockNumber(
             GetQuorumBitmapIndicesByOperatorIdsAtBlockNumberCall,
         ),
-        GetQuorumBitmapUpdateByOperatorIdByIndex(
-            GetQuorumBitmapUpdateByOperatorIdByIndexCall,
-        ),
-        GetQuorumBitmapUpdateByOperatorIdLength(
-            GetQuorumBitmapUpdateByOperatorIdLengthCall,
-        ),
+        GetQuorumBitmapUpdateByOperatorIdByIndex(GetQuorumBitmapUpdateByOperatorIdByIndexCall),
+        GetQuorumBitmapUpdateByOperatorIdLength(GetQuorumBitmapUpdateByOperatorIdLengthCall),
         IndexRegistry(IndexRegistryCall),
         NumRegistries(NumRegistriesCall),
         RegisterOperatorWithCoordinator(RegisterOperatorWithCoordinatorCall),
@@ -1620,49 +1417,50 @@ pub mod ibls_registry_coordinator_with_indices {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded) = <BlsPubkeyRegistryCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <BlsPubkeyRegistryCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::BlsPubkeyRegistry(decoded));
             }
-            if let Ok(decoded) = <DeregisterOperatorWithCoordinatorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <DeregisterOperatorWithCoordinatorCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
                 return Ok(Self::DeregisterOperatorWithCoordinator(decoded));
             }
-            if let Ok(decoded) = <EjectOperatorFromCoordinatorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <EjectOperatorFromCoordinatorCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::EjectOperatorFromCoordinator(decoded));
             }
-            if let Ok(decoded) = <GetCurrentQuorumBitmapByOperatorIdCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetCurrentQuorumBitmapByOperatorIdCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
                 return Ok(Self::GetCurrentQuorumBitmapByOperatorId(decoded));
             }
-            if let Ok(decoded) = <GetOperatorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <GetOperatorCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::GetOperator(decoded));
             }
-            if let Ok(decoded) = <GetOperatorFromIdCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetOperatorFromIdCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetOperatorFromId(decoded));
             }
-            if let Ok(decoded) = <GetOperatorIdCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <GetOperatorIdCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetOperatorId(decoded));
             }
-            if let Ok(decoded) = <GetOperatorSetParamsCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetOperatorSetParamsCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetOperatorSetParams(decoded));
             }
-            if let Ok(decoded) = <GetOperatorStatusCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetOperatorStatusCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetOperatorStatus(decoded));
             }
             if let Ok(decoded) = <GetQuorumBitmapByOperatorIdAtBlockNumberByIndexCall as ::ethers::core::abi::AbiDecode>::decode(
@@ -1689,29 +1487,26 @@ pub mod ibls_registry_coordinator_with_indices {
             ) {
                 return Ok(Self::GetQuorumBitmapUpdateByOperatorIdLength(decoded));
             }
-            if let Ok(decoded) = <IndexRegistryCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <IndexRegistryCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::IndexRegistry(decoded));
             }
-            if let Ok(decoded) = <NumRegistriesCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <NumRegistriesCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::NumRegistries(decoded));
             }
-            if let Ok(decoded) = <RegisterOperatorWithCoordinatorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <RegisterOperatorWithCoordinatorCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
                 return Ok(Self::RegisterOperatorWithCoordinator(decoded));
             }
-            if let Ok(decoded) = <RegistriesCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <RegistriesCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Registries(decoded));
             }
-            if let Ok(decoded) = <StakeRegistryCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <StakeRegistryCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::StakeRegistry(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -1720,9 +1515,7 @@ pub mod ibls_registry_coordinator_with_indices {
     impl ::ethers::core::abi::AbiEncode for IBLSRegistryCoordinatorWithIndicesCalls {
         fn encode(self) -> Vec<u8> {
             match self {
-                Self::BlsPubkeyRegistry(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::BlsPubkeyRegistry(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::DeregisterOperatorWithCoordinator(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -1732,21 +1525,13 @@ pub mod ibls_registry_coordinator_with_indices {
                 Self::GetCurrentQuorumBitmapByOperatorId(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::GetOperator(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::GetOperatorFromId(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::GetOperatorId(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::GetOperator(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::GetOperatorFromId(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::GetOperatorId(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::GetOperatorSetParams(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::GetOperatorStatus(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::GetOperatorStatus(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::GetQuorumBitmapByOperatorIdAtBlockNumberByIndex(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -1759,21 +1544,13 @@ pub mod ibls_registry_coordinator_with_indices {
                 Self::GetQuorumBitmapUpdateByOperatorIdLength(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::IndexRegistry(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::NumRegistries(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::IndexRegistry(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::NumRegistries(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::RegisterOperatorWithCoordinator(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::Registries(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::StakeRegistry(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::Registries(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::StakeRegistry(element) => ::ethers::core::abi::AbiEncode::encode(element),
             }
         }
     }
@@ -1793,9 +1570,7 @@ pub mod ibls_registry_coordinator_with_indices {
                 Self::GetOperator(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetOperatorFromId(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetOperatorId(element) => ::core::fmt::Display::fmt(element, f),
-                Self::GetOperatorSetParams(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::GetOperatorSetParams(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetOperatorStatus(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetQuorumBitmapByOperatorIdAtBlockNumberByIndex(element) => {
                     ::core::fmt::Display::fmt(element, f)
@@ -1819,110 +1594,108 @@ pub mod ibls_registry_coordinator_with_indices {
             }
         }
     }
-    impl ::core::convert::From<BlsPubkeyRegistryCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+    impl ::core::convert::From<BlsPubkeyRegistryCall> for IBLSRegistryCoordinatorWithIndicesCalls {
         fn from(value: BlsPubkeyRegistryCall) -> Self {
             Self::BlsPubkeyRegistry(value)
         }
     }
     impl ::core::convert::From<DeregisterOperatorWithCoordinatorCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+        for IBLSRegistryCoordinatorWithIndicesCalls
+    {
         fn from(value: DeregisterOperatorWithCoordinatorCall) -> Self {
             Self::DeregisterOperatorWithCoordinator(value)
         }
     }
     impl ::core::convert::From<EjectOperatorFromCoordinatorCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+        for IBLSRegistryCoordinatorWithIndicesCalls
+    {
         fn from(value: EjectOperatorFromCoordinatorCall) -> Self {
             Self::EjectOperatorFromCoordinator(value)
         }
     }
     impl ::core::convert::From<GetCurrentQuorumBitmapByOperatorIdCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+        for IBLSRegistryCoordinatorWithIndicesCalls
+    {
         fn from(value: GetCurrentQuorumBitmapByOperatorIdCall) -> Self {
             Self::GetCurrentQuorumBitmapByOperatorId(value)
         }
     }
-    impl ::core::convert::From<GetOperatorCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+    impl ::core::convert::From<GetOperatorCall> for IBLSRegistryCoordinatorWithIndicesCalls {
         fn from(value: GetOperatorCall) -> Self {
             Self::GetOperator(value)
         }
     }
-    impl ::core::convert::From<GetOperatorFromIdCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+    impl ::core::convert::From<GetOperatorFromIdCall> for IBLSRegistryCoordinatorWithIndicesCalls {
         fn from(value: GetOperatorFromIdCall) -> Self {
             Self::GetOperatorFromId(value)
         }
     }
-    impl ::core::convert::From<GetOperatorIdCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+    impl ::core::convert::From<GetOperatorIdCall> for IBLSRegistryCoordinatorWithIndicesCalls {
         fn from(value: GetOperatorIdCall) -> Self {
             Self::GetOperatorId(value)
         }
     }
-    impl ::core::convert::From<GetOperatorSetParamsCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+    impl ::core::convert::From<GetOperatorSetParamsCall> for IBLSRegistryCoordinatorWithIndicesCalls {
         fn from(value: GetOperatorSetParamsCall) -> Self {
             Self::GetOperatorSetParams(value)
         }
     }
-    impl ::core::convert::From<GetOperatorStatusCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+    impl ::core::convert::From<GetOperatorStatusCall> for IBLSRegistryCoordinatorWithIndicesCalls {
         fn from(value: GetOperatorStatusCall) -> Self {
             Self::GetOperatorStatus(value)
         }
     }
     impl ::core::convert::From<GetQuorumBitmapByOperatorIdAtBlockNumberByIndexCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+        for IBLSRegistryCoordinatorWithIndicesCalls
+    {
         fn from(value: GetQuorumBitmapByOperatorIdAtBlockNumberByIndexCall) -> Self {
             Self::GetQuorumBitmapByOperatorIdAtBlockNumberByIndex(value)
         }
     }
     impl ::core::convert::From<GetQuorumBitmapIndicesByOperatorIdsAtBlockNumberCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+        for IBLSRegistryCoordinatorWithIndicesCalls
+    {
         fn from(value: GetQuorumBitmapIndicesByOperatorIdsAtBlockNumberCall) -> Self {
             Self::GetQuorumBitmapIndicesByOperatorIdsAtBlockNumber(value)
         }
     }
     impl ::core::convert::From<GetQuorumBitmapUpdateByOperatorIdByIndexCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+        for IBLSRegistryCoordinatorWithIndicesCalls
+    {
         fn from(value: GetQuorumBitmapUpdateByOperatorIdByIndexCall) -> Self {
             Self::GetQuorumBitmapUpdateByOperatorIdByIndex(value)
         }
     }
     impl ::core::convert::From<GetQuorumBitmapUpdateByOperatorIdLengthCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+        for IBLSRegistryCoordinatorWithIndicesCalls
+    {
         fn from(value: GetQuorumBitmapUpdateByOperatorIdLengthCall) -> Self {
             Self::GetQuorumBitmapUpdateByOperatorIdLength(value)
         }
     }
-    impl ::core::convert::From<IndexRegistryCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+    impl ::core::convert::From<IndexRegistryCall> for IBLSRegistryCoordinatorWithIndicesCalls {
         fn from(value: IndexRegistryCall) -> Self {
             Self::IndexRegistry(value)
         }
     }
-    impl ::core::convert::From<NumRegistriesCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+    impl ::core::convert::From<NumRegistriesCall> for IBLSRegistryCoordinatorWithIndicesCalls {
         fn from(value: NumRegistriesCall) -> Self {
             Self::NumRegistries(value)
         }
     }
     impl ::core::convert::From<RegisterOperatorWithCoordinatorCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+        for IBLSRegistryCoordinatorWithIndicesCalls
+    {
         fn from(value: RegisterOperatorWithCoordinatorCall) -> Self {
             Self::RegisterOperatorWithCoordinator(value)
         }
     }
-    impl ::core::convert::From<RegistriesCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+    impl ::core::convert::From<RegistriesCall> for IBLSRegistryCoordinatorWithIndicesCalls {
         fn from(value: RegistriesCall) -> Self {
             Self::Registries(value)
         }
     }
-    impl ::core::convert::From<StakeRegistryCall>
-    for IBLSRegistryCoordinatorWithIndicesCalls {
+    impl ::core::convert::From<StakeRegistryCall> for IBLSRegistryCoordinatorWithIndicesCalls {
         fn from(value: StakeRegistryCall) -> Self {
             Self::StakeRegistry(value)
         }
@@ -1938,7 +1711,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct BlsPubkeyRegistryReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `getCurrentQuorumBitmapByOperatorId` function with signature `getCurrentQuorumBitmapByOperatorId(bytes32)` and selector `0x3431af25`
@@ -1952,7 +1725,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetCurrentQuorumBitmapByOperatorIdReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `getOperator` function with signature `getOperator(address)` and selector `0x5865c60c`
@@ -1966,7 +1739,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetOperatorReturn(pub Operator);
     ///Container type for all return fields from the `getOperatorFromId` function with signature `getOperatorFromId(bytes32)` and selector `0x296bb064`
@@ -1980,7 +1753,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetOperatorFromIdReturn {
         pub operator: ::ethers::core::types::Address,
@@ -1996,7 +1769,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetOperatorIdReturn(pub [u8; 32]);
     ///Container type for all return fields from the `getOperatorSetParams` function with signature `getOperatorSetParams(uint8)` and selector `0xe65797ad`
@@ -2010,7 +1783,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetOperatorSetParamsReturn(pub OperatorSetParam);
     ///Container type for all return fields from the `getOperatorStatus` function with signature `getOperatorStatus(address)` and selector `0xfd39105a`
@@ -2024,7 +1797,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetOperatorStatusReturn(pub u8);
     ///Container type for all return fields from the `getQuorumBitmapByOperatorIdAtBlockNumberByIndex` function with signature `getQuorumBitmapByOperatorIdAtBlockNumberByIndex(bytes32,uint32,uint256)` and selector `0x3064620d`
@@ -2038,7 +1811,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetQuorumBitmapByOperatorIdAtBlockNumberByIndexReturn(
         pub ::ethers::core::types::U256,
@@ -2054,11 +1827,9 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
-    pub struct GetQuorumBitmapIndicesByOperatorIdsAtBlockNumberReturn(
-        pub ::std::vec::Vec<u32>,
-    );
+    pub struct GetQuorumBitmapIndicesByOperatorIdsAtBlockNumberReturn(pub ::std::vec::Vec<u32>);
     ///Container type for all return fields from the `getQuorumBitmapUpdateByOperatorIdByIndex` function with signature `getQuorumBitmapUpdateByOperatorIdByIndex(bytes32,uint256)` and selector `0x0159f1ce`
     #[derive(
         Clone,
@@ -2070,7 +1841,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetQuorumBitmapUpdateByOperatorIdByIndexReturn(pub QuorumBitmapUpdate);
     ///Container type for all return fields from the `getQuorumBitmapUpdateByOperatorIdLength` function with signature `getQuorumBitmapUpdateByOperatorIdLength(bytes32)` and selector `0x055a62b6`
@@ -2084,11 +1855,9 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
-    pub struct GetQuorumBitmapUpdateByOperatorIdLengthReturn(
-        pub ::ethers::core::types::U256,
-    );
+    pub struct GetQuorumBitmapUpdateByOperatorIdLengthReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `indexRegistry` function with signature `indexRegistry()` and selector `0x9e9923c2`
     #[derive(
         Clone,
@@ -2100,7 +1869,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct IndexRegistryReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `numRegistries` function with signature `numRegistries()` and selector `0xd72d8dd6`
@@ -2114,7 +1883,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct NumRegistriesReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `registries` function with signature `registries(uint256)` and selector `0x6347c900`
@@ -2128,7 +1897,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct RegistriesReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `stakeRegistry` function with signature `stakeRegistry()` and selector `0x68304835`
@@ -2142,7 +1911,7 @@ pub mod ibls_registry_coordinator_with_indices {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct StakeRegistryReturn(pub ::ethers::core::types::Address);
 }

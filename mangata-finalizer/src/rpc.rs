@@ -8,7 +8,6 @@ use sha3::{Digest, Keccak256};
 use sp_core::H256;
 use tracing::instrument;
 
-
 use crate::{
     cli::CliArgs,
     crypto::bn254::{BlsKeypair, BlsSignature, PrivateKey},

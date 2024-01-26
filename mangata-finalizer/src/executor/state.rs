@@ -4,7 +4,10 @@ use node_primitives::BlockNumber;
 
 use sp_core::{storage::well_known_keys, twox_128};
 use sp_rpc::{list::ListOrValue::Value, number::NumberOrHex::Number};
-use sp_runtime::{traits::{Block as BlockT, Header}, DeserializeOwned};
+use sp_runtime::{
+    traits::{Block as BlockT, Header},
+    DeserializeOwned,
+};
 use std::{fmt::Debug, str::FromStr};
 use substrate_rpc_client::{ws_client, ChainApi};
 
@@ -37,7 +40,10 @@ impl State {
             }
         })?;
 
-        Ok(State { at: hash, uri: uri.to_owned() })
+        Ok(State {
+            at: hash,
+            uri: uri.to_owned(),
+        })
     }
 
     /// Return the `at` block hash as a `Hash`, if it exists.
