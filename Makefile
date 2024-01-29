@@ -81,13 +81,13 @@ cli-register-operator-with-avs: ##
 	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
 		--bls-key-file tests/keys/test.bls.key.json \
-		opt-in
+		opt-in-avs
 
 cli-deregister-operator-with-avs: ## 
 	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
 		--bls-key-file tests/keys/test.bls.key.json \
-		opt-out
+		opt-out-avs
 
 cli-print-operator-status: ## 
 	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \

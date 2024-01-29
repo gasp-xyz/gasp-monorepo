@@ -4,6 +4,7 @@ use bindings::{
     bls_registry_coordinator_with_indices::BLSRegistryCoordinatorWithIndices,
     mangata_service_manager::MangataServiceManager,
     mangata_task_manager::{MangataTaskManager, NewTaskCreatedFilter},
+    shared_types::Operator,
 };
 use ethers::{
     contract::Event,
@@ -86,12 +87,9 @@ impl AvsContracts {
     }
 
     pub async fn operator_id(&self) -> eyre::Result<Option<H256>> {
-        let id: H256 = self
-            .registry
-            .get_operator_id(self.client.address())
-            .await?
-            .into();
-        if id.is_zero() {
+        let status: Operator = self.registry.get_operator(self.client.address()).await?;
+        let id: H256 = status.operator_id.into();
+        if id.is_zero() || status.status != 1_u8 {
             Ok(None)
         } else {
             Ok(Some(id))

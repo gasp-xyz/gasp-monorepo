@@ -17,12 +17,10 @@ import (
 	blsaggservmock "github.com/Layr-Labs/eigensdk-go/services/mocks/blsagg"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/aggregator/bindings/MangataTaskManager"
+	chainiomocks "github.com/mangata-finance/eigen-layer-monorepo/aggregator/core/chainio/mocks"
 	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/mocks"
 	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/types"
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/contracts/bindings/MangataTaskManager"
-	chainiomocks "github.com/mangata-finance/eigen-layer-monorepo/core/chainio/mocks"
-
-	gsrpc_types "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 var MOCK_OPERATOR_ID = [32]byte{207, 73, 226, 221, 104, 100, 123, 41, 192, 3, 9, 119, 90, 83, 233, 159, 231, 151, 245, 96, 150, 48, 144, 27, 102, 253, 39, 101, 1, 26, 135, 173}
@@ -60,7 +58,7 @@ func TestSendNewTask(t *testing.T) {
 
 	var TASK_INDEX = uint32(0)
 	var CREATED_BLOCK_NUMBER = uint32(100)
-	var BLOCK_NUMBER = gsrpc_types.BlockNumber(30)
+	var BLOCK_NUMBER = uint32(30)
 	var BLOCK_NUMBER_BN = big.NewInt(int64(BLOCK_NUMBER))
 
 	mockAvsWriterer.EXPECT().SendNewTaskVerifyBlock(
