@@ -6,42 +6,22 @@ operatorEnabled: false
 updaterEnabled: false
 sequencerEnabled: false
 
-# it is possible to pass args as ENV vars instead, same name as cmd flag but SNAKE_UPPERCASED
-# see core/config/flags.go
-#
-# go run aggregator/cmd/main.go \
-# --eth-rpc-url $ETH_RPC_URL \
-# --eth-ws-url $ETH_WS_URL \
-# ^^ above are secret, contains personal API key to connect to a ETH node
-# --substrate-rpc-url $SUBSTRATE_RPC_URL \
-# --chain-id $CHAIN_ID \
-# --bls-public-key-compendium $BLS_PUBLIC_KEY_COMPENDIUM \
-# --bls-operator-state-retriever $BLS_OPERATOR_STATE_RETRIEVER \
-# --avs-service-manager $AVS_SERVICE_MANAGER \
-# --ecdsa-key-file ~/.eigenlayer/operator_keys/agro.ecdsa.key.json \
-# ^^ this is an encrytped key, password is passed with EcdsaKeyPasswordFlag that should be secret, currently empty string
-# --avs-server-ip-port-address $AGRO_HOST \
-# 2>&1 | zap-pretty
-
 env:
+  # rpc
   ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-rpc-url
   ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-ws-url
+  SUBSTRATE_RPC_URL: wss://kusama-archive.mangata.online
+  # contracts
+  CHAIN_ID: 5
+  BLS_COMPENDIUM_ADDR: 0xc81d3963087Fe09316cd1E032457989C7aC91b19
+  BLS_OPERATOR_STATE_RETRIEVER_ADDR: 0x737Dd62816a9392e84Fa21C531aF77C00816A3a3
+  AVS_SERVICE_MANAGER_ADDR: 0xD2333E11ea617E30fb97900f6ac9782A85f233e7
+  # keys
+  ECDSA_KEY_FILE: /config/ecdsa.key.json
+  # AVS
+  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
+  AVS_BLOCK_VALIDATION_PERIOD: 10
 
-aggregatorArgs:
-  - --substrate-rpc-url 
-  - wss://kusama-archive.mangata.online
-  - --chain-id 
-  - '"5"'
-  - --bls-public-key-compendium 
-  - 0xc81d3963087Fe09316cd1E032457989C7aC91b19
-  - --bls-operator-state-retriever 
-  - 0x737Dd62816a9392e84Fa21C531aF77C00816A3a3
-  - --avs-service-manager 
-  - 0xD2333E11ea617E30fb97900f6ac9782A85f233e7
-  - --ecdsa-key-file 
-  - /config/ecdsa.key.json
-  - --avs-server-ip-port-address 
-  - 0.0.0.0:8090
 aggregatorConfigFiles:
   - name: ecdsa.key.json
     content: |

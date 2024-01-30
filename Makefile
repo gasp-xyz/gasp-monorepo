@@ -7,21 +7,32 @@ help:
 AGGREGATOR_ECDSA_PRIV_KEY=0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
 CHALLENGER_ECDSA_PRIV_KEY=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
 
-ETH_RPC_URL=http://localhost:8545
-ETH_WS_URL=ws://localhost:8545
-SUBSTRATE_RPC_URL=wss://kusama-archive.mangata.online
-AGGREGATOR_RPC_URL=localhost:8090
-
-CHAIN_ID=31337
-
-BLS_PUBLIC_KEY_COMPENDIUM=0xc5a5C42992dECbae36851359345FE25997F5C42d
-BLS_OPERATOR_STATE_RETRIEVER=0x67d269191c92Caf3cD7723F116c85e6E9bf55933
-AVS_SERVICE_MANAGER=0x9E545E3C0baAB3E08CdfD552C960A1050f373042
-
 # Make sure to update this if the strategy address changes
 # check in contracts/script/output/${CHAINID}/strategy_output.json
 STRATEGY_ADDRESS=0x4A679253410272dd5232B3Ff7cF5dbB88f295319
 DEPLOYMENT_FILES_DIR=contracts/script/output/${CHAINID}
+
+CONTRACTS_REGEX="MangataServiceManager|MangataTaskManager|BLSPubkeyRegistry|BLSRegistryCoordinatorWithIndices|DelegationManager|BLSPublicKeyCompendium|Slasher"
+# CONTRACTS_REGEX=".+"
+
+-----------------------------: ## 
+
+.EXPORT_ALL_VARIABLES:
+
+SKIP_WASM_BUILD=1
+
+ETH_RPC_URL=http://localhost:8545
+ETH_WS_URL=ws://localhost:8545
+SUBSTRATE_RPC_URL=wss://kusama-archive.mangata.online:443
+AVS_RPC_URL=http://localhost:8090
+AVS_SERVER_IP_PORT_ADDRESS=localhost:8090
+
+CHAIN_ID=31337
+
+BLS_COMPENDIUM_ADDR=0xc5a5C42992dECbae36851359345FE25997F5C42d
+BLS_OPERATOR_STATE_RETRIEVER_ADDR=0x67d269191c92Caf3cD7723F116c85e6E9bf55933
+AVS_SERVICE_MANAGER_ADDR=0x9E545E3C0baAB3E08CdfD552C960A1050f373042
+REGISTER_AT_STARTUP=true
 
 -----------------------------: ## 
 
@@ -41,8 +52,11 @@ deploy-all-to-anvil-and-save-state: deploy-eigenlayer-contracts-to-anvil-and-sav
 start-anvil-chain-with-el-and-avs-deployed: ## starts anvil from a saved state file (with el and avs contracts deployed)
 	anvil --load-state tests/integration/avs-and-eigenlayer-deployed-anvil-state.json
 
-bindings: ## generates contract bindings
+bindings-go: ## generates contract bindings
 	cd contracts && ./generate-go-bindings.sh
+
+bindings-rs: ## generates rust bindings
+	forge bind --bindings-path ./mangata-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX} 
 
 # ___DOCKER___: ## 
 # docker-build-and-publish-images: ## builds and publishes operator and aggregator docker images using Ko
@@ -58,60 +72,28 @@ bindings: ## generates contract bindings
 cli-setup-operator: cli-register-operator-with-eigenlayer cli-register-operator-with-avs ## registers operator with eigenlayer and avs
 
 cli-register-operator-with-eigenlayer: ## registers operator with delegationManager
-	go run operator/plugin/cmd/main.go \
-		--eth-rpc-url ${ETH_RPC_URL} \
-		--eth-ws-url ${ETH_WS_URL} \
-		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
-		--aggregator-rpc-url ${AGGREGATOR_RPC_URL} \
-		--chain-id ${CHAIN_ID} \
-		--bls-public-key-compendium ${BLS_PUBLIC_KEY_COMPENDIUM} \
-		--bls-operator-state-retriever ${BLS_OPERATOR_STATE_RETRIEVER} \
-		--avs-service-manager ${AVS_SERVICE_MANAGER} \
+	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
 		--bls-key-file tests/keys/test.bls.key.json \
-		register-operator-with-eigen
+		register
 
 cli-register-operator-with-avs: ## 
-	go run operator/plugin/cmd/main.go \
-		--eth-rpc-url ${ETH_RPC_URL} \
-		--eth-ws-url ${ETH_WS_URL} \
-		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
-		--aggregator-rpc-url ${AGGREGATOR_RPC_URL} \
-		--chain-id ${CHAIN_ID} \
-		--bls-public-key-compendium ${BLS_PUBLIC_KEY_COMPENDIUM} \
-		--bls-operator-state-retriever ${BLS_OPERATOR_STATE_RETRIEVER} \
-		--avs-service-manager ${AVS_SERVICE_MANAGER} \
+	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
 		--bls-key-file tests/keys/test.bls.key.json \
-		register-operator-with-avs
+		opt-in-avs
 
 cli-deregister-operator-with-avs: ## 
-	go run operator/plugin/cmd/main.go \
-		--eth-rpc-url ${ETH_RPC_URL} \
-		--eth-ws-url ${ETH_WS_URL} \
-		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
-		--aggregator-rpc-url ${AGGREGATOR_RPC_URL} \
-		--chain-id ${CHAIN_ID} \
-		--bls-public-key-compendium ${BLS_PUBLIC_KEY_COMPENDIUM} \
-		--bls-operator-state-retriever ${BLS_OPERATOR_STATE_RETRIEVER} \
-		--avs-service-manager ${AVS_SERVICE_MANAGER} \
+	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
 		--bls-key-file tests/keys/test.bls.key.json \
-		register-operator-with-avs
+		opt-out-avs
 
 cli-print-operator-status: ## 
-	go run operator/plugin/cmd/main.go \
-		--eth-rpc-url ${ETH_RPC_URL} \
-		--eth-ws-url ${ETH_WS_URL} \
-		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
-		--aggregator-rpc-url ${AGGREGATOR_RPC_URL} \
-		--chain-id ${CHAIN_ID} \
-		--bls-public-key-compendium ${BLS_PUBLIC_KEY_COMPENDIUM} \
-		--bls-operator-state-retriever ${BLS_OPERATOR_STATE_RETRIEVER} \
-		--avs-service-manager ${AVS_SERVICE_MANAGER} \
+	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
 		--bls-key-file tests/keys/test.bls.key.json \
-		print-operator-status
+		print-status
 
 send-fund: ## sends fund to the operator saved in tests/keys/test.ecdsa.key.json
 	cast send 0x860B6912C2d0337ef05bbC89b0C2CB6CbAEAB4A5 --value 10ether --private-key 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
@@ -122,31 +104,13 @@ send-fund: ## sends fund to the operator saved in tests/keys/test.ecdsa.key.json
 ____OFFCHAIN_SOFTWARE___: ## 
 start-aggregator: ##
 	go run aggregator/cmd/main.go \
-		--eth-rpc-url ${ETH_RPC_URL} \
-		--eth-ws-url ${ETH_WS_URL} \
-		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
-		--chain-id ${CHAIN_ID} \
-		--bls-public-key-compendium ${BLS_PUBLIC_KEY_COMPENDIUM} \
-		--bls-operator-state-retriever ${BLS_OPERATOR_STATE_RETRIEVER} \
-		--avs-service-manager ${AVS_SERVICE_MANAGER} \
 		--ecdsa-key-file ./tests/keys/aggregator.ecdsa.key.json \
-		--avs-server-ip-port-address ${AGGREGATOR_RPC_URL} \
 		2>&1 | zap-pretty
 
 start-operator: ## 
-	go run operator/cmd/main.go \
-		--eth-rpc-url ${ETH_RPC_URL} \
-		--eth-ws-url ${ETH_WS_URL} \
-		--substrate-rpc-url ${SUBSTRATE_RPC_URL} \
-		--aggregator-rpc-url ${AGGREGATOR_RPC_URL} \
-		--chain-id ${CHAIN_ID} \
-		--bls-public-key-compendium ${BLS_PUBLIC_KEY_COMPENDIUM} \
-		--bls-operator-state-retriever ${BLS_OPERATOR_STATE_RETRIEVER} \
-		--avs-service-manager ${AVS_SERVICE_MANAGER} \
+	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
-		--bls-key-file tests/keys/test.bls.key.json \
-		--register-at-startup true
-		2>&1 | zap-pretty
+		--bls-key-file tests/keys/test.bls.key.json
 
 -----------------------------: ## 
 _____HELPER_____: ## 
@@ -160,7 +124,4 @@ tests-unit: ## runs all unit tests
 
 tests-contract: ## runs all forge tests
 	cd contracts && forge test
-
-tests-integration: ## runs all integration tests
-	go test ./tests/integration/... -v -count=1
 

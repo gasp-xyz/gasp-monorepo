@@ -6,7 +6,7 @@ import (
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/mangata-finance/eigen-layer-monorepo/core/config"
+	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/core/config"
 	"github.com/urfave/cli"
 )
 
@@ -18,6 +18,7 @@ type Config struct {
 	SubstrateWsRpcUrl string
 
 	ServerAddressPort string
+	BlockPeriod       int
 
 	BlsOperatorStateRetrieverAddr common.Address
 	BlsCompendiumAddr             common.Address
@@ -50,6 +51,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 	return &Config{
 		LogLevel:                      logLevel,
 		ServerAddressPort:             ctx.GlobalString(config.AvsServerPortAddressFlag.Name),
+		BlockPeriod:                   ctx.GlobalInt(config.AvsBlockValidationPeriodFlag.Name),
 		EthRpcUrl:                     ctx.GlobalString(config.EthRpcFlag.Name),
 		EthWsUrl:                      ctx.GlobalString(config.EthWsFlag.Name),
 		ChainId:                       chainId,
@@ -74,4 +76,5 @@ var Flags = []cli.Flag{
 	config.AvsServiceManagerFlag,
 	config.EcdsaKeyFileFlag,
 	config.EcdsaKeyPasswordFlag,
+	config.AvsBlockValidationPeriodFlag,
 }

@@ -28,7 +28,7 @@ mangata-sequencer/.env
 # vendor/
 
 # Go workspace file
-go.work
+# go.work
 coverage.html
 
 # log files
@@ -41,6 +41,10 @@ gha-creds-*.json
 
 # local env secrets
 .secret
+
+# rust build target
+**/target
+.cargo
 
 # IDE - VSCode
 .vscode/*

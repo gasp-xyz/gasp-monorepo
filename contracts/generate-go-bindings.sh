@@ -25,7 +25,7 @@ forge build
 
 avs_service_contracts="MangataServiceManager MangataTaskManager"
 for contract in $avs_service_contracts; do
-    create_binding . $contract ./bindings
+    create_binding . $contract ../aggregator/bindings
 done
 
-create_binding . ERC20Mock ./bindings
+create_binding . ERC20Mock ../aggregator/bindings
