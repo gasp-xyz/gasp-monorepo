@@ -16,9 +16,6 @@ env:
   BLS_COMPENDIUM_ADDR: 0xc5a5C42992dECbae36851359345FE25997F5C42d
   BLS_OPERATOR_STATE_RETRIEVER_ADDR: 0x67d269191c92Caf3cD7723F116c85e6E9bf55933
   AVS_SERVICE_MANAGER_ADDR: 0x9E545E3C0baAB3E08CdfD552C960A1050f373042
-  # keys have same path for both
-  # ECDSA_KEY_FILE: /config/ecdsa.key.json
-  ECDSA_KEY_FILE:
   BLS_KEY_FILE: /config/bls.key.json
   # AVS
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
@@ -27,9 +24,9 @@ env:
   AVS_RPC_URL: http://eigen-aggregator:8090
   REGISTER_AT_STARTUP: true
 
-aggregatorEthEcdsaKeypairJson: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
-# aggregatorEthEcdsaKeypairPassword: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
-aggregatorEthEcdsaKeypairPassword:
+envSecrets:
+  ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
+  ECDSA_KEY_PASSWORD: ''
 
 aggregatorConfigFiles:
   - name: ecdsa.key.json

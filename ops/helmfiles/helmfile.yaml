@@ -39,9 +39,8 @@ releases:
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
-        ethEcdsaKeypairJson: {{ .Values.aggregatorEthEcdsaKeypairJson }}
-        ethEcdsaKeypairPassword: {{ .Values.aggregatorEthEcdsaKeypairPassword }}
-        env:
+        envSecrets: {{ .Values.envSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        env: 
           ETH_RPC_URL: {{ .Values.env.ETH_RPC_URL | fetchSecretValue | quote }}
           ETH_WS_URL: {{ .Values.env.ETH_WS_URL | fetchSecretValue | quote }}
           SUBSTRATE_RPC_URL: {{ .Values.env.SUBSTRATE_RPC_URL | quote }}
@@ -49,7 +48,6 @@ releases:
           BLS_COMPENDIUM_ADDR: {{ .Values.env.BLS_COMPENDIUM_ADDR | quote }}
           BLS_OPERATOR_STATE_RETRIEVER_ADDR: {{ .Values.env.BLS_OPERATOR_STATE_RETRIEVER_ADDR | quote }}
           AVS_SERVICE_MANAGER_ADDR: {{ .Values.env.AVS_SERVICE_MANAGER_ADDR | quote }}
-          ECDSA_KEY_FILE: {{ .Values.env.ECDSA_KEY_FILE | quote }}
           AVS_SERVER_IP_PORT_ADDRESS: {{ .Values.env.AVS_SERVER_IP_PORT_ADDRESS | quote }}
           AVS_BLOCK_VALIDATION_PERIOD: {{ .Values.env.AVS_BLOCK_VALIDATION_PERIOD | quote | squote }}
   - name: eigen-operator  
@@ -75,7 +73,6 @@ releases:
           BLS_COMPENDIUM_ADDR: {{ .Values.env.BLS_COMPENDIUM_ADDR | quote }}
           BLS_OPERATOR_STATE_RETRIEVER_ADDR: {{ .Values.env.BLS_OPERATOR_STATE_RETRIEVER_ADDR | quote }}
           AVS_SERVICE_MANAGER_ADDR: {{ .Values.env.AVS_SERVICE_MANAGER_ADDR | quote }}
-          ECDSA_KEY_FILE: {{ .Values.env.ECDSA_KEY_FILE | quote }}
           BLS_KEY_FILE: {{ .Values.env.BLS_KEY_FILE | quote }}
           AVS_RPC_URL: {{ .Values.env.AVS_RPC_URL | quote }}
           REGISTER_AT_STARTUP: {{ .Values.env.REGISTER_AT_STARTUP | quote | squote }}
