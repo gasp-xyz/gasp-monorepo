@@ -10,6 +10,9 @@ args: []
 nodeNameOverride: ''
 rpcPort: 8090
 
+ethEcdsaKeypairJson: ''
+ethEcdsaKeypairPassword: ''
+
 ## Additional args to use
 env:
   LOG_LEVEL: "info"

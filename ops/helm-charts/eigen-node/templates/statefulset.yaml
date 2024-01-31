@@ -54,6 +54,16 @@ spec:
           {{- end }}
           {{- if .Values.env }}
           env:
+            - name: ECDSA_KEY_JSON
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "node.name" . }}-secret"
+                  key: ECDSA_KEY_JSON
+            - name: ECDSA_KEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "node.name" . }}-secret"
+                  key: ECDSA_KEY_PASSWORD
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}
               value: {{ $val }}

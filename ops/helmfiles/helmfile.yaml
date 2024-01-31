@@ -39,6 +39,8 @@ releases:
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
+        ethEcdsaKeypairJson: {{ .Values.aggregatorEthEcdsaKeypairJson }}
+        ethEcdsaKeypairPassword: {{ .Values.aggregatorEthEcdsaKeypairPassword }}
         env:
           ETH_RPC_URL: {{ .Values.env.ETH_RPC_URL | fetchSecretValue | quote }}
           ETH_WS_URL: {{ .Values.env.ETH_WS_URL | fetchSecretValue | quote }}
@@ -48,7 +50,6 @@ releases:
           BLS_OPERATOR_STATE_RETRIEVER_ADDR: {{ .Values.env.BLS_OPERATOR_STATE_RETRIEVER_ADDR | quote }}
           AVS_SERVICE_MANAGER_ADDR: {{ .Values.env.AVS_SERVICE_MANAGER_ADDR | quote }}
           ECDSA_KEY_FILE: {{ .Values.env.ECDSA_KEY_FILE | quote }}
-          ECDSA_KEY_JSON: {{ .Values.env.ECDSA_KEY_JSON | fetchSecretValue | quote }}
           AVS_SERVER_IP_PORT_ADDRESS: {{ .Values.env.AVS_SERVER_IP_PORT_ADDRESS | quote }}
           AVS_BLOCK_VALIDATION_PERIOD: {{ .Values.env.AVS_BLOCK_VALIDATION_PERIOD | quote | squote }}
   - name: eigen-operator  
