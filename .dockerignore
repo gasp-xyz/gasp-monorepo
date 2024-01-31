@@ -3,3 +3,4 @@
 .vscode
 Dockerfile*
 **/target
+!**/target/release/main

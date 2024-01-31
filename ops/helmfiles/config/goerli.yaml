@@ -17,12 +17,7 @@ env:
   BLS_OPERATOR_STATE_RETRIEVER_ADDR: 0x737Dd62816a9392e84Fa21C531aF77C00816A3a3
   AVS_SERVICE_MANAGER_ADDR: 0xD2333E11ea617E30fb97900f6ac9782A85f233e7
   # keys
-  ECDSA_KEY_FILE: /config/ecdsa.key.json
+  ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
   # AVS
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_BLOCK_VALIDATION_PERIOD: 10
-
-aggregatorConfigFiles:
-  - name: ecdsa.key.json
-    content: |
-      {"address":"5331fb44a5d16225ae8d804252e90c331cb2cb17","crypto":{"cipher":"aes-128-ctr","ciphertext":"7143fc3658f6ca5d985206f288f8b7f7372e0fa4c65f284c2528f52a1c9fbbf2","cipherparams":{"iv":"3eb290e9979a63c8abe379fe023e4de4"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"d0a5df5124867b34ea91a392236feca78a7f372603cf04fe9afbb59d4e74cab2"},"mac":"ece318e2000afb2e110dc1d367f9182a8d59af287aa895308c34e6d10b2bb2df"},"id":"07956b55-33b1-4f93-b874-a6ee83e59a87","version":3}

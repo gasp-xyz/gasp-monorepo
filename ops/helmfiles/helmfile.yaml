@@ -48,6 +48,7 @@ releases:
           BLS_OPERATOR_STATE_RETRIEVER_ADDR: {{ .Values.env.BLS_OPERATOR_STATE_RETRIEVER_ADDR | quote }}
           AVS_SERVICE_MANAGER_ADDR: {{ .Values.env.AVS_SERVICE_MANAGER_ADDR | quote }}
           ECDSA_KEY_FILE: {{ .Values.env.ECDSA_KEY_FILE | quote }}
+          ECDSA_KEY_JSON: {{ .Values.env.ECDSA_KEY_JSON | fetchSecretValue | quote }}
           AVS_SERVER_IP_PORT_ADDRESS: {{ .Values.env.AVS_SERVER_IP_PORT_ADDRESS | quote }}
           AVS_BLOCK_VALIDATION_PERIOD: {{ .Values.env.AVS_BLOCK_VALIDATION_PERIOD | quote | squote }}
   - name: eigen-operator  
