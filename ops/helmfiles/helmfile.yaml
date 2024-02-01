@@ -38,8 +38,7 @@ releases:
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
-        configFiles: {{ toYaml .Values.aggregatorConfigFiles | nindent 8 }}
-        envSecrets: {{ .Values.envSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.env | toYaml | nindent 10 }}
   - name: eigen-operator  
     namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
@@ -51,11 +50,11 @@ releases:
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
-        configFiles: {{ toYaml .Values.operatorConfigFiles | nindent 8 }}
         rpcPort: 9010
         enableServiceMonitorCollectors: {{ .Values.operatorEnableServiceMonitorCollectors }}
         prometheus:
           enabled: true
+        envSecrets: {{ .Values.operatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.env | toYaml | nindent 10 }}
   - name: mangata-updater
     namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'

@@ -5,6 +5,7 @@ use aes::{
 use ark_ec::{AffineRepr, CurveGroup};
 use ark_ff::fields::PrimeField;
 use eth_keystore::{CryptoJson, KdfparamsType};
+use ethers::signers::LocalWallet;
 use eyre::{eyre, Report};
 use scrypt::{scrypt, Params as ScryptParams};
 use serde::{Deserialize, Serialize};
@@ -13,38 +14,54 @@ use std::{fmt::Debug, fs::File, io::Read, path::Path};
 
 use crate::crypto::bn254::{BlsKeypair, PrivateKey, PublicKey};
 
+pub struct EncodedKeystore {
+    keystore: Keystore,
+    password: String,
+}
+
+impl EncodedKeystore {
+    pub fn from_path<P>(path: &P, password: String) -> eyre::Result<Self>
+    where
+        P: AsRef<Path>,
+    {
+        let mut file = File::open(path)?;
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)?;
+        let keystore: Keystore = serde_json::from_str(&contents)?;
+        Ok(Self { keystore, password })
+    }
+
+    pub fn from_string(contents: String, password: String) -> eyre::Result<Self> {
+        let keystore: Keystore = serde_json::from_str(&contents)?;
+        Ok(Self { keystore, password })
+    }
+
+    pub fn into_bls_keypair(self) -> eyre::Result<BlsKeypair> {
+        let secret = decrypt_key(self.keystore, self.password)?;
+        let fr = PrivateKey::from_be_bytes_mod_order(&secret);
+        let p = PublicKey::generator() * fr;
+
+        Ok(BlsKeypair {
+            private: fr,
+            public: p.into_affine(),
+        })
+    }
+
+    pub fn into_wallet(self) -> eyre::Result<LocalWallet> {
+        let secret = decrypt_key(self.keystore, self.password)?;
+        Ok(LocalWallet::from_bytes(&secret)?)
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize)]
-struct BlsKeystore {
-    pub crypto: CryptoJson,
+struct Keystore {
+    crypto: CryptoJson,
 }
 
-/// Decrypts an encrypted JSON from the provided path to construct a BN254 key
-pub fn decrypt_keystore<P, S>(keypath: &P, password: &S) -> eyre::Result<BlsKeypair>
+fn decrypt_key<S>(keystore: Keystore, password: S) -> eyre::Result<Vec<u8>>
 where
-    P: AsRef<Path>,
     S: AsRef<[u8]>,
 {
-    let secret = decrypt_key(keypath, password)?;
-    let fr = PrivateKey::from_be_bytes_mod_order(&secret);
-    let p = PublicKey::generator() * fr;
-
-    Ok(BlsKeypair {
-        private: fr,
-        public: p.into_affine(),
-    })
-}
-
-fn decrypt_key<P, S>(path: P, password: S) -> eyre::Result<Vec<u8>>
-where
-    P: AsRef<Path>,
-    S: AsRef<[u8]>,
-{
-    // Read the file contents as string and deserialize it.
-    let mut file = File::open(path)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    let keystore: BlsKeystore = serde_json::from_str(&contents)?;
-
     // Derive the key.
     let key = match keystore.crypto.kdfparams {
         KdfparamsType::Pbkdf2 { .. } => {

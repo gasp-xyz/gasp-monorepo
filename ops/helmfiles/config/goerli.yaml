@@ -18,7 +18,7 @@ env:
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_BLOCK_VALIDATION_PERIOD: '"10"'
 
-envSecrets:
+aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-password
   ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-rpc-url

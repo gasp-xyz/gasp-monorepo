@@ -1,7 +1,6 @@
 use crate::chainio::{avs::AvsContracts, build_eth_client, eigen::ElContracts, Client};
 use crate::cli::CliArgs;
 use crate::crypto::bn254::{BlsKeypair, OperatorId};
-use crate::crypto::keystore::decrypt_keystore;
 use crate::crypto::EthConvert;
 use crate::executor::execute::execute_block;
 use crate::rpc::Rpc;
@@ -49,13 +48,13 @@ pub struct Operator {
 impl Operator {
     #[instrument(name = "create_operator", skip_all)]
     pub async fn from_cli(cfg: &CliArgs) -> eyre::Result<Self> {
-        let client = Arc::new(build_eth_client(&cfg.into()).await?);
-        let avs_contracts = AvsContracts::build(&cfg.into(), client.clone()).await?;
+        let client = Arc::new(build_eth_client(cfg).await?);
+        let avs_contracts = AvsContracts::build(cfg, client.clone()).await?;
         let slasher = avs_contracts.slasher_address().await?;
-        let el_contracts = ElContracts::build(&cfg.into(), slasher, client.clone()).await?;
+        let el_contracts = ElContracts::build(cfg, slasher, client.clone()).await?;
 
-        info!("Decrypting BLS keypair at: {:?}", cfg.bls_key_file);
-        let bls_key = decrypt_keystore(&cfg.bls_key_file, &cfg.bls_key_password)?;
+        info!("Decrypting BLS keypair...");
+        let bls_key = cfg.get_bls_keystore()?.into_bls_keypair()?;
         info!(
             "Bls Keypair decrypted with operator id: {:x}",
             bls_key.operator_id()

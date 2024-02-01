@@ -69,9 +69,6 @@ spec:
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: config
-              mountPath: /config
-              readOnly: true 
             {{- if .Values.data.storageEnabled }}
             - mountPath: {{ .Values.data.mountPath }}
               name: data
@@ -87,10 +84,6 @@ spec:
         {{- with .Values.extraContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      volumes:
-        - name: config
-          configMap:
-            name: {{ include "node.name" . }}-configmap
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

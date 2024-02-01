@@ -14,20 +14,6 @@ use crate::{
 
 use super::Client;
 
-pub struct Config {
-    // bls_operator_state_retriever_addr: Address,
-    bls_compendium_addr: Address,
-    // service_manager_addr: Address,
-}
-
-impl From<&CliArgs> for Config {
-    fn from(args: &CliArgs) -> Self {
-        Self {
-            bls_compendium_addr: args.bls_compendium_addr,
-        }
-    }
-}
-
 pub struct ElContracts {
     delegation: DelegationManager<Client>,
     bls_pub_key: BLSPublicKeyCompendium<Client>,
@@ -45,7 +31,7 @@ impl Debug for ElContracts {
 
 impl ElContracts {
     pub async fn build(
-        config: &Config,
+        cfg: &CliArgs,
         slasher_addr: Address,
         client: Arc<Client>,
     ) -> eyre::Result<Self> {
@@ -54,7 +40,7 @@ impl ElContracts {
         let delegation = DelegationManager::new(delegation_addr, client.clone());
 
         let bls_pubkey_compendium =
-            BLSPublicKeyCompendium::new(config.bls_compendium_addr, client.clone());
+            BLSPublicKeyCompendium::new(cfg.bls_compendium_addr, client.clone());
 
         Ok(Self {
             delegation,
