@@ -52,34 +52,6 @@ var (
 		EnvVar:   "AVS_BLOCK_VALIDATION_PERIOD",
 	}
 
-	// metrics
-	EigenMetricsIpPortAddress = cli.StringFlag{
-		Name:     "eigen-metrics-ip-port-address",
-		Usage:    "Port at which eigen-metrics listens for calls",
-		Required: false,
-		Value:    "",
-		EnvVar:   "EIGEN_METRICS_IP_PORT_ADDRESS",
-	}
-	NodeApiIpPortAddress = cli.StringFlag{
-		Name:     "node-api-ip-port-address",
-		Usage:    "Port at which node-api- listens for calls",
-		Required: false,
-		Value:    "",
-		EnvVar:   "NODE_API_IP_PORT_ADDRESS",
-	}
-	EnableMetrics = cli.BoolFlag{
-		Name:     "enable-metrics",
-		Usage:    "enable metrics",
-		Required: false,
-		EnvVar:   "ENABLE_METRICS",
-	}
-	EnableNodeApi = cli.BoolFlag{
-		Name:     "enable-node-api",
-		Usage:    "enable metrics",
-		Required: false,
-		EnvVar:   "ENABLE_NODE_API",
-	}
-
 	// Deployment
 	BlsOperatorStateRetrieverFlag = cli.StringFlag{
 		Name:     "bls-operator-state-retriever-addr",
@@ -101,28 +73,21 @@ var (
 	}
 
 	// The files for encrypted private keys.
-	BlsKeyFileFlag = cli.StringFlag{
-		Name:     "bls-key-file",
-		Required: false,
-		Usage:    "Path to the encrypted bls private key",
-		Value:    "/app/operator_keys/bls_key.json",
-		EnvVar:   "BLS_KEY_FILE",
-	}
 	EcdsaKeyFileFlag = cli.StringFlag{
 		Name:     "ecdsa-key-file",
 		Required: false,
 		Usage:    "Path to the encrypted ecdsa private key",
-		Value:    "/app/operator_keys/ecdsa_key.json",
+		Value:    "",
 		EnvVar:   "ECDSA_KEY_FILE",
 	}
-	// Passwords to decrypt the private keys.
-	BlsKeyPasswordFlag = cli.StringFlag{
-		Name:     "bls-key-password",
+	EcdsaKeyJsonFlag = cli.StringFlag{
+		Name:     "ecdsa-key-json",
 		Required: false,
+		Usage:    "Encrypted ecdsa private key json",
 		Value:    "",
-		Usage:    "Password to decrypt bls private key",
-		EnvVar:   "BLS_KEY_PASSWORD",
+		EnvVar:   "ECDSA_KEY_JSON",
 	}
+	// Passwords to decrypt the private keys.
 	EcdsaKeyPasswordFlag = cli.StringFlag{
 		Name:     "ecdsa-key-password",
 		Required: false,

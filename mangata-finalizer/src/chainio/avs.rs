@@ -20,20 +20,6 @@ use crate::{
 
 use super::Client;
 
-pub struct Config {
-    eth_ws_url: String,
-    avs_service_manager_addr: Address,
-}
-
-impl From<&CliArgs> for Config {
-    fn from(args: &CliArgs) -> Self {
-        Self {
-            eth_ws_url: args.eth_ws_url.clone(),
-            avs_service_manager_addr: args.avs_service_manager_addr,
-        }
-    }
-}
-
 pub struct AvsContracts {
     service_manager: MangataServiceManager<Client>,
     task_manager: MangataTaskManager<Client>,
@@ -56,7 +42,7 @@ impl Debug for AvsContracts {
 impl AvsContracts {
     const QUORUM: [u8; 1] = [0_u8; 1];
 
-    pub async fn build(config: &Config, client: Arc<Client>) -> eyre::Result<Self> {
+    pub async fn build(config: &CliArgs, client: Arc<Client>) -> eyre::Result<Self> {
         let ws = Arc::new(Provider::connect(config.eth_ws_url.to_owned()).await?);
 
         let service_manager =

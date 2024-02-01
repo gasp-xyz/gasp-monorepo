@@ -4,14 +4,6 @@
 help:
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-AGGREGATOR_ECDSA_PRIV_KEY=0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
-CHALLENGER_ECDSA_PRIV_KEY=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
-
-# Make sure to update this if the strategy address changes
-# check in contracts/script/output/${CHAINID}/strategy_output.json
-STRATEGY_ADDRESS=0x4A679253410272dd5232B3Ff7cF5dbB88f295319
-DEPLOYMENT_FILES_DIR=contracts/script/output/${CHAINID}
-
 CONTRACTS_REGEX="MangataServiceManager|MangataTaskManager|BLSPubkeyRegistry|BLSRegistryCoordinatorWithIndices|DelegationManager|BLSPublicKeyCompendium|Slasher"
 # CONTRACTS_REGEX=".+"
 
@@ -28,7 +20,6 @@ AVS_RPC_URL=http://localhost:8090
 AVS_SERVER_IP_PORT_ADDRESS=localhost:8090
 
 CHAIN_ID=31337
-
 BLS_COMPENDIUM_ADDR=0xc5a5C42992dECbae36851359345FE25997F5C42d
 BLS_OPERATOR_STATE_RETRIEVER_ADDR=0x67d269191c92Caf3cD7723F116c85e6E9bf55933
 AVS_SERVICE_MANAGER_ADDR=0x9E545E3C0baAB3E08CdfD552C960A1050f373042
@@ -58,16 +49,10 @@ bindings-go: ## generates contract bindings
 bindings-rs: ## generates rust bindings
 	forge bind --bindings-path ./mangata-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX} 
 
-# ___DOCKER___: ## 
-# docker-build-and-publish-images: ## builds and publishes operator and aggregator docker images using Ko
-# 	docker buildx build --load --platform linux/amd64,linux/arm64 -t mangatasolutions/aggregator:latest -f aggregator/Dockerfile .
-# 	docker buildx build --load --platform linux/amd64,linux/arm64 -t mangatasolutions/operator:latest -f operator/Dockerfile .
-# 	# KO_DOCKER_REPO=mangatasolutions/aggregator ko build --bare aggregator/cmd/main.go --platform=linux/arm64,linux/amd64
-# 	# KO_DOCKER_REPO=mangatasolutions/operator ko build --bare operator/cmd/main.go --platform=linux/arm64,linux/amd64
-# docker-start-everything: docker-build-and-publish-images ## starts aggregator and operator docker containers
-# 	docker compose pull && docker compose up
 
-# __CLI__: ## 
+-----------------------------: ## 
+
+__CLI__: ## 
 
 cli-setup-operator: cli-register-operator-with-eigenlayer cli-register-operator-with-avs ## registers operator with eigenlayer and avs
 
@@ -104,7 +89,6 @@ send-fund: ## sends fund to the operator saved in tests/keys/test.ecdsa.key.json
 ____OFFCHAIN_SOFTWARE___: ## 
 start-aggregator: ##
 	go run aggregator/cmd/main.go \
-		--ecdsa-key-file ./tests/keys/aggregator.ecdsa.key.json \
 		2>&1 | zap-pretty
 
 start-operator: ## 

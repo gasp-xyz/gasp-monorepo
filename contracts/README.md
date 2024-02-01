@@ -65,10 +65,3 @@ $ anvil --help
 $ cast --help
 ```
 
-
-## TODO
-+ isolated deploy script for local testnet with:
-1 mock ERC20 token
-2 token strategy
-
-+ multisig structure ref: https://docs.eigenlayer.xyz/security/multisig-governance

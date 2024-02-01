@@ -52,19 +52,23 @@ spec:
             - containerPort: {{ .Values.prometheus.port }}
               name: prometheus
           {{- end }}
-          {{- if .Values.env }}
+          {{- if or .Values.env .Values.envSecrets }}
           env:
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}
               value: {{ $val }}
             {{- end }}
+            {{- range $key, $val := .Values.envSecrets }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "node.name" $ }}-secret"
+                  key: {{ $key }}
+            {{- end }}
           {{- end }}
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: config
-              mountPath: /config
-              readOnly: true 
             {{- if .Values.data.storageEnabled }}
             - mountPath: {{ .Values.data.mountPath }}
               name: data
@@ -80,10 +84,6 @@ spec:
         {{- with .Values.extraContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      volumes:
-        - name: config
-          configMap:
-            name: {{ include "node.name" . }}-configmap
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

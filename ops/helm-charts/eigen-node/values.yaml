@@ -15,6 +15,10 @@ env:
   LOG_LEVEL: "info"
   RUST_LOG: mangata_finalizer=debug
 
+envSecrets: {}
+  # ECDSA_KEY_JSON: ''
+  # ECDSA_KEY_PASSWORD: ''
+
 nameOverride: ''
 
 image:

@@ -1,10 +1,12 @@
 package aggregator
 
 import (
+	"errors"
 	"math/big"
 
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mangata-finance/eigen-layer-monorepo/aggregator/core/config"
 	"github.com/urfave/cli"
@@ -38,14 +40,37 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 
 	chainId := big.NewInt(int64(ctx.GlobalUint(config.ChainIdFlag.Name)))
 
-	signer, address, err := signerv2.SignerFromConfig(signerv2.Config{
-		KeystorePath: ctx.GlobalString(config.EcdsaKeyFileFlag.Name),
-		Password:     ctx.GlobalString(config.EcdsaKeyPasswordFlag.Name),
-	},
-		chainId,
-	)
-	if err != nil {
-		return nil, err
+	var signer signerv2.SignerFn
+	var address common.Address
+	keyStoreFile := ctx.GlobalString(config.EcdsaKeyFileFlag.Name)
+	if keyStoreFile == "" {
+		keyStoreContents := ctx.GlobalString(config.EcdsaKeyJsonFlag.Name)
+		if keyStoreContents == "" {
+			return nil, errors.New("one of --ecdsa-key-file or --ecdsa-key-json must be set")
+		}
+		sk, err := keystore.DecryptKey([]byte(keyStoreContents), ctx.GlobalString(config.EcdsaKeyPasswordFlag.Name))
+		if err != nil {
+			return nil, err
+		}
+		signer, address, err = signerv2.SignerFromConfig(signerv2.Config{
+			PrivateKey: sk.PrivateKey,
+		},
+			chainId,
+		)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		var err error
+		signer, address, err = signerv2.SignerFromConfig(signerv2.Config{
+			KeystorePath: ctx.GlobalString(config.EcdsaKeyFileFlag.Name),
+			Password:     ctx.GlobalString(config.EcdsaKeyPasswordFlag.Name),
+		},
+			chainId,
+		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &Config{
@@ -75,6 +100,7 @@ var Flags = []cli.Flag{
 	config.BlsOperatorStateRetrieverFlag,
 	config.AvsServiceManagerFlag,
 	config.EcdsaKeyFileFlag,
+	config.EcdsaKeyJsonFlag,
 	config.EcdsaKeyPasswordFlag,
 	config.AvsBlockValidationPeriodFlag,
 }
