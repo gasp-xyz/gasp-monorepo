@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/urfave/cli"
@@ -30,13 +29,13 @@ func main() {
 	app.Action = aggregatorMain
 	err := app.Run(os.Args)
 	if err != nil {
-		log.Fatalln("Application failed.", "Message:", err)
+		fmt.Println("Application failed with error:", err)
 	}
 }
 
 func aggregatorMain(ctx *cli.Context) error {
 
-	log.Println("Initializing Aggregator")
+	fmt.Println("Initializing Aggregator")
 	config, err := aggregator.NewConfig(ctx)
 	if err != nil {
 		return err

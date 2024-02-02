@@ -209,6 +209,8 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 				// we log the errors inside sendNewTask() so here we just continue to the next task
 				continue
 			}
+		case err := <-sub.Err():
+			return err
 		}
 	}
 }
