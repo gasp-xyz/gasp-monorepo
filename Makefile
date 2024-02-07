@@ -89,6 +89,7 @@ send-fund: ## sends fund to the operator saved in tests/keys/test.ecdsa.key.json
 ____OFFCHAIN_SOFTWARE___: ## 
 start-aggregator: ##
 	go run aggregator/cmd/main.go \
+	--ecdsa-key-file tests/keys/aggregator.ecdsa.key.json \
 		2>&1 | zap-pretty
 
 start-operator: ## 
