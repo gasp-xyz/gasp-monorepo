@@ -30,6 +30,15 @@ make start-anvil-chain-with-el-and-avs-deployed
 
 The above command starts a local anvil chain from a [saved state](tests/integration/avs-and-eigenlayer-deployed-anvil-state.json) with eigenlayer and mangata-avs contracts already deployed (but no operator registered).
 
+Then start the aggregator: 
+```bash
+make start-aggregator
+```
+And lately, the operator,
+```bash
+make start-operator
+```
+
 
 ## Avs Task Description
 
