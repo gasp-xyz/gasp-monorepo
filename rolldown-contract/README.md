@@ -18,6 +18,7 @@ https://book.getfoundry.sh/
 ### Build
 
 ```shell
+$ forge install OpenZeppelin/openzeppelin-contracts
 $ forge build
 ```
 
