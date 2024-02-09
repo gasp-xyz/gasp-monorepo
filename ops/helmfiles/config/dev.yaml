@@ -1,2 +1,2 @@
-operatorEnableServiceMonitorCollectors: true
+finalizerEnableServiceMonitorCollectors: true
 remoteCluster: true
