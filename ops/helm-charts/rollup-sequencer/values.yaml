@@ -1,4 +1,4 @@
-# Default values for rolllup-sequencer.
+# Default values for rollup-sequencer.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 environment: local
@@ -16,7 +16,7 @@ env:
 nameOverride: ""
 
 image:
-  repository: mangatasolutions/rolllup-sequencer
+  repository: mangatasolutions/rollup-sequencer
   pullPolicy: Always
   ## Overrides the image tag whose default is the chart appVersion.
   tag: latest

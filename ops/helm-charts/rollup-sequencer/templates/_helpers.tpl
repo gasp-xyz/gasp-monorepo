@@ -7,22 +7,22 @@ https://www.replex.io/blog/9-best-practices-and-examples-for-working-with-kubern
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "rolllup-sequencer.name" -}}
+{{- define "rollup-sequencer.name" -}}
 {{- default .Release.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "rolllup-sequencer.labels" -}}
-{{ include "rolllup-sequencer.selectorLabels" . }}
+{{- define "rollup-sequencer.labels" -}}
+{{ include "rollup-sequencer.selectorLabels" . }}
 heritage: {{ .Release.Service }}
-component: rolllup-eigen-layer
+component: rollup-eigen-layer
 {{- end }}
 
 {{/*
 Selector labels
 */}}
-{{- define "rolllup-sequencer.selectorLabels" -}}
-application: {{ include "rolllup-sequencer.name" . }}
+{{- define "rollup-sequencer.selectorLabels" -}}
+application: {{ include "rollup-sequencer.name" . }}
 {{- end }}

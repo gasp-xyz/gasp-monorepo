@@ -28,23 +28,23 @@ jobs:
     secrets: inherit
     with:
       version: ${{ inputs.version }}
-  build-rolllup-updater-image:
-    name: Build rolllup-updater Docker image
+  build-rollup-updater-image:
+    name: Build rollup-updater Docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rolllup-updater:${{ inputs.version }} ./rolllup-updater
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/rolllup-updater:${{ inputs.version }} ./rolllup-updater
-  build-rolllup-sequencer-image:
-    name: Build rolllup-sequencer Docker image
+          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-updater:${{ inputs.version }} ./rollup-updater
+          docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-updater:${{ inputs.version }} ./rollup-updater
+  build-rollup-sequencer-image:
+    name: Build rollup-sequencer Docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rolllup-sequencer:${{ inputs.version }} ./rolllup-sequencer
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/rolllup-sequencer:${{ inputs.version }} ./rolllup-sequencer
+          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
+          docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer

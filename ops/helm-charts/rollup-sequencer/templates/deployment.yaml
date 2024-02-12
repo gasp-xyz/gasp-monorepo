@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "rolllup-sequencer.name" . }}
-  labels: {{- include "rolllup-sequencer.labels" . | nindent 4 }}
-    service: {{ include "rolllup-sequencer.name" . }}
+  name: {{ include "rollup-sequencer.name" . }}
+  labels: {{- include "rollup-sequencer.labels" . | nindent 4 }}
+    service: {{ include "rollup-sequencer.name" . }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "rolllup-sequencer.selectorLabels" . | nindent 6 }}
-      service: {{ include "rolllup-sequencer.name" . }}
-  serviceName: {{ include "rolllup-sequencer.name" . }}
+      {{- include "rollup-sequencer.selectorLabels" . | nindent 6 }}
+      service: {{ include "rollup-sequencer.name" . }}
+  serviceName: {{ include "rollup-sequencer.name" . }}
   template:
     metadata:
       annotations:
@@ -19,11 +19,11 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "rolllup-sequencer.labels" . | nindent 8 }}
-        service: {{ include "rolllup-sequencer.name" . }}
+        {{- include "rollup-sequencer.labels" . | nindent 8 }}
+        service: {{ include "rollup-sequencer.name" . }}
     spec:
       containers:
-        - name: rolllup-sequencer
+        - name: rollup-sequencer
           image: "{{ .Values.image.repository}}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
           {{- if .Values.command }}
@@ -42,12 +42,12 @@ spec:
             - name: MNEMONIC
               valueFrom:
                 secretKeyRef:
-                  name: "{{ include "rolllup-sequencer.name" . }}-secret"
+                  name: "{{ include "rollup-sequencer.name" . }}-secret"
                   key: MNEMONIC
             - name: ETH_CHAIN_URL
               valueFrom:
                 secretKeyRef:
-                  name: "{{ include "rolllup-sequencer.name" . }}-secret"
+                  name: "{{ include "rollup-sequencer.name" . }}-secret"
                   key: ETH_CHAIN_URL
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}

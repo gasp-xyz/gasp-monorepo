@@ -1,5 +1,5 @@
 apiVersion: v2
-name: rolllup-updater
+name: rollup-updater
 description: Rollup Updater Helm chart for Kubernetes
 type: application
 version: 0.1.0
