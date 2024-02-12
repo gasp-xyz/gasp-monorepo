@@ -1,3 +1,4 @@
+use chainio::setup_deposits;
 use cli::CliArgs;
 use eyre::eyre;
 use operator::Operator;
@@ -18,13 +19,13 @@ pub async fn start() -> eyre::Result<()> {
     );
     let operator = Operator::from_cli(&cli).await?;
 
-    if let Some(cmd) = cli.command {
+    if let Some(cmd) = &cli.command {
         info!("Operator created with command '{:?}'", cmd);
         match cmd {
-            cli::Commands::Register => operator.register().await?,
             cli::Commands::OptInAvs => operator.opt_in_avs().await?,
             cli::Commands::OptOutAvs => operator.opt_out_avs().await?,
             cli::Commands::PrintStatus => print_status(&operator).await?,
+            cli::Commands::Testnet { stake } => ephemeral_testnet(&operator, *stake, &cli).await?,
         }
     } else {
         info!("Operator created and starting AVS verification");
@@ -69,5 +70,27 @@ pub(crate) async fn check_registration(operator: &Operator) -> eyre::Result<()> 
 pub(crate) async fn print_status(operator: &Operator) -> eyre::Result<()> {
     let status = operator.get_status().await?;
     info!("{:#?}", status);
+    Ok(())
+}
+
+pub(crate) async fn ephemeral_testnet(
+    operator: &Operator,
+    stake: u32,
+    cfg: &CliArgs,
+) -> eyre::Result<()> {
+    setup_deposits(
+        cfg.eth_rpc_url.clone(),
+        cfg.avs_service_manager_addr,
+        stake,
+        operator.client.signer().clone(),
+    )
+    .await?;
+
+    operator.register().await?;
+    operator.opt_in_avs().await?;
+    print_status(operator).await?;
+
+    operator.watch_new_tasks().await?;
+
     Ok(())
 }

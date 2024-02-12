@@ -12,17 +12,7 @@ interface IMangataTaskManager {
         TaskResponseMetadata taskResponseMetadata
     );
 
-    event TaskCompleted(uint32 indexed taskIndex);
-
-    event TaskChallengedSuccessfully(
-        uint32 indexed taskIndex,
-        address indexed challenger
-    );
-
-    event TaskChallengedUnsuccessfully(
-        uint32 indexed taskIndex,
-        address indexed challenger
-    );
+    event TaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash);
 
     // STRUCTS
     struct Task {
@@ -45,6 +35,8 @@ interface IMangataTaskManager {
         uint32 referenceTaskIndex;
         // This is the response that the operator has to provide for a finalized block.
         bytes32 blockHash;
+        // This is the response that the operator has to provide for a an executed block.
+        bytes32 storageProofHash;
     }
 
     // Extra information related to taskResponse, which is filled inside the contract.
@@ -53,6 +45,8 @@ interface IMangataTaskManager {
     struct TaskResponseMetadata {
         uint32 taskResponsedBlock;
         bytes32 hashOfNonSigners;
+        uint96[] quroumStakeTotals;
+        uint96[] quroumStakeSigned;
     }
 
     // FUNCTIONS
@@ -65,14 +59,6 @@ interface IMangataTaskManager {
 
     /// @notice Returns the current 'taskNumber' for the middleware
     function taskNumber() external view returns (uint32);
-
-    // // NOTE: this function raises challenge to existing tasks.
-    function raiseAndResolveChallenge(
-        Task calldata task,
-        TaskResponse calldata taskResponse,
-        TaskResponseMetadata calldata taskResponseMetadata,
-        BN254.G1Point[] memory pubkeysOfNonSigningOperators
-    ) external;
 
     /// @notice Returns the TASK_RESPONSE_WINDOW_BLOCK
     function getTaskResponseWindowBlock() external view returns (uint32);

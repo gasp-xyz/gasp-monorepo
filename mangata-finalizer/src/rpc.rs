@@ -1,17 +1,19 @@
-use ark_ec::AffineRepr;
-use ark_ff::PrimeField;
-use bindings::shared_types::TaskResponse;
-use ethers::abi::AbiEncode;
-use reqwest::{Client, Response};
-use serde::{ser::SerializeStruct, Serialize};
-use sha3::{Digest, Keccak256};
-use sp_core::H256;
-use tracing::instrument;
-
 use crate::{
     cli::CliArgs,
     crypto::bn254::{BlsKeypair, BlsSignature, PrivateKey},
 };
+use ark_ec::AffineRepr;
+use ark_ff::PrimeField;
+use bindings::shared_types::TaskResponse;
+use ethers::abi::AbiEncode;
+use reqwest::Response;
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
+use serde::{ser::SerializeStruct, Serialize};
+use sp_runtime::traits::{Hash, Keccak256};
+use tracing::instrument;
+
+type Bytes32 = [u8; 32];
 
 #[derive(Serialize)]
 struct SignedTaskResponse {
@@ -20,7 +22,7 @@ struct SignedTaskResponse {
     #[serde(rename = "BlsSignature")]
     bls_signature: BlsSignatureWire,
     #[serde(rename = "OperatorId")]
-    operator_id: [u8; 32],
+    operator_id: Bytes32,
 }
 
 #[derive(Serialize)]
@@ -28,7 +30,9 @@ struct TaskResponseWire {
     #[serde(rename = "ReferenceTaskIndex")]
     pub reference_task_index: u32,
     #[serde(rename = "BlockHash")]
-    pub block_hash: [u8; 32],
+    pub block_hash: Bytes32,
+    #[serde(rename = "StorageProofHash")]
+    pub storage_proof_hash: Bytes32,
 }
 
 impl From<TaskResponse> for TaskResponseWire {
@@ -36,6 +40,7 @@ impl From<TaskResponse> for TaskResponseWire {
         Self {
             reference_task_index: value.reference_task_index,
             block_hash: value.block_hash,
+            storage_proof_hash: value.storage_proof_hash,
         }
     }
 }
@@ -75,14 +80,18 @@ impl Serialize for G1PointWire {
 
 #[derive(Debug)]
 pub struct Rpc {
-    client: Client,
+    client: ClientWithMiddleware,
     avs_url: String,
 }
 
 impl Rpc {
     pub fn build(cfg: &CliArgs) -> Self {
+        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
+        let client = ClientBuilder::new(reqwest::Client::new())
+            .with(RetryTransientMiddleware::new_with_policy(retry_policy))
+            .build();
         Self {
-            client: reqwest::Client::new(),
+            client,
             avs_url: cfg.avs_rpc_url.to_owned(),
         }
     }
@@ -103,12 +112,8 @@ impl Rpc {
 fn create_response(task: TaskResponse, keypair: &BlsKeypair) -> eyre::Result<SignedTaskResponse> {
     let encoded = task.clone().encode();
 
-    let hash = Keccak256::new().chain_update(encoded).finalize();
-    let slice: H256 = TryInto::<[u8; 32]>::try_into(hash.as_slice())
-        .expect("incorrect size for Keccak256 and H256")
-        .into();
-
-    let sig = keypair.sign(slice.as_bytes())?;
+    let hash = Keccak256::hash(encoded.as_ref());
+    let sig = keypair.sign(hash.as_bytes())?;
 
     Ok(SignedTaskResponse {
         bls_signature: sig.into(),

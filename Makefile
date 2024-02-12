@@ -4,7 +4,7 @@
 help:
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-CONTRACTS_REGEX="MangataServiceManager|MangataTaskManager|BLSPubkeyRegistry|BLSRegistryCoordinatorWithIndices|DelegationManager|BLSPublicKeyCompendium|Slasher"
+CONTRACTS_REGEX="MangataServiceManager|MangataTaskManager|BLSPubkeyRegistry|BLSRegistryCoordinatorWithIndices|DelegationManager|BLSPublicKeyCompendium|Slasher|ERC20Mock|StrategyManager|IStrategy|StakeRegistry"
 # CONTRACTS_REGEX=".+"
 
 -----------------------------: ## 
@@ -24,6 +24,8 @@ BLS_COMPENDIUM_ADDR=0xc5a5C42992dECbae36851359345FE25997F5C42d
 BLS_OPERATOR_STATE_RETRIEVER_ADDR=0x67d269191c92Caf3cD7723F116c85e6E9bf55933
 AVS_SERVICE_MANAGER_ADDR=0x9E545E3C0baAB3E08CdfD552C960A1050f373042
 REGISTER_AT_STARTUP=true
+
+AVS_KICK_PERIOD=3
 
 -----------------------------: ## 
 
@@ -89,12 +91,21 @@ send-fund: ## sends fund to the operator saved in tests/keys/test.ecdsa.key.json
 ____OFFCHAIN_SOFTWARE___: ## 
 start-aggregator: ##
 	go run aggregator/cmd/main.go \
+		--ecdsa-key-file tests/keys/aggregator.ecdsa.key.json \
 		2>&1 | zap-pretty
+
+# start-operator: ## 
+# 	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
+# 		--bls-key-file tests/keys/test.bls.key.json \
+# 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
+# 		testnet
 
 start-operator: ## 
 	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
-		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
-		--bls-key-file tests/keys/test.bls.key.json
+		--ecdsa-ephemeral-key \
+		--bls-ephemeral-key \
+		testnet \
+		--stake 100
 
 -----------------------------: ## 
 _____HELPER_____: ## 

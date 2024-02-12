@@ -1,4 +1,4 @@
-module github.com/mangata-finance/eigen-layer-monorepo
+module github.com/mangata-finance/eigen-layer-monorepo/aggregator
 
 go 1.21
 

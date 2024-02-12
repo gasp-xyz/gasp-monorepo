@@ -23,6 +23,10 @@ func AbiEncodeTaskResponse(h *taskmanager.IMangataTaskManagerTaskResponse) ([]by
 			Name: "BlockHash",
 			Type: "bytes32",
 		},
+		{
+			Name: "StorageProofHash",
+			Type: "bytes32",
+		},
 	})
 	if err != nil {
 		return nil, err

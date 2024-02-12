@@ -98,7 +98,7 @@ pub(crate) fn state_machine_call_with_proof<Block: BlockT, HostFns: HostFunction
 
 /// Converts a [`sp_state_machine::StorageProof`] into a JSON string.
 fn storage_proof_to_raw_json(storage_proof: &sp_state_machine::StorageProof) -> String {
-    serde_json::Value::Object(
+    let obj = serde_json::Value::Object(
         storage_proof
             .to_memory_db::<sp_runtime::traits::BlakeTwo256>()
             .drain()
@@ -110,8 +110,8 @@ fn storage_proof_to_raw_json(storage_proof: &sp_state_machine::StorageProof) -> 
                 )
             })
             .collect(),
-    )
-    .to_string()
+    );
+    serde_json::to_string_pretty(&obj).unwrap()
 }
 
 pub(crate) fn rpc_err_handler(error: impl Debug) -> &'static str {

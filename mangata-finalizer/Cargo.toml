@@ -33,12 +33,10 @@ reqwest = { version = "0.11.23", default-features = false, features = ["rustls"]
 scrypt = "0.10.0"
 serde = { version = "1.0.192", features = ["derive"] }
 serde_json = { version = "1.0.85" }
-sha3 = "0.10.0"
 tokio = { version = "1.34.0", features = ["full"] }
 tracing = "0.1.40"
 tracing-error = "0.2.0"
 tracing-subscriber = { version = "0.3.18", features = ["json", "env-filter"] }
-
 
 # Polkadot SDK
 frame-remote-externalities = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
@@ -56,4 +54,6 @@ substrate-rpc-client = { git = "https://github.com/mangata-finance/polkadot-sdk"
 
 node-executor = { package = "node-executor", git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
 node-primitives = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
+reqwest-retry = "0.3.0"
+reqwest-middleware = "0.2.4"
 
