@@ -4,3 +4,4 @@
 Dockerfile*
 **/target
 !**/target/release/main
+ops/docker-compose-example/data

@@ -1,0 +1,51 @@
+services:
+  collator:
+    image: mangatasolutions/mangata-node:develop
+    restart: unless-stopped
+    platform: linux/amd64
+    command:
+      - --name=my-collator
+      - --collator
+      - --rpc-port=9944
+      - --port=30333
+      - --rpc-cors=all
+      - --chain=/etc/mangata-rococo-local-chainspec.json
+      - --base-path=/data
+      - --unsafe-rpc-external
+      - --rpc-methods=unsafe
+      - --bootnodes=/dns/node-01-p2p-dev.mangata.online/tcp/30333/p2p/12D3KooWSCufgHzV4fCwRijfH2k3abrpAJxTKxEvN1FDuRXA2U9x
+      - --
+      - --chain=/etc/relaychain-spec.json
+      - --bootnodes=/dns/relaychain-alice-dev.mangata.online/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+    volumes:
+      - ./relaychain-spec.json:/etc/relaychain-spec.json
+      - ./mangata-rococo-local-chainspec.json:/etc/mangata-rococo-local-chainspec.json
+      - ./data:/data
+    ports:
+      - 9944:9944
+
+  sequencer:
+    image: mangatasolutions/rollup-sequencer:f8638a4fb0c9af6883efa175bf680466e0f5990e
+    depends_on:
+      anvil:
+        condition: service_healthy
+    environment:
+      MANGATA_URL: ws://collator:9944
+      ETH_CHAIN_URL: ws://anvil:8545
+      MANGATA_CONTRACT_ADDRESS: "0x839De8D21F4762D791efbC0bA70C1Af0c442Ef98"
+      MNEMONIC: 'some mnemonic'
+  
+  anvil:
+    image: ghcr.io/foundry-rs/foundry
+    ports:
+      - 8545:8545
+    # changed entrypoint because the default 'bash -c' entrypoint wasn't working the intended way...
+    entrypoint: anvil
+    volumes:
+      - ../../tests/integration/avs-and-eigenlayer-deployed-anvil-state.json:/root/.anvil/state.json
+    command: --host 0.0.0.0 --load-state /root/.anvil/state.json
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "8545"]
+      interval: 2s
+      timeout: 10s
+      retries: 3
