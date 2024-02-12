@@ -20,7 +20,7 @@ env:
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_BLOCK_VALIDATION_PERIOD: '"5"'
   # OP
-  AVS_RPC_URL: http://eigen-aggregator:8090
+  AVS_RPC_URL: http://avs-aggregator:8090
   REGISTER_AT_STARTUP: "'true'"
 
 # tests/keys/aggregator.ecdsa.key.json
