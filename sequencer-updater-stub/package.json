@@ -1,0 +1,18 @@
+{
+  "name": "crowdloan-setup",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {},
+  "keywords": [],
+  "author": "MangataFinance",
+  "license": "GPL",
+  "dependencies": {
+    "web3": "4.2.2",
+    "ethereumjs-util": "7.1.5",
+    "@polkadot/api": "10.11.2",
+    "@polkadot/util": "12.6.2",
+    "yargs": "17.6.0"
+  }
+}
