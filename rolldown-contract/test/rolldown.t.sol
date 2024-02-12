@@ -44,25 +44,33 @@ import {Utilities, MyERC20} from "./utils/Utilities.sol";
         assertEq(l1Update.order.length, 1);
         assert(l1Update.order[0] == RollDown.PendingRequestType.DEPOSIT);
         assertEq(l1Update.pendingDeposits.length, 1);
-        //assertEq(l1Update.pendingDeposits[0].depositRecipient, msg.sender);
+        assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
         assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
         assertEq(l1Update.pendingDeposits[0].amount, amount);
     }
 
     function testExecuteWithdrawal() public {
+        address payable alice = users[0];
+        token = new MyERC20();
         // Arrange
         uint256 amount = 1000;
         address tokenAddress = 0xa7c534E6dF83C118A858Cb6fb4C1e8B92b03464b;
 
         // Act
+        vm.startPrank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit RollDown.WithdrawAcceptedIntoQueue(1, alice, tokenAddress, amount);
         rollDown.withdraw(tokenAddress, amount);
+        vm.stopPrank();
+
+
         RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
 
         // Assert
         assertEq(l1Update.order.length, 1);
         assert(l1Update.order[0] == RollDown.PendingRequestType.WITHDRAWAL);
         assertEq(l1Update.pendingWithdraws.length, 1);
-        //assertEq(l1Update.pendingDeposits[0].depositRecipient, msg.sender);
+        assertEq(l1Update.pendingWithdraws[0].withdrawRecipient, alice);
         assertEq(l1Update.pendingWithdraws[0].tokenAddress, tokenAddress);
         assertEq(l1Update.pendingWithdraws[0].amount, amount);
     }
