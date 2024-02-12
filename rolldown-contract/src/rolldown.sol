@@ -123,7 +123,7 @@ contract RollDown {
          // TODO: uncomment
          // require transfer tokens from the sender to the contract
         require(
-            token.transferFrom(msg.sender, address(this), amount),
+            token.transferFrom(msg.sender, tokenAddress, amount),
             "Token transfer failed"
         );
 
