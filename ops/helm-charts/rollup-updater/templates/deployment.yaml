@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rollup-updater.name" . }}
+  labels: {{- include "rollup-updater.labels" . | nindent 4 }}
+    service: {{ include "rollup-updater.name" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "rollup-updater.selectorLabels" . | nindent 6 }}
+      service: {{ include "rollup-updater.name" . }}
+  serviceName: {{ include "rollup-updater.name" . }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "rollup-updater.labels" . | nindent 8 }}
+        service: {{ include "rollup-updater.name" . }}
+    spec:
+      containers:
+        - name: rollup-updater
+          image: "{{ .Values.image.repository}}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
+          {{- if .Values.command }}
+          command:
+            {{- range .Values.command }}
+            - {{ . }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.args }}
+          args:
+            {{- range .Values.args }}
+            - {{ . }}
+            {{- end }}
+          {{- end }}
+          env:
+            - name: WALLET_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "rollup-updater.name" . }}-secret"
+                  key: WALLET_PRIVATE_KEY
+            - name: ETH_CHAIN_URL
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "rollup-updater.name" . }}-secret"
+                  key: ETH_CHAIN_URL
+            {{- range $key, $val := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $val }}
+            {{- end }}
+          resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 10 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -13,13 +13,6 @@
 
 # Test binary, built with `go test -c`
 *.test
-mangata-updater/node_modules
-mangata-updater/build
-mangata-updater/.env
-
-mangata-sequencer/node_modules
-mangata-sequencer/build
-mangata-sequencer/.env
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out

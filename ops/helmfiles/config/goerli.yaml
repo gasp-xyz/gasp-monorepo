@@ -2,7 +2,7 @@ remoteCluster: true
 
 anvilEnabled: false
 aggregatorEnabled: true
-operatorEnabled: false
+finalizerEnabled: false
 updaterEnabled: false
 sequencerEnabled: false
 
