@@ -107,31 +107,25 @@ contract RollDown {
 
 
 
-    // }
-
     constructor() {
         lastProcessedUpdate_origin_l1 = 0;
         counter = 1;
         lastProcessedUpdate_origin_l2 = 0;
         owner = msg.sender;
     }
-     
-    function mat() public {
-    }
 
     function deposit(address tokenAddress, uint256 amount) public {
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
         address depositRecipient = msg.sender;
-        //bytes depositRecipient = msg.sender;
 
-        //IERC20 token = IERC20(tokenAddress);
-        // TODO: uncomment
-        // require transfer tokens from the sender to the contract
-        //require(
-        //    token.transferFrom(msg.sender, address(this), amount),
-        //    "Token transfer failed"
-        //);
+        IERC20 token = IERC20(tokenAddress);
+         // TODO: uncomment
+         // require transfer tokens from the sender to the contract
+        require(
+            token.transferFrom(msg.sender, address(this), amount),
+            "Token transfer failed"
+        );
 
         Deposit memory newDeposit = Deposit({
             depositRecipient: depositRecipient,
@@ -173,9 +167,6 @@ contract RollDown {
             inputArray.results.length
         );
 
-        //TODO: updates doesnt have to come in any particular order
-        //we just need to make sure that all processed request have consequtive ids
-        //and the lowest request id matches the lastProcessedUpdate_origin_l1 
         uint256 oderCounter = inputArray.results[0].requestId;
         for (uint256 idx = 1; idx < inputArray.results.length; idx++) {
             if (inputArray.results[idx].requestId != oderCounter + 1) {
