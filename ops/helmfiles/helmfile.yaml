@@ -42,7 +42,7 @@ releases:
         env: {{ .Values.env | toYaml | nindent 10 }}
   - name: avs-finalizer
     namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.finalizer }}
+    installed: {{ .Values.finalizerEnabled }}
     chart: ../helm-charts/eigen-node
     values:
       - image:
