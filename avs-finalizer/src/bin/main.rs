@@ -12,7 +12,7 @@ async fn main() -> Result<()> {
 
     color_eyre::install()?;
 
-    mangata_finalizer::start().await?;
+    avs_finalizer::start().await?;
 
     Ok(())
 }
