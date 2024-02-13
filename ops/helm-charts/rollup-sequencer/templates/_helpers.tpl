@@ -17,7 +17,7 @@ Common labels
 {{- define "rollup-sequencer.labels" -}}
 {{ include "rollup-sequencer.selectorLabels" . }}
 heritage: {{ .Release.Service }}
-component: rollup-eigen-layer
+component: rollup
 {{- end }}
 
 {{/*
