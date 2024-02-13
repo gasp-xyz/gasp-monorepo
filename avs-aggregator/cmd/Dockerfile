@@ -4,7 +4,11 @@ ARG TARGETARCH
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY go.work go.work.sum ./
+COPY avs-aggregator/go.mod ./avs-aggregator/
+COPY avs-aggregator/go.sum ./avs-aggregator/
+COPY avs-eigensdk-go/go.mod ./avs-eigensdk-go/
+COPY avs-eigensdk-go/go.sum ./avs-eigensdk-go/
 RUN go mod download && go mod tidy && go mod verify
 
 COPY . .

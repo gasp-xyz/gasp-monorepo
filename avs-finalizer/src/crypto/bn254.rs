@@ -62,7 +62,14 @@ impl BlsKeypair {
 
     pub fn operator_id(&self) -> OperatorId {
         let xy = self.public.xy().expect("should have public");
-        Keccak256::hash([xy.0.into_bigint().to_bytes_be(), xy.1.into_bigint().to_bytes_be()].concat().as_ref())
+        Keccak256::hash(
+            [
+                xy.0.into_bigint().to_bytes_be(),
+                xy.1.into_bigint().to_bytes_be(),
+            ]
+            .concat()
+            .as_ref(),
+        )
     }
 
     pub fn make_pubkey_registration_data(
@@ -77,9 +84,10 @@ impl BlsKeypair {
             &[0_u8; 24],
             &chain_id.to_be_bytes(),
             b"EigenLayer_BN254_Pubkey_Registration",
-        ].concat();
+        ]
+        .concat();
         let hash = Keccak256::hash(&bytes);
-        self.sign(&hash.as_bytes())
+        self.sign(hash.as_bytes())
     }
 
     pub fn sign(&self, msg: &[u8]) -> eyre::Result<BlsSignature> {

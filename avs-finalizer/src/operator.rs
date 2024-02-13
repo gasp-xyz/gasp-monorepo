@@ -103,7 +103,10 @@ impl Operator {
         Ok(())
     }
 
-    pub(crate) async fn execute_block(&self, block_number: BlockNumber) -> eyre::Result<(H256, H256)> {
+    pub(crate) async fn execute_block(
+        &self,
+        block_number: BlockNumber,
+    ) -> eyre::Result<(H256, H256)> {
         use sc_executor::{sp_wasm_interface::ExtendedHostFunctions, NativeExecutionDispatch};
         let res = execute_block::<
             Block,

@@ -7,39 +7,31 @@ pub use i_stake_registry_stub::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types,
+    non_camel_case_types
 )]
 pub mod i_stake_registry_stub {
     #[allow(deprecated)]
     fn __abi() -> ::ethers::core::abi::Abi {
         ::ethers::core::abi::ethabi::Contract {
             constructor: ::core::option::Option::None,
-            functions: ::core::convert::From::from([
-                (
-                    ::std::borrow::ToOwned::to_owned("updateStakes"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("updateStakes"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operators"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Address,
-                                        ),
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address[]"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
-                ),
-            ]),
+            functions: ::core::convert::From::from([(
+                ::std::borrow::ToOwned::to_owned("updateStakes"),
+                ::std::vec![::ethers::core::abi::ethabi::Function {
+                    name: ::std::borrow::ToOwned::to_owned("updateStakes"),
+                    inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                        name: ::std::borrow::ToOwned::to_owned("operators"),
+                        kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                            ::std::boxed::Box::new(::ethers::core::abi::ethabi::ParamType::Address,),
+                        ),
+                        internal_type: ::core::option::Option::Some(
+                            ::std::borrow::ToOwned::to_owned("address[]"),
+                        ),
+                    },],
+                    outputs: ::std::vec![],
+                    constant: ::core::option::Option::None,
+                    state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                },],
+            )]),
             events: ::std::collections::BTreeMap::new(),
             errors: ::std::collections::BTreeMap::new(),
             receive: false,
@@ -47,9 +39,8 @@ pub mod i_stake_registry_stub {
         }
     }
     ///The parsed JSON ABI of the contract.
-    pub static ISTAKEREGISTRYSTUB_ABI: ::ethers::contract::Lazy<
-        ::ethers::core::abi::Abi,
-    > = ::ethers::contract::Lazy::new(__abi);
+    pub static ISTAKEREGISTRYSTUB_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
+        ::ethers::contract::Lazy::new(__abi);
     pub struct IStakeRegistryStub<M>(::ethers::contract::Contract<M>);
     impl<M> ::core::clone::Clone for IStakeRegistryStub<M> {
         fn clone(&self) -> Self {
@@ -81,13 +72,11 @@ pub mod i_stake_registry_stub {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(
-                ::ethers::contract::Contract::new(
-                    address.into(),
-                    ISTAKEREGISTRYSTUB_ABI.clone(),
-                    client,
-                ),
-            )
+            Self(::ethers::contract::Contract::new(
+                address.into(),
+                ISTAKEREGISTRYSTUB_ABI.clone(),
+                client,
+            ))
         }
         ///Calls the contract's `updateStakes` (0xce977ec3) function
         pub fn update_stakes(
@@ -100,7 +89,8 @@ pub mod i_stake_registry_stub {
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for IStakeRegistryStub<M> {
+        for IStakeRegistryStub<M>
+    {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -116,7 +106,7 @@ pub mod i_stake_registry_stub {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "updateStakes", abi = "updateStakes(address[])")]
     pub struct UpdateStakesCall {

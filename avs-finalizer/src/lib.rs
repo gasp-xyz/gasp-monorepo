@@ -52,8 +52,12 @@ pub(crate) async fn check_registration(operator: &Operator) -> eyre::Result<()> 
     info!("{:#?}", status);
 
     match (status.registered_with_eigen, status.operator_id, local_id) {
-        (false, _, _) => Err(eyre!("Operator not registered with EigenLayer, use eigenlayer cli to register")),
-        (true, None, _) => Err(eyre!("Operator not registered with AVS, run OptInAvs first")),
+        (false, _, _) => Err(eyre!(
+            "Operator not registered with EigenLayer, use eigenlayer cli to register"
+        )),
+        (true, None, _) => Err(eyre!(
+            "Operator not registered with AVS, run OptInAvs first"
+        )),
         (true, Some(id), local) if id == local => Ok(()),
         _ => Err(eyre!(
             "Registered operator id ({:x}) & BlsKeypair.operator_id() ({:x}) mismatch",
