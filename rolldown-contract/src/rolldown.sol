@@ -40,6 +40,7 @@ contract RollDown {
         address tokenAddress,
         uint256 amount
     );
+    event DepositReversed
     event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
 
     // Pending requests storage and structs
@@ -182,6 +183,10 @@ contract RollDown {
             }
 
             if (element.updateType == UpdateType.DEPOSIT) {
+                process_pending_update_deposit(
+                    element.requestId,
+                    element.status
+                );
                 l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
                     element.requestId
                 );
@@ -270,6 +275,30 @@ contract RollDown {
 
             // Transfer tokens from the contract to the recipient
             token.transfer(newWithdraw.withdrawRecipient, newWithdraw.amount);
+
+            emit FundsWithdrawn(
+                newWithdraw.withdrawRecipient,
+                newWithdraw.tokenAddress,
+                newWithdraw.amount
+            );
+        }
+    }
+
+     function process_pending_update_deposit(
+        uint256 requestId,
+        bool success
+    ) private {
+        if (!success) {
+            Deposit memory newDeposit = deposits[requestId];
+
+            IERC20 token = IERC20(newDeposit.tokenAddress);
+            require(
+                token.balanceOf(address(this)) >= newDeposit.amount,
+                "Insufficient balance in the contract"
+            );
+
+            // Transfer tokens from the contract to the recipient
+            token.transfer(newDeposit.depositRecipient, newDeposit.amount);
 
             emit FundsWithdrawn(
                 newWithdraw.withdrawRecipient,
