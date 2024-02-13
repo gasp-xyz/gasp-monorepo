@@ -78,7 +78,8 @@ type Aggregator struct {
 	substrateClient         gsrpc.SubstrateAPI
 	taskResponseWindowBlock uint32
 
-	kicker *Kicker
+	kicker  *Kicker
+	updater *StakeUpdate
 }
 
 // NewAggregator creates a new Aggregator with the provided config.
@@ -130,10 +131,15 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		logger.Error("Cannot create substrate RPC", "url", c.SubstrateWsRpcUrl, "err", err)
 		return nil, err
 	}
-	
+
 	kicker, err := NewKicker(logger, *ethRpc, uint32(c.KickPeriod), uint32(c.BlockPeriod))
 	if err != nil {
 		logger.Error("Cannot create operator active list filter", "err", err)
+		return nil, err
+	}
+	updater, err := NewStakeUpdate(logger, *ethRpc, uint32(c.UpdatePeriod), uint32(c.BlockPeriod))
+	if err != nil {
+		logger.Error("Cannot create operator stakes updateer", "err", err)
 		return nil, err
 	}
 
@@ -148,6 +154,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		taskResponseWindowBlock: taskResponseWindowBlock,
 		blockPeriod:             uint32(c.BlockPeriod),
 		kicker:                  kicker,
+		updater:                 updater,
 	}, nil
 }
 
@@ -239,6 +246,7 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 	agg.tasksMu.Unlock()
 
 	agg.kicker.TriggerNewTask(taskIndex)
+	agg.updater.TriggerNewTask(taskIndex)
 
 	quorumThresholdPercentages := make([]uint32, len(newTask.QuorumNumbers))
 	for i, _ := range newTask.QuorumNumbers {
