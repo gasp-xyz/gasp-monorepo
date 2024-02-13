@@ -1,6 +1,6 @@
 go 1.21.4
 
 use (
-	./aggregator
-	./eigensdk-go
+	./avs-aggregator
+	./avs-eigensdk-go
 )

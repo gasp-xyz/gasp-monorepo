@@ -49,25 +49,25 @@ bindings-go: ## generates contract bindings
 	cd contracts && ./generate-go-bindings.sh
 
 bindings-rs: ## generates rust bindings
-	forge bind --bindings-path ./mangata-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX} 
+	forge bind --bindings-path ./avs-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX} 
 
 
 -----------------------------: ## 
 # We pipe all zapper logs through https://github.com/maoueh/zap-pretty so make sure to install it
 # TODO: piping to zap-pretty only works when zapper environment is set to production, unsure why
 ____OFFCHAIN_SOFTWARE___: ## 
-start-aggregator: ##
-	go run aggregator/cmd/main.go \
+start-avs-aggregator: ##
+	go run avs-aggregator/cmd/main.go \
 		--ecdsa-key-file tests/keys/aggregator.ecdsa.key.json \
 		2>&1 | zap-pretty
 
 # start-operator: ## 
-# 	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
+#	RUST_LOG=avs_finalizer=debug cargo run --manifest-path=avs-finalizer/Cargo.toml -- \
 # 		--bls-key-file tests/keys/test.bls.key.json \
 # 		--ecdsa-key-file tests/keys/test.ecdsa.key.json
 
-start-operator: ## 
-	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
+start-avs-finalizer: ## 
+	RUST_LOG=avs_finalizer=debug cargo run --manifest-path=avs-finalizer/Cargo.toml -- \
 		--ecdsa-ephemeral-key \
 		--bls-ephemeral-key \
 		--stake 100

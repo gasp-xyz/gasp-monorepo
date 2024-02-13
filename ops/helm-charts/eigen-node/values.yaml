@@ -13,7 +13,6 @@ rpcPort: 8090
 ## Additional args to use
 env:
   LOG_LEVEL: "info"
-  RUST_LOG: mangata_finalizer=debug
 
 envSecrets: {}
   # ECDSA_KEY_JSON: ''
@@ -22,7 +21,7 @@ envSecrets: {}
 nameOverride: ''
 
 image:
-  repository: mangatasolutions/eigen-aggregator
+  repository: mangatasolutions/avs-aggregator
   pullPolicy: Always
   ## Overrides the image tag whose default is the chart appVersion.
   tag: latest

@@ -13,38 +13,38 @@ permissions:
   id-token: write
 
 jobs:
-  build-aggregator-image:
-    name: Build aggregator Docker image
+  build-avs-aggregator-image:
+    name: Build avs-aggregator Docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/aggregator:${{ inputs.version }} -f aggregator/cmd/Dockerfile .
-  build-operator-image:
-    name: Build operator Docker image
+          docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/avs-aggregator:${{ inputs.version }} -f avs-aggregator/cmd/Dockerfile .
+  build-avs--image:
+    name: Build avs-finalizer Docker image
     uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
       version: ${{ inputs.version }}
-  build-mangata-updater-image:
-    name: Build mangata-updater Docker image
+  build-rollup-updater-image:
+    name: Build rollup-updater Docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/mangata-updater:${{ inputs.version }} ./mangata-updater
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/mangata-updater:${{ inputs.version }} ./mangata-updater
-  build-mangata-sequencer-image:
-    name: Build mangata-sequencer Docker image
+          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-updater:${{ inputs.version }} ./rollup-updater
+          docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-updater:${{ inputs.version }} ./rollup-updater
+  build-rollup-sequencer-image:
+    name: Build rollup-sequencer Docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/mangata-sequencer:${{ inputs.version }} ./mangata-sequencer
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/mangata-sequencer:${{ inputs.version }} ./mangata-sequencer
+          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
+          docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
