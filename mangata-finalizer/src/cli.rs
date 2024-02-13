@@ -42,7 +42,10 @@ pub struct CliArgs {
     pub bls_key_password: Option<String>,
 
     #[arg(long, env, default_value_t = false)]
-    pub register_at_startup: bool,
+    pub testnet: bool,
+
+    #[arg(long, env, default_value_t = 100, requires("testnet"))]
+    pub stake: u32,
 
     #[command(subcommand)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -80,10 +83,6 @@ pub enum Commands {
     OptInAvs,
     OptOutAvs,
     PrintStatus,
-    Testnet {
-        #[arg(long, default_value_t = 100)]
-        stake: u32,
-    },
 }
 
 impl CliArgs {
@@ -91,10 +90,10 @@ impl CliArgs {
         let args = CliArgs::parse();
         if args.chain_id != Chain::AnvilHardhat as u64 {
             let mut cmd = CliArgs::command();
-            if let Some(Commands::Testnet { .. }) = args.command {
+            if args.testnet {
                 cmd.error(
                     ErrorKind::ArgumentConflict,
-                    "testnet command is only available with anvil testnet `--chain-id=31337`",
+                    "testnet is only available with anvil testnet `--chain-id=31337`",
                 )
                 .exit();
             }

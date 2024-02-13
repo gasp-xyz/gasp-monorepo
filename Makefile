@@ -23,7 +23,7 @@ CHAIN_ID=31337
 BLS_COMPENDIUM_ADDR=0xc5a5C42992dECbae36851359345FE25997F5C42d
 BLS_OPERATOR_STATE_RETRIEVER_ADDR=0x67d269191c92Caf3cD7723F116c85e6E9bf55933
 AVS_SERVICE_MANAGER_ADDR=0x9E545E3C0baAB3E08CdfD552C960A1050f373042
-REGISTER_AT_STARTUP=true
+TESTNET=true
 
 AVS_KICK_PERIOD=3
 
@@ -53,39 +53,6 @@ bindings-rs: ## generates rust bindings
 
 
 -----------------------------: ## 
-
-__CLI__: ## 
-
-cli-setup-operator: cli-register-operator-with-eigenlayer cli-register-operator-with-avs ## registers operator with eigenlayer and avs
-
-cli-register-operator-with-eigenlayer: ## registers operator with delegationManager
-	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
-		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
-		--bls-key-file tests/keys/test.bls.key.json \
-		register
-
-cli-register-operator-with-avs: ## 
-	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
-		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
-		--bls-key-file tests/keys/test.bls.key.json \
-		opt-in-avs
-
-cli-deregister-operator-with-avs: ## 
-	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
-		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
-		--bls-key-file tests/keys/test.bls.key.json \
-		opt-out-avs
-
-cli-print-operator-status: ## 
-	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
-		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
-		--bls-key-file tests/keys/test.bls.key.json \
-		print-status
-
-send-fund: ## sends fund to the operator saved in tests/keys/test.ecdsa.key.json
-	cast send 0x860B6912C2d0337ef05bbC89b0C2CB6CbAEAB4A5 --value 10ether --private-key 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
-
------------------------------: ## 
 # We pipe all zapper logs through https://github.com/maoueh/zap-pretty so make sure to install it
 # TODO: piping to zap-pretty only works when zapper environment is set to production, unsure why
 ____OFFCHAIN_SOFTWARE___: ## 
@@ -97,14 +64,12 @@ start-aggregator: ##
 # start-operator: ## 
 # 	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
 # 		--bls-key-file tests/keys/test.bls.key.json \
-# 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
-# 		testnet
+# 		--ecdsa-key-file tests/keys/test.ecdsa.key.json
 
 start-operator: ## 
 	RUST_LOG=mangata_finalizer=debug cargo run --manifest-path=mangata-finalizer/Cargo.toml -- \
 		--ecdsa-ephemeral-key \
 		--bls-ephemeral-key \
-		testnet \
 		--stake 100
 
 -----------------------------: ## 

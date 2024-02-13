@@ -25,22 +25,19 @@ pub async fn start() -> eyre::Result<()> {
             cli::Commands::OptInAvs => operator.opt_in_avs().await?,
             cli::Commands::OptOutAvs => operator.opt_out_avs().await?,
             cli::Commands::PrintStatus => print_status(&operator).await?,
-            cli::Commands::Testnet { stake } => ephemeral_testnet(&operator, *stake, &cli).await?,
         }
+    } else if cli.testnet {
+        info!("Operator created and starting testnet setup");
+        ephemeral_testnet(&operator, cli.stake, &cli).await?;
     } else {
         info!("Operator created and starting AVS verification");
-        verify(operator, cli.register_at_startup).await?;
+        run_node(operator).await?;
     }
 
     Ok(())
 }
 
-pub async fn verify(operator: Operator, register: bool) -> eyre::Result<()> {
-    if register {
-        operator.register().await?;
-        operator.opt_in_avs().await?;
-    }
-
+pub async fn run_node(operator: Operator) -> eyre::Result<()> {
     check_registration(&operator).await?;
     operator.watch_new_tasks().await?;
 
@@ -55,8 +52,8 @@ pub(crate) async fn check_registration(operator: &Operator) -> eyre::Result<()> 
     info!("{:#?}", status);
 
     match (status.registered_with_eigen, status.operator_id, local_id) {
-        (false, _, _) => Err(eyre!("Operator not registered with EigenLayer")),
-        (true, None, _) => Err(eyre!("Operator not registered with AVS")),
+        (false, _, _) => Err(eyre!("Operator not registered with EigenLayer, use eigenlayer cli to register")),
+        (true, None, _) => Err(eyre!("Operator not registered with AVS, run OptInAvs first")),
         (true, Some(id), local) if id == local => Ok(()),
         _ => Err(eyre!(
             "Registered operator id ({:x}) & BlsKeypair.operator_id() ({:x}) mismatch",
@@ -90,6 +87,7 @@ pub(crate) async fn ephemeral_testnet(
     operator.opt_in_avs().await?;
     print_status(operator).await?;
 
+    info!("Testnet setup sucessfully, starting AVS verification");
     operator.watch_new_tasks().await?;
 
     Ok(())
