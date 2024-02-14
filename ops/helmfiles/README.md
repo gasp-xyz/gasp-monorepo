@@ -9,17 +9,17 @@
 gcloud container clusters get-credentials mangata-dev-alpha --region europe-west1
 ```
 
-## How to deploy to goerli
+## How to deploy to testnet
 
 ```bash
-# Set ENVIRONMENT variable to `goerli`
-export ENVIRONMENT=goerli
+# Set ENVIRONMENT variable to `testnet`
+export ENVIRONMENT=testnet
 # Set image tag to deploy
 export IMAGE_TAG=latest
 
-# Deploy to `goerli` environment
-helmfile sync -e goerli
+# Deploy to `testnet` environment
+helmfile sync -e testnet
 ```
 
-Aggregator will be available by this URL: <https://eigen-aggregator-goerli.mangata.online/>
-You can find all of the deployed resources in `eigen-goerli` namespace of GKE cluster.
+Aggregator will be available by this URL: <https://rollup-aggregator-testnet.mangata.online/>
+You can find all of the deployed resources in `rollup-testnet` namespace of GKE cluster.
