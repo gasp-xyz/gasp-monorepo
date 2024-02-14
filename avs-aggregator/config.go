@@ -21,6 +21,7 @@ type Config struct {
 
 	ServerAddressPort string
 	BlockPeriod       int
+	UpdatePeriod      int
 
 	BlsOperatorStateRetrieverAddr common.Address
 	BlsCompendiumAddr             common.Address
@@ -80,6 +81,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		ServerAddressPort:             ctx.GlobalString(config.AvsServerPortAddressFlag.Name),
 		BlockPeriod:                   ctx.GlobalInt(config.AvsBlockValidationPeriodFlag.Name),
 		KickPeriod:                    ctx.GlobalInt(config.AvsKickPeriodFlag.Name),
+		UpdatePeriod:                  ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
 		EthRpcUrl:                     ctx.GlobalString(config.EthRpcFlag.Name),
 		EthWsUrl:                      ctx.GlobalString(config.EthWsFlag.Name),
 		ChainId:                       chainId,
@@ -107,4 +109,5 @@ var Flags = []cli.Flag{
 	config.EcdsaKeyPasswordFlag,
 	config.AvsBlockValidationPeriodFlag,
 	config.AvsKickPeriodFlag,
+	config.AvsUpdateStakePeriodFlag,
 }

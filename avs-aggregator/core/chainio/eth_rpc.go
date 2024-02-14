@@ -156,6 +156,7 @@ func NewEthRpc(
 		avsRegistryContractBindings.RegistryCoordinator,
 		avsRegistryContractBindings.BlsOperatorStateRetriever,
 		avsRegistryContractBindings.StakeRegistry,
+		avsRegistryContractBindings.IndexRegistry,
 		logger,
 		ethHttpClient,
 	)
