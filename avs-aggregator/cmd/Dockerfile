@@ -4,10 +4,12 @@ ARG TARGETARCH
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
-RUN go mod download && go mod tidy && go mod verify
+# COPY go.mod go.sum ./
+# RUN go mod download && go mod tidy && go mod verify
 
-COPY . .
+COPY go.work go.work.sum ./
+COPY avs-aggregator ./avs-aggregator
+COPY avs-eigensdk-go ./avs-eigensdk-go
 
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /avs-aggregator avs-aggregator/cmd/main.go
 

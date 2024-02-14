@@ -1,26 +1,27 @@
 use aes::{
-    cipher::{self, InnerIvInit, KeyInit, StreamCipherCore},
+    cipher::{InnerIvInit, KeyInit, StreamCipherCore},
     Aes128,
 };
 use ark_ec::{AffineRepr, CurveGroup};
-use ark_ff::fields::PrimeField;
+use ark_ff::{fields::PrimeField, Field};
 use eth_keystore::{CryptoJson, KdfparamsType};
-use ethers::signers::LocalWallet;
-use eyre::{eyre, Report};
-use scrypt::{scrypt, Params as ScryptParams};
+use ethers::{core::rand::thread_rng, signers::LocalWallet};
+use eyre::{eyre, Ok, Report};
+use scrypt::{password_hash::rand_core::RngCore, scrypt, Params as ScryptParams};
 use serde::{Deserialize, Serialize};
-use sha3::{Digest, Keccak256};
+use sp_runtime::traits::{Hash, Keccak256};
 use std::{fmt::Debug, fs::File, io::Read, path::Path};
 
 use crate::crypto::bn254::{BlsKeypair, PrivateKey, PublicKey};
 
+#[derive(Default)]
 pub struct EncodedKeystore {
-    keystore: Keystore,
-    password: String,
+    encrypted_keystore: Option<Keystore>,
+    password: Option<String>,
 }
 
 impl EncodedKeystore {
-    pub fn from_path<P>(path: &P, password: String) -> eyre::Result<Self>
+    pub fn from_path<P>(path: &P, password: Option<String>) -> eyre::Result<Self>
     where
         P: AsRef<Path>,
     {
@@ -28,17 +29,38 @@ impl EncodedKeystore {
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
         let keystore: Keystore = serde_json::from_str(&contents)?;
-        Ok(Self { keystore, password })
+        Ok(Self {
+            encrypted_keystore: Some(keystore),
+            password,
+        })
     }
 
-    pub fn from_string(contents: String, password: String) -> eyre::Result<Self> {
+    pub fn from_string(contents: String, password: Option<String>) -> eyre::Result<Self> {
         let keystore: Keystore = serde_json::from_str(&contents)?;
-        Ok(Self { keystore, password })
+        Ok(Self {
+            encrypted_keystore: Some(keystore),
+            password,
+        })
+    }
+
+    pub fn random() -> eyre::Result<Self> {
+        Ok(Self::default())
     }
 
     pub fn into_bls_keypair(self) -> eyre::Result<BlsKeypair> {
-        let secret = decrypt_key(self.keystore, self.password)?;
-        let fr = PrivateKey::from_be_bytes_mod_order(&secret);
+        let fr = if let Some(keystore) = self.encrypted_keystore {
+            let secret = decrypt_key(keystore, self.password.unwrap_or_default())?;
+            PrivateKey::from_be_bytes_mod_order(&secret)
+        } else {
+            let rnd = &mut [0_u8; 32];
+            let mut rng = thread_rng();
+            loop {
+                rng.fill_bytes(rnd);
+                if let Some(key) = PrivateKey::from_random_bytes(rnd) {
+                    break key;
+                }
+            }
+        };
         let p = PublicKey::generator() * fr;
 
         Ok(BlsKeypair {
@@ -48,8 +70,12 @@ impl EncodedKeystore {
     }
 
     pub fn into_wallet(self) -> eyre::Result<LocalWallet> {
-        let secret = decrypt_key(self.keystore, self.password)?;
-        Ok(LocalWallet::from_bytes(&secret)?)
+        if let Some(keystore) = self.encrypted_keystore {
+            let secret = decrypt_key(keystore, self.password.unwrap_or_default())?;
+            Ok(LocalWallet::from_bytes(&secret)?)
+        } else {
+            Ok(LocalWallet::new(&mut thread_rng()))
+        }
     }
 }
 
@@ -83,12 +109,13 @@ where
     };
 
     // Derive the MAC from the derived key and ciphertext.
-    let derived_mac = Keccak256::new()
-        .chain_update(&key[16..32])
-        .chain_update(&keystore.crypto.ciphertext)
-        .finalize();
+    let derived_mac = Keccak256::hash(
+        [&key[16..32], &keystore.crypto.ciphertext]
+            .concat()
+            .as_ref(),
+    );
 
-    if derived_mac.as_slice() != keystore.crypto.mac.as_slice() {
+    if derived_mac.as_bytes() != keystore.crypto.mac.as_slice() {
         return Err(eyre!("MacMismatch"));
     }
 
@@ -107,9 +134,9 @@ struct Aes128Ctr {
 }
 
 impl Aes128Ctr {
-    fn new(key: &[u8], iv: &[u8]) -> Result<Self, cipher::InvalidLength> {
+    fn new(key: &[u8], iv: &[u8]) -> eyre::Result<Self> {
         let cipher = aes::Aes128::new_from_slice(key).unwrap();
-        let inner = ctr::CtrCore::inner_iv_slice_init(cipher, iv).unwrap();
+        let inner = ctr::CtrCore::inner_iv_slice_init(cipher, iv)?;
         Ok(Self { inner })
     }
 

@@ -77,6 +77,8 @@ type Aggregator struct {
 	taskResponsesMu         sync.RWMutex
 	substrateClient         gsrpc.SubstrateAPI
 	taskResponseWindowBlock uint32
+
+	kicker *Kicker
 }
 
 // NewAggregator creates a new Aggregator with the provided config.
@@ -128,6 +130,12 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		logger.Error("Cannot create substrate RPC", "url", c.SubstrateWsRpcUrl, "err", err)
 		return nil, err
 	}
+	
+	kicker, err := NewKicker(logger, *ethRpc, uint32(c.KickPeriod), uint32(c.BlockPeriod))
+	if err != nil {
+		logger.Error("Cannot create operator active list filter", "err", err)
+		return nil, err
+	}
 
 	return &Aggregator{
 		logger:                  logger,
@@ -139,6 +147,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		substrateClient:         *substrateRpc,
 		taskResponseWindowBlock: taskResponseWindowBlock,
 		blockPeriod:             uint32(c.BlockPeriod),
+		kicker:                  kicker,
 	}, nil
 }
 
@@ -174,10 +183,8 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 }
 
 func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg.BlsAggregationServiceResponse) {
-	if blsAggServiceResp.Err != nil {
-		agg.logger.Warn("Task expired", "err", blsAggServiceResp.Err)
-		// panicing to help with debugging (fail fast), but we shouldn't panic if we run this in production
-		// panic(blsAggServiceResp.Err)
+	if blsAggServiceResp.Err != nil && blsAggServiceResp.Err != blsagg.TaskExpiredError {
+		agg.logger.Warn("bls aggregation error", "err", blsAggServiceResp.Err)
 		return
 	}
 	nonSignerPubkeys := []taskmanager.BN254G1Point{}
@@ -199,9 +206,7 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		NonSignerStakeIndices:        blsAggServiceResp.NonSignerStakeIndices,
 	}
 
-	agg.logger.Info("Threshold reached. Sending aggregated response onchain.",
-		"taskIndex", blsAggServiceResp.TaskIndex,
-	)
+	agg.logger.Info("sending aggregated response onchain.", "taskIndex", blsAggServiceResp.TaskIndex)
 	agg.tasksMu.RLock()
 	task := agg.tasks[blsAggServiceResp.TaskIndex]
 	agg.tasksMu.RUnlock()
@@ -232,6 +237,8 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 	agg.tasksMu.Lock()
 	agg.tasks[taskIndex] = newTask
 	agg.tasksMu.Unlock()
+
+	agg.kicker.TriggerNewTask(taskIndex)
 
 	quorumThresholdPercentages := make([]uint32, len(newTask.QuorumNumbers))
 	for i, _ := range newTask.QuorumNumbers {

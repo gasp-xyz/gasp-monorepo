@@ -51,6 +51,13 @@ var (
 		Value:    2,
 		EnvVar:   "AVS_BLOCK_VALIDATION_PERIOD",
 	}
+	AvsKickPeriodFlag = cli.IntFlag{
+		Name:     "avs-kick-period",
+		Usage:    "Period of active OPs check per tasks created",
+		Required: false,
+		Value:    50,
+		EnvVar:   "AVS_KICK_PERIOD",
+	}
 
 	// Deployment
 	BlsOperatorStateRetrieverFlag = cli.StringFlag{
