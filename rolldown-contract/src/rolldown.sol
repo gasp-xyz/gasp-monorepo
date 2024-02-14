@@ -40,7 +40,7 @@ contract RollDown {
         address tokenAddress,
         uint256 amount
     );
-    event DepositReversed(
+    event FailedDepositRefund(
         address depositRecipient,
         address tokenAddress,
         uint256 amount
@@ -93,7 +93,7 @@ contract RollDown {
 
 		struct RequestResult {
 			uint256 requestId;
-      UpdateType updateType;
+            UpdateType updateType;
 			bool status;
 		}
 
@@ -269,21 +269,21 @@ contract RollDown {
         bool success
     ) private {
         if (success) {
-            Withdraw memory newWithdraw = withdraws[requestId];
+            Withdraw memory withdraw = withdraws[requestId];
 
-            IERC20 token = IERC20(newWithdraw.tokenAddress);
+            IERC20 token = IERC20(withdraw.tokenAddress);
             require(
-                token.balanceOf(address(this)) >= newWithdraw.amount,
+                token.balanceOf(address(this)) >= withdraw.amount,
                 "Insufficient balance in the contract"
             );
 
             // Transfer tokens from the contract to the recipient
-            token.transfer(newWithdraw.withdrawRecipient, newWithdraw.amount);
+            token.transfer(withdrawRequest.withdrawRecipient, withdraw.amount);
 
             emit FundsWithdrawn(
-                newWithdraw.withdrawRecipient,
-                newWithdraw.tokenAddress,
-                newWithdraw.amount
+                withdraw.withdrawRecipient,
+                withdraw.tokenAddress,
+                withdraw.amount
             );
         }
     }
@@ -293,21 +293,21 @@ contract RollDown {
         bool success
     ) private {
         if (!success) {
-            Deposit memory newDeposit = deposits[requestId];
+            Deposit memory deposit = deposits[requestId];
 
-            IERC20 token = IERC20(newDeposit.tokenAddress);
+            IERC20 token = IERC20(deposit.tokenAddress);
             require(
-                token.balanceOf(address(this)) >= newDeposit.amount,
+                token.balanceOf(address(this)) >= deposit.amount,
                 "Insufficient balance in the contract"
             );
 
             // Transfer tokens from the contract to the recipient
-            token.transfer(newDeposit.depositRecipient, newDeposit.amount);
+            token.transfer(deposit.depositRecipient, deposit.amount);
 
-            emit DepositReversed(
-                newDeposit.depositRecipient,
-                newDeposit.tokenAddress,
-                newDeposit.amount
+            emit FailedDepositRefund(
+                deposit.depositRecipient,
+                deposit.tokenAddress,
+                deposit.amount
             );
         }
     }
