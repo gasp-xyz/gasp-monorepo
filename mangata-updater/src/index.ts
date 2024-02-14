@@ -19,9 +19,9 @@ const mangataContractAddress = process.env
 
 const forceSubmit = process.env.FORCE_SUBMIT;
 
-async function queryUpdates(api: ApiPromise, blockNumber: bigint | undefined) {
+async function queryUpdates(api: ApiPromise, blockNumber?: bigint | undefined) {
   if (blockNumber === undefined) {
-    return await api.rpc.rolldown.pending_updates();
+    return await (api.rpc as any).rolldown.pending_updates();
   } else {
     let hash = await api.rpc.chain.getBlockHash(blockNumber);
     let apiAt = await api.at(hash);
@@ -59,7 +59,6 @@ async function main() {
     onLogs: async (logs) => {
       for (const log of logs) {
 
-
         const pendingUpdates = await queryUpdates(api, log.blockNumber);
         let l2Update = decodeAbiParameters(eigenContractAbi.find((e: any) => e.name === "update_l1_from_l2")!.inputs, pendingUpdates.toHex());
 
@@ -77,6 +76,23 @@ async function main() {
       }
     },
   });
+
+  if (forceSubmit === "true") {
+    const pendingUpdates = await queryUpdates(api);
+    let l2Update = decodeAbiParameters(eigenContractAbi.find((e: any) => e.name === "update_l1_from_l2")!.inputs, pendingUpdates.toHex());
+
+    // Executes TX on ETH with all pending_updates with hashes
+    // Here we need to write to mangata contract
+    const storageHash = await walletClient.writeContract({
+      chain: goerli, // TODO: this needs the chain in order to work properly
+      abi: mangataContractAbi,
+      address: mangataContractAddress,
+      functionName: "update_l1_from_l2",
+      args: [l2Update as any],
+    });
+
+    await publicClient.waitForTransactionReceipt({ hash: storageHash });
+  }
 
   // We need to  unwatch if server is down or restarted to prevent leaks
   process.on("SIGINT", async () => {

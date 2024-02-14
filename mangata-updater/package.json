@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@mangata-finance/sdk": "2.1.2-rc-sdk.2",
-    "@mangata-finance/types": "2.0.1-feature-3rdparty-rewards-merge.13",
+    "@mangata-finance/types": "^2.2.3-eth-rollup-develop.1",
     "@polkadot/api": "10.9.1",
     "dotenv": "16.3.1",
     "viem": "1.19.11"
