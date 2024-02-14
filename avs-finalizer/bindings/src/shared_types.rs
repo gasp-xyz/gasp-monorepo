@@ -203,7 +203,7 @@ pub struct Task {
     pub quorum_numbers: ::ethers::core::types::Bytes,
     pub quorum_threshold_percentage: u32,
 }
-///`TaskResponse(uint32,bytes32)`
+///`TaskResponse(uint32,bytes32,bytes32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -219,8 +219,9 @@ pub struct Task {
 pub struct TaskResponse {
     pub reference_task_index: u32,
     pub block_hash: [u8; 32],
+    pub storage_proof_hash: [u8; 32],
 }
-///`TaskResponseMetadata(uint32,bytes32)`
+///`TaskResponseMetadata(uint32,bytes32,uint96[],uint96[])`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -236,6 +237,8 @@ pub struct TaskResponse {
 pub struct TaskResponseMetadata {
     pub task_responsed_block: u32,
     pub hash_of_non_signers: [u8; 32],
+    pub quroum_stake_totals: ::std::vec::Vec<u128>,
+    pub quroum_stake_signed: ::std::vec::Vec<u128>,
 }
 ///`Operator(bytes32,uint8)`
 #[derive(
@@ -324,6 +327,24 @@ pub struct MiddlewareTimes {
     pub stalest_update_block: u32,
     pub latest_serve_until_block: u32,
 }
+///`OperatorStakeUpdate(uint32,uint32,uint96)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+)]
+pub struct OperatorStakeUpdate {
+    pub update_block_number: u32,
+    pub next_update_block_number: u32,
+    pub stake: u128,
+}
 ///`DeprecatedStructQueuedWithdrawal(address[],uint256[],address,(address,uint96),uint32,address)`
 #[derive(
     Clone,
@@ -361,6 +382,23 @@ pub struct DeprecatedStructQueuedWithdrawal {
 pub struct DeprecatedStructWithdrawerAndNonce {
     pub withdrawer: ::ethers::core::types::Address,
     pub nonce: u128,
+}
+///`StrategyAndWeightingMultiplier(address,uint96)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+)]
+pub struct StrategyAndWeightingMultiplier {
+    pub strategy: ::ethers::core::types::Address,
+    pub multiplier: u128,
 }
 ///`FuzzInterface(address,string[])`
 #[derive(

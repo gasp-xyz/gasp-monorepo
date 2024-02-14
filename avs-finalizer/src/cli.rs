@@ -1,19 +1,14 @@
-use clap::{ArgGroup, Args, Parser, Subcommand};
-use ethers::types::Address;
+use clap::{error::ErrorKind, Args, CommandFactory, Parser, Subcommand};
+use ethers::types::{Address, Chain};
 use eyre::Ok;
 use serde::Serialize;
 use std::{fmt::Debug, path::PathBuf};
+use tracing::warn;
 
 use crate::crypto::keystore::EncodedKeystore;
 
-/// Simple program to greet a person
 #[derive(Parser, Serialize)]
 #[command(author, version, about, long_about = None)]
-#[clap(group(
-    ArgGroup::new("ecdsa-key")
-        .required(true)
-        .args(&["ecdsa_key_file", "ecdsa_key_json"]),
-))]
 pub struct CliArgs {
     #[arg(long, env)]
     pub avs_service_manager_addr: Address,
@@ -36,18 +31,21 @@ pub struct CliArgs {
 
     #[command(flatten)]
     pub ecdsa_key: EcdsaKey,
-    #[arg(long, env, default_value_t = String::new())]
+    #[arg(long, env)]
     #[serde(skip)]
-    pub ecdsa_key_password: String,
+    pub ecdsa_key_password: Option<String>,
 
     #[command(flatten)]
     pub bls_key: BlsKey,
-    #[arg(long, env, default_value_t = String::new())]
+    #[arg(long, env)]
     #[serde(skip)]
-    pub bls_key_password: String,
+    pub bls_key_password: Option<String>,
 
     #[arg(long, env, default_value_t = false)]
-    pub register_at_startup: bool,
+    pub testnet: bool,
+
+    #[arg(long, env, default_value_t = 100, requires("testnet"))]
+    pub stake: u32,
 
     #[command(subcommand)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -58,25 +56,30 @@ pub struct CliArgs {
 #[group(required = true, multiple = false)]
 pub struct EcdsaKey {
     #[arg(long, env)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ecdsa_key_file: Option<PathBuf>,
     #[arg(long, env)]
     #[serde(skip)]
     pub ecdsa_key_json: Option<String>,
+    #[arg(long, env)]
+    pub ecdsa_ephemeral_key: bool,
 }
 
 #[derive(Args, Serialize, Debug)]
 #[group(required = true, multiple = false)]
 pub struct BlsKey {
     #[arg(long, env)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bls_key_file: Option<PathBuf>,
     #[arg(long, env)]
     #[serde(skip)]
     pub bls_key_json: Option<String>,
+    #[arg(long, env)]
+    pub bls_ephemeral_key: bool,
 }
 
 #[derive(Debug, Subcommand, Serialize)]
 pub enum Commands {
-    Register,
     OptInAvs,
     OptOutAvs,
     PrintStatus,
@@ -85,42 +88,51 @@ pub enum Commands {
 impl CliArgs {
     pub fn build() -> Self {
         let args = CliArgs::parse();
-        match args.command {
-            Some(Commands::Register) if args.chain_id != 31337 => {
-                panic!("Commands only supported on local testnet")
+        if args.chain_id != Chain::AnvilHardhat as u64 {
+            let mut cmd = CliArgs::command();
+            if args.testnet {
+                cmd.error(
+                    ErrorKind::ArgumentConflict,
+                    "testnet is only available with anvil testnet `--chain-id=31337`",
+                )
+                .exit();
             }
-            _ => (),
-        };
+            if args.ecdsa_key.ecdsa_ephemeral_key || args.bls_key.bls_ephemeral_key {
+                warn!("!!! Runing operator with epehemeral keys !!!")
+            }
+        }
         args
     }
 
     pub fn get_ecdsa_keystore(&self) -> eyre::Result<EncodedKeystore> {
-        let keystore = if let Some(path) = &self.ecdsa_key.ecdsa_key_file {
-            EncodedKeystore::from_path(path, self.ecdsa_key_password.to_owned())
-        } else {
-            EncodedKeystore::from_string(
-                self.ecdsa_key
-                    .ecdsa_key_json
-                    .clone()
-                    .expect("either one must be set"),
-                self.ecdsa_key_password.to_owned(),
-            )
-        }?;
-        Ok(keystore)
+        get_keystore(
+            &self.ecdsa_key.ecdsa_key_file,
+            &self.ecdsa_key.ecdsa_key_json,
+            self.ecdsa_key.ecdsa_ephemeral_key,
+            &self.ecdsa_key_password,
+        )
     }
-
     pub fn get_bls_keystore(&self) -> eyre::Result<EncodedKeystore> {
-        let keystore = if let Some(path) = &self.bls_key.bls_key_file {
-            EncodedKeystore::from_path(path, self.bls_key_password.to_owned())
-        } else {
-            EncodedKeystore::from_string(
-                self.bls_key
-                    .bls_key_json
-                    .clone()
-                    .expect("either one must be set"),
-                self.bls_key_password.to_owned(),
-            )
-        }?;
-        Ok(keystore)
+        get_keystore(
+            &self.bls_key.bls_key_file,
+            &self.bls_key.bls_key_json,
+            self.bls_key.bls_ephemeral_key,
+            &self.bls_key_password,
+        )
     }
+}
+
+fn get_keystore(
+    path: &Option<PathBuf>,
+    content: &Option<String>,
+    is_random: bool,
+    password: &Option<String>,
+) -> eyre::Result<EncodedKeystore> {
+    let keystore = match (path, content, is_random) {
+        (_, _, true) => EncodedKeystore::random(),
+        (Some(path), _, _) => EncodedKeystore::from_path(path, password.clone()),
+        (_, Some(content), _) => EncodedKeystore::from_string(content.to_owned(), password.clone()),
+        _ => panic!("one of the key args must be set"),
+    }?;
+    Ok(keystore)
 }

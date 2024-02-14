@@ -2,31 +2,30 @@ use super::{
     full_extensions, rpc_err_handler, setup::build_executor, state::State,
     state_machine_call_with_proof,
 };
+use eyre::eyre;
 use node_primitives::BlockNumber;
 use sc_executor::sp_wasm_interface::HostFunctions;
+use sp_core::H256;
 use sp_runtime::{
     generic::SignedBlock,
-    traits::{Block as BlockT, Header as HeaderT, NumberFor},
+    traits::{Block as BlockT, Hash, Header as HeaderT, Keccak256, NumberFor},
 };
 use std::{fmt::Debug, str::FromStr};
 use substrate_rpc_client::{ws_client, ChainApi};
 use tracing::instrument;
 
 #[instrument(skip(uri))]
-pub async fn execute_block<Block, HostFns>(
-    uri: &str,
-    at: BlockNumber,
-) -> sc_cli::Result<Block::Hash>
+pub async fn execute_block<Block, HostFns>(uri: &str, at: BlockNumber) -> eyre::Result<(H256, H256)>
 where
     Block: BlockT + serde::de::DeserializeOwned,
     <Block::Hash as FromStr>::Err: Debug,
-    Block::Hash: serde::de::DeserializeOwned,
+    Block::Hash: serde::de::DeserializeOwned + Into<H256>,
     Block::Header: serde::de::DeserializeOwned,
     <NumberFor<Block> as TryInto<u64>>::Error: Debug,
     HostFns: HostFunctions,
 {
     let executor = build_executor::<HostFns>();
-    let rpc = ws_client(uri).await?;
+    let rpc = ws_client(uri).await.map_err(|e| eyre!(e))?;
 
     let execute_at_state = State::for_block_number::<Block>(uri, at).await?;
     let execute_at = execute_at_state.at::<Block>()?;
@@ -40,7 +39,8 @@ where
         Some(execute_at),
     )
     .await
-    .map_err(rpc_err_handler)?
+    .map_err(rpc_err_handler)
+    .map_err(|e| eyre!(e))?
     .expect("header exists, block should also exist; qed")
     .block;
 
@@ -53,7 +53,7 @@ where
     // for now, hardcoded for the sake of simplicity. We might customize them one day.
     let payload = block.clone().encode();
 
-    let _ = state_machine_call_with_proof::<Block, HostFns>(
+    let (proof, _) = state_machine_call_with_proof::<Block, HostFns>(
         &ext,
         &mut Default::default(),
         &executor,
@@ -62,6 +62,7 @@ where
         full_extensions(executor.clone()),
         None,
     )?;
+    let hash = Keccak256::hash_of(&proof);
 
-    Ok(block.hash())
+    Ok((block.hash().into(), hash))
 }

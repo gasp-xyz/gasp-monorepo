@@ -9,8 +9,7 @@ use ethers::{
     core::types::{H256, U256},
     types::Address,
 };
-
-use sha3::{Digest, Keccak256};
+use sp_runtime::traits::{Hash, Keccak256};
 
 pub type PrivateKey = Fr;
 pub type PublicKey = G1Affine;
@@ -63,15 +62,14 @@ impl BlsKeypair {
 
     pub fn operator_id(&self) -> OperatorId {
         let xy = self.public.xy().expect("should have public");
-        let hash = Keccak256::new()
-            .chain_update(xy.0.into_bigint().to_bytes_be())
-            .chain_update(xy.1.into_bigint().to_bytes_be())
-            .finalize();
-        let slice: &[u8; 32] = hash
-            .as_slice()
-            .try_into()
-            .expect("incorrect size for Keccak256 and H256");
-        slice.into()
+        Keccak256::hash(
+            [
+                xy.0.into_bigint().to_bytes_be(),
+                xy.1.into_bigint().to_bytes_be(),
+            ]
+            .concat()
+            .as_ref(),
+        )
     }
 
     pub fn make_pubkey_registration_data(
@@ -80,16 +78,16 @@ impl BlsKeypair {
         bls_pubkey_comp_addr: Address,
         chain_id: u64,
     ) -> eyre::Result<BlsSignature> {
-        let hash = Keccak256::new()
-            .chain_update(operator_addr.as_bytes())
-            .chain_update(bls_pubkey_comp_addr.as_bytes())
-            // make sure chainId is 32 bytes
-            .chain_update([0_u8; 24])
-            .chain_update(chain_id.to_be_bytes())
-            .chain_update(b"EigenLayer_BN254_Pubkey_Registration")
-            .finalize();
-
-        self.sign(&hash)
+        let bytes = [
+            operator_addr.as_bytes(),
+            bls_pubkey_comp_addr.as_bytes(),
+            &[0_u8; 24],
+            &chain_id.to_be_bytes(),
+            b"EigenLayer_BN254_Pubkey_Registration",
+        ]
+        .concat();
+        let hash = Keccak256::hash(&bytes);
+        self.sign(hash.as_bytes())
     }
 
     pub fn sign(&self, msg: &[u8]) -> eyre::Result<BlsSignature> {

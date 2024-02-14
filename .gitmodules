@@ -8,3 +8,6 @@
 [submodule "rolldown-contract/lib/openzeppelin-contracts"]
 	path = rolldown-contract/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "avs-eigensdk-go"]
+	path = avs-eigensdk-go
+	url = https://github.com/mangata-finance/eigensdk-go

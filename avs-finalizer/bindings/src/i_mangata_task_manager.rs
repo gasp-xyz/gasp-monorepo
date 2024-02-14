@@ -65,71 +65,6 @@ pub mod i_mangata_task_manager {
                     },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("raiseAndResolveChallenge"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("raiseAndResolveChallenge",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("task"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                ],),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned(
-                                        "struct IMangataTaskManager.Task",
-                                    ),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("taskResponse"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                ],),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned(
-                                        "struct IMangataTaskManager.TaskResponse",
-                                    ),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("taskResponseMetadata",),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                ],),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned(
-                                        "struct IMangataTaskManager.TaskResponseMetadata",
-                                    ),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned(
-                                    "pubkeysOfNonSigningOperators",
-                                ),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                        ],),
-                                    ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("struct BN254.G1Point[]"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("taskNumber"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("taskNumber"),
@@ -172,52 +107,21 @@ pub mod i_mangata_task_manager {
                     },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("TaskChallengedSuccessfully"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("TaskChallengedSuccessfully",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("taskIndex"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                indexed: true,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("challenger"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: true,
-                            },
-                        ],
-                        anonymous: false,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("TaskChallengedUnsuccessfully"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("TaskChallengedUnsuccessfully",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("taskIndex"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                indexed: true,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("challenger"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: true,
-                            },
-                        ],
-                        anonymous: false,
-                    },],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("TaskCompleted"),
                     ::std::vec![::ethers::core::abi::ethabi::Event {
                         name: ::std::borrow::ToOwned::to_owned("TaskCompleted"),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
-                            name: ::std::borrow::ToOwned::to_owned("taskIndex"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                            indexed: true,
-                        },],
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("taskIndex"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("blockHash"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                indexed: true,
+                            },
+                        ],
                         anonymous: false,
                     },],
                 ),
@@ -231,6 +135,7 @@ pub mod i_mangata_task_manager {
                                 kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
                                 ],),
                                 indexed: false,
                             },
@@ -239,6 +144,16 @@ pub mod i_mangata_task_manager {
                                 kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Array(
+                                        ::std::boxed::Box::new(
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                        ),
+                                    ),
+                                    ::ethers::core::abi::ethabi::ParamType::Array(
+                                        ::std::boxed::Box::new(
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                        ),
+                                    ),
                                 ],),
                                 indexed: false,
                             },
@@ -314,26 +229,6 @@ pub mod i_mangata_task_manager {
                 .method_hash([245, 201, 137, 157], ())
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `raiseAndResolveChallenge` (0x3cd27f64) function
-        pub fn raise_and_resolve_challenge(
-            &self,
-            task: Task,
-            task_response: TaskResponse,
-            task_response_metadata: TaskResponseMetadata,
-            pubkeys_of_non_signing_operators: ::std::vec::Vec<G1Point>,
-        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
-            self.0
-                .method_hash(
-                    [60, 210, 127, 100],
-                    (
-                        task,
-                        task_response,
-                        task_response_metadata,
-                        pubkeys_of_non_signing_operators,
-                    ),
-                )
-                .expect("method not found (this should never happen)")
-        }
         ///Calls the contract's `taskNumber` (0x72d18e8d) function
         pub fn task_number(&self) -> ::ethers::contract::builders::ContractCall<M, u32> {
             self.0
@@ -345,26 +240,6 @@ pub mod i_mangata_task_manager {
             &self,
         ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, NewTaskCreatedFilter>
         {
-            self.0.event()
-        }
-        ///Gets the contract's `TaskChallengedSuccessfully` event
-        pub fn task_challenged_successfully_filter(
-            &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            TaskChallengedSuccessfullyFilter,
-        > {
-            self.0.event()
-        }
-        ///Gets the contract's `TaskChallengedUnsuccessfully` event
-        pub fn task_challenged_unsuccessfully_filter(
-            &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            TaskChallengedUnsuccessfullyFilter,
-        > {
             self.0.event()
         }
         ///Gets the contract's `TaskCompleted` event
@@ -430,54 +305,12 @@ pub mod i_mangata_task_manager {
         Eq,
         Hash,
     )]
-    #[ethevent(
-        name = "TaskChallengedSuccessfully",
-        abi = "TaskChallengedSuccessfully(uint32,address)"
-    )]
-    pub struct TaskChallengedSuccessfullyFilter {
-        #[ethevent(indexed)]
-        pub task_index: u32,
-        #[ethevent(indexed)]
-        pub challenger: ::ethers::core::types::Address,
-    }
-    #[derive(
-        Clone,
-        ::ethers::contract::EthEvent,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethevent(
-        name = "TaskChallengedUnsuccessfully",
-        abi = "TaskChallengedUnsuccessfully(uint32,address)"
-    )]
-    pub struct TaskChallengedUnsuccessfullyFilter {
-        #[ethevent(indexed)]
-        pub task_index: u32,
-        #[ethevent(indexed)]
-        pub challenger: ::ethers::core::types::Address,
-    }
-    #[derive(
-        Clone,
-        ::ethers::contract::EthEvent,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethevent(name = "TaskCompleted", abi = "TaskCompleted(uint32)")]
+    #[ethevent(name = "TaskCompleted", abi = "TaskCompleted(uint32,bytes32)")]
     pub struct TaskCompletedFilter {
         #[ethevent(indexed)]
         pub task_index: u32,
+        #[ethevent(indexed)]
+        pub block_hash: [u8; 32],
     }
     #[derive(
         Clone,
@@ -493,7 +326,7 @@ pub mod i_mangata_task_manager {
     )]
     #[ethevent(
         name = "TaskResponded",
-        abi = "TaskResponded((uint32,bytes32),(uint32,bytes32))"
+        abi = "TaskResponded((uint32,bytes32,bytes32),(uint32,bytes32,uint96[],uint96[]))"
     )]
     pub struct TaskRespondedFilter {
         pub task_response: TaskResponse,
@@ -512,8 +345,6 @@ pub mod i_mangata_task_manager {
     )]
     pub enum IMangataTaskManagerEvents {
         NewTaskCreatedFilter(NewTaskCreatedFilter),
-        TaskChallengedSuccessfullyFilter(TaskChallengedSuccessfullyFilter),
-        TaskChallengedUnsuccessfullyFilter(TaskChallengedUnsuccessfullyFilter),
         TaskCompletedFilter(TaskCompletedFilter),
         TaskRespondedFilter(TaskRespondedFilter),
     }
@@ -523,14 +354,6 @@ pub mod i_mangata_task_manager {
         ) -> ::core::result::Result<Self, ::ethers::core::abi::Error> {
             if let Ok(decoded) = NewTaskCreatedFilter::decode_log(log) {
                 return Ok(IMangataTaskManagerEvents::NewTaskCreatedFilter(decoded));
-            }
-            if let Ok(decoded) = TaskChallengedSuccessfullyFilter::decode_log(log) {
-                return Ok(IMangataTaskManagerEvents::TaskChallengedSuccessfullyFilter(
-                    decoded,
-                ));
-            }
-            if let Ok(decoded) = TaskChallengedUnsuccessfullyFilter::decode_log(log) {
-                return Ok(IMangataTaskManagerEvents::TaskChallengedUnsuccessfullyFilter(decoded));
             }
             if let Ok(decoded) = TaskCompletedFilter::decode_log(log) {
                 return Ok(IMangataTaskManagerEvents::TaskCompletedFilter(decoded));
@@ -545,12 +368,6 @@ pub mod i_mangata_task_manager {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
                 Self::NewTaskCreatedFilter(element) => ::core::fmt::Display::fmt(element, f),
-                Self::TaskChallengedSuccessfullyFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::TaskChallengedUnsuccessfullyFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
                 Self::TaskCompletedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::TaskRespondedFilter(element) => ::core::fmt::Display::fmt(element, f),
             }
@@ -559,16 +376,6 @@ pub mod i_mangata_task_manager {
     impl ::core::convert::From<NewTaskCreatedFilter> for IMangataTaskManagerEvents {
         fn from(value: NewTaskCreatedFilter) -> Self {
             Self::NewTaskCreatedFilter(value)
-        }
-    }
-    impl ::core::convert::From<TaskChallengedSuccessfullyFilter> for IMangataTaskManagerEvents {
-        fn from(value: TaskChallengedSuccessfullyFilter) -> Self {
-            Self::TaskChallengedSuccessfullyFilter(value)
-        }
-    }
-    impl ::core::convert::From<TaskChallengedUnsuccessfullyFilter> for IMangataTaskManagerEvents {
-        fn from(value: TaskChallengedUnsuccessfullyFilter) -> Self {
-            Self::TaskChallengedUnsuccessfullyFilter(value)
         }
     }
     impl ::core::convert::From<TaskCompletedFilter> for IMangataTaskManagerEvents {
@@ -618,29 +425,6 @@ pub mod i_mangata_task_manager {
         abi = "getTaskResponseWindowBlock()"
     )]
     pub struct GetTaskResponseWindowBlockCall;
-    ///Container type for all input parameters for the `raiseAndResolveChallenge` function with signature `raiseAndResolveChallenge((uint256,uint32,bytes,uint32),(uint32,bytes32),(uint32,bytes32),(uint256,uint256)[])` and selector `0x3cd27f64`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "raiseAndResolveChallenge",
-        abi = "raiseAndResolveChallenge((uint256,uint32,bytes,uint32),(uint32,bytes32),(uint32,bytes32),(uint256,uint256)[])"
-    )]
-    pub struct RaiseAndResolveChallengeCall {
-        pub task: Task,
-        pub task_response: TaskResponse,
-        pub task_response_metadata: TaskResponseMetadata,
-        pub pubkeys_of_non_signing_operators: ::std::vec::Vec<G1Point>,
-    }
     ///Container type for all input parameters for the `taskNumber` function with signature `taskNumber()` and selector `0x72d18e8d`
     #[derive(
         Clone,
@@ -670,7 +454,6 @@ pub mod i_mangata_task_manager {
     pub enum IMangataTaskManagerCalls {
         CreateNewTask(CreateNewTaskCall),
         GetTaskResponseWindowBlock(GetTaskResponseWindowBlockCall),
-        RaiseAndResolveChallenge(RaiseAndResolveChallengeCall),
         TaskNumber(TaskNumberCall),
     }
     impl ::ethers::core::abi::AbiDecode for IMangataTaskManagerCalls {
@@ -687,11 +470,6 @@ pub mod i_mangata_task_manager {
             {
                 return Ok(Self::GetTaskResponseWindowBlock(decoded));
             }
-            if let Ok(decoded) =
-                <RaiseAndResolveChallengeCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::RaiseAndResolveChallenge(decoded));
-            }
             if let Ok(decoded) = <TaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::TaskNumber(decoded));
             }
@@ -705,9 +483,6 @@ pub mod i_mangata_task_manager {
                 Self::GetTaskResponseWindowBlock(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::RaiseAndResolveChallenge(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
                 Self::TaskNumber(element) => ::ethers::core::abi::AbiEncode::encode(element),
             }
         }
@@ -717,7 +492,6 @@ pub mod i_mangata_task_manager {
             match self {
                 Self::CreateNewTask(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetTaskResponseWindowBlock(element) => ::core::fmt::Display::fmt(element, f),
-                Self::RaiseAndResolveChallenge(element) => ::core::fmt::Display::fmt(element, f),
                 Self::TaskNumber(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
@@ -730,11 +504,6 @@ pub mod i_mangata_task_manager {
     impl ::core::convert::From<GetTaskResponseWindowBlockCall> for IMangataTaskManagerCalls {
         fn from(value: GetTaskResponseWindowBlockCall) -> Self {
             Self::GetTaskResponseWindowBlock(value)
-        }
-    }
-    impl ::core::convert::From<RaiseAndResolveChallengeCall> for IMangataTaskManagerCalls {
-        fn from(value: RaiseAndResolveChallengeCall) -> Self {
-            Self::RaiseAndResolveChallenge(value)
         }
     }
     impl ::core::convert::From<TaskNumberCall> for IMangataTaskManagerCalls {

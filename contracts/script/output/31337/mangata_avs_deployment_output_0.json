@@ -25,7 +25,7 @@
   "permissions": {
     "aggregator": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
     "mangataChurner": "0x0000000000000000000000000000000000000000",
-    "mangataEjector": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "mangataEjector": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
     "mangataMultisig": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "mangataOwner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "mangataUpgrader": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"

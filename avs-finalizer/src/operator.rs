@@ -37,7 +37,7 @@ pub struct OperatorStatus {
 
 #[derive(Debug)]
 pub struct Operator {
-    client: Arc<Client>,
+    pub client: Arc<Client>,
     avs_contracts: AvsContracts,
     el_contracts: ElContracts,
     bls_keypair: BlsKeypair,
@@ -81,12 +81,13 @@ impl Operator {
 
         while let Some(Ok(event)) = stream.next().await {
             info!("Executing a Block for task: {:?}", event);
-            let block = self.execute_block(event.task.block_number.as_u32()).await?;
+            let proofs = self.execute_block(event.task.block_number.as_u32()).await?;
             debug!("Block executed successfully");
 
             let payload = TaskResponse {
                 reference_task_index: event.task_index,
-                block_hash: block.as_fixed_bytes().to_owned(),
+                block_hash: proofs.0.as_fixed_bytes().to_owned(),
+                storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
             };
 
             let response = self
@@ -102,9 +103,12 @@ impl Operator {
         Ok(())
     }
 
-    pub(crate) async fn execute_block(&self, block_number: BlockNumber) -> eyre::Result<H256> {
+    pub(crate) async fn execute_block(
+        &self,
+        block_number: BlockNumber,
+    ) -> eyre::Result<(H256, H256)> {
         use sc_executor::{sp_wasm_interface::ExtendedHostFunctions, NativeExecutionDispatch};
-        let block = execute_block::<
+        let res = execute_block::<
             Block,
             ExtendedHostFunctions<
                 sp_io::SubstrateHostFunctions,
@@ -113,7 +117,7 @@ impl Operator {
         >(&self.substrate_client_uri, block_number)
         .await?;
 
-        Ok(block)
+        Ok(res)
     }
 
     pub(crate) fn operator_id(&self) -> OperatorId {
