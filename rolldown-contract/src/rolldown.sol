@@ -40,7 +40,11 @@ contract RollDown {
         address tokenAddress,
         uint256 amount
     );
-    event DepositReversed
+    event DepositReversed(
+        address depositRecipient,
+        address tokenAddress,
+        uint256 amount
+    );
     event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
 
     // Pending requests storage and structs
@@ -300,10 +304,10 @@ contract RollDown {
             // Transfer tokens from the contract to the recipient
             token.transfer(newDeposit.depositRecipient, newDeposit.amount);
 
-            emit FundsWithdrawn(
-                newWithdraw.withdrawRecipient,
-                newWithdraw.tokenAddress,
-                newWithdraw.amount
+            emit DepositReversed(
+                newDeposit.depositRecipient,
+                newDeposit.tokenAddress,
+                newDeposit.amount
             );
         }
     }
