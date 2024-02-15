@@ -69,4 +69,4 @@ testem.log
 Thumbs.db
 
 # custom
-ops/docker-compose-example/data
+ops/**/data
