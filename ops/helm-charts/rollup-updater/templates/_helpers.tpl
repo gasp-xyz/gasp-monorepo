@@ -17,7 +17,7 @@ Common labels
 {{- define "rollup-updater.labels" -}}
 {{ include "rollup-updater.selectorLabels" . }}
 heritage: {{ .Release.Service }}
-component: rollup-eigen-layer
+component: rollup
 {{- end }}
 
 {{/*

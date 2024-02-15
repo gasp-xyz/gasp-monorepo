@@ -10,10 +10,10 @@ environments:
     values:
     - config/default.yaml
     - config/dev.yaml
-  goerli:
+  testnet:
     values:
      - config/default.yaml
-     - config/goerli.yaml
+     - config/testnet.yaml
 ---
 helmDefaults:
   kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
@@ -21,7 +21,7 @@ helmDefaults:
 
 releases:
   - name: anvil
-    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.anvilEnabled }}
     chart: ../helm-charts/anvil-testnet
     values:
@@ -29,9 +29,9 @@ releases:
         remoteCluster: {{ .Values.remoteCluster }}
 
   - name: avs-aggregator
-    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.aggregatorEnabled }}
-    chart: ../helm-charts/eigen-node
+    chart: ../helm-charts/rollup-node
     values:
       - image:
           repository: mangatasolutions/avs-aggregator
@@ -41,9 +41,9 @@ releases:
         envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.env | toYaml | nindent 10 }}
   - name: avs-finalizer
-    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.finalizerEnabled }}
-    chart: ../helm-charts/eigen-node
+    chart: ../helm-charts/rollup-node
     values:
       - image:
           repository: mangatasolutions/avs-finalizer
@@ -57,7 +57,7 @@ releases:
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.env | toYaml | nindent 10 }}
   - name: rollup-updater
-    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.updaterEnabled }}
     chart: ../helm-charts/rollup-updater
     values:
@@ -68,7 +68,7 @@ releases:
         walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
         ethChainUrl: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-ethereum-rpc-url
   - name: rollup-sequencer
-    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.sequencerEnabled }}
     chart: ../helm-charts/rollup-sequencer
     values:

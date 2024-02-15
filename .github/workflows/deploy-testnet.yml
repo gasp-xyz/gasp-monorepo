@@ -1,4 +1,4 @@
-name: Deploy to Goerli
+name: Deploy to testnet
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ jobs:
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
   
-  deploy-goerli:
+  deploy-rollup-testnet:
     needs: [init, build-and-test]
     runs-on: ubuntu-latest
     steps:
@@ -55,17 +55,17 @@ jobs:
         with:
           step: start
           token: ${{ secrets.GITHUB_TOKEN }}
-          env: goerli
+          env: testnet
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
       
       - run: |
-          export ENVIRONMENT=goerli
+          export ENVIRONMENT=testnet
           export IMAGE_TAG=${{ needs.init.outputs.GLOBAL_VERSION }}
           
           # https://dev.to/derlin/helmfile-difference-between-sync-and-apply-helm-3-28o1
           
           export HELM_DIFF_THREE_WAY_MERGE=true
-          helmfile apply -e goerli
+          helmfile apply -e testnet
         working-directory: ops/helmfiles
       
       - name: Update the GitHub Deployment status
@@ -77,4 +77,4 @@ jobs:
           status: ${{ job.status }}
           env: ${{ steps.deployment.outputs.env }}
           deployment_id: ${{ steps.deployment.outputs.deployment_id }}
-          env_url: "https://eigen-operator-rpc-goerli.mangata.online"
+          env_url: "https://avs-operator-rpc-testnet.mangata.online"

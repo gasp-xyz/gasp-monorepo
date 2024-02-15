@@ -22,13 +22,6 @@ type AvsWriterer interface {
 		quorumThresholdPercentage uint32,
 		quorumNumbers []byte,
 	) (taskmanager.IMangataTaskManagerTask, uint32, error)
-	RaiseChallenge(
-		ctx context.Context,
-		task taskmanager.IMangataTaskManagerTask,
-		taskResponse taskmanager.IMangataTaskManagerTaskResponse,
-		taskResponseMetadata taskmanager.IMangataTaskManagerTaskResponseMetadata,
-		pubkeysOfNonSigningOperators []taskmanager.BN254G1Point,
-	) (*types.Receipt, error)
 	SendAggregatedResponse(ctx context.Context,
 		task taskmanager.IMangataTaskManagerTask,
 		taskResponse taskmanager.IMangataTaskManagerTaskResponse,
@@ -101,32 +94,5 @@ func (w *AvsWriter) SendAggregatedResponse(ctx context.Context, task taskmanager
 	}
 	w.logger.Infof("tx hash: %s", tx.Hash().String())
 	w.logger.Info("sent aggregated response with the AVS's task manager")
-	return receipt, nil
-}
-
-func (w *AvsWriter) RaiseChallenge(
-	ctx context.Context,
-	task taskmanager.IMangataTaskManagerTask,
-	taskResponse taskmanager.IMangataTaskManagerTaskResponse,
-	taskResponseMetadata taskmanager.IMangataTaskManagerTaskResponseMetadata,
-	pubkeysOfNonSigningOperators []taskmanager.BN254G1Point,
-) (*types.Receipt, error) {
-	w.logger.Info("raising a challange with the AVS's task manager")
-	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
-	if err != nil {
-		return nil, err
-	}
-	tx, err := w.AvsContractBindings.TaskManager.RaiseAndResolveChallenge(noSendTxOpts, task, taskResponse, taskResponseMetadata, pubkeysOfNonSigningOperators)
-	if err != nil {
-		w.logger.Errorf("Error assembling RaiseAndResolveChallenge tx")
-		return nil, err
-	}
-
-	receipt, err := w.txMgr.Send(ctx, tx)
-	if err != nil {
-		return nil, errors.New("failed to send tx with err: " + err.Error())
-	}
-	w.logger.Infof("tx hash: %s", tx.Hash().String())
-	w.logger.Info("sent RaiseAndResolveChallenge with the AVS's task manager")
 	return receipt, nil
 }

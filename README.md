@@ -21,6 +21,13 @@ go install github.com/maoueh/zap-pretty@latest
 This simple session illustrates the basic flow of the AVS. The makefile commands are hardcoded for a single avs-finalizer. For more avs-finalizers you would need to modify setup script to distribute mock ERC20 tokens and deposit into AVS per avs-finalizer.
 See [0_AnvilSetup.s.sol](contracts/script/0_AnvilSetup.s.sol#L88) script for more info.
 
+Init submodules and update deps,
+
+```bash
+  git submodule init
+  git submodule update
+```
+
 
 Start anvil in a separate terminal:
 
