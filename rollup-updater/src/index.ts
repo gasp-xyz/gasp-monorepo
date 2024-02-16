@@ -8,7 +8,6 @@ import { ApiPromise } from '@polkadot/api';
 import { decodeAbiParameters } from "viem";
 import { eigenContractAbi } from "./eigenAbi.js";
 import * as fs from 'fs';
-import { send } from "process";
 
 type ContractAddress = `0x${string}`;
 
