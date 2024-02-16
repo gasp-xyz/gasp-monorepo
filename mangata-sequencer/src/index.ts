@@ -34,13 +34,15 @@ async function main() {
         functionName: "getUpdateForL2",
       }) as any;
 
+      console.log(data)
+
       data.order = data.order.map((e: any) => {
         switch (e) {
-          case 1: {
-            return "WITHDRAWAL";
-          }
           case 0: {
             return "DEPOSIT";
+          }
+          case 1: {
+            return "WITHDRAWAL";
           }
           case 2: {
             return "CANCEL_RESOLUTION";
