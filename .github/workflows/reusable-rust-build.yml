@@ -30,9 +30,9 @@ jobs:
           toolchain: ${{ inputs.rust-version }}
           override: true
           components: rustfmt, clippy
-      - uses: arduino/setup-protoc@v2
+      - uses: arduino/setup-protoc@v3
       - name: Check formatting
-        working-directory: mangata-finalizer
+        working-directory: avs-finalizer
         run: cargo fmt --all -- --check
   
   clippy-check:
@@ -46,7 +46,7 @@ jobs:
           toolchain: ${{ inputs.rust-version }}
           override: true
           components: rustfmt, clippy
-      - uses: arduino/setup-protoc@v2
+      - uses: arduino/setup-protoc@v3
       
       - uses: google-github-actions/auth@v2
         with:
@@ -57,12 +57,12 @@ jobs:
         with:
           bucket: mangata-node-ci-cache
           path: |
-            ${{ github.workspace }}/mangata-finalizer/target
+            ${{ github.workspace }}/avs-finalizer/target
             ~/.cargo/bin/
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: cargo-eigen-clippy-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-rollup-clippy-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
       
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -74,7 +74,7 @@ jobs:
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
       
       - name: Run clippy check
-        working-directory: mangata-finalizer
+        working-directory: avs-finalizer
         run: cargo clippy -- -D warnings
       # - name: Install cargo check tools
         # run: |
@@ -84,7 +84,7 @@ jobs:
           # cargo install --locked cargo-audit || true
           # cargo install --locked cargo-pants || true
       # - name: Check
-        # working-directory: mangata-finalizer
+        # working-directory: avs-finalizer
         # run: |
           # cargo deny check
           # cargo outdated --exit-code 1
@@ -104,7 +104,7 @@ jobs:
           toolchain: ${{ inputs.rust-version }}
           override: true
           components: rustfmt, clippy
-      - uses: arduino/setup-protoc@v2
+      - uses: arduino/setup-protoc@v3
       
       - uses: google-github-actions/auth@v2
         with:
@@ -115,12 +115,12 @@ jobs:
         with:
           bucket: mangata-node-ci-cache
           path: |
-            ${{ github.workspace }}/mangata-finalizer/target
+            ${{ github.workspace }}/avs-finalizer/target
             ~/.cargo/bin/
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: cargo-eigen-tests-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-rollup-tests-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
       
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -132,7 +132,7 @@ jobs:
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
       
       - name: Run tests
-        working-directory: mangata-finalizer
+        working-directory: avs-finalizer
         run: cargo test
 
   build-node-image:
@@ -146,7 +146,7 @@ jobs:
           toolchain: ${{ inputs.rust-version }}
           override: true
           components: rustfmt, clippy
-      - uses: arduino/setup-protoc@v2
+      - uses: arduino/setup-protoc@v3
       
       - uses: google-github-actions/auth@v2
         with:
@@ -157,12 +157,12 @@ jobs:
         with:
           bucket: mangata-node-ci-cache
           path: |
-            ${{ github.workspace }}/mangata-finalizer/target
+            ${{ github.workspace }}/avs-finalizer/target
             ~/.cargo/bin/
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: cargo-eigen-compile-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-rollup-compile-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
       
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -174,12 +174,12 @@ jobs:
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
       
       - name: Run cargo build
-        working-directory: mangata-finalizer
+        working-directory: avs-finalizer
         run: cargo build --release
       
       - name: Create Docker image
-        working-directory: mangata-finalizer
+        working-directory: avs-finalizer
         run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/operator:${{ inputs.version }} -f src/bin/Dockerfile .
+          docker buildx build --push --platform linux/amd64 -t mangatasolutions/avs-finalizer:${{ inputs.version }} -f src/bin/Dockerfile .

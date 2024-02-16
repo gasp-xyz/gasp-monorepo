@@ -61,13 +61,13 @@ jobs:
           location: europe-west1
 
       - name: Delete Kubernetes namespace with resources for fungible environment
-        run: kubectl delete namespace eigen-pr-${{ github.event.number }}
+        run: kubectl delete namespace rollup-pr-${{ github.event.number }}
       
       - name: Delete GitHub Deployment environment
         if: always()
         uses: bobheadxi/deployments@v1.4.0
         with:
-          step: delete-env
+          step: deactivate-env
           token: ${{ secrets.GITHUB_TOKEN }}
           env: pr-${{ github.event.number }}
 

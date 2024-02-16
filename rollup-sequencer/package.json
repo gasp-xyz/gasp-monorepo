@@ -1,0 +1,28 @@
+{
+  "name": "rollup-sequencer",
+  "version": "1.0.0",
+  "description": "Rollup Sequencer",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "rimraf ./build && npx tsc",
+    "lint": "npx @biomejs/biome check --apply src/",
+    "start": "node build/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@biomejs/biome": "1.4.1",
+    "@types/node": "20.10.3",
+    "rimraf": "5.0.5",
+    "typescript": "5.3.2"
+  },
+  "dependencies": {
+    "@mangata-finance/sdk": "^2.2.0-feature-rpc-method.1",
+    "@mangata-finance/types": "^2.2.2-feature-rpc-method.1",
+    "@polkadot/api": "^10.9.1",
+    "dotenv": "^16.3.1",
+    "viem": "^1.19.11"
+  }
+}

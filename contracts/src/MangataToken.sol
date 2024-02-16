@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.12;
 
-import "@openzeppelin/contracts@5.0.1/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Mangata is ERC20 {
     constructor() ERC20("Mangata", "MGA") {

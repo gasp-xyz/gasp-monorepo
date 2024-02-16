@@ -1,0 +1,80 @@
+name: Deploy to testnet
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  deployments: write
+
+jobs:
+  init:
+    name: Set global version
+    runs-on: ubuntu-latest
+    outputs:
+      GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
+    steps:
+      - name: Set global version
+        id: set_vars
+        run: echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
+
+  build-and-test:
+    needs: [init]
+    name: Build
+    uses: ./.github/workflows/reusable-build-and-test.yml
+    secrets: inherit
+    with:
+      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+  
+  deploy-rollup-testnet:
+    needs: [init, build-and-test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jkroepke/setup-vals@v1.1.3
+      - name: Setup helmfile
+        uses: mamezou-tech/setup-helmfile@v1.3.0
+        with:
+          install-kubectl: no
+          install-helm: no
+          additional-helm-plugins: https://github.com/jkroepke/helm-secrets --version v4.1.1,https://github.com/aslafy-z/helm-git --version 0.14.0
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Set up GKE credentials
+        uses: google-github-actions/get-gke-credentials@v0.8.2
+        with:
+          cluster_name: mangata-dev-alpha
+          location: europe-west1
+      
+      - name: Create a GitHub Deployment
+        uses: bobheadxi/deployments@v1.4.0
+        id: deployment
+        with:
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: testnet
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+      
+      - run: |
+          export ENVIRONMENT=testnet
+          export IMAGE_TAG=${{ needs.init.outputs.GLOBAL_VERSION }}
+          
+          # https://dev.to/derlin/helmfile-difference-between-sync-and-apply-helm-3-28o1
+          
+          export HELM_DIFF_THREE_WAY_MERGE=true
+          helmfile apply -e testnet
+        working-directory: ops/helmfiles
+      
+      - name: Update the GitHub Deployment status
+        uses: bobheadxi/deployments@v1.4.0
+        if: always()
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          status: ${{ job.status }}
+          env: ${{ steps.deployment.outputs.env }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          env_url: "https://avs-operator-rpc-testnet.mangata.online"

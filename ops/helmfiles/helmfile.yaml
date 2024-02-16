@@ -10,10 +10,10 @@ environments:
     values:
     - config/default.yaml
     - config/dev.yaml
-  goerli:
+  testnet:
     values:
      - config/default.yaml
-     - config/goerli.yaml
+     - config/testnet.yaml
 ---
 helmDefaults:
   kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
@@ -21,59 +21,59 @@ helmDefaults:
 
 releases:
   - name: anvil
-    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.anvilEnabled }}
     chart: ../helm-charts/anvil-testnet
     values:
       - environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
 
-  - name: eigen-aggregator
-    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+  - name: avs-aggregator
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.aggregatorEnabled }}
-    chart: ../helm-charts/eigen-node
+    chart: ../helm-charts/rollup-node
     values:
       - image:
-          repository: mangatasolutions/aggregator
+          repository: mangatasolutions/avs-aggregator
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.env | toYaml | nindent 10 }}
-  - name: eigen-operator  
-    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.operatorEnabled }}
-    chart: ../helm-charts/eigen-node
+  - name: avs-finalizer
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.finalizerEnabled }}
+    chart: ../helm-charts/rollup-node
     values:
       - image:
-          repository: mangatasolutions/operator
+          repository: mangatasolutions/avs-finalizer
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         rpcPort: 9010
-        enableServiceMonitorCollectors: {{ .Values.operatorEnableServiceMonitorCollectors }}
+        enableServiceMonitorCollectors: {{ .Values.finalizerEnableServiceMonitorCollectors }}
         prometheus:
           enabled: true
-        envSecrets: {{ .Values.operatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.env | toYaml | nindent 10 }}
-  - name: mangata-updater
-    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+  - name: rollup-updater
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.updaterEnabled }}
-    chart: ../helm-charts/mangata-updater
+    chart: ../helm-charts/rollup-updater
     values:
       - image:
-          repository: mangatasolutions/mangata-updater
+          repository: mangatasolutions/rollup-updater
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
         ethChainUrl: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-ethereum-rpc-url
-  - name: mangata-sequencer
-    namespace: 'eigen-{{ requiredEnv "ENVIRONMENT" }}'
+  - name: rollup-sequencer
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.sequencerEnabled }}
-    chart: ../helm-charts/mangata-sequencer
+    chart: ../helm-charts/rollup-sequencer
     values:
       - image:
-          repository: mangatasolutions/mangata-sequencer
+          repository: mangatasolutions/rollup-sequencer
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         mnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic

@@ -53,8 +53,6 @@ contract AnvilSetup is Script, Utils, Test {
         require(configChainId == CHAIN_ID, "You are on the wrong chain for this config, only Anvil 31337 allowed");
         require(configChainId == currentChainId, "You are on the wrong chain for this config");
 
-        address operator = stdJson.readAddress(configData, ".permissions.operator");
-
         vm.startBroadcast();
 
         erc20Mock = new ERC20Mock();
@@ -77,20 +75,8 @@ contract AnvilSetup is Script, Utils, Test {
         IStrategy[] memory strats = new IStrategy[](1);
         strats[0] = erc20MockStrategy;
         strategyManager.addStrategiesToDepositWhitelist(strats);
-
-        erc20Mock.mint(operator, 100);
     
         vm.stopBroadcast();
-
-        // deposit into strategy for operator
-        // if you get `Insufficient funds`, use `cast send 0x860B6912C2d0337ef05bbC89b0C2CB6CbAEAB4A5 --value 10ether --private-key 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6` before
-        // tests/keys/test.ecdsa.key.json
-        uint256 operatorPrivateKey = vm.parseUint("0x113d0ef74250eab659fd828e62a33ca72fcb22948897b2ed66b1fa695a8b9313");
-        vm.startBroadcast(operatorPrivateKey);
-        erc20Mock.approve(address(strategyManager), 100);
-        strategyManager.depositIntoStrategy(erc20MockStrategy, erc20Mock, 100);
-        vm.stopBroadcast();
-
         _writeOutput();
     }
 
