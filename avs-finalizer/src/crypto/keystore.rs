@@ -5,9 +5,10 @@ use aes::{
 use ark_ec::{AffineRepr, CurveGroup};
 use ark_ff::{fields::PrimeField, Field};
 use eth_keystore::{CryptoJson, KdfparamsType};
-use ethers::{core::rand::thread_rng, signers::LocalWallet};
+use ethers::signers::LocalWallet;
 use eyre::{eyre, Ok, Report};
-use scrypt::{password_hash::rand_core::RngCore, scrypt, Params as ScryptParams};
+use rand::{thread_rng, RngCore};
+use scrypt::{scrypt, Params as ScryptParams};
 use serde::{Deserialize, Serialize};
 use sp_runtime::traits::{Hash, Keccak256};
 use std::{fmt::Debug, fs::File, io::Read, path::Path};

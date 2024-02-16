@@ -12,13 +12,13 @@ import (
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/services/avsregistry"
 	blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
-	pubkeycompserv "github.com/Layr-Labs/eigensdk-go/services/pubkeycompendium"
+	operatorpubkeys "github.com/Layr-Labs/eigensdk-go/services/operatorpubkeys"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/MangataTaskManager"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 )
@@ -71,9 +71,9 @@ type Aggregator struct {
 	avsWriter        chainio.AvsWriterer
 	// aggregation related fields
 	blsAggregationService   blsagg.BlsAggregationService
-	tasks                   map[types.TaskIndex]taskmanager.IMangataTaskManagerTask
+	tasks                   map[types.TaskIndex]taskmanager.IFinalizerTaskManagerTask
 	tasksMu                 sync.RWMutex
-	taskResponses           map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse
+	taskResponses           map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IFinalizerTaskManagerTaskResponse
 	taskResponsesMu         sync.RWMutex
 	substrateClient         gsrpc.SubstrateAPI
 	taskResponseWindowBlock uint32
@@ -90,9 +90,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 	}
 
 	ethRpc, err := chainio.NewEthRpc(
-		c.ServiceManagerAddr,
-		c.BlsOperatorStateRetrieverAddr,
-		c.BlsCompendiumAddr,
+		c.AvsRegistryCoordinatorAddr,
 		c.EthRpcUrl,
 		c.EthWsUrl,
 		c.SignerFn,
@@ -122,8 +120,8 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	pubkeyCompendiumService := pubkeycompserv.NewPubkeyCompendiumInMemory(context.Background(), ethRpc.ElClients.ElChainSubscriber, ethRpc.ElClients.ElChainReader, logger)
-	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.ElClients.AvsRegistryChainReader, ethRpc.ElClients.ElChainReader, pubkeyCompendiumService, logger)
+	pubkeyService := operatorpubkeys.NewOperatorPubkeysServiceInMemory(context.Background(), ethRpc.ElClients.AvsRegistryChainSubscriber, ethRpc.ElClients.AvsRegistryChainReader, logger)
+	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.ElClients.AvsRegistryChainReader, pubkeyService, logger)
 	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, logger)
 
 	substrateRpc, err := gsrpc.NewSubstrateAPI(c.SubstrateWsRpcUrl)
@@ -148,8 +146,8 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		serverIpPortAddr:        c.ServerAddressPort,
 		avsWriter:               ethRpc.AvsWriter,
 		blsAggregationService:   blsAggregationService,
-		tasks:                   make(map[types.TaskIndex]taskmanager.IMangataTaskManagerTask),
-		taskResponses:           make(map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse),
+		tasks:                   make(map[types.TaskIndex]taskmanager.IFinalizerTaskManagerTask),
+		taskResponses:           make(map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IFinalizerTaskManagerTaskResponse),
 		substrateClient:         *substrateRpc,
 		taskResponseWindowBlock: taskResponseWindowBlock,
 		blockPeriod:             uint32(c.BlockPeriod),

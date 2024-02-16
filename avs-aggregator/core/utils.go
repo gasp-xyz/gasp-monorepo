@@ -5,15 +5,15 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/MangataTaskManager"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	"golang.org/x/crypto/sha3"
 )
 
-// this hardcodes abi.encode() for taskmanager.IMangataTaskManagerTaskResponse
+// this hardcodes abi.encode() for taskmanager.IFinalizerTaskManagerTaskResponse
 // unclear why abigen doesn't provide this out of the box...
-func AbiEncodeTaskResponse(h *taskmanager.IMangataTaskManagerTaskResponse) ([]byte, error) {
+func AbiEncodeTaskResponse(h *taskmanager.IFinalizerTaskManagerTaskResponse) ([]byte, error) {
 
-	// The order here has to match the field ordering of taskmanager.IMangataTaskManagerTaskResponse
+	// The order here has to match the field ordering of taskmanager.IFinalizerTaskManagerTaskResponse
 	taskResponseType, err := abi.NewType("tuple", "", []abi.ArgumentMarshaling{
 		{
 			Name: "referenceTaskIndex",
@@ -46,7 +46,7 @@ func AbiEncodeTaskResponse(h *taskmanager.IMangataTaskManagerTaskResponse) ([]by
 }
 
 // GetTaskResponseDigest returns the hash of the TaskResponse, which is what operators sign over
-func GetTaskResponseDigest(h *taskmanager.IMangataTaskManagerTaskResponse) ([32]byte, error) {
+func GetTaskResponseDigest(h *taskmanager.IFinalizerTaskManagerTaskResponse) ([32]byte, error) {
 
 	encodeTaskResponseByte, err := AbiEncodeTaskResponse(h)
 	if err != nil {

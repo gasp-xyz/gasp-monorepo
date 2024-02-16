@@ -9,13 +9,13 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/MangataTaskManager"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 )
 
 type AvsSubscriberer interface {
-	SubscribeToNewTasks(newTaskCreatedChan chan *taskmanager.ContractMangataTaskManagerNewTaskCreated) event.Subscription
-	SubscribeToTaskResponses(taskResponseLogs chan *taskmanager.ContractMangataTaskManagerTaskResponded) event.Subscription
-	ParseTaskResponded(rawLog types.Log) (*taskmanager.ContractMangataTaskManagerTaskResponded, error)
+	SubscribeToNewTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewTaskCreated) event.Subscription
+	SubscribeToTaskResponses(taskResponseLogs chan *taskmanager.ContractFinalizerTaskManagerTaskResponded) event.Subscription
+	ParseTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerTaskResponded, error)
 }
 
 // Subscribers use a ws connection instead of http connection like Readers
@@ -27,8 +27,8 @@ type AvsSubscriber struct {
 	logger              sdklogging.Logger
 }
 
-func NewAvsSubscriber(serviceManagerAddr, blsOperatorStateRetrieverAddr gethcommon.Address, ethclient eth.EthClient, logger sdklogging.Logger) (*AvsSubscriber, error) {
-	avsContractBindings, err := NewAvsServiceBindings(serviceManagerAddr, blsOperatorStateRetrieverAddr, ethclient, logger)
+func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient eth.EthClient, logger sdklogging.Logger) (*AvsSubscriber, error) {
+	avsContractBindings, err := NewAvsServiceBindings(registryAddr, ethclient, logger)
 	if err != nil {
 		logger.Errorf("Failed to create contract bindings", "err", err)
 		return nil, err
@@ -39,7 +39,7 @@ func NewAvsSubscriber(serviceManagerAddr, blsOperatorStateRetrieverAddr gethcomm
 	}, nil
 }
 
-func (s *AvsSubscriber) SubscribeToNewTasks(newTaskCreatedChan chan *taskmanager.ContractMangataTaskManagerNewTaskCreated) event.Subscription {
+func (s *AvsSubscriber) SubscribeToNewTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewTaskCreated) event.Subscription {
 	sub, err := s.AvsContractBindings.TaskManager.WatchNewTaskCreated(
 		&bind.WatchOpts{}, newTaskCreatedChan, nil,
 	)
@@ -50,7 +50,7 @@ func (s *AvsSubscriber) SubscribeToNewTasks(newTaskCreatedChan chan *taskmanager
 	return sub
 }
 
-func (s *AvsSubscriber) SubscribeToTaskResponses(taskResponseChan chan *taskmanager.ContractMangataTaskManagerTaskResponded) event.Subscription {
+func (s *AvsSubscriber) SubscribeToTaskResponses(taskResponseChan chan *taskmanager.ContractFinalizerTaskManagerTaskResponded) event.Subscription {
 	sub, err := s.AvsContractBindings.TaskManager.WatchTaskResponded(
 		&bind.WatchOpts{}, taskResponseChan,
 	)
@@ -61,6 +61,6 @@ func (s *AvsSubscriber) SubscribeToTaskResponses(taskResponseChan chan *taskmana
 	return sub
 }
 
-func (s *AvsSubscriber) ParseTaskResponded(rawLog types.Log) (*taskmanager.ContractMangataTaskManagerTaskResponded, error) {
-	return s.AvsContractBindings.TaskManager.ContractMangataTaskManagerFilterer.ParseTaskResponded(rawLog)
+func (s *AvsSubscriber) ParseTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerTaskResponded, error) {
+	return s.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseTaskResponded(rawLog)
 }
