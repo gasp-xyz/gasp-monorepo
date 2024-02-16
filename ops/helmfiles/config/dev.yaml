@@ -1,2 +1,5 @@
 finalizerEnableServiceMonitorCollectors: true
 remoteCluster: true
+
+env:
+  SUBSTRATE_RPC_URL: wss://collator-01-ws-rollup-dev.mangata.online:443
