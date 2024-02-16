@@ -23,10 +23,8 @@ const verbose = process.env.VERBOSE;
 
 async function sendUpdateToL1(api: ApiPromise, walletClient: any, abi: any, blockNumber: number) {
 
-  let blockHash = await (api.rpc as any).chain.getBlockHash(blockNumber);
-  // TODO:  pass block hash to rpc when types are updated
-  // let pendingUpdates = await (api.rpc as any).rolldown.pending_updates(blockHash);
-  let pendingUpdates = await (api.rpc as any).rolldown.pending_updates();
+  let blockHash = await api.rpc.chain.getBlockHash(blockNumber);
+  let pendingUpdates = await (api.rpc as any).rolldown.pending_updates(blockHash);
   let l2Update = decodeAbiParameters(abi.find((e: any) => e.name === "update_l1_from_l2")!.inputs, pendingUpdates.toHex());
 
   let reqCount = l2Update[0].cancles.length + l2Update[0].results.length;

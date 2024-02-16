@@ -130,7 +130,9 @@ const main = async () => {
     }
   });
 
-  let pending_updates = await api.rpc.rolldown.pending_updates("0x0be2805fda91d7aaf9930c6b0b39a651a234d62e7517988699f9248c959daa43");
+
+  let blockHash = await api.rpc.chain.getBlockHash();
+  let pending_updates = await api.rpc.rolldown.pending_updates(blockHash);
   const updates = web3.eth.abi.decodeParameters(
     abi.abi.find((e) => e.name === "update_l1_from_l2").inputs,
     pending_updates.toHex()
