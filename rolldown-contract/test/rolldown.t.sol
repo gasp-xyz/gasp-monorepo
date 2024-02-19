@@ -178,6 +178,25 @@ import {Utilities, MyERC20} from "./utils/Utilities.sol";
         assertEq(update1.pendingWithdraws.length, update2.pendingWithdraws.length);
         assertEq(update1.pendingCancelResultions.length, update2.pendingCancelResultions.length);
         assertEq(update1.pendingL2UpdatesToRemove.length, update2.pendingL2UpdatesToRemove.length);
+    }
+
+    function testHashCompatibilityWithMangataNode() public {
+        RollDown.L1Update memory l1Update;
+        l1Update.offset = 1;
+        l1Update.pendingDeposits = new RollDown.Deposit[](1);
+        l1Update.pendingDeposits[0] = RollDown.Deposit ({
+          depositRecipient: 0x0000000000000000000000000000000000000004,
+          tokenAddress: 0x2CD2188119797153892438E57364D95B32975560,
+          amount: 1000000
+        });
+        l1Update.order = new RollDown.PendingRequestType[](1);
+        l1Update.order[0] = RollDown.PendingRequestType.DEPOSIT;
+
+        bytes32 l2Hash = 0xacf3b87e37038f4bc2dd017cb4818eef8c9da4cb36a23b8abcd6d3c17d69d65f;
+        assertEq(
+          keccak256(abi.encode(l1Update)),
+          l2Hash
+        );
 
     }
 }
