@@ -67,3 +67,6 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# custom
+ops/**/data

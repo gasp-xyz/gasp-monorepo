@@ -40,7 +40,7 @@ jobs:
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
           docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/avs-aggregator:${{ inputs.version }} -f avs-aggregator/cmd/Dockerfile .
-  build-avs--image:
+  build-avs-finalizer-image:
     name: Build avs-finalizer Docker image
     uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
