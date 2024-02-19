@@ -21,7 +21,7 @@ contract AnvilSetup is Script, Utils, Test {
     uint256 constant _CHAIN_ID = 31337;
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
     string constant _CONFIG_PATH = "deploy.config";
-    string constant _OUTPUT_PATH = "strategy_output";
+    string constant _OUTPUT_PATH = "strategy_output_";
 
     // ERC20 and Strategy: we need to deploy this erc20, create a strategy for it, and whitelist this strategy in the strategymanager
     ERC20Mock public erc20Mock;
@@ -92,6 +92,6 @@ contract AnvilSetup is Script, Utils, Test {
 
         vm.serializeString(parent_object, chain_info, chain_info_output);
         string memory finalJson = vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
-        writeOutput(finalJson, _OUTPUT_PATH);
+        writeOutput(finalJson, string.concat(_OUTPUT_PATH, stdJson.readString(finalJson, ".chainInfo.deploymentBlock")));
     }
 }
