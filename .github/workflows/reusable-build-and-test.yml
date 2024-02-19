@@ -13,6 +13,22 @@ permissions:
   id-token: write
 
 jobs:
+  rolldown-contract:
+    name: Build and test Rolldown contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Install deps
+        working-directory: rolldown-contract
+        run: forge install
+      - name: Run tests
+        working-directory: rolldown-contract
+        run: forge test -vvv
+
   build-avs-aggregator-image:
     name: Build avs-aggregator Docker image
     runs-on: ubuntu-latest

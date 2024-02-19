@@ -77,7 +77,13 @@ const main = async () => {
         rolldown: {
           pending_updates: {
             description: "",
-            params: [],
+            params: [
+              {
+                name: 'at',
+                type: 'Hash',
+                isOptional: true
+              }
+            ],
             type: "Vec<u8>"
           }
         }
@@ -124,7 +130,9 @@ const main = async () => {
     }
   });
 
-  let pending_updates = await api.rpc.rolldown.pending_updates();
+
+  let blockHash = await api.rpc.chain.getBlockHash();
+  let pending_updates = await api.rpc.rolldown.pending_updates(blockHash);
   const updates = web3.eth.abi.decodeParameters(
     abi.abi.find((e) => e.name === "update_l1_from_l2").inputs,
     pending_updates.toHex()

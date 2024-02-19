@@ -141,4 +141,43 @@ import {Utilities, MyERC20} from "./utils/Utilities.sol";
         assertEq(l1Update.lastProccessedRequestOnL1, 3);
         assertEq(l1Update.lastAcceptedRequestOnL1, 4);
     }
+
+    function testIgnoreDuplicatedUpdates() public {
+        // Arrange
+        uint256 amount = 1000;
+        address tokenAddress = 0xa7c534E6dF83C118A858Cb6fb4C1e8B92b03464b;
+        rollDown.withdraw(tokenAddress, amount);
+
+
+        RollDown.L2Update memory l2Update;
+        l2Update.cancles = new RollDown.Cancel[](0);
+        l2Update.results = new RollDown.RequestResult[](1);
+        l2Update.results[0] = RollDown.RequestResult({
+            requestId: 1,
+            updateType: RollDown.UpdateType.WITHDRAWAL,
+            status: false
+        });
+
+        // Act
+        // make sure that executing same request does not alter the state
+        rollDown.update_l1_from_l2(l2Update);
+        RollDown.L1Update memory update1 = rollDown.getUpdateForL2();
+        rollDown.update_l1_from_l2(l2Update);
+        rollDown.update_l1_from_l2(l2Update);
+        rollDown.update_l1_from_l2(l2Update);
+        rollDown.update_l1_from_l2(l2Update);
+        rollDown.update_l1_from_l2(l2Update);
+        RollDown.L1Update memory update2 = rollDown.getUpdateForL2();
+
+        // Assert
+        assertEq(update1.lastProccessedRequestOnL1, update2.lastProccessedRequestOnL1);
+        assertEq(update1.lastAcceptedRequestOnL1, update2.lastAcceptedRequestOnL1);
+        assertEq(update1.offset, update2.offset);
+        assertEq(update1.order.length, update2.order.length);
+        assertEq(update1.pendingDeposits.length, update2.pendingDeposits.length);
+        assertEq(update1.pendingWithdraws.length, update2.pendingWithdraws.length);
+        assertEq(update1.pendingCancelResultions.length, update2.pendingCancelResultions.length);
+        assertEq(update1.pendingL2UpdatesToRemove.length, update2.pendingL2UpdatesToRemove.length);
+
+    }
 }
