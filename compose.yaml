@@ -5,4 +5,5 @@ include:
   - path: ./ops/local-env-configs/anvil.compose.yml
   - path: ./avs-aggregator/compose.yml
   - path: ./avs-finalizer/compose.yml
-
+  - path: ./rollup-sequencer/compose.yml
+  - path: ./rollup-updater/compose.yml
