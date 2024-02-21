@@ -104,7 +104,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	chainId, err := ethRpc.Client.ChainID(context.Background())
+	chainId, err := ethRpc.Clients.EthHttpClient.ChainID(context.Background())
 	if err != nil {
 		logger.Error("Cannot get chainId", "err", err)
 		return nil, err
@@ -120,8 +120,8 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	pubkeyService := operatorpubkeys.NewOperatorPubkeysServiceInMemory(context.Background(), ethRpc.ElClients.AvsRegistryChainSubscriber, ethRpc.ElClients.AvsRegistryChainReader, logger)
-	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.ElClients.AvsRegistryChainReader, pubkeyService, logger)
+	pubkeyService := operatorpubkeys.NewOperatorPubkeysServiceInMemory(context.Background(), ethRpc.Clients.AvsRegistryChainSubscriber, ethRpc.Clients.AvsRegistryChainReader, logger)
+	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, pubkeyService, logger)
 	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, logger)
 
 	substrateRpc, err := gsrpc.NewSubstrateAPI(c.SubstrateWsRpcUrl)

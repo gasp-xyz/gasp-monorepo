@@ -65,8 +65,10 @@ pub(crate) async fn setup_deposits(
     let strategy_manager_address = delegation.strategy_manager().await?;
     let strategy_params = stake_reg.strategy_params_by_index(0, 0.into()).await?;
     let strategy_manager = StrategyManager::new(strategy_manager_address, client.clone());
+    debug!("startegy address {:?}", strategy_params);
     let strategy = IStrategy::new(strategy_params.strategy, client.clone());
     let erc20_address = strategy.underlying_token().call().await?;
+    debug!("erc address {:?}", erc20_address);
 
     let erc20 = ERC20Mock::new(erc20_address, client.clone());
     erc20.mint(op_address, stake.into()).send().await?.await?;

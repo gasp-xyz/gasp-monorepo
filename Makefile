@@ -4,7 +4,7 @@
 help:
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-CONTRACTS_REGEX="FinalizerServiceManager|FinalizerTaskManager|BLSApkRegistry|RegistryCoordinator|DelegationManager|ERC20Mock|StrategyManager|IStrategy|StakeRegistry"
+CONTRACTS_REGEX="FinalizerServiceManager|FinalizerTaskManager|AVSDirectory|BLSApkRegistry|RegistryCoordinator|DelegationManager|ERC20Mock|StrategyManager|IStrategy|StakeRegistry"
 # CONTRACTS_REGEX=".+"
 
 -----------------------------: ## 
@@ -20,11 +20,11 @@ AVS_RPC_URL=http://localhost:8090
 AVS_SERVER_IP_PORT_ADDRESS=localhost:8090
 
 CHAIN_ID=31337
-AVS_REGISTRY_COORDINATOR_ADDR=0x9E545E3C0baAB3E08CdfD552C960A1050f373042
+AVS_REGISTRY_COORDINATOR_ADDR=0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9
 TESTNET=true
 
 AVS_KICK_PERIOD=5
-AVS_UPDATE_STAKE_PERIOD=2
+AVS_UPDATE_STAKE_PERIOD=10
 
 -----------------------------: ## 
 
@@ -33,16 +33,19 @@ ___CONTRACTS___: ##
 deploy-eigenlayer-contracts-to-anvil-and-save-state: ## Deploy eigenlayer
 	./tests/integration/deploy-eigenlayer-save-anvil-state.sh
 
-deploy-shared-avs-contracts-to-anvil-and-save-state: ## Deploy blspubkeycompendium and blsstateoperatorretriever
-	./tests/integration/deploy-shared-avs-contracts-save-anvil-state.sh
-
 deploy-avs-contracts-to-anvil-and-save-state: ## Deploy avs
 	./tests/integration/deploy-avs-save-anvil-state.sh
 
-deploy-all-to-anvil-and-save-state: deploy-eigenlayer-contracts-to-anvil-and-save-state deploy-shared-avs-contracts-to-anvil-and-save-state deploy-avs-contracts-to-anvil-and-save-state ## deploy eigenlayer, shared avs contracts, and avs contracts 
+deploy-all-to-anvil-and-save-state: deploy-eigenlayer-contracts-to-anvil-and-save-state deploy-avs-contracts-to-anvil-and-save-state ## deploy eigenlayer and avs contracts 
 
 start-anvil-chain-with-el-and-avs-deployed: ## starts anvil from a saved state file (with el and avs contracts deployed)
 	anvil --load-state tests/integration/avs-and-eigenlayer-deployed-anvil-state.json
+
+start-anvil-and-deploy: ## starts anvil and deploys EL & avs contracts
+	./tests/integration/deploy-all-and-resume.sh
+
+start-anvil-deploy-and-verify: ## starts anvil, deploys EL & avs contracts, and verifies them on local blockscout, check ./tests/integration/readme for more info
+	./tests/integration/deploy-all-verify-and-resume.sh
 
 bindings-go: ## generates contract bindings
 	cd contracts && ./generate-go-bindings.sh

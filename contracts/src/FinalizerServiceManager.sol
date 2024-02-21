@@ -25,11 +25,15 @@ contract FinalizerServiceManager is ServiceManagerBase {
     }
 
     constructor(
-        IDelegationManager _delegation,
+        IAVSDirectory _avsDirectory,
         IRegistryCoordinator _registryCoordinator,
         IStakeRegistry _stakeRegistry,
         IFinalizerTaskManager _taskManager
-    ) ServiceManagerBase(_delegation, _registryCoordinator, _stakeRegistry) {
+    ) ServiceManagerBase(_avsDirectory, _registryCoordinator, _stakeRegistry) {
         taskManager = _taskManager;
+    }
+
+    function initialize(address initialOwner) public virtual initializer {
+        __ServiceManagerBase_init(initialOwner);
     }
 }
