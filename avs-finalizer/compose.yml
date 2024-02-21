@@ -1,0 +1,23 @@
+services:
+  avs-finalizer:
+    image: mangatasolutions/avs-finalizer:${AVS_FINALIZER_VERSION:-local}
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: src/bin/Dockerfile
+      platforms: [linux/amd64]
+      args:
+        - BINARY_PATH=${AVS_FINALIZER_BINARY_PATH:-target/release/main}
+    platform: linux/amd64
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - ETH_RPC_URL=${ETH_RPC_URL:-http://anvil:8545}
+      - ETH_WS_URL=${ETH_WS_URL:-ws://anvil:8545}
+      - CHAIN_ID=31337
+      - SUBSTRATE_RPC_URL=${SUBSTRATE_RPC_URL:-ws://collator-01:9944}
+      - AVS_RPC_URL=${AVS_RPC_URL:-http://avs-aggregator:8090}
+      - AVS_REGISTRY_COORDINATOR_ADDR=0x9E545E3C0baAB3E08CdfD552C960A1050f373042
+      - TESTNET=true
+      - ECDSA_EPHEMERAL_KEY=true
+      - BLS_EPHEMERAL_KEY=true
+  

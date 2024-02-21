@@ -1,6 +1,7 @@
 services:
   avs-aggregator:
     image: mangatasolutions/avs-aggregator:${AVS_AGGREGATOR_VERSION:-local}
+    restart: unless-stopped
     build:
       context: ../
       dockerfile: avs-aggregator/cmd/Dockerfile
