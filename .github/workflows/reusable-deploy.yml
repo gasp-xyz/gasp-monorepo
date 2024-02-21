@@ -94,4 +94,4 @@ jobs:
           status: ${{ job.status }}
           env: ${{ steps.deployment.outputs.env }}
           deployment_id: ${{ steps.deployment.outputs.deployment_id }}
-          env_url: "https://eigen-operator-${{ env.ENV_REF }}.mangata.online"
+          env_url: "https://rollup-finalizer-${{ env.ENV_REF }}.mangata.online"

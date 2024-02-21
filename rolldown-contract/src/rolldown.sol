@@ -174,6 +174,7 @@ contract RollDown {
             }
             oderCounter = inputArray.results[idx].requestId;
         }
+
         for (uint256 idx = 0; idx < inputArray.results.length; idx++) {
             RequestResult calldata element = inputArray.results[idx];
 
@@ -202,21 +203,24 @@ contract RollDown {
             } else {
                 revert("unknown request type");
             }
+
         }
 
-        // Create a new array with the correct size
-        uint256[] memory l2UpdatesToBeRemoved = new uint256[](
+        if(updatesToBeRemovedCounter > 0){
+          // Create a new array with the correct size
+          uint256[] memory l2UpdatesToBeRemoved = new uint256[](
             updatesToBeRemovedCounter
-        );
+          );
 
-        // Copy values from temp array to final array
-        for (uint256 i = 0; i < updatesToBeRemovedCounter; i++) {
+          // Copy values from temp array to final array
+          for (uint256 i = 0; i < updatesToBeRemovedCounter; i++) {
             l2UpdatesToBeRemoved[i] = l2UpdatesToBeRemovedTemp[i];
-        }
+          }
 
-        l2UpdatesToRemove[counter++].l2UpdatesToRemove = l2UpdatesToBeRemoved;// .push(l2UpdatesToBeRemoved[i]);
-        lastProcessedUpdate_origin_l1 += l2UpdatesToBeRemoved.length;
-        emit L2UpdatesToRemovedAcceptedIntoQueue(counter - 1, l2UpdatesToBeRemoved);
+          l2UpdatesToRemove[counter++].l2UpdatesToRemove = l2UpdatesToBeRemoved;// .push(l2UpdatesToBeRemoved[i]);
+          lastProcessedUpdate_origin_l1 += l2UpdatesToBeRemoved.length;
+          emit L2UpdatesToRemovedAcceptedIntoQueue(counter - 1, l2UpdatesToBeRemoved);
+        }
     }
 
     // Process functions

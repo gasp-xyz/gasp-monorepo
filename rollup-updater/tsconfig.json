@@ -1,13 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "lib": ["es6"],
+    "target": "es2020",
+    "lib": [
+      "es6"
+    ],
     "module": "esnext",
     "moduleResolution": "node",
     "rootDir": "src",
     "allowJs": true,
     "outDir": "build",
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

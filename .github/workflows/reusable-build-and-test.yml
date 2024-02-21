@@ -13,6 +13,22 @@ permissions:
   id-token: write
 
 jobs:
+  rolldown-contract:
+    name: Build and test Rolldown contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Install deps
+        working-directory: rolldown-contract
+        run: forge install
+      - name: Run tests
+        working-directory: rolldown-contract
+        run: forge test -vvv
+
   build-avs-aggregator-image:
     name: Build avs-aggregator Docker image
     runs-on: ubuntu-latest
@@ -24,7 +40,7 @@ jobs:
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
           docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/avs-aggregator:${{ inputs.version }} -f avs-aggregator/cmd/Dockerfile .
-  build-avs--image:
+  build-avs-finalizer-image:
     name: Build avs-finalizer Docker image
     uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
