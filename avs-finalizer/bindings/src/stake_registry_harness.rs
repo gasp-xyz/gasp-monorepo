@@ -7,7 +7,7 @@ pub use stake_registry_harness::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types,
+    non_camel_case_types
 )]
 pub mod stake_registry_harness {
     pub use super::super::shared_types::*;
@@ -20,18 +20,14 @@ pub mod stake_registry_harness {
                         name: ::std::borrow::ToOwned::to_owned("_registryCoordinator"),
                         kind: ::ethers::core::abi::ethabi::ParamType::Address,
                         internal_type: ::core::option::Option::Some(
-                            ::std::borrow::ToOwned::to_owned(
-                                "contract IRegistryCoordinator",
-                            ),
+                            ::std::borrow::ToOwned::to_owned("contract IRegistryCoordinator",),
                         ),
                     },
                     ::ethers::core::abi::ethabi::Param {
                         name: ::std::borrow::ToOwned::to_owned("_delegationManager"),
                         kind: ::ethers::core::abi::ethabi::ParamType::Address,
                         internal_type: ::core::option::Option::Some(
-                            ::std::borrow::ToOwned::to_owned(
-                                "contract IDelegationManager",
-                            ),
+                            ::std::borrow::ToOwned::to_owned("contract IDelegationManager",),
                         ),
                     },
                 ],
@@ -39,1472 +35,1241 @@ pub mod stake_registry_harness {
             functions: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("MAX_WEIGHING_FUNCTION_LENGTH"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "MAX_WEIGHING_FUNCTION_LENGTH",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("MAX_WEIGHING_FUNCTION_LENGTH",),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
                             ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("WEIGHTING_DIVISOR"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("WEIGHTING_DIVISOR"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("WEIGHTING_DIVISOR"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("addStrategies"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("addStrategies"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("addStrategies"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("_strategyParams"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                    ::std::boxed::Box::new(
+                                        ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                        ],),
                                     ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("_strategyParams"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                                ::std::vec![
-                                                    ::ethers::core::abi::ethabi::ParamType::Address,
-                                                    ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                                ],
-                                            ),
-                                        ),
+                                ),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned(
+                                        "struct IStakeRegistry.StrategyParams[]",
                                     ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IStakeRegistry.StrategyParams[]",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("applyDelta"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("applyDelta"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("value"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("delta"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Int(256usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("int256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::Pure,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("applyDelta"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("value"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint96"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("delta"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Int(256usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("int256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint96"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::Pure,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("calculateDelta"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("calculateDelta"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("prev"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("cur"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Int(256usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("int256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::Pure,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("calculateDelta"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("prev"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint96"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("cur"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint96"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Int(256usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("int256"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::Pure,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("delegation"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("delegation"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "contract IDelegationManager",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("delegation"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("contract IDelegationManager",),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("deregisterOperator"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("deregisterOperator"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("deregisterOperator"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getCurrentStake"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("getCurrentStake"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getCurrentStake"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint96"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getCurrentTotalStake"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getCurrentTotalStake",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getCurrentTotalStake",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint96"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getLatestStakeUpdate"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getLatestStakeUpdate",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getLatestStakeUpdate",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            ],),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned(
+                                    "struct IStakeRegistry.StakeUpdate",
+                                ),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IStakeRegistry.StakeUpdate",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getStakeAtBlockNumber"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getStakeAtBlockNumber",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getStakeAtBlockNumber",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("blockNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint32"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint96"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("blockNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getStakeAtBlockNumberAndIndex"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getStakeAtBlockNumberAndIndex",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getStakeAtBlockNumberAndIndex",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("blockNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("index"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint96"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("blockNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("index"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getStakeHistory"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("getStakeHistory"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                                ::std::vec![
-                                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                                    ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                                ],
-                                            ),
-                                        ),
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IStakeRegistry.StakeUpdate[]",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getStakeHistory"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                ::std::boxed::Box::new(
+                                    ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                    ],),
+                                ),
+                            ),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned(
+                                    "struct IStakeRegistry.StakeUpdate[]",
+                                ),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getStakeHistoryLength"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getStakeHistoryLength",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getStakeHistoryLength",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getStakeUpdateAtIndex"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getStakeUpdateAtIndex",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getStakeUpdateAtIndex",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("index"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            ],),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned(
+                                    "struct IStakeRegistry.StakeUpdate",
+                                ),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("index"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IStakeRegistry.StakeUpdate",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getStakeUpdateIndexAtBlockNumber"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getStakeUpdateIndexAtBlockNumber",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getStakeUpdateIndexAtBlockNumber",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("blockNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint32"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint32"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("blockNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned(
-                        "getTotalStakeAtBlockNumberFromIndex",
-                    ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getTotalStakeAtBlockNumberFromIndex",
+                    ::std::borrow::ToOwned::to_owned("getTotalStakeAtBlockNumberFromIndex"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned(
+                            "getTotalStakeAtBlockNumberFromIndex",
+                        ),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("blockNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("index"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint96"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("blockNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("index"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getTotalStakeHistoryLength"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getTotalStakeHistoryLength",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getTotalStakeHistoryLength",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned(
-                        "getTotalStakeIndicesAtBlockNumber",
-                    ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getTotalStakeIndicesAtBlockNumber",
+                    ::std::borrow::ToOwned::to_owned("getTotalStakeIndicesAtBlockNumber"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getTotalStakeIndicesAtBlockNumber",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("blockNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                ::std::boxed::Box::new(
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("blockNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                        ),
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32[]"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint32[]"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getTotalStakeUpdateAtIndex"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getTotalStakeUpdateAtIndex",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getTotalStakeUpdateAtIndex",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("index"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            ],),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned(
+                                    "struct IStakeRegistry.StakeUpdate",
+                                ),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("index"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IStakeRegistry.StakeUpdate",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("initializeQuorum"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("initializeQuorum"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("initializeQuorum"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("minimumStake"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint96"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("_strategyParams"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                    ::std::boxed::Box::new(
+                                        ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                        ],),
                                     ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("minimumStake"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
+                                ),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned(
+                                        "struct IStakeRegistry.StrategyParams[]",
                                     ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("_strategyParams"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                                ::std::vec![
-                                                    ::ethers::core::abi::ethabi::ParamType::Address,
-                                                    ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                                ],
-                                            ),
-                                        ),
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IStakeRegistry.StrategyParams[]",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("minimumStakeForQuorum"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "minimumStakeForQuorum",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("minimumStakeForQuorum",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint96"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("modifyStrategyParams"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "modifyStrategyParams",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("modifyStrategyParams",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("strategyIndices"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                    ::std::boxed::Box::new(
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
                                     ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("strategyIndices"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                        ),
+                                ),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256[]"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("newMultipliers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                    ::std::boxed::Box::new(
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
                                     ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256[]"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("newMultipliers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                        ),
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96[]"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                                ),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint96[]"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("recordOperatorStakeUpdate"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "recordOperatorStakeUpdate",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("recordOperatorStakeUpdate",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("newStake"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint96"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Int(256usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("int256"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("newStake"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Int(256usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("int256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("recordTotalStakeUpdate"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "recordTotalStakeUpdate",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("stakeDelta"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Int(256usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("int256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("recordTotalStakeUpdate",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("stakeDelta"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Int(256usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("int256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("registerOperator"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("registerOperator"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("registerOperator"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                    ::std::boxed::Box::new(
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
                                     ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
+                                ),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint96[]"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                    ::std::boxed::Box::new(
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
                                     ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                        ),
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96[]"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                        ),
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96[]"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                                ),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint96[]"),
+                                ),
+                            },
+                        ],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("registryCoordinator"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "registryCoordinator",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("registryCoordinator",),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
                             ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("removeStrategies"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("removeStrategies"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("removeStrategies"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("indicesToRemove"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                    ::std::boxed::Box::new(
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
                                     ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("indicesToRemove"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                        ),
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256[]"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                                ),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256[]"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("setMinimumStakeForQuorum"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "setMinimumStakeForQuorum",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("setMinimumStakeForQuorum",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("minimumStake"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint96"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("strategiesPerQuorum"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("strategiesPerQuorum",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("contract IStrategy"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("minimumStake"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("strategyParams"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("strategyParams"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("contract IStrategy"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("multiplier"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("strategyParams"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("multiplier"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint96"),
+                                ),
+                            },
+                        ],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("strategyParamsByIndex"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "strategyParamsByIndex",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("strategyParamsByIndex",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("index"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                ::ethers::core::abi::ethabi::ParamType::Address,
+                                ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            ],),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned(
+                                    "struct IStakeRegistry.StrategyParams",
+                                ),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("index"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Address,
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IStakeRegistry.StrategyParams",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("strategyParamsLength"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "strategyParamsLength",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("strategyParamsLength",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("updateOperatorStake"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "updateOperatorStake",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("updateOperatorStake",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(192usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint192"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        192usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint192"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("weightOfOperatorForQuorum"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "weightOfOperatorForQuorum",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("weightOfOperatorForQuorum",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint96"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
             ]),
             events: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("MinimumStakeForQuorumUpdated"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "MinimumStakeForQuorumUpdated",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("minimumStake"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("MinimumStakeForQuorumUpdated",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("minimumStake"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("OperatorStakeUpdate"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "OperatorStakeUpdate",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    indexed: false,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("stake"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("OperatorStakeUpdate",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("stake"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("QuorumCreated"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned("QuorumCreated"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    indexed: true,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("QuorumCreated"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
+                            name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            indexed: true,
+                        },],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("StrategyAddedToQuorum"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "StrategyAddedToQuorum",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("StrategyAddedToQuorum",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("StrategyMultiplierUpdated"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "StrategyMultiplierUpdated",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: false,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("multiplier"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("StrategyMultiplierUpdated",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("multiplier"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("StrategyRemovedFromQuorum"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "StrategyRemovedFromQuorum",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("StrategyRemovedFromQuorum",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
             ]),
             errors: ::std::collections::BTreeMap::new(),
@@ -1513,21 +1278,18 @@ pub mod stake_registry_harness {
         }
     }
     ///The parsed JSON ABI of the contract.
-    pub static STAKEREGISTRYHARNESS_ABI: ::ethers::contract::Lazy<
-        ::ethers::core::abi::Abi,
-    > = ::ethers::contract::Lazy::new(__abi);
+    pub static STAKEREGISTRYHARNESS_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
+        ::ethers::contract::Lazy::new(__abi);
     #[rustfmt::skip]
-    const __BYTECODE: &[u8] = b"`\xC0`@R4\x80\x15b\0\0\x11W`\0\x80\xFD[P`@Qb\08]8\x03\x80b\08]\x839\x81\x01`@\x81\x90Rb\0\x004\x91b\0\0eV[`\x01`\x01`\xA0\x1B\x03\x91\x82\x16`\xA0R\x16`\x80Rb\0\0\xA4V[`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14b\0\0bW`\0\x80\xFD[PV[`\0\x80`@\x83\x85\x03\x12\x15b\0\0yW`\0\x80\xFD[\x82Qb\0\0\x86\x81b\0\0LV[` \x84\x01Q\x90\x92Pb\0\0\x99\x81b\0\0LV[\x80\x91PP\x92P\x92\x90PV[`\x80Q`\xA0Qa7Tb\0\x01\t`\09`\0\x81\x81a\x03\xAE\x01R\x81\x81a\x06\x9B\x01R\x81\x81a\t\xD8\x01R\x81\x81a\rO\x01R\x81\x81a\x10\xA5\x01R\x81\x81a\x15\xE9\x01R\x81\x81a\x16\xE6\x01R\x81\x81a\x18\n\x01Ra\x1B\xCC\x01R`\0\x81\x81a\x05p\x01Ra\x1Fj\x01Ra7T`\0\xF3\xFE`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\x02\x06W`\x005`\xE0\x1C\x80c\x81\xC0u\x02\x11a\x01\x1AW\x80c\xC8)LV\x11a\0\xADW\x80c\xF2\xBE\x94\xAE\x11a\0|W\x80c\xF2\xBE\x94\xAE\x14a\x05\x92W\x80c\xF5\tU\x1A\x14a\x05\xA5W\x80c\xF8Q\xE1\x98\x14a\x05\xB8W\x80c\xFA(\xC6'\x14a\x05\xCBW\x80c\xFFiJw\x14a\x05\xDEW`\0\x80\xFD[\x80c\xC8)LV\x14a\x05\x1DW\x80c\xD5\xEC\xCC\x05\x14a\x050W\x80c\xDD\x98F\xB9\x14a\x05CW\x80c\xDF\\\xF7#\x14a\x05kW`\0\x80\xFD[\x80c\xBC\x9A@\xC3\x11a\0\xE9W\x80c\xBC\x9A@\xC3\x14a\x04\xBBW\x80c\xBD)\xB8\xCD\x14a\x04\xCEW\x80c\xC4gx\xA5\x14a\x04\xE1W\x80c\xC6\x01R}\x14a\x05\nW`\0\x80\xFD[\x80c\x81\xC0u\x02\x14a\x04(W\x80c\xACk\xFB\x03\x14a\x04HW\x80c\xAD\xC8\x04\xDA\x14a\x04hW\x80c\xB6\x90Kx\x14a\x04\xA8W`\0\x80\xFD[\x80cK\xD2n\t\x11a\x01\x9DW\x80cf\xAC\xFE\xFE\x11a\x01lW\x80cf\xAC\xFE\xFE\x14a\x03~W\x80cm\x14\xA9\x87\x14a\x03\xA9W\x80ctELm\x14a\x03\xE8W\x80c|\x17#G\x14a\x03\xFBW\x80c\x7FB\x98\"\x14a\x04\x15W`\0\x80\xFD[\x80cK\xD2n\t\x14a\x03\x19W\x80cT\x01\xED'\x14a\x03IW\x80c^Zgu\x14a\x03\\W\x80c_\x1F-w\x14a\x03kW`\0\x80\xFD[\x80c \xB6b\x98\x11a\x01\xD9W\x80c \xB6b\x98\x14a\x02\xA2W\x80c%PGw\x14a\x02\xB5W\x80c,\xD9Y@\x14a\x02\xD6W\x80c<\xA5\xA5\xF5\x14a\x02\xF6W`\0\x80\xFD[\x80c\x03\x90\xA4\xD5\x14a\x02\x0BW\x80c\x04\x91\xB4\x1C\x14a\x02 W\x80c\x08s$a\x14a\x02VW\x80c\x1F\x9Bt\xE0\x14a\x02wW[`\0\x80\xFD[a\x02\x1Ea\x02\x196`\x04a+\xAEV[a\x05\xF1V[\0[a\x02Ca\x02.6`\x04a+\xD8V[`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x90V[`@Q\x90\x81R` \x01[`@Q\x80\x91\x03\x90\xF3[a\x02ia\x02d6`\x04a+\xAEV[a\x06\0V[`@Qa\x02M\x92\x91\x90a+\xF3V[a\x02\x8Aa\x02\x856`\x04a,-V[a\x06IV[`@Q`\x01`\x01``\x1B\x03\x90\x91\x16\x81R` \x01a\x02MV[a\x02\x1Ea\x02\xB06`\x04a,\xA8V[a\x06\x99V[a\x02\xC8a\x02\xC36`\x04a-iV[a\t\xCAV[`@Qa\x02M\x92\x91\x90a.\x08V[a\x02\xE9a\x02\xE46`\x04a.-V[a\x0C\x95V[`@Qa\x02M\x91\x90a.YV[a\x02Ca\x03\x046`\x04a+\xD8V[`\xFF\x16`\0\x90\x81R`\x03` R`@\x90 T\x90V[a\x02Ca\x03'6`\x04a.-V[`\0\x91\x82R`\x02` \x90\x81R`@\x80\x84 `\xFF\x93\x90\x93\x16\x84R\x91\x90R\x90 T\x90V[a\x02\x8Aa\x03W6`\x04a.-V[a\r4V[a\x02Cg\r\xE0\xB6\xB3\xA7d\0\0\x81V[a\x02\x1Ea\x03y6`\x04a/bV[a\rMV[a\x03\x91a\x03\x8C6`\x04a-iV[a\x10\x98V[`@Q`\x01`\x01`\xC0\x1B\x03\x90\x91\x16\x81R` \x01a\x02MV[a\x03\xD0\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x81V[`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R` \x01a\x02MV[a\x02Ca\x03\xF66`\x04a0!V[a\x11\xF2V[a\x04\x03` \x81V[`@Q`\xFF\x90\x91\x16\x81R` \x01a\x02MV[a\x02\x8Aa\x04#6`\x04a0]V[a\x12\tV[a\x04;a\x0466`\x04a0\x8DV[a\x12\x15V[`@Qa\x02M\x91\x90a0\xDFV[a\x04[a\x04V6`\x04a1\x1DV[a\x14FV[`@Qa\x02M\x91\x90a1PV[a\x04{a\x04v6`\x04a+\xAEV[a\x14\xDEV[`@\x80Q\x82Q`\x01`\x01`\xA0\x1B\x03\x16\x81R` \x92\x83\x01Q`\x01`\x01``\x1B\x03\x16\x92\x81\x01\x92\x90\x92R\x01a\x02MV[a\x04[a\x04\xB66`\x04a+\xAEV[a\x15XV[a\x02\x1Ea\x04\xC96`\x04a1\x85V[a\x15\xE7V[a\x02\x1Ea\x04\xDC6`\x04a1\xAFV[a\x16\xDBV[a\x02\x8Aa\x04\xEF6`\x04a+\xD8V[`\0` \x81\x90R\x90\x81R`@\x90 T`\x01`\x01``\x1B\x03\x16\x81V[a\x02\x1Ea\x05\x186`\x04a2{V[a\x18\x08V[a\x02\x8Aa\x05+6`\x04a2\xC8V[a\x18\xFCV[a\x02\x8Aa\x05>6`\x04a+\xD8V[a\x19zV[a\x05Va\x05Q6`\x04a3\x04V[a\x19\xCDV[`@Qc\xFF\xFF\xFF\xFF\x90\x91\x16\x81R` \x01a\x02MV[a\x03\xD0\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x81V[a\x02\x8Aa\x05\xA06`\x04a37V[a\x19\xDAV[a\x02Ca\x05\xB36`\x04a3yV[a\x1AoV[a\x04[a\x05\xC66`\x04a.-V[a\x1A{V[a\x02\x8Aa\x05\xD96`\x04a3\x04V[a\x1B`V[a\x02\x1Ea\x05\xEC6`\x04a3\x95V[a\x1B\xC1V[a\x05\xFB\x82\x82a\x1D,V[PPPV[`\x03` R\x81`\0R`@`\0 \x81\x81T\x81\x10a\x06\x1CW`\0\x80\xFD[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x81\x16\x92P`\x01`\xA0\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x90P\x82V[`\xFF\x82\x16`\0\x90\x81R`\x01` R`@\x81 T\x83\x90a\x06\x83W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a3\xF2V[`@Q\x80\x91\x03\x90\xFD[`\0a\x06\x8F\x85\x85a\x1E\xA6V[P\x95\x94PPPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x06\xF7W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x07\x1B\x91\x90a4CV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x07KW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a4`V[\x84a\x07g\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x07\x83W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a3\xF2V[\x83\x80a\x07\xF9W`@\x80QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`$\x81\x01\x91\x90\x91R\x7FStakeRegistry.modifyStrategyPara`D\x82\x01R\x7Fms: no strategy indices provided`d\x82\x01R`\x84\x01a\x06zV[\x82\x81\x14a\x08nW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`9`$\x82\x01R\x7FStakeRegistry.modifyStrategyPara`D\x82\x01R\x7Fms: input length mismatch\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06zV[`\xFF\x87\x16`\0\x90\x81R`\x03` R`@\x81 \x90[\x82\x81\x10\x15a\t\xBFW\x85\x85\x82\x81\x81\x10a\x08\x9CWa\x08\x9Ca4\xDCV[\x90P` \x02\x01` \x81\x01\x90a\x08\xB1\x91\x90a4\xF2V[\x82\x89\x89\x84\x81\x81\x10a\x08\xC4Wa\x08\xC4a4\xDCV[\x90P` \x02\x015\x81T\x81\x10a\x08\xDBWa\x08\xDBa4\xDCV[\x90`\0R` `\0 \x01`\0\x01`\x14a\x01\0\n\x81T\x81`\x01`\x01``\x1B\x03\x02\x19\x16\x90\x83`\x01`\x01``\x1B\x03\x16\x02\x17\x90UP\x88`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x83\x8A\x8A\x85\x81\x81\x10a\tDWa\tDa4\xDCV[\x90P` \x02\x015\x81T\x81\x10a\t[Wa\t[a4\xDCV[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x16\x88\x88\x85\x81\x81\x10a\t\x82Wa\t\x82a4\xDCV[\x90P` \x02\x01` \x81\x01\x90a\t\x97\x91\x90a4\xF2V[`@Qa\t\xA5\x92\x91\x90a+\xF3V[`@Q\x80\x91\x03\x90\xA2\x80a\t\xB7\x81a5#V[\x91PPa\x08\x82V[PPPPPPPPPV[``\x803`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\n\x15W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a5>V[`\0\x83`\x01`\x01`@\x1B\x03\x81\x11\x15a\n/Wa\n/a.\xD1V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\nXW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0\x84`\x01`\x01`@\x1B\x03\x81\x11\x15a\nuWa\nua.\xD1V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\n\x9EW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0[\x85\x81\x10\x15a\x0C\x87W`\0\x87\x87\x83\x81\x81\x10a\n\xC0Wa\n\xC0a4\xDCV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x0BHW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`5`$\x82\x01R\x7FStakeRegistry.registerOperator: `D\x82\x01Rt\x1C][\xDC\x9D[H\x19\x1B\xD9\\\xC8\x1B\x9B\xDD\x08\x19^\x1A\\\xDD`Z\x1B`d\x82\x01R`\x84\x01a\x06zV[`\0\x80a\x0BU\x83\x8Da\x1E\xA6V[\x91P\x91P\x80a\x0B\xF2W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`[`$\x82\x01R\x7FStakeRegistry.registerOperator: `D\x82\x01R\x7FOperator does not meet minimum s`d\x82\x01R\x7Ftake requirement for quorum\0\0\0\0\0`\x84\x82\x01R`\xA4\x01a\x06zV[`\0a\x0B\xFF\x8C\x85\x85a \\V[\x90P\x82\x87\x86\x81Q\x81\x10a\x0C\x14Wa\x0C\x14a4\xDCV[` \x02` \x01\x01\x90`\x01`\x01``\x1B\x03\x16\x90\x81`\x01`\x01``\x1B\x03\x16\x81RPPa\x0C>\x84\x82a\x1D,V[\x86\x86\x81Q\x81\x10a\x0CPWa\x0CPa4\xDCV[` \x02` \x01\x01\x90`\x01`\x01``\x1B\x03\x16\x90\x81`\x01`\x01``\x1B\x03\x16\x81RPPPPPP\x80\x80a\x0C\x7F\x90a5#V[\x91PPa\n\xA4V[P\x90\x97\x90\x96P\x94PPPPPV[`\0\x82\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x85\x16\x84R\x82R\x80\x83 \x80T\x82Q\x81\x85\x02\x81\x01\x85\x01\x90\x93R\x80\x83R``\x94\x92\x93\x91\x92\x90\x91\x84\x01[\x82\x82\x10\x15a\r'W`\0\x84\x81R` \x90\x81\x90 `@\x80Q``\x81\x01\x82R\x91\x85\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x83\x85\x01R`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x90\x82\x01R\x82R`\x01\x90\x92\x01\x91\x01a\x0C\xCEV[PPPP\x90P[\x92\x91PPV[`\0\x80a\rA\x84\x84a\x1A{V[`@\x01Q\x94\x93PPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\r\xABW=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\r\xCF\x91\x90a4CV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\r\xFFW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a4`V[\x81a\x0E\x1B\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x0E7W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a3\xF2V[\x81Q\x80a\x0E\xACW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`=`$\x82\x01R\x7FStakeRegistry.removeStrategies: `D\x82\x01R\x7Fno indices to remove provided\0\0\0`d\x82\x01R`\x84\x01a\x06zV[`\xFF\x84\x16`\0\x90\x81R`\x03` R`@\x81 \x90[\x82\x81\x10\x15a\x10\x90W\x85`\xFF\x16\x7F1\xFA.,\xD2\x80\xC97^\x13\xFF\xCF=\x81\xE27\x81\0\x18n@X\xF8\xD3\xDD\xB6\x90\xB8-\xCD1\xF7\x83\x87\x84\x81Q\x81\x10a\x0F\0Wa\x0F\0a4\xDCV[` \x02` \x01\x01Q\x81T\x81\x10a\x0F\x18Wa\x0F\x18a4\xDCV[`\0\x91\x82R` \x91\x82\x90 \x01T`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R\x01`@Q\x80\x91\x03\x90\xA2\x85`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x83\x87\x84\x81Q\x81\x10a\x0FvWa\x0Fva4\xDCV[` \x02` \x01\x01Q\x81T\x81\x10a\x0F\x8EWa\x0F\x8Ea4\xDCV[`\0\x91\x82R` \x80\x83 \x91\x90\x91\x01T`@\x80Q`\x01`\x01`\xA0\x1B\x03\x90\x92\x16\x82R\x91\x81\x01\x92\x90\x92R\x01`@Q\x80\x91\x03\x90\xA2\x81T\x82\x90a\x0F\xCE\x90`\x01\x90a5\xB0V[\x81T\x81\x10a\x0F\xDEWa\x0F\xDEa4\xDCV[\x90`\0R` `\0 \x01\x82\x86\x83\x81Q\x81\x10a\x0F\xFBWa\x0F\xFBa4\xDCV[` \x02` \x01\x01Q\x81T\x81\x10a\x10\x13Wa\x10\x13a4\xDCV[`\0\x91\x82R` \x90\x91 \x82T\x91\x01\x80T`\x01`\x01`\xA0\x1B\x03\x19\x16`\x01`\x01`\xA0\x1B\x03\x90\x92\x16\x91\x82\x17\x81U\x91T`\x01`\x01``\x1B\x03`\x01`\xA0\x1B\x91\x82\x90\x04\x16\x02\x17\x90U\x81T\x82\x90\x80a\x10fWa\x10fa5\xC7V[`\0\x82\x81R` \x81 \x82\x01`\0\x19\x90\x81\x01\x91\x90\x91U\x01\x90U\x80a\x10\x88\x81a5#V[\x91PPa\x0E\xC0V[PPPPPPV[`\x003`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x10\xE2W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a5>V[`\0\x80[\x83\x81\x10\x15a\x06\x8FW`\0\x85\x85\x83\x81\x81\x10a\x11\x02Wa\x11\x02a4\xDCV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x11\x92W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`8`$\x82\x01R\x7FStakeRegistry.updateOperatorStak`D\x82\x01R\x7Fe: quorum does not exist\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06zV[`\0\x80a\x11\x9F\x83\x8Ba\x1E\xA6V[\x91P\x91P\x80a\x11\xC1W`\0\x91P`\x01`\xFF\x84\x16\x1B`\x01`\x01`\xC0\x1B\x03\x86\x16\x17\x94P[`\0a\x11\xCE\x8A\x85\x85a \\V[\x90Pa\x11\xDA\x84\x82a\x1D,V[PPPPP\x80\x80a\x11\xEA\x90a5#V[\x91PPa\x10\xE6V[`\0a\x11\xFF\x84\x84\x84a \\V[\x90P[\x93\x92PPPV[`\0a\x12\x02\x83\x83a\"\xDCV[```\0\x82`\x01`\x01`@\x1B\x03\x81\x11\x15a\x121Wa\x121a.\xD1V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\x12ZW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0[\x83\x81\x10\x15a\x14=W`\0\x85\x85\x83\x81\x81\x10a\x12|Wa\x12|a4\xDCV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x81 \x80T\x92\x94Pc\xFF\xFF\xFF\xFF\x8B\x16\x93P\x91a\x12\xADWa\x12\xADa4\xDCV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11\x15a\x13YW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`[`$\x82\x01R\x7FStakeRegistry.getTotalStakeIndic`D\x82\x01R\x7FesAtBlockNumber: quorum has no s`d\x82\x01R\x7Ftake history at blockNumber\0\0\0\0\0`\x84\x82\x01R`\xA4\x01a\x06zV[`\xFF\x81\x16`\0\x90\x81R`\x01` R`@\x81 T\x90[\x81\x81\x10\x15a\x14'W`\xFF\x83\x16`\0\x90\x81R`\x01` \x81\x90R`@\x90\x91 c\xFF\xFF\xFF\xFF\x8B\x16\x91a\x13\x9D\x84\x86a5\xB0V[a\x13\xA7\x91\x90a5\xB0V[\x81T\x81\x10a\x13\xB7Wa\x13\xB7a4\xDCV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11a\x14\x15W`\x01a\x13\xDA\x82\x84a5\xB0V[a\x13\xE4\x91\x90a5\xB0V[\x85\x85\x81Q\x81\x10a\x13\xF6Wa\x13\xF6a4\xDCV[` \x02` \x01\x01\x90c\xFF\xFF\xFF\xFF\x16\x90\x81c\xFF\xFF\xFF\xFF\x16\x81RPPa\x14'V[\x80a\x14\x1F\x81a5#V[\x91PPa\x13nV[PPP\x80\x80a\x145\x90a5#V[\x91PPa\x12`V[P\x94\x93PPPPV[`@\x80Q``\x81\x01\x82R`\0\x80\x82R` \x80\x83\x01\x82\x90R\x82\x84\x01\x82\x90R\x85\x82R`\x02\x81R\x83\x82 `\xFF\x88\x16\x83R\x90R\x91\x90\x91 \x80T\x83\x90\x81\x10a\x14\x8BWa\x14\x8Ba4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x92\x90\x91\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x93\x83\x01\x93\x90\x93R`\x01`@\x1B\x90\x92\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x94\x93PPPPV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R`\xFF\x83\x16`\0\x90\x81R`\x03` R`@\x90 \x80T\x83\x90\x81\x10a\x15\x16Wa\x15\x16a4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q\x80\x82\x01\x90\x91R\x91\x01T`\x01`\x01`\xA0\x1B\x03\x81\x16\x82R`\x01`\xA0\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x93\x92PPPV[`@\x80Q``\x81\x01\x82R`\0\x80\x82R` \x80\x83\x01\x82\x90R\x82\x84\x01\x82\x90R`\xFF\x86\x16\x82R`\x01\x90R\x91\x90\x91 \x80T\x83\x90\x81\x10a\x15\x95Wa\x15\x95a4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x92\x90\x91\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x93\x83\x01\x93\x90\x93R`\x01`@\x1B\x90\x92\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x93\x92PPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x16EW=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x16i\x91\x90a4CV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x16\x99W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a4`V[\x81a\x16\xB5\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x16\xD1W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a3\xF2V[a\x05\xFB\x83\x83a#\nV[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x17#W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a5>V[`\0[\x81\x81\x10\x15a\x18\x02W`\0\x83\x83\x83\x81\x81\x10a\x17BWa\x17Ba4\xDCV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x17\xD2W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`7`$\x82\x01R\x7FStakeRegistry.deregisterOperator`D\x82\x01R\x7F: quorum does not exist\0\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06zV[`\0a\x17\xE0\x86\x83`\0a \\V[\x90Pa\x17\xEC\x82\x82a\x1D,V[PPP\x80\x80a\x17\xFA\x90a5#V[\x91PPa\x17&V[PPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x18fW=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x18\x8A\x91\x90a4CV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x18\xBAW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a4`V[\x81a\x18\xD6\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x18\xF2W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a3\xF2V[a\x05\xFB\x83\x83a#sV[`\xFF\x83\x16`\0\x90\x81R`\x01` R`@\x81 \x80T\x82\x91\x90\x84\x90\x81\x10a\x19#Wa\x19#a4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x90Pa\rA\x81\x85a'WV[`\xFF\x81\x16`\0\x90\x81R`\x01` \x81\x90R`@\x82 \x80T\x90\x91a\x19\x9B\x91a5\xB0V[\x81T\x81\x10a\x19\xABWa\x19\xABa4\xDCV[`\0\x91\x82R` \x90\x91 \x01T`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x92\x91PPV[`\0a\x11\xFF\x84\x84\x84a(\xE2V[`\0\x82\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x88\x16\x84R\x90\x91R\x81 \x80T\x82\x91\x90\x84\x90\x81\x10a\x1A\x0BWa\x1A\x0Ba4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x90Pa\x1Ab\x81\x86a'WV[`@\x01Q\x95\x94PPPPPV[`\0a\x12\x02\x83\x83a+\x80V[`@\x80Q``\x80\x82\x01\x83R`\0\x80\x83R` \x80\x84\x01\x82\x90R\x83\x85\x01\x82\x90R\x86\x82R`\x02\x81R\x84\x82 `\xFF\x87\x16\x83R\x81R\x84\x82 T\x85Q\x93\x84\x01\x86R\x82\x84R\x90\x83\x01\x82\x90R\x93\x82\x01R\x90\x91\x90\x81a\x1A\xD4W\x91Pa\r.\x90PV[`\0\x85\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x88\x16\x84R\x90\x91R\x90 a\x1A\xFB`\x01\x84a5\xB0V[\x81T\x81\x10a\x1B\x0BWa\x1B\x0Ba4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x92Pa\r.\x91PPV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 a\x1B\x87\x85\x85\x85a(\xE2V[c\xFF\xFF\xFF\xFF\x16\x81T\x81\x10a\x1B\x9DWa\x1B\x9Da4\xDCV[`\0\x91\x82R` \x90\x91 \x01T`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x94\x93PPPPV[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x1C\tW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a5>V[`\xFF\x83\x16`\0\x90\x81R`\x01` R`@\x90 T\x15a\x1C\x87W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`5`$\x82\x01R\x7FStakeRegistry.initializeQuorum: `D\x82\x01Rtquorum already exists`X\x1B`d\x82\x01R`\x84\x01a\x06zV[a\x1C\x91\x83\x82a#sV[a\x1C\x9B\x83\x83a#\nV[PP`\xFF\x16`\0\x90\x81R`\x01` \x81\x81R`@\x80\x84 \x81Q``\x81\x01\x83Rc\xFF\xFF\xFF\xFFC\x81\x16\x82R\x81\x85\x01\x87\x81R\x93\x82\x01\x87\x81R\x83T\x96\x87\x01\x84U\x92\x87R\x93\x90\x95 \x94Q\x94\x90\x93\x01\x80T\x91Q\x93Q`\x01`\x01``\x1B\x03\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x94\x84\x16`\x01` \x1B\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x93\x16\x95\x90\x93\x16\x94\x90\x94\x17\x17\x91\x90\x91\x16\x17\x90UV[`\xFF\x82\x16`\0\x90\x81R`\x01` \x81\x90R`@\x82 \x80T\x91\x83\x91\x90a\x1DP\x90\x84a5\xB0V[\x81T\x81\x10a\x1D`Wa\x1D`a4\xDCV[\x90`\0R` `\0 \x01\x90P\x83`\0\x14\x15a\x1D\x8FWT`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x91Pa\r.\x90PV[\x80T`\0\x90a\x1D\xAE\x90`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x86a\"\xDCV[\x82T\x90\x91PCc\xFF\xFF\xFF\xFF\x90\x81\x16\x91\x16\x14\x15a\x1D\xEBW\x81T`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B`\x01`\x01``\x1B\x03\x83\x16\x02\x17\x82Ua\x1E\x9DV[\x81Tc\xFF\xFF\xFF\xFFC\x81\x16`\x01` \x1B\x81\x81\x02g\xFF\xFF\xFF\xFF\0\0\0\0\x19\x90\x94\x16\x93\x90\x93\x17\x85U`\xFF\x89\x16`\0\x90\x81R`\x01` \x81\x81R`@\x80\x84 \x81Q``\x81\x01\x83R\x95\x86R\x85\x83\x01\x85\x81R`\x01`\x01``\x1B\x03\x80\x8B\x16\x93\x88\x01\x93\x84R\x82T\x95\x86\x01\x83U\x91\x86R\x92\x90\x94 \x94Q\x94\x90\x92\x01\x80T\x91Q\x92Q\x90\x93\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x92\x86\x16\x90\x96\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x91\x16\x93\x90\x94\x16\x92\x90\x92\x17\x92\x90\x92\x17\x16\x91\x90\x91\x17\x90U[\x95\x94PPPPPV[`\0\x80`\0\x80a\x1E\xC5\x86`\xFF\x16`\0\x90\x81R`\x03` R`@\x90 T\x90V[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R\x90\x91P`\0[\x82\x81\x10\x15a )W`\xFF\x88\x16`\0\x90\x81R`\x03` R`@\x90 \x80T\x82\x90\x81\x10a\x1F\x0BWa\x1F\x0Ba4\xDCV[`\0\x91\x82R` \x80\x83 `@\x80Q\x80\x82\x01\x82R\x93\x90\x91\x01T`\x01`\x01`\xA0\x1B\x03\x80\x82\x16\x80\x86R`\x01`\xA0\x1B\x90\x92\x04`\x01`\x01``\x1B\x03\x16\x93\x85\x01\x93\x90\x93R\x90Qcw\x8EU\xF3`\xE0\x1B\x81R\x8B\x83\x16`\x04\x82\x01R`$\x81\x01\x91\x90\x91R\x91\x94P\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x90cw\x8EU\xF3\x90`D\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x1F\xB1W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x1F\xD5\x91\x90a5\xDDV[\x90P\x80\x15a \x16Wg\r\xE0\xB6\xB3\xA7d\0\0\x83` \x01Q`\x01`\x01``\x1B\x03\x16\x82a\x1F\xFF\x91\x90a5\xF6V[a \t\x91\x90a6\x15V[a \x13\x90\x86a67V[\x94P[P\x80a !\x81a5#V[\x91PPa\x1E\xDFV[PPP`\xFF\x85\x16`\0\x90\x81R` \x81\x90R`@\x90 T\x90\x92P`\x01`\x01``\x1B\x03\x90\x81\x16\x90\x83\x16\x10\x15\x90P[\x92P\x92\x90PV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 T\x81\x90\x80a! W`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x82R\x80\x83 \x81Q``\x81\x01\x83Rc\xFF\xFF\xFF\xFFC\x81\x16\x82R\x81\x85\x01\x86\x81R`\x01`\x01``\x1B\x03\x80\x8C\x16\x95\x84\x01\x95\x86R\x84T`\x01\x81\x01\x86U\x94\x88R\x95\x90\x96 \x91Q\x91\x90\x92\x01\x80T\x95Q\x93Q\x90\x94\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x93\x83\x16`\x01` \x1B\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x96\x16\x91\x90\x92\x16\x17\x93\x90\x93\x17\x16\x91\x90\x91\x17\x90Ua\"\x82V[`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x81 a!G`\x01\x84a5\xB0V[\x81T\x81\x10a!WWa!Wa4\xDCV[`\0\x91\x82R` \x90\x91 \x01\x80T`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x91\x04\x81\x16\x94P\x90\x91P\x85\x16\x83\x14\x15a!\x90W`\0\x93PPPPa\x12\x02V[\x80TCc\xFF\xFF\xFF\xFF\x90\x81\x16\x91\x16\x14\x15a!\xCAW\x80T`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B`\x01`\x01``\x1B\x03\x87\x16\x02\x17\x81Ua\"\x80V[\x80Tg\xFF\xFF\xFF\xFF\0\0\0\0\x19\x16`\x01` \x1BCc\xFF\xFF\xFF\xFF\x90\x81\x16\x82\x81\x02\x93\x90\x93\x17\x84U`\0\x8A\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x8D\x16\x84R\x82R\x80\x83 \x81Q``\x81\x01\x83R\x96\x87R\x86\x83\x01\x84\x81R`\x01`\x01``\x1B\x03\x8D\x81\x16\x93\x89\x01\x93\x84R\x82T`\x01\x81\x01\x84U\x92\x86R\x93\x90\x94 \x96Q\x96\x01\x80T\x93Q\x91Q\x96\x85\x16g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x94\x16\x93\x90\x93\x17\x93\x16\x90\x93\x02\x91\x90\x91\x17`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B\x93\x90\x92\x16\x92\x90\x92\x02\x17\x90U[P[`@\x80Q`\xFF\x87\x16\x81R`\x01`\x01``\x1B\x03\x86\x16` \x82\x01R\x87\x91\x7F/R}R~\x95\xD8\xFE@\xAE\xC5Swt;\xB7y\x08}\xA3\xF6\xD0\xD0\x8F\x12\xE3dD\xDAb2}\x91\x01`@Q\x80\x91\x03\x90\xA2a\"\xD2\x82\x85a+\x80V[\x96\x95PPPPPPV[`\0\x80\x82\x12\x15a#\0Wa\"\xEF\x82a6bV[a\"\xF9\x90\x84a6\x7FV[\x90Pa\r.V[a\"\xF9\x82\x84a67V[`\xFF\x82\x16`\0\x81\x81R` \x81\x81R`@\x91\x82\x90 \x80Tk\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x16`\x01`\x01``\x1B\x03\x86\x16\x90\x81\x17\x90\x91U\x91Q\x91\x82R\x7F&\xEE\xCF\xF2\xB7\x0B\nq\x10O\xF4\xD9@\xBAqb\xD2:\x95\xC2Hw\x1F\xC4\x87\xA7\xBE\x17\xA5\x96\xB3\xCF\x91\x01`@Q\x80\x91\x03\x90\xA2PPV[`\0\x81Q\x11a#\xD8W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`8`$\x82\x01R`\0\x80Q` a6\xFF\x839\x81Q\x91R`D\x82\x01R\x7F: no strategies provided\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06zV[\x80Q`\xFF\x83\x16`\0\x90\x81R`\x03` \x90\x81R`@\x90\x91 T\x90a#\xFB\x83\x83a6\xA7V[\x11\x15a$kW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`E`$\x82\x01R`\0\x80Q` a6\xFF\x839\x81Q\x91R`D\x82\x01R\x7F: exceed MAX_WEIGHING_FUNCTION_L`d\x82\x01Rd\x08\xA9\xC8\xEA\x89`\xDB\x1B`\x84\x82\x01R`\xA4\x01a\x06zV[`\0[\x82\x81\x10\x15a'PW`\0[a$\x83\x82\x84a6\xA7V[\x81\x10\x15a%dW\x84\x82\x81Q\x81\x10a$\x9CWa$\x9Ca4\xDCV[` \x02` \x01\x01Q`\0\x01Q`\x01`\x01`\xA0\x1B\x03\x16`\x03`\0\x88`\xFF\x16`\xFF\x16\x81R` \x01\x90\x81R` \x01`\0 \x82\x81T\x81\x10a$\xDBWa$\xDBa4\xDCV[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x16\x14\x15a%RW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`=`$\x82\x01R`\0\x80Q` a6\xFF\x839\x81Q\x91R`D\x82\x01R\x7F: cannot add same strategy 2x\0\0\0`d\x82\x01R`\x84\x01a\x06zV[\x80a%\\\x81a5#V[\x91PPa$yV[P`\0\x84\x82\x81Q\x81\x10a%yWa%ya4\xDCV[` \x02` \x01\x01Q` \x01Q`\x01`\x01``\x1B\x03\x16\x11a%\xFEW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`F`$\x82\x01R`\0\x80Q` a6\xFF\x839\x81Q\x91R`D\x82\x01R\x7F: cannot add strategy with zero `d\x82\x01Re\x1D\xD9ZY\xDA\x1D`\xD2\x1B`\x84\x82\x01R`\xA4\x01a\x06zV[`\xFF\x85\x16`\0\x90\x81R`\x03` R`@\x90 \x84Q\x85\x90\x83\x90\x81\x10a&$Wa&$a4\xDCV[` \x90\x81\x02\x91\x90\x91\x01\x81\x01Q\x82T`\x01\x81\x01\x84U`\0\x93\x84R\x92\x82\x90 \x81Q\x91\x90\x92\x01Q`\x01`\x01``\x1B\x03\x16`\x01`\xA0\x1B\x02`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x17\x91\x01U\x83Q`\xFF\x86\x16\x90\x7F\x10V^V\xCA\xCB\xF3.\xCA&yE\xF0T\xFE\xC0.Yu\x002\xD1\x13\xD30!\x82\xAD\x96\x7FT\x04\x90\x86\x90\x84\x90\x81\x10a&\xA1Wa&\xA1a4\xDCV[` \x90\x81\x02\x91\x90\x91\x01\x81\x01QQ`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R\x01`@Q\x80\x91\x03\x90\xA2\x84`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x85\x83\x81Q\x81\x10a&\xFEWa&\xFEa4\xDCV[` \x02` \x01\x01Q`\0\x01Q\x86\x84\x81Q\x81\x10a'\x1CWa'\x1Ca4\xDCV[` \x02` \x01\x01Q` \x01Q`@Qa'6\x92\x91\x90a+\xF3V[`@Q\x80\x91\x03\x90\xA2\x80a'H\x81a5#V[\x91PPa$nV[PPPPPV[\x81`\0\x01Qc\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x10\x15a(\x03W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R```$\x82\x01R\x7FStakeRegistry._validateOperatorS`D\x82\x01R\x7FtakeAtBlockNumber: operatorStake`d\x82\x01R\x7FUpdate is from after blockNumber`\x84\x82\x01R`\xA4\x01a\x06zV[` \x82\x01Qc\xFF\xFF\xFF\xFF\x16\x15\x80a()WP\x81` \x01Qc\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x10[a(\xDEW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`t`$\x82\x01R\x7FStakeRegistry._validateOperatorS`D\x82\x01R\x7FtakeAtBlockNumber: there is a ne`d\x82\x01R\x7Fwer operatorStakeUpdate availabl`\x84\x82\x01Rs2\x9012\xB37\xB92\x90167\xB1\xB5\xA7:\xB6\xB12\xB9`a\x1B`\xA4\x82\x01R`\xC4\x01a\x06zV[PPV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 T\x81[\x81\x81\x10\x15a*\xBBW`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x90 c\xFF\xFF\xFF\xFF\x85\x16\x90`\x01a)9\x84\x86a5\xB0V[a)C\x91\x90a5\xB0V[\x81T\x81\x10a)SWa)Sa4\xDCV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11a*\xA9W`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x81 `\x01a)\x92\x84\x86a5\xB0V[a)\x9C\x91\x90a5\xB0V[\x81T\x81\x10a)\xACWa)\xACa4\xDCV[`\0\x91\x82R` \x90\x91 \x01T`\x01` \x1B\x90\x04c\xFF\xFF\xFF\xFF\x16\x90P\x80\x15\x80a)\xDFWP\x84c\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x11[a*\x89W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`i`$\x82\x01R\x7FStakeRegistry._getStakeUpdateInd`D\x82\x01R\x7FexForOperatorAtBlockNumber: oper`d\x82\x01R\x7FatorId has no stake update at bl`\x84\x82\x01Rh7\xB1\xB5\xA7:\xB6\xB12\xB9`\xB9\x1B`\xA4\x82\x01R`\xC4\x01a\x06zV[`\x01a*\x95\x83\x85a5\xB0V[a*\x9F\x91\x90a5\xB0V[\x93PPPPa\x12\x02V[\x80a*\xB3\x81a5#V[\x91PPa)\x01V[P`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`\x81`$\x82\x01R\x7FStakeRegistry._getStakeUpdateInd`D\x82\x01R\x7FexForOperatorAtBlockNumber: no s`d\x82\x01R\x7Ftake update found for operatorId`\x84\x82\x01R\x7F and quorumNumber at block numbe`\xA4\x82\x01R`9`\xF9\x1B`\xC4\x82\x01R`\xE4\x01a\x06zV[`\0a\x12\x02`\x01`\x01``\x1B\x03\x80\x85\x16\x90\x84\x16a6\xBFV[\x805`\xFF\x81\x16\x81\x14a+\xA9W`\0\x80\xFD[\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a+\xC1W`\0\x80\xFD[a+\xCA\x83a+\x98V[\x94` \x93\x90\x93\x015\x93PPPV[`\0` \x82\x84\x03\x12\x15a+\xEAW`\0\x80\xFD[a\x12\x02\x82a+\x98V[`\x01`\x01`\xA0\x1B\x03\x92\x90\x92\x16\x82R`\x01`\x01``\x1B\x03\x16` \x82\x01R`@\x01\x90V[`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a,*W`\0\x80\xFD[PV[`\0\x80`@\x83\x85\x03\x12\x15a,@W`\0\x80\xFD[a,I\x83a+\x98V[\x91P` \x83\x015a,Y\x81a,\x15V[\x80\x91PP\x92P\x92\x90PV[`\0\x80\x83`\x1F\x84\x01\x12a,vW`\0\x80\xFD[P\x815`\x01`\x01`@\x1B\x03\x81\x11\x15a,\x8DW`\0\x80\xFD[` \x83\x01\x91P\x83` \x82`\x05\x1B\x85\x01\x01\x11\x15a UW`\0\x80\xFD[`\0\x80`\0\x80`\0``\x86\x88\x03\x12\x15a,\xC0W`\0\x80\xFD[a,\xC9\x86a+\x98V[\x94P` \x86\x015`\x01`\x01`@\x1B\x03\x80\x82\x11\x15a,\xE5W`\0\x80\xFD[a,\xF1\x89\x83\x8A\x01a,dV[\x90\x96P\x94P`@\x88\x015\x91P\x80\x82\x11\x15a-\nW`\0\x80\xFD[Pa-\x17\x88\x82\x89\x01a,dV[\x96\x99\x95\x98P\x93\x96P\x92\x94\x93\x92PPPV[`\0\x80\x83`\x1F\x84\x01\x12a-:W`\0\x80\xFD[P\x815`\x01`\x01`@\x1B\x03\x81\x11\x15a-QW`\0\x80\xFD[` \x83\x01\x91P\x83` \x82\x85\x01\x01\x11\x15a UW`\0\x80\xFD[`\0\x80`\0\x80``\x85\x87\x03\x12\x15a-\x7FW`\0\x80\xFD[\x845a-\x8A\x81a,\x15V[\x93P` \x85\x015\x92P`@\x85\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a-\xACW`\0\x80\xFD[a-\xB8\x87\x82\x88\x01a-(V[\x95\x98\x94\x97P\x95PPPPV[`\0\x81Q\x80\x84R` \x80\x85\x01\x94P\x80\x84\x01`\0[\x83\x81\x10\x15a-\xFDW\x81Q`\x01`\x01``\x1B\x03\x16\x87R\x95\x82\x01\x95\x90\x82\x01\x90`\x01\x01a-\xD8V[P\x94\x95\x94PPPPPV[`@\x81R`\0a.\x1B`@\x83\x01\x85a-\xC4V[\x82\x81\x03` \x84\x01Ra\x1E\x9D\x81\x85a-\xC4V[`\0\x80`@\x83\x85\x03\x12\x15a.@W`\0\x80\xFD[\x825\x91Pa.P` \x84\x01a+\x98V[\x90P\x92P\x92\x90PV[` \x80\x82R\x82Q\x82\x82\x01\x81\x90R`\0\x91\x90\x84\x82\x01\x90`@\x85\x01\x90\x84[\x81\x81\x10\x15a.\xC5Wa.\xB2\x83\x85Qc\xFF\xFF\xFF\xFF\x80\x82Q\x16\x83R\x80` \x83\x01Q\x16` \x84\x01RP`\x01`\x01``\x1B\x03`@\x82\x01Q\x16`@\x83\x01RPPV[\x92\x84\x01\x92``\x92\x90\x92\x01\x91`\x01\x01a.uV[P\x90\x96\x95PPPPPPV[cNH{q`\xE0\x1B`\0R`A`\x04R`$`\0\xFD[`@\x80Q\x90\x81\x01`\x01`\x01`@\x1B\x03\x81\x11\x82\x82\x10\x17\x15a/\tWa/\ta.\xD1V[`@R\x90V[`@Q`\x1F\x82\x01`\x1F\x19\x16\x81\x01`\x01`\x01`@\x1B\x03\x81\x11\x82\x82\x10\x17\x15a/7Wa/7a.\xD1V[`@R\x91\x90PV[`\0`\x01`\x01`@\x1B\x03\x82\x11\x15a/XWa/Xa.\xD1V[P`\x05\x1B` \x01\x90V[`\0\x80`@\x83\x85\x03\x12\x15a/uW`\0\x80\xFD[a/~\x83a+\x98V[\x91P` \x80\x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a/\x9AW`\0\x80\xFD[\x84\x01`\x1F\x81\x01\x86\x13a/\xABW`\0\x80\xFD[\x805a/\xBEa/\xB9\x82a/?V[a/\x0FV[\x81\x81R`\x05\x91\x90\x91\x1B\x82\x01\x83\x01\x90\x83\x81\x01\x90\x88\x83\x11\x15a/\xDDW`\0\x80\xFD[\x92\x84\x01\x92[\x82\x84\x10\x15a/\xFBW\x835\x82R\x92\x84\x01\x92\x90\x84\x01\x90a/\xE2V[\x80\x95PPPPPP\x92P\x92\x90PV[\x805`\x01`\x01``\x1B\x03\x81\x16\x81\x14a+\xA9W`\0\x80\xFD[`\0\x80`\0``\x84\x86\x03\x12\x15a06W`\0\x80\xFD[\x835\x92Pa0F` \x85\x01a+\x98V[\x91Pa0T`@\x85\x01a0\nV[\x90P\x92P\x92P\x92V[`\0\x80`@\x83\x85\x03\x12\x15a0pW`\0\x80\xFD[a+\xCA\x83a0\nV[\x805c\xFF\xFF\xFF\xFF\x81\x16\x81\x14a+\xA9W`\0\x80\xFD[`\0\x80`\0`@\x84\x86\x03\x12\x15a0\xA2W`\0\x80\xFD[a0\xAB\x84a0yV[\x92P` \x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a0\xC6W`\0\x80\xFD[a0\xD2\x86\x82\x87\x01a-(V[\x94\x97\x90\x96P\x93\x94PPPPV[` \x80\x82R\x82Q\x82\x82\x01\x81\x90R`\0\x91\x90\x84\x82\x01\x90`@\x85\x01\x90\x84[\x81\x81\x10\x15a.\xC5W\x83Qc\xFF\xFF\xFF\xFF\x16\x83R\x92\x84\x01\x92\x91\x84\x01\x91`\x01\x01a0\xFBV[`\0\x80`\0``\x84\x86\x03\x12\x15a12W`\0\x80\xFD[a1;\x84a+\x98V[\x95` \x85\x015\x95P`@\x90\x94\x015\x93\x92PPPV[\x81Qc\xFF\xFF\xFF\xFF\x90\x81\x16\x82R` \x80\x84\x01Q\x90\x91\x16\x90\x82\x01R`@\x80\x83\x01Q`\x01`\x01``\x1B\x03\x16\x90\x82\x01R``\x81\x01a\r.V[`\0\x80`@\x83\x85\x03\x12\x15a1\x98W`\0\x80\xFD[a1\xA1\x83a+\x98V[\x91Pa.P` \x84\x01a0\nV[`\0\x80`\0`@\x84\x86\x03\x12\x15a1\xC4W`\0\x80\xFD[\x835\x92P` \x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a0\xC6W`\0\x80\xFD[`\0\x82`\x1F\x83\x01\x12a1\xF2W`\0\x80\xFD[\x815` a2\x02a/\xB9\x83a/?V[\x82\x81R`\x06\x92\x90\x92\x1B\x84\x01\x81\x01\x91\x81\x81\x01\x90\x86\x84\x11\x15a2!W`\0\x80\xFD[\x82\x86\x01[\x84\x81\x10\x15a2pW`@\x81\x89\x03\x12\x15a2>W`\0\x80\x81\xFD[a2Fa.\xE7V[\x815a2Q\x81a,\x15V[\x81Ra2^\x82\x86\x01a0\nV[\x81\x86\x01R\x83R\x91\x83\x01\x91`@\x01a2%V[P\x96\x95PPPPPPV[`\0\x80`@\x83\x85\x03\x12\x15a2\x8EW`\0\x80\xFD[a2\x97\x83a+\x98V[\x91P` \x83\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a2\xB2W`\0\x80\xFD[a2\xBE\x85\x82\x86\x01a1\xE1V[\x91PP\x92P\x92\x90PV[`\0\x80`\0``\x84\x86\x03\x12\x15a2\xDDW`\0\x80\xFD[a2\xE6\x84a+\x98V[\x92Pa2\xF4` \x85\x01a0yV[\x91P`@\x84\x015\x90P\x92P\x92P\x92V[`\0\x80`\0``\x84\x86\x03\x12\x15a3\x19W`\0\x80\xFD[\x835\x92Pa3)` \x85\x01a+\x98V[\x91Pa0T`@\x85\x01a0yV[`\0\x80`\0\x80`\x80\x85\x87\x03\x12\x15a3MW`\0\x80\xFD[a3V\x85a+\x98V[\x93Pa3d` \x86\x01a0yV[\x93\x96\x93\x95PPPP`@\x82\x015\x91``\x015\x90V[`\0\x80`@\x83\x85\x03\x12\x15a3\x8CW`\0\x80\xFD[a1\xA1\x83a0\nV[`\0\x80`\0``\x84\x86\x03\x12\x15a3\xAAW`\0\x80\xFD[a3\xB3\x84a+\x98V[\x92Pa3\xC1` \x85\x01a0\nV[\x91P`@\x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a3\xDCW`\0\x80\xFD[a3\xE8\x86\x82\x87\x01a1\xE1V[\x91PP\x92P\x92P\x92V[` \x80\x82R`1\x90\x82\x01R\x7FStakeRegistry.quorumExists: quor`@\x82\x01Rp\x1D[H\x19\x1B\xD9\\\xC8\x1B\x9B\xDD\x08\x19^\x1A\\\xDD`z\x1B``\x82\x01R`\x80\x01\x90V[`\0` \x82\x84\x03\x12\x15a4UW`\0\x80\xFD[\x81Qa\x12\x02\x81a,\x15V[` \x80\x82R`V\x90\x82\x01R\x7FStakeRegistry.onlyCoordinatorOwn`@\x82\x01R\x7Fer: caller is not the owner of t``\x82\x01Ru42\x9092\xB3\xB4\xB9\xBA9<\xA1\xB7\xB7\xB924\xB70\xBA7\xB9`Q\x1B`\x80\x82\x01R`\xA0\x01\x90V[cNH{q`\xE0\x1B`\0R`2`\x04R`$`\0\xFD[`\0` \x82\x84\x03\x12\x15a5\x04W`\0\x80\xFD[a\x12\x02\x82a0\nV[cNH{q`\xE0\x1B`\0R`\x11`\x04R`$`\0\xFD[`\0`\0\x19\x82\x14\x15a57Wa57a5\rV[P`\x01\x01\x90V[` \x80\x82R`L\x90\x82\x01R\x7FStakeRegistry.onlyRegistryCoordi`@\x82\x01R\x7Fnator: caller is not the Registr``\x82\x01Rk<\xA1\xB7\xB7\xB924\xB70\xBA7\xB9`\xA1\x1B`\x80\x82\x01R`\xA0\x01\x90V[`\0\x82\x82\x10\x15a5\xC2Wa5\xC2a5\rV[P\x03\x90V[cNH{q`\xE0\x1B`\0R`1`\x04R`$`\0\xFD[`\0` \x82\x84\x03\x12\x15a5\xEFW`\0\x80\xFD[PQ\x91\x90PV[`\0\x81`\0\x19\x04\x83\x11\x82\x15\x15\x16\x15a6\x10Wa6\x10a5\rV[P\x02\x90V[`\0\x82a62WcNH{q`\xE0\x1B`\0R`\x12`\x04R`$`\0\xFD[P\x04\x90V[`\0`\x01`\x01``\x1B\x03\x80\x83\x16\x81\x85\x16\x80\x83\x03\x82\x11\x15a6YWa6Ya5\rV[\x01\x94\x93PPPPV[`\0`\x01`\xFF\x1B\x82\x14\x15a6xWa6xa5\rV[P`\0\x03\x90V[`\0`\x01`\x01``\x1B\x03\x83\x81\x16\x90\x83\x16\x81\x81\x10\x15a6\x9FWa6\x9Fa5\rV[\x03\x93\x92PPPV[`\0\x82\x19\x82\x11\x15a6\xBAWa6\xBAa5\rV[P\x01\x90V[`\0\x80\x83\x12\x80\x15`\x01`\xFF\x1B\x85\x01\x84\x12\x16\x15a6\xDDWa6\xDDa5\rV[`\x01`\x01`\xFF\x1B\x03\x84\x01\x83\x13\x81\x16\x15a6\xF8Wa6\xF8a5\rV[PP\x03\x90V\xFEStakeRegistry._addStrategyParams\xA2dipfsX\"\x12 \x08v\x88D\x84\xC2\xAA\xC0\xFC\xDD\xC8\xC3\x0C~2\xB6G\xD3\xB4\xF4\xB5\xBB\xCA\xAB\xB7\xAB\x8Eg\xA6\x82\x96\x92dsolcC\0\x08\x0C\x003";
+    const __BYTECODE: &[u8] = b"`\xC0`@R4\x80\x15b\0\0\x11W`\0\x80\xFD[P`@Qb\0;\x9C8\x03\x80b\0;\x9C\x839\x81\x01`@\x81\x90Rb\0\x004\x91b\0\0eV[`\x01`\x01`\xA0\x1B\x03\x91\x82\x16`\xA0R\x16`\x80Rb\0\0\xA4V[`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14b\0\0bW`\0\x80\xFD[PV[`\0\x80`@\x83\x85\x03\x12\x15b\0\0yW`\0\x80\xFD[\x82Qb\0\0\x86\x81b\0\0LV[` \x84\x01Q\x90\x92Pb\0\0\x99\x81b\0\0LV[\x80\x91PP\x92P\x92\x90PV[`\x80Q`\xA0Qa:\x93b\0\x01\t`\09`\0\x81\x81a\x03\xB9\x01R\x81\x81a\x06\xB9\x01R\x81\x81a\t\xF6\x01R\x81\x81a\rm\x01R\x81\x81a\x11\x98\x01R\x81\x81a\x17\xAB\x01R\x81\x81a\x18\xA8\x01R\x81\x81a\x19\xCC\x01Ra\x1D\x8E\x01R`\0\x81\x81a\x05\x8E\x01Ra \xC9\x01Ra:\x93`\0\xF3\xFE`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\x02\x11W`\x005`\xE0\x1C\x80c\x81\xC0u\x02\x11a\x01%W\x80c\xC8)LV\x11a\0\xADW\x80c\xF2\xBE\x94\xAE\x11a\0|W\x80c\xF2\xBE\x94\xAE\x14a\x05\xB0W\x80c\xF5\tU\x1A\x14a\x05\xC3W\x80c\xF8Q\xE1\x98\x14a\x05\xD6W\x80c\xFA(\xC6'\x14a\x05\xE9W\x80c\xFFiJw\x14a\x05\xFCW`\0\x80\xFD[\x80c\xC8)LV\x14a\x05;W\x80c\xD5\xEC\xCC\x05\x14a\x05NW\x80c\xDD\x98F\xB9\x14a\x05aW\x80c\xDF\\\xF7#\x14a\x05\x89W`\0\x80\xFD[\x80c\xB6\x90Kx\x11a\0\xF4W\x80c\xB6\x90Kx\x14a\x04\xC6W\x80c\xBC\x9A@\xC3\x14a\x04\xD9W\x80c\xBD)\xB8\xCD\x14a\x04\xECW\x80c\xC4gx\xA5\x14a\x04\xFFW\x80c\xC6\x01R}\x14a\x05(W`\0\x80\xFD[\x80c\x81\xC0u\x02\x14a\x043W\x80c\x9F<\xCFe\x14a\x04SW\x80c\xACk\xFB\x03\x14a\x04fW\x80c\xAD\xC8\x04\xDA\x14a\x04\x86W`\0\x80\xFD[\x80cK\xD2n\t\x11a\x01\xA8W\x80cf\xAC\xFE\xFE\x11a\x01wW\x80cf\xAC\xFE\xFE\x14a\x03\x89W\x80cm\x14\xA9\x87\x14a\x03\xB4W\x80ctELm\x14a\x03\xF3W\x80c|\x17#G\x14a\x04\x06W\x80c\x7FB\x98\"\x14a\x04 W`\0\x80\xFD[\x80cK\xD2n\t\x14a\x03$W\x80cT\x01\xED'\x14a\x03TW\x80c^Zgu\x14a\x03gW\x80c_\x1F-w\x14a\x03vW`\0\x80\xFD[\x80c \xB6b\x98\x11a\x01\xE4W\x80c \xB6b\x98\x14a\x02\xADW\x80c%PGw\x14a\x02\xC0W\x80c,\xD9Y@\x14a\x02\xE1W\x80c<\xA5\xA5\xF5\x14a\x03\x01W`\0\x80\xFD[\x80c\x03\x90\xA4\xD5\x14a\x02\x16W\x80c\x04\x91\xB4\x1C\x14a\x02+W\x80c\x08s$a\x14a\x02aW\x80c\x1F\x9Bt\xE0\x14a\x02\x82W[`\0\x80\xFD[a\x02)a\x02$6`\x04a.\x17V[a\x06\x0FV[\0[a\x02Na\x0296`\x04a.AV[`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x90V[`@Q\x90\x81R` \x01[`@Q\x80\x91\x03\x90\xF3[a\x02ta\x02o6`\x04a.\x17V[a\x06\x1EV[`@Qa\x02X\x92\x91\x90a.\\V[a\x02\x95a\x02\x906`\x04a.\x96V[a\x06gV[`@Q`\x01`\x01``\x1B\x03\x90\x91\x16\x81R` \x01a\x02XV[a\x02)a\x02\xBB6`\x04a/\x11V[a\x06\xB7V[a\x02\xD3a\x02\xCE6`\x04a/\xD2V[a\t\xE8V[`@Qa\x02X\x92\x91\x90a0qV[a\x02\xF4a\x02\xEF6`\x04a0\x96V[a\x0C\xB3V[`@Qa\x02X\x91\x90a0\xC2V[a\x02Na\x03\x0F6`\x04a.AV[`\xFF\x16`\0\x90\x81R`\x03` R`@\x90 T\x90V[a\x02Na\x0326`\x04a0\x96V[`\0\x91\x82R`\x02` \x90\x81R`@\x80\x84 `\xFF\x93\x90\x93\x16\x84R\x91\x90R\x90 T\x90V[a\x02\x95a\x03b6`\x04a0\x96V[a\rRV[a\x02Ng\r\xE0\xB6\xB3\xA7d\0\0\x81V[a\x02)a\x03\x846`\x04a1\xCBV[a\rkV[a\x03\x9Ca\x03\x976`\x04a/\xD2V[a\x11\x8BV[`@Q`\x01`\x01`\xC0\x1B\x03\x90\x91\x16\x81R` \x01a\x02XV[a\x03\xDB\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x81V[`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R` \x01a\x02XV[a\x02Na\x04\x016`\x04a2\x8AV[a\x12\xE5V[a\x04\x0E` \x81V[`@Q`\xFF\x90\x91\x16\x81R` \x01a\x02XV[a\x02\x95a\x04.6`\x04a2\xC6V[a\x12\xFCV[a\x04Fa\x04A6`\x04a2\xF6V[a\x13\x08V[`@Qa\x02X\x91\x90a3HV[a\x03\xDBa\x04a6`\x04a.\x17V[a\x15\xD0V[a\x04ya\x04t6`\x04a3\x86V[a\x16\x08V[`@Qa\x02X\x91\x90a3\xB9V[a\x04\x99a\x04\x946`\x04a.\x17V[a\x16\xA0V[`@\x80Q\x82Q`\x01`\x01`\xA0\x1B\x03\x16\x81R` \x92\x83\x01Q`\x01`\x01``\x1B\x03\x16\x92\x81\x01\x92\x90\x92R\x01a\x02XV[a\x04ya\x04\xD46`\x04a.\x17V[a\x17\x1AV[a\x02)a\x04\xE76`\x04a3\xEEV[a\x17\xA9V[a\x02)a\x04\xFA6`\x04a4\x18V[a\x18\x9DV[a\x02\x95a\x05\r6`\x04a.AV[`\0` \x81\x90R\x90\x81R`@\x90 T`\x01`\x01``\x1B\x03\x16\x81V[a\x02)a\x0566`\x04a4\xE4V[a\x19\xCAV[a\x02\x95a\x05I6`\x04a51V[a\x1A\xBEV[a\x02\x95a\x05\\6`\x04a.AV[a\x1B<V[a\x05ta\x05o6`\x04a5mV[a\x1B\x8FV[`@Qc\xFF\xFF\xFF\xFF\x90\x91\x16\x81R` \x01a\x02XV[a\x03\xDB\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x81V[a\x02\x95a\x05\xBE6`\x04a5\xA0V[a\x1B\x9CV[a\x02Na\x05\xD16`\x04a5\xE2V[a\x1C1V[a\x04ya\x05\xE46`\x04a0\x96V[a\x1C=V[a\x02\x95a\x05\xF76`\x04a5mV[a\x1D\"V[a\x02)a\x06\n6`\x04a5\xFEV[a\x1D\x83V[a\x06\x19\x82\x82a\x1E\xEEV[PPPV[`\x03` R\x81`\0R`@`\0 \x81\x81T\x81\x10a\x06:W`\0\x80\xFD[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x81\x16\x92P`\x01`\xA0\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x90P\x82V[`\xFF\x82\x16`\0\x90\x81R`\x01` R`@\x81 T\x83\x90a\x06\xA1W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6[V[`@Q\x80\x91\x03\x90\xFD[`\0a\x06\xAD\x85\x85a hV[P\x95\x94PPPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x07\x15W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x079\x91\x90a6\xACV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x07iW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6\xC9V[\x84a\x07\x85\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x07\xA1W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6[V[\x83\x80a\x08\x17W`@\x80QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`$\x81\x01\x91\x90\x91R\x7FStakeRegistry.modifyStrategyPara`D\x82\x01R\x7Fms: no strategy indices provided`d\x82\x01R`\x84\x01a\x06\x98V[\x82\x81\x14a\x08\x8CW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`9`$\x82\x01R\x7FStakeRegistry.modifyStrategyPara`D\x82\x01R\x7Fms: input length mismatch\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[`\xFF\x87\x16`\0\x90\x81R`\x03` R`@\x81 \x90[\x82\x81\x10\x15a\t\xDDW\x85\x85\x82\x81\x81\x10a\x08\xBAWa\x08\xBAa7EV[\x90P` \x02\x01` \x81\x01\x90a\x08\xCF\x91\x90a7[V[\x82\x89\x89\x84\x81\x81\x10a\x08\xE2Wa\x08\xE2a7EV[\x90P` \x02\x015\x81T\x81\x10a\x08\xF9Wa\x08\xF9a7EV[\x90`\0R` `\0 \x01`\0\x01`\x14a\x01\0\n\x81T\x81`\x01`\x01``\x1B\x03\x02\x19\x16\x90\x83`\x01`\x01``\x1B\x03\x16\x02\x17\x90UP\x88`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x83\x8A\x8A\x85\x81\x81\x10a\tbWa\tba7EV[\x90P` \x02\x015\x81T\x81\x10a\tyWa\tya7EV[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x16\x88\x88\x85\x81\x81\x10a\t\xA0Wa\t\xA0a7EV[\x90P` \x02\x01` \x81\x01\x90a\t\xB5\x91\x90a7[V[`@Qa\t\xC3\x92\x91\x90a.\\V[`@Q\x80\x91\x03\x90\xA2\x80a\t\xD5\x81a7\x8CV[\x91PPa\x08\xA0V[PPPPPPPPPV[``\x803`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\n3W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a7\xA7V[`\0\x83`\x01`\x01`@\x1B\x03\x81\x11\x15a\nMWa\nMa1:V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\nvW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0\x84`\x01`\x01`@\x1B\x03\x81\x11\x15a\n\x93Wa\n\x93a1:V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\n\xBCW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0[\x85\x81\x10\x15a\x0C\xA5W`\0\x87\x87\x83\x81\x81\x10a\n\xDEWa\n\xDEa7EV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x0BfW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`5`$\x82\x01R\x7FStakeRegistry.registerOperator: `D\x82\x01Rt\x1C][\xDC\x9D[H\x19\x1B\xD9\\\xC8\x1B\x9B\xDD\x08\x19^\x1A\\\xDD`Z\x1B`d\x82\x01R`\x84\x01a\x06\x98V[`\0\x80a\x0Bs\x83\x8Da hV[\x91P\x91P\x80a\x0C\x10W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`[`$\x82\x01R\x7FStakeRegistry.registerOperator: `D\x82\x01R\x7FOperator does not meet minimum s`d\x82\x01R\x7Ftake requirement for quorum\0\0\0\0\0`\x84\x82\x01R`\xA4\x01a\x06\x98V[`\0a\x0C\x1D\x8C\x85\x85a\"fV[\x90P\x82\x87\x86\x81Q\x81\x10a\x0C2Wa\x0C2a7EV[` \x02` \x01\x01\x90`\x01`\x01``\x1B\x03\x16\x90\x81`\x01`\x01``\x1B\x03\x16\x81RPPa\x0C\\\x84\x82a\x1E\xEEV[\x86\x86\x81Q\x81\x10a\x0CnWa\x0Cna7EV[` \x02` \x01\x01\x90`\x01`\x01``\x1B\x03\x16\x90\x81`\x01`\x01``\x1B\x03\x16\x81RPPPPPP\x80\x80a\x0C\x9D\x90a7\x8CV[\x91PPa\n\xC2V[P\x90\x97\x90\x96P\x94PPPPPV[`\0\x82\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x85\x16\x84R\x82R\x80\x83 \x80T\x82Q\x81\x85\x02\x81\x01\x85\x01\x90\x93R\x80\x83R``\x94\x92\x93\x91\x92\x90\x91\x84\x01[\x82\x82\x10\x15a\rEW`\0\x84\x81R` \x90\x81\x90 `@\x80Q``\x81\x01\x82R\x91\x85\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x83\x85\x01R`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x90\x82\x01R\x82R`\x01\x90\x92\x01\x91\x01a\x0C\xECV[PPPP\x90P[\x92\x91PPV[`\0\x80a\r_\x84\x84a\x1C=V[`@\x01Q\x94\x93PPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\r\xC9W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\r\xED\x91\x90a6\xACV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x0E\x1DW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6\xC9V[\x81a\x0E9\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x0EUW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6[V[\x81Q\x80a\x0E\xCAW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`=`$\x82\x01R\x7FStakeRegistry.removeStrategies: `D\x82\x01R\x7Fno indices to remove provided\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[`\xFF\x84\x16`\0\x90\x81R`\x03` \x90\x81R`@\x80\x83 `\x04\x90\x92R\x82 \x90\x91[\x83\x81\x10\x15a\x11\x82W\x86`\xFF\x16\x7F1\xFA.,\xD2\x80\xC97^\x13\xFF\xCF=\x81\xE27\x81\0\x18n@X\xF8\xD3\xDD\xB6\x90\xB8-\xCD1\xF7\x84\x88\x84\x81Q\x81\x10a\x0F)Wa\x0F)a7EV[` \x02` \x01\x01Q\x81T\x81\x10a\x0FAWa\x0FAa7EV[`\0\x91\x82R` \x91\x82\x90 \x01T`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R\x01`@Q\x80\x91\x03\x90\xA2\x86`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x84\x88\x84\x81Q\x81\x10a\x0F\x9FWa\x0F\x9Fa7EV[` \x02` \x01\x01Q\x81T\x81\x10a\x0F\xB7Wa\x0F\xB7a7EV[`\0\x91\x82R` \x80\x83 \x91\x90\x91\x01T`@\x80Q`\x01`\x01`\xA0\x1B\x03\x90\x92\x16\x82R\x91\x81\x01\x92\x90\x92R\x01`@Q\x80\x91\x03\x90\xA2\x82T\x83\x90a\x0F\xF7\x90`\x01\x90a8\x19V[\x81T\x81\x10a\x10\x07Wa\x10\x07a7EV[\x90`\0R` `\0 \x01\x83\x87\x83\x81Q\x81\x10a\x10$Wa\x10$a7EV[` \x02` \x01\x01Q\x81T\x81\x10a\x10<Wa\x10<a7EV[`\0\x91\x82R` \x90\x91 \x82T\x91\x01\x80T`\x01`\x01`\xA0\x1B\x03\x19\x16`\x01`\x01`\xA0\x1B\x03\x90\x92\x16\x91\x82\x17\x81U\x91T`\x01`\x01``\x1B\x03`\x01`\xA0\x1B\x91\x82\x90\x04\x16\x02\x17\x90U\x82T\x83\x90\x80a\x10\x8FWa\x10\x8Fa80V[`\0\x82\x81R` \x81 \x82\x01`\0\x19\x90\x81\x01\x91\x90\x91U\x01\x90U\x81T\x82\x90a\x10\xB7\x90`\x01\x90a8\x19V[\x81T\x81\x10a\x10\xC7Wa\x10\xC7a7EV[\x90`\0R` `\0 \x01`\0\x90T\x90a\x01\0\n\x90\x04`\x01`\x01`\xA0\x1B\x03\x16\x82\x87\x83\x81Q\x81\x10a\x10\xF8Wa\x10\xF8a7EV[` \x02` \x01\x01Q\x81T\x81\x10a\x11\x10Wa\x11\x10a7EV[\x90`\0R` `\0 \x01`\0a\x01\0\n\x81T\x81`\x01`\x01`\xA0\x1B\x03\x02\x19\x16\x90\x83`\x01`\x01`\xA0\x1B\x03\x16\x02\x17\x90UP\x81\x80T\x80a\x11NWa\x11Na80V[`\0\x82\x81R` \x90 \x81\x01`\0\x19\x90\x81\x01\x80T`\x01`\x01`\xA0\x1B\x03\x19\x16\x90U\x01\x90U\x80a\x11z\x81a7\x8CV[\x91PPa\x0E\xE9V[PPPPPPPV[`\x003`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x11\xD5W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a7\xA7V[`\0\x80[\x83\x81\x10\x15a\x06\xADW`\0\x85\x85\x83\x81\x81\x10a\x11\xF5Wa\x11\xF5a7EV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x12\x85W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`8`$\x82\x01R\x7FStakeRegistry.updateOperatorStak`D\x82\x01R\x7Fe: quorum does not exist\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[`\0\x80a\x12\x92\x83\x8Ba hV[\x91P\x91P\x80a\x12\xB4W`\0\x91P`\x01`\xFF\x84\x16\x1B`\x01`\x01`\xC0\x1B\x03\x86\x16\x17\x94P[`\0a\x12\xC1\x8A\x85\x85a\"fV[\x90Pa\x12\xCD\x84\x82a\x1E\xEEV[PPPPP\x80\x80a\x12\xDD\x90a7\x8CV[\x91PPa\x11\xD9V[`\0a\x12\xF2\x84\x84\x84a\"fV[\x90P[\x93\x92PPPV[`\0a\x12\xF5\x83\x83a$\xE6V[```\0\x82`\x01`\x01`@\x1B\x03\x81\x11\x15a\x13$Wa\x13$a1:V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\x13MW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0[\x83\x81\x10\x15a\x15\xC7W`\0\x85\x85\x83\x81\x81\x10a\x13oWa\x13oa7EV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x14\x0EW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`F`$\x82\x01R\x7FStakeRegistry.getTotalStakeIndic`D\x82\x01R\x7FesAtBlockNumber: quorum does not`d\x82\x01Re\x08\x19^\x1A\\\xDD`\xD2\x1B`\x84\x82\x01R`\xA4\x01a\x06\x98V[`\xFF\x81\x16`\0\x90\x81R`\x01` R`@\x81 \x80Tc\xFF\xFF\xFF\xFF\x8A\x16\x92\x90a\x147Wa\x147a7EV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11\x15a\x14\xE3W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`[`$\x82\x01R\x7FStakeRegistry.getTotalStakeIndic`D\x82\x01R\x7FesAtBlockNumber: quorum has no s`d\x82\x01R\x7Ftake history at blockNumber\0\0\0\0\0`\x84\x82\x01R`\xA4\x01a\x06\x98V[`\xFF\x81\x16`\0\x90\x81R`\x01` R`@\x81 T\x90[\x81\x81\x10\x15a\x15\xB1W`\xFF\x83\x16`\0\x90\x81R`\x01` \x81\x90R`@\x90\x91 c\xFF\xFF\xFF\xFF\x8B\x16\x91a\x15'\x84\x86a8\x19V[a\x151\x91\x90a8\x19V[\x81T\x81\x10a\x15AWa\x15Aa7EV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11a\x15\x9FW`\x01a\x15d\x82\x84a8\x19V[a\x15n\x91\x90a8\x19V[\x85\x85\x81Q\x81\x10a\x15\x80Wa\x15\x80a7EV[` \x02` \x01\x01\x90c\xFF\xFF\xFF\xFF\x16\x90\x81c\xFF\xFF\xFF\xFF\x16\x81RPPa\x15\xB1V[\x80a\x15\xA9\x81a7\x8CV[\x91PPa\x14\xF8V[PPP\x80\x80a\x15\xBF\x90a7\x8CV[\x91PPa\x13SV[P\x94\x93PPPPV[`\x04` R\x81`\0R`@`\0 \x81\x81T\x81\x10a\x15\xECW`\0\x80\xFD[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x16\x91P\x82\x90PV[`@\x80Q``\x81\x01\x82R`\0\x80\x82R` \x80\x83\x01\x82\x90R\x82\x84\x01\x82\x90R\x85\x82R`\x02\x81R\x83\x82 `\xFF\x88\x16\x83R\x90R\x91\x90\x91 \x80T\x83\x90\x81\x10a\x16MWa\x16Ma7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x92\x90\x91\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x93\x83\x01\x93\x90\x93R`\x01`@\x1B\x90\x92\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x94\x93PPPPV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R`\xFF\x83\x16`\0\x90\x81R`\x03` R`@\x90 \x80T\x83\x90\x81\x10a\x16\xD8Wa\x16\xD8a7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q\x80\x82\x01\x90\x91R\x91\x01T`\x01`\x01`\xA0\x1B\x03\x81\x16\x82R`\x01`\xA0\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x93\x92PPPV[`@\x80Q``\x81\x01\x82R`\0\x80\x82R` \x80\x83\x01\x82\x90R\x82\x84\x01\x82\x90R`\xFF\x86\x16\x82R`\x01\x90R\x91\x90\x91 \x80T\x83\x90\x81\x10a\x17WWa\x17Wa7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x92\x90\x91\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x93\x83\x01\x93\x90\x93R`\x01`@\x1B\x90\x92\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x93\x92PPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x18\x07W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x18+\x91\x90a6\xACV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x18[W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6\xC9V[\x81a\x18w\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x18\x93W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6[V[a\x06\x19\x83\x83a%\x14V[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x18\xE5W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a7\xA7V[`\0[\x81\x81\x10\x15a\x19\xC4W`\0\x83\x83\x83\x81\x81\x10a\x19\x04Wa\x19\x04a7EV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x19\x94W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`7`$\x82\x01R\x7FStakeRegistry.deregisterOperator`D\x82\x01R\x7F: quorum does not exist\0\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[`\0a\x19\xA2\x86\x83`\0a\"fV[\x90Pa\x19\xAE\x82\x82a\x1E\xEEV[PPP\x80\x80a\x19\xBC\x90a7\x8CV[\x91PPa\x18\xE8V[PPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x1A(W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x1AL\x91\x90a6\xACV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x1A|W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6\xC9V[\x81a\x1A\x98\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x1A\xB4W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6[V[a\x06\x19\x83\x83a%}V[`\xFF\x83\x16`\0\x90\x81R`\x01` R`@\x81 \x80T\x82\x91\x90\x84\x90\x81\x10a\x1A\xE5Wa\x1A\xE5a7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x90Pa\r_\x81\x85a)\xC0V[`\xFF\x81\x16`\0\x90\x81R`\x01` \x81\x90R`@\x82 \x80T\x90\x91a\x1B]\x91a8\x19V[\x81T\x81\x10a\x1BmWa\x1Bma7EV[`\0\x91\x82R` \x90\x91 \x01T`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x92\x91PPV[`\0a\x12\xF2\x84\x84\x84a+KV[`\0\x82\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x88\x16\x84R\x90\x91R\x81 \x80T\x82\x91\x90\x84\x90\x81\x10a\x1B\xCDWa\x1B\xCDa7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x90Pa\x1C$\x81\x86a)\xC0V[`@\x01Q\x95\x94PPPPPV[`\0a\x12\xF5\x83\x83a-\xE9V[`@\x80Q``\x80\x82\x01\x83R`\0\x80\x83R` \x80\x84\x01\x82\x90R\x83\x85\x01\x82\x90R\x86\x82R`\x02\x81R\x84\x82 `\xFF\x87\x16\x83R\x81R\x84\x82 T\x85Q\x93\x84\x01\x86R\x82\x84R\x90\x83\x01\x82\x90R\x93\x82\x01R\x90\x91\x90\x81a\x1C\x96W\x91Pa\rL\x90PV[`\0\x85\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x88\x16\x84R\x90\x91R\x90 a\x1C\xBD`\x01\x84a8\x19V[\x81T\x81\x10a\x1C\xCDWa\x1C\xCDa7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x92Pa\rL\x91PPV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 a\x1DI\x85\x85\x85a+KV[c\xFF\xFF\xFF\xFF\x16\x81T\x81\x10a\x1D_Wa\x1D_a7EV[`\0\x91\x82R` \x90\x91 \x01T`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x94\x93PPPPV[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x1D\xCBW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a7\xA7V[`\xFF\x83\x16`\0\x90\x81R`\x01` R`@\x90 T\x15a\x1EIW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`5`$\x82\x01R\x7FStakeRegistry.initializeQuorum: `D\x82\x01Rtquorum already exists`X\x1B`d\x82\x01R`\x84\x01a\x06\x98V[a\x1ES\x83\x82a%}V[a\x1E]\x83\x83a%\x14V[PP`\xFF\x16`\0\x90\x81R`\x01` \x81\x81R`@\x80\x84 \x81Q``\x81\x01\x83Rc\xFF\xFF\xFF\xFFC\x81\x16\x82R\x81\x85\x01\x87\x81R\x93\x82\x01\x87\x81R\x83T\x96\x87\x01\x84U\x92\x87R\x93\x90\x95 \x94Q\x94\x90\x93\x01\x80T\x91Q\x93Q`\x01`\x01``\x1B\x03\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x94\x84\x16`\x01` \x1B\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x93\x16\x95\x90\x93\x16\x94\x90\x94\x17\x17\x91\x90\x91\x16\x17\x90UV[`\xFF\x82\x16`\0\x90\x81R`\x01` \x81\x90R`@\x82 \x80T\x91\x83\x91\x90a\x1F\x12\x90\x84a8\x19V[\x81T\x81\x10a\x1F\"Wa\x1F\"a7EV[\x90`\0R` `\0 \x01\x90P\x83`\0\x14\x15a\x1FQWT`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x91Pa\rL\x90PV[\x80T`\0\x90a\x1Fp\x90`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x86a$\xE6V[\x82T\x90\x91PCc\xFF\xFF\xFF\xFF\x90\x81\x16\x91\x16\x14\x15a\x1F\xADW\x81T`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B`\x01`\x01``\x1B\x03\x83\x16\x02\x17\x82Ua _V[\x81Tc\xFF\xFF\xFF\xFFC\x81\x16`\x01` \x1B\x81\x81\x02g\xFF\xFF\xFF\xFF\0\0\0\0\x19\x90\x94\x16\x93\x90\x93\x17\x85U`\xFF\x89\x16`\0\x90\x81R`\x01` \x81\x81R`@\x80\x84 \x81Q``\x81\x01\x83R\x95\x86R\x85\x83\x01\x85\x81R`\x01`\x01``\x1B\x03\x80\x8B\x16\x93\x88\x01\x93\x84R\x82T\x95\x86\x01\x83U\x91\x86R\x92\x90\x94 \x94Q\x94\x90\x92\x01\x80T\x91Q\x92Q\x90\x93\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x92\x86\x16\x90\x96\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x91\x16\x93\x90\x94\x16\x92\x90\x92\x17\x92\x90\x92\x17\x16\x91\x90\x91\x17\x90U[\x95\x94PPPPPV[`\0\x80`\0\x80a \x87\x86`\xFF\x16`\0\x90\x81R`\x03` R`@\x90 T\x90V[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R\x90\x91P`\xFF\x87\x16`\0\x90\x81R`\x04` \x81\x90R`@\x80\x83 \x90Qc\x90\x04\x13G`\xE0\x1B\x81R`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x92c\x90\x04\x13G\x92a \xFC\x92\x8C\x92\x01a8FV[`\0`@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a!\x19W=`\0\x80>=`\0\xFD[PPPP`@Q=`\0\x82>`\x1F=\x90\x81\x01`\x1F\x19\x16\x82\x01`@Ra!A\x91\x90\x81\x01\x90a8\xA5V[\x90P`\0[\x83\x81\x10\x15a\"2W`\xFF\x89\x16`\0\x90\x81R`\x03` R`@\x90 \x80T\x82\x90\x81\x10a!rWa!ra7EV[`\0\x91\x82R` \x80\x83 `@\x80Q\x80\x82\x01\x90\x91R\x92\x01T`\x01`\x01`\xA0\x1B\x03\x81\x16\x83R`\x01`\xA0\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x90\x82\x01R\x83Q\x90\x94P\x83\x90\x83\x90\x81\x10a!\xC0Wa!\xC0a7EV[` \x02` \x01\x01Q\x11\x15a\" Wg\r\xE0\xB6\xB3\xA7d\0\0\x83` \x01Q`\x01`\x01``\x1B\x03\x16\x83\x83\x81Q\x81\x10a!\xF7Wa!\xF7a7EV[` \x02` \x01\x01Qa\"\t\x91\x90a95V[a\"\x13\x91\x90a9TV[a\"\x1D\x90\x86a9vV[\x94P[\x80a\"*\x81a7\x8CV[\x91PPa!FV[PPP`\xFF\x86\x16`\0\x90\x81R` \x81\x90R`@\x90 T\x91\x93PP`\x01`\x01``\x1B\x03\x90\x81\x16\x90\x83\x16\x10\x15\x90P[\x92P\x92\x90PV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 T\x81\x90\x80a#*W`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x82R\x80\x83 \x81Q``\x81\x01\x83Rc\xFF\xFF\xFF\xFFC\x81\x16\x82R\x81\x85\x01\x86\x81R`\x01`\x01``\x1B\x03\x80\x8C\x16\x95\x84\x01\x95\x86R\x84T`\x01\x81\x01\x86U\x94\x88R\x95\x90\x96 \x91Q\x91\x90\x92\x01\x80T\x95Q\x93Q\x90\x94\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x93\x83\x16`\x01` \x1B\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x96\x16\x91\x90\x92\x16\x17\x93\x90\x93\x17\x16\x91\x90\x91\x17\x90Ua$\x8CV[`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x81 a#Q`\x01\x84a8\x19V[\x81T\x81\x10a#aWa#aa7EV[`\0\x91\x82R` \x90\x91 \x01\x80T`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x91\x04\x81\x16\x94P\x90\x91P\x85\x16\x83\x14\x15a#\x9AW`\0\x93PPPPa\x12\xF5V[\x80TCc\xFF\xFF\xFF\xFF\x90\x81\x16\x91\x16\x14\x15a#\xD4W\x80T`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B`\x01`\x01``\x1B\x03\x87\x16\x02\x17\x81Ua$\x8AV[\x80Tg\xFF\xFF\xFF\xFF\0\0\0\0\x19\x16`\x01` \x1BCc\xFF\xFF\xFF\xFF\x90\x81\x16\x82\x81\x02\x93\x90\x93\x17\x84U`\0\x8A\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x8D\x16\x84R\x82R\x80\x83 \x81Q``\x81\x01\x83R\x96\x87R\x86\x83\x01\x84\x81R`\x01`\x01``\x1B\x03\x8D\x81\x16\x93\x89\x01\x93\x84R\x82T`\x01\x81\x01\x84U\x92\x86R\x93\x90\x94 \x96Q\x96\x01\x80T\x93Q\x91Q\x96\x85\x16g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x94\x16\x93\x90\x93\x17\x93\x16\x90\x93\x02\x91\x90\x91\x17`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B\x93\x90\x92\x16\x92\x90\x92\x02\x17\x90U[P[`@\x80Q`\xFF\x87\x16\x81R`\x01`\x01``\x1B\x03\x86\x16` \x82\x01R\x87\x91\x7F/R}R~\x95\xD8\xFE@\xAE\xC5Swt;\xB7y\x08}\xA3\xF6\xD0\xD0\x8F\x12\xE3dD\xDAb2}\x91\x01`@Q\x80\x91\x03\x90\xA2a$\xDC\x82\x85a-\xE9V[\x96\x95PPPPPPV[`\0\x80\x82\x12\x15a%\nWa$\xF9\x82a9\xA1V[a%\x03\x90\x84a9\xBEV[\x90Pa\rLV[a%\x03\x82\x84a9vV[`\xFF\x82\x16`\0\x81\x81R` \x81\x81R`@\x91\x82\x90 \x80Tk\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x16`\x01`\x01``\x1B\x03\x86\x16\x90\x81\x17\x90\x91U\x91Q\x91\x82R\x7F&\xEE\xCF\xF2\xB7\x0B\nq\x10O\xF4\xD9@\xBAqb\xD2:\x95\xC2Hw\x1F\xC4\x87\xA7\xBE\x17\xA5\x96\xB3\xCF\x91\x01`@Q\x80\x91\x03\x90\xA2PPV[`\0\x81Q\x11a%\xE2W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`8`$\x82\x01R`\0\x80Q` a:>\x839\x81Q\x91R`D\x82\x01R\x7F: no strategies provided\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[\x80Q`\xFF\x83\x16`\0\x90\x81R`\x03` \x90\x81R`@\x90\x91 T\x90a&\x05\x83\x83a9\xE6V[\x11\x15a&uW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`E`$\x82\x01R`\0\x80Q` a:>\x839\x81Q\x91R`D\x82\x01R\x7F: exceed MAX_WEIGHING_FUNCTION_L`d\x82\x01Rd\x08\xA9\xC8\xEA\x89`\xDB\x1B`\x84\x82\x01R`\xA4\x01a\x06\x98V[`\0[\x82\x81\x10\x15a)\xB9W`\0[a&\x8D\x82\x84a9\xE6V[\x81\x10\x15a'nW\x84\x82\x81Q\x81\x10a&\xA6Wa&\xA6a7EV[` \x02` \x01\x01Q`\0\x01Q`\x01`\x01`\xA0\x1B\x03\x16`\x03`\0\x88`\xFF\x16`\xFF\x16\x81R` \x01\x90\x81R` \x01`\0 \x82\x81T\x81\x10a&\xE5Wa&\xE5a7EV[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x16\x14\x15a'\\W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`=`$\x82\x01R`\0\x80Q` a:>\x839\x81Q\x91R`D\x82\x01R\x7F: cannot add same strategy 2x\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[\x80a'f\x81a7\x8CV[\x91PPa&\x83V[P`\0\x84\x82\x81Q\x81\x10a'\x83Wa'\x83a7EV[` \x02` \x01\x01Q` \x01Q`\x01`\x01``\x1B\x03\x16\x11a(\x08W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`F`$\x82\x01R`\0\x80Q` a:>\x839\x81Q\x91R`D\x82\x01R\x7F: cannot add strategy with zero `d\x82\x01Re\x1D\xD9ZY\xDA\x1D`\xD2\x1B`\x84\x82\x01R`\xA4\x01a\x06\x98V[`\xFF\x85\x16`\0\x90\x81R`\x03` R`@\x90 \x84Q\x85\x90\x83\x90\x81\x10a(.Wa(.a7EV[` \x90\x81\x02\x91\x90\x91\x01\x81\x01Q\x82T`\x01\x81\x01\x84U`\0\x93\x84R\x82\x84 \x82Q\x92\x84\x01Q`\x01`\x01``\x1B\x03\x16`\x01`\xA0\x1B\x02`\x01`\x01`\xA0\x1B\x03\x90\x93\x16\x92\x90\x92\x17\x91\x01U`\xFF\x87\x16\x82R`\x04\x90R`@\x90 \x84Q\x85\x90\x83\x90\x81\x10a(\x93Wa(\x93a7EV[` \x90\x81\x02\x91\x90\x91\x01\x81\x01QQ\x82T`\x01\x81\x01\x84U`\0\x93\x84R\x91\x90\x92 \x01\x80T`\x01`\x01`\xA0\x1B\x03\x19\x16`\x01`\x01`\xA0\x1B\x03\x90\x92\x16\x91\x90\x91\x17\x90U\x83Q`\xFF\x86\x16\x90\x7F\x10V^V\xCA\xCB\xF3.\xCA&yE\xF0T\xFE\xC0.Yu\x002\xD1\x13\xD30!\x82\xAD\x96\x7FT\x04\x90\x86\x90\x84\x90\x81\x10a)\nWa)\na7EV[` \x90\x81\x02\x91\x90\x91\x01\x81\x01QQ`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R\x01`@Q\x80\x91\x03\x90\xA2\x84`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x85\x83\x81Q\x81\x10a)gWa)ga7EV[` \x02` \x01\x01Q`\0\x01Q\x86\x84\x81Q\x81\x10a)\x85Wa)\x85a7EV[` \x02` \x01\x01Q` \x01Q`@Qa)\x9F\x92\x91\x90a.\\V[`@Q\x80\x91\x03\x90\xA2\x80a)\xB1\x81a7\x8CV[\x91PPa&xV[PPPPPV[\x81`\0\x01Qc\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x10\x15a*lW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R```$\x82\x01R\x7FStakeRegistry._validateOperatorS`D\x82\x01R\x7FtakeAtBlockNumber: operatorStake`d\x82\x01R\x7FUpdate is from after blockNumber`\x84\x82\x01R`\xA4\x01a\x06\x98V[` \x82\x01Qc\xFF\xFF\xFF\xFF\x16\x15\x80a*\x92WP\x81` \x01Qc\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x10[a+GW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`t`$\x82\x01R\x7FStakeRegistry._validateOperatorS`D\x82\x01R\x7FtakeAtBlockNumber: there is a ne`d\x82\x01R\x7Fwer operatorStakeUpdate availabl`\x84\x82\x01Rs2\x9012\xB37\xB92\x90167\xB1\xB5\xA7:\xB6\xB12\xB9`a\x1B`\xA4\x82\x01R`\xC4\x01a\x06\x98V[PPV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 T\x81[\x81\x81\x10\x15a-$W`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x90 c\xFF\xFF\xFF\xFF\x85\x16\x90`\x01a+\xA2\x84\x86a8\x19V[a+\xAC\x91\x90a8\x19V[\x81T\x81\x10a+\xBCWa+\xBCa7EV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11a-\x12W`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x81 `\x01a+\xFB\x84\x86a8\x19V[a,\x05\x91\x90a8\x19V[\x81T\x81\x10a,\x15Wa,\x15a7EV[`\0\x91\x82R` \x90\x91 \x01T`\x01` \x1B\x90\x04c\xFF\xFF\xFF\xFF\x16\x90P\x80\x15\x80a,HWP\x84c\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x11[a,\xF2W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`i`$\x82\x01R\x7FStakeRegistry._getStakeUpdateInd`D\x82\x01R\x7FexForOperatorAtBlockNumber: oper`d\x82\x01R\x7FatorId has no stake update at bl`\x84\x82\x01Rh7\xB1\xB5\xA7:\xB6\xB12\xB9`\xB9\x1B`\xA4\x82\x01R`\xC4\x01a\x06\x98V[`\x01a,\xFE\x83\x85a8\x19V[a-\x08\x91\x90a8\x19V[\x93PPPPa\x12\xF5V[\x80a-\x1C\x81a7\x8CV[\x91PPa+jV[P`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`\x81`$\x82\x01R\x7FStakeRegistry._getStakeUpdateInd`D\x82\x01R\x7FexForOperatorAtBlockNumber: no s`d\x82\x01R\x7Ftake update found for operatorId`\x84\x82\x01R\x7F and quorumNumber at block numbe`\xA4\x82\x01R`9`\xF9\x1B`\xC4\x82\x01R`\xE4\x01a\x06\x98V[`\0a\x12\xF5`\x01`\x01``\x1B\x03\x80\x85\x16\x90\x84\x16a9\xFEV[\x805`\xFF\x81\x16\x81\x14a.\x12W`\0\x80\xFD[\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a.*W`\0\x80\xFD[a.3\x83a.\x01V[\x94` \x93\x90\x93\x015\x93PPPV[`\0` \x82\x84\x03\x12\x15a.SW`\0\x80\xFD[a\x12\xF5\x82a.\x01V[`\x01`\x01`\xA0\x1B\x03\x92\x90\x92\x16\x82R`\x01`\x01``\x1B\x03\x16` \x82\x01R`@\x01\x90V[`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a.\x93W`\0\x80\xFD[PV[`\0\x80`@\x83\x85\x03\x12\x15a.\xA9W`\0\x80\xFD[a.\xB2\x83a.\x01V[\x91P` \x83\x015a.\xC2\x81a.~V[\x80\x91PP\x92P\x92\x90PV[`\0\x80\x83`\x1F\x84\x01\x12a.\xDFW`\0\x80\xFD[P\x815`\x01`\x01`@\x1B\x03\x81\x11\x15a.\xF6W`\0\x80\xFD[` \x83\x01\x91P\x83` \x82`\x05\x1B\x85\x01\x01\x11\x15a\"_W`\0\x80\xFD[`\0\x80`\0\x80`\0``\x86\x88\x03\x12\x15a/)W`\0\x80\xFD[a/2\x86a.\x01V[\x94P` \x86\x015`\x01`\x01`@\x1B\x03\x80\x82\x11\x15a/NW`\0\x80\xFD[a/Z\x89\x83\x8A\x01a.\xCDV[\x90\x96P\x94P`@\x88\x015\x91P\x80\x82\x11\x15a/sW`\0\x80\xFD[Pa/\x80\x88\x82\x89\x01a.\xCDV[\x96\x99\x95\x98P\x93\x96P\x92\x94\x93\x92PPPV[`\0\x80\x83`\x1F\x84\x01\x12a/\xA3W`\0\x80\xFD[P\x815`\x01`\x01`@\x1B\x03\x81\x11\x15a/\xBAW`\0\x80\xFD[` \x83\x01\x91P\x83` \x82\x85\x01\x01\x11\x15a\"_W`\0\x80\xFD[`\0\x80`\0\x80``\x85\x87\x03\x12\x15a/\xE8W`\0\x80\xFD[\x845a/\xF3\x81a.~V[\x93P` \x85\x015\x92P`@\x85\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a0\x15W`\0\x80\xFD[a0!\x87\x82\x88\x01a/\x91V[\x95\x98\x94\x97P\x95PPPPV[`\0\x81Q\x80\x84R` \x80\x85\x01\x94P\x80\x84\x01`\0[\x83\x81\x10\x15a0fW\x81Q`\x01`\x01``\x1B\x03\x16\x87R\x95\x82\x01\x95\x90\x82\x01\x90`\x01\x01a0AV[P\x94\x95\x94PPPPPV[`@\x81R`\0a0\x84`@\x83\x01\x85a0-V[\x82\x81\x03` \x84\x01Ra _\x81\x85a0-V[`\0\x80`@\x83\x85\x03\x12\x15a0\xA9W`\0\x80\xFD[\x825\x91Pa0\xB9` \x84\x01a.\x01V[\x90P\x92P\x92\x90PV[` \x80\x82R\x82Q\x82\x82\x01\x81\x90R`\0\x91\x90\x84\x82\x01\x90`@\x85\x01\x90\x84[\x81\x81\x10\x15a1.Wa1\x1B\x83\x85Qc\xFF\xFF\xFF\xFF\x80\x82Q\x16\x83R\x80` \x83\x01Q\x16` \x84\x01RP`\x01`\x01``\x1B\x03`@\x82\x01Q\x16`@\x83\x01RPPV[\x92\x84\x01\x92``\x92\x90\x92\x01\x91`\x01\x01a0\xDEV[P\x90\x96\x95PPPPPPV[cNH{q`\xE0\x1B`\0R`A`\x04R`$`\0\xFD[`@\x80Q\x90\x81\x01`\x01`\x01`@\x1B\x03\x81\x11\x82\x82\x10\x17\x15a1rWa1ra1:V[`@R\x90V[`@Q`\x1F\x82\x01`\x1F\x19\x16\x81\x01`\x01`\x01`@\x1B\x03\x81\x11\x82\x82\x10\x17\x15a1\xA0Wa1\xA0a1:V[`@R\x91\x90PV[`\0`\x01`\x01`@\x1B\x03\x82\x11\x15a1\xC1Wa1\xC1a1:V[P`\x05\x1B` \x01\x90V[`\0\x80`@\x83\x85\x03\x12\x15a1\xDEW`\0\x80\xFD[a1\xE7\x83a.\x01V[\x91P` \x80\x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a2\x03W`\0\x80\xFD[\x84\x01`\x1F\x81\x01\x86\x13a2\x14W`\0\x80\xFD[\x805a2'a2\"\x82a1\xA8V[a1xV[\x81\x81R`\x05\x91\x90\x91\x1B\x82\x01\x83\x01\x90\x83\x81\x01\x90\x88\x83\x11\x15a2FW`\0\x80\xFD[\x92\x84\x01\x92[\x82\x84\x10\x15a2dW\x835\x82R\x92\x84\x01\x92\x90\x84\x01\x90a2KV[\x80\x95PPPPPP\x92P\x92\x90PV[\x805`\x01`\x01``\x1B\x03\x81\x16\x81\x14a.\x12W`\0\x80\xFD[`\0\x80`\0``\x84\x86\x03\x12\x15a2\x9FW`\0\x80\xFD[\x835\x92Pa2\xAF` \x85\x01a.\x01V[\x91Pa2\xBD`@\x85\x01a2sV[\x90P\x92P\x92P\x92V[`\0\x80`@\x83\x85\x03\x12\x15a2\xD9W`\0\x80\xFD[a.3\x83a2sV[\x805c\xFF\xFF\xFF\xFF\x81\x16\x81\x14a.\x12W`\0\x80\xFD[`\0\x80`\0`@\x84\x86\x03\x12\x15a3\x0BW`\0\x80\xFD[a3\x14\x84a2\xE2V[\x92P` \x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a3/W`\0\x80\xFD[a3;\x86\x82\x87\x01a/\x91V[\x94\x97\x90\x96P\x93\x94PPPPV[` \x80\x82R\x82Q\x82\x82\x01\x81\x90R`\0\x91\x90\x84\x82\x01\x90`@\x85\x01\x90\x84[\x81\x81\x10\x15a1.W\x83Qc\xFF\xFF\xFF\xFF\x16\x83R\x92\x84\x01\x92\x91\x84\x01\x91`\x01\x01a3dV[`\0\x80`\0``\x84\x86\x03\x12\x15a3\x9BW`\0\x80\xFD[a3\xA4\x84a.\x01V[\x95` \x85\x015\x95P`@\x90\x94\x015\x93\x92PPPV[\x81Qc\xFF\xFF\xFF\xFF\x90\x81\x16\x82R` \x80\x84\x01Q\x90\x91\x16\x90\x82\x01R`@\x80\x83\x01Q`\x01`\x01``\x1B\x03\x16\x90\x82\x01R``\x81\x01a\rLV[`\0\x80`@\x83\x85\x03\x12\x15a4\x01W`\0\x80\xFD[a4\n\x83a.\x01V[\x91Pa0\xB9` \x84\x01a2sV[`\0\x80`\0`@\x84\x86\x03\x12\x15a4-W`\0\x80\xFD[\x835\x92P` \x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a3/W`\0\x80\xFD[`\0\x82`\x1F\x83\x01\x12a4[W`\0\x80\xFD[\x815` a4ka2\"\x83a1\xA8V[\x82\x81R`\x06\x92\x90\x92\x1B\x84\x01\x81\x01\x91\x81\x81\x01\x90\x86\x84\x11\x15a4\x8AW`\0\x80\xFD[\x82\x86\x01[\x84\x81\x10\x15a4\xD9W`@\x81\x89\x03\x12\x15a4\xA7W`\0\x80\x81\xFD[a4\xAFa1PV[\x815a4\xBA\x81a.~V[\x81Ra4\xC7\x82\x86\x01a2sV[\x81\x86\x01R\x83R\x91\x83\x01\x91`@\x01a4\x8EV[P\x96\x95PPPPPPV[`\0\x80`@\x83\x85\x03\x12\x15a4\xF7W`\0\x80\xFD[a5\0\x83a.\x01V[\x91P` \x83\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a5\x1BW`\0\x80\xFD[a5'\x85\x82\x86\x01a4JV[\x91PP\x92P\x92\x90PV[`\0\x80`\0``\x84\x86\x03\x12\x15a5FW`\0\x80\xFD[a5O\x84a.\x01V[\x92Pa5]` \x85\x01a2\xE2V[\x91P`@\x84\x015\x90P\x92P\x92P\x92V[`\0\x80`\0``\x84\x86\x03\x12\x15a5\x82W`\0\x80\xFD[\x835\x92Pa5\x92` \x85\x01a.\x01V[\x91Pa2\xBD`@\x85\x01a2\xE2V[`\0\x80`\0\x80`\x80\x85\x87\x03\x12\x15a5\xB6W`\0\x80\xFD[a5\xBF\x85a.\x01V[\x93Pa5\xCD` \x86\x01a2\xE2V[\x93\x96\x93\x95PPPP`@\x82\x015\x91``\x015\x90V[`\0\x80`@\x83\x85\x03\x12\x15a5\xF5W`\0\x80\xFD[a4\n\x83a2sV[`\0\x80`\0``\x84\x86\x03\x12\x15a6\x13W`\0\x80\xFD[a6\x1C\x84a.\x01V[\x92Pa6*` \x85\x01a2sV[\x91P`@\x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a6EW`\0\x80\xFD[a6Q\x86\x82\x87\x01a4JV[\x91PP\x92P\x92P\x92V[` \x80\x82R`1\x90\x82\x01R\x7FStakeRegistry.quorumExists: quor`@\x82\x01Rp\x1D[H\x19\x1B\xD9\\\xC8\x1B\x9B\xDD\x08\x19^\x1A\\\xDD`z\x1B``\x82\x01R`\x80\x01\x90V[`\0` \x82\x84\x03\x12\x15a6\xBEW`\0\x80\xFD[\x81Qa\x12\xF5\x81a.~V[` \x80\x82R`V\x90\x82\x01R\x7FStakeRegistry.onlyCoordinatorOwn`@\x82\x01R\x7Fer: caller is not the owner of t``\x82\x01Ru42\x9092\xB3\xB4\xB9\xBA9<\xA1\xB7\xB7\xB924\xB70\xBA7\xB9`Q\x1B`\x80\x82\x01R`\xA0\x01\x90V[cNH{q`\xE0\x1B`\0R`2`\x04R`$`\0\xFD[`\0` \x82\x84\x03\x12\x15a7mW`\0\x80\xFD[a\x12\xF5\x82a2sV[cNH{q`\xE0\x1B`\0R`\x11`\x04R`$`\0\xFD[`\0`\0\x19\x82\x14\x15a7\xA0Wa7\xA0a7vV[P`\x01\x01\x90V[` \x80\x82R`L\x90\x82\x01R\x7FStakeRegistry.onlyRegistryCoordi`@\x82\x01R\x7Fnator: caller is not the Registr``\x82\x01Rk<\xA1\xB7\xB7\xB924\xB70\xBA7\xB9`\xA1\x1B`\x80\x82\x01R`\xA0\x01\x90V[`\0\x82\x82\x10\x15a8+Wa8+a7vV[P\x03\x90V[cNH{q`\xE0\x1B`\0R`1`\x04R`$`\0\xFD[`\0`@\x82\x01`\x01\x80`\xA0\x1B\x03\x80\x86\x16\x84R` `@\x81\x86\x01R\x82\x86T\x80\x85R``\x87\x01\x91P\x87`\0R\x82`\0 \x94P`\0[\x81\x81\x10\x15a8\x97W\x85T\x85\x16\x83R`\x01\x95\x86\x01\x95\x92\x84\x01\x92\x01a8yV[P\x90\x98\x97PPPPPPPPV[`\0` \x80\x83\x85\x03\x12\x15a8\xB8W`\0\x80\xFD[\x82Q`\x01`\x01`@\x1B\x03\x81\x11\x15a8\xCEW`\0\x80\xFD[\x83\x01`\x1F\x81\x01\x85\x13a8\xDFW`\0\x80\xFD[\x80Qa8\xEDa2\"\x82a1\xA8V[\x81\x81R`\x05\x91\x90\x91\x1B\x82\x01\x83\x01\x90\x83\x81\x01\x90\x87\x83\x11\x15a9\x0CW`\0\x80\xFD[\x92\x84\x01\x92[\x82\x84\x10\x15a9*W\x83Q\x82R\x92\x84\x01\x92\x90\x84\x01\x90a9\x11V[\x97\x96PPPPPPPV[`\0\x81`\0\x19\x04\x83\x11\x82\x15\x15\x16\x15a9OWa9Oa7vV[P\x02\x90V[`\0\x82a9qWcNH{q`\xE0\x1B`\0R`\x12`\x04R`$`\0\xFD[P\x04\x90V[`\0`\x01`\x01``\x1B\x03\x80\x83\x16\x81\x85\x16\x80\x83\x03\x82\x11\x15a9\x98Wa9\x98a7vV[\x01\x94\x93PPPPV[`\0`\x01`\xFF\x1B\x82\x14\x15a9\xB7Wa9\xB7a7vV[P`\0\x03\x90V[`\0`\x01`\x01``\x1B\x03\x83\x81\x16\x90\x83\x16\x81\x81\x10\x15a9\xDEWa9\xDEa7vV[\x03\x93\x92PPPV[`\0\x82\x19\x82\x11\x15a9\xF9Wa9\xF9a7vV[P\x01\x90V[`\0\x80\x83\x12\x80\x15`\x01`\xFF\x1B\x85\x01\x84\x12\x16\x15a:\x1CWa:\x1Ca7vV[`\x01`\x01`\xFF\x1B\x03\x84\x01\x83\x13\x81\x16\x15a:7Wa:7a7vV[PP\x03\x90V\xFEStakeRegistry._addStrategyParams\xA2dipfsX\"\x12 \xAE\xF6\xB6c \xBF2\x08w\x98c~D\n\xB0b\xF3\xB9\x1ARLv$iu\x04\xD2\x97\xA7\xEF\xDF\xCFdsolcC\0\x08\x0C\x003";
     /// The bytecode of the contract.
-    pub static STAKEREGISTRYHARNESS_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
-        __BYTECODE,
-    );
+    pub static STAKEREGISTRYHARNESS_BYTECODE: ::ethers::core::types::Bytes =
+        ::ethers::core::types::Bytes::from_static(__BYTECODE);
     #[rustfmt::skip]
-    const __DEPLOYED_BYTECODE: &[u8] = b"`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\x02\x06W`\x005`\xE0\x1C\x80c\x81\xC0u\x02\x11a\x01\x1AW\x80c\xC8)LV\x11a\0\xADW\x80c\xF2\xBE\x94\xAE\x11a\0|W\x80c\xF2\xBE\x94\xAE\x14a\x05\x92W\x80c\xF5\tU\x1A\x14a\x05\xA5W\x80c\xF8Q\xE1\x98\x14a\x05\xB8W\x80c\xFA(\xC6'\x14a\x05\xCBW\x80c\xFFiJw\x14a\x05\xDEW`\0\x80\xFD[\x80c\xC8)LV\x14a\x05\x1DW\x80c\xD5\xEC\xCC\x05\x14a\x050W\x80c\xDD\x98F\xB9\x14a\x05CW\x80c\xDF\\\xF7#\x14a\x05kW`\0\x80\xFD[\x80c\xBC\x9A@\xC3\x11a\0\xE9W\x80c\xBC\x9A@\xC3\x14a\x04\xBBW\x80c\xBD)\xB8\xCD\x14a\x04\xCEW\x80c\xC4gx\xA5\x14a\x04\xE1W\x80c\xC6\x01R}\x14a\x05\nW`\0\x80\xFD[\x80c\x81\xC0u\x02\x14a\x04(W\x80c\xACk\xFB\x03\x14a\x04HW\x80c\xAD\xC8\x04\xDA\x14a\x04hW\x80c\xB6\x90Kx\x14a\x04\xA8W`\0\x80\xFD[\x80cK\xD2n\t\x11a\x01\x9DW\x80cf\xAC\xFE\xFE\x11a\x01lW\x80cf\xAC\xFE\xFE\x14a\x03~W\x80cm\x14\xA9\x87\x14a\x03\xA9W\x80ctELm\x14a\x03\xE8W\x80c|\x17#G\x14a\x03\xFBW\x80c\x7FB\x98\"\x14a\x04\x15W`\0\x80\xFD[\x80cK\xD2n\t\x14a\x03\x19W\x80cT\x01\xED'\x14a\x03IW\x80c^Zgu\x14a\x03\\W\x80c_\x1F-w\x14a\x03kW`\0\x80\xFD[\x80c \xB6b\x98\x11a\x01\xD9W\x80c \xB6b\x98\x14a\x02\xA2W\x80c%PGw\x14a\x02\xB5W\x80c,\xD9Y@\x14a\x02\xD6W\x80c<\xA5\xA5\xF5\x14a\x02\xF6W`\0\x80\xFD[\x80c\x03\x90\xA4\xD5\x14a\x02\x0BW\x80c\x04\x91\xB4\x1C\x14a\x02 W\x80c\x08s$a\x14a\x02VW\x80c\x1F\x9Bt\xE0\x14a\x02wW[`\0\x80\xFD[a\x02\x1Ea\x02\x196`\x04a+\xAEV[a\x05\xF1V[\0[a\x02Ca\x02.6`\x04a+\xD8V[`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x90V[`@Q\x90\x81R` \x01[`@Q\x80\x91\x03\x90\xF3[a\x02ia\x02d6`\x04a+\xAEV[a\x06\0V[`@Qa\x02M\x92\x91\x90a+\xF3V[a\x02\x8Aa\x02\x856`\x04a,-V[a\x06IV[`@Q`\x01`\x01``\x1B\x03\x90\x91\x16\x81R` \x01a\x02MV[a\x02\x1Ea\x02\xB06`\x04a,\xA8V[a\x06\x99V[a\x02\xC8a\x02\xC36`\x04a-iV[a\t\xCAV[`@Qa\x02M\x92\x91\x90a.\x08V[a\x02\xE9a\x02\xE46`\x04a.-V[a\x0C\x95V[`@Qa\x02M\x91\x90a.YV[a\x02Ca\x03\x046`\x04a+\xD8V[`\xFF\x16`\0\x90\x81R`\x03` R`@\x90 T\x90V[a\x02Ca\x03'6`\x04a.-V[`\0\x91\x82R`\x02` \x90\x81R`@\x80\x84 `\xFF\x93\x90\x93\x16\x84R\x91\x90R\x90 T\x90V[a\x02\x8Aa\x03W6`\x04a.-V[a\r4V[a\x02Cg\r\xE0\xB6\xB3\xA7d\0\0\x81V[a\x02\x1Ea\x03y6`\x04a/bV[a\rMV[a\x03\x91a\x03\x8C6`\x04a-iV[a\x10\x98V[`@Q`\x01`\x01`\xC0\x1B\x03\x90\x91\x16\x81R` \x01a\x02MV[a\x03\xD0\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x81V[`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R` \x01a\x02MV[a\x02Ca\x03\xF66`\x04a0!V[a\x11\xF2V[a\x04\x03` \x81V[`@Q`\xFF\x90\x91\x16\x81R` \x01a\x02MV[a\x02\x8Aa\x04#6`\x04a0]V[a\x12\tV[a\x04;a\x0466`\x04a0\x8DV[a\x12\x15V[`@Qa\x02M\x91\x90a0\xDFV[a\x04[a\x04V6`\x04a1\x1DV[a\x14FV[`@Qa\x02M\x91\x90a1PV[a\x04{a\x04v6`\x04a+\xAEV[a\x14\xDEV[`@\x80Q\x82Q`\x01`\x01`\xA0\x1B\x03\x16\x81R` \x92\x83\x01Q`\x01`\x01``\x1B\x03\x16\x92\x81\x01\x92\x90\x92R\x01a\x02MV[a\x04[a\x04\xB66`\x04a+\xAEV[a\x15XV[a\x02\x1Ea\x04\xC96`\x04a1\x85V[a\x15\xE7V[a\x02\x1Ea\x04\xDC6`\x04a1\xAFV[a\x16\xDBV[a\x02\x8Aa\x04\xEF6`\x04a+\xD8V[`\0` \x81\x90R\x90\x81R`@\x90 T`\x01`\x01``\x1B\x03\x16\x81V[a\x02\x1Ea\x05\x186`\x04a2{V[a\x18\x08V[a\x02\x8Aa\x05+6`\x04a2\xC8V[a\x18\xFCV[a\x02\x8Aa\x05>6`\x04a+\xD8V[a\x19zV[a\x05Va\x05Q6`\x04a3\x04V[a\x19\xCDV[`@Qc\xFF\xFF\xFF\xFF\x90\x91\x16\x81R` \x01a\x02MV[a\x03\xD0\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x81V[a\x02\x8Aa\x05\xA06`\x04a37V[a\x19\xDAV[a\x02Ca\x05\xB36`\x04a3yV[a\x1AoV[a\x04[a\x05\xC66`\x04a.-V[a\x1A{V[a\x02\x8Aa\x05\xD96`\x04a3\x04V[a\x1B`V[a\x02\x1Ea\x05\xEC6`\x04a3\x95V[a\x1B\xC1V[a\x05\xFB\x82\x82a\x1D,V[PPPV[`\x03` R\x81`\0R`@`\0 \x81\x81T\x81\x10a\x06\x1CW`\0\x80\xFD[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x81\x16\x92P`\x01`\xA0\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x90P\x82V[`\xFF\x82\x16`\0\x90\x81R`\x01` R`@\x81 T\x83\x90a\x06\x83W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a3\xF2V[`@Q\x80\x91\x03\x90\xFD[`\0a\x06\x8F\x85\x85a\x1E\xA6V[P\x95\x94PPPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x06\xF7W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x07\x1B\x91\x90a4CV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x07KW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a4`V[\x84a\x07g\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x07\x83W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a3\xF2V[\x83\x80a\x07\xF9W`@\x80QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`$\x81\x01\x91\x90\x91R\x7FStakeRegistry.modifyStrategyPara`D\x82\x01R\x7Fms: no strategy indices provided`d\x82\x01R`\x84\x01a\x06zV[\x82\x81\x14a\x08nW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`9`$\x82\x01R\x7FStakeRegistry.modifyStrategyPara`D\x82\x01R\x7Fms: input length mismatch\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06zV[`\xFF\x87\x16`\0\x90\x81R`\x03` R`@\x81 \x90[\x82\x81\x10\x15a\t\xBFW\x85\x85\x82\x81\x81\x10a\x08\x9CWa\x08\x9Ca4\xDCV[\x90P` \x02\x01` \x81\x01\x90a\x08\xB1\x91\x90a4\xF2V[\x82\x89\x89\x84\x81\x81\x10a\x08\xC4Wa\x08\xC4a4\xDCV[\x90P` \x02\x015\x81T\x81\x10a\x08\xDBWa\x08\xDBa4\xDCV[\x90`\0R` `\0 \x01`\0\x01`\x14a\x01\0\n\x81T\x81`\x01`\x01``\x1B\x03\x02\x19\x16\x90\x83`\x01`\x01``\x1B\x03\x16\x02\x17\x90UP\x88`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x83\x8A\x8A\x85\x81\x81\x10a\tDWa\tDa4\xDCV[\x90P` \x02\x015\x81T\x81\x10a\t[Wa\t[a4\xDCV[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x16\x88\x88\x85\x81\x81\x10a\t\x82Wa\t\x82a4\xDCV[\x90P` \x02\x01` \x81\x01\x90a\t\x97\x91\x90a4\xF2V[`@Qa\t\xA5\x92\x91\x90a+\xF3V[`@Q\x80\x91\x03\x90\xA2\x80a\t\xB7\x81a5#V[\x91PPa\x08\x82V[PPPPPPPPPV[``\x803`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\n\x15W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a5>V[`\0\x83`\x01`\x01`@\x1B\x03\x81\x11\x15a\n/Wa\n/a.\xD1V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\nXW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0\x84`\x01`\x01`@\x1B\x03\x81\x11\x15a\nuWa\nua.\xD1V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\n\x9EW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0[\x85\x81\x10\x15a\x0C\x87W`\0\x87\x87\x83\x81\x81\x10a\n\xC0Wa\n\xC0a4\xDCV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x0BHW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`5`$\x82\x01R\x7FStakeRegistry.registerOperator: `D\x82\x01Rt\x1C][\xDC\x9D[H\x19\x1B\xD9\\\xC8\x1B\x9B\xDD\x08\x19^\x1A\\\xDD`Z\x1B`d\x82\x01R`\x84\x01a\x06zV[`\0\x80a\x0BU\x83\x8Da\x1E\xA6V[\x91P\x91P\x80a\x0B\xF2W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`[`$\x82\x01R\x7FStakeRegistry.registerOperator: `D\x82\x01R\x7FOperator does not meet minimum s`d\x82\x01R\x7Ftake requirement for quorum\0\0\0\0\0`\x84\x82\x01R`\xA4\x01a\x06zV[`\0a\x0B\xFF\x8C\x85\x85a \\V[\x90P\x82\x87\x86\x81Q\x81\x10a\x0C\x14Wa\x0C\x14a4\xDCV[` \x02` \x01\x01\x90`\x01`\x01``\x1B\x03\x16\x90\x81`\x01`\x01``\x1B\x03\x16\x81RPPa\x0C>\x84\x82a\x1D,V[\x86\x86\x81Q\x81\x10a\x0CPWa\x0CPa4\xDCV[` \x02` \x01\x01\x90`\x01`\x01``\x1B\x03\x16\x90\x81`\x01`\x01``\x1B\x03\x16\x81RPPPPPP\x80\x80a\x0C\x7F\x90a5#V[\x91PPa\n\xA4V[P\x90\x97\x90\x96P\x94PPPPPV[`\0\x82\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x85\x16\x84R\x82R\x80\x83 \x80T\x82Q\x81\x85\x02\x81\x01\x85\x01\x90\x93R\x80\x83R``\x94\x92\x93\x91\x92\x90\x91\x84\x01[\x82\x82\x10\x15a\r'W`\0\x84\x81R` \x90\x81\x90 `@\x80Q``\x81\x01\x82R\x91\x85\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x83\x85\x01R`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x90\x82\x01R\x82R`\x01\x90\x92\x01\x91\x01a\x0C\xCEV[PPPP\x90P[\x92\x91PPV[`\0\x80a\rA\x84\x84a\x1A{V[`@\x01Q\x94\x93PPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\r\xABW=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\r\xCF\x91\x90a4CV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\r\xFFW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a4`V[\x81a\x0E\x1B\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x0E7W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a3\xF2V[\x81Q\x80a\x0E\xACW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`=`$\x82\x01R\x7FStakeRegistry.removeStrategies: `D\x82\x01R\x7Fno indices to remove provided\0\0\0`d\x82\x01R`\x84\x01a\x06zV[`\xFF\x84\x16`\0\x90\x81R`\x03` R`@\x81 \x90[\x82\x81\x10\x15a\x10\x90W\x85`\xFF\x16\x7F1\xFA.,\xD2\x80\xC97^\x13\xFF\xCF=\x81\xE27\x81\0\x18n@X\xF8\xD3\xDD\xB6\x90\xB8-\xCD1\xF7\x83\x87\x84\x81Q\x81\x10a\x0F\0Wa\x0F\0a4\xDCV[` \x02` \x01\x01Q\x81T\x81\x10a\x0F\x18Wa\x0F\x18a4\xDCV[`\0\x91\x82R` \x91\x82\x90 \x01T`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R\x01`@Q\x80\x91\x03\x90\xA2\x85`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x83\x87\x84\x81Q\x81\x10a\x0FvWa\x0Fva4\xDCV[` \x02` \x01\x01Q\x81T\x81\x10a\x0F\x8EWa\x0F\x8Ea4\xDCV[`\0\x91\x82R` \x80\x83 \x91\x90\x91\x01T`@\x80Q`\x01`\x01`\xA0\x1B\x03\x90\x92\x16\x82R\x91\x81\x01\x92\x90\x92R\x01`@Q\x80\x91\x03\x90\xA2\x81T\x82\x90a\x0F\xCE\x90`\x01\x90a5\xB0V[\x81T\x81\x10a\x0F\xDEWa\x0F\xDEa4\xDCV[\x90`\0R` `\0 \x01\x82\x86\x83\x81Q\x81\x10a\x0F\xFBWa\x0F\xFBa4\xDCV[` \x02` \x01\x01Q\x81T\x81\x10a\x10\x13Wa\x10\x13a4\xDCV[`\0\x91\x82R` \x90\x91 \x82T\x91\x01\x80T`\x01`\x01`\xA0\x1B\x03\x19\x16`\x01`\x01`\xA0\x1B\x03\x90\x92\x16\x91\x82\x17\x81U\x91T`\x01`\x01``\x1B\x03`\x01`\xA0\x1B\x91\x82\x90\x04\x16\x02\x17\x90U\x81T\x82\x90\x80a\x10fWa\x10fa5\xC7V[`\0\x82\x81R` \x81 \x82\x01`\0\x19\x90\x81\x01\x91\x90\x91U\x01\x90U\x80a\x10\x88\x81a5#V[\x91PPa\x0E\xC0V[PPPPPPV[`\x003`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x10\xE2W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a5>V[`\0\x80[\x83\x81\x10\x15a\x06\x8FW`\0\x85\x85\x83\x81\x81\x10a\x11\x02Wa\x11\x02a4\xDCV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x11\x92W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`8`$\x82\x01R\x7FStakeRegistry.updateOperatorStak`D\x82\x01R\x7Fe: quorum does not exist\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06zV[`\0\x80a\x11\x9F\x83\x8Ba\x1E\xA6V[\x91P\x91P\x80a\x11\xC1W`\0\x91P`\x01`\xFF\x84\x16\x1B`\x01`\x01`\xC0\x1B\x03\x86\x16\x17\x94P[`\0a\x11\xCE\x8A\x85\x85a \\V[\x90Pa\x11\xDA\x84\x82a\x1D,V[PPPPP\x80\x80a\x11\xEA\x90a5#V[\x91PPa\x10\xE6V[`\0a\x11\xFF\x84\x84\x84a \\V[\x90P[\x93\x92PPPV[`\0a\x12\x02\x83\x83a\"\xDCV[```\0\x82`\x01`\x01`@\x1B\x03\x81\x11\x15a\x121Wa\x121a.\xD1V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\x12ZW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0[\x83\x81\x10\x15a\x14=W`\0\x85\x85\x83\x81\x81\x10a\x12|Wa\x12|a4\xDCV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x81 \x80T\x92\x94Pc\xFF\xFF\xFF\xFF\x8B\x16\x93P\x91a\x12\xADWa\x12\xADa4\xDCV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11\x15a\x13YW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`[`$\x82\x01R\x7FStakeRegistry.getTotalStakeIndic`D\x82\x01R\x7FesAtBlockNumber: quorum has no s`d\x82\x01R\x7Ftake history at blockNumber\0\0\0\0\0`\x84\x82\x01R`\xA4\x01a\x06zV[`\xFF\x81\x16`\0\x90\x81R`\x01` R`@\x81 T\x90[\x81\x81\x10\x15a\x14'W`\xFF\x83\x16`\0\x90\x81R`\x01` \x81\x90R`@\x90\x91 c\xFF\xFF\xFF\xFF\x8B\x16\x91a\x13\x9D\x84\x86a5\xB0V[a\x13\xA7\x91\x90a5\xB0V[\x81T\x81\x10a\x13\xB7Wa\x13\xB7a4\xDCV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11a\x14\x15W`\x01a\x13\xDA\x82\x84a5\xB0V[a\x13\xE4\x91\x90a5\xB0V[\x85\x85\x81Q\x81\x10a\x13\xF6Wa\x13\xF6a4\xDCV[` \x02` \x01\x01\x90c\xFF\xFF\xFF\xFF\x16\x90\x81c\xFF\xFF\xFF\xFF\x16\x81RPPa\x14'V[\x80a\x14\x1F\x81a5#V[\x91PPa\x13nV[PPP\x80\x80a\x145\x90a5#V[\x91PPa\x12`V[P\x94\x93PPPPV[`@\x80Q``\x81\x01\x82R`\0\x80\x82R` \x80\x83\x01\x82\x90R\x82\x84\x01\x82\x90R\x85\x82R`\x02\x81R\x83\x82 `\xFF\x88\x16\x83R\x90R\x91\x90\x91 \x80T\x83\x90\x81\x10a\x14\x8BWa\x14\x8Ba4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x92\x90\x91\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x93\x83\x01\x93\x90\x93R`\x01`@\x1B\x90\x92\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x94\x93PPPPV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R`\xFF\x83\x16`\0\x90\x81R`\x03` R`@\x90 \x80T\x83\x90\x81\x10a\x15\x16Wa\x15\x16a4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q\x80\x82\x01\x90\x91R\x91\x01T`\x01`\x01`\xA0\x1B\x03\x81\x16\x82R`\x01`\xA0\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x93\x92PPPV[`@\x80Q``\x81\x01\x82R`\0\x80\x82R` \x80\x83\x01\x82\x90R\x82\x84\x01\x82\x90R`\xFF\x86\x16\x82R`\x01\x90R\x91\x90\x91 \x80T\x83\x90\x81\x10a\x15\x95Wa\x15\x95a4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x92\x90\x91\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x93\x83\x01\x93\x90\x93R`\x01`@\x1B\x90\x92\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x93\x92PPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x16EW=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x16i\x91\x90a4CV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x16\x99W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a4`V[\x81a\x16\xB5\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x16\xD1W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a3\xF2V[a\x05\xFB\x83\x83a#\nV[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x17#W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a5>V[`\0[\x81\x81\x10\x15a\x18\x02W`\0\x83\x83\x83\x81\x81\x10a\x17BWa\x17Ba4\xDCV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x17\xD2W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`7`$\x82\x01R\x7FStakeRegistry.deregisterOperator`D\x82\x01R\x7F: quorum does not exist\0\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06zV[`\0a\x17\xE0\x86\x83`\0a \\V[\x90Pa\x17\xEC\x82\x82a\x1D,V[PPP\x80\x80a\x17\xFA\x90a5#V[\x91PPa\x17&V[PPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x18fW=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x18\x8A\x91\x90a4CV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x18\xBAW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a4`V[\x81a\x18\xD6\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x18\xF2W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a3\xF2V[a\x05\xFB\x83\x83a#sV[`\xFF\x83\x16`\0\x90\x81R`\x01` R`@\x81 \x80T\x82\x91\x90\x84\x90\x81\x10a\x19#Wa\x19#a4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x90Pa\rA\x81\x85a'WV[`\xFF\x81\x16`\0\x90\x81R`\x01` \x81\x90R`@\x82 \x80T\x90\x91a\x19\x9B\x91a5\xB0V[\x81T\x81\x10a\x19\xABWa\x19\xABa4\xDCV[`\0\x91\x82R` \x90\x91 \x01T`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x92\x91PPV[`\0a\x11\xFF\x84\x84\x84a(\xE2V[`\0\x82\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x88\x16\x84R\x90\x91R\x81 \x80T\x82\x91\x90\x84\x90\x81\x10a\x1A\x0BWa\x1A\x0Ba4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x90Pa\x1Ab\x81\x86a'WV[`@\x01Q\x95\x94PPPPPV[`\0a\x12\x02\x83\x83a+\x80V[`@\x80Q``\x80\x82\x01\x83R`\0\x80\x83R` \x80\x84\x01\x82\x90R\x83\x85\x01\x82\x90R\x86\x82R`\x02\x81R\x84\x82 `\xFF\x87\x16\x83R\x81R\x84\x82 T\x85Q\x93\x84\x01\x86R\x82\x84R\x90\x83\x01\x82\x90R\x93\x82\x01R\x90\x91\x90\x81a\x1A\xD4W\x91Pa\r.\x90PV[`\0\x85\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x88\x16\x84R\x90\x91R\x90 a\x1A\xFB`\x01\x84a5\xB0V[\x81T\x81\x10a\x1B\x0BWa\x1B\x0Ba4\xDCV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x92Pa\r.\x91PPV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 a\x1B\x87\x85\x85\x85a(\xE2V[c\xFF\xFF\xFF\xFF\x16\x81T\x81\x10a\x1B\x9DWa\x1B\x9Da4\xDCV[`\0\x91\x82R` \x90\x91 \x01T`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x94\x93PPPPV[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x1C\tW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06z\x90a5>V[`\xFF\x83\x16`\0\x90\x81R`\x01` R`@\x90 T\x15a\x1C\x87W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`5`$\x82\x01R\x7FStakeRegistry.initializeQuorum: `D\x82\x01Rtquorum already exists`X\x1B`d\x82\x01R`\x84\x01a\x06zV[a\x1C\x91\x83\x82a#sV[a\x1C\x9B\x83\x83a#\nV[PP`\xFF\x16`\0\x90\x81R`\x01` \x81\x81R`@\x80\x84 \x81Q``\x81\x01\x83Rc\xFF\xFF\xFF\xFFC\x81\x16\x82R\x81\x85\x01\x87\x81R\x93\x82\x01\x87\x81R\x83T\x96\x87\x01\x84U\x92\x87R\x93\x90\x95 \x94Q\x94\x90\x93\x01\x80T\x91Q\x93Q`\x01`\x01``\x1B\x03\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x94\x84\x16`\x01` \x1B\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x93\x16\x95\x90\x93\x16\x94\x90\x94\x17\x17\x91\x90\x91\x16\x17\x90UV[`\xFF\x82\x16`\0\x90\x81R`\x01` \x81\x90R`@\x82 \x80T\x91\x83\x91\x90a\x1DP\x90\x84a5\xB0V[\x81T\x81\x10a\x1D`Wa\x1D`a4\xDCV[\x90`\0R` `\0 \x01\x90P\x83`\0\x14\x15a\x1D\x8FWT`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x91Pa\r.\x90PV[\x80T`\0\x90a\x1D\xAE\x90`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x86a\"\xDCV[\x82T\x90\x91PCc\xFF\xFF\xFF\xFF\x90\x81\x16\x91\x16\x14\x15a\x1D\xEBW\x81T`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B`\x01`\x01``\x1B\x03\x83\x16\x02\x17\x82Ua\x1E\x9DV[\x81Tc\xFF\xFF\xFF\xFFC\x81\x16`\x01` \x1B\x81\x81\x02g\xFF\xFF\xFF\xFF\0\0\0\0\x19\x90\x94\x16\x93\x90\x93\x17\x85U`\xFF\x89\x16`\0\x90\x81R`\x01` \x81\x81R`@\x80\x84 \x81Q``\x81\x01\x83R\x95\x86R\x85\x83\x01\x85\x81R`\x01`\x01``\x1B\x03\x80\x8B\x16\x93\x88\x01\x93\x84R\x82T\x95\x86\x01\x83U\x91\x86R\x92\x90\x94 \x94Q\x94\x90\x92\x01\x80T\x91Q\x92Q\x90\x93\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x92\x86\x16\x90\x96\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x91\x16\x93\x90\x94\x16\x92\x90\x92\x17\x92\x90\x92\x17\x16\x91\x90\x91\x17\x90U[\x95\x94PPPPPV[`\0\x80`\0\x80a\x1E\xC5\x86`\xFF\x16`\0\x90\x81R`\x03` R`@\x90 T\x90V[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R\x90\x91P`\0[\x82\x81\x10\x15a )W`\xFF\x88\x16`\0\x90\x81R`\x03` R`@\x90 \x80T\x82\x90\x81\x10a\x1F\x0BWa\x1F\x0Ba4\xDCV[`\0\x91\x82R` \x80\x83 `@\x80Q\x80\x82\x01\x82R\x93\x90\x91\x01T`\x01`\x01`\xA0\x1B\x03\x80\x82\x16\x80\x86R`\x01`\xA0\x1B\x90\x92\x04`\x01`\x01``\x1B\x03\x16\x93\x85\x01\x93\x90\x93R\x90Qcw\x8EU\xF3`\xE0\x1B\x81R\x8B\x83\x16`\x04\x82\x01R`$\x81\x01\x91\x90\x91R\x91\x94P\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x90cw\x8EU\xF3\x90`D\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x1F\xB1W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x1F\xD5\x91\x90a5\xDDV[\x90P\x80\x15a \x16Wg\r\xE0\xB6\xB3\xA7d\0\0\x83` \x01Q`\x01`\x01``\x1B\x03\x16\x82a\x1F\xFF\x91\x90a5\xF6V[a \t\x91\x90a6\x15V[a \x13\x90\x86a67V[\x94P[P\x80a !\x81a5#V[\x91PPa\x1E\xDFV[PPP`\xFF\x85\x16`\0\x90\x81R` \x81\x90R`@\x90 T\x90\x92P`\x01`\x01``\x1B\x03\x90\x81\x16\x90\x83\x16\x10\x15\x90P[\x92P\x92\x90PV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 T\x81\x90\x80a! W`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x82R\x80\x83 \x81Q``\x81\x01\x83Rc\xFF\xFF\xFF\xFFC\x81\x16\x82R\x81\x85\x01\x86\x81R`\x01`\x01``\x1B\x03\x80\x8C\x16\x95\x84\x01\x95\x86R\x84T`\x01\x81\x01\x86U\x94\x88R\x95\x90\x96 \x91Q\x91\x90\x92\x01\x80T\x95Q\x93Q\x90\x94\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x93\x83\x16`\x01` \x1B\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x96\x16\x91\x90\x92\x16\x17\x93\x90\x93\x17\x16\x91\x90\x91\x17\x90Ua\"\x82V[`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x81 a!G`\x01\x84a5\xB0V[\x81T\x81\x10a!WWa!Wa4\xDCV[`\0\x91\x82R` \x90\x91 \x01\x80T`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x91\x04\x81\x16\x94P\x90\x91P\x85\x16\x83\x14\x15a!\x90W`\0\x93PPPPa\x12\x02V[\x80TCc\xFF\xFF\xFF\xFF\x90\x81\x16\x91\x16\x14\x15a!\xCAW\x80T`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B`\x01`\x01``\x1B\x03\x87\x16\x02\x17\x81Ua\"\x80V[\x80Tg\xFF\xFF\xFF\xFF\0\0\0\0\x19\x16`\x01` \x1BCc\xFF\xFF\xFF\xFF\x90\x81\x16\x82\x81\x02\x93\x90\x93\x17\x84U`\0\x8A\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x8D\x16\x84R\x82R\x80\x83 \x81Q``\x81\x01\x83R\x96\x87R\x86\x83\x01\x84\x81R`\x01`\x01``\x1B\x03\x8D\x81\x16\x93\x89\x01\x93\x84R\x82T`\x01\x81\x01\x84U\x92\x86R\x93\x90\x94 \x96Q\x96\x01\x80T\x93Q\x91Q\x96\x85\x16g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x94\x16\x93\x90\x93\x17\x93\x16\x90\x93\x02\x91\x90\x91\x17`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B\x93\x90\x92\x16\x92\x90\x92\x02\x17\x90U[P[`@\x80Q`\xFF\x87\x16\x81R`\x01`\x01``\x1B\x03\x86\x16` \x82\x01R\x87\x91\x7F/R}R~\x95\xD8\xFE@\xAE\xC5Swt;\xB7y\x08}\xA3\xF6\xD0\xD0\x8F\x12\xE3dD\xDAb2}\x91\x01`@Q\x80\x91\x03\x90\xA2a\"\xD2\x82\x85a+\x80V[\x96\x95PPPPPPV[`\0\x80\x82\x12\x15a#\0Wa\"\xEF\x82a6bV[a\"\xF9\x90\x84a6\x7FV[\x90Pa\r.V[a\"\xF9\x82\x84a67V[`\xFF\x82\x16`\0\x81\x81R` \x81\x81R`@\x91\x82\x90 \x80Tk\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x16`\x01`\x01``\x1B\x03\x86\x16\x90\x81\x17\x90\x91U\x91Q\x91\x82R\x7F&\xEE\xCF\xF2\xB7\x0B\nq\x10O\xF4\xD9@\xBAqb\xD2:\x95\xC2Hw\x1F\xC4\x87\xA7\xBE\x17\xA5\x96\xB3\xCF\x91\x01`@Q\x80\x91\x03\x90\xA2PPV[`\0\x81Q\x11a#\xD8W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`8`$\x82\x01R`\0\x80Q` a6\xFF\x839\x81Q\x91R`D\x82\x01R\x7F: no strategies provided\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06zV[\x80Q`\xFF\x83\x16`\0\x90\x81R`\x03` \x90\x81R`@\x90\x91 T\x90a#\xFB\x83\x83a6\xA7V[\x11\x15a$kW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`E`$\x82\x01R`\0\x80Q` a6\xFF\x839\x81Q\x91R`D\x82\x01R\x7F: exceed MAX_WEIGHING_FUNCTION_L`d\x82\x01Rd\x08\xA9\xC8\xEA\x89`\xDB\x1B`\x84\x82\x01R`\xA4\x01a\x06zV[`\0[\x82\x81\x10\x15a'PW`\0[a$\x83\x82\x84a6\xA7V[\x81\x10\x15a%dW\x84\x82\x81Q\x81\x10a$\x9CWa$\x9Ca4\xDCV[` \x02` \x01\x01Q`\0\x01Q`\x01`\x01`\xA0\x1B\x03\x16`\x03`\0\x88`\xFF\x16`\xFF\x16\x81R` \x01\x90\x81R` \x01`\0 \x82\x81T\x81\x10a$\xDBWa$\xDBa4\xDCV[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x16\x14\x15a%RW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`=`$\x82\x01R`\0\x80Q` a6\xFF\x839\x81Q\x91R`D\x82\x01R\x7F: cannot add same strategy 2x\0\0\0`d\x82\x01R`\x84\x01a\x06zV[\x80a%\\\x81a5#V[\x91PPa$yV[P`\0\x84\x82\x81Q\x81\x10a%yWa%ya4\xDCV[` \x02` \x01\x01Q` \x01Q`\x01`\x01``\x1B\x03\x16\x11a%\xFEW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`F`$\x82\x01R`\0\x80Q` a6\xFF\x839\x81Q\x91R`D\x82\x01R\x7F: cannot add strategy with zero `d\x82\x01Re\x1D\xD9ZY\xDA\x1D`\xD2\x1B`\x84\x82\x01R`\xA4\x01a\x06zV[`\xFF\x85\x16`\0\x90\x81R`\x03` R`@\x90 \x84Q\x85\x90\x83\x90\x81\x10a&$Wa&$a4\xDCV[` \x90\x81\x02\x91\x90\x91\x01\x81\x01Q\x82T`\x01\x81\x01\x84U`\0\x93\x84R\x92\x82\x90 \x81Q\x91\x90\x92\x01Q`\x01`\x01``\x1B\x03\x16`\x01`\xA0\x1B\x02`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x17\x91\x01U\x83Q`\xFF\x86\x16\x90\x7F\x10V^V\xCA\xCB\xF3.\xCA&yE\xF0T\xFE\xC0.Yu\x002\xD1\x13\xD30!\x82\xAD\x96\x7FT\x04\x90\x86\x90\x84\x90\x81\x10a&\xA1Wa&\xA1a4\xDCV[` \x90\x81\x02\x91\x90\x91\x01\x81\x01QQ`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R\x01`@Q\x80\x91\x03\x90\xA2\x84`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x85\x83\x81Q\x81\x10a&\xFEWa&\xFEa4\xDCV[` \x02` \x01\x01Q`\0\x01Q\x86\x84\x81Q\x81\x10a'\x1CWa'\x1Ca4\xDCV[` \x02` \x01\x01Q` \x01Q`@Qa'6\x92\x91\x90a+\xF3V[`@Q\x80\x91\x03\x90\xA2\x80a'H\x81a5#V[\x91PPa$nV[PPPPPV[\x81`\0\x01Qc\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x10\x15a(\x03W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R```$\x82\x01R\x7FStakeRegistry._validateOperatorS`D\x82\x01R\x7FtakeAtBlockNumber: operatorStake`d\x82\x01R\x7FUpdate is from after blockNumber`\x84\x82\x01R`\xA4\x01a\x06zV[` \x82\x01Qc\xFF\xFF\xFF\xFF\x16\x15\x80a()WP\x81` \x01Qc\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x10[a(\xDEW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`t`$\x82\x01R\x7FStakeRegistry._validateOperatorS`D\x82\x01R\x7FtakeAtBlockNumber: there is a ne`d\x82\x01R\x7Fwer operatorStakeUpdate availabl`\x84\x82\x01Rs2\x9012\xB37\xB92\x90167\xB1\xB5\xA7:\xB6\xB12\xB9`a\x1B`\xA4\x82\x01R`\xC4\x01a\x06zV[PPV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 T\x81[\x81\x81\x10\x15a*\xBBW`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x90 c\xFF\xFF\xFF\xFF\x85\x16\x90`\x01a)9\x84\x86a5\xB0V[a)C\x91\x90a5\xB0V[\x81T\x81\x10a)SWa)Sa4\xDCV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11a*\xA9W`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x81 `\x01a)\x92\x84\x86a5\xB0V[a)\x9C\x91\x90a5\xB0V[\x81T\x81\x10a)\xACWa)\xACa4\xDCV[`\0\x91\x82R` \x90\x91 \x01T`\x01` \x1B\x90\x04c\xFF\xFF\xFF\xFF\x16\x90P\x80\x15\x80a)\xDFWP\x84c\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x11[a*\x89W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`i`$\x82\x01R\x7FStakeRegistry._getStakeUpdateInd`D\x82\x01R\x7FexForOperatorAtBlockNumber: oper`d\x82\x01R\x7FatorId has no stake update at bl`\x84\x82\x01Rh7\xB1\xB5\xA7:\xB6\xB12\xB9`\xB9\x1B`\xA4\x82\x01R`\xC4\x01a\x06zV[`\x01a*\x95\x83\x85a5\xB0V[a*\x9F\x91\x90a5\xB0V[\x93PPPPa\x12\x02V[\x80a*\xB3\x81a5#V[\x91PPa)\x01V[P`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`\x81`$\x82\x01R\x7FStakeRegistry._getStakeUpdateInd`D\x82\x01R\x7FexForOperatorAtBlockNumber: no s`d\x82\x01R\x7Ftake update found for operatorId`\x84\x82\x01R\x7F and quorumNumber at block numbe`\xA4\x82\x01R`9`\xF9\x1B`\xC4\x82\x01R`\xE4\x01a\x06zV[`\0a\x12\x02`\x01`\x01``\x1B\x03\x80\x85\x16\x90\x84\x16a6\xBFV[\x805`\xFF\x81\x16\x81\x14a+\xA9W`\0\x80\xFD[\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a+\xC1W`\0\x80\xFD[a+\xCA\x83a+\x98V[\x94` \x93\x90\x93\x015\x93PPPV[`\0` \x82\x84\x03\x12\x15a+\xEAW`\0\x80\xFD[a\x12\x02\x82a+\x98V[`\x01`\x01`\xA0\x1B\x03\x92\x90\x92\x16\x82R`\x01`\x01``\x1B\x03\x16` \x82\x01R`@\x01\x90V[`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a,*W`\0\x80\xFD[PV[`\0\x80`@\x83\x85\x03\x12\x15a,@W`\0\x80\xFD[a,I\x83a+\x98V[\x91P` \x83\x015a,Y\x81a,\x15V[\x80\x91PP\x92P\x92\x90PV[`\0\x80\x83`\x1F\x84\x01\x12a,vW`\0\x80\xFD[P\x815`\x01`\x01`@\x1B\x03\x81\x11\x15a,\x8DW`\0\x80\xFD[` \x83\x01\x91P\x83` \x82`\x05\x1B\x85\x01\x01\x11\x15a UW`\0\x80\xFD[`\0\x80`\0\x80`\0``\x86\x88\x03\x12\x15a,\xC0W`\0\x80\xFD[a,\xC9\x86a+\x98V[\x94P` \x86\x015`\x01`\x01`@\x1B\x03\x80\x82\x11\x15a,\xE5W`\0\x80\xFD[a,\xF1\x89\x83\x8A\x01a,dV[\x90\x96P\x94P`@\x88\x015\x91P\x80\x82\x11\x15a-\nW`\0\x80\xFD[Pa-\x17\x88\x82\x89\x01a,dV[\x96\x99\x95\x98P\x93\x96P\x92\x94\x93\x92PPPV[`\0\x80\x83`\x1F\x84\x01\x12a-:W`\0\x80\xFD[P\x815`\x01`\x01`@\x1B\x03\x81\x11\x15a-QW`\0\x80\xFD[` \x83\x01\x91P\x83` \x82\x85\x01\x01\x11\x15a UW`\0\x80\xFD[`\0\x80`\0\x80``\x85\x87\x03\x12\x15a-\x7FW`\0\x80\xFD[\x845a-\x8A\x81a,\x15V[\x93P` \x85\x015\x92P`@\x85\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a-\xACW`\0\x80\xFD[a-\xB8\x87\x82\x88\x01a-(V[\x95\x98\x94\x97P\x95PPPPV[`\0\x81Q\x80\x84R` \x80\x85\x01\x94P\x80\x84\x01`\0[\x83\x81\x10\x15a-\xFDW\x81Q`\x01`\x01``\x1B\x03\x16\x87R\x95\x82\x01\x95\x90\x82\x01\x90`\x01\x01a-\xD8V[P\x94\x95\x94PPPPPV[`@\x81R`\0a.\x1B`@\x83\x01\x85a-\xC4V[\x82\x81\x03` \x84\x01Ra\x1E\x9D\x81\x85a-\xC4V[`\0\x80`@\x83\x85\x03\x12\x15a.@W`\0\x80\xFD[\x825\x91Pa.P` \x84\x01a+\x98V[\x90P\x92P\x92\x90PV[` \x80\x82R\x82Q\x82\x82\x01\x81\x90R`\0\x91\x90\x84\x82\x01\x90`@\x85\x01\x90\x84[\x81\x81\x10\x15a.\xC5Wa.\xB2\x83\x85Qc\xFF\xFF\xFF\xFF\x80\x82Q\x16\x83R\x80` \x83\x01Q\x16` \x84\x01RP`\x01`\x01``\x1B\x03`@\x82\x01Q\x16`@\x83\x01RPPV[\x92\x84\x01\x92``\x92\x90\x92\x01\x91`\x01\x01a.uV[P\x90\x96\x95PPPPPPV[cNH{q`\xE0\x1B`\0R`A`\x04R`$`\0\xFD[`@\x80Q\x90\x81\x01`\x01`\x01`@\x1B\x03\x81\x11\x82\x82\x10\x17\x15a/\tWa/\ta.\xD1V[`@R\x90V[`@Q`\x1F\x82\x01`\x1F\x19\x16\x81\x01`\x01`\x01`@\x1B\x03\x81\x11\x82\x82\x10\x17\x15a/7Wa/7a.\xD1V[`@R\x91\x90PV[`\0`\x01`\x01`@\x1B\x03\x82\x11\x15a/XWa/Xa.\xD1V[P`\x05\x1B` \x01\x90V[`\0\x80`@\x83\x85\x03\x12\x15a/uW`\0\x80\xFD[a/~\x83a+\x98V[\x91P` \x80\x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a/\x9AW`\0\x80\xFD[\x84\x01`\x1F\x81\x01\x86\x13a/\xABW`\0\x80\xFD[\x805a/\xBEa/\xB9\x82a/?V[a/\x0FV[\x81\x81R`\x05\x91\x90\x91\x1B\x82\x01\x83\x01\x90\x83\x81\x01\x90\x88\x83\x11\x15a/\xDDW`\0\x80\xFD[\x92\x84\x01\x92[\x82\x84\x10\x15a/\xFBW\x835\x82R\x92\x84\x01\x92\x90\x84\x01\x90a/\xE2V[\x80\x95PPPPPP\x92P\x92\x90PV[\x805`\x01`\x01``\x1B\x03\x81\x16\x81\x14a+\xA9W`\0\x80\xFD[`\0\x80`\0``\x84\x86\x03\x12\x15a06W`\0\x80\xFD[\x835\x92Pa0F` \x85\x01a+\x98V[\x91Pa0T`@\x85\x01a0\nV[\x90P\x92P\x92P\x92V[`\0\x80`@\x83\x85\x03\x12\x15a0pW`\0\x80\xFD[a+\xCA\x83a0\nV[\x805c\xFF\xFF\xFF\xFF\x81\x16\x81\x14a+\xA9W`\0\x80\xFD[`\0\x80`\0`@\x84\x86\x03\x12\x15a0\xA2W`\0\x80\xFD[a0\xAB\x84a0yV[\x92P` \x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a0\xC6W`\0\x80\xFD[a0\xD2\x86\x82\x87\x01a-(V[\x94\x97\x90\x96P\x93\x94PPPPV[` \x80\x82R\x82Q\x82\x82\x01\x81\x90R`\0\x91\x90\x84\x82\x01\x90`@\x85\x01\x90\x84[\x81\x81\x10\x15a.\xC5W\x83Qc\xFF\xFF\xFF\xFF\x16\x83R\x92\x84\x01\x92\x91\x84\x01\x91`\x01\x01a0\xFBV[`\0\x80`\0``\x84\x86\x03\x12\x15a12W`\0\x80\xFD[a1;\x84a+\x98V[\x95` \x85\x015\x95P`@\x90\x94\x015\x93\x92PPPV[\x81Qc\xFF\xFF\xFF\xFF\x90\x81\x16\x82R` \x80\x84\x01Q\x90\x91\x16\x90\x82\x01R`@\x80\x83\x01Q`\x01`\x01``\x1B\x03\x16\x90\x82\x01R``\x81\x01a\r.V[`\0\x80`@\x83\x85\x03\x12\x15a1\x98W`\0\x80\xFD[a1\xA1\x83a+\x98V[\x91Pa.P` \x84\x01a0\nV[`\0\x80`\0`@\x84\x86\x03\x12\x15a1\xC4W`\0\x80\xFD[\x835\x92P` \x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a0\xC6W`\0\x80\xFD[`\0\x82`\x1F\x83\x01\x12a1\xF2W`\0\x80\xFD[\x815` a2\x02a/\xB9\x83a/?V[\x82\x81R`\x06\x92\x90\x92\x1B\x84\x01\x81\x01\x91\x81\x81\x01\x90\x86\x84\x11\x15a2!W`\0\x80\xFD[\x82\x86\x01[\x84\x81\x10\x15a2pW`@\x81\x89\x03\x12\x15a2>W`\0\x80\x81\xFD[a2Fa.\xE7V[\x815a2Q\x81a,\x15V[\x81Ra2^\x82\x86\x01a0\nV[\x81\x86\x01R\x83R\x91\x83\x01\x91`@\x01a2%V[P\x96\x95PPPPPPV[`\0\x80`@\x83\x85\x03\x12\x15a2\x8EW`\0\x80\xFD[a2\x97\x83a+\x98V[\x91P` \x83\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a2\xB2W`\0\x80\xFD[a2\xBE\x85\x82\x86\x01a1\xE1V[\x91PP\x92P\x92\x90PV[`\0\x80`\0``\x84\x86\x03\x12\x15a2\xDDW`\0\x80\xFD[a2\xE6\x84a+\x98V[\x92Pa2\xF4` \x85\x01a0yV[\x91P`@\x84\x015\x90P\x92P\x92P\x92V[`\0\x80`\0``\x84\x86\x03\x12\x15a3\x19W`\0\x80\xFD[\x835\x92Pa3)` \x85\x01a+\x98V[\x91Pa0T`@\x85\x01a0yV[`\0\x80`\0\x80`\x80\x85\x87\x03\x12\x15a3MW`\0\x80\xFD[a3V\x85a+\x98V[\x93Pa3d` \x86\x01a0yV[\x93\x96\x93\x95PPPP`@\x82\x015\x91``\x015\x90V[`\0\x80`@\x83\x85\x03\x12\x15a3\x8CW`\0\x80\xFD[a1\xA1\x83a0\nV[`\0\x80`\0``\x84\x86\x03\x12\x15a3\xAAW`\0\x80\xFD[a3\xB3\x84a+\x98V[\x92Pa3\xC1` \x85\x01a0\nV[\x91P`@\x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a3\xDCW`\0\x80\xFD[a3\xE8\x86\x82\x87\x01a1\xE1V[\x91PP\x92P\x92P\x92V[` \x80\x82R`1\x90\x82\x01R\x7FStakeRegistry.quorumExists: quor`@\x82\x01Rp\x1D[H\x19\x1B\xD9\\\xC8\x1B\x9B\xDD\x08\x19^\x1A\\\xDD`z\x1B``\x82\x01R`\x80\x01\x90V[`\0` \x82\x84\x03\x12\x15a4UW`\0\x80\xFD[\x81Qa\x12\x02\x81a,\x15V[` \x80\x82R`V\x90\x82\x01R\x7FStakeRegistry.onlyCoordinatorOwn`@\x82\x01R\x7Fer: caller is not the owner of t``\x82\x01Ru42\x9092\xB3\xB4\xB9\xBA9<\xA1\xB7\xB7\xB924\xB70\xBA7\xB9`Q\x1B`\x80\x82\x01R`\xA0\x01\x90V[cNH{q`\xE0\x1B`\0R`2`\x04R`$`\0\xFD[`\0` \x82\x84\x03\x12\x15a5\x04W`\0\x80\xFD[a\x12\x02\x82a0\nV[cNH{q`\xE0\x1B`\0R`\x11`\x04R`$`\0\xFD[`\0`\0\x19\x82\x14\x15a57Wa57a5\rV[P`\x01\x01\x90V[` \x80\x82R`L\x90\x82\x01R\x7FStakeRegistry.onlyRegistryCoordi`@\x82\x01R\x7Fnator: caller is not the Registr``\x82\x01Rk<\xA1\xB7\xB7\xB924\xB70\xBA7\xB9`\xA1\x1B`\x80\x82\x01R`\xA0\x01\x90V[`\0\x82\x82\x10\x15a5\xC2Wa5\xC2a5\rV[P\x03\x90V[cNH{q`\xE0\x1B`\0R`1`\x04R`$`\0\xFD[`\0` \x82\x84\x03\x12\x15a5\xEFW`\0\x80\xFD[PQ\x91\x90PV[`\0\x81`\0\x19\x04\x83\x11\x82\x15\x15\x16\x15a6\x10Wa6\x10a5\rV[P\x02\x90V[`\0\x82a62WcNH{q`\xE0\x1B`\0R`\x12`\x04R`$`\0\xFD[P\x04\x90V[`\0`\x01`\x01``\x1B\x03\x80\x83\x16\x81\x85\x16\x80\x83\x03\x82\x11\x15a6YWa6Ya5\rV[\x01\x94\x93PPPPV[`\0`\x01`\xFF\x1B\x82\x14\x15a6xWa6xa5\rV[P`\0\x03\x90V[`\0`\x01`\x01``\x1B\x03\x83\x81\x16\x90\x83\x16\x81\x81\x10\x15a6\x9FWa6\x9Fa5\rV[\x03\x93\x92PPPV[`\0\x82\x19\x82\x11\x15a6\xBAWa6\xBAa5\rV[P\x01\x90V[`\0\x80\x83\x12\x80\x15`\x01`\xFF\x1B\x85\x01\x84\x12\x16\x15a6\xDDWa6\xDDa5\rV[`\x01`\x01`\xFF\x1B\x03\x84\x01\x83\x13\x81\x16\x15a6\xF8Wa6\xF8a5\rV[PP\x03\x90V\xFEStakeRegistry._addStrategyParams\xA2dipfsX\"\x12 \x08v\x88D\x84\xC2\xAA\xC0\xFC\xDD\xC8\xC3\x0C~2\xB6G\xD3\xB4\xF4\xB5\xBB\xCA\xAB\xB7\xAB\x8Eg\xA6\x82\x96\x92dsolcC\0\x08\x0C\x003";
+    const __DEPLOYED_BYTECODE: &[u8] = b"`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\x02\x11W`\x005`\xE0\x1C\x80c\x81\xC0u\x02\x11a\x01%W\x80c\xC8)LV\x11a\0\xADW\x80c\xF2\xBE\x94\xAE\x11a\0|W\x80c\xF2\xBE\x94\xAE\x14a\x05\xB0W\x80c\xF5\tU\x1A\x14a\x05\xC3W\x80c\xF8Q\xE1\x98\x14a\x05\xD6W\x80c\xFA(\xC6'\x14a\x05\xE9W\x80c\xFFiJw\x14a\x05\xFCW`\0\x80\xFD[\x80c\xC8)LV\x14a\x05;W\x80c\xD5\xEC\xCC\x05\x14a\x05NW\x80c\xDD\x98F\xB9\x14a\x05aW\x80c\xDF\\\xF7#\x14a\x05\x89W`\0\x80\xFD[\x80c\xB6\x90Kx\x11a\0\xF4W\x80c\xB6\x90Kx\x14a\x04\xC6W\x80c\xBC\x9A@\xC3\x14a\x04\xD9W\x80c\xBD)\xB8\xCD\x14a\x04\xECW\x80c\xC4gx\xA5\x14a\x04\xFFW\x80c\xC6\x01R}\x14a\x05(W`\0\x80\xFD[\x80c\x81\xC0u\x02\x14a\x043W\x80c\x9F<\xCFe\x14a\x04SW\x80c\xACk\xFB\x03\x14a\x04fW\x80c\xAD\xC8\x04\xDA\x14a\x04\x86W`\0\x80\xFD[\x80cK\xD2n\t\x11a\x01\xA8W\x80cf\xAC\xFE\xFE\x11a\x01wW\x80cf\xAC\xFE\xFE\x14a\x03\x89W\x80cm\x14\xA9\x87\x14a\x03\xB4W\x80ctELm\x14a\x03\xF3W\x80c|\x17#G\x14a\x04\x06W\x80c\x7FB\x98\"\x14a\x04 W`\0\x80\xFD[\x80cK\xD2n\t\x14a\x03$W\x80cT\x01\xED'\x14a\x03TW\x80c^Zgu\x14a\x03gW\x80c_\x1F-w\x14a\x03vW`\0\x80\xFD[\x80c \xB6b\x98\x11a\x01\xE4W\x80c \xB6b\x98\x14a\x02\xADW\x80c%PGw\x14a\x02\xC0W\x80c,\xD9Y@\x14a\x02\xE1W\x80c<\xA5\xA5\xF5\x14a\x03\x01W`\0\x80\xFD[\x80c\x03\x90\xA4\xD5\x14a\x02\x16W\x80c\x04\x91\xB4\x1C\x14a\x02+W\x80c\x08s$a\x14a\x02aW\x80c\x1F\x9Bt\xE0\x14a\x02\x82W[`\0\x80\xFD[a\x02)a\x02$6`\x04a.\x17V[a\x06\x0FV[\0[a\x02Na\x0296`\x04a.AV[`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x90V[`@Q\x90\x81R` \x01[`@Q\x80\x91\x03\x90\xF3[a\x02ta\x02o6`\x04a.\x17V[a\x06\x1EV[`@Qa\x02X\x92\x91\x90a.\\V[a\x02\x95a\x02\x906`\x04a.\x96V[a\x06gV[`@Q`\x01`\x01``\x1B\x03\x90\x91\x16\x81R` \x01a\x02XV[a\x02)a\x02\xBB6`\x04a/\x11V[a\x06\xB7V[a\x02\xD3a\x02\xCE6`\x04a/\xD2V[a\t\xE8V[`@Qa\x02X\x92\x91\x90a0qV[a\x02\xF4a\x02\xEF6`\x04a0\x96V[a\x0C\xB3V[`@Qa\x02X\x91\x90a0\xC2V[a\x02Na\x03\x0F6`\x04a.AV[`\xFF\x16`\0\x90\x81R`\x03` R`@\x90 T\x90V[a\x02Na\x0326`\x04a0\x96V[`\0\x91\x82R`\x02` \x90\x81R`@\x80\x84 `\xFF\x93\x90\x93\x16\x84R\x91\x90R\x90 T\x90V[a\x02\x95a\x03b6`\x04a0\x96V[a\rRV[a\x02Ng\r\xE0\xB6\xB3\xA7d\0\0\x81V[a\x02)a\x03\x846`\x04a1\xCBV[a\rkV[a\x03\x9Ca\x03\x976`\x04a/\xD2V[a\x11\x8BV[`@Q`\x01`\x01`\xC0\x1B\x03\x90\x91\x16\x81R` \x01a\x02XV[a\x03\xDB\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x81V[`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R` \x01a\x02XV[a\x02Na\x04\x016`\x04a2\x8AV[a\x12\xE5V[a\x04\x0E` \x81V[`@Q`\xFF\x90\x91\x16\x81R` \x01a\x02XV[a\x02\x95a\x04.6`\x04a2\xC6V[a\x12\xFCV[a\x04Fa\x04A6`\x04a2\xF6V[a\x13\x08V[`@Qa\x02X\x91\x90a3HV[a\x03\xDBa\x04a6`\x04a.\x17V[a\x15\xD0V[a\x04ya\x04t6`\x04a3\x86V[a\x16\x08V[`@Qa\x02X\x91\x90a3\xB9V[a\x04\x99a\x04\x946`\x04a.\x17V[a\x16\xA0V[`@\x80Q\x82Q`\x01`\x01`\xA0\x1B\x03\x16\x81R` \x92\x83\x01Q`\x01`\x01``\x1B\x03\x16\x92\x81\x01\x92\x90\x92R\x01a\x02XV[a\x04ya\x04\xD46`\x04a.\x17V[a\x17\x1AV[a\x02)a\x04\xE76`\x04a3\xEEV[a\x17\xA9V[a\x02)a\x04\xFA6`\x04a4\x18V[a\x18\x9DV[a\x02\x95a\x05\r6`\x04a.AV[`\0` \x81\x90R\x90\x81R`@\x90 T`\x01`\x01``\x1B\x03\x16\x81V[a\x02)a\x0566`\x04a4\xE4V[a\x19\xCAV[a\x02\x95a\x05I6`\x04a51V[a\x1A\xBEV[a\x02\x95a\x05\\6`\x04a.AV[a\x1B<V[a\x05ta\x05o6`\x04a5mV[a\x1B\x8FV[`@Qc\xFF\xFF\xFF\xFF\x90\x91\x16\x81R` \x01a\x02XV[a\x03\xDB\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x81V[a\x02\x95a\x05\xBE6`\x04a5\xA0V[a\x1B\x9CV[a\x02Na\x05\xD16`\x04a5\xE2V[a\x1C1V[a\x04ya\x05\xE46`\x04a0\x96V[a\x1C=V[a\x02\x95a\x05\xF76`\x04a5mV[a\x1D\"V[a\x02)a\x06\n6`\x04a5\xFEV[a\x1D\x83V[a\x06\x19\x82\x82a\x1E\xEEV[PPPV[`\x03` R\x81`\0R`@`\0 \x81\x81T\x81\x10a\x06:W`\0\x80\xFD[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x81\x16\x92P`\x01`\xA0\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x90P\x82V[`\xFF\x82\x16`\0\x90\x81R`\x01` R`@\x81 T\x83\x90a\x06\xA1W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6[V[`@Q\x80\x91\x03\x90\xFD[`\0a\x06\xAD\x85\x85a hV[P\x95\x94PPPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x07\x15W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x079\x91\x90a6\xACV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x07iW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6\xC9V[\x84a\x07\x85\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x07\xA1W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6[V[\x83\x80a\x08\x17W`@\x80QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`$\x81\x01\x91\x90\x91R\x7FStakeRegistry.modifyStrategyPara`D\x82\x01R\x7Fms: no strategy indices provided`d\x82\x01R`\x84\x01a\x06\x98V[\x82\x81\x14a\x08\x8CW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`9`$\x82\x01R\x7FStakeRegistry.modifyStrategyPara`D\x82\x01R\x7Fms: input length mismatch\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[`\xFF\x87\x16`\0\x90\x81R`\x03` R`@\x81 \x90[\x82\x81\x10\x15a\t\xDDW\x85\x85\x82\x81\x81\x10a\x08\xBAWa\x08\xBAa7EV[\x90P` \x02\x01` \x81\x01\x90a\x08\xCF\x91\x90a7[V[\x82\x89\x89\x84\x81\x81\x10a\x08\xE2Wa\x08\xE2a7EV[\x90P` \x02\x015\x81T\x81\x10a\x08\xF9Wa\x08\xF9a7EV[\x90`\0R` `\0 \x01`\0\x01`\x14a\x01\0\n\x81T\x81`\x01`\x01``\x1B\x03\x02\x19\x16\x90\x83`\x01`\x01``\x1B\x03\x16\x02\x17\x90UP\x88`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x83\x8A\x8A\x85\x81\x81\x10a\tbWa\tba7EV[\x90P` \x02\x015\x81T\x81\x10a\tyWa\tya7EV[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x16\x88\x88\x85\x81\x81\x10a\t\xA0Wa\t\xA0a7EV[\x90P` \x02\x01` \x81\x01\x90a\t\xB5\x91\x90a7[V[`@Qa\t\xC3\x92\x91\x90a.\\V[`@Q\x80\x91\x03\x90\xA2\x80a\t\xD5\x81a7\x8CV[\x91PPa\x08\xA0V[PPPPPPPPPV[``\x803`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\n3W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a7\xA7V[`\0\x83`\x01`\x01`@\x1B\x03\x81\x11\x15a\nMWa\nMa1:V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\nvW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0\x84`\x01`\x01`@\x1B\x03\x81\x11\x15a\n\x93Wa\n\x93a1:V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\n\xBCW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0[\x85\x81\x10\x15a\x0C\xA5W`\0\x87\x87\x83\x81\x81\x10a\n\xDEWa\n\xDEa7EV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x0BfW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`5`$\x82\x01R\x7FStakeRegistry.registerOperator: `D\x82\x01Rt\x1C][\xDC\x9D[H\x19\x1B\xD9\\\xC8\x1B\x9B\xDD\x08\x19^\x1A\\\xDD`Z\x1B`d\x82\x01R`\x84\x01a\x06\x98V[`\0\x80a\x0Bs\x83\x8Da hV[\x91P\x91P\x80a\x0C\x10W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`[`$\x82\x01R\x7FStakeRegistry.registerOperator: `D\x82\x01R\x7FOperator does not meet minimum s`d\x82\x01R\x7Ftake requirement for quorum\0\0\0\0\0`\x84\x82\x01R`\xA4\x01a\x06\x98V[`\0a\x0C\x1D\x8C\x85\x85a\"fV[\x90P\x82\x87\x86\x81Q\x81\x10a\x0C2Wa\x0C2a7EV[` \x02` \x01\x01\x90`\x01`\x01``\x1B\x03\x16\x90\x81`\x01`\x01``\x1B\x03\x16\x81RPPa\x0C\\\x84\x82a\x1E\xEEV[\x86\x86\x81Q\x81\x10a\x0CnWa\x0Cna7EV[` \x02` \x01\x01\x90`\x01`\x01``\x1B\x03\x16\x90\x81`\x01`\x01``\x1B\x03\x16\x81RPPPPPP\x80\x80a\x0C\x9D\x90a7\x8CV[\x91PPa\n\xC2V[P\x90\x97\x90\x96P\x94PPPPPV[`\0\x82\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x85\x16\x84R\x82R\x80\x83 \x80T\x82Q\x81\x85\x02\x81\x01\x85\x01\x90\x93R\x80\x83R``\x94\x92\x93\x91\x92\x90\x91\x84\x01[\x82\x82\x10\x15a\rEW`\0\x84\x81R` \x90\x81\x90 `@\x80Q``\x81\x01\x82R\x91\x85\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x83\x85\x01R`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x90\x82\x01R\x82R`\x01\x90\x92\x01\x91\x01a\x0C\xECV[PPPP\x90P[\x92\x91PPV[`\0\x80a\r_\x84\x84a\x1C=V[`@\x01Q\x94\x93PPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\r\xC9W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\r\xED\x91\x90a6\xACV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x0E\x1DW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6\xC9V[\x81a\x0E9\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x0EUW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6[V[\x81Q\x80a\x0E\xCAW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`=`$\x82\x01R\x7FStakeRegistry.removeStrategies: `D\x82\x01R\x7Fno indices to remove provided\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[`\xFF\x84\x16`\0\x90\x81R`\x03` \x90\x81R`@\x80\x83 `\x04\x90\x92R\x82 \x90\x91[\x83\x81\x10\x15a\x11\x82W\x86`\xFF\x16\x7F1\xFA.,\xD2\x80\xC97^\x13\xFF\xCF=\x81\xE27\x81\0\x18n@X\xF8\xD3\xDD\xB6\x90\xB8-\xCD1\xF7\x84\x88\x84\x81Q\x81\x10a\x0F)Wa\x0F)a7EV[` \x02` \x01\x01Q\x81T\x81\x10a\x0FAWa\x0FAa7EV[`\0\x91\x82R` \x91\x82\x90 \x01T`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R\x01`@Q\x80\x91\x03\x90\xA2\x86`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x84\x88\x84\x81Q\x81\x10a\x0F\x9FWa\x0F\x9Fa7EV[` \x02` \x01\x01Q\x81T\x81\x10a\x0F\xB7Wa\x0F\xB7a7EV[`\0\x91\x82R` \x80\x83 \x91\x90\x91\x01T`@\x80Q`\x01`\x01`\xA0\x1B\x03\x90\x92\x16\x82R\x91\x81\x01\x92\x90\x92R\x01`@Q\x80\x91\x03\x90\xA2\x82T\x83\x90a\x0F\xF7\x90`\x01\x90a8\x19V[\x81T\x81\x10a\x10\x07Wa\x10\x07a7EV[\x90`\0R` `\0 \x01\x83\x87\x83\x81Q\x81\x10a\x10$Wa\x10$a7EV[` \x02` \x01\x01Q\x81T\x81\x10a\x10<Wa\x10<a7EV[`\0\x91\x82R` \x90\x91 \x82T\x91\x01\x80T`\x01`\x01`\xA0\x1B\x03\x19\x16`\x01`\x01`\xA0\x1B\x03\x90\x92\x16\x91\x82\x17\x81U\x91T`\x01`\x01``\x1B\x03`\x01`\xA0\x1B\x91\x82\x90\x04\x16\x02\x17\x90U\x82T\x83\x90\x80a\x10\x8FWa\x10\x8Fa80V[`\0\x82\x81R` \x81 \x82\x01`\0\x19\x90\x81\x01\x91\x90\x91U\x01\x90U\x81T\x82\x90a\x10\xB7\x90`\x01\x90a8\x19V[\x81T\x81\x10a\x10\xC7Wa\x10\xC7a7EV[\x90`\0R` `\0 \x01`\0\x90T\x90a\x01\0\n\x90\x04`\x01`\x01`\xA0\x1B\x03\x16\x82\x87\x83\x81Q\x81\x10a\x10\xF8Wa\x10\xF8a7EV[` \x02` \x01\x01Q\x81T\x81\x10a\x11\x10Wa\x11\x10a7EV[\x90`\0R` `\0 \x01`\0a\x01\0\n\x81T\x81`\x01`\x01`\xA0\x1B\x03\x02\x19\x16\x90\x83`\x01`\x01`\xA0\x1B\x03\x16\x02\x17\x90UP\x81\x80T\x80a\x11NWa\x11Na80V[`\0\x82\x81R` \x90 \x81\x01`\0\x19\x90\x81\x01\x80T`\x01`\x01`\xA0\x1B\x03\x19\x16\x90U\x01\x90U\x80a\x11z\x81a7\x8CV[\x91PPa\x0E\xE9V[PPPPPPPV[`\x003`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x11\xD5W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a7\xA7V[`\0\x80[\x83\x81\x10\x15a\x06\xADW`\0\x85\x85\x83\x81\x81\x10a\x11\xF5Wa\x11\xF5a7EV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x12\x85W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`8`$\x82\x01R\x7FStakeRegistry.updateOperatorStak`D\x82\x01R\x7Fe: quorum does not exist\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[`\0\x80a\x12\x92\x83\x8Ba hV[\x91P\x91P\x80a\x12\xB4W`\0\x91P`\x01`\xFF\x84\x16\x1B`\x01`\x01`\xC0\x1B\x03\x86\x16\x17\x94P[`\0a\x12\xC1\x8A\x85\x85a\"fV[\x90Pa\x12\xCD\x84\x82a\x1E\xEEV[PPPPP\x80\x80a\x12\xDD\x90a7\x8CV[\x91PPa\x11\xD9V[`\0a\x12\xF2\x84\x84\x84a\"fV[\x90P[\x93\x92PPPV[`\0a\x12\xF5\x83\x83a$\xE6V[```\0\x82`\x01`\x01`@\x1B\x03\x81\x11\x15a\x13$Wa\x13$a1:V[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\x13MW\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0[\x83\x81\x10\x15a\x15\xC7W`\0\x85\x85\x83\x81\x81\x10a\x13oWa\x13oa7EV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x14\x0EW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`F`$\x82\x01R\x7FStakeRegistry.getTotalStakeIndic`D\x82\x01R\x7FesAtBlockNumber: quorum does not`d\x82\x01Re\x08\x19^\x1A\\\xDD`\xD2\x1B`\x84\x82\x01R`\xA4\x01a\x06\x98V[`\xFF\x81\x16`\0\x90\x81R`\x01` R`@\x81 \x80Tc\xFF\xFF\xFF\xFF\x8A\x16\x92\x90a\x147Wa\x147a7EV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11\x15a\x14\xE3W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`[`$\x82\x01R\x7FStakeRegistry.getTotalStakeIndic`D\x82\x01R\x7FesAtBlockNumber: quorum has no s`d\x82\x01R\x7Ftake history at blockNumber\0\0\0\0\0`\x84\x82\x01R`\xA4\x01a\x06\x98V[`\xFF\x81\x16`\0\x90\x81R`\x01` R`@\x81 T\x90[\x81\x81\x10\x15a\x15\xB1W`\xFF\x83\x16`\0\x90\x81R`\x01` \x81\x90R`@\x90\x91 c\xFF\xFF\xFF\xFF\x8B\x16\x91a\x15'\x84\x86a8\x19V[a\x151\x91\x90a8\x19V[\x81T\x81\x10a\x15AWa\x15Aa7EV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11a\x15\x9FW`\x01a\x15d\x82\x84a8\x19V[a\x15n\x91\x90a8\x19V[\x85\x85\x81Q\x81\x10a\x15\x80Wa\x15\x80a7EV[` \x02` \x01\x01\x90c\xFF\xFF\xFF\xFF\x16\x90\x81c\xFF\xFF\xFF\xFF\x16\x81RPPa\x15\xB1V[\x80a\x15\xA9\x81a7\x8CV[\x91PPa\x14\xF8V[PPP\x80\x80a\x15\xBF\x90a7\x8CV[\x91PPa\x13SV[P\x94\x93PPPPV[`\x04` R\x81`\0R`@`\0 \x81\x81T\x81\x10a\x15\xECW`\0\x80\xFD[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x16\x91P\x82\x90PV[`@\x80Q``\x81\x01\x82R`\0\x80\x82R` \x80\x83\x01\x82\x90R\x82\x84\x01\x82\x90R\x85\x82R`\x02\x81R\x83\x82 `\xFF\x88\x16\x83R\x90R\x91\x90\x91 \x80T\x83\x90\x81\x10a\x16MWa\x16Ma7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x92\x90\x91\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x93\x83\x01\x93\x90\x93R`\x01`@\x1B\x90\x92\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x94\x93PPPPV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R`\xFF\x83\x16`\0\x90\x81R`\x03` R`@\x90 \x80T\x83\x90\x81\x10a\x16\xD8Wa\x16\xD8a7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q\x80\x82\x01\x90\x91R\x91\x01T`\x01`\x01`\xA0\x1B\x03\x81\x16\x82R`\x01`\xA0\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x93\x92PPPV[`@\x80Q``\x81\x01\x82R`\0\x80\x82R` \x80\x83\x01\x82\x90R\x82\x84\x01\x82\x90R`\xFF\x86\x16\x82R`\x01\x90R\x91\x90\x91 \x80T\x83\x90\x81\x10a\x17WWa\x17Wa7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x92\x90\x91\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x84R`\x01` \x1B\x82\x04\x16\x93\x83\x01\x93\x90\x93R`\x01`@\x1B\x90\x92\x04`\x01`\x01``\x1B\x03\x16\x91\x81\x01\x91\x90\x91R\x93\x92PPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x18\x07W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x18+\x91\x90a6\xACV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x18[W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6\xC9V[\x81a\x18w\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x18\x93W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6[V[a\x06\x19\x83\x83a%\x14V[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x18\xE5W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a7\xA7V[`\0[\x81\x81\x10\x15a\x19\xC4W`\0\x83\x83\x83\x81\x81\x10a\x19\x04Wa\x19\x04a7EV[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x01` R`@\x90 T\x90\x92P\x15\x15\x90Pa\x19\x94W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`7`$\x82\x01R\x7FStakeRegistry.deregisterOperator`D\x82\x01R\x7F: quorum does not exist\0\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[`\0a\x19\xA2\x86\x83`\0a\"fV[\x90Pa\x19\xAE\x82\x82a\x1E\xEEV[PPP\x80\x80a\x19\xBC\x90a7\x8CV[\x91PPa\x18\xE8V[PPPPV[\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0`\x01`\x01`\xA0\x1B\x03\x16c\x8D\xA5\xCB[`@Q\x81c\xFF\xFF\xFF\xFF\x16`\xE0\x1B\x81R`\x04\x01` `@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a\x1A(W=`\0\x80>=`\0\xFD[PPPP`@Q=`\x1F\x19`\x1F\x82\x01\x16\x82\x01\x80`@RP\x81\x01\x90a\x1AL\x91\x90a6\xACV[`\x01`\x01`\xA0\x1B\x03\x163`\x01`\x01`\xA0\x1B\x03\x16\x14a\x1A|W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6\xC9V[\x81a\x1A\x98\x81`\xFF\x16`\0\x90\x81R`\x01` R`@\x90 T\x15\x15\x90V[a\x1A\xB4W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a6[V[a\x06\x19\x83\x83a%}V[`\xFF\x83\x16`\0\x90\x81R`\x01` R`@\x81 \x80T\x82\x91\x90\x84\x90\x81\x10a\x1A\xE5Wa\x1A\xE5a7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x90Pa\r_\x81\x85a)\xC0V[`\xFF\x81\x16`\0\x90\x81R`\x01` \x81\x90R`@\x82 \x80T\x90\x91a\x1B]\x91a8\x19V[\x81T\x81\x10a\x1BmWa\x1Bma7EV[`\0\x91\x82R` \x90\x91 \x01T`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x92\x91PPV[`\0a\x12\xF2\x84\x84\x84a+KV[`\0\x82\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x88\x16\x84R\x90\x91R\x81 \x80T\x82\x91\x90\x84\x90\x81\x10a\x1B\xCDWa\x1B\xCDa7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x90Pa\x1C$\x81\x86a)\xC0V[`@\x01Q\x95\x94PPPPPV[`\0a\x12\xF5\x83\x83a-\xE9V[`@\x80Q``\x80\x82\x01\x83R`\0\x80\x83R` \x80\x84\x01\x82\x90R\x83\x85\x01\x82\x90R\x86\x82R`\x02\x81R\x84\x82 `\xFF\x87\x16\x83R\x81R\x84\x82 T\x85Q\x93\x84\x01\x86R\x82\x84R\x90\x83\x01\x82\x90R\x93\x82\x01R\x90\x91\x90\x81a\x1C\x96W\x91Pa\rL\x90PV[`\0\x85\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x88\x16\x84R\x90\x91R\x90 a\x1C\xBD`\x01\x84a8\x19V[\x81T\x81\x10a\x1C\xCDWa\x1C\xCDa7EV[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tc\xFF\xFF\xFF\xFF\x80\x82\x16\x83R`\x01` \x1B\x82\x04\x16\x93\x82\x01\x93\x90\x93R`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x93\x04\x92\x90\x92\x16\x90\x82\x01R\x92Pa\rL\x91PPV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 a\x1DI\x85\x85\x85a+KV[c\xFF\xFF\xFF\xFF\x16\x81T\x81\x10a\x1D_Wa\x1D_a7EV[`\0\x91\x82R` \x90\x91 \x01T`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x94\x93PPPPV[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x1D\xCBW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x06\x98\x90a7\xA7V[`\xFF\x83\x16`\0\x90\x81R`\x01` R`@\x90 T\x15a\x1EIW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`5`$\x82\x01R\x7FStakeRegistry.initializeQuorum: `D\x82\x01Rtquorum already exists`X\x1B`d\x82\x01R`\x84\x01a\x06\x98V[a\x1ES\x83\x82a%}V[a\x1E]\x83\x83a%\x14V[PP`\xFF\x16`\0\x90\x81R`\x01` \x81\x81R`@\x80\x84 \x81Q``\x81\x01\x83Rc\xFF\xFF\xFF\xFFC\x81\x16\x82R\x81\x85\x01\x87\x81R\x93\x82\x01\x87\x81R\x83T\x96\x87\x01\x84U\x92\x87R\x93\x90\x95 \x94Q\x94\x90\x93\x01\x80T\x91Q\x93Q`\x01`\x01``\x1B\x03\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x94\x84\x16`\x01` \x1B\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x93\x16\x95\x90\x93\x16\x94\x90\x94\x17\x17\x91\x90\x91\x16\x17\x90UV[`\xFF\x82\x16`\0\x90\x81R`\x01` \x81\x90R`@\x82 \x80T\x91\x83\x91\x90a\x1F\x12\x90\x84a8\x19V[\x81T\x81\x10a\x1F\"Wa\x1F\"a7EV[\x90`\0R` `\0 \x01\x90P\x83`\0\x14\x15a\x1FQWT`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x91Pa\rL\x90PV[\x80T`\0\x90a\x1Fp\x90`\x01`@\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x86a$\xE6V[\x82T\x90\x91PCc\xFF\xFF\xFF\xFF\x90\x81\x16\x91\x16\x14\x15a\x1F\xADW\x81T`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B`\x01`\x01``\x1B\x03\x83\x16\x02\x17\x82Ua _V[\x81Tc\xFF\xFF\xFF\xFFC\x81\x16`\x01` \x1B\x81\x81\x02g\xFF\xFF\xFF\xFF\0\0\0\0\x19\x90\x94\x16\x93\x90\x93\x17\x85U`\xFF\x89\x16`\0\x90\x81R`\x01` \x81\x81R`@\x80\x84 \x81Q``\x81\x01\x83R\x95\x86R\x85\x83\x01\x85\x81R`\x01`\x01``\x1B\x03\x80\x8B\x16\x93\x88\x01\x93\x84R\x82T\x95\x86\x01\x83U\x91\x86R\x92\x90\x94 \x94Q\x94\x90\x92\x01\x80T\x91Q\x92Q\x90\x93\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x92\x86\x16\x90\x96\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x91\x16\x93\x90\x94\x16\x92\x90\x92\x17\x92\x90\x92\x17\x16\x91\x90\x91\x17\x90U[\x95\x94PPPPPV[`\0\x80`\0\x80a \x87\x86`\xFF\x16`\0\x90\x81R`\x03` R`@\x90 T\x90V[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R\x90\x91P`\xFF\x87\x16`\0\x90\x81R`\x04` \x81\x90R`@\x80\x83 \x90Qc\x90\x04\x13G`\xE0\x1B\x81R`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x92c\x90\x04\x13G\x92a \xFC\x92\x8C\x92\x01a8FV[`\0`@Q\x80\x83\x03\x81\x86Z\xFA\x15\x80\x15a!\x19W=`\0\x80>=`\0\xFD[PPPP`@Q=`\0\x82>`\x1F=\x90\x81\x01`\x1F\x19\x16\x82\x01`@Ra!A\x91\x90\x81\x01\x90a8\xA5V[\x90P`\0[\x83\x81\x10\x15a\"2W`\xFF\x89\x16`\0\x90\x81R`\x03` R`@\x90 \x80T\x82\x90\x81\x10a!rWa!ra7EV[`\0\x91\x82R` \x80\x83 `@\x80Q\x80\x82\x01\x90\x91R\x92\x01T`\x01`\x01`\xA0\x1B\x03\x81\x16\x83R`\x01`\xA0\x1B\x90\x04`\x01`\x01``\x1B\x03\x16\x90\x82\x01R\x83Q\x90\x94P\x83\x90\x83\x90\x81\x10a!\xC0Wa!\xC0a7EV[` \x02` \x01\x01Q\x11\x15a\" Wg\r\xE0\xB6\xB3\xA7d\0\0\x83` \x01Q`\x01`\x01``\x1B\x03\x16\x83\x83\x81Q\x81\x10a!\xF7Wa!\xF7a7EV[` \x02` \x01\x01Qa\"\t\x91\x90a95V[a\"\x13\x91\x90a9TV[a\"\x1D\x90\x86a9vV[\x94P[\x80a\"*\x81a7\x8CV[\x91PPa!FV[PPP`\xFF\x86\x16`\0\x90\x81R` \x81\x90R`@\x90 T\x91\x93PP`\x01`\x01``\x1B\x03\x90\x81\x16\x90\x83\x16\x10\x15\x90P[\x92P\x92\x90PV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 T\x81\x90\x80a#*W`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x82R\x80\x83 \x81Q``\x81\x01\x83Rc\xFF\xFF\xFF\xFFC\x81\x16\x82R\x81\x85\x01\x86\x81R`\x01`\x01``\x1B\x03\x80\x8C\x16\x95\x84\x01\x95\x86R\x84T`\x01\x81\x01\x86U\x94\x88R\x95\x90\x96 \x91Q\x91\x90\x92\x01\x80T\x95Q\x93Q\x90\x94\x16`\x01`@\x1B\x02`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x93\x83\x16`\x01` \x1B\x02g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x96\x16\x91\x90\x92\x16\x17\x93\x90\x93\x17\x16\x91\x90\x91\x17\x90Ua$\x8CV[`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x81 a#Q`\x01\x84a8\x19V[\x81T\x81\x10a#aWa#aa7EV[`\0\x91\x82R` \x90\x91 \x01\x80T`\x01`\x01``\x1B\x03`\x01`@\x1B\x90\x91\x04\x81\x16\x94P\x90\x91P\x85\x16\x83\x14\x15a#\x9AW`\0\x93PPPPa\x12\xF5V[\x80TCc\xFF\xFF\xFF\xFF\x90\x81\x16\x91\x16\x14\x15a#\xD4W\x80T`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B`\x01`\x01``\x1B\x03\x87\x16\x02\x17\x81Ua$\x8AV[\x80Tg\xFF\xFF\xFF\xFF\0\0\0\0\x19\x16`\x01` \x1BCc\xFF\xFF\xFF\xFF\x90\x81\x16\x82\x81\x02\x93\x90\x93\x17\x84U`\0\x8A\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x8D\x16\x84R\x82R\x80\x83 \x81Q``\x81\x01\x83R\x96\x87R\x86\x83\x01\x84\x81R`\x01`\x01``\x1B\x03\x8D\x81\x16\x93\x89\x01\x93\x84R\x82T`\x01\x81\x01\x84U\x92\x86R\x93\x90\x94 \x96Q\x96\x01\x80T\x93Q\x91Q\x96\x85\x16g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x94\x16\x93\x90\x93\x17\x93\x16\x90\x93\x02\x91\x90\x91\x17`\x01`@\x1B`\x01`\xA0\x1B\x03\x19\x16`\x01`@\x1B\x93\x90\x92\x16\x92\x90\x92\x02\x17\x90U[P[`@\x80Q`\xFF\x87\x16\x81R`\x01`\x01``\x1B\x03\x86\x16` \x82\x01R\x87\x91\x7F/R}R~\x95\xD8\xFE@\xAE\xC5Swt;\xB7y\x08}\xA3\xF6\xD0\xD0\x8F\x12\xE3dD\xDAb2}\x91\x01`@Q\x80\x91\x03\x90\xA2a$\xDC\x82\x85a-\xE9V[\x96\x95PPPPPPV[`\0\x80\x82\x12\x15a%\nWa$\xF9\x82a9\xA1V[a%\x03\x90\x84a9\xBEV[\x90Pa\rLV[a%\x03\x82\x84a9vV[`\xFF\x82\x16`\0\x81\x81R` \x81\x81R`@\x91\x82\x90 \x80Tk\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x16`\x01`\x01``\x1B\x03\x86\x16\x90\x81\x17\x90\x91U\x91Q\x91\x82R\x7F&\xEE\xCF\xF2\xB7\x0B\nq\x10O\xF4\xD9@\xBAqb\xD2:\x95\xC2Hw\x1F\xC4\x87\xA7\xBE\x17\xA5\x96\xB3\xCF\x91\x01`@Q\x80\x91\x03\x90\xA2PPV[`\0\x81Q\x11a%\xE2W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`8`$\x82\x01R`\0\x80Q` a:>\x839\x81Q\x91R`D\x82\x01R\x7F: no strategies provided\0\0\0\0\0\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[\x80Q`\xFF\x83\x16`\0\x90\x81R`\x03` \x90\x81R`@\x90\x91 T\x90a&\x05\x83\x83a9\xE6V[\x11\x15a&uW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`E`$\x82\x01R`\0\x80Q` a:>\x839\x81Q\x91R`D\x82\x01R\x7F: exceed MAX_WEIGHING_FUNCTION_L`d\x82\x01Rd\x08\xA9\xC8\xEA\x89`\xDB\x1B`\x84\x82\x01R`\xA4\x01a\x06\x98V[`\0[\x82\x81\x10\x15a)\xB9W`\0[a&\x8D\x82\x84a9\xE6V[\x81\x10\x15a'nW\x84\x82\x81Q\x81\x10a&\xA6Wa&\xA6a7EV[` \x02` \x01\x01Q`\0\x01Q`\x01`\x01`\xA0\x1B\x03\x16`\x03`\0\x88`\xFF\x16`\xFF\x16\x81R` \x01\x90\x81R` \x01`\0 \x82\x81T\x81\x10a&\xE5Wa&\xE5a7EV[`\0\x91\x82R` \x90\x91 \x01T`\x01`\x01`\xA0\x1B\x03\x16\x14\x15a'\\W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`=`$\x82\x01R`\0\x80Q` a:>\x839\x81Q\x91R`D\x82\x01R\x7F: cannot add same strategy 2x\0\0\0`d\x82\x01R`\x84\x01a\x06\x98V[\x80a'f\x81a7\x8CV[\x91PPa&\x83V[P`\0\x84\x82\x81Q\x81\x10a'\x83Wa'\x83a7EV[` \x02` \x01\x01Q` \x01Q`\x01`\x01``\x1B\x03\x16\x11a(\x08W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`F`$\x82\x01R`\0\x80Q` a:>\x839\x81Q\x91R`D\x82\x01R\x7F: cannot add strategy with zero `d\x82\x01Re\x1D\xD9ZY\xDA\x1D`\xD2\x1B`\x84\x82\x01R`\xA4\x01a\x06\x98V[`\xFF\x85\x16`\0\x90\x81R`\x03` R`@\x90 \x84Q\x85\x90\x83\x90\x81\x10a(.Wa(.a7EV[` \x90\x81\x02\x91\x90\x91\x01\x81\x01Q\x82T`\x01\x81\x01\x84U`\0\x93\x84R\x82\x84 \x82Q\x92\x84\x01Q`\x01`\x01``\x1B\x03\x16`\x01`\xA0\x1B\x02`\x01`\x01`\xA0\x1B\x03\x90\x93\x16\x92\x90\x92\x17\x91\x01U`\xFF\x87\x16\x82R`\x04\x90R`@\x90 \x84Q\x85\x90\x83\x90\x81\x10a(\x93Wa(\x93a7EV[` \x90\x81\x02\x91\x90\x91\x01\x81\x01QQ\x82T`\x01\x81\x01\x84U`\0\x93\x84R\x91\x90\x92 \x01\x80T`\x01`\x01`\xA0\x1B\x03\x19\x16`\x01`\x01`\xA0\x1B\x03\x90\x92\x16\x91\x90\x91\x17\x90U\x83Q`\xFF\x86\x16\x90\x7F\x10V^V\xCA\xCB\xF3.\xCA&yE\xF0T\xFE\xC0.Yu\x002\xD1\x13\xD30!\x82\xAD\x96\x7FT\x04\x90\x86\x90\x84\x90\x81\x10a)\nWa)\na7EV[` \x90\x81\x02\x91\x90\x91\x01\x81\x01QQ`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R\x01`@Q\x80\x91\x03\x90\xA2\x84`\xFF\x16\x7F\x11\xA5d\x13\"\xDA\x1D\xFFV\xA4\xB6n\xAA\xC3\x1F\xFAFR\x95\xEC\xE9\x07\xCD\x1647y;M\0\x9Au\x85\x83\x81Q\x81\x10a)gWa)ga7EV[` \x02` \x01\x01Q`\0\x01Q\x86\x84\x81Q\x81\x10a)\x85Wa)\x85a7EV[` \x02` \x01\x01Q` \x01Q`@Qa)\x9F\x92\x91\x90a.\\V[`@Q\x80\x91\x03\x90\xA2\x80a)\xB1\x81a7\x8CV[\x91PPa&xV[PPPPPV[\x81`\0\x01Qc\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x10\x15a*lW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R```$\x82\x01R\x7FStakeRegistry._validateOperatorS`D\x82\x01R\x7FtakeAtBlockNumber: operatorStake`d\x82\x01R\x7FUpdate is from after blockNumber`\x84\x82\x01R`\xA4\x01a\x06\x98V[` \x82\x01Qc\xFF\xFF\xFF\xFF\x16\x15\x80a*\x92WP\x81` \x01Qc\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x10[a+GW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`t`$\x82\x01R\x7FStakeRegistry._validateOperatorS`D\x82\x01R\x7FtakeAtBlockNumber: there is a ne`d\x82\x01R\x7Fwer operatorStakeUpdate availabl`\x84\x82\x01Rs2\x9012\xB37\xB92\x90167\xB1\xB5\xA7:\xB6\xB12\xB9`a\x1B`\xA4\x82\x01R`\xC4\x01a\x06\x98V[PPV[`\0\x83\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x86\x16\x84R\x90\x91R\x81 T\x81[\x81\x81\x10\x15a-$W`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x90 c\xFF\xFF\xFF\xFF\x85\x16\x90`\x01a+\xA2\x84\x86a8\x19V[a+\xAC\x91\x90a8\x19V[\x81T\x81\x10a+\xBCWa+\xBCa7EV[`\0\x91\x82R` \x90\x91 \x01Tc\xFF\xFF\xFF\xFF\x16\x11a-\x12W`\0\x86\x81R`\x02` \x90\x81R`@\x80\x83 `\xFF\x89\x16\x84R\x90\x91R\x81 `\x01a+\xFB\x84\x86a8\x19V[a,\x05\x91\x90a8\x19V[\x81T\x81\x10a,\x15Wa,\x15a7EV[`\0\x91\x82R` \x90\x91 \x01T`\x01` \x1B\x90\x04c\xFF\xFF\xFF\xFF\x16\x90P\x80\x15\x80a,HWP\x84c\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x11[a,\xF2W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`i`$\x82\x01R\x7FStakeRegistry._getStakeUpdateInd`D\x82\x01R\x7FexForOperatorAtBlockNumber: oper`d\x82\x01R\x7FatorId has no stake update at bl`\x84\x82\x01Rh7\xB1\xB5\xA7:\xB6\xB12\xB9`\xB9\x1B`\xA4\x82\x01R`\xC4\x01a\x06\x98V[`\x01a,\xFE\x83\x85a8\x19V[a-\x08\x91\x90a8\x19V[\x93PPPPa\x12\xF5V[\x80a-\x1C\x81a7\x8CV[\x91PPa+jV[P`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`\x81`$\x82\x01R\x7FStakeRegistry._getStakeUpdateInd`D\x82\x01R\x7FexForOperatorAtBlockNumber: no s`d\x82\x01R\x7Ftake update found for operatorId`\x84\x82\x01R\x7F and quorumNumber at block numbe`\xA4\x82\x01R`9`\xF9\x1B`\xC4\x82\x01R`\xE4\x01a\x06\x98V[`\0a\x12\xF5`\x01`\x01``\x1B\x03\x80\x85\x16\x90\x84\x16a9\xFEV[\x805`\xFF\x81\x16\x81\x14a.\x12W`\0\x80\xFD[\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a.*W`\0\x80\xFD[a.3\x83a.\x01V[\x94` \x93\x90\x93\x015\x93PPPV[`\0` \x82\x84\x03\x12\x15a.SW`\0\x80\xFD[a\x12\xF5\x82a.\x01V[`\x01`\x01`\xA0\x1B\x03\x92\x90\x92\x16\x82R`\x01`\x01``\x1B\x03\x16` \x82\x01R`@\x01\x90V[`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a.\x93W`\0\x80\xFD[PV[`\0\x80`@\x83\x85\x03\x12\x15a.\xA9W`\0\x80\xFD[a.\xB2\x83a.\x01V[\x91P` \x83\x015a.\xC2\x81a.~V[\x80\x91PP\x92P\x92\x90PV[`\0\x80\x83`\x1F\x84\x01\x12a.\xDFW`\0\x80\xFD[P\x815`\x01`\x01`@\x1B\x03\x81\x11\x15a.\xF6W`\0\x80\xFD[` \x83\x01\x91P\x83` \x82`\x05\x1B\x85\x01\x01\x11\x15a\"_W`\0\x80\xFD[`\0\x80`\0\x80`\0``\x86\x88\x03\x12\x15a/)W`\0\x80\xFD[a/2\x86a.\x01V[\x94P` \x86\x015`\x01`\x01`@\x1B\x03\x80\x82\x11\x15a/NW`\0\x80\xFD[a/Z\x89\x83\x8A\x01a.\xCDV[\x90\x96P\x94P`@\x88\x015\x91P\x80\x82\x11\x15a/sW`\0\x80\xFD[Pa/\x80\x88\x82\x89\x01a.\xCDV[\x96\x99\x95\x98P\x93\x96P\x92\x94\x93\x92PPPV[`\0\x80\x83`\x1F\x84\x01\x12a/\xA3W`\0\x80\xFD[P\x815`\x01`\x01`@\x1B\x03\x81\x11\x15a/\xBAW`\0\x80\xFD[` \x83\x01\x91P\x83` \x82\x85\x01\x01\x11\x15a\"_W`\0\x80\xFD[`\0\x80`\0\x80``\x85\x87\x03\x12\x15a/\xE8W`\0\x80\xFD[\x845a/\xF3\x81a.~V[\x93P` \x85\x015\x92P`@\x85\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a0\x15W`\0\x80\xFD[a0!\x87\x82\x88\x01a/\x91V[\x95\x98\x94\x97P\x95PPPPV[`\0\x81Q\x80\x84R` \x80\x85\x01\x94P\x80\x84\x01`\0[\x83\x81\x10\x15a0fW\x81Q`\x01`\x01``\x1B\x03\x16\x87R\x95\x82\x01\x95\x90\x82\x01\x90`\x01\x01a0AV[P\x94\x95\x94PPPPPV[`@\x81R`\0a0\x84`@\x83\x01\x85a0-V[\x82\x81\x03` \x84\x01Ra _\x81\x85a0-V[`\0\x80`@\x83\x85\x03\x12\x15a0\xA9W`\0\x80\xFD[\x825\x91Pa0\xB9` \x84\x01a.\x01V[\x90P\x92P\x92\x90PV[` \x80\x82R\x82Q\x82\x82\x01\x81\x90R`\0\x91\x90\x84\x82\x01\x90`@\x85\x01\x90\x84[\x81\x81\x10\x15a1.Wa1\x1B\x83\x85Qc\xFF\xFF\xFF\xFF\x80\x82Q\x16\x83R\x80` \x83\x01Q\x16` \x84\x01RP`\x01`\x01``\x1B\x03`@\x82\x01Q\x16`@\x83\x01RPPV[\x92\x84\x01\x92``\x92\x90\x92\x01\x91`\x01\x01a0\xDEV[P\x90\x96\x95PPPPPPV[cNH{q`\xE0\x1B`\0R`A`\x04R`$`\0\xFD[`@\x80Q\x90\x81\x01`\x01`\x01`@\x1B\x03\x81\x11\x82\x82\x10\x17\x15a1rWa1ra1:V[`@R\x90V[`@Q`\x1F\x82\x01`\x1F\x19\x16\x81\x01`\x01`\x01`@\x1B\x03\x81\x11\x82\x82\x10\x17\x15a1\xA0Wa1\xA0a1:V[`@R\x91\x90PV[`\0`\x01`\x01`@\x1B\x03\x82\x11\x15a1\xC1Wa1\xC1a1:V[P`\x05\x1B` \x01\x90V[`\0\x80`@\x83\x85\x03\x12\x15a1\xDEW`\0\x80\xFD[a1\xE7\x83a.\x01V[\x91P` \x80\x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a2\x03W`\0\x80\xFD[\x84\x01`\x1F\x81\x01\x86\x13a2\x14W`\0\x80\xFD[\x805a2'a2\"\x82a1\xA8V[a1xV[\x81\x81R`\x05\x91\x90\x91\x1B\x82\x01\x83\x01\x90\x83\x81\x01\x90\x88\x83\x11\x15a2FW`\0\x80\xFD[\x92\x84\x01\x92[\x82\x84\x10\x15a2dW\x835\x82R\x92\x84\x01\x92\x90\x84\x01\x90a2KV[\x80\x95PPPPPP\x92P\x92\x90PV[\x805`\x01`\x01``\x1B\x03\x81\x16\x81\x14a.\x12W`\0\x80\xFD[`\0\x80`\0``\x84\x86\x03\x12\x15a2\x9FW`\0\x80\xFD[\x835\x92Pa2\xAF` \x85\x01a.\x01V[\x91Pa2\xBD`@\x85\x01a2sV[\x90P\x92P\x92P\x92V[`\0\x80`@\x83\x85\x03\x12\x15a2\xD9W`\0\x80\xFD[a.3\x83a2sV[\x805c\xFF\xFF\xFF\xFF\x81\x16\x81\x14a.\x12W`\0\x80\xFD[`\0\x80`\0`@\x84\x86\x03\x12\x15a3\x0BW`\0\x80\xFD[a3\x14\x84a2\xE2V[\x92P` \x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a3/W`\0\x80\xFD[a3;\x86\x82\x87\x01a/\x91V[\x94\x97\x90\x96P\x93\x94PPPPV[` \x80\x82R\x82Q\x82\x82\x01\x81\x90R`\0\x91\x90\x84\x82\x01\x90`@\x85\x01\x90\x84[\x81\x81\x10\x15a1.W\x83Qc\xFF\xFF\xFF\xFF\x16\x83R\x92\x84\x01\x92\x91\x84\x01\x91`\x01\x01a3dV[`\0\x80`\0``\x84\x86\x03\x12\x15a3\x9BW`\0\x80\xFD[a3\xA4\x84a.\x01V[\x95` \x85\x015\x95P`@\x90\x94\x015\x93\x92PPPV[\x81Qc\xFF\xFF\xFF\xFF\x90\x81\x16\x82R` \x80\x84\x01Q\x90\x91\x16\x90\x82\x01R`@\x80\x83\x01Q`\x01`\x01``\x1B\x03\x16\x90\x82\x01R``\x81\x01a\rLV[`\0\x80`@\x83\x85\x03\x12\x15a4\x01W`\0\x80\xFD[a4\n\x83a.\x01V[\x91Pa0\xB9` \x84\x01a2sV[`\0\x80`\0`@\x84\x86\x03\x12\x15a4-W`\0\x80\xFD[\x835\x92P` \x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a3/W`\0\x80\xFD[`\0\x82`\x1F\x83\x01\x12a4[W`\0\x80\xFD[\x815` a4ka2\"\x83a1\xA8V[\x82\x81R`\x06\x92\x90\x92\x1B\x84\x01\x81\x01\x91\x81\x81\x01\x90\x86\x84\x11\x15a4\x8AW`\0\x80\xFD[\x82\x86\x01[\x84\x81\x10\x15a4\xD9W`@\x81\x89\x03\x12\x15a4\xA7W`\0\x80\x81\xFD[a4\xAFa1PV[\x815a4\xBA\x81a.~V[\x81Ra4\xC7\x82\x86\x01a2sV[\x81\x86\x01R\x83R\x91\x83\x01\x91`@\x01a4\x8EV[P\x96\x95PPPPPPV[`\0\x80`@\x83\x85\x03\x12\x15a4\xF7W`\0\x80\xFD[a5\0\x83a.\x01V[\x91P` \x83\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a5\x1BW`\0\x80\xFD[a5'\x85\x82\x86\x01a4JV[\x91PP\x92P\x92\x90PV[`\0\x80`\0``\x84\x86\x03\x12\x15a5FW`\0\x80\xFD[a5O\x84a.\x01V[\x92Pa5]` \x85\x01a2\xE2V[\x91P`@\x84\x015\x90P\x92P\x92P\x92V[`\0\x80`\0``\x84\x86\x03\x12\x15a5\x82W`\0\x80\xFD[\x835\x92Pa5\x92` \x85\x01a.\x01V[\x91Pa2\xBD`@\x85\x01a2\xE2V[`\0\x80`\0\x80`\x80\x85\x87\x03\x12\x15a5\xB6W`\0\x80\xFD[a5\xBF\x85a.\x01V[\x93Pa5\xCD` \x86\x01a2\xE2V[\x93\x96\x93\x95PPPP`@\x82\x015\x91``\x015\x90V[`\0\x80`@\x83\x85\x03\x12\x15a5\xF5W`\0\x80\xFD[a4\n\x83a2sV[`\0\x80`\0``\x84\x86\x03\x12\x15a6\x13W`\0\x80\xFD[a6\x1C\x84a.\x01V[\x92Pa6*` \x85\x01a2sV[\x91P`@\x84\x015`\x01`\x01`@\x1B\x03\x81\x11\x15a6EW`\0\x80\xFD[a6Q\x86\x82\x87\x01a4JV[\x91PP\x92P\x92P\x92V[` \x80\x82R`1\x90\x82\x01R\x7FStakeRegistry.quorumExists: quor`@\x82\x01Rp\x1D[H\x19\x1B\xD9\\\xC8\x1B\x9B\xDD\x08\x19^\x1A\\\xDD`z\x1B``\x82\x01R`\x80\x01\x90V[`\0` \x82\x84\x03\x12\x15a6\xBEW`\0\x80\xFD[\x81Qa\x12\xF5\x81a.~V[` \x80\x82R`V\x90\x82\x01R\x7FStakeRegistry.onlyCoordinatorOwn`@\x82\x01R\x7Fer: caller is not the owner of t``\x82\x01Ru42\x9092\xB3\xB4\xB9\xBA9<\xA1\xB7\xB7\xB924\xB70\xBA7\xB9`Q\x1B`\x80\x82\x01R`\xA0\x01\x90V[cNH{q`\xE0\x1B`\0R`2`\x04R`$`\0\xFD[`\0` \x82\x84\x03\x12\x15a7mW`\0\x80\xFD[a\x12\xF5\x82a2sV[cNH{q`\xE0\x1B`\0R`\x11`\x04R`$`\0\xFD[`\0`\0\x19\x82\x14\x15a7\xA0Wa7\xA0a7vV[P`\x01\x01\x90V[` \x80\x82R`L\x90\x82\x01R\x7FStakeRegistry.onlyRegistryCoordi`@\x82\x01R\x7Fnator: caller is not the Registr``\x82\x01Rk<\xA1\xB7\xB7\xB924\xB70\xBA7\xB9`\xA1\x1B`\x80\x82\x01R`\xA0\x01\x90V[`\0\x82\x82\x10\x15a8+Wa8+a7vV[P\x03\x90V[cNH{q`\xE0\x1B`\0R`1`\x04R`$`\0\xFD[`\0`@\x82\x01`\x01\x80`\xA0\x1B\x03\x80\x86\x16\x84R` `@\x81\x86\x01R\x82\x86T\x80\x85R``\x87\x01\x91P\x87`\0R\x82`\0 \x94P`\0[\x81\x81\x10\x15a8\x97W\x85T\x85\x16\x83R`\x01\x95\x86\x01\x95\x92\x84\x01\x92\x01a8yV[P\x90\x98\x97PPPPPPPPV[`\0` \x80\x83\x85\x03\x12\x15a8\xB8W`\0\x80\xFD[\x82Q`\x01`\x01`@\x1B\x03\x81\x11\x15a8\xCEW`\0\x80\xFD[\x83\x01`\x1F\x81\x01\x85\x13a8\xDFW`\0\x80\xFD[\x80Qa8\xEDa2\"\x82a1\xA8V[\x81\x81R`\x05\x91\x90\x91\x1B\x82\x01\x83\x01\x90\x83\x81\x01\x90\x87\x83\x11\x15a9\x0CW`\0\x80\xFD[\x92\x84\x01\x92[\x82\x84\x10\x15a9*W\x83Q\x82R\x92\x84\x01\x92\x90\x84\x01\x90a9\x11V[\x97\x96PPPPPPPV[`\0\x81`\0\x19\x04\x83\x11\x82\x15\x15\x16\x15a9OWa9Oa7vV[P\x02\x90V[`\0\x82a9qWcNH{q`\xE0\x1B`\0R`\x12`\x04R`$`\0\xFD[P\x04\x90V[`\0`\x01`\x01``\x1B\x03\x80\x83\x16\x81\x85\x16\x80\x83\x03\x82\x11\x15a9\x98Wa9\x98a7vV[\x01\x94\x93PPPPV[`\0`\x01`\xFF\x1B\x82\x14\x15a9\xB7Wa9\xB7a7vV[P`\0\x03\x90V[`\0`\x01`\x01``\x1B\x03\x83\x81\x16\x90\x83\x16\x81\x81\x10\x15a9\xDEWa9\xDEa7vV[\x03\x93\x92PPPV[`\0\x82\x19\x82\x11\x15a9\xF9Wa9\xF9a7vV[P\x01\x90V[`\0\x80\x83\x12\x80\x15`\x01`\xFF\x1B\x85\x01\x84\x12\x16\x15a:\x1CWa:\x1Ca7vV[`\x01`\x01`\xFF\x1B\x03\x84\x01\x83\x13\x81\x16\x15a:7Wa:7a7vV[PP\x03\x90V\xFEStakeRegistry._addStrategyParams\xA2dipfsX\"\x12 \xAE\xF6\xB6c \xBF2\x08w\x98c~D\n\xB0b\xF3\xB9\x1ARLv$iu\x04\xD2\x97\xA7\xEF\xDF\xCFdsolcC\0\x08\x0C\x003";
     /// The deployed bytecode of the contract.
-    pub static STAKEREGISTRYHARNESS_DEPLOYED_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
-        __DEPLOYED_BYTECODE,
-    );
+    pub static STAKEREGISTRYHARNESS_DEPLOYED_BYTECODE: ::ethers::core::types::Bytes =
+        ::ethers::core::types::Bytes::from_static(__DEPLOYED_BYTECODE);
     pub struct StakeRegistryHarness<M>(::ethers::contract::Contract<M>);
     impl<M> ::core::clone::Clone for StakeRegistryHarness<M> {
         fn clone(&self) -> Self {
@@ -1559,13 +1321,11 @@ pub mod stake_registry_harness {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(
-                ::ethers::contract::Contract::new(
-                    address.into(),
-                    STAKEREGISTRYHARNESS_ABI.clone(),
-                    client,
-                ),
-            )
+            Self(::ethers::contract::Contract::new(
+                address.into(),
+                STAKEREGISTRYHARNESS_ABI.clone(),
+                client,
+            ))
         }
         /// Constructs the general purpose `Deployer` instance based on the provided constructor arguments and sends it.
         /// Returns a new instance of a deployer that returns an instance of this contract after sending the transaction
@@ -1655,10 +1415,7 @@ pub mod stake_registry_harness {
         ///Calls the contract's `delegation` (0xdf5cf723) function
         pub fn delegation(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
             self.0
                 .method_hash([223, 92, 247, 35], ())
                 .expect("method not found (this should never happen)")
@@ -1736,10 +1493,7 @@ pub mod stake_registry_harness {
             &self,
             operator_id: [u8; 32],
             quorum_number: u8,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::std::vec::Vec<StakeUpdate>,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::std::vec::Vec<StakeUpdate>> {
             self.0
                 .method_hash([44, 217, 89, 64], (operator_id, quorum_number))
                 .expect("method not found (this should never happen)")
@@ -1894,10 +1648,7 @@ pub mod stake_registry_harness {
         ///Calls the contract's `registryCoordinator` (0x6d14a987) function
         pub fn registry_coordinator(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
             self.0
                 .method_hash([109, 20, 169, 135], ())
                 .expect("method not found (this should never happen)")
@@ -1922,15 +1673,23 @@ pub mod stake_registry_harness {
                 .method_hash([188, 154, 64, 195], (quorum_number, minimum_stake))
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `strategiesPerQuorum` (0x9f3ccf65) function
+        pub fn strategies_per_quorum(
+            &self,
+            p0: u8,
+            p1: ::ethers::core::types::U256,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
+            self.0
+                .method_hash([159, 60, 207, 101], (p0, p1))
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `strategyParams` (0x08732461) function
         pub fn strategy_params(
             &self,
             p0: u8,
             p1: ::ethers::core::types::U256,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            (::ethers::core::types::Address, u128),
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, (::ethers::core::types::Address, u128)>
+        {
             self.0
                 .method_hash([8, 115, 36, 97], (p0, p1))
                 .expect("method not found (this should never happen)")
@@ -1991,31 +1750,22 @@ pub mod stake_registry_harness {
         ///Gets the contract's `OperatorStakeUpdate` event
         pub fn operator_stake_update_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            OperatorStakeUpdateFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, OperatorStakeUpdateFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `QuorumCreated` event
         pub fn quorum_created_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            QuorumCreatedFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, QuorumCreatedFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `StrategyAddedToQuorum` event
         pub fn strategy_added_to_quorum_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            StrategyAddedToQuorumFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, StrategyAddedToQuorumFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `StrategyMultiplierUpdated` event
@@ -2041,16 +1791,15 @@ pub mod stake_registry_harness {
         /// Returns an `Event` builder for all the events of this contract.
         pub fn events(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            StakeRegistryHarnessEvents,
-        > {
-            self.0.event_with_filter(::core::default::Default::default())
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, StakeRegistryHarnessEvents>
+        {
+            self.0
+                .event_with_filter(::core::default::Default::default())
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for StakeRegistryHarness<M> {
+        for StakeRegistryHarness<M>
+    {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -2065,7 +1814,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "MinimumStakeForQuorumUpdated",
@@ -2086,7 +1835,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "OperatorStakeUpdate",
@@ -2108,7 +1857,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(name = "QuorumCreated", abi = "QuorumCreated(uint8)")]
     pub struct QuorumCreatedFilter {
@@ -2125,7 +1874,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "StrategyAddedToQuorum",
@@ -2146,7 +1895,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "StrategyMultiplierUpdated",
@@ -2168,7 +1917,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "StrategyRemovedFromQuorum",
@@ -2188,7 +1937,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub enum StakeRegistryHarnessEvents {
         MinimumStakeForQuorumUpdatedFilter(MinimumStakeForQuorumUpdatedFilter),
@@ -2203,34 +1952,30 @@ pub mod stake_registry_harness {
             log: &::ethers::core::abi::RawLog,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::Error> {
             if let Ok(decoded) = MinimumStakeForQuorumUpdatedFilter::decode_log(log) {
-                return Ok(
-                    StakeRegistryHarnessEvents::MinimumStakeForQuorumUpdatedFilter(
-                        decoded,
-                    ),
-                );
+                return Ok(StakeRegistryHarnessEvents::MinimumStakeForQuorumUpdatedFilter(decoded));
             }
             if let Ok(decoded) = OperatorStakeUpdateFilter::decode_log(log) {
-                return Ok(
-                    StakeRegistryHarnessEvents::OperatorStakeUpdateFilter(decoded),
-                );
+                return Ok(StakeRegistryHarnessEvents::OperatorStakeUpdateFilter(
+                    decoded,
+                ));
             }
             if let Ok(decoded) = QuorumCreatedFilter::decode_log(log) {
                 return Ok(StakeRegistryHarnessEvents::QuorumCreatedFilter(decoded));
             }
             if let Ok(decoded) = StrategyAddedToQuorumFilter::decode_log(log) {
-                return Ok(
-                    StakeRegistryHarnessEvents::StrategyAddedToQuorumFilter(decoded),
-                );
+                return Ok(StakeRegistryHarnessEvents::StrategyAddedToQuorumFilter(
+                    decoded,
+                ));
             }
             if let Ok(decoded) = StrategyMultiplierUpdatedFilter::decode_log(log) {
-                return Ok(
-                    StakeRegistryHarnessEvents::StrategyMultiplierUpdatedFilter(decoded),
-                );
+                return Ok(StakeRegistryHarnessEvents::StrategyMultiplierUpdatedFilter(
+                    decoded,
+                ));
             }
             if let Ok(decoded) = StrategyRemovedFromQuorumFilter::decode_log(log) {
-                return Ok(
-                    StakeRegistryHarnessEvents::StrategyRemovedFromQuorumFilter(decoded),
-                );
+                return Ok(StakeRegistryHarnessEvents::StrategyRemovedFromQuorumFilter(
+                    decoded,
+                ));
             }
             Err(::ethers::core::abi::Error::InvalidData)
         }
@@ -2241,15 +1986,9 @@ pub mod stake_registry_harness {
                 Self::MinimumStakeForQuorumUpdatedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::OperatorStakeUpdateFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::QuorumCreatedFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::StrategyAddedToQuorumFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::OperatorStakeUpdateFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::QuorumCreatedFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::StrategyAddedToQuorumFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StrategyMultiplierUpdatedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
@@ -2259,14 +1998,12 @@ pub mod stake_registry_harness {
             }
         }
     }
-    impl ::core::convert::From<MinimumStakeForQuorumUpdatedFilter>
-    for StakeRegistryHarnessEvents {
+    impl ::core::convert::From<MinimumStakeForQuorumUpdatedFilter> for StakeRegistryHarnessEvents {
         fn from(value: MinimumStakeForQuorumUpdatedFilter) -> Self {
             Self::MinimumStakeForQuorumUpdatedFilter(value)
         }
     }
-    impl ::core::convert::From<OperatorStakeUpdateFilter>
-    for StakeRegistryHarnessEvents {
+    impl ::core::convert::From<OperatorStakeUpdateFilter> for StakeRegistryHarnessEvents {
         fn from(value: OperatorStakeUpdateFilter) -> Self {
             Self::OperatorStakeUpdateFilter(value)
         }
@@ -2276,20 +2013,17 @@ pub mod stake_registry_harness {
             Self::QuorumCreatedFilter(value)
         }
     }
-    impl ::core::convert::From<StrategyAddedToQuorumFilter>
-    for StakeRegistryHarnessEvents {
+    impl ::core::convert::From<StrategyAddedToQuorumFilter> for StakeRegistryHarnessEvents {
         fn from(value: StrategyAddedToQuorumFilter) -> Self {
             Self::StrategyAddedToQuorumFilter(value)
         }
     }
-    impl ::core::convert::From<StrategyMultiplierUpdatedFilter>
-    for StakeRegistryHarnessEvents {
+    impl ::core::convert::From<StrategyMultiplierUpdatedFilter> for StakeRegistryHarnessEvents {
         fn from(value: StrategyMultiplierUpdatedFilter) -> Self {
             Self::StrategyMultiplierUpdatedFilter(value)
         }
     }
-    impl ::core::convert::From<StrategyRemovedFromQuorumFilter>
-    for StakeRegistryHarnessEvents {
+    impl ::core::convert::From<StrategyRemovedFromQuorumFilter> for StakeRegistryHarnessEvents {
         fn from(value: StrategyRemovedFromQuorumFilter) -> Self {
             Self::StrategyRemovedFromQuorumFilter(value)
         }
@@ -2305,7 +2039,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "MAX_WEIGHING_FUNCTION_LENGTH",
@@ -2323,7 +2057,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "WEIGHTING_DIVISOR", abi = "WEIGHTING_DIVISOR()")]
     pub struct WeightingDivisorCall;
@@ -2338,9 +2072,12 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
-    #[ethcall(name = "addStrategies", abi = "addStrategies(uint8,(address,uint96)[])")]
+    #[ethcall(
+        name = "addStrategies",
+        abi = "addStrategies(uint8,(address,uint96)[])"
+    )]
     pub struct AddStrategiesCall {
         pub quorum_number: u8,
         pub strategy_params: ::std::vec::Vec<StrategyParams>,
@@ -2356,7 +2093,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "applyDelta", abi = "applyDelta(uint96,int256)")]
     pub struct ApplyDeltaCall {
@@ -2374,7 +2111,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "calculateDelta", abi = "calculateDelta(uint96,uint96)")]
     pub struct CalculateDeltaCall {
@@ -2392,7 +2129,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "delegation", abi = "delegation()")]
     pub struct DelegationCall;
@@ -2407,7 +2144,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "deregisterOperator", abi = "deregisterOperator(bytes32,bytes)")]
     pub struct DeregisterOperatorCall {
@@ -2425,7 +2162,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getCurrentStake", abi = "getCurrentStake(bytes32,uint8)")]
     pub struct GetCurrentStakeCall {
@@ -2443,7 +2180,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getCurrentTotalStake", abi = "getCurrentTotalStake(uint8)")]
     pub struct GetCurrentTotalStakeCall {
@@ -2460,7 +2197,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getLatestStakeUpdate",
@@ -2481,7 +2218,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getStakeAtBlockNumber",
@@ -2503,7 +2240,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getStakeAtBlockNumberAndIndex",
@@ -2526,7 +2263,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getStakeHistory", abi = "getStakeHistory(bytes32,uint8)")]
     pub struct GetStakeHistoryCall {
@@ -2544,7 +2281,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getStakeHistoryLength",
@@ -2565,7 +2302,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getStakeUpdateAtIndex",
@@ -2587,7 +2324,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getStakeUpdateIndexAtBlockNumber",
@@ -2609,7 +2346,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getTotalStakeAtBlockNumberFromIndex",
@@ -2631,7 +2368,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getTotalStakeHistoryLength",
@@ -2651,7 +2388,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getTotalStakeIndicesAtBlockNumber",
@@ -2672,7 +2409,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getTotalStakeUpdateAtIndex",
@@ -2693,7 +2430,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "initializeQuorum",
@@ -2715,7 +2452,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "minimumStakeForQuorum", abi = "minimumStakeForQuorum(uint8)")]
     pub struct MinimumStakeForQuorumCall(pub u8);
@@ -2730,7 +2467,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "modifyStrategyParams",
@@ -2752,7 +2489,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "recordOperatorStakeUpdate",
@@ -2774,7 +2511,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "recordTotalStakeUpdate",
@@ -2795,7 +2532,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "registerOperator",
@@ -2817,7 +2554,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "registryCoordinator", abi = "registryCoordinator()")]
     pub struct RegistryCoordinatorCall;
@@ -2832,7 +2569,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "removeStrategies", abi = "removeStrategies(uint8,uint256[])")]
     pub struct RemoveStrategiesCall {
@@ -2850,7 +2587,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "setMinimumStakeForQuorum",
@@ -2860,6 +2597,24 @@ pub mod stake_registry_harness {
         pub quorum_number: u8,
         pub minimum_stake: u128,
     }
+    ///Container type for all input parameters for the `strategiesPerQuorum` function with signature `strategiesPerQuorum(uint8,uint256)` and selector `0x9f3ccf65`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(
+        name = "strategiesPerQuorum",
+        abi = "strategiesPerQuorum(uint8,uint256)"
+    )]
+    pub struct StrategiesPerQuorumCall(pub u8, pub ::ethers::core::types::U256);
     ///Container type for all input parameters for the `strategyParams` function with signature `strategyParams(uint8,uint256)` and selector `0x08732461`
     #[derive(
         Clone,
@@ -2871,7 +2626,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "strategyParams", abi = "strategyParams(uint8,uint256)")]
     pub struct StrategyParamsCall(pub u8, pub ::ethers::core::types::U256);
@@ -2886,7 +2641,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "strategyParamsByIndex",
@@ -2907,7 +2662,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "strategyParamsLength", abi = "strategyParamsLength(uint8)")]
     pub struct StrategyParamsLengthCall {
@@ -2924,7 +2679,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "updateOperatorStake",
@@ -2946,7 +2701,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "weightOfOperatorForQuorum",
@@ -2965,7 +2720,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub enum StakeRegistryHarnessCalls {
         MaxWeighingFunctionLength(MaxWeighingFunctionLengthCall),
@@ -2997,6 +2752,7 @@ pub mod stake_registry_harness {
         RegistryCoordinator(RegistryCoordinatorCall),
         RemoveStrategies(RemoveStrategiesCall),
         SetMinimumStakeForQuorum(SetMinimumStakeForQuorumCall),
+        StrategiesPerQuorum(StrategiesPerQuorumCall),
         StrategyParams(StrategyParamsCall),
         StrategyParamsByIndex(StrategyParamsByIndexCall),
         StrategyParamsLength(StrategyParamsLengthCall),
@@ -3008,174 +2764,180 @@ pub mod stake_registry_harness {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded) = <MaxWeighingFunctionLengthCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <MaxWeighingFunctionLengthCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::MaxWeighingFunctionLength(decoded));
             }
-            if let Ok(decoded) = <WeightingDivisorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <WeightingDivisorCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::WeightingDivisor(decoded));
             }
-            if let Ok(decoded) = <AddStrategiesCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <AddStrategiesCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::AddStrategies(decoded));
             }
-            if let Ok(decoded) = <ApplyDeltaCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <ApplyDeltaCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::ApplyDelta(decoded));
             }
-            if let Ok(decoded) = <CalculateDeltaCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <CalculateDeltaCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::CalculateDelta(decoded));
             }
-            if let Ok(decoded) = <DelegationCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <DelegationCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Delegation(decoded));
             }
-            if let Ok(decoded) = <DeregisterOperatorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <DeregisterOperatorCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::DeregisterOperator(decoded));
             }
-            if let Ok(decoded) = <GetCurrentStakeCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetCurrentStakeCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetCurrentStake(decoded));
             }
-            if let Ok(decoded) = <GetCurrentTotalStakeCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetCurrentTotalStakeCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetCurrentTotalStake(decoded));
             }
-            if let Ok(decoded) = <GetLatestStakeUpdateCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetLatestStakeUpdateCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetLatestStakeUpdate(decoded));
             }
-            if let Ok(decoded) = <GetStakeAtBlockNumberCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetStakeAtBlockNumberCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetStakeAtBlockNumber(decoded));
             }
-            if let Ok(decoded) = <GetStakeAtBlockNumberAndIndexCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetStakeAtBlockNumberAndIndexCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetStakeAtBlockNumberAndIndex(decoded));
             }
-            if let Ok(decoded) = <GetStakeHistoryCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetStakeHistoryCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetStakeHistory(decoded));
             }
-            if let Ok(decoded) = <GetStakeHistoryLengthCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetStakeHistoryLengthCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetStakeHistoryLength(decoded));
             }
-            if let Ok(decoded) = <GetStakeUpdateAtIndexCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetStakeUpdateAtIndexCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetStakeUpdateAtIndex(decoded));
             }
-            if let Ok(decoded) = <GetStakeUpdateIndexAtBlockNumberCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetStakeUpdateIndexAtBlockNumberCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
                 return Ok(Self::GetStakeUpdateIndexAtBlockNumber(decoded));
             }
-            if let Ok(decoded) = <GetTotalStakeAtBlockNumberFromIndexCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetTotalStakeAtBlockNumberFromIndexCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
                 return Ok(Self::GetTotalStakeAtBlockNumberFromIndex(decoded));
             }
-            if let Ok(decoded) = <GetTotalStakeHistoryLengthCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetTotalStakeHistoryLengthCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetTotalStakeHistoryLength(decoded));
             }
-            if let Ok(decoded) = <GetTotalStakeIndicesAtBlockNumberCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetTotalStakeIndicesAtBlockNumberCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
                 return Ok(Self::GetTotalStakeIndicesAtBlockNumber(decoded));
             }
-            if let Ok(decoded) = <GetTotalStakeUpdateAtIndexCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetTotalStakeUpdateAtIndexCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetTotalStakeUpdateAtIndex(decoded));
             }
-            if let Ok(decoded) = <InitializeQuorumCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <InitializeQuorumCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::InitializeQuorum(decoded));
             }
-            if let Ok(decoded) = <MinimumStakeForQuorumCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <MinimumStakeForQuorumCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::MinimumStakeForQuorum(decoded));
             }
-            if let Ok(decoded) = <ModifyStrategyParamsCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <ModifyStrategyParamsCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::ModifyStrategyParams(decoded));
             }
-            if let Ok(decoded) = <RecordOperatorStakeUpdateCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <RecordOperatorStakeUpdateCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::RecordOperatorStakeUpdate(decoded));
             }
-            if let Ok(decoded) = <RecordTotalStakeUpdateCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <RecordTotalStakeUpdateCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::RecordTotalStakeUpdate(decoded));
             }
-            if let Ok(decoded) = <RegisterOperatorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <RegisterOperatorCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::RegisterOperator(decoded));
             }
-            if let Ok(decoded) = <RegistryCoordinatorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <RegistryCoordinatorCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::RegistryCoordinator(decoded));
             }
-            if let Ok(decoded) = <RemoveStrategiesCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <RemoveStrategiesCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::RemoveStrategies(decoded));
             }
-            if let Ok(decoded) = <SetMinimumStakeForQuorumCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <SetMinimumStakeForQuorumCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::SetMinimumStakeForQuorum(decoded));
             }
-            if let Ok(decoded) = <StrategyParamsCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <StrategiesPerQuorumCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::StrategiesPerQuorum(decoded));
+            }
+            if let Ok(decoded) =
+                <StrategyParamsCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::StrategyParams(decoded));
             }
-            if let Ok(decoded) = <StrategyParamsByIndexCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <StrategyParamsByIndexCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::StrategyParamsByIndex(decoded));
             }
-            if let Ok(decoded) = <StrategyParamsLengthCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <StrategyParamsLengthCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::StrategyParamsLength(decoded));
             }
-            if let Ok(decoded) = <UpdateOperatorStakeCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <UpdateOperatorStakeCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::UpdateOperatorStake(decoded));
             }
-            if let Ok(decoded) = <WeightOfOperatorForQuorumCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <WeightOfOperatorForQuorumCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::WeightOfOperatorForQuorum(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -3187,27 +2949,15 @@ pub mod stake_registry_harness {
                 Self::MaxWeighingFunctionLength(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::WeightingDivisor(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::AddStrategies(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::ApplyDelta(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::CalculateDelta(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::Delegation(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::WeightingDivisor(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::AddStrategies(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::ApplyDelta(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::CalculateDelta(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::Delegation(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::DeregisterOperator(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::GetCurrentStake(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::GetCurrentStake(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::GetCurrentTotalStake(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -3220,9 +2970,7 @@ pub mod stake_registry_harness {
                 Self::GetStakeAtBlockNumberAndIndex(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::GetStakeHistory(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::GetStakeHistory(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::GetStakeHistoryLength(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -3244,9 +2992,7 @@ pub mod stake_registry_harness {
                 Self::GetTotalStakeUpdateAtIndex(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::InitializeQuorum(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::InitializeQuorum(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::MinimumStakeForQuorum(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -3259,21 +3005,18 @@ pub mod stake_registry_harness {
                 Self::RecordTotalStakeUpdate(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::RegisterOperator(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::RegisterOperator(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::RegistryCoordinator(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::RemoveStrategies(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::RemoveStrategies(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::SetMinimumStakeForQuorum(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::StrategyParams(element) => {
+                Self::StrategiesPerQuorum(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
+                Self::StrategyParams(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::StrategyParamsByIndex(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -3292,91 +3035,53 @@ pub mod stake_registry_harness {
     impl ::core::fmt::Display for StakeRegistryHarnessCalls {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
-                Self::MaxWeighingFunctionLength(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::MaxWeighingFunctionLength(element) => ::core::fmt::Display::fmt(element, f),
                 Self::WeightingDivisor(element) => ::core::fmt::Display::fmt(element, f),
                 Self::AddStrategies(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ApplyDelta(element) => ::core::fmt::Display::fmt(element, f),
                 Self::CalculateDelta(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Delegation(element) => ::core::fmt::Display::fmt(element, f),
-                Self::DeregisterOperator(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::DeregisterOperator(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetCurrentStake(element) => ::core::fmt::Display::fmt(element, f),
-                Self::GetCurrentTotalStake(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::GetLatestStakeUpdate(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::GetStakeAtBlockNumber(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::GetCurrentTotalStake(element) => ::core::fmt::Display::fmt(element, f),
+                Self::GetLatestStakeUpdate(element) => ::core::fmt::Display::fmt(element, f),
+                Self::GetStakeAtBlockNumber(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetStakeAtBlockNumberAndIndex(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::GetStakeHistory(element) => ::core::fmt::Display::fmt(element, f),
-                Self::GetStakeHistoryLength(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::GetStakeUpdateAtIndex(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::GetStakeHistoryLength(element) => ::core::fmt::Display::fmt(element, f),
+                Self::GetStakeUpdateAtIndex(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetStakeUpdateIndexAtBlockNumber(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::GetTotalStakeAtBlockNumberFromIndex(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::GetTotalStakeHistoryLength(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::GetTotalStakeHistoryLength(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetTotalStakeIndicesAtBlockNumber(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::GetTotalStakeUpdateAtIndex(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::GetTotalStakeUpdateAtIndex(element) => ::core::fmt::Display::fmt(element, f),
                 Self::InitializeQuorum(element) => ::core::fmt::Display::fmt(element, f),
-                Self::MinimumStakeForQuorum(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::ModifyStrategyParams(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::RecordOperatorStakeUpdate(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::RecordTotalStakeUpdate(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::MinimumStakeForQuorum(element) => ::core::fmt::Display::fmt(element, f),
+                Self::ModifyStrategyParams(element) => ::core::fmt::Display::fmt(element, f),
+                Self::RecordOperatorStakeUpdate(element) => ::core::fmt::Display::fmt(element, f),
+                Self::RecordTotalStakeUpdate(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RegisterOperator(element) => ::core::fmt::Display::fmt(element, f),
-                Self::RegistryCoordinator(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::RegistryCoordinator(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RemoveStrategies(element) => ::core::fmt::Display::fmt(element, f),
-                Self::SetMinimumStakeForQuorum(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::SetMinimumStakeForQuorum(element) => ::core::fmt::Display::fmt(element, f),
+                Self::StrategiesPerQuorum(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StrategyParams(element) => ::core::fmt::Display::fmt(element, f),
-                Self::StrategyParamsByIndex(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::StrategyParamsLength(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::UpdateOperatorStake(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::WeightOfOperatorForQuorum(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::StrategyParamsByIndex(element) => ::core::fmt::Display::fmt(element, f),
+                Self::StrategyParamsLength(element) => ::core::fmt::Display::fmt(element, f),
+                Self::UpdateOperatorStake(element) => ::core::fmt::Display::fmt(element, f),
+                Self::WeightOfOperatorForQuorum(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
-    impl ::core::convert::From<MaxWeighingFunctionLengthCall>
-    for StakeRegistryHarnessCalls {
+    impl ::core::convert::From<MaxWeighingFunctionLengthCall> for StakeRegistryHarnessCalls {
         fn from(value: MaxWeighingFunctionLengthCall) -> Self {
             Self::MaxWeighingFunctionLength(value)
         }
@@ -3431,8 +3136,7 @@ pub mod stake_registry_harness {
             Self::GetStakeAtBlockNumber(value)
         }
     }
-    impl ::core::convert::From<GetStakeAtBlockNumberAndIndexCall>
-    for StakeRegistryHarnessCalls {
+    impl ::core::convert::From<GetStakeAtBlockNumberAndIndexCall> for StakeRegistryHarnessCalls {
         fn from(value: GetStakeAtBlockNumberAndIndexCall) -> Self {
             Self::GetStakeAtBlockNumberAndIndex(value)
         }
@@ -3452,32 +3156,27 @@ pub mod stake_registry_harness {
             Self::GetStakeUpdateAtIndex(value)
         }
     }
-    impl ::core::convert::From<GetStakeUpdateIndexAtBlockNumberCall>
-    for StakeRegistryHarnessCalls {
+    impl ::core::convert::From<GetStakeUpdateIndexAtBlockNumberCall> for StakeRegistryHarnessCalls {
         fn from(value: GetStakeUpdateIndexAtBlockNumberCall) -> Self {
             Self::GetStakeUpdateIndexAtBlockNumber(value)
         }
     }
-    impl ::core::convert::From<GetTotalStakeAtBlockNumberFromIndexCall>
-    for StakeRegistryHarnessCalls {
+    impl ::core::convert::From<GetTotalStakeAtBlockNumberFromIndexCall> for StakeRegistryHarnessCalls {
         fn from(value: GetTotalStakeAtBlockNumberFromIndexCall) -> Self {
             Self::GetTotalStakeAtBlockNumberFromIndex(value)
         }
     }
-    impl ::core::convert::From<GetTotalStakeHistoryLengthCall>
-    for StakeRegistryHarnessCalls {
+    impl ::core::convert::From<GetTotalStakeHistoryLengthCall> for StakeRegistryHarnessCalls {
         fn from(value: GetTotalStakeHistoryLengthCall) -> Self {
             Self::GetTotalStakeHistoryLength(value)
         }
     }
-    impl ::core::convert::From<GetTotalStakeIndicesAtBlockNumberCall>
-    for StakeRegistryHarnessCalls {
+    impl ::core::convert::From<GetTotalStakeIndicesAtBlockNumberCall> for StakeRegistryHarnessCalls {
         fn from(value: GetTotalStakeIndicesAtBlockNumberCall) -> Self {
             Self::GetTotalStakeIndicesAtBlockNumber(value)
         }
     }
-    impl ::core::convert::From<GetTotalStakeUpdateAtIndexCall>
-    for StakeRegistryHarnessCalls {
+    impl ::core::convert::From<GetTotalStakeUpdateAtIndexCall> for StakeRegistryHarnessCalls {
         fn from(value: GetTotalStakeUpdateAtIndexCall) -> Self {
             Self::GetTotalStakeUpdateAtIndex(value)
         }
@@ -3497,14 +3196,12 @@ pub mod stake_registry_harness {
             Self::ModifyStrategyParams(value)
         }
     }
-    impl ::core::convert::From<RecordOperatorStakeUpdateCall>
-    for StakeRegistryHarnessCalls {
+    impl ::core::convert::From<RecordOperatorStakeUpdateCall> for StakeRegistryHarnessCalls {
         fn from(value: RecordOperatorStakeUpdateCall) -> Self {
             Self::RecordOperatorStakeUpdate(value)
         }
     }
-    impl ::core::convert::From<RecordTotalStakeUpdateCall>
-    for StakeRegistryHarnessCalls {
+    impl ::core::convert::From<RecordTotalStakeUpdateCall> for StakeRegistryHarnessCalls {
         fn from(value: RecordTotalStakeUpdateCall) -> Self {
             Self::RecordTotalStakeUpdate(value)
         }
@@ -3524,10 +3221,14 @@ pub mod stake_registry_harness {
             Self::RemoveStrategies(value)
         }
     }
-    impl ::core::convert::From<SetMinimumStakeForQuorumCall>
-    for StakeRegistryHarnessCalls {
+    impl ::core::convert::From<SetMinimumStakeForQuorumCall> for StakeRegistryHarnessCalls {
         fn from(value: SetMinimumStakeForQuorumCall) -> Self {
             Self::SetMinimumStakeForQuorum(value)
+        }
+    }
+    impl ::core::convert::From<StrategiesPerQuorumCall> for StakeRegistryHarnessCalls {
+        fn from(value: StrategiesPerQuorumCall) -> Self {
+            Self::StrategiesPerQuorum(value)
         }
     }
     impl ::core::convert::From<StrategyParamsCall> for StakeRegistryHarnessCalls {
@@ -3550,8 +3251,7 @@ pub mod stake_registry_harness {
             Self::UpdateOperatorStake(value)
         }
     }
-    impl ::core::convert::From<WeightOfOperatorForQuorumCall>
-    for StakeRegistryHarnessCalls {
+    impl ::core::convert::From<WeightOfOperatorForQuorumCall> for StakeRegistryHarnessCalls {
         fn from(value: WeightOfOperatorForQuorumCall) -> Self {
             Self::WeightOfOperatorForQuorum(value)
         }
@@ -3567,7 +3267,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct MaxWeighingFunctionLengthReturn(pub u8);
     ///Container type for all return fields from the `WEIGHTING_DIVISOR` function with signature `WEIGHTING_DIVISOR()` and selector `0x5e5a6775`
@@ -3581,7 +3281,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct WeightingDivisorReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `applyDelta` function with signature `applyDelta(uint96,int256)` and selector `0x7f429822`
@@ -3595,7 +3295,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct ApplyDeltaReturn(pub u128);
     ///Container type for all return fields from the `calculateDelta` function with signature `calculateDelta(uint96,uint96)` and selector `0xf509551a`
@@ -3609,7 +3309,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct CalculateDeltaReturn(pub ::ethers::core::types::I256);
     ///Container type for all return fields from the `delegation` function with signature `delegation()` and selector `0xdf5cf723`
@@ -3623,7 +3323,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct DelegationReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `getCurrentStake` function with signature `getCurrentStake(bytes32,uint8)` and selector `0x5401ed27`
@@ -3637,7 +3337,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetCurrentStakeReturn(pub u128);
     ///Container type for all return fields from the `getCurrentTotalStake` function with signature `getCurrentTotalStake(uint8)` and selector `0xd5eccc05`
@@ -3651,7 +3351,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetCurrentTotalStakeReturn(pub u128);
     ///Container type for all return fields from the `getLatestStakeUpdate` function with signature `getLatestStakeUpdate(bytes32,uint8)` and selector `0xf851e198`
@@ -3665,7 +3365,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetLatestStakeUpdateReturn(pub StakeUpdate);
     ///Container type for all return fields from the `getStakeAtBlockNumber` function with signature `getStakeAtBlockNumber(bytes32,uint8,uint32)` and selector `0xfa28c627`
@@ -3679,7 +3379,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetStakeAtBlockNumberReturn(pub u128);
     ///Container type for all return fields from the `getStakeAtBlockNumberAndIndex` function with signature `getStakeAtBlockNumberAndIndex(uint8,uint32,bytes32,uint256)` and selector `0xf2be94ae`
@@ -3693,7 +3393,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetStakeAtBlockNumberAndIndexReturn(pub u128);
     ///Container type for all return fields from the `getStakeHistory` function with signature `getStakeHistory(bytes32,uint8)` and selector `0x2cd95940`
@@ -3707,7 +3407,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetStakeHistoryReturn(pub ::std::vec::Vec<StakeUpdate>);
     ///Container type for all return fields from the `getStakeHistoryLength` function with signature `getStakeHistoryLength(bytes32,uint8)` and selector `0x4bd26e09`
@@ -3721,7 +3421,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetStakeHistoryLengthReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `getStakeUpdateAtIndex` function with signature `getStakeUpdateAtIndex(uint8,bytes32,uint256)` and selector `0xac6bfb03`
@@ -3735,7 +3435,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetStakeUpdateAtIndexReturn(pub StakeUpdate);
     ///Container type for all return fields from the `getStakeUpdateIndexAtBlockNumber` function with signature `getStakeUpdateIndexAtBlockNumber(bytes32,uint8,uint32)` and selector `0xdd9846b9`
@@ -3749,7 +3449,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetStakeUpdateIndexAtBlockNumberReturn(pub u32);
     ///Container type for all return fields from the `getTotalStakeAtBlockNumberFromIndex` function with signature `getTotalStakeAtBlockNumberFromIndex(uint8,uint32,uint256)` and selector `0xc8294c56`
@@ -3763,7 +3463,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetTotalStakeAtBlockNumberFromIndexReturn(pub u128);
     ///Container type for all return fields from the `getTotalStakeHistoryLength` function with signature `getTotalStakeHistoryLength(uint8)` and selector `0x0491b41c`
@@ -3777,7 +3477,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetTotalStakeHistoryLengthReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `getTotalStakeIndicesAtBlockNumber` function with signature `getTotalStakeIndicesAtBlockNumber(uint32,bytes)` and selector `0x81c07502`
@@ -3791,7 +3491,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetTotalStakeIndicesAtBlockNumberReturn(pub ::std::vec::Vec<u32>);
     ///Container type for all return fields from the `getTotalStakeUpdateAtIndex` function with signature `getTotalStakeUpdateAtIndex(uint8,uint256)` and selector `0xb6904b78`
@@ -3805,7 +3505,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetTotalStakeUpdateAtIndexReturn(pub StakeUpdate);
     ///Container type for all return fields from the `minimumStakeForQuorum` function with signature `minimumStakeForQuorum(uint8)` and selector `0xc46778a5`
@@ -3819,7 +3519,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct MinimumStakeForQuorumReturn(pub u128);
     ///Container type for all return fields from the `recordOperatorStakeUpdate` function with signature `recordOperatorStakeUpdate(bytes32,uint8,uint96)` and selector `0x74454c6d`
@@ -3833,7 +3533,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct RecordOperatorStakeUpdateReturn(pub ::ethers::core::types::I256);
     ///Container type for all return fields from the `registerOperator` function with signature `registerOperator(address,bytes32,bytes)` and selector `0x25504777`
@@ -3847,12 +3547,9 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
-    pub struct RegisterOperatorReturn(
-        pub ::std::vec::Vec<u128>,
-        pub ::std::vec::Vec<u128>,
-    );
+    pub struct RegisterOperatorReturn(pub ::std::vec::Vec<u128>, pub ::std::vec::Vec<u128>);
     ///Container type for all return fields from the `registryCoordinator` function with signature `registryCoordinator()` and selector `0x6d14a987`
     #[derive(
         Clone,
@@ -3864,9 +3561,23 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct RegistryCoordinatorReturn(pub ::ethers::core::types::Address);
+    ///Container type for all return fields from the `strategiesPerQuorum` function with signature `strategiesPerQuorum(uint8,uint256)` and selector `0x9f3ccf65`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct StrategiesPerQuorumReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `strategyParams` function with signature `strategyParams(uint8,uint256)` and selector `0x08732461`
     #[derive(
         Clone,
@@ -3878,7 +3589,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct StrategyParamsReturn {
         pub strategy: ::ethers::core::types::Address,
@@ -3895,7 +3606,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct StrategyParamsByIndexReturn(pub StrategyParams);
     ///Container type for all return fields from the `strategyParamsLength` function with signature `strategyParamsLength(uint8)` and selector `0x3ca5a5f5`
@@ -3909,7 +3620,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct StrategyParamsLengthReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `updateOperatorStake` function with signature `updateOperatorStake(address,bytes32,bytes)` and selector `0x66acfefe`
@@ -3923,7 +3634,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct UpdateOperatorStakeReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `weightOfOperatorForQuorum` function with signature `weightOfOperatorForQuorum(uint8,address)` and selector `0x1f9b74e0`
@@ -3937,7 +3648,7 @@ pub mod stake_registry_harness {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct WeightOfOperatorForQuorumReturn(pub u128);
 }
