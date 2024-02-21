@@ -11,11 +11,9 @@ cd "$parent_path"
 # start an empty anvil chain in the background
 anvil &
 
-cd ../../contracts/lib/eigenlayer-middleware/lib/eigenlayer-contracts
-# deployment overwrites this file, so we save it as backup, because we want that output in our local files, and not in the eigenlayer-contracts submodule files
-mv script/output/M2_from_scratch_deployment_data.json script/output/M2_from_scratch_deployment_data.json.bak
-# M2_Deploy_From_Scratch.s.sol prepends "script/testing/" to the configFile passed as input (M2_deploy_from_scratch.anvil.config.json)
-forge script script/testing/M2_Deploy_From_Scratch.s.sol \
+cd ../../contracts
+# M2_Deploy_From_Scratch.s.sol prepends "script/" to the configFile passed as input (M2_deploy_from_scratch.anvil.config.json)
+forge script script/M2_Deploy_From_Scratch.s.sol \
     --rpc-url $RPC_URL \
     --private-key $PRIVATE_KEY \
     --broadcast \
@@ -25,12 +23,9 @@ forge script script/testing/M2_Deploy_From_Scratch.s.sol \
     --sig "run(string memory configFile)" \
     -- M2_deploy_from_scratch.anvil.config.json
 
-mv script/output/M2_from_scratch_deployment_data.json ../../../../script/input/31337/eigenlayer_deployment_output.json
-mv script/output/M2_from_scratch_deployment_data.json.bak script/output/M2_from_scratch_deployment_data.json
+mv script/output/M2_from_scratch_deployment_data.json script/input/31337/eigenlayer_deployment_output.json
 
 # create erc mock token & strategy in eigen
-cd "$parent_path"
-cd ../../contracts
 forge script script/0_AnvilSetup.s.sol \
     --rpc-url $RPC_URL \
     --private-key $PRIVATE_KEY \

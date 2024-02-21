@@ -21,7 +21,7 @@ contract AnvilSetup is Script, Utils, Test {
     uint256 constant _CHAIN_ID = 31337;
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
     string constant _CONFIG_PATH = "deploy.config";
-    string constant _OUTPUT_PATH = "strategy_output_";
+    string constant _OUTPUT_PATH = "strategy_output";
 
     // ERC20 and Strategy: we need to deploy this erc20, create a strategy for it, and whitelist this strategy in the strategymanager
     ERC20Mock public erc20Mock;
@@ -55,6 +55,7 @@ contract AnvilSetup is Script, Utils, Test {
 
         erc20Mock = new ERC20Mock();
 
+        // make sure you update config/{chain_id}/deploy.config.json with correct strategy address from the output of this script
         erc20MockStrategy = StrategyBaseTVLLimits(
             address(
                 new TransparentUpgradeableProxy(
@@ -71,8 +72,10 @@ contract AnvilSetup is Script, Utils, Test {
             )
         );
         IStrategy[] memory strats = new IStrategy[](1);
+        bool[] memory thirdPartyTransfersForbidden = new bool[](1);
+        thirdPartyTransfersForbidden[0] = false;
         strats[0] = erc20MockStrategy;
-        strategyManager.addStrategiesToDepositWhitelist(strats);
+        strategyManager.addStrategiesToDepositWhitelist(strats, thirdPartyTransfersForbidden);
 
         vm.stopBroadcast();
         _writeOutput();
@@ -92,6 +95,6 @@ contract AnvilSetup is Script, Utils, Test {
 
         vm.serializeString(parent_object, chain_info, chain_info_output);
         string memory finalJson = vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
-        writeOutput(finalJson, string.concat(_OUTPUT_PATH, stdJson.readString(finalJson, ".chainInfo.deploymentBlock")));
+        writeOutput(finalJson, _OUTPUT_PATH);
     }
 }

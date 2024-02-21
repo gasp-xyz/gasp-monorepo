@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import "@eigenlayer/contracts/core/AVSDirectory.sol";
 import "@eigenlayer/contracts/core/StrategyManager.sol";
 import "@eigenlayer/contracts/core/Slasher.sol";
 import "@eigenlayer/contracts/core/DelegationManager.sol";
@@ -32,7 +33,7 @@ contract Deployer is Script, Utils, Test {
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
     string constant _SHARED_AVS_DEPLOYMENT_PATH = "shared_avs_contracts_deployment_output";
     string constant _CONFIG_PATH = "deploy.config";
-    string constant _OUTPUT_PATH = "avs_deployment_output_";
+    string constant _OUTPUT_PATH = "avs_deployment_output";
 
     ProxyAdmin public avsProxyAdmin;
     PauserRegistry public avsPauserReg;
@@ -57,6 +58,7 @@ contract Deployer is Script, Utils, Test {
 
     // EigenLayer Contracts
     DelegationManager public delegation;
+    AVSDirectory public avsDirectory;
     StrategyManager public strategyManager;
 
     function run() external {
@@ -65,6 +67,7 @@ contract Deployer is Script, Utils, Test {
         strategyManager =
             StrategyManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.strategyManager"));
         delegation = DelegationManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.delegation"));
+        avsDirectory = AVSDirectory(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.avsDirectory"));
 
         // READ JSON CONFIG DATA
         string memory configData = readConfig(_CONFIG_PATH);
@@ -232,7 +235,7 @@ contract Deployer is Script, Utils, Test {
 
         //deploy serviceManager
         serviceManagerImplementation = new FinalizerServiceManager(
-            delegation,
+            avsDirectory,
             registryCoordinator,
             stakeRegistry,
             IFinalizerTaskManager(address(taskManager))
@@ -459,6 +462,6 @@ contract Deployer is Script, Utils, Test {
         vm.serializeString(parent_object, chain_info, chain_info_output);
         vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
         string memory finalJson = vm.serializeString(parent_object, permissions, permissions_output);
-        writeOutput(finalJson, string.concat(_OUTPUT_PATH, stdJson.readString(finalJson, ".chainInfo.deploymentBlock")));
+        writeOutput(finalJson, _OUTPUT_PATH);
     }
 }

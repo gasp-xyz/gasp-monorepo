@@ -189,9 +189,7 @@ impl Operator {
     #[instrument(skip_all)]
     pub(crate) async fn opt_out_avs(&self) -> eyre::Result<()> {
         if self.avs_contracts.operator_id().await?.is_some() {
-            self.avs_contracts
-                .deregister_with_avs()
-                .await?;
+            self.avs_contracts.deregister_with_avs().await?;
             info!("Operator opted out with AVS sucessfully");
         } else {
             info!("Operator not opt in with AVS");
