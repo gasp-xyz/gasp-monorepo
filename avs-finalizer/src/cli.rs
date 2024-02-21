@@ -11,11 +11,7 @@ use crate::crypto::keystore::EncodedKeystore;
 #[command(author, version, about, long_about = None)]
 pub struct CliArgs {
     #[arg(long, env)]
-    pub avs_service_manager_addr: Address,
-    #[arg(long, env)]
-    pub bls_compendium_addr: Address,
-    #[arg(long, env)]
-    pub bls_operator_state_retriever_addr: Address,
+    pub avs_registry_coordinator_addr: Address,
 
     #[arg(long, env)]
     pub substrate_rpc_url: String,

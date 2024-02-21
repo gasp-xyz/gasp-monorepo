@@ -2,6 +2,8 @@ package aggregator
 
 import (
 	"context"
+	"math/big"
+	"sort"
 
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -52,7 +54,7 @@ func (k *StakeUpdate) CheckStateAndupdate() error {
 
 	operatorAdrresses := []common.Address{}
 	for _, id := range operatorIds {
-		address, err := k.ethRpc.ElClients.AvsRegistryChainReader.GetOperatorAddress(&bind.CallOpts{}, id)
+		address, err := k.ethRpc.ElClients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, id)
 		if err != nil {
 			k.logger.Error("Cannot get operator address", "operatorId", id, "err", err)
 			return err
@@ -60,13 +62,21 @@ func (k *StakeUpdate) CheckStateAndupdate() error {
 		operatorAdrresses = append(operatorAdrresses, address)
 	}
 
-	_, err = k.ethRpc.ElClients.AvsRegistryChainWriter.UpdateStakes(context.Background(), operatorAdrresses)
-	if err != nil {
-		k.logger.Error("Cannot update stakes", "err", err)
-		return err
+	sort.Slice(operatorAdrresses, func(i, j int) bool {
+		a := big.NewInt(0).SetBytes(operatorAdrresses[i][:])
+		b := big.NewInt(0).SetBytes(operatorAdrresses[j][:])
+		return a.Cmp(b) < 0
+	})
+
+	if len(operatorAdrresses) > 0 {
+		_, err = k.ethRpc.ElClients.AvsRegistryChainWriter.UpdateStakesOfEntireOperatorSetForQuorums(context.Background(), [][]common.Address{operatorAdrresses}, types.QUORUM_NUMBERS)
+		if err != nil {
+			k.logger.Error("Cannot update stakes", "err", err)
+			return err
+		}
 	}
 
-	k.logger.Info("Operator stakes update successfuly", "addresses", operatorAdrresses)
+	k.logger.Info("Operator stakes update successfull", "addresses", operatorAdrresses)
 
 	return nil
 }

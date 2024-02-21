@@ -2,9 +2,7 @@ package aggregator
 
 import (
 	"context"
-	"math/big"
 
-	blsregistrycoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/BLSRegistryCoordinatorWithIndices"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -71,17 +69,13 @@ func (k *Kicker) CheckStateAndKick() error {
 	k.logger.Info("OAL check found list of pubkeys", "pubkeys", nonSigningOperatorPubKeys)
 	// fetch address and eject
 	for _, key := range nonSigningOperatorPubKeys {
-		address, err := k.ethRpc.ElClients.AvsRegistryChainReader.GetOperatorAddress(&bind.CallOpts{}, key.GetOperatorID())
+		address, err := k.ethRpc.ElClients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, key.GetOperatorID())
 		if err != nil {
 			k.logger.Error("Cannot get operator address", "operatorId", key.GetOperatorID(), "err", err)
 			return err
 		}
 
-		pubKey := blsregistrycoordinator.BN254G1Point{
-			X: key.X.BigInt(big.NewInt(0)),
-			Y: key.Y.BigInt(big.NewInt(0)),
-		}
-		_, err = k.ethRpc.ElClients.AvsRegistryChainWriter.EjectOperator(context.Background(), address, types.QUORUM_NUMBERS, pubKey)
+		_, err = k.ethRpc.ElClients.AvsRegistryChainWriter.EjectOperator(context.Background(), address, types.QUORUM_NUMBERS)
 		if err != nil {
 			k.logger.Error("Cannot eject operator", "operatorAddress", address, "err", err)
 			return err

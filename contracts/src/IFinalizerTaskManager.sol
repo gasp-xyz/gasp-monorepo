@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import {BN254} from "@eigenlayer-middleware/src/ServiceManagerBase.sol";
+import "@eigenlayer-middleware/src/libraries/BN254.sol";
 
-interface IMangataTaskManager {
+interface IFinalizerTaskManager {
     // EVENTS
     event NewTaskCreated(uint32 indexed taskIndex, Task task);
 

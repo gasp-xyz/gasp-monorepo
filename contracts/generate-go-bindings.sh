@@ -23,9 +23,9 @@ rm -rf bindings/*
 forge clean
 forge build
 
-avs_service_contracts="MangataServiceManager MangataTaskManager"
+avs_service_contracts="FinalizerServiceManager FinalizerTaskManager"
 for contract in $avs_service_contracts; do
-    create_binding . $contract ../aggregator/bindings
+    create_binding . $contract ../avs-aggregator/bindings
 done
 
-create_binding . ERC20Mock ../aggregator/bindings
+# create_binding . ERC20Mock ../avs-aggregator/bindings

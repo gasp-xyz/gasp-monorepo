@@ -6,7 +6,7 @@ use crate::executor::execute::execute_block;
 use crate::rpc::Rpc;
 
 use bindings::{
-    mangata_task_manager::NewTaskCreatedFilter,
+    finalizer_task_manager::NewTaskCreatedFilter,
     shared_types::{G1Point, G2Point, TaskResponse},
 };
 use ethers::prelude::*;
@@ -42,7 +42,6 @@ pub struct Operator {
     el_contracts: ElContracts,
     bls_keypair: BlsKeypair,
     substrate_client_uri: String,
-    chain_id: u64,
     rpc: Rpc,
 }
 impl Operator {
@@ -50,8 +49,7 @@ impl Operator {
     pub async fn from_cli(cfg: &CliArgs) -> eyre::Result<Self> {
         let client = Arc::new(build_eth_client(cfg).await?);
         let avs_contracts = AvsContracts::build(cfg, client.clone()).await?;
-        let slasher = avs_contracts.slasher_address().await?;
-        let el_contracts = ElContracts::build(cfg, slasher, client.clone()).await?;
+        let el_contracts = ElContracts::build(cfg, client.clone()).await?;
 
         info!("Decrypting BLS keypair...");
         let bls_key = cfg.get_bls_keystore()?.into_bls_keypair()?;
@@ -68,7 +66,6 @@ impl Operator {
             substrate_client_uri: cfg.substrate_rpc_url.to_owned(),
             client,
             bls_keypair: bls_key,
-            chain_id: cfg.chain_id,
             rpc,
         })
     }
@@ -131,17 +128,12 @@ impl Operator {
             .is_operator_registered(self.client.address())
             .await?;
 
-        let pubkey_status = self
-            .el_contracts
-            .has_operator_pubkey(self.client.address())
-            .await?;
-
         let id = self.avs_contracts.operator_id().await?;
 
         Ok(OperatorStatus {
             eth_address: self.client.address(),
             registered_with_eigen: el_status,
-            bls_key_registered: pubkey_status,
+            bls_key_registered: id.is_some(),
             bls_g1: EthConvert::to_g1(self.bls_keypair.public).unwrap_or_default(),
             bls_g2: EthConvert::to_g2(self.bls_keypair.public_g2()).unwrap_or_default(),
             operator_id: id,
@@ -163,10 +155,6 @@ impl Operator {
             );
 
             self.el_contracts
-                .register_bls_pub_key(&self.bls_keypair, self.chain_id)
-                .await?;
-
-            self.el_contracts
                 .register_as_operator_with_el(self.client.address())
                 .await?;
 
@@ -184,8 +172,9 @@ impl Operator {
             info!("Operator already opt-in AVS");
         } else {
             info!("Registering Operator {:x} with AVS", self.client.address());
+            let sig_params = self.el_contracts.get_delegation_signature_params().await?;
             self.avs_contracts
-                .register_with_avs(&self.bls_keypair)
+                .register_with_avs(&self.bls_keypair, sig_params)
                 .await?;
             let id = self
                 .avs_contracts
@@ -201,7 +190,7 @@ impl Operator {
     pub(crate) async fn opt_out_avs(&self) -> eyre::Result<()> {
         if self.avs_contracts.operator_id().await?.is_some() {
             self.avs_contracts
-                .deregister_with_avs(&self.bls_keypair)
+                .deregister_with_avs()
                 .await?;
             info!("Operator opted out with AVS sucessfully");
         } else {

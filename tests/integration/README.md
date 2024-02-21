@@ -19,3 +19,24 @@ forge script script/testing/M2_Deploy_From_Scratch.s.sol --rpc-url http://localh
 and finally kill the anvil chain with `Ctrl-C`. Make sure to copy the deployment [output file](https://github.com/Layr-Labs/eigenlayer-contracts/blob/master/script/output/M2_from_scratch_deployment_data.json) to [eigenlayer_deployment_output.json](../../contracts/script/output/31337/eigenlayer_deployment_output.json) so that the tests can find the deployed contracts.
 
 See the main [README](../../README.md#dependencies) to understand why we deploy from the `experimental-reduce-strategy-manager-bytecode-size` branch of eigenlayer-contracts.
+
+## Blockscout
+Blockscout is an opensource block explorer we can use on a local network to verify deployment state.
+
+To start the local explorer bound to anvil testnet:
+```
+clone git@github.com:blockscout/blockscout.git
+cd blockscout/docker-compose
+git checkout v6.1.0-beta
+DOCKER_TAG=6.1.0 docker-compose -f hardhat-network.yml up -d
+```
+run local testnet from root of monorepo:
+```
+tests/integration/deploy-all-verify-and-resume.sh
+```
+
+`tests/integration/deploy-all-verify-and-resume.sh` provides commands which also verifies the contracts on the blockscout explorer.
+we can use the 'verified contracts' tab in the explorer to read & write the current state
+
+note: as of v6.1.0 it was necessary to add env variable `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: 1`, with any value, to `hardhat-network.yml` in the `frontend` section to allow also call write methods on verified contracts.
+
