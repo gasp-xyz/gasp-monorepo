@@ -6,7 +6,7 @@ import (
 	"errors"
 	"net/http"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/MangataTaskManager"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
@@ -65,7 +65,7 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 }
 
 type SignedTaskResponse struct {
-	TaskResponse taskmanager.IMangataTaskManagerTaskResponse
+	TaskResponse taskmanager.IFinalizerTaskManagerTaskResponse
 	BlsSignature bls.Signature
 	OperatorId   bls.OperatorId
 }
@@ -87,7 +87,7 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 	}
 	agg.taskResponsesMu.Lock()
 	if _, ok := agg.taskResponses[taskIndex]; !ok {
-		agg.taskResponses[taskIndex] = make(map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse)
+		agg.taskResponses[taskIndex] = make(map[sdktypes.TaskResponseDigest]taskmanager.IFinalizerTaskManagerTaskResponse)
 	}
 	if _, ok := agg.taskResponses[taskIndex][taskResponseDigest]; !ok {
 		agg.taskResponses[taskIndex][taskResponseDigest] = signedTaskResponse.TaskResponse

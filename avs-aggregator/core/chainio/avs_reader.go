@@ -13,7 +13,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	logging "github.com/Layr-Labs/eigensdk-go/logging"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/MangataTaskManager"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 )
 
 type AvsReaderer interface {
@@ -21,9 +21,9 @@ type AvsReaderer interface {
 		ctx context.Context, msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
 	) (taskmanager.IBLSSignatureCheckerQuorumStakeTotals, error)
 
-	GetTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractMangataTaskManagerTaskResponded, error)
+	GetTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerTaskResponded, error)
 
-	GetNonSigningOperatorPubKeys(event taskmanager.ContractMangataTaskManagerTaskResponded) ([]*bls.G1Point, error)
+	GetNonSigningOperatorPubKeys(event taskmanager.ContractFinalizerTaskManagerTaskResponded) ([]*bls.G1Point, error)
 }
 
 type AvsReader struct {
@@ -34,12 +34,11 @@ type AvsReader struct {
 var _ AvsReaderer = (*AvsReader)(nil)
 
 func NewAvsReaderFromConfig(
-	serviceManager common.Address,
-	blsOperatorStateRetriever common.Address,
+	registry common.Address,
 	ethClient eth.EthClient,
 	logger logging.Logger,
 ) (*AvsReader, error) {
-	avsServiceBindings, err := NewAvsServiceBindings(serviceManager, blsOperatorStateRetriever, ethClient, logger)
+	avsServiceBindings, err := NewAvsServiceBindings(registry, ethClient, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +65,8 @@ func (r *AvsReader) CheckSignatures(
 	return stakeTotalsPerQuorum, nil
 }
 
-func (r *AvsReader) GetTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractMangataTaskManagerTaskResponded, error) {
-	events := []taskmanager.ContractMangataTaskManagerTaskResponded{}
+func (r *AvsReader) GetTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerTaskResponded, error) {
+	events := []taskmanager.ContractFinalizerTaskManagerTaskResponded{}
 
 	currentBlock, err := r.AvsServiceBindings.ethClient.BlockNumber(ctx)
 	if err != nil {
@@ -90,7 +89,7 @@ func (r *AvsReader) GetTaskRespondedEvents(ctx context.Context, blocksAgo uint32
 	return events, nil
 }
 
-func (r *AvsReader) GetNonSigningOperatorPubKeys(event taskmanager.ContractMangataTaskManagerTaskResponded) ([]*bls.G1Point, error) {
+func (r *AvsReader) GetNonSigningOperatorPubKeys(event taskmanager.ContractFinalizerTaskManagerTaskResponded) ([]*bls.G1Point, error) {
 	// r.logger.Debug("event.Raw is", "event.Raw", event.Raw)
 
 	// get the nonSignerStakesAndSignature
@@ -107,7 +106,7 @@ func (r *AvsReader) GetNonSigningOperatorPubKeys(event taskmanager.ContractManga
 	}
 	calldata := tx.Data()
 	// r.logger.Debug("calldata", "calldata", calldata)
-	cstmAbi, err := abi.JSON(strings.NewReader(taskmanager.ContractMangataTaskManagerABI))
+	cstmAbi, err := abi.JSON(strings.NewReader(taskmanager.ContractFinalizerTaskManagerABI))
 	if err != nil {
 		r.logger.Error("Error getting Abi", "err", err)
 		return nil, err

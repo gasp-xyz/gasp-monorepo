@@ -81,7 +81,7 @@ pub(crate) async fn ephemeral_testnet(
 ) -> eyre::Result<()> {
     setup_deposits(
         cfg.eth_rpc_url.clone(),
-        cfg.avs_service_manager_addr,
+        cfg.avs_registry_coordinator_addr,
         stake,
         operator.client.signer().clone(),
     )

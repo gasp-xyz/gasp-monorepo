@@ -3,28 +3,32 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
-import "@eigenlayer/contracts/permissions/Pausable.sol";
-import "@eigenlayer-middleware/src/interfaces/IServiceManager.sol";
-import {BLSPubkeyRegistry} from "@eigenlayer-middleware/src/BLSPubkeyRegistry.sol";
-import {BLSRegistryCoordinatorWithIndices} from "@eigenlayer-middleware/src/BLSRegistryCoordinatorWithIndices.sol";
-import {BLSSignatureChecker, IBLSRegistryCoordinatorWithIndices} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
-import {BLSOperatorStateRetriever} from "@eigenlayer-middleware/src/BLSOperatorStateRetriever.sol";
-import {BN254} from "@eigenlayer-middleware/src/ServiceManagerBase.sol";
-import "./IMangataTaskManager.sol";
 
-contract MangataTaskManager is
+import "@eigenlayer/contracts/permissions/Pausable.sol";
+
+import "@eigenlayer-middleware/src/libraries/BN254.sol";
+import "@eigenlayer-middleware/src/interfaces/IServiceManager.sol";
+
+import {BLSApkRegistry} from "@eigenlayer-middleware/src/BLSApkRegistry.sol";
+import {RegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
+import {BLSSignatureChecker, IRegistryCoordinator} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
+import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
+
+import "./IFinalizerTaskManager.sol";
+
+contract FinalizerTaskManager is
     Initializable,
     OwnableUpgradeable,
     Pausable,
     BLSSignatureChecker,
-    BLSOperatorStateRetriever,
-    IMangataTaskManager
+    OperatorStateRetriever,
+    IFinalizerTaskManager
 {
     using BN254 for BN254.G1Point;
 
     /* CONSTANT */
     // The number of blocks from the task initialization within which the aggregator has to respond to
-    uint32 public immutable TASK_RESPONSE_WINDOW_BLOCK;
+    uint32 internal immutable _TASK_RESPONSE_WINDOW_BLOCK;
     uint256 internal constant _THRESHOLD_DENOMINATOR = 100;
 
     /* STORAGE */
@@ -56,19 +60,16 @@ contract MangataTaskManager is
         _;
     }
 
-    constructor(
-        IBLSRegistryCoordinatorWithIndices _registryCoordinator,
-        uint32 _taskResponseWindowBlock
-    ) BLSSignatureChecker(_registryCoordinator) {
-        TASK_RESPONSE_WINDOW_BLOCK = _taskResponseWindowBlock;
+    constructor(IRegistryCoordinator _registryCoordinator, uint32 _taskResponseWindowBlock)
+        BLSSignatureChecker(_registryCoordinator)
+    {
+        _TASK_RESPONSE_WINDOW_BLOCK = _taskResponseWindowBlock;
     }
 
-    function initialize(
-        IPauserRegistry _pauserRegistry,
-        address initialOwner,
-        address _aggregator,
-        address _generator
-    ) public initializer {
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _aggregator, address _generator)
+        public
+        initializer
+    {
         _initializePauser(_pauserRegistry, UNPAUSE_ALL);
         _transferOwnership(initialOwner);
         aggregator = _aggregator;
@@ -77,11 +78,10 @@ contract MangataTaskManager is
 
     /* FUNCTIONS */
     // NOTE: this function creates new task, assigns it a taskId
-    function createNewTask(
-        uint256 blockNumber,
-        uint32 quorumThresholdPercentage,
-        bytes calldata quorumNumbers
-    ) external onlyTaskGenerator {
+    function createNewTask(uint256 blockNumber, uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
+        external
+        onlyTaskGenerator
+    {
         // create a new task struct
         Task memory newTask;
         newTask.blockNumber = blockNumber;
@@ -107,8 +107,7 @@ contract MangataTaskManager is
 
         // check that the task is valid, hasn't been responsed yet, and is being responsed in time
         require(
-            keccak256(abi.encode(task)) ==
-                allTaskHashes[taskResponse.referenceTaskIndex],
+            keccak256(abi.encode(task)) == allTaskHashes[taskResponse.referenceTaskIndex],
             "supplied task does not match the one recorded in the contract"
         );
         // some logical checks
@@ -117,8 +116,7 @@ contract MangataTaskManager is
             "Aggregator has already responded to the task"
         );
         require(
-            uint32(block.number) <=
-                taskCreatedBlock + TASK_RESPONSE_WINDOW_BLOCK,
+            uint32(block.number) <= taskCreatedBlock + _TASK_RESPONSE_WINDOW_BLOCK,
             "Aggregator has responded to the task too late"
         );
 
@@ -127,15 +125,8 @@ contract MangataTaskManager is
         bytes32 message = keccak256(abi.encode(taskResponse));
 
         // check the BLS signature
-        (
-            QuorumStakeTotals memory quorumStakeTotals,
-            bytes32 hashOfNonSigners
-        ) = checkSignatures(
-                message,
-                quorumNumbers,
-                taskCreatedBlock,
-                nonSignerStakesAndSignature
-            );
+        (QuorumStakeTotals memory quorumStakeTotals, bytes32 hashOfNonSigners) =
+            checkSignatures(message, quorumNumbers, taskCreatedBlock, nonSignerStakesAndSignature);
 
         TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
             uint32(block.number),
@@ -144,22 +135,18 @@ contract MangataTaskManager is
             quorumStakeTotals.signedStakeForQuorum
         );
         // updating the storage with task responsea
-        allTaskResponses[taskResponse.referenceTaskIndex] = keccak256(
-            abi.encode(taskResponse, taskResponseMetadata)
-        );
+        allTaskResponses[taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
 
         // emitting event
         emit TaskResponded(taskResponse, taskResponseMetadata);
 
         // check that signatories own at least a threshold percentage of each quourm
-        for (uint i = 0; i < quorumNumbers.length; i++) {
+        for (uint256 i = 0; i < quorumNumbers.length; i++) {
             // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
             // signed stake > total stake
-            if(
-                quorumStakeTotals.signedStakeForQuorum[i] *
-                    _THRESHOLD_DENOMINATOR <
-                    quorumStakeTotals.totalStakeForQuorum[i] *
-                        uint8(quorumThresholdPercentage)
+            if (
+                quorumStakeTotals.signedStakeForQuorum[i] * _THRESHOLD_DENOMINATOR
+                    < quorumStakeTotals.totalStakeForQuorum[i] * uint8(quorumThresholdPercentage)
             ) {
                 // "Signatories do not own at least threshold percentage of a quorum"
                 return;
@@ -175,6 +162,6 @@ contract MangataTaskManager is
     }
 
     function getTaskResponseWindowBlock() external view returns (uint32) {
-        return TASK_RESPONSE_WINDOW_BLOCK;
+        return _TASK_RESPONSE_WINDOW_BLOCK;
     }
 }

@@ -4,7 +4,7 @@
 help:
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-CONTRACTS_REGEX="MangataServiceManager|MangataTaskManager|BLSPubkeyRegistry|BLSRegistryCoordinatorWithIndices|DelegationManager|BLSPublicKeyCompendium|Slasher|ERC20Mock|StrategyManager|IStrategy|StakeRegistry"
+CONTRACTS_REGEX="FinalizerServiceManager|FinalizerTaskManager|BLSApkRegistry|RegistryCoordinator|DelegationManager|ERC20Mock|StrategyManager|IStrategy|StakeRegistry"
 # CONTRACTS_REGEX=".+"
 
 -----------------------------: ## 
@@ -20,13 +20,11 @@ AVS_RPC_URL=http://localhost:8090
 AVS_SERVER_IP_PORT_ADDRESS=localhost:8090
 
 CHAIN_ID=31337
-BLS_COMPENDIUM_ADDR=0xc5a5C42992dECbae36851359345FE25997F5C42d
-BLS_OPERATOR_STATE_RETRIEVER_ADDR=0x67d269191c92Caf3cD7723F116c85e6E9bf55933
-AVS_SERVICE_MANAGER_ADDR=0x9E545E3C0baAB3E08CdfD552C960A1050f373042
+AVS_REGISTRY_COORDINATOR_ADDR=0x9E545E3C0baAB3E08CdfD552C960A1050f373042
 TESTNET=true
 
-AVS_KICK_PERIOD=50
-AVS_UPDATE_STAKE_PERIOD=100
+AVS_KICK_PERIOD=5
+AVS_UPDATE_STAKE_PERIOD=2
 
 -----------------------------: ## 
 
