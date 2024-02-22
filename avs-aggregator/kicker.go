@@ -6,6 +6,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
 )
@@ -76,7 +77,7 @@ func (k *Kicker) CheckStateAndKick() error {
 			return err
 		}
 
-		k.logger.Info("Ejecting Operator", "address", address, "id", id)
+		k.logger.Info("Ejecting Operator", "address", address, "id", hexutil.Encode(id[:]))
 		_, err = k.ethRpc.Clients.AvsRegistryChainWriter.EjectOperator(context.Background(), address, types.QUORUM_NUMBERS)
 		if err != nil {
 			k.logger.Error("Cannot eject operator", "operatorAddress", address, "err", err)
