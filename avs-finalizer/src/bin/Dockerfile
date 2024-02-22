@@ -4,6 +4,9 @@ RUN apt-get update
 RUN apt-get install -y ca-certificates
 
 WORKDIR /app
-COPY ./target/release/main ./
+
+ARG BINARY_PATH=target/release/main
+
+COPY ./${BINARY_PATH} ./
 
 ENTRYPOINT [ "./main" ]
