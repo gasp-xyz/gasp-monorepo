@@ -8,9 +8,9 @@ use bindings::{
     strategy_manager_storage::{PubkeyRegistrationParams, SignatureWithSaltAndExpiry},
 };
 use ethers::{
-    contract::Event,
+    contract::{EthEvent, Event},
     providers::{Provider, Ws},
-    types::{TransactionReceipt, H256, Filter},
+    types::{Filter, TransactionReceipt, H256},
 };
 use eyre::{Ok, OptionExt};
 
@@ -66,8 +66,8 @@ impl AvsContracts {
     }
 
     pub fn new_task_stream(&self) -> Event<Arc<Provider<Ws>>, Provider<Ws>, NewTaskCreatedFilter> {
-        self.task_manager_sub.new_task_created_filter()
-        // self.task_manager_sub.event_with_filter::<NewTaskCreatedFilter>(Filter::new())
+        self.task_manager_sub
+            .event_with_filter(Filter::new().event(&NewTaskCreatedFilter::abi_signature()))
     }
 
     pub async fn operator_id(&self) -> eyre::Result<Option<H256>> {
