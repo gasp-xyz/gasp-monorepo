@@ -8,7 +8,7 @@ nameOverride: ''
 remoteCluster: false
 ingressClassName: nginx
 
-image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
+image: mangatasolutions/anvil:be439052d9ed89109c4dd02b387cdf7cbbcc6870
 
 resources: {}
   # requests:

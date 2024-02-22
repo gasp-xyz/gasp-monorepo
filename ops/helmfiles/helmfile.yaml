@@ -25,7 +25,8 @@ releases:
     installed: {{ .Values.anvilEnabled }}
     chart: ../helm-charts/anvil-testnet
     values:
-      - environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+      - image: mangatasolutions/anvil:{{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
 
   - name: avs-aggregator

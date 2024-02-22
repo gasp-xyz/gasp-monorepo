@@ -21,10 +21,6 @@ spec:
       containers:
         - name: {{ $name }}
           image: {{ .Values.image | quote }}
-          command:
-            - anvil
-            - --host=0.0.0.0
-            - --load-state=/config/avs-and-eigenlayer-deployed-anvil-state.json
           ports:
             - containerPort: 8545
               name: rpc
