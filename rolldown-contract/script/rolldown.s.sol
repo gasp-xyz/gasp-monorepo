@@ -23,7 +23,7 @@ contract MyScript is Script {
         // approve rolldown contract to use token
         token.approve(address(rd), 1000000);
 
-        rd.withdraw(address(token), 1000);
+  
         rd.deposit(address(token), 2000);
         rd.deposit(address(token), 2000);
 
