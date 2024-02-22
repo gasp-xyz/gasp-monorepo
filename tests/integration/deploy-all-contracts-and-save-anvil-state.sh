@@ -36,5 +36,3 @@ forge script script/rolldown.s.sol:MyScript --rpc-url $RPC_URL --private-key $PR
 
 # kill anvil to save its state
 pkill anvil
-
-
