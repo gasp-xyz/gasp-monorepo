@@ -25,7 +25,9 @@ releases:
     installed: {{ .Values.anvilEnabled }}
     chart: ../helm-charts/anvil-testnet
     values:
-      - image: mangatasolutions/anvil:{{ requiredEnv "IMAGE_TAG" | quote }}
+      - image:
+          repository: mangatasolutions/anvil
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
 

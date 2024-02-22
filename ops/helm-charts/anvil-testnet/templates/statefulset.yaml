@@ -20,7 +20,8 @@ spec:
     spec:
       containers:
         - name: {{ $name }}
-          image: {{ .Values.image | quote }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
           ports:
             - containerPort: 8545
               name: rpc

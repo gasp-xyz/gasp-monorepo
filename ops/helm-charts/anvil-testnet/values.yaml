@@ -8,7 +8,9 @@ nameOverride: ''
 remoteCluster: false
 ingressClassName: nginx
 
-image: mangatasolutions/anvil:be439052d9ed89109c4dd02b387cdf7cbbcc6870
+image: 
+  repository: mangatasolutions/anvil
+  tag: be439052d9ed89109c4dd02b387cdf7cbbcc6870
 
 resources: {}
   # requests:
