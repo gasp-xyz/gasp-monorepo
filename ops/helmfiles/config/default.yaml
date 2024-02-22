@@ -3,8 +3,10 @@ remoteCluster: true
 anvilEnabled: true
 aggregatorEnabled: true
 finalizerEnabled: true
+secondFinalizerEnabled: false
 updaterEnabled: true
 sequencerEnabled: true
+secondSequencerEnabled: false
 
 env:
   # rpc

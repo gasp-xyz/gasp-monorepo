@@ -43,6 +43,7 @@ releases:
         remoteCluster: {{ .Values.remoteCluster }}
         envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.env | toYaml | nindent 10 }}
+
   - name: avs-finalizer
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.finalizerEnabled }}
@@ -59,6 +60,23 @@ releases:
           enabled: true
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.env | toYaml | nindent 10 }}
+  - name: avs-finalizer-2
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.secondFinalizerEnabled }}
+    chart: ../helm-charts/rollup-node
+    values:
+      - image:
+          repository: mangatasolutions/avs-finalizer
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        remoteCluster: {{ .Values.remoteCluster }}
+        rpcPort: 9010
+        enableServiceMonitorCollectors: {{ .Values.finalizerEnableServiceMonitorCollectors }}
+        prometheus:
+          enabled: true
+        envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        env: {{ .Values.env | toYaml | nindent 10 }}
+
   - name: rollup-updater
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.updaterEnabled }}
@@ -70,9 +88,21 @@ releases:
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
         ethChainUrl: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-ethereum-rpc-url
+  
   - name: rollup-sequencer
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.sequencerEnabled }}
+    chart: ../helm-charts/rollup-sequencer
+    values:
+      - image:
+          repository: mangatasolutions/rollup-sequencer
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        mnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
+        ethChainUrl: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-ethereum-rpc-url
+  - name: rollup-sequencer-2
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.secondSequencerEnabled }}
     chart: ../helm-charts/rollup-sequencer
     values:
       - image:
