@@ -47,18 +47,20 @@ func (k *Kicker) CheckStateAndKick() error {
 	k.logger.Debug("Got last events", "eventsCount", len(events))
 	// get non signers present in every trx
 	hash := make(map[bls.OperatorId]*int)
-	nonSigningOperatorPubKeys := make([]*bls.G1Point, 0)
+	nonSigningOperatorIds := make([]bls.OperatorId, 0)
+	logIds := make([]string, 0)
 	for _, ev := range events {
 		keys, err := k.ethRpc.AvsReader.GetNonSigningOperatorPubKeys(ev)
 		if err != nil {
-			k.logger.Error("Cannot get list of NonSigningOperatorPubKeys for TaskResponded event", "err", err)
+			k.logger.Error("Cannot get list of NonSigningOperatorIds for TaskResponded event", "err", err)
 			return err
 		}
 		for _, key := range keys {
 			id := key.GetOperatorID()
 			if counter := hash[id]; counter != nil {
 				if *counter++; *counter >= len(events) {
-					nonSigningOperatorPubKeys = append(nonSigningOperatorPubKeys, key)
+					nonSigningOperatorIds = append(nonSigningOperatorIds, id)
+					logIds = append(logIds, hexutil.Encode(id[:]))
 				}
 			} else {
 				i := 1
@@ -67,17 +69,16 @@ func (k *Kicker) CheckStateAndKick() error {
 		}
 	}
 
-	k.logger.Info("OAL check found list of pubkeys", "pubkeys", nonSigningOperatorPubKeys)
+	k.logger.Info("OAL check found list of ids", "operatorIds", logIds)
 	// fetch address and eject
-	for _, key := range nonSigningOperatorPubKeys {
-		id := key.GetOperatorID()
-		address, err := k.ethRpc.Clients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, id)
+	for i, key := range nonSigningOperatorIds {
+		address, err := k.ethRpc.Clients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, key)
 		if err != nil {
-			k.logger.Error("Cannot get operator address", "operatorId", key.GetOperatorID(), "err", err)
+			k.logger.Error("Cannot get operator address", "operatorId", logIds[i], "err", err)
 			return err
 		}
 
-		k.logger.Info("Ejecting Operator", "address", address, "id", hexutil.Encode(id[:]))
+		k.logger.Info("Ejecting Operator", "address", address, "id", logIds[i])
 		_, err = k.ethRpc.Clients.AvsRegistryChainWriter.EjectOperator(context.Background(), address, types.QUORUM_NUMBERS)
 		if err != nil {
 			k.logger.Error("Cannot eject operator", "operatorAddress", address, "err", err)

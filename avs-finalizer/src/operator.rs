@@ -92,11 +92,14 @@ impl Operator {
                     let response = self
                         .rpc
                         .send_task_response(payload, &self.bls_keypair)
-                        .await?;
+                        .await;
 
-                    match response.error_for_status_ref() {
-                        Err(e) => error!("{} - {}", e, response.text().await?),
-                        Ok(_) => info!("Task finished successfuly and sent to AVS service"),
+                    match response {
+                        Ok(r) => match r.error_for_status_ref() {
+                            Err(e) => error!("{} - {}", e, r.text().await?),
+                            Ok(_) => info!("Task finished successfuly and sent to AVS service"),
+                        },
+                        Err(e) => error!("{}", e),
                     }
                 }
                 Err(e) => tracing::error!("EthWs subscription error {:?}", e),
