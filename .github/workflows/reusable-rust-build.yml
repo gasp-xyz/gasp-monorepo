@@ -135,8 +135,8 @@ jobs:
         working-directory: avs-finalizer
         run: cargo test
 
-  build-node-image:
-    name: Build node Docker image
+  build-avs-finalizer-image:
+    name: Build avs-finalizer Docker image
     runs-on: compile-eigen-gke
     steps:
       - uses: actions/checkout@v4
