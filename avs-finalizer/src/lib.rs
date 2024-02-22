@@ -2,7 +2,7 @@ use chainio::setup_deposits;
 use cli::CliArgs;
 use eyre::eyre;
 use operator::Operator;
-use tracing::{info, instrument};
+use tracing::{info, instrument, warn};
 
 mod chainio;
 mod cli;
@@ -41,6 +41,8 @@ pub async fn run_node(operator: Operator) -> eyre::Result<()> {
     check_registration(&operator).await?;
     operator.watch_new_tasks().await?;
 
+    warn!("Eth websocket listener closed, shutting down.");
+
     Ok(())
 }
 
@@ -76,13 +78,13 @@ pub(crate) async fn print_status(operator: &Operator) -> eyre::Result<()> {
 
 pub(crate) async fn ephemeral_testnet(
     operator: &Operator,
-    stake: u32,
+    stake: Option<u32>,
     cfg: &CliArgs,
 ) -> eyre::Result<()> {
     setup_deposits(
         cfg.eth_rpc_url.clone(),
         cfg.avs_registry_coordinator_addr,
-        stake,
+        stake.unwrap_or(100),
         operator.client.signer().clone(),
     )
     .await?;

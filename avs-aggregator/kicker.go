@@ -69,12 +69,14 @@ func (k *Kicker) CheckStateAndKick() error {
 	k.logger.Info("OAL check found list of pubkeys", "pubkeys", nonSigningOperatorPubKeys)
 	// fetch address and eject
 	for _, key := range nonSigningOperatorPubKeys {
-		address, err := k.ethRpc.Clients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, key.GetOperatorID())
+		id := key.GetOperatorID()
+		address, err := k.ethRpc.Clients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, id)
 		if err != nil {
 			k.logger.Error("Cannot get operator address", "operatorId", key.GetOperatorID(), "err", err)
 			return err
 		}
 
+		k.logger.Info("Ejecting Operator", "address", address, "id", id)
 		_, err = k.ethRpc.Clients.AvsRegistryChainWriter.EjectOperator(context.Background(), address, types.QUORUM_NUMBERS)
 		if err != nil {
 			k.logger.Error("Cannot eject operator", "operatorAddress", address, "err", err)

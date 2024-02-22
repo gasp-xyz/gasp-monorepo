@@ -31,7 +31,6 @@ import "forge-std/console.sol";
 // forge script script/1_FinalizerAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
 contract Deployer is Script, Utils, Test {
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
-    string constant _SHARED_AVS_DEPLOYMENT_PATH = "shared_avs_contracts_deployment_output";
     string constant _CONFIG_PATH = "deploy.config";
     string constant _OUTPUT_PATH = "avs_deployment_output";
 
