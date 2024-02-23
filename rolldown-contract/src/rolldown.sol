@@ -250,9 +250,6 @@ contract RollDown {
                         inputArray.cancels[cancelIdx].lastAcceptedRequestOnL1,
                         uint256(inputArray.cancels[cancelIdx].hash)
                     );
-                    l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
-                        inputArray.cancels[cancelIdx].requestId
-                    );
                     cancelIdx++;
                 } else if (
                     inputArray.withdraws.length >= 1 &&
