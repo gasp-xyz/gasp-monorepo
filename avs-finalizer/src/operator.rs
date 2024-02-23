@@ -188,7 +188,7 @@ impl Operator {
                 .avs_contracts
                 .operator_id()
                 .await?
-                .expect("should have operator id after success trx");
+                .expect("should have operator id after success register trx");
             info!("Sucessfully registered with AVS with id {:x}", id);
         }
         Ok(())

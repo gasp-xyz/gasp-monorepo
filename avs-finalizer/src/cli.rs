@@ -38,6 +38,9 @@ pub struct CliArgs {
     pub bls_key_password: Option<String>,
 
     #[arg(long, env, default_value_t = false)]
+    pub opt_in_at_startup: bool,
+
+    #[arg(long, env, default_value_t = false)]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub testnet: bool,
 

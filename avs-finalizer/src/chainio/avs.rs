@@ -10,9 +10,9 @@ use bindings::{
 use ethers::{
     contract::{EthEvent, Event},
     providers::{Provider, Ws},
-    types::{Filter, TransactionReceipt, H256},
+    types::{Filter, TransactionReceipt, H256, U64},
 };
-use eyre::{Ok, OptionExt};
+use eyre::{eyre, Ok, OptionExt};
 
 use crate::{
     cli::CliArgs,
@@ -109,6 +109,12 @@ impl AvsContracts {
 
         let pending = trx.send().await?;
         let receipt = pending.await?;
+
+        if Some(U64::zero()) == receipt.as_ref().and_then(|r| r.status) {
+            return Err(eyre!(
+                "trx failed, possibly expired registration signature, check contract call on block explorer for details"
+            ));
+        }
 
         receipt.ok_or_eyre("register_with_avs trx failed")
     }
