@@ -34,6 +34,7 @@ async function sendUpdateToL1(api: ApiPromise, walletClient: any, abi: any, bloc
   if (verbose) {
     console.log(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
   }
+  return null;
   if (reqCount > 0) {
     const storageHash = await walletClient.writeContract({
       chain: goerli, // TODO: this needs the chain in order to work properly

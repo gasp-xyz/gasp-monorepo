@@ -1,9 +1,19 @@
 name: rollup
 
+
 include:
-  - path: ./ops/local-env-configs/parachain.compose.yml
+  # - path: ./ops/local-env-configs/parachain.compose.yml
   - path: ./ops/local-env-configs/anvil.compose.yml
   - path: ./avs-aggregator/compose.yml
   - path: ./avs-finalizer/compose.yml
   - path: ./rollup-sequencer/compose.yml
   - path: ./rollup-updater/compose.yml
+  - path: ./rolldown-contract/compose.yml
+
+  # Wait for Postgres to be joinable.
+services:
+  check-anvil-started: 
+    image: jwilder/dockerize:0.6.1
+    depends_on:
+      - anvil
+    command: 'dockerize -wait=tcp://anvil:8545'

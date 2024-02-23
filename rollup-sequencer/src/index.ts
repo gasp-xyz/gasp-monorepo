@@ -9,19 +9,26 @@ type ContractAddress = `0x${string}`;
 
 const mangataContractAddress = process.env.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
 
+
 async function main() {
   let abi = rolldownAbi.abi;
-
-  const api = await Mangata.instance([process.env.MANGATA_URL!]).api();
-
-  const keyring = new Keyring({ type: "sr25519" });
-  const collator = keyring.addFromUri(process.env.MNEMONIC!)
-
   const publicClient = createPublicClient({
     transport: webSocket(process.env.ETH_CHAIN_URL, {
       retryCount: 5,
     }),
   });
+
+  const data = await publicClient.readContract({
+    address: mangataContractAddress,
+    abi: abi,
+    functionName: "getUpdateForL2",
+  }) as any;
+  console.log(data)
+
+  const api = await Mangata.instance([process.env.MANGATA_URL!]).api();
+
+  const keyring = new Keyring({ type: "sr25519" });
+  const collator = keyring.addFromUri(process.env.MNEMONIC!)
 
   await api.derive.chain.subscribeNewHeads(async (header) => {
     console.log(`block #${header.number} was authored by ${header.author}`);
