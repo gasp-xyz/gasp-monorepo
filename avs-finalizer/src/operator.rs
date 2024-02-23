@@ -76,25 +76,33 @@ impl Operator {
         let mut stream: stream::EventStream<'_, _, NewTaskCreatedFilter, _> =
             evs.subscribe().await?;
 
-        while let Some(Ok(event)) = stream.next().await {
-            info!("Executing a Block for task: {:?}", event);
-            let proofs = self.execute_block(event.task.block_number.as_u32()).await?;
-            debug!("Block executed successfully");
+        while let Some(res) = stream.next().await {
+            match res {
+                Ok(event) => {
+                    info!("Executing a Block for task: {:?}", event);
+                    let proofs = self.execute_block(event.task.block_number.as_u32()).await?;
+                    debug!("Block executed successfully");
 
-            let payload = TaskResponse {
-                reference_task_index: event.task_index,
-                block_hash: proofs.0.as_fixed_bytes().to_owned(),
-                storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
-            };
+                    let payload = TaskResponse {
+                        reference_task_index: event.task_index,
+                        block_hash: proofs.0.as_fixed_bytes().to_owned(),
+                        storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
+                    };
 
-            let response = self
-                .rpc
-                .send_task_response(payload, &self.bls_keypair)
-                .await?;
+                    let response = self
+                        .rpc
+                        .send_task_response(payload, &self.bls_keypair)
+                        .await;
 
-            match response.error_for_status_ref() {
-                Err(e) => error!("{} - {}", e, response.text().await?),
-                Ok(_) => info!("Task finished successfuly and sent to AVS service"),
+                    match response {
+                        Ok(r) => match r.error_for_status_ref() {
+                            Err(e) => error!("{} - {}", e, r.text().await?),
+                            Ok(_) => info!("Task finished successfuly and sent to AVS service"),
+                        },
+                        Err(e) => error!("{}", e),
+                    }
+                }
+                Err(e) => tracing::error!("EthWs subscription error {:?}", e),
             }
         }
         Ok(())
@@ -180,7 +188,7 @@ impl Operator {
                 .avs_contracts
                 .operator_id()
                 .await?
-                .expect("should have operator id after success trx");
+                .expect("should have operator id after success register trx");
             info!("Sucessfully registered with AVS with id {:x}", id);
         }
         Ok(())

@@ -29,12 +29,12 @@ func NewEthRpc(
 ) (*EthRpc, error) {
 
 	// tmp to get OperatorStateRetriever address
-	ethClient, err := eth.NewClient(ethHttpUrl)
+	client, err := eth.NewClient(ethHttpUrl)
 	if err != nil {
 		logger.Error("Failed to create Eth Http client", "err", err)
 		return nil, err
 	}
-	avsReader, err := NewAvsReaderFromConfig(registryAddr, ethClient, logger)
+	avs, err := NewAvsReaderFromConfig(registryAddr, client, logger)
 	if err != nil {
 		logger.Error("Cannot create AvsReader", "err", err)
 		return nil, err
@@ -44,7 +44,7 @@ func NewEthRpc(
 		EthHttpUrl:                 ethHttpUrl,
 		EthWsUrl:                   ethWsUrl,
 		RegistryCoordinatorAddr:    registryAddr.String(),
-		OperatorStateRetrieverAddr: avsReader.AvsServiceBindings.OperatorStateRetriever.String(),
+		OperatorStateRetrieverAddr: avs.AvsServiceBindings.OperatorStateRetriever.String(),
 		AvsName:                    avsName,
 		PromMetricsIpPortAddress:   metricsIpPort,
 	}
@@ -53,14 +53,14 @@ func NewEthRpc(
 		logger.Error("Cannot create eth Clients", "err", err)
 		return nil, err
 	}
-	txMgr := txmgr.NewSimpleTxManager(clients.EthHttpClient, logger, signer, address)
-
-	avsReader, err = NewAvsReaderFromConfig(registryAddr, ethClient, logger)
+	
+	avsReader, err := NewAvsReaderFromConfig(registryAddr, clients.EthHttpClient, logger)
 	if err != nil {
 		logger.Error("Cannot create AvsReader", "err", err)
 		return nil, err
 	}
-
+	
+	txMgr := txmgr.NewSimpleTxManager(clients.EthHttpClient, logger, signer, address)
 	avsWriter, err := NewAvsWriter(txMgr, registryAddr, clients.EthHttpClient, logger)
 	if err != nil {
 		logger.Error("Cannot create AvsWriter", "err", err)

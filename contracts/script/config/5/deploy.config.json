@@ -11,7 +11,7 @@
     "aggregator": "0xd082d8ff9491b5066db6e1e03efb19daaf50de02"
   },
 
-  "minimumStakes": [10000000000000000000],
+  "minimumStakes": [1000000000000000000],
 
   "strategyWeights": [
     [
@@ -52,13 +52,13 @@
 
   "operatorSetParams": [
     {
-      "0_maxOperatorCount": 30,
+      "0_maxOperatorCount": 9000,
       "1_kickBIPsOfOperatorStake": 11000,
       "2_kickBIPsOfTotalStake": 50
     }
   ],
 
   "taskManagerParams": {
-    "taskResponseWindowBlocks": 30
+    "taskResponseWindowBlocks": 20
   }
 }

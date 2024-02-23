@@ -89,7 +89,7 @@ impl ElContracts {
             .await?
             .ok_or_eyre("block should be found for known number")?;
 
-        let expiry = block.timestamp.add(U256::from(30));
+        let expiry = block.timestamp.add(U256::from(60));
 
         let digest = self
             .avs_directory

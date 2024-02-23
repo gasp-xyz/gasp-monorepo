@@ -12,7 +12,6 @@ environments:
     - config/dev.yaml
   testnet:
     values:
-     - config/default.yaml
      - config/testnet.yaml
 ---
 helmDefaults:

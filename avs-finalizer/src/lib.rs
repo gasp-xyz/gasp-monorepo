@@ -1,8 +1,8 @@
 use chainio::setup_deposits;
 use cli::CliArgs;
-use eyre::eyre;
+use eyre::{eyre, Ok};
 use operator::Operator;
-use tracing::{info, instrument};
+use tracing::{info, instrument, warn};
 
 mod chainio;
 mod cli;
@@ -31,21 +31,23 @@ pub async fn start() -> eyre::Result<()> {
         ephemeral_testnet(&operator, cli.stake, &cli).await?;
     } else {
         info!("Operator created and starting AVS verification");
-        run_node(operator).await?;
+        run_node(operator, cli.opt_in_at_startup).await?;
     }
 
     Ok(())
 }
 
-pub async fn run_node(operator: Operator) -> eyre::Result<()> {
-    check_registration(&operator).await?;
+pub async fn run_node(operator: Operator, opt_in: bool) -> eyre::Result<()> {
+    check_registration(&operator, opt_in).await?;
     operator.watch_new_tasks().await?;
+
+    warn!("Eth websocket listener closed, shutting down.");
 
     Ok(())
 }
 
 #[instrument(skip_all)]
-pub(crate) async fn check_registration(operator: &Operator) -> eyre::Result<()> {
+pub(crate) async fn check_registration(operator: &Operator, opt_in: bool) -> eyre::Result<()> {
     let status = operator.get_status().await?;
     let local_id = operator.operator_id();
 
@@ -55,9 +57,16 @@ pub(crate) async fn check_registration(operator: &Operator) -> eyre::Result<()> 
         (false, _, _) => Err(eyre!(
             "Operator not registered with EigenLayer, use eigenlayer cli to register"
         )),
-        (true, None, _) => Err(eyre!(
-            "Operator not registered with AVS, run OptInAvs first"
-        )),
+        (true, None, _) => {
+            if opt_in {
+                operator.opt_in_avs().await?;
+                Ok(())
+            } else {
+                Err(eyre!(
+                    "Operator not registered with AVS, run OptInAvs first"
+                ))
+            }
+        }
         (true, Some(id), local) if id == local => Ok(()),
         _ => Err(eyre!(
             "Registered operator id ({:x}) & BlsKeypair.operator_id() ({:x}) mismatch",
@@ -76,13 +85,13 @@ pub(crate) async fn print_status(operator: &Operator) -> eyre::Result<()> {
 
 pub(crate) async fn ephemeral_testnet(
     operator: &Operator,
-    stake: u32,
+    stake: Option<u32>,
     cfg: &CliArgs,
 ) -> eyre::Result<()> {
     setup_deposits(
         cfg.eth_rpc_url.clone(),
         cfg.avs_registry_coordinator_addr,
-        stake,
+        stake.unwrap_or(100),
         operator.client.signer().clone(),
     )
     .await?;
