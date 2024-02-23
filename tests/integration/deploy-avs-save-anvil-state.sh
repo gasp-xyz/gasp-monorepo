@@ -16,6 +16,3 @@ forge script script/1_FinalizerAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL --p
 
 # kill anvil to save its state
 pkill anvil
-
-cd "$parent_path"
-cp avs-and-eigenlayer-deployed-anvil-state.json ../../ops/helm-charts/anvil-testnet/files/

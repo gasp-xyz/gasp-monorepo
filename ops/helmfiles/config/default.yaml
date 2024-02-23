@@ -3,8 +3,10 @@ remoteCluster: true
 anvilEnabled: true
 aggregatorEnabled: true
 finalizerEnabled: true
+secondFinalizerEnabled: false
 updaterEnabled: true
 sequencerEnabled: true
+secondSequencerEnabled: false
 
 env:
   # rpc
@@ -18,6 +20,7 @@ env:
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_BLOCK_VALIDATION_PERIOD: '"5"'
   # OP
+  RUST_LOG: info
   AVS_RPC_URL: http://avs-aggregator:8090
   TESTNET: "'true'"
   ECDSA_EPHEMERAL_KEY: "'true'"
