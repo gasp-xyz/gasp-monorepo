@@ -46,6 +46,40 @@ And lately, the avs-finalizer,
 make start-avs-finalizer
 ```
 
+## Running via docker-compose
+
+### Setup 
+
+(To be automated at some point)
+
+- build avs-aggregator 
+```
+cd avs-aggregator
+go build
+```
+
+- build avs-finalizer 
+```
+cd avs-finalizer
+cargo build --release
+```
+
+- setup mangata-node using `parachain-launch` (to be removed with solochain)
+```
+cd ./ops/parachain-launch-mangata-node/
+npx @open-web3/parachain-launch generate config.yml
+```
+
+### Run
+
+```
+docker compose up --build --wait 
+```
+
+### Tear down
+```
+docker compose down -v
+```
 
 ## Avs Task Description
 
