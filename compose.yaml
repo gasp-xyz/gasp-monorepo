@@ -2,7 +2,7 @@ name: rollup
 
 
 include:
-  - path: ./ops/local-env-configs/parachain.compose.yml
+  # - path: ./ops/local-env-configs/parachain.compose.yml
   - path: ./ops/parachain-launch-mangata-node/output/docker-compose.yml
   - path: ./ops/local-env-configs/anvil.compose.yml
   - path: ./avs-aggregator/compose.yml

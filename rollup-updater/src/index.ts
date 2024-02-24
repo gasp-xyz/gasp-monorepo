@@ -7,9 +7,9 @@ import { goerli } from "viem/chains";
 import { defineChain } from "viem";
 import { ApiPromise } from '@polkadot/api';
 import { decodeAbiParameters } from "viem";
-import { eigenContractAbi } from "./eigenAbi.js";
 import "@mangata-finance/types"
 import rolldownAbi from './RollDown.json' assert {type: 'json'};
+import eigenContractAbi from './IFinalizerTaskManager.json' assert {type: 'json'};
 
 type ContractAddress = `0x${string}`;
 
@@ -21,6 +21,24 @@ const mangataContractAddress = process.env
 
 const finalizationSource = process.env.FINALIZATION_SOURCE;
 const verbose = process.env.VERBOSE;
+const anvil = defineChain({
+  id: 31337,
+  name: 'anvil',
+  network: 'Anvil',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    public: {
+      http: ['ws://127.0.0.1:8545'],
+    },
+    default: {
+      http: ['ws://127.0.0.1:8545'],
+    },
+  },
+})
 
 async function sendUpdateToL1(api: ApiPromise, walletClient: any, abi: any, blockNumber: number) {
 
@@ -34,10 +52,10 @@ async function sendUpdateToL1(api: ApiPromise, walletClient: any, abi: any, bloc
   if (verbose) {
     console.log(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
   }
-  return null;
+
   if (reqCount > 0) {
     const storageHash = await walletClient.writeContract({
-      chain: goerli, // TODO: this needs the chain in order to work properly
+      chain: anvil, // TODO: this needs the chain in order to work properly
       abi: abi,
       address: mangataContractAddress,
       functionName: "update_l1_from_l2",
@@ -57,24 +75,6 @@ async function main() {
   console.log("api", api.isConnected);
 
 
-  const anvil = defineChain({
-    id: 31337,
-    name: 'anvil',
-    network: 'Anvil',
-    nativeCurrency: {
-      decimals: 18,
-      name: 'Ether',
-      symbol: 'ETH',
-    },
-    rpcUrls: {
-      public: {
-        http: ['wss://127.0.0.1:8545'],
-      },
-      default: {
-        http: ['wss://127.0.0.1:8545'],
-      },
-    },
-  })
 
   // Ethereum private key
   // We need this to write to Mangata contract
@@ -99,7 +99,6 @@ async function main() {
 
 
   let unwatch: any;
-  let la
 
   if (finalizationSource === "relay") {
     unwatch = await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
@@ -113,8 +112,8 @@ async function main() {
   } else {
     unwatch = publicClient.watchContractEvent({
       address: eigenContractAddress,
-      abi: eigenContractAbi,
-      eventName: "TaskResponded",
+      abi: eigenContractAbi.abi,
+      eventName: "TaskResponse",
       onLogs: async (logs) => {
         for (const log of logs) {
           let txHash = await sendUpdateToL1(api, walletClient, abi, Number(log.blockNumber));
