@@ -9,6 +9,9 @@ type ContractAddress = `0x${string}`;
 
 const mangataContractAddress = process.env.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
 
+function sleep_ms(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function main() {
   let abi = rolldownAbi.abi;
@@ -18,12 +21,20 @@ async function main() {
     }),
   });
 
-  const data = await publicClient.readContract({
-    address: mangataContractAddress,
-    abi: abi,
-    functionName: "getUpdateForL2",
-  }) as any;
-  console.log(data)
+  while (true) {
+    try {
+      const data = await publicClient.readContract({
+        address: mangataContractAddress,
+        abi: abi,
+        functionName: "getUpdateForL2",
+      }) as any;
+      console.log(data)
+      break;
+    } catch (e) {
+      console.log(`${mangataContractAddress} contract not found`)
+      await sleep_ms(1000);
+    }
+  }
 
   const api = await Mangata.instance([process.env.MANGATA_URL!]).api();
 

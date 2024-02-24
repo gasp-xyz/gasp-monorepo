@@ -9,7 +9,7 @@ services:
     # volumes:
       # - ../../tests/integration/avs-and-eigenlayer-deployed-anvil-state.json:/root/.anvil/state.json
     # command: --host 0.0.0.0 --load-state /root/.anvil/state.json
-    command: --host 0.0.0.0 --disable-block-gas-limit  --balance 1000000000000000000 --chain-id 5
+    command: --host 0.0.0.0 --disable-block-gas-limit  --balance 1000000000000000000 #--chain-id 5
     healthcheck:
       test: ["CMD", "nc", "-vz", "localhost", "8545"]
       interval: 2s
