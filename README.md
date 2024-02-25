@@ -52,13 +52,7 @@ make start-avs-finalizer
 
 (To be automated at some point)
 
-- build avs-aggregator 
-```
-cd avs-aggregator
-go build
-```
-
-- build avs-finalizer 
+- build `avs-finalizer`
 ```
 cd avs-finalizer
 cargo build --release
@@ -72,6 +66,7 @@ npx @open-web3/parachain-launch generate config.yml
 
 ### Run
 
+*** !!! `--wait` and `--build` parameters here are essential !!! ***
 ```
 docker compose up --build --wait 
 ```
