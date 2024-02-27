@@ -7,5 +7,5 @@ services:
       ETH_CHAIN_URL: ${ROLLUP_UPDATER_ETH_CHAIN_URL:-wss://ethereum.publicnode.com}
       # Randomly generated key, should not be used for anything
       WALLET_PRIVATE_KEY: "15cb3150921ee606d71b9def1b6392c9df1d4fea399cbcca2047d9cf84f44f08"
-      EIGEN_CONTRACT_ADDRESS: "0x839De8D21F4762D791efbC0bA70C1Af0c442Ef98"
+      EIGEN_CONTRACT_ADDRESS: "0x9E545E3C0baAB3E08CdfD552C960A1050f373042"
       MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
