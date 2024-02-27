@@ -50,12 +50,16 @@ make start-avs-finalizer
 
 ### Setup 
 
+- update eigen layer dependant submodules
+```
+git submodule update --init --recursive
+```
 (To be automated at some point)
 
-- build `avs-finalizer`
+- build `avs-finalizer` with *up to date* stable toolchain (to be automated)
 ```
 cd avs-finalizer
-cargo build --release
+cargo +stable build --release
 ```
 
 - setup mangata-node using `parachain-launch` (to be removed with solochain)
@@ -69,6 +73,30 @@ npx @open-web3/parachain-launch generate config.yml
 *** !!! `--wait` and `--build` parameters here are essential !!! ***
 ```
 docker compose up --build --wait 
+```
+
+### How to modify particular services
+
+For every service other than:
+- `mangata-node`
+- `avs-finalizer`
+
+just modify source code, tear down current docker-compose setup and run it again
+
+####  Mangata Node
+For using custom `mangata-node` :
+- generate docker image either locally or pick one build by github 
+- modify `./ops/parachain-launch-mangata-node/config.yml` accordingly 
+- generate docker-compose config using `parachain-launch`
+```
+cd ./ops/parachain-launch-mangata-node/
+npx @open-web3/parachain-launch generate config.yml
+```
+
+####  avs-finalizer
+Steps:
+- Modify `avs-finalizer` sources
+- rebuild `avs-finalizer` locally
 ```
 
 ### Tear down
@@ -120,3 +148,8 @@ AVS Registry contracts have a stale view of finalizer shares in the delegation m
 ## Integration Tests
 
 See the integration tests [README](tests/integration/README.md) for more details.
+
+## How to start a local environment
+
+1. Ensure you have Docker Compose installed
+2. Run `docker compose up -d` command from the root of the repository

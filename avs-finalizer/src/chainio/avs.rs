@@ -8,11 +8,11 @@ use bindings::{
     strategy_manager_storage::{PubkeyRegistrationParams, SignatureWithSaltAndExpiry},
 };
 use ethers::{
-    contract::Event,
+    contract::{EthEvent, Event},
     providers::{Provider, Ws},
-    types::{TransactionReceipt, H256},
+    types::{Filter, TransactionReceipt, H256, U64},
 };
-use eyre::{Ok, OptionExt};
+use eyre::{eyre, Ok, OptionExt};
 
 use crate::{
     cli::CliArgs,
@@ -66,7 +66,8 @@ impl AvsContracts {
     }
 
     pub fn new_task_stream(&self) -> Event<Arc<Provider<Ws>>, Provider<Ws>, NewTaskCreatedFilter> {
-        self.task_manager_sub.new_task_created_filter()
+        self.task_manager_sub
+            .event_with_filter(Filter::new().event(&NewTaskCreatedFilter::abi_signature()))
     }
 
     pub async fn operator_id(&self) -> eyre::Result<Option<H256>> {
@@ -108,6 +109,12 @@ impl AvsContracts {
 
         let pending = trx.send().await?;
         let receipt = pending.await?;
+
+        if Some(U64::zero()) == receipt.as_ref().and_then(|r| r.status) {
+            return Err(eyre!(
+                "trx failed, possibly expired registration signature, check contract call on block explorer for details"
+            ));
+        }
 
         receipt.ok_or_eyre("register_with_avs trx failed")
     }

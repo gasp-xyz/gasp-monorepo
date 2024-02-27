@@ -38,6 +38,9 @@ deploy-avs-contracts-to-anvil-and-save-state: ## Deploy avs
 
 deploy-all-to-anvil-and-save-state: deploy-eigenlayer-contracts-to-anvil-and-save-state deploy-avs-contracts-to-anvil-and-save-state ## deploy eigenlayer and avs contracts 
 
+deploy-all-contracts-and-save-state:
+	./tests/integration/deploy-all-contracts-and-save-anvil-state.sh
+
 start-anvil-chain-with-el-and-avs-deployed: ## starts anvil from a saved state file (with el and avs contracts deployed)
 	anvil --load-state tests/integration/avs-and-eigenlayer-deployed-anvil-state.json
 

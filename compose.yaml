@@ -4,7 +4,7 @@ name: rollup
 include:
   # - path: ./ops/local-env-configs/parachain.compose.yml
   - path: ./ops/parachain-launch-mangata-node/output/docker-compose.yml
-  - path: ./ops/local-env-configs/anvil-emtpy.compose.yml
+  - path: ./ops/local-env-configs/anvil-empty-compose.yml
   - path: ./avs-aggregator/compose.yml
   - path: ./avs-finalizer/compose.yml
   - path: ./rollup-sequencer/compose.yml

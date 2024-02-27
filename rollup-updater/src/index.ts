@@ -42,7 +42,7 @@ const anvil = defineChain({
 
 async function sendUpdateToL1(api: ApiPromise, walletClient: any, abi: any, blockHash: any) {
 
-  console.log(`NUMBER ${blockHash} `)
+  console.log(`HASH ${blockHash} `)
   let pendingUpdates = await (api.rpc as any).rolldown.pending_updates(blockHash);
   let l2Update = decodeAbiParameters(abi.find((e: any) => e.name === "update_l1_from_l2")!.inputs, pendingUpdates.toHex());
 
@@ -71,10 +71,6 @@ async function sendUpdateToL1(api: ApiPromise, walletClient: any, abi: any, bloc
 async function main() {
   const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
   let abi = rolldownAbi.abi;
-  console.log("hello world");
-  console.log("api", api.isConnected);
-
-
 
   // Ethereum private key
   // We need this to write to Mangata contract
@@ -117,7 +113,6 @@ async function main() {
       eventName: "TaskCompleted",
       onLogs: async (logs) => {
         for (const log of logs) {
-          console.log(`RECEIVED LOG: ${JSON.stringify(log)}`);
           let txHash = await sendUpdateToL1(api, walletClient, abi, (log as any).args.blockHash);
           if (txHash) {
             let result = await publicClient.waitForTransactionReceipt({ hash: txHash });

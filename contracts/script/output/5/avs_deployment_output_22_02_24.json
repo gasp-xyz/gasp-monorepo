@@ -1,0 +1,30 @@
+{
+  "addresses": {
+    "avsPauseReg": "0x50ACb0fa9CD480A4a7305d2742473c1499537B05",
+    "avsProxyAdmin": "0x55876B658e8E36afA24BF404e7D5686a11857b0F",
+    "blsApkRegistry": "0xb2c45eF20a9095267813514B8099e7A2959465Db",
+    "blsApkRegistryImplementation": "0xfBFeeE4406b5BBB101418B89Ec6D544c38055DFB",
+    "indexRegistry": "0xF5decc6806606bb2f8Fa28124a169CbA1ff5670c",
+    "indexRegistryImplementation": "0x93de6a193A839218BCA00c8D478256Ac78281cE3",
+    "registryCoordinator": "0x5620cDb94BaAaD10c20483bd8705DA711b2Bc0a3",
+    "registryCoordinatorImplementation": "0x58bfDE76d7DD610f2778096A0A825D95458334bF",
+    "serviceManager": "0xc1e8A34181ECA43Acc4cF74C1B2bD08e2DD0e449",
+    "serviceManagerImplementation": "0xf46622c2d3781D9F65D89a23782675D4B53442f6",
+    "stakeRegistry": "0x30644588DDa69a2d371a200D7D44c8F56F4e203B",
+    "stakeRegistryImplementation": "0x9371e1cC60e3612Ff0F128b4742645833bBF68Cf",
+    "taksManagerImplementation": "0x057ca726805712aF88dE4F165452878f36532C8F",
+    "taskManager": "0xE6cA1AC117A8D8F4D42d6D64Ed99A99C7c196EAc"
+  },
+  "chainInfo": {
+    "chainId": 5,
+    "deploymentBlock": 10577865
+  },
+  "permissions": {
+    "aggregator": "0xd082D8fF9491b5066Db6e1E03efB19daaF50de02",
+    "avsChurner": "0x0000000000000000000000000000000000000000",
+    "avsEjector": "0xd082D8fF9491b5066Db6e1E03efB19daaF50de02",
+    "avsMultisig": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "avsOwner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "avsUpgrader": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337"
+  }
+}
