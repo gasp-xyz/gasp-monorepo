@@ -9,7 +9,7 @@ import { ApiPromise } from '@polkadot/api';
 import { decodeAbiParameters } from "viem";
 import "@mangata-finance/types"
 import rolldownAbi from './RollDown.json' assert {type: 'json'};
-import eigenContractAbi from './IFinalizerTaskManager.json' assert {type: 'json'};
+import eigenContractAbi from './FinalizerTaskManager.json' assert {type: 'json'};
 
 type ContractAddress = `0x${string}`;
 
@@ -40,10 +40,9 @@ const anvil = defineChain({
   },
 })
 
-async function sendUpdateToL1(api: ApiPromise, walletClient: any, abi: any, blockNumber: number) {
+async function sendUpdateToL1(api: ApiPromise, walletClient: any, abi: any, blockHash: any) {
 
-  console.log(`NUMBER ${blockNumber} `)
-  let blockHash = await api.rpc.chain.getBlockHash(blockNumber);
+  console.log(`NUMBER ${blockHash} `)
   let pendingUpdates = await (api.rpc as any).rolldown.pending_updates(blockHash);
   let l2Update = decodeAbiParameters(abi.find((e: any) => e.name === "update_l1_from_l2")!.inputs, pendingUpdates.toHex());
 
@@ -72,6 +71,7 @@ async function sendUpdateToL1(api: ApiPromise, walletClient: any, abi: any, bloc
 async function main() {
   const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
   let abi = rolldownAbi.abi;
+  console.log("hello world");
   console.log("api", api.isConnected);
 
 
@@ -103,20 +103,22 @@ async function main() {
   if (finalizationSource === "relay") {
     unwatch = await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
       console.log(`Chain is at block: #${header.number}`);
-      let txHash = await sendUpdateToL1(api, walletClient, abi, header.number.toNumber());
+      let txHash = await sendUpdateToL1(api, walletClient, abi, header.hash);
       if (txHash) {
         let result = await publicClient.waitForTransactionReceipt({ hash: txHash });
         console.log(`#${result.blockNumber} ${result.transactionHash} : ${result.status}`);
       }
     });
   } else {
+    console.log("subscribing to eth events")
     unwatch = publicClient.watchContractEvent({
       address: eigenContractAddress,
       abi: eigenContractAbi.abi,
-      eventName: "TaskResponse",
+      eventName: "TaskCompleted",
       onLogs: async (logs) => {
         for (const log of logs) {
-          let txHash = await sendUpdateToL1(api, walletClient, abi, Number(log.blockNumber));
+          console.log(`RECEIVED LOG: ${JSON.stringify(log)}`);
+          let txHash = await sendUpdateToL1(api, walletClient, abi, (log as any).args.blockHash);
           if (txHash) {
             let result = await publicClient.waitForTransactionReceipt({ hash: txHash });
             console.log(`#${result.blockNumber} ${result.transactionHash} : ${result.status}`);

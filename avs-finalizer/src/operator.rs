@@ -19,7 +19,7 @@ use sp_runtime::{generic, OpaqueExtrinsic};
 use std::sync::Arc;
 use tracing::{debug, error, info, instrument};
 
-pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
+pub type Header = generic::HeaderVer<u32, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 
 #[derive(Debug, Serialize)]
@@ -77,6 +77,7 @@ impl Operator {
             evs.subscribe().await?;
 
         while let Some(Ok(event)) = stream.next().await {
+            tokio::time::sleep(std::time::Duration::new(5,0)).await;
             info!("Executing a Block for task: {:?}", event);
             let proofs = self.execute_block(event.task.block_number.as_u32()).await?;
             debug!("Block executed successfully");

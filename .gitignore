@@ -71,5 +71,11 @@ Thumbs.db
 # custom
 ops/**/data
 .env
-./ops/parachain-launch-mangata-node/output/**
+ops/parachain-launch-mangata-node/output/
+rolldown-contract/broadcast/
+rolldown-contract/cache/
+rolldown-contract/out/
+*.gas-snapshot
+contracts/script/output/*
+
 

@@ -86,7 +86,8 @@ pub struct Rpc {
 
 impl Rpc {
     pub fn build(cfg: &CliArgs) -> Self {
-        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
+        let retry_policy = ExponentialBackoff::builder()
+            .build_with_max_retries(3);
         let client = ClientBuilder::new(reqwest::Client::new())
             .with(RetryTransientMiddleware::new_with_policy(retry_policy))
             .build();
