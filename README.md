@@ -70,7 +70,7 @@ npx @open-web3/parachain-launch generate config.yml
 
 ### Run
 
-*** !!! `--wait` and `--build` parameters here are essential !!! ***
+***!!! `--wait` and `--build` parameters here are essential !!!***
 ```
 docker compose up --build --wait 
 ```
@@ -97,7 +97,6 @@ npx @open-web3/parachain-launch generate config.yml
 Steps:
 - Modify `avs-finalizer` sources
 - rebuild `avs-finalizer` locally
-```
 
 ### Tear down
 ```
