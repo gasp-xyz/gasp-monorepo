@@ -50,9 +50,9 @@ jobs:
           make deploy-all-contracts-and-save-state
 
           # Save the state to the Github Step summary
-          echo "```json" >> $GITHUB_STEP_SUMMARY
-          cat contracts/script/output/31337/avs_deployment_output.json >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          echo "$(cat contracts/script/output/31337/avs_deployment_output.json)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
         
       
       - run: |
