@@ -5,5 +5,5 @@ services:
     environment:
       MANGATA_URL: ${ROLLUP_SEQUENCER_MANGATA_URL:-wss://collator-01-ws-rococo.mangata.online}
       ETH_CHAIN_URL: ${ROLLUP_SEQUENCER_ETH_CHAIN_URL:-wss://ethereum.publicnode.com}
-      MANGATA_CONTRACT_ADDRESS: "0x839De8D21F4762D791efbC0bA70C1Af0c442Ef98"
+      MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
       MNEMONIC: 'some mnemonic'

@@ -12,7 +12,7 @@ ethChainUrl: wss://ethereum.publicnode.com
 env:
   MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
   EIGEN_CONTRACT_ADDRESS: "0x839De8D21F4762D791efbC0bA70C1Af0c442Ef98"
-  MANGATA_CONTRACT_ADDRESS: "0x839De8D21F4762D791efbC0bA70C1Af0c442Ef98"
+  MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
 
 nameOverride: ""
 
