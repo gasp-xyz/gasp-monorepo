@@ -69,6 +69,7 @@ npx @open-web3/parachain-launch generate config.yml
 ```
 
 ### Run
+In the root folder run:
 
 ***!!! `--wait` and `--build` parameters here are essential !!!***
 ```
