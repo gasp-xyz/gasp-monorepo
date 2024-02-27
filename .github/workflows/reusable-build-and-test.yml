@@ -46,7 +46,10 @@ jobs:
         run: forge install
 
       - name: Generate `anvil` state json
-        run: make deploy-all-contracts-and-save-state
+        run: | 
+          make deploy-all-contracts-and-save-state
+          cat contracts/script/output/31337/avs_deployment_output.json
+        
       
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
