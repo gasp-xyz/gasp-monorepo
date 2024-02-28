@@ -67,3 +67,17 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# custom
+ops/**/data
+.env
+tests/integration/anvil-state.json
+
+# foundry related ignore
+# reference: https://github.com/PaulRBerg/foundry-template/blob/main/.gitignore
+cache
+coverage
+out
+!broadcast
+**/broadcast/*
+**/broadcast/*/31337/

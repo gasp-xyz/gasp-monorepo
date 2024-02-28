@@ -23,9 +23,7 @@ type Config struct {
 	BlockPeriod       int
 	UpdatePeriod      int
 
-	BlsOperatorStateRetrieverAddr common.Address
-	BlsCompendiumAddr             common.Address
-	ServiceManagerAddr            common.Address
+	AvsRegistryCoordinatorAddr common.Address
 
 	SignerFn signerv2.SignerFn
 	Address  common.Address
@@ -77,20 +75,18 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 	}
 
 	return &Config{
-		LogLevel:                      logLevel,
-		ServerAddressPort:             ctx.GlobalString(config.AvsServerPortAddressFlag.Name),
-		BlockPeriod:                   ctx.GlobalInt(config.AvsBlockValidationPeriodFlag.Name),
-		KickPeriod:                    ctx.GlobalInt(config.AvsKickPeriodFlag.Name),
-		UpdatePeriod:                  ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
-		EthRpcUrl:                     ctx.GlobalString(config.EthRpcFlag.Name),
-		EthWsUrl:                      ctx.GlobalString(config.EthWsFlag.Name),
-		ChainId:                       chainId,
-		SubstrateWsRpcUrl:             ctx.GlobalString(config.SubstrateRpcFlag.Name),
-		BlsOperatorStateRetrieverAddr: common.HexToAddress(ctx.GlobalString(config.BlsOperatorStateRetrieverFlag.Name)),
-		BlsCompendiumAddr:             common.HexToAddress(ctx.GlobalString(config.BlsCompendiumFlag.Name)),
-		ServiceManagerAddr:            common.HexToAddress(ctx.GlobalString(config.AvsServiceManagerFlag.Name)),
-		SignerFn:                      signer,
-		Address:                       address,
+		LogLevel:                   logLevel,
+		ServerAddressPort:          ctx.GlobalString(config.AvsServerPortAddressFlag.Name),
+		BlockPeriod:                ctx.GlobalInt(config.AvsBlockValidationPeriodFlag.Name),
+		KickPeriod:                 ctx.GlobalInt(config.AvsKickPeriodFlag.Name),
+		UpdatePeriod:               ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
+		EthRpcUrl:                  ctx.GlobalString(config.EthRpcFlag.Name),
+		EthWsUrl:                   ctx.GlobalString(config.EthWsFlag.Name),
+		ChainId:                    chainId,
+		SubstrateWsRpcUrl:          ctx.GlobalString(config.SubstrateRpcFlag.Name),
+		AvsRegistryCoordinatorAddr: common.HexToAddress(ctx.GlobalString(config.AvsRegistryCoordinatorFlag.Name)),
+		SignerFn:                   signer,
+		Address:                    address,
 	}, nil
 }
 
@@ -101,9 +97,7 @@ var Flags = []cli.Flag{
 	config.SubstrateRpcFlag,
 	config.AvsServerPortAddressFlag,
 	config.ChainIdFlag,
-	config.BlsCompendiumFlag,
-	config.BlsOperatorStateRetrieverFlag,
-	config.AvsServiceManagerFlag,
+	config.AvsRegistryCoordinatorFlag,
 	config.EcdsaKeyFileFlag,
 	config.EcdsaKeyJsonFlag,
 	config.EcdsaKeyPasswordFlag,

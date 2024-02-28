@@ -91,3 +91,8 @@ AVS Registry contracts have a stale view of finalizer shares in the delegation m
 ## Integration Tests
 
 See the integration tests [README](tests/integration/README.md) for more details.
+
+## How to start a local environment
+
+1. Ensure you have Docker Compose installed
+2. Run `docker compose up -d` command from the root of the repository

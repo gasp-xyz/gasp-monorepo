@@ -2,6 +2,8 @@ package aggregator
 
 import (
 	"context"
+	"math/big"
+	"sort"
 
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -38,13 +40,13 @@ func (k *StakeUpdate) TriggerNewTask(taskIndex uint32) {
 func (k *StakeUpdate) CheckStateAndupdate() error {
 	k.logger.Info("Running Operator Stake Update check")
 
-	currentBlock, err := k.ethRpc.Client.BlockNumber(context.Background())
+	currentBlock, err := k.ethRpc.Clients.EthHttpClient.BlockNumber(context.Background())
 	if err != nil {
 		k.logger.Error("Cannot get current block number", "err", err)
 		return err
 	}
 
-	operatorIds, err := k.ethRpc.ElClients.AvsRegistryChainReader.GetOperatorIdList(&bind.CallOpts{}, types.QUORUM_NUMBER, uint32(currentBlock))
+	operatorIds, err := k.ethRpc.Clients.AvsRegistryChainReader.GetOperatorIdList(&bind.CallOpts{}, types.QUORUM_NUMBER, uint32(currentBlock))
 	if err != nil {
 		k.logger.Error("Cannot get current operator list", "err", err)
 		return err
@@ -52,7 +54,7 @@ func (k *StakeUpdate) CheckStateAndupdate() error {
 
 	operatorAdrresses := []common.Address{}
 	for _, id := range operatorIds {
-		address, err := k.ethRpc.ElClients.AvsRegistryChainReader.GetOperatorAddress(&bind.CallOpts{}, id)
+		address, err := k.ethRpc.Clients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, id)
 		if err != nil {
 			k.logger.Error("Cannot get operator address", "operatorId", id, "err", err)
 			return err
@@ -60,13 +62,21 @@ func (k *StakeUpdate) CheckStateAndupdate() error {
 		operatorAdrresses = append(operatorAdrresses, address)
 	}
 
-	_, err = k.ethRpc.ElClients.AvsRegistryChainWriter.UpdateStakes(context.Background(), operatorAdrresses)
-	if err != nil {
-		k.logger.Error("Cannot update stakes", "err", err)
-		return err
+	sort.Slice(operatorAdrresses, func(i, j int) bool {
+		a := big.NewInt(0).SetBytes(operatorAdrresses[i][:])
+		b := big.NewInt(0).SetBytes(operatorAdrresses[j][:])
+		return a.Cmp(b) < 0
+	})
+
+	if len(operatorAdrresses) > 0 {
+		_, err = k.ethRpc.Clients.AvsRegistryChainWriter.UpdateStakesOfEntireOperatorSetForQuorums(context.Background(), [][]common.Address{operatorAdrresses}, types.QUORUM_NUMBERS)
+		if err != nil {
+			k.logger.Error("Cannot update stakes", "err", err)
+			return err
+		}
 	}
 
-	k.logger.Info("Operator stakes update successfuly", "addresses", operatorAdrresses)
+	k.logger.Info("Operator stakes update successfull", "addresses", operatorAdrresses)
 
 	return nil
 }

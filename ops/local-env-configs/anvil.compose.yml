@@ -1,0 +1,18 @@
+services:
+  anvil:
+    image: ${ANVIL_IMAGE:-mangatasolutions/anvil:local}
+    build:
+      context: ../../
+      dockerfile: ops/anvil-with-state-image/Dockerfile
+      platforms:
+        - linux/amd64
+    platform: linux/amd64
+    ports:
+      - 8545:8545
+    volumes:
+      - ../../tests/integration/anvil-state.json:/app/anvil-state.json
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "8545"]
+      interval: 2s
+      timeout: 10s
+      retries: 3

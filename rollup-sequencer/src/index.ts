@@ -3,15 +3,14 @@ import "@mangata-finance/types";
 import { Keyring } from "@polkadot/api";
 import "dotenv/config";
 import { createPublicClient, webSocket } from "viem";
-
-import * as fs from 'fs';
+import rolldownAbi from './RollDown.json' assert {type: 'json'};
 
 type ContractAddress = `0x${string}`;
 
 const mangataContractAddress = process.env.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
 
 async function main() {
-  let abi = JSON.parse(fs.readFileSync('./../rolldown-contract/out/rolldown.sol/RollDown.json', 'utf8'))["abi"] as unknown[];
+  let abi = rolldownAbi.abi;
 
   const api = await Mangata.instance([process.env.MANGATA_URL!]).api();
 

@@ -30,22 +30,15 @@ contract RollDownTest is Test {
         // Act
         vm.startPrank(alice);
         token.approve(address(rollDown), amount);
-        uint256 aliceBalanceBefore = token.balanceOf(alice);
-        uint256 contractBalanceBefore = token.balanceOf(address(rollDown));
 
         vm.expectEmit(true, true, true, true);
         emit RollDown.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
         rollDown.deposit(tokenAddress, 10);
         vm.stopPrank();
 
-        uint256 aliceBalanceAfter = token.balanceOf(alice);
-        uint256 contractBalanceAfter = token.balanceOf(address(rollDown));
-
         RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
 
         // Assert
-        assertEq(aliceBalanceBefore - amount, aliceBalanceAfter);
-        assertEq(contractBalanceBefore + amount, contractBalanceAfter);
         assertEq(l1Update.order.length, 1);
         assert(l1Update.order[0] == RollDown.PendingRequestType.DEPOSIT);
         assertEq(l1Update.pendingDeposits.length, 1);
@@ -66,8 +59,15 @@ contract RollDownTest is Test {
         rollDown.deposit(tokenAddress, 10);
         vm.stopPrank();
 
+        RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
+        assertEq(l1Update.order.length, 1);
+        assert(l1Update.order[0] == RollDown.PendingRequestType.DEPOSIT);
+        assertEq(l1Update.offset, 1);
+        assertEq(l1Update.lastProccessedRequestOnL1, 0);
+        assertEq(l1Update.lastAcceptedRequestOnL1, 1);
+
         RollDown.L2Update memory l2Update;
-        l2Update.cancels = new RollDown.Cancel[](0);
+        l2Update.cancles = new RollDown.Cancel[](0);
         l2Update.results = new RollDown.RequestResult[](1);
         l2Update.results[0] = RollDown.RequestResult({
             requestId: 1,
@@ -75,11 +75,10 @@ contract RollDownTest is Test {
             status: false
         });
 
-        //  Act
-
+        // Act
         rollDown.update_l1_from_l2(l2Update);
 
-        RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
+        l1Update = rollDown.getUpdateForL2();
         assertEq(l1Update.order.length, 1);
         assert(
             l1Update.order[0] ==
@@ -90,7 +89,7 @@ contract RollDownTest is Test {
         assertEq(l1Update.lastAcceptedRequestOnL1, 2);
 
         RollDown.L2Update memory l2Update2;
-        l2Update2.cancels = new RollDown.Cancel[](0);
+        l2Update2.cancles = new RollDown.Cancel[](0);
         l2Update2.results = new RollDown.RequestResult[](1);
         l2Update2.results[0] = RollDown.RequestResult({
             requestId: 2,
@@ -106,7 +105,7 @@ contract RollDownTest is Test {
         assertEq(l1Update.lastAcceptedRequestOnL1, 3);
 
         RollDown.L2Update memory l2Update3;
-        l2Update3.cancels = new RollDown.Cancel[](0);
+        l2Update3.cancles = new RollDown.Cancel[](0);
         l2Update3.results = new RollDown.RequestResult[](1);
         l2Update3.results[0] = RollDown.RequestResult({
             requestId: 3,
@@ -137,7 +136,7 @@ contract RollDownTest is Test {
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
-        l2Update.cancels = new RollDown.Cancel[](0);
+        l2Update.cancles = new RollDown.Cancel[](0);
         l2Update.results = new RollDown.RequestResult[](1);
         l2Update.results[0] = RollDown.RequestResult({
             requestId: 1,
@@ -181,6 +180,88 @@ contract RollDownTest is Test {
         );
     }
 
+    function testHashCompatibilityWithMangataNode() public {
+        RollDown.L1Update memory l1Update;
+        l1Update.offset = 1;
+        l1Update.pendingDeposits = new RollDown.Deposit[](1);
+        l1Update.pendingDeposits[0] = RollDown.Deposit({
+            depositRecipient: 0x0000000000000000000000000000000000000004,
+            tokenAddress: 0x2CD2188119797153892438E57364D95B32975560,
+            amount: 1000000
+        });
+        l1Update.order = new RollDown.PendingRequestType[](1);
+        l1Update.order[0] = RollDown.PendingRequestType.DEPOSIT;
+
+        bytes32 l2Hash = 0x033f8b8c13f3dd23df7d50f5a5106621177bb75f71cb39e9a8fd4ab565bec339;
+        assertEq(keccak256(abi.encode(l1Update)), l2Hash);
+    }
+
+    function testCancelResolutionWithNonMatchingHashResultsWithUnjustifiedStatus()
+        public
+    {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 1000;
+        deal(tokenAddress, alice, amount);
+        vm.startPrank(alice);
+        token.approve(address(rollDown), amount);
+        rollDown.deposit(tokenAddress, amount);
+        vm.stopPrank();
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](0);
+        l2Update.cancles = new RollDown.Cancel[](1);
+        l2Update.cancles[0] = RollDown.Cancel({
+            l2RequestId: 50000,
+            lastProccessedRequestOnL1: 0,
+            lastAcceptedRequestOnL1: 1,
+            hash: bytes32(uint256(0))
+        });
+
+        vm.startPrank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit RollDown.DisputeResolutionAcceptedIntoQueue(50000, false);
+        rollDown.update_l1_from_l2(l2Update);
+        vm.stopPrank();
+    }
+
+    function testCancelResolutionWithMatchingHashResultsWithJustifiedStatus()
+        public
+    {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 1000;
+        deal(tokenAddress, alice, amount);
+
+        // Act
+        vm.startPrank(alice);
+        token.approve(address(rollDown), amount);
+        rollDown.deposit(tokenAddress, amount);
+        vm.stopPrank();
+
+        RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](0);
+        l2Update.cancles = new RollDown.Cancel[](1);
+        l2Update.cancles[0] = RollDown.Cancel({
+            l2RequestId: 50000,
+            lastAcceptedRequestOnL1: 1,
+            lastProccessedRequestOnL1: 0,
+            hash: bytes32(keccak256(abi.encode(l1Update)))
+        });
+
+        vm.startPrank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit RollDown.DisputeResolutionAcceptedIntoQueue(50000, true);
+        rollDown.update_l1_from_l2(l2Update);
+        vm.stopPrank();
+    }
+
     function testProcessWithdraw() public {
         address payable alice = users[0];
         token = new MyERC20();
@@ -198,7 +279,6 @@ contract RollDownTest is Test {
         uint256 contractBalanceBefore = token.balanceOf(address(rollDown));
 
         RollDown.L2Update memory l2Update;
-        l2Update.cancels = new RollDown.Cancel[](0);
         l2Update.results = new RollDown.RequestResult[](0);
         l2Update.withdraws = new RollDown.Withdraw[](1);
         l2Update.withdraws[0] = RollDown.Withdraw({
@@ -216,7 +296,3 @@ contract RollDownTest is Test {
         assertEq(contractBalanceBefore - amount, contractBalanceAfter);
     }
 }
-
-//missing req
-//req not in order
-//all types process

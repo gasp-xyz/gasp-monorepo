@@ -6,7 +6,7 @@ use crate::executor::execute::execute_block;
 use crate::rpc::Rpc;
 
 use bindings::{
-    mangata_task_manager::NewTaskCreatedFilter,
+    finalizer_task_manager::NewTaskCreatedFilter,
     shared_types::{G1Point, G2Point, TaskResponse},
 };
 use ethers::prelude::*;
@@ -42,7 +42,6 @@ pub struct Operator {
     el_contracts: ElContracts,
     bls_keypair: BlsKeypair,
     substrate_client_uri: String,
-    chain_id: u64,
     rpc: Rpc,
 }
 impl Operator {
@@ -50,8 +49,7 @@ impl Operator {
     pub async fn from_cli(cfg: &CliArgs) -> eyre::Result<Self> {
         let client = Arc::new(build_eth_client(cfg).await?);
         let avs_contracts = AvsContracts::build(cfg, client.clone()).await?;
-        let slasher = avs_contracts.slasher_address().await?;
-        let el_contracts = ElContracts::build(cfg, slasher, client.clone()).await?;
+        let el_contracts = ElContracts::build(cfg, client.clone()).await?;
 
         info!("Decrypting BLS keypair...");
         let bls_key = cfg.get_bls_keystore()?.into_bls_keypair()?;
@@ -68,7 +66,6 @@ impl Operator {
             substrate_client_uri: cfg.substrate_rpc_url.to_owned(),
             client,
             bls_keypair: bls_key,
-            chain_id: cfg.chain_id,
             rpc,
         })
     }
@@ -79,25 +76,33 @@ impl Operator {
         let mut stream: stream::EventStream<'_, _, NewTaskCreatedFilter, _> =
             evs.subscribe().await?;
 
-        while let Some(Ok(event)) = stream.next().await {
-            info!("Executing a Block for task: {:?}", event);
-            let proofs = self.execute_block(event.task.block_number.as_u32()).await?;
-            debug!("Block executed successfully");
+        while let Some(res) = stream.next().await {
+            match res {
+                Ok(event) => {
+                    info!("Executing a Block for task: {:?}", event);
+                    let proofs = self.execute_block(event.task.block_number.as_u32()).await?;
+                    debug!("Block executed successfully {:?}", proofs);
 
-            let payload = TaskResponse {
-                reference_task_index: event.task_index,
-                block_hash: proofs.0.as_fixed_bytes().to_owned(),
-                storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
-            };
+                    let payload = TaskResponse {
+                        reference_task_index: event.task_index,
+                        block_hash: proofs.0.as_fixed_bytes().to_owned(),
+                        storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
+                    };
 
-            let response = self
-                .rpc
-                .send_task_response(payload, &self.bls_keypair)
-                .await?;
+                    let response = self
+                        .rpc
+                        .send_task_response(payload, &self.bls_keypair)
+                        .await;
 
-            match response.error_for_status_ref() {
-                Err(e) => error!("{} - {}", e, response.text().await?),
-                Ok(_) => info!("Task finished successfuly and sent to AVS service"),
+                    match response {
+                        Ok(r) => match r.error_for_status_ref() {
+                            Err(e) => error!("{} - {}", e, r.text().await?),
+                            Ok(_) => info!("Task finished successfuly and sent to AVS service"),
+                        },
+                        Err(e) => error!("{}", e),
+                    }
+                }
+                Err(e) => tracing::error!("EthWs subscription error {:?}", e),
             }
         }
         Ok(())
@@ -131,17 +136,12 @@ impl Operator {
             .is_operator_registered(self.client.address())
             .await?;
 
-        let pubkey_status = self
-            .el_contracts
-            .has_operator_pubkey(self.client.address())
-            .await?;
-
         let id = self.avs_contracts.operator_id().await?;
 
         Ok(OperatorStatus {
             eth_address: self.client.address(),
             registered_with_eigen: el_status,
-            bls_key_registered: pubkey_status,
+            bls_key_registered: id.is_some(),
             bls_g1: EthConvert::to_g1(self.bls_keypair.public).unwrap_or_default(),
             bls_g2: EthConvert::to_g2(self.bls_keypair.public_g2()).unwrap_or_default(),
             operator_id: id,
@@ -163,10 +163,6 @@ impl Operator {
             );
 
             self.el_contracts
-                .register_bls_pub_key(&self.bls_keypair, self.chain_id)
-                .await?;
-
-            self.el_contracts
                 .register_as_operator_with_el(self.client.address())
                 .await?;
 
@@ -184,14 +180,15 @@ impl Operator {
             info!("Operator already opt-in AVS");
         } else {
             info!("Registering Operator {:x} with AVS", self.client.address());
+            let sig_params = self.el_contracts.get_delegation_signature_params().await?;
             self.avs_contracts
-                .register_with_avs(&self.bls_keypair)
+                .register_with_avs(&self.bls_keypair, sig_params)
                 .await?;
             let id = self
                 .avs_contracts
                 .operator_id()
                 .await?
-                .expect("should have operator id after success trx");
+                .expect("should have operator id after success register trx");
             info!("Sucessfully registered with AVS with id {:x}", id);
         }
         Ok(())
@@ -200,9 +197,7 @@ impl Operator {
     #[instrument(skip_all)]
     pub(crate) async fn opt_out_avs(&self) -> eyre::Result<()> {
         if self.avs_contracts.operator_id().await?.is_some() {
-            self.avs_contracts
-                .deregister_with_avs(&self.bls_keypair)
-                .await?;
+            self.avs_contracts.deregister_with_avs().await?;
             info!("Operator opted out with AVS sucessfully");
         } else {
             info!("Operator not opt in with AVS");

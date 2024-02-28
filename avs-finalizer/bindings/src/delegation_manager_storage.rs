@@ -682,6 +682,71 @@ pub mod delegation_manager_storage {
                     },],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("getOperatorShares"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getOperatorShares"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("strategies"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                    ::std::boxed::Box::new(
+                                        ::ethers::core::abi::ethabi::ParamType::Address,
+                                    ),
+                                ),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("contract IStrategy[]"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                ::std::boxed::Box::new(
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                ),
+                            ),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256[]"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("getWithdrawalDelay"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getWithdrawalDelay"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("strategies"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                ::std::boxed::Box::new(
+                                    ::ethers::core::abi::ethabi::ParamType::Address,
+                                ),
+                            ),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("contract IStrategy[]"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("increaseDelegatedShares"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("increaseDelegatedShares",),
@@ -797,6 +862,22 @@ pub mod delegation_manager_storage {
                         outputs: ::std::vec![],
                         constant: ::core::option::Option::None,
                         state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("minWithdrawalDelayBlocks"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("minWithdrawalDelayBlocks",),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
                     },],
                 ),
                 (
@@ -998,22 +1079,6 @@ pub mod delegation_manager_storage {
                     },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("stakeRegistry"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("stakeRegistry"),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("contract IStakeRegistryStub",),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("stakerNonce"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("stakerNonce"),
@@ -1074,6 +1139,28 @@ pub mod delegation_manager_storage {
                     },],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("strategyWithdrawalDelayBlocks"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("strategyWithdrawalDelayBlocks",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("undelegate"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("undelegate"),
@@ -1086,9 +1173,13 @@ pub mod delegation_manager_storage {
                         },],
                         outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
                             name: ::std::borrow::ToOwned::to_owned("withdrawalRoot"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                ::std::boxed::Box::new(
+                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                ),
+                            ),
                             internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ::std::borrow::ToOwned::to_owned("bytes32[]"),
                             ),
                         },],
                         constant: ::core::option::Option::None,
@@ -1111,24 +1202,27 @@ pub mod delegation_manager_storage {
                         state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
                     },],
                 ),
-                (
-                    ::std::borrow::ToOwned::to_owned("withdrawalDelayBlocks"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("withdrawalDelayBlocks",),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("uint256"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
             ]),
             events: ::core::convert::From::from([
+                (
+                    ::std::borrow::ToOwned::to_owned("MinWithdrawalDelayBlocksSet"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("MinWithdrawalDelayBlocksSet",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("previousValue"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("newValue"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
+                ),
                 (
                     ::std::borrow::ToOwned::to_owned("OperatorDetailsModified"),
                     ::std::vec![::ethers::core::abi::ethabi::Event {
@@ -1253,18 +1347,6 @@ pub mod delegation_manager_storage {
                     },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("StakeRegistrySet"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("StakeRegistrySet"),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
-                            name: ::std::borrow::ToOwned::to_owned("stakeRegistry"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            indexed: false,
-                        },],
-                        anonymous: false,
-                    },],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("StakerDelegated"),
                     ::std::vec![::ethers::core::abi::ethabi::Event {
                         name: ::std::borrow::ToOwned::to_owned("StakerDelegated"),
@@ -1322,22 +1404,15 @@ pub mod delegation_manager_storage {
                     },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("WithdrawalCompleted"),
+                    ::std::borrow::ToOwned::to_owned("StrategyWithdrawalDelayBlocksSet"),
                     ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("WithdrawalCompleted",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
-                            name: ::std::borrow::ToOwned::to_owned("withdrawalRoot"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            indexed: false,
-                        },],
-                        anonymous: false,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("WithdrawalDelayBlocksSet"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("WithdrawalDelayBlocksSet",),
+                        name: ::std::borrow::ToOwned::to_owned("StrategyWithdrawalDelayBlocksSet",),
                         inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
                             ::ethers::core::abi::ethabi::EventParam {
                                 name: ::std::borrow::ToOwned::to_owned("previousValue"),
                                 kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
@@ -1349,6 +1424,18 @@ pub mod delegation_manager_storage {
                                 indexed: false,
                             },
                         ],
+                        anonymous: false,
+                    },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("WithdrawalCompleted"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("WithdrawalCompleted",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
+                            name: ::std::borrow::ToOwned::to_owned("withdrawalRoot"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            indexed: false,
+                        },],
                         anonymous: false,
                     },],
                 ),
@@ -1677,6 +1764,28 @@ pub mod delegation_manager_storage {
                 .method_hash([70, 101, 188, 218], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `getOperatorShares` (0x90041347) function
+        pub fn get_operator_shares(
+            &self,
+            operator: ::ethers::core::types::Address,
+            strategies: ::std::vec::Vec<::ethers::core::types::Address>,
+        ) -> ::ethers::contract::builders::ContractCall<
+            M,
+            ::std::vec::Vec<::ethers::core::types::U256>,
+        > {
+            self.0
+                .method_hash([144, 4, 19, 71], (operator, strategies))
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `getWithdrawalDelay` (0x0449ca39) function
+        pub fn get_withdrawal_delay(
+            &self,
+            strategies: ::std::vec::Vec<::ethers::core::types::Address>,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::U256> {
+            self.0
+                .method_hash([4, 73, 202, 57], strategies)
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `increaseDelegatedShares` (0x28a573ae) function
         pub fn increase_delegated_shares(
             &self,
@@ -1713,6 +1822,14 @@ pub mod delegation_manager_storage {
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash([92, 254, 141, 44], withdrawals_to_queue)
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `minWithdrawalDelayBlocks` (0xc448feb8) function
+        pub fn min_withdrawal_delay_blocks(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::U256> {
+            self.0
+                .method_hash([196, 72, 254, 184], ())
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `modifyOperatorDetails` (0xf16172b0) function
@@ -1782,14 +1899,6 @@ pub mod delegation_manager_storage {
                 .method_hash([177, 52, 66, 113], ())
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `stakeRegistry` (0x68304835) function
-        pub fn stake_registry(
-            &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
-            self.0
-                .method_hash([104, 48, 72, 53], ())
-                .expect("method not found (this should never happen)")
-        }
         ///Calls the contract's `stakerNonce` (0x29c77d4f) function
         pub fn staker_nonce(
             &self,
@@ -1816,11 +1925,20 @@ pub mod delegation_manager_storage {
                 .method_hash([57, 183, 14, 56], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `strategyWithdrawalDelayBlocks` (0xc488375a) function
+        pub fn strategy_withdrawal_delay_blocks(
+            &self,
+            p0: ::ethers::core::types::Address,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::U256> {
+            self.0
+                .method_hash([196, 136, 55, 90], p0)
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `undelegate` (0xda8be864) function
         pub fn undelegate(
             &self,
             staker: ::ethers::core::types::Address,
-        ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::std::vec::Vec<[u8; 32]>> {
             self.0
                 .method_hash([218, 139, 232, 100], staker)
                 .expect("method not found (this should never happen)")
@@ -1834,13 +1952,15 @@ pub mod delegation_manager_storage {
                 .method_hash([153, 190, 129, 200], metadata_uri)
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `withdrawalDelayBlocks` (0x50f73e7c) function
-        pub fn withdrawal_delay_blocks(
+        ///Gets the contract's `MinWithdrawalDelayBlocksSet` event
+        pub fn min_withdrawal_delay_blocks_set_filter(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::U256> {
-            self.0
-                .method_hash([80, 247, 62, 124], ())
-                .expect("method not found (this should never happen)")
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            MinWithdrawalDelayBlocksSetFilter,
+        > {
+            self.0.event()
         }
         ///Gets the contract's `OperatorDetailsModified` event
         pub fn operator_details_modified_filter(
@@ -1889,13 +2009,6 @@ pub mod delegation_manager_storage {
         > {
             self.0.event()
         }
-        ///Gets the contract's `StakeRegistrySet` event
-        pub fn stake_registry_set_filter(
-            &self,
-        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, StakeRegistrySetFilter>
-        {
-            self.0.event()
-        }
         ///Gets the contract's `StakerDelegated` event
         pub fn staker_delegated_filter(
             &self,
@@ -1917,21 +2030,21 @@ pub mod delegation_manager_storage {
         {
             self.0.event()
         }
+        ///Gets the contract's `StrategyWithdrawalDelayBlocksSet` event
+        pub fn strategy_withdrawal_delay_blocks_set_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            StrategyWithdrawalDelayBlocksSetFilter,
+        > {
+            self.0.event()
+        }
         ///Gets the contract's `WithdrawalCompleted` event
         pub fn withdrawal_completed_filter(
             &self,
         ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, WithdrawalCompletedFilter>
         {
-            self.0.event()
-        }
-        ///Gets the contract's `WithdrawalDelayBlocksSet` event
-        pub fn withdrawal_delay_blocks_set_filter(
-            &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            WithdrawalDelayBlocksSetFilter,
-        > {
             self.0.event()
         }
         ///Gets the contract's `WithdrawalMigrated` event
@@ -1966,6 +2079,26 @@ pub mod delegation_manager_storage {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethevent(
+        name = "MinWithdrawalDelayBlocksSet",
+        abi = "MinWithdrawalDelayBlocksSet(uint256,uint256)"
+    )]
+    pub struct MinWithdrawalDelayBlocksSetFilter {
+        pub previous_value: ::ethers::core::types::U256,
+        pub new_value: ::ethers::core::types::U256,
     }
     #[derive(
         Clone,
@@ -2088,22 +2221,6 @@ pub mod delegation_manager_storage {
         Eq,
         Hash,
     )]
-    #[ethevent(name = "StakeRegistrySet", abi = "StakeRegistrySet(address)")]
-    pub struct StakeRegistrySetFilter {
-        pub stake_registry: ::ethers::core::types::Address,
-    }
-    #[derive(
-        Clone,
-        ::ethers::contract::EthEvent,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
     #[ethevent(name = "StakerDelegated", abi = "StakerDelegated(address,address)")]
     pub struct StakerDelegatedFilter {
         #[ethevent(indexed)]
@@ -2164,9 +2281,14 @@ pub mod delegation_manager_storage {
         Eq,
         Hash,
     )]
-    #[ethevent(name = "WithdrawalCompleted", abi = "WithdrawalCompleted(bytes32)")]
-    pub struct WithdrawalCompletedFilter {
-        pub withdrawal_root: [u8; 32],
+    #[ethevent(
+        name = "StrategyWithdrawalDelayBlocksSet",
+        abi = "StrategyWithdrawalDelayBlocksSet(address,uint256,uint256)"
+    )]
+    pub struct StrategyWithdrawalDelayBlocksSetFilter {
+        pub strategy: ::ethers::core::types::Address,
+        pub previous_value: ::ethers::core::types::U256,
+        pub new_value: ::ethers::core::types::U256,
     }
     #[derive(
         Clone,
@@ -2180,13 +2302,9 @@ pub mod delegation_manager_storage {
         Eq,
         Hash,
     )]
-    #[ethevent(
-        name = "WithdrawalDelayBlocksSet",
-        abi = "WithdrawalDelayBlocksSet(uint256,uint256)"
-    )]
-    pub struct WithdrawalDelayBlocksSetFilter {
-        pub previous_value: ::ethers::core::types::U256,
-        pub new_value: ::ethers::core::types::U256,
+    #[ethevent(name = "WithdrawalCompleted", abi = "WithdrawalCompleted(bytes32)")]
+    pub struct WithdrawalCompletedFilter {
+        pub withdrawal_root: [u8; 32],
     }
     #[derive(
         Clone,
@@ -2240,17 +2358,17 @@ pub mod delegation_manager_storage {
         Hash,
     )]
     pub enum DelegationManagerStorageEvents {
+        MinWithdrawalDelayBlocksSetFilter(MinWithdrawalDelayBlocksSetFilter),
         OperatorDetailsModifiedFilter(OperatorDetailsModifiedFilter),
         OperatorMetadataURIUpdatedFilter(OperatorMetadataURIUpdatedFilter),
         OperatorRegisteredFilter(OperatorRegisteredFilter),
         OperatorSharesDecreasedFilter(OperatorSharesDecreasedFilter),
         OperatorSharesIncreasedFilter(OperatorSharesIncreasedFilter),
-        StakeRegistrySetFilter(StakeRegistrySetFilter),
         StakerDelegatedFilter(StakerDelegatedFilter),
         StakerForceUndelegatedFilter(StakerForceUndelegatedFilter),
         StakerUndelegatedFilter(StakerUndelegatedFilter),
+        StrategyWithdrawalDelayBlocksSetFilter(StrategyWithdrawalDelayBlocksSetFilter),
         WithdrawalCompletedFilter(WithdrawalCompletedFilter),
-        WithdrawalDelayBlocksSetFilter(WithdrawalDelayBlocksSetFilter),
         WithdrawalMigratedFilter(WithdrawalMigratedFilter),
         WithdrawalQueuedFilter(WithdrawalQueuedFilter),
     }
@@ -2258,6 +2376,11 @@ pub mod delegation_manager_storage {
         fn decode_log(
             log: &::ethers::core::abi::RawLog,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::Error> {
+            if let Ok(decoded) = MinWithdrawalDelayBlocksSetFilter::decode_log(log) {
+                return Ok(
+                    DelegationManagerStorageEvents::MinWithdrawalDelayBlocksSetFilter(decoded),
+                );
+            }
             if let Ok(decoded) = OperatorDetailsModifiedFilter::decode_log(log) {
                 return Ok(DelegationManagerStorageEvents::OperatorDetailsModifiedFilter(decoded));
             }
@@ -2277,11 +2400,6 @@ pub mod delegation_manager_storage {
             if let Ok(decoded) = OperatorSharesIncreasedFilter::decode_log(log) {
                 return Ok(DelegationManagerStorageEvents::OperatorSharesIncreasedFilter(decoded));
             }
-            if let Ok(decoded) = StakeRegistrySetFilter::decode_log(log) {
-                return Ok(DelegationManagerStorageEvents::StakeRegistrySetFilter(
-                    decoded,
-                ));
-            }
             if let Ok(decoded) = StakerDelegatedFilter::decode_log(log) {
                 return Ok(DelegationManagerStorageEvents::StakerDelegatedFilter(
                     decoded,
@@ -2295,13 +2413,15 @@ pub mod delegation_manager_storage {
                     decoded,
                 ));
             }
+            if let Ok(decoded) = StrategyWithdrawalDelayBlocksSetFilter::decode_log(log) {
+                return Ok(
+                    DelegationManagerStorageEvents::StrategyWithdrawalDelayBlocksSetFilter(decoded),
+                );
+            }
             if let Ok(decoded) = WithdrawalCompletedFilter::decode_log(log) {
                 return Ok(DelegationManagerStorageEvents::WithdrawalCompletedFilter(
                     decoded,
                 ));
-            }
-            if let Ok(decoded) = WithdrawalDelayBlocksSetFilter::decode_log(log) {
-                return Ok(DelegationManagerStorageEvents::WithdrawalDelayBlocksSetFilter(decoded));
             }
             if let Ok(decoded) = WithdrawalMigratedFilter::decode_log(log) {
                 return Ok(DelegationManagerStorageEvents::WithdrawalMigratedFilter(
@@ -2319,6 +2439,9 @@ pub mod delegation_manager_storage {
     impl ::core::fmt::Display for DelegationManagerStorageEvents {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
+                Self::MinWithdrawalDelayBlocksSetFilter(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::OperatorDetailsModifiedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
@@ -2332,19 +2455,23 @@ pub mod delegation_manager_storage {
                 Self::OperatorSharesIncreasedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::StakeRegistrySetFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StakerDelegatedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StakerForceUndelegatedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::StakerUndelegatedFilter(element) => ::core::fmt::Display::fmt(element, f),
-                Self::WithdrawalCompletedFilter(element) => ::core::fmt::Display::fmt(element, f),
-                Self::WithdrawalDelayBlocksSetFilter(element) => {
+                Self::StrategyWithdrawalDelayBlocksSetFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
+                Self::WithdrawalCompletedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::WithdrawalMigratedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::WithdrawalQueuedFilter(element) => ::core::fmt::Display::fmt(element, f),
             }
+        }
+    }
+    impl ::core::convert::From<MinWithdrawalDelayBlocksSetFilter> for DelegationManagerStorageEvents {
+        fn from(value: MinWithdrawalDelayBlocksSetFilter) -> Self {
+            Self::MinWithdrawalDelayBlocksSetFilter(value)
         }
     }
     impl ::core::convert::From<OperatorDetailsModifiedFilter> for DelegationManagerStorageEvents {
@@ -2372,11 +2499,6 @@ pub mod delegation_manager_storage {
             Self::OperatorSharesIncreasedFilter(value)
         }
     }
-    impl ::core::convert::From<StakeRegistrySetFilter> for DelegationManagerStorageEvents {
-        fn from(value: StakeRegistrySetFilter) -> Self {
-            Self::StakeRegistrySetFilter(value)
-        }
-    }
     impl ::core::convert::From<StakerDelegatedFilter> for DelegationManagerStorageEvents {
         fn from(value: StakerDelegatedFilter) -> Self {
             Self::StakerDelegatedFilter(value)
@@ -2392,14 +2514,16 @@ pub mod delegation_manager_storage {
             Self::StakerUndelegatedFilter(value)
         }
     }
+    impl ::core::convert::From<StrategyWithdrawalDelayBlocksSetFilter>
+        for DelegationManagerStorageEvents
+    {
+        fn from(value: StrategyWithdrawalDelayBlocksSetFilter) -> Self {
+            Self::StrategyWithdrawalDelayBlocksSetFilter(value)
+        }
+    }
     impl ::core::convert::From<WithdrawalCompletedFilter> for DelegationManagerStorageEvents {
         fn from(value: WithdrawalCompletedFilter) -> Self {
             Self::WithdrawalCompletedFilter(value)
-        }
-    }
-    impl ::core::convert::From<WithdrawalDelayBlocksSetFilter> for DelegationManagerStorageEvents {
-        fn from(value: WithdrawalDelayBlocksSetFilter) -> Self {
-            Self::WithdrawalDelayBlocksSetFilter(value)
         }
     }
     impl ::core::convert::From<WithdrawalMigratedFilter> for DelegationManagerStorageEvents {
@@ -2799,6 +2923,44 @@ pub mod delegation_manager_storage {
     )]
     #[ethcall(name = "eigenPodManager", abi = "eigenPodManager()")]
     pub struct EigenPodManagerCall;
+    ///Container type for all input parameters for the `getOperatorShares` function with signature `getOperatorShares(address,address[])` and selector `0x90041347`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(
+        name = "getOperatorShares",
+        abi = "getOperatorShares(address,address[])"
+    )]
+    pub struct GetOperatorSharesCall {
+        pub operator: ::ethers::core::types::Address,
+        pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
+    }
+    ///Container type for all input parameters for the `getWithdrawalDelay` function with signature `getWithdrawalDelay(address[])` and selector `0x0449ca39`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "getWithdrawalDelay", abi = "getWithdrawalDelay(address[])")]
+    pub struct GetWithdrawalDelayCall {
+        pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
+    }
     ///Container type for all input parameters for the `increaseDelegatedShares` function with signature `increaseDelegatedShares(address,address,uint256)` and selector `0x28a573ae`
     #[derive(
         Clone,
@@ -2875,6 +3037,21 @@ pub mod delegation_manager_storage {
     pub struct MigrateQueuedWithdrawalsCall {
         pub withdrawals_to_queue: ::std::vec::Vec<DeprecatedStructQueuedWithdrawal>,
     }
+    ///Container type for all input parameters for the `minWithdrawalDelayBlocks` function with signature `minWithdrawalDelayBlocks()` and selector `0xc448feb8`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "minWithdrawalDelayBlocks", abi = "minWithdrawalDelayBlocks()")]
+    pub struct MinWithdrawalDelayBlocksCall;
     ///Container type for all input parameters for the `modifyOperatorDetails` function with signature `modifyOperatorDetails((address,address,uint32))` and selector `0xf16172b0`
     #[derive(
         Clone,
@@ -3001,21 +3178,6 @@ pub mod delegation_manager_storage {
     )]
     #[ethcall(name = "slasher", abi = "slasher()")]
     pub struct SlasherCall;
-    ///Container type for all input parameters for the `stakeRegistry` function with signature `stakeRegistry()` and selector `0x68304835`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "stakeRegistry", abi = "stakeRegistry()")]
-    pub struct StakeRegistryCall;
     ///Container type for all input parameters for the `stakerNonce` function with signature `stakerNonce(address)` and selector `0x29c77d4f`
     #[derive(
         Clone,
@@ -3066,6 +3228,24 @@ pub mod delegation_manager_storage {
     )]
     #[ethcall(name = "strategyManager", abi = "strategyManager()")]
     pub struct StrategyManagerCall;
+    ///Container type for all input parameters for the `strategyWithdrawalDelayBlocks` function with signature `strategyWithdrawalDelayBlocks(address)` and selector `0xc488375a`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(
+        name = "strategyWithdrawalDelayBlocks",
+        abi = "strategyWithdrawalDelayBlocks(address)"
+    )]
+    pub struct StrategyWithdrawalDelayBlocksCall(pub ::ethers::core::types::Address);
     ///Container type for all input parameters for the `undelegate` function with signature `undelegate(address)` and selector `0xda8be864`
     #[derive(
         Clone,
@@ -3103,21 +3283,6 @@ pub mod delegation_manager_storage {
     pub struct UpdateOperatorMetadataURICall {
         pub metadata_uri: ::std::string::String,
     }
-    ///Container type for all input parameters for the `withdrawalDelayBlocks` function with signature `withdrawalDelayBlocks()` and selector `0x50f73e7c`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "withdrawalDelayBlocks", abi = "withdrawalDelayBlocks()")]
-    pub struct WithdrawalDelayBlocksCall;
     ///Container type for all of the contract's call
     #[derive(
         Clone,
@@ -3150,10 +3315,13 @@ pub mod delegation_manager_storage {
         DomainSeparator(DomainSeparatorCall),
         EarningsReceiver(EarningsReceiverCall),
         EigenPodManager(EigenPodManagerCall),
+        GetOperatorShares(GetOperatorSharesCall),
+        GetWithdrawalDelay(GetWithdrawalDelayCall),
         IncreaseDelegatedShares(IncreaseDelegatedSharesCall),
         IsDelegated(IsDelegatedCall),
         IsOperator(IsOperatorCall),
         MigrateQueuedWithdrawals(MigrateQueuedWithdrawalsCall),
+        MinWithdrawalDelayBlocks(MinWithdrawalDelayBlocksCall),
         ModifyOperatorDetails(ModifyOperatorDetailsCall),
         OperatorDetails(OperatorDetailsCall),
         OperatorShares(OperatorSharesCall),
@@ -3161,13 +3329,12 @@ pub mod delegation_manager_storage {
         QueueWithdrawals(QueueWithdrawalsCall),
         RegisterAsOperator(RegisterAsOperatorCall),
         Slasher(SlasherCall),
-        StakeRegistry(StakeRegistryCall),
         StakerNonce(StakerNonceCall),
         StakerOptOutWindowBlocks(StakerOptOutWindowBlocksCall),
         StrategyManager(StrategyManagerCall),
+        StrategyWithdrawalDelayBlocks(StrategyWithdrawalDelayBlocksCall),
         Undelegate(UndelegateCall),
         UpdateOperatorMetadataURI(UpdateOperatorMetadataURICall),
-        WithdrawalDelayBlocks(WithdrawalDelayBlocksCall),
     }
     impl ::ethers::core::abi::AbiDecode for DelegationManagerStorageCalls {
         fn decode(
@@ -3273,6 +3440,16 @@ pub mod delegation_manager_storage {
                 return Ok(Self::EigenPodManager(decoded));
             }
             if let Ok(decoded) =
+                <GetOperatorSharesCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::GetOperatorShares(decoded));
+            }
+            if let Ok(decoded) =
+                <GetWithdrawalDelayCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::GetWithdrawalDelay(decoded));
+            }
+            if let Ok(decoded) =
                 <IncreaseDelegatedSharesCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::IncreaseDelegatedShares(decoded));
@@ -3287,6 +3464,11 @@ pub mod delegation_manager_storage {
                 <MigrateQueuedWithdrawalsCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::MigrateQueuedWithdrawals(decoded));
+            }
+            if let Ok(decoded) =
+                <MinWithdrawalDelayBlocksCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::MinWithdrawalDelayBlocks(decoded));
             }
             if let Ok(decoded) =
                 <ModifyOperatorDetailsCall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -3321,10 +3503,6 @@ pub mod delegation_manager_storage {
             if let Ok(decoded) = <SlasherCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Slasher(decoded));
             }
-            if let Ok(decoded) = <StakeRegistryCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::StakeRegistry(decoded));
-            }
             if let Ok(decoded) = <StakerNonceCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::StakerNonce(decoded));
             }
@@ -3338,6 +3516,11 @@ pub mod delegation_manager_storage {
             {
                 return Ok(Self::StrategyManager(decoded));
             }
+            if let Ok(decoded) =
+                <StrategyWithdrawalDelayBlocksCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::StrategyWithdrawalDelayBlocks(decoded));
+            }
             if let Ok(decoded) = <UndelegateCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Undelegate(decoded));
             }
@@ -3345,11 +3528,6 @@ pub mod delegation_manager_storage {
                 <UpdateOperatorMetadataURICall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::UpdateOperatorMetadataURI(decoded));
-            }
-            if let Ok(decoded) =
-                <WithdrawalDelayBlocksCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::WithdrawalDelayBlocks(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
         }
@@ -3405,12 +3583,19 @@ pub mod delegation_manager_storage {
                 Self::DomainSeparator(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::EarningsReceiver(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::EigenPodManager(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::GetOperatorShares(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::GetWithdrawalDelay(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::IncreaseDelegatedShares(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::IsDelegated(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::IsOperator(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::MigrateQueuedWithdrawals(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
+                Self::MinWithdrawalDelayBlocks(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::ModifyOperatorDetails(element) => {
@@ -3426,17 +3611,16 @@ pub mod delegation_manager_storage {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::Slasher(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::StakeRegistry(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::StakerNonce(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::StakerOptOutWindowBlocks(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::StrategyManager(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::Undelegate(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::UpdateOperatorMetadataURI(element) => {
+                Self::StrategyWithdrawalDelayBlocks(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::WithdrawalDelayBlocks(element) => {
+                Self::Undelegate(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::UpdateOperatorMetadataURI(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
             }
@@ -3473,10 +3657,13 @@ pub mod delegation_manager_storage {
                 Self::DomainSeparator(element) => ::core::fmt::Display::fmt(element, f),
                 Self::EarningsReceiver(element) => ::core::fmt::Display::fmt(element, f),
                 Self::EigenPodManager(element) => ::core::fmt::Display::fmt(element, f),
+                Self::GetOperatorShares(element) => ::core::fmt::Display::fmt(element, f),
+                Self::GetWithdrawalDelay(element) => ::core::fmt::Display::fmt(element, f),
                 Self::IncreaseDelegatedShares(element) => ::core::fmt::Display::fmt(element, f),
                 Self::IsDelegated(element) => ::core::fmt::Display::fmt(element, f),
                 Self::IsOperator(element) => ::core::fmt::Display::fmt(element, f),
                 Self::MigrateQueuedWithdrawals(element) => ::core::fmt::Display::fmt(element, f),
+                Self::MinWithdrawalDelayBlocks(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ModifyOperatorDetails(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorDetails(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorShares(element) => ::core::fmt::Display::fmt(element, f),
@@ -3484,13 +3671,14 @@ pub mod delegation_manager_storage {
                 Self::QueueWithdrawals(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RegisterAsOperator(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Slasher(element) => ::core::fmt::Display::fmt(element, f),
-                Self::StakeRegistry(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StakerNonce(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StakerOptOutWindowBlocks(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StrategyManager(element) => ::core::fmt::Display::fmt(element, f),
+                Self::StrategyWithdrawalDelayBlocks(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::Undelegate(element) => ::core::fmt::Display::fmt(element, f),
                 Self::UpdateOperatorMetadataURI(element) => ::core::fmt::Display::fmt(element, f),
-                Self::WithdrawalDelayBlocks(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
@@ -3600,6 +3788,16 @@ pub mod delegation_manager_storage {
             Self::EigenPodManager(value)
         }
     }
+    impl ::core::convert::From<GetOperatorSharesCall> for DelegationManagerStorageCalls {
+        fn from(value: GetOperatorSharesCall) -> Self {
+            Self::GetOperatorShares(value)
+        }
+    }
+    impl ::core::convert::From<GetWithdrawalDelayCall> for DelegationManagerStorageCalls {
+        fn from(value: GetWithdrawalDelayCall) -> Self {
+            Self::GetWithdrawalDelay(value)
+        }
+    }
     impl ::core::convert::From<IncreaseDelegatedSharesCall> for DelegationManagerStorageCalls {
         fn from(value: IncreaseDelegatedSharesCall) -> Self {
             Self::IncreaseDelegatedShares(value)
@@ -3618,6 +3816,11 @@ pub mod delegation_manager_storage {
     impl ::core::convert::From<MigrateQueuedWithdrawalsCall> for DelegationManagerStorageCalls {
         fn from(value: MigrateQueuedWithdrawalsCall) -> Self {
             Self::MigrateQueuedWithdrawals(value)
+        }
+    }
+    impl ::core::convert::From<MinWithdrawalDelayBlocksCall> for DelegationManagerStorageCalls {
+        fn from(value: MinWithdrawalDelayBlocksCall) -> Self {
+            Self::MinWithdrawalDelayBlocks(value)
         }
     }
     impl ::core::convert::From<ModifyOperatorDetailsCall> for DelegationManagerStorageCalls {
@@ -3655,11 +3858,6 @@ pub mod delegation_manager_storage {
             Self::Slasher(value)
         }
     }
-    impl ::core::convert::From<StakeRegistryCall> for DelegationManagerStorageCalls {
-        fn from(value: StakeRegistryCall) -> Self {
-            Self::StakeRegistry(value)
-        }
-    }
     impl ::core::convert::From<StakerNonceCall> for DelegationManagerStorageCalls {
         fn from(value: StakerNonceCall) -> Self {
             Self::StakerNonce(value)
@@ -3675,6 +3873,11 @@ pub mod delegation_manager_storage {
             Self::StrategyManager(value)
         }
     }
+    impl ::core::convert::From<StrategyWithdrawalDelayBlocksCall> for DelegationManagerStorageCalls {
+        fn from(value: StrategyWithdrawalDelayBlocksCall) -> Self {
+            Self::StrategyWithdrawalDelayBlocks(value)
+        }
+    }
     impl ::core::convert::From<UndelegateCall> for DelegationManagerStorageCalls {
         fn from(value: UndelegateCall) -> Self {
             Self::Undelegate(value)
@@ -3683,11 +3886,6 @@ pub mod delegation_manager_storage {
     impl ::core::convert::From<UpdateOperatorMetadataURICall> for DelegationManagerStorageCalls {
         fn from(value: UpdateOperatorMetadataURICall) -> Self {
             Self::UpdateOperatorMetadataURI(value)
-        }
-    }
-    impl ::core::convert::From<WithdrawalDelayBlocksCall> for DelegationManagerStorageCalls {
-        fn from(value: WithdrawalDelayBlocksCall) -> Self {
-            Self::WithdrawalDelayBlocks(value)
         }
     }
     ///Container type for all return fields from the `DELEGATION_APPROVAL_TYPEHASH` function with signature `DELEGATION_APPROVAL_TYPEHASH()` and selector `0x04a4f979`
@@ -3900,6 +4098,34 @@ pub mod delegation_manager_storage {
         Hash,
     )]
     pub struct EigenPodManagerReturn(pub ::ethers::core::types::Address);
+    ///Container type for all return fields from the `getOperatorShares` function with signature `getOperatorShares(address,address[])` and selector `0x90041347`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct GetOperatorSharesReturn(pub ::std::vec::Vec<::ethers::core::types::U256>);
+    ///Container type for all return fields from the `getWithdrawalDelay` function with signature `getWithdrawalDelay(address[])` and selector `0x0449ca39`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct GetWithdrawalDelayReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `isDelegated` function with signature `isDelegated(address)` and selector `0x3e28391d`
     #[derive(
         Clone,
@@ -3928,6 +4154,20 @@ pub mod delegation_manager_storage {
         Hash,
     )]
     pub struct IsOperatorReturn(pub bool);
+    ///Container type for all return fields from the `minWithdrawalDelayBlocks` function with signature `minWithdrawalDelayBlocks()` and selector `0xc448feb8`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct MinWithdrawalDelayBlocksReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `operatorDetails` function with signature `operatorDetails(address)` and selector `0xc5e480db`
     #[derive(
         Clone,
@@ -3998,20 +4238,6 @@ pub mod delegation_manager_storage {
         Hash,
     )]
     pub struct SlasherReturn(pub ::ethers::core::types::Address);
-    ///Container type for all return fields from the `stakeRegistry` function with signature `stakeRegistry()` and selector `0x68304835`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct StakeRegistryReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `stakerNonce` function with signature `stakerNonce(address)` and selector `0x29c77d4f`
     #[derive(
         Clone,
@@ -4054,6 +4280,20 @@ pub mod delegation_manager_storage {
         Hash,
     )]
     pub struct StrategyManagerReturn(pub ::ethers::core::types::Address);
+    ///Container type for all return fields from the `strategyWithdrawalDelayBlocks` function with signature `strategyWithdrawalDelayBlocks(address)` and selector `0xc488375a`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct StrategyWithdrawalDelayBlocksReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `undelegate` function with signature `undelegate(address)` and selector `0xda8be864`
     #[derive(
         Clone,
@@ -4068,20 +4308,6 @@ pub mod delegation_manager_storage {
         Hash,
     )]
     pub struct UndelegateReturn {
-        pub withdrawal_root: [u8; 32],
+        pub withdrawal_root: ::std::vec::Vec<[u8; 32]>,
     }
-    ///Container type for all return fields from the `withdrawalDelayBlocks` function with signature `withdrawalDelayBlocks()` and selector `0x50f73e7c`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct WithdrawalDelayBlocksReturn(pub ::ethers::core::types::U256);
 }

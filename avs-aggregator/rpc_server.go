@@ -6,10 +6,11 @@ import (
 	"errors"
 	"net/http"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/MangataTaskManager"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
+	"github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 )
 
@@ -57,7 +58,12 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 		case TaskResponseDigestNotFoundError500, CallToGetCheckSignaturesIndicesFailed500:
 			status = http.StatusInternalServerError
 		default:
-			status = http.StatusBadRequest
+			switch err.Error() {
+			case blsagg.TaskNotFoundErrorFn(response.TaskResponse.ReferenceTaskIndex).Error():
+				status = http.StatusNotFound
+			default:
+				status = http.StatusBadRequest
+			}
 		}
 		http.Error(w, err.Error(), status)
 		return
@@ -65,7 +71,7 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 }
 
 type SignedTaskResponse struct {
-	TaskResponse taskmanager.IMangataTaskManagerTaskResponse
+	TaskResponse taskmanager.IFinalizerTaskManagerTaskResponse
 	BlsSignature bls.Signature
 	OperatorId   bls.OperatorId
 }
@@ -87,7 +93,7 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 	}
 	agg.taskResponsesMu.Lock()
 	if _, ok := agg.taskResponses[taskIndex]; !ok {
-		agg.taskResponses[taskIndex] = make(map[sdktypes.TaskResponseDigest]taskmanager.IMangataTaskManagerTaskResponse)
+		agg.taskResponses[taskIndex] = make(map[sdktypes.TaskResponseDigest]taskmanager.IFinalizerTaskManagerTaskResponse)
 	}
 	if _, ok := agg.taskResponses[taskIndex][taskResponseDigest]; !ok {
 		agg.taskResponses[taskIndex][taskResponseDigest] = signedTaskResponse.TaskResponse

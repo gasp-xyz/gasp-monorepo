@@ -43,6 +43,7 @@ where
     .map_err(|e| eyre!(e))?
     .expect("header exists, block should also exist; qed")
     .block;
+    let block_hash = block.hash();
 
     // A digest item gets added when the runtime is processing the block, so we need to pop
     // the last one to be consistent with what a gossiped block would contain.
@@ -64,5 +65,5 @@ where
     )?;
     let hash = Keccak256::hash_of(&proof);
 
-    Ok((block.hash().into(), hash))
+    Ok((block_hash.into(), hash))
 }

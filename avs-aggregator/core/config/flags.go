@@ -67,23 +67,11 @@ var (
 	}
 
 	// Deployment
-	BlsOperatorStateRetrieverFlag = cli.StringFlag{
-		Name:     "bls-operator-state-retriever-addr",
-		Usage:    "Address of the BLS Operator State Retriever",
+	AvsRegistryCoordinatorFlag = cli.StringFlag{
+		Name:     "avs-registry-coordinator-addr",
+		Usage:    "Address of the AVS Registry Coordinator",
 		Required: true,
-		EnvVar:   "BLS_OPERATOR_STATE_RETRIEVER_ADDR",
-	}
-	BlsCompendiumFlag = cli.StringFlag{
-		Name:     "bls-compendium-addr",
-		Usage:    "Address of the BLS Public Key Compendium",
-		Required: true,
-		EnvVar:   "BLS_COMPENDIUM_ADDR",
-	}
-	AvsServiceManagerFlag = cli.StringFlag{
-		Name:     "avs-service-manager-addr",
-		Usage:    "Address of the AVS Service Manager",
-		Required: true,
-		EnvVar:   "AVS_SERVICE_MANAGER_ADDR",
+		EnvVar:   "AVS_REGISTRY_COORDINATOR_ADDR",
 	}
 
 	// The files for encrypted private keys.

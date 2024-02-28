@@ -4,3 +4,5 @@
 Dockerfile*
 **/target
 !**/target/release/main
+ops/**/data
+.env
