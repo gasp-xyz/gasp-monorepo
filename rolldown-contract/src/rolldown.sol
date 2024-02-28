@@ -56,13 +56,13 @@ contract RollDown {
     enum PendingRequestType{ DEPOSIT, WITHDRAWAL, CANCEL_RESOLUTION, L2_UPDATES_TO_REMOVE}
 
     struct L1Update {
-			uint256 lastProccessedRequestOnL1;
-			uint256 lastAcceptedRequestOnL1;
-			uint256 offset;
-			PendingRequestType[] order;
-			Deposit[] pendingDeposits;
-			CancelResolution[] pendingCancelResultions;
-			L2UpdatesToRemove[] pendingL2UpdatesToRemove;
+      uint256 lastProccessedRequestOnL1;
+      uint256 lastAcceptedRequestOnL1;
+      uint256 offset;
+      PendingRequestType[] order;
+      Deposit[] pendingDeposits;
+      CancelResolution[] pendingCancelResultions;
+      L2UpdatesToRemove[] pendingL2UpdatesToRemove;
     }
 
     mapping(uint256 => CancelResolution) public cancelResolutions;
@@ -72,17 +72,17 @@ contract RollDown {
 
     enum UpdateType{ DEPOSIT, WITHDRAWAL, INDEX_UPDATE, CANCEL_RESOLUTION}
 
-		struct RequestResult {
-			uint256 requestId;
+    struct RequestResult {
+      uint256 requestId;
       UpdateType updateType;
-			bool status;
-		}
+      bool status;
+    }
 
-		struct L2Update {
-			Cancel[] cancles;
+    struct L2Update {
+      Cancel[] cancles;
       Withdraw[] withdraws;
-			RequestResult[] results;
-		}
+      RequestResult[] results;
+    }
 
     struct Cancel {
         uint256 l2RequestId;
