@@ -82,7 +82,7 @@ impl Operator {
                     tokio::time::sleep(std::time::Duration::new(5, 0)).await;
                     info!("Executing a Block for task: {:?}", event);
                     let proofs = self.execute_block(event.task.block_number.as_u32()).await?;
-                    debug!("Block executed successfully");
+                    debug!("Block executed successfully {:?}", proofs);
 
                     let payload = TaskResponse {
                         reference_task_index: event.task_index,
