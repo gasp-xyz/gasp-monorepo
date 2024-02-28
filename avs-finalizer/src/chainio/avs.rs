@@ -19,7 +19,7 @@ use crate::{
     crypto::{bn254::BlsKeypair, EthConvert},
 };
 
-use super::Client;
+use super::{map_revert, Client};
 
 pub struct AvsContracts {
     service_manager: FinalizerServiceManager<Client>,
@@ -107,7 +107,7 @@ impl AvsContracts {
             sig_params,
         );
 
-        let pending = trx.send().await?;
+        let pending = trx.send().await.map_err(map_revert)?;
         let receipt = pending.await?;
 
         if Some(U64::zero()) == receipt.as_ref().and_then(|r| r.status) {
@@ -124,7 +124,7 @@ impl AvsContracts {
             .registry
             .deregister_operator(AvsContracts::QUORUM.into());
 
-        let pending = trx.send().await?;
+        let pending = trx.send().await.map_err(map_revert)?;
         let receipt = pending.await?;
 
         receipt.ok_or_eyre("register_with_avs trx failed")

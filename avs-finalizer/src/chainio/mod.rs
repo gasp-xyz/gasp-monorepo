@@ -6,12 +6,15 @@ use bindings::{
     strategy_manager::StrategyManager,
 };
 use ethers::{
+    contract::{ContractError, EthError},
     middleware::{MiddlewareBuilder, NonceManagerMiddleware, SignerMiddleware},
     providers::{Http, Middleware, Provider},
     signers::{LocalWallet, Signer},
     types::{Address, Chain, TransactionRequest},
     utils::parse_ether,
 };
+use eyre::eyre;
+use sp_core::hexdisplay::AsBytesRef;
 use tracing::{debug, info, instrument};
 
 use crate::cli::CliArgs;
@@ -32,6 +35,17 @@ pub(crate) async fn build_eth_client(cfg: &CliArgs) -> eyre::Result<Client> {
     let client = Client::new_with_provider_chain(nonce, wallet.with_chain_id(cfg.chain_id)).await?;
 
     Ok(client)
+}
+
+pub(crate) fn map_revert(e: ContractError<Client>) -> eyre::Report {
+    match e {
+        ContractError::Revert(b) => eyre!(
+            "Contract call reverted with message: {}",
+            String::decode_with_selector(b.as_bytes_ref())
+                .unwrap_or("cannot parse message".to_string())
+        ),
+        _ => eyre::Report::new(e),
+    }
 }
 
 #[instrument(skip_all)]

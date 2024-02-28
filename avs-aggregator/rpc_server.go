@@ -10,6 +10,7 @@ import (
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
+	"github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 )
 
@@ -57,7 +58,12 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 		case TaskResponseDigestNotFoundError500, CallToGetCheckSignaturesIndicesFailed500:
 			status = http.StatusInternalServerError
 		default:
-			status = http.StatusBadRequest
+			switch err.Error() {
+			case blsagg.TaskNotFoundErrorFn(response.TaskResponse.ReferenceTaskIndex).Error():
+				status = http.StatusNotFound
+			default:
+				status = http.StatusBadRequest
+			}
 		}
 		http.Error(w, err.Error(), status)
 		return

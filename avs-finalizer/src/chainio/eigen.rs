@@ -16,7 +16,7 @@ use sp_core::U256;
 
 use crate::cli::CliArgs;
 
-use super::Client;
+use super::{map_revert, Client};
 
 pub struct ElContracts {
     delegation: DelegationManager<Client>,
@@ -70,7 +70,7 @@ impl ElContracts {
             .delegation
             .register_as_operator(op_details, String::new());
 
-        let pending = tx.send().await?;
+        let pending = tx.send().await.map_err(map_revert)?;
         let receipt = pending.await?;
 
         receipt.ok_or_eyre("register_as_operator_with_el trx failed")
