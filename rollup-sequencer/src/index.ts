@@ -36,7 +36,7 @@ async function main() {
     }
   }
 
-  const api = await Mangata.instance([process.env.MANGATA_URL!]).api();
+  const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
 
   const keyring = new Keyring({ type: "sr25519" });
   const collator = keyring.addFromUri(process.env.MNEMONIC!)
