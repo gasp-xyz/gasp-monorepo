@@ -70,13 +70,15 @@ Thumbs.db
 
 # custom
 ops/**/data
-.env
-tests/integration/anvil-state.json
+
+*.gas-snapshot
+contracts/script/output/*
 
 # foundry related ignore
 # reference: https://github.com/PaulRBerg/foundry-template/blob/main/.gitignore
 cache
 coverage
+output
 out
 !broadcast
 **/broadcast/*

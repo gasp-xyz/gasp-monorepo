@@ -1,0 +1,16 @@
+services:
+  rolldown:
+    image: mangatasolutions/rolldown-contract:local
+    build: .
+    depends_on:
+      anvil:
+        condition: service_healthy
+      avs-3:
+        condition: service_completed_successfully
+    command:
+     - script
+     - script/rolldown.s.sol:MyScript
+     - --fork-url
+     - http://anvil:8545
+     - --broadcast
+     - -vvvv

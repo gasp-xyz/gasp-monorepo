@@ -129,7 +129,7 @@ contract RollDown {
 
 
     function getUpdateForL2() public view returns (L1Update memory) {
-        return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter);
+        return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
     }
 
     function getOrderOfRequestsOriginatingOnL2(L2Update calldata update) private returns (UpdateType[] memory){
