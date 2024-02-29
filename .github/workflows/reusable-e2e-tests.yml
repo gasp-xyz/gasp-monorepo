@@ -49,8 +49,8 @@ jobs:
         working-directory: ops/parachain-launch-mangata-node/
         run: npx @open-web3/parachain-launch generate config.yml -y
 
-      #- name: Submodules setup
-      #  run: git submodule update --init --recursive
+      - name: Submodules setup
+        run: git submodule update --init --recursive
 
       #- name: build finalizer
       #  working-directory: avs-finalizer/
