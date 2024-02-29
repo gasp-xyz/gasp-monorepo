@@ -1,4 +1,4 @@
-name: Pull Request
+name: Run e2e
 on:
   pull_request:
     types: [opened, synchronize, closed]
