@@ -38,3 +38,11 @@ finalizerEnvSecrets:
   BLS_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-operator-1-bls-password
   ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-rpc-url
   ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-ws-url
+
+updaterEnv:
+  MANGATA_URL: wss://collator-01-ws-rollup-testnet.mangata.online
+  MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
+
+sequencerEnv:
+  MANGATA_URL: wss://collator-01-ws-rollup-testnet.mangata.online
+  MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
