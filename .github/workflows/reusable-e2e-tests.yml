@@ -44,6 +44,7 @@ jobs:
     runs-on: [ubuntu-latest]
     needs: [build-and-test]
     steps:
+      - uses: actions/checkout@v4
       - name: Build parachain launch
         working-directory: ops/parachain-launch-mangata-node/
         run: npx @open-web3/parachain-launch generate config.yml
