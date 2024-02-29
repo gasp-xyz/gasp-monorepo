@@ -7,7 +7,6 @@ services:
         condition: service_completed_successfully
       parachain-2110-0:
         condition: service_started
-    # so it can access parachain-launch hosted env
     environment:
       MANGATA_NODE_URL: ${ROLLUP_UPDATER_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}
       ETH_CHAIN_URL: ${ROLLUP_UPDATER_ETH_CHAIN_URL:-wss://ethereum.publicnode.com}

@@ -6,7 +6,6 @@ services:
         condition: service_completed_successfully
       parachain-2110-0:
         condition: service_started
-    # so it can access parachain-launch hosted env
     build: .
     environment:
       MANGATA_URL: ${ROLLUP_SEQUENCER_MANGATA_URL:-wss://collator-01-ws-rococo.mangata.online}
