@@ -32,22 +32,22 @@ jobs:
         id: set_vars
         run: echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
   
-  build-and-test:
-    needs: [init]
-    name: Build
-    uses: ./.github/workflows/reusable-build-and-test.yml
-    secrets: inherit
-    with:
-      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+  #build-and-test:
+    #needs: [init]
+    #name: Build
+    #uses: ./.github/workflows/reusable-build-and-test.yml
+    #secrets: inherit
+    #with:
+      #version: ${{ needs.init.outputs.GLOBAL_VERSION }}
 
   start-env:
     runs-on: [ubuntu-latest]
-    needs: [build-and-test]
+    needs: [init]
     steps:
       - uses: actions/checkout@v4
       - name: Build parachain launch
         working-directory: ops/parachain-launch-mangata-node/
-        run: npx @open-web3/parachain-launch generate config.yml
+        run: npx @open-web3/parachain-launch generate config.yml -y
 
       - name: Start env
         run: docker compose up --build --wait 
