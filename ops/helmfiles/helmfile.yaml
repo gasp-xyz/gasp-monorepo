@@ -86,7 +86,7 @@ releases:
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
-        ethChainUrl: {{ .Values.updaterEthChainUrl | expandSecretRefs | quote }}
+        ethChainUrl: {{ .Values.updaterEthChainUrl | fetchSecretValue | quote }}
         env: {{ .Values.updaterEnv | toYaml | nindent 10 }}
   
   - name: rollup-sequencer
@@ -99,7 +99,7 @@ releases:
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         mnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
-        ethChainUrl:  {{ .Values.sequencerEthChainUrl | expandSecretRefs | quote }}
+        ethChainUrl:  {{ .Values.sequencerEthChainUrl | fetchSecretValue | quote }}
         env: {{ .Values.sequencerEnv | toYaml | nindent 10 }}
   - name: rollup-sequencer-2
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
@@ -111,5 +111,5 @@ releases:
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         mnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
-        ethChainUrl:  {{ .Values.sequencerEthChainUrl | expandSecretRefs | quote }}
+        ethChainUrl:  {{ .Values.sequencerEthChainUrl | fetchSecretValue | quote }}
         env: {{ .Values.sequencerEnv | toYaml | nindent 10 }}
