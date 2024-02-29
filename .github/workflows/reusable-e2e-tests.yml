@@ -44,10 +44,9 @@ jobs:
     runs-on: [ubuntu-latest]
     needs: [init]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Build parachain launch
         working-directory: ops/parachain-launch-mangata-node/

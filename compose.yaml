@@ -10,4 +10,4 @@ include:
   - path: ./rollup-sequencer/compose.yml
   - path: ./rollup-updater/compose.yml
   - path: ./rolldown-contract/compose.yml
-  #- path: ./contracts/compose.yml
+  - path: ./contracts/compose.yml

@@ -11,8 +11,8 @@ services:
     depends_on:
       anvil:
         condition: service_healthy
-      #avs-3:
-        #condition: service_completed_successfully
+      avs-3:
+        condition: service_completed_successfully
     platform: linux/amd64
     environment:
       - RUST_LOG=info
