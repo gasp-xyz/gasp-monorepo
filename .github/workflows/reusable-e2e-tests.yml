@@ -49,15 +49,19 @@ jobs:
         working-directory: ops/parachain-launch-mangata-node/
         run: npx @open-web3/parachain-launch generate config.yml -y
 
-      - name: Submodules setup
-        run: git submodule update --init --recursive
+      #- name: Submodules setup
+      #  run: git submodule update --init --recursive
 
-      - name: build finalizer
-        working-directory: avs-finalizer/
-        run: cargo +stable build --release
+      #- name: build finalizer
+      #  working-directory: avs-finalizer/
+      #  run: cargo +stable build --release
 
       - name: Start env
-        run: docker compose up --build --wait 
+        run: |
+          export AVS_AGGREGATOR_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
+          export AVS_FINALIZER_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
+          docker compose up --build --wait 
+        
 
       - name: Sleep for 2 minutes
         run: sleep 120s
