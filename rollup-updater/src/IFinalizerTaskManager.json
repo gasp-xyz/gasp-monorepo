@@ -1,0 +1,1313 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "taskIndex",
+          "type": "uint32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "blockNumber",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint32",
+              "name": "taskCreatedBlock",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes",
+              "name": "quorumNumbers",
+              "type": "bytes"
+            },
+            {
+              "internalType": "uint32",
+              "name": "quorumThresholdPercentage",
+              "type": "uint32"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IFinalizerTaskManager.Task",
+          "name": "task",
+          "type": "tuple"
+        }
+      ],
+      "name": "NewTaskCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "taskIndex",
+          "type": "uint32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "blockHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "TaskCompleted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "referenceTaskIndex",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "blockHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "storageProofHash",
+              "type": "bytes32"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IFinalizerTaskManager.TaskResponse",
+          "name": "taskResponse",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "taskResponsedBlock",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "hashOfNonSigners",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint96[]",
+              "name": "quroumStakeTotals",
+              "type": "uint96[]"
+            },
+            {
+              "internalType": "uint96[]",
+              "name": "quroumStakeSigned",
+              "type": "uint96[]"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IFinalizerTaskManager.TaskResponseMetadata",
+          "name": "taskResponseMetadata",
+          "type": "tuple"
+        }
+      ],
+      "name": "TaskResponded",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint32",
+          "name": "quorumThresholdPercentage",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bytes",
+          "name": "quorumNumbers",
+          "type": "bytes"
+        }
+      ],
+      "name": "createNewTask",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getTaskResponseWindowBlock",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "taskNumber",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "createNewTask(uint256,uint32,bytes)": "6b92787e",
+    "getTaskResponseWindowBlock()": "f5c9899d",
+    "taskNumber()": "72d18e8d"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.12+commit.f00d7308\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint32\",\"name\":\"taskIndex\",\"type\":\"uint32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"blockNumber\",\"type\":\"uint256\"},{\"internalType\":\"uint32\",\"name\":\"taskCreatedBlock\",\"type\":\"uint32\"},{\"internalType\":\"bytes\",\"name\":\"quorumNumbers\",\"type\":\"bytes\"},{\"internalType\":\"uint32\",\"name\":\"quorumThresholdPercentage\",\"type\":\"uint32\"}],\"indexed\":false,\"internalType\":\"struct IFinalizerTaskManager.Task\",\"name\":\"task\",\"type\":\"tuple\"}],\"name\":\"NewTaskCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint32\",\"name\":\"taskIndex\",\"type\":\"uint32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"blockHash\",\"type\":\"bytes32\"}],\"name\":\"TaskCompleted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"components\":[{\"internalType\":\"uint32\",\"name\":\"referenceTaskIndex\",\"type\":\"uint32\"},{\"internalType\":\"bytes32\",\"name\":\"blockHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"storageProofHash\",\"type\":\"bytes32\"}],\"indexed\":false,\"internalType\":\"struct IFinalizerTaskManager.TaskResponse\",\"name\":\"taskResponse\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint32\",\"name\":\"taskResponsedBlock\",\"type\":\"uint32\"},{\"internalType\":\"bytes32\",\"name\":\"hashOfNonSigners\",\"type\":\"bytes32\"},{\"internalType\":\"uint96[]\",\"name\":\"quroumStakeTotals\",\"type\":\"uint96[]\"},{\"internalType\":\"uint96[]\",\"name\":\"quroumStakeSigned\",\"type\":\"uint96[]\"}],\"indexed\":false,\"internalType\":\"struct IFinalizerTaskManager.TaskResponseMetadata\",\"name\":\"taskResponseMetadata\",\"type\":\"tuple\"}],\"name\":\"TaskResponded\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"blockNumber\",\"type\":\"uint256\"},{\"internalType\":\"uint32\",\"name\":\"quorumThresholdPercentage\",\"type\":\"uint32\"},{\"internalType\":\"bytes\",\"name\":\"quorumNumbers\",\"type\":\"bytes\"}],\"name\":\"createNewTask\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getTaskResponseWindowBlock\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"taskNumber\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"getTaskResponseWindowBlock()\":{\"notice\":\"Returns the TASK_RESPONSE_WINDOW_BLOCK\"},\"taskNumber()\":{\"notice\":\"Returns the current 'taskNumber' for the middleware\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/IFinalizerTaskManager.sol\":\"IFinalizerTaskManager\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@eigenlayer-middleware/=lib/eigenlayer-middleware/\",\":@eigenlayer-scripts/=lib/eigenlayer-middleware/lib/eigenlayer-contracts/script/\",\":@eigenlayer/=lib/eigenlayer-middleware/lib/eigenlayer-contracts/src/\",\":@openzeppelin-upgrades/=lib/eigenlayer-middleware/lib/eigenlayer-contracts/lib/openzeppelin-contracts-upgradeable/\",\":@openzeppelin/=lib/eigenlayer-middleware/lib/eigenlayer-contracts/lib/openzeppelin-contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":eigenlayer-contracts/=lib/eigenlayer-middleware/lib/eigenlayer-contracts/\",\":eigenlayer-middleware/=lib/eigenlayer-middleware/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/eigenlayer-middleware/lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/eigenlayer-middleware/lib/openzeppelin-contracts/\"]},\"sources\":{\"lib/eigenlayer-middleware/src/libraries/BN254.sol\":{\"keccak256\":\"0xc7c5c9529ba56d63487a02cebd5ec41e4f7044ccac6a7bdbbd53492932f1e5e9\",\"license\":\"BUSL-1.1 AND MIT\",\"urls\":[\"bzz-raw://1d3ab347b2554544eee112846bf479fcd579ce573275c59d84676207ec36be06\",\"dweb:/ipfs/Qmd8e3z1JGuHKjLAdep4u8JDBsf3j6hNShQCt14eKufJYh\"]},\"src/IFinalizerTaskManager.sol\":{\"keccak256\":\"0xa199df44fb40d2c50c24c9b08be33a231df8c8acea9759b7b4d0aa0b69ba1acc\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://9f726e6b65360bce66b2da2574c94bcb36948823f306a4b6ccf9aa816d721258\",\"dweb:/ipfs/QmdBm8xCZmijgP51DBgpvJTPEWYdsP9yLzUqSpddPwdPmg\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.12+commit.f00d7308"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint32",
+              "name": "taskIndex",
+              "type": "uint32",
+              "indexed": true
+            },
+            {
+              "internalType": "struct IFinalizerTaskManager.Task",
+              "name": "task",
+              "type": "tuple",
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "blockNumber",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "taskCreatedBlock",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "quorumNumbers",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "quorumThresholdPercentage",
+                  "type": "uint32"
+                }
+              ],
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "NewTaskCreated",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint32",
+              "name": "taskIndex",
+              "type": "uint32",
+              "indexed": true
+            },
+            {
+              "internalType": "bytes32",
+              "name": "blockHash",
+              "type": "bytes32",
+              "indexed": true
+            }
+          ],
+          "type": "event",
+          "name": "TaskCompleted",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "struct IFinalizerTaskManager.TaskResponse",
+              "name": "taskResponse",
+              "type": "tuple",
+              "components": [
+                {
+                  "internalType": "uint32",
+                  "name": "referenceTaskIndex",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "blockHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "storageProofHash",
+                  "type": "bytes32"
+                }
+              ],
+              "indexed": false
+            },
+            {
+              "internalType": "struct IFinalizerTaskManager.TaskResponseMetadata",
+              "name": "taskResponseMetadata",
+              "type": "tuple",
+              "components": [
+                {
+                  "internalType": "uint32",
+                  "name": "taskResponsedBlock",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "hashOfNonSigners",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint96[]",
+                  "name": "quroumStakeTotals",
+                  "type": "uint96[]"
+                },
+                {
+                  "internalType": "uint96[]",
+                  "name": "quroumStakeSigned",
+                  "type": "uint96[]"
+                }
+              ],
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "TaskResponded",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "blockNumber",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint32",
+              "name": "quorumThresholdPercentage",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes",
+              "name": "quorumNumbers",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "createNewTask"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getTaskResponseWindowBlock",
+          "outputs": [
+            {
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "taskNumber",
+          "outputs": [
+            {
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "getTaskResponseWindowBlock()": {
+            "notice": "Returns the TASK_RESPONSE_WINDOW_BLOCK"
+          },
+          "taskNumber()": {
+            "notice": "Returns the current 'taskNumber' for the middleware"
+          }
+        },
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        "@eigenlayer-middleware/=lib/eigenlayer-middleware/",
+        "@eigenlayer-scripts/=lib/eigenlayer-middleware/lib/eigenlayer-contracts/script/",
+        "@eigenlayer/=lib/eigenlayer-middleware/lib/eigenlayer-contracts/src/",
+        "@openzeppelin-upgrades/=lib/eigenlayer-middleware/lib/eigenlayer-contracts/lib/openzeppelin-contracts-upgradeable/",
+        "@openzeppelin/=lib/eigenlayer-middleware/lib/eigenlayer-contracts/lib/openzeppelin-contracts/",
+        "ds-test/=lib/forge-std/lib/ds-test/src/",
+        "eigenlayer-contracts/=lib/eigenlayer-middleware/lib/eigenlayer-contracts/",
+        "eigenlayer-middleware/=lib/eigenlayer-middleware/",
+        "forge-std/=lib/forge-std/src/",
+        "openzeppelin-contracts-upgradeable/=lib/eigenlayer-middleware/lib/openzeppelin-contracts-upgradeable/",
+        "openzeppelin-contracts/=lib/eigenlayer-middleware/lib/openzeppelin-contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "src/IFinalizerTaskManager.sol": "IFinalizerTaskManager"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "lib/eigenlayer-middleware/src/libraries/BN254.sol": {
+        "keccak256": "0xc7c5c9529ba56d63487a02cebd5ec41e4f7044ccac6a7bdbbd53492932f1e5e9",
+        "urls": [
+          "bzz-raw://1d3ab347b2554544eee112846bf479fcd579ce573275c59d84676207ec36be06",
+          "dweb:/ipfs/Qmd8e3z1JGuHKjLAdep4u8JDBsf3j6hNShQCt14eKufJYh"
+        ],
+        "license": "BUSL-1.1 AND MIT"
+      },
+      "src/IFinalizerTaskManager.sol": {
+        "keccak256": "0xa199df44fb40d2c50c24c9b08be33a231df8c8acea9759b7b4d0aa0b69ba1acc",
+        "urls": [
+          "bzz-raw://9f726e6b65360bce66b2da2574c94bcb36948823f306a4b6ccf9aa816d721258",
+          "dweb:/ipfs/QmdBm8xCZmijgP51DBgpvJTPEWYdsP9yLzUqSpddPwdPmg"
+        ],
+        "license": "UNLICENSED"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "src/IFinalizerTaskManager.sol",
+    "id": 78770,
+    "exportedSymbols": {
+      "BN254": [
+        26684
+      ],
+      "IFinalizerTaskManager": [
+        78769
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "39:2571:125",
+    "nodes": [
+      {
+        "id": 78698,
+        "nodeType": "PragmaDirective",
+        "src": "39:23:125",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".9"
+        ]
+      },
+      {
+        "id": 78699,
+        "nodeType": "ImportDirective",
+        "src": "64:56:125",
+        "nodes": [],
+        "absolutePath": "lib/eigenlayer-middleware/src/libraries/BN254.sol",
+        "file": "@eigenlayer-middleware/src/libraries/BN254.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 78770,
+        "sourceUnit": 26685,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 78769,
+        "nodeType": "ContractDefinition",
+        "src": "122:2487:125",
+        "nodes": [
+          {
+            "id": 78706,
+            "nodeType": "EventDefinition",
+            "src": "174:58:125",
+            "nodes": [],
+            "anonymous": false,
+            "name": "NewTaskCreated",
+            "nameLocation": "180:14:125",
+            "parameters": {
+              "id": 78705,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 78701,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "taskIndex",
+                  "nameLocation": "210:9:125",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 78706,
+                  "src": "195:24:125",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 78700,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "195:6:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 78704,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "task",
+                  "nameLocation": "226:4:125",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 78706,
+                  "src": "221:9:125",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Task_$78729_memory_ptr",
+                    "typeString": "struct IFinalizerTaskManager.Task"
+                  },
+                  "typeName": {
+                    "id": 78703,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 78702,
+                      "name": "Task",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 78729,
+                      "src": "221:4:125"
+                    },
+                    "referencedDeclaration": 78729,
+                    "src": "221:4:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Task_$78729_storage_ptr",
+                      "typeString": "struct IFinalizerTaskManager.Task"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "194:37:125"
+            }
+          },
+          {
+            "id": 78714,
+            "nodeType": "EventDefinition",
+            "src": "238:112:125",
+            "nodes": [],
+            "anonymous": false,
+            "name": "TaskResponded",
+            "nameLocation": "244:13:125",
+            "parameters": {
+              "id": 78713,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 78709,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "taskResponse",
+                  "nameLocation": "280:12:125",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 78714,
+                  "src": "267:25:125",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_TaskResponse_$78736_memory_ptr",
+                    "typeString": "struct IFinalizerTaskManager.TaskResponse"
+                  },
+                  "typeName": {
+                    "id": 78708,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 78707,
+                      "name": "TaskResponse",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 78736,
+                      "src": "267:12:125"
+                    },
+                    "referencedDeclaration": 78736,
+                    "src": "267:12:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_TaskResponse_$78736_storage_ptr",
+                      "typeString": "struct IFinalizerTaskManager.TaskResponse"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 78712,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "taskResponseMetadata",
+                  "nameLocation": "323:20:125",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 78714,
+                  "src": "302:41:125",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_TaskResponseMetadata_$78747_memory_ptr",
+                    "typeString": "struct IFinalizerTaskManager.TaskResponseMetadata"
+                  },
+                  "typeName": {
+                    "id": 78711,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 78710,
+                      "name": "TaskResponseMetadata",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 78747,
+                      "src": "302:20:125"
+                    },
+                    "referencedDeclaration": 78747,
+                    "src": "302:20:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_TaskResponseMetadata_$78747_storage_ptr",
+                      "typeString": "struct IFinalizerTaskManager.TaskResponseMetadata"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "257:92:125"
+            }
+          },
+          {
+            "id": 78720,
+            "nodeType": "EventDefinition",
+            "src": "356:73:125",
+            "nodes": [],
+            "anonymous": false,
+            "name": "TaskCompleted",
+            "nameLocation": "362:13:125",
+            "parameters": {
+              "id": 78719,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 78716,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "taskIndex",
+                  "nameLocation": "391:9:125",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 78720,
+                  "src": "376:24:125",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 78715,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "376:6:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 78718,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "blockHash",
+                  "nameLocation": "418:9:125",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 78720,
+                  "src": "402:25:125",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 78717,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "402:7:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "375:53:125"
+            }
+          },
+          {
+            "id": 78729,
+            "nodeType": "StructDefinition",
+            "src": "450:712:125",
+            "nodes": [],
+            "canonicalName": "IFinalizerTaskManager.Task",
+            "members": [
+              {
+                "constant": false,
+                "id": 78722,
+                "mutability": "mutable",
+                "name": "blockNumber",
+                "nameLocation": "480:11:125",
+                "nodeType": "VariableDeclaration",
+                "scope": 78729,
+                "src": "472:19:125",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 78721,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "472:7:125",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 78724,
+                "mutability": "mutable",
+                "name": "taskCreatedBlock",
+                "nameLocation": "508:16:125",
+                "nodeType": "VariableDeclaration",
+                "scope": 78729,
+                "src": "501:23:125",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 78723,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "501:6:125",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 78726,
+                "mutability": "mutable",
+                "name": "quorumNumbers",
+                "nameLocation": "1100:13:125",
+                "nodeType": "VariableDeclaration",
+                "scope": 78729,
+                "src": "1094:19:125",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 78725,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1094:5:125",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 78728,
+                "mutability": "mutable",
+                "name": "quorumThresholdPercentage",
+                "nameLocation": "1130:25:125",
+                "nodeType": "VariableDeclaration",
+                "scope": 78729,
+                "src": "1123:32:125",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 78727,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1123:6:125",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Task",
+            "nameLocation": "457:4:125",
+            "scope": 78769,
+            "visibility": "public"
+          },
+          {
+            "id": 78736,
+            "nodeType": "StructDefinition",
+            "src": "1301:375:125",
+            "nodes": [],
+            "canonicalName": "IFinalizerTaskManager.TaskResponse",
+            "members": [
+              {
+                "constant": false,
+                "id": 78731,
+                "mutability": "mutable",
+                "name": "referenceTaskIndex",
+                "nameLocation": "1412:18:125",
+                "nodeType": "VariableDeclaration",
+                "scope": 78736,
+                "src": "1405:25:125",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 78730,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1405:6:125",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 78733,
+                "mutability": "mutable",
+                "name": "blockHash",
+                "nameLocation": "1536:9:125",
+                "nodeType": "VariableDeclaration",
+                "scope": 78736,
+                "src": "1528:17:125",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                },
+                "typeName": {
+                  "id": 78732,
+                  "name": "bytes32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1528:7:125",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 78735,
+                "mutability": "mutable",
+                "name": "storageProofHash",
+                "nameLocation": "1653:16:125",
+                "nodeType": "VariableDeclaration",
+                "scope": 78736,
+                "src": "1645:24:125",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                },
+                "typeName": {
+                  "id": 78734,
+                  "name": "bytes32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1645:7:125",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "TaskResponse",
+            "nameLocation": "1308:12:125",
+            "scope": 78769,
+            "visibility": "public"
+          },
+          {
+            "id": 78747,
+            "nodeType": "StructDefinition",
+            "src": "1959:176:125",
+            "nodes": [],
+            "canonicalName": "IFinalizerTaskManager.TaskResponseMetadata",
+            "members": [
+              {
+                "constant": false,
+                "id": 78738,
+                "mutability": "mutable",
+                "name": "taskResponsedBlock",
+                "nameLocation": "2004:18:125",
+                "nodeType": "VariableDeclaration",
+                "scope": 78747,
+                "src": "1997:25:125",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 78737,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1997:6:125",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 78740,
+                "mutability": "mutable",
+                "name": "hashOfNonSigners",
+                "nameLocation": "2040:16:125",
+                "nodeType": "VariableDeclaration",
+                "scope": 78747,
+                "src": "2032:24:125",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                },
+                "typeName": {
+                  "id": 78739,
+                  "name": "bytes32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2032:7:125",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 78743,
+                "mutability": "mutable",
+                "name": "quroumStakeTotals",
+                "nameLocation": "2075:17:125",
+                "nodeType": "VariableDeclaration",
+                "scope": 78747,
+                "src": "2066:26:125",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_array$_t_uint96_$dyn_storage_ptr",
+                  "typeString": "uint96[]"
+                },
+                "typeName": {
+                  "baseType": {
+                    "id": 78741,
+                    "name": "uint96",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2066:6:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint96",
+                      "typeString": "uint96"
+                    }
+                  },
+                  "id": 78742,
+                  "nodeType": "ArrayTypeName",
+                  "src": "2066:8:125",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint96_$dyn_storage_ptr",
+                    "typeString": "uint96[]"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 78746,
+                "mutability": "mutable",
+                "name": "quroumStakeSigned",
+                "nameLocation": "2111:17:125",
+                "nodeType": "VariableDeclaration",
+                "scope": 78747,
+                "src": "2102:26:125",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_array$_t_uint96_$dyn_storage_ptr",
+                  "typeString": "uint96[]"
+                },
+                "typeName": {
+                  "baseType": {
+                    "id": 78744,
+                    "name": "uint96",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2102:6:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint96",
+                      "typeString": "uint96"
+                    }
+                  },
+                  "id": 78745,
+                  "nodeType": "ArrayTypeName",
+                  "src": "2102:8:125",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint96_$dyn_storage_ptr",
+                    "typeString": "uint96[]"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "TaskResponseMetadata",
+            "nameLocation": "1966:20:125",
+            "scope": 78769,
+            "visibility": "public"
+          },
+          {
+            "id": 78756,
+            "nodeType": "FunctionDefinition",
+            "src": "2203:147:125",
+            "nodes": [],
+            "functionSelector": "6b92787e",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "createNewTask",
+            "nameLocation": "2212:13:125",
+            "parameters": {
+              "id": 78754,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 78749,
+                  "mutability": "mutable",
+                  "name": "blockNumber",
+                  "nameLocation": "2243:11:125",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 78756,
+                  "src": "2235:19:125",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 78748,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2235:7:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 78751,
+                  "mutability": "mutable",
+                  "name": "quorumThresholdPercentage",
+                  "nameLocation": "2271:25:125",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 78756,
+                  "src": "2264:32:125",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 78750,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2264:6:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 78753,
+                  "mutability": "mutable",
+                  "name": "quorumNumbers",
+                  "nameLocation": "2321:13:125",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 78756,
+                  "src": "2306:28:125",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_calldata_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 78752,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2306:5:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2225:115:125"
+            },
+            "returnParameters": {
+              "id": 78755,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2349:0:125"
+            },
+            "scope": 78769,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 78762,
+            "nodeType": "FunctionDefinition",
+            "src": "2424:53:125",
+            "nodes": [],
+            "documentation": {
+              "id": 78757,
+              "nodeType": "StructuredDocumentation",
+              "src": "2356:63:125",
+              "text": "@notice Returns the current 'taskNumber' for the middleware"
+            },
+            "functionSelector": "72d18e8d",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "taskNumber",
+            "nameLocation": "2433:10:125",
+            "parameters": {
+              "id": 78758,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2443:2:125"
+            },
+            "returnParameters": {
+              "id": 78761,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 78760,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 78762,
+                  "src": "2469:6:125",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 78759,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2469:6:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2468:8:125"
+            },
+            "scope": 78769,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 78768,
+            "nodeType": "FunctionDefinition",
+            "src": "2538:69:125",
+            "nodes": [],
+            "documentation": {
+              "id": 78763,
+              "nodeType": "StructuredDocumentation",
+              "src": "2483:50:125",
+              "text": "@notice Returns the TASK_RESPONSE_WINDOW_BLOCK"
+            },
+            "functionSelector": "f5c9899d",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getTaskResponseWindowBlock",
+            "nameLocation": "2547:26:125",
+            "parameters": {
+              "id": 78764,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2573:2:125"
+            },
+            "returnParameters": {
+              "id": 78767,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 78766,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 78768,
+                  "src": "2599:6:125",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 78765,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2599:6:125",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2598:8:125"
+            },
+            "scope": 78769,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IFinalizerTaskManager",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          78769
+        ],
+        "name": "IFinalizerTaskManager",
+        "nameLocation": "132:21:125",
+        "scope": 78770,
+        "usedErrors": []
+      }
+    ],
+    "license": "UNLICENSED"
+  },
+  "id": 125
+}

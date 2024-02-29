@@ -148,7 +148,7 @@ contract RollDown {
     }
 
     function getUpdateForL2() public view returns (L1Update memory) {
-        return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter);
+        return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
     }
 
 
@@ -261,8 +261,8 @@ contract RollDown {
 
         for (uint256 idx = 0; idx < cancles.length; idx++) {
             L1Update memory pending = getPendingRequests(
-                cancles[idx].lastAcceptedRequestOnL1,
-                cancles[idx].lastProccessedRequestOnL1
+                cancles[idx].lastProccessedRequestOnL1 + 1,
+                cancles[idx].lastAcceptedRequestOnL1
             );
             bytes32 correct_hash = keccak256(abi.encode(pending));
 
@@ -334,7 +334,7 @@ contract RollDown {
         result.pendingDeposits = new Deposit[](depositsCounter);
         result.pendingCancelResultions = new CancelResolution[](cancelsCounter);
         result.pendingL2UpdatesToRemove = new L2UpdatesToRemove[](updatesToBeRemovedCounter);
-        result.lastProccessedRequestOnL1 = start;
+        result.lastProccessedRequestOnL1 = start - 1;
         result.lastAcceptedRequestOnL1 = end;
 
         withdrawsCounter = 0;

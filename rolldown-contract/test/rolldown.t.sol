@@ -82,8 +82,8 @@ contract RollDownTest is Test {
         assertEq(l1Update.order.length, 1);
         assert(l1Update.order[0] == RollDown.PendingRequestType.WITHDRAWAL);
         assertEq(l1Update.offset, 1);
-        assertEq(l1Update.lastProccessedRequestOnL1, 1);
-        assertEq(l1Update.lastAcceptedRequestOnL1, 2);
+        assertEq(l1Update.lastProccessedRequestOnL1, 0);
+        assertEq(l1Update.lastAcceptedRequestOnL1, 1);
 
         RollDown.L2Update memory l2Update;
         l2Update.cancles = new RollDown.Cancel[](0);
@@ -104,8 +104,8 @@ contract RollDownTest is Test {
                 RollDown.PendingRequestType.L2_UPDATES_TO_REMOVE
         );
         assertEq(l1Update.offset, 2);
-        assertEq(l1Update.lastProccessedRequestOnL1, 2);
-        assertEq(l1Update.lastAcceptedRequestOnL1, 3);
+        assertEq(l1Update.lastProccessedRequestOnL1, 1);
+        assertEq(l1Update.lastAcceptedRequestOnL1, 2);
 
         RollDown.L2Update memory l2Update2;
         l2Update2.cancles = new RollDown.Cancel[](0);
@@ -120,8 +120,8 @@ contract RollDownTest is Test {
         l1Update = rollDown.getUpdateForL2();
         assertEq(l1Update.order.length, 1);
         assertEq(l1Update.offset, 3);
-        assertEq(l1Update.lastProccessedRequestOnL1, 3);
-        assertEq(l1Update.lastAcceptedRequestOnL1, 4);
+        assertEq(l1Update.lastProccessedRequestOnL1, 2);
+        assertEq(l1Update.lastAcceptedRequestOnL1, 3);
 
         RollDown.L2Update memory l2Update3;
         l2Update3.cancles = new RollDown.Cancel[](0);
@@ -137,8 +137,8 @@ contract RollDownTest is Test {
         l1Update = rollDown.getUpdateForL2();
         assertEq(l1Update.order.length, 1);
         assertEq(l1Update.offset, 4);
-        assertEq(l1Update.lastProccessedRequestOnL1, 4);
-        assertEq(l1Update.lastAcceptedRequestOnL1, 5);
+        assertEq(l1Update.lastProccessedRequestOnL1, 3);
+        assertEq(l1Update.lastAcceptedRequestOnL1, 4);
     }
 
     function testIgnoreDuplicatedUpdates() public {
@@ -261,7 +261,7 @@ contract RollDownTest is Test {
         l2Update.cancles[0] = RollDown.Cancel({
             l2RequestId: 50000,
             lastAcceptedRequestOnL1: 1,
-            lastProccessedRequestOnL1: 2,
+            lastProccessedRequestOnL1: 0,
             hash: bytes32(keccak256(abi.encode(l1Update)))
         });
 

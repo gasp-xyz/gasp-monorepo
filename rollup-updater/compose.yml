@@ -2,10 +2,17 @@ services:
   updater:
     image: mangatasolutions/rollup-updater:local
     build: .
+    depends_on:
+      rolldown:
+        condition: service_completed_successfully
+      parachain-2110-0:
+        condition: service_started
     environment:
       MANGATA_NODE_URL: ${ROLLUP_UPDATER_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}
       ETH_CHAIN_URL: ${ROLLUP_UPDATER_ETH_CHAIN_URL:-wss://ethereum.publicnode.com}
-      # Randomly generated key, should not be used for anything
-      WALLET_PRIVATE_KEY: "15cb3150921ee606d71b9def1b6392c9df1d4fea399cbcca2047d9cf84f44f08"
+      FINALIZATION_SOURCE: ${ROLLUP_UPDATER_FINALIZATION_SOURCE:-relay}
+      # Defaults to one of anvil default accounts private key
+      WALLET_PRIVATE_KEY: ${ROLLUP_UPDATER_WALLET_PRIVATE_KEY:-0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80}
+      VERBOSE: 1
       EIGEN_CONTRACT_ADDRESS: "0x9E545E3C0baAB3E08CdfD552C960A1050f373042"
       MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"

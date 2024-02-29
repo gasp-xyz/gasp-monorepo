@@ -8,6 +8,11 @@ services:
       platforms: [linux/amd64]
       args:
         - BINARY_PATH=${AVS_FINALIZER_BINARY_PATH:-target/release/main}
+    depends_on:
+      anvil:
+        condition: service_healthy
+      avs-3:
+        condition: service_completed_successfully
     platform: linux/amd64
     environment:
       - RUST_LOG=info
