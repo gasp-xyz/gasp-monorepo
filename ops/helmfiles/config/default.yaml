@@ -33,3 +33,11 @@ aggregatorEnvSecrets:
 finalizerEnableServiceMonitorCollectors: false
 
 finalizerEnvSecrets:
+
+updaterEnv:
+  MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
+  MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
+
+sequencerEnv:
+  MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
+  MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
