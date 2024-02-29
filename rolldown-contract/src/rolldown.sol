@@ -43,17 +43,20 @@ contract RollDown {
         address depositRecipient;
         address tokenAddress;
         uint256 amount;
+        bytes32 blockHash;
     }
 
     /// PENING REQUESTS TYPES (L1)
 
     struct L2UpdatesToRemove {
         uint256[] l2UpdatesToRemove;
+        bytes32 blockHash;
     }
 
     struct CancelResolution {
         uint256 l2RequestId;
         bool cancelJustified;
+        bytes32 blockHash;
     }
 
     enum PendingRequestType {
@@ -133,10 +136,13 @@ contract RollDown {
             "Token transfer failed"
         );
 
+        bytes32 blockHash = blockhash(block.number);
+
         Deposit memory newDeposit = Deposit({
             depositRecipient: depositRecipient,
             tokenAddress: tokenAddress,
-            amount: amount
+            amount: amount,
+            blockHash: blockHash
         });
         // Add the new request to the mapping
         deposits[counter++] = newDeposit;
@@ -289,6 +295,9 @@ contract RollDown {
             l2UpdatesToRemove[counter++]
                 .l2UpdatesToRemove = l2UpdatesToBeRemoved; // .push(l2UpdatesToBeRemoved[i]);
 
+            bytes32 blockHash = blockhash(block.number);
+
+            l2UpdatesToRemove[counter++].blockHash = blockHash;
             emit L2UpdatesToRemovedAcceptedIntoQueue(
                 counter - 1,
                 l2UpdatesToBeRemoved
@@ -315,9 +324,13 @@ contract RollDown {
         bytes32 jsonHash = keccak256(abi.encodePacked(jsonString));
         //compare with hash provided in cancel
         bool cancelJustified = (jsonHash != bytes32(cancelHashAsUint));
+
+        bytes32 blockHash = blockhash(block.number);
+
         CancelResolution memory newCancelResolution = CancelResolution({
             l2RequestId: requestId,
-            cancelJustified: cancelJustified
+            cancelJustified: cancelJustified,
+            blockHash: blockHash
         });
         // Add the new request to the mapping
         cancelResolutions[counter] = newCancelResolution;
