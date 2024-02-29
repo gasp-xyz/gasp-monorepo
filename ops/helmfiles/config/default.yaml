@@ -36,6 +36,7 @@ finalizerEnvSecrets:
 
 updaterEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
+  EIGEN_CONTRACT_ADDRESS: "0x9E545E3C0baAB3E08CdfD552C960A1050f373042"
   MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
 
 sequencerEnv:
