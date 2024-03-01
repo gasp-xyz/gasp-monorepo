@@ -57,9 +57,10 @@ jobs:
       #  run: cargo +stable build --release
 
       - name: Start env
-        run: docker compose up --build --wait 
-          #export AVS_AGGREGATOR_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
-          #export AVS_FINALIZER_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
+        run: |
+          export AVS_AGGREGATOR_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
+          export AVS_FINALIZER_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
+          docker compose up --build --wait 
           
         
 
