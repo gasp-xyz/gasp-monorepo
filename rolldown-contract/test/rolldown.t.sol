@@ -47,40 +47,21 @@ contract RollDownTest is Test {
         assertEq(l1Update.pendingDeposits[0].amount, amount);
     }
 
-    function testExecuteWithdrawal() public {
+    function testAcceptL2Update() public {
+        // Arrange
         address payable alice = users[0];
         token = new MyERC20();
-        // Arrange
-        uint256 amount = 1000;
-        address tokenAddress = 0xa7c534E6dF83C118A858Cb6fb4C1e8B92b03464b;
-
-        // Act
+        address tokenAddress = address(token);
+        uint256 amount = 10;
+        deal(tokenAddress, alice, 100 ether);
         vm.startPrank(alice);
-        vm.expectEmit(true, true, true, true);
-        emit RollDown.WithdrawAcceptedIntoQueue(1, alice, tokenAddress, amount);
-        rollDown.withdraw(tokenAddress, amount);
+        token.approve(address(rollDown), amount);
+        rollDown.deposit(tokenAddress, 10);
         vm.stopPrank();
 
         RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
-
-        // Assert
         assertEq(l1Update.order.length, 1);
-        assert(l1Update.order[0] == RollDown.PendingRequestType.WITHDRAWAL);
-        assertEq(l1Update.pendingWithdraws.length, 1);
-        assertEq(l1Update.pendingWithdraws[0].withdrawRecipient, alice);
-        assertEq(l1Update.pendingWithdraws[0].tokenAddress, tokenAddress);
-        assertEq(l1Update.pendingWithdraws[0].amount, amount);
-    }
-
-    function testAcceptL2Update() public {
-        // Arrange
-        uint256 amount = 1000;
-        address tokenAddress = 0xa7c534E6dF83C118A858Cb6fb4C1e8B92b03464b;
-        rollDown.withdraw(tokenAddress, amount);
-
-        RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
-        assertEq(l1Update.order.length, 1);
-        assert(l1Update.order[0] == RollDown.PendingRequestType.WITHDRAWAL);
+        assert(l1Update.order[0] == RollDown.PendingRequestType.DEPOSIT);
         assertEq(l1Update.offset, 1);
         assertEq(l1Update.lastProccessedRequestOnL1, 0);
         assertEq(l1Update.lastAcceptedRequestOnL1, 1);
@@ -90,7 +71,7 @@ contract RollDownTest is Test {
         l2Update.results = new RollDown.RequestResult[](1);
         l2Update.results[0] = RollDown.RequestResult({
             requestId: 1,
-            updateType: RollDown.UpdateType.WITHDRAWAL,
+            updateType: RollDown.UpdateType.DEPOSIT,
             status: false
         });
 
@@ -143,16 +124,23 @@ contract RollDownTest is Test {
 
     function testIgnoreDuplicatedUpdates() public {
         // Arrange
-        uint256 amount = 1000;
-        address tokenAddress = 0xa7c534E6dF83C118A858Cb6fb4C1e8B92b03464b;
-        rollDown.withdraw(tokenAddress, amount);
+
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 10;
+        deal(tokenAddress, alice, 100 ether);
+        vm.startPrank(alice);
+        token.approve(address(rollDown), amount);
+        rollDown.deposit(tokenAddress, 10);
+        vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
         l2Update.cancles = new RollDown.Cancel[](0);
         l2Update.results = new RollDown.RequestResult[](1);
         l2Update.results[0] = RollDown.RequestResult({
             requestId: 1,
-            updateType: RollDown.UpdateType.WITHDRAWAL,
+            updateType: RollDown.UpdateType.DEPOSIT,
             status: false
         });
 
@@ -183,10 +171,6 @@ contract RollDownTest is Test {
             update2.pendingDeposits.length
         );
         assertEq(
-            update1.pendingWithdraws.length,
-            update2.pendingWithdraws.length
-        );
-        assertEq(
             update1.pendingCancelResultions.length,
             update2.pendingCancelResultions.length
         );
@@ -208,21 +192,23 @@ contract RollDownTest is Test {
         l1Update.order = new RollDown.PendingRequestType[](1);
         l1Update.order[0] = RollDown.PendingRequestType.DEPOSIT;
 
-        bytes32 l2Hash = 0xacf3b87e37038f4bc2dd017cb4818eef8c9da4cb36a23b8abcd6d3c17d69d65f;
+        bytes32 l2Hash = 0x033f8b8c13f3dd23df7d50f5a5106621177bb75f71cb39e9a8fd4ab565bec339;
         assertEq(keccak256(abi.encode(l1Update)), l2Hash);
     }
 
     function testCancelResolutionWithNonMatchingHashResultsWithUnjustifiedStatus()
         public
     {
+        // Arrange
         address payable alice = users[0];
         token = new MyERC20();
-        // Arrange
+        address tokenAddress = address(token);
         uint256 amount = 1000;
-        address tokenAddress = 0xa7c534E6dF83C118A858Cb6fb4C1e8B92b03464b;
-
-        // Act
-        rollDown.withdraw(tokenAddress, amount);
+        deal(tokenAddress, alice, amount);
+        vm.startPrank(alice);
+        token.approve(address(rollDown), amount);
+        rollDown.deposit(tokenAddress, amount);
+        vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
         l2Update.results = new RollDown.RequestResult[](0);
@@ -244,14 +230,18 @@ contract RollDownTest is Test {
     function testCancelResolutionWithMatchingHashResultsWithJustifiedStatus()
         public
     {
+        // Arrange
         address payable alice = users[0];
         token = new MyERC20();
-        // Arrange
+        address tokenAddress = address(token);
         uint256 amount = 1000;
-        address tokenAddress = 0xa7c534E6dF83C118A858Cb6fb4C1e8B92b03464b;
+        deal(tokenAddress, alice, amount);
 
         // Act
-        rollDown.withdraw(tokenAddress, amount);
+        vm.startPrank(alice);
+        token.approve(address(rollDown), amount);
+        rollDown.deposit(tokenAddress, amount);
+        vm.stopPrank();
 
         RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
 
@@ -270,5 +260,39 @@ contract RollDownTest is Test {
         emit RollDown.DisputeResolutionAcceptedIntoQueue(50000, true);
         rollDown.update_l1_from_l2(l2Update);
         vm.stopPrank();
+    }
+
+    function testProcessWithdraw() public {
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 10;
+
+        // Arrange
+        deal(tokenAddress, alice, 100 ether);
+
+        // Act
+        vm.startPrank(alice);
+        token.transfer(address(rollDown), amount);
+        vm.stopPrank();
+        uint256 aliceBalanceBefore = token.balanceOf(alice);
+        uint256 contractBalanceBefore = token.balanceOf(address(rollDown));
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](0);
+        l2Update.withdraws = new RollDown.Withdraw[](1);
+        l2Update.withdraws[0] = RollDown.Withdraw({
+            requestId: 170141183460469231731687303715884105728, //u128max/2+1
+            withdrawRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: amount
+        });
+
+        rollDown.update_l1_from_l2(l2Update);
+        uint256 aliceBalanceAfter = token.balanceOf(alice);
+        uint256 contractBalanceAfter = token.balanceOf(address(rollDown));
+
+        assertEq(aliceBalanceBefore + amount, aliceBalanceAfter);
+        assertEq(contractBalanceBefore - amount, contractBalanceAfter);
     }
 }
