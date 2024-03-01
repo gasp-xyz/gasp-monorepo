@@ -98,7 +98,7 @@ releases:
           repository: mangatasolutions/rollup-sequencer
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        mnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
+        mnemonic: {{ .Values.firstSequencerMnemonic | fetchSecretValue | quote }}
         ethChainUrl:  {{ .Values.sequencerEthChainUrl | fetchSecretValue | quote }}
         env: {{ .Values.sequencerEnv | toYaml | nindent 10 }}
   - name: rollup-sequencer-2
@@ -110,6 +110,6 @@ releases:
           repository: mangatasolutions/rollup-sequencer
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        mnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
+        mnemonic: {{ .Values.secondSequencerMnemonic | fetchSecretValue | quote }}
         ethChainUrl:  {{ .Values.sequencerEthChainUrl | fetchSecretValue | quote }}
         env: {{ .Values.sequencerEnv | toYaml | nindent 10 }}
