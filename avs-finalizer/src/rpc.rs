@@ -36,6 +36,8 @@ struct TaskResponseWire {
     pub block_hash: Bytes32,
     #[serde(rename = "StorageProofHash")]
     pub storage_proof_hash: Bytes32,
+    #[serde(rename = "PendingStateHash")]
+    pub pending_state_hash: Bytes32,
 }
 
 impl From<TaskResponse> for TaskResponseWire {
@@ -44,6 +46,7 @@ impl From<TaskResponse> for TaskResponseWire {
             reference_task_index: value.reference_task_index,
             block_hash: value.block_hash,
             storage_proof_hash: value.storage_proof_hash,
+            pending_state_hash: value.pending_state_hash,
         }
     }
 }

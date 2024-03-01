@@ -86,8 +86,9 @@ impl Operator {
 
                     let payload = TaskResponse {
                         reference_task_index: event.task_index,
-                        block_hash: proofs.0.as_fixed_bytes().to_owned(),
-                        storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
+                        block_hash: proofs.0.to_fixed_bytes(),
+                        storage_proof_hash: proofs.1.to_fixed_bytes(),
+                        pending_state_hash: proofs.2.to_fixed_bytes(),
                     };
 
                     let response = self
@@ -112,7 +113,7 @@ impl Operator {
     pub(crate) async fn execute_block(
         &self,
         block_number: BlockNumber,
-    ) -> eyre::Result<(H256, H256)> {
+    ) -> eyre::Result<(H256, H256, H256)> {
         use sc_executor::{sp_wasm_interface::ExtendedHostFunctions, NativeExecutionDispatch};
         let res = execute_block::<
             Block,
