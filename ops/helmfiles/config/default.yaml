@@ -42,6 +42,8 @@ updaterEnv:
 
 
 # rollup-sequencer configs
+firstSequencerMnemonic: 'bottom drive obey lake curtain smoke basket hold race lonely fit walk//Alice'
+secondSequencerMnemonic: 'bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob'
 sequencerEthChainUrl: ws://anvil:8545
 sequencerEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
