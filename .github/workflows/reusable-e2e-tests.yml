@@ -91,6 +91,10 @@ jobs:
         env:
           NODE_OPTIONS: --max_old_space_size=12288
 
+      - name: Get Seq logs 
+        if: failure()
+        run: docker logs rollup-sequencer-1
+
       - name: Test Report
         uses: dorny/test-reporter@v1.7.0
         continue-on-error: true
