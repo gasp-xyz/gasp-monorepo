@@ -5,10 +5,10 @@ on:
 
   workflow_dispatch:
       inputs:
-        environment:
+        e2eBranch:
           description: ''
           required: false
-          default: ''
+          default: 'eth-rollup-develop'
 
 permissions:
   contents: write
@@ -69,11 +69,45 @@ jobs:
       - name: docker ps
         run: docker ps
 
+      - name: Decide if main - branch or parameter
+        # if we have something in e2eBranch - override E2EBranchName, else -> E2EBRANCHNAME , that
+        # by default will be main.
+        run: echo "E2EBRANCHNAME=${{ inputs.e2eBranch || 'eth-rollup-develop' }}" >> $GITHUB_ENV
+
+      - name: Checkout tests
+        uses: actions/checkout@v4
+        with:
+          repository: mangata-finance/mangata-e2e
+          ref: "feature/happy-path"
+          path: e2eTests
+
+      - name: Install e2e tests dependencies
+        working-directory: e2eTests
+        run: yarn install
+
+      - name: Run tests
+        working-directory: e2eTests
+        run: "yarn test-rollup"
+        env:
+          NODE_OPTIONS: --max_old_space_size=12288
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1.7.0
+        continue-on-error: true
+        if: success() || failure() # run this step even if previous step failed
+        with:
+          name: E2E report test-rollup # Name of the check run which will be created
+          path: e2eTests/reports/*.xml # Path to test results
+          reporter: jest-junit # Format of test results
+
+
       - name: Stop env
         run: |
           export AVS_AGGREGATOR_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
           export AVS_FINALIZER_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
           docker compose down -v 
+
+      
 
         
   
