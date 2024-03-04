@@ -1,8 +1,8 @@
-import { Mangata, signTx } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
+import { Mangata, signTx } from "@mangata-finance/sdk";
 import { Keyring } from "@polkadot/api";
 import "dotenv/config";
-import { createPublicClient, webSocket } from "viem";
+import {createPublicClient, encodeAbiParameters, webSocket} from "viem";
 import rolldownAbi from './RollDown.json' assert {type: 'json'};
 
 type ContractAddress = `0x${string}`;
@@ -71,6 +71,26 @@ async function main() {
       });
 
       await signTx(api, api.tx.rolldown.updateL2FromL1(data), collator);
+    } else {
+      console.log("I am in the else block")
+      const data = await publicClient.readContract({
+        address: mangataContractAddress,
+        abi: abi,
+        functionName: "getUpdateForL2",
+      }) as any;
+
+      // @ts-ignore
+      let encodedData = encodeAbiParameters(abi.find((e: any) => e!.name === "getUpdateForL2").outputs, [data]);
+
+      const events = await api.query.system.events()
+      const pendingRequestsEvents = events.filter(event => event.event.section === "rolldown" && event.event.method === "PendingRequestStored")
+      const eventData= pendingRequestsEvents.map(event => event.event.data.toPrimitive())
+      const requestId = eventData[2]!.toString()
+
+      const verified = await api.rpc.rolldown.verify_pending_requests(encodedData, requestId)
+      if (!verified) {
+        await signTx(api, api.tx.rolldown.cancelRequestsFromL1(requestId), collator);
+      }
     }
   });
 }

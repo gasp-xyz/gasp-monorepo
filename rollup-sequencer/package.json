@@ -19,9 +19,9 @@
     "typescript": "5.3.2"
   },
   "dependencies": {
-    "@mangata-finance/sdk": "^2.2.0-feature-rpc-method.1",
-    "@mangata-finance/types": "^2.2.2-feature-rpc-method.1",
-    "@polkadot/api": "^10.9.1",
+    "@mangata-finance/sdk": "2.2.1-feature-rpc-verify-pending-requests.1",
+    "@mangata-finance/types": "2.2.3-feature-rpc-verify-pending-requests.1",
+    "@polkadot/api": "10.9.1",
     "dotenv": "^16.3.1",
     "viem": "^1.19.11"
   }
