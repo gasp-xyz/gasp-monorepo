@@ -72,7 +72,6 @@ async function main() {
 
       await signTx(api, api.tx.rolldown.updateL2FromL1(data), collator);
     } else {
-      console.log("I am in the else block")
       const data = await publicClient.readContract({
         address: mangataContractAddress,
         abi: abi,
@@ -84,12 +83,14 @@ async function main() {
 
       const events = await api.query.system.events()
       const pendingRequestsEvents = events.filter(event => event.event.section === "rolldown" && event.event.method === "PendingRequestStored")
-      const eventData= pendingRequestsEvents.map(event => event.event.data.toPrimitive())
-      const requestId = eventData[2]!.toString()
+      if (pendingRequestsEvents.length > 0) {
+        const eventData= pendingRequestsEvents.map(event => event.event.data.toPrimitive())
+        const requestId = eventData[2]!.toString()
 
-      const verified = await api.rpc.rolldown.verify_pending_requests(encodedData, requestId)
-      if (!verified) {
-        await signTx(api, api.tx.rolldown.cancelRequestsFromL1(requestId), collator);
+        const verified = await api.rpc.rolldown.verify_pending_requests(encodedData, requestId)
+        if (!verified) {
+          await signTx(api, api.tx.rolldown.cancelRequestsFromL1(requestId), collator);
+        }
       }
     }
   });
