@@ -8,7 +8,10 @@ use bindings::shared_types::TaskResponse;
 use ethers::abi::AbiEncode;
 use reqwest::Response;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
+use reqwest_retry::{
+    default_on_request_failure, default_on_request_success, policies::ExponentialBackoff,
+    RetryTransientMiddleware, Retryable, RetryableStrategy,
+};
 use serde::{ser::SerializeStruct, Serialize};
 use sp_runtime::traits::{Hash, Keccak256};
 use tracing::instrument;
@@ -84,11 +87,26 @@ pub struct Rpc {
     avs_url: String,
 }
 
+struct RetryFailed;
+impl RetryableStrategy for RetryFailed {
+    fn handle(&self, res: &reqwest_middleware::Result<reqwest::Response>) -> Option<Retryable> {
+        match res {
+            // retry if 404 task not initialized, in case block reexecution is faster the aggr task initialization, usually on local testnet
+            Ok(success) if success.status() == 404 => Some(Retryable::Transient),
+            Ok(success) => default_on_request_success(success),
+            Err(error) => default_on_request_failure(error),
+        }
+    }
+}
+
 impl Rpc {
     pub fn build(cfg: &CliArgs) -> Self {
         let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
         let client = ClientBuilder::new(reqwest::Client::new())
-            .with(RetryTransientMiddleware::new_with_policy(retry_policy))
+            .with(RetryTransientMiddleware::new_with_policy_and_strategy(
+                retry_policy,
+                RetryFailed,
+            ))
             .build();
         Self {
             client,

@@ -8,8 +8,11 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 
 # start an anvil instance in the background that has eigenlayer contracts deployed
-anvil --load-state eigenlayer-and-shared-avs-contracts-deployed-anvil-state.json --dump-state avs-and-eigenlayer-deployed-anvil-state.json &
+anvil --load-state eigenlayer-deployed-anvil-state.json --dump-state avs-and-eigenlayer-deployed-anvil-state.json &
+
 cd ../../contracts
-forge script script/1_MangataAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -v
+cast rpc evm_mine
+forge script script/1_FinalizerAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -v
+
 # kill anvil to save its state
 pkill anvil

@@ -3,26 +3,43 @@ import "@mangata-finance/types";
 import { Keyring } from "@polkadot/api";
 import "dotenv/config";
 import { createPublicClient, webSocket } from "viem";
-
-import * as fs from 'fs';
+import rolldownAbi from './RollDown.json' assert {type: 'json'};
 
 type ContractAddress = `0x${string}`;
 
 const mangataContractAddress = process.env.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
 
+function sleep_ms(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function main() {
-  let abi = JSON.parse(fs.readFileSync('./../rolldown-contract/out/rolldown.sol/RollDown.json', 'utf8'))["abi"] as unknown[];
-
-  const api = await Mangata.instance([process.env.MANGATA_URL!]).api();
-
-  const keyring = new Keyring({ type: "sr25519" });
-  const collator = keyring.addFromUri(process.env.MNEMONIC!)
-
+  let abi = rolldownAbi.abi;
   const publicClient = createPublicClient({
     transport: webSocket(process.env.ETH_CHAIN_URL, {
       retryCount: 5,
     }),
   });
+
+  while (true) {
+    try {
+      const data = await publicClient.readContract({
+        address: mangataContractAddress,
+        abi: abi,
+        functionName: "getUpdateForL2",
+      }) as any;
+      console.log(data)
+      break;
+    } catch (e) {
+      console.log(`${mangataContractAddress} contract not found`)
+      await sleep_ms(1000);
+    }
+  }
+
+  const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
+
+  const keyring = new Keyring({ type: "sr25519" });
+  const collator = keyring.addFromUri(process.env.MNEMONIC!)
 
   await api.derive.chain.subscribeNewHeads(async (header) => {
     console.log(`block #${header.number} was authored by ${header.author}`);

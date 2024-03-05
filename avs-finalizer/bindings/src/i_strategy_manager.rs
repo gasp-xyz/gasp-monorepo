@@ -29,6 +29,13 @@ pub mod i_strategy_manager {
                                 ),
                             },
                             ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("token"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("contract IERC20"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
                                 name: ::std::borrow::ToOwned::to_owned("strategy"),
                                 kind: ::ethers::core::abi::ethabi::ParamType::Address,
                                 internal_type: ::core::option::Option::Some(
@@ -52,17 +59,32 @@ pub mod i_strategy_manager {
                     ::std::borrow::ToOwned::to_owned("addStrategiesToDepositWhitelist"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("addStrategiesToDepositWhitelist",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("strategiesToWhitelist",),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                ::std::boxed::Box::new(
-                                    ::ethers::core::abi::ethabi::ParamType::Address,
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("strategiesToWhitelist",),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                    ::std::boxed::Box::new(
+                                        ::ethers::core::abi::ethabi::ParamType::Address,
+                                    ),
                                 ),
-                            ),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("contract IStrategy[]"),
-                            ),
-                        },],
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("contract IStrategy[]"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned(
+                                    "thirdPartyTransfersForbiddenValues",
+                                ),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                    ::std::boxed::Box::new(
+                                        ::ethers::core::abi::ethabi::ParamType::Bool,
+                                    ),
+                                ),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bool[]"),
+                                ),
+                            },
+                        ],
                         outputs: ::std::vec![],
                         constant: ::core::option::Option::None,
                         state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
@@ -471,6 +493,28 @@ pub mod i_strategy_manager {
                     },],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("thirdPartyTransfersForbidden"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("thirdPartyTransfersForbidden",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("strategy"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bool"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("withdrawSharesAsTokens"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("withdrawSharesAsTokens",),
@@ -585,6 +629,27 @@ pub mod i_strategy_manager {
                         anonymous: false,
                     },],
                 ),
+                (
+                    ::std::borrow::ToOwned::to_owned("UpdatedThirdPartyTransfersForbidden"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned(
+                            "UpdatedThirdPartyTransfersForbidden",
+                        ),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("value"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
+                ),
             ]),
             errors: ::std::collections::BTreeMap::new(),
             receive: false,
@@ -631,24 +696,32 @@ pub mod i_strategy_manager {
                 client,
             ))
         }
-        ///Calls the contract's `addShares` (0x50ff7225) function
+        ///Calls the contract's `addShares` (0xc4623ea1) function
         pub fn add_shares(
             &self,
             staker: ::ethers::core::types::Address,
+            token: ::ethers::core::types::Address,
             strategy: ::ethers::core::types::Address,
             shares: ::ethers::core::types::U256,
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
-                .method_hash([80, 255, 114, 37], (staker, strategy, shares))
+                .method_hash([196, 98, 62, 161], (staker, token, strategy, shares))
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `addStrategiesToDepositWhitelist` (0x5de08ff2) function
+        ///Calls the contract's `addStrategiesToDepositWhitelist` (0xdf5b3547) function
         pub fn add_strategies_to_deposit_whitelist(
             &self,
             strategies_to_whitelist: ::std::vec::Vec<::ethers::core::types::Address>,
+            third_party_transfers_forbidden_values: ::std::vec::Vec<bool>,
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
-                .method_hash([93, 224, 143, 242], strategies_to_whitelist)
+                .method_hash(
+                    [223, 91, 53, 71],
+                    (
+                        strategies_to_whitelist,
+                        third_party_transfers_forbidden_values,
+                    ),
+                )
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `calculateWithdrawalRoot` (0xb43b514b) function
@@ -783,6 +856,15 @@ pub mod i_strategy_manager {
                 .method_hash([150, 127, 192, 210], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `thirdPartyTransfersForbidden` (0x9b4da03d) function
+        pub fn third_party_transfers_forbidden(
+            &self,
+            strategy: ::ethers::core::types::Address,
+        ) -> ::ethers::contract::builders::ContractCall<M, bool> {
+            self.0
+                .method_hash([155, 77, 160, 61], strategy)
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `withdrawSharesAsTokens` (0xc608c7f3) function
         pub fn withdraw_shares_as_tokens(
             &self,
@@ -828,6 +910,16 @@ pub mod i_strategy_manager {
             ::std::sync::Arc<M>,
             M,
             StrategyWhitelisterChangedFilter,
+        > {
+            self.0.event()
+        }
+        ///Gets the contract's `UpdatedThirdPartyTransfersForbidden` event
+        pub fn updated_third_party_transfers_forbidden_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            UpdatedThirdPartyTransfersForbiddenFilter,
         > {
             self.0.event()
         }
@@ -924,6 +1016,26 @@ pub mod i_strategy_manager {
         pub previous_address: ::ethers::core::types::Address,
         pub new_address: ::ethers::core::types::Address,
     }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethevent(
+        name = "UpdatedThirdPartyTransfersForbidden",
+        abi = "UpdatedThirdPartyTransfersForbidden(address,bool)"
+    )]
+    pub struct UpdatedThirdPartyTransfersForbiddenFilter {
+        pub strategy: ::ethers::core::types::Address,
+        pub value: bool,
+    }
     ///Container type for all of the contract's events
     #[derive(
         Clone,
@@ -940,6 +1052,7 @@ pub mod i_strategy_manager {
         StrategyAddedToDepositWhitelistFilter(StrategyAddedToDepositWhitelistFilter),
         StrategyRemovedFromDepositWhitelistFilter(StrategyRemovedFromDepositWhitelistFilter),
         StrategyWhitelisterChangedFilter(StrategyWhitelisterChangedFilter),
+        UpdatedThirdPartyTransfersForbiddenFilter(UpdatedThirdPartyTransfersForbiddenFilter),
     }
     impl ::ethers::contract::EthLogDecode for IStrategyManagerEvents {
         fn decode_log(
@@ -961,6 +1074,11 @@ pub mod i_strategy_manager {
                     decoded,
                 ));
             }
+            if let Ok(decoded) = UpdatedThirdPartyTransfersForbiddenFilter::decode_log(log) {
+                return Ok(
+                    IStrategyManagerEvents::UpdatedThirdPartyTransfersForbiddenFilter(decoded),
+                );
+            }
             Err(::ethers::core::abi::Error::InvalidData)
         }
     }
@@ -975,6 +1093,9 @@ pub mod i_strategy_manager {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::StrategyWhitelisterChangedFilter(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
+                Self::UpdatedThirdPartyTransfersForbiddenFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
             }
@@ -1000,7 +1121,12 @@ pub mod i_strategy_manager {
             Self::StrategyWhitelisterChangedFilter(value)
         }
     }
-    ///Container type for all input parameters for the `addShares` function with signature `addShares(address,address,uint256)` and selector `0x50ff7225`
+    impl ::core::convert::From<UpdatedThirdPartyTransfersForbiddenFilter> for IStrategyManagerEvents {
+        fn from(value: UpdatedThirdPartyTransfersForbiddenFilter) -> Self {
+            Self::UpdatedThirdPartyTransfersForbiddenFilter(value)
+        }
+    }
+    ///Container type for all input parameters for the `addShares` function with signature `addShares(address,address,address,uint256)` and selector `0xc4623ea1`
     #[derive(
         Clone,
         ::ethers::contract::EthCall,
@@ -1013,13 +1139,14 @@ pub mod i_strategy_manager {
         Eq,
         Hash,
     )]
-    #[ethcall(name = "addShares", abi = "addShares(address,address,uint256)")]
+    #[ethcall(name = "addShares", abi = "addShares(address,address,address,uint256)")]
     pub struct AddSharesCall {
         pub staker: ::ethers::core::types::Address,
+        pub token: ::ethers::core::types::Address,
         pub strategy: ::ethers::core::types::Address,
         pub shares: ::ethers::core::types::U256,
     }
-    ///Container type for all input parameters for the `addStrategiesToDepositWhitelist` function with signature `addStrategiesToDepositWhitelist(address[])` and selector `0x5de08ff2`
+    ///Container type for all input parameters for the `addStrategiesToDepositWhitelist` function with signature `addStrategiesToDepositWhitelist(address[],bool[])` and selector `0xdf5b3547`
     #[derive(
         Clone,
         ::ethers::contract::EthCall,
@@ -1034,10 +1161,11 @@ pub mod i_strategy_manager {
     )]
     #[ethcall(
         name = "addStrategiesToDepositWhitelist",
-        abi = "addStrategiesToDepositWhitelist(address[])"
+        abi = "addStrategiesToDepositWhitelist(address[],bool[])"
     )]
     pub struct AddStrategiesToDepositWhitelistCall {
         pub strategies_to_whitelist: ::std::vec::Vec<::ethers::core::types::Address>,
+        pub third_party_transfers_forbidden_values: ::std::vec::Vec<bool>,
     }
     ///Container type for all input parameters for the `calculateWithdrawalRoot` function with signature `calculateWithdrawalRoot((address[],uint256[],address,(address,uint96),uint32,address))` and selector `0xb43b514b`
     #[derive(
@@ -1283,6 +1411,26 @@ pub mod i_strategy_manager {
     )]
     #[ethcall(name = "strategyWhitelister", abi = "strategyWhitelister()")]
     pub struct StrategyWhitelisterCall;
+    ///Container type for all input parameters for the `thirdPartyTransfersForbidden` function with signature `thirdPartyTransfersForbidden(address)` and selector `0x9b4da03d`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(
+        name = "thirdPartyTransfersForbidden",
+        abi = "thirdPartyTransfersForbidden(address)"
+    )]
+    pub struct ThirdPartyTransfersForbiddenCall {
+        pub strategy: ::ethers::core::types::Address,
+    }
     ///Container type for all input parameters for the `withdrawSharesAsTokens` function with signature `withdrawSharesAsTokens(address,address,uint256,address)` and selector `0xc608c7f3`
     #[derive(
         Clone,
@@ -1333,6 +1481,7 @@ pub mod i_strategy_manager {
         StakerStrategyListLength(StakerStrategyListLengthCall),
         StakerStrategyShares(StakerStrategySharesCall),
         StrategyWhitelister(StrategyWhitelisterCall),
+        ThirdPartyTransfersForbidden(ThirdPartyTransfersForbiddenCall),
         WithdrawSharesAsTokens(WithdrawSharesAsTokensCall),
     }
     impl ::ethers::core::abi::AbiDecode for IStrategyManagerCalls {
@@ -1413,6 +1562,11 @@ pub mod i_strategy_manager {
                 return Ok(Self::StrategyWhitelister(decoded));
             }
             if let Ok(decoded) =
+                <ThirdPartyTransfersForbiddenCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::ThirdPartyTransfersForbidden(decoded));
+            }
+            if let Ok(decoded) =
                 <WithdrawSharesAsTokensCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::WithdrawSharesAsTokens(decoded));
@@ -1456,6 +1610,9 @@ pub mod i_strategy_manager {
                 Self::StrategyWhitelister(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
+                Self::ThirdPartyTransfersForbidden(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::WithdrawSharesAsTokens(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -1486,6 +1643,9 @@ pub mod i_strategy_manager {
                 Self::StakerStrategyListLength(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StakerStrategyShares(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StrategyWhitelister(element) => ::core::fmt::Display::fmt(element, f),
+                Self::ThirdPartyTransfersForbidden(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::WithdrawSharesAsTokens(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
@@ -1563,6 +1723,11 @@ pub mod i_strategy_manager {
     impl ::core::convert::From<StrategyWhitelisterCall> for IStrategyManagerCalls {
         fn from(value: StrategyWhitelisterCall) -> Self {
             Self::StrategyWhitelister(value)
+        }
+    }
+    impl ::core::convert::From<ThirdPartyTransfersForbiddenCall> for IStrategyManagerCalls {
+        fn from(value: ThirdPartyTransfersForbiddenCall) -> Self {
+            Self::ThirdPartyTransfersForbidden(value)
         }
     }
     impl ::core::convert::From<WithdrawSharesAsTokensCall> for IStrategyManagerCalls {
@@ -1733,4 +1898,18 @@ pub mod i_strategy_manager {
         Hash,
     )]
     pub struct StrategyWhitelisterReturn(pub ::ethers::core::types::Address);
+    ///Container type for all return fields from the `thirdPartyTransfersForbidden` function with signature `thirdPartyTransfersForbidden(address)` and selector `0x9b4da03d`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct ThirdPartyTransfersForbiddenReturn(pub bool);
 }

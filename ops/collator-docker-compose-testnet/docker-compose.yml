@@ -1,0 +1,48 @@
+services:
+  collator:
+    image: mangatasolutions/mangata-node:eth-rollup-develop
+    restart: unless-stopped
+    platform: linux/amd64
+    command:
+      - --name=my-collator
+      - --collator
+      - --rpc-port=9944
+      - --port=30333
+      - --rpc-cors=all
+      - --chain=/etc/testnet-para-chainspec.json
+      - --base-path=/data
+      - --unsafe-rpc-external
+      - --rpc-methods=unsafe
+      - --bootnodes=/dns/collator-01-p2p-rollup-testnet.mangata.online/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+      - --
+      - --chain=/etc/testnet-relay-chainspec.json
+      - --bootnodes=/dns/relay-01-p2p-rollup-testnet.mangata.online/tcp/30333/p2p/12D3KooWHuPE8vcHgd4bWzPG3nKciNj72LaYJTaTtJpEiRzbou87
+    volumes:
+      - ./testnet-para-chainspec.json:/etc/testnet-para-chainspec.json
+      - ./testnet-relay-chainspec.json:/etc/testnet-relay-chainspec.json
+      - ./data:/data
+    ports:
+      - 9944:9944
+
+  sequencer:
+    image: mangatasolutions/rollup-sequencer:f8638a4fb0c9af6883efa175bf680466e0f5990e
+    restart: unless-stopped
+    platform: linux/amd64
+    environment:
+      MANGATA_NODE_URL: ws://collator:9944
+      ETH_CHAIN_URL: wss://ethereum.publicnode.com
+      MANGATA_CONTRACT_ADDRESS: '0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154'
+      MNEMONIC: 'some mnemonic'
+
+  # updater:
+  #   image: mangatasolutions/rollup-updater:f8638a4fb0c9af6883efa175bf680466e0f5990e
+  #   restart: unless-stopped
+  #   platform: linux/amd64
+  #   environment:
+  #     MANGATA_NODE_URL: ws://collator:9944
+  #     ETH_CHAIN_URL: wss://ethereum.publicnode.com
+  #     # Randomly generated key, should not be used for anything
+  #     WALLET_PRIVATE_KEY: "15cb3150921ee606d71b9def1b6392c9df1d4fea399cbcca2047d9cf84f44f08"
+  #     EIGEN_CONTRACT_ADDRESS: "0x9E545E3C0baAB3E08CdfD552C960A1050f373042"
+  #     MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
+  

@@ -67,3 +67,19 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# custom
+ops/**/data
+
+*.gas-snapshot
+contracts/script/output/*
+
+# foundry related ignore
+# reference: https://github.com/PaulRBerg/foundry-template/blob/main/.gitignore
+cache
+coverage
+output
+out
+!broadcast
+**/broadcast/*
+**/broadcast/*/31337/

@@ -26,7 +26,7 @@ impl From<BlsKeypair> for Option<G1Point> {
     fn from(val: BlsKeypair) -> Self {
         if let Some((x, y)) = val.public.xy() {
             Some(G1Point {
-                x: U256::from_little_endian(&x.into_bigint().to_bytes_le()),
+                x: U256::from_big_endian(&x.into_bigint().to_bytes_le()),
                 y: U256::from_little_endian(&y.into_bigint().to_bytes_le()),
             })
         } else {
@@ -93,6 +93,12 @@ impl BlsKeypair {
     pub fn sign(&self, msg: &[u8]) -> eyre::Result<BlsSignature> {
         let h = Self::map_to_curve(msg)?;
         let sig = h * self.private;
+
+        Ok(sig.into_affine())
+    }
+
+    pub fn sign_hashed(&self, msg: G1Affine) -> eyre::Result<BlsSignature> {
+        let sig = msg * self.private;
 
         Ok(sig.into_affine())
     }

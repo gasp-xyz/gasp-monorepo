@@ -11,11 +11,7 @@ use crate::crypto::keystore::EncodedKeystore;
 #[command(author, version, about, long_about = None)]
 pub struct CliArgs {
     #[arg(long, env)]
-    pub avs_service_manager_addr: Address,
-    #[arg(long, env)]
-    pub bls_compendium_addr: Address,
-    #[arg(long, env)]
-    pub bls_operator_state_retriever_addr: Address,
+    pub avs_registry_coordinator_addr: Address,
 
     #[arg(long, env)]
     pub substrate_rpc_url: String,
@@ -42,10 +38,15 @@ pub struct CliArgs {
     pub bls_key_password: Option<String>,
 
     #[arg(long, env, default_value_t = false)]
+    pub opt_in_at_startup: bool,
+
+    #[arg(long, env, default_value_t = false)]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub testnet: bool,
 
-    #[arg(long, env, default_value_t = 100, requires("testnet"))]
-    pub stake: u32,
+    #[arg(long, env, requires("testnet"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stake: Option<u32>,
 
     #[command(subcommand)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -62,6 +63,7 @@ pub struct EcdsaKey {
     #[serde(skip)]
     pub ecdsa_key_json: Option<String>,
     #[arg(long, env)]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub ecdsa_ephemeral_key: bool,
 }
 
@@ -75,6 +77,7 @@ pub struct BlsKey {
     #[serde(skip)]
     pub bls_key_json: Option<String>,
     #[arg(long, env)]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub bls_ephemeral_key: bool,
 }
 

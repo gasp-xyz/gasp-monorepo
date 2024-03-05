@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
 import "@eigenlayer/contracts/core/StrategyManager.sol";
 import {StrategyBaseTVLLimits} from "@eigenlayer/contracts/strategies/StrategyBaseTVLLimits.sol";
-import {IVoteWeigher} from "@eigenlayer-middleware/src/interfaces/IVoteWeigher.sol";
 
 import "../src/ERC20Mock.sol";
 import {Utils} from "./utils/Utils.sol";
@@ -19,11 +18,10 @@ import "forge-std/console.sol";
 // # To deploy strategy and setup deposits on Anvil
 // forge script script/0_AnvilSetup.s.sol:AnvilSetup --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast -vvvv
 contract AnvilSetup is Script, Utils, Test {
-    uint256 constant CHAIN_ID = 31337;
-    string constant EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
-    string constant SHARED_AVS_DEPLOYMENT_PATH = "shared_avs_contracts_deployment_output";
-    string constant CONFIG_PATH = "deploy.config";
-    string constant OUTPUT_PATH = "strategy_output";
+    uint256 constant _CHAIN_ID = 31337;
+    string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
+    string constant _CONFIG_PATH = "deploy.config";
+    string constant _OUTPUT_PATH = "strategy_output";
 
     // ERC20 and Strategy: we need to deploy this erc20, create a strategy for it, and whitelist this strategy in the strategymanager
     ERC20Mock public erc20Mock;
@@ -31,7 +29,7 @@ contract AnvilSetup is Script, Utils, Test {
 
     function run() external {
         // Eigenlayer contracts
-        string memory eigenlayerDeployedContracts = readInput(EIGEN_DEPLOYMENT_PATH);
+        string memory eigenlayerDeployedContracts = readInput(_EIGEN_DEPLOYMENT_PATH);
         StrategyManager strategyManager =
             StrategyManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.strategyManager"));
 
@@ -44,19 +42,20 @@ contract AnvilSetup is Script, Utils, Test {
             PauserRegistry(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.eigenLayerPauserReg"));
 
         // READ JSON CONFIG DATA
-        string memory configData = readConfig(CONFIG_PATH);
+        string memory configData = readConfig(_CONFIG_PATH);
 
         // check that the chainID matches the one in the config
         uint256 currentChainId = block.chainid;
         uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
         emit log_named_uint("You are deploying on ChainID", currentChainId);
-        require(configChainId == CHAIN_ID, "You are on the wrong chain for this config, only Anvil 31337 allowed");
+        require(configChainId == _CHAIN_ID, "You are on the wrong chain for this config, only Anvil 31337 allowed");
         require(configChainId == currentChainId, "You are on the wrong chain for this config");
 
         vm.startBroadcast();
 
         erc20Mock = new ERC20Mock();
 
+        // make sure you update config/{chain_id}/deploy.config.json with correct strategy address from the output of this script
         erc20MockStrategy = StrategyBaseTVLLimits(
             address(
                 new TransparentUpgradeableProxy(
@@ -73,9 +72,11 @@ contract AnvilSetup is Script, Utils, Test {
             )
         );
         IStrategy[] memory strats = new IStrategy[](1);
+        bool[] memory thirdPartyTransfersForbidden = new bool[](1);
+        thirdPartyTransfersForbidden[0] = false;
         strats[0] = erc20MockStrategy;
-        strategyManager.addStrategiesToDepositWhitelist(strats);
-    
+        strategyManager.addStrategiesToDepositWhitelist(strats, thirdPartyTransfersForbidden);
+
         vm.stopBroadcast();
         _writeOutput();
     }
@@ -94,6 +95,6 @@ contract AnvilSetup is Script, Utils, Test {
 
         vm.serializeString(parent_object, chain_info, chain_info_output);
         string memory finalJson = vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
-        writeOutput(finalJson, OUTPUT_PATH);
+        writeOutput(finalJson, _OUTPUT_PATH);
     }
 }
