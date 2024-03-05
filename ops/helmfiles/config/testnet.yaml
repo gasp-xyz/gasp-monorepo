@@ -3,8 +3,10 @@ remoteCluster: true
 anvilEnabled: false
 aggregatorEnabled: true
 finalizerEnabled: true
+secondFinalizerEnabled: false
 updaterEnabled: false
 sequencerEnabled: false
+secondSequencerEnabled: false
 
 env:
   # rpc
@@ -23,6 +25,7 @@ env:
     # OP
   AVS_RPC_URL: https://avs-aggregator-testnet.mangata.online
   RUST_LOG: avs=debug
+  OPT_IN_AT_STARTUP: '"true"'
 
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
