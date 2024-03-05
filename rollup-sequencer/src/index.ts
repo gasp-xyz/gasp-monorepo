@@ -94,7 +94,7 @@ async function main() {
 
 				// @ts-ignore
 				const encodedData = encodeAbiParameters(
-					abi.find((e: any) => e!.name === "getUpdateForL2").outputs,
+					abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
 					[data],
 				);
 				const verified = await api.rpc.rolldown.verify_pending_requests(
