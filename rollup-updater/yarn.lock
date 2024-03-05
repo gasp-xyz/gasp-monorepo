@@ -19,10 +19,10 @@
     "@biomejs/cli-win32-arm64" "1.4.1"
     "@biomejs/cli-win32-x64" "1.4.1"
 
-"@biomejs/cli-linux-x64@1.4.1":
+"@biomejs/cli-darwin-arm64@1.4.1":
   version "1.4.1"
-  resolved "https://registry.npmjs.org/@biomejs/cli-linux-x64/-/cli-linux-x64-1.4.1.tgz"
-  integrity sha512-9YOZw3qBd/KUj63A6Hn2zZgzGb2nbESM0qNmeMXgmqinVKM//uc4OgY5TuKITuGjMSvcVxxd4dX1IzYjV9qvNQ==
+  resolved "https://registry.npmjs.org/@biomejs/cli-darwin-arm64/-/cli-darwin-arm64-1.4.1.tgz"
+  integrity sha512-PZWy2Idndqux38p6AXSDQM2ldRAWi32bvb7bMbTN0ALzpWYMYnxd71ornatumSSJYoNhKmxzDLq+jct7nZJ79w==
 
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"
@@ -36,25 +36,25 @@
     wrap-ansi "^8.1.0"
     wrap-ansi-cjs "npm:wrap-ansi@^7.0.0"
 
-"@mangata-finance/sdk@^2.2.0-feature-rpc-method.2":
-  version "2.2.0-feature-rpc-method.2"
-  resolved "https://registry.npmjs.org/@mangata-finance/sdk/-/sdk-2.2.0-feature-rpc-method.2.tgz"
-  integrity sha512-dqW1RYSIf/FvXgJ1Vecpc3jXn7T9GWXazdgCnpkgF3tvdR9p/YcyXglwLFE4Nx2U7GO03F7vnxFNT6Tcy+NnZQ==
+"@mangata-finance/sdk@2.2.1-feature-rpc-verify-pending-requests.1":
+  version "2.2.1-feature-rpc-verify-pending-requests.1"
+  resolved "https://registry.npmjs.org/@mangata-finance/sdk/-/sdk-2.2.1-feature-rpc-verify-pending-requests.1.tgz"
+  integrity sha512-j5pd6MJieU6LaqWFLuZw02l66FXUILo5++UrkQof13z3cLrtY9Fg2FmG/jn59kjT9pp6BFSH+uU90d7tzB8B6Q==
   dependencies:
-    "@mangata-finance/type-definitions" "2.1.2-feature-rpc-method.1"
+    "@mangata-finance/type-definitions" "2.1.3-feature-rpc-verify-pending-requests.1"
     big.js "6.2.1"
     tslib "^2.3.0"
     tslog "4.8.2"
 
-"@mangata-finance/type-definitions@2.1.2-feature-rpc-method.1":
-  version "2.1.2-feature-rpc-method.1"
-  resolved "https://registry.npmjs.org/@mangata-finance/type-definitions/-/type-definitions-2.1.2-feature-rpc-method.1.tgz"
-  integrity sha512-2qZVWtoB9nVDOgwvHZBe1eQcrVcFsUP7x7p3otgTdLe+WFg9czQ7F9U4lLcZx+7UzSbudZTI2DDuEWnAohHKDw==
+"@mangata-finance/type-definitions@2.1.3-feature-rpc-verify-pending-requests.1":
+  version "2.1.3-feature-rpc-verify-pending-requests.1"
+  resolved "https://registry.npmjs.org/@mangata-finance/type-definitions/-/type-definitions-2.1.3-feature-rpc-verify-pending-requests.1.tgz"
+  integrity sha512-d8ZuNHQPHp2KmXcJVOWmttd+AZiOKs9pXe8slLWe1BxBxPmwSVgylx1Nj67mfZJpC7I1XiFrsYSTc1RwIgzEzA==
 
-"@mangata-finance/types@^2.2.2-feature-rpc-method.2":
-  version "2.2.2-feature-rpc-method.2"
-  resolved "https://registry.npmjs.org/@mangata-finance/types/-/types-2.2.2-feature-rpc-method.2.tgz"
-  integrity sha512-asXgRuybxcf2pyMZWjah0QaGASFxu+asnzVQYZ7oBfqGA/NXB4fsTSxs3JzvGn48Wy7t3+IdMm3t6t+z5ynF3g==
+"@mangata-finance/types@2.2.3-feature-rpc-verify-pending-requests.1":
+  version "2.2.3-feature-rpc-verify-pending-requests.1"
+  resolved "https://registry.npmjs.org/@mangata-finance/types/-/types-2.2.3-feature-rpc-verify-pending-requests.1.tgz"
+  integrity sha512-lF4wmLtzOfjF1ilCT/0TtIOh8qd68ICynYXo/65d7iyreUyA9AGZ3sFF+y7e7EAfRjms9setaV9q0YTnopoP7w==
 
 "@noble/curves@^1.3.0":
   version "1.3.0"
@@ -216,13 +216,13 @@
   optionalDependencies:
     "@substrate/connect" "0.7.26"
 
-"@polkadot/types-augment@10.11.2":
-  version "10.11.2"
-  resolved "https://registry.npmjs.org/@polkadot/types-augment/-/types-augment-10.11.2.tgz"
-  integrity sha512-8eB8ew04wZiE5GnmFvEFW1euJWmF62SGxb1O+8wL3zoUtB9Xgo1vB6w6xbTrd+HLV6jNSeXXnbbF1BEUvi9cNg==
+"@polkadot/types-augment@10.11.3":
+  version "10.11.3"
+  resolved "https://registry.npmjs.org/@polkadot/types-augment/-/types-augment-10.11.3.tgz"
+  integrity sha512-QVWvLnoK9qfJhWxV7E+itWo4zpQjz7Aco+Jmfdta/qKS4juYZQx8TGmxJfvB+p/xI/o8QewQh2lg3jlO5v2WOA==
   dependencies:
-    "@polkadot/types" "10.11.2"
-    "@polkadot/types-codec" "10.11.2"
+    "@polkadot/types" "10.11.3"
+    "@polkadot/types-codec" "10.11.3"
     "@polkadot/util" "^12.6.2"
     tslib "^2.6.2"
 
@@ -236,10 +236,10 @@
     "@polkadot/util" "^12.3.1"
     tslib "^2.5.3"
 
-"@polkadot/types-codec@10.11.2":
-  version "10.11.2"
-  resolved "https://registry.npmjs.org/@polkadot/types-codec/-/types-codec-10.11.2.tgz"
-  integrity sha512-3xjOQL+LOOMzYqlgP9ROL0FQnzU8lGflgYewzau7AsDlFziSEtb49a9BpYo6zil4koC+QB8zQ9OHGFumG08T8w==
+"@polkadot/types-codec@10.11.3":
+  version "10.11.3"
+  resolved "https://registry.npmjs.org/@polkadot/types-codec/-/types-codec-10.11.3.tgz"
+  integrity sha512-N2uEko2X7CixqFrF/sbmBi0T0UAfWca3t3HecpFIjn3gMky8ki6C+mqs5XsqZt6B+7Kh+Xds7SSxZaXeU9q5Qw==
   dependencies:
     "@polkadot/util" "^12.6.2"
     "@polkadot/x-bigint" "^12.6.2"
@@ -254,12 +254,12 @@
     "@polkadot/x-bigint" "^12.3.1"
     tslib "^2.5.3"
 
-"@polkadot/types-create@10.11.2":
-  version "10.11.2"
-  resolved "https://registry.npmjs.org/@polkadot/types-create/-/types-create-10.11.2.tgz"
-  integrity sha512-SJt23NxYvefRxVZZm6mT9ed1pR6FDoIGQ3xUpbjhTLfU2wuhpKjekMVorYQ6z/gK2JLMu2kV92Ardsz+6GX5XQ==
+"@polkadot/types-create@10.11.3":
+  version "10.11.3"
+  resolved "https://registry.npmjs.org/@polkadot/types-create/-/types-create-10.11.3.tgz"
+  integrity sha512-xb2MXcFxYar1DEpSRDunfMgfQoaSYyUcRr5TeFh1Zi0VZf3Zf3FsLKNfaEt3AFul1ZHwpIJO/R8KLeTSsgfK/A==
   dependencies:
-    "@polkadot/types-codec" "10.11.2"
+    "@polkadot/types-codec" "10.11.3"
     "@polkadot/util" "^12.6.2"
     tslib "^2.6.2"
 
@@ -292,15 +292,15 @@
     "@polkadot/util" "^12.3.1"
     tslib "^2.5.3"
 
-"@polkadot/types@^10.9.1", "@polkadot/types@10.11.2":
-  version "10.11.2"
-  resolved "https://registry.npmjs.org/@polkadot/types/-/types-10.11.2.tgz"
-  integrity sha512-d52j3xXni+C8GdYZVTSfu8ROAnzXFMlyRvXtor0PudUc8UQHOaC4+mYAkTBGA2gKdmL8MHSfRSbhcxHhsikY6Q==
+"@polkadot/types@^10.9.1", "@polkadot/types@10.11.3":
+  version "10.11.3"
+  resolved "https://registry.npmjs.org/@polkadot/types/-/types-10.11.3.tgz"
+  integrity sha512-SQGQp/MnNL1Cw+bqH2tyGpcQKa+up56p8rnRQYO8+yZVAjD+2digYQ0vYrVWZ3vwk0w0aiRc6MuIkOOq9KPU5A==
   dependencies:
     "@polkadot/keyring" "^12.6.2"
-    "@polkadot/types-augment" "10.11.2"
-    "@polkadot/types-codec" "10.11.2"
-    "@polkadot/types-create" "10.11.2"
+    "@polkadot/types-augment" "10.11.3"
+    "@polkadot/types-codec" "10.11.3"
+    "@polkadot/types-create" "10.11.3"
     "@polkadot/util" "^12.6.2"
     "@polkadot/util-crypto" "^12.6.2"
     rxjs "^7.8.1"
