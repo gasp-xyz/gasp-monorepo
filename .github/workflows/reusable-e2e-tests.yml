@@ -70,6 +70,9 @@ jobs:
       - name: docker ps
         run: docker ps
 
+      - name: docker network inspect
+        run: docker network inspect  rollup_default
+
       - name: Decide if main - branch or parameter
         # if we have something in e2eBranch - override E2EBranchName, else -> E2EBRANCHNAME , that
         # by default will be main.
@@ -107,6 +110,7 @@ jobs:
 
 
       - name: Stop env
+        if: success() || failure() # run this step even if previous step failed
         run: |
           export AVS_AGGREGATOR_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
           export AVS_FINALIZER_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
