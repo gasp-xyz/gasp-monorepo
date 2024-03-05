@@ -74,9 +74,6 @@ jobs:
       - name: docker ps
         run: docker ps
 
-      - name: docker network inspect
-        run: docker network inspect  rollup_default
-
       - name: Decide if main - branch or parameter
         # if we have something in e2eBranch - override E2EBranchName, else -> E2EBRANCHNAME , that
         # by default will be main.
@@ -103,7 +100,7 @@ jobs:
           NODE_OPTIONS: --max_old_space_size=12288
 
       - name: Get Seq logs 
-        if: failure()
+        if: success() || failure()
         run: docker logs rollup-sequencer-1
 
       - name: Test Report
