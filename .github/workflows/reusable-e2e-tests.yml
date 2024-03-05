@@ -51,6 +51,10 @@ jobs:
       - name: Build parachain launch
         working-directory: ops/parachain-launch-mangata-node/
         run: npx @open-web3/parachain-launch generate config.yml -y
+
+      - name: Print docker compose content
+        working-directory: ops/parachain-launch-mangata-node/output/
+        run: cat docker-compose.yml 
           
       #- name: build finalizer
       #  working-directory: avs-finalizer/
@@ -88,6 +92,9 @@ jobs:
       - name: Install e2e tests dependencies
         working-directory: e2eTests
         run: yarn install
+      
+      - name: restart sequencer
+        run: docker restart rollup-sequencer-1
 
       - name: Run tests
         working-directory: e2eTests
