@@ -17,7 +17,7 @@ relaychain:
     - name: bob
 
 parachains:
-  - image: mangatasolutions/mangata-node:feature-fix-ensure
+  - image: mangatasolutions/mangata-node:feature-collate-using-eve
     chain:
       base: mangata-rococo-local-seq
       collators:
