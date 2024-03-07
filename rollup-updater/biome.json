@@ -7,10 +7,14 @@
 		"enabled": true,
 		"rules": {
 			"style": {
-				"noNonNullAssertion": "off"
+				"noNonNullAssertion": "off",
+				"noUselessElse": "off"
 			},
 			"correctness": {
 				"noConstantCondition": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "off"
 			}
 		}
 	}
