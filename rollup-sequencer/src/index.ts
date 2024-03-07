@@ -3,6 +3,7 @@ import "@mangata-finance/types";
 import { Keyring } from "@polkadot/api";
 import "dotenv/config";
 import { createPublicClient, encodeAbiParameters, webSocket } from "viem";
+import { keccak256 } from "viem";
 import rolldownAbi from "./RollDown.json" assert { type: "json" };
 
 type ContractAddress = `0x${string}`;
@@ -38,11 +39,13 @@ async function main() {
 	}
 
 	const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
+	await api.isReady;
 
 	const keyring = new Keyring({ type: "sr25519" });
 	const collator = keyring.addFromUri(process.env.MNEMONIC!);
 
 	await api.derive.chain.subscribeNewHeads(async (header) => {
+		const apiAt = await api.at(header.hash);
 		console.log(`block #${header.number} was authored by ${header.author}`);
 
 		if (header.author?.toString() === collator.address) {
@@ -72,43 +75,43 @@ async function main() {
 			});
 
 			await signTx(api, api.tx.rolldown.updateL2FromL1(data), collator);
-		} else {
-			const events = await api.query.system.events();
-			const pendingRequestsEvents = events.filter(
-				(event) =>
-					event.event.section === "rolldown" &&
-					event.event.method === "PendingRequestStored",
-			);
+		}
+		const events = await apiAt.query.system.events();
+		const pendingRequestsEvents = events.filter(
+			(event) =>
+				event.event.section === "rolldown" &&
+				event.event.method === "PendingRequestStored",
+		);
 
-			if (pendingRequestsEvents.length > 0) {
-				const eventData = pendingRequestsEvents.map((event) =>
-					event.event.data.toPrimitive(),
-				);
-				const requestId = eventData[2]!.toString();
-
-				const data = (await publicClient.readContract({
-					address: mangataContractAddress,
-					abi: abi,
-					functionName: "getUpdateForL2",
-				})) as any;
-
-				// @ts-ignore
-				const encodedData = encodeAbiParameters(
-					abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
-					[data],
-				);
-				const verified = await api.rpc.rolldown.verify_pending_requests(
-					encodedData,
-					requestId,
-				);
-				if (!verified) {
-					await signTx(
-						api,
-						api.tx.rolldown.cancelRequestsFromL1(requestId),
-						collator,
+		if (pendingRequestsEvents.length > 0) {
+			pendingRequestsEvents.forEach((record) => {
+				record.event.data.forEach(async (data, index) => {
+					const requestId = (data as unknown as string[])[1];
+					const contractData = (await publicClient.readContract({
+						address: mangataContractAddress,
+						abi: abi,
+						functionName: "getUpdateForL2",
+					})) as any;
+					// @ts-ignore
+					const encodedData = encodeAbiParameters(
+						abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
+						[contractData],
 					);
-				}
-			}
+
+					const verified = await api.rpc.rolldown.verify_pending_requests(
+						keccak256(encodedData),
+						requestId.toString(),
+					);
+
+					if (verified.isFalse) {
+						await signTx(
+							api,
+							api.tx.rolldown.cancelRequestsFromL1(requestId.toString()),
+							collator,
+						);
+					}
+				});
+			});
 		}
 	});
 }
