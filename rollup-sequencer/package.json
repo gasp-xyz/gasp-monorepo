@@ -19,8 +19,8 @@
     "typescript": "5.3.2"
   },
   "dependencies": {
-    "@mangata-finance/sdk": "2.2.1-eth-rollup-develop.6",
-    "@mangata-finance/types": "2.2.3-eth-rollup-develop.13",
+    "@mangata-finance/sdk": "2.2.1-eth-rollup-develop.9",
+    "@mangata-finance/types": "2.2.3-eth-rollup-develop.16",
     "@polkadot/api": "10.9.1",
     "dotenv": "^16.3.1",
     "viem": "^1.19.11"
