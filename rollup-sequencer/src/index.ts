@@ -1,3 +1,4 @@
+import util from "util";
 import { Mangata, signTx } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
 import { Keyring } from "@polkadot/api";
@@ -55,7 +56,7 @@ async function main() {
 				functionName: "getUpdateForL2",
 			})) as any;
 
-			console.log(data);
+			console.log(util.inspect(data, { depth: null }));
 
 			data.order = data.order.map((e: any) => {
 				switch (e) {
