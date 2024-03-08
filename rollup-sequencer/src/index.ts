@@ -1,3 +1,4 @@
+import util from "util";
 import { Mangata, signTx } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
 import { Keyring } from "@polkadot/api";
@@ -5,7 +6,6 @@ import "dotenv/config";
 import { createPublicClient, encodeAbiParameters, webSocket } from "viem";
 import { keccak256 } from "viem";
 import rolldownAbi from "./RollDown.json" assert { type: "json" };
-import util from "util";
 
 type ContractAddress = `0x${string}`;
 
