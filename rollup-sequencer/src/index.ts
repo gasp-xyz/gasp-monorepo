@@ -103,7 +103,9 @@ async function main() {
 						requestId.toString(),
 					);
 
-					if (verified.isFalse) {
+					const isVerified = Boolean(verified.toString())
+
+					if (!isVerified) {
 						await signTx(
 							api,
 							api.tx.rolldown.cancelRequestsFromL1(requestId.toString()),
