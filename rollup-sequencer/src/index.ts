@@ -5,6 +5,7 @@ import "dotenv/config";
 import { createPublicClient, encodeAbiParameters, webSocket } from "viem";
 import { keccak256 } from "viem";
 import rolldownAbi from "./RollDown.json" assert { type: "json" };
+import util from "util";
 
 type ContractAddress = `0x${string}`;
 
@@ -55,7 +56,7 @@ async function main() {
 				functionName: "getUpdateForL2",
 			})) as any;
 
-			console.log(data);
+			console.log(util.inspect(data, { depth: null }));
 
 			data.order = data.order.map((e: any) => {
 				switch (e) {
