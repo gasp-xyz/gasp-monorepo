@@ -68,8 +68,8 @@ jobs:
           
         
 
-      - name: Sleep for 2 minutes
-        run: sleep 120s
+#      - name: Sleep for 2 minutes
+#        run: sleep 120s
 
       - name: docker ps
         run: docker ps
@@ -99,9 +99,9 @@ jobs:
         env:
           NODE_OPTIONS: --max_old_space_size=12288
 
-      - name: Get Seq logs 
-        if: success() || failure()
-        run: docker logs rollup-sequencer-1
+#      - name: Get Seq logs 
+#        if: success() || failure()
+#        run: docker logs rollup-sequencer-1
 
       - name: Test Report
         uses: dorny/test-reporter@v1.7.0
