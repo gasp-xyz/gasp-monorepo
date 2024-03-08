@@ -113,7 +113,7 @@ contract RollDown {
 
         IERC20 token = IERC20(tokenAddress);
         require(
-            token.transferFrom(msg.sender, tokenAddress, amount),
+            token.transferFrom(msg.sender, address(this), amount),
             "Token transfer failed"
         );
 
