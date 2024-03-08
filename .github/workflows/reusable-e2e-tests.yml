@@ -90,8 +90,8 @@ jobs:
         working-directory: e2eTests
         run: yarn install
       
-      - name: restart sequencer
-        run: docker restart rollup-sequencer-1
+#      - name: restart sequencer
+#        run: docker restart rollup-sequencer-1
 
       - name: Run tests
         working-directory: e2eTests
@@ -99,9 +99,14 @@ jobs:
         env:
           NODE_OPTIONS: --max_old_space_size=12288
 
-#      - name: Get Seq logs 
-#        if: success() || failure()
-#        run: docker logs rollup-sequencer-1
+      - name: Get Seq logs 
+        if: success() || failure()
+        run: docker logs rollup-sequencer-1
+
+      
+      - name: Get updater logs 
+        if: success() || failure()
+        run: docker logs rollup-updater-1
 
       - name: Test Report
         uses: dorny/test-reporter@v1.7.0
