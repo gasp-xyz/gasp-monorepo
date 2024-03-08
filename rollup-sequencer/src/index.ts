@@ -103,7 +103,7 @@ async function main() {
 						requestId.toString(),
 					);
 
-					const isVerified = Boolean(verified.toString())
+					const isVerified = Boolean(verified.toString());
 
 					if (!isVerified) {
 						await signTx(
