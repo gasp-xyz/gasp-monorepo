@@ -17,11 +17,11 @@ relaychain:
     - name: bob
 
 parachains:
-  - image: mangatasolutions/mangata-node:feature-collate-using-eve
+  - image: mangatasolutions/mangata-node:eth-rollup-develop
     chain:
       base: mangata-rococo-local-seq
       collators:
-        - eve
+        - alice
         - bob
       sudo: alice
       skipCollatorSelection: true
@@ -42,6 +42,6 @@ parachains:
     volumePath: /mangata/data
     nodes:
       - flags:
-          - --eve
+          - --alice
       - flags:
           - --bob
