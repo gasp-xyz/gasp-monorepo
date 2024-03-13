@@ -219,12 +219,12 @@ contract RollDownTest is Test {
         });
 
 
-        bytes32 l2Hash = 0x11d64281be3f1d98a5516771879c181f94d201926497822ff7174d531f80ed0c;
-        assertEq(keccak256(abi.encode(l1Update)), l2Hash);
+        assertEq(keccak256(abi.encode(l1Update)), 0x5129c9a6605d367397902fa839ef429af9abed97f0dd36e3b1973939817d40dc);
     }
 
 
     function testL2UpdateHashCompatibilityWithMangataNode() public {
+        // TODO: add such  a test on substrate side
         RollDown.L2Update memory l2Update;
         l2Update.cancels = new RollDown.Cancel[](1);
         l2Update.withdrawals = new RollDown.Withdrawal[](1);
@@ -250,7 +250,7 @@ contract RollDownTest is Test {
             status: true
         });
 
-        bytes32 l2Hash = 0x11d64281be3f1d98a5516771879c181f94d201926497822ff7174d531f80ed0c;
+        bytes32 l2Hash = 0x86056ca0e2dd30bb80627000335bd10a2a57699f532e665260ffebb55047544f;
         assertEq(keccak256(abi.encode(l2Update)), l2Hash);
     }
 
