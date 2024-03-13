@@ -254,7 +254,6 @@ contract RollDown {
                 revert("unknown update type");
             }
         }
-        console.log("lastProcessedUpdate_origin_l2", lastProcessedUpdate_origin_l2);
     }
 
     function update_l1_from_l2(L2Update calldata inputArray) external {
