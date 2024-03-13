@@ -79,13 +79,6 @@ contract RollDown {
         bytes32 blockHash;
     }
 
-    enum PendingRequestType {
-        DEPOSIT,
-        WITHDRAWAL,
-        CANCEL_RESOLUTION,
-        L2_UPDATES_TO_REMOVE
-    }
-
     struct L1Update {
         Deposit[] pendingDeposits;
         CancelResolution[] pendingCancelResultions;
@@ -97,12 +90,14 @@ contract RollDown {
     mapping(uint256 => CancelResolution) public cancelResolutions;
     mapping(uint256 => Deposit) private deposits;
     mapping(uint256 => L2UpdatesToRemove) private l2UpdatesToRemove;
-    /// PENING REQUESTS TYPES (L1)
 
+    //TODO: should be renamed to RequestType
     enum UpdateType {
         DEPOSIT,
         WITHDRAWAL,
+        WITHDRAWAL_RESOLUTION,
         INDEX_UPDATE,
+        CANCEL,
         CANCEL_RESOLUTION
     }
 
@@ -226,7 +221,7 @@ contract RollDown {
                 cancelId < update.cancels.length &&
                 update.cancels[cancelId].requestId.id == i
             ) {
-                order[orderId] = UpdateType.CANCEL_RESOLUTION;
+                order[orderId] = UpdateType.CANCEL;
                 cancelId++;
                 orderId++;
             } else {
@@ -248,7 +243,7 @@ contract RollDown {
         for (uint256 i = 0; i < order.length; i++) {
             if (order[i] == UpdateType.WITHDRAWAL) {
                 process_l2_update_withdrawal(inputArray.withdrawals[withdrawalId++]);
-            } else if (order[i] == UpdateType.CANCEL_RESOLUTION) {
+            } else if (order[i] == UpdateType.CANCEL) {
                 process_l2_update_cancels(inputArray.cancels[cancelId++]);
             } else {
                 revert("unknown update type");
