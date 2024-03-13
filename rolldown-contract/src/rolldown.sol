@@ -51,7 +51,8 @@ contract RollDown {
 
 		struct L2UpdatesToRemove {
 			RequestId requestId;
-			RequestId[] l2UpdatesToRemove;
+			uint256[] l1;
+			uint256[] l2;
 		}
 
 		struct CancelResolution {
@@ -214,10 +215,13 @@ contract RollDown {
 
         processRequestsOriginatingOnL2(inputArray);
 
+        uint256[] memory ids = new uint256[](10);
+
         // Create a new array with the correct size
         if (l2UpdatesToBeRemoved.length > 0) {
-            l2UpdatesToRemove[counter++]
-                .l2UpdatesToRemove = l2UpdatesToBeRemoved;
+            l2UpdatesToRemove[counter++].l2 = ids;
+            // l2UpdatesToRemove[counter++]
+            //     .l2UpdatesToRemove = l2UpdatesToBeRemoved;
             lastProcessedUpdate_origin_l1 += l2UpdatesToBeRemoved.length;
             emit L2UpdatesToRemovedAcceptedIntoQueue(
                 counter - 1,
@@ -326,11 +330,11 @@ contract RollDown {
         uint256 updatesToBeRemovedCounter = 0;
 
         for (uint256 requestId = start; requestId <= end; requestId++) {
-            if (deposits[requestId].depositRecipient != address(0)) {
+            if (deposits[requestId].requestId.id != 0) {
               depositsCounter++;
-            } else if (l2UpdatesToRemove[requestId].l2UpdatesToRemove.length > 0) {
+            } else if (l2UpdatesToRemove[requestId].requestId.id != 0) {
               updatesToBeRemovedCounter++;
-            } else if (cancelResolutions[requestId].l2RequestId > 0) {
+            } else if (cancelResolutions[requestId].requestId.id != 0) {
               cancelsCounter++;
             }
         }
@@ -350,7 +354,7 @@ contract RollDown {
         for (uint256 requestId = start; requestId <= end; requestId++) {
             if (deposits[requestId].depositRecipient != address(0)) {
               result.pendingDeposits[depositsCounter++] = deposits[requestId];
-            } else if ( l2UpdatesToRemove[requestId].l2UpdatesToRemove.length > 0) {
+            } else if ( l2UpdatesToRemove[requestId].requestId.id > 0) {
               result.pendingL2UpdatesToRemove[updatesToBeRemovedCounter++] = l2UpdatesToRemove[requestId];
             } else if (cancelResolutions[requestId].l2RequestId > 0) {
               result.pendingCancelResultions[cancelsCounter++] = cancelResolutions[requestId];

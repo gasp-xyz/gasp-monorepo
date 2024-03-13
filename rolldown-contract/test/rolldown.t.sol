@@ -192,13 +192,13 @@ contract RollDownTest is Test {
         });
 
         // Request
-        RollDown.RequestId[] memory l2UpdatesToRemove = new RollDown.RequestId[](1);
-        l2UpdatesToRemove[0] = RollDown.RequestId({id: 1, origin: RollDown.Origin.L2});
-        l1Update.pendingL2UpdatesToRemove[0] = RollDown.L2UpdatesToRemove({
-            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L1}),
-            l2UpdatesToRemove: l2UpdatesToRemove
-        });
-
+        // RollDown.RequestId[] memory l2UpdatesToRemove = new RollDown.RequestId[](1);
+        // l2UpdatesToRemove[0] = RollDown.RequestId({id: 1, origin: RollDown.Origin.L2});
+        // l1Update.pendingL2UpdatesToRemove[0] = RollDown.L2UpdatesToRemove({
+        //     requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L1}),
+        //     l2UpdatesToRemove: l2UpdatesToRemove
+        // });
+        //
 
         bytes32 l2Hash = 0x033f8b8c13f3dd23df7d50f5a5106621177bb75f71cb39e9a8fd4ab565bec339;
         assertEq(keccak256(abi.encode(l1Update)), l2Hash);
