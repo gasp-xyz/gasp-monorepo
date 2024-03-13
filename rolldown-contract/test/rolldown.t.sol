@@ -193,7 +193,7 @@ contract RollDownTest is Test {
         // });
         //
 
-        bytes32 l2Hash =  0x134d8fb03451305234f1d783a3923bffd5a6b276a646386d0a18fc953c403637;
+        bytes32 l2Hash = 0x134d8fb03451305234f1d783a3923bffd5a6b276a646386d0a18fc953c403637;
         assertEq(keccak256(abi.encode(l1Update)), l2Hash);
     }
 
@@ -215,11 +215,13 @@ contract RollDownTest is Test {
         l2Update.results = new RollDown.RequestResult[](0);
         l2Update.cancles = new RollDown.Cancel[](1);
         l2Update.cancles[0] = RollDown.Cancel({
-            requestId: RollDown.RequestId({id: 50000, origin: RollDown.Origin.L2}),
+            requestId: RollDown.RequestId({
+                id: 50000,
+                origin: RollDown.Origin.L2
+            }),
             range: RollDown.Range({start: 1, end: 1}),
             hash: bytes32(uint256(0))
         });
-
 
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
@@ -250,7 +252,10 @@ contract RollDownTest is Test {
         l2Update.results = new RollDown.RequestResult[](0);
         l2Update.cancles = new RollDown.Cancel[](1);
         l2Update.cancles[0] = RollDown.Cancel({
-            requestId: RollDown.RequestId({id: 50000, origin: RollDown.Origin.L2}),
+            requestId: RollDown.RequestId({
+                id: 50000,
+                origin: RollDown.Origin.L2
+            }),
             range: RollDown.Range({start: 1, end: 1}),
             hash: bytes32(keccak256(abi.encode(l1Update)))
         });
@@ -296,3 +301,4 @@ contract RollDownTest is Test {
         assertEq(contractBalanceBefore - amount, contractBalanceAfter);
     }
 }
+
