@@ -90,8 +90,8 @@ jobs:
         working-directory: e2eTests
         run: yarn install
       
-#      - name: restart sequencer
-#        run: docker restart rollup-sequencer-1
+      - name: restart sequencer
+        run: docker restart rollup-sequencer-1
 
       - name: Run tests
         working-directory: e2eTests
