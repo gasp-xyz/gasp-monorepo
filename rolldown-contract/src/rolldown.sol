@@ -173,11 +173,9 @@ contract RollDown {
             getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
     }
 
-    function getOrderOfRequestsOriginatingOnL2(L2Update calldata update)
-        private
-        view
-        returns (UpdateType[] memory)
-    {
+    function getOrderOfRequestsOriginatingOnL2(
+        L2Update calldata update
+    ) private view returns (UpdateType[] memory) {
         if (update.cancels.length == 0 && update.withdrawals.length == 0) {
             return new UpdateType[](0);
         }
@@ -231,9 +229,9 @@ contract RollDown {
         return order;
     }
 
-    function processRequestsOriginatingOnL2(L2Update calldata inputArray)
-        private
-    {
+    function processRequestsOriginatingOnL2(
+        L2Update calldata inputArray
+    ) private {
         UpdateType[] memory order = getOrderOfRequestsOriginatingOnL2(
             inputArray
         );
@@ -242,7 +240,9 @@ contract RollDown {
 
         for (uint256 i = 0; i < order.length; i++) {
             if (order[i] == UpdateType.WITHDRAWAL) {
-                process_l2_update_withdrawal(inputArray.withdrawals[withdrawalId++]);
+                process_l2_update_withdrawal(
+                    inputArray.withdrawals[withdrawalId++]
+                );
             } else if (order[i] == UpdateType.CANCEL) {
                 process_l2_update_cancels(inputArray.cancels[cancelId++]);
             } else {
@@ -336,7 +336,7 @@ contract RollDown {
 
     function process_l2_update_cancels(Cancel calldata cancel) private {
         if (cancel.requestId.id <= lastProcessedUpdate_origin_l1) {
-          return;
+            return;
         }
         L1Update memory pending = getPendingRequests(
             cancel.range.start,
@@ -359,11 +359,11 @@ contract RollDown {
         );
     }
 
-    function process_l2_update_withdrawal(Withdrawal calldata withdrawal)
-        private
-    {
+    function process_l2_update_withdrawal(
+        Withdrawal calldata withdrawal
+    ) private {
         if (withdrawal.requestId.id <= lastProcessedUpdate_origin_l1) {
-          return;
+            return;
         }
         IERC20 token = IERC20(withdrawal.tokenAddress);
         bool status = token.balanceOf(address(this)) >= withdrawal.amount;
@@ -377,10 +377,10 @@ contract RollDown {
         });
 
         withdrawalResolutions[counter++] = resolution;
-          emit WithdrawalResolutionAcceptedIntoQueue(
+        emit WithdrawalResolutionAcceptedIntoQueue(
             resolution.requestId.id,
             status
-          );
+        );
 
         if (status) {
             token.transfer(withdrawal.withdrawalRecipient, withdrawal.amount);
@@ -392,11 +392,10 @@ contract RollDown {
         }
     }
 
-    function getPendingRequests(uint256 start, uint256 end)
-        private
-        view
-        returns (L1Update memory)
-    {
+    function getPendingRequests(
+        uint256 start,
+        uint256 end
+    ) private view returns (L1Update memory) {
         L1Update memory result;
 
         uint256 depositsCounter = 0;
@@ -431,11 +430,17 @@ contract RollDown {
             if (deposits[requestId].requestId.id > 0) {
                 result.pendingDeposits[depositsCounter++] = deposits[requestId];
             } else if (withdrawalResolutions[requestId].requestId.id > 0) {
-              result.pendingWithdrawalResolutions[withdrawalsCounter++] = withdrawalResolutions[requestId];
+                result.pendingWithdrawalResolutions[
+                    withdrawalsCounter++
+                ] = withdrawalResolutions[requestId];
             } else if (l2UpdatesToRemove[requestId].requestId.id > 0) {
-              result.pendingL2UpdatesToRemove[updatesToBeRemovedCounter++] = l2UpdatesToRemove[requestId];
+                result.pendingL2UpdatesToRemove[
+                    updatesToBeRemovedCounter++
+                ] = l2UpdatesToRemove[requestId];
             } else if (cancelResolutions[requestId].l2RequestId > 0) {
-              result.pendingCancelResultions[cancelsCounter++] = cancelResolutions[requestId];
+                result.pendingCancelResultions[
+                    cancelsCounter++
+                ] = cancelResolutions[requestId];
             } else {
                 break;
             }

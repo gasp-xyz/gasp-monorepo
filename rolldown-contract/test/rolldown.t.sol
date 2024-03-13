@@ -86,7 +86,10 @@ contract RollDownTest is Test {
         assertEq(l1Update.pendingDeposits.length, 0);
         assertEq(l1Update.pendingCancelResultions.length, 0);
         assertEq(l1Update.pendingL2UpdatesToRemove[0].requestId.id, 2);
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length, 1);
+        assertEq(
+            l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
+            1
+        );
         assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove[0], 1);
 
         RollDown.L2Update memory l2Update2;
@@ -105,7 +108,10 @@ contract RollDownTest is Test {
         assertEq(l1Update.pendingDeposits.length, 0);
         assertEq(l1Update.pendingCancelResultions.length, 0);
         assertEq(l1Update.pendingL2UpdatesToRemove[0].requestId.id, 3);
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length, 1);
+        assertEq(
+            l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
+            1
+        );
         assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove[0], 2);
 
         RollDown.L2Update memory l2Update3;
@@ -125,7 +131,10 @@ contract RollDownTest is Test {
         assertEq(l1Update.pendingDeposits.length, 0);
         assertEq(l1Update.pendingCancelResultions.length, 0);
         assertEq(l1Update.pendingL2UpdatesToRemove[0].requestId.id, 4);
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length, 1);
+        assertEq(
+            l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
+            1
+        );
         assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove[0], 3);
     }
 
@@ -169,14 +178,14 @@ contract RollDownTest is Test {
             update2.pendingL2UpdatesToRemove.length
         );
 
-        assertEq( update1.pendingWithdrawalResolutions.length, 0);
-        assertEq( update2.pendingWithdrawalResolutions.length, 0);
+        assertEq(update1.pendingWithdrawalResolutions.length, 0);
+        assertEq(update2.pendingWithdrawalResolutions.length, 0);
 
-        assertEq( update1.pendingDeposits.length, 0);
-        assertEq( update2.pendingDeposits.length, 0);
+        assertEq(update1.pendingDeposits.length, 0);
+        assertEq(update2.pendingDeposits.length, 0);
         //
-        assertEq( update1.pendingCancelResultions.length, 0);
-        assertEq( update2.pendingCancelResultions.length, 0);
+        assertEq(update1.pendingCancelResultions.length, 0);
+        assertEq(update2.pendingCancelResultions.length, 0);
         //
     }
 
@@ -185,7 +194,10 @@ contract RollDownTest is Test {
         l1Update.pendingDeposits = new RollDown.Deposit[](1);
         l1Update.pendingL2UpdatesToRemove = new RollDown.L2UpdatesToRemove[](1);
         l1Update.pendingCancelResultions = new RollDown.CancelResolution[](1);
-        l1Update.pendingWithdrawalResolutions = new RollDown.WithdrawalResolution[](1);
+        l1Update
+            .pendingWithdrawalResolutions = new RollDown.WithdrawalResolution[](
+            1
+        );
 
         l1Update.pendingDeposits[0] = RollDown.Deposit({
             requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L1}),
@@ -202,13 +214,16 @@ contract RollDownTest is Test {
             blockHash: 0x0000000000000000000000000000000000000000000000000000000000000008
         });
 
-        l1Update.pendingWithdrawalResolutions[0] = RollDown.WithdrawalResolution({
-            requestId: RollDown.RequestId({id: 9, origin: RollDown.Origin.L1}),
-            l2RequestId: 10,
-            status: true,
-            blockHash: 0x000000000000000000000000000000000000000000000000000000000000000b
-        });
-
+        l1Update.pendingWithdrawalResolutions[0] = RollDown
+            .WithdrawalResolution({
+                requestId: RollDown.RequestId({
+                    id: 9,
+                    origin: RollDown.Origin.L1
+                }),
+                l2RequestId: 10,
+                status: true,
+                blockHash: 0x000000000000000000000000000000000000000000000000000000000000000b
+            });
 
         uint256[] memory l2UpdatesToRemove = new uint256[](1);
         l2UpdatesToRemove[0] = 13;
@@ -218,10 +233,11 @@ contract RollDownTest is Test {
             blockHash: 0x000000000000000000000000000000000000000000000000000000000000000e
         });
 
-
-        assertEq(keccak256(abi.encode(l1Update)), 0x5129c9a6605d367397902fa839ef429af9abed97f0dd36e3b1973939817d40dc);
+        assertEq(
+            keccak256(abi.encode(l1Update)),
+            0x5129c9a6605d367397902fa839ef429af9abed97f0dd36e3b1973939817d40dc
+        );
     }
-
 
     function testL2UpdateHashCompatibilityWithMangataNode() public {
         // TODO: add such  a test on substrate side
@@ -276,7 +292,6 @@ contract RollDownTest is Test {
             range: RollDown.Range({start: 1, end: 1}),
             hash: bytes32(uint256(0))
         });
-
 
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
@@ -353,10 +368,7 @@ contract RollDownTest is Test {
         assertEq(contractBalanceBefore - amount, contractBalanceAfter);
     }
 
-
-    function testSuccessfulWithdrawalRequest()
-        public
-    {
+    function testSuccessfulWithdrawalRequest() public {
         // Arrange
         address payable alice = users[0];
         token = new MyERC20();
@@ -378,18 +390,15 @@ contract RollDownTest is Test {
             amount: 500
         });
 
-
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
         emit RollDown.WithdrawalResolutionAcceptedIntoQueue(2, true);
-        emit RollDown.FundsWithdrawn(alice, tokenAddress, 500); 
+        emit RollDown.FundsWithdrawn(alice, tokenAddress, 500);
         rollDown.update_l1_from_l2(l2Update);
         vm.stopPrank();
     }
 
-    function testUnsuccessfulWithdrawalRequest()
-        public
-    {
+    function testUnsuccessfulWithdrawalRequest() public {
         // Arrange
         address payable alice = users[0];
         token = new MyERC20();
@@ -411,12 +420,10 @@ contract RollDownTest is Test {
             amount: 1001
         });
 
-
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
         emit RollDown.WithdrawalResolutionAcceptedIntoQueue(2, false);
         rollDown.update_l1_from_l2(l2Update);
         vm.stopPrank();
     }
-
 }
