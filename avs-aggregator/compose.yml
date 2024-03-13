@@ -22,4 +22,5 @@ services:
       - TESTNET=true
       - ECDSA_EPHEMERAL_KEY=true
       - BLS_EPHEMERAL_KEY=true
-  
+    ports:
+      - "8090:8090" 

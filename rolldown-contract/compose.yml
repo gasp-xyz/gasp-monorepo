@@ -12,5 +12,12 @@ services:
      - script/rolldown.s.sol:MyScript
      - --fork-url
      - http://anvil:8545
-     - --broadcast
-     - -vvvv
+     - --broadcast 
+     - --verify
+     - --verifier
+     - blockscout
+     - --verifier-url
+     - http://host.docker.internal/api
+     - -vvvv 
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

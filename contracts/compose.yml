@@ -4,6 +4,8 @@ services:
     build: .
     depends_on:
      - anvil
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command:
       - script 
       - script/M2_Deploy_From_Scratch.s.sol
@@ -15,6 +17,11 @@ services:
       - --sig
       - "run(string memory configFile)"
       - M2_deploy_from_scratch.anvil.config.json
+      - --verify
+      - --verifier
+      - blockscout
+      - --verifier-url
+      - http://host.docker.internal/api
 
   avs-2:
     image: mangatasolutions/avs-contract:local
@@ -22,6 +29,8 @@ services:
     depends_on:
       avs-1:
         condition: service_completed_successfully
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command:
       - script 
       - script/0_AnvilSetup.s.sol
@@ -31,6 +40,11 @@ services:
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
       - -v
+      - --verify
+      - --verifier
+      - blockscout
+      - --verifier-url
+      - http://host.docker.internal/api
 
   avs-3:
     image: mangatasolutions/avs-contract:local
@@ -38,6 +52,8 @@ services:
     depends_on:
       avs-2:
         condition: service_completed_successfully
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command:
       - script 
       - script/1_FinalizerAvsDeployer.s.sol:Deployer
@@ -47,3 +63,8 @@ services:
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
       - -v
+      - --verify
+      - --verifier
+      - blockscout
+      - --verifier-url
+      - http://host.docker.internal/api
