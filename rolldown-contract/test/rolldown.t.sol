@@ -312,4 +312,71 @@ contract RollDownTest is Test {
         assertEq(aliceBalanceBefore + amount, aliceBalanceAfter);
         assertEq(contractBalanceBefore - amount, contractBalanceAfter);
     }
+
+
+    function testSuccessfulWithdrawalRequest()
+        public
+    {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 1000;
+        deal(tokenAddress, alice, amount);
+        vm.startPrank(alice);
+        token.approve(address(rollDown), amount);
+        rollDown.deposit(tokenAddress, amount);
+        vm.stopPrank();
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](0);
+        l2Update.withdrawals = new RollDown.Withdrawal[](1);
+        l2Update.withdrawals[0] = RollDown.Withdrawal({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            withdrawalRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: 500
+        });
+
+
+        vm.startPrank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit RollDown.WithdrawalResolutionAcceptedIntoQueue(2, true);
+        emit RollDown.FundsWithdrawn(alice, tokenAddress, 500); 
+        rollDown.update_l1_from_l2(l2Update);
+        vm.stopPrank();
+    }
+
+    function testUnsuccessfulWithdrawalRequest()
+        public
+    {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 1000;
+        deal(tokenAddress, alice, amount);
+        vm.startPrank(alice);
+        token.approve(address(rollDown), amount);
+        rollDown.deposit(tokenAddress, amount);
+        vm.stopPrank();
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](0);
+        l2Update.withdrawals = new RollDown.Withdrawal[](1);
+        l2Update.withdrawals[0] = RollDown.Withdrawal({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            withdrawalRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: 1001
+        });
+
+
+        vm.startPrank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit RollDown.WithdrawalResolutionAcceptedIntoQueue(2, false);
+        rollDown.update_l1_from_l2(l2Update);
+        vm.stopPrank();
+    }
+
 }

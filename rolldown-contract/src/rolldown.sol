@@ -26,6 +26,10 @@ contract RollDown {
         uint256 requestId,
         bool cancelJustified
     );
+    event WithdrawalResolutionAcceptedIntoQueue(
+        uint256 requestId,
+        bool success
+    );
     event L2UpdatesToRemovedAcceptedIntoQueue(
         uint256 requestId,
         uint256[] l2UpdatesToRemove
@@ -378,6 +382,10 @@ contract RollDown {
         });
 
         withdrawalResolutions[counter++] = resolution;
+        emit WithdrawalResolutionAcceptedIntoQueue(
+          resolution.requestId.id,
+          status
+        );
 
         if (status) {
             token.transfer(withdrawal.withdrawalRecipient, withdrawal.amount);
