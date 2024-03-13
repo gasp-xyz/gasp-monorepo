@@ -426,4 +426,77 @@ contract RollDownTest is Test {
         rollDown.update_l1_from_l2(l2Update);
         vm.stopPrank();
     }
+
+    function testRejectL2UpdateWhenSubmittedSecondTime() public {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 1000;
+        deal(tokenAddress, alice, 2 * amount);
+        vm.startPrank(alice);
+        token.approve(address(rollDown), 2 * amount);
+        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit(tokenAddress, amount);
+        vm.stopPrank();
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](0);
+        l2Update.withdrawals = new RollDown.Withdrawal[](1);
+        l2Update.withdrawals[0] = RollDown.Withdrawal({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            withdrawalRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: 1000
+        });
+
+        rollDown.update_l1_from_l2(l2Update);
+
+        vm.expectRevert("Invalid L2Update");
+        rollDown.update_l1_from_l2(l2Update);
+    }
+
+    function testRejectL2UpdateWithPartiallyOutdatedInfo() public {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 1000;
+        deal(tokenAddress, alice, 2 * amount);
+        vm.startPrank(alice);
+        token.approve(address(rollDown), 2 * amount);
+        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit(tokenAddress, amount);
+        vm.stopPrank();
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](0);
+        l2Update.withdrawals = new RollDown.Withdrawal[](1);
+        l2Update.withdrawals[0] = RollDown.Withdrawal({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            withdrawalRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: 1000
+        });
+        rollDown.update_l1_from_l2(l2Update);
+
+        RollDown.L2Update memory outdatedUpdate;
+        outdatedUpdate.results = new RollDown.RequestResult[](0);
+        outdatedUpdate.withdrawals = new RollDown.Withdrawal[](2);
+        outdatedUpdate.withdrawals[0] = RollDown.Withdrawal({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            withdrawalRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: 1000
+        });
+        outdatedUpdate.withdrawals[1] = RollDown.Withdrawal({
+            requestId: RollDown.RequestId({id: 2, origin: RollDown.Origin.L2}),
+            withdrawalRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: 1000
+        });
+
+        vm.expectRevert("Invalid L2Update");
+        rollDown.update_l1_from_l2(outdatedUpdate);
+    }
 }

@@ -204,9 +204,10 @@ contract RollDown {
         }
 
         require(
-            firstId <= lastProcessedUpdate_origin_l2 + 1,
+            firstId == lastProcessedUpdate_origin_l2 + 1,
             "Invalid L2Update"
         );
+
         for (uint256 i = firstId; i < firstId + updatesAmount; i++) {
             if (
                 withdrawalId < update.withdrawals.length &&
@@ -240,16 +241,20 @@ contract RollDown {
 
         for (uint256 i = 0; i < order.length; i++) {
             if (order[i] == UpdateType.WITHDRAWAL) {
-                process_l2_update_withdrawal(
-                    inputArray.withdrawals[withdrawalId++]
-                );
+                Withdrawal calldata withdrawal = inputArray.withdrawals[
+                    withdrawalId++
+                ];
+                process_l2_update_withdrawal(withdrawal);
+                lastProcessedUpdate_origin_l2 = withdrawal.requestId.id;
             } else if (order[i] == UpdateType.CANCEL) {
-                process_l2_update_cancels(inputArray.cancels[cancelId++]);
+                Cancel calldata cancel = inputArray.cancels[cancelId++];
+                process_l2_update_cancels(cancel);
+                lastProcessedUpdate_origin_l2 = cancel.requestId.id;
             } else {
                 revert("unknown update type");
             }
-            lastProcessedUpdate_origin_l2 = i;
         }
+        console.log("lastProcessedUpdate_origin_l2", lastProcessedUpdate_origin_l2);
     }
 
     function update_l1_from_l2(L2Update calldata inputArray) external {
