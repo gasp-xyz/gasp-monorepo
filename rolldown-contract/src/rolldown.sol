@@ -68,6 +68,13 @@ contract RollDown {
         bytes32 blockHash;
     }
 
+    struct WithdrawalResolutions {
+        RequestId requestId;
+        uint256 l2RequestId;
+        bool status;
+        bytes32 blockHash;
+    }
+
     enum PendingRequestType {
         DEPOSIT,
         WITHDRAWAL,
@@ -78,9 +85,11 @@ contract RollDown {
     struct L1Update {
         Deposit[] pendingDeposits;
         CancelResolution[] pendingCancelResultions;
+        WithdrawalResolutions[] pendingWithdrawalResolutions;
         L2UpdatesToRemove[] pendingL2UpdatesToRemove;
     }
 
+    mapping(uint256 => WithdrawalResolutions) public withdrawalResolutions;
     mapping(uint256 => CancelResolution) public cancelResolutions;
     mapping(uint256 => Deposit) private deposits;
     mapping(uint256 => L2UpdatesToRemove) private l2UpdatesToRemove;
@@ -101,7 +110,7 @@ contract RollDown {
     }
 
     struct L2Update {
-        Cancel[] cancles;
+        Cancel[] cancels;
         Withdrawal[] withdrawals;
         RequestResult[] results;
     }
@@ -147,7 +156,7 @@ contract RollDown {
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
             tokenAddress: tokenAddress,
-            amount: amount
+            amount: amount,
             blockHash: blockHash
         });
         // Add the new request to the mapping
@@ -167,9 +176,10 @@ contract RollDown {
 
     function getOrderOfRequestsOriginatingOnL2(L2Update calldata update)
         private
+        view
         returns (UpdateType[] memory)
     {
-        if (update.cancles.length == 0 && update.withdrawals.length == 0) {
+        if (update.cancels.length == 0 && update.withdrawals.length == 0) {
             return new UpdateType[](0);
         }
 
@@ -180,13 +190,13 @@ contract RollDown {
         unchecked {
             firstId = uint256(0) - 1;
         }
-        uint256 updatesAmount = update.cancles.length +
+        uint256 updatesAmount = update.cancels.length +
             update.withdrawals.length;
         UpdateType[] memory order = new UpdateType[](updatesAmount);
 
-        if (update.cancles.length > 0) {
-            firstId = update.cancles[0].requestId.id < firstId
-                ? update.cancles[0].requestId.id
+        if (update.cancels.length > 0) {
+            firstId = update.cancels[0].requestId.id < firstId
+                ? update.cancels[0].requestId.id
                 : firstId;
         }
 
@@ -209,8 +219,8 @@ contract RollDown {
                 withdrawalId++;
                 orderId++;
             } else if (
-                cancelId < update.cancles.length &&
-                update.cancles[cancelId].requestId.id == i
+                cancelId < update.cancels.length &&
+                update.cancels[cancelId].requestId.id == i
             ) {
                 order[orderId] = UpdateType.CANCEL_RESOLUTION;
                 cancelId++;
@@ -230,30 +240,16 @@ contract RollDown {
         );
         uint256 cancelId = 0;
         uint256 withdrawalId = 0;
+
         for (uint256 i = 0; i < order.length; i++) {
             if (order[i] == UpdateType.WITHDRAWAL) {
-                if (
-                    inputArray.withdraws[withdrawalId].requestId <=
-                    lastProcessedUpdate_origin_l2
-                ) {
-                    continue;
-                }
-                process_l2_update_withdrawal(
-                );
+                process_l2_update_withdrawal(inputArray.withdrawals[withdrawalId++]);
             } else if (order[i] == UpdateType.CANCEL_RESOLUTION) {
-                if (
-                    inputArray.cancels[cancelId].l2RequestId <=
-                    lastProcessedUpdate_origin_l2
-                ) {
-                    continue;
-                }
                 process_l2_update_cancels(inputArray.cancels[cancelId++]);
             } else {
                 revert("unknown update type");
             }
-            if (i == order.length - 1) {
-                lastProcessedUpdate_origin_l2 = i;
-            }
+            lastProcessedUpdate_origin_l2 = i;
         }
     }
 
@@ -264,7 +260,7 @@ contract RollDown {
         // require(msg.sender == owner, "Not the owner");
         require(
             inputArray.results.length >= 1 ||
-                inputArray.cancles.length >= 1 ||
+                inputArray.cancels.length >= 1 ||
                 inputArray.withdrawals.length >= 1,
             "Array must have at least 1 update"
         );
@@ -291,7 +287,7 @@ contract RollDown {
 
     function process_l2_update_requests_results(
         RequestResult[] calldata results
-    ) private returns (uint256[] memory) {
+    ) private view returns (uint256[] memory) {
         uint256 updatesToBeRemovedCounter = 0;
         if (results.length == 0) {
             return new uint256[](0);
@@ -340,16 +336,21 @@ contract RollDown {
     }
 
     function process_l2_update_cancels(Cancel calldata cancel) private {
+        if (cancel.requestId.id <= lastProcessedUpdate_origin_l1) {
+          return;
+        }
         L1Update memory pending = getPendingRequests(
             cancel.range.start,
             cancel.range.end
         );
         bytes32 correct_hash = keccak256(abi.encode(pending));
+        bytes32 blockHash = blockhash(block.number);
 
         CancelResolution memory resolution = CancelResolution({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             l2RequestId: cancel.requestId.id,
-            cancelJustified: correct_hash == cancel.hash
+            cancelJustified: correct_hash == cancel.hash,
+            blockHash: blockHash
         });
 
         cancelResolutions[counter++] = resolution;
@@ -359,23 +360,33 @@ contract RollDown {
         );
     }
 
-    function process_l2_update_withdrawal(Withdrawal calldata withdraw)
+    function process_l2_update_withdrawal(Withdrawal calldata withdrawal)
         private
     {
-        IERC20 token = IERC20(withdraw.tokenAddress);
-        require(
-            token.balanceOf(address(this)) >= withdraw.amount,
-            "Insufficient balance in the contract"
-        );
+        if (withdrawal.requestId.id <= lastProcessedUpdate_origin_l1) {
+          return;
+        }
+        IERC20 token = IERC20(withdrawal.tokenAddress);
+        bool status = token.balanceOf(address(this)) >= withdrawal.amount;
+        bytes32 blockHash = blockhash(block.number);
 
-        // Transfer tokens from the contract to the recipient
-        token.transfer(withdraw.withdrawalRecipient, withdraw.amount);
+        WithdrawalResolutions memory resolution = WithdrawalResolutions({
+            requestId: RequestId({origin: Origin.L1, id: counter++}),
+            l2RequestId: withdrawal.requestId.id,
+            status: status,
+            blockHash: blockHash
+        });
 
-        emit FundsWithdrawn(
-            withdraw.withdrawalRecipient,
-            withdraw.tokenAddress,
-            withdraw.amount
-        );
+        withdrawalResolutions[counter++] = resolution;
+
+        if (status) {
+            token.transfer(withdrawal.withdrawalRecipient, withdrawal.amount);
+            emit FundsWithdrawn(
+                withdrawal.withdrawalRecipient,
+                withdrawal.tokenAddress,
+                withdrawal.amount
+            );
+        }
     }
 
     function getPendingRequests(uint256 start, uint256 end)
@@ -386,7 +397,7 @@ contract RollDown {
         L1Update memory result;
 
         uint256 depositsCounter = 0;
-        uint256 withdrawsCounter = 0;
+        uint256 withdrawalsCounter = 0;
         uint256 cancelsCounter = 0;
         uint256 updatesToBeRemovedCounter = 0;
 
@@ -395,15 +406,12 @@ contract RollDown {
                 depositsCounter++;
             } else if (l2UpdatesToRemove[requestId].requestId.id != 0) {
                 updatesToBeRemovedCounter++;
+            } else if (withdrawalResolutions[requestId].requestId.id != 0) {
+                withdrawalsCounter++;
             } else if (cancelResolutions[requestId].requestId.id != 0) {
                 cancelsCounter++;
             }
         }
-
-        uint256 requestCounter = depositsCounter +
-            withdrawsCounter +
-            cancelsCounter +
-            updatesToBeRemovedCounter;
 
         result.pendingDeposits = new Deposit[](depositsCounter);
         result.pendingCancelResultions = new CancelResolution[](cancelsCounter);
@@ -411,23 +419,20 @@ contract RollDown {
             updatesToBeRemovedCounter
         );
 
-        withdrawsCounter = 0;
+        withdrawalsCounter = 0;
         depositsCounter = 0;
         cancelsCounter = 0;
         updatesToBeRemovedCounter = 0;
-        requestCounter = 0;
 
         for (uint256 requestId = start; requestId <= end; requestId++) {
-            if (deposits[requestId].depositRecipient != address(0)) {
+            if (deposits[requestId].requestId.id > 0) {
                 result.pendingDeposits[depositsCounter++] = deposits[requestId];
+            } else if (withdrawalResolutions[requestId].requestId.id > 0) {
+              result.pendingWithdrawalResolutions[withdrawalsCounter++] = withdrawalResolutions[requestId];
             } else if (l2UpdatesToRemove[requestId].requestId.id > 0) {
-                result.pendingL2UpdatesToRemove[z
-                    updatesToBeRemovedCounter++
-                ] = l2UpdatesToRemove[requestId];
+              result.pendingL2UpdatesToRemove[updatesToBeRemovedCounter++] = l2UpdatesToRemove[requestId];
             } else if (cancelResolutions[requestId].l2RequestId > 0) {
-                result.pendingCancelResultions[
-                    cancelsCounter++
-                ] = cancelResolutions[requestId];
+              result.pendingCancelResultions[cancelsCounter++] = cancelResolutions[requestId];
             } else {
                 break;
             }
@@ -437,3 +442,5 @@ contract RollDown {
     }
 }
 
+// TODO: counter l2 check
+// TODO: align types again
