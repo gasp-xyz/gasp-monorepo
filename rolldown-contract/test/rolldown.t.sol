@@ -19,24 +19,26 @@ contract RollDownTest is Test {
     function beforeEach() public {}
 
     function testExecuteDeposit() public {
+        // Arrange
         address payable alice = users[0];
         token = new MyERC20();
         address tokenAddress = address(token);
         uint256 amount = 10;
-
-        // Arrange
         deal(tokenAddress, alice, 100 ether);
+        uint256 aliceBalanceBefore = token.balanceOf(alice);
+        uint256 contractBalanceBefore = token.balanceOf(address(rollDown));
 
         // Act
         vm.startPrank(alice);
         token.approve(address(rollDown), amount);
-
         vm.expectEmit(true, true, true, true);
         emit RollDown.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
         rollDown.deposit(tokenAddress, 10);
         vm.stopPrank();
 
         RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
+        uint256 aliceBalanceAfter = token.balanceOf(alice);
+        uint256 contractBalanceAfter = token.balanceOf(address(rollDown));
 
         // Assert
         assertEq(l1Update.order.length, 1);
@@ -45,6 +47,8 @@ contract RollDownTest is Test {
         assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
         assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
         assertEq(l1Update.pendingDeposits[0].amount, amount);
+        assertEq(aliceBalanceBefore - aliceBalanceAfter, 10);
+        assertEq(contractBalanceAfter - contractBalanceBefore, 10);
     }
 
     function testAcceptL2Update() public {

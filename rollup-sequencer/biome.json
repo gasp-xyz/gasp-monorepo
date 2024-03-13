@@ -6,11 +6,17 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
+			"suspicious": {
+				"noExplicitAny": "off"
+			},
 			"style": {
 				"noNonNullAssertion": "off"
 			},
 			"correctness": {
 				"noConstantCondition": "off"
+			},
+			"complexity": {
+				"noForEach": "off"
 			}
 		}
 	}
