@@ -66,7 +66,7 @@ func (w *AvsWriter) SendNewTaskVerifyBlock(ctx context.Context, blockNumber *big
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
 	}
-	w.logger.Infof("tx hash: %s", tx.Hash().String())
+	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
 	newTaskCreatedEvent, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewTaskCreated(*receipt.Logs[0])
 	if err != nil {
@@ -92,7 +92,7 @@ func (w *AvsWriter) SendAggregatedResponse(ctx context.Context, task taskmanager
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
 	}
-	w.logger.Infof("tx hash: %s", tx.Hash().String())
+	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent aggregated response with the AVS's task manager")
 	return receipt, nil
 }
