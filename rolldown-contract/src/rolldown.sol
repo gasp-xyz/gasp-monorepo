@@ -52,17 +52,20 @@ contract RollDown {
         address depositRecipient;
         address tokenAddress;
         uint256 amount;
+        bytes32 blockHash;
     }
 
     struct L2UpdatesToRemove {
         RequestId requestId;
         uint256[] l2UpdatesToRemove;
+        bytes32 blockHash;
     }
 
     struct CancelResolution {
         RequestId requestId;
         uint256 l2RequestId;
         bool cancelJustified;
+        bytes32 blockHash;
     }
 
     enum PendingRequestType {
@@ -139,11 +142,13 @@ contract RollDown {
             "Token transfer failed"
         );
 
+        bytes32 blockHash = blockhash(block.number);
         Deposit memory depositRequest = Deposit({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
             tokenAddress: tokenAddress,
             amount: amount
+            blockHash: blockHash
         });
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
@@ -191,6 +196,10 @@ contract RollDown {
                 : firstId;
         }
 
+        require(
+            firstId <= lastProcessedUpdate_origin_l2 + 1,
+            "Invalid L2Update"
+        );
         for (uint256 i = firstId; i < firstId + updatesAmount; i++) {
             if (
                 withdrawalId < update.withdrawals.length &&
@@ -223,13 +232,27 @@ contract RollDown {
         uint256 withdrawalId = 0;
         for (uint256 i = 0; i < order.length; i++) {
             if (order[i] == UpdateType.WITHDRAWAL) {
+                if (
+                    inputArray.withdraws[withdrawalId].requestId <=
+                    lastProcessedUpdate_origin_l2
+                ) {
+                    continue;
+                }
                 process_l2_update_withdrawal(
-                    inputArray.withdrawals[withdrawalId++]
                 );
             } else if (order[i] == UpdateType.CANCEL_RESOLUTION) {
-                process_l2_update_cancels(inputArray.cancles[cancelId++]);
+                if (
+                    inputArray.cancels[cancelId].l2RequestId <=
+                    lastProcessedUpdate_origin_l2
+                ) {
+                    continue;
+                }
+                process_l2_update_cancels(inputArray.cancels[cancelId++]);
             } else {
                 revert("unknown update type");
+            }
+            if (i == order.length - 1) {
+                lastProcessedUpdate_origin_l2 = i;
             }
         }
     }
@@ -398,7 +421,7 @@ contract RollDown {
             if (deposits[requestId].depositRecipient != address(0)) {
                 result.pendingDeposits[depositsCounter++] = deposits[requestId];
             } else if (l2UpdatesToRemove[requestId].requestId.id > 0) {
-                result.pendingL2UpdatesToRemove[
+                result.pendingL2UpdatesToRemove[z
                     updatesToBeRemovedCounter++
                 ] = l2UpdatesToRemove[requestId];
             } else if (cancelResolutions[requestId].l2RequestId > 0) {

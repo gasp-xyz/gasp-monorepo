@@ -70,7 +70,7 @@ contract RollDownTest is Test {
         assertEq(l1Update.pendingDeposits[0].requestId.id, 1);
 
         RollDown.L2Update memory l2Update;
-        l2Update.cancles = new RollDown.Cancel[](0);
+        l2Update.cancels = new RollDown.Cancel[](0);
         l2Update.results = new RollDown.RequestResult[](1);
         l2Update.results[0] = RollDown.RequestResult({
             requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
@@ -89,7 +89,7 @@ contract RollDownTest is Test {
         assertEq(l1Update.pendingDeposits[0].requestId.id, 2);
 
         RollDown.L2Update memory l2Update2;
-        l2Update2.cancles = new RollDown.Cancel[](0);
+        l2Update2.cancels = new RollDown.Cancel[](0);
         l2Update2.results = new RollDown.RequestResult[](1);
         l2Update2.results[0] = RollDown.RequestResult({
             requestId: RollDown.RequestId({id: 2, origin: RollDown.Origin.L2}),
@@ -106,7 +106,7 @@ contract RollDownTest is Test {
         assertEq(l1Update.pendingL2UpdatesToRemove[0].requestId.id, 3);
 
         RollDown.L2Update memory l2Update3;
-        l2Update3.cancles = new RollDown.Cancel[](0);
+        l2Update3.cancels = new RollDown.Cancel[](0);
         l2Update3.results = new RollDown.RequestResult[](1);
         l2Update3.results[0] = RollDown.RequestResult({
             requestId: RollDown.RequestId({id: 3, origin: RollDown.Origin.L2}),
@@ -138,7 +138,7 @@ contract RollDownTest is Test {
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
-        l2Update.cancles = new RollDown.Cancel[](0);
+        l2Update.cancels = new RollDown.Cancel[](0);
         l2Update.results = new RollDown.RequestResult[](1);
         l2Update.results[0] = RollDown.RequestResult({
             requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
@@ -182,7 +182,8 @@ contract RollDownTest is Test {
             requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L1}),
             depositRecipient: 0x0000000000000000000000000000000000000004,
             tokenAddress: 0x0000000000000000000000000000000000000004,
-            amount: 1000000
+            amount: 1000000,
+            blockHash: 0x0000000000000000000000000000000000000000000000000000000000000000
         });
 
         l1Update.pendingCancelResultions[0] = RollDown.CancelResolution({
@@ -200,7 +201,7 @@ contract RollDownTest is Test {
         // });
         //
 
-        bytes32 l2Hash = 0ox033f8b8c13f3dd23df7d50f5a5106621177bb75f71cb39e9a8fd4ab565bec339;
+        bytes32 l2Hash = 0x033f8b8c13f3dd23df7d50f5a5106621177bb75f71cb39e9a8fd4ab565bec339;
         assertEq(keccak256(abi.encode(l1Update)), l2Hash);
     }
 
@@ -220,9 +221,9 @@ contract RollDownTest is Test {
 
         RollDown.L2Update memory l2Update;
         l2Update.results = new RollDown.RequestResult[](0);
-        l2Update.cancles = new RollDown.Cancel[](1);
-        l2Update.cancles[0] = RollDown.Cancel({
-            requestId: RollDown.RequestId({id: 50000, origin: RollDown.Origin.L2}),
+        l2Update.cancels = new RollDown.Cancel[](1);
+        l2Update.cancels[0] = RollDown.Cancel({
+            l2RequestId: 50000,
             range: RollDown.Range({start: 1, end: 1}),
             hash: bytes32(uint256(0))
         });
@@ -230,7 +231,7 @@ contract RollDownTest is Test {
 
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit RollDown.DisputeResolutionAcceptedIntoQueue(50000, false);
+        emit RollDown.DisputeResolutionAcceptedIntoQueue(170141183460469231731687303715884105728, false);
         rollDown.update_l1_from_l2(l2Update);
         vm.stopPrank();
     }
@@ -255,16 +256,16 @@ contract RollDownTest is Test {
 
         RollDown.L2Update memory l2Update;
         l2Update.results = new RollDown.RequestResult[](0);
-        l2Update.cancles = new RollDown.Cancel[](1);
-        l2Update.cancles[0] = RollDown.Cancel({
-            requestId: RollDown.RequestId({id: 50000, origin: RollDown.Origin.L2}),
+        l2Update.cancels = new RollDown.Cancel[](1);
+        l2Update.cancels[0] = RollDown.Cancel({
+            l2RequestId: 50000,
             range: RollDown.Range({start: 1, end: 1}),
             hash: bytes32(keccak256(abi.encode(l1Update)))
         });
 
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit RollDown.DisputeResolutionAcceptedIntoQueue(50000, true);
+        emit RollDown.DisputeResolutionAcceptedIntoQueue(170141183460469231731687303715884105728, true);
         rollDown.update_l1_from_l2(l2Update);
         vm.stopPrank();
     }
