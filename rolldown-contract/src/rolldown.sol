@@ -72,7 +72,7 @@ contract RollDown {
         bytes32 blockHash;
     }
 
-    struct WithdrawalResolutions {
+    struct WithdrawalResolution {
         RequestId requestId;
         uint256 l2RequestId;
         bool status;
@@ -89,11 +89,11 @@ contract RollDown {
     struct L1Update {
         Deposit[] pendingDeposits;
         CancelResolution[] pendingCancelResultions;
-        WithdrawalResolutions[] pendingWithdrawalResolutions;
+        WithdrawalResolution[] pendingWithdrawalResolutions;
         L2UpdatesToRemove[] pendingL2UpdatesToRemove;
     }
 
-    mapping(uint256 => WithdrawalResolutions) public withdrawalResolutions;
+    mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
     mapping(uint256 => CancelResolution) public cancelResolutions;
     mapping(uint256 => Deposit) private deposits;
     mapping(uint256 => L2UpdatesToRemove) private l2UpdatesToRemove;
@@ -374,7 +374,7 @@ contract RollDown {
         bool status = token.balanceOf(address(this)) >= withdrawal.amount;
         bytes32 blockHash = blockhash(block.number);
 
-        WithdrawalResolutions memory resolution = WithdrawalResolutions({
+        WithdrawalResolution memory resolution = WithdrawalResolution({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             l2RequestId: withdrawal.requestId.id,
             status: status,
@@ -382,10 +382,10 @@ contract RollDown {
         });
 
         withdrawalResolutions[counter++] = resolution;
-        emit WithdrawalResolutionAcceptedIntoQueue(
-          resolution.requestId.id,
-          status
-        );
+          emit WithdrawalResolutionAcceptedIntoQueue(
+            resolution.requestId.id,
+            status
+          );
 
         if (status) {
             token.transfer(withdrawal.withdrawalRecipient, withdrawal.amount);

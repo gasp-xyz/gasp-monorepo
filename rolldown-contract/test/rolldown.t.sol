@@ -180,38 +180,78 @@ contract RollDownTest is Test {
         //
     }
 
-    function testHashCompatibilityWithMangataNode() public {
+    function testL1UpdateHashCompatibilityWithMangataNode() public {
         RollDown.L1Update memory l1Update;
         l1Update.pendingDeposits = new RollDown.Deposit[](1);
         l1Update.pendingL2UpdatesToRemove = new RollDown.L2UpdatesToRemove[](1);
         l1Update.pendingCancelResultions = new RollDown.CancelResolution[](1);
+        l1Update.pendingWithdrawalResolutions = new RollDown.WithdrawalResolution[](1);
 
         l1Update.pendingDeposits[0] = RollDown.Deposit({
             requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L1}),
-            depositRecipient: 0x0000000000000000000000000000000000000004,
-            tokenAddress: 0x0000000000000000000000000000000000000004,
-            amount: 1000000,
-            blockHash: 0x0000000000000000000000000000000000000000000000000000000000000000
+            depositRecipient: 0x0000000000000000000000000000000000000002,
+            tokenAddress: 0x0000000000000000000000000000000000000003,
+            amount: 4,
+            blockHash: 0x0000000000000000000000000000000000000000000000000000000000000005
         });
 
         l1Update.pendingCancelResultions[0] = RollDown.CancelResolution({
-            requestId: RollDown.RequestId({id: 2, origin: RollDown.Origin.L1}),
-            l2RequestId: 3,
+            requestId: RollDown.RequestId({id: 6, origin: RollDown.Origin.L1}),
+            l2RequestId: 7,
             cancelJustified: true,
-            blockHash: 0x0000000000000000000000000000000000000000000000000000000000000000
+            blockHash: 0x0000000000000000000000000000000000000000000000000000000000000008
         });
 
-        // Request
-        // RollDown.RequestId[] memory l2UpdatesToRemove = new RollDown.RequestId[](1);
-        // l2UpdatesToRemove[0] = RollDown.RequestId({id: 1, origin: RollDown.Origin.L2});
-        // l1Update.pendingL2UpdatesToRemove[0] = RollDown.L2UpdatesToRemove({
-        //     requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L1}),
-        //     l2UpdatesToRemove: l2UpdatesToRemove
-        // });
-        //
+        l1Update.pendingWithdrawalResolutions[0] = RollDown.WithdrawalResolution({
+            requestId: RollDown.RequestId({id: 9, origin: RollDown.Origin.L1}),
+            l2RequestId: 10,
+            status: true,
+            blockHash: 0x000000000000000000000000000000000000000000000000000000000000000b
+        });
+
+
+        uint256[] memory l2UpdatesToRemove = new uint256[](1);
+        l2UpdatesToRemove[0] = 13;
+        l1Update.pendingL2UpdatesToRemove[0] = RollDown.L2UpdatesToRemove({
+            requestId: RollDown.RequestId({id: 12, origin: RollDown.Origin.L1}),
+            l2UpdatesToRemove: l2UpdatesToRemove,
+            blockHash: 0x000000000000000000000000000000000000000000000000000000000000000e
+        });
+
 
         bytes32 l2Hash = 0x11d64281be3f1d98a5516771879c181f94d201926497822ff7174d531f80ed0c;
         assertEq(keccak256(abi.encode(l1Update)), l2Hash);
+    }
+
+
+    function testL2UpdateHashCompatibilityWithMangataNode() public {
+        RollDown.L2Update memory l2Update;
+        l2Update.cancels = new RollDown.Cancel[](1);
+        l2Update.withdrawals = new RollDown.Withdrawal[](1);
+        l2Update.results = new RollDown.RequestResult[](1);
+
+        l2Update.cancels[0] = RollDown.Cancel({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            range: RollDown.Range({start: 2, end: 3}),
+            hash: 0x0000000000000000000000000000000000000000000000000000000000000004
+        });
+
+        l2Update.withdrawals[0] = RollDown.Withdrawal({
+            requestId: RollDown.RequestId({id: 5, origin: RollDown.Origin.L2}),
+            withdrawalRecipient: 0x0000000000000000000000000000000000000006,
+            tokenAddress: 0x0000000000000000000000000000000000000007,
+            amount: 8
+        });
+
+        l2Update.results[0] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 9, origin: RollDown.Origin.L2}),
+            originRequestId: 10,
+            updateType: RollDown.UpdateType.INDEX_UPDATE,
+            status: true
+        });
+
+        bytes32 l2Hash = 0x11d64281be3f1d98a5516771879c181f94d201926497822ff7174d531f80ed0c;
+        assertEq(keccak256(abi.encode(l2Update)), l2Hash);
     }
 
     function testCancelResolutionWithNonMatchingHashResultsWithUnjustifiedStatus()
