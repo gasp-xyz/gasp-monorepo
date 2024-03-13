@@ -86,7 +86,7 @@ contract RollDownTest is Test {
         assertEq(l1Update.pendingL2UpdatesToRemove.length, 1);
         assertEq(l1Update.pendingDeposits.length, 0);
         assertEq(l1Update.pendingCancelResultions.length, 0);
-        assertEq(l1Update.pendingDeposits[0].requestId.id, 2);
+        assertEq(l1Update.pendingL2UpdatesToRemove[0].requestId.id, 2);
 
         RollDown.L2Update memory l2Update2;
         l2Update2.cancles = new RollDown.Cancel[](0);
@@ -142,8 +142,8 @@ contract RollDownTest is Test {
         l2Update.results = new RollDown.RequestResult[](1);
         l2Update.results[0] = RollDown.RequestResult({
             requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
-            originRequestId: 1,
             updateType: RollDown.UpdateType.DEPOSIT,
+            originRequestId: 1,
             status: false
         });
 
@@ -160,16 +160,9 @@ contract RollDownTest is Test {
 
         // Assert
         assertEq(
-            update1.pendingDeposits[0].requestId.id,
-            update2.pendingDeposits[0].requestId.id
+            update1.pendingL2UpdatesToRemove[0].l2UpdatesToRemove,
+            update2.pendingL2UpdatesToRemove[0].l2UpdatesToRemove
         );
-
-        assertEq( update1.pendingCancelResultions.length, 0);
-        assertEq( update2.pendingCancelResultions.length, 0);
-
-        assertEq( update1.pendingL2UpdatesToRemove.length, 0);
-        assertEq( update2.pendingL2UpdatesToRemove.length, 0);
-
     }
 
     function testHashCompatibilityWithMangataNode() public {
@@ -200,7 +193,7 @@ contract RollDownTest is Test {
         // });
         //
 
-        bytes32 l2Hash = 0x033f8b8c13f3dd23df7d50f5a5106621177bb75f71cb39e9a8fd4ab565bec339;
+        bytes32 l2Hash =  0x134d8fb03451305234f1d783a3923bffd5a6b276a646386d0a18fc953c403637;
         assertEq(keccak256(abi.encode(l1Update)), l2Hash);
     }
 

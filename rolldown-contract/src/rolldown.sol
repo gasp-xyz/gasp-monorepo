@@ -27,7 +27,7 @@ contract RollDown {
         uint256 requestId,
         bool cancelJustified
     );
-    event L2UpdatesToRemovedAcceptedIntoQueue(uint256 requestId, RequestId[] l2UpdatesToRemove);
+    event L2UpdatesToRemovedAcceptedIntoQueue(uint256 requestId, uint256[] l2UpdatesToRemove);
     event FundsWithdrawn(
         address withdrawRecipient,
         address tokenAddress,
@@ -51,8 +51,7 @@ contract RollDown {
 
 		struct L2UpdatesToRemove {
 			RequestId requestId;
-			uint256[] l1;
-			uint256[] l2;
+			uint256[] l2UpdatesToRemove;
 		}
 
 		struct CancelResolution {
@@ -208,23 +207,21 @@ contract RollDown {
             "Array must have at least 1 update"
         );
 
-        RequestId[]
+        uint256[]
             memory l2UpdatesToBeRemoved = process_l2_update_requests_results(
                 inputArray.results
             );
 
         processRequestsOriginatingOnL2(inputArray);
 
-        uint256[] memory ids = new uint256[](10);
-
         // Create a new array with the correct size
         if (l2UpdatesToBeRemoved.length > 0) {
-            l2UpdatesToRemove[counter++].l2 = ids;
-            // l2UpdatesToRemove[counter++]
-            //     .l2UpdatesToRemove = l2UpdatesToBeRemoved;
+            uint256 rid = counter++;
+            l2UpdatesToRemove[rid].requestId = RequestId({origin: Origin.L1, id: rid});
+            l2UpdatesToRemove[rid].l2UpdatesToRemove = l2UpdatesToBeRemoved;
             lastProcessedUpdate_origin_l1 += l2UpdatesToBeRemoved.length;
             emit L2UpdatesToRemovedAcceptedIntoQueue(
-                counter - 1,
+                rid,
                 l2UpdatesToBeRemoved
             );
         }
@@ -233,13 +230,13 @@ contract RollDown {
 
     function process_l2_update_requests_results(
         RequestResult[] calldata results
-    ) private returns (RequestId[] memory) {
+    ) private returns (uint256[] memory) {
         uint256 updatesToBeRemovedCounter = 0;
         if (results.length == 0) {
-            return new RequestId[](0);
+            return new uint256[](0);
         }
         uint256 oderCounter = results[0].requestId.id;
-        RequestId[] memory l2UpdatesToBeRemovedTemp = new RequestId[](
+        uint256[] memory l2UpdatesToBeRemovedTemp = new uint256[](
             results.length
         );
 
@@ -259,18 +256,18 @@ contract RollDown {
 
             if (element.updateType == UpdateType.DEPOSIT) {
                 l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
-                    element.requestId
+                    element.originRequestId
                 );
             } else if (element.updateType == UpdateType.INDEX_UPDATE) {
               l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
-                element.requestId
+                  element.originRequestId
               );
             } else {
                 revert("unknown request type");
             }
         }
 
-        RequestId[] memory l2UpdatesToBeRemoved = new RequestId[](
+        uint256[] memory l2UpdatesToBeRemoved = new uint256[](
             updatesToBeRemovedCounter
         );
 
@@ -352,6 +349,7 @@ contract RollDown {
         requestCounter = 0;
 
         for (uint256 requestId = start; requestId <= end; requestId++) {
+            
             if (deposits[requestId].depositRecipient != address(0)) {
               result.pendingDeposits[depositsCounter++] = deposits[requestId];
             } else if ( l2UpdatesToRemove[requestId].requestId.id > 0) {
