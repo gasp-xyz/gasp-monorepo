@@ -277,7 +277,11 @@ contract RollDown {
             firstId <= lastProcessedUpdate_origin_l2 + 1,
             "Invalid L2Update"
         );
+        console.log('before');
+        console.log('last id', lastId);
+        console.log('last processed', lastProcessedUpdate_origin_l2);
         require(lastId > lastProcessedUpdate_origin_l2, "Invalid L2Update");
+        console.log('after');
 
         UpdateType[] memory order = getOrderOfRequestsOriginatingOnL2(
             firstId,
@@ -286,21 +290,38 @@ contract RollDown {
 
         uint256 cancelId = 0;
         uint256 withdrawalId = 0;
+        uint256 resultsId = 0;
 
         for (uint256 i = 0; i < order.length; i++) {
             if (order[i] == UpdateType.WITHDRAWAL) {
                 Withdrawal calldata withdrawal = inputArray.withdrawals[
                     withdrawalId++
                 ];
+                if (withdrawal.requestId.id <= lastProcessedUpdate_origin_l2) {
+                    continue;
+                }
                 process_l2_update_withdrawal(withdrawal);
+                lastProcessedUpdate_origin_l2++;
             } else if (order[i] == UpdateType.CANCEL) {
                 Cancel calldata cancel = inputArray.cancels[cancelId++];
+                if (cancel.requestId.id <= lastProcessedUpdate_origin_l2) {
+                    continue;
+                }
                 process_l2_update_cancels(cancel);
-            } else if (order[i] == UpdateType.INDEX_UPDATE) {} else {
+                lastProcessedUpdate_origin_l2++;
+            } else if (order[i] == UpdateType.INDEX_UPDATE) {
+                RequestResult calldata result = inputArray.results[resultsId++];
+                if (result.requestId.id <= lastProcessedUpdate_origin_l2) {
+                    continue;
+                }
+                lastProcessedUpdate_origin_l2++;
+            } else {
                 revert("unknown update type");
             }
         }
-        lastProcessedUpdate_origin_l2 += order.length;
+        // lastProcessedUpdate_origin_l2 += order.length;
+        console.log('settting lastProcessedUpdate_origin_l2', lastProcessedUpdate_origin_l2);
+            
     }
 
     function update_l1_from_l2(L2Update calldata inputArray) external {
@@ -369,6 +390,14 @@ contract RollDown {
                 l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
                     element.originRequestId
                 );
+            } else if (element.updateType == UpdateType.CANCEL_RESOLUTION) {
+                l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
+                    element.originRequestId
+                );
+            } else if (element.updateType == UpdateType.WITHDRAWAL_RESOLUTION){
+                l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
+                    element.originRequestId
+                );
             } else {
                 revert("unknown request type");
             }
@@ -386,9 +415,6 @@ contract RollDown {
     }
 
     function process_l2_update_cancels(Cancel calldata cancel) private {
-        if (cancel.requestId.id <= lastProcessedUpdate_origin_l1) {
-            return;
-        }
         L1Update memory pending = getPendingRequests(
             cancel.range.start,
             cancel.range.end
@@ -403,7 +429,7 @@ contract RollDown {
             blockHash: blockHash
         });
 
-        cancelResolutions[counter++] = resolution;
+        cancelResolutions[resolution.requestId.id] = resolution;
         emit DisputeResolutionAcceptedIntoQueue(
             resolution.l2RequestId,
             resolution.cancelJustified
@@ -413,9 +439,6 @@ contract RollDown {
     function process_l2_update_withdrawal(
         Withdrawal calldata withdrawal
     ) private {
-        if (withdrawal.requestId.id <= lastProcessedUpdate_origin_l1) {
-            return;
-        }
         IERC20 token = IERC20(withdrawal.tokenAddress);
         bool status = token.balanceOf(address(this)) >= withdrawal.amount;
         bytes32 blockHash = blockhash(block.number);
@@ -427,14 +450,14 @@ contract RollDown {
             blockHash: blockHash
         });
 
-        withdrawalResolutions[counter++] = resolution;
+        withdrawalResolutions[resolution.requestId.id] = resolution;
         emit WithdrawalResolutionAcceptedIntoQueue(
             resolution.requestId.id,
             status
         );
 
         if (status) {
-            // token.transfer(withdrawal.withdrawalRecipient, withdrawal.amount);
+            token.transfer(withdrawal.withdrawalRecipient, withdrawal.amount);
             emit FundsWithdrawn(
                 withdrawal.withdrawalRecipient,
                 withdrawal.tokenAddress,
