@@ -17,7 +17,7 @@ relaychain:
     - name: bob
 
 parachains:
-  - image: mangatasolutions/mangata-node:eth-rollup-develop
+  - image: mangatasolutions/mangata-node:local
     chain:
       base: mangata-rococo-local-seq
       collators:

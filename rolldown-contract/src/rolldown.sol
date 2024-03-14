@@ -173,40 +173,57 @@ contract RollDown {
             getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
     }
 
-    function getOrderOfRequestsOriginatingOnL2(
+    function min(uint256 a, uint256 b) private pure returns (uint256) {
+      return a < b ? a : b;
+    }
+
+    function max(uint256 a, uint256 b) private pure returns (uint256) {
+      return a > b ? a : b;
+    }
+
+    function getRequestsRange(
         L2Update calldata update
-    ) private view returns (UpdateType[] memory) {
-        if (update.cancels.length == 0 && update.withdrawals.length == 0) {
+    ) private pure returns (uint256, uint256) {
+
+        uint256 firstId;
+        unchecked {
+            firstId = uint256(0) - 1;
+        }
+        uint256 lastId = 0;
+
+        if (update.cancels.length > 0) {
+            firstId = min(update.cancels[0].requestId.id, firstId);
+            lastId = max(update.cancels[update.cancels.length - 1].requestId.id, lastId);
+        }
+
+        if (update.withdrawals.length > 0) {
+            firstId = min( update.withdrawals[0].requestId.id, firstId);
+            lastId = max(update.withdrawals[update.withdrawals.length - 1].requestId.id, lastId);
+        }
+
+        if (update.results.length > 0) {
+            firstId = min(update.results[0].requestId.id, firstId);
+            lastId = max(update.results[update.results.length - 1].requestId.id, lastId);
+        }
+
+        return (firstId, lastId);
+    }
+
+    function getOrderOfRequestsOriginatingOnL2(
+        uint256 firstId,
+        L2Update calldata update
+    ) private pure returns (UpdateType[] memory) {
+        if (update.results.length == 0 && update.cancels.length == 0 && update.withdrawals.length == 0) {
             return new UpdateType[](0);
         }
 
         uint256 withdrawalId = 0;
         uint256 cancelId = 0;
+        uint256 resultId = 0;
         uint256 orderId = 0;
-        uint256 firstId;
-        unchecked {
-            firstId = uint256(0) - 1;
-        }
         uint256 updatesAmount = update.cancels.length +
-            update.withdrawals.length;
+            update.withdrawals.length + update.results.length;
         UpdateType[] memory order = new UpdateType[](updatesAmount);
-
-        if (update.cancels.length > 0) {
-            firstId = update.cancels[0].requestId.id < firstId
-                ? update.cancels[0].requestId.id
-                : firstId;
-        }
-
-        if (update.withdrawals.length > 0) {
-            firstId = update.withdrawals[0].requestId.id < firstId
-                ? update.withdrawals[0].requestId.id
-                : firstId;
-        }
-
-        require(
-            firstId == lastProcessedUpdate_origin_l2 + 1,
-            "Invalid L2Update"
-        );
 
         for (uint256 i = firstId; i < firstId + updatesAmount; i++) {
             if (
@@ -223,6 +240,13 @@ contract RollDown {
                 order[orderId] = UpdateType.CANCEL;
                 cancelId++;
                 orderId++;
+            } else if (
+                resultId < update.results.length &&
+                update.results[resultId].requestId.id == i
+            ) {
+                order[orderId] = UpdateType.INDEX_UPDATE;
+                resultId++;
+                orderId++;
             } else {
                 revert("invalide L2Update");
             }
@@ -233,9 +257,24 @@ contract RollDown {
     function processRequestsOriginatingOnL2(
         L2Update calldata inputArray
     ) private {
+
+        (uint256 firstId, uint256 lastId) = getRequestsRange(inputArray);
+
+        require(firstId != 0, "Invalid L2Update");
+        require(
+            firstId <= lastProcessedUpdate_origin_l2 + 1,
+            "Invalid L2Update"
+        );
+        require(
+            lastId > lastProcessedUpdate_origin_l2,
+            "Invalid L2Update"
+        );
+
         UpdateType[] memory order = getOrderOfRequestsOriginatingOnL2(
+            firstId,
             inputArray
         );
+
         uint256 cancelId = 0;
         uint256 withdrawalId = 0;
 
@@ -245,15 +284,15 @@ contract RollDown {
                     withdrawalId++
                 ];
                 process_l2_update_withdrawal(withdrawal);
-                lastProcessedUpdate_origin_l2 = withdrawal.requestId.id;
             } else if (order[i] == UpdateType.CANCEL) {
                 Cancel calldata cancel = inputArray.cancels[cancelId++];
                 process_l2_update_cancels(cancel);
-                lastProcessedUpdate_origin_l2 = cancel.requestId.id;
+            } else if (order[i] == UpdateType.INDEX_UPDATE){
             } else {
                 revert("unknown update type");
             }
         }
+        lastProcessedUpdate_origin_l2 += order.length;
     }
 
     function update_l1_from_l2(L2Update calldata inputArray) external {
@@ -387,7 +426,7 @@ contract RollDown {
         );
 
         if (status) {
-            token.transfer(withdrawal.withdrawalRecipient, withdrawal.amount);
+            // token.transfer(withdrawal.withdrawalRecipient, withdrawal.amount);
             emit FundsWithdrawn(
                 withdrawal.withdrawalRecipient,
                 withdrawal.tokenAddress,
@@ -421,6 +460,7 @@ contract RollDown {
 
         result.pendingDeposits = new Deposit[](depositsCounter);
         result.pendingCancelResultions = new CancelResolution[](cancelsCounter);
+        result.pendingWithdrawalResolutions = new WithdrawalResolution[](withdrawalsCounter);
         result.pendingL2UpdatesToRemove = new L2UpdatesToRemove[](
             updatesToBeRemovedCounter
         );

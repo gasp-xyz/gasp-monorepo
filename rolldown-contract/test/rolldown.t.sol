@@ -140,7 +140,6 @@ contract RollDownTest is Test {
 
     function testIgnoreDuplicatedUpdates() public {
         // Arrange
-
         address payable alice = users[0];
         token = new MyERC20();
         address tokenAddress = address(token);
@@ -164,29 +163,9 @@ contract RollDownTest is Test {
         // Act
         // make sure that executing same request does not alter the state
         rollDown.update_l1_from_l2(l2Update);
-        RollDown.L1Update memory update1 = rollDown.getUpdateForL2();
+        vm.expectRevert("Invalid L2Update");
         rollDown.update_l1_from_l2(l2Update);
-        rollDown.update_l1_from_l2(l2Update);
-        rollDown.update_l1_from_l2(l2Update);
-        rollDown.update_l1_from_l2(l2Update);
-        rollDown.update_l1_from_l2(l2Update);
-        RollDown.L1Update memory update2 = rollDown.getUpdateForL2();
 
-        // Assert
-        assertEq(
-            update1.pendingL2UpdatesToRemove.length,
-            update2.pendingL2UpdatesToRemove.length
-        );
-
-        assertEq(update1.pendingWithdrawalResolutions.length, 0);
-        assertEq(update2.pendingWithdrawalResolutions.length, 0);
-
-        assertEq(update1.pendingDeposits.length, 0);
-        assertEq(update2.pendingDeposits.length, 0);
-        //
-        assertEq(update1.pendingCancelResultions.length, 0);
-        assertEq(update2.pendingCancelResultions.length, 0);
-        //
     }
 
     function testL1UpdateHashCompatibilityWithMangataNode() public {
@@ -396,6 +375,9 @@ contract RollDownTest is Test {
         emit RollDown.FundsWithdrawn(alice, tokenAddress, 500);
         rollDown.update_l1_from_l2(l2Update);
         vm.stopPrank();
+
+        RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
+        assertEq(l1Update.pendingWithdrawalResolutions.length, 1);
     }
 
     function testUnsuccessfulWithdrawalRequest() public {
@@ -456,7 +438,7 @@ contract RollDownTest is Test {
         rollDown.update_l1_from_l2(l2Update);
     }
 
-    function testRejectL2UpdateWithPartiallyOutdatedInfo() public {
+    function testDoNotRejectPartialyKnownL2Update() public {
         // Arrange
         address payable alice = users[0];
         token = new MyERC20();
@@ -480,23 +462,184 @@ contract RollDownTest is Test {
         });
         rollDown.update_l1_from_l2(l2Update);
 
-        RollDown.L2Update memory outdatedUpdate;
-        outdatedUpdate.results = new RollDown.RequestResult[](0);
-        outdatedUpdate.withdrawals = new RollDown.Withdrawal[](2);
-        outdatedUpdate.withdrawals[0] = RollDown.Withdrawal({
+        RollDown.L2Update memory partiallyKnownUpdate;
+        partiallyKnownUpdate.results = new RollDown.RequestResult[](0);
+        partiallyKnownUpdate.withdrawals = new RollDown.Withdrawal[](2);
+        partiallyKnownUpdate.withdrawals[0] = RollDown.Withdrawal({
             requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
             withdrawalRecipient: alice,
             tokenAddress: tokenAddress,
             amount: 1000
         });
-        outdatedUpdate.withdrawals[1] = RollDown.Withdrawal({
+        partiallyKnownUpdate.withdrawals[1] = RollDown.Withdrawal({
             requestId: RollDown.RequestId({id: 2, origin: RollDown.Origin.L2}),
             withdrawalRecipient: alice,
             tokenAddress: tokenAddress,
             amount: 1000
         });
 
-        vm.expectRevert("Invalid L2Update");
-        rollDown.update_l1_from_l2(outdatedUpdate);
+        rollDown.update_l1_from_l2(partiallyKnownUpdate);
+    }
+
+    function testReproduce() public {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 1000;
+        deal(tokenAddress, alice, 2 * amount);
+        vm.startPrank(alice);
+        token.approve(address(rollDown), 2 * amount);
+        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit(tokenAddress, amount);
+        vm.stopPrank();
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](2);
+        l2Update.results[0] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            originRequestId: 1,
+            updateType: RollDown.UpdateType.DEPOSIT,
+            status: true
+        });
+        l2Update.results[1] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 2, origin: RollDown.Origin.L2}),
+            originRequestId: 2,
+            updateType: RollDown.UpdateType.DEPOSIT,
+            status: false
+        });
+
+        rollDown.update_l1_from_l2(l2Update);
+
+
+        RollDown.L2Update memory l2Update2;
+        l2Update2.withdrawals = new RollDown.Withdrawal[](1);
+        l2Update2.withdrawals[0] = RollDown.Withdrawal({
+          requestId: RollDown.RequestId({id: 3, origin: RollDown.Origin.L2}),
+          withdrawalRecipient: alice,
+          tokenAddress: tokenAddress,
+          amount: 1000
+        });
+
+        l2Update2.results = new RollDown.RequestResult[](1);
+        l2Update2.results[0] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 4, origin: RollDown.Origin.L2}),
+            originRequestId: 3,
+            updateType: RollDown.UpdateType.INDEX_UPDATE,
+            status: true
+        });
+
+        rollDown.update_l1_from_l2(l2Update2);
+
+    }
+
+    function testOverlapping() public {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 1000;
+        deal(tokenAddress, alice, 2 * amount);
+        vm.startPrank(alice);
+        token.approve(address(rollDown), 2 * amount);
+        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit(tokenAddress, amount);
+        vm.stopPrank();
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](2);
+        l2Update.results[0] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            originRequestId: 1,
+            updateType: RollDown.UpdateType.DEPOSIT,
+            status: true
+        });
+        l2Update.results[1] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 2, origin: RollDown.Origin.L2}),
+            originRequestId: 2,
+            updateType: RollDown.UpdateType.DEPOSIT,
+            status: false
+        });
+
+        rollDown.update_l1_from_l2(l2Update);
+
+
+        RollDown.L2Update memory l2Update2;
+        l2Update2.withdrawals = new RollDown.Withdrawal[](1);
+        l2Update2.withdrawals[0] = RollDown.Withdrawal({
+          requestId: RollDown.RequestId({id: 3, origin: RollDown.Origin.L2}),
+          withdrawalRecipient: alice,
+          tokenAddress: tokenAddress,
+          amount: 1000
+        });
+
+        l2Update2.results = new RollDown.RequestResult[](2);
+        l2Update2.results[0] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            originRequestId: 1,
+            updateType: RollDown.UpdateType.DEPOSIT,
+            status: true
+        });
+        l2Update2.results[1] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 2, origin: RollDown.Origin.L2}),
+            originRequestId: 2,
+            updateType: RollDown.UpdateType.DEPOSIT,
+            status: false
+        });
+
+        rollDown.update_l1_from_l2(l2Update2);
+
+    }
+
+    function testReproduce2() public {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 1000;
+        deal(tokenAddress, alice, 2 * amount);
+        vm.startPrank(alice);
+        token.approve(address(rollDown), 2 * amount);
+        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit(tokenAddress, amount);
+        vm.stopPrank();
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](2);
+        l2Update.results[0] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            originRequestId: 1,
+            updateType: RollDown.UpdateType.DEPOSIT,
+            status: true
+        });
+        l2Update.results[1] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 2, origin: RollDown.Origin.L2}),
+            originRequestId: 2,
+            updateType: RollDown.UpdateType.DEPOSIT,
+            status: false
+        });
+
+        rollDown.update_l1_from_l2(l2Update);
+
+
+        RollDown.L2Update memory l2Update2;
+        l2Update2.withdrawals = new RollDown.Withdrawal[](1);
+        l2Update2.withdrawals[0] = RollDown.Withdrawal({
+          requestId: RollDown.RequestId({id: 3, origin: RollDown.Origin.L2}),
+          withdrawalRecipient: alice,
+          tokenAddress: tokenAddress,
+          amount: 1000
+        });
+
+        l2Update2.results = new RollDown.RequestResult[](1);
+        l2Update2.results[0] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 4, origin: RollDown.Origin.L2}),
+            originRequestId: 3,
+            updateType: RollDown.UpdateType.DEPOSIT,
+            status: true
+        });
+
+        rollDown.update_l1_from_l2(l2Update2);
+
     }
 }
