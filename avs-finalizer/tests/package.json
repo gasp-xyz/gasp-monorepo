@@ -1,0 +1,36 @@
+{
+  "name": "avs-tests",
+  "version": "1.0.0",
+  "description": "e2e tests for avs",
+  "main": "index.js",
+  "type": "module",
+  "repository": "git@github.com:mangata-finance/eigen-layer-monorepo.git",
+  "author": "GonCer <gonza.cerro@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "jest": "^29.7.0",
+    "testcontainers": "^10.7.2",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.2",
+    "viem": "1.19.11"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.ts?$": "ts-jest"
+    },
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/(?!@polkadot|@babel/runtime/helpers/esm/)"
+    ],
+    "verbose": true,
+    "bail": false,
+    "globals": {
+      "ts-jest": {
+        "useESM": true
+      }
+    },
+    "testTimeout": 1500000
+  }
+}
