@@ -165,7 +165,6 @@ contract RollDownTest is Test {
         rollDown.update_l1_from_l2(l2Update);
         vm.expectRevert("Invalid L2Update");
         rollDown.update_l1_from_l2(l2Update);
-
     }
 
     function testL1UpdateHashCompatibilityWithMangataNode() public {
@@ -511,14 +510,13 @@ contract RollDownTest is Test {
 
         rollDown.update_l1_from_l2(l2Update);
 
-
         RollDown.L2Update memory l2Update2;
         l2Update2.withdrawals = new RollDown.Withdrawal[](1);
         l2Update2.withdrawals[0] = RollDown.Withdrawal({
-          requestId: RollDown.RequestId({id: 3, origin: RollDown.Origin.L2}),
-          withdrawalRecipient: alice,
-          tokenAddress: tokenAddress,
-          amount: 1000
+            requestId: RollDown.RequestId({id: 3, origin: RollDown.Origin.L2}),
+            withdrawalRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: 1000
         });
 
         l2Update2.results = new RollDown.RequestResult[](1);
@@ -530,7 +528,6 @@ contract RollDownTest is Test {
         });
 
         rollDown.update_l1_from_l2(l2Update2);
-
     }
 
     function testOverlapping() public {
@@ -563,14 +560,13 @@ contract RollDownTest is Test {
 
         rollDown.update_l1_from_l2(l2Update);
 
-
         RollDown.L2Update memory l2Update2;
         l2Update2.withdrawals = new RollDown.Withdrawal[](1);
         l2Update2.withdrawals[0] = RollDown.Withdrawal({
-          requestId: RollDown.RequestId({id: 3, origin: RollDown.Origin.L2}),
-          withdrawalRecipient: alice,
-          tokenAddress: tokenAddress,
-          amount: 1000
+            requestId: RollDown.RequestId({id: 3, origin: RollDown.Origin.L2}),
+            withdrawalRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: 1000
         });
 
         l2Update2.results = new RollDown.RequestResult[](2);
@@ -588,7 +584,6 @@ contract RollDownTest is Test {
         });
 
         rollDown.update_l1_from_l2(l2Update2);
-
     }
 
     function testReproduce2() public {
@@ -621,14 +616,13 @@ contract RollDownTest is Test {
 
         rollDown.update_l1_from_l2(l2Update);
 
-
         RollDown.L2Update memory l2Update2;
         l2Update2.withdrawals = new RollDown.Withdrawal[](1);
         l2Update2.withdrawals[0] = RollDown.Withdrawal({
-          requestId: RollDown.RequestId({id: 3, origin: RollDown.Origin.L2}),
-          withdrawalRecipient: alice,
-          tokenAddress: tokenAddress,
-          amount: 1000
+            requestId: RollDown.RequestId({id: 3, origin: RollDown.Origin.L2}),
+            withdrawalRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: 1000
         });
 
         l2Update2.results = new RollDown.RequestResult[](1);
@@ -640,6 +634,5 @@ contract RollDownTest is Test {
         });
 
         rollDown.update_l1_from_l2(l2Update2);
-
     }
 }

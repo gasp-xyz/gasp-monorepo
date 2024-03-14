@@ -174,17 +174,16 @@ contract RollDown {
     }
 
     function min(uint256 a, uint256 b) private pure returns (uint256) {
-      return a < b ? a : b;
+        return a < b ? a : b;
     }
 
     function max(uint256 a, uint256 b) private pure returns (uint256) {
-      return a > b ? a : b;
+        return a > b ? a : b;
     }
 
     function getRequestsRange(
         L2Update calldata update
     ) private pure returns (uint256, uint256) {
-
         uint256 firstId;
         unchecked {
             firstId = uint256(0) - 1;
@@ -193,17 +192,26 @@ contract RollDown {
 
         if (update.cancels.length > 0) {
             firstId = min(update.cancels[0].requestId.id, firstId);
-            lastId = max(update.cancels[update.cancels.length - 1].requestId.id, lastId);
+            lastId = max(
+                update.cancels[update.cancels.length - 1].requestId.id,
+                lastId
+            );
         }
 
         if (update.withdrawals.length > 0) {
-            firstId = min( update.withdrawals[0].requestId.id, firstId);
-            lastId = max(update.withdrawals[update.withdrawals.length - 1].requestId.id, lastId);
+            firstId = min(update.withdrawals[0].requestId.id, firstId);
+            lastId = max(
+                update.withdrawals[update.withdrawals.length - 1].requestId.id,
+                lastId
+            );
         }
 
         if (update.results.length > 0) {
             firstId = min(update.results[0].requestId.id, firstId);
-            lastId = max(update.results[update.results.length - 1].requestId.id, lastId);
+            lastId = max(
+                update.results[update.results.length - 1].requestId.id,
+                lastId
+            );
         }
 
         return (firstId, lastId);
@@ -213,7 +221,11 @@ contract RollDown {
         uint256 firstId,
         L2Update calldata update
     ) private pure returns (UpdateType[] memory) {
-        if (update.results.length == 0 && update.cancels.length == 0 && update.withdrawals.length == 0) {
+        if (
+            update.results.length == 0 &&
+            update.cancels.length == 0 &&
+            update.withdrawals.length == 0
+        ) {
             return new UpdateType[](0);
         }
 
@@ -222,7 +234,8 @@ contract RollDown {
         uint256 resultId = 0;
         uint256 orderId = 0;
         uint256 updatesAmount = update.cancels.length +
-            update.withdrawals.length + update.results.length;
+            update.withdrawals.length +
+            update.results.length;
         UpdateType[] memory order = new UpdateType[](updatesAmount);
 
         for (uint256 i = firstId; i < firstId + updatesAmount; i++) {
@@ -257,7 +270,6 @@ contract RollDown {
     function processRequestsOriginatingOnL2(
         L2Update calldata inputArray
     ) private {
-
         (uint256 firstId, uint256 lastId) = getRequestsRange(inputArray);
 
         require(firstId != 0, "Invalid L2Update");
@@ -265,10 +277,7 @@ contract RollDown {
             firstId <= lastProcessedUpdate_origin_l2 + 1,
             "Invalid L2Update"
         );
-        require(
-            lastId > lastProcessedUpdate_origin_l2,
-            "Invalid L2Update"
-        );
+        require(lastId > lastProcessedUpdate_origin_l2, "Invalid L2Update");
 
         UpdateType[] memory order = getOrderOfRequestsOriginatingOnL2(
             firstId,
@@ -287,8 +296,7 @@ contract RollDown {
             } else if (order[i] == UpdateType.CANCEL) {
                 Cancel calldata cancel = inputArray.cancels[cancelId++];
                 process_l2_update_cancels(cancel);
-            } else if (order[i] == UpdateType.INDEX_UPDATE){
-            } else {
+            } else if (order[i] == UpdateType.INDEX_UPDATE) {} else {
                 revert("unknown update type");
             }
         }
@@ -460,7 +468,9 @@ contract RollDown {
 
         result.pendingDeposits = new Deposit[](depositsCounter);
         result.pendingCancelResultions = new CancelResolution[](cancelsCounter);
-        result.pendingWithdrawalResolutions = new WithdrawalResolution[](withdrawalsCounter);
+        result.pendingWithdrawalResolutions = new WithdrawalResolution[](
+            withdrawalsCounter
+        );
         result.pendingL2UpdatesToRemove = new L2UpdatesToRemove[](
             updatesToBeRemovedCounter
         );
