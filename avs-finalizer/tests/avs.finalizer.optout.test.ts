@@ -1,19 +1,12 @@
-import { jest, describe, it } from "@jest/globals";
+import { jest, describe, it, expect, afterEach } from "@jest/globals";
 import { DockerUtils } from "./DockerUtils";
 import {
-    createPublicClient,
+    createPublicClient, defineChain, PublicClient,
     webSocket,
 } from "viem";
 
-// import indexRegistry   from "./abis/IndexRegistryStorage.json" ;
-// const indexRegistryAddress = "0x851356ae760d987E095750cCeb3bC6014560891C"
-
-// import registryCoordinator   from "./abis/RegistryCoordinatorStorage.json" ;
-// const registryCoordinatorAddress = "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9"
-
 import registryCoordinator from "./abis/RegistryCoordinator.json";
-import {defineChain} from "viem/utils/chain/defineChain";
-const registryCoordinatorAddress = '0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf'
+const registryCoordinatorAddress = '0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9'
 
 
 jest.setTimeout(1500000);
@@ -29,55 +22,72 @@ const anvil3 = defineChain({
     },
     rpcUrls: {
         public: {
-            http: ["ws://127.0.0.1:8545"],
+            http: ["ws://0.0.0.0:8545"],
         },
         default: {
-            http: ["ws://127.0.0.1:8545"],
+            http: ["ws://0.0.0.0:8545"],
         },
     },
 });
-
-export const anvil2 = /*#__PURE__*/ defineChain({
-    id: 31_337,
-    name: 'Anvil',
-    nativeCurrency: {
-        decimals: 18,
-        name: 'Ether',
-        symbol: 'ETH',
-    },
-    rpcUrls: {
-        default: {
-            http: ['http://0.0.0.0:8545'],
-            webSocket: ['ws://0.0.0.0:8545'],
-        },
-    },
-})
-
+let dockerUtils: DockerUtils;
 
 describe('AVS Finalizer opt-out', () => {
     it('should opt-out of finalization', async () => {
-        const dockerUtils = new DockerUtils();
+        dockerUtils = new DockerUtils();
         console.log("subscribing to eth events");
-        const transport = webSocket("http://0.0.0.0:8545" , {
+        const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
         });
         const publicClient = createPublicClient({
             transport,
-            // @ts-ignore
             chain: anvil3,
         });
-        const unwatch = publicClient.watchContractEvent({
+        const POperatorAddress = waitForOperatorRegistered(publicClient);
+        await dockerUtils.startContainer();
+        const operatorAddress = await POperatorAddress;
+        console.log("operatorAddress: " + operatorAddress);
+        const res = await publicClient.readContract({
             address: registryCoordinatorAddress,
             abi: registryCoordinator.abi,
-            eventName: "OperatorRegistered",
-            onLogs: async (logs) => {
-                for (const log of logs) {
-                    console.info(JSON.stringify(log));
-                }
-            },
+            functionName: "getOperatorStatus",
+            args: [operatorAddress],
         });
-        await dockerUtils.startContainer();
-        unwatch();
+        expect(res).toBe(1);
+
+        // opt-out
+        await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
+            console.log(result);
+        }).catch((err) => {
+            console.error(err);
+        });
+
+    });
+    afterEach(async () => {
         await dockerUtils.stopContainer();
     });
 });
+
+function waitForOperatorRegistered(publicClient: PublicClient) {
+    return new Promise((resolve, _) => {
+        publicClient.watchEvent({
+            address: registryCoordinatorAddress,
+            event: {
+                type: "event",
+                name: "OperatorRegistered",
+                inputs: [
+                    {name: "operator", type: "address", indexed: true, internalType: "address"},
+                    {name: "operatorId", type: "bytes32", indexed: true, internalType: "bytes32"}],
+                anonymous: false
+            },
+            onLogs: async (logs) => {
+                for (const log of logs) {
+                    const operator = log.args.operator;
+                    const operatorId = log.args.operatorId;
+                    console.debug(JSON.stringify(operator));
+                    console.debug(JSON.stringify(operatorId));
+                    resolve(operator);
+                }
+            },
+        });
+    })
+}
