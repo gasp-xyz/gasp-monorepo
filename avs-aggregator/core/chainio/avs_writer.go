@@ -2,6 +2,7 @@ package chainio
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"math/big"
 
@@ -78,11 +79,15 @@ func (w *AvsWriter) SendNewTaskVerifyBlock(ctx context.Context, blockNumber *big
 
 func (w *AvsWriter) SendAggregatedResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerTask, taskResponse taskmanager.IFinalizerTaskManagerTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error) {
 	w.logger.Info("sending aggregated task response with the AVS's task manager")
-	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
-	if err != nil {
-		return nil, err
-	}
-	tx, err := w.AvsContractBindings.TaskManager.RespondToTask(noSendTxOpts, task, taskResponse, nonSignerStakesAndSignature)
+	// noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
+	// if err != nil {
+		// return nil, err
+	// }
+	abi, err := taskmanager.ContractFinalizerTaskManagerMetaData.GetAbi()
+	packed, err := abi.Pack("respondToTask", task, taskResponse, nonSignerStakesAndSignature)
+	w.logger.Debug("*********", "trx packed data", hex.EncodeToString(packed))
+	tx := types.NewTransaction(0, w.AvsContractBindings.OperatorStateRetriever, big.NewInt(0), 0, big.NewInt(0), packed)
+	// tx, err := w.AvsContractBindings.TaskManager.RespondToTask(noSendTxOpts, task, taskResponse, nonSignerStakesAndSignature)
 	if err != nil {
 		w.logger.Errorf("Error assembling RespondToTask tx")
 		return nil, err
