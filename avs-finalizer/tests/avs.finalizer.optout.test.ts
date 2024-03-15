@@ -5,6 +5,7 @@ import {
     webSocket,
 } from "viem";
 
+// @ts-ignore
 import registryCoordinator from "./abis/RegistryCoordinator.json";
 const registryCoordinatorAddress = '0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9'
 
@@ -34,7 +35,6 @@ let dockerUtils: DockerUtils;
 describe('AVS Finalizer opt-out', () => {
     it('should opt-out of finalization', async () => {
         dockerUtils = new DockerUtils();
-        console.log("subscribing to eth events");
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
         });
@@ -54,12 +54,24 @@ describe('AVS Finalizer opt-out', () => {
         });
         expect(res).toBe(1);
 
+        const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
+
         // opt-out
         await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
             console.log(result);
         }).catch((err) => {
             console.error(err);
         });
+        const deRegistered = await PoperatorDeregisteredAddress;
+        expect(deRegistered).toBe(operatorAddress);
+
+        const statusAfter = await publicClient.readContract({
+            address: registryCoordinatorAddress,
+            abi: registryCoordinator.abi,
+            functionName: "getOperatorStatus",
+            args: [operatorAddress],
+        });
+        expect(statusAfter).toBe(2);
 
     });
     afterEach(async () => {
@@ -85,6 +97,30 @@ function waitForOperatorRegistered(publicClient: PublicClient) {
                     const operatorId = log.args.operatorId;
                     console.debug(JSON.stringify(operator));
                     console.debug(JSON.stringify(operatorId));
+                    resolve(operator);
+                }
+            },
+        });
+    })
+}
+function waitForOperatorDeRegistered(publicClient: PublicClient) {
+    return new Promise((resolve, _) => {
+        publicClient.watchEvent({
+            address: registryCoordinatorAddress,
+            event: {
+                "type":"event",
+                "name":"OperatorDeregistered",
+                "inputs":[
+                    {"name":"operator","type":"address","indexed":true,"internalType":"address"},
+                    {"name":"operatorId","type":"bytes32","indexed":true,"internalType":"bytes32"}],
+                "anonymous":false
+            },
+            onLogs: async (logs) => {
+                for (const log of logs) {
+                    const operator = log.args.operator;
+                    const operatorId = log.args.operatorId;
+                    console.debug("Deregistered"  + JSON.stringify(operator));
+                    console.debug("Deregistered"  + JSON.stringify(operatorId));
                     resolve(operator);
                 }
             },
