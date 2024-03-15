@@ -32,8 +32,8 @@ const anvil3 = defineChain({
 });
 let dockerUtils: DockerUtils;
 
-describe('AVS Finalizer opt-out', () => {
-    it('should opt-out of finalization', async () => {
+describe('AVS Finalizer', () => {
+    it('opt-out', async () => {
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -74,6 +74,43 @@ describe('AVS Finalizer opt-out', () => {
         expect(statusAfter).toBe(2);
 
     });
+    it('eject', async () => {
+        dockerUtils = new DockerUtils();
+        const transport = webSocket("ws://0.0.0.0:8545" , {
+            retryCount: 5,
+        });
+        const publicClient = createPublicClient({
+            transport,
+            chain: anvil3,
+        });
+        const POperatorAddress = waitForOperatorRegistered(publicClient);
+        await dockerUtils.startContainer();
+        const operatorAddress = await POperatorAddress;
+        console.log("operatorAddress: " + operatorAddress);
+        const res = await publicClient.readContract({
+            address: registryCoordinatorAddress,
+            abi: registryCoordinator.abi,
+            functionName: "getOperatorStatus",
+            args: [operatorAddress],
+        });
+        expect(res).toBe(1);
+        await dockerUtils.stopContainer();
+
+        const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
+
+
+        const deRegistered = await PoperatorDeregisteredAddress;
+        expect(deRegistered).toBe(operatorAddress);
+
+        const statusAfter = await publicClient.readContract({
+            address: registryCoordinatorAddress,
+            abi: registryCoordinator.abi,
+            functionName: "getOperatorStatus",
+            args: [operatorAddress],
+        });
+        expect(statusAfter).toBe(2);
+
+    });
     afterEach(async () => {
         await dockerUtils.stopContainer();
     });
@@ -94,9 +131,7 @@ function waitForOperatorRegistered(publicClient: PublicClient) {
             onLogs: async (logs) => {
                 for (const log of logs) {
                     const operator = log.args.operator;
-                    const operatorId = log.args.operatorId;
                     console.debug(JSON.stringify(operator));
-                    console.debug(JSON.stringify(operatorId));
                     resolve(operator);
                 }
             },
@@ -118,9 +153,7 @@ function waitForOperatorDeRegistered(publicClient: PublicClient) {
             onLogs: async (logs) => {
                 for (const log of logs) {
                     const operator = log.args.operator;
-                    const operatorId = log.args.operatorId;
                     console.debug("Deregistered"  + JSON.stringify(operator));
-                    console.debug("Deregistered"  + JSON.stringify(operatorId));
                     resolve(operator);
                 }
             },
