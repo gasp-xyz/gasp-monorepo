@@ -277,11 +277,7 @@ contract RollDown {
             firstId <= lastProcessedUpdate_origin_l2 + 1,
             "Invalid L2Update"
         );
-        console.log('before');
-        console.log('last id', lastId);
-        console.log('last processed', lastProcessedUpdate_origin_l2);
         require(lastId > lastProcessedUpdate_origin_l2, "Invalid L2Update");
-        console.log('after');
 
         UpdateType[] memory order = getOrderOfRequestsOriginatingOnL2(
             firstId,
@@ -319,9 +315,6 @@ contract RollDown {
                 revert("unknown update type");
             }
         }
-        // lastProcessedUpdate_origin_l2 += order.length;
-        console.log('settting lastProcessedUpdate_origin_l2', lastProcessedUpdate_origin_l2);
-            
     }
 
     function update_l1_from_l2(L2Update calldata inputArray) external {
@@ -394,7 +387,7 @@ contract RollDown {
                 l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
                     element.originRequestId
                 );
-            } else if (element.updateType == UpdateType.WITHDRAWAL_RESOLUTION){
+            } else if (element.updateType == UpdateType.WITHDRAWAL_RESOLUTION) {
                 l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
                     element.originRequestId
                 );

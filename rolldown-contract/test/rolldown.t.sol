@@ -586,7 +586,9 @@ contract RollDownTest is Test {
         rollDown.update_l1_from_l2(l2Update2);
     }
 
-    function testWithdrawalAlongIndexUpdateWhenWithdrawalProcessedBeforeIndexUpdate() public {
+    function testWithdrawalAlongIndexUpdateWhenWithdrawalProcessedBeforeIndexUpdate()
+        public
+    {
         // Arrange
         address payable alice = users[0];
         token = new MyERC20();
@@ -636,11 +638,16 @@ contract RollDownTest is Test {
         rollDown.update_l1_from_l2(l2Update2);
         RollDown.L1Update memory update = rollDown.getUpdateForL2();
         assertEq(update.pendingWithdrawalResolutions.length, 1);
-        assert(update.pendingWithdrawalResolutions[0].requestId.origin == RollDown.Origin.L1);
+        assert(
+            update.pendingWithdrawalResolutions[0].requestId.origin ==
+                RollDown.Origin.L1
+        );
         assertEq(update.pendingWithdrawalResolutions[0].requestId.id, 4);
     }
 
-    function testWithdrawalAlongIndexUpdateWhenWithdrawalProcessedAfterIndexUpdate() public {
+    function testWithdrawalAlongIndexUpdateWhenWithdrawalProcessedAfterIndexUpdate()
+        public
+    {
         // Arrange
         address payable alice = users[0];
         token = new MyERC20();
@@ -690,7 +697,10 @@ contract RollDownTest is Test {
         rollDown.update_l1_from_l2(l2Update2);
         RollDown.L1Update memory update = rollDown.getUpdateForL2();
         assertEq(update.pendingWithdrawalResolutions.length, 1);
-        assert(update.pendingWithdrawalResolutions[0].requestId.origin == RollDown.Origin.L1);
+        assert(
+            update.pendingWithdrawalResolutions[0].requestId.origin ==
+                RollDown.Origin.L1
+        );
         assertEq(update.pendingWithdrawalResolutions[0].requestId.id, 4);
     }
 
@@ -750,7 +760,6 @@ contract RollDownTest is Test {
         });
         rollDown.update_l1_from_l2(l2Update3);
 
-
         RollDown.L2Update memory l2Update4;
         l2Update4.results = new RollDown.RequestResult[](2);
         l2Update4.results[0] = RollDown.RequestResult({
@@ -767,7 +776,6 @@ contract RollDownTest is Test {
         });
         rollDown.update_l1_from_l2(l2Update4);
     }
-
 
     function testReproduceWithdrawalHandling2() public {
         // Arrange
@@ -821,7 +829,6 @@ contract RollDownTest is Test {
         });
         rollDown.update_l1_from_l2(l2Update2);
 
-
         RollDown.L2Update memory l2Update3;
         l2Update3.results = new RollDown.RequestResult[](2);
         l2Update3.results[0] = RollDown.RequestResult({
@@ -839,7 +846,9 @@ contract RollDownTest is Test {
         rollDown.update_l1_from_l2(l2Update3);
     }
 
-    function testEveryRequestResultIsIncludedInSingleL2UpdatesToRemoveForOverlappingL2Updates() public {
+    function testEveryRequestResultIsIncludedInSingleL2UpdatesToRemoveForOverlappingL2Updates()
+        public
+    {
         // Arrange
         address payable alice = users[0];
         token = new MyERC20();
@@ -863,7 +872,10 @@ contract RollDownTest is Test {
         rollDown.update_l1_from_l2(l2Update);
         RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
         assertEq(l1Update.pendingL2UpdatesToRemove.length, 1);
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length, 1);
+        assertEq(
+            l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
+            1
+        );
         assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove[0], 1);
 
         RollDown.L2Update memory l2Update2;
@@ -885,11 +897,16 @@ contract RollDownTest is Test {
 
         l1Update = rollDown.getUpdateForL2();
         assertEq(l1Update.pendingL2UpdatesToRemove.length, 2);
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length, 1);
+        assertEq(
+            l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
+            1
+        );
         assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove[0], 1);
 
-        assertEq(l1Update.pendingL2UpdatesToRemove[1].l2UpdatesToRemove.length, 1);
+        assertEq(
+            l1Update.pendingL2UpdatesToRemove[1].l2UpdatesToRemove.length,
+            1
+        );
         assertEq(l1Update.pendingL2UpdatesToRemove[1].l2UpdatesToRemove[0], 2);
-
     }
 }
