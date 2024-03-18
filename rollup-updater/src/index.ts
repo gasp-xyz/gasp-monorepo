@@ -61,7 +61,7 @@ async function sendUpdateToL1(
 		pendingUpdates.toHex(),
 	);
 
-	const reqCount = l2Update[0].cancles.length + l2Update[0].results.length;
+	const reqCount = l2Update[0].withdrawals.length + l2Update[0].cancels.length + l2Update[0].results.length;
 
 	if (verbose) {
 		console.log(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);

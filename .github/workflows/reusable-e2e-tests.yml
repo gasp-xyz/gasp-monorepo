@@ -48,14 +48,6 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Build parachain launch
-        working-directory: ops/parachain-launch-mangata-node/
-        run: npx @open-web3/parachain-launch generate config.yml -y
-
-      - name: Print docker compose content
-        working-directory: ops/parachain-launch-mangata-node/output/
-        run: cat docker-compose.yml 
-          
       #- name: build finalizer
       #  working-directory: avs-finalizer/
       #  run: cargo +stable build --release
@@ -64,9 +56,8 @@ jobs:
         run: |
           export AVS_AGGREGATOR_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
           export AVS_FINALIZER_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
+          docker compose build sequencer updater
           docker compose up --wait 
-          
-        
 
 #      - name: Sleep for 2 minutes
 #        run: sleep 120s

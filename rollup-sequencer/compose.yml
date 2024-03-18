@@ -5,7 +5,7 @@ services:
     depends_on:
       rolldown:
         condition: service_completed_successfully
-      parachain-2110-0:
+      node-alice:
         condition: service_started
     build: .
     environment:
