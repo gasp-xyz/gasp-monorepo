@@ -32,6 +32,32 @@ const anvil3 = defineChain({
 });
 let dockerUtils: DockerUtils;
 
+async function mineEthBlocks(blocks: number) {
+    for (let i = 0; i < blocks; i++) {
+        const host = anvil3.rpcUrls.default.http[0].replace("ws", "http");
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        const raw = JSON.stringify({
+            method: "evm_mine",
+            params: [],
+            id: i,
+            jsonrpc: "2.0",
+        });
+        const requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow",
+        };
+        // @ts-ignore
+        await fetch(host, requestOptions)
+            .then((response) => response.text())
+            .then((result) => console.log(result))
+            .catch((error) => console.error(error));
+    }
+
+}
+
 describe('AVS Finalizer', () => {
     it('opt-out', async () => {
         dockerUtils = new DockerUtils();
@@ -95,11 +121,11 @@ describe('AVS Finalizer', () => {
         });
         expect(res).toBe(1);
         await dockerUtils.stopContainer();
-
+        await mineEthBlocks(10);
         const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
-
-
+        // 10s * 2 * 5 = 100s ( every two blocks we produce a task, and at 5th task we eject)
         const deRegistered = await PoperatorDeregisteredAddress;
+
         expect(deRegistered).toBe(operatorAddress);
 
         const statusAfter = await publicClient.readContract({
