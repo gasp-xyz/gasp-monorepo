@@ -7,7 +7,7 @@ name: mangata-node
 
 services:
   node-alice:
-    image: mangatasolutions/rollup-node:local
+    image: mangatasolutions/rollup-node:eth-rollup-develop
     command:
       - --alice
       - --chain=rollup-local-seq
