@@ -43,6 +43,10 @@ jobs:
   Run-AVS-tests:
     runs-on: [ubuntu-latest]
     needs: [init]
+    environment:
+      AVS_AGGREGATOR_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
+      AVS_FINALIZER_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -61,10 +65,7 @@ jobs:
       #  run: cargo +stable build --release
 
       - name: Start env
-        run: |
-          export AVS_AGGREGATOR_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
-          export AVS_FINALIZER_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
-          docker compose up --wait 
+        run: docker compose up --wait
           
 
       - name: docker ps
@@ -95,10 +96,7 @@ jobs:
 
       - name: Stop env
         if: success() || failure() # run this step even if previous step failed
-        run: |
-          export AVS_AGGREGATOR_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
-          export AVS_FINALIZER_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
-          docker compose down -v 
+        run: docker compose down -v
 
       
 

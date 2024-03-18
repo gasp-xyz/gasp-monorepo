@@ -4,10 +4,7 @@ import { randomBytes } from "crypto";
 import Wallet from 'ethereumjs-wallet'
 import {generateBls12381G2KeyPair} from "@mattrglobal/bbs-signatures";
 
-export const FINALIZER_IMAGE_LOCAL = "mangatasolutions/avs-finalizer:local";
-export const REDIS_HOST_DOCKER_IMAGE_NAME = "mangatasolutions/redis-test-stash:latest";
-export const MAX_DAYS="max";
-export const MAX_INTERVAL="day";
+export const FINALIZER_IMAGE_LOCAL = "mangatasolutions/avs-finalizer:" + process.env.AVS_FINALIZER_VERSION || 'local';
 
 async function getNewKeys() {
     const key = randomBytes(32).toString("hex");
