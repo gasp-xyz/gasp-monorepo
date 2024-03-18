@@ -74,7 +74,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: mangata-finance/mangata-e2e
-          ref: "eth-rollup-develop"
+          ref: "${{ env.E2EBRANCHNAME }}"
           path: e2eTests
 
       - name: Install e2e tests dependencies
