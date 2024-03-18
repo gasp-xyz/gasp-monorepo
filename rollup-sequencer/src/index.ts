@@ -57,24 +57,6 @@ async function main() {
 			})) as any;
 
 			console.log(util.inspect(data, { depth: null }));
-
-			data.order = data.order.map((e: any) => {
-				switch (e) {
-					case 0: {
-						return "DEPOSIT";
-					}
-					case 1: {
-						return "WITHDRAWAL";
-					}
-					case 2: {
-						return "CANCEL_RESOLUTION";
-					}
-					case 3: {
-						return "L2_UPDATES_TO_REMOVE";
-					}
-				}
-			});
-
 			await signTx(api, api.tx.rolldown.updateL2FromL1(data), collator);
 		}
 		const events = await apiAt.query.system.events();
