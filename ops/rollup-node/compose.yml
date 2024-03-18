@@ -22,7 +22,7 @@ services:
       - data-alice:/data
 
   node-bob:
-    image: mangatasolutions/rollup-node:local
+    image: mangatasolutions/rollup-node:eth-rollup-develop
     command:
       - --bob
       - --chain=rollup-local-seq
