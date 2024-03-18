@@ -51,14 +51,6 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Build parachain launch
-        working-directory: ops/parachain-launch-mangata-node/
-        run: npx @open-web3/parachain-launch generate config.yml -y
-
-      - name: Print docker compose content
-        working-directory: ops/parachain-launch-mangata-node/output/
-        run: cat docker-compose.yml 
-          
       #- name: build finalizer
       #  working-directory: avs-finalizer/
       #  run: cargo +stable build --release
@@ -66,6 +58,8 @@ jobs:
       - name: Start env
         run: docker compose up --wait
           
+      - name: Stop unnecessary services
+        run: docker stop rollup-sequencer-1 rollup-updater-1
 
       - name: docker ps
         run: docker ps
