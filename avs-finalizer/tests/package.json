@@ -8,7 +8,7 @@
   "author": "GonCer <gonza.cerro@gmail.com>",
   "license": "MIT",
     "scripts": {
-        "test": "jest"
+        "test": "jest --detectOpenHandles --verbose  --forceExit"
     },
   "dependencies": {
     "@mattrglobal/bbs-signatures": "^1.3.1",
