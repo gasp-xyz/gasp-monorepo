@@ -44,8 +44,8 @@ jobs:
     runs-on: [ubuntu-latest]
     needs: [init]
     env:
-      AVS_AGGREGATOR_VERSION: 8dd0c81aa88b967334d001d8cae031f8799a189f
-      AVS_FINALIZER_VERSION: 8dd0c81aa88b967334d001d8cae031f8799a189f
+      AVS_AGGREGATOR_VERSION: b48ef3f478a838dc8cbae9f5f8745adf9e91a322
+      AVS_FINALIZER_VERSION: b48ef3f478a838dc8cbae9f5f8745adf9e91a322
     steps:
       - uses: actions/checkout@v4
         with:

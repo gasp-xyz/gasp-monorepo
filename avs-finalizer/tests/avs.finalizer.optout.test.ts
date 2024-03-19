@@ -121,7 +121,7 @@ describe('AVS Finalizer', () => {
         });
         expect(res).toBe(1);
         await dockerUtils.stopContainer();
-        await mineEthBlocks(10);
+        await mineEthBlocks(1);
         const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
         // 10s * 2 * 5 = 100s ( every two blocks we produce a task, and at 5th task we eject)
         const deRegistered = await PoperatorDeregisteredAddress;
