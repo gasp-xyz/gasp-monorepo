@@ -54,6 +54,7 @@ export class DockerUtils{
         AVS_RPC_URL:"http://0.0.0.0:8090" ,
         AVS_REGISTRY_COORDINATOR_ADDR:"0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9" ,
         TESTNET:"true",
+        STAKE:"32",
 //        ECDSA_EPHEMERAL_KEY:"false" ,
 //        BLS_EPHEMERAL_KEY:"false"
     }
