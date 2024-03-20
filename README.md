@@ -62,12 +62,6 @@ cd avs-finalizer
 cargo +stable build --release
 ```
 
-- setup mangata-node using `parachain-launch` (to be removed with solochain)
-```
-cd ./ops/parachain-launch-mangata-node/
-npx @open-web3/parachain-launch generate config.yml
-```
-
 ### Run
 In the root folder run:
 
