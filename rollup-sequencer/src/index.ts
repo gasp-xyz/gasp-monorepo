@@ -57,27 +57,49 @@ async function main() {
 			})) as any;
 
 			console.log(util.inspect(data, { depth: null }));
-			await signTx(api, api.tx.rolldown.updateL2FromL1(data), collator);
+
+			// @ts-ignore
+			const encodedData = encodeAbiParameters(
+				abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
+				[data],
+			);
+
+			const nativeL1Update = await api.rpc.rolldown.get_native_l1_update(
+				encodedData.substring(2),
+			);
+
+			await signTx(
+				api,
+				api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
+				collator,
+			);
 		}
 		const events = await apiAt.query.system.events();
 		const pendingRequestsEvents = events.filter(
 			(event) =>
 				event.event.section === "rolldown" &&
-				event.event.method === "PendingRequestStored",
+				event.event.method === "L1ReadStored",
 		);
 
 		if (pendingRequestsEvents.length > 0) {
 			pendingRequestsEvents.forEach((record) => {
 				record.event.data.forEach(async (data, index) => {
 					const requestId = (data as unknown as string[])[1];
+					const { start, end } = (data as any)[2] as unknown as {
+						start: string;
+						end: string;
+					};
+
 					const contractData = (await publicClient.readContract({
 						address: mangataContractAddress,
 						abi: abi,
-						functionName: "getUpdateForL2",
+						functionName: "getPendingRequests",
+						args: [start, end],
 					})) as any;
+
 					// @ts-ignore
 					const encodedData = encodeAbiParameters(
-						abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
+						abi.find((e: any) => e!.name === "getPendingRequests")!.outputs!,
 						[contractData],
 					);
 
