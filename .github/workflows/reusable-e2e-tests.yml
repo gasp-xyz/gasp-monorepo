@@ -9,6 +9,10 @@ on:
           description: ''
           required: false
           default: 'eth-rollup-develop'
+        rollupDockerImage:
+          description: ''
+          required: false
+          default: 'eth-rollup-develop'
 
 permissions:
   contents: write
@@ -48,9 +52,10 @@ jobs:
         with:
           submodules: 'recursive'
 
-      #- name: build finalizer
-      #  working-directory: avs-finalizer/
-      #  run: cargo +stable build --release
+      - name: Decide docker image
+        # if we have something in e2eBranch - override E2EBranchName, else -> E2EBRANCHNAME , that
+        # by default will be main.
+        run: echo "MANGATA_NODE_VERSION=${{ inputs.rollupDockerImage || 'eth-rollup-develop' }}" >> $GITHUB_ENV
 
       - name: Start env
         run: |
