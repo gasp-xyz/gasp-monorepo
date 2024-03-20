@@ -1,12 +1,12 @@
 name: rollup
 
-# include:
-#   - path: ./avs-aggregator/compose.yml
-#   - path: ./avs-finalizer/compose.yml
-#   - path: ./rollup-sequencer/compose.yml
-#   - path: ./rollup-updater/compose.yml
-#   - path: ./rolldown-contract/compose.yml
-#   - path: ./contracts/compose.yml
+include:
+  - path: ./avs-aggregator/compose.yml
+  - path: ./avs-finalizer/compose.yml
+  - path: ./rollup-sequencer/compose.yml
+  - path: ./rollup-updater/compose.yml
+  - path: ./rolldown-contract/compose.yml
+  - path: ./contracts/compose.yml
 
 services:
   anvil:
@@ -26,7 +26,7 @@ services:
     image: mangatasolutions/rollup-node:${MANGATA_NODE_VERSION:-eth-rollup-develop}
     command: 
       - --alice
-      - --chain=rollup-local
+      - --chain=rollup-local-seq
       - --base-path=/data
       - --rpc-cors=all
       - --unsafe-rpc-external
@@ -34,23 +34,15 @@ services:
     ports:
       - 9944:9944
       - 30333:30333
-    volumes: 
-      - data-alice:/data
   
   node-bob:
     image: mangatasolutions/rollup-node:${MANGATA_NODE_VERSION:-eth-rollup-develop}
     command: 
       - --bob
-      - --chain=rollup-local
+      - --chain=rollup-local-seq
       - --base-path=/data
       - --rpc-cors=all
       - --unsafe-rpc-external
       - --bootnodes=/dns/node-alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
     ports:
       - 9946:9944
-    volumes: 
-      - data-bob:/data
-
-volumes:
-  data-alice:
-  data-bob:
