@@ -4,7 +4,7 @@ import { randomBytes } from "crypto";
 import Wallet from 'ethereumjs-wallet'
 import {generateBls12381G2KeyPair} from "@mattrglobal/bbs-signatures";
 
-export const FINALIZER_IMAGE_LOCAL = "mangatasolutions/avs-finalizer:" + process.env.AVS_FINALIZER_VERSION || 'local';
+
 
 async function getNewKeys() {
     const key = randomBytes(32).toString("hex");
@@ -17,11 +17,13 @@ async function getNewKeys() {
 export class DockerUtils{
     container?: StartedTestContainer;
     containerName: string;
+    FINALIZER_IMAGE: string;
     constructor() {
         this.container = undefined;
         this.containerName = "";
+        this.FINALIZER_IMAGE = "mangatasolutions/avs-finalizer:" + process.env.AVS_FINALIZER_VERSION || 'local';
     }
-    async startContainer(image: string = FINALIZER_IMAGE_LOCAL, env = this.finalizerLocalEnvironment) {
+    async startContainer(image: string = this.FINALIZER_IMAGE, env = this.finalizerLocalEnvironment) {
         this.containerName = image;
         const json = await getNewKeys();
         console.info("keys: " + JSON.stringify(json));
@@ -33,6 +35,12 @@ export class DockerUtils{
                 .withWaitStrategy(Wait.forLogMessage("Testnet setup sucessfully, starting AVS verification"))
                 .withEnvironment(env)
                 .withNetworkMode("host")
+                .withName("rollup-avs-finalizer-TEST-" + randomBytes(4).toString("hex"))
+                .withLogConsumer(stream => {
+                    stream.on("data", line => console.debug(line));
+                    stream.on("err", line => console.debug(line));
+                    stream.on("end", () => console.debug("Stream closed"));
+                })
                 .start();
         }else{
             console.info("Container already started: " + this.container.getName());
@@ -55,7 +63,16 @@ export class DockerUtils{
         AVS_REGISTRY_COORDINATOR_ADDR:"0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9" ,
         TESTNET:"true",
         STAKE:"32",
-//        ECDSA_EPHEMERAL_KEY:"false" ,
-//        BLS_EPHEMERAL_KEY:"false"
+    }
+    corruptedFinalizerLocalEnvironment : Environment = {
+        RUST_LOG: "info",
+        ETH_RPC_URL:"http://0.0.0.0:8545" ,
+        ETH_WS_URL:"ws://0.0.0.0:8545" ,
+        CHAIN_ID:"31337" ,
+        SUBSTRATE_RPC_URL:"wss://kusama-archive.mangata.online:443" ,
+        AVS_RPC_URL:"http://0.0.0.0:8090" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9" ,
+        TESTNET:"true",
+        STAKE:"90",
     }
 }
