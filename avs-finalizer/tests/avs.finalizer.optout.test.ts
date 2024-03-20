@@ -1,12 +1,13 @@
 import { jest, describe, it, expect, afterEach } from "@jest/globals";
 import { DockerUtils } from "./DockerUtils";
 import {
-    createPublicClient, defineChain, PublicClient,
+    createPublicClient, defineChain,
     webSocket,
 } from "viem";
 
 // @ts-ignore
 import registryCoordinator from "./abis/RegistryCoordinator.json";
+import {waitForOperatorDeRegistered, waitForOperatorRegistered} from "./operatorUtilities";
 const registryCoordinatorAddress = '0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9'
 
 
@@ -141,48 +142,3 @@ describe('AVS Finalizer', () => {
         await dockerUtils.stopContainer();
     });
 });
-
-function waitForOperatorRegistered(publicClient: PublicClient) {
-    return new Promise((resolve, _) => {
-        publicClient.watchEvent({
-            address: registryCoordinatorAddress,
-            event: {
-                type: "event",
-                name: "OperatorRegistered",
-                inputs: [
-                    {name: "operator", type: "address", indexed: true, internalType: "address"},
-                    {name: "operatorId", type: "bytes32", indexed: true, internalType: "bytes32"}],
-                anonymous: false
-            },
-            onLogs: async (logs) => {
-                for (const log of logs) {
-                    const operator = log.args.operator;
-                    console.debug(JSON.stringify(operator));
-                    resolve(operator);
-                }
-            },
-        });
-    })
-}
-function waitForOperatorDeRegistered(publicClient: PublicClient) {
-    return new Promise((resolve, _) => {
-        publicClient.watchEvent({
-            address: registryCoordinatorAddress,
-            event: {
-                "type":"event",
-                "name":"OperatorDeregistered",
-                "inputs":[
-                    {"name":"operator","type":"address","indexed":true,"internalType":"address"},
-                    {"name":"operatorId","type":"bytes32","indexed":true,"internalType":"bytes32"}],
-                "anonymous":false
-            },
-            onLogs: async (logs) => {
-                for (const log of logs) {
-                    const operator = log.args.operator;
-                    console.debug("Deregistered"  + JSON.stringify(operator));
-                    resolve(operator);
-                }
-            },
-        });
-    })
-}
