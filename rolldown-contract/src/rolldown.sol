@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 // Import ERC-20 interface
@@ -27,7 +26,14 @@ contract RollDown {
         uint256 requestId,
         bool cancelJustified
     );
-    event L2UpdatesToRemovedAcceptedIntoQueue(uint256 requestId, uint256[] l2UpdatesToRemove);
+    event WithdrawalResolutionAcceptedIntoQueue(
+        uint256 requestId,
+        bool success
+    );
+    event L2UpdatesToRemovedAcceptedIntoQueue(
+        uint256 requestId,
+        uint256[] l2UpdatesToRemove
+    );
     event FundsWithdrawn(
         address withdrawRecipient,
         address tokenAddress,
@@ -35,69 +41,96 @@ contract RollDown {
     );
     event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
 
-    // Pending requests storage and structs
+    enum Origin {
+        L1,
+        L2
+    }
+
+    struct RequestId {
+        Origin origin;
+        uint256 id;
+    }
+
     struct Deposit {
+        RequestId requestId;
         address depositRecipient;
         address tokenAddress;
         uint256 amount;
+        bytes32 blockHash;
     }
 
-    /// PENING REQUESTS TYPES (L1)
-
     struct L2UpdatesToRemove {
+        RequestId requestId;
         uint256[] l2UpdatesToRemove;
+        bytes32 blockHash;
     }
 
     struct CancelResolution {
+        RequestId requestId;
         uint256 l2RequestId;
         bool cancelJustified;
+        bytes32 blockHash;
     }
 
-    enum PendingRequestType{ DEPOSIT, WITHDRAWAL, CANCEL_RESOLUTION, L2_UPDATES_TO_REMOVE}
+    struct WithdrawalResolution {
+        RequestId requestId;
+        uint256 l2RequestId;
+        bool status;
+        bytes32 blockHash;
+    }
 
     struct L1Update {
-      uint256 lastProccessedRequestOnL1;
-      uint256 lastAcceptedRequestOnL1;
-      uint256 offset;
-      PendingRequestType[] order;
-      Deposit[] pendingDeposits;
-      CancelResolution[] pendingCancelResultions;
-      L2UpdatesToRemove[] pendingL2UpdatesToRemove;
+        Deposit[] pendingDeposits;
+        CancelResolution[] pendingCancelResultions;
+        WithdrawalResolution[] pendingWithdrawalResolutions;
+        L2UpdatesToRemove[] pendingL2UpdatesToRemove;
     }
 
+    mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
     mapping(uint256 => CancelResolution) public cancelResolutions;
     mapping(uint256 => Deposit) private deposits;
     mapping(uint256 => L2UpdatesToRemove) private l2UpdatesToRemove;
-    /// PENING REQUESTS TYPES (L1)
 
-    enum UpdateType{ DEPOSIT, WITHDRAWAL, INDEX_UPDATE, CANCEL_RESOLUTION}
+    //TODO: should be renamed to RequestType
+    enum UpdateType {
+        DEPOSIT,
+        WITHDRAWAL,
+        WITHDRAWAL_RESOLUTION,
+        INDEX_UPDATE,
+        CANCEL,
+        CANCEL_RESOLUTION
+    }
 
     struct RequestResult {
-      uint256 requestId;
-      UpdateType updateType;
-      bool status;
+        RequestId requestId;
+        uint256 originRequestId;
+        UpdateType updateType;
+        bool status;
     }
 
     struct L2Update {
-      Cancel[] cancles;
-      Withdraw[] withdraws;
-      RequestResult[] results;
+        Cancel[] cancels;
+        Withdrawal[] withdrawals;
+        RequestResult[] results;
+    }
+
+    struct Range {
+        uint256 start;
+        uint256 end;
     }
 
     struct Cancel {
-        uint256 l2RequestId;
-        uint256 lastProccessedRequestOnL1;
-        uint256 lastAcceptedRequestOnL1;
+        RequestId requestId;
+        Range range;
         bytes32 hash;
     }
 
-    struct Withdraw {
-        uint256 requestId;
-        address withdrawRecipient;
+    struct Withdrawal {
+        RequestId requestId;
+        address withdrawalRecipient;
         address tokenAddress;
         uint256 amount;
     }
-
 
     constructor() {
         lastProcessedUpdate_origin_l1 = 0;
@@ -113,76 +146,174 @@ contract RollDown {
 
         IERC20 token = IERC20(tokenAddress);
         require(
-            token.transferFrom(msg.sender, tokenAddress, amount),
+            token.transferFrom(msg.sender, address(this), amount),
             "Token transfer failed"
         );
 
-        Deposit memory newDeposit = Deposit({
+        bytes32 blockHash = blockhash(block.number);
+        Deposit memory depositRequest = Deposit({
+            requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
             tokenAddress: tokenAddress,
-            amount: amount
+            amount: amount,
+            blockHash: blockHash
         });
         // Add the new request to the mapping
-        deposits[counter++] = newDeposit;
-        emit DepositAcceptedIntoQueue(counter-1, depositRecipient, tokenAddress, amount);
+        deposits[depositRequest.requestId.id] = depositRequest;
+        emit DepositAcceptedIntoQueue(
+            depositRequest.requestId.id,
+            depositRecipient,
+            tokenAddress,
+            amount
+        );
     }
-
 
     function getUpdateForL2() public view returns (L1Update memory) {
-        return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
+        return
+            getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
     }
 
-    function getOrderOfRequestsOriginatingOnL2(L2Update calldata update) private returns (UpdateType[] memory){
-      if (update.cancles.length == 0 && update.withdraws.length == 0 ){
-        return new UpdateType[](0);
-      }
+    function min(uint256 a, uint256 b) private pure returns (uint256) {
+        return a < b ? a : b;
+    }
 
-      uint256 withdrawalId = 0;
-      uint256 cancelId = 0;
-      uint256 orderId = 0;
-      uint256 firstId;
-      unchecked {
-        firstId =  uint256(0) - 1;
-      }
-      uint256 updatesAmount = update.cancles.length + update.withdraws.length;
-      UpdateType[] memory order = new UpdateType[](updatesAmount);
+    function max(uint256 a, uint256 b) private pure returns (uint256) {
+        return a > b ? a : b;
+    }
 
-      if (update.cancles.length > 0){
-        firstId = update.cancles[0].l2RequestId <  firstId ? update.cancles[0].l2RequestId : firstId;
-      }
-
-      if (update.withdraws.length > 0){
-        firstId = update.withdraws[0].requestId <  firstId ? update.withdraws[0].requestId : firstId;
-      }
-
-      for( uint256 i = firstId; i < firstId + updatesAmount; i++) {
-        if (withdrawalId < update.withdraws.length && update.withdraws[withdrawalId].requestId == i){
-          order[orderId] = UpdateType.WITHDRAWAL;
-          withdrawalId++;
-          orderId++;
-        }else if (cancelId < update.cancles.length && update.cancles[cancelId].l2RequestId == i){
-          order[orderId] = UpdateType.CANCEL_RESOLUTION;
-          cancelId++;
-          orderId++;
-        }else{
-          revert("invalide L2Update");
+    function getRequestsRange(
+        L2Update calldata update
+    ) private pure returns (uint256, uint256) {
+        uint256 firstId;
+        unchecked {
+            firstId = uint256(0) - 1;
         }
-      }
-      return order;
+        uint256 lastId = 0;
+
+        if (update.cancels.length > 0) {
+            firstId = min(update.cancels[0].requestId.id, firstId);
+            lastId = max(
+                update.cancels[update.cancels.length - 1].requestId.id,
+                lastId
+            );
+        }
+
+        if (update.withdrawals.length > 0) {
+            firstId = min(update.withdrawals[0].requestId.id, firstId);
+            lastId = max(
+                update.withdrawals[update.withdrawals.length - 1].requestId.id,
+                lastId
+            );
+        }
+
+        if (update.results.length > 0) {
+            firstId = min(update.results[0].requestId.id, firstId);
+            lastId = max(
+                update.results[update.results.length - 1].requestId.id,
+                lastId
+            );
+        }
+
+        return (firstId, lastId);
     }
-     
-    function processRequestsOriginatingOnL2(L2Update calldata inputArray) private {
-        UpdateType[] memory order = getOrderOfRequestsOriginatingOnL2(inputArray);
+
+    function getOrderOfRequestsOriginatingOnL2(
+        uint256 firstId,
+        L2Update calldata update
+    ) private pure returns (UpdateType[] memory) {
+        if (
+            update.results.length == 0 &&
+            update.cancels.length == 0 &&
+            update.withdrawals.length == 0
+        ) {
+            return new UpdateType[](0);
+        }
+
+        uint256 withdrawalId = 0;
         uint256 cancelId = 0;
-        uint256 withdrawalId = 0; 
-        for (uint256 i = 0; i < order.length; i++){
-          if (order[i] == UpdateType.WITHDRAWAL) {
-            process_l2_update_withdrawal(inputArray.withdraws[withdrawalId++]);
-          }else if (order[i] == UpdateType.CANCEL_RESOLUTION) {
-            process_l2_update_cancels(inputArray.cancles[cancelId++]);
-          }else{
-            revert("unknown update type");
-          }
+        uint256 resultId = 0;
+        uint256 orderId = 0;
+        uint256 updatesAmount = update.cancels.length +
+            update.withdrawals.length +
+            update.results.length;
+        UpdateType[] memory order = new UpdateType[](updatesAmount);
+
+        for (uint256 i = firstId; i < firstId + updatesAmount; i++) {
+            if (
+                withdrawalId < update.withdrawals.length &&
+                update.withdrawals[withdrawalId].requestId.id == i
+            ) {
+                order[orderId] = UpdateType.WITHDRAWAL;
+                withdrawalId++;
+                orderId++;
+            } else if (
+                cancelId < update.cancels.length &&
+                update.cancels[cancelId].requestId.id == i
+            ) {
+                order[orderId] = UpdateType.CANCEL;
+                cancelId++;
+                orderId++;
+            } else if (
+                resultId < update.results.length &&
+                update.results[resultId].requestId.id == i
+            ) {
+                order[orderId] = UpdateType.INDEX_UPDATE;
+                resultId++;
+                orderId++;
+            } else {
+                revert("invalide L2Update");
+            }
+        }
+        return order;
+    }
+
+    function processRequestsOriginatingOnL2(
+        L2Update calldata inputArray
+    ) private {
+        (uint256 firstId, uint256 lastId) = getRequestsRange(inputArray);
+
+        require(firstId != 0, "Invalid L2Update");
+        require(
+            firstId <= lastProcessedUpdate_origin_l2 + 1,
+            "Invalid L2Update"
+        );
+        require(lastId > lastProcessedUpdate_origin_l2, "Invalid L2Update");
+
+        UpdateType[] memory order = getOrderOfRequestsOriginatingOnL2(
+            firstId,
+            inputArray
+        );
+
+        uint256 cancelId = 0;
+        uint256 withdrawalId = 0;
+        uint256 resultsId = 0;
+
+        for (uint256 i = 0; i < order.length; i++) {
+            if (order[i] == UpdateType.WITHDRAWAL) {
+                Withdrawal calldata withdrawal = inputArray.withdrawals[
+                    withdrawalId++
+                ];
+                if (withdrawal.requestId.id <= lastProcessedUpdate_origin_l2) {
+                    continue;
+                }
+                process_l2_update_withdrawal(withdrawal);
+                lastProcessedUpdate_origin_l2++;
+            } else if (order[i] == UpdateType.CANCEL) {
+                Cancel calldata cancel = inputArray.cancels[cancelId++];
+                if (cancel.requestId.id <= lastProcessedUpdate_origin_l2) {
+                    continue;
+                }
+                process_l2_update_cancels(cancel);
+                lastProcessedUpdate_origin_l2++;
+            } else if (order[i] == UpdateType.INDEX_UPDATE) {
+                RequestResult calldata result = inputArray.results[resultsId++];
+                if (result.requestId.id <= lastProcessedUpdate_origin_l2) {
+                    continue;
+                }
+                lastProcessedUpdate_origin_l2++;
+            } else {
+                revert("unknown update type");
+            }
         }
     }
 
@@ -193,8 +324,8 @@ contract RollDown {
         // require(msg.sender == owner, "Not the owner");
         require(
             inputArray.results.length >= 1 ||
-                inputArray.cancles.length >= 1 ||
-                inputArray.withdraws.length >= 1,
+                inputArray.cancels.length >= 1 ||
+                inputArray.withdrawals.length >= 1,
             "Array must have at least 1 update"
         );
 
@@ -207,51 +338,59 @@ contract RollDown {
 
         // Create a new array with the correct size
         if (l2UpdatesToBeRemoved.length > 0) {
-            l2UpdatesToRemove[counter++]
-                .l2UpdatesToRemove = l2UpdatesToBeRemoved; // .push(l2UpdatesToBeRemoved[i]);
+            uint256 rid = counter++;
+            l2UpdatesToRemove[rid].requestId = RequestId({
+                origin: Origin.L1,
+                id: rid
+            });
+            l2UpdatesToRemove[rid].l2UpdatesToRemove = l2UpdatesToBeRemoved;
             lastProcessedUpdate_origin_l1 += l2UpdatesToBeRemoved.length;
-            emit L2UpdatesToRemovedAcceptedIntoQueue(
-                counter - 1,
-                l2UpdatesToBeRemoved
-            );
+            emit L2UpdatesToRemovedAcceptedIntoQueue(rid, l2UpdatesToBeRemoved);
         }
     }
 
-
     function process_l2_update_requests_results(
         RequestResult[] calldata results
-    ) private returns (uint256[] memory) {
+    ) private view returns (uint256[] memory) {
         uint256 updatesToBeRemovedCounter = 0;
         if (results.length == 0) {
             return new uint256[](0);
         }
-        uint256 oderCounter = results[0].requestId;
+        uint256 oderCounter = results[0].requestId.id;
         uint256[] memory l2UpdatesToBeRemovedTemp = new uint256[](
             results.length
         );
 
         for (uint256 idx = 1; idx < results.length; idx++) {
-            if (results[idx].requestId != oderCounter + 1) {
-              revert("Requests are not in order");
+            if (results[idx].requestId.id != oderCounter + 1) {
+                revert("Requests are not in order");
             }
-            oderCounter = results[idx].requestId;
+            oderCounter = results[idx].requestId.id;
         }
 
         for (uint256 idx = 0; idx < results.length; idx++) {
             RequestResult calldata element = results[idx];
 
-            if (element.requestId <= lastProcessedUpdate_origin_l1) {
+            if (element.requestId.id <= lastProcessedUpdate_origin_l1) {
                 continue;
             }
 
             if (element.updateType == UpdateType.DEPOSIT) {
                 l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
-                    element.requestId
+                    element.originRequestId
                 );
             } else if (element.updateType == UpdateType.INDEX_UPDATE) {
-              l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
-                element.requestId
-              );
+                l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
+                    element.originRequestId
+                );
+            } else if (element.updateType == UpdateType.CANCEL_RESOLUTION) {
+                l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
+                    element.originRequestId
+                );
+            } else if (element.updateType == UpdateType.WITHDRAWAL_RESOLUTION) {
+                l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
+                    element.originRequestId
+                );
             } else {
                 revert("unknown request type");
             }
@@ -268,97 +407,118 @@ contract RollDown {
         return l2UpdatesToBeRemoved;
     }
 
-    function process_l2_update_cancels(
-        Cancel calldata cancel
-    ) private {
+    function process_l2_update_cancels(Cancel calldata cancel) private {
+        L1Update memory pending = getPendingRequests(
+            cancel.range.start,
+            cancel.range.end
+        );
+        bytes32 correct_hash = keccak256(abi.encode(pending));
+        bytes32 blockHash = blockhash(block.number);
 
-            L1Update memory pending = getPendingRequests(
-                cancel.lastProccessedRequestOnL1 + 1,
-                cancel.lastAcceptedRequestOnL1
-            );
-            bytes32 correct_hash = keccak256(abi.encode(pending));
+        CancelResolution memory resolution = CancelResolution({
+            requestId: RequestId({origin: Origin.L1, id: counter++}),
+            l2RequestId: cancel.requestId.id,
+            cancelJustified: correct_hash == cancel.hash,
+            blockHash: blockHash
+        });
 
-            CancelResolution memory resolution = CancelResolution({
-                l2RequestId: cancel.l2RequestId,
-                cancelJustified: correct_hash == cancel.hash
-            });
-
-            cancelResolutions[counter++] = resolution;
-            emit DisputeResolutionAcceptedIntoQueue(
-                resolution.l2RequestId,
-                resolution.cancelJustified
-            );
+        cancelResolutions[resolution.requestId.id] = resolution;
+        emit DisputeResolutionAcceptedIntoQueue(
+            resolution.l2RequestId,
+            resolution.cancelJustified
+        );
     }
 
-    function process_l2_update_withdrawal(Withdraw calldata withdraw) private {
-        IERC20 token = IERC20(withdraw.tokenAddress);
-        require(
-            token.balanceOf(address(this)) >= withdraw.amount,
-            "Insufficient balance in the contract"
+    function process_l2_update_withdrawal(
+        Withdrawal calldata withdrawal
+    ) private {
+        IERC20 token = IERC20(withdrawal.tokenAddress);
+        bool status = token.balanceOf(address(this)) >= withdrawal.amount;
+        bytes32 blockHash = blockhash(block.number);
+
+        WithdrawalResolution memory resolution = WithdrawalResolution({
+            requestId: RequestId({origin: Origin.L1, id: counter++}),
+            l2RequestId: withdrawal.requestId.id,
+            status: status,
+            blockHash: blockHash
+        });
+
+        withdrawalResolutions[resolution.requestId.id] = resolution;
+        emit WithdrawalResolutionAcceptedIntoQueue(
+            resolution.requestId.id,
+            status
         );
 
-        // Transfer tokens from the contract to the recipient
-        token.transfer(withdraw.withdrawRecipient, withdraw.amount);
-
-        emit FundsWithdrawn(withdraw.withdrawRecipient, withdraw.tokenAddress, withdraw.amount);
-    }
-
-    function getPendingRequestsRemove(uint256 id) private view returns (uint256[] memory){
-      return l2UpdatesToRemove[id].l2UpdatesToRemove;
+        if (status) {
+            token.transfer(withdrawal.withdrawalRecipient, withdrawal.amount);
+            emit FundsWithdrawn(
+                withdrawal.withdrawalRecipient,
+                withdrawal.tokenAddress,
+                withdrawal.amount
+            );
+        }
     }
 
     function getPendingRequests(
         uint256 start,
         uint256 end
-    ) private view returns ( L1Update memory) {
+    ) private view returns (L1Update memory) {
         L1Update memory result;
 
         uint256 depositsCounter = 0;
-        uint256 withdrawsCounter = 0;
+        uint256 withdrawalsCounter = 0;
         uint256 cancelsCounter = 0;
         uint256 updatesToBeRemovedCounter = 0;
 
         for (uint256 requestId = start; requestId <= end; requestId++) {
-            if (deposits[requestId].depositRecipient != address(0)) {
-              depositsCounter++;
-            } else if (l2UpdatesToRemove[requestId].l2UpdatesToRemove.length > 0) {
-              updatesToBeRemovedCounter++;
-            } else if (cancelResolutions[requestId].l2RequestId > 0) {
-              cancelsCounter++;
+            if (deposits[requestId].requestId.id != 0) {
+                depositsCounter++;
+            } else if (l2UpdatesToRemove[requestId].requestId.id != 0) {
+                updatesToBeRemovedCounter++;
+            } else if (withdrawalResolutions[requestId].requestId.id != 0) {
+                withdrawalsCounter++;
+            } else if (cancelResolutions[requestId].requestId.id != 0) {
+                cancelsCounter++;
             }
         }
 
-        uint256 requestCounter = depositsCounter + withdrawsCounter + cancelsCounter + updatesToBeRemovedCounter;
-        result.order = new PendingRequestType[](requestCounter);
-
-        result.offset = start;
         result.pendingDeposits = new Deposit[](depositsCounter);
         result.pendingCancelResultions = new CancelResolution[](cancelsCounter);
-        result.pendingL2UpdatesToRemove = new L2UpdatesToRemove[](updatesToBeRemovedCounter);
-        result.lastProccessedRequestOnL1 = lastProcessedUpdate_origin_l1;
-        result.lastAcceptedRequestOnL1 = counter - 1;
+        result.pendingWithdrawalResolutions = new WithdrawalResolution[](
+            withdrawalsCounter
+        );
+        result.pendingL2UpdatesToRemove = new L2UpdatesToRemove[](
+            updatesToBeRemovedCounter
+        );
 
-        withdrawsCounter = 0;
+        withdrawalsCounter = 0;
         depositsCounter = 0;
         cancelsCounter = 0;
         updatesToBeRemovedCounter = 0;
-        requestCounter = 0;
 
         for (uint256 requestId = start; requestId <= end; requestId++) {
-            if (deposits[requestId].depositRecipient != address(0)) {
-              result.order[requestCounter++] = PendingRequestType.DEPOSIT;
-              result.pendingDeposits[depositsCounter++] = deposits[requestId];
-            } else if ( l2UpdatesToRemove[requestId].l2UpdatesToRemove.length > 0) {
-              result.order[requestCounter++] = PendingRequestType.L2_UPDATES_TO_REMOVE;
-              result.pendingL2UpdatesToRemove[updatesToBeRemovedCounter++] = l2UpdatesToRemove[requestId];
+            if (deposits[requestId].requestId.id > 0) {
+                result.pendingDeposits[depositsCounter++] = deposits[requestId];
+            } else if (withdrawalResolutions[requestId].requestId.id > 0) {
+                result.pendingWithdrawalResolutions[
+                    withdrawalsCounter++
+                ] = withdrawalResolutions[requestId];
+            } else if (l2UpdatesToRemove[requestId].requestId.id > 0) {
+                result.pendingL2UpdatesToRemove[
+                    updatesToBeRemovedCounter++
+                ] = l2UpdatesToRemove[requestId];
             } else if (cancelResolutions[requestId].l2RequestId > 0) {
-              result.order[requestCounter++] = PendingRequestType.CANCEL_RESOLUTION;
-              result.pendingCancelResultions[cancelsCounter++] = cancelResolutions[requestId];
-            }else{
-              break;
+                result.pendingCancelResultions[
+                    cancelsCounter++
+                ] = cancelResolutions[requestId];
+            } else {
+                break;
             }
         }
 
         return result;
     }
 }
+
+// TODO: counter l2 check
+// TODO: align types again

@@ -5,7 +5,7 @@ services:
     depends_on:
       rolldown:
         condition: service_completed_successfully
-      parachain-2110-0:
+      node-alice:
         condition: service_started
     environment:
       MANGATA_NODE_URL: ${ROLLUP_UPDATER_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}

@@ -9,11 +9,17 @@ use bindings::{
     finalizer_task_manager::NewTaskCreatedFilter,
     shared_types::{G1Point, G2Point, TaskResponse},
 };
-use ethers::prelude::*;
+use ethers::providers::{Middleware, PendingTransaction};
+use ethers::{
+    contract::{stream, LogMeta},
+    providers::StreamExt,
+    types::Address,
+};
 use node_executor::ExecutorDispatch;
 use node_primitives::BlockNumber;
 
 use serde::Serialize;
+use sp_core::H256;
 use sp_runtime::traits::BlakeTwo256;
 use sp_runtime::{generic, OpaqueExtrinsic};
 use std::sync::Arc;
@@ -73,13 +79,14 @@ impl Operator {
     #[instrument(skip_all)]
     pub async fn watch_new_tasks(&self) -> eyre::Result<()> {
         let evs = self.avs_contracts.new_task_stream();
-        let mut stream: stream::EventStream<'_, _, NewTaskCreatedFilter, _> =
-            evs.subscribe().await?;
+        let mut stream: stream::EventStream<'_, _, (NewTaskCreatedFilter, LogMeta), _> =
+            evs.subscribe_with_meta().await?;
 
         while let Some(res) = stream.next().await {
             match res {
-                Ok(event) => {
-                    // tokio::time::sleep(std::time::Duration::new(5, 0)).await;
+                Ok((event, log)) => {
+                    debug!("Got new task at: {:?}", log);
+                    PendingTransaction::new(log.transaction_hash, self.client.provider()).await?;
                     info!("Executing a Block for task: {:?}", event);
                     let proofs = self.execute_block(event.task.block_number.as_u32()).await?;
                     debug!("Block executed successfully {:?}", proofs);
