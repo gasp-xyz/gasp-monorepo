@@ -6,9 +6,19 @@ on:
   workflow_dispatch:
       inputs:
         e2eBranch:
-          description: ''
+          description: 'branch name for e2e tests'
           required: false
           default: 'eth-rollup-develop'
+
+        nodeVersion:
+          description: 'image tag for rollup-node'
+          required: false
+          default: 'eth-rollup-develop'
+
+        avsVersion:
+          description: 'image tag for avs-aggregator and avs-finalizer'
+          required: false
+          default: '8dd0c81aa88b967334d001d8cae031f8799a189f'
 
 permissions:
   contents: write
@@ -30,7 +40,10 @@ jobs:
     steps:
       - name: Set global version
         id: set_vars
-        run: echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
+        run: |
+          echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT 
+          echo "NODE_VERSION=${{ inputs.nodeVersion || 'eth-rollup-develop' }}" >> $GITHUB_OUTPUT
+          echo "AVS_VERSION=${{ inputs.avsVersion || '8dd0c81aa88b967334d001d8cae031f8799a189f' }}" >> $GITHUB_OUTPUT
   
   #build-and-test:
     #needs: [init]
@@ -54,8 +67,9 @@ jobs:
 
       - name: Start env
         run: |
-          export AVS_AGGREGATOR_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
-          export AVS_FINALIZER_VERSION=8dd0c81aa88b967334d001d8cae031f8799a189f
+          export AVS_AGGREGATOR_VERSION=${{ needs.init.outputs.AVS_VERSION }}
+          export AVS_FINALIZER_VERSION=${{ needs.init.outputs.AVS_VERSION }}
+          export MANGATA_NODE_VERSION=${{ needs.init.outputs.NODE_VERSION }}
           docker compose build sequencer updater
           docker compose up --wait 
 
@@ -66,15 +80,13 @@ jobs:
         run: docker ps
 
       - name: Decide if main - branch or parameter
-        # if we have something in e2eBranch - override E2EBranchName, else -> E2EBRANCHNAME , that
-        # by default will be main.
         run: echo "E2EBRANCHNAME=${{ inputs.e2eBranch || 'eth-rollup-develop' }}" >> $GITHUB_ENV
 
       - name: Checkout tests
         uses: actions/checkout@v4
         with:
           repository: mangata-finance/mangata-e2e
-          ref: "eth-rollup-develop"
+          ref: "${{ env.E2EBRANCHNAME }}"
           path: e2eTests
 
       - name: Install e2e tests dependencies
