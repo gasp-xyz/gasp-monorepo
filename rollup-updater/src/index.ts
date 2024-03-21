@@ -77,7 +77,7 @@ async function sendUpdateToL1(
 			address: mangataContractAddress,
 			functionName: "update_l1_from_l2",
 			args: l2Update as any,
-			gas: 200000n,
+			gas: 999999n,
 		});
 		return storageHash;
 	} else {
