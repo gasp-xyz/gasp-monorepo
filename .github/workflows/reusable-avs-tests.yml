@@ -46,6 +46,7 @@ jobs:
     env:
       AVS_AGGREGATOR_VERSION: 3925bdc91c10d038e8fde28dfcaa72959b335ab4
       AVS_FINALIZER_VERSION: 3925bdc91c10d038e8fde28dfcaa72959b335ab4
+      AVS_BLOCK_VALIDATION_PERIOD: 2
     steps:
       - uses: actions/checkout@v4
         with:

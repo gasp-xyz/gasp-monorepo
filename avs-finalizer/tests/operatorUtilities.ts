@@ -11,7 +11,7 @@ export const taskManagerAddress = "0x9E545E3C0baAB3E08CdfD552C960A1050f373042";
 
 export async function waitForOperatorRegistered(publicClient: PublicClient) {
     return new Promise((resolve, _) => {
-        publicClient.watchEvent({
+        const unwatch = publicClient.watchEvent({
             address: registryCoordinatorAddress,
             event: {
                 type: "event",
@@ -25,6 +25,7 @@ export async function waitForOperatorRegistered(publicClient: PublicClient) {
                 for (const log of logs) {
                     const operator = log.args.operator;
                     console.debug(JSON.stringify(operator));
+                    unwatch()
                     resolve(operator);
                 }
             },
@@ -33,7 +34,7 @@ export async function waitForOperatorRegistered(publicClient: PublicClient) {
 }
 export async function waitForOperatorDeRegistered(publicClient: PublicClient) {
     return new Promise((resolve, _) => {
-        publicClient.watchEvent({
+        const unwatch = publicClient.watchEvent({
             address: registryCoordinatorAddress,
             event: {
                 "type":"event",
@@ -47,6 +48,7 @@ export async function waitForOperatorDeRegistered(publicClient: PublicClient) {
                 for (const log of logs) {
                     const operator = log.args.operator;
                     console.debug("Deregistered"  + JSON.stringify(operator));
+                    unwatch();
                     resolve(operator);
                 }
             },
