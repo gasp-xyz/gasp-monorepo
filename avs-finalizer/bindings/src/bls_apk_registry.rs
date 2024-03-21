@@ -7,7 +7,7 @@ pub use bls_apk_registry::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types,
+    non_camel_case_types
 )]
 pub mod bls_apk_registry {
     pub use super::super::shared_types::*;
@@ -15,816 +15,648 @@ pub mod bls_apk_registry {
     fn __abi() -> ::ethers::core::abi::Abi {
         ::ethers::core::abi::ethabi::Contract {
             constructor: ::core::option::Option::Some(::ethers::core::abi::ethabi::Constructor {
-                inputs: ::std::vec![
-                    ::ethers::core::abi::ethabi::Param {
-                        name: ::std::borrow::ToOwned::to_owned("_registryCoordinator"),
-                        kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                        internal_type: ::core::option::Option::Some(
-                            ::std::borrow::ToOwned::to_owned(
-                                "contract IRegistryCoordinator",
-                            ),
-                        ),
-                    },
-                ],
+                inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                    name: ::std::borrow::ToOwned::to_owned("_registryCoordinator"),
+                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                    internal_type: ::core::option::Option::Some(::std::borrow::ToOwned::to_owned(
+                        "contract IRegistryCoordinator",
+                    ),),
+                },],
             }),
             functions: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("apkHistory"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("apkHistory"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("apkHash"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        24usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes24"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("updateBlockNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned(
-                                        "nextUpdateBlockNumber",
-                                    ),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("apkHistory"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("apkHash"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(24usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes24"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("updateBlockNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("nextUpdateBlockNumber",),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint32"),
+                                ),
+                            },
+                        ],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("currentApk"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("currentApk"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("X"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("Y"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("currentApk"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
+                            ),
+                        },],
+                        outputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("X"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("Y"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("deregisterOperator"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("deregisterOperator"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("deregisterOperator"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getApk"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("getApk"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("struct BN254.G1Point"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getApk"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                            ],),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("struct BN254.G1Point"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getApkHashAtBlockNumberAndIndex"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getApkHashAtBlockNumberAndIndex",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getApkHashAtBlockNumberAndIndex",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("blockNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("index"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(24usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes24"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("blockNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("index"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        24usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes24"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getApkHistoryLength"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getApkHistoryLength",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getApkHistoryLength",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint32"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getApkIndicesAtBlockNumber"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getApkIndicesAtBlockNumber",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getApkIndicesAtBlockNumber",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("blockNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                ::std::boxed::Box::new(
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("blockNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                        ),
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32[]"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint32[]"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getApkUpdateAtIndex"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getApkUpdateAtIndex",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getApkUpdateAtIndex",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("index"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                ::ethers::core::abi::ethabi::ParamType::FixedBytes(24usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                            ],),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned(
+                                    "struct IBLSApkRegistry.ApkUpdate",
+                                ),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("index"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(24usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IBLSApkRegistry.ApkUpdate",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getOperatorFromPubkeyHash"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getOperatorFromPubkeyHash",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getOperatorFromPubkeyHash",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("pubkeyHash"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("pubkeyHash"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getOperatorId"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("getOperatorId"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getOperatorId"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("operator"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getRegisteredPubkey"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "getRegisteredPubkey",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("getRegisteredPubkey",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("operator"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("struct BN254.G1Point"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                ],),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("struct BN254.G1Point"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                        ],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("initializeQuorum"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("initializeQuorum"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("initializeQuorum"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("quorumNumber"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
+                            ),
+                        },],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("operatorToPubkey"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("operatorToPubkey"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("X"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("Y"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("operatorToPubkey"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
+                            ),
+                        },],
+                        outputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("X"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("Y"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("operatorToPubkeyHash"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "operatorToPubkeyHash",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("operatorToPubkeyHash",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("pubkeyHashToOperator"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "pubkeyHashToOperator",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("pubkeyHashToOperator",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("registerBLSPublicKey"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "registerBLSPublicKey",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("params"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                                ::std::vec![
-                                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                                ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("registerBLSPublicKey",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("params"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                    ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                    ],),
+                                    ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                        ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                    ],),
+                                    ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                        ::ethers::core::abi::ethabi::ParamType::FixedArray(
+                                            ::std::boxed::Box::new(
+                                                ::ethers::core::abi::ethabi::ParamType::Uint(
+                                                    256usize
+                                                ),
                                             ),
-                                            ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                                ::std::vec![
-                                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                                ],
-                                            ),
-                                            ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                                ::std::vec![
-                                                    ::ethers::core::abi::ethabi::ParamType::FixedArray(
-                                                        ::std::boxed::Box::new(
-                                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                                        ),
-                                                        2usize,
-                                                    ),
-                                                    ::ethers::core::abi::ethabi::ParamType::FixedArray(
-                                                        ::std::boxed::Box::new(
-                                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                                        ),
-                                                        2usize,
-                                                    ),
-                                                ],
-                                            ),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct IBLSApkRegistry.PubkeyRegistrationParams",
+                                            2usize,
                                         ),
+                                        ::ethers::core::abi::ethabi::ParamType::FixedArray(
+                                            ::std::boxed::Box::new(
+                                                ::ethers::core::abi::ethabi::ParamType::Uint(
+                                                    256usize
+                                                ),
+                                            ),
+                                            2usize,
+                                        ),
+                                    ],),
+                                ],),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned(
+                                        "struct IBLSApkRegistry.PubkeyRegistrationParams",
                                     ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned(
-                                        "pubkeyRegistrationMessageHash",
-                                    ),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("struct BN254.G1Point"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorId"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned(
+                                    "pubkeyRegistrationMessageHash",
+                                ),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                ],),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("struct BN254.G1Point"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("registerOperator"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("registerOperator"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("registerOperator"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("registryCoordinator"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "registryCoordinator",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("registryCoordinator",),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
                             ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
             ]),
             events: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("Initialized"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned("Initialized"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("version"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("Initialized"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
+                            name: ::std::borrow::ToOwned::to_owned("version"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            indexed: false,
+                        },],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("NewPubkeyRegistration"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "NewPubkeyRegistration",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("pubkeyG1"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("NewPubkeyRegistration",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("pubkeyG1"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                ],),
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("pubkeyG2"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                    ::ethers::core::abi::ethabi::ParamType::FixedArray(
+                                        ::std::boxed::Box::new(
                                             ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                        ),
+                                        2usize,
+                                    ),
+                                    ::ethers::core::abi::ethabi::ParamType::FixedArray(
+                                        ::std::boxed::Box::new(
                                             ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                        ],
+                                        ),
+                                        2usize,
                                     ),
-                                    indexed: false,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("pubkeyG2"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::FixedArray(
-                                                ::std::boxed::Box::new(
-                                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                                ),
-                                                2usize,
-                                            ),
-                                            ::ethers::core::abi::ethabi::ParamType::FixedArray(
-                                                ::std::boxed::Box::new(
-                                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                                ),
-                                                2usize,
-                                            ),
-                                        ],
-                                    ),
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                                ],),
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("OperatorAddedToQuorums"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "OperatorAddedToQuorums",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: false,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("OperatorAddedToQuorums",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("OperatorRemovedFromQuorums"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "OperatorRemovedFromQuorums",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: false,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("OperatorRemovedFromQuorums",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
             ]),
             errors: ::std::collections::BTreeMap::new(),
@@ -833,21 +665,18 @@ pub mod bls_apk_registry {
         }
     }
     ///The parsed JSON ABI of the contract.
-    pub static BLSAPKREGISTRY_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> = ::ethers::contract::Lazy::new(
-        __abi,
-    );
+    pub static BLSAPKREGISTRY_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
+        ::ethers::contract::Lazy::new(__abi);
     #[rustfmt::skip]
     const __BYTECODE: &[u8] = b"`\xA0`@R4\x80\x15b\0\0\x11W`\0\x80\xFD[P`@Qb\0!78\x03\x80b\0!7\x839\x81\x01`@\x81\x90Rb\0\x004\x91b\0\x01\x16V[`\x01`\x01`\xA0\x1B\x03\x81\x16`\x80R\x80b\0\0Lb\0\0TV[PPb\0\x01HV[`\0Ta\x01\0\x90\x04`\xFF\x16\x15b\0\0\xC1W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`'`$\x82\x01R\x7FInitializable: contract is initi`D\x82\x01Rfalizing`\xC8\x1B`d\x82\x01R`\x84\x01`@Q\x80\x91\x03\x90\xFD[`\0T`\xFF\x90\x81\x16\x10\x15b\0\x01\x14W`\0\x80T`\xFF\x19\x16`\xFF\x90\x81\x17\x90\x91U`@Q\x90\x81R\x7F\x7F&\xB8?\xF9n\x1F+jh/\x138R\xF6y\x8A\t\xC4e\xDA\x95\x92\x14`\xCE\xFB8G@$\x98\x90` \x01`@Q\x80\x91\x03\x90\xA1[V[`\0` \x82\x84\x03\x12\x15b\0\x01)W`\0\x80\xFD[\x81Q`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14b\0\x01AW`\0\x80\xFD[\x93\x92PPPV[`\x80Qa\x1F\xB7b\0\x01\x80`\09`\0\x81\x81a\x03\x0F\x01R\x81\x81a\x04f\x01R\x81\x81a\x05\xBF\x01R\x81\x81a\t\xA5\x01Ra\x10B\x01Ra\x1F\xB7`\0\xF3\xFE`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\x01\x15W`\x005`\xE0\x1C\x80cm\x14\xA9\x87\x11a\0\xA2W\x80c\xBFy\xCEX\x11a\0qW\x80c\xBFy\xCEX\x14a\x03\xCCW\x80c\xD5%J\x8C\x14a\x03\xDFW\x80c\xDE)\xFA\xC0\x14a\x03\xFFW\x80c\xE8\xBB\x9A\xE6\x14a\x04\x1FW\x80c\xF4\xE2O\xE5\x14a\x04HW`\0\x80\xFD[\x80cm\x14\xA9\x87\x14a\x03\nW\x80cy\x16\xCE\xA6\x14a\x031W\x80c\x7F\xF8\x1A\x87\x14a\x03rW\x80c\xA3\xDB\x80\xE2\x14a\x03\xA5W`\0\x80\xFD[\x80c?\xB2yR\x11a\0\xE9W\x80c?\xB2yR\x14a\x01\xDFW\x80cG\xB3\x14\xE8\x14a\x01\xF2W\x80c_a\xA8\x84\x14a\x023W\x80c`WG\xD5\x14a\x02\x8FW\x80ch\xBC\xCA\xAC\x14a\x02\xDDW`\0\x80\xFD[\x80b\xA1\xF4\xCB\x14a\x01\x1AW\x80c\x13T*N\x14a\x01[W\x80c&\xD9A\xF2\x14a\x01\x92W\x80c7~\xD9\x9D\x14a\x01\xA7W[`\0\x80\xFD[a\x01Aa\x01(6`\x04a\x19\x05V[`\x03` R`\0\x90\x81R`@\x90 \x80T`\x01\x90\x91\x01T\x82V[`@\x80Q\x92\x83R` \x83\x01\x91\x90\x91R\x01[`@Q\x80\x91\x03\x90\xF3[a\x01\x84a\x01i6`\x04a\x19\x05V[`\x01`\x01`\xA0\x1B\x03\x16`\0\x90\x81R`\x01` R`@\x90 T\x90V[`@Q\x90\x81R` \x01a\x01RV[a\x01\xA5a\x01\xA06`\x04a\x198V[a\x04[V[\0[a\x01\xCAa\x01\xB56`\x04a\x198V[`\xFF\x16`\0\x90\x81R`\x04` R`@\x90 T\x90V[`@Qc\xFF\xFF\xFF\xFF\x90\x91\x16\x81R` \x01a\x01RV[a\x01\xA5a\x01\xED6`\x04a\x19\xC3V[a\x05\xB4V[a\x02\x1Ba\x02\x006`\x04a\x1AiV[`\0\x90\x81R`\x02` R`@\x90 T`\x01`\x01`\xA0\x1B\x03\x16\x90V[`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R` \x01a\x01RV[a\x02\x82a\x02A6`\x04a\x198V[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01RP`\xFF\x16`\0\x90\x81R`\x05` \x90\x81R`@\x91\x82\x90 \x82Q\x80\x84\x01\x90\x93R\x80T\x83R`\x01\x01T\x90\x82\x01R\x90V[`@Qa\x01R\x91\x90a\x1A\x82V[a\x02\xA2a\x02\x9D6`\x04a\x1A\x99V[a\x06RV[`@\x80Q\x82Qg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x16\x81R` \x80\x84\x01Qc\xFF\xFF\xFF\xFF\x90\x81\x16\x91\x83\x01\x91\x90\x91R\x92\x82\x01Q\x90\x92\x16\x90\x82\x01R``\x01a\x01RV[a\x02\xF0a\x02\xEB6`\x04a\x1A\xC3V[a\x06\xE5V[`@Qg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x91\x16\x81R` \x01a\x01RV[a\x02\x1B\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x81V[a\x03Da\x03?6`\x04a\x1A\x99V[a\x08\x80V[`@\x80Qg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x94\x16\x84Rc\xFF\xFF\xFF\xFF\x92\x83\x16` \x85\x01R\x91\x16\x90\x82\x01R``\x01a\x01RV[a\x03\x85a\x03\x806`\x04a\x19\x05V[a\x08\xCBV[`@\x80Q\x83Q\x81R` \x93\x84\x01Q\x93\x81\x01\x93\x90\x93R\x82\x01R``\x01a\x01RV[a\x01Aa\x03\xB36`\x04a\x198V[`\x05` R`\0\x90\x81R`@\x90 \x80T`\x01\x90\x91\x01T\x82V[a\x01\x84a\x03\xDA6`\x04a\x1B\x0BV[a\t\x98V[a\x03\xF2a\x03\xED6`\x04a\x1BhV[a\r\xECV[`@Qa\x01R\x91\x90a\x1B\xE0V[a\x01\x84a\x04\r6`\x04a\x19\x05V[`\x01` R`\0\x90\x81R`@\x90 T\x81V[a\x02\x1Ba\x04-6`\x04a\x1AiV[`\x02` R`\0\x90\x81R`@\x90 T`\x01`\x01`\xA0\x1B\x03\x16\x81V[a\x01\xA5a\x04V6`\x04a\x19\xC3V[a\x107V[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x04\xACW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x04\xA3\x90a\x1C*V[`@Q\x80\x91\x03\x90\xFD[`\xFF\x81\x16`\0\x90\x81R`\x04` R`@\x90 T\x15a\x05+W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`6`$\x82\x01R\x7FBLSApkRegistry.initializeQuorum:`D\x82\x01Ru quorum already exists`P\x1B`d\x82\x01R`\x84\x01a\x04\xA3V[`\xFF\x16`\0\x90\x81R`\x04` \x90\x81R`@\x80\x83 \x81Q``\x81\x01\x83R\x84\x81Rc\xFF\xFF\xFF\xFFC\x81\x16\x82\x86\x01\x90\x81R\x82\x85\x01\x87\x81R\x84T`\x01\x81\x01\x86U\x94\x88R\x95\x90\x96 \x91Q\x91\x90\x92\x01\x80T\x95Q\x94Q\x83\x16`\x01`\xE0\x1B\x02`\x01`\x01`\xE0\x1B\x03\x95\x90\x93\x16`\x01`\xC0\x1B\x02`\x01`\x01`\xE0\x1B\x03\x19\x90\x96\x16\x91\x90\x93\x1C\x17\x93\x90\x93\x17\x91\x90\x91\x16\x91\x90\x91\x17\x90UV[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x05\xFCW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x04\xA3\x90a\x1C*V[`\0a\x06\x07\x83a\x08\xCBV[P\x90Pa\x06\x14\x82\x82a\x10\xD0V[\x7FSX\xC5\xB4!y\x17\x8C\x8F\xC7WsJ\xC2\xA3\x19\x8F\x90q\xC7e\xEE\r\x83\x89!\x15%\xF5\0RF\x83\x83`@Qa\x06E\x92\x91\x90a\x1C\x9EV[`@Q\x80\x91\x03\x90\xA1PPPV[`@\x80Q``\x81\x01\x82R`\0\x80\x82R` \x80\x83\x01\x82\x90R\x82\x84\x01\x82\x90R`\xFF\x86\x16\x82R`\x04\x90R\x91\x90\x91 \x80T\x83\x90\x81\x10a\x06\x8FWa\x06\x8Fa\x1D\x03V[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x81\x84\x1B\x16\x82Rc\xFF\xFF\xFF\xFF`\x01`\xC0\x1B\x82\x04\x81\x16\x94\x83\x01\x94\x90\x94R`\x01`\xE0\x1B\x90\x04\x90\x92\x16\x90\x82\x01R\x90P[\x92\x91PPV[`\xFF\x83\x16`\0\x90\x81R`\x04` R`@\x81 \x80T\x82\x91\x90\x84\x90\x81\x10a\x07\x0CWa\x07\x0Ca\x1D\x03V[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x81\x84\x1B\x16\x82Rc\xFF\xFF\xFF\xFF`\x01`\xC0\x1B\x82\x04\x81\x16\x94\x83\x01\x85\x90R`\x01`\xE0\x1B\x90\x91\x04\x81\x16\x92\x82\x01\x92\x90\x92R\x92P\x85\x16\x10\x15a\x07\xD3W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`>`$\x82\x01R\x7FBLSApkRegistry._validateApkHashA`D\x82\x01R\x7FtBlockNumber: index too recent\0\0`d\x82\x01R`\x84\x01a\x04\xA3V[`@\x81\x01Qc\xFF\xFF\xFF\xFF\x16\x15\x80a\x07\xF9WP\x80`@\x01Qc\xFF\xFF\xFF\xFF\x16\x84c\xFF\xFF\xFF\xFF\x16\x10[a\x08wW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`C`$\x82\x01R\x7FBLSApkRegistry._validateApkHashA`D\x82\x01R\x7FtBlockNumber: not latest apk upd`d\x82\x01Rbate`\xE8\x1B`\x84\x82\x01R`\xA4\x01a\x04\xA3V[Q\x94\x93PPPPV[`\x04` R\x81`\0R`@`\0 \x81\x81T\x81\x10a\x08\x9CW`\0\x80\xFD[`\0\x91\x82R` \x90\x91 \x01T`@\x81\x90\x1B\x92Pc\xFF\xFF\xFF\xFF`\x01`\xC0\x1B\x82\x04\x81\x16\x92P`\x01`\xE0\x1B\x90\x91\x04\x16\x83V[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R`\x01`\x01`\xA0\x1B\x03\x82\x16`\0\x81\x81R`\x03` \x90\x81R`@\x80\x83 \x81Q\x80\x83\x01\x83R\x81T\x81R`\x01\x91\x82\x01T\x81\x85\x01R\x94\x84R\x90\x91R\x81 T\x90\x91\x90\x80a\t\x8EW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`>`$\x82\x01R\x7FBLSApkRegistry.getRegisteredPubk`D\x82\x01R\x7Fey: operator is not registered\0\0`d\x82\x01R`\x84\x01a\x04\xA3V[\x90\x94\x90\x93P\x91PPV[`\x003`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\t\xE2W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x04\xA3\x90a\x1C*V[`\0a\n\x10a\t\xF96\x86\x90\x03\x86\x01`@\x87\x01a\x1D\x19V[\x80Q`\0\x90\x81R` \x91\x82\x01Q\x90\x91R`@\x90 \x90V[\x90P\x7F\xAD2(\xB6v\xF7\xD3\xCDB\x84\xA5D?\x17\xF1\x96+6\xE4\x91\xB3\n@\xB2@XI\xE5\x97\xBA_\xB5\x81\x14\x15a\n\x98W`@\x80QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`$\x81\x01\x91\x90\x91R`\0\x80Q` a\x1Fb\x839\x81Q\x91R`D\x82\x01R\x7FKey: cannot register zero pubkey`d\x82\x01R`\x84\x01a\x04\xA3V[`\x01`\x01`\xA0\x1B\x03\x85\x16`\0\x90\x81R`\x01` R`@\x90 T\x15a\x0B\"W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`G`$\x82\x01R`\0\x80Q` a\x1Fb\x839\x81Q\x91R`D\x82\x01R\x7FKey: operator already registered`d\x82\x01Rf pubkey`\xC8\x1B`\x84\x82\x01R`\xA4\x01a\x04\xA3V[`\0\x81\x81R`\x02` R`@\x90 T`\x01`\x01`\xA0\x1B\x03\x16\x15a\x0B\xA6W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`B`$\x82\x01R`\0\x80Q` a\x1Fb\x839\x81Q\x91R`D\x82\x01R\x7FKey: public key already register`d\x82\x01Ra\x19Y`\xF2\x1B`\x84\x82\x01R`\xA4\x01a\x04\xA3V[`@\x80Q`\0\x91\x7F0dNr\xE11\xA0)\xB8PE\xB6\x81\x81X](3\xE8Hy\xB9p\x91C\xE1\xF5\x93\xF0\0\0\x01\x91a\x0B\xFF\x91\x885\x91` \x80\x8B\x015\x92\x8B\x015\x91``\x8C\x015\x91`\x80\x8D\x01\x91`\xC0\x8E\x01\x91\x8D5\x91\x8E\x82\x015\x91\x01a\x1DKV[`@Q` \x81\x83\x03\x03\x81R\x90`@R\x80Q\x90` \x01 `\0\x1Ca\x0C\"\x91\x90a\x1D\x96V[\x90Pa\x0C\xBCa\x0C[a\x0CF\x83a\x0C@6\x8A\x90\x03\x8A\x01`@\x8B\x01a\x1D\x19V[\x90a\x13\x1BV[a\x0CU6\x89\x90\x03\x89\x01\x89a\x1D\x19V[\x90a\x13\xB2V[a\x0Cca\x14FV[a\x0C\xA5a\x0C\x96\x85a\x0C@`@\x80Q\x80\x82\x01\x82R`\0\x80\x82R` \x91\x82\x01R\x81Q\x80\x83\x01\x90\x92R`\x01\x82R`\x02\x90\x82\x01R\x90V[a\x0CU6\x8A\x90\x03\x8A\x01\x8Aa\x1D\x19V[a\x0C\xB76\x8A\x90\x03\x8A\x01`\x80\x8B\x01a\x1E\x08V[a\x15\x06V[a\rWW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`l`$\x82\x01R`\0\x80Q` a\x1Fb\x839\x81Q\x91R`D\x82\x01R\x7FKey: either the G1 signature is `d\x82\x01R\x7Fwrong, or G1 and G2 private key `\x84\x82\x01Rk\x0C\x8D\xE4\r\xCD\xEE\x84\r\xAC.\x8Cm`\xA3\x1B`\xA4\x82\x01R`\xC4\x01a\x04\xA3V[`\x01`\x01`\xA0\x1B\x03\x86\x16`\0\x81\x81R`\x03` \x90\x81R`@\x80\x83 \x89\x82\x01\x805\x82U``\x8B\x015`\x01\x92\x83\x01U\x90\x83R\x81\x84 \x87\x90U\x86\x84R`\x02\x90\x92R\x91\x82\x90 \x80T`\x01`\x01`\xA0\x1B\x03\x19\x16\x84\x17\x90U\x90Q\x7F\xE3\xFBf\x13\xAF.\x890\xCF\x85\xD4\x7F\xCFm\xB1\x01\x92\"Jd\xC6\xCB\xE8\x02>\x0E\xEE\x1B\xA3\x82\x80A\x91a\r\xDB\x91`\x80\x8A\x01\x90a\x1EeV[`@Q\x80\x91\x03\x90\xA2P\x94\x93PPPPV[```\0\x83g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x81\x11\x15a\x0E\tWa\x0E\ta\x19SV[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\x0E2W\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0[\x84\x81\x10\x15a\x10.W`\0\x86\x86\x83\x81\x81\x10a\x0ETWa\x0ETa\x1D\x03V[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x04` R`@\x90 T\x90\x92P\x90Pc\xFF\xFF\xFF\xFF\x81\x16\x15\x80a\x0E\xBDWP`\xFF\x82\x16`\0\x90\x81R`\x04` R`@\x81 \x80T\x90\x91\x90a\x0E\xA1Wa\x0E\xA1a\x1D\x03V[`\0\x91\x82R` \x90\x91 \x01T`\x01`\xC0\x1B\x90\x04c\xFF\xFF\xFF\xFF\x16\x86\x10[\x15a\x0FJW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`Q`$\x82\x01R\x7FBLSApkRegistry.getApkIndicesAtBl`D\x82\x01R\x7FockNumber: blockNumber is before`d\x82\x01Rp the first update`x\x1B`\x84\x82\x01R`\xA4\x01a\x04\xA3V[`\0[\x81c\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x10\x15a\x10\x18W`\xFF\x83\x16`\0\x90\x81R`\x04` R`@\x90 \x87\x90`\x01a\x0F\x81\x84\x86a\x1E\xAFV[a\x0F\x8B\x91\x90a\x1E\xAFV[c\xFF\xFF\xFF\xFF\x16\x81T\x81\x10a\x0F\xA1Wa\x0F\xA1a\x1D\x03V[`\0\x91\x82R` \x90\x91 \x01T`\x01`\xC0\x1B\x90\x04c\xFF\xFF\xFF\xFF\x16\x11a\x10\x06W`\x01a\x0F\xCB\x82\x84a\x1E\xAFV[a\x0F\xD5\x91\x90a\x1E\xAFV[\x85\x85\x81Q\x81\x10a\x0F\xE7Wa\x0F\xE7a\x1D\x03V[` \x02` \x01\x01\x90c\xFF\xFF\xFF\xFF\x16\x90\x81c\xFF\xFF\xFF\xFF\x16\x81RPPa\x10\x18V[\x80a\x10\x10\x81a\x1E\xD4V[\x91PPa\x0FMV[PPP\x80\x80a\x10&\x90a\x1E\xF8V[\x91PPa\x0E8V[P\x94\x93PPPPV[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x10\x7FW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x04\xA3\x90a\x1C*V[`\0a\x10\x8A\x83a\x08\xCBV[P\x90Pa\x10\x9F\x82a\x10\x9A\x83a\x17sV[a\x10\xD0V[\x7F\x14\xA5\x17+1.\x9D,\"\xB8F\x8F\x9Cp\xEC,\xAA\x9D\xE94\xFE8\x074\xFB\xC6\xF3\xBE\xFF+\x14\xBA\x83\x83`@Qa\x06E\x92\x91\x90a\x1C\x9EV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R`\0[\x83Q\x81\x10\x15a\x13\x15W`\0\x84\x82\x81Q\x81\x10a\x11\x04Wa\x11\x04a\x1D\x03V[\x01` \x90\x81\x01Q`\xF8\x1C`\0\x81\x81R`\x04\x90\x92R`@\x90\x91 T\x90\x91P\x80a\x11\x94W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`=`$\x82\x01R\x7FBLSApkRegistry._processQuorumApk`D\x82\x01R\x7FUpdate: quorum does not exist\0\0\0`d\x82\x01R`\x84\x01a\x04\xA3V[`\xFF\x82\x16`\0\x90\x81R`\x05` \x90\x81R`@\x91\x82\x90 \x82Q\x80\x84\x01\x90\x93R\x80T\x83R`\x01\x01T\x90\x82\x01Ra\x11\xC8\x90\x86a\x13\xB2V[`\xFF\x83\x16`\0\x81\x81R`\x05` \x90\x81R`@\x80\x83 \x85Q\x80\x82U\x86\x84\x01\x80Q`\x01\x93\x84\x01U\x90\x85RQ\x83R\x81\x84 \x94\x84R`\x04\x90\x92R\x82 \x93\x97P\x91\x92\x90\x91a\x12\x11\x90\x85a\x1F\x13V[\x81T\x81\x10a\x12!Wa\x12!a\x1D\x03V[`\0\x91\x82R` \x90\x91 \x01\x80T\x90\x91PCc\xFF\xFF\xFF\xFF\x90\x81\x16`\x01`\xC0\x1B\x90\x92\x04\x16\x14\x15a\x12bW\x80T`\x01`\x01`\xC0\x1B\x03\x19\x16`@\x83\x90\x1C\x17\x81Ua\x12\xFEV[\x80Tc\xFF\xFF\xFF\xFFC\x81\x16`\x01`\xE0\x1B\x81\x81\x02`\x01`\x01`\xE0\x1B\x03\x94\x85\x16\x17\x85U`\xFF\x88\x16`\0\x90\x81R`\x04` \x90\x81R`@\x80\x83 \x81Q``\x81\x01\x83Rg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x8B\x16\x81R\x80\x84\x01\x96\x87R\x80\x83\x01\x85\x81R\x82T`\x01\x81\x01\x84U\x92\x86R\x93\x90\x94 \x93Q\x93\x01\x80T\x95Q\x92Q\x87\x16\x90\x94\x02\x91\x90\x95\x16`\x01`\xC0\x1B\x02`\x01`\x01`\xE0\x1B\x03\x19\x94\x90\x94\x16\x91\x90\x94\x1C\x17\x91\x90\x91\x17\x90\x92\x16\x17\x90U[PPPP\x80\x80a\x13\r\x90a\x1E\xF8V[\x91PPa\x10\xE7V[PPPPV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01Ra\x137a\x182V[\x83Q\x81R` \x80\x85\x01Q\x90\x82\x01R`@\x80\x82\x01\x84\x90R`\0\x90\x83``\x84`\x07a\x07\xD0Z\x03\xFA\x90P\x80\x80\x15a\x13jWa\x13lV[\xFE[P\x80a\x13\xAAW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`\r`$\x82\x01Rl\x19X\xCB[][\x0BY\x98Z[\x19Y`\x9A\x1B`D\x82\x01R`d\x01a\x04\xA3V[PP\x92\x91PPV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01Ra\x13\xCEa\x18PV[\x83Q\x81R` \x80\x85\x01Q\x81\x83\x01R\x83Q`@\x80\x84\x01\x91\x90\x91R\x90\x84\x01Q``\x83\x01R`\0\x90\x83`\x80\x84`\x06a\x07\xD0Z\x03\xFA\x90P\x80\x80\x15a\x13jWP\x80a\x13\xAAW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`\r`$\x82\x01Rl\x19X\xCBXY\x19\x0BY\x98Z[\x19Y`\x9A\x1B`D\x82\x01R`d\x01a\x04\xA3V[a\x14Na\x18nV[P`@\x80Q`\x80\x81\x01\x82R\x7F\x19\x8E\x93\x93\x92\rH:r`\xBF\xB71\xFB]%\xF1\xAAI35\xA9\xE7\x12\x97\xE4\x85\xB7\xAE\xF3\x12\xC2\x81\x83\x01\x90\x81R\x7F\x18\0\xDE\xEF\x12\x1F\x1EvBj\0f^\\DygC\"\xD4\xF7^\xDA\xDDF\xDE\xBD\\\xD9\x92\xF6\xED``\x83\x01R\x81R\x81Q\x80\x83\x01\x90\x92R\x7F']\xC4\xA2\x88\xD1\xAF\xB3\xCB\xB1\xAC\t\x18u$\xC7\xDB69]\xF7\xBE;\x99\xE6s\xB1:\x07Ze\xEC\x82R\x7F\x1D\x9B\xEF\xCD\x05\xA52>m\xA4\xD45\xF3\xB6\x17\xCD\xB3\xAF\x83(\\-\xF7\x11\xEF9\xC0\x15q\x82\x7F\x9D` \x83\x81\x01\x91\x90\x91R\x81\x01\x91\x90\x91R\x90V[`@\x80Q\x80\x82\x01\x82R\x85\x81R` \x80\x82\x01\x85\x90R\x82Q\x80\x84\x01\x90\x93R\x85\x83R\x82\x01\x83\x90R`\0\x91a\x155a\x18\x93V[`\0[`\x02\x81\x10\x15a\x16\xFAW`\0a\x15N\x82`\x06a\x1F*V[\x90P\x84\x82`\x02\x81\x10a\x15bWa\x15ba\x1D\x03V[` \x02\x01QQ\x83a\x15t\x83`\0a\x1FIV[`\x0C\x81\x10a\x15\x84Wa\x15\x84a\x1D\x03V[` \x02\x01R\x84\x82`\x02\x81\x10a\x15\x9BWa\x15\x9Ba\x1D\x03V[` \x02\x01Q` \x01Q\x83\x82`\x01a\x15\xB2\x91\x90a\x1FIV[`\x0C\x81\x10a\x15\xC2Wa\x15\xC2a\x1D\x03V[` \x02\x01R\x83\x82`\x02\x81\x10a\x15\xD9Wa\x15\xD9a\x1D\x03V[` \x02\x01QQQ\x83a\x15\xEC\x83`\x02a\x1FIV[`\x0C\x81\x10a\x15\xFCWa\x15\xFCa\x1D\x03V[` \x02\x01R\x83\x82`\x02\x81\x10a\x16\x13Wa\x16\x13a\x1D\x03V[` \x02\x01QQ`\x01` \x02\x01Q\x83a\x16,\x83`\x03a\x1FIV[`\x0C\x81\x10a\x16<Wa\x16<a\x1D\x03V[` \x02\x01R\x83\x82`\x02\x81\x10a\x16SWa\x16Sa\x1D\x03V[` \x02\x01Q` \x01Q`\0`\x02\x81\x10a\x16nWa\x16na\x1D\x03V[` \x02\x01Q\x83a\x16\x7F\x83`\x04a\x1FIV[`\x0C\x81\x10a\x16\x8FWa\x16\x8Fa\x1D\x03V[` \x02\x01R\x83\x82`\x02\x81\x10a\x16\xA6Wa\x16\xA6a\x1D\x03V[` \x02\x01Q` \x01Q`\x01`\x02\x81\x10a\x16\xC1Wa\x16\xC1a\x1D\x03V[` \x02\x01Q\x83a\x16\xD2\x83`\x05a\x1FIV[`\x0C\x81\x10a\x16\xE2Wa\x16\xE2a\x1D\x03V[` \x02\x01RP\x80a\x16\xF2\x81a\x1E\xF8V[\x91PPa\x158V[Pa\x17\x03a\x18\xB2V[`\0` \x82a\x01\x80\x85`\x08a\x07\xD0Z\x03\xFA\x90P\x80\x80\x15a\x13jWP\x80a\x17cW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`\x15`$\x82\x01Rt\x1C\x18Z\\\x9A[\x99\xCB[\xDC\x18\xDB\xD9\x19KY\x98Z[\x19Y`Z\x1B`D\x82\x01R`d\x01a\x04\xA3V[PQ\x15\x15\x98\x97PPPPPPPPV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R\x81Q\x15\x80\x15a\x17\x98WP` \x82\x01Q\x15[\x15a\x17\xB6WPP`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R\x90V[`@Q\x80`@\x01`@R\x80\x83`\0\x01Q\x81R` \x01\x7F0dNr\xE11\xA0)\xB8PE\xB6\x81\x81X]\x97\x81j\x91hq\xCA\x8D< \x8C\x16\xD8|\xFDG\x84` \x01Qa\x17\xFB\x91\x90a\x1D\x96V[a\x18%\x90\x7F0dNr\xE11\xA0)\xB8PE\xB6\x81\x81X]\x97\x81j\x91hq\xCA\x8D< \x8C\x16\xD8|\xFDGa\x1F\x13V[\x90R\x92\x91PPV[\x91\x90PV[`@Q\x80``\x01`@R\x80`\x03\x90` \x82\x02\x806\x837P\x91\x92\x91PPV[`@Q\x80`\x80\x01`@R\x80`\x04\x90` \x82\x02\x806\x837P\x91\x92\x91PPV[`@Q\x80`@\x01`@R\x80a\x18\x81a\x18\xD0V[\x81R` \x01a\x18\x8Ea\x18\xD0V[\x90R\x90V[`@Q\x80a\x01\x80\x01`@R\x80`\x0C\x90` \x82\x02\x806\x837P\x91\x92\x91PPV[`@Q\x80` \x01`@R\x80`\x01\x90` \x82\x02\x806\x837P\x91\x92\x91PPV[`@Q\x80`@\x01`@R\x80`\x02\x90` \x82\x02\x806\x837P\x91\x92\x91PPV[\x805`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a\x18-W`\0\x80\xFD[`\0` \x82\x84\x03\x12\x15a\x19\x17W`\0\x80\xFD[a\x19 \x82a\x18\xEEV[\x93\x92PPPV[\x805`\xFF\x81\x16\x81\x14a\x18-W`\0\x80\xFD[`\0` \x82\x84\x03\x12\x15a\x19JW`\0\x80\xFD[a\x19 \x82a\x19'V[cNH{q`\xE0\x1B`\0R`A`\x04R`$`\0\xFD[`@\x80Q\x90\x81\x01g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x81\x11\x82\x82\x10\x17\x15a\x19\x8CWa\x19\x8Ca\x19SV[`@R\x90V[`@Q`\x1F\x82\x01`\x1F\x19\x16\x81\x01g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x81\x11\x82\x82\x10\x17\x15a\x19\xBBWa\x19\xBBa\x19SV[`@R\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a\x19\xD6W`\0\x80\xFD[a\x19\xDF\x83a\x18\xEEV[\x91P` \x80\x84\x015g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x82\x11\x15a\x19\xFDW`\0\x80\xFD[\x81\x86\x01\x91P\x86`\x1F\x83\x01\x12a\x1A\x11W`\0\x80\xFD[\x815\x81\x81\x11\x15a\x1A#Wa\x1A#a\x19SV[a\x1A5`\x1F\x82\x01`\x1F\x19\x16\x85\x01a\x19\x92V[\x91P\x80\x82R\x87\x84\x82\x85\x01\x01\x11\x15a\x1AKW`\0\x80\xFD[\x80\x84\x84\x01\x85\x84\x017`\0\x84\x82\x84\x01\x01RP\x80\x93PPPP\x92P\x92\x90PV[`\0` \x82\x84\x03\x12\x15a\x1A{W`\0\x80\xFD[P5\x91\x90PV[\x81Q\x81R` \x80\x83\x01Q\x90\x82\x01R`@\x81\x01a\x06\xDFV[`\0\x80`@\x83\x85\x03\x12\x15a\x1A\xACW`\0\x80\xFD[a\x1A\xB5\x83a\x19'V[\x94` \x93\x90\x93\x015\x93PPPV[`\0\x80`\0``\x84\x86\x03\x12\x15a\x1A\xD8W`\0\x80\xFD[a\x1A\xE1\x84a\x19'V[\x92P` \x84\x015c\xFF\xFF\xFF\xFF\x81\x16\x81\x14a\x1A\xFAW`\0\x80\xFD[\x92\x95\x92\x94PPP`@\x91\x90\x91\x015\x90V[`\0\x80`\0\x83\x85\x03a\x01`\x81\x12\x15a\x1B\"W`\0\x80\xFD[a\x1B+\x85a\x18\xEEV[\x93Pa\x01\0`\x1F\x19\x82\x01\x12\x15a\x1B@W`\0\x80\xFD[` \x85\x01\x92P`@a\x01\x1F\x19\x82\x01\x12\x15a\x1BYW`\0\x80\xFD[Pa\x01 \x84\x01\x90P\x92P\x92P\x92V[`\0\x80`\0`@\x84\x86\x03\x12\x15a\x1B}W`\0\x80\xFD[\x835g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x82\x11\x15a\x1B\x95W`\0\x80\xFD[\x81\x86\x01\x91P\x86`\x1F\x83\x01\x12a\x1B\xA9W`\0\x80\xFD[\x815\x81\x81\x11\x15a\x1B\xB8W`\0\x80\xFD[\x87` \x82\x85\x01\x01\x11\x15a\x1B\xCAW`\0\x80\xFD[` \x92\x83\x01\x98\x90\x97P\x95\x90\x91\x015\x94\x93PPPPV[` \x80\x82R\x82Q\x82\x82\x01\x81\x90R`\0\x91\x90\x84\x82\x01\x90`@\x85\x01\x90\x84[\x81\x81\x10\x15a\x1C\x1EW\x83Qc\xFF\xFF\xFF\xFF\x16\x83R\x92\x84\x01\x92\x91\x84\x01\x91`\x01\x01a\x1B\xFCV[P\x90\x96\x95PPPPPPV[` \x80\x82R`N\x90\x82\x01R\x7FBLSApkRegistry.onlyRegistryCoord`@\x82\x01R\x7Finator: caller is not the regist``\x82\x01Rm9<\x901\xB7\xB7\xB924\xB70\xBA7\xB9`\x91\x1B`\x80\x82\x01R`\xA0\x01\x90V[`\x01\x80`\xA0\x1B\x03\x83\x16\x81R`\0` `@\x81\x84\x01R\x83Q\x80`@\x85\x01R`\0[\x81\x81\x10\x15a\x1C\xDAW\x85\x81\x01\x83\x01Q\x85\x82\x01``\x01R\x82\x01a\x1C\xBEV[\x81\x81\x11\x15a\x1C\xECW`\0``\x83\x87\x01\x01R[P`\x1F\x01`\x1F\x19\x16\x92\x90\x92\x01``\x01\x94\x93PPPPV[cNH{q`\xE0\x1B`\0R`2`\x04R`$`\0\xFD[`\0`@\x82\x84\x03\x12\x15a\x1D+W`\0\x80\xFD[a\x1D3a\x19iV[\x825\x81R` \x83\x015` \x82\x01R\x80\x91PP\x92\x91PPV[\x88\x81R\x87` \x82\x01R\x86`@\x82\x01R\x85``\x82\x01R`@\x85`\x80\x83\x017`\0`\xC0\x82\x01`\0\x81R`@\x86\x827PPa\x01\0\x81\x01\x92\x90\x92Ra\x01 \x82\x01Ra\x01@\x01\x96\x95PPPPPPV[`\0\x82a\x1D\xB3WcNH{q`\xE0\x1B`\0R`\x12`\x04R`$`\0\xFD[P\x06\x90V[`\0\x82`\x1F\x83\x01\x12a\x1D\xC9W`\0\x80\xFD[a\x1D\xD1a\x19iV[\x80`@\x84\x01\x85\x81\x11\x15a\x1D\xE3W`\0\x80\xFD[\x84[\x81\x81\x10\x15a\x1D\xFDW\x805\x84R` \x93\x84\x01\x93\x01a\x1D\xE5V[P\x90\x95\x94PPPPPV[`\0`\x80\x82\x84\x03\x12\x15a\x1E\x1AW`\0\x80\xFD[`@Q`@\x81\x01\x81\x81\x10g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x82\x11\x17\x15a\x1E=Wa\x1E=a\x19SV[`@Ra\x1EJ\x84\x84a\x1D\xB8V[\x81Ra\x1EY\x84`@\x85\x01a\x1D\xB8V[` \x82\x01R\x93\x92PPPV[\x825\x81R` \x80\x84\x015\x90\x82\x01R`\xC0\x81\x01`@\x83\x81\x84\x017`\x80\x82\x01`\0\x81R`@\x80\x85\x01\x827P`\0\x81R\x93\x92PPPV[cNH{q`\xE0\x1B`\0R`\x11`\x04R`$`\0\xFD[`\0c\xFF\xFF\xFF\xFF\x83\x81\x16\x90\x83\x16\x81\x81\x10\x15a\x1E\xCCWa\x1E\xCCa\x1E\x99V[\x03\x93\x92PPPV[`\0c\xFF\xFF\xFF\xFF\x80\x83\x16\x81\x81\x14\x15a\x1E\xEEWa\x1E\xEEa\x1E\x99V[`\x01\x01\x93\x92PPPV[`\0`\0\x19\x82\x14\x15a\x1F\x0CWa\x1F\x0Ca\x1E\x99V[P`\x01\x01\x90V[`\0\x82\x82\x10\x15a\x1F%Wa\x1F%a\x1E\x99V[P\x03\x90V[`\0\x81`\0\x19\x04\x83\x11\x82\x15\x15\x16\x15a\x1FDWa\x1FDa\x1E\x99V[P\x02\x90V[`\0\x82\x19\x82\x11\x15a\x1F\\Wa\x1F\\a\x1E\x99V[P\x01\x90V\xFEBLSApkRegistry.registerBLSPublic\xA2dipfsX\"\x12 \x0B\x96\x9B\xE5Q\xE4\x95\xF3a\xC0\xF4\x13t\x16\x95\xBB\n\xAF\\\x80\xE1~v\xBB\x8Ee\xD2\xA9c\xDC\xC0[dsolcC\0\x08\x0C\x003";
     /// The bytecode of the contract.
-    pub static BLSAPKREGISTRY_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
-        __BYTECODE,
-    );
+    pub static BLSAPKREGISTRY_BYTECODE: ::ethers::core::types::Bytes =
+        ::ethers::core::types::Bytes::from_static(__BYTECODE);
     #[rustfmt::skip]
     const __DEPLOYED_BYTECODE: &[u8] = b"`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\x01\x15W`\x005`\xE0\x1C\x80cm\x14\xA9\x87\x11a\0\xA2W\x80c\xBFy\xCEX\x11a\0qW\x80c\xBFy\xCEX\x14a\x03\xCCW\x80c\xD5%J\x8C\x14a\x03\xDFW\x80c\xDE)\xFA\xC0\x14a\x03\xFFW\x80c\xE8\xBB\x9A\xE6\x14a\x04\x1FW\x80c\xF4\xE2O\xE5\x14a\x04HW`\0\x80\xFD[\x80cm\x14\xA9\x87\x14a\x03\nW\x80cy\x16\xCE\xA6\x14a\x031W\x80c\x7F\xF8\x1A\x87\x14a\x03rW\x80c\xA3\xDB\x80\xE2\x14a\x03\xA5W`\0\x80\xFD[\x80c?\xB2yR\x11a\0\xE9W\x80c?\xB2yR\x14a\x01\xDFW\x80cG\xB3\x14\xE8\x14a\x01\xF2W\x80c_a\xA8\x84\x14a\x023W\x80c`WG\xD5\x14a\x02\x8FW\x80ch\xBC\xCA\xAC\x14a\x02\xDDW`\0\x80\xFD[\x80b\xA1\xF4\xCB\x14a\x01\x1AW\x80c\x13T*N\x14a\x01[W\x80c&\xD9A\xF2\x14a\x01\x92W\x80c7~\xD9\x9D\x14a\x01\xA7W[`\0\x80\xFD[a\x01Aa\x01(6`\x04a\x19\x05V[`\x03` R`\0\x90\x81R`@\x90 \x80T`\x01\x90\x91\x01T\x82V[`@\x80Q\x92\x83R` \x83\x01\x91\x90\x91R\x01[`@Q\x80\x91\x03\x90\xF3[a\x01\x84a\x01i6`\x04a\x19\x05V[`\x01`\x01`\xA0\x1B\x03\x16`\0\x90\x81R`\x01` R`@\x90 T\x90V[`@Q\x90\x81R` \x01a\x01RV[a\x01\xA5a\x01\xA06`\x04a\x198V[a\x04[V[\0[a\x01\xCAa\x01\xB56`\x04a\x198V[`\xFF\x16`\0\x90\x81R`\x04` R`@\x90 T\x90V[`@Qc\xFF\xFF\xFF\xFF\x90\x91\x16\x81R` \x01a\x01RV[a\x01\xA5a\x01\xED6`\x04a\x19\xC3V[a\x05\xB4V[a\x02\x1Ba\x02\x006`\x04a\x1AiV[`\0\x90\x81R`\x02` R`@\x90 T`\x01`\x01`\xA0\x1B\x03\x16\x90V[`@Q`\x01`\x01`\xA0\x1B\x03\x90\x91\x16\x81R` \x01a\x01RV[a\x02\x82a\x02A6`\x04a\x198V[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01RP`\xFF\x16`\0\x90\x81R`\x05` \x90\x81R`@\x91\x82\x90 \x82Q\x80\x84\x01\x90\x93R\x80T\x83R`\x01\x01T\x90\x82\x01R\x90V[`@Qa\x01R\x91\x90a\x1A\x82V[a\x02\xA2a\x02\x9D6`\x04a\x1A\x99V[a\x06RV[`@\x80Q\x82Qg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x16\x81R` \x80\x84\x01Qc\xFF\xFF\xFF\xFF\x90\x81\x16\x91\x83\x01\x91\x90\x91R\x92\x82\x01Q\x90\x92\x16\x90\x82\x01R``\x01a\x01RV[a\x02\xF0a\x02\xEB6`\x04a\x1A\xC3V[a\x06\xE5V[`@Qg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x91\x16\x81R` \x01a\x01RV[a\x02\x1B\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x81V[a\x03Da\x03?6`\x04a\x1A\x99V[a\x08\x80V[`@\x80Qg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x90\x94\x16\x84Rc\xFF\xFF\xFF\xFF\x92\x83\x16` \x85\x01R\x91\x16\x90\x82\x01R``\x01a\x01RV[a\x03\x85a\x03\x806`\x04a\x19\x05V[a\x08\xCBV[`@\x80Q\x83Q\x81R` \x93\x84\x01Q\x93\x81\x01\x93\x90\x93R\x82\x01R``\x01a\x01RV[a\x01Aa\x03\xB36`\x04a\x198V[`\x05` R`\0\x90\x81R`@\x90 \x80T`\x01\x90\x91\x01T\x82V[a\x01\x84a\x03\xDA6`\x04a\x1B\x0BV[a\t\x98V[a\x03\xF2a\x03\xED6`\x04a\x1BhV[a\r\xECV[`@Qa\x01R\x91\x90a\x1B\xE0V[a\x01\x84a\x04\r6`\x04a\x19\x05V[`\x01` R`\0\x90\x81R`@\x90 T\x81V[a\x02\x1Ba\x04-6`\x04a\x1AiV[`\x02` R`\0\x90\x81R`@\x90 T`\x01`\x01`\xA0\x1B\x03\x16\x81V[a\x01\xA5a\x04V6`\x04a\x19\xC3V[a\x107V[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x04\xACW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x04\xA3\x90a\x1C*V[`@Q\x80\x91\x03\x90\xFD[`\xFF\x81\x16`\0\x90\x81R`\x04` R`@\x90 T\x15a\x05+W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`6`$\x82\x01R\x7FBLSApkRegistry.initializeQuorum:`D\x82\x01Ru quorum already exists`P\x1B`d\x82\x01R`\x84\x01a\x04\xA3V[`\xFF\x16`\0\x90\x81R`\x04` \x90\x81R`@\x80\x83 \x81Q``\x81\x01\x83R\x84\x81Rc\xFF\xFF\xFF\xFFC\x81\x16\x82\x86\x01\x90\x81R\x82\x85\x01\x87\x81R\x84T`\x01\x81\x01\x86U\x94\x88R\x95\x90\x96 \x91Q\x91\x90\x92\x01\x80T\x95Q\x94Q\x83\x16`\x01`\xE0\x1B\x02`\x01`\x01`\xE0\x1B\x03\x95\x90\x93\x16`\x01`\xC0\x1B\x02`\x01`\x01`\xE0\x1B\x03\x19\x90\x96\x16\x91\x90\x93\x1C\x17\x93\x90\x93\x17\x91\x90\x91\x16\x91\x90\x91\x17\x90UV[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x05\xFCW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x04\xA3\x90a\x1C*V[`\0a\x06\x07\x83a\x08\xCBV[P\x90Pa\x06\x14\x82\x82a\x10\xD0V[\x7FSX\xC5\xB4!y\x17\x8C\x8F\xC7WsJ\xC2\xA3\x19\x8F\x90q\xC7e\xEE\r\x83\x89!\x15%\xF5\0RF\x83\x83`@Qa\x06E\x92\x91\x90a\x1C\x9EV[`@Q\x80\x91\x03\x90\xA1PPPV[`@\x80Q``\x81\x01\x82R`\0\x80\x82R` \x80\x83\x01\x82\x90R\x82\x84\x01\x82\x90R`\xFF\x86\x16\x82R`\x04\x90R\x91\x90\x91 \x80T\x83\x90\x81\x10a\x06\x8FWa\x06\x8Fa\x1D\x03V[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x81\x84\x1B\x16\x82Rc\xFF\xFF\xFF\xFF`\x01`\xC0\x1B\x82\x04\x81\x16\x94\x83\x01\x94\x90\x94R`\x01`\xE0\x1B\x90\x04\x90\x92\x16\x90\x82\x01R\x90P[\x92\x91PPV[`\xFF\x83\x16`\0\x90\x81R`\x04` R`@\x81 \x80T\x82\x91\x90\x84\x90\x81\x10a\x07\x0CWa\x07\x0Ca\x1D\x03V[`\0\x91\x82R` \x91\x82\x90 `@\x80Q``\x81\x01\x82R\x91\x90\x92\x01Tg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x81\x84\x1B\x16\x82Rc\xFF\xFF\xFF\xFF`\x01`\xC0\x1B\x82\x04\x81\x16\x94\x83\x01\x85\x90R`\x01`\xE0\x1B\x90\x91\x04\x81\x16\x92\x82\x01\x92\x90\x92R\x92P\x85\x16\x10\x15a\x07\xD3W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`>`$\x82\x01R\x7FBLSApkRegistry._validateApkHashA`D\x82\x01R\x7FtBlockNumber: index too recent\0\0`d\x82\x01R`\x84\x01a\x04\xA3V[`@\x81\x01Qc\xFF\xFF\xFF\xFF\x16\x15\x80a\x07\xF9WP\x80`@\x01Qc\xFF\xFF\xFF\xFF\x16\x84c\xFF\xFF\xFF\xFF\x16\x10[a\x08wW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`C`$\x82\x01R\x7FBLSApkRegistry._validateApkHashA`D\x82\x01R\x7FtBlockNumber: not latest apk upd`d\x82\x01Rbate`\xE8\x1B`\x84\x82\x01R`\xA4\x01a\x04\xA3V[Q\x94\x93PPPPV[`\x04` R\x81`\0R`@`\0 \x81\x81T\x81\x10a\x08\x9CW`\0\x80\xFD[`\0\x91\x82R` \x90\x91 \x01T`@\x81\x90\x1B\x92Pc\xFF\xFF\xFF\xFF`\x01`\xC0\x1B\x82\x04\x81\x16\x92P`\x01`\xE0\x1B\x90\x91\x04\x16\x83V[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R`\x01`\x01`\xA0\x1B\x03\x82\x16`\0\x81\x81R`\x03` \x90\x81R`@\x80\x83 \x81Q\x80\x83\x01\x83R\x81T\x81R`\x01\x91\x82\x01T\x81\x85\x01R\x94\x84R\x90\x91R\x81 T\x90\x91\x90\x80a\t\x8EW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`>`$\x82\x01R\x7FBLSApkRegistry.getRegisteredPubk`D\x82\x01R\x7Fey: operator is not registered\0\0`d\x82\x01R`\x84\x01a\x04\xA3V[\x90\x94\x90\x93P\x91PPV[`\x003`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\t\xE2W`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x04\xA3\x90a\x1C*V[`\0a\n\x10a\t\xF96\x86\x90\x03\x86\x01`@\x87\x01a\x1D\x19V[\x80Q`\0\x90\x81R` \x91\x82\x01Q\x90\x91R`@\x90 \x90V[\x90P\x7F\xAD2(\xB6v\xF7\xD3\xCDB\x84\xA5D?\x17\xF1\x96+6\xE4\x91\xB3\n@\xB2@XI\xE5\x97\xBA_\xB5\x81\x14\x15a\n\x98W`@\x80QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`$\x81\x01\x91\x90\x91R`\0\x80Q` a\x1Fb\x839\x81Q\x91R`D\x82\x01R\x7FKey: cannot register zero pubkey`d\x82\x01R`\x84\x01a\x04\xA3V[`\x01`\x01`\xA0\x1B\x03\x85\x16`\0\x90\x81R`\x01` R`@\x90 T\x15a\x0B\"W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`G`$\x82\x01R`\0\x80Q` a\x1Fb\x839\x81Q\x91R`D\x82\x01R\x7FKey: operator already registered`d\x82\x01Rf pubkey`\xC8\x1B`\x84\x82\x01R`\xA4\x01a\x04\xA3V[`\0\x81\x81R`\x02` R`@\x90 T`\x01`\x01`\xA0\x1B\x03\x16\x15a\x0B\xA6W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`B`$\x82\x01R`\0\x80Q` a\x1Fb\x839\x81Q\x91R`D\x82\x01R\x7FKey: public key already register`d\x82\x01Ra\x19Y`\xF2\x1B`\x84\x82\x01R`\xA4\x01a\x04\xA3V[`@\x80Q`\0\x91\x7F0dNr\xE11\xA0)\xB8PE\xB6\x81\x81X](3\xE8Hy\xB9p\x91C\xE1\xF5\x93\xF0\0\0\x01\x91a\x0B\xFF\x91\x885\x91` \x80\x8B\x015\x92\x8B\x015\x91``\x8C\x015\x91`\x80\x8D\x01\x91`\xC0\x8E\x01\x91\x8D5\x91\x8E\x82\x015\x91\x01a\x1DKV[`@Q` \x81\x83\x03\x03\x81R\x90`@R\x80Q\x90` \x01 `\0\x1Ca\x0C\"\x91\x90a\x1D\x96V[\x90Pa\x0C\xBCa\x0C[a\x0CF\x83a\x0C@6\x8A\x90\x03\x8A\x01`@\x8B\x01a\x1D\x19V[\x90a\x13\x1BV[a\x0CU6\x89\x90\x03\x89\x01\x89a\x1D\x19V[\x90a\x13\xB2V[a\x0Cca\x14FV[a\x0C\xA5a\x0C\x96\x85a\x0C@`@\x80Q\x80\x82\x01\x82R`\0\x80\x82R` \x91\x82\x01R\x81Q\x80\x83\x01\x90\x92R`\x01\x82R`\x02\x90\x82\x01R\x90V[a\x0CU6\x8A\x90\x03\x8A\x01\x8Aa\x1D\x19V[a\x0C\xB76\x8A\x90\x03\x8A\x01`\x80\x8B\x01a\x1E\x08V[a\x15\x06V[a\rWW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`l`$\x82\x01R`\0\x80Q` a\x1Fb\x839\x81Q\x91R`D\x82\x01R\x7FKey: either the G1 signature is `d\x82\x01R\x7Fwrong, or G1 and G2 private key `\x84\x82\x01Rk\x0C\x8D\xE4\r\xCD\xEE\x84\r\xAC.\x8Cm`\xA3\x1B`\xA4\x82\x01R`\xC4\x01a\x04\xA3V[`\x01`\x01`\xA0\x1B\x03\x86\x16`\0\x81\x81R`\x03` \x90\x81R`@\x80\x83 \x89\x82\x01\x805\x82U``\x8B\x015`\x01\x92\x83\x01U\x90\x83R\x81\x84 \x87\x90U\x86\x84R`\x02\x90\x92R\x91\x82\x90 \x80T`\x01`\x01`\xA0\x1B\x03\x19\x16\x84\x17\x90U\x90Q\x7F\xE3\xFBf\x13\xAF.\x890\xCF\x85\xD4\x7F\xCFm\xB1\x01\x92\"Jd\xC6\xCB\xE8\x02>\x0E\xEE\x1B\xA3\x82\x80A\x91a\r\xDB\x91`\x80\x8A\x01\x90a\x1EeV[`@Q\x80\x91\x03\x90\xA2P\x94\x93PPPPV[```\0\x83g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x81\x11\x15a\x0E\tWa\x0E\ta\x19SV[`@Q\x90\x80\x82R\x80` \x02` \x01\x82\x01`@R\x80\x15a\x0E2W\x81` \x01` \x82\x02\x806\x837\x01\x90P[P\x90P`\0[\x84\x81\x10\x15a\x10.W`\0\x86\x86\x83\x81\x81\x10a\x0ETWa\x0ETa\x1D\x03V[\x91\x90\x91\x015`\xF8\x1C`\0\x81\x81R`\x04` R`@\x90 T\x90\x92P\x90Pc\xFF\xFF\xFF\xFF\x81\x16\x15\x80a\x0E\xBDWP`\xFF\x82\x16`\0\x90\x81R`\x04` R`@\x81 \x80T\x90\x91\x90a\x0E\xA1Wa\x0E\xA1a\x1D\x03V[`\0\x91\x82R` \x90\x91 \x01T`\x01`\xC0\x1B\x90\x04c\xFF\xFF\xFF\xFF\x16\x86\x10[\x15a\x0FJW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`Q`$\x82\x01R\x7FBLSApkRegistry.getApkIndicesAtBl`D\x82\x01R\x7FockNumber: blockNumber is before`d\x82\x01Rp the first update`x\x1B`\x84\x82\x01R`\xA4\x01a\x04\xA3V[`\0[\x81c\xFF\xFF\xFF\xFF\x16\x81c\xFF\xFF\xFF\xFF\x16\x10\x15a\x10\x18W`\xFF\x83\x16`\0\x90\x81R`\x04` R`@\x90 \x87\x90`\x01a\x0F\x81\x84\x86a\x1E\xAFV[a\x0F\x8B\x91\x90a\x1E\xAFV[c\xFF\xFF\xFF\xFF\x16\x81T\x81\x10a\x0F\xA1Wa\x0F\xA1a\x1D\x03V[`\0\x91\x82R` \x90\x91 \x01T`\x01`\xC0\x1B\x90\x04c\xFF\xFF\xFF\xFF\x16\x11a\x10\x06W`\x01a\x0F\xCB\x82\x84a\x1E\xAFV[a\x0F\xD5\x91\x90a\x1E\xAFV[\x85\x85\x81Q\x81\x10a\x0F\xE7Wa\x0F\xE7a\x1D\x03V[` \x02` \x01\x01\x90c\xFF\xFF\xFF\xFF\x16\x90\x81c\xFF\xFF\xFF\xFF\x16\x81RPPa\x10\x18V[\x80a\x10\x10\x81a\x1E\xD4V[\x91PPa\x0FMV[PPP\x80\x80a\x10&\x90a\x1E\xF8V[\x91PPa\x0E8V[P\x94\x93PPPPV[3`\x01`\x01`\xA0\x1B\x03\x7F\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x16\x14a\x10\x7FW`@QbF\x1B\xCD`\xE5\x1B\x81R`\x04\x01a\x04\xA3\x90a\x1C*V[`\0a\x10\x8A\x83a\x08\xCBV[P\x90Pa\x10\x9F\x82a\x10\x9A\x83a\x17sV[a\x10\xD0V[\x7F\x14\xA5\x17+1.\x9D,\"\xB8F\x8F\x9Cp\xEC,\xAA\x9D\xE94\xFE8\x074\xFB\xC6\xF3\xBE\xFF+\x14\xBA\x83\x83`@Qa\x06E\x92\x91\x90a\x1C\x9EV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R`\0[\x83Q\x81\x10\x15a\x13\x15W`\0\x84\x82\x81Q\x81\x10a\x11\x04Wa\x11\x04a\x1D\x03V[\x01` \x90\x81\x01Q`\xF8\x1C`\0\x81\x81R`\x04\x90\x92R`@\x90\x91 T\x90\x91P\x80a\x11\x94W`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`=`$\x82\x01R\x7FBLSApkRegistry._processQuorumApk`D\x82\x01R\x7FUpdate: quorum does not exist\0\0\0`d\x82\x01R`\x84\x01a\x04\xA3V[`\xFF\x82\x16`\0\x90\x81R`\x05` \x90\x81R`@\x91\x82\x90 \x82Q\x80\x84\x01\x90\x93R\x80T\x83R`\x01\x01T\x90\x82\x01Ra\x11\xC8\x90\x86a\x13\xB2V[`\xFF\x83\x16`\0\x81\x81R`\x05` \x90\x81R`@\x80\x83 \x85Q\x80\x82U\x86\x84\x01\x80Q`\x01\x93\x84\x01U\x90\x85RQ\x83R\x81\x84 \x94\x84R`\x04\x90\x92R\x82 \x93\x97P\x91\x92\x90\x91a\x12\x11\x90\x85a\x1F\x13V[\x81T\x81\x10a\x12!Wa\x12!a\x1D\x03V[`\0\x91\x82R` \x90\x91 \x01\x80T\x90\x91PCc\xFF\xFF\xFF\xFF\x90\x81\x16`\x01`\xC0\x1B\x90\x92\x04\x16\x14\x15a\x12bW\x80T`\x01`\x01`\xC0\x1B\x03\x19\x16`@\x83\x90\x1C\x17\x81Ua\x12\xFEV[\x80Tc\xFF\xFF\xFF\xFFC\x81\x16`\x01`\xE0\x1B\x81\x81\x02`\x01`\x01`\xE0\x1B\x03\x94\x85\x16\x17\x85U`\xFF\x88\x16`\0\x90\x81R`\x04` \x90\x81R`@\x80\x83 \x81Q``\x81\x01\x83Rg\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x19\x8B\x16\x81R\x80\x84\x01\x96\x87R\x80\x83\x01\x85\x81R\x82T`\x01\x81\x01\x84U\x92\x86R\x93\x90\x94 \x93Q\x93\x01\x80T\x95Q\x92Q\x87\x16\x90\x94\x02\x91\x90\x95\x16`\x01`\xC0\x1B\x02`\x01`\x01`\xE0\x1B\x03\x19\x94\x90\x94\x16\x91\x90\x94\x1C\x17\x91\x90\x91\x17\x90\x92\x16\x17\x90U[PPPP\x80\x80a\x13\r\x90a\x1E\xF8V[\x91PPa\x10\xE7V[PPPPV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01Ra\x137a\x182V[\x83Q\x81R` \x80\x85\x01Q\x90\x82\x01R`@\x80\x82\x01\x84\x90R`\0\x90\x83``\x84`\x07a\x07\xD0Z\x03\xFA\x90P\x80\x80\x15a\x13jWa\x13lV[\xFE[P\x80a\x13\xAAW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`\r`$\x82\x01Rl\x19X\xCB[][\x0BY\x98Z[\x19Y`\x9A\x1B`D\x82\x01R`d\x01a\x04\xA3V[PP\x92\x91PPV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01Ra\x13\xCEa\x18PV[\x83Q\x81R` \x80\x85\x01Q\x81\x83\x01R\x83Q`@\x80\x84\x01\x91\x90\x91R\x90\x84\x01Q``\x83\x01R`\0\x90\x83`\x80\x84`\x06a\x07\xD0Z\x03\xFA\x90P\x80\x80\x15a\x13jWP\x80a\x13\xAAW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`\r`$\x82\x01Rl\x19X\xCBXY\x19\x0BY\x98Z[\x19Y`\x9A\x1B`D\x82\x01R`d\x01a\x04\xA3V[a\x14Na\x18nV[P`@\x80Q`\x80\x81\x01\x82R\x7F\x19\x8E\x93\x93\x92\rH:r`\xBF\xB71\xFB]%\xF1\xAAI35\xA9\xE7\x12\x97\xE4\x85\xB7\xAE\xF3\x12\xC2\x81\x83\x01\x90\x81R\x7F\x18\0\xDE\xEF\x12\x1F\x1EvBj\0f^\\DygC\"\xD4\xF7^\xDA\xDDF\xDE\xBD\\\xD9\x92\xF6\xED``\x83\x01R\x81R\x81Q\x80\x83\x01\x90\x92R\x7F']\xC4\xA2\x88\xD1\xAF\xB3\xCB\xB1\xAC\t\x18u$\xC7\xDB69]\xF7\xBE;\x99\xE6s\xB1:\x07Ze\xEC\x82R\x7F\x1D\x9B\xEF\xCD\x05\xA52>m\xA4\xD45\xF3\xB6\x17\xCD\xB3\xAF\x83(\\-\xF7\x11\xEF9\xC0\x15q\x82\x7F\x9D` \x83\x81\x01\x91\x90\x91R\x81\x01\x91\x90\x91R\x90V[`@\x80Q\x80\x82\x01\x82R\x85\x81R` \x80\x82\x01\x85\x90R\x82Q\x80\x84\x01\x90\x93R\x85\x83R\x82\x01\x83\x90R`\0\x91a\x155a\x18\x93V[`\0[`\x02\x81\x10\x15a\x16\xFAW`\0a\x15N\x82`\x06a\x1F*V[\x90P\x84\x82`\x02\x81\x10a\x15bWa\x15ba\x1D\x03V[` \x02\x01QQ\x83a\x15t\x83`\0a\x1FIV[`\x0C\x81\x10a\x15\x84Wa\x15\x84a\x1D\x03V[` \x02\x01R\x84\x82`\x02\x81\x10a\x15\x9BWa\x15\x9Ba\x1D\x03V[` \x02\x01Q` \x01Q\x83\x82`\x01a\x15\xB2\x91\x90a\x1FIV[`\x0C\x81\x10a\x15\xC2Wa\x15\xC2a\x1D\x03V[` \x02\x01R\x83\x82`\x02\x81\x10a\x15\xD9Wa\x15\xD9a\x1D\x03V[` \x02\x01QQQ\x83a\x15\xEC\x83`\x02a\x1FIV[`\x0C\x81\x10a\x15\xFCWa\x15\xFCa\x1D\x03V[` \x02\x01R\x83\x82`\x02\x81\x10a\x16\x13Wa\x16\x13a\x1D\x03V[` \x02\x01QQ`\x01` \x02\x01Q\x83a\x16,\x83`\x03a\x1FIV[`\x0C\x81\x10a\x16<Wa\x16<a\x1D\x03V[` \x02\x01R\x83\x82`\x02\x81\x10a\x16SWa\x16Sa\x1D\x03V[` \x02\x01Q` \x01Q`\0`\x02\x81\x10a\x16nWa\x16na\x1D\x03V[` \x02\x01Q\x83a\x16\x7F\x83`\x04a\x1FIV[`\x0C\x81\x10a\x16\x8FWa\x16\x8Fa\x1D\x03V[` \x02\x01R\x83\x82`\x02\x81\x10a\x16\xA6Wa\x16\xA6a\x1D\x03V[` \x02\x01Q` \x01Q`\x01`\x02\x81\x10a\x16\xC1Wa\x16\xC1a\x1D\x03V[` \x02\x01Q\x83a\x16\xD2\x83`\x05a\x1FIV[`\x0C\x81\x10a\x16\xE2Wa\x16\xE2a\x1D\x03V[` \x02\x01RP\x80a\x16\xF2\x81a\x1E\xF8V[\x91PPa\x158V[Pa\x17\x03a\x18\xB2V[`\0` \x82a\x01\x80\x85`\x08a\x07\xD0Z\x03\xFA\x90P\x80\x80\x15a\x13jWP\x80a\x17cW`@QbF\x1B\xCD`\xE5\x1B\x81R` `\x04\x82\x01R`\x15`$\x82\x01Rt\x1C\x18Z\\\x9A[\x99\xCB[\xDC\x18\xDB\xD9\x19KY\x98Z[\x19Y`Z\x1B`D\x82\x01R`d\x01a\x04\xA3V[PQ\x15\x15\x98\x97PPPPPPPPV[`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R\x81Q\x15\x80\x15a\x17\x98WP` \x82\x01Q\x15[\x15a\x17\xB6WPP`@\x80Q\x80\x82\x01\x90\x91R`\0\x80\x82R` \x82\x01R\x90V[`@Q\x80`@\x01`@R\x80\x83`\0\x01Q\x81R` \x01\x7F0dNr\xE11\xA0)\xB8PE\xB6\x81\x81X]\x97\x81j\x91hq\xCA\x8D< \x8C\x16\xD8|\xFDG\x84` \x01Qa\x17\xFB\x91\x90a\x1D\x96V[a\x18%\x90\x7F0dNr\xE11\xA0)\xB8PE\xB6\x81\x81X]\x97\x81j\x91hq\xCA\x8D< \x8C\x16\xD8|\xFDGa\x1F\x13V[\x90R\x92\x91PPV[\x91\x90PV[`@Q\x80``\x01`@R\x80`\x03\x90` \x82\x02\x806\x837P\x91\x92\x91PPV[`@Q\x80`\x80\x01`@R\x80`\x04\x90` \x82\x02\x806\x837P\x91\x92\x91PPV[`@Q\x80`@\x01`@R\x80a\x18\x81a\x18\xD0V[\x81R` \x01a\x18\x8Ea\x18\xD0V[\x90R\x90V[`@Q\x80a\x01\x80\x01`@R\x80`\x0C\x90` \x82\x02\x806\x837P\x91\x92\x91PPV[`@Q\x80` \x01`@R\x80`\x01\x90` \x82\x02\x806\x837P\x91\x92\x91PPV[`@Q\x80`@\x01`@R\x80`\x02\x90` \x82\x02\x806\x837P\x91\x92\x91PPV[\x805`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a\x18-W`\0\x80\xFD[`\0` \x82\x84\x03\x12\x15a\x19\x17W`\0\x80\xFD[a\x19 \x82a\x18\xEEV[\x93\x92PPPV[\x805`\xFF\x81\x16\x81\x14a\x18-W`\0\x80\xFD[`\0` \x82\x84\x03\x12\x15a\x19JW`\0\x80\xFD[a\x19 \x82a\x19'V[cNH{q`\xE0\x1B`\0R`A`\x04R`$`\0\xFD[`@\x80Q\x90\x81\x01g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x81\x11\x82\x82\x10\x17\x15a\x19\x8CWa\x19\x8Ca\x19SV[`@R\x90V[`@Q`\x1F\x82\x01`\x1F\x19\x16\x81\x01g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x81\x11\x82\x82\x10\x17\x15a\x19\xBBWa\x19\xBBa\x19SV[`@R\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a\x19\xD6W`\0\x80\xFD[a\x19\xDF\x83a\x18\xEEV[\x91P` \x80\x84\x015g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x82\x11\x15a\x19\xFDW`\0\x80\xFD[\x81\x86\x01\x91P\x86`\x1F\x83\x01\x12a\x1A\x11W`\0\x80\xFD[\x815\x81\x81\x11\x15a\x1A#Wa\x1A#a\x19SV[a\x1A5`\x1F\x82\x01`\x1F\x19\x16\x85\x01a\x19\x92V[\x91P\x80\x82R\x87\x84\x82\x85\x01\x01\x11\x15a\x1AKW`\0\x80\xFD[\x80\x84\x84\x01\x85\x84\x017`\0\x84\x82\x84\x01\x01RP\x80\x93PPPP\x92P\x92\x90PV[`\0` \x82\x84\x03\x12\x15a\x1A{W`\0\x80\xFD[P5\x91\x90PV[\x81Q\x81R` \x80\x83\x01Q\x90\x82\x01R`@\x81\x01a\x06\xDFV[`\0\x80`@\x83\x85\x03\x12\x15a\x1A\xACW`\0\x80\xFD[a\x1A\xB5\x83a\x19'V[\x94` \x93\x90\x93\x015\x93PPPV[`\0\x80`\0``\x84\x86\x03\x12\x15a\x1A\xD8W`\0\x80\xFD[a\x1A\xE1\x84a\x19'V[\x92P` \x84\x015c\xFF\xFF\xFF\xFF\x81\x16\x81\x14a\x1A\xFAW`\0\x80\xFD[\x92\x95\x92\x94PPP`@\x91\x90\x91\x015\x90V[`\0\x80`\0\x83\x85\x03a\x01`\x81\x12\x15a\x1B\"W`\0\x80\xFD[a\x1B+\x85a\x18\xEEV[\x93Pa\x01\0`\x1F\x19\x82\x01\x12\x15a\x1B@W`\0\x80\xFD[` \x85\x01\x92P`@a\x01\x1F\x19\x82\x01\x12\x15a\x1BYW`\0\x80\xFD[Pa\x01 \x84\x01\x90P\x92P\x92P\x92V[`\0\x80`\0`@\x84\x86\x03\x12\x15a\x1B}W`\0\x80\xFD[\x835g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x82\x11\x15a\x1B\x95W`\0\x80\xFD[\x81\x86\x01\x91P\x86`\x1F\x83\x01\x12a\x1B\xA9W`\0\x80\xFD[\x815\x81\x81\x11\x15a\x1B\xB8W`\0\x80\xFD[\x87` \x82\x85\x01\x01\x11\x15a\x1B\xCAW`\0\x80\xFD[` \x92\x83\x01\x98\x90\x97P\x95\x90\x91\x015\x94\x93PPPPV[` \x80\x82R\x82Q\x82\x82\x01\x81\x90R`\0\x91\x90\x84\x82\x01\x90`@\x85\x01\x90\x84[\x81\x81\x10\x15a\x1C\x1EW\x83Qc\xFF\xFF\xFF\xFF\x16\x83R\x92\x84\x01\x92\x91\x84\x01\x91`\x01\x01a\x1B\xFCV[P\x90\x96\x95PPPPPPV[` \x80\x82R`N\x90\x82\x01R\x7FBLSApkRegistry.onlyRegistryCoord`@\x82\x01R\x7Finator: caller is not the regist``\x82\x01Rm9<\x901\xB7\xB7\xB924\xB70\xBA7\xB9`\x91\x1B`\x80\x82\x01R`\xA0\x01\x90V[`\x01\x80`\xA0\x1B\x03\x83\x16\x81R`\0` `@\x81\x84\x01R\x83Q\x80`@\x85\x01R`\0[\x81\x81\x10\x15a\x1C\xDAW\x85\x81\x01\x83\x01Q\x85\x82\x01``\x01R\x82\x01a\x1C\xBEV[\x81\x81\x11\x15a\x1C\xECW`\0``\x83\x87\x01\x01R[P`\x1F\x01`\x1F\x19\x16\x92\x90\x92\x01``\x01\x94\x93PPPPV[cNH{q`\xE0\x1B`\0R`2`\x04R`$`\0\xFD[`\0`@\x82\x84\x03\x12\x15a\x1D+W`\0\x80\xFD[a\x1D3a\x19iV[\x825\x81R` \x83\x015` \x82\x01R\x80\x91PP\x92\x91PPV[\x88\x81R\x87` \x82\x01R\x86`@\x82\x01R\x85``\x82\x01R`@\x85`\x80\x83\x017`\0`\xC0\x82\x01`\0\x81R`@\x86\x827PPa\x01\0\x81\x01\x92\x90\x92Ra\x01 \x82\x01Ra\x01@\x01\x96\x95PPPPPPV[`\0\x82a\x1D\xB3WcNH{q`\xE0\x1B`\0R`\x12`\x04R`$`\0\xFD[P\x06\x90V[`\0\x82`\x1F\x83\x01\x12a\x1D\xC9W`\0\x80\xFD[a\x1D\xD1a\x19iV[\x80`@\x84\x01\x85\x81\x11\x15a\x1D\xE3W`\0\x80\xFD[\x84[\x81\x81\x10\x15a\x1D\xFDW\x805\x84R` \x93\x84\x01\x93\x01a\x1D\xE5V[P\x90\x95\x94PPPPPV[`\0`\x80\x82\x84\x03\x12\x15a\x1E\x1AW`\0\x80\xFD[`@Q`@\x81\x01\x81\x81\x10g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x82\x11\x17\x15a\x1E=Wa\x1E=a\x19SV[`@Ra\x1EJ\x84\x84a\x1D\xB8V[\x81Ra\x1EY\x84`@\x85\x01a\x1D\xB8V[` \x82\x01R\x93\x92PPPV[\x825\x81R` \x80\x84\x015\x90\x82\x01R`\xC0\x81\x01`@\x83\x81\x84\x017`\x80\x82\x01`\0\x81R`@\x80\x85\x01\x827P`\0\x81R\x93\x92PPPV[cNH{q`\xE0\x1B`\0R`\x11`\x04R`$`\0\xFD[`\0c\xFF\xFF\xFF\xFF\x83\x81\x16\x90\x83\x16\x81\x81\x10\x15a\x1E\xCCWa\x1E\xCCa\x1E\x99V[\x03\x93\x92PPPV[`\0c\xFF\xFF\xFF\xFF\x80\x83\x16\x81\x81\x14\x15a\x1E\xEEWa\x1E\xEEa\x1E\x99V[`\x01\x01\x93\x92PPPV[`\0`\0\x19\x82\x14\x15a\x1F\x0CWa\x1F\x0Ca\x1E\x99V[P`\x01\x01\x90V[`\0\x82\x82\x10\x15a\x1F%Wa\x1F%a\x1E\x99V[P\x03\x90V[`\0\x81`\0\x19\x04\x83\x11\x82\x15\x15\x16\x15a\x1FDWa\x1FDa\x1E\x99V[P\x02\x90V[`\0\x82\x19\x82\x11\x15a\x1F\\Wa\x1F\\a\x1E\x99V[P\x01\x90V\xFEBLSApkRegistry.registerBLSPublic\xA2dipfsX\"\x12 \x0B\x96\x9B\xE5Q\xE4\x95\xF3a\xC0\xF4\x13t\x16\x95\xBB\n\xAF\\\x80\xE1~v\xBB\x8Ee\xD2\xA9c\xDC\xC0[dsolcC\0\x08\x0C\x003";
     /// The deployed bytecode of the contract.
-    pub static BLSAPKREGISTRY_DEPLOYED_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
-        __DEPLOYED_BYTECODE,
-    );
+    pub static BLSAPKREGISTRY_DEPLOYED_BYTECODE: ::ethers::core::types::Bytes =
+        ::ethers::core::types::Bytes::from_static(__DEPLOYED_BYTECODE);
     pub struct BLSApkRegistry<M>(::ethers::contract::Contract<M>);
     impl<M> ::core::clone::Clone for BLSApkRegistry<M> {
         fn clone(&self) -> Self {
@@ -879,13 +708,11 @@ pub mod bls_apk_registry {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(
-                ::ethers::contract::Contract::new(
-                    address.into(),
-                    BLSAPKREGISTRY_ABI.clone(),
-                    client,
-                ),
-            )
+            Self(::ethers::contract::Contract::new(
+                address.into(),
+                BLSAPKREGISTRY_ABI.clone(),
+                client,
+            ))
         }
         /// Constructs the general purpose `Deployer` instance based on the provided constructor arguments and sends it.
         /// Returns a new instance of a deployer that returns an instance of this contract after sending the transaction
@@ -1011,10 +838,7 @@ pub mod bls_apk_registry {
         pub fn get_operator_from_pubkey_hash(
             &self,
             pubkey_hash: [u8; 32],
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
             self.0
                 .method_hash([71, 179, 20, 232], pubkey_hash)
                 .expect("method not found (this should never happen)")
@@ -1071,10 +895,7 @@ pub mod bls_apk_registry {
         pub fn pubkey_hash_to_operator(
             &self,
             p0: [u8; 32],
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
             self.0
                 .method_hash([232, 187, 154, 230], p0)
                 .expect("method not found (this should never happen)")
@@ -1106,10 +927,7 @@ pub mod bls_apk_registry {
         ///Calls the contract's `registryCoordinator` (0x6d14a987) function
         pub fn registry_coordinator(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
             self.0
                 .method_hash([109, 20, 169, 135], ())
                 .expect("method not found (this should never happen)")
@@ -1117,31 +935,22 @@ pub mod bls_apk_registry {
         ///Gets the contract's `Initialized` event
         pub fn initialized_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            InitializedFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, InitializedFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `NewPubkeyRegistration` event
         pub fn new_pubkey_registration_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            NewPubkeyRegistrationFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, NewPubkeyRegistrationFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `OperatorAddedToQuorums` event
         pub fn operator_added_to_quorums_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            OperatorAddedToQuorumsFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, OperatorAddedToQuorumsFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `OperatorRemovedFromQuorums` event
@@ -1157,16 +966,15 @@ pub mod bls_apk_registry {
         /// Returns an `Event` builder for all the events of this contract.
         pub fn events(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            BLSApkRegistryEvents,
-        > {
-            self.0.event_with_filter(::core::default::Default::default())
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, BLSApkRegistryEvents>
+        {
+            self.0
+                .event_with_filter(::core::default::Default::default())
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for BLSApkRegistry<M> {
+        for BLSApkRegistry<M>
+    {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -1181,7 +989,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(name = "Initialized", abi = "Initialized(uint8)")]
     pub struct InitializedFilter {
@@ -1197,7 +1005,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "NewPubkeyRegistration",
@@ -1219,7 +1027,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "OperatorAddedToQuorums",
@@ -1239,7 +1047,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "OperatorRemovedFromQuorums",
@@ -1258,7 +1066,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub enum BLSApkRegistryEvents {
         InitializedFilter(InitializedFilter),
@@ -1280,9 +1088,9 @@ pub mod bls_apk_registry {
                 return Ok(BLSApkRegistryEvents::OperatorAddedToQuorumsFilter(decoded));
             }
             if let Ok(decoded) = OperatorRemovedFromQuorumsFilter::decode_log(log) {
-                return Ok(
-                    BLSApkRegistryEvents::OperatorRemovedFromQuorumsFilter(decoded),
-                );
+                return Ok(BLSApkRegistryEvents::OperatorRemovedFromQuorumsFilter(
+                    decoded,
+                ));
             }
             Err(::ethers::core::abi::Error::InvalidData)
         }
@@ -1291,9 +1099,7 @@ pub mod bls_apk_registry {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
                 Self::InitializedFilter(element) => ::core::fmt::Display::fmt(element, f),
-                Self::NewPubkeyRegistrationFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::NewPubkeyRegistrationFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorAddedToQuorumsFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
@@ -1318,8 +1124,7 @@ pub mod bls_apk_registry {
             Self::OperatorAddedToQuorumsFilter(value)
         }
     }
-    impl ::core::convert::From<OperatorRemovedFromQuorumsFilter>
-    for BLSApkRegistryEvents {
+    impl ::core::convert::From<OperatorRemovedFromQuorumsFilter> for BLSApkRegistryEvents {
         fn from(value: OperatorRemovedFromQuorumsFilter) -> Self {
             Self::OperatorRemovedFromQuorumsFilter(value)
         }
@@ -1335,7 +1140,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "apkHistory", abi = "apkHistory(uint8,uint256)")]
     pub struct ApkHistoryCall(pub u8, pub ::ethers::core::types::U256);
@@ -1350,7 +1155,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "currentApk", abi = "currentApk(uint8)")]
     pub struct CurrentApkCall(pub u8);
@@ -1365,7 +1170,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "deregisterOperator", abi = "deregisterOperator(address,bytes)")]
     pub struct DeregisterOperatorCall {
@@ -1383,7 +1188,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getApk", abi = "getApk(uint8)")]
     pub struct GetApkCall {
@@ -1400,7 +1205,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getApkHashAtBlockNumberAndIndex",
@@ -1422,7 +1227,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getApkHistoryLength", abi = "getApkHistoryLength(uint8)")]
     pub struct GetApkHistoryLengthCall {
@@ -1439,7 +1244,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getApkIndicesAtBlockNumber",
@@ -1460,9 +1265,12 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
-    #[ethcall(name = "getApkUpdateAtIndex", abi = "getApkUpdateAtIndex(uint8,uint256)")]
+    #[ethcall(
+        name = "getApkUpdateAtIndex",
+        abi = "getApkUpdateAtIndex(uint8,uint256)"
+    )]
     pub struct GetApkUpdateAtIndexCall {
         pub quorum_number: u8,
         pub index: ::ethers::core::types::U256,
@@ -1478,7 +1286,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "getOperatorFromPubkeyHash",
@@ -1498,7 +1306,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getOperatorId", abi = "getOperatorId(address)")]
     pub struct GetOperatorIdCall {
@@ -1515,7 +1323,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getRegisteredPubkey", abi = "getRegisteredPubkey(address)")]
     pub struct GetRegisteredPubkeyCall {
@@ -1532,7 +1340,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "initializeQuorum", abi = "initializeQuorum(uint8)")]
     pub struct InitializeQuorumCall {
@@ -1549,7 +1357,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "operatorToPubkey", abi = "operatorToPubkey(address)")]
     pub struct OperatorToPubkeyCall(pub ::ethers::core::types::Address);
@@ -1564,7 +1372,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "operatorToPubkeyHash", abi = "operatorToPubkeyHash(address)")]
     pub struct OperatorToPubkeyHashCall(pub ::ethers::core::types::Address);
@@ -1579,7 +1387,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "pubkeyHashToOperator", abi = "pubkeyHashToOperator(bytes32)")]
     pub struct PubkeyHashToOperatorCall(pub [u8; 32]);
@@ -1594,7 +1402,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "registerBLSPublicKey",
@@ -1616,7 +1424,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "registerOperator", abi = "registerOperator(address,bytes)")]
     pub struct RegisterOperatorCall {
@@ -1634,7 +1442,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "registryCoordinator", abi = "registryCoordinator()")]
     pub struct RegistryCoordinatorCall;
@@ -1647,7 +1455,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub enum BLSApkRegistryCalls {
         ApkHistory(ApkHistoryCall),
@@ -1674,94 +1482,89 @@ pub mod bls_apk_registry {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded) = <ApkHistoryCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <ApkHistoryCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::ApkHistory(decoded));
             }
-            if let Ok(decoded) = <CurrentApkCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <CurrentApkCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::CurrentApk(decoded));
             }
-            if let Ok(decoded) = <DeregisterOperatorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <DeregisterOperatorCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::DeregisterOperator(decoded));
             }
-            if let Ok(decoded) = <GetApkCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <GetApkCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::GetApk(decoded));
             }
-            if let Ok(decoded) = <GetApkHashAtBlockNumberAndIndexCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetApkHashAtBlockNumberAndIndexCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
                 return Ok(Self::GetApkHashAtBlockNumberAndIndex(decoded));
             }
-            if let Ok(decoded) = <GetApkHistoryLengthCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetApkHistoryLengthCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetApkHistoryLength(decoded));
             }
-            if let Ok(decoded) = <GetApkIndicesAtBlockNumberCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetApkIndicesAtBlockNumberCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetApkIndicesAtBlockNumber(decoded));
             }
-            if let Ok(decoded) = <GetApkUpdateAtIndexCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetApkUpdateAtIndexCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetApkUpdateAtIndex(decoded));
             }
-            if let Ok(decoded) = <GetOperatorFromPubkeyHashCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetOperatorFromPubkeyHashCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetOperatorFromPubkeyHash(decoded));
             }
-            if let Ok(decoded) = <GetOperatorIdCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <GetOperatorIdCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetOperatorId(decoded));
             }
-            if let Ok(decoded) = <GetRegisteredPubkeyCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <GetRegisteredPubkeyCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetRegisteredPubkey(decoded));
             }
-            if let Ok(decoded) = <InitializeQuorumCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <InitializeQuorumCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::InitializeQuorum(decoded));
             }
-            if let Ok(decoded) = <OperatorToPubkeyCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <OperatorToPubkeyCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::OperatorToPubkey(decoded));
             }
-            if let Ok(decoded) = <OperatorToPubkeyHashCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <OperatorToPubkeyHashCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::OperatorToPubkeyHash(decoded));
             }
-            if let Ok(decoded) = <PubkeyHashToOperatorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <PubkeyHashToOperatorCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::PubkeyHashToOperator(decoded));
             }
-            if let Ok(decoded) = <RegisterBLSPublicKeyCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <RegisterBLSPublicKeyCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::RegisterBLSPublicKey(decoded));
             }
-            if let Ok(decoded) = <RegisterOperatorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <RegisterOperatorCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::RegisterOperator(decoded));
             }
-            if let Ok(decoded) = <RegistryCoordinatorCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <RegistryCoordinatorCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::RegistryCoordinator(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -1770,12 +1573,8 @@ pub mod bls_apk_registry {
     impl ::ethers::core::abi::AbiEncode for BLSApkRegistryCalls {
         fn encode(self) -> Vec<u8> {
             match self {
-                Self::ApkHistory(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::CurrentApk(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::ApkHistory(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::CurrentApk(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::DeregisterOperator(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -1795,18 +1594,12 @@ pub mod bls_apk_registry {
                 Self::GetOperatorFromPubkeyHash(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::GetOperatorId(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::GetOperatorId(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::GetRegisteredPubkey(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::InitializeQuorum(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::OperatorToPubkey(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::InitializeQuorum(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::OperatorToPubkey(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::OperatorToPubkeyHash(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -1816,9 +1609,7 @@ pub mod bls_apk_registry {
                 Self::RegisterBLSPublicKey(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::RegisterOperator(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::RegisterOperator(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::RegistryCoordinator(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -1830,44 +1621,24 @@ pub mod bls_apk_registry {
             match self {
                 Self::ApkHistory(element) => ::core::fmt::Display::fmt(element, f),
                 Self::CurrentApk(element) => ::core::fmt::Display::fmt(element, f),
-                Self::DeregisterOperator(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::DeregisterOperator(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetApk(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetApkHashAtBlockNumberAndIndex(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::GetApkHistoryLength(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::GetApkIndicesAtBlockNumber(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::GetApkUpdateAtIndex(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::GetOperatorFromPubkeyHash(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::GetApkHistoryLength(element) => ::core::fmt::Display::fmt(element, f),
+                Self::GetApkIndicesAtBlockNumber(element) => ::core::fmt::Display::fmt(element, f),
+                Self::GetApkUpdateAtIndex(element) => ::core::fmt::Display::fmt(element, f),
+                Self::GetOperatorFromPubkeyHash(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetOperatorId(element) => ::core::fmt::Display::fmt(element, f),
-                Self::GetRegisteredPubkey(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::GetRegisteredPubkey(element) => ::core::fmt::Display::fmt(element, f),
                 Self::InitializeQuorum(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorToPubkey(element) => ::core::fmt::Display::fmt(element, f),
-                Self::OperatorToPubkeyHash(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::PubkeyHashToOperator(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::RegisterBLSPublicKey(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::OperatorToPubkeyHash(element) => ::core::fmt::Display::fmt(element, f),
+                Self::PubkeyHashToOperator(element) => ::core::fmt::Display::fmt(element, f),
+                Self::RegisterBLSPublicKey(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RegisterOperator(element) => ::core::fmt::Display::fmt(element, f),
-                Self::RegistryCoordinator(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::RegistryCoordinator(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
@@ -1891,8 +1662,7 @@ pub mod bls_apk_registry {
             Self::GetApk(value)
         }
     }
-    impl ::core::convert::From<GetApkHashAtBlockNumberAndIndexCall>
-    for BLSApkRegistryCalls {
+    impl ::core::convert::From<GetApkHashAtBlockNumberAndIndexCall> for BLSApkRegistryCalls {
         fn from(value: GetApkHashAtBlockNumberAndIndexCall) -> Self {
             Self::GetApkHashAtBlockNumberAndIndex(value)
         }
@@ -1973,7 +1743,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct ApkHistoryReturn {
         pub apk_hash: [u8; 24],
@@ -1991,7 +1761,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct CurrentApkReturn {
         pub x: ::ethers::core::types::U256,
@@ -2008,7 +1778,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetApkReturn(pub G1Point);
     ///Container type for all return fields from the `getApkHashAtBlockNumberAndIndex` function with signature `getApkHashAtBlockNumberAndIndex(uint8,uint32,uint256)` and selector `0x68bccaac`
@@ -2022,7 +1792,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetApkHashAtBlockNumberAndIndexReturn(pub [u8; 24]);
     ///Container type for all return fields from the `getApkHistoryLength` function with signature `getApkHistoryLength(uint8)` and selector `0x377ed99d`
@@ -2036,7 +1806,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetApkHistoryLengthReturn(pub u32);
     ///Container type for all return fields from the `getApkIndicesAtBlockNumber` function with signature `getApkIndicesAtBlockNumber(bytes,uint256)` and selector `0xd5254a8c`
@@ -2050,7 +1820,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetApkIndicesAtBlockNumberReturn(pub ::std::vec::Vec<u32>);
     ///Container type for all return fields from the `getApkUpdateAtIndex` function with signature `getApkUpdateAtIndex(uint8,uint256)` and selector `0x605747d5`
@@ -2064,7 +1834,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetApkUpdateAtIndexReturn(pub ApkUpdate);
     ///Container type for all return fields from the `getOperatorFromPubkeyHash` function with signature `getOperatorFromPubkeyHash(bytes32)` and selector `0x47b314e8`
@@ -2078,7 +1848,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetOperatorFromPubkeyHashReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `getOperatorId` function with signature `getOperatorId(address)` and selector `0x13542a4e`
@@ -2092,7 +1862,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetOperatorIdReturn(pub [u8; 32]);
     ///Container type for all return fields from the `getRegisteredPubkey` function with signature `getRegisteredPubkey(address)` and selector `0x7ff81a87`
@@ -2106,7 +1876,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetRegisteredPubkeyReturn(pub G1Point, pub [u8; 32]);
     ///Container type for all return fields from the `operatorToPubkey` function with signature `operatorToPubkey(address)` and selector `0x00a1f4cb`
@@ -2120,7 +1890,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct OperatorToPubkeyReturn {
         pub x: ::ethers::core::types::U256,
@@ -2137,7 +1907,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct OperatorToPubkeyHashReturn(pub [u8; 32]);
     ///Container type for all return fields from the `pubkeyHashToOperator` function with signature `pubkeyHashToOperator(bytes32)` and selector `0xe8bb9ae6`
@@ -2151,7 +1921,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct PubkeyHashToOperatorReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `registerBLSPublicKey` function with signature `registerBLSPublicKey(address,((uint256,uint256),(uint256,uint256),(uint256[2],uint256[2])),(uint256,uint256))` and selector `0xbf79ce58`
@@ -2165,7 +1935,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct RegisterBLSPublicKeyReturn {
         pub operator_id: [u8; 32],
@@ -2181,7 +1951,7 @@ pub mod bls_apk_registry {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct RegistryCoordinatorReturn(pub ::ethers::core::types::Address);
 }

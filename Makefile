@@ -54,7 +54,8 @@ bindings-go: ## generates contract bindings
 	cd contracts && ./generate-go-bindings.sh
 
 bindings-rs: ## generates rust bindings
-	forge bind --bindings-path ./avs-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX} 
+	forge bind --bindings-path ./avs-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX}
+	cd ./avs-finalizer && cargo fmt
 
 bindings-json: ## generate JS bindings
 	cd ./rolldown-contract && make update-abi

@@ -9,7 +9,7 @@
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct G1Point {
     pub x: ::ethers::core::types::U256,
@@ -26,7 +26,7 @@ pub struct G1Point {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct G2Point {
     pub x: [::ethers::core::types::U256; 2],
@@ -43,7 +43,7 @@ pub struct G2Point {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct ApkUpdate {
     pub apk_hash: [u8; 24],
@@ -61,7 +61,7 @@ pub struct ApkUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct PubkeyRegistrationParams {
     pub pubkey_registration_signature: G1Point,
@@ -79,7 +79,7 @@ pub struct PubkeyRegistrationParams {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OperatorDetails {
     pub earnings_receiver: ::ethers::core::types::Address,
@@ -97,7 +97,7 @@ pub struct OperatorDetails {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct QueuedWithdrawalParams {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
@@ -115,7 +115,7 @@ pub struct QueuedWithdrawalParams {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Withdrawal {
     pub staker: ::ethers::core::types::Address,
@@ -137,7 +137,7 @@ pub struct Withdrawal {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Task {
     pub block_number: ::ethers::core::types::U256,
@@ -156,7 +156,7 @@ pub struct Task {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct TaskResponse {
     pub reference_task_index: u32,
@@ -175,7 +175,7 @@ pub struct TaskResponse {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct TaskResponseMetadata {
     pub task_responsed_block: u32,
@@ -194,7 +194,7 @@ pub struct TaskResponseMetadata {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OperatorInfo {
     pub operator_id: [u8; 32],
@@ -211,7 +211,7 @@ pub struct OperatorInfo {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OperatorKickParam {
     pub quorum_number: u8,
@@ -228,7 +228,7 @@ pub struct OperatorKickParam {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OperatorSetParam {
     pub max_operator_count: u32,
@@ -246,7 +246,7 @@ pub struct OperatorSetParam {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct QuorumBitmapUpdate {
     pub update_block_number: u32,
@@ -264,7 +264,7 @@ pub struct QuorumBitmapUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct SignatureWithExpiry {
     pub signature: ::ethers::core::types::Bytes,
@@ -281,7 +281,7 @@ pub struct SignatureWithExpiry {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct SignatureWithSaltAndExpiry {
     pub signature: ::ethers::core::types::Bytes,
@@ -299,7 +299,7 @@ pub struct SignatureWithSaltAndExpiry {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct StakeUpdate {
     pub update_block_number: u32,
@@ -317,7 +317,7 @@ pub struct StakeUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct StrategyParams {
     pub strategy: ::ethers::core::types::Address,
@@ -334,7 +334,7 @@ pub struct StrategyParams {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct DeprecatedStructQueuedWithdrawal {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
@@ -355,7 +355,7 @@ pub struct DeprecatedStructQueuedWithdrawal {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct DeprecatedStructWithdrawerAndNonce {
     pub withdrawer: ::ethers::core::types::Address,
@@ -372,7 +372,7 @@ pub struct DeprecatedStructWithdrawerAndNonce {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct FuzzInterface {
     pub addr: ::ethers::core::types::Address,
@@ -389,7 +389,7 @@ pub struct FuzzInterface {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct FuzzSelector {
     pub addr: ::ethers::core::types::Address,
