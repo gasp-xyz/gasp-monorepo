@@ -56,6 +56,11 @@ bindings-go: ## generates contract bindings
 bindings-rs: ## generates rust bindings
 	forge bind --bindings-path ./avs-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX} 
 
+bindings-json: ## generate JS bindings
+	cd ./rolldown-contract && make update-abi
+	cd ./contracts && forge build && cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../rollup-updater/src/FinalizerTaskManager.json
+
+bindings: bindings-go bindings-rs bindings-json ## generate all bindings
 
 -----------------------------: ## 
 # We pipe all zapper logs through https://github.com/maoueh/zap-pretty so make sure to install it

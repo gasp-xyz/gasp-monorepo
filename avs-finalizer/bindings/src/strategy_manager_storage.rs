@@ -7,7 +7,7 @@ pub use strategy_manager_storage::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types
+    non_camel_case_types,
 )]
 pub mod strategy_manager_storage {
     pub use super::super::shared_types::*;
@@ -18,766 +18,960 @@ pub mod strategy_manager_storage {
             functions: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("DEPOSIT_TYPEHASH"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("DEPOSIT_TYPEHASH"),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("DEPOSIT_TYPEHASH"),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
+                                        32usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bytes32"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("DOMAIN_TYPEHASH"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("DOMAIN_TYPEHASH"),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("DOMAIN_TYPEHASH"),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
+                                        32usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bytes32"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("addShares"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("addShares"),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("staker"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("token"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IERC20"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("strategy"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IStrategy"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("shares"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint256"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("addShares"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("staker"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("address"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("token"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IERC20"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("shares"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("addStrategiesToDepositWhitelist"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("addStrategiesToDepositWhitelist",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("strategiesToWhitelist",),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Address,
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "addStrategiesToDepositWhitelist",
+                            ),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned(
+                                        "strategiesToWhitelist",
                                     ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IStrategy[]"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned(
-                                    "thirdPartyTransfersForbiddenValues",
-                                ),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Bool,
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                        ::std::boxed::Box::new(
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
+                                        ),
                                     ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("bool[]"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy[]"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned(
+                                        "thirdPartyTransfersForbiddenValues",
+                                    ),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                        ::std::boxed::Box::new(
+                                            ::ethers::core::abi::ethabi::ParamType::Bool,
+                                        ),
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bool[]"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("calculateWithdrawalRoot"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("calculateWithdrawalRoot",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("queuedWithdrawal"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ),
-                                ),
-                                ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                    ),
-                                ),
-                                ::ethers::core::abi::ethabi::ParamType::Address,
-                                ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                ],),
-                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                ::ethers::core::abi::ethabi::ParamType::Address,
-                            ],),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned(
-                                    "struct IStrategyManager.DeprecatedStruct_QueuedWithdrawal",
-                                ),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "calculateWithdrawalRoot",
                             ),
-                        },],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::Pure,
-                    },],
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("queuedWithdrawal"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
+                                        ::std::vec![
+                                            ::ethers::core::abi::ethabi::ParamType::Array(
+                                                ::std::boxed::Box::new(
+                                                    ::ethers::core::abi::ethabi::ParamType::Address,
+                                                ),
+                                            ),
+                                            ::ethers::core::abi::ethabi::ParamType::Array(
+                                                ::std::boxed::Box::new(
+                                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                                ),
+                                            ),
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
+                                            ::ethers::core::abi::ethabi::ParamType::Tuple(
+                                                ::std::vec![
+                                                    ::ethers::core::abi::ethabi::ParamType::Address,
+                                                    ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                                ],
+                                            ),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
+                                        ],
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned(
+                                            "struct IStrategyManager.DeprecatedStruct_QueuedWithdrawal",
+                                        ),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
+                                        32usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bytes32"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::Pure,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("delegation"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("delegation"),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("contract IDelegationManager",),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("delegation"),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned(
+                                            "contract IDelegationManager",
+                                        ),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("depositIntoStrategy"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("depositIntoStrategy",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("strategy"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IStrategy"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("token"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IERC20"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("amount"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint256"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("shares"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("uint256"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "depositIntoStrategy",
                             ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("token"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IERC20"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("amount"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("shares"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("depositIntoStrategyWithSignature"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("depositIntoStrategyWithSignature",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("strategy"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IStrategy"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("token"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IERC20"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("amount"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint256"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("staker"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("expiry"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint256"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("signature"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("bytes"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("shares"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("uint256"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "depositIntoStrategyWithSignature",
                             ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("token"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IERC20"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("amount"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("staker"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("address"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("expiry"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("signature"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bytes"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("shares"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("eigenPodManager"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("eigenPodManager"),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("contract IEigenPodManager",),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("eigenPodManager"),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned(
+                                            "contract IEigenPodManager",
+                                        ),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getDeposits"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("getDeposits"),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("staker"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("address"),
-                            ),
-                        },],
-                        outputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Address,
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("getDeposits"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("staker"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("address"),
                                     ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IStrategy[]"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                        ::std::boxed::Box::new(
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
+                                        ),
                                     ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint256[]"),
-                                ),
-                            },
-                        ],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy[]"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                        ::std::boxed::Box::new(
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                        ),
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256[]"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("migrateQueuedWithdrawal"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("migrateQueuedWithdrawal",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("queuedWithdrawal"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ),
-                                ),
-                                ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                    ),
-                                ),
-                                ::ethers::core::abi::ethabi::ParamType::Address,
-                                ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                ],),
-                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                ::ethers::core::abi::ethabi::ParamType::Address,
-                            ],),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned(
-                                    "struct IStrategyManager.DeprecatedStruct_QueuedWithdrawal",
-                                ),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "migrateQueuedWithdrawal",
                             ),
-                        },],
-                        outputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("bool"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("bytes32"),
-                                ),
-                            },
-                        ],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("queuedWithdrawal"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
+                                        ::std::vec![
+                                            ::ethers::core::abi::ethabi::ParamType::Array(
+                                                ::std::boxed::Box::new(
+                                                    ::ethers::core::abi::ethabi::ParamType::Address,
+                                                ),
+                                            ),
+                                            ::ethers::core::abi::ethabi::ParamType::Array(
+                                                ::std::boxed::Box::new(
+                                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                                ),
+                                            ),
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
+                                            ::ethers::core::abi::ethabi::ParamType::Tuple(
+                                                ::std::vec![
+                                                    ::ethers::core::abi::ethabi::ParamType::Address,
+                                                    ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                                ],
+                                            ),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
+                                        ],
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned(
+                                            "struct IStrategyManager.DeprecatedStruct_QueuedWithdrawal",
+                                        ),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bool"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
+                                        32usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bytes32"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("nonces"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("nonces"),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("address"),
-                            ),
-                        },],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("uint256"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("nonces"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("address"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("removeShares"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("removeShares"),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("staker"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("strategy"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IStrategy"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("shares"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint256"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("removeShares"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("staker"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("address"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("shares"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("removeStrategiesFromDepositWhitelist"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned(
-                            "removeStrategiesFromDepositWhitelist",
-                        ),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                    ::std::borrow::ToOwned::to_owned(
+                        "removeStrategiesFromDepositWhitelist",
+                    ),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
                             name: ::std::borrow::ToOwned::to_owned(
-                                "strategiesToRemoveFromWhitelist",
+                                "removeStrategiesFromDepositWhitelist",
                             ),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                ::std::boxed::Box::new(
-                                    ::ethers::core::abi::ethabi::ParamType::Address,
-                                ),
-                            ),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("contract IStrategy[]"),
-                            ),
-                        },],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned(
+                                        "strategiesToRemoveFromWhitelist",
+                                    ),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                        ::std::boxed::Box::new(
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
+                                        ),
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy[]"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("slasher"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("slasher"),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("contract ISlasher"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("slasher"),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract ISlasher"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("stakerStrategyList"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("stakerStrategyList"),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint256"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("contract IStrategy"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("stakerStrategyList"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("address"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("stakerStrategyListLength"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("stakerStrategyListLength",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("staker"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("address"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "stakerStrategyListLength",
                             ),
-                        },],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("uint256"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("staker"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("address"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("stakerStrategyShares"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("stakerStrategyShares",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IStrategy"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("uint256"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "stakerStrategyShares",
                             ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("address"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("strategyIsWhitelistedForDeposit"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("strategyIsWhitelistedForDeposit",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "strategyIsWhitelistedForDeposit",
                             ),
-                        },],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bool"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bool"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("strategyWhitelister"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("strategyWhitelister",),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("address"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "strategyWhitelister",
                             ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("address"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("thirdPartyTransfersForbidden"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("thirdPartyTransfersForbidden",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "thirdPartyTransfersForbidden",
                             ),
-                        },],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bool"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bool"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("withdrawSharesAsTokens"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("withdrawSharesAsTokens",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("recipient"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("strategy"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IStrategy"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("shares"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint256"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("token"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("contract IERC20"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "withdrawSharesAsTokens",
+                            ),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("recipient"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("address"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("shares"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("token"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IERC20"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("withdrawalRootPending"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("withdrawalRootPending",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "withdrawalRootPending",
                             ),
-                        },],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bool"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
+                                        32usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bytes32"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bool"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
             ]),
             events: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("Deposit"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("Deposit"),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("staker"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: false,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("token"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: false,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("strategy"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: false,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("shares"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                                indexed: false,
-                            },
-                        ],
-                        anonymous: false,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned("Deposit"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("staker"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    indexed: false,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("token"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    indexed: false,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    indexed: false,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("shares"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("StrategyAddedToDepositWhitelist"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("StrategyAddedToDepositWhitelist",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
-                            name: ::std::borrow::ToOwned::to_owned("strategy"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            indexed: false,
-                        },],
-                        anonymous: false,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "StrategyAddedToDepositWhitelist",
+                            ),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("StrategyRemovedFromDepositWhitelist"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned(
-                            "StrategyRemovedFromDepositWhitelist",
-                        ),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
-                            name: ::std::borrow::ToOwned::to_owned("strategy"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            indexed: false,
-                        },],
-                        anonymous: false,
-                    },],
+                    ::std::borrow::ToOwned::to_owned(
+                        "StrategyRemovedFromDepositWhitelist",
+                    ),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "StrategyRemovedFromDepositWhitelist",
+                            ),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("StrategyWhitelisterChanged"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("StrategyWhitelisterChanged",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("previousAddress"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: false,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("newAddress"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: false,
-                            },
-                        ],
-                        anonymous: false,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "StrategyWhitelisterChanged",
+                            ),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("previousAddress"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    indexed: false,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("newAddress"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("UpdatedThirdPartyTransfersForbidden"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned(
-                            "UpdatedThirdPartyTransfersForbidden",
-                        ),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("strategy"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: false,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("value"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                                indexed: false,
-                            },
-                        ],
-                        anonymous: false,
-                    },],
+                    ::std::borrow::ToOwned::to_owned(
+                        "UpdatedThirdPartyTransfersForbidden",
+                    ),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "UpdatedThirdPartyTransfersForbidden",
+                            ),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    indexed: false,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("value"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
                 ),
             ]),
             errors: ::std::collections::BTreeMap::new(),
@@ -786,8 +980,9 @@ pub mod strategy_manager_storage {
         }
     }
     ///The parsed JSON ABI of the contract.
-    pub static STRATEGYMANAGERSTORAGE_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
-        ::ethers::contract::Lazy::new(__abi);
+    pub static STRATEGYMANAGERSTORAGE_ABI: ::ethers::contract::Lazy<
+        ::ethers::core::abi::Abi,
+    > = ::ethers::contract::Lazy::new(__abi);
     pub struct StrategyManagerStorage<M>(::ethers::contract::Contract<M>);
     impl<M> ::core::clone::Clone for StrategyManagerStorage<M> {
         fn clone(&self) -> Self {
@@ -819,20 +1014,26 @@ pub mod strategy_manager_storage {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(::ethers::contract::Contract::new(
-                address.into(),
-                STRATEGYMANAGERSTORAGE_ABI.clone(),
-                client,
-            ))
+            Self(
+                ::ethers::contract::Contract::new(
+                    address.into(),
+                    STRATEGYMANAGERSTORAGE_ABI.clone(),
+                    client,
+                ),
+            )
         }
         ///Calls the contract's `DEPOSIT_TYPEHASH` (0x48825e94) function
-        pub fn deposit_typehash(&self) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
+        pub fn deposit_typehash(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
             self.0
                 .method_hash([72, 130, 94, 148], ())
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `DOMAIN_TYPEHASH` (0x20606b70) function
-        pub fn domain_typehash(&self) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
+        pub fn domain_typehash(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
             self.0
                 .method_hash([32, 96, 107, 112], ())
                 .expect("method not found (this should never happen)")
@@ -858,10 +1059,7 @@ pub mod strategy_manager_storage {
             self.0
                 .method_hash(
                     [223, 91, 53, 71],
-                    (
-                        strategies_to_whitelist,
-                        third_party_transfers_forbidden_values,
-                    ),
+                    (strategies_to_whitelist, third_party_transfers_forbidden_values),
                 )
                 .expect("method not found (this should never happen)")
         }
@@ -877,7 +1075,10 @@ pub mod strategy_manager_storage {
         ///Calls the contract's `delegation` (0xdf5cf723) function
         pub fn delegation(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
+        ) -> ::ethers::contract::builders::ContractCall<
+            M,
+            ::ethers::core::types::Address,
+        > {
             self.0
                 .method_hash([223, 92, 247, 35], ())
                 .expect("method not found (this should never happen)")
@@ -913,7 +1114,10 @@ pub mod strategy_manager_storage {
         ///Calls the contract's `eigenPodManager` (0x4665bcda) function
         pub fn eigen_pod_manager(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
+        ) -> ::ethers::contract::builders::ContractCall<
+            M,
+            ::ethers::core::types::Address,
+        > {
             self.0
                 .method_hash([70, 101, 188, 218], ())
                 .expect("method not found (this should never happen)")
@@ -965,7 +1169,9 @@ pub mod strategy_manager_storage {
         ///Calls the contract's `removeStrategiesFromDepositWhitelist` (0xb5d8b5b8) function
         pub fn remove_strategies_from_deposit_whitelist(
             &self,
-            strategies_to_remove_from_whitelist: ::std::vec::Vec<::ethers::core::types::Address>,
+            strategies_to_remove_from_whitelist: ::std::vec::Vec<
+                ::ethers::core::types::Address,
+            >,
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash([181, 216, 181, 184], strategies_to_remove_from_whitelist)
@@ -974,7 +1180,10 @@ pub mod strategy_manager_storage {
         ///Calls the contract's `slasher` (0xb1344271) function
         pub fn slasher(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
+        ) -> ::ethers::contract::builders::ContractCall<
+            M,
+            ::ethers::core::types::Address,
+        > {
             self.0
                 .method_hash([177, 52, 66, 113], ())
                 .expect("method not found (this should never happen)")
@@ -984,7 +1193,10 @@ pub mod strategy_manager_storage {
             &self,
             p0: ::ethers::core::types::Address,
             p1: ::ethers::core::types::U256,
-        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
+        ) -> ::ethers::contract::builders::ContractCall<
+            M,
+            ::ethers::core::types::Address,
+        > {
             self.0
                 .method_hash([203, 194, 189, 98], (p0, p1))
                 .expect("method not found (this should never happen)")
@@ -1020,7 +1232,10 @@ pub mod strategy_manager_storage {
         ///Calls the contract's `strategyWhitelister` (0x967fc0d2) function
         pub fn strategy_whitelister(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
+        ) -> ::ethers::contract::builders::ContractCall<
+            M,
+            ::ethers::core::types::Address,
+        > {
             self.0
                 .method_hash([150, 127, 192, 210], ())
                 .expect("method not found (this should never happen)")
@@ -1104,15 +1319,16 @@ pub mod strategy_manager_storage {
         /// Returns an `Event` builder for all the events of this contract.
         pub fn events(
             &self,
-        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, StrategyManagerStorageEvents>
-        {
-            self.0
-                .event_with_filter(::core::default::Default::default())
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            StrategyManagerStorageEvents,
+        > {
+            self.0.event_with_filter(::core::default::Default::default())
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-        for StrategyManagerStorage<M>
-    {
+    for StrategyManagerStorage<M> {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -1127,7 +1343,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethevent(name = "Deposit", abi = "Deposit(address,address,address,uint256)")]
     pub struct DepositFilter {
@@ -1146,7 +1362,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethevent(
         name = "StrategyAddedToDepositWhitelist",
@@ -1165,7 +1381,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethevent(
         name = "StrategyRemovedFromDepositWhitelist",
@@ -1184,7 +1400,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethevent(
         name = "StrategyWhitelisterChanged",
@@ -1204,7 +1420,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethevent(
         name = "UpdatedThirdPartyTransfersForbidden",
@@ -1223,14 +1439,18 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub enum StrategyManagerStorageEvents {
         DepositFilter(DepositFilter),
         StrategyAddedToDepositWhitelistFilter(StrategyAddedToDepositWhitelistFilter),
-        StrategyRemovedFromDepositWhitelistFilter(StrategyRemovedFromDepositWhitelistFilter),
+        StrategyRemovedFromDepositWhitelistFilter(
+            StrategyRemovedFromDepositWhitelistFilter,
+        ),
         StrategyWhitelisterChangedFilter(StrategyWhitelisterChangedFilter),
-        UpdatedThirdPartyTransfersForbiddenFilter(UpdatedThirdPartyTransfersForbiddenFilter),
+        UpdatedThirdPartyTransfersForbiddenFilter(
+            UpdatedThirdPartyTransfersForbiddenFilter,
+        ),
     }
     impl ::ethers::contract::EthLogDecode for StrategyManagerStorageEvents {
         fn decode_log(
@@ -1241,10 +1461,14 @@ pub mod strategy_manager_storage {
             }
             if let Ok(decoded) = StrategyAddedToDepositWhitelistFilter::decode_log(log) {
                 return Ok(
-                    StrategyManagerStorageEvents::StrategyAddedToDepositWhitelistFilter(decoded),
+                    StrategyManagerStorageEvents::StrategyAddedToDepositWhitelistFilter(
+                        decoded,
+                    ),
                 );
             }
-            if let Ok(decoded) = StrategyRemovedFromDepositWhitelistFilter::decode_log(log) {
+            if let Ok(decoded) = StrategyRemovedFromDepositWhitelistFilter::decode_log(
+                log,
+            ) {
                 return Ok(
                     StrategyManagerStorageEvents::StrategyRemovedFromDepositWhitelistFilter(
                         decoded,
@@ -1252,9 +1476,15 @@ pub mod strategy_manager_storage {
                 );
             }
             if let Ok(decoded) = StrategyWhitelisterChangedFilter::decode_log(log) {
-                return Ok(StrategyManagerStorageEvents::StrategyWhitelisterChangedFilter(decoded));
+                return Ok(
+                    StrategyManagerStorageEvents::StrategyWhitelisterChangedFilter(
+                        decoded,
+                    ),
+                );
             }
-            if let Ok(decoded) = UpdatedThirdPartyTransfersForbiddenFilter::decode_log(log) {
+            if let Ok(decoded) = UpdatedThirdPartyTransfersForbiddenFilter::decode_log(
+                log,
+            ) {
                 return Ok(
                     StrategyManagerStorageEvents::UpdatedThirdPartyTransfersForbiddenFilter(
                         decoded,
@@ -1288,26 +1518,26 @@ pub mod strategy_manager_storage {
             Self::DepositFilter(value)
         }
     }
-    impl ::core::convert::From<StrategyAddedToDepositWhitelistFilter> for StrategyManagerStorageEvents {
+    impl ::core::convert::From<StrategyAddedToDepositWhitelistFilter>
+    for StrategyManagerStorageEvents {
         fn from(value: StrategyAddedToDepositWhitelistFilter) -> Self {
             Self::StrategyAddedToDepositWhitelistFilter(value)
         }
     }
     impl ::core::convert::From<StrategyRemovedFromDepositWhitelistFilter>
-        for StrategyManagerStorageEvents
-    {
+    for StrategyManagerStorageEvents {
         fn from(value: StrategyRemovedFromDepositWhitelistFilter) -> Self {
             Self::StrategyRemovedFromDepositWhitelistFilter(value)
         }
     }
-    impl ::core::convert::From<StrategyWhitelisterChangedFilter> for StrategyManagerStorageEvents {
+    impl ::core::convert::From<StrategyWhitelisterChangedFilter>
+    for StrategyManagerStorageEvents {
         fn from(value: StrategyWhitelisterChangedFilter) -> Self {
             Self::StrategyWhitelisterChangedFilter(value)
         }
     }
     impl ::core::convert::From<UpdatedThirdPartyTransfersForbiddenFilter>
-        for StrategyManagerStorageEvents
-    {
+    for StrategyManagerStorageEvents {
         fn from(value: UpdatedThirdPartyTransfersForbiddenFilter) -> Self {
             Self::UpdatedThirdPartyTransfersForbiddenFilter(value)
         }
@@ -1323,7 +1553,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "DEPOSIT_TYPEHASH", abi = "DEPOSIT_TYPEHASH()")]
     pub struct DepositTypehashCall;
@@ -1338,7 +1568,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "DOMAIN_TYPEHASH", abi = "DOMAIN_TYPEHASH()")]
     pub struct DomainTypehashCall;
@@ -1353,7 +1583,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "addShares", abi = "addShares(address,address,address,uint256)")]
     pub struct AddSharesCall {
@@ -1373,7 +1603,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(
         name = "addStrategiesToDepositWhitelist",
@@ -1394,7 +1624,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(
         name = "calculateWithdrawalRoot",
@@ -1414,7 +1644,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "delegation", abi = "delegation()")]
     pub struct DelegationCall;
@@ -1429,7 +1659,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(
         name = "depositIntoStrategy",
@@ -1451,7 +1681,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(
         name = "depositIntoStrategyWithSignature",
@@ -1476,7 +1706,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "eigenPodManager", abi = "eigenPodManager()")]
     pub struct EigenPodManagerCall;
@@ -1491,7 +1721,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "getDeposits", abi = "getDeposits(address)")]
     pub struct GetDepositsCall {
@@ -1508,7 +1738,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(
         name = "migrateQueuedWithdrawal",
@@ -1528,7 +1758,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "nonces", abi = "nonces(address)")]
     pub struct NoncesCall(pub ::ethers::core::types::Address);
@@ -1543,7 +1773,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "removeShares", abi = "removeShares(address,address,uint256)")]
     pub struct RemoveSharesCall {
@@ -1562,14 +1792,16 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(
         name = "removeStrategiesFromDepositWhitelist",
         abi = "removeStrategiesFromDepositWhitelist(address[])"
     )]
     pub struct RemoveStrategiesFromDepositWhitelistCall {
-        pub strategies_to_remove_from_whitelist: ::std::vec::Vec<::ethers::core::types::Address>,
+        pub strategies_to_remove_from_whitelist: ::std::vec::Vec<
+            ::ethers::core::types::Address,
+        >,
     }
     ///Container type for all input parameters for the `slasher` function with signature `slasher()` and selector `0xb1344271`
     #[derive(
@@ -1582,7 +1814,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "slasher", abi = "slasher()")]
     pub struct SlasherCall;
@@ -1597,12 +1829,9 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
-    #[ethcall(
-        name = "stakerStrategyList",
-        abi = "stakerStrategyList(address,uint256)"
-    )]
+    #[ethcall(name = "stakerStrategyList", abi = "stakerStrategyList(address,uint256)")]
     pub struct StakerStrategyListCall(
         pub ::ethers::core::types::Address,
         pub ::ethers::core::types::U256,
@@ -1618,7 +1847,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(
         name = "stakerStrategyListLength",
@@ -1638,7 +1867,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(
         name = "stakerStrategyShares",
@@ -1659,7 +1888,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(
         name = "strategyIsWhitelistedForDeposit",
@@ -1677,7 +1906,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "strategyWhitelister", abi = "strategyWhitelister()")]
     pub struct StrategyWhitelisterCall;
@@ -1692,7 +1921,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(
         name = "thirdPartyTransfersForbidden",
@@ -1710,7 +1939,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(
         name = "withdrawSharesAsTokens",
@@ -1733,7 +1962,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "withdrawalRootPending", abi = "withdrawalRootPending(bytes32)")]
     pub struct WithdrawalRootPendingCall(pub [u8; 32]);
@@ -1746,7 +1975,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub enum StrategyManagerStorageCalls {
         DepositTypehash(DepositTypehashCall),
@@ -1778,116 +2007,119 @@ pub mod strategy_manager_storage {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded) =
-                <DepositTypehashCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <DepositTypehashCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::DepositTypehash(decoded));
             }
-            if let Ok(decoded) =
-                <DomainTypehashCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <DomainTypehashCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::DomainTypehash(decoded));
             }
-            if let Ok(decoded) = <AddSharesCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <AddSharesCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::AddShares(decoded));
             }
-            if let Ok(decoded) =
-                <AddStrategiesToDepositWhitelistCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                )
-            {
+            if let Ok(decoded) = <AddStrategiesToDepositWhitelistCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::AddStrategiesToDepositWhitelist(decoded));
             }
-            if let Ok(decoded) =
-                <CalculateWithdrawalRootCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <CalculateWithdrawalRootCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::CalculateWithdrawalRoot(decoded));
             }
-            if let Ok(decoded) = <DelegationCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <DelegationCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::Delegation(decoded));
             }
-            if let Ok(decoded) =
-                <DepositIntoStrategyCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <DepositIntoStrategyCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::DepositIntoStrategy(decoded));
             }
-            if let Ok(decoded) =
-                <DepositIntoStrategyWithSignatureCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                )
-            {
+            if let Ok(decoded) = <DepositIntoStrategyWithSignatureCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::DepositIntoStrategyWithSignature(decoded));
             }
-            if let Ok(decoded) =
-                <EigenPodManagerCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <EigenPodManagerCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::EigenPodManager(decoded));
             }
-            if let Ok(decoded) = <GetDepositsCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <GetDepositsCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::GetDeposits(decoded));
             }
-            if let Ok(decoded) =
-                <MigrateQueuedWithdrawalCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <MigrateQueuedWithdrawalCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::MigrateQueuedWithdrawal(decoded));
             }
-            if let Ok(decoded) = <NoncesCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <NoncesCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::Nonces(decoded));
             }
-            if let Ok(decoded) = <RemoveSharesCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <RemoveSharesCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::RemoveShares(decoded));
             }
-            if let Ok(decoded) =
-                <RemoveStrategiesFromDepositWhitelistCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                )
-            {
+            if let Ok(decoded) = <RemoveStrategiesFromDepositWhitelistCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::RemoveStrategiesFromDepositWhitelist(decoded));
             }
-            if let Ok(decoded) = <SlasherCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <SlasherCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::Slasher(decoded));
             }
-            if let Ok(decoded) =
-                <StakerStrategyListCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <StakerStrategyListCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::StakerStrategyList(decoded));
             }
-            if let Ok(decoded) =
-                <StakerStrategyListLengthCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <StakerStrategyListLengthCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::StakerStrategyListLength(decoded));
             }
-            if let Ok(decoded) =
-                <StakerStrategySharesCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <StakerStrategySharesCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::StakerStrategyShares(decoded));
             }
-            if let Ok(decoded) =
-                <StrategyIsWhitelistedForDepositCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                )
-            {
+            if let Ok(decoded) = <StrategyIsWhitelistedForDepositCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::StrategyIsWhitelistedForDeposit(decoded));
             }
-            if let Ok(decoded) =
-                <StrategyWhitelisterCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <StrategyWhitelisterCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::StrategyWhitelister(decoded));
             }
-            if let Ok(decoded) =
-                <ThirdPartyTransfersForbiddenCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <ThirdPartyTransfersForbiddenCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::ThirdPartyTransfersForbidden(decoded));
             }
-            if let Ok(decoded) =
-                <WithdrawSharesAsTokensCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <WithdrawSharesAsTokensCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::WithdrawSharesAsTokens(decoded));
             }
-            if let Ok(decoded) =
-                <WithdrawalRootPendingCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <WithdrawalRootPendingCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::WithdrawalRootPending(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -1896,29 +2128,43 @@ pub mod strategy_manager_storage {
     impl ::ethers::core::abi::AbiEncode for StrategyManagerStorageCalls {
         fn encode(self) -> Vec<u8> {
             match self {
-                Self::DepositTypehash(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::DomainTypehash(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::AddShares(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::DepositTypehash(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
+                Self::DomainTypehash(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
+                Self::AddShares(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::AddStrategiesToDepositWhitelist(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::CalculateWithdrawalRoot(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::Delegation(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::Delegation(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::DepositIntoStrategy(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::DepositIntoStrategyWithSignature(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::EigenPodManager(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::GetDeposits(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::EigenPodManager(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
+                Self::GetDeposits(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::MigrateQueuedWithdrawal(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::Nonces(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::RemoveShares(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::RemoveShares(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::RemoveStrategiesFromDepositWhitelist(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -1959,33 +2205,51 @@ pub mod strategy_manager_storage {
                 Self::AddStrategiesToDepositWhitelist(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::CalculateWithdrawalRoot(element) => ::core::fmt::Display::fmt(element, f),
+                Self::CalculateWithdrawalRoot(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::Delegation(element) => ::core::fmt::Display::fmt(element, f),
-                Self::DepositIntoStrategy(element) => ::core::fmt::Display::fmt(element, f),
+                Self::DepositIntoStrategy(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::DepositIntoStrategyWithSignature(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::EigenPodManager(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetDeposits(element) => ::core::fmt::Display::fmt(element, f),
-                Self::MigrateQueuedWithdrawal(element) => ::core::fmt::Display::fmt(element, f),
+                Self::MigrateQueuedWithdrawal(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::Nonces(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RemoveShares(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RemoveStrategiesFromDepositWhitelist(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::Slasher(element) => ::core::fmt::Display::fmt(element, f),
-                Self::StakerStrategyList(element) => ::core::fmt::Display::fmt(element, f),
-                Self::StakerStrategyListLength(element) => ::core::fmt::Display::fmt(element, f),
-                Self::StakerStrategyShares(element) => ::core::fmt::Display::fmt(element, f),
+                Self::StakerStrategyList(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
+                Self::StakerStrategyListLength(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
+                Self::StakerStrategyShares(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::StrategyIsWhitelistedForDeposit(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::StrategyWhitelister(element) => ::core::fmt::Display::fmt(element, f),
+                Self::StrategyWhitelister(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::ThirdPartyTransfersForbidden(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::WithdrawSharesAsTokens(element) => ::core::fmt::Display::fmt(element, f),
-                Self::WithdrawalRootPending(element) => ::core::fmt::Display::fmt(element, f),
+                Self::WithdrawSharesAsTokens(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
+                Self::WithdrawalRootPending(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
             }
         }
     }
@@ -2004,12 +2268,14 @@ pub mod strategy_manager_storage {
             Self::AddShares(value)
         }
     }
-    impl ::core::convert::From<AddStrategiesToDepositWhitelistCall> for StrategyManagerStorageCalls {
+    impl ::core::convert::From<AddStrategiesToDepositWhitelistCall>
+    for StrategyManagerStorageCalls {
         fn from(value: AddStrategiesToDepositWhitelistCall) -> Self {
             Self::AddStrategiesToDepositWhitelist(value)
         }
     }
-    impl ::core::convert::From<CalculateWithdrawalRootCall> for StrategyManagerStorageCalls {
+    impl ::core::convert::From<CalculateWithdrawalRootCall>
+    for StrategyManagerStorageCalls {
         fn from(value: CalculateWithdrawalRootCall) -> Self {
             Self::CalculateWithdrawalRoot(value)
         }
@@ -2024,7 +2290,8 @@ pub mod strategy_manager_storage {
             Self::DepositIntoStrategy(value)
         }
     }
-    impl ::core::convert::From<DepositIntoStrategyWithSignatureCall> for StrategyManagerStorageCalls {
+    impl ::core::convert::From<DepositIntoStrategyWithSignatureCall>
+    for StrategyManagerStorageCalls {
         fn from(value: DepositIntoStrategyWithSignatureCall) -> Self {
             Self::DepositIntoStrategyWithSignature(value)
         }
@@ -2039,7 +2306,8 @@ pub mod strategy_manager_storage {
             Self::GetDeposits(value)
         }
     }
-    impl ::core::convert::From<MigrateQueuedWithdrawalCall> for StrategyManagerStorageCalls {
+    impl ::core::convert::From<MigrateQueuedWithdrawalCall>
+    for StrategyManagerStorageCalls {
         fn from(value: MigrateQueuedWithdrawalCall) -> Self {
             Self::MigrateQueuedWithdrawal(value)
         }
@@ -2055,8 +2323,7 @@ pub mod strategy_manager_storage {
         }
     }
     impl ::core::convert::From<RemoveStrategiesFromDepositWhitelistCall>
-        for StrategyManagerStorageCalls
-    {
+    for StrategyManagerStorageCalls {
         fn from(value: RemoveStrategiesFromDepositWhitelistCall) -> Self {
             Self::RemoveStrategiesFromDepositWhitelist(value)
         }
@@ -2071,17 +2338,20 @@ pub mod strategy_manager_storage {
             Self::StakerStrategyList(value)
         }
     }
-    impl ::core::convert::From<StakerStrategyListLengthCall> for StrategyManagerStorageCalls {
+    impl ::core::convert::From<StakerStrategyListLengthCall>
+    for StrategyManagerStorageCalls {
         fn from(value: StakerStrategyListLengthCall) -> Self {
             Self::StakerStrategyListLength(value)
         }
     }
-    impl ::core::convert::From<StakerStrategySharesCall> for StrategyManagerStorageCalls {
+    impl ::core::convert::From<StakerStrategySharesCall>
+    for StrategyManagerStorageCalls {
         fn from(value: StakerStrategySharesCall) -> Self {
             Self::StakerStrategyShares(value)
         }
     }
-    impl ::core::convert::From<StrategyIsWhitelistedForDepositCall> for StrategyManagerStorageCalls {
+    impl ::core::convert::From<StrategyIsWhitelistedForDepositCall>
+    for StrategyManagerStorageCalls {
         fn from(value: StrategyIsWhitelistedForDepositCall) -> Self {
             Self::StrategyIsWhitelistedForDeposit(value)
         }
@@ -2091,17 +2361,20 @@ pub mod strategy_manager_storage {
             Self::StrategyWhitelister(value)
         }
     }
-    impl ::core::convert::From<ThirdPartyTransfersForbiddenCall> for StrategyManagerStorageCalls {
+    impl ::core::convert::From<ThirdPartyTransfersForbiddenCall>
+    for StrategyManagerStorageCalls {
         fn from(value: ThirdPartyTransfersForbiddenCall) -> Self {
             Self::ThirdPartyTransfersForbidden(value)
         }
     }
-    impl ::core::convert::From<WithdrawSharesAsTokensCall> for StrategyManagerStorageCalls {
+    impl ::core::convert::From<WithdrawSharesAsTokensCall>
+    for StrategyManagerStorageCalls {
         fn from(value: WithdrawSharesAsTokensCall) -> Self {
             Self::WithdrawSharesAsTokens(value)
         }
     }
-    impl ::core::convert::From<WithdrawalRootPendingCall> for StrategyManagerStorageCalls {
+    impl ::core::convert::From<WithdrawalRootPendingCall>
+    for StrategyManagerStorageCalls {
         fn from(value: WithdrawalRootPendingCall) -> Self {
             Self::WithdrawalRootPending(value)
         }
@@ -2117,7 +2390,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct DepositTypehashReturn(pub [u8; 32]);
     ///Container type for all return fields from the `DOMAIN_TYPEHASH` function with signature `DOMAIN_TYPEHASH()` and selector `0x20606b70`
@@ -2131,7 +2404,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct DomainTypehashReturn(pub [u8; 32]);
     ///Container type for all return fields from the `calculateWithdrawalRoot` function with signature `calculateWithdrawalRoot((address[],uint256[],address,(address,uint96),uint32,address))` and selector `0xb43b514b`
@@ -2145,7 +2418,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct CalculateWithdrawalRootReturn(pub [u8; 32]);
     ///Container type for all return fields from the `delegation` function with signature `delegation()` and selector `0xdf5cf723`
@@ -2159,7 +2432,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct DelegationReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `depositIntoStrategy` function with signature `depositIntoStrategy(address,address,uint256)` and selector `0xe7a050aa`
@@ -2173,7 +2446,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct DepositIntoStrategyReturn {
         pub shares: ::ethers::core::types::U256,
@@ -2189,7 +2462,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct DepositIntoStrategyWithSignatureReturn {
         pub shares: ::ethers::core::types::U256,
@@ -2205,7 +2478,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct EigenPodManagerReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `getDeposits` function with signature `getDeposits(address)` and selector `0x94f649dd`
@@ -2219,7 +2492,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct GetDepositsReturn(
         pub ::std::vec::Vec<::ethers::core::types::Address>,
@@ -2236,7 +2509,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct MigrateQueuedWithdrawalReturn(pub bool, pub [u8; 32]);
     ///Container type for all return fields from the `nonces` function with signature `nonces(address)` and selector `0x7ecebe00`
@@ -2250,7 +2523,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct NoncesReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `slasher` function with signature `slasher()` and selector `0xb1344271`
@@ -2264,7 +2537,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct SlasherReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `stakerStrategyList` function with signature `stakerStrategyList(address,uint256)` and selector `0xcbc2bd62`
@@ -2278,7 +2551,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct StakerStrategyListReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `stakerStrategyListLength` function with signature `stakerStrategyListLength(address)` and selector `0x8b8aac3c`
@@ -2292,7 +2565,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct StakerStrategyListLengthReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `stakerStrategyShares` function with signature `stakerStrategyShares(address,address)` and selector `0x7a7e0d92`
@@ -2306,7 +2579,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct StakerStrategySharesReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `strategyIsWhitelistedForDeposit` function with signature `strategyIsWhitelistedForDeposit(address)` and selector `0x663c1de4`
@@ -2320,7 +2593,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct StrategyIsWhitelistedForDepositReturn(pub bool);
     ///Container type for all return fields from the `strategyWhitelister` function with signature `strategyWhitelister()` and selector `0x967fc0d2`
@@ -2334,7 +2607,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct StrategyWhitelisterReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `thirdPartyTransfersForbidden` function with signature `thirdPartyTransfersForbidden(address)` and selector `0x9b4da03d`
@@ -2348,7 +2621,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct ThirdPartyTransfersForbiddenReturn(pub bool);
     ///Container type for all return fields from the `withdrawalRootPending` function with signature `withdrawalRootPending(bytes32)` and selector `0xc3c6b3a9`
@@ -2362,7 +2635,7 @@ pub mod strategy_manager_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct WithdrawalRootPendingReturn(pub bool);
 }

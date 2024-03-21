@@ -7,7 +7,7 @@ pub use i_finalizer_task_manager::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types
+    non_camel_case_types,
 )]
 pub mod i_finalizer_task_manager {
     pub use super::super::shared_types::*;
@@ -18,149 +18,181 @@ pub mod i_finalizer_task_manager {
             functions: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("createNewTask"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("createNewTask"),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("blockNumber"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint256"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("quorumThresholdPercentage",),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint32"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("bytes"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("createNewTask"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("blockNumber"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned(
+                                        "quorumThresholdPercentage",
+                                    ),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint32"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bytes"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("getTaskResponseWindowBlock"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("getTaskResponseWindowBlock",),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("uint32"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "getTaskResponseWindowBlock",
                             ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint32"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("taskNumber"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("taskNumber"),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("uint32"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("taskNumber"),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint32"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
             ]),
             events: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("NewTaskCreated"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("NewTaskCreated"),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("taskIndex"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                indexed: true,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("task"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                ],),
-                                indexed: false,
-                            },
-                        ],
-                        anonymous: false,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned("NewTaskCreated"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("taskIndex"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    indexed: true,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("task"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
+                                        ::std::vec![
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                        ],
+                                    ),
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("TaskCompleted"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("TaskCompleted"),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("taskIndex"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                indexed: true,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("blockHash"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                                indexed: true,
-                            },
-                        ],
-                        anonymous: false,
-                    },],
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned("TaskCompleted"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("taskIndex"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    indexed: true,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("blockHash"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
+                                        32usize,
+                                    ),
+                                    indexed: true,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("TaskResponded"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("TaskResponded"),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("taskResponse"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                ],),
-                                indexed: false,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("taskResponseMetadata",),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                        ),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned("TaskResponded"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("taskResponse"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
+                                        ::std::vec![
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                        ],
                                     ),
-                                    ::ethers::core::abi::ethabi::ParamType::Array(
-                                        ::std::boxed::Box::new(
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                        ),
+                                    indexed: false,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned(
+                                        "taskResponseMetadata",
                                     ),
-                                ],),
-                                indexed: false,
-                            },
-                        ],
-                        anonymous: false,
-                    },],
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
+                                        ::std::vec![
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Array(
+                                                ::std::boxed::Box::new(
+                                                    ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                                ),
+                                            ),
+                                            ::ethers::core::abi::ethabi::ParamType::Array(
+                                                ::std::boxed::Box::new(
+                                                    ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                                                ),
+                                            ),
+                                        ],
+                                    ),
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
                 ),
             ]),
             errors: ::std::collections::BTreeMap::new(),
@@ -169,8 +201,9 @@ pub mod i_finalizer_task_manager {
         }
     }
     ///The parsed JSON ABI of the contract.
-    pub static IFINALIZERTASKMANAGER_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
-        ::ethers::contract::Lazy::new(__abi);
+    pub static IFINALIZERTASKMANAGER_ABI: ::ethers::contract::Lazy<
+        ::ethers::core::abi::Abi,
+    > = ::ethers::contract::Lazy::new(__abi);
     pub struct IFinalizerTaskManager<M>(::ethers::contract::Contract<M>);
     impl<M> ::core::clone::Clone for IFinalizerTaskManager<M> {
         fn clone(&self) -> Self {
@@ -202,11 +235,13 @@ pub mod i_finalizer_task_manager {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(::ethers::contract::Contract::new(
-                address.into(),
-                IFINALIZERTASKMANAGER_ABI.clone(),
-                client,
-            ))
+            Self(
+                ::ethers::contract::Contract::new(
+                    address.into(),
+                    IFINALIZERTASKMANAGER_ABI.clone(),
+                    client,
+                ),
+            )
         }
         ///Calls the contract's `createNewTask` (0x6b92787e) function
         pub fn create_new_task(
@@ -239,36 +274,46 @@ pub mod i_finalizer_task_manager {
         ///Gets the contract's `NewTaskCreated` event
         pub fn new_task_created_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, NewTaskCreatedFilter>
-        {
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            NewTaskCreatedFilter,
+        > {
             self.0.event()
         }
         ///Gets the contract's `TaskCompleted` event
         pub fn task_completed_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, TaskCompletedFilter>
-        {
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            TaskCompletedFilter,
+        > {
             self.0.event()
         }
         ///Gets the contract's `TaskResponded` event
         pub fn task_responded_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, TaskRespondedFilter>
-        {
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            TaskRespondedFilter,
+        > {
             self.0.event()
         }
         /// Returns an `Event` builder for all the events of this contract.
         pub fn events(
             &self,
-        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, IFinalizerTaskManagerEvents>
-        {
-            self.0
-                .event_with_filter(::core::default::Default::default())
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            IFinalizerTaskManagerEvents,
+        > {
+            self.0.event_with_filter(::core::default::Default::default())
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-        for IFinalizerTaskManager<M>
-    {
+    for IFinalizerTaskManager<M> {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -283,7 +328,7 @@ pub mod i_finalizer_task_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethevent(
         name = "NewTaskCreated",
@@ -304,7 +349,7 @@ pub mod i_finalizer_task_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethevent(name = "TaskCompleted", abi = "TaskCompleted(uint32,bytes32)")]
     pub struct TaskCompletedFilter {
@@ -323,7 +368,7 @@ pub mod i_finalizer_task_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethevent(
         name = "TaskResponded",
@@ -342,7 +387,7 @@ pub mod i_finalizer_task_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub enum IFinalizerTaskManagerEvents {
         NewTaskCreatedFilter(NewTaskCreatedFilter),
@@ -368,9 +413,15 @@ pub mod i_finalizer_task_manager {
     impl ::core::fmt::Display for IFinalizerTaskManagerEvents {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
-                Self::NewTaskCreatedFilter(element) => ::core::fmt::Display::fmt(element, f),
-                Self::TaskCompletedFilter(element) => ::core::fmt::Display::fmt(element, f),
-                Self::TaskRespondedFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::NewTaskCreatedFilter(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
+                Self::TaskCompletedFilter(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
+                Self::TaskRespondedFilter(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
             }
         }
     }
@@ -400,7 +451,7 @@ pub mod i_finalizer_task_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "createNewTask", abi = "createNewTask(uint256,uint32,bytes)")]
     pub struct CreateNewTaskCall {
@@ -419,12 +470,9 @@ pub mod i_finalizer_task_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
-    #[ethcall(
-        name = "getTaskResponseWindowBlock",
-        abi = "getTaskResponseWindowBlock()"
-    )]
+    #[ethcall(name = "getTaskResponseWindowBlock", abi = "getTaskResponseWindowBlock()")]
     pub struct GetTaskResponseWindowBlockCall;
     ///Container type for all input parameters for the `taskNumber` function with signature `taskNumber()` and selector `0x72d18e8d`
     #[derive(
@@ -437,7 +485,7 @@ pub mod i_finalizer_task_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "taskNumber", abi = "taskNumber()")]
     pub struct TaskNumberCall;
@@ -450,7 +498,7 @@ pub mod i_finalizer_task_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub enum IFinalizerTaskManagerCalls {
         CreateNewTask(CreateNewTaskCall),
@@ -462,16 +510,19 @@ pub mod i_finalizer_task_manager {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded) = <CreateNewTaskCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <CreateNewTaskCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::CreateNewTask(decoded));
             }
-            if let Ok(decoded) =
-                <GetTaskResponseWindowBlockCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
+            if let Ok(decoded) = <GetTaskResponseWindowBlockCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::GetTaskResponseWindowBlock(decoded));
             }
-            if let Ok(decoded) = <TaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <TaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::TaskNumber(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -480,11 +531,15 @@ pub mod i_finalizer_task_manager {
     impl ::ethers::core::abi::AbiEncode for IFinalizerTaskManagerCalls {
         fn encode(self) -> Vec<u8> {
             match self {
-                Self::CreateNewTask(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::CreateNewTask(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::GetTaskResponseWindowBlock(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::TaskNumber(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::TaskNumber(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
             }
         }
     }
@@ -492,7 +547,9 @@ pub mod i_finalizer_task_manager {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
                 Self::CreateNewTask(element) => ::core::fmt::Display::fmt(element, f),
-                Self::GetTaskResponseWindowBlock(element) => ::core::fmt::Display::fmt(element, f),
+                Self::GetTaskResponseWindowBlock(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::TaskNumber(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
@@ -502,7 +559,8 @@ pub mod i_finalizer_task_manager {
             Self::CreateNewTask(value)
         }
     }
-    impl ::core::convert::From<GetTaskResponseWindowBlockCall> for IFinalizerTaskManagerCalls {
+    impl ::core::convert::From<GetTaskResponseWindowBlockCall>
+    for IFinalizerTaskManagerCalls {
         fn from(value: GetTaskResponseWindowBlockCall) -> Self {
             Self::GetTaskResponseWindowBlock(value)
         }
@@ -523,7 +581,7 @@ pub mod i_finalizer_task_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct GetTaskResponseWindowBlockReturn(pub u32);
     ///Container type for all return fields from the `taskNumber` function with signature `taskNumber()` and selector `0x72d18e8d`
@@ -537,7 +595,7 @@ pub mod i_finalizer_task_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     pub struct TaskNumberReturn(pub u32);
 }
