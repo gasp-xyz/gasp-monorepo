@@ -64,6 +64,9 @@ jobs:
       - name: docker ps
         run: docker ps
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
       - name: build and copy contracts
         working-directory: contracts
         run: |
