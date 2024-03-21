@@ -33,6 +33,9 @@ describe('Corrupted AVS Finalizer', () => {
         const address = await POperatorAddress;
         console.info("Started");
         const operatorId = await getOperatorId(publicClient, address as string);
+        // lets wait for some time, to be sure that the operator fully onboard.
+        await new Promise(r => setTimeout(r, 10000));
+
         console.info("Corrupted - Operator Address: " + POperatorAddress + " Id " + operatorId);
 
         const noResponse = await waitForNoTaskResponded(publicClient, 120);
