@@ -37,6 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
+      NODE_VERSION: ${{ steps.set_vars.outputs.NODE_VERSION }}
+      AVS_VERSION: ${{ steps.set_vars.outputs.AVS_VERSION }}
     steps:
       - name: Set global version
         id: set_vars
