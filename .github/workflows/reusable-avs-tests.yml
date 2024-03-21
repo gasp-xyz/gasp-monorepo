@@ -64,6 +64,15 @@ jobs:
       - name: docker ps
         run: docker ps
 
+      - name: build and copy contracts
+        working-directory: contracts
+        run: |
+          forge build 
+          cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../avs-finalizer/tests/abis/FinalizerTaskManager.json
+          cp out/IndexRegistryStorage.sol/IndexRegistryStorage.json ../avs-finalizer/tests/abis/IndexRegistryStorage.json
+          cp out/RegistryCoordinator.sol/RegistryCoordinator.json ../avs-finalizer/tests/abis/RegistryCoordinator.json
+          cp out/RegistryCoordinatorStorage.sol/RegistryCoordinatorStorage.json ../avs-finalizer/tests/abis/RegistryCoordinatorStorage.json          
+      
       - name: FINALIZER tests - install deps
         working-directory: avs-finalizer/tests/
         run: yarn install
