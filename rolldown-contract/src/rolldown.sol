@@ -450,7 +450,7 @@ contract RollDown {
     function getPendingRequests(
         uint256 start,
         uint256 end
-    ) private view returns (L1Update memory) {
+    ) public view returns (L1Update memory) {
         L1Update memory result;
 
         uint256 depositsCounter = 0;
