@@ -8,6 +8,7 @@ import {
 	WalletClient,
 	createPublicClient,
 	createWalletClient,
+	keccak256,
 	webSocket,
 } from "viem";
 import { defineChain } from "viem";
@@ -48,6 +49,8 @@ const anvil = defineChain({
 	},
 });
 
+let pendingUpdatesStored = "";
+
 async function sendUpdateToL1(
 	api: ApiPromise,
 	walletClient: any,
@@ -56,31 +59,49 @@ async function sendUpdateToL1(
 ) {
 	console.log(`HASH ${blockHash} `);
 	const pendingUpdates = await api.rpc.rolldown.pending_updates(blockHash);
-	const l2Update = decodeAbiParameters(
-		abi.find((e: any) => e.name === "update_l1_from_l2")!.inputs,
-		pendingUpdates.toHex(),
-	);
-
-	const reqCount =
-		l2Update[0].withdrawals.length +
-		l2Update[0].cancels.length +
-		l2Update[0].results.length;
 
 	if (verbose) {
-		console.log(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
+		console.log(
+			"----------------------------------------------------------------",
+		);
+		console.log("Fetched pending updates", keccak256(pendingUpdates.toHex()));
+		console.log("Stored pending updates", pendingUpdatesStored);
+		console.log(
+			"----------------------------------------------------------------",
+		);
 	}
 
-	if (reqCount > 0) {
-		const storageHash = await walletClient.writeContract({
-			chain: anvil, // TODO: this needs the chain in order to work properly
-			abi: abi,
-			address: mangataContractAddress,
-			functionName: "update_l1_from_l2",
-			args: l2Update as any,
-			gas: 999999n,
-		});
-		return storageHash;
+	if (pendingUpdatesStored === keccak256(pendingUpdates.toHex())) {
+		console.log("Duplicate updates: ", keccak256(pendingUpdates.toHex()));
+		return null;
 	} else {
+		pendingUpdatesStored = keccak256(pendingUpdates.toHex());
+		const l2Update = decodeAbiParameters(
+			abi.find((e: any) => e.name === "update_l1_from_l2")!.inputs,
+			pendingUpdates.toHex(),
+		);
+
+		const reqCount =
+			l2Update[0].withdrawals.length +
+			l2Update[0].cancels.length +
+			l2Update[0].results.length;
+
+		if (verbose) {
+			console.log(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
+		}
+
+		if (reqCount > 0) {
+			const storageHash = await walletClient.writeContract({
+				chain: anvil, // TODO: this needs the chain in order to work properly
+				abi: abi,
+				address: mangataContractAddress,
+				functionName: "update_l1_from_l2",
+				args: l2Update as any,
+				gas: 999999n,
+			});
+			return storageHash;
+		}
+
 		console.log("no updates available");
 		return null;
 	}
