@@ -17,6 +17,7 @@ function sleep_ms(ms: number) {
 }
 
 async function main() {
+	let lastSubmitted = "";
 	const abi = rolldownAbi.abi;
 	const publicClient = createPublicClient({
 		transport: webSocket(process.env.ETH_CHAIN_URL, {
@@ -68,13 +69,20 @@ async function main() {
 				encodedData.substring(2),
 			);
 
-			await signTx(
-				api,
-				api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
-				collator,
-			);
+			if (lastSubmitted !== keccak256(encodedData)) {
+				await signTx(
+					api,
+					api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
+					collator,
+				);
+				lastSubmitted = keccak256(encodedData);
+			} else {
+				console.log(`L1Update was already submitted ${encodedData}`);
+			}
 		}
+
 		const events = await apiAt.query.system.events();
+
 		const pendingRequestsEvents = events.filter(
 			(event) =>
 				event.event.section === "rolldown" &&
@@ -108,9 +116,7 @@ async function main() {
 						requestId.toString(),
 					);
 
-					const isVerified = Boolean(verified.toString());
-
-					if (!isVerified) {
+					if (!verified.toPrimitive()) {
 						await signTx(
 							api,
 							api.tx.rolldown.cancelRequestsFromL1(requestId.toString()),
