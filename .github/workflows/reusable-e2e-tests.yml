@@ -44,7 +44,7 @@ jobs:
         id: set_vars
         run: |
           echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT 
-          echo "NODE_VERSION=${{ inputs.nodeVersion || ${{ env.MANGATA_NODE_VERSION }}" >> $GITHUB_OUTPUT
+          echo "NODE_VERSION=${{ inputs.nodeVersion || env.MANGATA_NODE_VERSION }}" >> $GITHUB_OUTPUT
           echo "AVS_VERSION=${{ inputs.avsVersion || '8dd0c81aa88b967334d001d8cae031f8799a189f' }}" >> $GITHUB_OUTPUT
   
   #build-and-test:
