@@ -41,9 +41,10 @@ jobs:
       AVS_VERSION: ${{ steps.set_vars.outputs.AVS_VERSION }}
     steps:
       - name: Load environment variables
-        uses: dotenv-actions/setup-dotenv@v2
+        uses: xom9ikk/dotenv@v2
         with:
-        dotenv_path: .env
+          mode: development
+          load-mode: strict
         
       - name: Set global version
         id: set_vars
