@@ -1,0 +1,45 @@
+name: rollup-frontend branch workflow
+
+on:
+  push:
+    branches: [rollup-frontend, ci/add-rollup-frontend-deployment-workflow-MGX-944]
+
+permissions:
+  contents: write
+  id-token: write
+  deployments: write
+  checks: write
+
+# The following concurrency group queus in-progress jobs
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: false
+
+jobs:
+  init:
+    name: Set global version
+    runs-on: ubuntu-latest
+    outputs:
+      GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
+    steps:
+      - name: Set global version
+        id: set_vars
+        run: echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
+  
+  build-and-test:
+    needs: [init]
+    name: Build
+    uses: ./.github/workflows/reusable-build-and-test.yml
+    secrets: inherit
+    with:
+      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+  
+  deploy-frontend-env:
+    name: Deploy `frontend` environment
+    needs: [init, build-and-test]
+    uses: ./.github/workflows/reusable-deploy.yml
+    secrets: inherit
+    with:
+      env: frontend
+      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+

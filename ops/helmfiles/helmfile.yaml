@@ -10,6 +10,10 @@ environments:
     values:
     - config/default.yaml
     - config/dev.yaml
+  frontend:
+    values:
+    - config/default.yaml
+    - config/frontend.yaml
   testnet:
     values:
      - config/testnet.yaml
