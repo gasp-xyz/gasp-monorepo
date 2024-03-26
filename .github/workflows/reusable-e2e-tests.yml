@@ -41,7 +41,7 @@ jobs:
       AVS_VERSION: ${{ steps.set_vars.outputs.AVS_VERSION }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Load environment variables
         uses: xom9ikk/dotenv@v2
         with:
@@ -89,8 +89,19 @@ jobs:
       - name: docker ps
         run: docker ps
 
+      - name: E2E- Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v7.0.5
+
+      - name: E2E- Calculate if run e2e feature branch or main.
+        run: |
+          echo DEFAULT: E2E test will run with: $E2EBRANCHNAME
+          echo "Running on: ${{ steps.branch-name.outputs.current_branch }}"
+          if [ -n "$(git ls-remote --heads https://github.com/mangata-finance/mangata-e2e.git ${{ steps.branch-name.outputs.current_branch }} --force --quiet)" ]; then echo "E2EBRANCHNAME=${{ steps.branch-name.outputs.current_branch }}" >> $GITHUB_ENV; echo "MATCH - OK" ; elif [ -n "$(git ls-remote --heads https://github.com/mangata-finance/mangata-e2e.git ${{ github.base_ref }} --force --quiet)" ]; then echo "E2EBRANCHNAME=${{ github.base_ref }}" >> $GITHUB_ENV; echo "MATCH - OK" ;  fi
+
+
       - name: Decide if main - branch or parameter
-        run: echo "E2EBRANCHNAME=${{ inputs.e2eBranch || 'eth-rollup-develop' }}" >> $GITHUB_ENV
+        run: echo "E2EBRANCHNAME=${{ inputs.e2eBranch || env.E2EBRANCHNAME }}" >> $GITHUB_ENV
 
       - name: Checkout tests
         uses: actions/checkout@v4
