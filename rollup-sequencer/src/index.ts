@@ -12,6 +12,8 @@ type ContractAddress = `0x${string}`;
 const mangataContractAddress = process.env
 	.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
 
+const blockNumberDelay = process.env.BLOCK_NUMBER_DELAY!;
+
 function sleep_ms(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -46,38 +48,54 @@ async function main() {
 	const keyring = new Keyring({ type: "sr25519" });
 	const collator = keyring.addFromUri(process.env.MNEMONIC!);
 
+
 	await api.derive.chain.subscribeNewHeads(async (header) => {
 		const apiAt = await api.at(header.hash);
 		console.log(`block #${header.number} was authored by ${header.author}`);
 
 		if (header.author?.toString() === collator.address) {
-			const data = (await publicClient.readContract({
-				address: mangataContractAddress,
-				abi: abi,
-				functionName: "getUpdateForL2",
-			})) as any;
 
-			console.log(util.inspect(data, { depth: null }));
+			try {
+				const latestBlockNumber = await publicClient.getBlockNumber()
+				const delayedBlockNumber = latestBlockNumber - BigInt(blockNumberDelay)
 
-			// @ts-ignore
-			const encodedData = encodeAbiParameters(
-				abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
-				[data],
-			);
+				console.log("Latest Block Number: " + latestBlockNumber.toString())
+				console.log("Delayed Block Number: " + delayedBlockNumber.toString())
 
-			const nativeL1Update = await api.rpc.rolldown.get_native_l1_update(
-				encodedData.substring(2),
-			);
+				const data = (await publicClient.readContract({
+					address: mangataContractAddress,
+					abi: abi,
+					functionName: "getUpdateForL2",
+					blockNumber: delayedBlockNumber,
+				})) as any;
 
-			if (lastSubmitted !== keccak256(encodedData)) {
-				await signTx(
-					api,
-					api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
-					collator,
+				console.log(util.inspect(data, { depth: null }));
+
+				// @ts-ignore
+				const encodedData = encodeAbiParameters(
+					abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
+					[data],
 				);
-				lastSubmitted = keccak256(encodedData);
-			} else {
-				console.log(`L1Update was already submitted ${encodedData}`);
+
+				const nativeL1Update = await api.rpc.rolldown.get_native_l1_update(
+					encodedData.substring(2),
+				);
+
+				if (lastSubmitted !== keccak256(encodedData)) {
+					await signTx(
+						api,
+						api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
+						collator,
+					);
+					lastSubmitted = keccak256(encodedData);
+				} else {
+					console.log(`L1Update was already submitted ${encodedData}`);
+				}
+			} catch (e) {
+				// Do nothing with error
+				// Error only appear when we have block where there are no data for getUpdateForL2 at all.
+				// This is only in the very beginning
+				// ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
 			}
 		}
 

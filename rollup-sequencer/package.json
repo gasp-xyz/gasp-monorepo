@@ -23,6 +23,6 @@
     "@mangata-finance/types": "2.2.3-eth-rollup-develop.20",
     "@polkadot/api": "^10.12.2",
     "dotenv": "^16.3.1",
-    "viem": "^1.19.11"
+    "viem": "^2.9.2"
   }
 }
