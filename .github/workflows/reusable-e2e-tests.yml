@@ -40,6 +40,14 @@ jobs:
       NODE_VERSION: ${{ steps.set_vars.outputs.NODE_VERSION }}
       AVS_VERSION: ${{ steps.set_vars.outputs.AVS_VERSION }}
     steps:
+      - name: Load environment variables
+        uses: dotenv-actions/setup-dotenv@v2
+        with:
+        dotenv_path: .env
+        run: | 
+          echo "$MANGATA_NODE_VERSION" 
+          run: echo "MANGATA_NODE_VERSION=$MANGATA_NODE_VERSION" >> $GITHUB_ENV
+
       - name: Set global version
         id: set_vars
         run: |
