@@ -43,6 +43,7 @@ jobs:
       - name: Load environment variables
         uses: xom9ikk/dotenv@v2
         with:
+          path: ./
           load-mode: strict
         
       - name: Set global version
