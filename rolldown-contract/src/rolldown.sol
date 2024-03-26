@@ -183,7 +183,7 @@ contract RollDown {
 
     function getRequestsRange(
         L2Update calldata update
-    ) private pure returns (uint256, uint256) {
+    ) private returns (uint256, uint256) {
         uint256 firstId;
         unchecked {
             firstId = uint256(0) - 1;
@@ -220,7 +220,7 @@ contract RollDown {
     function getOrderOfRequestsOriginatingOnL2(
         uint256 firstId,
         L2Update calldata update
-    ) private pure returns (UpdateType[] memory) {
+    ) private returns (UpdateType[] memory) {
         if (
             update.results.length == 0 &&
             update.cancels.length == 0 &&
@@ -261,6 +261,7 @@ contract RollDown {
                 resultId++;
                 orderId++;
             } else {
+                console.log("requests not in order");
                 revert("invalide L2Update");
             }
         }
@@ -268,22 +269,9 @@ contract RollDown {
     }
 
     function processRequestsOriginatingOnL2(
+        UpdateType[] memory order,
         L2Update calldata inputArray
     ) private {
-        (uint256 firstId, uint256 lastId) = getRequestsRange(inputArray);
-
-        require(firstId != 0, "Invalid L2Update");
-        require(
-            firstId <= lastProcessedUpdate_origin_l2 + 1,
-            "Invalid L2Update"
-        );
-        require(lastId > lastProcessedUpdate_origin_l2, "Invalid L2Update");
-
-        UpdateType[] memory order = getOrderOfRequestsOriginatingOnL2(
-            firstId,
-            inputArray
-        );
-
         uint256 cancelId = 0;
         uint256 withdrawalId = 0;
         uint256 resultsId = 0;
@@ -328,71 +316,71 @@ contract RollDown {
                 inputArray.withdrawals.length >= 1,
             "Array must have at least 1 update"
         );
+        (uint256 firstId, uint256 lastId) = getRequestsRange(inputArray);
+        require(firstId != 0, "Invalid L2Update");
+        require(
+            firstId <= lastProcessedUpdate_origin_l2 + 1,
+            "Invalid L2Update"
+        );
+        require(lastId > lastProcessedUpdate_origin_l2, "Invalid L2Update");
+
+        UpdateType[] memory order = getOrderOfRequestsOriginatingOnL2(
+            firstId,
+            inputArray
+        );
 
         uint256[]
             memory l2UpdatesToBeRemoved = process_l2_update_requests_results(
+                order,
                 inputArray.results
             );
 
-        processRequestsOriginatingOnL2(inputArray);
+        processRequestsOriginatingOnL2(order, inputArray);
 
         // Create a new array with the correct size
         if (l2UpdatesToBeRemoved.length > 0) {
             uint256 rid = counter++;
-            l2UpdatesToRemove[rid].requestId = RequestId({
-                origin: Origin.L1,
-                id: rid
+            l2UpdatesToRemove[rid] = L2UpdatesToRemove({
+                requestId: RequestId({origin: Origin.L1, id: rid}),
+                l2UpdatesToRemove: l2UpdatesToBeRemoved,
+                blockHash: blockhash(block.number)
             });
-            l2UpdatesToRemove[rid].l2UpdatesToRemove = l2UpdatesToBeRemoved;
             lastProcessedUpdate_origin_l1 += l2UpdatesToBeRemoved.length;
             emit L2UpdatesToRemovedAcceptedIntoQueue(rid, l2UpdatesToBeRemoved);
         }
     }
 
     function process_l2_update_requests_results(
+        UpdateType[] memory order,
         RequestResult[] calldata results
     ) private view returns (uint256[] memory) {
-        uint256 updatesToBeRemovedCounter = 0;
         if (results.length == 0) {
             return new uint256[](0);
         }
-        uint256 oderCounter = results[0].requestId.id;
+        uint256 updatesToBeRemovedCounter = 0;
         uint256[] memory l2UpdatesToBeRemovedTemp = new uint256[](
             results.length
         );
+        uint256 updatesCnt = 0;
 
-        for (uint256 idx = 1; idx < results.length; idx++) {
-            if (results[idx].requestId.id != oderCounter + 1) {
-                revert("Requests are not in order");
-            }
-            oderCounter = results[idx].requestId.id;
-        }
-
-        for (uint256 idx = 0; idx < results.length; idx++) {
-            RequestResult calldata element = results[idx];
-
-            if (element.requestId.id <= lastProcessedUpdate_origin_l1) {
-                continue;
-            }
-
-            if (element.updateType == UpdateType.DEPOSIT) {
-                l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
-                    element.originRequestId
-                );
-            } else if (element.updateType == UpdateType.INDEX_UPDATE) {
-                l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
-                    element.originRequestId
-                );
-            } else if (element.updateType == UpdateType.CANCEL_RESOLUTION) {
-                l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
-                    element.originRequestId
-                );
-            } else if (element.updateType == UpdateType.WITHDRAWAL_RESOLUTION) {
-                l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
-                    element.originRequestId
-                );
-            } else {
-                revert("unknown request type");
+        for (uint256 idx = 0; idx < order.length; idx++) {
+            if (order[idx] == UpdateType.INDEX_UPDATE) {
+                RequestResult memory element = results[updatesCnt++];
+                if (element.requestId.id <= lastProcessedUpdate_origin_l2) {
+                    continue;
+                }
+                if (
+                    element.updateType == UpdateType.DEPOSIT ||
+                    element.updateType == UpdateType.INDEX_UPDATE ||
+                    element.updateType == UpdateType.CANCEL_RESOLUTION ||
+                    element.updateType == UpdateType.WITHDRAWAL_RESOLUTION
+                ) {
+                    l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
+                        element.originRequestId
+                    );
+                } else {
+                    revert("unknown request type");
+                }
             }
         }
 
@@ -462,7 +450,7 @@ contract RollDown {
     function getPendingRequests(
         uint256 start,
         uint256 end
-    ) private view returns (L1Update memory) {
+    ) public view returns (L1Update memory) {
         L1Update memory result;
 
         uint256 depositsCounter = 0;
