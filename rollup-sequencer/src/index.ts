@@ -12,7 +12,7 @@ type ContractAddress = `0x${string}`;
 const mangataContractAddress = process.env
 	.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
 
-const blockNumberDelay = process.env.BLOCK_NUMBER_DELAY!;
+const blockNumberDelay = process.env.BLOCK_NUMBER_DELAY! || 5;
 
 function sleep_ms(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
