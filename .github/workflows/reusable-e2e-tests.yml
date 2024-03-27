@@ -13,9 +13,8 @@ on:
           default: '8dd0c81aa88b967334d001d8cae031f8799a189f'
 
 permissions:
-  contents: write
-  id-token: write
-  deployments: write
+  contents: read
+  actions: read
   checks: write
 
 jobs:
