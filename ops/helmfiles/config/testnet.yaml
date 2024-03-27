@@ -4,8 +4,8 @@ anvilEnabled: false
 aggregatorEnabled: true
 finalizerEnabled: true
 secondFinalizerEnabled: false
-updaterEnabled: false
-sequencerEnabled: false
+updaterEnabled: true
+sequencerEnabled: true
 secondSequencerEnabled: false
 
 env:
