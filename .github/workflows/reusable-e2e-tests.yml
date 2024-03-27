@@ -1,4 +1,4 @@
-name: Run e2e
+name: Run e2e tests
 on:
   workflow_dispatch:
       inputs:
@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   run-e2e-tests:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -61,3 +61,52 @@ jobs:
           name: E2E report test-rollup
           path: e2eTests/reports/*.xml
           reporter: jest-junit
+
+  run-avs-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Start env
+        env:
+          AVS_AGGREGATOR_VERSION: ${{ github.event.inputs.globalVersion }}
+          AVS_FINALIZER_VERSION: ${{ github.event.inputs.globalVersion }}
+          ROLLUP_SEQUENCER_VERSION: ${{ github.event.inputs.globalVersion }}
+          ROLLUP_UPDATER_VERSION: ${{ github.event.inputs.globalVersion }}
+          MANGATA_NODE_VERSION: ${{ github.event.inputs.substrateNodeVersion }}
+        run: docker compose up -d --wait && docker ps
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: build and copy contracts
+        working-directory: contracts
+        run: |
+          forge build 
+          cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../avs-finalizer/tests/abis/FinalizerTaskManager.json
+          cp out/IndexRegistryStorage.sol/IndexRegistryStorage.json ../avs-finalizer/tests/abis/IndexRegistryStorage.json
+          cp out/RegistryCoordinator.sol/RegistryCoordinator.json ../avs-finalizer/tests/abis/RegistryCoordinator.json
+          cp out/RegistryCoordinatorStorage.sol/RegistryCoordinatorStorage.json ../avs-finalizer/tests/abis/RegistryCoordinatorStorage.json     
+
+      - name: FINALIZER tests - install deps
+        working-directory: avs-finalizer/tests/
+        run: yarn install
+  
+      - name: FINALIZER tests - run tests
+        working-directory: avs-finalizer/tests/
+        run: yarn test
+
+      - name: Get avs-aggregator logs
+        if: success() || failure()
+        run: docker logs rollup-avs-aggregator-1
+      
+      - name: Get avs-finalizer logs
+        if: success() || failure()
+        run: docker logs rollup-avs-finalizer-1
+
+      - name: Get anvil logs
+        if: success() || failure()
+        run: docker logs rollup-anvil-1
+
+      - run: docker ps
