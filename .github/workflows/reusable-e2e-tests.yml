@@ -1,21 +1,45 @@
 name: Run e2e tests
 on:
+  workflow_call:
+    inputs:
+      e2eBranch:
+        type: string
+        required: false
+        default: 'eth-rollup-develop'
+      substrateNodeVersion:
+        type: string
+        required: false
+        default: 'eth-rollup-develop'
+      globalVersion:
+        type: string
+        required: false
+        default: '8dd0c81aa88b967334d001d8cae031f8799a189f'
   workflow_dispatch:
-      inputs:
-        e2eBranch:
-          required: false
-          default: 'eth-rollup-develop'
-        substrateNodeVersion:
-          required: false
-          default: 'eth-rollup-develop'
-        globalVersion:
-          required: false
-          default: '8dd0c81aa88b967334d001d8cae031f8799a189f'
+    inputs:
+      e2eBranch:
+        type: string
+        required: false
+        default: 'eth-rollup-develop'
+      substrateNodeVersion:
+        type: string
+        required: false
+        default: 'eth-rollup-develop'
+      globalVersion:
+        type: string
+        required: false
+        default: '8dd0c81aa88b967334d001d8cae031f8799a189f'
 
 permissions:
   contents: read
   actions: read
   checks: write
+
+env:
+  AVS_AGGREGATOR_VERSION: ${{ github.event.inputs.globalVersion }}
+  AVS_FINALIZER_VERSION: ${{ github.event.inputs.globalVersion }}
+  ROLLUP_SEQUENCER_VERSION: ${{ github.event.inputs.globalVersion }}
+  ROLLUP_UPDATER_VERSION: ${{ github.event.inputs.globalVersion }}
+  MANGATA_NODE_VERSION: ${{ github.event.inputs.substrateNodeVersion }}
 
 jobs:
   run-e2e-tests:
@@ -24,12 +48,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Start env
-        env:
-          AVS_AGGREGATOR_VERSION: ${{ github.event.inputs.globalVersion }}
-          AVS_FINALIZER_VERSION: ${{ github.event.inputs.globalVersion }}
-          ROLLUP_SEQUENCER_VERSION: ${{ github.event.inputs.globalVersion }}
-          ROLLUP_UPDATER_VERSION: ${{ github.event.inputs.globalVersion }}
-          MANGATA_NODE_VERSION: ${{ github.event.inputs.substrateNodeVersion }}
         run: docker compose up -d --wait
 
       - name: Checkout tests
@@ -70,13 +88,7 @@ jobs:
           submodules: recursive
 
       - name: Start env
-        env:
-          AVS_AGGREGATOR_VERSION: ${{ github.event.inputs.globalVersion }}
-          AVS_FINALIZER_VERSION: ${{ github.event.inputs.globalVersion }}
-          ROLLUP_SEQUENCER_VERSION: ${{ github.event.inputs.globalVersion }}
-          ROLLUP_UPDATER_VERSION: ${{ github.event.inputs.globalVersion }}
-          MANGATA_NODE_VERSION: ${{ github.event.inputs.substrateNodeVersion }}
-        run: docker compose up -d --wait && docker ps
+        run: docker compose up -d --wait
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
