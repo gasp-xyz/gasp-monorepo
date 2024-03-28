@@ -97,7 +97,7 @@ jobs:
         run: |
           echo DEFAULT: E2E test will run with: $E2EBRANCHNAME
           echo "Running on: ${{ steps.branch-name.outputs.current_branch }}"
-          if [ -n "$(git ls-remote --heads https://github.com/mangata-finance/mangata-e2e.git ${{ steps.branch-name.outputs.current_branch }} --force --quiet)" ]; then echo "E2EBRANCHNAME=${{ steps.branch-name.outputs.current_branch }}" >> $GITHUB_ENV; echo "MATCH - OK" ; elif [ -n "$(git ls-remote --heads https://github.com/mangata-finance/mangata-e2e.git ${{ github.base_ref }} --force --quiet)" ]; then echo "E2EBRANCHNAME=${{ github.base_ref }}" >> $GITHUB_ENV; echo "MATCH - OK" ;  fi
+          if [ -n "$(git ls-remote --heads https://github.com/mangata-finance/mangata-e2e.git ${{ steps.branch-name.outputs.current_branch }} --force --quiet)" ]; then echo "E2EBRANCHNAME=${{ steps.branch-name.outputs.current_branch }}" >> $GITHUB_ENV; echo "MATCH - OK" ; elif [ "${{ github.base_ref }}" == "main" ]; then echo "E2EBRANCHNAME=eth-rollup-develop" >> $GITHUB_ENV; echo "MATCH - OK" ;  elif [ -n "$(git ls-remote --heads https://github.com/mangata-finance/mangata-e2e.git ${{ github.base_ref }} --force --quiet)" ]; then echo "E2EBRANCHNAME=${{ github.base_ref }}" >> $GITHUB_ENV; echo "MATCH - OK" ;  fi
 
 
       - name: Decide if main - branch or parameter
