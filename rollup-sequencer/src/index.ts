@@ -1,6 +1,7 @@
 import util from "util";
 import { Mangata, signTx } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
+import { u8aToHex, hexToU8a} from "@polkadot/util"
 import { Keyring } from "@polkadot/api";
 import "dotenv/config";
 import { createPublicClient, encodeAbiParameters, webSocket } from "viem";
@@ -43,14 +44,13 @@ async function main() {
 	const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
 	await api.isReady;
 
-	const keyring = new Keyring({ type: "sr25519" });
-	const collator = keyring.addFromUri(process.env.MNEMONIC!);
+	const keyring = new Keyring({ type: "ethereum" });
+	const collator = keyring.addFromSeed(hexToU8a(process.env.MNEMONIC!));
 
 	await api.derive.chain.subscribeNewHeads(async (header) => {
 		const apiAt = await api.at(header.hash);
 		console.log(`block #${header.number} was authored by ${header.author}`);
 
-		if (header.author?.toString() === collator.address) {
 			const data = (await publicClient.readContract({
 				address: mangataContractAddress,
 				abi: abi,
@@ -79,7 +79,6 @@ async function main() {
 			} else {
 				console.log(`L1Update was already submitted ${encodedData}`);
 			}
-		}
 
 		const events = await apiAt.query.system.events();
 
