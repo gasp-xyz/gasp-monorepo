@@ -11,6 +11,7 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
+	"github.com/Layr-Labs/eigensdk-go/types"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 )
 
@@ -73,7 +74,7 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 type SignedTaskResponse struct {
 	TaskResponse taskmanager.IFinalizerTaskManagerTaskResponse
 	BlsSignature bls.Signature
-	OperatorId   bls.OperatorId
+	OperatorId   types.OperatorId
 }
 
 // rpc endpoint which is called by operator

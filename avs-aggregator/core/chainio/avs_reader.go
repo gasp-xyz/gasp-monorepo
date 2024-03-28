@@ -35,7 +35,7 @@ var _ AvsReaderer = (*AvsReader)(nil)
 
 func NewAvsReaderFromConfig(
 	registry common.Address,
-	ethClient eth.EthClient,
+	ethClient eth.Client,
 	logger logging.Logger,
 ) (*AvsReader, error) {
 	avsServiceBindings, err := NewAvsServiceBindings(registry, ethClient, logger)

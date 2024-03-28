@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: BUSL-1.1
-// copied from contracts/lib/eigenlayer-middleware/lib/eigenlayer-contracts/script/testing/M2_Deploy_From_Scratch.s.sol
-// to avoid forking contracts repo
 pragma solidity =0.8.12;
 
 import "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
@@ -57,12 +55,12 @@ contract Deployer_M2 is Script, Test {
     DelegationManager public delegationImplementation;
     StrategyManager public strategyManager;
     StrategyManager public strategyManagerImplementation;
+    AVSDirectory public avsDirectory;
+    AVSDirectory public avsDirectoryImplementation;
     EigenPodManager public eigenPodManager;
     EigenPodManager public eigenPodManagerImplementation;
     DelayedWithdrawalRouter public delayedWithdrawalRouter;
     DelayedWithdrawalRouter public delayedWithdrawalRouterImplementation;
-    AVSDirectory public avsDirectory;
-    AVSDirectory public avsDirectoryImplementation;
     UpgradeableBeacon public eigenPodBeacon;
     EigenPod public eigenPodImplementation;
     StrategyBase public baseStrategyImplementation;
@@ -164,10 +162,10 @@ contract Deployer_M2 is Script, Test {
         delegation = DelegationManager(
             address(new TransparentUpgradeableProxy(address(emptyContract), address(eigenLayerProxyAdmin), ""))
         );
-        avsDirectory = AVSDirectory(
+        strategyManager = StrategyManager(
             address(new TransparentUpgradeableProxy(address(emptyContract), address(eigenLayerProxyAdmin), ""))
         );
-        strategyManager = StrategyManager(
+        avsDirectory = AVSDirectory(
             address(new TransparentUpgradeableProxy(address(emptyContract), address(eigenLayerProxyAdmin), ""))
         );
         slasher = Slasher(
@@ -199,8 +197,8 @@ contract Deployer_M2 is Script, Test {
 
         // Second, deploy the *implementation* contracts, using the *proxy contracts* as inputs
         delegationImplementation = new DelegationManager(strategyManager, slasher, eigenPodManager);
-        avsDirectoryImplementation = new AVSDirectory(delegation);
         strategyManagerImplementation = new StrategyManager(delegation, eigenPodManager, slasher);
+        avsDirectoryImplementation = new AVSDirectory(delegation);
         slasherImplementation = new Slasher(strategyManager, delegation);
         eigenPodManagerImplementation = new EigenPodManager(
             ethPOSDeposit,
@@ -212,26 +210,23 @@ contract Deployer_M2 is Script, Test {
         delayedWithdrawalRouterImplementation = new DelayedWithdrawalRouter(eigenPodManager);
 
         // Third, upgrade the proxy contracts to use the correct implementation contracts and initialize them.
-        IStrategy[] memory _strategies;
-        uint256[] memory _withdrawalDelayBlocks;
-        eigenLayerProxyAdmin.upgradeAndCall(
-            TransparentUpgradeableProxy(payable(address(delegation))),
-            address(delegationImplementation),
-            abi.encodeWithSelector(
-                DelegationManager.initialize.selector,
-                executorMultisig,
-                eigenLayerPauserReg,
-                DELEGATION_INIT_PAUSED_STATUS,
-                DELEGATION_WITHDRAWAL_DELAY_BLOCKS,
-                _strategies,
-                _withdrawalDelayBlocks
-            )
-        );
-        eigenLayerProxyAdmin.upgradeAndCall(
-            TransparentUpgradeableProxy(payable(address(avsDirectory))),
-            address(avsDirectoryImplementation),
-            abi.encodeWithSelector(AVSDirectory.initialize.selector, executorMultisig, eigenLayerPauserReg, 0)
-        );
+        {
+            IStrategy[] memory _strategies;
+            uint256[] memory _withdrawalDelayBlocks;
+            eigenLayerProxyAdmin.upgradeAndCall(
+                TransparentUpgradeableProxy(payable(address(delegation))),
+                address(delegationImplementation),
+                abi.encodeWithSelector(
+                    DelegationManager.initialize.selector,
+                    executorMultisig,
+                    eigenLayerPauserReg,
+                    DELEGATION_INIT_PAUSED_STATUS,
+                    DELEGATION_WITHDRAWAL_DELAY_BLOCKS,
+                    _strategies,
+                    _withdrawalDelayBlocks
+                )
+            );
+        }
         eigenLayerProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(strategyManager))),
             address(strategyManagerImplementation),
@@ -254,11 +249,15 @@ contract Deployer_M2 is Script, Test {
             )
         );
         eigenLayerProxyAdmin.upgradeAndCall(
+            TransparentUpgradeableProxy(payable(address(avsDirectory))),
+            address(avsDirectoryImplementation),
+            abi.encodeWithSelector(AVSDirectory.initialize.selector, executorMultisig, eigenLayerPauserReg, 0)
+        );
+        eigenLayerProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(eigenPodManager))),
             address(eigenPodManagerImplementation),
             abi.encodeWithSelector(
                 EigenPodManager.initialize.selector,
-                EIGENPOD_MANAGER_MAX_PODS,
                 IBeaconChainOracle(address(0)),
                 executorMultisig,
                 eigenLayerPauserReg,
@@ -325,7 +324,74 @@ contract Deployer_M2 is Script, Test {
         _verifyInitialOwners();
         _checkPauserInitializations();
         _verifyInitializationParams();
-        _print(strategyConfigs, chainId);
+
+        // WRITE JSON DATA
+        string memory parent_object = "parent object";
+
+        string memory deployed_strategies = "strategies";
+        for (uint256 i = 0; i < strategyConfigs.length; ++i) {
+            vm.serializeAddress(deployed_strategies, strategyConfigs[i].tokenSymbol, address(deployedStrategyArray[i]));
+        }
+        string memory deployed_strategies_output = strategyConfigs.length == 0
+            ? ""
+            : vm.serializeAddress(
+                deployed_strategies,
+                strategyConfigs[strategyConfigs.length - 1].tokenSymbol,
+                address(deployedStrategyArray[strategyConfigs.length - 1])
+            );
+
+        string memory deployed_addresses = "addresses";
+        vm.serializeAddress(deployed_addresses, "eigenLayerProxyAdmin", address(eigenLayerProxyAdmin));
+        vm.serializeAddress(deployed_addresses, "eigenLayerPauserReg", address(eigenLayerPauserReg));
+        vm.serializeAddress(deployed_addresses, "slasher", address(slasher));
+        vm.serializeAddress(deployed_addresses, "slasherImplementation", address(slasherImplementation));
+        vm.serializeAddress(deployed_addresses, "delegation", address(delegation));
+        vm.serializeAddress(deployed_addresses, "delegationImplementation", address(delegationImplementation));
+        vm.serializeAddress(deployed_addresses, "avsDirectory", address(avsDirectory));
+        vm.serializeAddress(deployed_addresses, "avsDirectoryImplementation", address(avsDirectoryImplementation));
+        vm.serializeAddress(deployed_addresses, "strategyManager", address(strategyManager));
+        vm.serializeAddress(
+            deployed_addresses,
+            "strategyManagerImplementation",
+            address(strategyManagerImplementation)
+        );
+        vm.serializeAddress(deployed_addresses, "eigenPodManager", address(eigenPodManager));
+        vm.serializeAddress(
+            deployed_addresses,
+            "eigenPodManagerImplementation",
+            address(eigenPodManagerImplementation)
+        );
+        vm.serializeAddress(deployed_addresses, "delayedWithdrawalRouter", address(delayedWithdrawalRouter));
+        vm.serializeAddress(
+            deployed_addresses,
+            "delayedWithdrawalRouterImplementation",
+            address(delayedWithdrawalRouterImplementation)
+        );
+        vm.serializeAddress(deployed_addresses, "eigenPodBeacon", address(eigenPodBeacon));
+        vm.serializeAddress(deployed_addresses, "eigenPodImplementation", address(eigenPodImplementation));
+        vm.serializeAddress(deployed_addresses, "baseStrategyImplementation", address(baseStrategyImplementation));
+        vm.serializeAddress(deployed_addresses, "emptyContract", address(emptyContract));
+        string memory deployed_addresses_output = vm.serializeString(
+            deployed_addresses,
+            "strategies",
+            deployed_strategies_output
+        );
+
+        string memory parameters = "parameters";
+        vm.serializeAddress(parameters, "executorMultisig", executorMultisig);
+        string memory parameters_output = vm.serializeAddress(parameters, "operationsMultisig", operationsMultisig);
+
+        string memory chain_info = "chainInfo";
+        vm.serializeUint(chain_info, "deploymentBlock", block.number);
+        string memory chain_info_output = vm.serializeUint(chain_info, "chainId", chainId);
+
+        // serialize all the data
+        vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
+        vm.serializeString(parent_object, chain_info, chain_info_output);
+        string memory finalJson = vm.serializeString(parent_object, parameters, parameters_output);
+        // TODO: should output to different file depending on configFile passed to run()
+        //       so that we don't override mainnet output by deploying to goerli for eg.
+        vm.writeJson(finalJson, "script/output/M2_from_scratch_deployment_data.json");
     }
 
     function _verifyContractsPointAtOneAnother(
@@ -549,79 +615,5 @@ contract Deployer_M2 is Script, Test {
             require(setMaxPerDeposit == maxPerDeposit, "setMaxPerDeposit not set correctly");
             require(setMaxDeposits == maxDeposits, "setMaxDeposits not set correctly");
         }
-    }
-
-    function _print(
-        StrategyConfig[] memory strategyConfigs,
-        uint256 chainId
-    ) internal {
-        // WRITE JSON DATA
-        string memory parent_object = "parent object";
-
-        string memory deployed_strategies = "strategies";
-        for (uint256 i = 0; i < strategyConfigs.length; ++i) {
-            vm.serializeAddress(deployed_strategies, strategyConfigs[i].tokenSymbol, address(deployedStrategyArray[i]));
-        }
-        string memory deployed_strategies_output = strategyConfigs.length == 0
-            ? ""
-            : vm.serializeAddress(
-                deployed_strategies,
-                strategyConfigs[strategyConfigs.length - 1].tokenSymbol,
-                address(deployedStrategyArray[strategyConfigs.length - 1])
-            );
-
-        string memory deployed_addresses = "addresses";
-        vm.serializeAddress(deployed_addresses, "eigenLayerProxyAdmin", address(eigenLayerProxyAdmin));
-        vm.serializeAddress(deployed_addresses, "eigenLayerPauserReg", address(eigenLayerPauserReg));
-        vm.serializeAddress(deployed_addresses, "slasher", address(slasher));
-        vm.serializeAddress(deployed_addresses, "slasherImplementation", address(slasherImplementation));
-        vm.serializeAddress(deployed_addresses, "delegation", address(delegation));
-        vm.serializeAddress(deployed_addresses, "delegationImplementation", address(delegationImplementation));
-        vm.serializeAddress(deployed_addresses, "strategyManager", address(strategyManager));
-        vm.serializeAddress(
-            deployed_addresses,
-            "strategyManagerImplementation",
-            address(strategyManagerImplementation)
-        );
-        vm.serializeAddress(deployed_addresses, "avsDirectory", address(avsDirectory));
-        vm.serializeAddress(deployed_addresses, "avsDirectoryImplementation", address(avsDirectoryImplementation));
-        vm.serializeAddress(deployed_addresses, "eigenPodManager", address(eigenPodManager));
-        vm.serializeAddress(
-            deployed_addresses,
-            "eigenPodManagerImplementation",
-            address(eigenPodManagerImplementation)
-        );
-        vm.serializeAddress(deployed_addresses, "delayedWithdrawalRouter", address(delayedWithdrawalRouter));
-        vm.serializeAddress(
-            deployed_addresses,
-            "delayedWithdrawalRouterImplementation",
-            address(delayedWithdrawalRouterImplementation)
-        );
-        vm.serializeAddress(deployed_addresses, "eigenPodBeacon", address(eigenPodBeacon));
-        vm.serializeAddress(deployed_addresses, "eigenPodImplementation", address(eigenPodImplementation));
-        vm.serializeAddress(deployed_addresses, "baseStrategyImplementation", address(baseStrategyImplementation));
-        vm.serializeAddress(deployed_addresses, "emptyContract", address(emptyContract));
-        string memory deployed_addresses_output = vm.serializeString(
-            deployed_addresses,
-            "strategies",
-            deployed_strategies_output
-        );
-
-        string memory parameters = "parameters";
-        vm.serializeAddress(parameters, "executorMultisig", executorMultisig);
-        string memory parameters_output = vm.serializeAddress(parameters, "operationsMultisig", operationsMultisig);
-
-        string memory chain_info = "chainInfo";
-        vm.serializeUint(chain_info, "deploymentBlock", block.number);
-        string memory chain_info_output = vm.serializeUint(chain_info, "chainId", chainId);
-
-        // serialize all the data
-        vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
-        vm.serializeString(parent_object, chain_info, chain_info_output);
-        string memory finalJson = vm.serializeString(parent_object, parameters, parameters_output);
-        // TODO: should output to different file depending on configFile passed to run()
-        //       so that we don't override mainnet output by deploying to goerli for eg.
-        vm.writeJson(finalJson, "script/output/M2_from_scratch_deployment_data.json");
-
     }
 }
