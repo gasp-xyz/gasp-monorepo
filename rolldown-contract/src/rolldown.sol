@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 
 // Import ERC-20 interface
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/console.sol";
 
@@ -15,6 +16,9 @@ contract RollDown {
     uint256 public lastProcessedUpdate_origin_l1;
     // Counter for last processed updates comming from l2 to ensure not reading and processing already processed
     uint256 public lastProcessedUpdate_origin_l2;
+
+    address public constant ETH_TOKEN_ADDRESS =
+        0x5748395867463837537395739375937493733457;
 
     event DepositAcceptedIntoQueue(
         uint256 requestId,
@@ -40,6 +44,7 @@ contract RollDown {
         uint256 amount
     );
     event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
+    event PendingEthWithdrawn(address sender, uint amount);
 
     enum Origin {
         L1,
@@ -90,6 +95,7 @@ contract RollDown {
     mapping(uint256 => CancelResolution) public cancelResolutions;
     mapping(uint256 => Deposit) private deposits;
     mapping(uint256 => L2UpdatesToRemove) private l2UpdatesToRemove;
+    mapping(address => uint) private pendingEthWithdrawals;    
 
     //TODO: should be renamed to RequestType
     enum UpdateType {
@@ -139,7 +145,47 @@ contract RollDown {
         owner = msg.sender;
     }
 
-    function deposit(address tokenAddress, uint256 amount) public {
+    function withdraw_pending_eth(uint256 amount) external {
+        require(amount > 0, "Amount must be greater than zero");
+        address payable sender = payable(msg.sender);
+        require(pendingEthWithdrawals[sender] >= amount, "not enough pending withdraw amount");
+        require(payable(address(this)).balance >= amount, "not enough eth funds");
+
+        // important to set this here before .sendValue
+        // to prevent reentrancy
+        pendingEthWithdrawals[sender] -= amount;
+
+        emit PendingEthWithdrawn(sender, amount);
+
+        // send value uses call (gas unbounded)
+        // and reverts upon failure
+        Address.sendValue(sender, amount);
+    }
+
+    function deposit_eth() external payable {
+        require(msg.value > 0, "msg value must be greater that 0");
+        address depositRecipient = msg.sender;
+        uint amount = msg.value;
+
+        bytes32 blockHash = blockhash(block.number);
+        Deposit memory depositRequest = Deposit({
+            requestId: RequestId({origin: Origin.L1, id: counter++}),
+            depositRecipient: depositRecipient,
+            tokenAddress: ETH_TOKEN_ADDRESS,
+            amount: amount,
+            blockHash: blockHash
+        });
+        // Add the new request to the mapping
+        deposits[depositRequest.requestId.id] = depositRequest;
+        emit DepositAcceptedIntoQueue(
+            depositRequest.requestId.id,
+            depositRecipient,
+            ETH_TOKEN_ADDRESS,
+            amount
+        );
+    }
+
+    function deposit_erc20(address tokenAddress, uint256 amount) public {
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
         address depositRecipient = msg.sender;
@@ -418,6 +464,46 @@ contract RollDown {
     }
 
     function process_l2_update_withdrawal(
+        Withdrawal calldata withdrawal
+    ) private {
+        if (withdrawal.tokenAddress == ETH_TOKEN_ADDRESS){
+            process_eth_withdrawal(withdrawal);
+        }
+        else {
+            process_erc20_withdrawal(withdrawal);
+        }
+    }
+
+    function process_eth_withdrawal(
+        Withdrawal calldata withdrawal
+    ) private {
+        bool status = payable(address(this)).balance >= withdrawal.amount;
+        bytes32 blockHash = blockhash(block.number);
+
+        WithdrawalResolution memory resolution = WithdrawalResolution({
+            requestId: RequestId({origin: Origin.L1, id: counter++}),
+            l2RequestId: withdrawal.requestId.id,
+            status: status,
+            blockHash: blockHash
+        });
+
+        withdrawalResolutions[resolution.requestId.id] = resolution;
+        emit WithdrawalResolutionAcceptedIntoQueue(
+            resolution.requestId.id,
+            status
+        );
+
+        if (status) {
+            pendingEthWithdrawals[withdrawal.withdrawalRecipient] += withdrawal.amount;
+            emit FundsWithdrawn(
+                withdrawal.withdrawalRecipient,
+                withdrawal.tokenAddress,
+                withdrawal.amount
+            );
+        }
+    }
+
+    function process_erc20_withdrawal(
         Withdrawal calldata withdrawal
     ) private {
         IERC20 token = IERC20(withdrawal.tokenAddress);
