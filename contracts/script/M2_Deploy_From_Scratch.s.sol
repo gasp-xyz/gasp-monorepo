@@ -345,7 +345,7 @@ contract Deployer_M2 is Script, Test {
         vm.serializeAddress(deployed_addresses, "eigenLayerPauserReg", address(eigenLayerPauserReg));
         vm.serializeAddress(deployed_addresses, "slasher", address(slasher));
         vm.serializeAddress(deployed_addresses, "slasherImplementation", address(slasherImplementation));
-        vm.serializeAddress(deployed_addresses, "delegation", address(delegation));
+        vm.serializeAddress(deployed_addresses, "delegationManager", address(delegation));
         vm.serializeAddress(deployed_addresses, "delegationImplementation", address(delegationImplementation));
         vm.serializeAddress(deployed_addresses, "avsDirectory", address(avsDirectory));
         vm.serializeAddress(deployed_addresses, "avsDirectoryImplementation", address(avsDirectoryImplementation));
