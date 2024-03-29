@@ -12,8 +12,8 @@ env:
   # rpc
   SUBSTRATE_RPC_URL: wss://collator-02-ws-rollup-testnet.mangata.online:443
   # contracts
-  CHAIN_ID: '"5"'
-  AVS_REGISTRY_COORDINATOR_ADDR: 0x5620cDb94BaAaD10c20483bd8705DA711b2Bc0a3
+  CHAIN_ID: '"17000"'
+  AVS_REGISTRY_COORDINATOR_ADDR: 0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1
   # AVS
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   # every 25th block, ~ 5min

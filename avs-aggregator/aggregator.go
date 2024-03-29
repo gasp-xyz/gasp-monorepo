@@ -28,7 +28,8 @@ const (
 	// this hardcoded here because it's also hardcoded in the contracts, but should
 	// ideally be fetched from the contracts
 	// taskChallengeWindowBlock = 100
-	blockTimeSeconds = 12 * time.Second
+	// 6s block time on rollup nodes
+	blockTimeSeconds = 6 * time.Second
 )
 
 // Aggregator sends tasks (numbers to square) onchain, then listens for operator signed TaskResponses.
@@ -246,14 +247,18 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 	agg.kicker.TriggerNewTask(taskIndex)
 	agg.updater.TriggerNewTask(taskIndex)
 
-	quorumThresholdPercentages := make([]uint32, len(newTask.QuorumNumbers))
+	quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.QuorumNumbers))
 	for i, _ := range newTask.QuorumNumbers {
-		quorumThresholdPercentages[i] = newTask.QuorumThresholdPercentage
+		quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.QuorumThresholdPercentage)
+	}
+	quorumNums := make(sdktypes.QuorumNums, len(newTask.QuorumNumbers))
+	for i, n := range newTask.QuorumNumbers {
+		quorumNums[i] = sdktypes.QuorumNum(n)
 	}
 	// TODO(samlaf): we use seconds for now, but we should ideally pass a blocknumber to the blsAggregationService
 	// and it should monitor the chain and only expire the task aggregation once the chain has reached that block number.
 	taskTimeToExpiry := time.Duration(agg.taskResponseWindowBlock) * blockTimeSeconds
-	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, newTask.QuorumNumbers, quorumThresholdPercentages, taskTimeToExpiry)
+	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
 	agg.logger.Info("Aggregator initialized new task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
 	return nil
 }

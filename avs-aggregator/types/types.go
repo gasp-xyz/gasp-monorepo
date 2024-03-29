@@ -13,8 +13,8 @@ const QUORUM_THRESHOLD_DENOMINATOR = uint32(100)
 const QUERY_FILTER_FROM_BLOCK = uint64(1)
 
 // we only use a single quorum (quorum 0)
-var QUORUM_NUMBERS = []byte{QUORUM_NUMBER}
-var QUORUM_NUMBER = uint8(0)
+var QUORUM_NUMBERS = sdktypes.QuorumNums{QUORUM_NUMBER}
+var QUORUM_NUMBER = sdktypes.QuorumNum(0)
 
 // type BlockNumber = uint32
 type TaskIndex = uint32
