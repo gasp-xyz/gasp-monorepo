@@ -10,7 +10,6 @@ spec:
     matchLabels:
       {{- include "rollup-updater.selectorLabels" . | nindent 6 }}
       service: {{ include "rollup-updater.name" . }}
-  serviceName: {{ include "rollup-updater.name" . }}
   template:
     metadata:
       annotations:
