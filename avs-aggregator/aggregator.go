@@ -28,7 +28,8 @@ const (
 	// this hardcoded here because it's also hardcoded in the contracts, but should
 	// ideally be fetched from the contracts
 	// taskChallengeWindowBlock = 100
-	blockTimeSeconds = 12 * time.Second
+	// 6s block time on rollup nodes
+	blockTimeSeconds = 6 * time.Second
 )
 
 // Aggregator sends tasks (numbers to square) onchain, then listens for operator signed TaskResponses.
