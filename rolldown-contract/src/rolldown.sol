@@ -44,6 +44,7 @@ contract RollDown {
         uint256 amount
     );
     event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
+    event EthWithdrawPending(address sender, uint amount);
     event PendingEthWithdrawn(address sender, uint amount);
 
     enum Origin {
@@ -95,7 +96,7 @@ contract RollDown {
     mapping(uint256 => CancelResolution) public cancelResolutions;
     mapping(uint256 => Deposit) private deposits;
     mapping(uint256 => L2UpdatesToRemove) private l2UpdatesToRemove;
-    mapping(address => uint) private pendingEthWithdrawals;    
+    mapping(address => uint) public pendingEthWithdrawals;    
 
     //TODO: should be renamed to RequestType
     enum UpdateType {
@@ -495,10 +496,9 @@ contract RollDown {
 
         if (status) {
             pendingEthWithdrawals[withdrawal.withdrawalRecipient] += withdrawal.amount;
-            emit FundsWithdrawn(
+            emit EthWithdrawPending(
                 withdrawal.withdrawalRecipient,
-                withdrawal.tokenAddress,
-                withdrawal.amount
+                pendingEthWithdrawals[withdrawal.withdrawalRecipient]
             );
         }
     }

@@ -5,18 +5,130 @@ import "forge-std/console.sol";
 import {Utilities, MyERC20} from "./utils/Utilities.sol";
 
 contract RollDownTest is Test {
+    using stdStorage for StdStorage;
     RollDown public rollDown;
     Utilities internal utils;
     address payable[] internal users;
     MyERC20 internal token;
+    address payable internal ETH_TOKEN_ADDRESS;
 
     function setUp() public {
         utils = new Utilities();
         users = utils.createUsers(1);
         rollDown = new RollDown();
+        ETH_TOKEN_ADDRESS = payable(0x5748395867463837537395739375937493733457);
     }
 
     function beforeEach() public {}
+
+    function testExecuteDepositEth() public {
+        // Arrange
+        address payable alice = users[0];
+        uint256 amount = 10;
+        address payable tokenAddress = payable(ETH_TOKEN_ADDRESS);
+        address payable contract_address = payable(address(rollDown));
+        deal(alice, 100 ether);
+        uint256 aliceBalanceBefore = alice.balance;
+        uint256 contractBalanceBefore = contract_address.balance;
+
+        // Act
+        vm.startPrank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit RollDown.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
+        rollDown.deposit_eth{value: amount}();
+        vm.stopPrank();
+
+        RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
+        uint256 aliceBalanceAfter = alice.balance;
+        uint256 contractBalanceAfter = contract_address.balance;
+
+        // Assert
+        assertEq(l1Update.pendingDeposits.length, 1);
+        assertEq(l1Update.pendingCancelResultions.length, 0);
+        assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
+        assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
+        assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
+        assertEq(l1Update.pendingDeposits[0].amount, amount);
+        assertEq(aliceBalanceBefore - aliceBalanceAfter, 10);
+        assertEq(contractBalanceAfter - contractBalanceBefore, 10);
+    }
+
+    function testExecuteWithdrawEth() public {
+        // Arrange
+        address payable alice = users[0];
+        uint256 amount = 1000;
+        address payable tokenAddress = payable(ETH_TOKEN_ADDRESS);
+        address payable contract_address = payable(address(rollDown));
+        deal(alice, 10000 ether);
+        uint256 aliceBalanceBefore = alice.balance;
+        uint256 contractBalanceBefore = contract_address.balance;
+
+        // Act
+        vm.startPrank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit RollDown.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
+        rollDown.deposit_eth{value: amount}();
+        vm.stopPrank();
+
+        RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
+        uint256 aliceBalanceAfterDeposit = alice.balance;
+        uint256 contractBalanceAfterDeposit = contract_address.balance;
+
+        // Assert
+        assertEq(l1Update.pendingDeposits.length, 1);
+        assertEq(l1Update.pendingCancelResultions.length, 0);
+        assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
+        assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
+        assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
+        assertEq(l1Update.pendingDeposits[0].amount, amount);
+        assertEq(aliceBalanceBefore - aliceBalanceAfterDeposit, amount);
+        assertEq(contractBalanceAfterDeposit - contractBalanceBefore, amount);
+
+        uint withdraw_amount = 500;
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](0);
+        l2Update.withdrawals = new RollDown.Withdrawal[](1);
+        l2Update.withdrawals[0] = RollDown.Withdrawal({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            withdrawalRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: withdraw_amount
+        });
+
+        vm.startPrank(alice);
+        vm.expectEmit(true, true, true, true);
+        emit RollDown.WithdrawalResolutionAcceptedIntoQueue(2, true);
+        vm.expectEmit(true, true, false, true);
+        emit RollDown.EthWithdrawPending(alice, 500);
+        rollDown.update_l1_from_l2(l2Update);
+        vm.stopPrank();
+
+        RollDown.L1Update memory l1UpdateAfterWithdraw = rollDown.getUpdateForL2();
+        assertEq(l1UpdateAfterWithdraw.pendingWithdrawalResolutions.length, 1);
+        assertEq(stdstore
+                    .target(address(rollDown))
+                    .sig(rollDown.pendingEthWithdrawals.selector)
+                    .with_key(alice)
+                    .read_uint(),
+                withdraw_amount);
+
+        uint withdraw_from_pending = 200;
+
+        vm.startPrank(alice);
+        vm.expectEmit(true, true, false, true);
+        emit RollDown.PendingEthWithdrawn(alice, withdraw_from_pending);
+        rollDown.withdraw_pending_eth(withdraw_from_pending);
+        vm.stopPrank();
+
+        assertEq(stdstore
+                    .target(address(rollDown))
+                    .sig(rollDown.pendingEthWithdrawals.selector)
+                    .with_key(alice)
+                    .read_uint(),
+                withdraw_amount - withdraw_from_pending);
+        assertEq(alice.balance - aliceBalanceAfterDeposit, withdraw_from_pending);
+        assertEq(contractBalanceAfterDeposit - contract_address.balance, withdraw_from_pending);
+    }
 
     function testExecuteDeposit() public {
         // Arrange
@@ -33,7 +145,7 @@ contract RollDownTest is Test {
         token.approve(address(rollDown), amount);
         vm.expectEmit(true, true, true, true);
         emit RollDown.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
-        rollDown.deposit(tokenAddress, 10);
+        rollDown.deposit_erc20(tokenAddress, 10);
         vm.stopPrank();
 
         RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
@@ -60,7 +172,7 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 100 ether);
         vm.startPrank(alice);
         token.approve(address(rollDown), amount);
-        rollDown.deposit(tokenAddress, 10);
+        rollDown.deposit_erc20(tokenAddress, 10);
         vm.stopPrank();
 
         RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
@@ -147,7 +259,7 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 100 ether);
         vm.startPrank(alice);
         token.approve(address(rollDown), amount);
-        rollDown.deposit(tokenAddress, 10);
+        rollDown.deposit_erc20(tokenAddress, 10);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -259,7 +371,7 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -291,7 +403,7 @@ contract RollDownTest is Test {
         // Act
         vm.startPrank(alice);
         token.approve(address(rollDown), amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
@@ -350,7 +462,7 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -383,7 +495,7 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -412,8 +524,8 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 2 * amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), 2 * amount);
-        rollDown.deposit(tokenAddress, amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -441,8 +553,8 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 2 * amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), 2 * amount);
-        rollDown.deposit(tokenAddress, amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -484,8 +596,8 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 2 * amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), 2 * amount);
-        rollDown.deposit(tokenAddress, amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -534,8 +646,8 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 2 * amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), 2 * amount);
-        rollDown.deposit(tokenAddress, amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -592,8 +704,8 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 2 * amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), 2 * amount);
-        rollDown.deposit(tokenAddress, amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -651,8 +763,8 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 2 * amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), 2 * amount);
-        rollDown.deposit(tokenAddress, amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -708,8 +820,8 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 2 * amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), 2 * amount);
-        rollDown.deposit(tokenAddress, amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -781,8 +893,8 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 2 * amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), 2 * amount);
-        rollDown.deposit(tokenAddress, amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -852,8 +964,8 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 2 * amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), 2 * amount);
-        rollDown.deposit(tokenAddress, amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
@@ -914,8 +1026,8 @@ contract RollDownTest is Test {
         deal(tokenAddress, alice, 2 * amount);
         vm.startPrank(alice);
         token.approve(address(rollDown), 2 * amount);
-        rollDown.deposit(tokenAddress, amount);
-        rollDown.deposit(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
+        rollDown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
 
         RollDown.L2Update memory l2Update;
