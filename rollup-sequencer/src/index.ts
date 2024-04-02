@@ -1,5 +1,5 @@
 import util from "util";
-import { Mangata, signTx } from "@mangata-finance/sdk";
+import { Mangata, signTx, MangataGenericEvent } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
 import { Keyring } from "@polkadot/api";
 import "dotenv/config";
@@ -14,6 +14,11 @@ const mangataContractAddress = process.env
 
 function sleep_ms(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isSuccess(events: MangataGenericEvent[]) {
+  return events.some((event) => event.section === "system" && event.method === "ExtrinsicSuccess");
+  // events.any((event) => event.section === "system" && event.method === "ExtrinsicSuccess");
 }
 
 async function main() {
@@ -70,12 +75,18 @@ async function main() {
 			);
 
 			if (lastSubmitted !== keccak256(encodedData)) {
-				await signTx(
+				let result =  await signTx(
 					api,
 					api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
 					collator,
 				);
-				lastSubmitted = keccak256(encodedData);
+
+        if (isSuccess(result)) {
+          console.log(`L1Update was submitted successfully`);
+          lastSubmitted = keccak256(encodedData);
+        }else{
+          console.log(`L1Update was submitted unsuccessfully`);
+        }
 			} else {
 				console.log(`L1Update was already submitted ${encodedData}`);
 			}
