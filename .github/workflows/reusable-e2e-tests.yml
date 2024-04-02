@@ -58,19 +58,19 @@ jobs:
           # Implementation of this conditional action was taken from here:
           # https://github.com/actions/checkout/issues/512#issuecomment-1264735491
           
-          # Checking if e2eBranch input is provided
+          # This condition check if the input `e2eBranch` is empty, and if it is, it checks if the current branch name exists in `mangata-e2e` repository
           if [[ -z "${{ inputs.e2eBranch }}" ]]; then
-            echo "No custom branch provided, using default `${DEFAULT_E2E_REPO_BRANCH}` branch"
-            echo "BRANCH=${DEFAULT_E2E_REPO_BRANCH}" >> $GITHUB_OUTPUT
-          else
             # Checking if current branch name exists in `mangata-e2e` repository
-            if git ls-remote --heads --quiet --exit-code https://github.com/mangata-finance/mangata-e2e.git $CURRENT_BRANCH; then
-              echo "Using custom `${CURRENT_BRANCH}` branch as it exists in `mangata-e2e` repository"
-              echo "BRANCH=${CURRENT_BRANCH}" >> $GITHUB_OUTPUT
+            if git ls-remote --heads --quiet --exit-code https://github.com/mangata-finance/mangata-e2e.git ${{ env.CURRENT_BRANCH }}; then
+              echo "Using custom `${{ env.CURRENT_BRANCH }}` branch as it exists in `mangata-e2e` repository"
+              echo "BRANCH=${{ env.CURRENT_BRANCH }}" >> $GITHUB_OUTPUT
             else
-              echo "Custom branch `${CURRENT_BRANCH}` does not exist in `mangata-e2e` repository, using default `${DEFAULT_E2E_REPO_BRANCH}` branch"
-              echo "BRANCH=${DEFAULT_E2E_REPO_BRANCH}" >> $GITHUB_OUTPUT
+              echo "Custom branch `${{ env.CURRENT_BRANCH }}` does not exist in `mangata-e2e` repository, using default `${{ env.DEFAULT_E2E_REPO_BRANCH }}` branch"
+              echo "BRANCH=${{ env.DEFAULT_E2E_REPO_BRANCH }}" >> $GITHUB_OUTPUT
             fi
+          else
+            echo "Using `${{ inputs.e2eBranch }}` branch fo `mangata-e2e` repository as it was provided in the input"
+            echo "BRANCH=${{ inputs.e2eBranch }}" >> $GITHUB_OUTPUT
           fi
       
       - name: Checkout tests
