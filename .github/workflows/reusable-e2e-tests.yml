@@ -33,6 +33,8 @@ permissions:
   checks: write
 
 env:
+  CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
+  DEFAULT_E2E_REPO_BRANCH: eth-rollup-develop
   AVS_AGGREGATOR_VERSION: ${{ inputs.globalVersion }}
   AVS_FINALIZER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
@@ -55,9 +57,6 @@ jobs:
         run: |
           # Implementation of this conditional action was taken from here:
           # https://github.com/actions/checkout/issues/512#issuecomment-1264735491
-          
-          echo "CURRENT_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
-          echo "DEFAULT_E2E_REPO_BRANCH=eth-rollup-develop" >> $GITHUB_ENV
           
           # Checking if e2eBranch input is provided
           if [[ -z "${{ inputs.e2eBranch }}" ]]; then
