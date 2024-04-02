@@ -5,7 +5,6 @@ on:
       e2eBranch:
         type: string
         required: false
-        default: 'eth-rollup-develop'
       substrateNodeVersion:
         type: string
         required: false
@@ -19,7 +18,6 @@ on:
       e2eBranch:
         type: string
         required: false
-        default: 'eth-rollup-develop'
       substrateNodeVersion:
         type: string
         required: false
@@ -51,12 +49,36 @@ jobs:
 
       - name: Start env
         run: docker compose up -d --wait
-
+      
+      - name: Use custom branch in e2e tests repository if it exists, otherwise use default branch
+        id: e2e
+        run: |
+          # Implementation of this conditional action was taken from here:
+          # https://github.com/actions/checkout/issues/512#issuecomment-1264735491
+          
+          echo "CURRENT_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+          echo "DEFAULT_E2E_REPO_BRANCH=eth-rollup-develop" >> $GITHUB_ENV
+          
+          # Checking if e2eBranch input is provided
+          if [[ -z "${{ inputs.e2eBranch }}" ]]; then
+            echo "No custom branch provided, using default `${DEFAULT_E2E_REPO_BRANCH}` branch"
+            echo "BRANCH=${DEFAULT_E2E_REPO_BRANCH}" >> $GITHUB_OUTPUT
+          else
+            # Checking if current branch name exists in `mangata-e2e` repository
+            if git ls-remote --heads --quiet --exit-code https://github.com/mangata-finance/mangata-e2e.git $CURRENT_BRANCH; then
+              echo "Using custom `${CURRENT_BRANCH}` branch as it exists in `mangata-e2e` repository"
+              echo "BRANCH=${CURRENT_BRANCH}" >> $GITHUB_OUTPUT
+            else
+              echo "Custom branch `${CURRENT_BRANCH}` does not exist in `mangata-e2e` repository, using default `${DEFAULT_E2E_REPO_BRANCH}` branch"
+              echo "BRANCH=${DEFAULT_E2E_REPO_BRANCH}" >> $GITHUB_OUTPUT
+            fi
+          fi
+      
       - name: Checkout tests
         uses: actions/checkout@v4
         with:
           repository: mangata-finance/mangata-e2e
-          ref: ${{ inputs.e2eBranch }}
+          ref: ${{ steps.e2e.outputs.BRANCH}}
           path: e2eTests
 
       - name: Install e2e tests dependencies
