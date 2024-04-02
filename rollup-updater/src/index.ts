@@ -14,7 +14,7 @@ import {
 import { defineChain } from "viem";
 import { decodeAbiParameters } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { goerli } from "viem/chains";
+import { holesky } from "viem/chains";
 import eigenContractAbi from "./FinalizerTaskManager.json" assert {
 	type: "json",
 };
@@ -30,26 +30,33 @@ const mangataContractAddress = process.env
 
 const finalizationSource = process.env.FINALIZATION_SOURCE;
 const verbose = process.env.VERBOSE;
-const anvil = defineChain({
-	id: 31337,
-	name: "anvil",
-	network: "Anvil",
-	nativeCurrency: {
-		decimals: 18,
-		name: "Ether",
-		symbol: "ETH",
-	},
-	rpcUrls: {
-		public: {
-			http: ["ws://127.0.0.1:8545"],
-		},
-		default: {
-			http: ["ws://127.0.0.1:8545"],
-		},
-	},
-});
 
 let pendingUpdatesStored = "";
+
+function getChain() {
+  if (process.env.CHAIN == "holesky"){
+    return holesky
+  }else{
+    return defineChain({
+      id: 31337,
+      name: "anvil",
+      network: "Anvil",
+      nativeCurrency: {
+        decimals: 18,
+        name: "Ether",
+        symbol: "ETH",
+      },
+      rpcUrls: {
+        public: {
+          http: ["ws://127.0.0.1:8545"],
+        },
+        default: {
+          http: ["ws://127.0.0.1:8545"],
+        },
+      },
+    });
+  }
+}
 
 async function sendUpdateToL1(
 	api: ApiPromise,
@@ -92,7 +99,7 @@ async function sendUpdateToL1(
 
 		if (reqCount > 0) {
 			const storageHash = await walletClient.writeContract({
-				chain: anvil, // TODO: this needs the chain in order to work properly
+				chain: getChain(),
 				abi: abi,
 				address: mangataContractAddress,
 				functionName: "update_l1_from_l2",
@@ -128,7 +135,7 @@ async function main() {
 	// We need public client in order to read and subscribe to contract
 	const publicClient = createPublicClient({
 		transport,
-		chain: anvil,
+		chain: getChain(),
 	});
 	(BigInt.prototype as any).toJSON = function () {
 		return this.toString();
