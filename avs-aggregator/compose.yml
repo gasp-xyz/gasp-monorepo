@@ -16,10 +16,13 @@ services:
       - SUBSTRATE_RPC_URL=${SUBSTRATE_RPC_URL:-ws://collator-01:9944}
       - CHAIN_ID=31337
       - AVS_SERVER_IP_PORT_ADDRESS=0.0.0.0:8090
-      - AVS_BLOCK_VALIDATION_PERIOD=5
+      - AVS_BLOCK_VALIDATION_PERIOD=${AVS_BLOCK_VALIDATION_PERIOD:-5}
       - AVS_REGISTRY_COORDINATOR_ADDR=0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9
       - ECDSA_KEY_JSON={"address":"a0ee7a142d267c1f36714e4a8f75612f20a79720","crypto":{"cipher":"aes-128-ctr","ciphertext":"b0f6f8e3ba33f0b382b080de6661d827181de480f1a4f94bc20d66cb3d585907","cipherparams":{"iv":"4e3f9a8ca6ef8d1cd408e8aaae3c22d2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"c8f9f8cc03913e09cee7e1fd68732fac327576203ab277d740270f1dea82ee7e"},"mac":"353d65850b20d5fdb90ca2385c52e5b57662cb1d906fd58143f20a7720723cf6"},"id":"d3036cc7-d068-4f2f-9667-60aaca660e61","version":3}
       - TESTNET=true
       - ECDSA_EPHEMERAL_KEY=true
       - BLS_EPHEMERAL_KEY=true
+      - AVS_KICK_PERIOD=5
+    ports:
+      - "8090:8090"
   

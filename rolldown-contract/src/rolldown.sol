@@ -375,6 +375,7 @@ contract RollDown {
                     continue;
                 }
                 if (
+                    element.updateType == UpdateType.DEPOSIT ||
                     element.updateType == UpdateType.INDEX_UPDATE ||
                     element.updateType == UpdateType.CANCEL_RESOLUTION ||
                     element.updateType == UpdateType.WITHDRAWAL_RESOLUTION
@@ -382,11 +383,9 @@ contract RollDown {
                     l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
                         element.originRequestId
                     );
-                } else if (element.updateType == UpdateType.DEPOSIT) {
-                    process_l2_update_deposit(element);
-                    l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
-                        element.originRequestId
-                    );
+                    if (element.updateType == UpdateType.DEPOSIT){
+                      process_l2_update_deposit(element);
+                    }
                 } else {
                     revert("unknown request type");
                 }
