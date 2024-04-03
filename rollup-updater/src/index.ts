@@ -163,6 +163,7 @@ async function main() {
 			abi: eigenContractAbi.abi,
 			eventName: "TaskCompleted",
 			onLogs: async (logs) => {
+				console.log("received task notification from L1");
 				for (const log of logs) {
 					const txHash = await sendUpdateToL1(
 						api,
