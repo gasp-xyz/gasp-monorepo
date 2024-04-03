@@ -22,6 +22,7 @@ export class DockerUtils{
         this.container = undefined;
         this.containerName = "";
         this.FINALIZER_IMAGE = "mangatasolutions/avs-finalizer:" + process.env.AVS_FINALIZER_VERSION || 'local';
+        console.info("Using image: " + this.FINALIZER_IMAGE);
     }
     async startContainer(image: string = this.FINALIZER_IMAGE, env = this.finalizerLocalEnvironment) {
         this.containerName = image;
