@@ -5,7 +5,6 @@ import (
 	"errors"
 	"math/big"
 	"sync"
-	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
@@ -21,15 +20,6 @@ import (
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
-)
-
-const (
-	// number of blocks after which a task is considered expired
-	// this hardcoded here because it's also hardcoded in the contracts, but should
-	// ideally be fetched from the contracts
-	// taskChallengeWindowBlock = 100
-	// 6s block time on rollup nodes
-	blockTimeSeconds = 6 * time.Second
 )
 
 // Aggregator sends tasks (numbers to square) onchain, then listens for operator signed TaskResponses.
@@ -123,7 +113,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 
 	pubkeyService := operatorpubkeys.NewOperatorPubkeysServiceInMemory(context.Background(), ethRpc.Clients.AvsRegistryChainSubscriber, ethRpc.Clients.AvsRegistryChainReader, logger)
 	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, pubkeyService, logger)
-	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, logger)
+	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, ethRpc.Clients.EthWsClient, logger)
 
 	substrateRpc, err := gsrpc.NewSubstrateAPI(c.SubstrateWsRpcUrl)
 	if err != nil {
@@ -257,8 +247,7 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 	}
 	// TODO(samlaf): we use seconds for now, but we should ideally pass a blocknumber to the blsAggregationService
 	// and it should monitor the chain and only expire the task aggregation once the chain has reached that block number.
-	taskTimeToExpiry := time.Duration(agg.taskResponseWindowBlock) * blockTimeSeconds
-	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
-	agg.logger.Info("Aggregator initialized new task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
+	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, agg.taskResponseWindowBlock, quorumNums, quorumThresholdPercentages)
+	agg.logger.Info("Aggregator initialized new task", "block number", blockNumber, "task index", taskIndex, "expiry", newTask.TaskCreatedBlock + agg.taskResponseWindowBlock)
 	return nil
 }
