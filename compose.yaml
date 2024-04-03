@@ -17,7 +17,7 @@ services:
     entrypoint: anvil
     command: --host 0.0.0.0 --disable-block-gas-limit  --balance 1000000000000000000
     healthcheck:
-      test: ["CMD", "nc", "-vz", "localhost", "8545"]
+      test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
       interval: 2s
       timeout: 10s
       retries: 3
