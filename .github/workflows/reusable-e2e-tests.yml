@@ -77,7 +77,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: mangata-finance/mangata-e2e
-          ref: ${{ steps.e2e.outputs.BRANCH}}
+          ref: ${{ steps.e2e.outputs.BRANCH }}
           path: e2eTests
 
       - name: Install e2e tests dependencies
