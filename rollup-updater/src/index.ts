@@ -1,7 +1,7 @@
 import { Mangata } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
 import "@mangata-finance/types";
-import { ApiPromise } from "@polkadot/api";
+import type { ApiPromise } from "@polkadot/api";
 import "dotenv/config";
 import {
 	TestClient,
@@ -14,7 +14,6 @@ import {
 import { defineChain } from "viem";
 import { decodeAbiParameters } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { goerli } from "viem/chains";
 import eigenContractAbi from "./FinalizerTaskManager.json" assert {
 	type: "json",
 };

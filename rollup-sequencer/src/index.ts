@@ -1,4 +1,4 @@
-import util from "util";
+import util from "node:util";
 import { Mangata, signTx } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
 import { Keyring } from "@polkadot/api";
