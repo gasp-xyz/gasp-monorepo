@@ -39,11 +39,6 @@ contract RollDown {
         address tokenAddress,
         uint256 amount
     );
-    event FundsReturned(
-        address depositRecipient,
-        address tokenAddress,
-        uint256 amount
-    );
     event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
 
     enum Origin {
@@ -61,27 +56,27 @@ contract RollDown {
         address depositRecipient;
         address tokenAddress;
         uint256 amount;
-        uint256 timeStamp;
+        bytes32 blockHash;
     }
 
     struct L2UpdatesToRemove {
         RequestId requestId;
         uint256[] l2UpdatesToRemove;
-        uint256 timeStamp;
+        bytes32 blockHash;
     }
 
     struct CancelResolution {
         RequestId requestId;
         uint256 l2RequestId;
         bool cancelJustified;
-        uint256 timeStamp;
+        bytes32 blockHash;
     }
 
     struct WithdrawalResolution {
         RequestId requestId;
         uint256 l2RequestId;
         bool status;
-        uint256 timeStamp;
+        bytes32 blockHash;
     }
 
     struct L1Update {
@@ -155,13 +150,13 @@ contract RollDown {
             "Token transfer failed"
         );
 
-        uint256 timeStamp = block.timestamp;
+        bytes32 blockHash = blockhash(block.number);
         Deposit memory depositRequest = Deposit({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
             tokenAddress: tokenAddress,
             amount: amount,
-            timeStamp: timeStamp
+            blockHash: blockHash
         });
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
@@ -348,7 +343,7 @@ contract RollDown {
             l2UpdatesToRemove[rid] = L2UpdatesToRemove({
                 requestId: RequestId({origin: Origin.L1, id: rid}),
                 l2UpdatesToRemove: l2UpdatesToBeRemoved,
-                timeStamp: block.timestamp
+                blockHash: blockhash(block.number)
             });
             lastProcessedUpdate_origin_l1 += l2UpdatesToBeRemoved.length;
             emit L2UpdatesToRemovedAcceptedIntoQueue(rid, l2UpdatesToBeRemoved);
@@ -358,7 +353,7 @@ contract RollDown {
     function process_l2_update_requests_results(
         UpdateType[] memory order,
         RequestResult[] calldata results
-    ) private returns (uint256[] memory) {
+    ) private view returns (uint256[] memory) {
         if (results.length == 0) {
             return new uint256[](0);
         }
@@ -383,9 +378,6 @@ contract RollDown {
                     l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
                         element.originRequestId
                     );
-                    if (element.updateType == UpdateType.DEPOSIT){
-                      process_l2_update_deposit(element);
-                    }
                 } else {
                     revert("unknown request type");
                 }
@@ -409,13 +401,13 @@ contract RollDown {
             cancel.range.end
         );
         bytes32 correct_hash = keccak256(abi.encode(pending));
-        uint256 timeStamp = block.timestamp;
+        bytes32 blockHash = blockhash(block.number);
 
         CancelResolution memory resolution = CancelResolution({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             l2RequestId: cancel.requestId.id,
             cancelJustified: correct_hash == cancel.hash,
-            timeStamp: timeStamp
+            blockHash: blockHash
         });
 
         cancelResolutions[resolution.requestId.id] = resolution;
@@ -430,13 +422,13 @@ contract RollDown {
     ) private {
         IERC20 token = IERC20(withdrawal.tokenAddress);
         bool status = token.balanceOf(address(this)) >= withdrawal.amount;
-        uint256 timeStamp = block.timestamp;
+        bytes32 blockHash = blockhash(block.number);
 
         WithdrawalResolution memory resolution = WithdrawalResolution({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             l2RequestId: withdrawal.requestId.id,
             status: status,
-            timeStamp: timeStamp
+            blockHash: blockHash
         });
 
         withdrawalResolutions[resolution.requestId.id] = resolution;
@@ -451,23 +443,6 @@ contract RollDown {
                 withdrawal.withdrawalRecipient,
                 withdrawal.tokenAddress,
                 withdrawal.amount
-            );
-        }
-    }
-
-    function process_l2_update_deposit(
-        RequestResult memory depositResult
-    ) private {
-        if (!depositResult.status) {
-            uint256 requestId = depositResult.requestId.id;
-            Deposit memory theDeposit = deposits[requestId];
-            IERC20 token = IERC20(theDeposit.tokenAddress);
-            token.transfer(theDeposit.depositRecipient, theDeposit.amount);
-
-            emit FundsReturned(
-                theDeposit.depositRecipient,
-                theDeposit.tokenAddress,
-                theDeposit.amount
             );
         }
     }
