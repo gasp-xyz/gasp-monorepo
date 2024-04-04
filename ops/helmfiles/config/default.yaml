@@ -42,7 +42,7 @@ updaterEnv:
 
 
 # rollup-sequencer configs
-firstSequencerMnemonic: '0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133'
+firstSequencerMnemonic: 'bottom drive obey lake curtain smoke basket hold race lonely fit walk//Alice'
 secondSequencerMnemonic: 'bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob'
 sequencerEthChainUrl: ws://anvil:8545
 sequencerEnv:

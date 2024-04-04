@@ -182,14 +182,14 @@ contract RollDownTest is Test {
             depositRecipient: 0x0000000000000000000000000000000000000002,
             tokenAddress: 0x0000000000000000000000000000000000000003,
             amount: 4,
-            timeStamp: 1
+            blockHash: 0x0000000000000000000000000000000000000000000000000000000000000005
         });
 
         l1Update.pendingCancelResultions[0] = RollDown.CancelResolution({
             requestId: RollDown.RequestId({id: 6, origin: RollDown.Origin.L1}),
             l2RequestId: 7,
             cancelJustified: true,
-            timeStamp: 2
+            blockHash: 0x0000000000000000000000000000000000000000000000000000000000000008
         });
 
         l1Update.pendingWithdrawalResolutions[0] = RollDown
@@ -200,7 +200,7 @@ contract RollDownTest is Test {
                 }),
                 l2RequestId: 10,
                 status: true,
-                timeStamp: 3
+                blockHash: 0x000000000000000000000000000000000000000000000000000000000000000b
             });
 
         uint256[] memory l2UpdatesToRemove = new uint256[](1);
@@ -208,12 +208,12 @@ contract RollDownTest is Test {
         l1Update.pendingL2UpdatesToRemove[0] = RollDown.L2UpdatesToRemove({
             requestId: RollDown.RequestId({id: 12, origin: RollDown.Origin.L1}),
             l2UpdatesToRemove: l2UpdatesToRemove,
-            timeStamp: 4
+            blockHash: 0x000000000000000000000000000000000000000000000000000000000000000e
         });
 
         assertEq(
             keccak256(abi.encode(l1Update)),
-            0x6ebab65d2a7e2e2ac74b0415ccb2943ed7818bec57609986ab154b6880311c89
+            0x5129c9a6605d367397902fa839ef429af9abed97f0dd36e3b1973939817d40dc
         );
     }
 
@@ -339,6 +339,11 @@ contract RollDownTest is Test {
         });
 
         rollDown.update_l1_from_l2(l2Update);
+        uint256 aliceBalanceAfter = token.balanceOf(alice);
+        uint256 contractBalanceAfter = token.balanceOf(address(rollDown));
+
+        assertEq(aliceBalanceBefore + amount, aliceBalanceAfter);
+        assertEq(contractBalanceBefore - amount, contractBalanceAfter);
     }
 
     function testSuccessfulWithdrawalRequest() public {
@@ -903,131 +908,5 @@ contract RollDownTest is Test {
             1
         );
         assertEq(l1Update.pendingL2UpdatesToRemove[1].l2UpdatesToRemove[0], 2);
-    }
-
-    function testUpdateWithWithdrawalAndRequestResult() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, 2 * amount);
-        vm.startPrank(alice);
-        token.approve(address(rollDown), 2 * amount);
-        rollDown.deposit(tokenAddress, amount);
-        rollDown.deposit(tokenAddress, amount);
-        vm.stopPrank();
-
-        RollDown.L2Update memory l2Update;
-        l2Update.results = new RollDown.RequestResult[](2);
-        l2Update.results[0] = RollDown.RequestResult({
-            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
-            originRequestId: 1,
-            updateType: RollDown.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update.results[1] = RollDown.RequestResult({
-            requestId: RollDown.RequestId({id: 2, origin: RollDown.Origin.L2}),
-            originRequestId: 2,
-            updateType: RollDown.UpdateType.DEPOSIT,
-            status: false
-        });
-        rollDown.update_l1_from_l2(l2Update);
-
-        RollDown.L2Update memory l2Update2;
-        l2Update2.results = new RollDown.RequestResult[](2);
-        l2Update2.results[0] = RollDown.RequestResult({
-            requestId: RollDown.RequestId({id: 3, origin: RollDown.Origin.L2}),
-            originRequestId: 1,
-            updateType: RollDown.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update2.results[1] = RollDown.RequestResult({
-            requestId: RollDown.RequestId({id: 5, origin: RollDown.Origin.L2}),
-            originRequestId: 1,
-            updateType: RollDown.UpdateType.DEPOSIT,
-            status: true
-        });
-
-        l2Update2.withdrawals = new RollDown.Withdrawal[](1);
-        l2Update2.withdrawals[0] = RollDown.Withdrawal({
-            requestId: RollDown.RequestId({id: 4, origin: RollDown.Origin.L2}),
-            withdrawalRecipient: 0x0000000000000000000000000000000000000006,
-            tokenAddress: tokenAddress,
-            amount: 8
-        });
-        rollDown.update_l1_from_l2(l2Update2);
-    }
-
-    function testNonsuccessfullDepositHandling() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 10;
-        deal(tokenAddress, alice, 100 ether);
-        uint256 aliceBalanceBefore = token.balanceOf(alice);
-        uint256 contractBalanceBefore = token.balanceOf(address(rollDown));
-
-        // Act
-        vm.startPrank(alice);
-        token.approve(address(rollDown), amount);
-        rollDown.deposit(tokenAddress, 10);
-        uint256 aliceBalanceAfterDeposit = token.balanceOf(alice);
-        uint256 contractAfterDeposit = token.balanceOf(address(rollDown));
-
-        RollDown.L2Update memory l2Update;
-        l2Update.results = new RollDown.RequestResult[](1);
-        l2Update.results[0] = RollDown.RequestResult({
-            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
-            originRequestId: 1,
-            updateType: RollDown.UpdateType.DEPOSIT,
-            status: false
-        });
-        rollDown.update_l1_from_l2(l2Update);
-        uint256 aliceBalanceAfterDepositUpdate = token.balanceOf(alice);
-        uint256 contractAfterDepositUpdate = token.balanceOf(address(rollDown));
-        vm.stopPrank();
-
-        assertEq(aliceBalanceBefore - aliceBalanceAfterDeposit, 10);
-        assertEq(contractAfterDeposit - contractBalanceBefore, 10);
-        assertEq(aliceBalanceBefore - aliceBalanceAfterDepositUpdate, 0);
-        assertEq(contractBalanceBefore - contractAfterDepositUpdate, 0);
-    }
-
-    function testSuccessfullDepositHandling() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 10;
-        deal(tokenAddress, alice, 100 ether);
-        uint256 aliceBalanceBefore = token.balanceOf(alice);
-        uint256 contractBalanceBefore = token.balanceOf(address(rollDown));
-
-        // Act
-        vm.startPrank(alice);
-        token.approve(address(rollDown), amount);
-        rollDown.deposit(tokenAddress, 10);
-        uint256 aliceBalanceAfterDeposit = token.balanceOf(alice);
-        uint256 contractAfterDeposit = token.balanceOf(address(rollDown));
-
-        RollDown.L2Update memory l2Update;
-        l2Update.results = new RollDown.RequestResult[](1);
-        l2Update.results[0] = RollDown.RequestResult({
-            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
-            originRequestId: 1,
-            updateType: RollDown.UpdateType.DEPOSIT,
-            status: true
-        });
-        rollDown.update_l1_from_l2(l2Update);
-        uint256 aliceBalanceAfterDepositUpdate = token.balanceOf(alice);
-        uint256 contractAfterDepositUpdate = token.balanceOf(address(rollDown));
-        vm.stopPrank();
-
-        assertEq(aliceBalanceBefore - aliceBalanceAfterDeposit, 10);
-        assertEq(contractAfterDeposit - contractBalanceBefore, 10);
-        assertEq(aliceBalanceBefore - aliceBalanceAfterDepositUpdate, 10);
-        assertEq(contractAfterDepositUpdate - contractBalanceBefore, 10);
     }
 }

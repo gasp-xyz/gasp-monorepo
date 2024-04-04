@@ -83,9 +83,3 @@ out
 !broadcast
 **/broadcast/*
 **/broadcast/*/31337/
-
-/ops/blockscout-docker-compose/services/blockscout-db-data
-/ops/blockscout-docker-compose/services/stats-db-data
-/ops/blockscout-docker-compose/services/redis-data
-/ops/blockscout-docker-compose/services/logs
-/ops/blockscout-docker-compose/tmp

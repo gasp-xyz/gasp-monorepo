@@ -1,7 +1,7 @@
 services:
   sequencer:
     restart: unless-stopped
-    image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
+    image: mangatasolutions/rollup-sequencer:local
     depends_on:
       rolldown:
         condition: service_completed_successfully
