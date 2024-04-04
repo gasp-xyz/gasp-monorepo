@@ -67,13 +67,17 @@ export async function getOperatorId(publicClient: PublicClient, operatorAddress:
 }
 
 export async function waitForTaskResponded(publicClient: PublicClient, numTasks = 1) : Promise<any[]> {
+    return waitFor(publicClient, numTasks, "TaskResponded");
+}
+
+export async function waitFor(publicClient: PublicClient, numTasks = 1, eventName="TaskResponded") : Promise<any[]> {
     let tasks : any[] = [];
     console.info("Waiting for :" + numTasks + " tasks to be responded to..");
     return await  new Promise( (resolve) => {
         const unwatch = publicClient.watchContractEvent({
             abi : finalizerTaskManager.abi,
             address: taskManagerAddress,
-            eventName: "TaskResponded",
+            eventName: eventName,
             onLogs: async (logs) => {
                 if(tasks.length < numTasks) {
                     tasks = tasks.concat(logs);
@@ -87,15 +91,16 @@ export async function waitForTaskResponded(publicClient: PublicClient, numTasks 
     } )
 }
 
-export async function waitForNoTaskResponded(publicClient: PublicClient, waitingTime = 120) : Promise<boolean> {
-    console.info("Waiting for :" + waitingTime + " tasks to be responded to..");
+
+export async function waitForNo(publicClient: PublicClient, waitingTime = 120 , eventName="TaskResponded") : Promise<boolean> {
+    console.info("Waiting for :" + waitingTime + " tasks to be " + eventName + "..");
     return await  new Promise( (resolve) => {
         const unwatch = publicClient.watchContractEvent({
             abi : finalizerTaskManager.abi,
             address: taskManagerAddress,
-            eventName: "TaskResponded",
+            eventName: eventName,
             onLogs: async (logs) => {
-                console.warn("Task responded: " + JSON.stringify(logs));
+                console.warn("Oh oh , got an event : " + JSON.stringify(logs));
                 resolve(false);
             },
         });
