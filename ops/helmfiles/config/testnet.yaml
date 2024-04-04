@@ -4,8 +4,8 @@ anvilEnabled: false
 aggregatorEnabled: true
 finalizerEnabled: true
 secondFinalizerEnabled: false
-updaterEnabled: false
-sequencerEnabled: false
+updaterEnabled: true
+sequencerEnabled: true
 secondSequencerEnabled: false
 
 env:
@@ -30,8 +30,8 @@ env:
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-password
-  ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-rpc-url
-  ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-ws-url
+  ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
+  ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/holesky-wss-rpc-url
 
 finalizerEnableServiceMonitorCollectors: true
 finalizerEnvSecrets:
@@ -39,11 +39,11 @@ finalizerEnvSecrets:
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-operator-1-ecdsa-password
   BLS_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-operator-1-bls-key
   BLS_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-operator-1-bls-password
-  ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-rpc-url
-  ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-ws-url
+  ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
+  ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/holesky-wss-rpc-url
 
 #rollup-updater configs
-updaterEthChainUrl: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-ethereum-rpc-url
+updaterEthChainUrl: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
 updaterEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-testnet.mangata.online
   MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
@@ -51,7 +51,7 @@ updaterEnv:
 # rollup-sequencer configs
 firstSequencerMnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
 secondSequencerMnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
-sequencerEthChainUrl: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-ethereum-rpc-url
+sequencerEthChainUrl: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
 sequencerEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-testnet.mangata.online
   MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"

@@ -77,6 +77,14 @@ start-avs-finalizer: ##
 		--bls-ephemeral-key \
 		--stake 100
 
+start-blockscout: ## starts blockscout
+	cd ops/blockscout-docker-compose && docker-compose up -d
+
+stop-blockscout: ## stops blockscout
+	cd ops/blockscout-docker-compose && docker-compose down -v
+
+restart-blockscout: ## restarts blockscout (useful when you want to reset the database)
+	cd ops/blockscout-docker-compose && docker-compose down -v && docker-compose up -d
 -----------------------------: ## 
 _____HELPER_____: ## 
 mocks: ## generates mocks for tests
@@ -89,4 +97,3 @@ tests-unit: ## runs all unit tests
 
 tests-contract: ## runs all forge tests
 	cd contracts && forge test
-
