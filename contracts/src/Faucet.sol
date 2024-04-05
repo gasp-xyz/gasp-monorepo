@@ -13,7 +13,6 @@ contract TestFaucet is Ownable {
     uint256 public lockTime = 10 minutes;
 
     event Withdrawal(address indexed to, uint256 indexed amount);
-    event Deposit(address indexed from, uint256 indexed amount);
 
     mapping(address => uint256) nextAccessTime;
 
