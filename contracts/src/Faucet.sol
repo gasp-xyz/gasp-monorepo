@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
-contract TestFaucet is Ownable {
+contract Faucet is Ownable {
     IERC20 public token;
 
     uint256 public withdrawalAmount = 10 * (10**18);
@@ -41,6 +41,7 @@ contract TestFaucet is Ownable {
         );
 
         nextAccessTime[msg.sender] = block.timestamp + lockTime;
+        usageCount[msg.sender]++;
 
         token.transfer(msg.sender, withdrawalAmount);
     }
