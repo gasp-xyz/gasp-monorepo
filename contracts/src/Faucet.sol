@@ -11,16 +11,13 @@ contract Faucet is Ownable {
 
     uint256 public withdrawalAmount = 10 * (10**18);
     uint256 public lockTime = 10 minutes;
+    uint256 public maxUsageCount = 3;
 
     event Withdrawal(address indexed to, uint256 indexed amount);
 
     mapping(address => uint256) private nextAccessTime;
 
-    // Mapping to keep track of usage count for each address
     mapping(address => uint256) private usageCount;
-
-    // Maximum number of times an address can use the faucet
-    uint256 public constant maxUsageCount = 3;
 
     constructor(address tokenAddress) Ownable() payable {
         token = IERC20(tokenAddress);
@@ -40,10 +37,10 @@ contract Faucet is Ownable {
             "Address has already used the faucet maximum 3 times"
         );
 
+        token.transfer(msg.sender, withdrawalAmount);
+
         nextAccessTime[msg.sender] = block.timestamp + lockTime;
         usageCount[msg.sender]++;
-
-        token.transfer(msg.sender, withdrawalAmount);
     }
 
     function getBalance() external view returns (uint256) {
