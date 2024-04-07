@@ -14,7 +14,7 @@ contract Faucet is Ownable {
 
     event Withdrawal(address indexed to, uint256 indexed amount);
 
-    mapping(address => uint256) nextAccessTime;
+    mapping(address => uint256) private nextAccessTime;
 
     // Mapping to keep track of usage count for each address
     mapping(address => uint256) private usageCount;
@@ -56,6 +56,10 @@ contract Faucet is Ownable {
 
     function setLockTime(uint256 amount) public onlyOwner {
         lockTime = amount * 1 minutes;
+    }
+
+    function setMaxUsageCount(uint256 count) public onlyOwner {
+        maxUsageCount = count;
     }
 
     function withdraw() external onlyOwner {
