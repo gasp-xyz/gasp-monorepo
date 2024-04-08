@@ -1,0 +1,63 @@
+name: Deploy Faucet to App Engine
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - faucet-web-app/**
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and yarn
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        working-directory: faucet-web-app
+        run: npm install
+
+      - name: Build React app
+        working-directory: faucet-web-app
+        run: npm run build
+
+      - name: Create temp folder
+        working-directory: faucet-web-app
+        run: mkdir temp_folder
+
+      # This will create a temporary folder
+      # It will have build folder and app.yaml
+      # app.yaml will use the relative build folder to deploy to GCPs
+      - name: Copy build to temp folder
+        working-directory: faucet-web-app
+        run: cp -r build/ temp_folder/build/
+
+      - name: Copy app.yaml to temp folder
+        working-directory: faucet-web-app
+        run: cp app.yaml temp_folder/app.yaml
+
+      - name: List contents of temp folder for verification
+        working-directory: faucet-web-app
+        run: ls -l temp_folder/
+
+      - name: Google Cloud Auth
+        uses: "google-github-actions/auth@v2"
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Set up Cloud SDK
+        uses: "google-github-actions/setup-gcloud@v2"
+
+      - name: Deploy to Google Cloud Storage
+        working-directory: faucet-web-app
+        run: |
+          cd temp_folder
+          gcloud app deploy app.yaml --quiet

@@ -131,6 +131,42 @@ function App() {
         }
     };
 
+    const addGaspToMetamsk = async () => {
+        try {
+            await window.ethereum.request({
+                "method": "wallet_watchAsset",
+                "params": {
+                    "type": "ERC20",
+                    "options": {
+                        "address": "0x1317106Dd45FF0EB911e9F0aF78D63FBF9076f69",
+                        "symbol": "GASP",
+                        "decimals": 18
+                    }
+                }
+            });
+        } catch (e) {
+            setWithdrawError(JSON.stringify(e.message));
+        }
+    };
+
+    const addGethToMetamsk = async () => {
+        try {
+            await window.ethereum.request({
+                "method": "wallet_watchAsset",
+                "params": {
+                    "type": "ERC20",
+                    "options": {
+                        "address": "0xce658E386fAc0646CEDAf810070f0525Af14D11d",
+                        "symbol": "GETH",
+                        "decimals": 18
+                    }
+                }
+            });
+        } catch (e) {
+            setWithdrawError(JSON.stringify(e.message));
+        }
+    };
+
     return (
         <section className="hero is-fullheight">
             <div className="hero-head">
@@ -231,6 +267,10 @@ function App() {
                         </p>
                     </div>
                 </div>
+            </div>
+            <div>
+                <button className="button is-info mb-2 mr-2" onClick={() => addGaspToMetamsk()}>Add GASP to MetaMask</button>
+                <button className="button is-info mb-2" onClick={() => addGethToMetamsk()}>Add GETH to MetaMask</button>
             </div>
             <article className="card is-grey-darker">
                 <p className="panel-heading">Transaction Data</p>
