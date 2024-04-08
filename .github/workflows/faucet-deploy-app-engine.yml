@@ -5,6 +5,11 @@ on:
     branches:
       - feat/faucet-webapp
 
+permissions:
+  contents: read
+  id-token: write
+  deployments: write
+
 env:
   CI: false
 
