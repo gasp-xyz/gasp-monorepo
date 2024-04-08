@@ -3,7 +3,7 @@ name: Deploy Faucet to App Engine
 on:
   push:
     branches:
-      - feat/faucet-web-app
+      - feat/faucet-webapp
 
 jobs:
   build-and-deploy:
