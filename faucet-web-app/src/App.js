@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { ethers } from "ethers";
-import faucetContract from "./faucet";
+import {gaspFaucetContract, gethFaucetContract} from "./faucet";
 
 function App() {
     const [walletAddress, setWalletAddress] = useState("");
     const [signer, setSigner] = useState();
-    const [fcContract, setFcContract] = useState();
+    const [gaspFcContract, setGaspFcContract] = useState();
+    const [gethFcContract, setGethFcContract] = useState();
     const [withdrawError, setWithdrawError] = useState("");
     const [withdrawSuccess, setWithdrawSuccess] = useState("");
     const [transactionData, setTransactionData] = useState("");
@@ -15,13 +16,25 @@ function App() {
     useEffect(() => {
         getCurrentWalletConnected();
         addWalletListener();
-        getContractBalance()
+        getGaspContractBalance()
+        getGethContractBalance()
     }, [walletAddress]);
 
-    const getContractBalance = async () => {
-        if (fcContract) {
+    const getGaspContractBalance = async () => {
+        if (gaspFcContract) {
             try {
-                const balance = await fcContract.getBalance()
+                const balance = await gaspFcContract.getBalance()
+                setContractBalance(parseInt(ethers.utils.formatEther(balance)))
+            } catch (err) {
+                console.log(err.message);
+            }
+        }
+    };
+
+    const getGethContractBalance = async () => {
+        if (gethFcContract) {
+            try {
+                const balance = await gethFcContract.getBalance()
                 setContractBalance(parseInt(ethers.utils.formatEther(balance)))
             } catch (err) {
                 console.log(err.message);
@@ -39,7 +52,9 @@ function App() {
                 /* get signer */
                 setSigner(provider.getSigner());
                 /* local contract instance */
-                setFcContract(faucetContract(provider));
+                setGaspFcContract(gaspFaucetContract(provider));
+                setGethFcContract(gethFaucetContract(provider));
+
                 /* set active wallet address */
                 setWalletAddress(accounts[0]);
             } catch (err) {
@@ -62,7 +77,8 @@ function App() {
                     /* get signer */
                     setSigner(provider.getSigner());
                     /* local contract instance */
-                    setFcContract(faucetContract(provider));
+                    setGaspFcContract(gaspFaucetContract(provider));
+                    setGethFcContract(gethFaucetContract(provider));
                     /* set active wallet address */
                     setWalletAddress(accounts[0]);
                 } else {
@@ -89,126 +105,145 @@ function App() {
         }
     };
 
-    const getOCTHandler = async () => {
+    const getGASPHandler = async () => {
         setWithdrawError("");
         setWithdrawSuccess("");
         try {
-            const fcContractWithSigner = fcContract.connect(signer);
+            const fcContractWithSigner = gaspFcContract.connect(signer);
             const resp = await fcContractWithSigner.requestTokens();
             setWithdrawSuccess("Operation succeeded - enjoy your tokens!");
             setTransactionData(resp.hash);
         } catch (err) {
-            setWithdrawError(err.message.reason);
+            setWithdrawError(JSON.stringify(err.reason));
+        }
+    };
+
+    const getGETHHandler = async () => {
+        setWithdrawError("");
+        setWithdrawSuccess("");
+        try {
+            const fcContractWithSigner = gethFcContract.connect(signer);
+            const resp = await fcContractWithSigner.requestTokens();
+            setWithdrawSuccess("Operation succeeded - enjoy your tokens!");
+            setTransactionData(resp.hash);
+        } catch (err) {
+            setWithdrawError(JSON.stringify(err.reason));
         }
     };
 
     return (
-        <div>
-            <nav className="navbar">
-                <div className="container">
-                    <div className="navbar-brand">
-                        <h1 className="navbar-item is-size-4">GASP and GETH Tokens</h1>
-                    </div>
-                    <div id="navbarMenu" className="navbar-menu">
-                        <div className="navbar-end is-align-items-center">
-                            <button
-                                className="button is-white connect-wallet"
-                                onClick={connectWallet}
-                            >
-                <span className="is-link has-text-weight-bold">
+        <section className="hero is-fullheight">
+            <div className="hero-head">
+                <header className="navbar">
+                    <div className="container">
+                        <div className="navbar-brand">
+                            <a className="navbar-item">
+                                <span className="subtitle is-bold is-size-3">GASP FAUCET</span>
+                            </a>
+                            <span className="navbar-burger" data-target="navbarMenuHeroC">
+               <span></span>
+               <span></span>
+               <span></span>
+               <span></span>
+               </span>
+                        </div>
+                        <div id="navbarMenuHeroC" className="navbar-menu">
+                            <div className="navbar-end">
+                  <span className="navbar-item">
+                  <a className="button is-inverted" onClick={connectWallet}>
+                  <span className="has-text-weight-bold">
                   {walletAddress && walletAddress.length > 0
                       ? `Connected: ${walletAddress.substring(
                           0,
                           6
                       )}...${walletAddress.substring(38)}`
                       : "Connect Wallet"}
-                </span>
+                  </span>
+                  </a>
+                  </span>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <nav className="level is-mobile">
+                    <div className="level-item has-text-centered">
+                        <div>
+                            <p className="heading has-text-black">GASP Tokens</p>
+                            <p className="title has-text-black">10</p>
+                        </div>
+                    </div>
+                    <div className="level-item has-text-centered">
+                        <div>
+                            <p className="heading has-text-black">GETH Tokens</p>
+                            <p className="title has-text-black">10</p>
+                        </div>
+                    </div>
+                    <div className="level-item has-text-centered">
+                        <div>
+                            <p className="heading has-text-black">GASP Contract Tokens</p>
+                            <p className="title has-text-black">{contractBalance}</p>
+                        </div>
+                    </div>
+                    <div className="level-item has-text-centered">
+                        <div>
+                            <p className="heading has-text-black">GETH Contract Tokens</p>
+                            <p className="title has-text-black">{contractBalance}</p>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+            <div className="container mt-5">
+                {withdrawError && (
+                    <div className="withdraw-error">{withdrawError}</div>
+                )}
+                {withdrawSuccess && (
+                    <div className="withdraw-success">{withdrawSuccess}</div>
+                )}{" "}
+            </div>
+            <div className="hero-body">
+                <div className="container has-text-centered box">
+                    <div className="field is-grouped mb-6">
+                        <p className="control is-expanded">
+                            <input className="input" type="text" value={walletAddress}
+                                   placeholder="Enter your wallet address (0x...)"/>
+                        </p>
+                        <p className="control">
+                            <button
+                                className="button is-info"
+                                onClick={getGASPHandler}
+                                disabled={walletAddress ? false : true}>
+                                Get GASP Tokens
                             </button>
-                        </div>
+                        </p>
+                    </div>
+                    <div className="field is-grouped">
+                        <p className="control is-expanded">
+                            <input className="input" type="text" value={walletAddress}
+                                   placeholder="Enter your wallet address (0x...)"/>
+                        </p>
+                        <p className="control">
+                            <button
+                                className="button is-info"
+                                onClick={getGETHHandler}
+                                disabled={walletAddress ? false : true}>
+                                Get GETH Tokens
+                            </button>
+                        </p>
                     </div>
                 </div>
-            </nav>
-            <section className="hero is-fullheight">
-                <div className="faucet-hero-body">
-                    <div className="container has-text-centered main-content">
-                        <h1 className="title is-1 has-text-black">Faucet ({contractBalance} GASP)</h1>
-                        <p className="title has-text-black">10 GASP</p>
-                        <div className="mt-5">
-                            {withdrawError && (
-                                <div className="withdraw-error">{withdrawError}</div>
-                            )}
-                            {withdrawSuccess && (
-                                <div className="withdraw-success">{withdrawSuccess}</div>
-                            )}{" "}
-                        </div>
-                        <div className="box address-box">
-                            <div className="columns">
-                                <div className="column is-four-fifths">
-                                    <input
-                                        className="input is-medium"
-                                        type="text"
-                                        placeholder="Enter your wallet address (0x...)"
-                                        defaultValue={walletAddress}
-                                    />
-                                </div>
-                                <div className="column">
-                                    <button
-                                        className="button is-link is-medium"
-                                        onClick={getOCTHandler}
-                                        disabled={walletAddress ? false : true}
-                                    >
-                                        GET GASP
-                                    </button>
-                                </div>
-                            </div>
-                            <article className="panel is-grey-darker">
-                                <p className="panel-heading">Transaction Data</p>
-                                <div className="panel-block">
-                                    <p>
-                                        {transactionData
-                                            ? `Transaction hash: ${transactionData}`
-                                            : "--"}
-                                    </p>
-                                </div>
-                            </article>
-                        </div>
-                        <h1 className="title is-1 has-text-black">Faucet ({contractBalance} GETH)</h1>
-                        <p className="title has-text-black">10 GETH</p>
-                        <div className="box address-box">
-                            <div className="columns">
-                                <div className="column is-four-fifths">
-                                    <input
-                                        className="input is-medium"
-                                        type="text"
-                                        placeholder="Enter your wallet address (0x...)"
-                                        defaultValue={walletAddress}
-                                    />
-                                </div>
-                                <div className="column">
-                                    <button
-                                        className="button is-link is-medium"
-                                        onClick={getOCTHandler}
-                                        disabled={walletAddress ? false : true}
-                                    >
-                                        GET GETH
-                                    </button>
-                                </div>
-                            </div>
-                            <article className="panel is-grey-darker">
-                                <p className="panel-heading">Transaction Data</p>
-                                <div className="panel-block">
-                                    <p>
-                                        {transactionData
-                                            ? `Transaction hash: ${transactionData}`
-                                            : "--"}
-                                    </p>
-                                </div>
-                            </article>
-                        </div>
-                    </div>
+            </div>
+            <article className="card is-grey-darker">
+                <p className="panel-heading">Transaction Data</p>
+                <div className="panel-block">
+                    <p>
+                        {transactionData
+                            ? `Transaction hash: ${transactionData}`
+                            : "--"}
+                    </p>
                 </div>
-            </section>
-        </div>
+            </article>
+        </section>
+
     );
 }
 

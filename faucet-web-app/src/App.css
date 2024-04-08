@@ -27,16 +27,25 @@ body {
   padding: 3em;
 }
 
+.box {
+  background-color: transparent;
+}
+
 .box .title {
   color: #333;
 }
 
 .navbar {
   background-color: black;
+  margin-bottom: 70px;
 }
 
 .navbar .navbar-item {
   color: white;
+}
+
+.panel-heading {
+  border-radius: 0;
 }
 
 .connect-wallet span {

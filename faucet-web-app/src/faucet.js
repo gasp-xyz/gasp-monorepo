@@ -93,6 +93,19 @@ const faucetAbi = [
     },
     {
         "type": "function",
+        "name": "setMaxUsageCount",
+        "inputs": [
+            {
+                "name": "count",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
         "name": "setWithdrawalAmount",
         "inputs": [
             {
@@ -152,25 +165,6 @@ const faucetAbi = [
     },
     {
         "type": "event",
-        "name": "Deposit",
-        "inputs": [
-            {
-                "name": "from",
-                "type": "address",
-                "indexed": true,
-                "internalType": "address"
-            },
-            {
-                "name": "amount",
-                "type": "uint256",
-                "indexed": true,
-                "internalType": "uint256"
-            }
-        ],
-        "anonymous": false
-    },
-    {
-        "type": "event",
         "name": "OwnershipTransferred",
         "inputs": [
             {
@@ -208,12 +202,20 @@ const faucetAbi = [
         "anonymous": false
     }
 ]
-const faucetContract = (provider) => {
+const gaspFaucetContract = (provider) => {
     return new ethers.Contract(
-        "0x51cabc6c185b47687a3121f702e0a3528929a631",
+        "0x1828eaa3cde0b2373bc869a19cf5b4804c21752c",
         faucetAbi,
         provider
     );
 };
 
-export default faucetContract;
+const gethFaucetContract = (provider) => {
+    return new ethers.Contract(
+        "0xBD95C31C3035d93C53106cD00A727F7c4664F2c8",
+        faucetAbi,
+        provider
+    );
+};
+
+export {gethFaucetContract, gaspFaucetContract}
