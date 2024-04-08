@@ -45,3 +45,4 @@ jobs:
         with:
           path: 'faucet-web-app/build'
           destination: 'holesky-faucet.gasp.xyz'
+          parent: false
