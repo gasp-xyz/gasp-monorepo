@@ -10,7 +10,6 @@ function App() {
     const [gethFcContract, setGethFcContract] = useState();
     const [withdrawError, setWithdrawError] = useState("");
     const [withdrawSuccess, setWithdrawSuccess] = useState("");
-    const [transactionData, setTransactionData] = useState("");
     const [contractBalance, setContractBalance] = useState(0);
 
     useEffect(() => {
@@ -110,9 +109,8 @@ function App() {
         setWithdrawSuccess("");
         try {
             const fcContractWithSigner = gaspFcContract.connect(signer);
-            const resp = await fcContractWithSigner.requestTokens();
+            await fcContractWithSigner.requestTokens();
             setWithdrawSuccess("Operation succeeded - enjoy your tokens!");
-            setTransactionData(resp.hash);
         } catch (err) {
             setWithdrawError(JSON.stringify(err.reason));
         }
@@ -123,9 +121,8 @@ function App() {
         setWithdrawSuccess("");
         try {
             const fcContractWithSigner = gethFcContract.connect(signer);
-            const resp = await fcContractWithSigner.requestTokens();
+            await fcContractWithSigner.requestTokens();
             setWithdrawSuccess("Operation succeeded - enjoy your tokens!");
-            setTransactionData(resp.hash);
         } catch (err) {
             setWithdrawError(JSON.stringify(err.reason));
         }
@@ -269,19 +266,9 @@ function App() {
                 </div>
             </div>
             <div>
-                <button className="button is-info mb-2 mr-2" onClick={() => addGaspToMetamsk()}>Add GASP to MetaMask</button>
-                <button className="button is-info mb-2" onClick={() => addGethToMetamsk()}>Add GETH to MetaMask</button>
+                <button className="button is-info mb-2 mr-2" onClick={() => addGaspToMetamsk()} disabled={walletAddress ? false : true}>Add GASP to MetaMask</button>
+                <button className="button is-info mb-2" onClick={() => addGethToMetamsk()} disabled={walletAddress ? false : true}>Add GETH to MetaMask</button>
             </div>
-            <article className="card is-grey-darker">
-                <p className="panel-heading">Transaction Data</p>
-                <div className="panel-block">
-                    <p>
-                        {transactionData
-                            ? `Transaction hash: ${transactionData}`
-                            : "--"}
-                    </p>
-                </div>
-            </article>
         </section>
 
     );
