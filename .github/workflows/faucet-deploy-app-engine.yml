@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - feat/faucet-web-app
-    paths:
-      - faucet-web-app/**
 
 jobs:
   build-and-deploy:
