@@ -5,6 +5,9 @@ on:
     branches:
       - feat/faucet-webapp
 
+env:
+  CI: false
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
