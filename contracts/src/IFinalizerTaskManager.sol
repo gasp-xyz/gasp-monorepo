@@ -7,24 +7,29 @@ interface IFinalizerTaskManager {
     // EVENTS
     event NewTaskCreated(uint32 indexed taskIndex, Task task);
 
+    // When we have some response from OPs
+    // note we want to keep track of responded tasks that did not meet the completion criteria 
     event TaskResponded(
         TaskResponse taskResponse,
         TaskResponseMetadata taskResponseMetadata
     );
 
+    // When aggregated stake for OP's responses exceeds the required threshold
     event TaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash);
 
     // STRUCTS
     struct Task {
+        // L2 block number which operators are required to execute and provide proofs for
         uint256 blockNumber;
+        // used for expiration checks
         uint32 taskCreatedBlock;
         // task submitter decides on the criteria for a task to be completed
-        // note that this does not mean the task was "correctly" answered (i.e. the number was squared correctly)
-        //      this is for the challenge logic to verify
-        // task is completed (and contract will accept its TaskResponse) when each quorumNumbers specified here
+        // note that this does not mean the task was "correctly" answered
+        // task is completed when each quorumNumbers specified here
         // are signed by at least quorumThresholdPercentage of the operators
         // note that we set the quorumThresholdPercentage to be the same for all quorumNumbers, but this could be changed
         bytes quorumNumbers;
+        // percentage of quorum's total stake needed to consider task completed
         uint32 quorumThresholdPercentage;
     }
 
@@ -41,11 +46,13 @@ interface IFinalizerTaskManager {
 
     // Extra information related to taskResponse, which is filled inside the contract.
     // It thus cannot be signed by operators, so we keep it in a separate struct than TaskResponse
-    // This metadata is needed by the challenger, so we emit it in the TaskResponded event
+    // This metadata serves informative purposes for now - emitted in TaskResponded event
     struct TaskResponseMetadata {
         uint32 taskResponsedBlock;
         bytes32 hashOfNonSigners;
+        // current total stake for quorums
         uint96[] quroumStakeTotals;
+        // quorum stake signed by the majority of OPs
         uint96[] quroumStakeSigned;
     }
 
