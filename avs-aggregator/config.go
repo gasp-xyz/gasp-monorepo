@@ -24,8 +24,9 @@ type Config struct {
 	UpdatePeriod      int
 
 	AvsRegistryCoordinatorAddr common.Address
+	AvsDeploymentBlock         uint64
 
-	SignerFn signerv2.SignerFn
+	SignerFn signerv2.SignerFn `json:"-"`
 	Address  common.Address
 
 	KickPeriod int
@@ -85,6 +86,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		ChainId:                    chainId,
 		SubstrateWsRpcUrl:          ctx.GlobalString(config.SubstrateRpcFlag.Name),
 		AvsRegistryCoordinatorAddr: common.HexToAddress(ctx.GlobalString(config.AvsRegistryCoordinatorFlag.Name)),
+		AvsDeploymentBlock:         uint64(ctx.GlobalInt(config.AvsDeploymentBlockFlag.Name)),
 		SignerFn:                   signer,
 		Address:                    address,
 	}, nil
@@ -98,6 +100,7 @@ var Flags = []cli.Flag{
 	config.AvsServerPortAddressFlag,
 	config.ChainIdFlag,
 	config.AvsRegistryCoordinatorFlag,
+	config.AvsDeploymentBlockFlag,
 	config.EcdsaKeyFileFlag,
 	config.EcdsaKeyJsonFlag,
 	config.EcdsaKeyPasswordFlag,
