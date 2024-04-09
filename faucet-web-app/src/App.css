@@ -1,7 +1,10 @@
 body {
-  background: url("./images/gasp-app-bcg.jpg") no-repeat;
-  background-color: #070709;
+  background: url("./images/gasp-app-bcg.jpg") no-repeat center center fixed;
   color: white;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
 }
 
 .title {
