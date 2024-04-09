@@ -190,6 +190,27 @@ function App() {
         }
     };
 
+    const addHoleskyNetwork = async () => {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        try {
+            await provider.send("wallet_switchEthereumChain", [{ chainId: "0x4268" }]);
+        } catch (switchError) {
+            // This error code indicates that the chain has not been added to MetaMask.
+            if (switchError.code === 4902) {
+                try {
+                    await provider.send("wallet_addEthereumChain", [{
+                        chainId: "0x4268",
+                        chainName: "Holesky",
+                        rpcUrls: ["https://rpc.holesky.ethpandaops.io"] /* ... */,
+                    }])
+                } catch (addError) {
+                    console.error(addError)
+                }
+            }
+            console.error(switchError)
+        }
+    };
+
     return (
         <section className="hero is-fullheight">
             <div className="hero-head">
@@ -252,7 +273,12 @@ function App() {
                 </nav>
             </div>
             <div className="container mt-5">
-                <span className={chainId === "0x4268" ? "tag is-success is-size-3" : "tag is-danger is-size-3"}>{`${chainId === "0x4268" ? "Connected to Holesky" : "Please connect to Holesky"}`}</span>
+                {chainId === "0x4268" ? (
+                    <span className="tag is-success is-size-3">Connected to Holesky</span>
+                ) : (
+                    <span className="tag is-danger is-size-3 button" onClick={addHoleskyNetwork}>Please connect to Holesky</span>
+                )}
+
             </div>
             <div className="container mt-5">
                 {withdrawError && (
