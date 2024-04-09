@@ -48,7 +48,7 @@ var (
 		Name:     "avs-block-validation-period",
 		Usage:    "Period of block finalization per block produced on mangata",
 		Required: false,
-		Value:    2,
+		Value:    4,
 		EnvVar:   "AVS_BLOCK_VALIDATION_PERIOD",
 	}
 	AvsKickPeriodFlag = cli.IntFlag{
