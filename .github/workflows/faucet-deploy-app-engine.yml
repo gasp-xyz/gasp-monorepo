@@ -46,3 +46,4 @@ jobs:
           path: 'faucet-web-app/build'
           destination: 'holesky-faucet.gasp.xyz'
           parent: false
+          process_gcloudignore: false
