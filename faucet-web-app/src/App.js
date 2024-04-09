@@ -10,7 +10,8 @@ function App() {
     const [gethFcContract, setGethFcContract] = useState();
     const [withdrawError, setWithdrawError] = useState("");
     const [withdrawSuccess, setWithdrawSuccess] = useState("");
-    const [contractBalance, setContractBalance] = useState(0);
+    const [contractGaspBalance, setContractGaspBalance] = useState(0);
+    const [contractGethBalance, setContractGethBalance] = useState(0);
 
     useEffect(() => {
         getCurrentWalletConnected();
@@ -23,7 +24,7 @@ function App() {
         if (gaspFcContract) {
             try {
                 const balance = await gaspFcContract.getBalance()
-                setContractBalance(parseInt(ethers.utils.formatEther(balance)))
+                setContractGaspBalance(parseInt(ethers.utils.formatEther(balance)))
             } catch (err) {
                 console.log(err.message);
             }
@@ -34,7 +35,7 @@ function App() {
         if (gethFcContract) {
             try {
                 const balance = await gethFcContract.getBalance()
-                setContractBalance(parseInt(ethers.utils.formatEther(balance)))
+                setContractGethBalance(parseInt(ethers.utils.formatEther(balance)))
             } catch (err) {
                 console.log(err.message);
             }
@@ -214,13 +215,13 @@ function App() {
                     <div className="level-item has-text-centered">
                         <div>
                             <p className="heading has-text-black">GASP Contract Tokens</p>
-                            <p className="title has-text-black">{contractBalance}</p>
+                            <p className="title has-text-black">{contractGaspBalance}</p>
                         </div>
                     </div>
                     <div className="level-item has-text-centered">
                         <div>
                             <p className="heading has-text-black">GETH Contract Tokens</p>
-                            <p className="title has-text-black">{contractBalance}</p>
+                            <p className="title has-text-black">{contractGethBalance}</p>
                         </div>
                     </div>
                 </nav>
