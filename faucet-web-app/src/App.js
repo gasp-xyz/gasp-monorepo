@@ -8,6 +8,7 @@ function App() {
     const [signer, setSigner] = useState();
     const [gaspFcContract, setGaspFcContract] = useState();
     const [gethFcContract, setGethFcContract] = useState();
+    const [chainId, setChainId] = useState();
     const [withdrawError, setWithdrawError] = useState("");
     const [withdrawSuccess, setWithdrawSuccess] = useState("");
     const [contractGaspBalance, setContractGaspBalance] = useState(0);
@@ -19,6 +20,30 @@ function App() {
         getGaspContractBalance()
         getGethContractBalance()
     }, [walletAddress]);
+
+    useEffect(() => {
+        const getCurrentChainId = async () => {
+            if(window.ethereum) {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const metamaskChainId = await provider.send("eth_chainId");
+                setChainId(metamaskChainId);
+            }
+        }
+
+        getCurrentChainId()
+    },[chainId])
+
+    useEffect(() => {
+        if(window.ethereum) {
+            window.ethereum.on('chainChanged', () => {
+                window.location.reload();
+            })
+        }
+    });
+
+    const handleChangeWallet = (event) => {
+        setWalletAddress(event.target.value);
+    };
 
     const getGaspContractBalance = async () => {
         if (gaspFcContract) {
@@ -227,6 +252,9 @@ function App() {
                 </nav>
             </div>
             <div className="container mt-5">
+                <span className={chainId === "0x4268" ? "tag is-success is-size-3" : "tag is-danger is-size-3"}>{`${chainId === "0x4268" ? "Connected to Holesky" : "Please connect to Holesky"}`}</span>
+            </div>
+            <div className="container mt-5">
                 {withdrawError && (
                     <div className="withdraw-error">{withdrawError}</div>
                 )}
@@ -239,13 +267,13 @@ function App() {
                     <div className="field is-grouped mb-6">
                         <p className="control is-expanded">
                             <input className="input" type="text" value={walletAddress}
-                                   placeholder="Enter your wallet address (0x...)"/>
+                                   placeholder="Enter your wallet address (0x...)" onChange={handleChangeWallet}/>
                         </p>
                         <p className="control">
                             <button
                                 className="button is-info"
                                 onClick={getGASPHandler}
-                                disabled={walletAddress ? false : true}>
+                                disabled={!walletAddress || chainId !== "0x4268"}>
                                 Get GASP Tokens
                             </button>
                         </p>
@@ -253,13 +281,13 @@ function App() {
                     <div className="field is-grouped">
                         <p className="control is-expanded">
                             <input className="input" type="text" value={walletAddress}
-                                   placeholder="Enter your wallet address (0x...)"/>
+                                   placeholder="Enter your wallet address (0x...)" onChange={handleChangeWallet}/>
                         </p>
                         <p className="control">
                             <button
                                 className="button is-info"
                                 onClick={getGETHHandler}
-                                disabled={walletAddress ? false : true}>
+                                disabled={!walletAddress || chainId !== "0x4268"}>
                                 Get GETH Tokens
                             </button>
                         </p>
@@ -267,8 +295,12 @@ function App() {
                 </div>
             </div>
             <div>
-                <button className="button is-info mb-2 mr-2" onClick={() => addGaspToMetamsk()} disabled={walletAddress ? false : true}>Add GASP to MetaMask</button>
-                <button className="button is-info mb-2" onClick={() => addGethToMetamsk()} disabled={walletAddress ? false : true}>Add GETH to MetaMask</button>
+                <button className="button is-info mb-2 mr-2" onClick={() => addGaspToMetamsk()}
+                        disabled={!walletAddress || chainId !== "0x4268"}>Add GASP to MetaMask
+                </button>
+                <button className="button is-info mb-2" onClick={() => addGethToMetamsk()}
+                        disabled={!walletAddress || chainId !== "0x4268"}>Add GETH to MetaMask
+                </button>
             </div>
         </section>
 
