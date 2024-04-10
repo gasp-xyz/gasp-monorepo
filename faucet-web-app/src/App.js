@@ -234,11 +234,11 @@ function App() {
                   <a className="button is-inverted" onClick={connectWallet}>
                   <span className="has-text-weight-bold">
                   {walletAddress && walletAddress.length > 0
-                      ? `Connected: ${walletAddress.substring(
+                      ? <span>{`Connected: ${walletAddress.substring(
                           0,
                           6
-                      )}...${walletAddress.substring(38)}`
-                      : "Connect Wallet"}
+                      )}...${walletAddress.substring(38)}`}</span>
+                      : <span>Connect Metamask</span>}
                   </span>
                   </a>
                   </span>
@@ -293,7 +293,7 @@ function App() {
                 <div className="container has-text-centered box">
                     <div className="field is-grouped mb-6">
                         <p className="control is-expanded">
-                            <input className="input" type="text" value={walletAddress}
+                            <input className="input" readOnly type="text" value={walletAddress}
                                    placeholder="Enter your wallet address (0x...)" onChange={handleChangeWallet}/>
                         </p>
                         <p className="control">
@@ -307,7 +307,7 @@ function App() {
                     </div>
                     <div className="field is-grouped">
                         <p className="control is-expanded">
-                            <input className="input" type="text" value={walletAddress}
+                            <input className="input" readOnly type="text" value={walletAddress}
                                    placeholder="Enter your wallet address (0x...)" onChange={handleChangeWallet}/>
                         </p>
                         <p className="control">
