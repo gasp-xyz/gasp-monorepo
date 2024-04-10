@@ -82,7 +82,7 @@ jobs:
         run: docker ps
 
       - name: Decide if main - branch or parameter
-        run: echo "E2EBRANCHNAME=${{ inputs.e2eBranch || 'eth-rollup-develop' }}" >> $GITHUB_ENV
+        run: echo "E2EBRANCHNAME=${{ inputs.e2eBranch || 'feature/minor-fixes' }}" >> $GITHUB_ENV
 
       - name: Checkout tests
         uses: actions/checkout@v4
