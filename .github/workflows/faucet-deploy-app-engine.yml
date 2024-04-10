@@ -3,7 +3,9 @@ name: Deploy Faucet to App Engine
 on:
   push:
     branches:
-      - feat/faucet-webapp
+      - main
+    paths:
+      - faucet-web-app/**
 
 permissions:
   contents: read
