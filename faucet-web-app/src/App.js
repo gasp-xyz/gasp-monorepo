@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { ethers } from "ethers";
+import gaspLogo from "./images/gasp.logo.svg"
 import {gaspFaucetContract, gethFaucetContract} from "./faucet";
 
 function App() {
@@ -218,7 +219,7 @@ function App() {
                     <div className="container">
                         <div className="navbar-brand">
                             <a className="navbar-item">
-                                <span className="subtitle is-bold is-size-3">GASP FAUCET</span>
+                                <img style={{transform: 'scale(1.3)'}} src={gaspLogo} alt="Logo"/>
                             </a>
                             <span className="navbar-burger" data-target="navbarMenuHeroC">
                <span></span>
