@@ -1,7 +1,8 @@
 name: Run e2e
 on:
-  pull_request:
-    types: [opened, synchronize, closed]
+  # re-enable when merged.
+  #pull_request:
+  #  types: [opened, synchronize, closed]
 
   workflow_dispatch:
       inputs:
@@ -82,7 +83,7 @@ jobs:
         run: docker ps
 
       - name: Decide if main - branch or parameter
-        run: echo "E2EBRANCHNAME=${{ inputs.e2eBranch || 'feature/minor-fixes' }}" >> $GITHUB_ENV
+        run: echo "E2EBRANCHNAME=${{ inputs.e2eBranch || 'eth-rollup-develop' }}" >> $GITHUB_ENV
 
       - name: Checkout tests
         uses: actions/checkout@v4
