@@ -14,6 +14,7 @@ env:
   # contracts
   CHAIN_ID: '"17000"'
   AVS_REGISTRY_COORDINATOR_ADDR: 0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1
+  AVS_DEPLOYMENT_BLOCK: '"1233400"'
   # AVS
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   # every 25th block, ~ 5min
@@ -30,8 +31,8 @@ env:
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-password
-  ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
-  ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/holesky-wss-rpc-url
+  ETH_RPC_URL: https://ethereum-holesky-rpc.publicnode.com
+  ETH_WS_URL: wss://ethereum-holesky-rpc.publicnode.com
 
 finalizerEnableServiceMonitorCollectors: true
 finalizerEnvSecrets:

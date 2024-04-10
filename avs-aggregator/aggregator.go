@@ -59,7 +59,7 @@ type Aggregator struct {
 	logger           sdklogging.Logger
 	serverIpPortAddr string
 	blockPeriod      uint32
-	avsWriter        chainio.AvsWriterer
+	ethRpc           *chainio.EthRpc
 	// aggregation related fields
 	blsAggregationService   blsagg.BlsAggregationService
 	tasks                   map[types.TaskIndex]taskmanager.IFinalizerTaskManagerTask
@@ -145,7 +145,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 	return &Aggregator{
 		logger:                  logger,
 		serverIpPortAddr:        c.ServerAddressPort,
-		avsWriter:               ethRpc.AvsWriter,
+		ethRpc:                  ethRpc,
 		blsAggregationService:   blsAggregationService,
 		tasks:                   make(map[types.TaskIndex]taskmanager.IFinalizerTaskManagerTask),
 		taskResponses:           make(map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IFinalizerTaskManagerTaskResponse),
@@ -219,7 +219,18 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 	agg.taskResponsesMu.RLock()
 	taskResponse := agg.taskResponses[blsAggServiceResp.TaskIndex][blsAggServiceResp.TaskResponseDigest]
 	agg.taskResponsesMu.RUnlock()
-	r, err := agg.avsWriter.SendAggregatedResponse(context.Background(), task, taskResponse, nonSignerStakesAndSignature)
+
+	// response cannot be submitted in the same block as task created block
+	latest := uint64(task.TaskCreatedBlock)
+	var err error
+	for latest <= uint64(task.TaskCreatedBlock) {
+		latest, err = agg.ethRpc.Clients.EthHttpClient.BlockNumber(context.Background())
+		if err != nil {
+			agg.logger.Error("Failed to get current block number", "err", err)
+		}
+	}
+
+	r, err := agg.ethRpc.AvsWriter.SendAggregatedResponse(context.Background(), task, taskResponse, nonSignerStakesAndSignature)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to respond to task", "err", err)
 	}
@@ -234,7 +245,7 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 	}
 	agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
 	// Send number to square to the task manager contract
-	newTask, taskIndex, err := agg.avsWriter.SendNewTaskVerifyBlock(context.Background(), big.NewInt(int64(blockNumber)), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
+	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewTaskVerifyBlock(context.Background(), big.NewInt(int64(blockNumber)), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
 		return err
