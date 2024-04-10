@@ -10,7 +10,9 @@ contract Faucet is Ownable {
     IERC20 public token;
 
     uint256 public withdrawalAmount = 10 * (10**18);
-    uint256 public lockTime = 1 minutes;
+
+    uint256 public lockTime = 10 minutes;
+
     uint256 public maxUsageCount = 3;
 
     event Withdrawal(address indexed to, uint256 indexed amount);
