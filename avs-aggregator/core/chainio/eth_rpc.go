@@ -28,7 +28,7 @@ func NewEthRpc(
 ) (*EthRpc, error) {
 
 	// tmp to get OperatorStateRetriever address
-	client, err := eth.NewClient(ethHttpUrl)
+	client, err := eth.NewInstrumentedClient(ethHttpUrl, clients.EthLogger{Logger: logger})
 	if err != nil {
 		logger.Error("Failed to create Eth Http client", "err", err)
 		return nil, err
