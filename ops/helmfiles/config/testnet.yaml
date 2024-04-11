@@ -18,7 +18,7 @@ env:
   # AVS
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   # every 25th block, ~ 5min
-  AVS_BLOCK_VALIDATION_PERIOD: '"25"'
+  AVS_BLOCK_VALIDATION_PERIOD: '"50"'
   # every 50th task, ~ 4h
   AVS_KICK_PERIOD: '"50"'
   # every 300th task, ~ daily

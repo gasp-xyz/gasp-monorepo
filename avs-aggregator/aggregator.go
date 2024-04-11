@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math/big"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
@@ -220,19 +221,9 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 	taskResponse := agg.taskResponses[blsAggServiceResp.TaskIndex][blsAggServiceResp.TaskResponseDigest]
 	agg.taskResponsesMu.RUnlock()
 
-	// response cannot be submitted in the same block as task created block
-	latest := uint64(task.TaskCreatedBlock)
-	var err error
-	for latest <= uint64(task.TaskCreatedBlock) {
-		latest, err = agg.ethRpc.Clients.EthHttpClient.BlockNumber(context.Background())
-		if err != nil {
-			agg.logger.Error("Failed to get current block number", "err", err)
-		}
-	}
-
 	r, err := agg.ethRpc.AvsWriter.SendAggregatedResponse(context.Background(), task, taskResponse, nonSignerStakesAndSignature)
 	if err != nil {
-		agg.logger.Error("Aggregator failed to respond to task", "err", err)
+		agg.logger.Error("Aggregator failed to respond to task", "task", task, "err", err)
 	}
 	agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r)
 }
