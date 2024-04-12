@@ -31,8 +31,8 @@ env:
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-password
-  ETH_RPC_URL: https://ethereum-holesky-rpc.publicnode.com
-  ETH_WS_URL: wss://ethereum-holesky-rpc.publicnode.com
+  ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
+  ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/holesky-wss-rpc-url
 
 finalizerEnableServiceMonitorCollectors: true
 finalizerEnvSecrets:

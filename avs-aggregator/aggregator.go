@@ -233,6 +233,11 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 	if blockNumber%agg.blockPeriod != 0 {
 		return nil
 	}
+	latest, err := agg.substrateClient.RPC.Chain.GetHeaderLatest()
+	if uint32(latest.Number) != blockNumber || err != nil {
+		return nil
+	}
+
 	agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
 	// Send number to square to the task manager contract
 	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewTaskVerifyBlock(context.Background(), big.NewInt(int64(blockNumber)), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
