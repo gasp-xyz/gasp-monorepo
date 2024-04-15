@@ -280,7 +280,12 @@ function App() {
             </div>
             <div className="container mt-5">
                 {chainId === "0x4268" ? (
-                    <span className="tag is-success is-size-3">Connected to Holesky</span>
+                    <div>
+                        <span className="tag is-success is-size-3 mr-3">Connected to Holesky</span>
+                        <a className="tag is-success is-size-3 button" href="https://www.holeskyfaucet.io/" target="_blank" rel="noreferrer">
+                            Claim Holesky ETH (Faucet)
+                        </a>
+                    </div>
                 ) : (
                     <span className="tag is-danger is-size-3 button" onClick={addHoleskyNetwork}>Please connect to Holesky</span>
                 )}
