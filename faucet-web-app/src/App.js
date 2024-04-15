@@ -205,7 +205,7 @@ function App() {
                         rpcUrls: ["https://rpc.holesky.ethpandaops.io"],
                         nativeCurrency: {
                             decimals: 18,
-                            name: "ETH",
+                            name: "Ethereum",
                             symbol: "ETH",
                         }
                     }])
