@@ -1,8 +1,8 @@
-import util from "util";
+import util from "node:util";
 import { Mangata, signTx } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
-import { u8aToHex, hexToU8a} from "@polkadot/util"
 import { Keyring } from "@polkadot/api";
+import { hexToU8a } from "@polkadot/util";
 import "dotenv/config";
 import { createPublicClient, encodeAbiParameters, webSocket } from "viem";
 import { keccak256 } from "viem";
@@ -12,6 +12,8 @@ type ContractAddress = `0x${string}`;
 
 const mangataContractAddress = process.env
 	.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
+
+const blockNumberDelay = process.env.BLOCK_NUMBER_DELAY! || 5;
 
 function sleep_ms(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -51,10 +53,18 @@ async function main() {
 		const apiAt = await api.at(header.hash);
 		console.log(`block #${header.number} was authored by ${header.author}`);
 
+		try {
+			const latestBlockNumber = await publicClient.getBlockNumber();
+			const delayedBlockNumber = latestBlockNumber - BigInt(blockNumberDelay);
+
+			console.log(`Latest Block Number: ${latestBlockNumber.toString()}`);
+			console.log(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
+
 			const data = (await publicClient.readContract({
 				address: mangataContractAddress,
 				abi: abi,
 				functionName: "getUpdateForL2",
+				blockNumber: delayedBlockNumber,
 			})) as any;
 
 			console.log(util.inspect(data, { depth: null }));
@@ -79,6 +89,12 @@ async function main() {
 			} else {
 				console.log(`L1Update was already submitted ${encodedData}`);
 			}
+		} catch (e) {
+			// Do nothing with error
+			// Error only appear when we have block where there are no data for getUpdateForL2 at all.
+			// This is only in the very beginning
+			// ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
+		}
 
 		const events = await apiAt.query.system.events();
 
