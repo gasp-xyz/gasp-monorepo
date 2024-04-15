@@ -27,7 +27,19 @@ contract MyScript is Script {
         rd.deposit(address(token), 2000);
         rd.deposit(address(token), 2000);
 
+        _record_addresses(address(token), address(rd));
 
         vm.stopBroadcast();
+    }
+
+
+    function _record_addresses(
+        address tokenContractAddress,
+        address rolldownContractAddress
+    ) internal {
+        string memory parent_object = "parent object";
+        vm.serializeAddress(parent_object, "tokenAddress", tokenContractAddress);
+        string memory output = vm.serializeAddress(parent_object, "rolldownContractAddress", rolldownContractAddress);
+        vm.writeJson(output, "./out/addresses.json");
     }
 }
