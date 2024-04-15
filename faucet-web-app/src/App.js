@@ -202,7 +202,12 @@ function App() {
                     await provider.send("wallet_addEthereumChain", [{
                         chainId: "0x4268",
                         chainName: "Holesky",
-                        rpcUrls: ["https://rpc.holesky.ethpandaops.io"] /* ... */,
+                        rpcUrls: ["https://rpc.holesky.ethpandaops.io"],
+                        nativeCurrency: {
+                            decimals: 18,
+                            name: "Ethereum",
+                            symbol: "ETH",
+                        }
                     }])
                 } catch (addError) {
                     console.error(addError)
