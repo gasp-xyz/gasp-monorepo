@@ -70,7 +70,7 @@ start-avs-finalizer: ##
 		--ecdsa-ephemeral-key \
 		--bls-ephemeral-key \
 		--testnet \
-		--stake 100
+		--stake 50
 
 start-avs-finalizer-testkeys: ## 
 	RUST_LOG=avs_finalizer=debug cargo run --manifest-path=avs-finalizer/Cargo.toml -- \

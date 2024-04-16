@@ -2,6 +2,7 @@ package aggregator
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"math/big"
 	"sync"
@@ -194,9 +195,13 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		return
 	}
 	nonSignerPubkeys := []taskmanager.BN254G1Point{}
+	log := []string{}
 	for _, nonSignerPubkey := range blsAggServiceResp.NonSignersPubkeysG1 {
 		nonSignerPubkeys = append(nonSignerPubkeys, core.ConvertToBN254G1Point(nonSignerPubkey))
+		id := nonSignerPubkey.GetOperatorID()
+		log = append(log, hex.EncodeToString(id[:]))
 	}
+	agg.logger.Info("Response non signer ids", "nonSignerIds", log)
 	quorumApks := []taskmanager.BN254G1Point{}
 	for _, quorumApk := range blsAggServiceResp.QuorumApksG1 {
 		quorumApks = append(quorumApks, core.ConvertToBN254G1Point(quorumApk))
