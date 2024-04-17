@@ -4,8 +4,6 @@ import "@mangata-finance/types";
 import type { ApiPromise } from "@polkadot/api";
 import "dotenv/config";
 import {
-	TestClient,
-	WalletClient,
 	createPublicClient,
 	createWalletClient,
 	keccak256,
@@ -55,6 +53,8 @@ async function sendUpdateToL1(
 	walletClient: any,
 	abi: any,
 	blockHash: any,
+	publicClient: any,
+	account: any
 ) {
 	console.log(`HASH ${blockHash} `);
 	const pendingUpdates = await api.rpc.rolldown.pending_updates(blockHash);
@@ -90,15 +90,24 @@ async function sendUpdateToL1(
 		}
 
 		if (reqCount > 0) {
-			const storageHash = await walletClient.writeContract({
+			const gasPrice = await publicClient.getGasPrice()
+
+			const gas = await publicClient.estimateContractGas({
+				address: mangataContractAddress,
+				abi: abi,
+				functionName: "update_l1_from_l2",
+				args: l2Update as any,
+				account,
+			})
+
+			return await walletClient.writeContract({
 				chain: anvil, // TODO: this needs the chain in order to work properly
 				abi: abi,
 				address: mangataContractAddress,
 				functionName: "update_l1_from_l2",
 				args: l2Update as any,
-				gas: 999999n,
+				gas: BigInt(gas) * BigInt(gasPrice),
 			});
-			return storageHash;
 		}
 
 		console.log("no updates available");
@@ -129,6 +138,7 @@ async function main() {
 		transport,
 		chain: anvil,
 	});
+
 	(BigInt.prototype as any).toJSON = function () {
 		return this.toString();
 	};
@@ -138,7 +148,7 @@ async function main() {
 	if (finalizationSource === "relay") {
 		unwatch = await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
 			console.log(`Chain is at block: #${header.number}`);
-			const txHash = await sendUpdateToL1(api, walletClient, abi, header.hash);
+			const txHash = await sendUpdateToL1(api, walletClient, abi, header.hash, publicClient, account);
 			if (txHash) {
 				const result = await publicClient.waitForTransactionReceipt({
 					hash: txHash,
@@ -161,6 +171,8 @@ async function main() {
 						walletClient,
 						abi,
 						(log as any).args.blockHash,
+						publicClient,
+						account
 					);
 					if (txHash) {
 						const result = await publicClient.waitForTransactionReceipt({
