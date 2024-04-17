@@ -86,7 +86,7 @@ contract RollDown {
 
     struct L1Update {
         Deposit[] pendingDeposits;
-        CancelResolution[] pendingCancelResultions;
+        CancelResolution[] pendingCancelResolutions;
         WithdrawalResolution[] pendingWithdrawalResolutions;
         L2UpdatesToRemove[] pendingL2UpdatesToRemove;
     }
@@ -496,7 +496,7 @@ contract RollDown {
         }
 
         result.pendingDeposits = new Deposit[](depositsCounter);
-        result.pendingCancelResultions = new CancelResolution[](cancelsCounter);
+        result.pendingCancelResolutions = new CancelResolution[](cancelsCounter);
         result.pendingWithdrawalResolutions = new WithdrawalResolution[](
             withdrawalsCounter
         );
@@ -521,7 +521,7 @@ contract RollDown {
                     updatesToBeRemovedCounter++
                 ] = l2UpdatesToRemove[requestId];
             } else if (cancelResolutions[requestId].l2RequestId > 0) {
-                result.pendingCancelResultions[
+                result.pendingCancelResolutions[
                     cancelsCounter++
                 ] = cancelResolutions[requestId];
             } else {
