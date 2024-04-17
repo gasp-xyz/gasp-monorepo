@@ -53,9 +53,6 @@ tmp
 
 # dependencies
 node_modules
-
-rollup-sequencer/env
-rollup-updater/env
 # misc
 /.sass-cache
 /connect.lock
