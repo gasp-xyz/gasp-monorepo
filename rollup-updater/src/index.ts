@@ -30,39 +30,73 @@ const mangataContractAddress = process.env
 
 const finalizationSource = process.env.FINALIZATION_SOURCE;
 const verbose = process.env.VERBOSE;
-const limit = process.env.BLOCK_NUMBER_DELAY! || "0";
+const limit = process.env.LIMIT! || "0";
 
 
-let pendingUpdatesStored = "";
+let lastStoredUpdateHash = "";
+let lastSubmittedId = 0;
 
 
+function getMinRequestId(l2Update: any) {
+  let minId = Math.min.apply(null, l2Update[0].withdrawals.map(function(item:any) {
+    return Number(item.requestId.id);
+  }))
+
+  minId = Math.min.apply(minId, l2Update[0].cancels.map(function(item:any) {
+    return Number(item.requestId.id);
+  }))
+
+  minId = Math.min.apply(minId, l2Update[0].results.map(function(item:any) {
+    return Number(item.requestId.id);
+  }))
+  return minId;
+}
+
+
+function getMaxRequestId(l2Update: any) {
+  let maxId = Math.max.apply(null, l2Update[0].withdrawals.map(function(item:any) {
+    return Number(item.requestId.id);
+  }))
+
+  maxId = Math.max.apply(maxId, l2Update[0].cancels.map(function(item:any) {
+    return Number(item.requestId.id);
+  }))
+
+  maxId = Math.max.apply(maxId, l2Update[0].results.map(function(item:any) {
+    return Number(item.requestId.id);
+  }))
+  return maxId;
+}
 
 function filterUpdates(l2Update: any): any {
- let minId = Math.min.apply(null, l2Update.withdrawals.map(function(item:any) {
-    return item.requestId.id;
-  }))
 
- minId = Math.min.apply(minId, l2Update.cancels.map(function(item:any) {
-    return item.requestId.id;
-  }))
+  l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem:any) => {
+    return elem.requestId.id > lastSubmittedId;
+  });
+  l2Update[0].cancels = l2Update[0].cancels.filter((elem:any) => {
+    return elem.requestId.id > lastSubmittedId;
+  });
+  l2Update[0].results = l2Update[0].results.filter((elem:any) => {
+    return elem.requestId.id > lastSubmittedId;
+  });
 
- minId = Math.min.apply(minId, l2Update.results.map(function(item:any) {
-    return item.requestId.id;
-  }))
+  let minId = getMinRequestId(l2Update);
+  if (minId == null ) {
+    return l2Update;
+  }
 
   let maxAmountOfUpdates = parseInt(limit);
-  if (minId !== null && maxAmountOfUpdates > 0) {
-    l2Update.withdrawals = l2Update.withdrawals.filter((elem:any) => {
-      return elem.requestId.id < minId + maxAmountOfUpdates;
+  if (maxAmountOfUpdates > 0) {
+    l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem:any) => {
+      return elem.requestId.id < BigInt(minId + maxAmountOfUpdates);
     });
-    l2Update.withdrawals = l2Update.cancels.filter((elem:any) => {
-      return elem.requestId.id < minId + maxAmountOfUpdates;
+    l2Update[0].cancels = l2Update[0].cancels.filter((elem:any) => {
+      return elem.requestId.id < BigInt(minId + maxAmountOfUpdates);
     });
-    l2Update.withdrawals = l2Update.results.filter((elem:any) => {
-      return elem.requestId.id < minId + maxAmountOfUpdates;
+    l2Update[0].results = l2Update[0].results.filter((elem:any) => {
+      return elem.requestId.id < BigInt(minId + maxAmountOfUpdates);
     });
     return l2Update;
-
   }else{
     return l2Update;
   }
@@ -104,58 +138,45 @@ async function sendUpdateToL1(
 	console.log(`HASH ${blockHash} `);
 	const pendingUpdates = await api.rpc.rolldown.pending_updates(blockHash);
 
-	if (verbose) {
-		console.log(
-			"----------------------------------------------------------------",
-		);
-		console.log("Fetched pending updates", keccak256(pendingUpdates.toHex()));
-		console.log("Stored pending updates", pendingUpdatesStored);
-		console.log(
-			"----------------------------------------------------------------",
-		);
-	}
+    let offset = 0;
+    let updateHash = keccak256(pendingUpdates.toHex());
 
-	if (pendingUpdatesStored === keccak256(pendingUpdates.toHex())) {
-		console.log("Duplicate updates: ", keccak256(pendingUpdates.toHex()));
-		return null;
-	} else {
-		pendingUpdatesStored = keccak256(pendingUpdates.toHex());
 		let l2Update = decodeAbiParameters(
 			abi.find((e: any) => e.name === "update_l1_from_l2")!.inputs,
 			pendingUpdates.toHex(),
 		);
 
-
-		const reqCount =
-			l2Update[0].withdrawals.length +
-			l2Update[0].cancels.length +
-			l2Update[0].results.length;
-
-
 		if (verbose) {
 			console.log(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
 		}
 
-		if (reqCount > 0) {
-
-      let filteredUpdates = filterUpdates(l2Update);
-
-      if (verbose) {
-        console.log(`filtered l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
-      }
-			const storageHash = await walletClient.writeContract({
-				chain: getChain(),
-				abi: abi,
-				address: mangataContractAddress,
-				functionName: "update_l1_from_l2",
-				args: filteredUpdates,
-			});
-			return storageHash;
+    let update = filterUpdates(l2Update);
+		if (verbose) {
+			console.log(`filtered l2Update:  ${JSON.stringify(update, null, 2)}`);
 		}
 
-		console.log("no updates available");
-		return null;
-	}
+		const reqCount =
+			update[0].withdrawals.length +
+			update[0].cancels.length +
+			update[0].results.length;
+
+    if (reqCount == 0) {
+      return null;
+    }
+
+    const storageHash = await walletClient.writeContract({
+      chain: getChain(),
+      abi: abi,
+      address: mangataContractAddress,
+      functionName: "update_l1_from_l2",
+      args: update,
+      // gas: 9999999n,
+    });
+
+    lastStoredUpdateHash = updateHash;
+    lastSubmittedId = getMaxRequestId(update); 
+
+    return storageHash;
 }
 
 async function main() {
