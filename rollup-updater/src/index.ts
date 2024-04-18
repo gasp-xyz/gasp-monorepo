@@ -30,8 +30,45 @@ const mangataContractAddress = process.env
 
 const finalizationSource = process.env.FINALIZATION_SOURCE;
 const verbose = process.env.VERBOSE;
+const limit = process.env.BLOCK_NUMBER_DELAY! || "0";
+
 
 let pendingUpdatesStored = "";
+
+
+
+function filterUpdates(l2Update: any): any {
+ let minId = Math.min.apply(null, l2Update.withdrawals.map(function(item:any) {
+    return item.requestId.id;
+  }))
+
+ minId = Math.min.apply(minId, l2Update.cancels.map(function(item:any) {
+    return item.requestId.id;
+  }))
+
+ minId = Math.min.apply(minId, l2Update.results.map(function(item:any) {
+    return item.requestId.id;
+  }))
+
+  let maxAmountOfUpdates = parseInt(limit);
+  if (minId !== null && maxAmountOfUpdates > 0) {
+    l2Update.withdrawals = l2Update.withdrawals.filter((elem:any) => {
+      return elem.requestId.id < minId + maxAmountOfUpdates;
+    });
+    l2Update.withdrawals = l2Update.cancels.filter((elem:any) => {
+      return elem.requestId.id < minId + maxAmountOfUpdates;
+    });
+    l2Update.withdrawals = l2Update.results.filter((elem:any) => {
+      return elem.requestId.id < minId + maxAmountOfUpdates;
+    });
+    return l2Update;
+
+  }else{
+    return l2Update;
+  }
+
+}
+
 
 function getChain() {
   if (process.env.CHAIN == "holesky"){
@@ -83,28 +120,35 @@ async function sendUpdateToL1(
 		return null;
 	} else {
 		pendingUpdatesStored = keccak256(pendingUpdates.toHex());
-		const l2Update = decodeAbiParameters(
+		let l2Update = decodeAbiParameters(
 			abi.find((e: any) => e.name === "update_l1_from_l2")!.inputs,
 			pendingUpdates.toHex(),
 		);
+
 
 		const reqCount =
 			l2Update[0].withdrawals.length +
 			l2Update[0].cancels.length +
 			l2Update[0].results.length;
 
+
 		if (verbose) {
 			console.log(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
 		}
 
 		if (reqCount > 0) {
+
+      let filteredUpdates = filterUpdates(l2Update);
+
+      if (verbose) {
+        console.log(`filtered l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
+      }
 			const storageHash = await walletClient.writeContract({
 				chain: getChain(),
 				abi: abi,
 				address: mangataContractAddress,
 				functionName: "update_l1_from_l2",
-				args: l2Update as any,
-				gas: 9999999n,
+				args: filteredUpdates,
 			});
 			return storageHash;
 		}
@@ -142,19 +186,26 @@ async function main() {
 	};
 
 	let unwatch: any;
+	let inProgress = false;
 
 	if (finalizationSource === "relay") {
 		unwatch = await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
-			console.log(`Chain is at block: #${header.number}`);
-			const txHash = await sendUpdateToL1(api, walletClient, abi, header.hash);
-			if (txHash) {
-				const result = await publicClient.waitForTransactionReceipt({
-					hash: txHash,
-				});
-				console.log(
-					`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
-				);
-			}
+      if (inProgress === false){
+        inProgress = true;
+        console.log(`Chain is at block: #${header.number}`);
+        const txHash = await sendUpdateToL1(api, walletClient, abi, header.hash);
+        if (txHash) {
+          const result = await publicClient.waitForTransactionReceipt({
+            hash: txHash,
+          });
+          console.log(
+            `#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
+          );
+        }
+        inProgress = false;
+      }else{
+        console.log(`Chain is at block: #${header.number} - tx pending`);
+      }
 		});
 	} else {
 		console.log("subscribing to eth events");
@@ -209,3 +260,4 @@ main()
 		console.log("Success");
 	})
 	.catch((e) => console.error("Something went wrong", e));
+
