@@ -4,29 +4,29 @@ import "@mangata-finance/types";
 import { ApiPromise } from "@polkadot/api";
 import "dotenv/config";
 import {
-	TestClient,
-	WalletClient,
-	createPublicClient,
-	createWalletClient,
-	keccak256,
-	webSocket,
+  TestClient,
+  WalletClient,
+  createPublicClient,
+  createWalletClient,
+  keccak256,
+  webSocket,
 } from "viem";
 import { defineChain } from "viem";
 import { decodeAbiParameters } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { holesky } from "viem/chains";
 import eigenContractAbi from "./FinalizerTaskManager.json" assert {
-	type: "json",
+  type: "json",
 };
 import rolldownAbi from "./RollDown.json" assert { type: "json" };
 
 type ContractAddress = `0x${string}`;
 
 const eigenContractAddress = process.env
-	.EIGEN_CONTRACT_ADDRESS! as ContractAddress;
+  .EIGEN_CONTRACT_ADDRESS! as ContractAddress;
 
 const mangataContractAddress = process.env
-	.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
+  .MANGATA_CONTRACT_ADDRESS! as ContractAddress;
 
 const finalizationSource = process.env.FINALIZATION_SOURCE;
 const verbose = process.env.VERBOSE;
@@ -38,15 +38,15 @@ let lastSubmittedId = 0;
 
 
 function getMinRequestId(l2Update: any) {
-  let minId = Math.min.apply(null, l2Update[0].withdrawals.map(function(item:any) {
+  let minId = Math.min.apply(null, l2Update[0].withdrawals.map(function(item: any) {
     return Number(item.requestId.id);
   }))
 
-  minId = Math.min.apply(minId, l2Update[0].cancels.map(function(item:any) {
+  minId = Math.min.apply(minId, l2Update[0].cancels.map(function(item: any) {
     return Number(item.requestId.id);
   }))
 
-  minId = Math.min.apply(minId, l2Update[0].results.map(function(item:any) {
+  minId = Math.min.apply(minId, l2Update[0].results.map(function(item: any) {
     return Number(item.requestId.id);
   }))
   return minId;
@@ -54,15 +54,15 @@ function getMinRequestId(l2Update: any) {
 
 
 function getMaxRequestId(l2Update: any) {
-  let maxId = Math.max.apply(null, l2Update[0].withdrawals.map(function(item:any) {
+  let maxId = Math.max.apply(null, l2Update[0].withdrawals.map(function(item: any) {
     return Number(item.requestId.id);
   }))
 
-  maxId = Math.max.apply(maxId, l2Update[0].cancels.map(function(item:any) {
+  maxId = Math.max.apply(maxId, l2Update[0].cancels.map(function(item: any) {
     return Number(item.requestId.id);
   }))
 
-  maxId = Math.max.apply(maxId, l2Update[0].results.map(function(item:any) {
+  maxId = Math.max.apply(maxId, l2Update[0].results.map(function(item: any) {
     return Number(item.requestId.id);
   }))
   return maxId;
@@ -70,34 +70,34 @@ function getMaxRequestId(l2Update: any) {
 
 function filterUpdates(l2Update: any): any {
 
-  l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem:any) => {
+  l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem: any) => {
     return elem.requestId.id > lastSubmittedId;
   });
-  l2Update[0].cancels = l2Update[0].cancels.filter((elem:any) => {
+  l2Update[0].cancels = l2Update[0].cancels.filter((elem: any) => {
     return elem.requestId.id > lastSubmittedId;
   });
-  l2Update[0].results = l2Update[0].results.filter((elem:any) => {
+  l2Update[0].results = l2Update[0].results.filter((elem: any) => {
     return elem.requestId.id > lastSubmittedId;
   });
 
-  let minId = getMinRequestId(l2Update);
-  if (minId == null ) {
+  const minId = getMinRequestId(l2Update);
+  if (minId == null) {
     return l2Update;
   }
 
-  let maxAmountOfUpdates = parseInt(limit);
+  const maxAmountOfUpdates = parseInt(limit);
   if (maxAmountOfUpdates > 0) {
-    l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem:any) => {
+    l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem: any) => {
       return elem.requestId.id < BigInt(minId + maxAmountOfUpdates);
     });
-    l2Update[0].cancels = l2Update[0].cancels.filter((elem:any) => {
+    l2Update[0].cancels = l2Update[0].cancels.filter((elem: any) => {
       return elem.requestId.id < BigInt(minId + maxAmountOfUpdates);
     });
-    l2Update[0].results = l2Update[0].results.filter((elem:any) => {
+    l2Update[0].results = l2Update[0].results.filter((elem: any) => {
       return elem.requestId.id < BigInt(minId + maxAmountOfUpdates);
     });
     return l2Update;
-  }else{
+  } else {
     return l2Update;
   }
 
@@ -105,9 +105,9 @@ function filterUpdates(l2Update: any): any {
 
 
 function getChain() {
-  if (process.env.CHAIN == "holesky"){
+  if (process.env.CHAIN == "holesky") {
     return holesky
-  }else{
+  } else {
     return defineChain({
       id: 31337,
       name: "anvil",
@@ -130,88 +130,88 @@ function getChain() {
 }
 
 async function sendUpdateToL1(
-	api: ApiPromise,
-	walletClient: any,
-	abi: any,
-	blockHash: any,
+  api: ApiPromise,
+  walletClient: any,
+  abi: any,
+  blockHash: any,
 ) {
-	console.log(`HASH ${blockHash} `);
-	const pendingUpdates = await api.rpc.rolldown.pending_updates(blockHash);
+  console.log(`HASH ${blockHash} `);
+  const pendingUpdates = await api.rpc.rolldown.pending_updates(blockHash);
 
-    let offset = 0;
-    let updateHash = keccak256(pendingUpdates.toHex());
+  const offset = 0;
+  const updateHash = keccak256(pendingUpdates.toHex());
 
-		let l2Update = decodeAbiParameters(
-			abi.find((e: any) => e.name === "update_l1_from_l2")!.inputs,
-			pendingUpdates.toHex(),
-		);
+  const l2Update = decodeAbiParameters(
+    abi.find((e: any) => e.name === "update_l1_from_l2")!.inputs,
+    pendingUpdates.toHex(),
+  );
 
-		if (verbose) {
-			console.log(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
-		}
+  if (verbose) {
+    console.log(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
+  }
 
-    let update = filterUpdates(l2Update);
-		if (verbose) {
-			console.log(`filtered l2Update:  ${JSON.stringify(update, null, 2)}`);
-		}
+  const update = filterUpdates(l2Update);
+  if (verbose) {
+    console.log(`filtered l2Update:  ${JSON.stringify(update, null, 2)}`);
+  }
 
-		const reqCount =
-			update[0].withdrawals.length +
-			update[0].cancels.length +
-			update[0].results.length;
+  const reqCount =
+    update[0].withdrawals.length +
+    update[0].cancels.length +
+    update[0].results.length;
 
-    if (reqCount == 0) {
-      return null;
-    }
+  if (reqCount == 0) {
+    return null;
+  }
 
-    const storageHash = await walletClient.writeContract({
-      chain: getChain(),
-      abi: abi,
-      address: mangataContractAddress,
-      functionName: "update_l1_from_l2",
-      args: update,
-      // gas: 9999999n,
-    });
+  const storageHash = await walletClient.writeContract({
+    chain: getChain(),
+    abi: abi,
+    address: mangataContractAddress,
+    functionName: "update_l1_from_l2",
+    args: update,
+    // gas: 9999999n,
+  });
 
-    lastStoredUpdateHash = updateHash;
-    lastSubmittedId = getMaxRequestId(update); 
+  lastStoredUpdateHash = updateHash;
+  lastSubmittedId = getMaxRequestId(update);
 
-    return storageHash;
+  return storageHash;
 }
 
 async function main() {
-	const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
-	const abi = rolldownAbi.abi;
+  const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
+  const abi = rolldownAbi.abi;
 
-	// Ethereum private key
-	// We need this to write to Mangata contract
-	const account = privateKeyToAccount(`0x${process.env.WALLET_PRIVATE_KEY!}`);
+  // Ethereum private key
+  // We need this to write to Mangata contract
+  const account = privateKeyToAccount(`0x${process.env.WALLET_PRIVATE_KEY!}`);
 
-	const transport = webSocket(process.env.ETH_CHAIN_URL, {
-		retryCount: 5,
-	});
+  const transport = webSocket(process.env.ETH_CHAIN_URL, {
+    retryCount: 5,
+  });
 
-	// We need wallet client in order to write to contract
-	const walletClient = createWalletClient({
-		account,
-		transport,
-	});
+  // We need wallet client in order to write to contract
+  const walletClient = createWalletClient({
+    account,
+    transport,
+  });
 
-	// We need public client in order to read and subscribe to contract
-	const publicClient = createPublicClient({
-		transport,
-		chain: getChain(),
-	});
-	(BigInt.prototype as any).toJSON = function () {
-		return this.toString();
-	};
+  // We need public client in order to read and subscribe to contract
+  const publicClient = createPublicClient({
+    transport,
+    chain: getChain(),
+  });
+  (BigInt.prototype as any).toJSON = function() {
+    return this.toString();
+  };
 
-	let unwatch: any;
-	let inProgress = false;
+  let unwatch: any;
+  let inProgress = false;
 
-	if (finalizationSource === "relay") {
-		unwatch = await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
-      if (inProgress === false){
+  if (finalizationSource === "relay") {
+    unwatch = await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
+      if (inProgress === false) {
         inProgress = true;
         console.log(`Chain is at block: #${header.number}`);
         const txHash = await sendUpdateToL1(api, walletClient, abi, header.hash);
@@ -224,61 +224,61 @@ async function main() {
           );
         }
         inProgress = false;
-      }else{
+      } else {
         console.log(`Chain is at block: #${header.number} - tx pending`);
       }
-		});
-	} else {
-		console.log("subscribing to eth events");
-		unwatch = publicClient.watchContractEvent({
-			address: eigenContractAddress,
-			abi: eigenContractAbi.abi,
-			eventName: "TaskCompleted",
-			onLogs: async (logs) => {
-				console.log("received task notification from L1");
-				for (const log of logs) {
-					const txHash = await sendUpdateToL1(
-						api,
-						walletClient,
-						abi,
-						(log as any).args.blockHash,
-					);
-					if (txHash) {
-						const result = await publicClient.waitForTransactionReceipt({
-							hash: txHash,
-						});
-						console.log(
-							`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
-						);
-					}
-				}
-			},
-		});
-	}
+    });
+  } else {
+    console.log("subscribing to eth events");
+    unwatch = publicClient.watchContractEvent({
+      address: eigenContractAddress,
+      abi: eigenContractAbi.abi,
+      eventName: "TaskCompleted",
+      onLogs: async (logs) => {
+        console.log("received task notification from L1");
+        for (const log of logs) {
+          const txHash = await sendUpdateToL1(
+            api,
+            walletClient,
+            abi,
+            (log as any).args.blockHash,
+          );
+          if (txHash) {
+            const result = await publicClient.waitForTransactionReceipt({
+              hash: txHash,
+            });
+            console.log(
+              `#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
+            );
+          }
+        }
+      },
+    });
+  }
 
-	// We need to  unwatch if server is down or restarted to prevent leaks
-	process.on("SIGINT", async () => {
-		console.error("Stopping the process..., SIGINT signal");
-		unwatch(); // Unsubscribe from event watching
-		process.exit();
-	});
+  // We need to  unwatch if server is down or restarted to prevent leaks
+  process.on("SIGINT", async () => {
+    console.error("Stopping the process..., SIGINT signal");
+    unwatch(); // Unsubscribe from event watching
+    process.exit();
+  });
 
-	process.on("SIGTERM", async () => {
-		console.error("Stopping the process..., SIGTERM signal");
-		unwatch(); // Unsubscribe from event watching
-		process.exit();
-	});
+  process.on("SIGTERM", async () => {
+    console.error("Stopping the process..., SIGTERM signal");
+    unwatch(); // Unsubscribe from event watching
+    process.exit();
+  });
 
-	process.on("SIGHUP", async () => {
-		console.error("Stopping the process..., SIGHUP signal");
-		unwatch(); // Unsubscribe from event watching
-		process.exit();
-	});
+  process.on("SIGHUP", async () => {
+    console.error("Stopping the process..., SIGHUP signal");
+    unwatch(); // Unsubscribe from event watching
+    process.exit();
+  });
 }
 
 main()
-	.then(() => {
-		console.log("Success");
-	})
-	.catch((e) => console.error("Something went wrong", e));
+  .then(() => {
+    console.log("Success");
+  })
+  .catch((e) => console.error("Something went wrong", e));
 
