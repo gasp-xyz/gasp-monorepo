@@ -267,7 +267,7 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 		quorumNums[i] = sdktypes.QuorumNum(n)
 	}
 	// should monitor the chain and only expire the task aggregation once the chain has reached that block number.
-	taskTimeToExpiry := agg.taskResponseWindowBlock
+	taskTimeToExpiry := agg.taskResponseWindowBlock / 2
 	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, taskTimeToExpiry, quorumNums, quorumThresholdPercentages)
 	agg.logger.Info("Aggregator initialized new task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
 	return nil

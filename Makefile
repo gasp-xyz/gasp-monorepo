@@ -61,6 +61,7 @@ bindings-rs: ## generates rust bindings
 # TODO: piping to zap-pretty only works when zapper environment is set to production, unsure why
 ____OFFCHAIN_SOFTWARE___: ## 
 start-avs-aggregator: ##
+	cast rpc evm_mine && \
 	go run avs-aggregator/cmd/main.go \
 		--ecdsa-key-file tests/keys/aggregator.ecdsa.key.json \
 		2>&1 | zap-pretty
