@@ -12,20 +12,20 @@ env:
   # rpc
   SUBSTRATE_RPC_URL: wss://collator-02-ws-rollup-testnet.mangata.online:443
   # contracts
-  CHAIN_ID: '"17000"'
+  CHAIN_ID: '17000'
   AVS_REGISTRY_COORDINATOR_ADDR: 0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1
   # AVS
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   # every 25th block, ~ 5min
-  AVS_BLOCK_VALIDATION_PERIOD: '"25"'
+  AVS_BLOCK_VALIDATION_PERIOD: '25'
   # every 50th task, ~ 4h
-  AVS_KICK_PERIOD: '"50"'
+  AVS_KICK_PERIOD: '50'
   # every 300th task, ~ daily
-  AVS_UPDATE_STAKE_PERIOD: '"300"'
+  AVS_UPDATE_STAKE_PERIOD: '300'
     # OP
   AVS_RPC_URL: https://avs-aggregator-testnet.mangata.online
   RUST_LOG: avs=debug
-  OPT_IN_AT_STARTUP: '"true"'
+  OPT_IN_AT_STARTUP: 'true'
 
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
