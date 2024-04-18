@@ -14,17 +14,17 @@ env:
   ETH_WS_URL: ws://anvil:8545
   SUBSTRATE_RPC_URL: wss://kusama-archive.mangata.online:443
   # contracts
-  CHAIN_ID: '"31337"'
+  CHAIN_ID: '31337'
   AVS_REGISTRY_COORDINATOR_ADDR: 0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9
   # AVS
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  AVS_BLOCK_VALIDATION_PERIOD: '"5"'
+  AVS_BLOCK_VALIDATION_PERIOD: '5'
   # OP
   RUST_LOG: info
   AVS_RPC_URL: http://avs-aggregator:8090
-  TESTNET: "'true'"
-  ECDSA_EPHEMERAL_KEY: "'true'"
-  BLS_EPHEMERAL_KEY: "'true'"
+  TESTNET: 'true'
+  ECDSA_EPHEMERAL_KEY: 'true'
+  BLS_EPHEMERAL_KEY: 'true'
 
 # tests/keys/aggregator.ecdsa.key.json
 aggregatorEnvSecrets:
