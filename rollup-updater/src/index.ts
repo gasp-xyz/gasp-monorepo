@@ -49,7 +49,11 @@ function getMinRequestId(l2Update: any) {
   minId = Math.min.apply(minId, l2Update[0].results.map(function(item: any) {
     return Number(item.requestId.id);
   }))
-  return minId;
+  if (minId === Infinity) {
+    return null;
+  } else {
+    return minId;
+  }
 }
 
 
@@ -65,7 +69,11 @@ function getMaxRequestId(l2Update: any) {
   maxId = Math.max.apply(maxId, l2Update[0].results.map(function(item: any) {
     return Number(item.requestId.id);
   }))
-  return maxId;
+  if (maxId === -Infinity) {
+    return null;
+  } else {
+    return maxId;
+  }
 }
 
 function filterUpdates(l2Update: any): any {
@@ -86,6 +94,8 @@ function filterUpdates(l2Update: any): any {
   }
 
   const maxAmountOfUpdates = parseInt(limit);
+  console.log(`minID: ${minId}`);
+  console.log(`maxAmountOfUpdates ${maxAmountOfUpdates}`);
   if (maxAmountOfUpdates > 0) {
     l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem: any) => {
       return elem.requestId.id < BigInt(minId + maxAmountOfUpdates);
@@ -174,7 +184,10 @@ async function sendUpdateToL1(
   });
 
   lastStoredUpdateHash = updateHash;
-  lastSubmittedId = getMaxRequestId(update);
+  let maxId = getMaxRequestId(update);
+  if (maxId !== null) {
+    lastSubmittedId = maxId;
+  }
 
   return storageHash;
 }
