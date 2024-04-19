@@ -52,9 +52,14 @@ async function main() {
 	await api.derive.chain.subscribeNewHeads(async (header) => {
 		const apiAt = await api.at(header.hash);
 		console.log(`block #${header.number} was authored by ${header.author}`);
-		const selectedSequencer = await apiAt.query.sequencerStaking.selectedSequencer()
+		const selectedSequencer =
+			await apiAt.query.sequencerStaking.selectedSequencer();
 
-		if (selectedSequencer.isSome && u8aToHex(selectedSequencer.unwrap()).toLowerCase() === collator.address.toLowerCase()) {
+		if (
+			selectedSequencer.isSome &&
+			u8aToHex(selectedSequencer.unwrap()).toLowerCase() ===
+				collator.address.toLowerCase()
+		) {
 			try {
 				const latestBlockNumber = await publicClient.getBlockNumber();
 				const delayedBlockNumber = latestBlockNumber - BigInt(blockNumberDelay);
