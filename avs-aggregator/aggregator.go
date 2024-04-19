@@ -2,10 +2,10 @@ package aggregator
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"math/big"
 	"sync"
-	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
@@ -21,15 +21,6 @@ import (
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
-)
-
-const (
-	// number of blocks after which a task is considered expired
-	// this hardcoded here because it's also hardcoded in the contracts, but should
-	// ideally be fetched from the contracts
-	// taskChallengeWindowBlock = 100
-	// 6s block time on rollup nodes
-	blockTimeSeconds = 6 * time.Second
 )
 
 // Aggregator sends tasks (numbers to square) onchain, then listens for operator signed TaskResponses.
@@ -69,7 +60,7 @@ type Aggregator struct {
 	logger           sdklogging.Logger
 	serverIpPortAddr string
 	blockPeriod      uint32
-	avsWriter        chainio.AvsWriterer
+	ethRpc           *chainio.EthRpc
 	// aggregation related fields
 	blsAggregationService   blsagg.BlsAggregationService
 	tasks                   map[types.TaskIndex]taskmanager.IFinalizerTaskManagerTask
@@ -89,6 +80,8 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Debug("creating new aggregator", "config", c)
 
 	ethRpc, err := chainio.NewEthRpc(
 		c.AvsRegistryCoordinatorAddr,
@@ -121,9 +114,17 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	pubkeyService := operatorpubkeys.NewOperatorPubkeysServiceInMemory(context.Background(), ethRpc.Clients.AvsRegistryChainSubscriber, ethRpc.Clients.AvsRegistryChainReader, logger)
+	pubkeyService := operatorpubkeys.NewOperatorPubkeysServiceInMemory(
+		context.Background(),
+		ethRpc.Clients.AvsRegistryChainSubscriber,
+		ethRpc.Clients.AvsRegistryChainReader,
+		ethRpc.Clients.EthHttpClient,
+		c.AvsDeploymentBlock,
+		50_000,
+		logger,
+	)
 	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, pubkeyService, logger)
-	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, logger)
+	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, ethRpc.Clients.EthWsClient, logger)
 
 	substrateRpc, err := gsrpc.NewSubstrateAPI(c.SubstrateWsRpcUrl)
 	if err != nil {
@@ -145,7 +146,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 	return &Aggregator{
 		logger:                  logger,
 		serverIpPortAddr:        c.ServerAddressPort,
-		avsWriter:               ethRpc.AvsWriter,
+		ethRpc:                  ethRpc,
 		blsAggregationService:   blsAggregationService,
 		tasks:                   make(map[types.TaskIndex]taskmanager.IFinalizerTaskManagerTask),
 		taskResponses:           make(map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IFinalizerTaskManagerTaskResponse),
@@ -194,9 +195,13 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		return
 	}
 	nonSignerPubkeys := []taskmanager.BN254G1Point{}
+	log := []string{}
 	for _, nonSignerPubkey := range blsAggServiceResp.NonSignersPubkeysG1 {
 		nonSignerPubkeys = append(nonSignerPubkeys, core.ConvertToBN254G1Point(nonSignerPubkey))
+		id := nonSignerPubkey.GetOperatorID()
+		log = append(log, hex.EncodeToString(id[:]))
 	}
+	agg.logger.Info("Response non signer ids", "nonSignerIds", log)
 	quorumApks := []taskmanager.BN254G1Point{}
 	for _, quorumApk := range blsAggServiceResp.QuorumApksG1 {
 		quorumApks = append(quorumApks, core.ConvertToBN254G1Point(quorumApk))
@@ -219,9 +224,10 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 	agg.taskResponsesMu.RLock()
 	taskResponse := agg.taskResponses[blsAggServiceResp.TaskIndex][blsAggServiceResp.TaskResponseDigest]
 	agg.taskResponsesMu.RUnlock()
-	r, err := agg.avsWriter.SendAggregatedResponse(context.Background(), task, taskResponse, nonSignerStakesAndSignature)
+
+	r, err := agg.ethRpc.AvsWriter.SendAggregatedResponse(context.Background(), task, taskResponse, nonSignerStakesAndSignature)
 	if err != nil {
-		agg.logger.Error("Aggregator failed to respond to task", "err", err)
+		agg.logger.Error("Aggregator failed to respond to task", "task", task, "err", err)
 	}
 	agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r)
 }
@@ -232,9 +238,14 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 	if blockNumber%agg.blockPeriod != 0 {
 		return nil
 	}
+	latest, err := agg.substrateClient.RPC.Chain.GetHeaderLatest()
+	if uint32(latest.Number) != blockNumber || err != nil {
+		return nil
+	}
+
 	agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
 	// Send number to square to the task manager contract
-	newTask, taskIndex, err := agg.avsWriter.SendNewTaskVerifyBlock(context.Background(), big.NewInt(int64(blockNumber)), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
+	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewTaskVerifyBlock(context.Background(), big.NewInt(int64(blockNumber)), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
 		return err
@@ -255,10 +266,9 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 	for i, n := range newTask.QuorumNumbers {
 		quorumNums[i] = sdktypes.QuorumNum(n)
 	}
-	// TODO(samlaf): we use seconds for now, but we should ideally pass a blocknumber to the blsAggregationService
-	// and it should monitor the chain and only expire the task aggregation once the chain has reached that block number.
-	taskTimeToExpiry := time.Duration(agg.taskResponseWindowBlock) * blockTimeSeconds
-	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
+	// should monitor the chain and only expire the task aggregation once the chain has reached that block number.
+	taskTimeToExpiry := agg.taskResponseWindowBlock / 2
+	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, taskTimeToExpiry, quorumNums, quorumThresholdPercentages)
 	agg.logger.Info("Aggregator initialized new task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
 	return nil
 }

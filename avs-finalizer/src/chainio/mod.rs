@@ -57,7 +57,7 @@ pub(crate) async fn setup_deposits(
 ) -> eyre::Result<()> {
     let provider: Provider<Http> = MW::try_from(eth_rpc_url)?;
     let anvil = LocalWallet::from_str(
-        "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6",
+        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     )?
     .with_chain_id(Chain::AnvilHardhat as u64);
     let op_address = operator.address();

@@ -81,7 +81,7 @@ type SignedTaskResponse struct {
 // reply doesn't need to be checked. If there are no errors, the task response is accepted
 // rpc framework forces a reply type to exist, so we put bool as a placeholder
 func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskResponse, reply *bool) error {
-	agg.logger.Info("Received signed task response", "response", signedTaskResponse)
+	agg.logger.Info("Received signed task response", "response", signedTaskResponse, "operatorId", signedTaskResponse.OperatorId.LogValue())
 	taskIndex := signedTaskResponse.TaskResponse.ReferenceTaskIndex
 	taskResponseDigest, err := core.GetTaskResponseDigest(&signedTaskResponse.TaskResponse)
 	if err != nil {

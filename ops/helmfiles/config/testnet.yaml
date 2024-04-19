@@ -10,18 +10,19 @@ secondSequencerEnabled: false
 
 env:
   # rpc
-  SUBSTRATE_RPC_URL: wss://collator-02-ws-rollup-testnet.mangata.online:443
+  SUBSTRATE_RPC_URL: wss://rollup-testnet-rpc.mangata.online:443
   # contracts
   CHAIN_ID: '17000'
   AVS_REGISTRY_COORDINATOR_ADDR: 0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1
+  AVS_DEPLOYMENT_BLOCK: '1233400'
   # AVS
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  # every 25th block, ~ 5min
-  AVS_BLOCK_VALIDATION_PERIOD: '25'
-  # every 50th task, ~ 4h
-  AVS_KICK_PERIOD: '50'
-  # every 300th task, ~ daily
-  AVS_UPDATE_STAKE_PERIOD: '300'
+  # every 100th block, ~ 10min
+  AVS_BLOCK_VALIDATION_PERIOD: '100'
+  # every 25th task, ~ 4h
+  AVS_KICK_PERIOD: '25'
+  # every 150th task, ~ daily
+  AVS_UPDATE_STAKE_PERIOD: '150'
     # OP
   AVS_RPC_URL: https://avs-aggregator-testnet.mangata.online
   RUST_LOG: avs=debug
@@ -49,6 +50,7 @@ updaterEnv:
   MANGATA_CONTRACT_ADDRESS: "0x329D0C4a58B3cEfdb40c5513E155228f6Cc7B6c5"
   EIGEN_CONTRACT_ADDRESS: "0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   CHAIN: "holesky"
+  FINALIZATION_SOURCE: "relay"
   LIMIT: "10"
 
 # rollup-sequencer configs
