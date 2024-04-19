@@ -37,6 +37,8 @@ interface IFinalizerTaskManager {
         bytes32 blockHash;
         // This is the response that the operator has to provide for a an executed block.
         bytes32 storageProofHash;
+        // This is the response that the operator has to provide for a state hash at given block.
+        bytes32 pendingStateHash;
     }
 
     // Extra information related to taskResponse, which is filled inside the contract.
