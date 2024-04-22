@@ -43,6 +43,6 @@
   ],
 
   "taskManagerParams": {
-    "taskResponseWindowBlocks": 20
+    "taskResponseWindowBlocks": 100
   }
 }
