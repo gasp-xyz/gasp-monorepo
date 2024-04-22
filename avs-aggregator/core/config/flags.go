@@ -46,10 +46,17 @@ var (
 	}
 	AvsBlockValidationPeriodFlag = cli.IntFlag{
 		Name:     "avs-block-validation-period",
-		Usage:    "Period of block finalization per block produced on mangata",
+		Usage:    "Period of block finalization per block produced on L2",
 		Required: false,
 		Value:    4,
 		EnvVar:   "AVS_BLOCK_VALIDATION_PERIOD",
+	}
+	AvsTaskExpirationFlag = cli.IntFlag{
+		Name:     "avs-task-expiration",
+		Usage:    "Expiration of task in seconds",
+		Required: false,
+		Value:    30,
+		EnvVar:   "AVS_TASK_EXPIRATION",
 	}
 	AvsKickPeriodFlag = cli.IntFlag{
 		Name:     "avs-kick-period",

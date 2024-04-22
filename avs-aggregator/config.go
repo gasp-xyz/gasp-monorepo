@@ -21,6 +21,7 @@ type Config struct {
 
 	ServerAddressPort string
 	BlockPeriod       int
+	Expiration        int
 	UpdatePeriod      int
 
 	AvsRegistryCoordinatorAddr common.Address
@@ -79,6 +80,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		LogLevel:                   logLevel,
 		ServerAddressPort:          ctx.GlobalString(config.AvsServerPortAddressFlag.Name),
 		BlockPeriod:                ctx.GlobalInt(config.AvsBlockValidationPeriodFlag.Name),
+		Expiration:                 ctx.GlobalInt(config.AvsTaskExpirationFlag.Name),
 		KickPeriod:                 ctx.GlobalInt(config.AvsKickPeriodFlag.Name),
 		UpdatePeriod:               ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
 		EthRpcUrl:                  ctx.GlobalString(config.EthRpcFlag.Name),
@@ -107,4 +109,5 @@ var Flags = []cli.Flag{
 	config.AvsBlockValidationPeriodFlag,
 	config.AvsKickPeriodFlag,
 	config.AvsUpdateStakePeriodFlag,
+	config.AvsTaskExpirationFlag,
 }

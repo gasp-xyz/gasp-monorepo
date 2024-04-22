@@ -12,7 +12,7 @@
     "serviceManagerImplementation": "0x3287D5077e05e0b0bcF7103C8340a5d6cc992fF1",
     "stakeRegistry": "0x96A14F6eb10a67167249Adb64149F33f5D6e8f2b",
     "stakeRegistryImplementation": "0xD2333E11ea617E30fb97900f6ac9782A85f233e7",
-    "taksManagerImplementation": "0x72fB284429F4088aD38E7Bc229A218FEefe62a3E",
+    "taksManagerImplementation": "0xF361D5EFb03E14F10f669ffE334f6A9394eb57f7",
     "taskManager": "0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   },
   "chainInfo": {

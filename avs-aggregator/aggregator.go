@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math/big"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
@@ -60,6 +61,7 @@ type Aggregator struct {
 	logger           sdklogging.Logger
 	serverIpPortAddr string
 	blockPeriod      uint32
+	expiration       uint32
 	ethRpc           *chainio.EthRpc
 	// aggregation related fields
 	blsAggregationService   blsagg.BlsAggregationService
@@ -124,7 +126,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		logger,
 	)
 	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, pubkeyService, logger)
-	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, ethRpc.Clients.EthWsClient, logger)
+	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, logger)
 
 	substrateRpc, err := gsrpc.NewSubstrateAPI(c.SubstrateWsRpcUrl)
 	if err != nil {
@@ -155,6 +157,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		blockPeriod:             uint32(c.BlockPeriod),
 		kicker:                  kicker,
 		updater:                 updater,
+		expiration:              uint32(c.Expiration),
 	}, nil
 }
 
@@ -266,9 +269,8 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 	for i, n := range newTask.QuorumNumbers {
 		quorumNums[i] = sdktypes.QuorumNum(n)
 	}
-	// should monitor the chain and only expire the task aggregation once the chain has reached that block number.
-	taskTimeToExpiry := agg.taskResponseWindowBlock / 2
-	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, taskTimeToExpiry, quorumNums, quorumThresholdPercentages)
+	taskTimeToExpiry := time.Second * time.Duration(agg.expiration)
+	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
 	agg.logger.Info("Aggregator initialized new task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
 	return nil
 }
