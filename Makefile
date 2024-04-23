@@ -15,7 +15,7 @@ SKIP_WASM_BUILD=1
 
 ETH_RPC_URL=http://localhost:8545
 ETH_WS_URL=ws://localhost:8545
-SUBSTRATE_RPC_URL=wss://kusama-archive.mangata.online:443
+SUBSTRATE_RPC_URL=wss://collator-01-ws-rollup-testnet.mangata.online:443
 AVS_RPC_URL=http://localhost:8090
 AVS_SERVER_IP_PORT_ADDRESS=localhost:8090
 
@@ -54,8 +54,14 @@ bindings-go: ## generates contract bindings
 	cd contracts && ./generate-go-bindings.sh
 
 bindings-rs: ## generates rust bindings
-	forge bind --bindings-path ./avs-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX} 
+	forge bind --bindings-path ./avs-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX}
+	cd ./avs-finalizer && cargo fmt
 
+bindings-json: ## generate JS bindings
+	cd ./rolldown-contract && make update-abi
+	cd ./contracts && forge build && cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../rollup-updater/src/FinalizerTaskManager.json
+
+bindings: bindings-go bindings-rs bindings-json ## generate all bindings
 
 -----------------------------: ## 
 # We pipe all zapper logs through https://github.com/maoueh/zap-pretty so make sure to install it
