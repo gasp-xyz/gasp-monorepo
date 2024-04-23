@@ -1,53 +1,45 @@
 import util from "node:util";
 import { Mangata, signTx } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
-import { Keyring } from "@polkadot/api";
-import { hexToU8a } from "@polkadot/util";
 import "dotenv/config";
-import { createPublicClient, encodeAbiParameters, webSocket } from "viem";
+import {encodeAbiParameters} from "viem";
 import { keccak256 } from "viem";
-import rolldownAbi from "./RollDown.json" assert { type: "json" };
+import {MANGATA_CONTRACT_ADDRESS, BLOCK_NUMBER_DELAY, ABI, getCollatorAddress, sleep} from "./utils"
+import {getPublicClient} from "./viem/client";
+import {webSocketTransport} from "./viem/transport";
+import {configuration} from "./config";
 
-type ContractAddress = `0x${string}`;
 
-const mangataContractAddress = process.env
-	.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
-
-const blockNumberDelay = process.env.BLOCK_NUMBER_DELAY! || 5;
-
-function sleep_ms(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 async function main() {
 	let lastSubmitted = "";
-	const abi = rolldownAbi.abi;
-	const publicClient = createPublicClient({
-		transport: webSocket(process.env.ETH_CHAIN_URL, {
-			retryCount: 5,
-		}),
-	});
+
+	const publicClient = getPublicClient({ transport: webSocketTransport})
 
 	while (true) {
 		try {
-			const data = (await publicClient.readContract({
-				address: mangataContractAddress,
-				abi: abi,
+
+			const data = await publicClient.readContract({
+				address: MANGATA_CONTRACT_ADDRESS,
+				abi: ABI,
 				functionName: "getUpdateForL2",
-			})) as any;
-			console.log(data);
+			})
+
+			console.log(util.inspect(data, { depth: null }));
+
 			break;
 		} catch (e) {
-			console.log(`${mangataContractAddress} contract not found`);
-			await sleep_ms(1000);
+
+			console.log(`${MANGATA_CONTRACT_ADDRESS} contract not found`);
+
+			await sleep(1000);
 		}
 	}
 
 	const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
 	await api.isReady;
 
-	const keyring = new Keyring({ type: "ethereum" });
-	const collator = keyring.addFromSeed(hexToU8a(process.env.MNEMONIC!));
+	const collator = getCollatorAddress("ethereum", configuration.MNEMONIC)
 
 	await api.derive.chain.subscribeNewHeads(async (header) => {
 		const apiAt = await api.at(header.hash);
@@ -55,14 +47,14 @@ async function main() {
 
 		try {
 			const latestBlockNumber = await publicClient.getBlockNumber();
-			const delayedBlockNumber = latestBlockNumber - BigInt(blockNumberDelay);
+			const delayedBlockNumber = latestBlockNumber - BigInt(BLOCK_NUMBER_DELAY);
 
 			console.log(`Latest Block Number: ${latestBlockNumber.toString()}`);
 			console.log(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
 
 			const data = (await publicClient.readContract({
-				address: mangataContractAddress,
-				abi: abi,
+				address: MANGATA_CONTRACT_ADDRESS,
+				abi: ABI,
 				functionName: "getUpdateForL2",
 				blockNumber: delayedBlockNumber,
 			})) as any;
@@ -71,7 +63,7 @@ async function main() {
 
 			// @ts-ignore
 			const encodedData = encodeAbiParameters(
-				abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
+				ABI.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
 				[data],
 			);
 
@@ -114,15 +106,15 @@ async function main() {
 					};
 
 					const contractData = (await publicClient.readContract({
-						address: mangataContractAddress,
-						abi: abi,
+						address: MANGATA_CONTRACT_ADDRESS,
+						abi: ABI,
 						functionName: "getPendingRequests",
 						args: [start, end],
 					})) as any;
 
 					// @ts-ignore
 					const encodedData = encodeAbiParameters(
-						abi.find((e: any) => e!.name === "getPendingRequests")!.outputs!,
+						ABI.find((e: any) => e!.name === "getPendingRequests")!.outputs!,
 						[contractData],
 					);
 
