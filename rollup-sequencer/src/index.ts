@@ -51,56 +51,62 @@ async function main() {
 
 	await api.derive.chain.subscribeNewHeads(async (header) => {
 		const apiAt = await api.at(header.hash);
+
 		console.log(`block #${header.number} was authored by ${header.author}`);
+
 		const selectedSequencer =
 			await apiAt.query.sequencerStaking.selectedSequencer();
 
-		if (
-			selectedSequencer.isSome &&
-			u8aToHex(selectedSequencer.unwrap()).toLowerCase() ===
-				collator.address.toLowerCase()
-		) {
-			try {
-				const latestBlockNumber = await publicClient.getBlockNumber();
-				const delayedBlockNumber = latestBlockNumber - BigInt(blockNumberDelay);
+		if (selectedSequencer.isSome) {
 
-				console.log(`Latest Block Number: ${latestBlockNumber.toString()}`);
-				console.log(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
+			const collatorAddress = collator.address
+			const isSequencerSelected = u8aToHex(selectedSequencer.unwrap()).toLowerCase() === collatorAddress.toLowerCase()
+			const sequencerRights = await api.query.rolldown.sequencerRights(collatorAddress);
+			const hasSequencerRights = sequencerRights.unwrap().readRights.toNumber() === 0
 
-				const data = (await publicClient.readContract({
-					address: mangataContractAddress,
-					abi: abi,
-					functionName: "getUpdateForL2",
-					blockNumber: delayedBlockNumber,
-				})) as any;
+			if (isSequencerSelected && !hasSequencerRights) {
+				try {
+					const latestBlockNumber = await publicClient.getBlockNumber();
+					const delayedBlockNumber = latestBlockNumber - BigInt(blockNumberDelay);
 
-				console.log(util.inspect(data, { depth: null }));
+					console.log(`Latest Block Number: ${latestBlockNumber.toString()}`);
+					console.log(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
 
-				// @ts-ignore
-				const encodedData = encodeAbiParameters(
-					abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
-					[data],
-				);
+					const data = (await publicClient.readContract({
+						address: mangataContractAddress,
+						abi: abi,
+						functionName: "getUpdateForL2",
+						blockNumber: delayedBlockNumber,
+					})) as any;
 
-				const nativeL1Update = await api.rpc.rolldown.get_native_l1_update(
-					encodedData.substring(2),
-				);
+					console.log(util.inspect(data, { depth: null }));
 
-				if (lastSubmitted !== keccak256(encodedData)) {
-					await signTx(
-						api,
-						api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
-						collator,
+					// @ts-ignore
+					const encodedData = encodeAbiParameters(
+						abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
+						[data],
 					);
-					lastSubmitted = keccak256(encodedData);
-				} else {
-					console.log(`L1Update was already submitted ${encodedData}`);
+
+					const nativeL1Update = await api.rpc.rolldown.get_native_l1_update(
+						encodedData.substring(2),
+					);
+
+					if (lastSubmitted !== keccak256(encodedData)) {
+						await signTx(
+							api,
+							api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
+							collator,
+						);
+						lastSubmitted = keccak256(encodedData);
+					} else {
+						console.log(`L1Update was already submitted ${encodedData}`);
+					}
+				} catch (e) {
+					// Do nothing with error
+					// Error only appear when we have block where there are no data for getUpdateForL2 at all.
+					// This is only in the very beginning
+					// ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
 				}
-			} catch (e) {
-				// Do nothing with error
-				// Error only appear when we have block where there are no data for getUpdateForL2 at all.
-				// This is only in the very beginning
-				// ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
 			}
 		}
 
