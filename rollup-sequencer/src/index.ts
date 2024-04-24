@@ -11,10 +11,11 @@ import { countReset } from "console";
 type ContractAddress = `0x${string}`;
 
 const mangataContractAddress = process.env
-	.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
+  .MANGATA_CONTRACT_ADDRESS! as ContractAddress;
+const limit = process.env.LIMIT! || "0";
 
 function sleep_ms(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function isSuccess(events: MangataGenericEvent[]) {
@@ -105,8 +106,7 @@ function filterUpdates(l2Update: any, lastRequestId: number): any {
     l2Update.pendingL2UpdatesToRemove.shift();
   }
 
-  const maxAmountOfUpdates = 500;
-
+  const maxAmountOfUpdates = parseInt(limit);
 
   if (maxAmountOfUpdates > 0) {
     let lastRequestId = firstRequestId + maxAmountOfUpdates;
@@ -135,43 +135,43 @@ function filterUpdates(l2Update: any, lastRequestId: number): any {
 }
 
 async function main() {
-	let lastSubmitted = "";
-	const abi = rolldownAbi.abi;
-	const publicClient = createPublicClient({
-		transport: webSocket(process.env.ETH_CHAIN_URL, {
-			retryCount: 5,
-		}),
-	});
+  let lastSubmitted = "";
+  const abi = rolldownAbi.abi;
+  const publicClient = createPublicClient({
+    transport: webSocket(process.env.ETH_CHAIN_URL, {
+      retryCount: 5,
+    }),
+  });
 
-	while (true) {
-		try {
-			const data = (await publicClient.readContract({
-				address: mangataContractAddress,
-				abi: abi,
-				functionName: "getUpdateForL2",
-			})) as any;
-			console.log(util.inspect(data, { depth: null }));
-			break;
-		} catch (e) {
+  while (true) {
+    try {
+      const data = (await publicClient.readContract({
+        address: mangataContractAddress,
+        abi: abi,
+        functionName: "getUpdateForL2",
+      })) as any;
+      console.log(util.inspect(data, { depth: null }));
+      break;
+    } catch (e) {
       console.log(e)
-			console.log(`${mangataContractAddress} contract not found`);
-			await sleep_ms(1000);
-		}
-	}
+      console.log(`${mangataContractAddress} contract not found`);
+      await sleep_ms(1000);
+    }
+  }
 
-	const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
-	await api.isReady;
+  const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
+  await api.isReady;
 
-	const keyring = new Keyring({ type: "sr25519" });
-	const collator = keyring.addFromUri(process.env.MNEMONIC!);
+  const keyring = new Keyring({ type: "sr25519" });
+  const collator = keyring.addFromUri(process.env.MNEMONIC!);
   let lastRequestId = parseInt((await api.query.rolldown.lastProcessedRequestOnL2("Ethereum")).toString());
   let inProgress = false;
 
-	await api.derive.chain.subscribeNewHeads(async (header) => {
-		const apiAt = await api.at(header.hash);
-		console.log(`block #${header.number} was authored by ${header.author}`);
+  await api.derive.chain.subscribeNewHeads(async (header) => {
+    const apiAt = await api.at(header.hash);
+    console.log(`block #${header.number} was authored by ${header.author}`);
 
-		if (header.author?.toString() === collator.address) {
+    if (header.author?.toString() === collator.address) {
 
       let rights = await api.query.rolldown.sequencerRights(collator.address);
       if (rights.unwrap().readRights.toNumber() === 0) {
@@ -181,108 +181,108 @@ async function main() {
 
       if (inProgress) {
         console.log(`in progress, skipping...`);
-      }else{
+      } else {
         inProgress = true;
       }
 
-			const data = (await publicClient.readContract({
-				address: mangataContractAddress,
-				abi: abi,
-				functionName: "getUpdateForL2",
-			})) as any;
+      const data = (await publicClient.readContract({
+        address: mangataContractAddress,
+        abi: abi,
+        functionName: "getUpdateForL2",
+      })) as any;
 
 
-			// @ts-ignore
-			const encodedData = encodeAbiParameters(
-				abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
-				[data],
-			);
+      // @ts-ignore
+      const encodedData = encodeAbiParameters(
+        abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
+        [data],
+      );
 
 
-			const nativeL1Update = (await api.rpc.rolldown.get_native_l1_update(
-				encodedData.substring(2),
-			)).unwrap();
+      const nativeL1Update = (await api.rpc.rolldown.get_native_l1_update(
+        encodedData.substring(2),
+      )).unwrap();
 
       let filtered = filterUpdates(nativeL1Update, lastRequestId);
       let requestsCount = countRequests(filtered);
- 
-			if (requestsCount > 0) {
-				let result =  await signTx(
-					api,
-					api.tx.rolldown.updateL2FromL1(filtered),
-					collator,
-				);
+
+      if (requestsCount > 0) {
+        let result = await signTx(
+          api,
+          api.tx.rolldown.updateL2FromL1(filtered),
+          collator,
+        );
 
         if (isSuccess(result)) {
 
           console.log(`l1update was submitted successfully`);
 
-          if (lastSubmitted == keccak256(encodedData)){
+          if (lastSubmitted == keccak256(encodedData)) {
             lastRequestId = getMaxRequestId(filtered)!;
-          }else{
+          } else {
             lastSubmitted = keccak256(encodedData);
             lastRequestId = parseInt((await api.query.rolldown.lastProcessedRequestOnL2("Ethereum")).toString());
           }
 
-        }else{
+        } else {
           console.log(`l1update was submitted unsuccessfully`);
         }
-			} else {
-				console.log(`L1Update was already submitted ${encodedData}`);
-			}
+      } else {
+        console.log(`L1Update was already submitted ${encodedData}`);
+      }
       inProgress = false;
-		}
+    }
 
-		const events = await apiAt.query.system.events();
+    const events = await apiAt.query.system.events();
 
-		const pendingRequestsEvents = events.filter(
-			(event) =>
-				event.event.section === "rolldown" &&
-				event.event.method === "L1ReadStored",
-		);
+    const pendingRequestsEvents = events.filter(
+      (event) =>
+        event.event.section === "rolldown" &&
+        event.event.method === "L1ReadStored",
+    );
 
-		if (pendingRequestsEvents.length > 0) {
-			pendingRequestsEvents.forEach((record) => {
-				record.event.data.forEach(async (data, index) => {
-					const requestId = (data as unknown as string[])[1];
-					const { start, end } = (data as any)[2] as unknown as {
-						start: string;
-						end: string;
-					};
+    if (pendingRequestsEvents.length > 0) {
+      pendingRequestsEvents.forEach((record) => {
+        record.event.data.forEach(async (data, index) => {
+          const requestId = (data as unknown as string[])[1];
+          const { start, end } = (data as any)[2] as unknown as {
+            start: string;
+            end: string;
+          };
 
-					const contractData = (await publicClient.readContract({
-						address: mangataContractAddress,
-						abi: abi,
-						functionName: "getPendingRequests",
-						args: [start, end],
-					})) as any;
+          const contractData = (await publicClient.readContract({
+            address: mangataContractAddress,
+            abi: abi,
+            functionName: "getPendingRequests",
+            args: [start, end],
+          })) as any;
 
-					// @ts-ignore
-					const encodedData = encodeAbiParameters(
-						abi.find((e: any) => e!.name === "getPendingRequests")!.outputs!,
-						[contractData],
-					);
+          // @ts-ignore
+          const encodedData = encodeAbiParameters(
+            abi.find((e: any) => e!.name === "getPendingRequests")!.outputs!,
+            [contractData],
+          );
 
-					const verified = await api.rpc.rolldown.verify_pending_requests(
-						keccak256(encodedData),
-						requestId.toString(),
-					);
+          const verified = await api.rpc.rolldown.verify_pending_requests(
+            keccak256(encodedData),
+            requestId.toString(),
+          );
 
-					if (!verified.toPrimitive()) {
-						await signTx(
-							api,
-							api.tx.rolldown.cancelRequestsFromL1(requestId.toString()),
-							collator,
-						);
-					}
-				});
-			});
-		}
-	});
+          if (!verified.toPrimitive()) {
+            await signTx(
+              api,
+              api.tx.rolldown.cancelRequestsFromL1(requestId.toString()),
+              collator,
+            );
+          }
+        });
+      });
+    }
+  });
 }
 
 main()
-	.then(() => {
-		console.log("Success");
-	})
-	.catch((e) => console.error("Something went wrong", e));
+  .then(() => {
+    console.log("Success");
+  })
+  .catch((e) => console.error("Something went wrong", e));
