@@ -12,7 +12,7 @@ type ContractAddress = `0x${string}`;
 
 const mangataContractAddress = process.env
   .MANGATA_CONTRACT_ADDRESS! as ContractAddress;
-const limit = process.env.LIMIT! || "0";
+const limit = process.env.LIMIT! || "10";
 
 function sleep_ms(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
