@@ -49,7 +49,7 @@ updaterEnv:
   MANGATA_CONTRACT_ADDRESS: "0x329D0C4a58B3cEfdb40c5513E155228f6Cc7B6c5"
   EIGEN_CONTRACT_ADDRESS: "0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   CHAIN: "holesky"
-  LIMIT: "10"
+  LIMIT: "25"
 
 # rollup-sequencer configs
 firstSequencerMnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
@@ -58,3 +58,4 @@ sequencerEthChainUrl: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
 sequencerEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-testnet.mangata.online
   MANGATA_CONTRACT_ADDRESS: "0x329D0C4a58B3cEfdb40c5513E155228f6Cc7B6c5"
+  LIMIT: "500"
