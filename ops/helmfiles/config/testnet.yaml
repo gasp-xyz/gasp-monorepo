@@ -25,7 +25,9 @@ env:
   AVS_KICK_PERIOD: '25'
   # every 150th task, ~ daily
   AVS_UPDATE_STAKE_PERIOD: '150'
-    # OP
+  # wait 20s for next RPC response even if task done
+  AVS_DEBOUNCE_RPC: '20'
+  # OP
   AVS_RPC_URL: https://avs-aggregator-testnet.mangata.online
   RUST_LOG: avs=debug
   OPT_IN_AT_STARTUP: 'true'

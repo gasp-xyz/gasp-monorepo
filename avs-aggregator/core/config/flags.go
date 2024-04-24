@@ -72,6 +72,13 @@ var (
 		Value:    50,
 		EnvVar:   "AVS_UPDATE_STAKE_PERIOD",
 	}
+	AvsDebounceRpcFlag = cli.IntFlag{
+		Name:     "avs-debounce-rpc",
+		Usage:    "How many seconds do we wait for subsequent RPC response",
+		Required: false,
+		Value:    5,
+		EnvVar:   "AVS_DEBOUNCE_RPC",
+	}
 
 	// Deployment
 	AvsRegistryCoordinatorFlag = cli.StringFlag{
