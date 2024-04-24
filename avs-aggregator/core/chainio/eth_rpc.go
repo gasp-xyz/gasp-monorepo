@@ -1,15 +1,10 @@
 package chainio
 
 import (
-	"errors"
-
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
-	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
-	"github.com/Layr-Labs/eigensdk-go/types"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -64,12 +59,7 @@ func NewEthRpc(
 		return nil, err
 	}
 
-	pkWallet, err := wallet.NewPrivateKeyWallet(clients.EthHttpClient, signer, address, logger)
-	if err != nil {
-		return nil, types.WrapError(errors.New("Failed to create transaction sender"), err)
-	}
-	txMgr := txmgr.NewSimpleTxManager(pkWallet, clients.EthHttpClient, logger, address)
-	avsWriter, err := NewAvsWriter(txMgr, registryAddr, clients.EthHttpClient, logger)
+	avsWriter, err := NewAvsWriter(clients.TxMgr, registryAddr, clients.EthHttpClient, logger)
 	if err != nil {
 		logger.Error("Cannot create AvsWriter", "err", err)
 		return nil, err

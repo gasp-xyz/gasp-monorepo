@@ -46,10 +46,17 @@ var (
 	}
 	AvsBlockValidationPeriodFlag = cli.IntFlag{
 		Name:     "avs-block-validation-period",
-		Usage:    "Period of block finalization per block produced on mangata",
+		Usage:    "Period of block finalization per block produced on L2",
 		Required: false,
-		Value:    2,
+		Value:    4,
 		EnvVar:   "AVS_BLOCK_VALIDATION_PERIOD",
+	}
+	AvsTaskExpirationFlag = cli.IntFlag{
+		Name:     "avs-task-expiration",
+		Usage:    "Expiration of task in seconds",
+		Required: false,
+		Value:    30,
+		EnvVar:   "AVS_TASK_EXPIRATION",
 	}
 	AvsKickPeriodFlag = cli.IntFlag{
 		Name:     "avs-kick-period",
@@ -72,6 +79,13 @@ var (
 		Usage:    "Address of the AVS Registry Coordinator",
 		Required: true,
 		EnvVar:   "AVS_REGISTRY_COORDINATOR_ADDR",
+	}
+	AvsDeploymentBlockFlag = cli.IntFlag{
+		Name:     "avs-deployment-block",
+		Usage:    "block number at which AVS contracts were deployed, used for startBlock event filtering",
+		Required: false,
+		Value:    0,
+		EnvVar:   "AVS_DEPLOYMENT_BLOCK",
 	}
 
 	// The files for encrypted private keys.

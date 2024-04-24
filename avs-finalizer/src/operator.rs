@@ -9,7 +9,7 @@ use bindings::{
     finalizer_task_manager::NewTaskCreatedFilter,
     shared_types::{G1Point, G2Point, TaskResponse},
 };
-use ethers::providers::{Middleware, PendingTransaction};
+use ethers::providers::{Middleware, PendingTransaction, SubscriptionStream};
 use ethers::{
     contract::{stream, LogMeta},
     providers::StreamExt,
@@ -23,6 +23,7 @@ use sp_core::H256;
 use sp_runtime::traits::BlakeTwo256;
 use sp_runtime::{generic, OpaqueExtrinsic};
 use std::sync::Arc;
+use tokio::select;
 use tracing::{debug, error, info, instrument};
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
@@ -82,37 +83,47 @@ impl Operator {
         let mut stream: stream::EventStream<'_, _, (NewTaskCreatedFilter, LogMeta), _> =
             evs.subscribe_with_meta().await?;
 
-        while let Some(res) = stream.next().await {
-            match res {
-                Ok((event, log)) => {
-                    debug!("Got new task at: {:?}", log);
-                    PendingTransaction::new(log.transaction_hash, self.client.provider()).await?;
-                    info!("Executing a Block for task: {:?}", event);
-                    let proofs = self.execute_block(event.task.block_number.as_u32()).await?;
-                    debug!("Block executed successfully {:?}", proofs);
+        // event stream does not finish with `None` after websocket closure, use block subscription for it
+        let mut blocks: SubscriptionStream<'_, _, _> =
+            self.avs_contracts.ws_client.subscribe_blocks().await?;
 
-                    let payload = TaskResponse {
-                        reference_task_index: event.task_index,
-                        block_hash: proofs.0.as_fixed_bytes().to_owned(),
-                        storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
-                    };
-
-                    let response = self
-                        .rpc
-                        .send_task_response(payload, &self.bls_keypair)
-                        .await;
-
-                    match response {
-                        Ok(r) => match r.error_for_status_ref() {
-                            Err(e) => error!("{} - {}", e, r.text().await?),
-                            Ok(_) => info!("Task finished successfuly and sent to AVS service"),
-                        },
-                        Err(e) => error!("{}", e),
+        loop {
+            select! {
+                Some(event) = stream.next() => match event {
+                    Ok((event, log)) => {
+                        debug!("Got new task at: {:?}", log);
+                        PendingTransaction::new(log.transaction_hash, self.client.provider()).await?;
+                        info!("Executing a Block for task: {:?}", event);
+                        let proofs = self.execute_block(event.task.block_number.as_u32()).await?;
+                        debug!("Block executed successfully {:?}", proofs);
+                        let payload = TaskResponse {
+                            reference_task_index: event.task_index,
+                            block_hash: proofs.0.as_fixed_bytes().to_owned(),
+                            storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
+                        };
+                        let response = self
+                            .rpc
+                            .send_task_response(payload, &self.bls_keypair)
+                            .await;
+                        match response {
+                            Ok(r) => match r.error_for_status_ref() {
+                                Err(e) => error!("{} - {}", e, r.text().await?),
+                                Ok(_) => info!("Task finished successfuly and sent to AVS service"),
+                            },
+                            Err(e) => error!("{}", e),
+                        }
+                    }
+                    Err(e) => tracing::error!("EthWs subscription error {:?}", e),
+                },
+                block = blocks.next() => {
+                    if block.is_none() {
+                        break
                     }
                 }
-                Err(e) => tracing::error!("EthWs subscription error {:?}", e),
             }
         }
+
+        // ws provider has internal reconnect, but if it fails we are done
         Ok(())
     }
 

@@ -21,11 +21,13 @@ type Config struct {
 
 	ServerAddressPort string
 	BlockPeriod       int
+	Expiration        int
 	UpdatePeriod      int
 
 	AvsRegistryCoordinatorAddr common.Address
+	AvsDeploymentBlock         uint64
 
-	SignerFn signerv2.SignerFn
+	SignerFn signerv2.SignerFn `json:"-"`
 	Address  common.Address
 
 	KickPeriod int
@@ -78,6 +80,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		LogLevel:                   logLevel,
 		ServerAddressPort:          ctx.GlobalString(config.AvsServerPortAddressFlag.Name),
 		BlockPeriod:                ctx.GlobalInt(config.AvsBlockValidationPeriodFlag.Name),
+		Expiration:                 ctx.GlobalInt(config.AvsTaskExpirationFlag.Name),
 		KickPeriod:                 ctx.GlobalInt(config.AvsKickPeriodFlag.Name),
 		UpdatePeriod:               ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
 		EthRpcUrl:                  ctx.GlobalString(config.EthRpcFlag.Name),
@@ -85,6 +88,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		ChainId:                    chainId,
 		SubstrateWsRpcUrl:          ctx.GlobalString(config.SubstrateRpcFlag.Name),
 		AvsRegistryCoordinatorAddr: common.HexToAddress(ctx.GlobalString(config.AvsRegistryCoordinatorFlag.Name)),
+		AvsDeploymentBlock:         uint64(ctx.GlobalInt(config.AvsDeploymentBlockFlag.Name)),
 		SignerFn:                   signer,
 		Address:                    address,
 	}, nil
@@ -98,10 +102,12 @@ var Flags = []cli.Flag{
 	config.AvsServerPortAddressFlag,
 	config.ChainIdFlag,
 	config.AvsRegistryCoordinatorFlag,
+	config.AvsDeploymentBlockFlag,
 	config.EcdsaKeyFileFlag,
 	config.EcdsaKeyJsonFlag,
 	config.EcdsaKeyPasswordFlag,
 	config.AvsBlockValidationPeriodFlag,
 	config.AvsKickPeriodFlag,
 	config.AvsUpdateStakePeriodFlag,
+	config.AvsTaskExpirationFlag,
 }
