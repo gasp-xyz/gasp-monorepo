@@ -34,7 +34,6 @@ const limit = process.env.LIMIT! || "0";
 
 
 let lastStoredUpdateHash = "";
-let lastSubmittedId = 0;
 
 
 function getMinRequestId(l2Update: any) {
@@ -74,7 +73,7 @@ function getMaxRequestId(l2Update: any) {
   }
 }
 
-function filterUpdates(l2Update: any): any {
+function filterUpdates(l2Update: any, lastSubmittedId: number): any {
 
   l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem: any) => {
     return elem.requestId.id > lastSubmittedId;
@@ -92,8 +91,6 @@ function filterUpdates(l2Update: any): any {
   }
 
   const maxAmountOfUpdates = parseInt(limit);
-  console.log(`minID: ${minId}`);
-  console.log(`maxAmountOfUpdates ${maxAmountOfUpdates}`);
   if (maxAmountOfUpdates > 0) {
     l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem: any) => {
       return elem.requestId.id < BigInt(minId + maxAmountOfUpdates);
@@ -140,13 +137,13 @@ function getChain() {
 async function sendUpdateToL1(
   api: ApiPromise,
   walletClient: any,
+  publicClient: any,
   abi: any,
   blockHash: any,
 ) {
   console.log(`HASH ${blockHash} `);
   const pendingUpdates = await api.rpc.rolldown.pending_updates(blockHash);
 
-  const offset = 0;
   const updateHash = keccak256(pendingUpdates.toHex());
 
   const l2Update = decodeAbiParameters(
@@ -158,7 +155,13 @@ async function sendUpdateToL1(
     console.log(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
   }
 
-  const update = filterUpdates(l2Update);
+  const lastSubmittedId = (await publicClient.readContract({
+    address: mangataContractAddress,
+    abi: abi,
+    functionName: "lastProcessedUpdate_origin_l2",
+  })) as number;
+
+  const update = filterUpdates(l2Update, lastSubmittedId);
   if (verbose) {
     console.log(`filtered l2Update:  ${JSON.stringify(update, null, 2)}`);
   }
@@ -184,7 +187,7 @@ async function sendUpdateToL1(
   lastStoredUpdateHash = updateHash;
   let maxId = getMaxRequestId(update);
   if (maxId !== null) {
-    lastSubmittedId = maxId;
+    console.log(`lastSubmittedId: ${lastSubmittedId}`);
   }
 
   return storageHash;
@@ -225,7 +228,8 @@ async function main() {
       if (inProgress === false) {
         inProgress = true;
         console.log(`Chain is at block: #${header.number}`);
-        const txHash = await sendUpdateToL1(api, walletClient, abi, header.hash);
+
+        const txHash = await sendUpdateToL1(api, walletClient, publicClient, abi, header.hash);
         if (txHash) {
           const result = await publicClient.waitForTransactionReceipt({
             hash: txHash,
@@ -251,6 +255,7 @@ async function main() {
           const txHash = await sendUpdateToL1(
             api,
             walletClient,
+            publicClient,
             abi,
             (log as any).args.blockHash,
           );
