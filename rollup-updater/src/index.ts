@@ -41,9 +41,9 @@ function getMinRequestId(l2Update: any) {
       l2Update[0].cancels,
       l2Update[0].results
     ].flat()
-    .map(function(item: any) {
-    return Number(item.requestId.id);
-  }))
+      .map(function(item: any) {
+        return Number(item.requestId.id);
+      }))
 
   if (minId === Infinity) {
     return null;
@@ -60,9 +60,9 @@ function getMaxRequestId(l2Update: any) {
       l2Update[0].cancels,
       l2Update[0].results
     ].flat()
-    .map(function(item: any) {
-    return Number(item.requestId.id);
-  }));
+      .map(function(item: any) {
+        return Number(item.requestId.id);
+      }));
 
   if (maxId === -Infinity) {
     return null;
