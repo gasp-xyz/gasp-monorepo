@@ -33,8 +33,6 @@ const verbose = process.env.VERBOSE;
 const limit = process.env.LIMIT! || "0";
 
 
-let lastStoredUpdateHash = "";
-
 
 function getMinRequestId(l2Update: any) {
   let minId = Math.min.apply(null,
@@ -161,6 +159,7 @@ async function sendUpdateToL1(
     functionName: "lastProcessedUpdate_origin_l2",
   })) as number;
 
+  console.log(`L1::lastSubmittedId: ${lastSubmittedId}`);
   const update = filterUpdates(l2Update, lastSubmittedId);
   if (verbose) {
     console.log(`filtered l2Update:  ${JSON.stringify(update, null, 2)}`);
@@ -183,12 +182,6 @@ async function sendUpdateToL1(
     args: update,
     // gas: 9999999n,
   });
-
-  lastStoredUpdateHash = updateHash;
-  let maxId = getMaxRequestId(update);
-  if (maxId !== null) {
-    console.log(`lastSubmittedId: ${lastSubmittedId}`);
-  }
 
   return storageHash;
 }
