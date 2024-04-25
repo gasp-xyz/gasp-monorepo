@@ -38,17 +38,16 @@ let lastSubmittedId = 0;
 
 
 function getMinRequestId(l2Update: any) {
-  let minId = Math.min.apply(null, l2Update[0].withdrawals.map(function(item: any) {
+  let minId = Math.min.apply(null,
+    [
+      l2Update[0].withdrawals,
+      l2Update[0].cancels,
+      l2Update[0].results
+    ].flat()
+    .map(function(item: any) {
     return Number(item.requestId.id);
   }))
 
-  minId = Math.min.apply(minId, l2Update[0].cancels.map(function(item: any) {
-    return Number(item.requestId.id);
-  }))
-
-  minId = Math.min.apply(minId, l2Update[0].results.map(function(item: any) {
-    return Number(item.requestId.id);
-  }))
   if (minId === Infinity) {
     return null;
   } else {
@@ -58,17 +57,16 @@ function getMinRequestId(l2Update: any) {
 
 
 function getMaxRequestId(l2Update: any) {
-  let maxId = Math.max.apply(null, l2Update[0].withdrawals.map(function(item: any) {
+  let maxId = Math.max.apply(null,
+    [
+      l2Update[0].withdrawals,
+      l2Update[0].cancels,
+      l2Update[0].results
+    ].flat()
+    .map(function(item: any) {
     return Number(item.requestId.id);
-  }))
+  }));
 
-  maxId = Math.max.apply(maxId, l2Update[0].cancels.map(function(item: any) {
-    return Number(item.requestId.id);
-  }))
-
-  maxId = Math.max.apply(maxId, l2Update[0].results.map(function(item: any) {
-    return Number(item.requestId.id);
-  }))
   if (maxId === -Infinity) {
     return null;
   } else {

@@ -23,21 +23,25 @@ function isSuccess(events: MangataGenericEvent[]) {
 }
 
 function getMinRequestId(l2Update: any) {
-  let minId = Math.min.apply(null, l2Update.pendingCancelResultions.map(function(item: any) {
+
+  // hacky way as polkadot arrays are not actually arrays ...
+  let minId1 = Math.min.apply(null, l2Update.pendingCancelResultions.map(function(item: any) {
     return Number(item.requestId.id);
   }))
 
-  minId = Math.min.apply(null, l2Update.pendingWithdrawalResolutions.map(function(item: any) {
+  let minId2 = Math.min.apply(null, l2Update.pendingWithdrawalResolutions.map(function(item: any) {
     return Number(item.requestId.id);
   }))
 
-  minId = Math.min.apply(minId, l2Update.pendingL2UpdatesToRemove.map(function(item: any) {
+  let minId3 = Math.min.apply(null, l2Update.pendingL2UpdatesToRemove.map(function(item: any) {
     return Number(item.requestId.id);
   }))
 
-  minId = Math.min.apply(minId, l2Update.pendingDeposits.map(function(item: any) {
+  let minId4 = Math.min.apply(null, l2Update.pendingDeposits.map(function(item: any) {
     return Number(item.requestId.id);
   }))
+
+  let minId = Math.min.apply(null, [minId1, minId2, minId3, minId4]);
 
   if (minId === Infinity) {
     return null;
@@ -47,21 +51,23 @@ function getMinRequestId(l2Update: any) {
 }
 
 function getMaxRequestId(l2Update: any) {
-  let maxId = Math.max.apply(null, l2Update.pendingCancelResultions.map(function(item: any) {
+  let maxId1 = Math.max.apply(null, l2Update.pendingCancelResultions.map(function(item: any) {
     return Number(item.requestId.id);
   }))
 
-  maxId = Math.max.apply(maxId, l2Update.pendingWithdrawalResolutions.map(function(item: any) {
+  let maxId2 = Math.max.apply(null, l2Update.pendingWithdrawalResolutions.map(function(item: any) {
     return Number(item.requestId.id);
   }))
 
-  maxId = Math.max.apply(maxId, l2Update.pendingL2UpdatesToRemove.map(function(item: any) {
+  let maxId3 = Math.max.apply(null, l2Update.pendingL2UpdatesToRemove.map(function(item: any) {
     return Number(item.requestId.id);
   }))
 
-  maxId = Math.max.apply(maxId, l2Update.pendingDeposits.map(function(item: any) {
+  let maxId4 = Math.max.apply(null, l2Update.pendingDeposits.map(function(item: any) {
     return Number(item.requestId.id);
   }))
+
+  let maxId = Math.max.apply(null, [maxId1, maxId2, maxId3, maxId4]);
 
   if (maxId === -Infinity) {
     return null;
