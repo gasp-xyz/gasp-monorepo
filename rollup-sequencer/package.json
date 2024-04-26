@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "build": "rimraf ./build && npx tsc",
-    "lint": "npx @biomejs/biome check --apply src/index.ts",
+    "lint": "npx @biomejs/biome check --apply src/common src/config src/utils src/viem src/index.ts",
     "start": "node build/index.js"
   },
   "keywords": [],

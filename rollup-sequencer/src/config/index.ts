@@ -1,9 +1,9 @@
-import { createConfig } from "./envs/config";
+import { createConfig } from "./config.js";
 
 function getConfig() {
-    // Here we can distinguish between different
-    // configs like - local, test, staging, production
-    return createConfig()
+	// Here we can distinguish between different
+	// configs like - local, test, staging, production
+	return createConfig();
 }
 
 export const configuration = getConfig();
