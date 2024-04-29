@@ -6,7 +6,7 @@ import { keccak256 } from "viem";
 import { MANGATA_NODE_URL, MNEMONIC } from "./common/constants.js";
 import {
 	getApi,
-	getCollator,
+	getCollator, getSelectedSequencerWithRights,
 	initReadContractWithRetry,
 	print,
 	processDataForL2Update,
@@ -28,29 +28,33 @@ async function main() {
 		const collator = getCollator("ethereum", MNEMONIC);
 
 		print(`block #${header.number} was authored by ${header.author}`);
+		const {isSequencerSelected, hasSequencerRights, selectedSequencer} = await getSelectedSequencerWithRights(api, collator.address, header.hash)
+		if (isSequencerSelected && hasSequencerRights) {
+			print(`Sequencer selected: ${selectedSequencer}`)
+			try {
 
-		try {
-			const { encodedData, nativeL1Update } = await processDataForL2Update(
-				api,
-				publicClient,
-			);
-
-			if (lastSubmitted !== keccak256(encodedData)) {
-				await signTx(
+				const { encodedData, nativeL1Update } = await processDataForL2Update(
 					api,
-					api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
-					collator,
+					publicClient,
 				);
-				lastSubmitted = keccak256(encodedData);
-			} else {
-				print(`L1Update was already submitted ${encodedData}`);
+
+				if (lastSubmitted !== keccak256(encodedData)) {
+					await signTx(
+						api,
+						api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
+						collator,
+					);
+					lastSubmitted = keccak256(encodedData);
+				} else {
+					print(`L1Update was already submitted ${encodedData}`);
+				}
+			} catch (e) {
+				print("The contract function getUpdateForL2 returned no data");
+				// Do nothing with error
+				// Error only appear when we have block where there are no data for getUpdateForL2 at all.
+				// This is only in the very beginning
+				// ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
 			}
-		} catch (e) {
-			print("The contract function getUpdateForL2 returned no data");
-			// Do nothing with error
-			// Error only appear when we have block where there are no data for getUpdateForL2 at all.
-			// This is only in the very beginning
-			// ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
 		}
 
 		await processPendingRequestsEvents(

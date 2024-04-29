@@ -8,7 +8,7 @@ import type {
 	FrameSystemEventRecord,
 	PalletRolldownMessagesL1Update,
 } from "@polkadot/types/lookup";
-import { hexToU8a } from "@polkadot/util";
+import { hexToU8a, u8aToHex } from "@polkadot/util";
 import type { KeypairType } from "@polkadot/util-crypto/types";
 import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
 import {
@@ -154,6 +154,27 @@ async function processPendingRequestsEvents(
 	}
 }
 
+async function getSelectedSequencerWithRights(api: ApiPromise, collatorAddress: string, headerHash: Uint8Array) {
+	const apiAt = await api.at(headerHash);
+	const selectedSequencer = await apiAt.query.sequencerStaking.selectedSequencer();
+	if (selectedSequencer.isSome) {
+		const isSequencerSelected = u8aToHex(selectedSequencer.unwrap()).toLowerCase() === collatorAddress.toLowerCase()
+		const sequencerRights = await apiAt.query.rolldown.sequencerRights(collatorAddress);
+		const hasSequencerRights = sequencerRights.unwrap().readRights.toNumber() > 0
+		return {
+			isSequencerSelected,
+			hasSequencerRights,
+			selectedSequencer: u8aToHex(selectedSequencer.unwrap()).toLowerCase()
+		}
+	} else {
+		return {
+			isSequencerSelected: false,
+			hasSequencerRights: false,
+			selectedSequencer: null
+		}
+	}
+}
+
 function print(data: any) {
 	console.log(util.inspect(data, { depth: null }));
 }
@@ -169,4 +190,5 @@ export {
 	processDataForL2Update,
 	initReadContractWithRetry,
 	processPendingRequestsEvents,
+	getSelectedSequencerWithRights,
 };
