@@ -2,7 +2,7 @@ import util from "node:util";
 import { Mangata, signTx } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
 import { Keyring } from "@polkadot/api";
-import { hexToU8a } from "@polkadot/util";
+import { hexToU8a, u8aToHex } from "@polkadot/util";
 import "dotenv/config";
 import { createPublicClient, encodeAbiParameters, webSocket } from "viem";
 import { keccak256 } from "viem";
@@ -51,49 +51,63 @@ async function main() {
 
 	await api.derive.chain.subscribeNewHeads(async (header) => {
 		const apiAt = await api.at(header.hash);
+
 		console.log(`block #${header.number} was authored by ${header.author}`);
 
-		try {
-			const latestBlockNumber = await publicClient.getBlockNumber();
-			const delayedBlockNumber = latestBlockNumber - BigInt(blockNumberDelay);
+		const selectedSequencer =
+			await apiAt.query.sequencerStaking.selectedSequencer();
 
-			console.log(`Latest Block Number: ${latestBlockNumber.toString()}`);
-			console.log(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
+		if (selectedSequencer.isSome) {
 
-			const data = (await publicClient.readContract({
-				address: mangataContractAddress,
-				abi: abi,
-				functionName: "getUpdateForL2",
-				blockNumber: delayedBlockNumber,
-			})) as any;
+			const collatorAddress = collator.address
+			const isSequencerSelected = u8aToHex(selectedSequencer.unwrap()).toLowerCase() === collatorAddress.toLowerCase()
+			const sequencerRights = await api.query.rolldown.sequencerRights(collatorAddress);
+			const hasSequencerRights = sequencerRights.unwrap().readRights.toNumber() === 0
 
-			console.log(util.inspect(data, { depth: null }));
+			if (isSequencerSelected && !hasSequencerRights) {
+				try {
+					const latestBlockNumber = await publicClient.getBlockNumber();
+					const delayedBlockNumber = latestBlockNumber - BigInt(blockNumberDelay);
 
-			// @ts-ignore
-			const encodedData = encodeAbiParameters(
-				abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
-				[data],
-			);
+					console.log(`Latest Block Number: ${latestBlockNumber.toString()}`);
+					console.log(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
 
-			const nativeL1Update = await api.rpc.rolldown.get_native_l1_update(
-				encodedData.substring(2),
-			);
+					const data = (await publicClient.readContract({
+						address: mangataContractAddress,
+						abi: abi,
+						functionName: "getUpdateForL2",
+						blockNumber: delayedBlockNumber,
+					})) as any;
 
-			if (lastSubmitted !== keccak256(encodedData)) {
-				await signTx(
-					api,
-					api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
-					collator,
-				);
-				lastSubmitted = keccak256(encodedData);
-			} else {
-				console.log(`L1Update was already submitted ${encodedData}`);
+					console.log(util.inspect(data, { depth: null }));
+
+					// @ts-ignore
+					const encodedData = encodeAbiParameters(
+						abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
+						[data],
+					);
+
+					const nativeL1Update = await api.rpc.rolldown.get_native_l1_update(
+						encodedData.substring(2),
+					);
+
+					if (lastSubmitted !== keccak256(encodedData)) {
+						await signTx(
+							api,
+							api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
+							collator,
+						);
+						lastSubmitted = keccak256(encodedData);
+					} else {
+						console.log(`L1Update was already submitted ${encodedData}`);
+					}
+				} catch (e) {
+					// Do nothing with error
+					// Error only appear when we have block where there are no data for getUpdateForL2 at all.
+					// This is only in the very beginning
+					// ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
+				}
 			}
-		} catch (e) {
-			// Do nothing with error
-			// Error only appear when we have block where there are no data for getUpdateForL2 at all.
-			// This is only in the very beginning
-			// ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
 		}
 
 		const events = await apiAt.query.system.events();
