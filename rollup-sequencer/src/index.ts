@@ -5,9 +5,11 @@ import "dotenv/config";
 import { keccak256 } from "viem";
 import { MANGATA_NODE_URL, MNEMONIC } from "./common/constants.js";
 import {
+	countRequests,
+	filterUpdates,
 	getApi,
-	getCollator, getSelectedSequencerWithRights,
-	initReadContractWithRetry,
+	getCollator, getLastRequestId, getMaxRequestId, getSelectedSequencerWithRights,
+	initReadContractWithRetry, isSuccess,
 	print,
 	processDataForL2Update,
 	processPendingRequestsEvents,
@@ -17,12 +19,15 @@ import { webSocketTransport } from "./viem/transport.js";
 
 async function main() {
 	let lastSubmitted = "";
+	let inProgress = false;
 
 	const publicClient = getPublicClient({ transport: webSocketTransport });
 
 	const api = await getApi(MANGATA_NODE_URL);
 
 	await initReadContractWithRetry(publicClient);
+
+	let lastRequestId = await  getLastRequestId(api)
 
 	await api.derive.chain.subscribeNewHeads(async (header: HeaderExtended) => {
 		const collator = getCollator("ethereum", MNEMONIC);
@@ -32,29 +37,51 @@ async function main() {
 		if (isSequencerSelected && hasSequencerRights) {
 			print(`Sequencer selected: ${selectedSequencer}`)
 			try {
-
+				if (inProgress) {
+					print(`in progress, skipping...`)
+				} else {
+					inProgress = true;
+				}
 				const { encodedData, nativeL1Update } = await processDataForL2Update(
 					api,
 					publicClient,
 				);
 
-				if (lastSubmitted !== keccak256(encodedData)) {
-					await signTx(
+				const filteredUpdates = filterUpdates(nativeL1Update.unwrap(), lastRequestId)
+				const requestsCount = countRequests(filteredUpdates);
+
+				if (requestsCount > 0) {
+					let result = await signTx(
 						api,
-						api.tx.rolldown.updateL2FromL1(nativeL1Update.unwrap()),
+						api.tx.rolldown.updateL2FromL1(filteredUpdates),
 						collator,
 					);
-					lastSubmitted = keccak256(encodedData);
+
+					if (isSuccess(result)) {
+						print(`L1update was submitted successfully`);
+
+						if (lastSubmitted == keccak256(encodedData)) {
+							lastRequestId = getMaxRequestId(filteredUpdates)!;
+						} else {
+							lastSubmitted = keccak256(encodedData);
+							lastRequestId = await getLastRequestId(api)
+						}
+
+					} else {
+						print(`L1update was submitted unsuccessfully`);
+					}
 				} else {
 					print(`L1Update was already submitted ${encodedData}`);
 				}
 			} catch (e) {
+				print(e)
 				print("The contract function getUpdateForL2 returned no data");
 				// Do nothing with error
 				// Error only appear when we have block where there are no data for getUpdateForL2 at all.
 				// This is only in the very beginning
 				// ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
 			}
+			inProgress = false;
 		}
 
 		await processPendingRequestsEvents(
