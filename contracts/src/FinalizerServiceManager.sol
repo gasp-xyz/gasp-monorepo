@@ -5,10 +5,6 @@ import "@eigenlayer/contracts/libraries/BytesLib.sol";
 import "./IFinalizerTaskManager.sol";
 import "@eigenlayer-middleware/src/ServiceManagerBase.sol";
 
-/**
- * @title Primary entrypoint for procuring services from Finalizer.
- * @author Layr Labs, Inc.
- */
 contract FinalizerServiceManager is ServiceManagerBase {
     using BytesLib for bytes;
 
