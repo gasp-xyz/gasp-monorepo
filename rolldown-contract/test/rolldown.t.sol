@@ -44,7 +44,7 @@ contract RollDownTest is Test {
 
         // Assert
         assertEq(l1Update.pendingDeposits.length, 1);
-        assertEq(l1Update.pendingCancelResultions.length, 0);
+        assertEq(l1Update.pendingCancelResolutions.length, 0);
         assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
         assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
         assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
@@ -76,7 +76,7 @@ contract RollDownTest is Test {
 
         // Assert
         assertEq(l1Update.pendingDeposits.length, 1);
-        assertEq(l1Update.pendingCancelResultions.length, 0);
+        assertEq(l1Update.pendingCancelResolutions.length, 0);
         assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
         assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
         assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);

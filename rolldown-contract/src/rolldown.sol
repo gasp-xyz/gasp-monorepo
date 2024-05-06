@@ -173,13 +173,13 @@ contract RollDown {
         address depositRecipient = msg.sender;
         uint amount = msg.value;
 
-        bytes32 blockHash = blockhash(block.number);
+        uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
             tokenAddress: ETH_TOKEN_ADDRESS,
             amount: amount,
-            blockHash: blockHash
+            timeStamp: timeStamp
         });
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
@@ -491,13 +491,13 @@ contract RollDown {
         Withdrawal calldata withdrawal
     ) private {
         bool status = payable(address(this)).balance >= withdrawal.amount;
-        bytes32 blockHash = blockhash(block.number);
+        uint256 timeStamp = block.timestamp;
 
         WithdrawalResolution memory resolution = WithdrawalResolution({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             l2RequestId: withdrawal.requestId.id,
             status: status,
-            blockHash: blockHash
+            timeStamp: timeStamp
         });
 
         withdrawalResolutions[resolution.requestId.id] = resolution;
