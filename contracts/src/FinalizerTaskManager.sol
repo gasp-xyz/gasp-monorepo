@@ -47,6 +47,8 @@ contract FinalizerTaskManager is
     address public aggregator;
     address public generator;
 
+    bytes32 latestPendingStateHash;
+
     /* MODIFIERS */
     modifier onlyAggregator() {
         require(msg.sender == aggregator, "Aggregator must be the caller");
@@ -54,7 +56,6 @@ contract FinalizerTaskManager is
     }
 
     // onlyTaskGenerator is used to restrict createNewTask from only being called by a permissioned entity
-    // in a real world scenario, this would be removed by instead making createNewTask a payable function
     modifier onlyTaskGenerator() {
         require(msg.sender == generator, "Task generator must be the caller");
         _;
@@ -153,6 +154,7 @@ contract FinalizerTaskManager is
             }
         }
 
+        latestPendingStateHash = taskResponse.pendingStateHash;
         // emitting completed event
         emit TaskCompleted(taskResponse.referenceTaskIndex, taskResponse.blockHash);
     }
@@ -163,5 +165,9 @@ contract FinalizerTaskManager is
 
     function getTaskResponseWindowBlock() external view returns (uint32) {
         return _TASK_RESPONSE_WINDOW_BLOCK;
+    }
+
+    function getLatestPendingStateHash() external view returns (bytes32) {
+        return latestPendingStateHash;
     }
 }

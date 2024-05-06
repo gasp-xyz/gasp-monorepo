@@ -154,7 +154,7 @@ contract RollDownTest is Test {
 
         // Assert
         assertEq(l1Update.pendingDeposits.length, 1);
-        assertEq(l1Update.pendingCancelResultions.length, 0);
+        assertEq(l1Update.pendingCancelResolutions.length, 0);
         assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
         assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
         assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
@@ -178,7 +178,7 @@ contract RollDownTest is Test {
         RollDown.L1Update memory l1Update = rollDown.getUpdateForL2();
         assertEq(l1Update.pendingDeposits.length, 1);
         assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
-        assertEq(l1Update.pendingCancelResultions.length, 0);
+        assertEq(l1Update.pendingCancelResolutions.length, 0);
         assertEq(l1Update.pendingDeposits[0].requestId.id, 1);
 
         RollDown.L2Update memory l2Update;
@@ -196,7 +196,7 @@ contract RollDownTest is Test {
         l1Update = rollDown.getUpdateForL2();
         assertEq(l1Update.pendingL2UpdatesToRemove.length, 1);
         assertEq(l1Update.pendingDeposits.length, 0);
-        assertEq(l1Update.pendingCancelResultions.length, 0);
+        assertEq(l1Update.pendingCancelResolutions.length, 0);
         assertEq(l1Update.pendingL2UpdatesToRemove[0].requestId.id, 2);
         assertEq(
             l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
@@ -218,7 +218,7 @@ contract RollDownTest is Test {
         l1Update = rollDown.getUpdateForL2();
         assertEq(l1Update.pendingL2UpdatesToRemove.length, 1);
         assertEq(l1Update.pendingDeposits.length, 0);
-        assertEq(l1Update.pendingCancelResultions.length, 0);
+        assertEq(l1Update.pendingCancelResolutions.length, 0);
         assertEq(l1Update.pendingL2UpdatesToRemove[0].requestId.id, 3);
         assertEq(
             l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
@@ -241,7 +241,7 @@ contract RollDownTest is Test {
         l1Update = rollDown.getUpdateForL2();
         assertEq(l1Update.pendingL2UpdatesToRemove.length, 1);
         assertEq(l1Update.pendingDeposits.length, 0);
-        assertEq(l1Update.pendingCancelResultions.length, 0);
+        assertEq(l1Update.pendingCancelResolutions.length, 0);
         assertEq(l1Update.pendingL2UpdatesToRemove[0].requestId.id, 4);
         assertEq(
             l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
@@ -283,7 +283,7 @@ contract RollDownTest is Test {
         RollDown.L1Update memory l1Update;
         l1Update.pendingDeposits = new RollDown.Deposit[](1);
         l1Update.pendingL2UpdatesToRemove = new RollDown.L2UpdatesToRemove[](1);
-        l1Update.pendingCancelResultions = new RollDown.CancelResolution[](1);
+        l1Update.pendingCancelResolutions = new RollDown.CancelResolution[](1);
         l1Update
             .pendingWithdrawalResolutions = new RollDown.WithdrawalResolution[](
             1
@@ -294,14 +294,14 @@ contract RollDownTest is Test {
             depositRecipient: 0x0000000000000000000000000000000000000002,
             tokenAddress: 0x0000000000000000000000000000000000000003,
             amount: 4,
-            blockHash: 0x0000000000000000000000000000000000000000000000000000000000000005
+            timeStamp: 1
         });
 
-        l1Update.pendingCancelResultions[0] = RollDown.CancelResolution({
+        l1Update.pendingCancelResolutions[0] = RollDown.CancelResolution({
             requestId: RollDown.RequestId({id: 6, origin: RollDown.Origin.L1}),
             l2RequestId: 7,
             cancelJustified: true,
-            blockHash: 0x0000000000000000000000000000000000000000000000000000000000000008
+            timeStamp: 2
         });
 
         l1Update.pendingWithdrawalResolutions[0] = RollDown
@@ -312,7 +312,7 @@ contract RollDownTest is Test {
                 }),
                 l2RequestId: 10,
                 status: true,
-                blockHash: 0x000000000000000000000000000000000000000000000000000000000000000b
+                timeStamp: 3
             });
 
         uint256[] memory l2UpdatesToRemove = new uint256[](1);
@@ -320,12 +320,12 @@ contract RollDownTest is Test {
         l1Update.pendingL2UpdatesToRemove[0] = RollDown.L2UpdatesToRemove({
             requestId: RollDown.RequestId({id: 12, origin: RollDown.Origin.L1}),
             l2UpdatesToRemove: l2UpdatesToRemove,
-            blockHash: 0x000000000000000000000000000000000000000000000000000000000000000e
+            timeStamp: 4
         });
 
         assertEq(
             keccak256(abi.encode(l1Update)),
-            0x5129c9a6605d367397902fa839ef429af9abed97f0dd36e3b1973939817d40dc
+            0x6ebab65d2a7e2e2ac74b0415ccb2943ed7818bec57609986ab154b6880311c89
         );
     }
 
@@ -1069,5 +1069,77 @@ contract RollDownTest is Test {
             amount: 8
         });
         rollDown.update_l1_from_l2(l2Update2);
+    }
+
+    function testNonsuccessfullDepositHandling() public {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 10;
+        deal(tokenAddress, alice, 100 ether);
+        uint256 aliceBalanceBefore = token.balanceOf(alice);
+        uint256 contractBalanceBefore = token.balanceOf(address(rollDown));
+
+        // Act
+        vm.startPrank(alice);
+        token.approve(address(rollDown), amount);
+        rollDown.deposit(tokenAddress, 10);
+        uint256 aliceBalanceAfterDeposit = token.balanceOf(alice);
+        uint256 contractAfterDeposit = token.balanceOf(address(rollDown));
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](1);
+        l2Update.results[0] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            originRequestId: 1,
+            updateType: RollDown.UpdateType.DEPOSIT,
+            status: false
+        });
+        rollDown.update_l1_from_l2(l2Update);
+        uint256 aliceBalanceAfterDepositUpdate = token.balanceOf(alice);
+        uint256 contractAfterDepositUpdate = token.balanceOf(address(rollDown));
+        vm.stopPrank();
+
+        assertEq(aliceBalanceBefore - aliceBalanceAfterDeposit, 10);
+        assertEq(contractAfterDeposit - contractBalanceBefore, 10);
+        assertEq(aliceBalanceBefore - aliceBalanceAfterDepositUpdate, 0);
+        assertEq(contractBalanceBefore - contractAfterDepositUpdate, 0);
+    }
+
+    function testSuccessfullDepositHandling() public {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 10;
+        deal(tokenAddress, alice, 100 ether);
+        uint256 aliceBalanceBefore = token.balanceOf(alice);
+        uint256 contractBalanceBefore = token.balanceOf(address(rollDown));
+
+        // Act
+        vm.startPrank(alice);
+        token.approve(address(rollDown), amount);
+        rollDown.deposit(tokenAddress, 10);
+        uint256 aliceBalanceAfterDeposit = token.balanceOf(alice);
+        uint256 contractAfterDeposit = token.balanceOf(address(rollDown));
+
+        RollDown.L2Update memory l2Update;
+        l2Update.results = new RollDown.RequestResult[](1);
+        l2Update.results[0] = RollDown.RequestResult({
+            requestId: RollDown.RequestId({id: 1, origin: RollDown.Origin.L2}),
+            originRequestId: 1,
+            updateType: RollDown.UpdateType.DEPOSIT,
+            status: true
+        });
+        rollDown.update_l1_from_l2(l2Update);
+        uint256 aliceBalanceAfterDepositUpdate = token.balanceOf(alice);
+        uint256 contractAfterDepositUpdate = token.balanceOf(address(rollDown));
+        vm.stopPrank();
+
+        assertEq(aliceBalanceBefore - aliceBalanceAfterDeposit, 10);
+        assertEq(contractAfterDeposit - contractBalanceBefore, 10);
+        assertEq(aliceBalanceBefore - aliceBalanceAfterDepositUpdate, 10);
+        assertEq(contractAfterDepositUpdate - contractBalanceBefore, 10);
     }
 }

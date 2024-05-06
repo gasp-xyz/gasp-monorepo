@@ -145,7 +145,7 @@ pub struct Task {
     pub quorum_numbers: ::ethers::core::types::Bytes,
     pub quorum_threshold_percentage: u32,
 }
-///`TaskResponse(uint32,bytes32,bytes32)`
+///`TaskResponse(uint32,bytes32,bytes32,bytes32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -162,6 +162,7 @@ pub struct TaskResponse {
     pub reference_task_index: u32,
     pub block_hash: [u8; 32],
     pub storage_proof_hash: [u8; 32],
+    pub pending_state_hash: [u8; 32],
 }
 ///`TaskResponseMetadata(uint32,bytes32,uint96[],uint96[])`
 #[derive(

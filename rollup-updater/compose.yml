@@ -1,6 +1,6 @@
 services:
   updater:
-    image: mangatasolutions/rollup-updater:local
+    image: mangatasolutions/rollup-updater:${ROLLUP_UPDATER_VERSION:-local}
     build: .
     depends_on:
       rolldown:
