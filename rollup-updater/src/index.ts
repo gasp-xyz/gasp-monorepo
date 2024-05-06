@@ -1,174 +1,204 @@
 import { Mangata } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
 import "@mangata-finance/types";
-import type { ApiPromise } from "@polkadot/api";
+import { ApiPromise } from "@polkadot/api";
 import "dotenv/config";
 import {
-	TestClient,
-	WalletClient,
 	createPublicClient,
 	createWalletClient,
-	keccak256,
 	webSocket,
 } from "viem";
 import { defineChain } from "viem";
 import { decodeAbiParameters } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import eigenContractAbi from "./FinalizerTaskManager.json" assert {
-	type: "json",
-};
-import rolldownAbi from "./RollDown.json" assert { type: "json" };
+import { holesky } from "viem/chains";
+import {print} from "./util/utils.js";
+import "./util/polyfill.js"
+import {
+	ROLLDOWN_ABI,
+	EIGEN_ABI,
+	MANGATA_CONTRACT_ADDRESS,
+	EIGEN_CONTRACT_ADDRESS,
+	LIMIT,
+	VERBOSE, FINALIZATION_SOURCE, MANGATA_NODE_URL, WALLET_PRIVATE_KEY, ETH_CHAIN_URL
+} from "./common/constants.js";
+import {getChain, getPublicClient, getWalletClient, webSocketTransport, ethAccount} from "./viem/client.js";
 
-type ContractAddress = `0x${string}`;
 
-const eigenContractAddress = process.env
-	.EIGEN_CONTRACT_ADDRESS! as ContractAddress;
 
-const mangataContractAddress = process.env
-	.MANGATA_CONTRACT_ADDRESS! as ContractAddress;
+function getMinRequestId(l2Update: any) {
+	let minId = Math.min.apply(null,
+		[
+			l2Update[0].withdrawals,
+			l2Update[0].cancels,
+			l2Update[0].results
+		].flat()
+			.map(function(item: any) {
+				return Number(item.requestId.id);
+			}))
 
-const finalizationSource = process.env.FINALIZATION_SOURCE;
-const verbose = process.env.VERBOSE;
-const anvil = defineChain({
-	id: 31337,
-	name: "anvil",
-	network: "Anvil",
-	nativeCurrency: {
-		decimals: 18,
-		name: "Ether",
-		symbol: "ETH",
-	},
-	rpcUrls: {
-		public: {
-			http: ["ws://127.0.0.1:8545"],
-		},
-		default: {
-			http: ["ws://127.0.0.1:8545"],
-		},
-	},
-});
+	if (minId === Infinity) {
+		return null;
+	} else {
+		return minId;
+	}
+}
 
-let pendingUpdatesStored = "";
+
+function getMaxRequestId(l2Update: any) {
+	let maxId = Math.max.apply(null,
+		[
+			l2Update[0].withdrawals,
+			l2Update[0].cancels,
+			l2Update[0].results
+		].flat()
+			.map(function(item: any) {
+				return Number(item.requestId.id);
+			}));
+
+	if (maxId === -Infinity) {
+		return null;
+	} else {
+		return maxId;
+	}
+}
+
+function filterUpdates(l2Update: any, lastSubmittedId: number): any {
+
+	l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem: any) => {
+		return elem.requestId.id > lastSubmittedId;
+	});
+	l2Update[0].cancels = l2Update[0].cancels.filter((elem: any) => {
+		return elem.requestId.id > lastSubmittedId;
+	});
+	l2Update[0].results = l2Update[0].results.filter((elem: any) => {
+		return elem.requestId.id > lastSubmittedId;
+	});
+
+	const minId = getMinRequestId(l2Update);
+	if (minId == null) {
+		return l2Update;
+	}
+
+	const maxAmountOfUpdates = LIMIT
+	if (maxAmountOfUpdates > 0) {
+		l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem: any) => {
+			return elem.requestId.id < BigInt(minId + maxAmountOfUpdates);
+		});
+		l2Update[0].cancels = l2Update[0].cancels.filter((elem: any) => {
+			return elem.requestId.id < BigInt(minId + maxAmountOfUpdates);
+		});
+		l2Update[0].results = l2Update[0].results.filter((elem: any) => {
+			return elem.requestId.id < BigInt(minId + maxAmountOfUpdates);
+		});
+		return l2Update;
+	} else {
+		return l2Update;
+	}
+
+}
+
 
 async function sendUpdateToL1(
 	api: ApiPromise,
 	walletClient: any,
-	abi: any,
+	publicClient: any,
 	blockHash: any,
 ) {
-	console.log(`HASH ${blockHash} `);
+	print(`HASH: ${blockHash} `);
 	const pendingUpdates = await api.rpc.rolldown.pending_updates(blockHash);
 
-	if (verbose) {
-		console.log(
-			"----------------------------------------------------------------",
-		);
-		console.log("Fetched pending updates", keccak256(pendingUpdates.toHex()));
-		console.log("Stored pending updates", pendingUpdatesStored);
-		console.log(
-			"----------------------------------------------------------------",
-		);
+	const l2Update = decodeAbiParameters(
+		ROLLDOWN_ABI.find((e: any) => e.name === "update_l1_from_l2")!.inputs,
+		pendingUpdates.toHex(),
+	);
+
+	if (VERBOSE) {
+		print(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
 	}
 
-	if (pendingUpdatesStored === keccak256(pendingUpdates.toHex())) {
-		console.log("Duplicate updates: ", keccak256(pendingUpdates.toHex()));
-		return null;
-	} else {
-		pendingUpdatesStored = keccak256(pendingUpdates.toHex());
-		const l2Update = decodeAbiParameters(
-			abi.find((e: any) => e.name === "update_l1_from_l2")!.inputs,
-			pendingUpdates.toHex(),
-		);
+	const lastSubmittedId = (await publicClient.readContract({
+		address: MANGATA_CONTRACT_ADDRESS,
+		abi: ROLLDOWN_ABI,
+		functionName: "lastProcessedUpdate_origin_l2",
+	})) as number;
 
-		const reqCount =
-			l2Update[0].withdrawals.length +
-			l2Update[0].cancels.length +
-			l2Update[0].results.length;
+	print(`L1::lastSubmittedId: ${lastSubmittedId}`);
+	const update = filterUpdates(l2Update, lastSubmittedId);
+	if (VERBOSE) {
+		console.log(`filtered l2Update:  ${JSON.stringify(update, null, 2)}`);
+	}
 
-		if (verbose) {
-			console.log(`l2Update:  ${JSON.stringify(l2Update, null, 2)}`);
-		}
+	const reqCount =
+		update[0].withdrawals.length +
+		update[0].cancels.length +
+		update[0].results.length;
 
-		if (reqCount > 0) {
-			const storageHash = await walletClient.writeContract({
-				chain: anvil, // TODO: this needs the chain in order to work properly
-				abi: abi,
-				address: mangataContractAddress,
-				functionName: "update_l1_from_l2",
-				args: l2Update as any,
-				gas: 999999n,
-			});
-			return storageHash;
-		}
-
-		console.log("no updates available");
+	if (reqCount == 0) {
 		return null;
 	}
+
+	const storageHash = await walletClient.writeContract({
+		chain: getChain(),
+		abi: ROLLDOWN_ABI,
+		address: MANGATA_CONTRACT_ADDRESS,
+		functionName: "update_l1_from_l2",
+		args: update,
+		// gas: 9999999n,
+	});
+
+	return storageHash;
 }
 
 async function main() {
-	const api = await Mangata.instance([process.env.MANGATA_NODE_URL!]).api();
-	const abi = rolldownAbi.abi;
-
-	// Ethereum private key
-	// We need this to write to Mangata contract
-	const account = privateKeyToAccount(`0x${process.env.WALLET_PRIVATE_KEY!}`);
-
-	const transport = webSocket(process.env.ETH_CHAIN_URL, {
-		retryCount: 5,
-	});
-
-	// We need wallet client in order to write to contract
-	const walletClient = createWalletClient({
-		account,
-		transport,
-	});
-
-	// We need public client in order to read and subscribe to contract
-	const publicClient = createPublicClient({
-		transport,
-		chain: anvil,
-	});
-	(BigInt.prototype as any).toJSON = function () {
-		return this.toString();
-	};
+	const api = await Mangata.instance([MANGATA_NODE_URL]).api();
+	const publicClient = getPublicClient({transport: webSocketTransport, chain: getChain()})
+	const walletClient = getWalletClient({
+		account: ethAccount,
+		transport: webSocketTransport
+	})
 
 	let unwatch: any;
+	let inProgress = false;
 
-	if (finalizationSource === "relay") {
+	if (FINALIZATION_SOURCE === "relay") {
 		unwatch = await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
-			console.log(`Chain is at block: #${header.number}`);
-			const txHash = await sendUpdateToL1(api, walletClient, abi, header.hash);
-			if (txHash) {
-				const result = await publicClient.waitForTransactionReceipt({
-					hash: txHash,
-				});
-				console.log(
-					`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
-				);
+			if (inProgress === false) {
+				inProgress = true;
+				print(`Chain is at block: #${header.number}`);
+
+				const txHash = await sendUpdateToL1(api, walletClient, publicClient, header.hash);
+				if (txHash) {
+					const result = await publicClient.waitForTransactionReceipt({
+						hash: txHash,
+					});
+					print(`#${result.blockNumber} ${result.transactionHash} : ${result.status}`);
+				}
+				inProgress = false;
+			} else {
+				print(`Chain is at block: #${header.number} - tx pending`);
 			}
 		});
 	} else {
-		console.log("subscribing to eth events");
+		print("Subscribing to eth events");
 		unwatch = publicClient.watchContractEvent({
-			address: eigenContractAddress,
-			abi: eigenContractAbi.abi,
+			address: EIGEN_CONTRACT_ADDRESS,
+			abi: EIGEN_ABI,
 			eventName: "TaskCompleted",
 			onLogs: async (logs) => {
+				print("Received task notification from L1");
 				for (const log of logs) {
 					const txHash = await sendUpdateToL1(
 						api,
 						walletClient,
-						abi,
+						publicClient,
 						(log as any).args.blockHash,
 					);
 					if (txHash) {
 						const result = await publicClient.waitForTransactionReceipt({
 							hash: txHash,
 						});
-						console.log(
-							`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
-						);
+						print(`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,);
 					}
 				}
 			},
@@ -197,6 +227,6 @@ async function main() {
 
 main()
 	.then(() => {
-		console.log("Success");
+		print("Success");
 	})
 	.catch((e) => console.error("Something went wrong", e));
