@@ -191,6 +191,10 @@ contract RollDown {
         );
     }
 
+    function deposit(address tokenAddress, uint256 amount) public {
+        deposit_erc20(tokenAddress, amount);
+    }
+
     function deposit_erc20(address tokenAddress, uint256 amount) public {
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
