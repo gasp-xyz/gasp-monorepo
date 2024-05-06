@@ -20,8 +20,8 @@ contract MyScript is Script {
 
         // approve rolldown contract to use token
         token.approve(address(rd), 1000000);
-        rd.deposit(address(token), 2000);
-        rd.deposit(address(token), 2000);
+        rd.deposit_erc20(address(token), 2000);
+        rd.deposit_erc20(address(token), 2000);
 
         _record_addresses(address(token), address(rd));
 
