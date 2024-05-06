@@ -11,6 +11,7 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
+	"github.com/Layr-Labs/eigensdk-go/types"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 )
 
@@ -73,14 +74,14 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 type SignedTaskResponse struct {
 	TaskResponse taskmanager.IFinalizerTaskManagerTaskResponse
 	BlsSignature bls.Signature
-	OperatorId   bls.OperatorId
+	OperatorId   types.OperatorId
 }
 
 // rpc endpoint which is called by operator
 // reply doesn't need to be checked. If there are no errors, the task response is accepted
 // rpc framework forces a reply type to exist, so we put bool as a placeholder
 func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskResponse, reply *bool) error {
-	agg.logger.Info("Received signed task response", "response", signedTaskResponse)
+	agg.logger.Info("Received signed task response", "response", signedTaskResponse, "operatorId", signedTaskResponse.OperatorId.LogValue())
 	taskIndex := signedTaskResponse.TaskResponse.ReferenceTaskIndex
 	taskResponseDigest, err := core.GetTaskResponseDigest(&signedTaskResponse.TaskResponse)
 	if err != nil {

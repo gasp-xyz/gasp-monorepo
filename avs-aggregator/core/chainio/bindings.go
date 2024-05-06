@@ -16,11 +16,11 @@ type AvsServiceBindings struct {
 	TaskManager            *taskmanager.ContractFinalizerTaskManager
 	ServiceManager         *servicemanager.ContractFinalizerServiceManager
 	OperatorStateRetriever common.Address
-	ethClient              eth.EthClient
+	ethClient              eth.Client
 	logger                 logging.Logger
 }
 
-func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth.EthClient, logger logging.Logger) (*AvsServiceBindings, error) {
+func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth.Client, logger logging.Logger) (*AvsServiceBindings, error) {
 	contractRegistryCoordinator, err := regcoord.NewContractRegistryCoordinator(registryCoordinatorAddr, ethclient)
 	if err != nil {
 		return nil, err

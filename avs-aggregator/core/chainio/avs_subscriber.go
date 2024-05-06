@@ -27,7 +27,7 @@ type AvsSubscriber struct {
 	logger              sdklogging.Logger
 }
 
-func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient eth.EthClient, logger sdklogging.Logger) (*AvsSubscriber, error) {
+func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient eth.Client, logger sdklogging.Logger) (*AvsSubscriber, error) {
 	avsContractBindings, err := NewAvsServiceBindings(registryAddr, ethclient, logger)
 	if err != nil {
 		logger.Errorf("Failed to create contract bindings", "err", err)
