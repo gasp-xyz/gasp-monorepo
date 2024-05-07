@@ -56,7 +56,7 @@ pub(crate) async fn setup_deposits(
     operator: LocalWallet,
 ) -> eyre::Result<()> {
     let op_address = operator.address();
-    anvil_balance(op_address, 100).await?;
+    anvil_balance(eth_rpc_url.clone(), op_address, 100).await?;
     debug!("set some ether to operator");
 
     let provider: Provider<Http> = MW::try_from(eth_rpc_url)?;
@@ -92,10 +92,14 @@ pub(crate) async fn setup_deposits(
     Ok(())
 }
 
-async fn anvil_balance(address: Address, ether: u128) -> Result<(), reqwest::Error> {
+async fn anvil_balance(
+    eth_rpc_url: String,
+    address: Address,
+    ether: u128,
+) -> Result<(), reqwest::Error> {
     let client = reqwest::Client::new();
     client
-        .post("http://127.0.0.1:8545")
+        .post(eth_rpc_url)
         .json(&serde_json::json!({
             "jsonrpc": "2.0",
             "method": "anvil_setBalance",
