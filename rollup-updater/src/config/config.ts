@@ -11,7 +11,7 @@ const appConfigSchema = z.object({
     MANGATA_CONTRACT_ADDRESS: z.string(),
     FINALIZATION_SOURCE: z.string(),
     LIMIT: z.string().default("0"),
-    CHAIN: z.string(),
+    CHAIN: z.string().default("anvil"),
     MANGATA_NODE_URL: z.string(),
     WALLET_PRIVATE_KEY: z.string(),
     ETH_CHAIN_URL: z.string(),
