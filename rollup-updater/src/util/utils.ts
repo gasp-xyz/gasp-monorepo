@@ -69,6 +69,11 @@ async function sendUpdateToL1(
     print(`HASH: ${blockHash} `);
     const pendingUpdates = await getPendingUpdate(api, blockHash);
 
+    if (pendingUpdates.isEmpty){
+        print("PendingUpdates is empty");
+        return null;
+    }
+
     const l2Update = getDecodedData("update_l1_from_l2", pendingUpdates.toHex())
 
     if (VERBOSE) {
