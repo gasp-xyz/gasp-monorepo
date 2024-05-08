@@ -61,7 +61,7 @@ export class DockerUtils{
         CHAIN_ID:"31337" ,
         SUBSTRATE_RPC_URL:"ws://0.0.0.0:9946" ,
         AVS_RPC_URL:"http://0.0.0.0:8090" ,
-        AVS_REGISTRY_COORDINATOR_ADDR:"0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0x851356ae760d987E095750cCeb3bC6014560891C" ,
         TESTNET:"true",
         STAKE:"32",
     }
@@ -72,7 +72,7 @@ export class DockerUtils{
         CHAIN_ID:"31337" ,
         SUBSTRATE_RPC_URL:"wss://kusama-archive.mangata.online:443" ,
         AVS_RPC_URL:"http://0.0.0.0:8090" ,
-        AVS_REGISTRY_COORDINATOR_ADDR:"0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0x851356ae760d987E095750cCeb3bC6014560891C" ,
         TESTNET:"true",
         STAKE:"90",
     }

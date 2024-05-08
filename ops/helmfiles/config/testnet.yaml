@@ -10,19 +10,24 @@ secondSequencerEnabled: false
 
 env:
   # rpc
-  SUBSTRATE_RPC_URL: wss://collator-02-ws-rollup-testnet.mangata.online:443
+  SUBSTRATE_RPC_URL: wss://rollup-testnet-rpc.gasp.xyz:443
   # contracts
-  CHAIN_ID: '5'
-  AVS_REGISTRY_COORDINATOR_ADDR: 0x5620cDb94BaAaD10c20483bd8705DA711b2Bc0a3
+  CHAIN_ID: '17000'
+  AVS_REGISTRY_COORDINATOR_ADDR: 0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1
+  AVS_DEPLOYMENT_BLOCK: '1233400'
   # AVS
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  # every 25th block, ~ 5min
-  AVS_BLOCK_VALIDATION_PERIOD: '25'
-  # every 50th task, ~ 4h
-  AVS_KICK_PERIOD: '50'
-  # every 300th task, ~ daily
-  AVS_UPDATE_STAKE_PERIOD: '300'
-    # OP
+  # every 100th block, ~ 10min
+  AVS_BLOCK_VALIDATION_PERIOD: '100'
+  # 5min
+  AVS_TASK_EXPIRATION: '300'
+  # every 25th task, ~ 4h
+  AVS_KICK_PERIOD: '25'
+  # every 150th task, ~ daily
+  AVS_UPDATE_STAKE_PERIOD: '150'
+  # wait 20s for next RPC response even if task done
+  AVS_DEBOUNCE_RPC: '20'
+  # OP
   AVS_RPC_URL: https://avs-aggregator-testnet.mangata.online
   RUST_LOG: avs=debug
   OPT_IN_AT_STARTUP: 'true'
@@ -46,7 +51,11 @@ finalizerEnvSecrets:
 updaterEthChainUrl: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
 updaterEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-testnet.mangata.online
-  MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
+  MANGATA_CONTRACT_ADDRESS: "0x329D0C4a58B3cEfdb40c5513E155228f6Cc7B6c5"
+  EIGEN_CONTRACT_ADDRESS: "0x998AaF69F731009d4E2d470E974766F1EB8f5142"
+  CHAIN: "holesky"
+  FINALIZATION_SOURCE: "relay"
+  LIMIT: "25"
 
 # rollup-sequencer configs
 firstSequencerMnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
@@ -54,4 +63,5 @@ secondSequencerMnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequ
 sequencerEthChainUrl: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
 sequencerEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-testnet.mangata.online
-  MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
+  MANGATA_CONTRACT_ADDRESS: "0x329D0C4a58B3cEfdb40c5513E155228f6Cc7B6c5"
+  LIMIT: "500"

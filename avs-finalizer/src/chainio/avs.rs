@@ -27,6 +27,7 @@ pub struct AvsContracts {
     task_manager_sub: FinalizerTaskManager<Provider<Ws>>,
     registry: RegistryCoordinator<Client>,
     client: Arc<Client>,
+    pub ws_client: Arc<Provider<Ws>>,
 }
 
 impl Debug for AvsContracts {
@@ -44,7 +45,7 @@ impl AvsContracts {
     const QUORUM: [u8; 1] = [0_u8; 1];
 
     pub async fn build(config: &CliArgs, client: Arc<Client>) -> eyre::Result<Self> {
-        let ws = Arc::new(Provider::connect(config.eth_ws_url.to_owned()).await?);
+        let ws_client = Arc::new(Provider::connect(config.eth_ws_url.to_owned()).await?);
 
         let registry =
             RegistryCoordinator::new(config.avs_registry_coordinator_addr, client.clone());
@@ -54,7 +55,7 @@ impl AvsContracts {
 
         let task_manager_addr = service_manager.task_manager().await?;
         let task_manager = FinalizerTaskManager::new(task_manager_addr, client.clone());
-        let task_manager_sub = FinalizerTaskManager::new(task_manager_addr, ws);
+        let task_manager_sub = FinalizerTaskManager::new(task_manager_addr, ws_client.clone());
 
         Ok(Self {
             service_manager,
@@ -62,6 +63,7 @@ impl AvsContracts {
             task_manager_sub,
             registry,
             client,
+            ws_client,
         })
     }
 

@@ -25,7 +25,9 @@ jobs:
     steps:
       - name: Set global version
         id: set_vars
-        run: echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
+        run: |
+          echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "IMAGE TAG=${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
   
   build-and-test:
     needs: [init]

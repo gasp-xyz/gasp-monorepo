@@ -59,6 +59,11 @@ async function sendUpdateToL1(
 	console.log(`HASH ${blockHash} `);
 	const pendingUpdates = await api.rpc.rolldown.pending_updates(blockHash);
 
+	if (pendingUpdates.isEmpty){
+		console.log("pendingUpdates is empty");
+		return null;
+	}
+
 	if (verbose) {
 		console.log(
 			"----------------------------------------------------------------",

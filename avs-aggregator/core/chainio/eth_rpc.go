@@ -3,7 +3,6 @@ package chainio
 import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
-	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 
@@ -53,15 +52,14 @@ func NewEthRpc(
 		logger.Error("Cannot create eth Clients", "err", err)
 		return nil, err
 	}
-	
+
 	avsReader, err := NewAvsReaderFromConfig(registryAddr, clients.EthHttpClient, logger)
 	if err != nil {
 		logger.Error("Cannot create AvsReader", "err", err)
 		return nil, err
 	}
-	
-	txMgr := txmgr.NewSimpleTxManager(clients.EthHttpClient, logger, signer, address)
-	avsWriter, err := NewAvsWriter(txMgr, registryAddr, clients.EthHttpClient, logger)
+
+	avsWriter, err := NewAvsWriter(clients.TxMgr, registryAddr, clients.EthHttpClient, logger)
 	if err != nil {
 		logger.Error("Cannot create AvsWriter", "err", err)
 		return nil, err
