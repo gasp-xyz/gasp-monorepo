@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "build": "rimraf ./build && npx tsc",
-    "lint": "npx @biomejs/biome check --apply src/index.ts",
+    "lint": "npx @biomejs/biome check --apply src/common src/config src/utils src/viem src/index.ts",
     "start": "node build/index.js"
   },
   "keywords": [],
@@ -19,10 +19,11 @@
     "typescript": "5.3.2"
   },
   "dependencies": {
-    "@mangata-finance/sdk": "2.2.1-eth-rollup-develop.29",
-    "@mangata-finance/types": "2.2.3-eth-rollup-develop.36",
+    "@mangata-finance/sdk": "2.2.1-eth-rollup-develop.34",
+    "@mangata-finance/types": "2.2.3-eth-rollup-develop.41",
     "@polkadot/api": "^10.12.2",
     "dotenv": "^16.3.1",
-    "viem": "^2.9.2"
+    "viem": "^2.9.2",
+    "zod": "^3.22.5"
   }
 }
