@@ -67,11 +67,7 @@ async function getEvents(
 async function initReadContractWithRetry(publicClient: PublicClient) {
 	while (true) {
 		try {
-			return await publicClient.readContract({
-				address: MANGATA_CONTRACT_ADDRESS,
-				abi: ABI,
-				functionName: "getUpdateForL2",
-			});
+      return await getUpdateForL2(publicClient);
 		} catch (e) {
 			print(`${MANGATA_CONTRACT_ADDRESS} contract not found`);
 			await sleep(1000);
@@ -89,13 +85,7 @@ async function processDataForL2Update(
 	print(`Latest Block Number: ${latestBlockNumber.toString()}`);
 	print(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
 
-	const data = await publicClient.readContract({
-		address: MANGATA_CONTRACT_ADDRESS,
-		abi: ABI,
-		functionName: "getUpdateForL2",
-		blockNumber: delayedBlockNumber,
-	});
-
+	const data = await getUpdateForL2(publicClient);
 	print(data);
 
 	const encodedData = getEncodedData("getUpdateForL2", data);
@@ -297,6 +287,34 @@ async function getLastRequestId(api: ApiPromise) {
 function print(data: any) {
 	console.log(util.inspect(data, { depth: null }));
 }
+
+async function getUpdateForL2(publicClient: any) {
+  const lastProcessed = (await publicClient.readContract({
+    address: MANGATA_CONTRACT_ADDRESS,
+    abi: ABI,
+    functionName: "lastProcessedUpdate_origin_l1",
+  })) as bigint;
+
+  const counter = (await publicClient.readContract({
+    address: MANGATA_CONTRACT_ADDRESS,
+    abi: ABI,
+    functionName: "counter",
+  })) as bigint;
+
+  const rangeStart = lastProcessed + 1n;
+  let rangeEnd = rangeStart + BigInt(LIMIT);
+  if (rangeEnd > counter - 1n) {
+    rangeEnd = counter - 1n;
+  }
+
+  return (await publicClient.readContract({
+    address: MANGATA_CONTRACT_ADDRESS,
+    abi: ABI,
+    functionName: "getPendingRequests",
+    args: [rangeStart, rangeEnd],
+  }))
+}
+
 
 export {
 	print,
