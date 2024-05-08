@@ -3,7 +3,7 @@ import { Mangata, signTx, MangataGenericEvent } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
 import { Keyring } from "@polkadot/api";
 import "dotenv/config";
-import { createPublicClient, encodeAbiParameters, webSocket } from "viem";
+import { createPublicClient, encodeAbiParameters, webSocket, http } from "viem";
 import { keccak256 } from "viem";
 import rolldownAbi from "./RollDown.json" assert { type: "json" };
 import { countReset } from "console";
@@ -140,22 +140,47 @@ function filterUpdates(l2Update: any, lastRequestId: number): any {
 
 }
 
+async function getUpdateForL2(abi: any, publicClient: any) {
+  const lastProcessed = (await publicClient.readContract({
+    address: mangataContractAddress,
+    abi: abi,
+    functionName: "lastProcessedUpdate_origin_l1",
+  })) as bigint;
+
+  const counter = (await publicClient.readContract({
+    address: mangataContractAddress,
+    abi: abi,
+    functionName: "counter",
+  })) as bigint;
+
+  const rangeStart = lastProcessed + 1n;
+  let rangeEnd = rangeStart + BigInt(limit);
+  if (rangeEnd > counter - 1n) {
+    rangeEnd = counter - 1n;
+  }
+
+  return (await publicClient.readContract({
+    address: mangataContractAddress,
+    abi: abi,
+    functionName: "getPendingRequests",
+    args: [rangeStart, rangeEnd],
+  }))
+}
+
 async function main() {
   let lastSubmitted = "";
   const abi = rolldownAbi.abi;
   const publicClient = createPublicClient({
-    transport: webSocket(process.env.ETH_CHAIN_URL, {
-      retryCount: 5,
-    }),
+    transport: http(process.env.ETH_CHAIN_URL),
+    // chain: holesky,
+    // transport: webSocket(process.env.ETH_CHAIN_URL, {
+    //   retryCount: 5,
+    // }),
   });
 
   while (true) {
     try {
-      const data = (await publicClient.readContract({
-        address: mangataContractAddress,
-        abi: abi,
-        functionName: "getUpdateForL2",
-      })) as any;
+      const data = await getUpdateForL2(abi, publicClient);
       console.log(util.inspect(data, { depth: null }));
       break;
     } catch (e) {
@@ -191,13 +216,7 @@ async function main() {
         inProgress = true;
       }
 
-      const data = (await publicClient.readContract({
-        address: mangataContractAddress,
-        abi: abi,
-        functionName: "getUpdateForL2",
-      })) as any;
-
-
+      const data = await getUpdateForL2(abi, publicClient);
       // @ts-ignore
       const encodedData = encodeAbiParameters(
         abi.find((e: any) => e!.name === "getUpdateForL2")!.outputs!,
