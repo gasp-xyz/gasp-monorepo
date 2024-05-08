@@ -1,4 +1,4 @@
-use std::{str::FromStr, sync::Arc};
+use std::sync::Arc;
 
 use bindings::{
     delegation_manager::DelegationManager, erc20_mock::ERC20Mock, i_strategy::IStrategy,
@@ -8,9 +8,9 @@ use bindings::{
 use ethers::{
     contract::{ContractError, EthError},
     middleware::{MiddlewareBuilder, NonceManagerMiddleware, SignerMiddleware},
-    providers::{Http, Middleware, Provider},
+    providers::{Http, Provider},
     signers::{LocalWallet, Signer},
-    types::{Address, Chain, TransactionRequest},
+    types::Address,
     utils::parse_ether,
 };
 use eyre::eyre;
@@ -55,21 +55,11 @@ pub(crate) async fn setup_deposits(
     stake: u32,
     operator: LocalWallet,
 ) -> eyre::Result<()> {
-    let provider: Provider<Http> = MW::try_from(eth_rpc_url)?;
-    let anvil = LocalWallet::from_str(
-        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-    )?
-    .with_chain_id(Chain::AnvilHardhat as u64);
     let op_address = operator.address();
-    let transfer = TransactionRequest::pay(op_address, parse_ether(100).unwrap());
-    provider
-        .clone()
-        .with_signer(anvil)
-        .send_transaction(transfer, None)
-        .await?
-        .await?;
-    debug!("sent some ether to operator");
+    anvil_balance(eth_rpc_url.clone(), op_address, 100).await?;
+    debug!("set some ether to operator");
 
+    let provider: Provider<Http> = MW::try_from(eth_rpc_url)?;
     let client = Arc::new(provider.with_signer(operator));
     let registry = RegistryCoordinator::new(registry_address, client.clone());
     let stake_registry_address = registry.stake_registry().await?;
@@ -99,5 +89,24 @@ pub(crate) async fn setup_deposits(
         .await?
         .await?;
     debug!("deposited into startegy manager for erc20 for operator");
+    Ok(())
+}
+
+async fn anvil_balance(
+    eth_rpc_url: String,
+    address: Address,
+    ether: u128,
+) -> Result<(), reqwest::Error> {
+    let client = reqwest::Client::new();
+    client
+        .post(eth_rpc_url)
+        .json(&serde_json::json!({
+            "jsonrpc": "2.0",
+            "method": "anvil_setBalance",
+            "params": [address, parse_ether(ether).unwrap()],
+            "id": 1
+        }))
+        .send()
+        .await?;
     Ok(())
 }

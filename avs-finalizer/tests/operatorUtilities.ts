@@ -7,7 +7,7 @@ import registryCoordinator from "./abis/RegistryCoordinator.json";
 import finalizerTaskManager from "./abis/FinalizerTaskManager.json";
 import {DockerUtils} from "./DockerUtils";
 export const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
-export const taskManagerAddress = "0x9E545E3C0baAB3E08CdfD552C960A1050f373042";
+export const taskManagerAddress = "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8";
 
 export async function waitForOperatorRegistered(publicClient: PublicClient) {
     return new Promise((resolve, _) => {
