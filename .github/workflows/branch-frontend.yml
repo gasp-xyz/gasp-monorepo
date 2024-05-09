@@ -2,7 +2,7 @@ name: rollup-frontend branch workflow
 
 on:
   push:
-    branches: [rollup-frontend, ci/add-rollup-frontend-deployment-workflow-MGX-944]
+    branches: [rollup-frontend]
 
 permissions:
   contents: write
