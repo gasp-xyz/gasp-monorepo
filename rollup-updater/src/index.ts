@@ -11,7 +11,6 @@ import {
 } from "./common/constants.js";
 import {getChain, getPublicClient, getWalletClient, webSocketTransport, ethAccount} from "./viem/client.js";
 
-
 async function main() {
 	const api = await Mangata.instance([MANGATA_NODE_URL]).api();
 	const publicClient = getPublicClient({transport: webSocketTransport, chain: getChain()})

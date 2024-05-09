@@ -65,7 +65,7 @@ contract Deployer is Script, Utils, Test {
         string memory eigenlayerDeployedContracts = readInput(_EIGEN_DEPLOYMENT_PATH);
         strategyManager =
             StrategyManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.strategyManager"));
-        delegation = DelegationManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.delegation"));
+        delegation = DelegationManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.delegationManager"));
         avsDirectory = AVSDirectory(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.avsDirectory"));
 
         // READ JSON CONFIG DATA

@@ -10,22 +10,18 @@ contract MyScript is Script {
 
     function run() external {
         // anvil account
-        uint256 anvilPriv = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
-        address anvilAddr = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
-        vm.startBroadcast(anvilPriv);
+        vm.startBroadcast();
         RollDown rd = new RollDown();
         TestToken token = new TestToken();
 
         // mint tokens to test account
-        token.mint(anvilAddr, 1000000);
+        token.mint(msg.sender, 1000000);
 
         // approve rolldown contract to use token
         token.approve(address(rd), 1000000);
-
-  
-        rd.deposit(address(token), 2000);
-        rd.deposit(address(token), 2000);
+        rd.deposit_erc20(address(token), 2000);
+        rd.deposit_erc20(address(token), 2000);
 
         _record_addresses(address(token), address(rd));
 
@@ -40,6 +36,7 @@ contract MyScript is Script {
         string memory parent_object = "parent object";
         vm.serializeAddress(parent_object, "tokenAddress", tokenContractAddress);
         string memory output = vm.serializeAddress(parent_object, "rolldownContractAddress", rolldownContractAddress);
+        console.log(output);
         vm.writeJson(output, "./out/addresses.json");
     }
 }
