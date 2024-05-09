@@ -288,7 +288,7 @@ function print(data: any) {
 	console.log(util.inspect(data, { depth: null }));
 }
 
-async function getUpdateForL2(publicClient: any) {
+async function getUpdateForL2(publicClient: PublicClient) {
   const lastProcessed = (await publicClient.readContract({
     address: MANGATA_CONTRACT_ADDRESS,
     abi: ABI,
