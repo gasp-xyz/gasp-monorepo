@@ -2,22 +2,32 @@ import { Mangata } from "@mangata-finance/sdk";
 import "@mangata-finance/types";
 import "@mangata-finance/types";
 import "dotenv/config";
-import {print, sendUpdateToL1} from "./util/utils.js";
-import "./util/polyfill.js"
 import {
 	EIGEN_ABI,
 	EIGEN_CONTRACT_ADDRESS,
-	FINALIZATION_SOURCE, MANGATA_NODE_URL
+	FINALIZATION_SOURCE,
+	MANGATA_NODE_URL,
 } from "./common/constants.js";
-import {getChain, getPublicClient, getWalletClient, webSocketTransport, ethAccount} from "./viem/client.js";
+import "./util/polyfill.js";
+import { print, sendUpdateToL1 } from "./util/utils.js";
+import {
+	ethAccount,
+	getChain,
+	getPublicClient,
+	getWalletClient,
+	webSocketTransport,
+} from "./viem/client.js";
 
 async function main() {
 	const api = await Mangata.instance([MANGATA_NODE_URL]).api();
-	const publicClient = getPublicClient({transport: webSocketTransport, chain: getChain()})
+	const publicClient = getPublicClient({
+		transport: webSocketTransport,
+		chain: getChain(),
+	});
 	const walletClient = getWalletClient({
 		account: ethAccount,
-		transport: webSocketTransport
-	})
+		transport: webSocketTransport,
+	});
 
 	let unwatch: any;
 	let inProgress = false;
@@ -28,12 +38,19 @@ async function main() {
 				inProgress = true;
 				print(`Chain is at block: #${header.number}`);
 
-				const txHash = await sendUpdateToL1(api, walletClient, publicClient, header.hash);
+				const txHash = await sendUpdateToL1(
+					api,
+					walletClient,
+					publicClient,
+					header.hash,
+				);
 				if (txHash) {
 					const result = await publicClient.waitForTransactionReceipt({
 						hash: txHash,
 					});
-					print(`#${result.blockNumber} ${result.transactionHash} : ${result.status}`);
+					print(
+						`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
+					);
 				}
 				inProgress = false;
 			} else {
@@ -59,7 +76,9 @@ async function main() {
 						const result = await publicClient.waitForTransactionReceipt({
 							hash: txHash,
 						});
-						print(`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,);
+						print(
+							`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
+						);
 					}
 				}
 			},
