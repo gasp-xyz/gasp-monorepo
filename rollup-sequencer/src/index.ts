@@ -8,8 +8,12 @@ import {
 	countRequests,
 	filterUpdates,
 	getApi,
-	getCollator, getLastRequestId, getMaxRequestId, getSelectedSequencerWithRights,
-	initReadContractWithRetry, isSuccess,
+	getCollator,
+	getLastRequestId,
+	getMaxRequestId,
+	getSelectedSequencerWithRights,
+	initReadContractWithRetry,
+	isSuccess,
 	print,
 	processDataForL2Update,
 	processPendingRequestsEvents,
@@ -27,18 +31,19 @@ async function main() {
 
 	await initReadContractWithRetry(publicClient);
 
-	let lastRequestId = await  getLastRequestId(api)
+	let lastRequestId = await getLastRequestId(api);
 
 	await api.derive.chain.subscribeNewHeads(async (header: HeaderExtended) => {
 		const collator = getCollator("ethereum", MNEMONIC);
 
 		print(`block #${header.number} was authored by ${header.author}`);
-		const {isSequencerSelected, hasSequencerRights, selectedSequencer} = await getSelectedSequencerWithRights(api, collator.address, header.hash)
+		const { isSequencerSelected, hasSequencerRights, selectedSequencer } =
+			await getSelectedSequencerWithRights(api, collator.address, header.hash);
 		if (isSequencerSelected && hasSequencerRights) {
-			print(`Sequencer selected: ${selectedSequencer}`)
+			print(`Sequencer selected: ${selectedSequencer}`);
 			try {
 				if (inProgress) {
-					print(`in progress, skipping...`)
+					print("In progress, skipping...");
 				} else {
 					inProgress = true;
 				}
@@ -47,34 +52,36 @@ async function main() {
 					publicClient,
 				);
 
-				const filteredUpdates = filterUpdates(nativeL1Update.unwrap(), lastRequestId)
+				const filteredUpdates = filterUpdates(
+					nativeL1Update.unwrap(),
+					lastRequestId,
+				);
 				const requestsCount = countRequests(filteredUpdates);
 
 				if (requestsCount > 0) {
-					let result = await signTx(
+					const result = await signTx(
 						api,
 						api.tx.rolldown.updateL2FromL1(filteredUpdates),
 						collator,
 					);
 
 					if (isSuccess(result)) {
-						print(`L1update was submitted successfully`);
+						print("L1update was submitted successfully");
 
-						if (lastSubmitted == keccak256(encodedData)) {
+						if (lastSubmitted === keccak256(encodedData)) {
 							lastRequestId = getMaxRequestId(filteredUpdates)!;
 						} else {
 							lastSubmitted = keccak256(encodedData);
-							lastRequestId = await getLastRequestId(api)
+							lastRequestId = await getLastRequestId(api);
 						}
-
 					} else {
-						print(`L1update was submitted unsuccessfully`);
+						print("L1update was submitted unsuccessfully");
 					}
 				} else {
 					print(`L1Update was already submitted ${encodedData}`);
 				}
 			} catch (e) {
-				print(e)
+				print(e);
 				print("The contract function getUpdateForL2 returned no data");
 				// Do nothing with error
 				// Error only appear when we have block where there are no data for getUpdateForL2 at all.
