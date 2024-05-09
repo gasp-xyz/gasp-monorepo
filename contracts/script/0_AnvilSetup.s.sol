@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
 import "@eigenlayer/contracts/core/StrategyManager.sol";
+import "@eigenlayer/contracts/core/DelegationManager.sol";
 import {StrategyBaseTVLLimits} from "@eigenlayer/contracts/strategies/StrategyBaseTVLLimits.sol";
 
 import "../src/ERC20Mock.sol";
@@ -32,6 +33,8 @@ contract AnvilSetup is Script, Utils, Test {
         string memory eigenlayerDeployedContracts = readInput(_EIGEN_DEPLOYMENT_PATH);
         StrategyManager strategyManager =
             StrategyManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.strategyManager"));
+        DelegationManager delegation =
+            DelegationManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.delegationManager"));
 
         ProxyAdmin eigenLayerProxyAdmin =
             ProxyAdmin(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.eigenLayerProxyAdmin"));
@@ -50,6 +53,10 @@ contract AnvilSetup is Script, Utils, Test {
         emit log_named_uint("You are deploying on ChainID", currentChainId);
         require(configChainId == _CHAIN_ID, "You are on the wrong chain for this config, only Anvil 31337 allowed");
         require(configChainId == currentChainId, "You are on the wrong chain for this config");
+
+        // tests/keys/test.ecdsa.key.json
+        uint256 operatorPrivateKey = vm.parseUint("0x113d0ef74250eab659fd828e62a33ca72fcb22948897b2ed66b1fa695a8b9313");
+        address operatorAddress = vm.addr(operatorPrivateKey);
 
         vm.startBroadcast();
 
@@ -77,7 +84,19 @@ contract AnvilSetup is Script, Utils, Test {
         strats[0] = erc20MockStrategy;
         strategyManager.addStrategiesToDepositWhitelist(strats, thirdPartyTransfersForbidden);
 
+        erc20Mock.mint(operatorAddress, 100);
+        operatorAddress.call{value: 100 ether}("");
+
         vm.stopBroadcast();
+
+        // setup deposit for tests/keys/test.ecdsa.key.json
+        vm.startBroadcast(operatorPrivateKey);
+        erc20Mock.approve(address(strategyManager), 100);
+        strategyManager.depositIntoStrategy(erc20MockStrategy, erc20Mock, 100);
+        IDelegationManager.OperatorDetails memory op = IDelegationManager.OperatorDetails(operatorAddress, address(0), 0);
+        delegation.registerAsOperator(op, "");
+        vm.stopBroadcast();
+
         _writeOutput();
     }
 

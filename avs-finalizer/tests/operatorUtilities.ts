@@ -6,8 +6,8 @@ import registryCoordinator from "./abis/RegistryCoordinator.json";
 // @ts-ignore
 import finalizerTaskManager from "./abis/FinalizerTaskManager.json";
 import {DockerUtils} from "./DockerUtils";
-export const registryCoordinatorAddress = '0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9'
-export const taskManagerAddress = "0x9E545E3C0baAB3E08CdfD552C960A1050f373042";
+export const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
+export const taskManagerAddress = "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8";
 
 export async function waitForOperatorRegistered(publicClient: PublicClient) {
     return new Promise((resolve, _) => {
@@ -67,13 +67,17 @@ export async function getOperatorId(publicClient: PublicClient, operatorAddress:
 }
 
 export async function waitForTaskResponded(publicClient: PublicClient, numTasks = 1) : Promise<any[]> {
+    return waitFor(publicClient, numTasks, "TaskResponded");
+}
+
+export async function waitFor(publicClient: PublicClient, numTasks = 1, eventName="TaskResponded") : Promise<any[]> {
     let tasks : any[] = [];
     console.info("Waiting for :" + numTasks + " tasks to be responded to..");
     return await  new Promise( (resolve) => {
         const unwatch = publicClient.watchContractEvent({
             abi : finalizerTaskManager.abi,
             address: taskManagerAddress,
-            eventName: "TaskResponded",
+            eventName: eventName,
             onLogs: async (logs) => {
                 if(tasks.length < numTasks) {
                     tasks = tasks.concat(logs);
@@ -87,15 +91,16 @@ export async function waitForTaskResponded(publicClient: PublicClient, numTasks 
     } )
 }
 
-export async function waitForNoTaskResponded(publicClient: PublicClient, waitingTime = 120) : Promise<boolean> {
-    console.info("Waiting for :" + waitingTime + " tasks to be responded to..");
+
+export async function waitForNo(publicClient: PublicClient, waitingTime = 120 , eventName="TaskResponded") : Promise<boolean> {
+    console.info("Waiting for :" + waitingTime + " tasks to be " + eventName + "..");
     return await  new Promise( (resolve) => {
         const unwatch = publicClient.watchContractEvent({
             abi : finalizerTaskManager.abi,
             address: taskManagerAddress,
-            eventName: "TaskResponded",
+            eventName: eventName,
             onLogs: async (logs) => {
-                console.warn("Task responded: " + JSON.stringify(logs));
+                console.warn("Oh oh , got an event : " + JSON.stringify(logs));
                 resolve(false);
             },
         });

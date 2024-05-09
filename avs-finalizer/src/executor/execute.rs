@@ -11,11 +11,14 @@ use sp_runtime::{
     traits::{Block as BlockT, Hash, Header as HeaderT, Keccak256, NumberFor},
 };
 use std::{fmt::Debug, str::FromStr};
-use substrate_rpc_client::{ws_client, ChainApi};
+use substrate_rpc_client::{rpc_params, ws_client, ChainApi, ClientT};
 use tracing::instrument;
 
 #[instrument(skip(uri))]
-pub async fn execute_block<Block, HostFns>(uri: &str, at: BlockNumber) -> eyre::Result<(H256, H256)>
+pub async fn execute_block<Block, HostFns>(
+    uri: &str,
+    at: BlockNumber,
+) -> eyre::Result<(H256, H256, H256)>
 where
     Block: BlockT + serde::de::DeserializeOwned,
     <Block::Hash as FromStr>::Err: Debug,
@@ -65,5 +68,10 @@ where
     )?;
     let hash = Keccak256::hash_of(&proof);
 
-    Ok((block_hash.into(), hash))
+    let params = rpc_params!(block_hash);
+    let update_hash = rpc
+        .request::<H256, _>("rolldown_pending_updates_hash", params)
+        .await?;
+
+    Ok((block_hash.into(), hash, update_hash))
 }

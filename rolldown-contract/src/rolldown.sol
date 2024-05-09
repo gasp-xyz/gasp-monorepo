@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 
 // Import ERC-20 interface
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/console.sol";
 
@@ -15,6 +16,9 @@ contract RollDown {
     uint256 public lastProcessedUpdate_origin_l1;
     // Counter for last processed updates comming from l2 to ensure not reading and processing already processed
     uint256 public lastProcessedUpdate_origin_l2;
+
+    address public constant ETH_TOKEN_ADDRESS =
+        0x5748395867463837537395739375937493733457;
 
     event DepositAcceptedIntoQueue(
         uint256 requestId,
@@ -39,7 +43,14 @@ contract RollDown {
         address tokenAddress,
         uint256 amount
     );
+    event FundsReturned(
+        address depositRecipient,
+        address tokenAddress,
+        uint256 amount
+    );
     event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
+    event EthWithdrawPending(address sender, uint amount);
+    event PendingEthWithdrawn(address sender, uint amount);
 
     enum Origin {
         L1,
@@ -56,32 +67,32 @@ contract RollDown {
         address depositRecipient;
         address tokenAddress;
         uint256 amount;
-        bytes32 blockHash;
+        uint256 timeStamp;
     }
 
     struct L2UpdatesToRemove {
         RequestId requestId;
         uint256[] l2UpdatesToRemove;
-        bytes32 blockHash;
+        uint256 timeStamp;
     }
 
     struct CancelResolution {
         RequestId requestId;
         uint256 l2RequestId;
         bool cancelJustified;
-        bytes32 blockHash;
+        uint256 timeStamp;
     }
 
     struct WithdrawalResolution {
         RequestId requestId;
         uint256 l2RequestId;
         bool status;
-        bytes32 blockHash;
+        uint256 timeStamp;
     }
 
     struct L1Update {
         Deposit[] pendingDeposits;
-        CancelResolution[] pendingCancelResultions;
+        CancelResolution[] pendingCancelResolutions;
         WithdrawalResolution[] pendingWithdrawalResolutions;
         L2UpdatesToRemove[] pendingL2UpdatesToRemove;
     }
@@ -90,6 +101,7 @@ contract RollDown {
     mapping(uint256 => CancelResolution) public cancelResolutions;
     mapping(uint256 => Deposit) private deposits;
     mapping(uint256 => L2UpdatesToRemove) private l2UpdatesToRemove;
+    mapping(address => uint) public pendingEthWithdrawals;    
 
     //TODO: should be renamed to RequestType
     enum UpdateType {
@@ -139,7 +151,51 @@ contract RollDown {
         owner = msg.sender;
     }
 
+    function withdraw_pending_eth(uint256 amount) external {
+        require(amount > 0, "Amount must be greater than zero");
+        address payable sender = payable(msg.sender);
+        require(pendingEthWithdrawals[sender] >= amount, "not enough pending withdraw amount");
+        require(payable(address(this)).balance >= amount, "not enough eth funds");
+
+        // important to set this here before .sendValue
+        // to prevent reentrancy
+        pendingEthWithdrawals[sender] -= amount;
+
+        emit PendingEthWithdrawn(sender, amount);
+
+        // send value uses call (gas unbounded)
+        // and reverts upon failure
+        Address.sendValue(sender, amount);
+    }
+
+    function deposit_eth() external payable {
+        require(msg.value > 0, "msg value must be greater that 0");
+        address depositRecipient = msg.sender;
+        uint amount = msg.value;
+
+        uint256 timeStamp = block.timestamp;
+        Deposit memory depositRequest = Deposit({
+            requestId: RequestId({origin: Origin.L1, id: counter++}),
+            depositRecipient: depositRecipient,
+            tokenAddress: ETH_TOKEN_ADDRESS,
+            amount: amount,
+            timeStamp: timeStamp
+        });
+        // Add the new request to the mapping
+        deposits[depositRequest.requestId.id] = depositRequest;
+        emit DepositAcceptedIntoQueue(
+            depositRequest.requestId.id,
+            depositRecipient,
+            ETH_TOKEN_ADDRESS,
+            amount
+        );
+    }
+
     function deposit(address tokenAddress, uint256 amount) public {
+        deposit_erc20(tokenAddress, amount);
+    }
+
+    function deposit_erc20(address tokenAddress, uint256 amount) public {
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
         address depositRecipient = msg.sender;
@@ -150,13 +206,13 @@ contract RollDown {
             "Token transfer failed"
         );
 
-        bytes32 blockHash = blockhash(block.number);
+        uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
             tokenAddress: tokenAddress,
             amount: amount,
-            blockHash: blockHash
+            timeStamp: timeStamp
         });
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
@@ -343,7 +399,7 @@ contract RollDown {
             l2UpdatesToRemove[rid] = L2UpdatesToRemove({
                 requestId: RequestId({origin: Origin.L1, id: rid}),
                 l2UpdatesToRemove: l2UpdatesToBeRemoved,
-                blockHash: blockhash(block.number)
+                timeStamp: block.timestamp
             });
             lastProcessedUpdate_origin_l1 += l2UpdatesToBeRemoved.length;
             emit L2UpdatesToRemovedAcceptedIntoQueue(rid, l2UpdatesToBeRemoved);
@@ -353,7 +409,7 @@ contract RollDown {
     function process_l2_update_requests_results(
         UpdateType[] memory order,
         RequestResult[] calldata results
-    ) private view returns (uint256[] memory) {
+    ) private returns (uint256[] memory) {
         if (results.length == 0) {
             return new uint256[](0);
         }
@@ -378,6 +434,9 @@ contract RollDown {
                     l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
                         element.originRequestId
                     );
+                    if (element.updateType == UpdateType.DEPOSIT){
+                      process_l2_update_deposit(element);
+                    }
                 } else {
                     revert("unknown request type");
                 }
@@ -401,13 +460,13 @@ contract RollDown {
             cancel.range.end
         );
         bytes32 correct_hash = keccak256(abi.encode(pending));
-        bytes32 blockHash = blockhash(block.number);
+        uint256 timeStamp = block.timestamp;
 
         CancelResolution memory resolution = CancelResolution({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             l2RequestId: cancel.requestId.id,
             cancelJustified: correct_hash == cancel.hash,
-            blockHash: blockHash
+            timeStamp: timeStamp
         });
 
         cancelResolutions[resolution.requestId.id] = resolution;
@@ -420,15 +479,54 @@ contract RollDown {
     function process_l2_update_withdrawal(
         Withdrawal calldata withdrawal
     ) private {
-        IERC20 token = IERC20(withdrawal.tokenAddress);
-        bool status = token.balanceOf(address(this)) >= withdrawal.amount;
-        bytes32 blockHash = blockhash(block.number);
+        if (withdrawal.tokenAddress == ETH_TOKEN_ADDRESS){
+            process_eth_withdrawal(withdrawal);
+        }
+        else {
+            process_erc20_withdrawal(withdrawal);
+        }
+    }
+
+    function process_eth_withdrawal(
+        Withdrawal calldata withdrawal
+    ) private {
+        bool status = payable(address(this)).balance >= withdrawal.amount;
+        uint256 timeStamp = block.timestamp;
 
         WithdrawalResolution memory resolution = WithdrawalResolution({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             l2RequestId: withdrawal.requestId.id,
             status: status,
-            blockHash: blockHash
+            timeStamp: timeStamp
+        });
+
+        withdrawalResolutions[resolution.requestId.id] = resolution;
+        emit WithdrawalResolutionAcceptedIntoQueue(
+            resolution.requestId.id,
+            status
+        );
+
+        if (status) {
+            pendingEthWithdrawals[withdrawal.withdrawalRecipient] += withdrawal.amount;
+            emit EthWithdrawPending(
+                withdrawal.withdrawalRecipient,
+                pendingEthWithdrawals[withdrawal.withdrawalRecipient]
+            );
+        }
+    }
+
+    function process_erc20_withdrawal(
+        Withdrawal calldata withdrawal
+    ) private {
+        IERC20 token = IERC20(withdrawal.tokenAddress);
+        bool status = token.balanceOf(address(this)) >= withdrawal.amount;
+        uint256 timeStamp = block.timestamp;
+
+        WithdrawalResolution memory resolution = WithdrawalResolution({
+            requestId: RequestId({origin: Origin.L1, id: counter++}),
+            l2RequestId: withdrawal.requestId.id,
+            status: status,
+            timeStamp: timeStamp
         });
 
         withdrawalResolutions[resolution.requestId.id] = resolution;
@@ -443,6 +541,23 @@ contract RollDown {
                 withdrawal.withdrawalRecipient,
                 withdrawal.tokenAddress,
                 withdrawal.amount
+            );
+        }
+    }
+
+    function process_l2_update_deposit(
+        RequestResult memory depositResult
+    ) private {
+        if (!depositResult.status) {
+            uint256 requestId = depositResult.requestId.id;
+            Deposit memory theDeposit = deposits[requestId];
+            IERC20 token = IERC20(theDeposit.tokenAddress);
+            token.transfer(theDeposit.depositRecipient, theDeposit.amount);
+
+            emit FundsReturned(
+                theDeposit.depositRecipient,
+                theDeposit.tokenAddress,
+                theDeposit.amount
             );
         }
     }
@@ -471,7 +586,7 @@ contract RollDown {
         }
 
         result.pendingDeposits = new Deposit[](depositsCounter);
-        result.pendingCancelResultions = new CancelResolution[](cancelsCounter);
+        result.pendingCancelResolutions = new CancelResolution[](cancelsCounter);
         result.pendingWithdrawalResolutions = new WithdrawalResolution[](
             withdrawalsCounter
         );
@@ -496,7 +611,7 @@ contract RollDown {
                     updatesToBeRemovedCounter++
                 ] = l2UpdatesToRemove[requestId];
             } else if (cancelResolutions[requestId].l2RequestId > 0) {
-                result.pendingCancelResultions[
+                result.pendingCancelResolutions[
                     cancelsCounter++
                 ] = cancelResolutions[requestId];
             } else {
