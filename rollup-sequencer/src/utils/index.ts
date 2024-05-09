@@ -1,5 +1,9 @@
 import util from "node:util";
-import {Mangata, MangataGenericEvent, signTx} from "@mangata-finance/sdk";
+import {
+	Mangata,
+	type MangataGenericEvent,
+	signTx,
+} from "@mangata-finance/sdk";
 import { type ApiPromise, Keyring } from "@polkadot/api";
 import type { ApiDecoration } from "@polkadot/api/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
@@ -14,7 +18,8 @@ import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
 import {
 	ABI,
 	BLOCK_NUMBER_DELAY,
-	L1_READ_STORED_EVENT_METHOD, LIMIT,
+	L1_READ_STORED_EVENT_METHOD,
+	LIMIT,
 	MANGATA_CONTRACT_ADDRESS,
 	ROLLDOWN_EVENT_SECTION,
 } from "../common/constants.js";
@@ -67,7 +72,7 @@ async function getEvents(
 async function initReadContractWithRetry(publicClient: PublicClient) {
 	while (true) {
 		try {
-      return await getUpdateForL2(publicClient);
+			return await getUpdateForL2(publicClient);
 		} catch (e) {
 			print(`${MANGATA_CONTRACT_ADDRESS} contract not found`);
 			await sleep(1000);
@@ -144,144 +149,222 @@ async function processPendingRequestsEvents(
 	}
 }
 
-async function getSelectedSequencerWithRights(api: ApiPromise, collatorAddress: string, headerHash: Uint8Array) {
+async function getSelectedSequencerWithRights(
+	api: ApiPromise,
+	collatorAddress: string,
+	headerHash: Uint8Array,
+) {
 	const apiAt = await api.at(headerHash);
-	const selectedSequencer = await apiAt.query.sequencerStaking.selectedSequencer();
+	const selectedSequencer =
+		await apiAt.query.sequencerStaking.selectedSequencer();
 	if (selectedSequencer.isSome) {
-		const isSequencerSelected = u8aToHex(selectedSequencer.unwrap()).toLowerCase() === collatorAddress.toLowerCase()
-		const sequencerRights = await apiAt.query.rolldown.sequencerRights(collatorAddress);
-		const hasSequencerRights = sequencerRights.unwrap().readRights.toNumber() > 0
+		const isSequencerSelected =
+			u8aToHex(selectedSequencer.unwrap()).toLowerCase() ===
+			collatorAddress.toLowerCase();
+		const sequencerRights =
+			await apiAt.query.rolldown.sequencerRights(collatorAddress);
+		const hasSequencerRights =
+			sequencerRights.unwrap().readRights.toNumber() > 0;
 		return {
 			isSequencerSelected,
 			hasSequencerRights,
-			selectedSequencer: u8aToHex(selectedSequencer.unwrap()).toLowerCase()
-		}
-	} else {
-		return {
-			isSequencerSelected: false,
-			hasSequencerRights: false,
-			selectedSequencer: null
-		}
+			selectedSequencer: u8aToHex(selectedSequencer.unwrap()).toLowerCase(),
+		};
 	}
+	return {
+		isSequencerSelected: false,
+		hasSequencerRights: false,
+		selectedSequencer: null,
+	};
 }
 
 function isSuccess(events: MangataGenericEvent[]) {
-	return events.some((event) => event.section === "system" && event.method === "ExtrinsicSuccess");
+	return events.some(
+		(event) =>
+			event.section === "system" && event.method === "ExtrinsicSuccess",
+	);
 }
 
-function getRequestIds(l2update: PalletRolldownMessagesL1Update, type: "pendingCancelResolutions" | "pendingWithdrawalResolutions" | "pendingL2UpdatesToRemove" | "pendingDeposits") {
-	return l2update[type].map(item => item.requestId.id.toNumber())
+function getRequestIds(
+	l2update: PalletRolldownMessagesL1Update,
+	type:
+		| "pendingCancelResolutions"
+		| "pendingWithdrawalResolutions"
+		| "pendingL2UpdatesToRemove"
+		| "pendingDeposits",
+) {
+	return l2update[type].map((item) => item.requestId.id.toNumber());
 }
 
 function getMinMaxRequestId(requestIds: Array<number>, type: "min" | "max") {
 	if (type === "min") {
 		return Math.min(...requestIds);
-	} else {
-		return Math.max(...requestIds)
 	}
+	return Math.max(...requestIds);
 }
 
 function getMinRequestId(l2Update: PalletRolldownMessagesL1Update) {
-	const pendingCancelResolutionsRequestIds = getRequestIds(l2Update, "pendingCancelResolutions")
+	const pendingCancelResolutionsRequestIds = getRequestIds(
+		l2Update,
+		"pendingCancelResolutions",
+	);
 
-	const pendingWithdrawalResolutionsRequestIds = getRequestIds(l2Update, "pendingWithdrawalResolutions")
+	const pendingWithdrawalResolutionsRequestIds = getRequestIds(
+		l2Update,
+		"pendingWithdrawalResolutions",
+	);
 
-	const pendingL2UpdatesToRemoveRequestIds = getRequestIds(l2Update, "pendingL2UpdatesToRemove")
+	const pendingL2UpdatesToRemoveRequestIds = getRequestIds(
+		l2Update,
+		"pendingL2UpdatesToRemove",
+	);
 
-	const pendingDepositsRequestIds = getRequestIds(l2Update, "pendingDeposits")
+	const pendingDepositsRequestIds = getRequestIds(l2Update, "pendingDeposits");
 
-	const minId = getMinMaxRequestId([
-		Math.min(...pendingCancelResolutionsRequestIds),
-		Math.min(...pendingWithdrawalResolutionsRequestIds),
-		Math.min(...pendingL2UpdatesToRemoveRequestIds),
-		Math.min(...pendingDepositsRequestIds)
-	], "min")
+	const minId = getMinMaxRequestId(
+		[
+			Math.min(...pendingCancelResolutionsRequestIds),
+			Math.min(...pendingWithdrawalResolutionsRequestIds),
+			Math.min(...pendingL2UpdatesToRemoveRequestIds),
+			Math.min(...pendingDepositsRequestIds),
+		],
+		"min",
+	);
 
-	return minId === Infinity ? null : minId
+	return minId === Number.POSITIVE_INFINITY ? null : minId;
 }
 
 function getMaxRequestId(l2Update: PalletRolldownMessagesL1Update) {
+	const pendingCancelResolutionsRequestIds = getRequestIds(
+		l2Update,
+		"pendingCancelResolutions",
+	);
 
-	const pendingCancelResolutionsRequestIds = getRequestIds(l2Update, "pendingCancelResolutions")
+	const pendingWithdrawalResolutionsRequestIds = getRequestIds(
+		l2Update,
+		"pendingWithdrawalResolutions",
+	);
 
-	const pendingWithdrawalResolutionsRequestIds = getRequestIds(l2Update, "pendingWithdrawalResolutions")
+	const pendingL2UpdatesToRemoveRequestIds = getRequestIds(
+		l2Update,
+		"pendingL2UpdatesToRemove",
+	);
 
-	const pendingL2UpdatesToRemoveRequestIds = getRequestIds(l2Update, "pendingL2UpdatesToRemove")
+	const pendingDepositsRequestIds = getRequestIds(l2Update, "pendingDeposits");
 
-	const pendingDepositsRequestIds = getRequestIds(l2Update, "pendingDeposits")
+	const maxId = getMinMaxRequestId(
+		[
+			Math.max(...pendingCancelResolutionsRequestIds),
+			Math.max(...pendingWithdrawalResolutionsRequestIds),
+			Math.max(...pendingL2UpdatesToRemoveRequestIds),
+			Math.max(...pendingDepositsRequestIds),
+		],
+		"max",
+	);
 
-	let maxId = getMinMaxRequestId([
-		Math.max(...pendingCancelResolutionsRequestIds),
-		Math.max(...pendingWithdrawalResolutionsRequestIds),
-		Math.max(...pendingL2UpdatesToRemoveRequestIds),
-		Math.max(...pendingDepositsRequestIds)
-	], "max")
-
-	return maxId === Infinity ? null : maxId
+	return maxId === Number.POSITIVE_INFINITY ? null : maxId;
 }
 
-function filterUpdates(l2Update: PalletRolldownMessagesL1Update, lastRequestId: number) {
-
+function filterUpdates(
+	l2Update: PalletRolldownMessagesL1Update,
+	lastRequestId: number,
+) {
 	const minId = getMinRequestId(l2Update);
 	if (minId === null) {
 		return l2Update;
 	}
-	let firstRequestId = Math.max(minId, lastRequestId + 1);
+	const firstRequestId = Math.max(minId, lastRequestId + 1);
 
-
-	while (l2Update.pendingDeposits.length > 0 && l2Update.pendingDeposits[0].requestId.id.toNumber() < firstRequestId) {
+	while (
+		l2Update.pendingDeposits.length > 0 &&
+		l2Update.pendingDeposits[0].requestId.id.toNumber() < firstRequestId
+	) {
 		l2Update.pendingDeposits.shift();
 	}
 
-	while (l2Update.pendingCancelResolutions.length > 0 && l2Update.pendingCancelResolutions[0].requestId.id.toNumber() < firstRequestId) {
+	while (
+		l2Update.pendingCancelResolutions.length > 0 &&
+		l2Update.pendingCancelResolutions[0].requestId.id.toNumber() <
+			firstRequestId
+	) {
 		l2Update.pendingCancelResolutions.shift();
 	}
 
-	while (l2Update.pendingWithdrawalResolutions.length > 0 && l2Update.pendingWithdrawalResolutions[0].requestId.id.toNumber() < firstRequestId) {
+	while (
+		l2Update.pendingWithdrawalResolutions.length > 0 &&
+		l2Update.pendingWithdrawalResolutions[0].requestId.id.toNumber() <
+			firstRequestId
+	) {
 		l2Update.pendingWithdrawalResolutions.shift();
 	}
 
-	while (l2Update.pendingL2UpdatesToRemove.length > 0 && l2Update.pendingL2UpdatesToRemove[0].requestId.id.toNumber() < firstRequestId) {
+	while (
+		l2Update.pendingL2UpdatesToRemove.length > 0 &&
+		l2Update.pendingL2UpdatesToRemove[0].requestId.id.toNumber() <
+			firstRequestId
+	) {
 		l2Update.pendingL2UpdatesToRemove.shift();
 	}
 
-	const maxAmountOfUpdates = parseInt(LIMIT);
+	const maxAmountOfUpdates = Number.parseInt(LIMIT);
 
 	if (maxAmountOfUpdates > 0) {
-		let lastRequestId = firstRequestId + maxAmountOfUpdates;
+		const lastRequestId = firstRequestId + maxAmountOfUpdates;
 
-		while (l2Update.pendingDeposits.length > 0 && l2Update.pendingDeposits[l2Update.pendingDeposits.length - 1].requestId.id.toNumber() > lastRequestId) {
+		while (
+			l2Update.pendingDeposits.length > 0 &&
+			l2Update.pendingDeposits[
+				l2Update.pendingDeposits.length - 1
+			].requestId.id.toNumber() > lastRequestId
+		) {
 			l2Update.pendingDeposits.pop();
 		}
 
-		while (l2Update.pendingCancelResolutions.length > 0 && l2Update.pendingCancelResolutions[l2Update.pendingCancelResolutions.length - 1].requestId.id.toNumber() > lastRequestId) {
+		while (
+			l2Update.pendingCancelResolutions.length > 0 &&
+			l2Update.pendingCancelResolutions[
+				l2Update.pendingCancelResolutions.length - 1
+			].requestId.id.toNumber() > lastRequestId
+		) {
 			l2Update.pendingCancelResolutions.pop();
 		}
 
-		while (l2Update.pendingWithdrawalResolutions.length > 0 && l2Update.pendingWithdrawalResolutions[l2Update.pendingWithdrawalResolutions.length - 1].requestId.id.toNumber() > lastRequestId) {
+		while (
+			l2Update.pendingWithdrawalResolutions.length > 0 &&
+			l2Update.pendingWithdrawalResolutions[
+				l2Update.pendingWithdrawalResolutions.length - 1
+			].requestId.id.toNumber() > lastRequestId
+		) {
 			l2Update.pendingWithdrawalResolutions.pop();
 		}
 
-		while (l2Update.pendingL2UpdatesToRemove.length > 0 && l2Update.pendingL2UpdatesToRemove[l2Update.pendingL2UpdatesToRemove.length - 1].requestId.id.toNumber() > lastRequestId) {
+		while (
+			l2Update.pendingL2UpdatesToRemove.length > 0 &&
+			l2Update.pendingL2UpdatesToRemove[
+				l2Update.pendingL2UpdatesToRemove.length - 1
+			].requestId.id.toNumber() > lastRequestId
+		) {
 			l2Update.pendingL2UpdatesToRemove.pop();
 		}
 
 		return l2Update;
-	} else {
-		return l2Update;
 	}
-
+	return l2Update;
 }
 
 function countRequests(l2Update: PalletRolldownMessagesL1Update) {
-	return l2Update.pendingCancelResolutions.length +
+	return (
+		l2Update.pendingCancelResolutions.length +
 		l2Update.pendingWithdrawalResolutions.length +
 		l2Update.pendingL2UpdatesToRemove.length +
-		l2Update.pendingDeposits.length;
+		l2Update.pendingDeposits.length
+	);
 }
 
 async function getLastRequestId(api: ApiPromise) {
-	return parseInt((await api.query.rolldown.lastProcessedRequestOnL2("Ethereum")).toString());
+	return Number.parseInt(
+		(await api.query.rolldown.lastProcessedRequestOnL2("Ethereum")).toString(),
+	);
 }
 
 function print(data: any) {
@@ -289,32 +372,31 @@ function print(data: any) {
 }
 
 async function getUpdateForL2(publicClient: PublicClient) {
-  const lastProcessed = (await publicClient.readContract({
-    address: MANGATA_CONTRACT_ADDRESS,
-    abi: ABI,
-    functionName: "lastProcessedUpdate_origin_l1",
-  })) as bigint;
+	const lastProcessed = (await publicClient.readContract({
+		address: MANGATA_CONTRACT_ADDRESS,
+		abi: ABI,
+		functionName: "lastProcessedUpdate_origin_l1",
+	})) as bigint;
 
-  const counter = (await publicClient.readContract({
-    address: MANGATA_CONTRACT_ADDRESS,
-    abi: ABI,
-    functionName: "counter",
-  })) as bigint;
+	const counter = (await publicClient.readContract({
+		address: MANGATA_CONTRACT_ADDRESS,
+		abi: ABI,
+		functionName: "counter",
+	})) as bigint;
 
-  const rangeStart = lastProcessed + 1n;
-  let rangeEnd = rangeStart + BigInt(LIMIT);
-  if (rangeEnd > counter - 1n) {
-    rangeEnd = counter - 1n;
-  }
+	const rangeStart = lastProcessed + 1n;
+	let rangeEnd = rangeStart + BigInt(LIMIT);
+	if (rangeEnd > counter - 1n) {
+		rangeEnd = counter - 1n;
+	}
 
-  return (await publicClient.readContract({
-    address: MANGATA_CONTRACT_ADDRESS,
-    abi: ABI,
-    functionName: "getPendingRequests",
-    args: [rangeStart, rangeEnd],
-  }))
+	return await publicClient.readContract({
+		address: MANGATA_CONTRACT_ADDRESS,
+		abi: ABI,
+		functionName: "getPendingRequests",
+		args: [rangeStart, rangeEnd],
+	});
 }
-
 
 export {
 	print,
