@@ -1,7 +1,7 @@
 services:
   sequencer:
     restart: unless-stopped
-    image: mangatasolutions/rollup-sequencer:local
+    image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
     depends_on:
       rolldown:
         condition: service_completed_successfully
@@ -11,5 +11,6 @@ services:
     environment:
       MANGATA_NODE_URL: ${ROLLUP_SEQUENCER_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}
       ETH_CHAIN_URL: ${ROLLUP_SEQUENCER_ETH_CHAIN_URL:-wss://ethereum.publicnode.com}
-      MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
+      MANGATA_CONTRACT_ADDRESS: "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90"
       MNEMONIC: ${ROLLUP_SEQUENCER_MNEMONIC:-'//Bob'}
+      BLOCK_NUMBER_DELAY: ${ROLLUP_SEQUENCER_BLOCK_NUMBER_DELAY}

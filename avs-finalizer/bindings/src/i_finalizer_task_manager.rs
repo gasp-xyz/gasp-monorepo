@@ -136,6 +136,7 @@ pub mod i_finalizer_task_manager {
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
                                 ],),
                                 indexed: false,
                             },
@@ -326,7 +327,7 @@ pub mod i_finalizer_task_manager {
     )]
     #[ethevent(
         name = "TaskResponded",
-        abi = "TaskResponded((uint32,bytes32,bytes32),(uint32,bytes32,uint96[],uint96[]))"
+        abi = "TaskResponded((uint32,bytes32,bytes32,bytes32),(uint32,bytes32,uint96[],uint96[]))"
     )]
     pub struct TaskRespondedFilter {
         pub task_response: TaskResponse,

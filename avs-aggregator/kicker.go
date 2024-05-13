@@ -3,8 +3,8 @@ package aggregator
 import (
 	"context"
 
-	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/Layr-Labs/eigensdk-go/logging"
+	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
@@ -46,8 +46,8 @@ func (k *Kicker) CheckStateAndKick() error {
 
 	k.logger.Debug("Got last events", "eventsCount", len(events))
 	// get non signers present in every trx
-	hash := make(map[bls.OperatorId]*int)
-	nonSigningOperatorIds := make([]bls.OperatorId, 0)
+	hash := make(map[sdktypes.OperatorId]*int)
+	nonSigningOperatorIds := make([]sdktypes.OperatorId, 0)
 	logIds := make([]string, 0)
 	for _, ev := range events {
 		keys, err := k.ethRpc.AvsReader.GetNonSigningOperatorPubKeys(ev)

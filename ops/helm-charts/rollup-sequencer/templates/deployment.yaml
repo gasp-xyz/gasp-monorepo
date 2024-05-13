@@ -10,7 +10,6 @@ spec:
     matchLabels:
       {{- include "rollup-sequencer.selectorLabels" . | nindent 6 }}
       service: {{ include "rollup-sequencer.name" . }}
-  serviceName: {{ include "rollup-sequencer.name" . }}
   template:
     metadata:
       annotations:
@@ -51,7 +50,7 @@ spec:
                   key: ETH_CHAIN_URL
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}
-              value: {{ $val }}
+              value: {{ $val | quote }}
             {{- end }}
           resources:
           {{- toYaml .Values.resources | nindent 12 }}

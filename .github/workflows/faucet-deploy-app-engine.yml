@@ -1,0 +1,51 @@
+name: Deploy Faucet to App Engine
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - faucet-web-app/**
+
+permissions:
+  contents: read
+  id-token: write
+  deployments: write
+
+env:
+  CI: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and yarn
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        working-directory: faucet-web-app
+        run: npm install
+
+      - name: Build React app
+        working-directory: faucet-web-app
+        run: npm run build
+
+      - name: Google auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Upload folder
+        uses: 'google-github-actions/upload-cloud-storage@v2'
+        with:
+          path: 'faucet-web-app/build'
+          destination: 'holesky-faucet.gasp.xyz'
+          parent: false
+          process_gcloudignore: false

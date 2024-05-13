@@ -11,6 +11,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	logging "github.com/Layr-Labs/eigensdk-go/logging"
+	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 )
@@ -20,7 +21,7 @@ type AvsWriterer interface {
 		ctx context.Context,
 		blockNumber *big.Int,
 		quorumThresholdPercentage uint32,
-		quorumNumbers []byte,
+		quorumNumbers sdktypes.QuorumNums,
 	) (taskmanager.IFinalizerTaskManagerTask, uint32, error)
 	SendAggregatedResponse(ctx context.Context,
 		task taskmanager.IFinalizerTaskManagerTask,
@@ -35,7 +36,7 @@ type AvsWriter struct {
 	logger              logging.Logger
 }
 
-func NewAvsWriter(txMgr txmgr.TxManager, registryAddr gethcommon.Address, ethHttpClient eth.EthClient, logger logging.Logger) (*AvsWriter, error) {
+func NewAvsWriter(txMgr txmgr.TxManager, registryAddr gethcommon.Address, ethHttpClient eth.Client, logger logging.Logger) (*AvsWriter, error) {
 	avsServiceBindings, err := NewAvsServiceBindings(registryAddr, ethHttpClient, logger)
 	if err != nil {
 		logger.Error("Failed to create contract bindings", "err", err)
@@ -50,13 +51,13 @@ func NewAvsWriter(txMgr txmgr.TxManager, registryAddr gethcommon.Address, ethHtt
 }
 
 // returns the tx receipt, as well as the task index (which it gets from parsing the tx receipt logs)
-func (w *AvsWriter) SendNewTaskVerifyBlock(ctx context.Context, blockNumber *big.Int, quorumThresholdPercentage uint32, quorumNumbers []byte) (taskmanager.IFinalizerTaskManagerTask, uint32, error) {
+func (w *AvsWriter) SendNewTaskVerifyBlock(ctx context.Context, blockNumber *big.Int, quorumThresholdPercentage uint32, quorumNumbers sdktypes.QuorumNums) (taskmanager.IFinalizerTaskManagerTask, uint32, error) {
 	w.logger.Info("creating new task with AVS's task manager")
 	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerTask{}, 0, err
 	}
-	tx, err := w.AvsContractBindings.TaskManager.CreateNewTask(noSendTxOpts, blockNumber, quorumThresholdPercentage, quorumNumbers)
+	tx, err := w.AvsContractBindings.TaskManager.CreateNewTask(noSendTxOpts, blockNumber, quorumThresholdPercentage, quorumNumbers.UnderlyingType())
 	if err != nil {
 		w.logger.Errorf("Error assembling CreateNewTask tx")
 		return taskmanager.IFinalizerTaskManagerTask{}, 0, err

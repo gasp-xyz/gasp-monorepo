@@ -7,8 +7,8 @@ import {
 
 // @ts-ignore
 import registryCoordinator from "./abis/RegistryCoordinator.json";
-import {waitForOperatorDeRegistered, waitForOperatorRegistered} from "./operatorUtilities";
-const registryCoordinatorAddress = '0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9'
+import {waitFor, waitForOperatorDeRegistered, waitForOperatorRegistered} from "./operatorUtilities";
+const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
 
 
 jest.setTimeout(1500000);
@@ -99,6 +99,8 @@ describe('AVS Finalizer', () => {
             args: [operatorAddress],
         });
         expect(statusAfter).toBe(2);
+        const tasks = await waitFor(publicClient, 2, "TaskCompleted");
+        expect(tasks).toHaveLength(2);
 
     });
     it('eject', async () => {
