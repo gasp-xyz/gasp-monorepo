@@ -5,7 +5,6 @@ include:
   - path: ./avs-finalizer/compose.yml
   - path: ./rollup-sequencer/compose.yml
   - path: ./rollup-updater/compose.yml
-  - path: ./rolldown-contract/compose.yml
   - path: ./contracts/compose.yml
 
 services:

@@ -19,6 +19,7 @@ cd "$parent_path" && cd ../../contracts
 forge script script/M2_Deploy_From_Scratch.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --sig "run(string memory configFile)" -- M2_deploy_from_scratch.anvil.config.json
 mv script/output/M2_from_scratch_deployment_data.json script/input/31337/eigenlayer_deployment_output.json
 forge script script/0_AnvilSetup.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -v
+cp script/output/31337/strategy_output.json script/input/31337/strategy_output_copy.json
 
 ############################################
 # Deploy avs contracts
@@ -26,12 +27,6 @@ forge script script/0_AnvilSetup.s.sol --rpc-url $RPC_URL --private-key $PRIVATE
 cd "$parent_path" && cd ../../contracts
 cast rpc evm_mine
 forge script script/1_FinalizerAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -v
-
-############################################
-# Deploy rolldown contracts
-############################################
-cd "$parent_path" && cd ../../rolldown-contract
-forge script script/rolldown.s.sol:MyScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -v
 
 
 # kill anvil to save its state

@@ -3,8 +3,6 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
-import "@openzeppelin-upgrades/contracts/token/ERC20/ERC20Upgradeable.sol";
-
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
 import "@eigenlayer/contracts/core/AVSDirectory.sol";
 import "@eigenlayer/contracts/core/StrategyManager.sol";
@@ -36,6 +34,7 @@ contract Deployer is Script, Utils, Test {
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
     string constant _CONFIG_PATH = "deploy.config";
     string constant _OUTPUT_PATH = "avs_deployment_output";
+    string constant _STRATEGY_OUTPUT = "strategy_output_copy";
 
     ProxyAdmin public avsProxyAdmin;
     PauserRegistry public avsPauserReg;
@@ -66,6 +65,11 @@ contract Deployer is Script, Utils, Test {
     StrategyManager public strategyManager;
 
     function run() external {
+
+        string memory strategyOutput = readInput(_STRATEGY_OUTPUT);
+        erc20Mock =
+            ERC20Mock(stdJson.readAddress(strategyOutput, ".addresses.erc20Mock"));
+
         // Eigenlayer contracts
         string memory eigenlayerDeployedContracts = readInput(_EIGEN_DEPLOYMENT_PATH);
         strategyManager =
@@ -469,6 +473,7 @@ contract Deployer is Script, Utils, Test {
         string memory parent_object = "parent object";
 
         string memory deployed_addresses = "addresses";
+        vm.serializeAddress(deployed_addresses, "erc20Mock", address(erc20Mock));
         vm.serializeAddress(deployed_addresses, "avsProxyAdmin", address(avsProxyAdmin));
         vm.serializeAddress(deployed_addresses, "avsPauseReg", address(avsPauserReg));
         vm.serializeAddress(deployed_addresses, "serviceManager", address(serviceManager));

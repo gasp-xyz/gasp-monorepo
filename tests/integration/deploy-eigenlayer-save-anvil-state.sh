@@ -21,5 +21,7 @@ cd "$parent_path"
 cd ../../contracts
 forge script script/0_AnvilSetup.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -v
 
+cp script/output/31337/strategy_output.json script/input/31337/strategy_output_copy.json
+
 # kill anvil to save its state
 pkill anvil

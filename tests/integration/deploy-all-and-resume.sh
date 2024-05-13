@@ -28,6 +28,8 @@ forge script script/0_AnvilSetup.s.sol \
     --private-key $PRIVATE_KEY \
     --broadcast -v
 
+cp script/output/31337/strategy_output.json script/input/31337/strategy_output_copy.json
+
 # deploy AVS contracts
 forge script script/1_FinalizerAvsDeployer.s.sol:Deployer \
     --rpc-url $RPC_URL \
