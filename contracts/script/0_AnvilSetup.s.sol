@@ -70,8 +70,8 @@ contract AnvilSetup is Script, Utils, Test {
                     address(eigenLayerProxyAdmin),
                     abi.encodeWithSelector(
                         StrategyBaseTVLLimits.initialize.selector,
-                        1 ether, // maxPerDeposit
-                        100 ether, // maxDeposits
+                        1 ether, // 
+                        100 ether, // maxDepositsmaxPerDeposit
                         IERC20(erc20Mock),
                         eigenLayerPauserReg
                     )
