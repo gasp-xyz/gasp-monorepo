@@ -3,7 +3,7 @@ services:
     image: mangatasolutions/rollup-updater:${ROLLUP_UPDATER_VERSION:-local}
     build: .
     depends_on:
-      rolldown:
+      avs-3:
         condition: service_completed_successfully
       node-alice:
         condition: service_started
