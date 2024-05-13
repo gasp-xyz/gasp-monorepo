@@ -1,4 +1,4 @@
-import rolldownAbi from "../RollDown.json" assert { type: "json" };
+import rolldownAbi from "../Rolldown.json" assert { type: "json" };
 import { configuration } from "../config/index.js";
 
 export const MANGATA_CONTRACT_ADDRESS =

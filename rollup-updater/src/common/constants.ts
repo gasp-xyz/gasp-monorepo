@@ -1,5 +1,5 @@
 import eigenContractAbi from "../FinalizerTaskManager.json" assert {type: "json"};
-import rolldownAbi from "../RollDown.json" assert { type: "json" };
+import rolldownAbi from "../Rolldown.json" assert { type: "json" };
 import {configuration} from "../config/config.js"
 
 
