@@ -61,6 +61,23 @@ function getCountRequest(l2Update: Array<L2Update>) {
         l2Update[0].results.length;
 }
 
+async function estimateGasInWei(publicClient: PublicClient) {
+    // https://www.blocknative.com/blog/eip-1559-fees
+    // We do not want VIEM estimate we would like to make our own estimate
+    // based on this equation: Max Fee = (2 * Base Fee) + Max Priority Fee
+
+    // Max Fee = maxFeePerGas (viem)
+    // Max Priority Fee = maxPriorityFeePerGas (viem)
+
+    const baseFeeInWei = await publicClient.getGasPrice()
+
+    const maxPriorityFeePerGasInWei =  await estimateMaxPriorityFeePerGas(publicClient)
+
+    const maxFeeInWei = BigInt(2) * BigInt(baseFeeInWei) + BigInt(maxPriorityFeePerGasInWei)
+
+    return {maxFeeInWei, maxPriorityFeePerGasInWei}
+}
+
 async function sendUpdateToL1(
     api: ApiPromise,
     walletClient: WalletClient,
@@ -98,18 +115,7 @@ async function sendUpdateToL1(
     if (getCountRequest(l2Update) === 0) {
         return null
     } else {
-        // https://www.blocknative.com/blog/eip-1559-fees
-        // We do not want VIEM estimate we would like to make our own estimate
-        // based on this equation: Max Fee = (2 * Base Fee) + Max Priority Fee
-
-        // Max Fee = maxFeePerGas (viem)
-        // Max Priority Fee = maxPriorityFeePerGas (viem)
-
-        const baseFeeInWei = await publicClient.getGasPrice()
-
-        const maxPriorityFeePerGasInWei =  await estimateMaxPriorityFeePerGas(publicClient)
-
-        const maxFeeInWei = BigInt(2) * BigInt(baseFeeInWei) + BigInt(maxPriorityFeePerGasInWei)
+        const {maxFeeInWei, maxPriorityFeePerGasInWei} = await estimateGasInWei(publicClient)
 
         const {request} = await publicClient.simulateContract({
             account: ethAccount,
