@@ -1,9 +1,10 @@
 import * as util from "node:util";
 import {ApiPromise} from "@polkadot/api";
-import {decodeAbiParameters, type PublicClient, type WalletClient} from "viem";
+import {decodeAbiParameters, publicActions, type PublicClient, type WalletClient} from "viem";
 import {LIMIT, MANGATA_CONTRACT_ADDRESS, ROLLDOWN_ABI, VERBOSE} from "../common/constants.js";
 import {ethAccount, getChain} from "../viem/client.js";
 import {Cancel, L2Update, RequestResult, Withdrawal} from "../common/types.js";
+import {estimateMaxPriorityFeePerGas} from "viem/actions";
 
 
 export function getMinRequestId(l2Update: Array<L2Update>) {
@@ -94,15 +95,37 @@ async function sendUpdateToL1(
         console.log(`filtered l2Update:  ${JSON.stringify(update, null, 2)}`);
     }
 
-    return getCountRequest(l2Update) === 0 ? null : await walletClient.writeContract({
-        account: ethAccount,
-        chain: getChain(),
-        abi: ROLLDOWN_ABI,
-        address: MANGATA_CONTRACT_ADDRESS,
-        functionName: "update_l1_from_l2",
-        args: update,
-        // gas: 9999999n,
-    })
+    if (getCountRequest(l2Update) === 0) {
+        return null
+    } else {
+        // https://www.blocknative.com/blog/eip-1559-fees
+        // We do not want VIEM estimate we would like to make our own estimate
+        // based on this equation: Max Fee = (2 * Base Fee) + Max Priority Fee
+
+        // Max Fee = maxFeePerGas (viem)
+        // Max Priority Fee = maxPriorityFeePerGas (viem)
+
+        const baseFeeInWei = await publicClient.getGasPrice()
+
+        const maxPriorityFeePerGasInWei =  await estimateMaxPriorityFeePerGas(publicClient)
+
+        const maxFeeInWei = BigInt(2) * BigInt(baseFeeInWei) + BigInt(maxPriorityFeePerGasInWei)
+
+        const {request} = await publicClient.simulateContract({
+            account: ethAccount,
+            chain: getChain(),
+            abi: ROLLDOWN_ABI,
+            address: MANGATA_CONTRACT_ADDRESS,
+            functionName: "update_l1_from_l2",
+            args: update,
+            maxFeePerGas: maxFeeInWei,
+            maxPriorityFeePerGas: maxPriorityFeePerGasInWei
+        })
+
+        print(`Write Contract Request: ${JSON.stringify(request.args)}`)
+
+        return await walletClient.writeContract(request)
+    }
 }
 
 function print(data: any) {
