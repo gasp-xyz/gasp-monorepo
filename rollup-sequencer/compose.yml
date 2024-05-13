@@ -3,7 +3,7 @@ services:
     restart: unless-stopped
     image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
     depends_on:
-      rolldown:
+      avs-3:
         condition: service_completed_successfully
       node-alice:
         condition: service_started
