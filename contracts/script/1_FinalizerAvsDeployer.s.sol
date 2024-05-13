@@ -20,6 +20,7 @@ import {FinalizerServiceManager, IServiceManager} from "../src/FinalizerServiceM
 import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "../src/IFinalizerTaskManager.sol";
 import {Rolldown} from "../src/Rolldown.sol";
+import {ERC20Mock} from "../src/ERC20Mock.sol";
 
 import {Utils} from "./utils/Utils.sol";
 
@@ -49,6 +50,7 @@ contract Deployer is Script, Utils, Test {
     IndexRegistry public indexRegistry;
     StakeRegistry public stakeRegistry;
     Rolldown public rolldown;
+    ERC20Mock public erc20Mock;
 
     //upgradeable contract implementations
     FinalizerServiceManager public serviceManagerImplementation;
@@ -415,9 +417,9 @@ contract Deployer is Script, Utils, Test {
         require(rolldown.owner() == avsOwner, "rolldown.owner() != avsOwner");
 
 
-        require(rolldown.lastProcessedUpdate_origin_l1 == 0, "rolldown.lastProcessedUpdate_origin_l1 != 0");
-        require(rolldown.counter == 1, "rolldown.counter != 1");
-        require(rolldown.lastProcessedUpdate_origin_l2 == 0, "rolldown.lastProcessedUpdate_origin_l2 != 0");
+        require(rolldown.lastProcessedUpdate_origin_l1() == 0, "rolldown.lastProcessedUpdate_origin_l1 != 0");
+        require(rolldown.counter() == 1, "rolldown.counter != 1");
+        require(rolldown.lastProcessedUpdate_origin_l2() == 0, "rolldown.lastProcessedUpdate_origin_l2 != 0");
 
         require(registryCoordinator.churnApprover() == churner, "registryCoordinator.churner() != churner");
         require(registryCoordinator.ejector() == ejector, "registryCoordinator.ejector() != ejector");
