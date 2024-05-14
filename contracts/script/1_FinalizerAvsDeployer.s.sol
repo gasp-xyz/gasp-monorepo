@@ -275,7 +275,7 @@ contract Deployer is Script, Utils, Test {
 
         rolldownImplementation = new Rolldown();
 
-        // upgrade task manager proxy to implementation and initialize
+        // upgrade rolldown proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),

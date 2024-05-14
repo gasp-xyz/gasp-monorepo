@@ -105,15 +105,4 @@ contract Utils is Script {
         );
         vm.writeJson(outputJson, outputFilePath);
     }
-
-    function _record_addresses(
-        address tokenContractAddress,
-        address rolldownContractAddress
-    ) internal {
-        string memory parent_object = "parent object";
-        vm.serializeAddress(parent_object, "tokenAddress", tokenContractAddress);
-        string memory output = vm.serializeAddress(parent_object, "rolldownContractAddress", rolldownContractAddress);
-        console.log(output);
-        vm.writeJson(output, "./out/addresses.json");
-    }
 }
