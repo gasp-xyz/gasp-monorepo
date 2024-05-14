@@ -2,16 +2,23 @@ finalizerEnableServiceMonitorCollectors: true
 remoteCluster: true
 
 secondFinalizerEnabled: true
-secondSequencerEnabled: true
+secondSequencerEnabled: false
 
 env:
   SUBSTRATE_RPC_URL: wss://collator-01-ws-rollup-frontend.mangata.online:443
 
+updaterEthChainUrl: "https://anvil-frontend.mangata.online" 
 updaterEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-frontend.mangata.online
-  EIGEN_CONTRACT_ADDRESS: "0x9E545E3C0baAB3E08CdfD552C960A1050f373042"
-  MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
+  EIGEN_CONTRACT_ADDRESS: "0x1291Be112d480055DaFd8a610b7d1e203891C274"
+  MANGATA_CONTRACT_ADDRESS: "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90"
+  CHAIN: "anvil"
+  FINALIZATION_SOURCE: "relay"
+  LIMIT: "25"
 
+firstSequencerMnemonic: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
+sequencerEthChainUrl: "https://anvil-frontend.mangata.online" 
 sequencerEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-frontend.mangata.online
-  MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
+  MANGATA_CONTRACT_ADDRESS: "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90"
+  LIMIT: "500"
