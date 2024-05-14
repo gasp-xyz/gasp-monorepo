@@ -34,6 +34,7 @@ jobs:
           # Save the state to the Github Step summary
           echo '```json' >> $GITHUB_STEP_SUMMARY
           echo "$(cat contracts/script/output/31337/avs_deployment_output.json)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat contracts/script/output/31337/strategy_output.json)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
       
       - run: |
