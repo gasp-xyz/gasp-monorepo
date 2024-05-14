@@ -68,9 +68,14 @@ contract Deployer is Script, Utils, Test {
 
     function run() external {
 
-        string memory strategyOutput = readInput(_STRATEGY_OUTPUT);
-        erc20Mock =
-            ERC20Mock(stdJson.readAddress(strategyOutput, ".addresses.erc20Mock"));
+        uint256 currentChainId = block.chainid;
+        bool IsAnvil = currentChainId == 31337;
+
+        if IsAnvil{
+            string memory strategyOutput = readInput(_STRATEGY_OUTPUT);
+            erc20Mock =
+                ERC20Mock(stdJson.readAddress(strategyOutput, ".addresses.erc20Mock"));
+        }
 
         // Eigenlayer contracts
         string memory eigenlayerDeployedContracts = readInput(_EIGEN_DEPLOYMENT_PATH);
@@ -83,7 +88,6 @@ contract Deployer is Script, Utils, Test {
         string memory configData = readConfig(_CONFIG_PATH);
 
         // check that the chainID matches the one in the config
-        uint256 currentChainId = block.chainid;
         uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
         emit log_named_uint("You are deploying on ChainID", currentChainId);
         require(configChainId == currentChainId, "You are on the wrong chain for this config");
@@ -475,7 +479,9 @@ contract Deployer is Script, Utils, Test {
         string memory parent_object = "parent object";
 
         string memory deployed_addresses = "addresses";
-        vm.serializeAddress(deployed_addresses, "erc20Mock", address(erc20Mock));
+        if IsAnvil{
+            vm.serializeAddress(deployed_addresses, "erc20Mock", address(erc20Mock));
+        }
         vm.serializeAddress(deployed_addresses, "avsProxyAdmin", address(avsProxyAdmin));
         vm.serializeAddress(deployed_addresses, "avsPauseReg", address(avsPauserReg));
         vm.serializeAddress(deployed_addresses, "serviceManager", address(serviceManager));
