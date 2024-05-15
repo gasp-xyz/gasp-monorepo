@@ -17,7 +17,7 @@ import type { KeypairType } from "@polkadot/util-crypto/types";
 import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
 import {
 	ABI,
-	BLOCK_NUMBER_DELAY,
+	BLOCK_NUMBER_DELAY, L1_CHAIN,
 	L1_READ_STORED_EVENT_METHOD,
 	LIMIT,
 	MANGATA_CONTRACT_ADDRESS,
@@ -69,10 +69,10 @@ async function getEvents(
 	);
 }
 
-async function initReadContractWithRetry(publicClient: PublicClient) {
+async function initReadContractWithRetry(publicClient: PublicClient, api: ApiPromise) {
 	while (true) {
 		try {
-			return await getUpdateForL2(publicClient);
+			return await getUpdateForL2(publicClient, api);
 		} catch (e) {
 			print(`${MANGATA_CONTRACT_ADDRESS} contract not found`);
 			await sleep(1000);
@@ -90,7 +90,7 @@ async function processDataForL2Update(
 	print(`Latest Block Number: ${latestBlockNumber.toString()}`);
 	print(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
 
-	const data = await getUpdateForL2(publicClient);
+	const data = await getUpdateForL2(publicClient, api);
 	print(data);
 
 	const encodedData = getEncodedData("getUpdateForL2", data);
@@ -371,20 +371,16 @@ function print(data: any) {
 	console.log(util.inspect(data, { depth: null }));
 }
 
-async function getUpdateForL2(publicClient: PublicClient) {
-	const lastProcessed = (await publicClient.readContract({
-		address: MANGATA_CONTRACT_ADDRESS,
-		abi: ABI,
-		functionName: "lastProcessedUpdate_origin_l1",
-	})) as bigint;
-
+async function getUpdateForL2(publicClient: PublicClient, api: ApiPromise) {
+	const lastProcessed =  await api.query.rolldown.lastProcessedRequestOnL2(L1_CHAIN)
 	const counter = (await publicClient.readContract({
 		address: MANGATA_CONTRACT_ADDRESS,
 		abi: ABI,
 		functionName: "counter",
 	})) as bigint;
 
-	const rangeStart = lastProcessed + 1n;
+	const rangeStart = BigInt(lastProcessed.toString()) + 1n;
+
 	let rangeEnd = rangeStart + BigInt(LIMIT);
 	if (rangeEnd > counter - 1n) {
 		rangeEnd = counter - 1n;
