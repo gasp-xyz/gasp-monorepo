@@ -17,7 +17,8 @@ import type { KeypairType } from "@polkadot/util-crypto/types";
 import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
 import {
 	ABI,
-	BLOCK_NUMBER_DELAY, L1_CHAIN,
+	BLOCK_NUMBER_DELAY,
+	L1_CHAIN,
 	L1_READ_STORED_EVENT_METHOD,
 	LIMIT,
 	MANGATA_CONTRACT_ADDRESS,
@@ -69,7 +70,10 @@ async function getEvents(
 	);
 }
 
-async function initReadContractWithRetry(publicClient: PublicClient, api: ApiPromise) {
+async function initReadContractWithRetry(
+	publicClient: PublicClient,
+	api: ApiPromise,
+) {
 	while (true) {
 		try {
 			return await getUpdateForL2(publicClient, api);
@@ -372,7 +376,8 @@ function print(data: any) {
 }
 
 async function getUpdateForL2(publicClient: PublicClient, api: ApiPromise) {
-	const lastProcessed =  await api.query.rolldown.lastProcessedRequestOnL2(L1_CHAIN)
+	const lastProcessed =
+		await api.query.rolldown.lastProcessedRequestOnL2(L1_CHAIN);
 	const counter = (await publicClient.readContract({
 		address: MANGATA_CONTRACT_ADDRESS,
 		abi: ABI,

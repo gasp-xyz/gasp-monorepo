@@ -15,6 +15,6 @@ export const MNEMONIC = configuration.MNEMONIC;
 export const ROLLDOWN_EVENT_SECTION = "rolldown";
 export const L1_READ_STORED_EVENT_METHOD = "L1ReadStored";
 export const LIMIT = configuration.LIMIT;
-export const L1_CHAIN = configuration.L1_CHAIN
+export const L1_CHAIN = configuration.L1_CHAIN;
 
 export const ABI = rolldownAbi.abi;
