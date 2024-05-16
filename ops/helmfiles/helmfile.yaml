@@ -89,7 +89,7 @@ releases:
           repository: mangatasolutions/rollup-updater
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
+        walletPrivateKey: {{ .Values.updaterWalletPrivateKey | fetchSecretValue | quote }}
         ethChainUrl: {{ .Values.updaterEthChainUrl | fetchSecretValue | quote }}
         env: {{ .Values.updaterEnv | toYaml | nindent 10 }}
   
