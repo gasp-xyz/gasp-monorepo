@@ -503,6 +503,7 @@ contract Deployer is Script, Utils, Test {
         vm.serializeString(parent_object, chain_info, chain_info_output);
         vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
         string memory finalJson = vm.serializeString(parent_object, permissions, permissions_output);
+        console.logString(finalJson);
         writeOutput(finalJson, _OUTPUT_PATH);
     }
 }
