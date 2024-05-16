@@ -19,6 +19,7 @@ import "@eigenlayer-middleware/src/StakeRegistry.sol";
 import {FinalizerServiceManager, IServiceManager} from "../src/FinalizerServiceManager.sol";
 import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "../src/IFinalizerTaskManager.sol";
+import {Rolldown} from "../src/Rolldown.sol";
 
 import {Utils} from "./utils/Utils.sol";
 
@@ -46,6 +47,7 @@ contract Deployer is Script, Utils, Test {
     BLSApkRegistry public blsApkRegistry;
     IndexRegistry public indexRegistry;
     StakeRegistry public stakeRegistry;
+    Rolldown public rolldown;
 
     //upgradeable contract implementations
     FinalizerServiceManager public serviceManagerImplementation;
@@ -54,6 +56,7 @@ contract Deployer is Script, Utils, Test {
     BLSApkRegistry public blsApkRegistryImplementation;
     IndexRegistry public indexRegistryImplementation;
     StakeRegistry public stakeRegistryImplementation;
+    Rolldown public rolldownImplementation;
 
     // EigenLayer Contracts
     DelegationManager public delegation;
@@ -61,6 +64,7 @@ contract Deployer is Script, Utils, Test {
     StrategyManager public strategyManager;
 
     function run() external {
+
         // Eigenlayer contracts
         string memory eigenlayerDeployedContracts = readInput(_EIGEN_DEPLOYMENT_PATH);
         strategyManager =
@@ -167,6 +171,16 @@ contract Deployer is Script, Utils, Test {
             )
         );
 
+        rolldown = Rolldown(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(emptyContract),
+                    address(avsProxyAdmin),
+                    ""
+                )
+            )
+        );
+
         // deploy StakeRegistry
         stakeRegistryImplementation = new StakeRegistry(
             registryCoordinator,
@@ -257,6 +271,15 @@ contract Deployer is Script, Utils, Test {
             TransparentUpgradeableProxy(payable(address(taskManager))),
             address(taskManagerImplementation),
             abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator)
+        );
+
+        rolldownImplementation = new Rolldown();
+
+        // upgrade rolldown proxy to implementation and initialize
+        avsProxyAdmin.upgradeAndCall(
+            TransparentUpgradeableProxy(payable(address(rolldown))),
+            address(rolldownImplementation),
+            abi.encodeWithSelector(rolldown.initialize.selector, avsPauserReg, avsOwner)
         );
 
         // transfer ownership of proxy admin to upgrader
@@ -369,6 +392,11 @@ contract Deployer is Script, Utils, Test {
                 == address(stakeRegistryImplementation),
             "stakeRegistry: implementation set incorrectly"
         );
+        require(
+            avsProxyAdmin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(rolldown))))
+                == address(rolldownImplementation),
+            "rolldown: implementation set incorrectly"
+        );
     }
 
     function _verifyInitalizations(
@@ -379,6 +407,12 @@ contract Deployer is Script, Utils, Test {
         IStakeRegistry.StrategyParams[][] memory strategyAndWeightingMultipliers
     ) internal view {
         require(serviceManager.owner() == avsOwner, "serviceManager.owner() != avsOwner");
+        require(rolldown.owner() == avsOwner, "rolldown.owner() != avsOwner");
+
+
+        require(rolldown.lastProcessedUpdate_origin_l1() == 0, "rolldown.lastProcessedUpdate_origin_l1 != 0");
+        require(rolldown.counter() == 1, "rolldown.counter != 1");
+        require(rolldown.lastProcessedUpdate_origin_l2() == 0, "rolldown.lastProcessedUpdate_origin_l2 != 0");
 
         require(registryCoordinator.churnApprover() == churner, "registryCoordinator.churner() != churner");
         require(registryCoordinator.ejector() == ejector, "registryCoordinator.ejector() != ejector");
@@ -387,6 +421,12 @@ contract Deployer is Script, Utils, Test {
             "registryCoordinator: pauser registry not set correctly"
         );
         require(registryCoordinator.paused() == 0, "registryCoordinator: init paused status set incorrectly");
+
+        require(
+            rolldown.pauserRegistry() == avsPauserReg,
+            "rolldown: pauser registry not set correctly"
+        );
+        require(rolldown.paused() == 0, "rolldown: init paused status set incorrectly");
 
         for (uint8 i = 0; i < operatorSetParams.length; ++i) {
             require(
@@ -432,6 +472,8 @@ contract Deployer is Script, Utils, Test {
         vm.serializeAddress(deployed_addresses, "avsPauseReg", address(avsPauserReg));
         vm.serializeAddress(deployed_addresses, "serviceManager", address(serviceManager));
         vm.serializeAddress(deployed_addresses, "serviceManagerImplementation", address(serviceManagerImplementation));
+        vm.serializeAddress(deployed_addresses, "rolldown", address(rolldown));
+        vm.serializeAddress(deployed_addresses, "rolldownImplementation", address(rolldownImplementation));
         vm.serializeAddress(deployed_addresses, "taskManager", address(taskManager));
         vm.serializeAddress(deployed_addresses, "taksManagerImplementation", address(taskManagerImplementation));
         vm.serializeAddress(deployed_addresses, "registryCoordinator", address(registryCoordinator));
@@ -461,6 +503,7 @@ contract Deployer is Script, Utils, Test {
         vm.serializeString(parent_object, chain_info, chain_info_output);
         vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
         string memory finalJson = vm.serializeString(parent_object, permissions, permissions_output);
+        console.logString(finalJson);
         writeOutput(finalJson, _OUTPUT_PATH);
     }
 }

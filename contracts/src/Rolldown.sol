@@ -1,157 +1,38 @@
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.9;
 
-// Import ERC-20 interface
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/console.sol";
 
-contract RollDown {
-    //tbr
-    address owner;
+import "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
+import "@eigenlayer/contracts/permissions/Pausable.sol";
+import "./RolldownStorage.sol";
 
-    // Counter for mapping key
-    uint256 public counter;
-    // Counter for last processed request to ensure not reading and processing already processed
-    uint256 public lastProcessedUpdate_origin_l1;
-    // Counter for last processed updates comming from l2 to ensure not reading and processing already processed
-    uint256 public lastProcessedUpdate_origin_l2;
+contract Rolldown is
+    Initializable,
+    OwnableUpgradeable,
+    Pausable,
+    RolldownStorage
+{
 
     address public constant ETH_TOKEN_ADDRESS =
         0x5748395867463837537395739375937493733457;
 
-    event DepositAcceptedIntoQueue(
-        uint256 requestId,
-        address depositRecipient,
-        address tokenAddress,
-        uint256 amount
-    );
-    event DisputeResolutionAcceptedIntoQueue(
-        uint256 requestId,
-        bool cancelJustified
-    );
-    event WithdrawalResolutionAcceptedIntoQueue(
-        uint256 requestId,
-        bool success
-    );
-    event L2UpdatesToRemovedAcceptedIntoQueue(
-        uint256 requestId,
-        uint256[] l2UpdatesToRemove
-    );
-    event FundsWithdrawn(
-        address withdrawRecipient,
-        address tokenAddress,
-        uint256 amount
-    );
-    event FundsReturned(
-        address depositRecipient,
-        address tokenAddress,
-        uint256 amount
-    );
-    event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
-    event EthWithdrawPending(address sender, uint amount);
-    event PendingEthWithdrawn(address sender, uint amount);
-
-    enum Origin {
-        L1,
-        L2
-    }
-
-    struct RequestId {
-        Origin origin;
-        uint256 id;
-    }
-
-    struct Deposit {
-        RequestId requestId;
-        address depositRecipient;
-        address tokenAddress;
-        uint256 amount;
-        uint256 timeStamp;
-    }
-
-    struct L2UpdatesToRemove {
-        RequestId requestId;
-        uint256[] l2UpdatesToRemove;
-        uint256 timeStamp;
-    }
-
-    struct CancelResolution {
-        RequestId requestId;
-        uint256 l2RequestId;
-        bool cancelJustified;
-        uint256 timeStamp;
-    }
-
-    struct WithdrawalResolution {
-        RequestId requestId;
-        uint256 l2RequestId;
-        bool status;
-        uint256 timeStamp;
-    }
-
-    struct L1Update {
-        Deposit[] pendingDeposits;
-        CancelResolution[] pendingCancelResolutions;
-        WithdrawalResolution[] pendingWithdrawalResolutions;
-        L2UpdatesToRemove[] pendingL2UpdatesToRemove;
-    }
-
-    mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
-    mapping(uint256 => CancelResolution) public cancelResolutions;
-    mapping(uint256 => Deposit) private deposits;
-    mapping(uint256 => L2UpdatesToRemove) private l2UpdatesToRemove;
-    mapping(address => uint) public pendingEthWithdrawals;    
-
-    //TODO: should be renamed to RequestType
-    enum UpdateType {
-        DEPOSIT,
-        WITHDRAWAL,
-        WITHDRAWAL_RESOLUTION,
-        INDEX_UPDATE,
-        CANCEL,
-        CANCEL_RESOLUTION
-    }
-
-    struct RequestResult {
-        RequestId requestId;
-        uint256 originRequestId;
-        UpdateType updateType;
-        bool status;
-    }
-
-    struct L2Update {
-        Cancel[] cancels;
-        Withdrawal[] withdrawals;
-        RequestResult[] results;
-    }
-
-    struct Range {
-        uint256 start;
-        uint256 end;
-    }
-
-    struct Cancel {
-        RequestId requestId;
-        Range range;
-        bytes32 hash;
-    }
-
-    struct Withdrawal {
-        RequestId requestId;
-        address withdrawalRecipient;
-        address tokenAddress;
-        uint256 amount;
-    }
-
-    constructor() {
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner)
+        public
+        initializer
+    {
+        _initializePauser(_pauserRegistry, UNPAUSE_ALL);
+        _transferOwnership(initialOwner);
         lastProcessedUpdate_origin_l1 = 0;
         counter = 1;
         lastProcessedUpdate_origin_l2 = 0;
-        owner = msg.sender;
     }
 
-    function withdraw_pending_eth(uint256 amount) external {
+    function withdraw_pending_eth(uint256 amount) external whenNotPaused {
         require(amount > 0, "Amount must be greater than zero");
         address payable sender = payable(msg.sender);
         require(pendingEthWithdrawals[sender] >= amount, "not enough pending withdraw amount");
@@ -168,7 +49,7 @@ contract RollDown {
         Address.sendValue(sender, amount);
     }
 
-    function deposit_eth() external payable {
+    function deposit_eth() external payable whenNotPaused {
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
         uint amount = msg.value;
@@ -191,11 +72,11 @@ contract RollDown {
         );
     }
 
-    function deposit(address tokenAddress, uint256 amount) public {
+    function deposit(address tokenAddress, uint256 amount) public whenNotPaused {
         deposit_erc20(tokenAddress, amount);
     }
 
-    function deposit_erc20(address tokenAddress, uint256 amount) public {
+    function deposit_erc20(address tokenAddress, uint256 amount) public whenNotPaused {
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
         address depositRecipient = msg.sender;
@@ -361,7 +242,9 @@ contract RollDown {
         }
     }
 
-    function update_l1_from_l2(L2Update calldata inputArray) external {
+    // TODO
+    // Maybe add onlyOwner modifier?  
+    function update_l1_from_l2(L2Update calldata inputArray) external whenNotPaused {
         //1st iteration, security comes from ensuring dedicated acc
         //Ensure sender is dedic acc
         // TODO: uncomment & fix UT
@@ -622,6 +505,3 @@ contract RollDown {
         return result;
     }
 }
-
-// TODO: counter l2 check
-// TODO: align types again

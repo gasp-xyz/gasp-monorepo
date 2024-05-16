@@ -27,12 +27,6 @@ cd "$parent_path" && cd ../../contracts
 cast rpc evm_mine
 forge script script/1_FinalizerAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -v
 
-############################################
-# Deploy rolldown contracts
-############################################
-cd "$parent_path" && cd ../../rolldown-contract
-forge script script/rolldown.s.sol:MyScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -v
-
 
 # kill anvil to save its state
 pkill anvil
