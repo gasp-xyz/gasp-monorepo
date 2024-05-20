@@ -48,43 +48,46 @@ make start-avs-finalizer
 
 ## Running via docker-compose
 
-### Setup 
+### Setup
 
 - update eigen layer dependant submodules
-```
-git submodule update --init --recursive
-```
-(To be automated at some point)
 
-- build `avs-finalizer` with *up to date* stable toolchain (to be automated)
-```
-cd avs-finalizer
-cargo +stable build --release
+```bash
+git submodule update --init --recursive
 ```
 
 ### Run
+
 In the root folder run:
 
-***!!! `--wait` and `--build` parameters here are essential !!!***
-```
+> [!IMPORTANT]
+> `--wait` and `--build` parameters here are essential
+> [!WARNING]
+> For MacOS users with M1/M2 series processors parameter `Use Rosetta for x86_64/amd64 emulation on Apple Silicon` should be turned OFF in your Docker Desktop configurations
+
+```bash
 docker compose up --build --wait 
 ```
 
 ### How to modify particular services
 
 For every service other than:
+
 - `mangata-node`
 - `avs-finalizer`
 
 just modify source code, tear down current docker-compose setup and run it again
 
-####  avs-finalizer
+#### avs-finalizer
+
 Steps:
+
 - Modify `avs-finalizer` sources
 - rebuild `avs-finalizer` locally
 
 ### Tear down
-```
+
+```bash
 docker compose down -v
 ```
 
