@@ -43,8 +43,8 @@ FROM debian:stable-slim
 
 WORKDIR /app
 
-ARG BINARY_PATH=target/release/rollup-node
+ARG BINARY_PATH=target/release/main
 
-COPY --from=builder /app/${BINARY_PATH} /app/node
+COPY --from=builder /app/${BINARY_PATH} /app/main
 
-ENTRYPOINT ["/app/node"]
+ENTRYPOINT ["/app/main"]
