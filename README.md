@@ -65,8 +65,12 @@ cargo +stable build --release
 ### Run
 In the root folder run:
 
-***!!! `--wait` and `--build` parameters here are essential !!!***
-```
+> [!IMPORTANT]
+> `--wait` and `--build` parameters here are essential
+> [!WARNING]
+> For MacOS users with M1/M2 series processors parameter `Use Rosetta for x86_64/amd64 emulation on Apple Silicon` should be turned OFF in your Docker Desktop configurations
+
+```bash
 docker compose up --build --wait 
 ```
 
