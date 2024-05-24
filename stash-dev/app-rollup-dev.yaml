@@ -1,0 +1,27 @@
+runtime: nodejs18
+
+service: mangata-stash-rollup-dev
+
+includes:
+  - app-import-handlers.yaml
+
+env_variables:
+  APP_ENV: $APP_ENV
+  PROJECT_ID: $SERVICE_NAME
+  MANGATA_NODE_URL: $MANGATA_NODE_URL
+  REDIS_HOST: $REDIS_HOST
+  REDIS_PORT: $REDIS_PORT
+  TIMESERIES_HOST: $TIMESERIES_HOST
+  TIMESERIES_PORT: $TIMESERIES_PORT
+  TIMESERIES_PASS: $TIMESERIES_PASS
+  TOKEN_FOR_PRICE_SYMBOL: $TOKEN_FOR_PRICE_SYMBOL
+  NODE_ENV: $APP_ENV
+  COINGECKO_API_KEY: $COINGECKO_API_KEY
+
+manual_scaling:
+  instances: 1
+
+instance_class: B1
+
+vpc_access_connector:
+  name: 'projects/direct-pixel-353917/locations/europe-west6/connectors/redis-app-engine'
