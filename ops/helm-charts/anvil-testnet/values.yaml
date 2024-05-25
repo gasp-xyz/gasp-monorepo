@@ -24,3 +24,19 @@ resources:
   limits:
     cpu: 2
     memory: 500Mi
+
+# otterscan:
+#   enabled: true
+#   imageRepository: otterscan/otterscan
+#   imageTag: v2.5.0
+#   env:
+#     ERIGON_URL: 'https://anvil-pr-127.mangata.online'
+#     # EXPERIMENTAL_FIXED_CHAIN_ID: '31337'
+#     # EXPERIMENTAL: 'false'
+#   resources:
+#     requests:
+#       cpu: 1
+#       memory: 100Mi
+#     limits:
+#       cpu: 2
+#       memory: 500Mi

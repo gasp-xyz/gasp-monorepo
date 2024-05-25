@@ -18,6 +18,18 @@ spec:
         {{- include "anvil.labels" . | nindent 8 }}
         service: {{ $name }}
     spec:
+      {{- if .Values.enablePersistence }}
+      initContainers:
+        - name: init
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
+          command: ["sh", "-c", "cp -R /app/data/* /tmp/ || true"]
+          resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: data
+      {{- end }}
       containers:
         - name: {{ $name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
