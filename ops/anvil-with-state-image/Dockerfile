@@ -7,4 +7,4 @@ COPY tests/integration/anvil-state.json /app/data/anvil-state.json
 
 VOLUME /app/data
 
-ENTRYPOINT anvil --host 0.0.0.0 --state /app/data/anvil-state.json
+ENTRYPOINT anvil --host 0.0.0.0 --state /app/data/anvil-state.json --steps-tracing

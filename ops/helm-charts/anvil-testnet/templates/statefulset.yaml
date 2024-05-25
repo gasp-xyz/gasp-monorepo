@@ -32,14 +32,14 @@ spec:
             - mountPath: {{ .Values.dataMountPath }}
               name: data
             {{- end }}
-            {{- if .Values.enablePersistence }}
-            volumeClaimTemplates:
-              - metadata:
-                  name: data
-                spec:
-                  storageClassName: {{ .Values.storageClass }}
-                  accessModes: ["ReadWriteOnce"]
-                  resources:
-                    requests:
-                      storage: {{ .Values.storageSize }}
-            {{- end }}
+  {{- if .Values.enablePersistence }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: {{ .Values.storageClass }}
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.storageSize }}
+  {{- end }}
