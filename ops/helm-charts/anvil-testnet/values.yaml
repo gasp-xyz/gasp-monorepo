@@ -8,14 +8,19 @@ nameOverride: ''
 remoteCluster: false
 ingressClassName: nginx
 
+enablePersistence: false
+dataMountPath: /app/data
+storageClass: standard
+storageSize: 1Gi
+
 image: 
   repository: mangatasolutions/anvil
   tag: be439052d9ed89109c4dd02b387cdf7cbbcc6870
 
-resources: {}
-  # requests:
-  #   cpu: 200m
-  #   memory: 1Gi
-  # limits:
-  #   cpu: 1000m
-  #   memory: 2Gi
+resources:
+  requests:
+    cpu: 1
+    memory: 100Mi
+  limits:
+    cpu: 2
+    memory: 500Mi

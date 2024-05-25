@@ -1,2 +1,3 @@
 finalizerEnableServiceMonitorCollectors: true
 remoteCluster: true
+anvilEnablePersistence: true

@@ -28,10 +28,18 @@ spec:
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: config
-              mountPath: /config
-              readOnly: true
-      volumes:
-        - name: config
-          configMap:
-            name: {{ include "anvil.name" . }}-configmap
+            {{- if .Values.enablePersistence }}
+            - mountPath: {{ .Values.dataMountPath }}
+              name: data
+            {{- end }}
+            {{- if .Values.enablePersistence }}
+            volumeClaimTemplates:
+              - metadata:
+                  name: data
+                spec:
+                  storageClassName: {{ .Values.storageClass }}
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: {{ .Values.storageSize }}
+            {{- end }}

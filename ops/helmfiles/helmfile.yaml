@@ -33,6 +33,7 @@ releases:
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
+        enablePersistence: {{ .Values.anvilEnablePersistence }}
 
   - name: avs-aggregator
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
