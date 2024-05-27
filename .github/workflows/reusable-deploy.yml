@@ -70,7 +70,7 @@ jobs:
           env: ${{ env.ENV_REF }}
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
       
-      # TODO: To review this step before merging the PR
+      # TODO: To review this step before merging the PR | test
       # - name: Delete the fungible env deployment before new one to allow operator to register and not fail
       #   if: inputs.env == 'fungible'
       #   run: export IMAGE_TAG=${{ inputs.version }} && export ENVIRONMENT=${{ env.ENV_REF }} && helmfile destroy -e fungible
