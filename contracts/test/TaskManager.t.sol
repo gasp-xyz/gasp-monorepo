@@ -124,7 +124,6 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
 
     }
-
     function testCreateAndRespondOnlyAggregator() public {
         
         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
@@ -163,7 +162,6 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature);
         
     }
-
     function testCreateAndRespondTaskValidation() public {
         
         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
@@ -200,7 +198,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature);
         
     }
-    function testCreateAndRespondEmptyQuorum() public {
+    function getwindowBock() public {
         
         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
 
@@ -235,6 +233,47 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         
         cheats.prank(aggregator, aggregator);
         vm.expectRevert("BLSSignatureChecker.checkSignatures: empty quorum input");
+        tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature);
+        
+    }
+    function testGetTimeWindow() public {
+        uint32 timeWindow = tm.getTaskResponseWindowBlock();
+        assertEq(timeWindow, 30);
+    } 
+    function testCreateAndRespondTaskTimeWindow() public {
+        
+        bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
+
+        Task memory newTask;
+        newTask.blockNumber = 2;
+        newTask.taskCreatedBlock = 1;
+        newTask.quorumThresholdPercentage = 100;
+        newTask.quorumNumbers = quorumNumbers;
+
+        cheats.prank(generator, generator);
+        vm.expectEmit(true, true, false, true);
+        emit NewTaskCreated( 0, newTask);
+        tm.createNewTask(2, 100, quorumNumbers);
+        
+        vm.roll( block.number + tm.getTaskResponseWindowBlock() + 1);
+        IFinalizerTaskManager.TaskResponse memory taskResponse;
+        taskResponse.referenceTaskIndex = tm.latestTaskNum() -1;
+        taskResponse.blockHash = keccak256(abi.encode(newTask));
+        taskResponse.storageProofHash = keccak256(abi.encodePacked("storageProofHash"));
+        taskResponse.pendingStateHash = keccak256(abi.encodePacked("pendingStateHash"));
+
+        assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
+        
+        IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
+
+        IFinalizerTaskManager.Task memory newTaskResponse;
+        newTaskResponse.blockNumber = 2;
+        newTaskResponse.taskCreatedBlock = 1;
+        newTaskResponse.quorumThresholdPercentage = 100;
+        newTaskResponse.quorumNumbers = quorumNumbers;
+        
+        cheats.prank(aggregator, aggregator);
+        vm.expectRevert("Aggregator has responded to the task too late");
         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature);
         
     }
