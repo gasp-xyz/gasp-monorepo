@@ -2,6 +2,7 @@ remoteCluster: true
 
 anvilEnabled: true
 anvilEnablePersistence: false
+blockscoutEnabled: false
 aggregatorEnabled: true
 finalizerEnabled: true
 secondFinalizerEnabled: false

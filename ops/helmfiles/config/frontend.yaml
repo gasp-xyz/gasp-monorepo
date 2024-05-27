@@ -1,6 +1,7 @@
 finalizerEnableServiceMonitorCollectors: true
 remoteCluster: true
 
+blockscoutEnabled: true
 secondFinalizerEnabled: true
 secondSequencerEnabled: true
 

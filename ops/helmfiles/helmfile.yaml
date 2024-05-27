@@ -18,6 +18,10 @@ environments:
     values:
      - config/testnet.yaml
 ---
+repositories:
+  - name: ethereum-helm-charts
+    url: https://ethpandaops.github.io/ethereum-helm-charts
+    
 helmDefaults:
   kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
   wait: false
@@ -118,3 +122,29 @@ releases:
         mnemonic: {{ .Values.secondSequencerMnemonic | fetchSecretValue | quote }}
         ethChainUrl:  {{ .Values.sequencerEthChainUrl | fetchSecretValue | quote }}
         env: {{ .Values.sequencerEnv | toYaml | nindent 10 }}
+
+  - name: blockscout
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.blockscoutEnabled }}
+    chart: ethereum-helm-charts/blockscout
+    values:
+      - config:
+          MIX_ENV: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+          ETHEREUM_JSONRPC_HTTP_URL: http://anvil:8545
+        ingress:
+          enabled: true
+          ingressClassName: nginx
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}.gasp.xyz
+            kubernetes.io/ingress.class: nginx
+            kubernetes.io/tls-acme: 'true'
+          hosts:
+            - host: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}.gasp.xyz
+              paths:
+                - pathType: Prefix
+                  path: '/'
+          tls:
+            - hosts: ['blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}.gasp.xyz']
+              secretName: blockscout-tls
+          smart-contract-verifier-http:
+            enabled: true
