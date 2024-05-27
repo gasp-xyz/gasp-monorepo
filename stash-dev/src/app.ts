@@ -85,7 +85,7 @@ app.get(
 app.get('/coingecko/pairs', coingeckoController.pairs)
 app.get('/coingecko/tickers', coingeckoController.tickers)
 
-if (process.env.APP_ENV === 'rollup-testnet') {
+if (process.env.APP_ENV === 'rollup-dev') {
   app.get('/affirmed-network/list', networkController.networkList)
   app.get('/affirmed-token/list', networkController.tokenList)
   app.get(

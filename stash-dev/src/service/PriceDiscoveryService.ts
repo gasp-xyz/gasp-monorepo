@@ -19,8 +19,7 @@ import logger from '../util/Logger.js'
 
 const minInSec = 60
 const secInMs = 1000
-const coinGeckoId =
-  process.env.APP_ENV === 'rollup-testnet' ? 'ethereum' : 'kusama'
+const coinGeckoId = process.env.APP_ENV === 'rollup-dev' ? 'ethereum' : 'kusama'
 const tokenForPriceSymbol = process.env.TOKEN_FOR_PRICE_SYMBOL
 
 let baseTokenPrice: CoinGeckoCoinData = null

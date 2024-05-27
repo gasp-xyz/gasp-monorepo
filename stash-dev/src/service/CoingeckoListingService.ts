@@ -16,7 +16,7 @@ import {
 
 export const pairs = async () => {
   const assetsInfo = await MangataClient.query.getAssetsInfo()
-  if (process.env.APP_ENV === 'rollup-testnet') {
+  if (process.env.APP_ENV === 'rollup-dev') {
     delete assetsInfo['7'] // we do not need ETH-GETH pool
     delete assetsInfo['8'] // we do not need ETH-GASP pool
   }
@@ -43,7 +43,7 @@ export const pairs = async () => {
 
 export const tickers = async () => {
   const assetsInfo = await MangataClient.query.getAssetsInfo()
-  if (process.env.APP_ENV === 'rollup-testnet') {
+  if (process.env.APP_ENV === 'rollup-dev') {
     delete assetsInfo['7'] // we do not need ETH-GETH pool
     delete assetsInfo['8'] // we do not need ETH-GASP pool
   }

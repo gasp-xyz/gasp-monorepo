@@ -1,0 +1,16 @@
+name: App Engine Deploy
+description: Deploy code to the GCP App Engine
+
+runs:
+  using: composite
+  steps:
+    - id: deploy
+      uses: google-github-actions/deploy-appengine@v0
+      with:
+        credentials: ${{ env.GCP_SA_KEY }}
+        deliverables: "stash-dev/app-${{ env.APP_ENV }}.yaml"
+    - id: smoke-test
+      shell: bash
+      run: |
+        curl "${{ steps.deploy.outputs.url }}"
+        echo "Deployed to ${{ steps.deploy.outputs.url }}"

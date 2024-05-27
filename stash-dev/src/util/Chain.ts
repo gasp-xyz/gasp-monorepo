@@ -5,7 +5,7 @@ import _ from 'lodash'
 
 export const GETH = 5
 export const KSM = 4
-export const BASE_TOKEN = process.env.APP_ENV === 'rollup-testnet' ? GETH : KSM
+export const BASE_TOKEN = process.env.APP_ENV === 'rollup-dev' ? GETH : KSM
 
 export type CodecOrArray = Codec | Codec[]
 

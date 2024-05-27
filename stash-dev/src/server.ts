@@ -23,7 +23,7 @@ const server = app.listen(app.get('port'), async () => {
 
   await networkService.initService()
 
-  if (process.env.APP_ENV !== 'rollup-testnet') {
+  if (process.env.APP_ENV !== 'rollup-dev') {
     await xcmService.initService()
   }
 

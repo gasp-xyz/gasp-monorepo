@@ -1,0 +1,13 @@
+name: Install & Build
+description: Install dependencies and build node project
+
+runs:
+  using: composite
+  steps:
+    - name: "Node.js Microservice Install & Build"
+      shell: bash
+      working-directory: stash-dev
+      run: |
+        yarn install --frozen-lockfile
+        yarn run build
+

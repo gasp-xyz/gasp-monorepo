@@ -23,7 +23,6 @@ type Network = {
   parentChainId: number
   explorerUrl: string
   rpcUrl: string
-  contractAddress: string
   nativeToken: NativeToken
   status: Status
 }
@@ -46,7 +45,6 @@ const defaultNetworks: Array<Network> = [
     parentChainId: 1,
     explorerUrl: 'default',
     rpcUrl: 'default',
-    contractAddress: 'default',
     nativeToken: {
       name: 'default',
       decimals: 'default',

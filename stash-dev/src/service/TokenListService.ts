@@ -20,7 +20,7 @@ export const tokenDetails = async (
   const assetsInfo = await MangataClient.query.getAssetsInfo()
   const tokenInfo = Object.values(assetsInfo)
     .filter((asset) => {
-      if (process.env.APP_ENV === 'rollup-testnet') {
+      if (process.env.APP_ENV === 'rollup-dev') {
         return asset.name !== 'L1Asset' // we do not want to have L1Asset there
       } else {
         return true
@@ -78,7 +78,7 @@ export const tokenList = async (): Promise<TokenInfoStats[]> => {
     .map(([id, info]) => ({ id, ...info }))
     .filter((asset) => !asset.name.includes(FILTER_LIQUIDITY_TOKENS))
     .filter((asset) => {
-      if (process.env.APP_ENV === 'rollup-testnet') {
+      if (process.env.APP_ENV === 'rollup-dev') {
         return asset.name !== 'L1Asset' // we do not want to have L1Asset there
       } else {
         return true

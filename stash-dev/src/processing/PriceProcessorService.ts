@@ -161,7 +161,7 @@ const prepareKusama = async () => {
   }
 
   const prices = await getCoinHistory(
-    process.env.APP_ENV === 'rollup-testnet' ? ETHEREUM_ID : KUSAMA_ID,
+    process.env.APP_ENV === 'rollup-dev' ? ETHEREUM_ID : KUSAMA_ID,
     diff
   )
 
@@ -171,14 +171,14 @@ const prepareKusama = async () => {
     prices.map((p) => [
       p.timestamp,
       p.price.div(
-        process.env.APP_ENV === 'rollup-testnet' ? ETH_DECIMALS : KSM_DECIMALS
+        process.env.APP_ENV === 'rollup-dev' ? ETH_DECIMALS : KSM_DECIMALS
       ),
     ]),
     prices.length === 0 ? 0 : _.last(prices).timestamp
   )
   logger.debug(
     `PriceService: fetched ${
-      process.env.APP_ENV === 'rollup-testnet' ? 'ethereum' : 'kusama'
+      process.env.APP_ENV === 'rollup-dev' ? 'ethereum' : 'kusama'
     } ${prices.length} prices`
   )
 }
