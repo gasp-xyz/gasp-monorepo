@@ -277,4 +277,10 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature);
         
     }
+    //TODO: Create test for
+    // respondToTask -> happy path
+    // respondToTask -> alreadyResponded
+    // respondToTask -> Threshold not reached ( validate storage value )
+    // respondToTask -> Threshold reached ( validate storage value )
+    // respondToTask -> getLatestStateHash
 }
