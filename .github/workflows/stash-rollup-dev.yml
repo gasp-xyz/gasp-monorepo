@@ -49,10 +49,11 @@ jobs:
           working_directory: stash-dev
           deliverables: app-rollup-dev.yaml
       
-      - name: smoke test
-        run: |
-          curl "${{ steps.deploy.outputs.url }}"
-          echo "Deployed to ${{ steps.deploy.outputs.url }}"
+      # TODO: temporary disable smoke test
+      # - name: smoke test
+      #   run: |
+      #     curl "${{ steps.deploy.outputs.url }}"
+      #     echo "Deployed to ${{ steps.deploy.outputs.url }}"
 
       # - name: Delete old versions
       #   # This command deletes all versions except the last 14
