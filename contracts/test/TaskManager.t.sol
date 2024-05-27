@@ -238,7 +238,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
     }
     function testGetTimeWindow() public {
         uint32 timeWindow = tm.getTaskResponseWindowBlock();
-        assertEq(timeWindow, 30);
+        assertEq(timeWindow, TASK_RESPONSE_WINDOW_BLOCK);
     } 
     function testCreateAndRespondTaskTimeWindow() public {
         
