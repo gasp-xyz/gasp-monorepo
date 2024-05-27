@@ -1,8 +1,6 @@
 remoteCluster: true
 
 anvilEnabled: false
-# TODO: blockscout should be disabled for fungible envs
-blockscoutEnabled: true
 aggregatorEnabled: true
 finalizerEnabled: true
 secondFinalizerEnabled: false
