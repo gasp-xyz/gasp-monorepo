@@ -78,6 +78,7 @@ async function initReadContractWithRetry(
 		try {
 			return await getUpdateForL2(publicClient, api);
 		} catch (e) {
+      print(`error: ${e}`)
 			print(`${MANGATA_CONTRACT_ADDRESS} contract not found`);
 			await sleep(1000);
 		}
