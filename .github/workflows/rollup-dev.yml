@@ -12,7 +12,6 @@ on:
 env:
   SERVICE_NAME: 'mangata-stash'
   APP_ENV: 'rollup-dev'
-  GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
   MANGATA_NODE_URL: 'wss://collator-01-ws-rollup-dev.mangata.online'
   REDIS_HOST: '10.15.245.67'
   REDIS_PORT: 6379

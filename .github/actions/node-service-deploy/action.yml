@@ -4,10 +4,14 @@ description: Deploy code to the GCP App Engine
 runs:
   using: composite
   steps:
-    - id: deploy
-      uses: google-github-actions/deploy-appengine@v0
+    - name: Google auth
+      uses: 'google-github-actions/auth@v2'
       with:
-        credentials: ${{ env.GCP_SA_KEY }}
+        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+    - id: deploy
+      uses: 'google-github-actions/deploy-appengine@v2'
+      with:
         deliverables: "stash-dev/app-${{ env.APP_ENV }}.yaml"
     - id: smoke-test
       shell: bash
