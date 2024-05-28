@@ -8,7 +8,12 @@ import {
 // @ts-ignore
 import registryCoordinator from "./abis/RegistryCoordinator.json";
 import {getOperatorId, waitFor, waitForOperatorDeRegistered, waitForOperatorRegistered} from "./operatorUtilities";
-import {validateBLSApkRegistry} from "./validators";
+import {
+    getLatestQuorumUpdate,
+    validateBLSApkRegistry, validateOperatorOptInIndexRegistry,
+    validateOperatorOptInStakeRegistry, validateOperatorOptOutIndexRegistry,
+    validateOperatorOptOutStakeRegistry,
+} from "./validators";
 const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
 
 
@@ -83,6 +88,9 @@ describe('AVS Finalizer', () => {
         expect(res).toBe(1);
 
         const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
+        await validateOperatorOptInStakeRegistry(publicClient, operatorAddress as string);
+        await validateOperatorOptInIndexRegistry(publicClient, operatorAddress as string);
+        const statusBeforeOptOut = await getLatestQuorumUpdate(publicClient);
 
         // opt-out
         await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
@@ -101,10 +109,11 @@ describe('AVS Finalizer', () => {
         });
         expect(statusAfter).toBe(2);
         const tasks = await waitFor(publicClient, 2, "TaskCompleted");
-        expect(tasks).toHaveLength(2);
+         expect(tasks).toHaveLength(2);
         //Test that after op-out the operator still has the bls keys in the registry
         await validateBLSApkRegistry(publicClient, operatorAddress as string , await getOperatorId(publicClient, operatorAddress as string) as string);
-
+        await validateOperatorOptOutStakeRegistry(publicClient, operatorAddress as string);
+        await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
 
     });
     it('eject', async () => {
@@ -129,6 +138,8 @@ describe('AVS Finalizer', () => {
         expect(res).toBe(1);
         await dockerUtils.stopContainer();
         await mineEthBlocks(1);
+        const statusBeforeOptOut = await getLatestQuorumUpdate(publicClient);
+
         const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
         // 10s * 2 * 5 = 100s ( every two blocks we produce a task, and at 5th task we eject)
         const deRegistered = await PoperatorDeregisteredAddress;
@@ -142,6 +153,8 @@ describe('AVS Finalizer', () => {
             args: [operatorAddress],
         });
         expect(statusAfter).toBe(2);
+        await validateOperatorOptOutStakeRegistry(publicClient, operatorAddress as string);
+        await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
 
     });
     afterEach(async () => {

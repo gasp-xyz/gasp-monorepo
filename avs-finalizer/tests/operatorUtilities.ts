@@ -7,12 +7,19 @@ import registryCoordinator from "./abis/RegistryCoordinator.json";
 import finalizerTaskManager from "./abis/FinalizerTaskManager.json";
 // @ts-ignore
 import blsApkRegistry from "./abis/BLSApkRegistryStorage.json";
+// @ts-ignore
+import stakeRegistry from "./abis/StakeRegistryStorage.json";
+// @ts-ignore
+import indexRegistry from "./abis/IndexRegistryStorage.json";
 
 import {DockerUtils} from "./DockerUtils";
 export const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
 export const taskManagerAddress = "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8";
 export const blsApkRegistryAddress = "0xf5059a5D33d5853360D16C683c16e67980206f36";
+export const stakeRegistryAddress = "0x998abeb3E57409262aE5b751f60747921B33613E";
+export const indexRegistryAddress = "0x95401dc811bb5740090279Ba06cfA8fcF6113778";
 
+export const DEFAULT_QUORUM = 0;
 
 export async function waitForOperatorRegistered(publicClient: PublicClient) {
     return new Promise((resolve, _) => {
@@ -61,7 +68,7 @@ export async function waitForOperatorDeRegistered(publicClient: PublicClient) {
     })
 }
 
-export async function getOperatorId(publicClient: PublicClient, operatorAddress: string) {
+export async function getOperatorId(publicClient: any, operatorAddress: string) {
     const res = await publicClient.readContract({
         address: registryCoordinatorAddress,
         abi: registryCoordinator.abi,
@@ -129,6 +136,27 @@ export async function getEntryFromBlsApkRegistry(publicClient: PublicClient, fun
     const res = await publicClient.readContract({
         address: blsApkRegistryAddress,
         abi: blsApkRegistry.abi,
+        functionName: functionName,
+        args: args,
+    });
+    return res as any as string[];
+}
+
+export async function getEntryFromStakeRegistry(publicClient: PublicClient, functionName: string, args: any[]) {
+    const res = await publicClient.readContract({
+        address: stakeRegistryAddress,
+        abi: stakeRegistry.abi,
+        functionName: functionName,
+        args: args,
+    });
+    return res as any as string[];
+}
+
+
+export async function getEntryFromIndexRegistry(publicClient: PublicClient, functionName: string, args: any[]) {
+    const res = await publicClient.readContract({
+        address: indexRegistryAddress,
+        abi: indexRegistry.abi,
         functionName: functionName,
         args: args,
     });
