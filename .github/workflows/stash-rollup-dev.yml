@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - feat/stash-dev-migration
+      - main
     paths:
       - "stash-dev/**/*"
       - ".github/**/rollup-dev**"
