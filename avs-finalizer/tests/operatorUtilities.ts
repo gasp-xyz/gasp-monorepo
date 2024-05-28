@@ -5,9 +5,14 @@ import registryCoordinator from "./abis/RegistryCoordinator.json";
 
 // @ts-ignore
 import finalizerTaskManager from "./abis/FinalizerTaskManager.json";
+// @ts-ignore
+import blsApkRegistry from "./abis/BLSApkRegistryStorage.json";
+
 import {DockerUtils} from "./DockerUtils";
 export const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
 export const taskManagerAddress = "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8";
+export const blsApkRegistryAddress = "0xf5059a5D33d5853360D16C683c16e67980206f36";
+
 
 export async function waitForOperatorRegistered(publicClient: PublicClient) {
     return new Promise((resolve, _) => {
@@ -119,5 +124,17 @@ export async function optOut(dockerUtilsInstance: DockerUtils){
         console.error(err);
     });
 }
+
+export async function getEntryFromBlsApkRegistry(publicClient: PublicClient, functionName: string, args: any[]) {
+    const res = await publicClient.readContract({
+        address: blsApkRegistryAddress,
+        abi: blsApkRegistry.abi,
+        functionName: functionName,
+        args: args,
+    });
+    return res as any as string[];
+}
+
+
 // @ts-ignore
 BigInt.prototype.toJSON = function() { return this.toString() }

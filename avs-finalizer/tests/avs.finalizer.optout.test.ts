@@ -7,7 +7,8 @@ import {
 
 // @ts-ignore
 import registryCoordinator from "./abis/RegistryCoordinator.json";
-import {waitFor, waitForOperatorDeRegistered, waitForOperatorRegistered} from "./operatorUtilities";
+import {getOperatorId, waitFor, waitForOperatorDeRegistered, waitForOperatorRegistered} from "./operatorUtilities";
+import {validateBLSApkRegistry} from "./validators";
 const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
 
 
@@ -101,6 +102,9 @@ describe('AVS Finalizer', () => {
         expect(statusAfter).toBe(2);
         const tasks = await waitFor(publicClient, 2, "TaskCompleted");
         expect(tasks).toHaveLength(2);
+        //Test that after op-out the operator still has the bls keys in the registry
+        await validateBLSApkRegistry(publicClient, operatorAddress as string , await getOperatorId(publicClient, operatorAddress as string) as string);
+
 
     });
     it('eject', async () => {
