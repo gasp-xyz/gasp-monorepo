@@ -66,7 +66,7 @@ async function mineEthBlocks(blocks: number) {
 }
 
 describe('AVS Finalizer', () => {
-    it('opt-out', async () => {
+    it('opt-in / opt-out', async () => {
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -87,11 +87,11 @@ describe('AVS Finalizer', () => {
         });
         expect(res).toBe(1);
 
-        const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
         await validateOperatorOptInStakeRegistry(publicClient, operatorAddress as string);
         await validateOperatorOptInIndexRegistry(publicClient, operatorAddress as string);
         const statusBeforeOptOut = await getLatestQuorumUpdate(publicClient);
 
+        const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
         // opt-out
         await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
             console.log(result);
@@ -110,13 +110,14 @@ describe('AVS Finalizer', () => {
         expect(statusAfter).toBe(2);
         const tasks = await waitFor(publicClient, 2, "TaskCompleted");
          expect(tasks).toHaveLength(2);
-        //Test that after op-out the operator still has the bls keys in the registry
+
+         //Test that after op-out the operator still has the bls keys in the registry
         await validateBLSApkRegistry(publicClient, operatorAddress as string , await getOperatorId(publicClient, operatorAddress as string) as string);
         await validateOperatorOptOutStakeRegistry(publicClient, operatorAddress as string);
         await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
 
     });
-    it('eject', async () => {
+    it('operator that does not respond -> eject', async () => {
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
