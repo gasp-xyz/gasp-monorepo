@@ -93,7 +93,7 @@ export async function waitFor(publicClient: PublicClient, numTasks = 1, eventNam
 
 
 export async function waitForNo(publicClient: PublicClient, waitingTime = 120 , eventName="TaskResponded") : Promise<boolean> {
-    console.info("Waiting for :" + waitingTime + " tasks to be " + eventName + "..");
+    console.info("Waiting for :" + waitingTime + " secs to be " + eventName + "..");
     return await  new Promise( (resolve) => {
         const unwatch = publicClient.watchContractEvent({
             abi : finalizerTaskManager.abi,

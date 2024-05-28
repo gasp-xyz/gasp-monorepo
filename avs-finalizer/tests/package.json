@@ -10,7 +10,8 @@
   "scripts": {
     "test-opt-out": "jest ./avs.finalizer.optout.test.ts --detectOpenHandles --verbose  --forceExit",
     "test-corrupted": "jest ./avs.finalizer.corrupted.test.ts --detectOpenHandles --verbose  --forceExit",
-    "test": "jest --detectOpenHandles --verbose  --forceExit --runInBand"
+    "test": "jest --detectOpenHandles --verbose  --forceExit --runInBand",
+    "update-contracts": "cd ../../contracts && forge clean && forge build && cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../avs-finalizer/tests/abis/FinalizerTaskManager.json && cp out/IndexRegistryStorage.sol/IndexRegistryStorage.json ../avs-finalizer/tests/abis/IndexRegistryStorage.json && cp out/RegistryCoordinator.sol/RegistryCoordinator.json ../avs-finalizer/tests/abis/RegistryCoordinator.json && cp out/RegistryCoordinatorStorage.sol/RegistryCoordinatorStorage.json ../avs-finalizer/tests/abis/RegistryCoordinatorStorage.json "
   },
   "dependencies": {
     "@mattrglobal/bbs-signatures": "^1.3.1",
