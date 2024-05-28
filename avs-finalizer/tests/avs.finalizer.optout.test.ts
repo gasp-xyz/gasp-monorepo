@@ -7,14 +7,19 @@ import {
 
 // @ts-ignore
 import registryCoordinator from "./abis/RegistryCoordinator.json";
-import {getOperatorId, waitFor, waitForOperatorDeRegistered, waitForOperatorRegistered} from "./operatorUtilities";
+import {
+    getOperatorId, registryCoordinatorAddress,
+    waitFor,
+    waitForOperatorDeRegistered,
+    waitForOperatorRegistered,
+    waitForTaskResponded
+} from "./operatorUtilities";
 import {
     getLatestQuorumUpdate,
     validateBLSApkRegistry, validateOperatorOptInIndexRegistry,
     validateOperatorOptInStakeRegistry, validateOperatorOptOutIndexRegistry,
     validateOperatorOptOutStakeRegistry,
 } from "./validators";
-const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
 
 
 jest.setTimeout(1500000);
@@ -159,6 +164,79 @@ describe('AVS Finalizer', () => {
 
     });
     afterEach(async () => {
+        await dockerUtils.stopContainer();
+    });
+
+});
+
+describe("AVS Finalizer - tasks", () => {
+    it.skip('When operator online -> threshold changes', async () => {
+        dockerUtils = new DockerUtils();
+        const transport = webSocket("ws://0.0.0.0:8545" , {
+            retryCount: 5,
+        });
+        const publicClient = createPublicClient({
+            transport,
+            chain: anvil3,
+        });
+        const POperatorAddress = waitForOperatorRegistered(publicClient);
+        await dockerUtils.startContainer();
+        const operatorAddress = await POperatorAddress;
+        console.log("operatorAddress: " + operatorAddress);
+        const tasks = await waitForTaskResponded(publicClient, 2).then((tasks) => {
+            expect(tasks).toHaveLength(2);
+            return tasks.map( x=> x.args.taskResponseMetadata)
+        })
+        tasks
+
+
+
+    });
+    it.skip('When operator online -> task response is submitted', async () => {
+        dockerUtils = new DockerUtils();
+        const transport = webSocket("ws://0.0.0.0:8545" , {
+            retryCount: 5,
+        });
+        const publicClient = createPublicClient({
+            transport,
+            chain: anvil3,
+        });
+        const POperatorAddress = waitForOperatorRegistered(publicClient);
+        await dockerUtils.startContainer();
+        const operatorAddress = await POperatorAddress;
+        console.log("operatorAddress: " + operatorAddress);
+
+
+
+
+
+    });
+    it.skip('When operator online -> task non-responded are timedout', async () => {
+        dockerUtils = new DockerUtils();
+        const transport = webSocket("ws://0.0.0.0:8545" , {
+            retryCount: 5,
+        });
+        const publicClient = createPublicClient({
+            transport,
+            chain: anvil3,
+        });
+        const POperatorAddress = waitForOperatorRegistered(publicClient);
+        await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE, dockerUtils.bigStakeLocalEnvironment);
+        const operatorAddress = await POperatorAddress;
+        console.log("operatorAddress: " + operatorAddress);
+
+
+
+
+
+    });
+    afterEach(async () => {
+        // opt-out
+        await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
+            console.log(result);
+        }).catch((err) => {
+            console.error(err);
+        });
         await dockerUtils.stopContainer();
     });
 });
