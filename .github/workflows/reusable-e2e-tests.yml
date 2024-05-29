@@ -125,7 +125,7 @@ jobs:
           cp out/RegistryCoordinatorStorage.sol/RegistryCoordinatorStorage.json ../avs-finalizer/tests/abis/RegistryCoordinatorStorage.json 
           cp out/BLSApkRegistryStorage.sol/BLSApkRegistryStorage.json ../avs-finalizer/tests/abis/BLSApkRegistryStorage.json
           cp out/StakeRegistryStorage.sol/StakeRegistryStorage.json ../avs-finalizer/tests/abis/StakeRegistryStorage.json
-          cp out/IndexRegistryStorage.sol/IndexRegistryStorage.json ../avs-finalizer/tests/abis/IndexRegistryStorage.json"
+          cp out/IndexRegistryStorage.sol/IndexRegistryStorage.json ../avs-finalizer/tests/abis/IndexRegistryStorage.json
           
 
       - name: FINALIZER tests - install deps
