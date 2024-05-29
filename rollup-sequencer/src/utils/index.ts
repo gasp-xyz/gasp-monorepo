@@ -55,7 +55,7 @@ async function getNativeL1Update(
 	api: ApiPromise,
 	encodedData: `0x${string}`,
 ): Promise<Option<PalletRolldownMessagesL1Update>> {
-	return await api.rpc.rolldown.get_native_l1_update(encodedData.substring(2));
+  return await api.rpc.rolldown.get_native_sequencer_update(encodedData.substring(2));
 }
 
 async function getEvents(
@@ -137,7 +137,8 @@ async function processPendingRequestsEvents(
 
 				const encodedData = getEncodedData("getPendingRequests", contractData);
 
-				const verified = await api.rpc.rolldown.verify_pending_requests(
+				const verified = await api.rpc.rolldown.verify_sequencer_update(
+          L1_CHAIN,
 					keccak256(encodedData),
 					requestId.toString(),
 				);
@@ -145,7 +146,7 @@ async function processPendingRequestsEvents(
 				if (!verified.toPrimitive()) {
 					await signTx(
 						api,
-						api.tx.rolldown.cancelRequestsFromL1(requestId.toString()),
+						api.tx.rolldown.cancelRequestsFromL1(L1_CHAIN as any, requestId.toString()),
 						collator,
 					);
 				}
@@ -160,27 +161,29 @@ async function getSelectedSequencerWithRights(
 	headerHash: Uint8Array,
 ) {
 	const apiAt = await api.at(headerHash);
-	const selectedSequencer =
-		await apiAt.query.sequencerStaking.selectedSequencer();
-	if (selectedSequencer.isSome) {
-		const isSequencerSelected =
-			u8aToHex(selectedSequencer.unwrap()).toLowerCase() ===
-			collatorAddress.toLowerCase();
-		const sequencerRights =
-			await apiAt.query.rolldown.sequencerRights(collatorAddress);
-		const hasSequencerRights =
-			sequencerRights.unwrap().readRights.toNumber() > 0;
-		return {
-			isSequencerSelected,
-			hasSequencerRights,
-			selectedSequencer: u8aToHex(selectedSequencer.unwrap()).toLowerCase(),
-		};
-	}
-	return {
-		isSequencerSelected: false,
-		hasSequencerRights: false,
-		selectedSequencer: null,
-	};
+	const selectedSequencerMap =
+    await apiAt.query.sequencerStaking.selectedSequencer();
+  const selectedSequencer = u8aToHex(selectedSequencerMap.get(L1_CHAIN as any)!).toLowerCase();
+
+  const isSequencerSelected = selectedSequencer === collatorAddress.toLowerCase();
+  const sequencerRights = await apiAt.query.rolldown.sequencersRights(L1_CHAIN);
+  // console.log(sequencerRights)
+  // console.log(sequencerRights.toJSON())
+  console.log(sequencerRights.toHuman())
+  // console.log(
+  console.log('blah')
+  console.log((sequencerRights.toHuman() as any)[collatorAddress])
+  console.log('blah 2 ')
+
+  const hasSequencerRights =
+    (sequencerRights.toHuman() as any)[collatorAddress].readRights.toNumber() > 0;
+
+  return {
+    isSequencerSelected,
+    hasSequencerRights,
+    selectedSequencer,
+  };
+
 }
 
 function isSuccess(events: MangataGenericEvent[]) {

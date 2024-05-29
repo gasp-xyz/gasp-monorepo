@@ -35,10 +35,13 @@ async function main() {
 
 	await api.derive.chain.subscribeNewHeads(async (header: HeaderExtended) => {
 		const collator = getCollator("ethereum", MNEMONIC);
+    print(`collator address: ${collator.address}`)
 
 		print(`block #${header.number} was authored by ${header.author}`);
 		const { isSequencerSelected, hasSequencerRights, selectedSequencer } =
 			await getSelectedSequencerWithRights(api, collator.address, header.hash);
+    print(`is selected ${isSequencerSelected}`);
+    print(`rights : ${hasSequencerRights}`);
 		if (isSequencerSelected && hasSequencerRights) {
 			print(`Sequencer selected: ${selectedSequencer}`);
 			try {
