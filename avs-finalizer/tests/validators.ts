@@ -5,7 +5,8 @@ import {
     getOperatorId
 } from "./operatorUtilities";
 import {expect} from "@jest/globals";
-import {Mangata, MangataInstance} from "@mangata-finance/sdk";
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import {DockerUtils} from "./DockerUtils";
 
 export async function validateBLSApkRegistry(publicClient: any, operatorAddress: string, operatorId: string) {
     const response = await getEntryFromBlsApkRegistry(publicClient, "getRegisteredPubkey", [operatorAddress] );
@@ -69,13 +70,16 @@ export async function validateTaskDataFromEvent(publicClient: any, taskIndex: st
     expect(allTaskResponses).not.toBe("0x0000000000000000000000000000000000000000000000000000000000000000");
     expect(block.transactions).toContain(txTransactionHash);
     const txInfo = await publicClient.getTransactionReceipt({hash: txTransactionHash });
+    expect(txInfo.blockNumber).toBe(taskBlockNumber);
 
-    const instance: MangataInstance = Mangata.instance(["ws://0.0.0.9946"]);
-    const L2Block = await ( await instance.api() ).rpc.chain.getBlock(taskResponse.blockHash);
-    expect(L2Block.block.header.number).toBeGreaterThan(0);
+
+    const wsProvider = new WsProvider(new DockerUtils().bigStakeLocalEnvironment.SUBSTRATE_RPC_URL);
+    const api = await ApiPromise.create({ provider: wsProvider });
+
+    //TODO: Cehck existance of blockHash on MGA side.
+    const L2Block = await api.rpc.chain.getBlock(taskResponse.blockHash);
+    expect(L2Block.block.header.number.toNumber()).toBeGreaterThan(0);
 
     console.log("Block: " + JSON.stringify(block));
-    console.log(allTaskResponses);
     console.log(taskResponse);
-    console.log(txInfo);
 }

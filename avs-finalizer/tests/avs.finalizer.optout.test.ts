@@ -169,7 +169,7 @@ describe('AVS Finalizer', () => {
 
 });
 
-describe.only("AVS Finalizer - tasks", () => {
+describe("AVS Finalizer - tasks", () => {
     it('When operator online -> threshold changes && task response is submitted', async () => {
         dockerUtils = new DockerUtils();
         const publicClient = getPubClient();
