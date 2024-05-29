@@ -14,7 +14,11 @@
     "update-contracts": "cd ../../contracts && forge clean && forge build && cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../avs-finalizer/tests/abis/FinalizerTaskManager.json && cp out/IndexRegistryStorage.sol/IndexRegistryStorage.json ../avs-finalizer/tests/abis/IndexRegistryStorage.json && cp out/RegistryCoordinator.sol/RegistryCoordinator.json ../avs-finalizer/tests/abis/RegistryCoordinator.json && cp out/RegistryCoordinatorStorage.sol/RegistryCoordinatorStorage.json ../avs-finalizer/tests/abis/RegistryCoordinatorStorage.json && cp out/BLSApkRegistryStorage.sol/BLSApkRegistryStorage.json ../avs-finalizer/tests/abis/BLSApkRegistryStorage.json && cp out/StakeRegistryStorage.sol/StakeRegistryStorage.json ../avs-finalizer/tests/abis/StakeRegistryStorage.json && cp out/IndexRegistryStorage.sol/IndexRegistryStorage.json ../avs-finalizer/tests/abis/IndexRegistryStorage.json"
   },
   "dependencies": {
+    "@mangata-finance/sdk": "2.2.1-eth-rollup-develop.51",
+    "@mangata-finance/types": "2.2.3-eth-rollup-develop.58",
     "@mattrglobal/bbs-signatures": "^1.3.1",
+    "@polkadot/api": "11.1.1",
+    "@polkadot/types": "11.1.1",
     "crypto": "^1.0.1",
     "ethereum-abi-types-generator": "^1.3.4",
     "ethereumjs-wallet": "^1.0.2",

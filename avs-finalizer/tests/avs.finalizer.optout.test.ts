@@ -18,7 +18,7 @@ import {
     getLatestQuorumUpdate,
     validateBLSApkRegistry, validateOperatorOptInIndexRegistry,
     validateOperatorOptInStakeRegistry, validateOperatorOptOutIndexRegistry,
-    validateOperatorOptOutStakeRegistry,
+    validateOperatorOptOutStakeRegistry, validateTaskDataFromEvent,
 } from "./validators";
 
 
@@ -169,49 +169,57 @@ describe('AVS Finalizer', () => {
 
 });
 
-describe("AVS Finalizer - tasks", () => {
-    it.skip('When operator online -> threshold changes', async () => {
+describe.only("AVS Finalizer - tasks", () => {
+    it('When operator online -> threshold changes && task response is submitted', async () => {
         dockerUtils = new DockerUtils();
-        const transport = webSocket("ws://0.0.0.0:8545" , {
-            retryCount: 5,
-        });
-        const publicClient = createPublicClient({
-            transport,
-            chain: anvil3,
-        });
+        const publicClient = getPubClient();
+
+        const taskBefore = await waitForTaskResponded(publicClient, 1).then((tasks) => {
+            return tasks.map( x=> x.args.taskResponseMetadata)
+        })
+
         const POperatorAddress = waitForOperatorRegistered(publicClient);
-        await dockerUtils.startContainer();
+        await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE, dockerUtils.bigStakeLocalEnvironment);
         const operatorAddress = await POperatorAddress;
         console.log("operatorAddress: " + operatorAddress);
-        const tasks = await waitForTaskResponded(publicClient, 2).then((tasks) => {
+        const taskAfter = await waitForTaskResponded(publicClient, 2).then((tasks) => {
             expect(tasks).toHaveLength(2);
             return tasks.map( x=> x.args.taskResponseMetadata)
         })
-        tasks
+        expect(taskBefore).not.toEqual(taskAfter);
+        const quorumBefore = BigInt(taskBefore[0].quroumStakeTotals[0]) ;
+        //used the latest task  event to avoid flakiness [1]
+        const quorumAfter = BigInt(taskAfter[1].quroumStakeTotals[0]);
+        const operatorStake = BigInt(dockerUtils.bigStakeLocalEnvironment.STAKE);
+        expect(quorumAfter - quorumBefore).toBe(operatorStake);
 
+        const taskCompletedWithOperator = await waitForTaskResponded(publicClient, 1).then((tasks) => {
+            return tasks.map( x=> JSON.parse(JSON.stringify(x)))
+        })
+        console.log(taskCompletedWithOperator)
+        await validateTaskDataFromEvent(
+            publicClient,
+            taskCompletedWithOperator[0].args.taskResponse.referenceTaskIndex,
+            taskCompletedWithOperator[0].args.taskResponse,
+            BigInt(taskCompletedWithOperator[0].blockNumber),
+            taskCompletedWithOperator[0].transactionHash );
+        //opt-out
+        await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
+            console.log(result);
+        }).catch((err) => {
+            console.error(err);
+        });
+        await mineEthBlocks(5);
+        const taskAfterOptOut = await waitForTaskResponded(publicClient, 3).then((tasks) => {
+            return tasks.map( x=> x.args.taskResponseMetadata)
+        });
 
+        // let's wait for 3 tasks, it can happen that quorum is not updated in the first task
+        const quorumAfterOptOut = BigInt(taskAfterOptOut[2].quroumStakeTotals[0]);
+        expect(quorumAfterOptOut).toBe(quorumBefore);
 
     });
-    it.skip('When operator online -> task response is submitted', async () => {
-        dockerUtils = new DockerUtils();
-        const transport = webSocket("ws://0.0.0.0:8545" , {
-            retryCount: 5,
-        });
-        const publicClient = createPublicClient({
-            transport,
-            chain: anvil3,
-        });
-        const POperatorAddress = waitForOperatorRegistered(publicClient);
-        await dockerUtils.startContainer();
-        const operatorAddress = await POperatorAddress;
-        console.log("operatorAddress: " + operatorAddress);
-
-
-
-
-
-    });
-    it.skip('When operator online -> task non-responded are timedout', async () => {
+    it.skip('When operator is offline -> task non-responded are timedout until ejected', async () => {
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -239,4 +247,15 @@ describe("AVS Finalizer - tasks", () => {
         });
         await dockerUtils.stopContainer();
     });
+
+    function getPubClient() {
+        const transport = webSocket("ws://0.0.0.0:8545", {
+            retryCount: 5,
+        });
+        const publicClient = createPublicClient({
+            transport,
+            chain: anvil3,
+        });
+        return publicClient;
+    }
 });

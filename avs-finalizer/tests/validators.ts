@@ -1,10 +1,11 @@
 import {
     DEFAULT_QUORUM,
     getEntryFromBlsApkRegistry, getEntryFromIndexRegistry,
-    getEntryFromStakeRegistry,
+    getEntryFromStakeRegistry, getEntryFromTaskManagerRegistry,
     getOperatorId
 } from "./operatorUtilities";
 import {expect} from "@jest/globals";
+import {Mangata, MangataInstance} from "@mangata-finance/sdk";
 
 export async function validateBLSApkRegistry(publicClient: any, operatorAddress: string, operatorId: string) {
     const response = await getEntryFromBlsApkRegistry(publicClient, "getRegisteredPubkey", [operatorAddress] );
@@ -60,4 +61,21 @@ export async function validateOperatorOptOutIndexRegistry(publicClient: any, ope
     expect(JSON.parse(JSON.stringify(latestUpdate)).fromBlockNumber).toBe(JSON.parse(JSON.stringify(latestQuorumUpdate)).fromBlockNumber);
     expect(parseInt(numOperatorsBefore) - 1 ).toBe(JSON.parse(JSON.stringify(latestQuorumUpdate)).numOperators);
 
+}
+
+export async function validateTaskDataFromEvent(publicClient: any, taskIndex: string , taskResponse :any , taskBlockNumber : bigint, txTransactionHash: string){
+    const allTaskResponses = await getEntryFromTaskManagerRegistry(publicClient, "allTaskResponses", [taskIndex] );
+    const block = await publicClient.getBlock({blockNumber: taskBlockNumber});
+    expect(allTaskResponses).not.toBe("0x0000000000000000000000000000000000000000000000000000000000000000");
+    expect(block.transactions).toContain(txTransactionHash);
+    const txInfo = await publicClient.getTransactionReceipt({hash: txTransactionHash });
+
+    const instance: MangataInstance = Mangata.instance(["ws://0.0.0.9946"]);
+    const L2Block = await ( await instance.api() ).rpc.chain.getBlock(taskResponse.blockHash);
+    expect(L2Block.block.header.number).toBeGreaterThan(0);
+
+    console.log("Block: " + JSON.stringify(block));
+    console.log(allTaskResponses);
+    console.log(taskResponse);
+    console.log(txInfo);
 }

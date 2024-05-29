@@ -163,6 +163,16 @@ export async function getEntryFromIndexRegistry(publicClient: PublicClient, func
     return res as any as string[];
 }
 
+export async function getEntryFromTaskManagerRegistry(publicClient: PublicClient, functionName: string, args: any[]) {
+    const res = await publicClient.readContract({
+        address: taskManagerAddress,
+        abi: finalizerTaskManager.abi,
+        functionName: functionName,
+        args: args,
+    });
+    return res as any as string[];
+}
+
 
 // @ts-ignore
 BigInt.prototype.toJSON = function() { return this.toString() }
