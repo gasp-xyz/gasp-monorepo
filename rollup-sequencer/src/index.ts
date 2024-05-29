@@ -40,8 +40,10 @@ async function main() {
 		print(`block #${header.number} was authored by ${header.author}`);
 		const { isSequencerSelected, hasSequencerRights, selectedSequencer } =
 			await getSelectedSequencerWithRights(api, collator.address, header.hash);
+    print(`me ${collator.address}`);
     print(`is selected ${isSequencerSelected}`);
     print(`rights : ${hasSequencerRights}`);
+    print(`selected : ${selectedSequencer}`);
 		if (isSequencerSelected && hasSequencerRights) {
 			print(`Sequencer selected: ${selectedSequencer}`);
 			try {
@@ -55,10 +57,12 @@ async function main() {
 					publicClient,
 				);
 
+        // console.log(`here ${nativeL1Update.unwrap().toString()}`)
 				const filteredUpdates = filterUpdates(
 					nativeL1Update.unwrap(),
 					lastRequestId,
 				);
+        // console.log(filteredUpdates.toString())
 				const requestsCount = countRequests(filteredUpdates);
 
 				if (requestsCount > 0) {

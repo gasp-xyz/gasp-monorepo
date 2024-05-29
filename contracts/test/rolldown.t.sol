@@ -35,7 +35,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         users = utils.createUsers(1);
         rolldown = new Rolldown();
-        rolldown.initialize(avsPauserReg, avsOwner);
+        rolldown.initialize(avsPauserReg, avsOwner, ChainId.Ethereum);
         ETH_TOKEN_ADDRESS = payable(0x5748395867463837537395739375937493733457);
     }
 

@@ -73,7 +73,10 @@ interface IRolldownPrimitives {
         uint256 timeStamp;
     }
 
+		enum ChainId{ Ethereum, Arbitrum }
+
     struct L1Update {
+        ChainId chain;
         Deposit[] pendingDeposits;
         CancelResolution[] pendingCancelResolutions;
         WithdrawalResolution[] pendingWithdrawalResolutions;

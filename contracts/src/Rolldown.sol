@@ -21,7 +21,7 @@ contract Rolldown is
     address public constant ETH_TOKEN_ADDRESS =
         0x5748395867463837537395739375937493733457;
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner)
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chain)
         public
         initializer
     {
@@ -30,6 +30,7 @@ contract Rolldown is
         lastProcessedUpdate_origin_l1 = 0;
         counter = 1;
         lastProcessedUpdate_origin_l2 = 0;
+        chain = chain;
     }
 
     function withdraw_pending_eth(uint256 amount) external whenNotPaused {
@@ -451,6 +452,7 @@ contract Rolldown is
     ) public view returns (L1Update memory) {
         L1Update memory result;
 
+        result.chain = ChainId.Ethereum;
         uint256 depositsCounter = 0;
         uint256 withdrawalsCounter = 0;
         uint256 cancelsCounter = 0;

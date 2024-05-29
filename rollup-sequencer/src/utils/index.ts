@@ -55,6 +55,7 @@ async function getNativeL1Update(
 	api: ApiPromise,
 	encodedData: `0x${string}`,
 ): Promise<Option<PalletRolldownMessagesL1Update>> {
+  // console.log(`PAYLOAD: ${encodedData.substring(2)}`)
   return await api.rpc.rolldown.get_native_sequencer_update(encodedData.substring(2));
 }
 
@@ -96,10 +97,12 @@ async function processDataForL2Update(
 	print(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
 
 	const data = await getUpdateForL2(publicClient, api);
-	print(data);
+	// print(`ETH native data : ${util.inspect(data, { depth: null })}`);
 
 	const encodedData = getEncodedData("getUpdateForL2", data);
 	const nativeL1Update = await getNativeL1Update(api, encodedData);
+  // console.log(nativeL1Update.unwrap().chain)
+	// print(`Substrate native data : ${nativeL1Update.toString()}`);
 	return {
 		encodedData,
 		nativeL1Update,
@@ -163,20 +166,15 @@ async function getSelectedSequencerWithRights(
 	const apiAt = await api.at(headerHash);
 	const selectedSequencerMap =
     await apiAt.query.sequencerStaking.selectedSequencer();
-  const selectedSequencer = u8aToHex(selectedSequencerMap.get(L1_CHAIN as any)!).toLowerCase();
+  const selectedMap = JSON.parse(selectedSequencerMap.toString());
+
+  const selectedSequencer = selectedMap[L1_CHAIN].toLowerCase();
+  console.log(selectedSequencer)
 
   const isSequencerSelected = selectedSequencer === collatorAddress.toLowerCase();
   const sequencerRights = await apiAt.query.rolldown.sequencersRights(L1_CHAIN);
-  // console.log(sequencerRights)
-  // console.log(sequencerRights.toJSON())
-  console.log(sequencerRights.toHuman())
-  // console.log(
-  console.log('blah')
-  console.log((sequencerRights.toHuman() as any)[collatorAddress])
-  console.log('blah 2 ')
-
-  const hasSequencerRights =
-    (sequencerRights.toHuman() as any)[collatorAddress].readRights.toNumber() > 0;
+  let rights = JSON.parse(sequencerRights.toString())[collatorAddress.toLowerCase()]
+  const hasSequencerRights = rights.readRights > 0;
 
   return {
     isSequencerSelected,

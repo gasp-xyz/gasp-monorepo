@@ -45,7 +45,7 @@ function filterUpdates(l2Update: Array<L2Update>, lastSubmittedId: number) {
 
 
 async function getPendingUpdate(api: ApiPromise, blockHash: Uint8Array) {
-    return await api.rpc.rolldown.pending_updates(blockHash);
+    return await api.rpc.rolldown.pending_l2_requests('Ethereum', blockHash);
 }
 
 function getDecodedData(methodName: string, pendingUpdates: `0x${string}`): Array<L2Update> {

@@ -20,6 +20,7 @@ import {FinalizerServiceManager, IServiceManager} from "../src/FinalizerServiceM
 import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "../src/IFinalizerTaskManager.sol";
 import {Rolldown} from "../src/Rolldown.sol";
+import {IRolldownPrimitives} from "../src/Rolldown.sol";
 
 import {Utils} from "./utils/Utils.sol";
 
@@ -76,8 +77,8 @@ contract Deployer is Script, Utils, Test {
         string memory configData = readConfig(_CONFIG_PATH);
 
         // check that the chainID matches the one in the config
-        uint256 currentChainId = block.chainid;
         uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
+        uint256 currentChainId = block.chainid;
         emit log_named_uint("You are deploying on ChainID", currentChainId);
         require(configChainId == currentChainId, "You are on the wrong chain for this config");
 
@@ -279,7 +280,7 @@ contract Deployer is Script, Utils, Test {
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeWithSelector(rolldown.initialize.selector, avsPauserReg, avsOwner)
+            abi.encodeWithSelector(rolldown.initialize.selector, avsPauserReg, avsOwner, IRolldownPrimitives.ChainId.Ethereum)
         );
 
         // transfer ownership of proxy admin to upgrader
