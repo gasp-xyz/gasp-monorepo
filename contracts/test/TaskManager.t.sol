@@ -7,7 +7,7 @@ import {BLSMockAVSDeployer} from "@eigenlayer-middleware/test/utils/BLSMockAVSDe
 import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {BitmapUtils} from "@eigenlayer-middleware/src/libraries/BitmapUtils.sol";
-
+import { FinalizerTaskManager } from "../src/FinalizerTaskManager.sol";
 import { IFinalizerTaskManager } from "../src/IFinalizerTaskManager.sol";
 
 import { IBLSSignatureChecker  } from "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
@@ -18,35 +18,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
     FinalizerTaskManager tm;
     FinalizerTaskManager tmImplementation;
 
-    event NewTaskCreated(uint32 indexed taskIndex, Task task);
-
-    struct Task {
-        // L2 block number which operators are required to execute and provide proofs for
-        uint256 blockNumber;
-        // used for expiration checks
-        uint32 taskCreatedBlock;
-        // task submitter decides on the criteria for a task to be completed
-        // note that this does not mean the task was "correctly" answered
-        // task is completed when each quorumNumbers specified here
-        // are signed by at least quorumThresholdPercentage of the operators
-        // note that we set the quorumThresholdPercentage to be the same for all quorumNumbers, but this could be changed
-        bytes quorumNumbers;
-        // percentage of quorum's total stake needed to consider task completed
-        uint32 quorumThresholdPercentage;
-    }
-    
-
-    struct TaskResponse {
-        // Can be obtained by the operator from the event NewTaskCreated.
-        uint32 referenceTaskIndex;
-        // This is the response that the operator has to provide for a finalized block.
-        bytes32 blockHash;
-        // This is the response that the operator has to provide for a an executed block.
-        bytes32 storageProofHash;
-        // This is the response that the operator has to provide for a state hash at given block.
-        bytes32 pendingStateHash;
-    }
-
+    event NewTaskCreated(uint32 indexed taskIndex, FinalizerTaskManager.Task task);
 
     uint32 public constant TASK_RESPONSE_WINDOW_BLOCK = 30;
     address aggregator =
@@ -85,8 +57,8 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
     function testCreateNewTask() public {
         bytes memory quorumNumbers = new bytes(0);
         cheats.prank(generator, generator);
-        
-        Task memory newTask;
+
+        FinalizerTaskManager.Task memory newTask;
         newTask.blockNumber = 2;
         newTask.taskCreatedBlock = 1;
         newTask.quorumThresholdPercentage = 100;
@@ -113,7 +85,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         tm.createNewTask(2, 100, quorumNumbers);
         assertEq(tm.latestTaskNum(), 2);
 
-        Task memory newTask;
+        FinalizerTaskManager.Task memory newTask;
         newTask.blockNumber = 2;
         newTask.taskCreatedBlock = 1;
         newTask.quorumThresholdPercentage = 100;
@@ -128,7 +100,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         
         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
 
-        Task memory newTask;
+        FinalizerTaskManager.Task memory newTask;
         newTask.blockNumber = 2;
         newTask.taskCreatedBlock = 1;
         newTask.quorumThresholdPercentage = 100;
@@ -166,7 +138,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         
         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
 
-        Task memory newTask;
+        FinalizerTaskManager.Task memory newTask;
         newTask.blockNumber = 2;
         newTask.taskCreatedBlock = 1;
         newTask.quorumThresholdPercentage = 100;
@@ -202,7 +174,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         
         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
 
-        Task memory newTask;
+        FinalizerTaskManager.Task memory newTask;
         newTask.blockNumber = 2;
         newTask.taskCreatedBlock = 1;
         newTask.quorumThresholdPercentage = 100;
@@ -244,7 +216,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         
         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
 
-        Task memory newTask;
+        FinalizerTaskManager.Task memory newTask;
         newTask.blockNumber = 2;
         newTask.taskCreatedBlock = 1;
         newTask.quorumThresholdPercentage = 100;
