@@ -10,13 +10,15 @@ import blsApkRegistry from "../../contracts/out/BLSApkRegistryStorage.sol/BLSApk
 import stakeRegistry from "../../contracts/out/StakeRegistryStorage.sol/StakeRegistryStorage.json";
 // @ts-ignore
 import indexRegistry from "../../contracts/out/IndexRegistryStorage.sol/IndexRegistryStorage.json";
+//@ts-ignore
+import deploymentJson from "../../contracts/script/output/31337/avs_deployment_output.json";
 
 import {DockerUtils} from "./DockerUtils";
-export const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
-export const taskManagerAddress = "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8";
-export const blsApkRegistryAddress = "0xf5059a5D33d5853360D16C683c16e67980206f36";
-export const stakeRegistryAddress = "0x998abeb3E57409262aE5b751f60747921B33613E";
-export const indexRegistryAddress = "0x95401dc811bb5740090279Ba06cfA8fcF6113778";
+export const registryCoordinatorAddress = deploymentJson.addresses.registryCoordinator;
+export const taskManagerAddress = deploymentJson.addresses.taskManager;
+export const blsApkRegistryAddress = deploymentJson.addresses.blsApkRegistry;
+export const stakeRegistryAddress = deploymentJson.addresses.stakeRegistry;
+export const indexRegistryAddress = deploymentJson.addresses.indexRegistry;
 
 export const DEFAULT_QUORUM = 0;
 
