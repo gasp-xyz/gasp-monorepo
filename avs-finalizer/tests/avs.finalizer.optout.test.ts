@@ -184,7 +184,7 @@ describe("AVS Finalizer - tasks", () => {
         const operatorAddress = await POperatorAddress;
         console.log("operatorAddress: " + operatorAddress);
         const taskAfter = await waitForTaskResponded(publicClient, 4).then((tasks) => {
-            expect(tasks).toHaveLength(2);
+            expect(tasks).toHaveLength(4);
             return tasks.map( x=> x.args.taskResponseMetadata)
         })
         expect(taskBefore).not.toEqual(taskAfter);
