@@ -14,6 +14,7 @@ import indexRegistry from "../../contracts/out/IndexRegistryStorage.sol/IndexReg
 import deploymentJson from "../../contracts/script/output/31337/avs_deployment_output.json";
 
 import {DockerUtils} from "./DockerUtils";
+//IF those addresses gets de-sync: call the makefile deploy all save state, to update it , and commit the changes
 export const registryCoordinatorAddress = deploymentJson.addresses.registryCoordinator;
 export const taskManagerAddress = deploymentJson.addresses.taskManager;
 export const blsApkRegistryAddress = deploymentJson.addresses.blsApkRegistry;
