@@ -38,7 +38,7 @@ const main = async () => {
       demandOption: "The uri is required.",
       type: "string",
       nargs: 1,
-      default: "/home/dev/mangata-eth/out/rolldown.sol/RollDown.json",
+      default: "/home/dev/mangata-eth/out/Rolldown.sol/Rolldown.json",
     })
     .option("l2", {
       alias: "l2-uri",
@@ -68,7 +68,7 @@ const main = async () => {
 
   const { l1, l2, seq, up } = cli.argv;
 
-  let abi = JSON.parse(fs.readFileSync('/home/dev/mangata-eth/out/rolldown.sol/RollDown.json', 'utf8'));
+  let abi = JSON.parse(fs.readFileSync('/home/dev/mangata-eth/out/Rolldown.sol/Rolldown.json', 'utf8'));
   let web3 = new Web3(l2);
   const api = new ApiPromise(
     {

@@ -3,21 +3,23 @@
     "avsPauseReg": "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
     "avsProxyAdmin": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
     "blsApkRegistry": "0xf5059a5D33d5853360D16C683c16e67980206f36",
-    "blsApkRegistryImplementation": "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf",
+    "blsApkRegistryImplementation": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
     "indexRegistry": "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
-    "indexRegistryImplementation": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf",
+    "indexRegistryImplementation": "0x9d4454B023096f34B160D6B654540c56A1F81688",
     "registryCoordinator": "0x851356ae760d987E095750cCeb3bC6014560891C",
-    "registryCoordinatorImplementation": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
+    "registryCoordinatorImplementation": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
+    "rolldown": "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49",
+    "rolldownImplementation": "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90",
     "serviceManager": "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
-    "serviceManagerImplementation": "0x809d550fca64d94Bd9F66E60752A544199cfAC3D",
+    "serviceManagerImplementation": "0x4c5859f0F772848b2D91F1D83E2Fe57935348029",
     "stakeRegistry": "0x998abeb3E57409262aE5b751f60747921B33613E",
-    "stakeRegistryImplementation": "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49",
-    "taksManagerImplementation": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
+    "stakeRegistryImplementation": "0x4826533B4897376654Bb4d4AD88B7faFD0C98528",
+    "taksManagerImplementation": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
     "taskManager": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
   },
   "chainInfo": {
     "chainId": 31337,
-    "deploymentBlock": 22
+    "deploymentBlock": 21
   },
   "permissions": {
     "aggregator": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",

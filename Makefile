@@ -58,8 +58,7 @@ bindings-rs: ## generates rust bindings
 	cd ./avs-finalizer && cargo fmt
 
 bindings-json: ## generate JS bindings
-	cd ./rolldown-contract && make update-abi
-	cd ./contracts && forge build && cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../rollup-updater/src/FinalizerTaskManager.json
+	cd ./contracts && forge build && cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../rollup-updater/src/FinalizerTaskManager.json && cp out/Rolldown.sol/Rolldown.json ../rollup-updater/src/Rolldown.json && cp out/Rolldown.sol/Rolldown.json ../rollup-sequencer/src/Rolldown.json
 
 bindings: bindings-go bindings-rs bindings-json ## generate all bindings
 

@@ -7,6 +7,7 @@ export const appConfigSchema = z.object({
 	MANGATA_NODE_URL: z.string(),
 	MNEMONIC: z.string(),
 	LIMIT: z.string().default("10"),
+	L1_CHAIN: z.string().default("Ethereum"),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;
@@ -23,5 +24,6 @@ export function createConfig() {
 		MANGATA_NODE_URL: process.env.MANGATA_NODE_URL!,
 		MNEMONIC: process.env.MNEMONIC!,
 		LIMIT: process.env.LIMIT!,
+		L1_CHAIN: process.env.L1_CHAIN!,
 	});
 }

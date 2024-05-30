@@ -29,7 +29,7 @@ async function main() {
 
 	const api = await getApi(MANGATA_NODE_URL);
 
-	await initReadContractWithRetry(publicClient);
+	await initReadContractWithRetry(publicClient, api);
 
 	let lastRequestId = await getLastRequestId(api);
 
