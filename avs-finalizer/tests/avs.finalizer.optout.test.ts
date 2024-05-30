@@ -1,14 +1,12 @@
-import { jest, describe, it, expect, afterEach } from "@jest/globals";
-import { DockerUtils } from "./DockerUtils";
-import {
-    createPublicClient, defineChain,
-    webSocket,
-} from "viem";
+import {afterEach, describe, expect, it, jest} from "@jest/globals";
+import {DockerUtils} from "./DockerUtils";
+import {createPublicClient, defineChain, webSocket,} from "viem";
 
 // @ts-ignore
 import registryCoordinator from "./abis/RegistryCoordinator.json";
 import {
-    getOperatorId, registryCoordinatorAddress,
+    getOperatorId,
+    registryCoordinatorAddress,
     waitFor,
     waitForOperatorDeRegistered,
     waitForOperatorRegistered,
@@ -16,9 +14,12 @@ import {
 } from "./operatorUtilities";
 import {
     getLatestQuorumUpdate,
-    validateBLSApkRegistry, validateOperatorOptInIndexRegistry,
-    validateOperatorOptInStakeRegistry, validateOperatorOptOutIndexRegistry,
-    validateOperatorOptOutStakeRegistry, validateTaskDataFromEvent,
+    validateBLSApkRegistry,
+    validateOperatorOptInIndexRegistry,
+    validateOperatorOptInStakeRegistry,
+    validateOperatorOptOutIndexRegistry,
+    validateOperatorOptOutStakeRegistry,
+    validateTaskDataFromEvent,
 } from "./validators";
 
 
@@ -182,14 +183,14 @@ describe("AVS Finalizer - tasks", () => {
         await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE, dockerUtils.bigStakeLocalEnvironment);
         const operatorAddress = await POperatorAddress;
         console.log("operatorAddress: " + operatorAddress);
-        const taskAfter = await waitForTaskResponded(publicClient, 2).then((tasks) => {
+        const taskAfter = await waitForTaskResponded(publicClient, 4).then((tasks) => {
             expect(tasks).toHaveLength(2);
             return tasks.map( x=> x.args.taskResponseMetadata)
         })
         expect(taskBefore).not.toEqual(taskAfter);
         const quorumBefore = BigInt(taskBefore[0].quroumStakeTotals[0]) ;
-        //used the latest task  event to avoid flakiness [1]
-        const quorumAfter = BigInt(taskAfter[1].quroumStakeTotals[0]);
+        //used the latest task  event to avoid flakiness [3]
+        const quorumAfter = BigInt(taskAfter[3].quroumStakeTotals[0]);
         const operatorStake = BigInt(dockerUtils.bigStakeLocalEnvironment.STAKE);
         expect(quorumAfter - quorumBefore).toBe(operatorStake);
 
@@ -252,10 +253,9 @@ describe("AVS Finalizer - tasks", () => {
         const transport = webSocket("ws://0.0.0.0:8545", {
             retryCount: 5,
         });
-        const publicClient = createPublicClient({
+        return createPublicClient({
             transport,
             chain: anvil3,
         });
-        return publicClient;
     }
 });
