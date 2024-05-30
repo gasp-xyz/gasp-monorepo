@@ -3,7 +3,8 @@ import {DockerUtils} from "./DockerUtils";
 import {createPublicClient, defineChain, webSocket,} from "viem";
 
 // @ts-ignore
-import registryCoordinator from "./abis/RegistryCoordinator.json";
+import registryCoordinator from "../../contracts/out/RegistryCoordinator.sol/RegistryCoordinator.json";
+
 import {
     getOperatorId,
     registryCoordinatorAddress,
@@ -165,6 +166,12 @@ describe('AVS Finalizer', () => {
 
     });
     afterEach(async () => {
+        //try opt-out just in case.
+        await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
+            console.log(result);
+        }).catch((err) => {
+            console.error(err);
+        });
         await dockerUtils.stopContainer();
     });
 

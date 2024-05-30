@@ -1,16 +1,15 @@
 import {PublicClient} from "viem";
 
 // @ts-ignore
-import registryCoordinator from "./abis/RegistryCoordinator.json";
-
+import registryCoordinator from "../../contracts/out/RegistryCoordinator.sol/RegistryCoordinator.json";
 // @ts-ignore
-import finalizerTaskManager from "./abis/FinalizerTaskManager.json";
+import finalizerTaskManager from "../../contracts/out/FinalizerTaskManager.sol/FinalizerTaskManager.json";
 // @ts-ignore
-import blsApkRegistry from "./abis/BLSApkRegistryStorage.json";
+import blsApkRegistry from "../../contracts/out/BLSApkRegistryStorage.sol/BLSApkRegistryStorage.json";
 // @ts-ignore
-import stakeRegistry from "./abis/StakeRegistryStorage.json";
+import stakeRegistry from "../../contracts/out/StakeRegistryStorage.sol/StakeRegistryStorage.json";
 // @ts-ignore
-import indexRegistry from "./abis/IndexRegistryStorage.json";
+import indexRegistry from "../../contracts/out/IndexRegistryStorage.sol/IndexRegistryStorage.json";
 
 import {DockerUtils} from "./DockerUtils";
 export const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
