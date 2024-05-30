@@ -16,6 +16,7 @@ pub mod finalizer_service_manager;
 pub mod finalizer_task_manager;
 pub mod finalizer_task_manager_test;
 pub mod i_delegation_manager;
+pub mod i_finalizer_service_manager;
 pub mod i_finalizer_task_manager;
 pub mod i_registry_coordinator;
 pub mod i_stake_registry;
