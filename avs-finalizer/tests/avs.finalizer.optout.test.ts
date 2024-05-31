@@ -4,6 +4,7 @@ import {createPublicClient, defineChain, webSocket,} from "viem";
 
 // @ts-ignore
 import registryCoordinator from "../../contracts/out/RegistryCoordinator.sol/RegistryCoordinator.json";
+import {toIncludeAllMembers} from "jest-extended";
 
 import {
     getOperatorId,
@@ -22,6 +23,8 @@ import {
     validateOperatorOptOutStakeRegistry,
     validateTaskDataFromEvent,
 } from "./validators";
+expect.extend( { toIncludeAllMembers} );
+import 'jest-extended';
 
 
 jest.setTimeout(1500000);
@@ -231,7 +234,8 @@ describe("AVS Finalizer - tasks", () => {
         expect(quorumAfterOptOut).toBe(quorumBefore);
 
         //Quorum must be adapted, so it can happen that some tasks are not completed, but at least one must be.
-        expect(taskCompletedAfterOptOut.flatMap( x=> x.args.taskIndex)).toContain(taskAfterOptOut.flatMap( x=> x.args.taskResponse.referenceTaskIndex));
+        //@ts-ignore
+        expect(taskCompletedAfterOptOut.flatMap( x=> x.args.taskIndex)).toIncludeAllMembers(taskAfterOptOut.flatMap( x=> x.args.taskResponse.referenceTaskIndex));
     });
     afterEach(async () => {
         // opt-out
