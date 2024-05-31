@@ -1,0 +1,9 @@
+.yarn
+.vscode
+dist
+coverage
+*.yml
+*.md
+.pnp.*
+api
+**/*.json
