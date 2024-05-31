@@ -15,11 +15,11 @@ import deploymentJson from "../../contracts/script/output/31337/avs_deployment_o
 
 import {DockerUtils} from "./DockerUtils";
 //IF those addresses gets de-sync: call the makefile deploy all save state, to update it , and commit the changes
-export const registryCoordinatorAddress = deploymentJson.addresses.registryCoordinator;
-export const taskManagerAddress = deploymentJson.addresses.taskManager;
-export const blsApkRegistryAddress = deploymentJson.addresses.blsApkRegistry;
-export const stakeRegistryAddress = deploymentJson.addresses.stakeRegistry;
-export const indexRegistryAddress = deploymentJson.addresses.indexRegistry;
+export const registryCoordinatorAddress : `0x${string}` = deploymentJson.addresses.registryCoordinator as `0x${string}`;
+export const taskManagerAddress : `0x${string}` = deploymentJson.addresses.taskManager as `0x${string}`;
+export const blsApkRegistryAddress : `0x${string}` = deploymentJson.addresses.blsApkRegistry as `0x${string}`;
+export const stakeRegistryAddress : `0x${string}` = deploymentJson.addresses.stakeRegistry as `0x${string}`;
+export const indexRegistryAddress : `0x${string}` = deploymentJson.addresses.indexRegistry as `0x${string}`;
 
 export const DEFAULT_QUORUM = 0;
 
