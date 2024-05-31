@@ -117,17 +117,8 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
       - name: build and copy contracts
         working-directory: contracts
-        run: |
-          forge build 
-          cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../avs-finalizer/tests/abis/FinalizerTaskManager.json
-          cp out/IndexRegistryStorage.sol/IndexRegistryStorage.json ../avs-finalizer/tests/abis/IndexRegistryStorage.json
-          cp out/RegistryCoordinator.sol/RegistryCoordinator.json ../avs-finalizer/tests/abis/RegistryCoordinator.json
-          cp out/RegistryCoordinatorStorage.sol/RegistryCoordinatorStorage.json ../avs-finalizer/tests/abis/RegistryCoordinatorStorage.json 
-          cp out/BLSApkRegistryStorage.sol/BLSApkRegistryStorage.json ../avs-finalizer/tests/abis/BLSApkRegistryStorage.json
-          cp out/StakeRegistryStorage.sol/StakeRegistryStorage.json ../avs-finalizer/tests/abis/StakeRegistryStorage.json
-          cp out/IndexRegistryStorage.sol/IndexRegistryStorage.json ../avs-finalizer/tests/abis/IndexRegistryStorage.json
-          
-
+        run: forge build
+        
       - name: FINALIZER tests - install deps
         working-directory: avs-finalizer/tests/
         run: yarn install
