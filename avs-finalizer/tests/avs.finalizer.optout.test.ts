@@ -195,15 +195,15 @@ describe("AVS Finalizer - tasks", () => {
             return tasks.map( x=> x.args.taskResponseMetadata)
         })
         expect(taskBefore).not.toEqual(taskAfter);
-        const quorumBefore = BigInt(taskBefore[4].quroumStakeTotals[0]) ;
+        const quorumBefore = BigInt(taskBefore[taskBefore.length -1].quroumStakeTotals[0]) ;
         //used the latest task  event to avoid flakiness [3]
-        const quorumAfter = BigInt(taskAfter[3].quroumStakeTotals[0]);
+        const quorumAfter = BigInt(taskAfter[taskAfter.length -1].quroumStakeTotals[0]);
         const operatorStake = BigInt(dockerUtils.bigStakeLocalEnvironment.STAKE);
         expect(quorumAfter - quorumBefore).toBe(operatorStake);
         const pTaskCompleted = waitFor(publicClient, 1, "TaskCompleted");
         const taskRespondedWithOp = await waitForTaskResponded(publicClient, 1).then((tasks) => {
             return tasks.map( x=> JSON.parse(JSON.stringify(x)))
-        })
+        });
         const taskCompleted = await pTaskCompleted;
         expect(taskCompleted).toHaveLength(1);
         expect(taskCompleted[0].args.taskIndex).toBe(taskRespondedWithOp[0].args.taskResponse.referenceTaskIndex);
@@ -220,34 +220,18 @@ describe("AVS Finalizer - tasks", () => {
         }).catch((err) => {
             console.error(err);
         });
+        const pTaskCompletedAfterOptOut = waitFor(publicClient, 3, "TaskCompleted");
         await mineEthBlocks(5);
         const taskAfterOptOut = await waitForTaskResponded(publicClient, 3).then((tasks) => {
-            return tasks.map( x=> x.args.taskResponseMetadata)
+            return tasks.map( x=> JSON.parse(JSON.stringify(x)))
         });
-
+        const taskCompletedAfterOptOut = await pTaskCompletedAfterOptOut;
         // let's wait for 3 tasks, it can happen that quorum is not updated in the first task
-        const quorumAfterOptOut = BigInt(taskAfterOptOut[2].quroumStakeTotals[0]);
+        const quorumAfterOptOut = BigInt(taskAfterOptOut[2].args.taskResponseMetadata.quroumStakeTotals[0]);
         expect(quorumAfterOptOut).toBe(quorumBefore);
 
-    });
-    it.skip('When operator is offline -> task non-responded are timedout until ejected', async () => {
-        dockerUtils = new DockerUtils();
-        const transport = webSocket("ws://0.0.0.0:8545" , {
-            retryCount: 5,
-        });
-        const publicClient = createPublicClient({
-            transport,
-            chain: anvil3,
-        });
-        const POperatorAddress = waitForOperatorRegistered(publicClient);
-        await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE, dockerUtils.bigStakeLocalEnvironment);
-        const operatorAddress = await POperatorAddress;
-        console.log("operatorAddress: " + operatorAddress);
-
-
-
-
-
+        //Quorum must be adapted, so it can happen that some tasks are not completed, but at least one must be.
+        expect(taskCompletedAfterOptOut.flatMap( x=> x.args.taskIndex)).toContain(taskAfterOptOut.flatMap( x=> x.args.taskResponse.referenceTaskIndex));
     });
     afterEach(async () => {
         // opt-out
