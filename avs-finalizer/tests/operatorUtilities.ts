@@ -86,7 +86,7 @@ export async function waitForTaskResponded(publicClient: PublicClient, numTasks 
 
 export async function waitFor(publicClient: PublicClient, numTasks = 1, eventName="TaskResponded") : Promise<any[]> {
     let tasks : any[] = [];
-    console.info("Waiting for :" + numTasks + " tasks to be responded to..");
+    console.info("Waiting for :" + numTasks + " tasks to be " + eventName + "..");
     return await  new Promise( (resolve) => {
         const unwatch = publicClient.watchContractEvent({
             abi : finalizerTaskManager.abi,

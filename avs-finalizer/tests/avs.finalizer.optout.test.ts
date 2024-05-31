@@ -200,17 +200,20 @@ describe("AVS Finalizer - tasks", () => {
         const quorumAfter = BigInt(taskAfter[3].quroumStakeTotals[0]);
         const operatorStake = BigInt(dockerUtils.bigStakeLocalEnvironment.STAKE);
         expect(quorumAfter - quorumBefore).toBe(operatorStake);
-
-        const taskCompletedWithOperator = await waitForTaskResponded(publicClient, 1).then((tasks) => {
+        const pTaskCompleted = waitFor(publicClient, 1, "TaskCompleted");
+        const taskRespondedWithOp = await waitForTaskResponded(publicClient, 1).then((tasks) => {
             return tasks.map( x=> JSON.parse(JSON.stringify(x)))
         })
-        console.log(taskCompletedWithOperator)
+        const taskCompleted = await pTaskCompleted;
+        expect(taskCompleted).toHaveLength(1);
+        expect(taskCompleted[0].args.taskIndex).toBe(taskRespondedWithOp[0].args.taskResponse.referenceTaskIndex);
+        console.log(taskRespondedWithOp)
         await validateTaskDataFromEvent(
             publicClient,
-            taskCompletedWithOperator[0].args.taskResponse.referenceTaskIndex,
-            taskCompletedWithOperator[0].args.taskResponse,
-            BigInt(taskCompletedWithOperator[0].blockNumber),
-            taskCompletedWithOperator[0].transactionHash );
+            taskRespondedWithOp[0].args.taskResponse.referenceTaskIndex,
+            taskRespondedWithOp[0].args.taskResponse,
+            BigInt(taskRespondedWithOp[0].blockNumber),
+            taskRespondedWithOp[0].transactionHash );
         //opt-out
         await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
             console.log(result);
