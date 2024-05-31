@@ -181,8 +181,8 @@ describe("AVS Finalizer - tasks", () => {
     it('When operator online -> threshold changes && task response is submitted', async () => {
         dockerUtils = new DockerUtils();
         const publicClient = getPubClient();
-
-        const taskBefore = await waitForTaskResponded(publicClient, 1).then((tasks) => {
+        //let's wait for 4 tasks to avoid quorum numbers from other tests.
+        const taskBefore = await waitForTaskResponded(publicClient, 5).then((tasks) => {
             return tasks.map( x=> x.args.taskResponseMetadata)
         })
 
@@ -195,7 +195,7 @@ describe("AVS Finalizer - tasks", () => {
             return tasks.map( x=> x.args.taskResponseMetadata)
         })
         expect(taskBefore).not.toEqual(taskAfter);
-        const quorumBefore = BigInt(taskBefore[0].quroumStakeTotals[0]) ;
+        const quorumBefore = BigInt(taskBefore[4].quroumStakeTotals[0]) ;
         //used the latest task  event to avoid flakiness [3]
         const quorumAfter = BigInt(taskAfter[3].quroumStakeTotals[0]);
         const operatorStake = BigInt(dockerUtils.bigStakeLocalEnvironment.STAKE);
