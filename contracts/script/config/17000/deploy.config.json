@@ -44,5 +44,8 @@
 
   "taskManagerParams": {
     "taskResponseWindowBlocks": 100
+  },
+  "registryParams": {
+    "recurrentRegistrationLimit": 7200
   }
 }
