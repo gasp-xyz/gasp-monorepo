@@ -181,11 +181,11 @@ describe("AVS Finalizer - tasks", () => {
     it('When operator online -> threshold changes && task response is submitted', async () => {
         dockerUtils = new DockerUtils();
         const publicClient = getPubClient();
-        //let's wait for 4 tasks to avoid quorum numbers from other tests.
+
+        //let's wait for 5 tasks to avoid quorum numbers from other tests.
         const taskBefore = await waitForTaskResponded(publicClient, 5).then((tasks) => {
             return tasks.map( x=> x.args.taskResponseMetadata)
         })
-
         const POperatorAddress = waitForOperatorRegistered(publicClient);
         await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE, dockerUtils.bigStakeLocalEnvironment);
         const operatorAddress = await POperatorAddress;
