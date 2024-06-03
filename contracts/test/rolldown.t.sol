@@ -301,6 +301,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
     function testL1UpdateHashCompatibilityWithMangataNode() public {
         Rolldown.L1Update memory l1Update;
+        l1Update.chain = ChainId.Ethereum;
         l1Update.pendingDeposits = new Rolldown.Deposit[](1);
         l1Update.pendingL2UpdatesToRemove = new Rolldown.L2UpdatesToRemove[](1);
         l1Update.pendingCancelResolutions = new Rolldown.CancelResolution[](1);
@@ -345,7 +346,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         assertEq(
             keccak256(abi.encode(l1Update)),
-            0x6ebab65d2a7e2e2ac74b0415ccb2943ed7818bec57609986ab154b6880311c89
+            0x3c1e43a559da200b6b94ab0efb9f273b653242cb014efe2310807ff26d1db2d1
         );
     }
 
