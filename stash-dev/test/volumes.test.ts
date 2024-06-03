@@ -10,13 +10,19 @@ describe('test volumes processor', () => {
 
   beforeAll(async () => {
     vi.doMock('../src/repository/VolumeRepository', () => ({
-      getLatest: vi.fn().mockImplementation((id) => (latests.has(id) ? latests.get(id) : 0)),
+      getLatest: vi
+        .fn()
+        .mockImplementation((id) => (latests.has(id) ? latests.get(id) : 0)),
       save: vi.fn().mockImplementation(async (asset, volumes, latest) => {
-        const all = (store.has(asset.id) ? store.get(asset.id) : [])!.concat(volumes)
+        const all = (store.has(asset.id) ? store.get(asset.id) : [])!.concat(
+          volumes
+        )
         store.set(asset.id, all)
         latests.set(asset.id, latest)
       }),
-      saveLatest: vi.fn().mockImplementation((id, latest) => latests.set(id, latest)),
+      saveLatest: vi
+        .fn()
+        .mockImplementation((id, latest) => latests.set(id, latest)),
     }))
     vi.doMock('../src/repository/PriceRepository', () => ({
       get: vi.fn().mockImplementation(async (id, from, to) => {
@@ -50,7 +56,9 @@ describe('test volumes processor', () => {
     await volumes.initService()
 
     // check that we processed all of the pool entries that had procecessed prices
-    fixtures.assets.map((asset) => volumeStore.getLatest(asset.id)).should.be.eql([...fixtures.latest.values()])
+    fixtures.assets
+      .map((asset) => volumeStore.getLatest(asset.id))
+      .should.be.eql([...fixtures.latest.values()])
 
     // check len of the processed entries
     store.get(fixtures.asset_10.id)!.length.should.be.equal(fixtures.LEN)

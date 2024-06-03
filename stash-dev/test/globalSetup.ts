@@ -1,4 +1,8 @@
-import { REDIS_HOST_DOCKER_IMAGE_NAME, startContainer, TIMESERIES_HOST_DOCKER_IMAGE_NAME } from './api/utils'
+import {
+  REDIS_HOST_DOCKER_IMAGE_NAME,
+  startContainer,
+  TIMESERIES_HOST_DOCKER_IMAGE_NAME,
+} from './api/utils'
 
 const globalConfig = async () => {
   await startContainer(TIMESERIES_HOST_DOCKER_IMAGE_NAME)

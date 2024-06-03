@@ -302,6 +302,16 @@
         }
       }
     },
+    "/collators/staking/apy": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/account/{address}/liquid-staking/rewards-history/24h/sum": {
       "get": {
         "description": "",

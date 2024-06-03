@@ -10,13 +10,21 @@ describe('test trades processor', () => {
 
   beforeAll(async () => {
     vi.doMock('../src/repository/TradeVolumeRepository', () => ({
-      getLatest: vi.fn().mockImplementation((asset) => (latests.has(asset.id) ? latests.get(asset.id) : 0)),
+      getLatest: vi
+        .fn()
+        .mockImplementation((asset) =>
+          latests.has(asset.id) ? latests.get(asset.id) : 0
+        ),
       save: vi.fn().mockImplementation(async (asset, volumes, latest) => {
-        const all = (store.has(asset.id) ? store.get(asset.id) : [])!.concat(volumes)
+        const all = (store.has(asset.id) ? store.get(asset.id) : [])!.concat(
+          volumes
+        )
         store.set(asset.id, all)
         latests.set(asset.id, latest)
       }),
-      saveLatest: vi.fn().mockImplementation((id, latest) => latests.set(id, latest)),
+      saveLatest: vi
+        .fn()
+        .mockImplementation((id, latest) => latests.set(id, latest)),
     }))
     vi.doMock('../src/repository/PriceRepository', () => ({
       get: vi.fn().mockImplementation(async (id, from, to) => {
@@ -30,7 +38,9 @@ describe('test trades processor', () => {
       getEvents: vi
         .fn()
         .mockImplementation((from, to) =>
-          fixtures.events.filter((ev) => ev.timestamp > from && ev.timestamp <= to).slice(0, fixtures.LIMIT)
+          fixtures.events
+            .filter((ev) => ev.timestamp > from && ev.timestamp <= to)
+            .slice(0, fixtures.LIMIT)
         ),
       LIMIT: fixtures.LIMIT,
     }))
@@ -70,7 +80,9 @@ describe('test trades processor', () => {
     store.get(fixtures.asset_12.id)!.length.should.be.equal(0)
     store.get(fixtures.asset_13.id)!.length.should.be.equal(0)
     // range is half of LEN, event every 25 block, half of prices missing
-    store.get(fixtures.asset_14.id)!.length.should.be.equal(fixtures.LEN / 2 / 25 / 2)
+    store
+      .get(fixtures.asset_14.id)!
+      .length.should.be.equal(fixtures.LEN / 2 / 25 / 2)
     store.get(fixtures.asset_15.id)!.length.should.be.equal(0)
     store.get(fixtures.asset_16.id)!.length.should.be.equal(0)
     store.get(fixtures.asset_17.id)!.length.should.be.equal(0)

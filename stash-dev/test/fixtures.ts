@@ -77,7 +77,9 @@ export const assets: Asset[] = [
   toString: () => `${a.id}->[${a.pool}]`,
 }))
 
-export const basePrices = RANGE().map((t) => [t, new Decimal(1)] as TimestampedAmount)
+export const basePrices = RANGE().map(
+  (t) => [t, new Decimal(1)] as TimestampedAmount
+)
 
 export const pool = (asset, n1, n2) =>
   RANGE().map((t) => ({
@@ -114,9 +116,19 @@ export const pools = new Map([
   // zeros, should ignore
   [asset_13.id, pool_13],
   // holes smaller then batching limit, half of pools
-  [asset_14.id, pool_14.filter((p) => Math.round(p.timestamp / 10) % 2 === 0).slice(0, LEN / 4)],
+  [
+    asset_14.id,
+    pool_14
+      .filter((p) => Math.round(p.timestamp / 10) % 2 === 0)
+      .slice(0, LEN / 4),
+  ],
   // fill in missing entries of above pool
-  [asset_15.id, pool_15.filter((p) => Math.round(p.timestamp / 10) % 2 === 1).slice(0, LEN / 4)],
+  [
+    asset_15.id,
+    pool_15
+      .filter((p) => Math.round(p.timestamp / 10) % 2 === 1)
+      .slice(0, LEN / 4),
+  ],
   // dependent on asset 6 in asset_14 & asset_15
   [asset_16.id, pool_16],
   // no base price, but should mark as processed
@@ -141,18 +153,39 @@ export const latest = new Map([
 // prices and pools has to match, if we have a pool, we have a price
 export const prices = new Map([
   [BASE, basePrices],
-  [1, pools.get(asset_10.id)!.map((p) => [p.timestamp, new Decimal(p.timestamp / 100)])],
-  [2, pools.get(asset_11.id)!.map((p) => [p.timestamp, new Decimal(p.timestamp / 50)])],
-  [3, pools.get(asset_12.id)!.map((p) => [p.timestamp, new Decimal(p.timestamp)])],
+  [
+    1,
+    pools
+      .get(asset_10.id)!
+      .map((p) => [p.timestamp, new Decimal(p.timestamp / 100)]),
+  ],
+  [
+    2,
+    pools
+      .get(asset_11.id)!
+      .map((p) => [p.timestamp, new Decimal(p.timestamp / 50)]),
+  ],
+  [
+    3,
+    pools.get(asset_12.id)!.map((p) => [p.timestamp, new Decimal(p.timestamp)]),
+  ],
   // no prices, pool with zeros
   [5, []],
   [
     6,
     pools
       .get(asset_14.id)!
-      .map((p) => [p.timestamp, new Decimal(p.timestamp > 125 ? p.timestamp / 10 : p.timestamp * 10)]),
+      .map((p) => [
+        p.timestamp,
+        new Decimal(p.timestamp > 125 ? p.timestamp / 10 : p.timestamp * 10),
+      ]),
   ],
-  [7, pools.get(asset_16.id)!.map((p) => [p.timestamp, new Decimal(p.timestamp * 3)])],
+  [
+    7,
+    pools
+      .get(asset_16.id)!
+      .map((p) => [p.timestamp, new Decimal(p.timestamp * 3)]),
+  ],
   // missing prices for 7 & 8
   [8, []],
   [9, []],
@@ -210,7 +243,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5EYCAe5ijiYfyeZ2JJezKNMZfdbiFMyQc4YVzxaiMebAZBcm', amount: '36,500,001' },
+          data: {
+            currencyId: '4',
+            who: '5EYCAe5ijiYfyeZ2JJezKNMZfdbiFMyQc4YVzxaiMebAZBcm',
+            amount: '36,500,001',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -228,7 +265,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -258,7 +301,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -288,7 +337,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -316,7 +371,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -330,7 +391,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5HRRU6LUDYUowbneh4iH6X3iVThRBpKTRCYLhYWbvxsxrwxT', amount: '375,321,006,265' },
+          data: {
+            currencyId: '4',
+            who: '5HRRU6LUDYUowbneh4iH6X3iVThRBpKTRCYLhYWbvxsxrwxT',
+            amount: '375,321,006,265',
+          },
         },
         {
           method: 'LiquidityBurned',
@@ -350,7 +415,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -370,12 +441,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '275,000,000,017,643,189,977',
           },
         },
-        { method: 'RewardsClaimed', section: 'bootstrap', index: '0x3502', data: ['5', '668,032,908,208,143,927,311'] },
+        {
+          method: 'RewardsClaimed',
+          section: 'bootstrap',
+          index: '0x3502',
+          data: ['5', '668,032,908,208,143,927,311'],
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -401,7 +483,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -427,7 +515,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -453,7 +547,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -473,7 +573,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '711,814,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '711,814,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -497,19 +603,33 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Dviu815YXfppFdpgJF4LzWd22yoMqn96dpK8zJPv1TyL2tJ', '5', '23,223,177,256,854,597,881,483'],
+          data: [
+            '5Dviu815YXfppFdpgJF4LzWd22yoMqn96dpK8zJPv1TyL2tJ',
+            '5',
+            '23,223,177,256,854,597,881,483',
+          ],
         },
         {
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5CSikproDLMgCk9oV3SXx4Ga3R1W8FYwENzj9t87DHV1SL3u', amount: '5,507,064,516' },
+          data: {
+            currencyId: '4',
+            who: '5CSikproDLMgCk9oV3SXx4Ga3R1W8FYwENzj9t87DHV1SL3u',
+            amount: '5,507,064,516',
+          },
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -539,7 +659,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -565,7 +691,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -591,7 +723,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -617,7 +755,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -643,7 +787,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -672,7 +822,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -698,7 +854,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -726,7 +888,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -752,7 +920,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -776,7 +950,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5H1MgERwsj7NWejMibokz8wPrc2N5obU1G7v9MUWz5hmSydS', amount: '645,715,928,298' },
+          data: {
+            currencyId: '4',
+            who: '5H1MgERwsj7NWejMibokz8wPrc2N5obU1G7v9MUWz5hmSydS',
+            amount: '645,715,928,298',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -794,7 +972,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -820,7 +1004,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -846,7 +1036,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -872,7 +1068,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -882,24 +1084,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 257625,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xe9f0ea3bae7cb7e90fdd5abca43d9157b125facd66bd494447bcc859c64ed773', { Complete: '4,000,000,000' }],
+          data: [
+            '0xe9f0ea3bae7cb7e90fdd5abca43d9157b125facd66bd494447bcc859c64ed773',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x43925a33fc114e4a7febedd1594b9155b8d1149569797703a4d2d1a076eb9047'],
+          data: [
+            '4,000,000,000',
+            '0x43925a33fc114e4a7febedd1594b9155b8d1149569797703a4d2d1a076eb9047',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -923,13 +1138,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5FvZWEKZKRo4jMByUd7sJqC6Z9jkfjX3VDiyVBHtBeWmMxGL', '5', '219,163,422,202,404,769,210,846'],
+          data: [
+            '5FvZWEKZKRo4jMByUd7sJqC6Z9jkfjX3VDiyVBHtBeWmMxGL',
+            '5',
+            '219,163,422,202,404,769,210,846',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -945,12 +1170,23 @@ export const tradesFirstDay: EventEntry[] = [
           index: '0x1101',
           data: ['5CtPDsdc1kZeXAk8VFjB1cEwaEL6Ez7vbhVuxeLGQrHuELyW', '0'],
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '400,010,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '400,010,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -971,12 +1207,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '4,139,480,618,975,139,523,219,994',
           },
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '446,607,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '446,607,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -990,14 +1237,29 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'VestingUpdated',
           section: 'vesting',
           index: '0x1100',
-          data: ['5CtPDsdc1kZeXAk8VFjB1cEwaEL6Ez7vbhVuxeLGQrHuELyW', '0', '1,035,876,470,796,938,057,202,631'],
+          data: [
+            '5CtPDsdc1kZeXAk8VFjB1cEwaEL6Ez7vbhVuxeLGQrHuELyW',
+            '0',
+            '1,035,876,470,796,938,057,202,631',
+          ],
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '493,548,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '493,548,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1011,13 +1273,21 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Sudid',
           section: 'sudo',
           index: '0x3100',
-          data: { sudoResult: { Err: { Module: { index: '10', error: '0' } } } },
+          data: {
+            sudoResult: { Err: { Module: { index: '10', error: '0' } } },
+          },
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '446,607,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '446,607,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1041,13 +1311,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5G3wpn2mLw7FVccBBauE1NNXToxrWJrVmce55V2rt7FtEFyg', '5', '7,793,375,245,017,668,256,842'],
+          data: [
+            '5G3wpn2mLw7FVccBBauE1NNXToxrWJrVmce55V2rt7FtEFyg',
+            '5',
+            '7,793,375,245,017,668,256,842',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1071,13 +1351,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5H3m4aemqRNvASmWxFyYLARUzFkvaoG7QLtxUTHSJ94RhE3S', '5', '62,173,483,544,249,336,485,109'],
+          data: [
+            '5H3m4aemqRNvASmWxFyYLARUzFkvaoG7QLtxUTHSJ94RhE3S',
+            '5',
+            '62,173,483,544,249,336,485,109',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1101,13 +1391,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5H1hmHbgg9FbFguNeEXCG68AZPHVv4kijf5NmRSMpPsgxfmt', '5', '16,492,514,593,206,122,208,387'],
+          data: [
+            '5H1hmHbgg9FbFguNeEXCG68AZPHVv4kijf5NmRSMpPsgxfmt',
+            '5',
+            '16,492,514,593,206,122,208,387',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1128,12 +1428,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '266,935,381,617,494,666,666,667',
           },
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '446,607,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '446,607,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1157,13 +1468,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Dvu4NX6h98hnvxRyvyAAXuBHzB8qXoczrUmgUHiWudJwjhE', '5', '136,404,052,378,054,852,751,167'],
+          data: [
+            '5Dvu4NX6h98hnvxRyvyAAXuBHzB8qXoczrUmgUHiWudJwjhE',
+            '5',
+            '136,404,052,378,054,852,751,167',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1173,24 +1494,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 257677,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xaef9c36a1aebf4fa9e4c6c4bdfdc3e717eec265de7b5dfacd796b1789ef516f0', { Complete: '4,000,000,000' }],
+          data: [
+            '0xaef9c36a1aebf4fa9e4c6c4bdfdc3e717eec265de7b5dfacd796b1789ef516f0',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xc1cecd64b89522c87db5b4a4053fd40bcc972435f741a1f1c958c3a4db2aac08'],
+          data: [
+            '4,000,000,000',
+            '0xc1cecd64b89522c87db5b4a4053fd40bcc972435f741a1f1c958c3a4db2aac08',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -1220,7 +1554,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1230,24 +1570,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 257701,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xac45f609918bc14f52e7403b461fcde647f19fbd55afd763967115d3c83eb9fe', { Complete: '4,000,000,000' }],
+          data: [
+            '0xac45f609918bc14f52e7403b461fcde647f19fbd55afd763967115d3c83eb9fe',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xefda3730a1faecdef5323fb7b4ab2c9ce709c8ef8c593bdee8d97903329dfa56'],
+          data: [
+            '4,000,000,000',
+            '0xefda3730a1faecdef5323fb7b4ab2c9ce709c8ef8c593bdee8d97903329dfa56',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -1257,24 +1610,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 257705,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xe9f0ea3bae7cb7e90fdd5abca43d9157b125facd66bd494447bcc859c64ed773', { Complete: '4,000,000,000' }],
+          data: [
+            '0xe9f0ea3bae7cb7e90fdd5abca43d9157b125facd66bd494447bcc859c64ed773',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x1133b2a3e81d5378b2b692d9002f54ca1f2ac09629fc22c595bbb46dd420bc72'],
+          data: [
+            '4,000,000,000',
+            '0x1133b2a3e81d5378b2b692d9002f54ca1f2ac09629fc22c595bbb46dd420bc72',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -1284,7 +1650,12 @@ export const tradesFirstDay: EventEntry[] = [
     block: 257707,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'Endowed',
           section: 'tokens',
@@ -1299,19 +1670,27 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x1781a0e791dd5683c81acec95172fd7377a54da9600bc628029c51d75651c122', { Complete: '4,000,000,000' }],
+          data: [
+            '0x1781a0e791dd5683c81acec95172fd7377a54da9600bc628029c51d75651c122',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xe7d0bf5ccbfdeb6eb7626f948eaf27d703087669ad27cc57685e3aada38ee757'],
+          data: [
+            '4,000,000,000',
+            '0xe7d0bf5ccbfdeb6eb7626f948eaf27d703087669ad27cc57685e3aada38ee757',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
       [
@@ -1335,7 +1714,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1370,7 +1755,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1394,13 +1785,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5HKgtV7xNbKQyX4RZeTA5gtpZZZb67fay4kfjDhgjzdPe6ap', '5', '5,731,957,164,629,847,067,642'],
+          data: [
+            '5HKgtV7xNbKQyX4RZeTA5gtpZZZb67fay4kfjDhgjzdPe6ap',
+            '5',
+            '5,731,957,164,629,847,067,642',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1426,7 +1827,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1456,7 +1863,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1480,13 +1893,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DWpX5RdYBwstMoMFdtrLhjVDfKhQGbhVACG43wBVjnoC2uT', '5', '3,637,082,036,105,847,317,884'],
+          data: [
+            '5DWpX5RdYBwstMoMFdtrLhjVDfKhQGbhVACG43wBVjnoC2uT',
+            '5',
+            '3,637,082,036,105,847,317,884',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1516,14 +1939,29 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'VestingUpdated',
           section: 'vesting',
           index: '0x1100',
-          data: ['5Git6FKJTqo3vhCwXnTAnbjZ5cEnNoPKUbFhhQuuH6kwnCQB', '0', '258,704,667,681,380,010,210,988'],
+          data: [
+            '5Git6FKJTqo3vhCwXnTAnbjZ5cEnNoPKUbFhhQuuH6kwnCQB',
+            '0',
+            '258,704,667,681,380,010,210,988',
+          ],
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '493,548,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '493,548,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1551,7 +1989,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1571,12 +2015,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '412,500,000,026,464,784,965',
           },
         },
-        { method: 'RewardsClaimed', section: 'bootstrap', index: '0x3502', data: ['5', '412,500,000,026,464,784,965'] },
+        {
+          method: 'RewardsClaimed',
+          section: 'bootstrap',
+          index: '0x3502',
+          data: ['5', '412,500,000,026,464,784,965'],
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1592,12 +2047,23 @@ export const tradesFirstDay: EventEntry[] = [
           index: '0x1101',
           data: ['5Git6FKJTqo3vhCwXnTAnbjZ5cEnNoPKUbFhhQuuH6kwnCQB', '0'],
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '400,010,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '400,010,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1618,12 +2084,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '266,666,666,666,666,666,666,666',
           },
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '446,607,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '446,607,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1649,7 +2126,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1670,12 +2153,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '66,666,666,666,666,666,666,667',
           },
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '446,607,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '446,607,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1699,13 +2193,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Cicv6EQBbw4a8NEqeTxAQcxgHYY1ZnDfwCAUt3Ucexyo4jc', '5', '274,175,041,938,083,316,166,931'],
+          data: [
+            '5Cicv6EQBbw4a8NEqeTxAQcxgHYY1ZnDfwCAUt3Ucexyo4jc',
+            '5',
+            '274,175,041,938,083,316,166,931',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -1713,14 +2217,29 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'VestingUpdated',
           section: 'vesting',
           index: '0x1100',
-          data: ['5Git6FKJTqo3vhCwXnTAnbjZ5cEnNoPKUbFhhQuuH6kwnCQB', '0', '258,702,435,312,024,353,184,116'],
+          data: [
+            '5Git6FKJTqo3vhCwXnTAnbjZ5cEnNoPKUbFhhQuuH6kwnCQB',
+            '0',
+            '258,702,435,312,024,353,184,116',
+          ],
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '493,548,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '493,548,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1730,24 +2249,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 257777,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x19e87e627c5334fcc429d277ccfda9358e23aed7ad1cbbee72b080fa270de95b', { Complete: '4,000,000,000' }],
+          data: [
+            '0x19e87e627c5334fcc429d277ccfda9358e23aed7ad1cbbee72b080fa270de95b',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xfe130b508dd09c517af13ca12e8477dcdf7e51221dd22b223516d5829da69844'],
+          data: [
+            '4,000,000,000',
+            '0xfe130b508dd09c517af13ca12e8477dcdf7e51221dd22b223516d5829da69844',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -1757,24 +2289,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 257778,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xdef716cb51f122b76460cf9c9f7fe6be3e3abfa4945976956e43c1e741c11815', { Complete: '4,000,000,000' }],
+          data: [
+            '0xdef716cb51f122b76460cf9c9f7fe6be3e3abfa4945976956e43c1e741c11815',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xf0c806eff8e80ae575863084c479a1f89ca082807f9e8149b538bad390791c35'],
+          data: [
+            '4,000,000,000',
+            '0xf0c806eff8e80ae575863084c479a1f89ca082807f9e8149b538bad390791c35',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -1798,13 +2343,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5H8eFtCtsn29ME7L3PcBbUKbShtgXVZRitodj9JQuqiKPtG1', '5', '15,983,946,647,178,112,378,943'],
+          data: [
+            '5H8eFtCtsn29ME7L3PcBbUKbShtgXVZRitodj9JQuqiKPtG1',
+            '5',
+            '15,983,946,647,178,112,378,943',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1818,7 +2373,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5FcTDLa9G2361TyUUKWfJTPKc2EWfZS5d9TTneAN53x5zLP5', amount: '193,274,483,372' },
+          data: {
+            currencyId: '4',
+            who: '5FcTDLa9G2361TyUUKWfJTPKc2EWfZS5d9TTneAN53x5zLP5',
+            amount: '193,274,483,372',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -1836,7 +2395,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1866,7 +2431,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1876,24 +2447,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 257790,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x0f7cb719a67c1db35d9c7f42b3267f5e44dd85c2448983c3a2d8d0d878a4a9be', { Complete: '4,000,000,000' }],
+          data: [
+            '0x0f7cb719a67c1db35d9c7f42b3267f5e44dd85c2448983c3a2d8d0d878a4a9be',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xa7e03960aeae7447a041c020da85cf4afc1b3aee3f057f2f6e9cc1b79b5a42b8'],
+          data: [
+            '4,000,000,000',
+            '0xa7e03960aeae7447a041c020da85cf4afc1b3aee3f057f2f6e9cc1b79b5a42b8',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
       [
@@ -1917,7 +2501,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -1941,13 +2531,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityDeactivated',
           section: 'xyk',
           index: '0x0d06',
-          data: ['5H1hmHbgg9FbFguNeEXCG68AZPHVv4kijf5NmRSMpPsgxfmt', '5', '16,492,514,593,206,122,208,387'],
+          data: [
+            '5H1hmHbgg9FbFguNeEXCG68AZPHVv4kijf5NmRSMpPsgxfmt',
+            '5',
+            '16,492,514,593,206,122,208,387',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,084,598,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,084,598,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -1976,7 +2576,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2011,7 +2617,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2048,12 +2660,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '400,000,000,000,000,000,000,000',
           },
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '446,607,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '446,607,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2067,14 +2690,29 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'VestingUpdated',
           section: 'vesting',
           index: '0x1100',
-          data: ['5Dq8rPLHn7zz1B4bfaD31NqBKEzv9yub4RBzGWNHSz7VPs5N', '0', '1,552,198,782,343,987,823,509,190'],
+          data: [
+            '5Dq8rPLHn7zz1B4bfaD31NqBKEzv9yub4RBzGWNHSz7VPs5N',
+            '0',
+            '1,552,198,782,343,987,823,509,190',
+          ],
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '493,548,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '493,548,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2110,7 +2748,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2134,13 +2778,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Da252m2QT5BSMXDykAKKi4nmxfSHcMEWZYRkK38vHRgCiow', '5', '7,687,171,987,563,799,280,577'],
+          data: [
+            '5Da252m2QT5BSMXDykAKKi4nmxfSHcMEWZYRkK38vHRgCiow',
+            '5',
+            '7,687,171,987,563,799,280,577',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2164,13 +2818,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GbctRB8SWqaoaQHtwfKsuqj7iYLTJrxYB1UuL3dzYUnwDA6', '5', '143,567,501,487,880,877,895,701'],
+          data: [
+            '5GbctRB8SWqaoaQHtwfKsuqj7iYLTJrxYB1UuL3dzYUnwDA6',
+            '5',
+            '143,567,501,487,880,877,895,701',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2184,13 +2848,25 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'AssetsSwapped',
           section: 'xyk',
           index: '0x0d01',
-          data: ['5Cob2Q3Z3bSr4erQkZbkUqQ1JJrDEJtu8e7iYZkeabT8Fd98', '0', '5,000', '4', '0'],
+          data: [
+            '5Cob2Q3Z3bSr4erQkZbkUqQ1JJrDEJtu8e7iYZkeabT8Fd98',
+            '0',
+            '5,000',
+            '4',
+            '0',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2214,13 +2890,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Cym3R5kA3GfxaTD4HAJEg7e3gH288GbE4mJzp2tWY2f1RXw', '5', '7,709,580,874,383,238,287,744'],
+          data: [
+            '5Cym3R5kA3GfxaTD4HAJEg7e3gH288GbE4mJzp2tWY2f1RXw',
+            '5',
+            '7,709,580,874,383,238,287,744',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -2250,7 +2936,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -2272,7 +2964,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2298,7 +2996,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2322,13 +3026,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5CiPzKN3W8niUV2SVgmfQAUUUaJCPW1oJnHaVGmpd3NUkbkK', '5', '14,719,792,587,949,147,402,684'],
+          data: [
+            '5CiPzKN3W8niUV2SVgmfQAUUUaJCPW1oJnHaVGmpd3NUkbkK',
+            '5',
+            '14,719,792,587,949,147,402,684',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2338,24 +3052,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 257888,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xcf42215411a4c7c7aac8139378f693b1cc6b4d36822ad8213b810b2f4dae5f0a', { Complete: '4,000,000,000' }],
+          data: [
+            '0xcf42215411a4c7c7aac8139378f693b1cc6b4d36822ad8213b810b2f4dae5f0a',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x5132851664b889ac21084a551101b0442e5ebaec9f99805ac7cdea5759a36e26'],
+          data: [
+            '4,000,000,000',
+            '0x5132851664b889ac21084a551101b0442e5ebaec9f99805ac7cdea5759a36e26',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
       [
@@ -2384,7 +3111,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2408,13 +3141,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5D5Q7u4KLyKL7mFt58scYzmsWb1kF5Jut1Dz5v6v3UyssQsh', '5', '64,808,118,848,412,082,157,674'],
+          data: [
+            '5D5Q7u4KLyKL7mFt58scYzmsWb1kF5Jut1Dz5v6v3UyssQsh',
+            '5',
+            '64,808,118,848,412,082,157,674',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2444,7 +3187,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2480,7 +3229,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2508,7 +3263,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2532,13 +3293,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5HiW1Lvfw9dncUyrSp2RHNEFr7UvJZX1f2JLsTTWfoiBT7Cd', '5', '56,595,438,403,086,810,353,322'],
+          data: [
+            '5HiW1Lvfw9dncUyrSp2RHNEFr7UvJZX1f2JLsTTWfoiBT7Cd',
+            '5',
+            '56,595,438,403,086,810,353,322',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2562,13 +3333,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5D58irWKzTcjbWH4AYTbHqobDcoJEbnGsyxRyE7JwFwCaTeA', '5', '19,360,990,089,907,148,483,146'],
+          data: [
+            '5D58irWKzTcjbWH4AYTbHqobDcoJEbnGsyxRyE7JwFwCaTeA',
+            '5',
+            '19,360,990,089,907,148,483,146',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2594,7 +3375,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2622,7 +3409,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2646,13 +3439,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5CyxVy1muA79vsQEpMgz44FNZEbTGeWGA4ytt1vSt1NANCae', '5', '11,912,142,888,508,525,859,910'],
+          data: [
+            '5CyxVy1muA79vsQEpMgz44FNZEbTGeWGA4ytt1vSt1NANCae',
+            '5',
+            '11,912,142,888,508,525,859,910',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2687,7 +3490,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2711,13 +3520,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Gdr7wvYuCMK4i7XVQYgvnrFzKkXVk9Z4qWhcHDA8ShpHWQr', '5', '125,000,000,024,058,895,422,994'],
+          data: [
+            '5Gdr7wvYuCMK4i7XVQYgvnrFzKkXVk9Z4qWhcHDA8ShpHWQr',
+            '5',
+            '125,000,000,024,058,895,422,994',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2743,7 +3562,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2769,7 +3594,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2793,13 +3624,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityDeactivated',
           section: 'xyk',
           index: '0x0d06',
-          data: ['5CyxVy1muA79vsQEpMgz44FNZEbTGeWGA4ytt1vSt1NANCae', '5', '11,912,142,888,508,525,859,910'],
+          data: [
+            '5CyxVy1muA79vsQEpMgz44FNZEbTGeWGA4ytt1vSt1NANCae',
+            '5',
+            '11,912,142,888,508,525,859,910',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,084,598,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,084,598,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2815,12 +3656,23 @@ export const tradesFirstDay: EventEntry[] = [
           index: '0x1101',
           data: ['5HisFFAqYNrcXGWTQKiupvTrDrKmwruAJD6usxAUD7TDGfgo', '0'],
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '400,010,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '400,010,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2844,13 +3696,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5FnepiabWkVY5SaCRLRrqeArh3N6xJiwHosx56McxYwDpo9E', '5', '9,396,562,922,588,763,503,962'],
+          data: [
+            '5FnepiabWkVY5SaCRLRrqeArh3N6xJiwHosx56McxYwDpo9E',
+            '5',
+            '9,396,562,922,588,763,503,962',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2870,12 +3732,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '884,365,819,259,695,295,274',
           },
         },
-        { method: 'RewardsClaimed', section: 'bootstrap', index: '0x3502', data: ['5', '884,365,819,259,695,295,274'] },
+        {
+          method: 'RewardsClaimed',
+          section: 'bootstrap',
+          index: '0x3502',
+          data: ['5', '884,365,819,259,695,295,274'],
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2912,12 +3785,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '6,711,111,111,111,111,111,111,111',
           },
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '446,607,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '446,607,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2955,7 +3839,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,604,106,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,604,106,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -2969,7 +3859,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5Cg6YMVDKvBa9ThyicZKN37DJKG4pXsbvw6SGk3WpTwmhwCY', amount: '18,355,915,831' },
+          data: {
+            currencyId: '4',
+            who: '5Cg6YMVDKvBa9ThyicZKN37DJKG4pXsbvw6SGk3WpTwmhwCY',
+            amount: '18,355,915,831',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -2987,7 +3881,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3024,12 +3924,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '6,711,111,111,111,111,111,111,111',
           },
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '446,607,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '446,607,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3066,12 +3977,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '6,711,111,111,111,111,111,111,112',
           },
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '446,607,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '446,607,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3085,14 +4007,29 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'VestingUpdated',
           section: 'vesting',
           index: '0x1100',
-          data: ['5Fn8u8J9z8TuVuMNknQp99niBx8MU8gPwHsB34xEkz6WZu76', '0', '26,643,741,873,837,307,627,404,530'],
+          data: [
+            '5Fn8u8J9z8TuVuMNknQp99niBx8MU8gPwHsB34xEkz6WZu76',
+            '0',
+            '26,643,741,873,837,307,627,404,530',
+          ],
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '493,548,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '493,548,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3106,14 +4043,29 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'VestingUpdated',
           section: 'vesting',
           index: '0x1100',
-          data: ['5F6atG8uUsxF1S9GfJ1ea6ArjbPnpUWZAy8czKqvLfTQSCBh', '0', '26,643,738,043,294,435,988,642,483'],
+          data: [
+            '5F6atG8uUsxF1S9GfJ1ea6ArjbPnpUWZAy8czKqvLfTQSCBh',
+            '0',
+            '26,643,738,043,294,435,988,642,483',
+          ],
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '493,548,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '493,548,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3127,14 +4079,29 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'VestingUpdated',
           section: 'vesting',
           index: '0x1100',
-          data: ['5FLR18BcdAGCWQ2q1HgDAguvzsc48LfqeykvvboLbUK55g9W', '0', '26,643,735,489,599,188,229,467,785'],
+          data: [
+            '5FLR18BcdAGCWQ2q1HgDAguvzsc48LfqeykvvboLbUK55g9W',
+            '0',
+            '26,643,735,489,599,188,229,467,785',
+          ],
         },
-        { method: 'Sudid', section: 'sudo', index: '0x3100', data: { sudoResult: 'Ok' } },
+        {
+          method: 'Sudid',
+          section: 'sudo',
+          index: '0x3100',
+          data: { sudoResult: 'Ok' },
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '493,548,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '493,548,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3160,7 +4127,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3196,7 +4169,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3210,169 +4189,268 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5EaErrU1fcHXjpoeVANXfERqdFb6qJ9Jjrb5cPvFdDcwFfNF', '11,050,228,262,922,374,465,753'],
+          data: [
+            '5EaErrU1fcHXjpoeVANXfERqdFb6qJ9Jjrb5cPvFdDcwFfNF',
+            '11,050,228,262,922,374,465,753',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5CBCt39UDbBKusD1nRrA2quBACwKuNSZ1ryZz7CdG31D9KmU', '10,319,634,619,817,351,671,233'],
+          data: [
+            '5CBCt39UDbBKusD1nRrA2quBACwKuNSZ1ryZz7CdG31D9KmU',
+            '10,319,634,619,817,351,671,233',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5DLBpNQrbtFKeJizeo5QuWMibsbEf2K7kixsL8trA5zsCoA9', '2,100,456,545,844,748,931,507'],
+          data: [
+            '5DLBpNQrbtFKeJizeo5QuWMibsbEf2K7kixsL8trA5zsCoA9',
+            '2,100,456,545,844,748,931,507',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5Fgaa9uYoYLX7ZePrzBGvFZ6z7Wxy2SaGJRh9ib1w3mwbG3s', '821,917,807,397,260,273,973'],
+          data: [
+            '5Fgaa9uYoYLX7ZePrzBGvFZ6z7Wxy2SaGJRh9ib1w3mwbG3s',
+            '821,917,807,397,260,273,973',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5FxNpQPAL9CeEWa2bkL9tgqLR7sSDjx5WkrieM8KcP8xzKbC', '11,324,200,865,388,127,890,411'],
+          data: [
+            '5FxNpQPAL9CeEWa2bkL9tgqLR7sSDjx5WkrieM8KcP8xzKbC',
+            '11,324,200,865,388,127,890,411',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5C8QeA5CdAFoHPtfRkPKva5Wigw3f2hs5g7fEqiYUhnC545Y', '10,410,958,893,698,630,136,986'],
+          data: [
+            '5C8QeA5CdAFoHPtfRkPKva5Wigw3f2hs5g7fEqiYUhnC545Y',
+            '10,410,958,893,698,630,136,986',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5CSikproDLMgCk9oV3SXx4Ga3R1W8FYwENzj9t87DHV1SL3u', '10,045,662,017,351,598,246,575'],
+          data: [
+            '5CSikproDLMgCk9oV3SXx4Ga3R1W8FYwENzj9t87DHV1SL3u',
+            '10,045,662,017,351,598,246,575',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5H96StyhZFMWjXdgh5iW74vV4VFcBHQNayyUYaQrsa1FFrbY', '11,415,525,029,680,365,369,863'],
+          data: [
+            '5H96StyhZFMWjXdgh5iW74vV4VFcBHQNayyUYaQrsa1FFrbY',
+            '11,415,525,029,680,365,369,863',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5EpjXqS6TPBNgD5RuuJD55eVRu3ewQQgULfB6gUPCkj2chsh', '10,593,607,222,283,105,095,890'],
+          data: [
+            '5EpjXqS6TPBNgD5RuuJD55eVRu3ewQQgULfB6gUPCkj2chsh',
+            '10,593,607,222,283,105,095,890',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5DtMwN2UKjHA5kgYhH2TTRUfSx2xqU7NTb12xLebvdvJ7z3x', '10,958,904,098,630,136,986,301'],
+          data: [
+            '5DtMwN2UKjHA5kgYhH2TTRUfSx2xqU7NTb12xLebvdvJ7z3x',
+            '10,958,904,098,630,136,986,301',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5HK7Uey9ngguvABqbfnKmT6v33hfQwYVFSXfRVmixjwtMu1f', '7,397,260,266,575,342,465,753'],
+          data: [
+            '5HK7Uey9ngguvABqbfnKmT6v33hfQwYVFSXfRVmixjwtMu1f',
+            '7,397,260,266,575,342,465,753',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5CZbRcrFHwn1Rycf1HpredmhrjXKgPANM52kbUtx1b63zcro', '2,283,104,984,018,264,876,712'],
+          data: [
+            '5CZbRcrFHwn1Rycf1HpredmhrjXKgPANM52kbUtx1b63zcro',
+            '2,283,104,984,018,264,876,712',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5DvoL2BNoSm7wRt2tfZ6WW5QFrxm68GLv5SCrPQ4JBLjbvpL', '10,867,579,824,748,858,520,548'],
+          data: [
+            '5DvoL2BNoSm7wRt2tfZ6WW5QFrxm68GLv5SCrPQ4JBLjbvpL',
+            '10,867,579,824,748,858,520,548',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5C8QeA5CdAFoHPtfRkPKva5Wigw3f2hs5g7fEqiYUhnC545Y', '6,666,666,666,666,666,666,667'],
+          data: [
+            '216',
+            '5C8QeA5CdAFoHPtfRkPKva5Wigw3f2hs5g7fEqiYUhnC545Y',
+            '6,666,666,666,666,666,666,667',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5CBCt39UDbBKusD1nRrA2quBACwKuNSZ1ryZz7CdG31D9KmU', '10,000,000,000,000,000,000'],
+          data: [
+            '216',
+            '5CBCt39UDbBKusD1nRrA2quBACwKuNSZ1ryZz7CdG31D9KmU',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5CSikproDLMgCk9oV3SXx4Ga3R1W8FYwENzj9t87DHV1SL3u', '10,000,000,000,000,000,000'],
+          data: [
+            '216',
+            '5CSikproDLMgCk9oV3SXx4Ga3R1W8FYwENzj9t87DHV1SL3u',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5CZbRcrFHwn1Rycf1HpredmhrjXKgPANM52kbUtx1b63zcro', '10,000,000,000,000,000,000'],
+          data: [
+            '216',
+            '5CZbRcrFHwn1Rycf1HpredmhrjXKgPANM52kbUtx1b63zcro',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5DLBpNQrbtFKeJizeo5QuWMibsbEf2K7kixsL8trA5zsCoA9', '333,333,333,333,333,333,333'],
+          data: [
+            '216',
+            '5DLBpNQrbtFKeJizeo5QuWMibsbEf2K7kixsL8trA5zsCoA9',
+            '333,333,333,333,333,333,333',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5DtMwN2UKjHA5kgYhH2TTRUfSx2xqU7NTb12xLebvdvJ7z3x', '10,000,000,000,000,000,000'],
+          data: [
+            '216',
+            '5DtMwN2UKjHA5kgYhH2TTRUfSx2xqU7NTb12xLebvdvJ7z3x',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5DvoL2BNoSm7wRt2tfZ6WW5QFrxm68GLv5SCrPQ4JBLjbvpL', '10,000,000,000,000,000,000'],
+          data: [
+            '216',
+            '5DvoL2BNoSm7wRt2tfZ6WW5QFrxm68GLv5SCrPQ4JBLjbvpL',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5EaErrU1fcHXjpoeVANXfERqdFb6qJ9Jjrb5cPvFdDcwFfNF', '10,000,000,000,000,000,000'],
+          data: [
+            '216',
+            '5EaErrU1fcHXjpoeVANXfERqdFb6qJ9Jjrb5cPvFdDcwFfNF',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5EpjXqS6TPBNgD5RuuJD55eVRu3ewQQgULfB6gUPCkj2chsh', '10,000,000,000,000,000,000'],
+          data: [
+            '216',
+            '5EpjXqS6TPBNgD5RuuJD55eVRu3ewQQgULfB6gUPCkj2chsh',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5Fgaa9uYoYLX7ZePrzBGvFZ6z7Wxy2SaGJRh9ib1w3mwbG3s', '10,000,000,000,000,000,000'],
+          data: [
+            '216',
+            '5Fgaa9uYoYLX7ZePrzBGvFZ6z7Wxy2SaGJRh9ib1w3mwbG3s',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5FxNpQPAL9CeEWa2bkL9tgqLR7sSDjx5WkrieM8KcP8xzKbC', '3,333,333,333,333,333,333,333'],
+          data: [
+            '216',
+            '5FxNpQPAL9CeEWa2bkL9tgqLR7sSDjx5WkrieM8KcP8xzKbC',
+            '3,333,333,333,333,333,333,333',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5H96StyhZFMWjXdgh5iW74vV4VFcBHQNayyUYaQrsa1FFrbY', '10,000,000,000,000,000,000'],
+          data: [
+            '216',
+            '5H96StyhZFMWjXdgh5iW74vV4VFcBHQNayyUYaQrsa1FFrbY',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['216', '5HK7Uey9ngguvABqbfnKmT6v33hfQwYVFSXfRVmixjwtMu1f', '10,000,000,000,000,000,000'],
+          data: [
+            '216',
+            '5HK7Uey9ngguvABqbfnKmT6v33hfQwYVFSXfRVmixjwtMu1f',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'SessionIssuanceIssued',
           section: 'issuance',
           index: '0x1300',
-          data: ['215', '136,986,301,479,452,054,794,520', '109,589,040,986,301,369,863,014'],
+          data: [
+            '215',
+            '136,986,301,479,452,054,794,520',
+            '109,589,040,986,301,369,863,014',
+          ],
         },
         {
           method: 'SessionIssuanceRecorded',
           section: 'issuance',
           index: '0x1301',
-          data: ['215', '136,986,301,479,452,054,794,520', '109,589,040,986,301,369,863,014'],
+          data: [
+            '215',
+            '136,986,301,479,452,054,794,520',
+            '109,589,040,986,301,369,863,014',
+          ],
         },
         {
           method: 'NewRound',
@@ -3380,7 +4458,12 @@ export const tradesFirstDay: EventEntry[] = [
           index: '0x1500',
           data: ['258,000', '215', '13', '10,433,333,333,333,333,333,333'],
         },
-        { method: 'NewSession', section: 'session', index: '0x1600', data: { sessionIndex: '215' } },
+        {
+          method: 'NewSession',
+          section: 'session',
+          index: '0x1600',
+          data: { sessionIndex: '215' },
+        },
       ],
     ],
   },
@@ -3407,7 +4490,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3433,7 +4522,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3459,7 +4554,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3485,7 +4586,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3509,13 +4616,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5EEbgtFaP8ehwhyeH2qQLiifN5fudqvcYyBPMnD9p2dqYQL8', '5', '39,674,506,505,645,188,459,035'],
+          data: [
+            '5EEbgtFaP8ehwhyeH2qQLiifN5fudqvcYyBPMnD9p2dqYQL8',
+            '5',
+            '39,674,506,505,645,188,459,035',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3550,7 +4667,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3576,7 +4699,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3611,7 +4740,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3635,13 +4770,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5EqrDxVusQ3ccmUU1zwG8mi2ub7pPHJvEGwKcAkszuFkfAUF', '5', '8,870,215,720,691,123,561,845'],
+          data: [
+            '5EqrDxVusQ3ccmUU1zwG8mi2ub7pPHJvEGwKcAkszuFkfAUF',
+            '5',
+            '8,870,215,720,691,123,561,845',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3655,7 +4800,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5CLWCiLiTnoeQVNgLEyqbNEdRnAu4jLojToaC8JtcjzTHriD', amount: '996,327,262,570' },
+          data: {
+            currencyId: '4',
+            who: '5CLWCiLiTnoeQVNgLEyqbNEdRnAu4jLojToaC8JtcjzTHriD',
+            amount: '996,327,262,570',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -3673,7 +4822,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3699,7 +4854,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3713,7 +4874,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5G9pSYAqhkqcZFScBxdd9epKC4c5v75yGsXagqC6HJKSrdLd', amount: '655,205,834,560' },
+          data: {
+            currencyId: '4',
+            who: '5G9pSYAqhkqcZFScBxdd9epKC4c5v75yGsXagqC6HJKSrdLd',
+            amount: '655,205,834,560',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -3731,7 +4896,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3769,7 +4940,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,604,106,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,604,106,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -3798,7 +4975,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3833,7 +5016,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3859,7 +5048,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3883,13 +5078,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityDeactivated',
           section: 'xyk',
           index: '0x0d06',
-          data: ['5DWpX5RdYBwstMoMFdtrLhjVDfKhQGbhVACG43wBVjnoC2uT', '5', '3,637,082,036,105,847,317,884'],
+          data: [
+            '5DWpX5RdYBwstMoMFdtrLhjVDfKhQGbhVACG43wBVjnoC2uT',
+            '5',
+            '3,637,082,036,105,847,317,884',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,084,598,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,084,598,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3913,13 +5118,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5H6EV9P7g4tczfvpW6p6Nn9X3cuHKVsUnuAutoLA4BdUGVDM', '5', '61,683,551,021,345,596,029,085'],
+          data: [
+            '5H6EV9P7g4tczfvpW6p6Nn9X3cuHKVsUnuAutoLA4BdUGVDM',
+            '5',
+            '61,683,551,021,345,596,029,085',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3943,13 +5158,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5CvnqYjXyFJK9usKJ4gnctM5vcfqhx8m5QqwXwAE5Ynz1vii', '5', '24,462,745,055,011,578,079,146'],
+          data: [
+            '5CvnqYjXyFJK9usKJ4gnctM5vcfqhx8m5QqwXwAE5Ynz1vii',
+            '5',
+            '24,462,745,055,011,578,079,146',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -3971,7 +5196,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -3981,30 +5212,47 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258245,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5DwJwoXoEquf63DDMXroMdVYFQj4UQxca7QX9yg3KPQTyAG3', amount: '78,496,000,000' },
+          data: {
+            currencyId: '4',
+            who: '5DwJwoXoEquf63DDMXroMdVYFQj4UQxca7QX9yg3KPQTyAG3',
+            amount: '78,496,000,000',
+          },
         },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xbb04eaf820d8e5c9ae78ebd3be89bfaadd2f9c1c45e866843152bedcfb76b8e3', { Complete: '4,000,000,000' }],
+          data: [
+            '0xbb04eaf820d8e5c9ae78ebd3be89bfaadd2f9c1c45e866843152bedcfb76b8e3',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x0026d41dbc6c93551131ff0e18259d0a6050b6e043faaa7e172271c0cca33c05'],
+          data: [
+            '4,000,000,000',
+            '0x0026d41dbc6c93551131ff0e18259d0a6050b6e043faaa7e172271c0cca33c05',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -4028,13 +5276,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DwJwoXoEquf63DDMXroMdVYFQj4UQxca7QX9yg3KPQTyAG3', '5', '2,065,000,000,132,484,317,463'],
+          data: [
+            '5DwJwoXoEquf63DDMXroMdVYFQj4UQxca7QX9yg3KPQTyAG3',
+            '5',
+            '2,065,000,000,132,484,317,463',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4069,7 +5327,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4093,13 +5357,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GWZBr8jbawBDvMkQqCcA6Qn2bnPMpJMxWm7cFR7obn8CTX6', '5', '825,000,000,052,929,569,931'],
+          data: [
+            '5GWZBr8jbawBDvMkQqCcA6Qn2bnPMpJMxWm7cFR7obn8CTX6',
+            '5',
+            '825,000,000,052,929,569,931',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -4117,13 +5391,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GRAhqRobqDhdW32tipvKbQSgjD1EEUCHrm4TvgLMjH4ckca', '5', '565,708,772,746,065,358,705'],
+          data: [
+            '5GRAhqRobqDhdW32tipvKbQSgjD1EEUCHrm4TvgLMjH4ckca',
+            '5',
+            '565,708,772,746,065,358,705',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4147,13 +5431,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GWGarFWqanigYdP53KD65DnbKFFMRY9gohWQ3ihtVu3N6m7', '5', '17,495,196,059,728,929,119,938'],
+          data: [
+            '5GWGarFWqanigYdP53KD65DnbKFFMRY9gohWQ3ihtVu3N6m7',
+            '5',
+            '17,495,196,059,728,929,119,938',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4179,7 +5473,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4189,24 +5489,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258310,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x653f8426c8777b3e725bbb87d137af471d5915dd5131304bf2b2831d4598baa2', { Complete: '4,000,000,000' }],
+          data: [
+            '0x653f8426c8777b3e725bbb87d137af471d5915dd5131304bf2b2831d4598baa2',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x89b4f2f8a6cd30a61eaeccb3c3259db0fc183be5cf334910e69079bbb7204e7e'],
+          data: [
+            '4,000,000,000',
+            '0x89b4f2f8a6cd30a61eaeccb3c3259db0fc183be5cf334910e69079bbb7204e7e',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -4242,7 +5555,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4266,13 +5585,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5HGUByxcNd7ogYbMb5QmVhHm81vjt1VxCPoNjDXdcBrMVFQw', '5', '1,230,147,242,945,032,441,810'],
+          data: [
+            '5HGUByxcNd7ogYbMb5QmVhHm81vjt1VxCPoNjDXdcBrMVFQw',
+            '5',
+            '1,230,147,242,945,032,441,810',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4302,7 +5631,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4326,13 +5661,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Dq31Eg5dwrm6Ltqi2vpZp8AeNwtxesG212oyWPtj3aNK6dC', '5', '34,875,354,221,454,065,449,370'],
+          data: [
+            '5Dq31Eg5dwrm6Ltqi2vpZp8AeNwtxesG212oyWPtj3aNK6dC',
+            '5',
+            '34,875,354,221,454,065,449,370',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4342,24 +5687,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258350,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x72b4cfbd0930a05344e5f95aa94ae9c4d59e036af09f902fd7eadbfee4b26f8c', { Complete: '4,000,000,000' }],
+          data: [
+            '0x72b4cfbd0930a05344e5f95aa94ae9c4d59e036af09f902fd7eadbfee4b26f8c',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xf1abfeff7db2eb2fc7a8b0ebbb7db49df623096b8d267a728aa0dacc8290ab1e'],
+          data: [
+            '4,000,000,000',
+            '0xf1abfeff7db2eb2fc7a8b0ebbb7db49df623096b8d267a728aa0dacc8290ab1e',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -4394,7 +5752,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4418,13 +5782,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Ec1a7MWiRdBcfTqxbYnSwxjfVd7Pvo8DSnwAxZqV4UJv8bd', '5', '11,690,062,867,526,502,385,263'],
+          data: [
+            '5Ec1a7MWiRdBcfTqxbYnSwxjfVd7Pvo8DSnwAxZqV4UJv8bd',
+            '5',
+            '11,690,062,867,526,502,385,263',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4448,13 +5822,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityDeactivated',
           section: 'xyk',
           index: '0x0d06',
-          data: ['5HGUByxcNd7ogYbMb5QmVhHm81vjt1VxCPoNjDXdcBrMVFQw', '5', '1,230,147,242,945,032,441,810'],
+          data: [
+            '5HGUByxcNd7ogYbMb5QmVhHm81vjt1VxCPoNjDXdcBrMVFQw',
+            '5',
+            '1,230,147,242,945,032,441,810',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,084,598,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,084,598,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4482,7 +5866,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4508,7 +5898,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4533,7 +5929,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '423,307,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '423,307,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4561,7 +5963,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4587,7 +5995,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4622,7 +6036,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4663,7 +6083,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '423,307,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '423,307,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4688,7 +6114,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '423,307,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '423,307,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4698,24 +6130,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258483,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xd3edf07e455d495892fd04ec651345ba923ec7e33709928cf7c1ff95ce441e5b', { Complete: '4,000,000,000' }],
+          data: [
+            '0xd3edf07e455d495892fd04ec651345ba923ec7e33709928cf7c1ff95ce441e5b',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x63d6516199102d07ea939f8302366c5209e31dc5abd68fa1de3601a3c8a53063'],
+          data: [
+            '4,000,000,000',
+            '0x63d6516199102d07ea939f8302366c5209e31dc5abd68fa1de3601a3c8a53063',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -4745,7 +6190,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4769,13 +6220,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5HKz3KQXTutbf79Nyq6cDXSgtQhamBmZ4vqz6s42rZMmeCMy', '5', '1,220,910,256,434,243,984,304'],
+          data: [
+            '5HKz3KQXTutbf79Nyq6cDXSgtQhamBmZ4vqz6s42rZMmeCMy',
+            '5',
+            '1,220,910,256,434,243,984,304',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4799,13 +6260,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5FFTemNzVqVduFk7n8z7G6qukrnBfTTQRE8EGPbjmtdpz2c1', '5', '14,147,850,322,465,088,490,008'],
+          data: [
+            '5FFTemNzVqVduFk7n8z7G6qukrnBfTTQRE8EGPbjmtdpz2c1',
+            '5',
+            '14,147,850,322,465,088,490,008',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4829,13 +6300,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityDeactivated',
           section: 'xyk',
           index: '0x0d06',
-          data: ['5HKz3KQXTutbf79Nyq6cDXSgtQhamBmZ4vqz6s42rZMmeCMy', '5', '1,220,910,256,434,243,984,304'],
+          data: [
+            '5HKz3KQXTutbf79Nyq6cDXSgtQhamBmZ4vqz6s42rZMmeCMy',
+            '5',
+            '1,220,910,256,434,243,984,304',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,084,598,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,084,598,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4859,13 +6340,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5EUtDmDBCGcVKRULfPE4GHUTmJLiaYY9TaBZc53ALR3dLA8V', '5', '79,714,507,520,162,239,694,441'],
+          data: [
+            '5EUtDmDBCGcVKRULfPE4GHUTmJLiaYY9TaBZc53ALR3dLA8V',
+            '5',
+            '79,714,507,520,162,239,694,441',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4891,7 +6382,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4927,7 +6424,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4951,13 +6454,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Fbn1p7VB3oMTkZPFQnYCF6AvKijwMoSNjz3vH8vKwA78SK6', '5', '3,812,893,251,874,404,159,323'],
+          data: [
+            '5Fbn1p7VB3oMTkZPFQnYCF6AvKijwMoSNjz3vH8vKwA78SK6',
+            '5',
+            '3,812,893,251,874,404,159,323',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -4981,13 +6494,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GBh6kEXwAjC8wYdzGc96sXEHZH5e3SJJNNJtTNZRSXFrYWk', '5', '3,790,484,365,054,965,152,155'],
+          data: [
+            '5GBh6kEXwAjC8wYdzGc96sXEHZH5e3SJJNNJtTNZRSXFrYWk',
+            '5',
+            '3,790,484,365,054,965,152,155',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5015,7 +6538,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -5023,7 +6552,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5HosYfffhWidsMysGkLDtbdSEyEiYch7VgSjzCPVAiSfY2R5', amount: '531,064,523,968' },
+          data: {
+            currencyId: '4',
+            who: '5HosYfffhWidsMysGkLDtbdSEyEiYch7VgSjzCPVAiSfY2R5',
+            amount: '531,064,523,968',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -5041,7 +6574,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5051,24 +6590,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258531,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x4d58970663353b0abe206687ccdcf2d60bb50cbda8f7132351ba766915981568', { Complete: '4,000,000,000' }],
+          data: [
+            '0x4d58970663353b0abe206687ccdcf2d60bb50cbda8f7132351ba766915981568',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xf8b741060c5426f36f6552fe82b51f144adb766f6fe8992631d681e869329406'],
+          data: [
+            '4,000,000,000',
+            '0xf8b741060c5426f36f6552fe82b51f144adb766f6fe8992631d681e869329406',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -5096,7 +6648,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5131,7 +6689,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5157,7 +6721,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5193,7 +6763,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5229,7 +6805,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5264,7 +6846,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5288,13 +6876,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DjxYSSBYhbUyvaPkub5S2NQzCeJHuytwWzFNWvEztXGjHyz', '5', '5,062,893,251,954,600,477,400'],
+          data: [
+            '5DjxYSSBYhbUyvaPkub5S2NQzCeJHuytwWzFNWvEztXGjHyz',
+            '5',
+            '5,062,893,251,954,600,477,400',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5304,24 +6902,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258556,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x9d9cdc4bfe8704a24670b2a8bcb330ac98fa43988dbf81b12a6a591ce05687ed', { Complete: '4,000,000,000' }],
+          data: [
+            '0x9d9cdc4bfe8704a24670b2a8bcb330ac98fa43988dbf81b12a6a591ce05687ed',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x7d0f6e6e2247bc74d55a09524af35960979106ddc3a06ad933db8e2ad47bc729'],
+          data: [
+            '4,000,000,000',
+            '0x7d0f6e6e2247bc74d55a09524af35960979106ddc3a06ad933db8e2ad47bc729',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -5331,24 +6942,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258557,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x58a936aed134003173456300f84fea6fca6162ddcf11d86c6a448288f35f67ed', { Complete: '4,000,000,000' }],
+          data: [
+            '0x58a936aed134003173456300f84fea6fca6162ddcf11d86c6a448288f35f67ed',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xef8589f247c00ab2d6620e6afe6019fb14f57d150bf7407476477d385ac1ecf0'],
+          data: [
+            '4,000,000,000',
+            '0xef8589f247c00ab2d6620e6afe6019fb14f57d150bf7407476477d385ac1ecf0',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -5386,7 +7010,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,604,106,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,604,106,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5416,7 +7046,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5430,7 +7066,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5EC961jPfT2q2KsuEYTmDt8F8ZKNTXJx1vjfYVS1jAeffqS5', amount: '306,383,459,228' },
+          data: {
+            currencyId: '4',
+            who: '5EC961jPfT2q2KsuEYTmDt8F8ZKNTXJx1vjfYVS1jAeffqS5',
+            amount: '306,383,459,228',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -5448,7 +7088,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5472,13 +7118,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DV2MqtiuYYGdt1UyBLcpHcsMeZ7Jpe2ETGobk164QgH7HpR', '5', '6,396,687,622,669,226,764,574'],
+          data: [
+            '5DV2MqtiuYYGdt1UyBLcpHcsMeZ7Jpe2ETGobk164QgH7HpR',
+            '5',
+            '6,396,687,622,669,226,764,574',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5492,7 +7148,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5F6hScVLNZuEyA6RdJbWG8UkXRq3EsvbpoePxWxRHMi3p4u8', amount: '326,834,782,910' },
+          data: {
+            currencyId: '4',
+            who: '5F6hScVLNZuEyA6RdJbWG8UkXRq3EsvbpoePxWxRHMi3p4u8',
+            amount: '326,834,782,910',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -5510,7 +7170,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -5540,7 +7206,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -5558,13 +7230,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5C8PdYoRGAX2YqPawqdKG3FS7R5Rmg3cW3g6wFvcsSi11bLi', '5', '125,000,000,008,019,631,808'],
+          data: [
+            '5C8PdYoRGAX2YqPawqdKG3FS7R5Rmg3cW3g6wFvcsSi11bLi',
+            '5',
+            '125,000,000,008,019,631,808',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5599,7 +7281,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5624,7 +7312,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '423,307,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '423,307,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5654,7 +7348,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5678,13 +7378,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GgCvdSixqt21pudjRAYXBCkVpTD3XkJX1V7FVJYwKf1TWNR', '5', '21,472,474,933,765,895,727,580'],
+          data: [
+            '5GgCvdSixqt21pudjRAYXBCkVpTD3XkJX1V7FVJYwKf1TWNR',
+            '5',
+            '21,472,474,933,765,895,727,580',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5710,7 +7420,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5734,13 +7450,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5H68xgdu88kD38rD7QP3JTgdej2QsAUTZcuQNAVks8nngWuB', '5', '19,399,643,741,909,740,673,008'],
+          data: [
+            '5H68xgdu88kD38rD7QP3JTgdej2QsAUTZcuQNAVks8nngWuB',
+            '5',
+            '19,399,643,741,909,740,673,008',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5776,7 +7502,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5814,7 +7546,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,604,106,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,604,106,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5842,7 +7580,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5866,13 +7610,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5G1oSMnEAE9LLy9vxTMKognyatrnRL5hgsGVFumurRL4DXWV', '5', '21,821,294,607,762,186,509,559'],
+          data: [
+            '5G1oSMnEAE9LLy9vxTMKognyatrnRL5hgsGVFumurRL4DXWV',
+            '5',
+            '21,821,294,607,762,186,509,559',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5896,13 +7650,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityDeactivated',
           section: 'xyk',
           index: '0x0d06',
-          data: ['5Dvu4NX6h98hnvxRyvyAAXuBHzB8qXoczrUmgUHiWudJwjhE', '5', '136,404,052,378,054,852,751,167'],
+          data: [
+            '5Dvu4NX6h98hnvxRyvyAAXuBHzB8qXoczrUmgUHiWudJwjhE',
+            '5',
+            '136,404,052,378,054,852,751,167',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,084,598,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,084,598,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5928,7 +7692,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5963,7 +7733,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -5983,7 +7759,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '711,814,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '711,814,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6018,7 +7800,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6053,7 +7841,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6077,13 +7871,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5FhmsW5Q8UeiEeXJtM4d17KA1nwKPNA5EJTQzZoVnvf3xbet', '5', '13,553,193,513,489,470,229,264'],
+          data: [
+            '5FhmsW5Q8UeiEeXJtM4d17KA1nwKPNA5EJTQzZoVnvf3xbet',
+            '5',
+            '13,553,193,513,489,470,229,264',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6108,7 +7912,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '423,307,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '423,307,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6132,13 +7942,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5ECSqLVnYQCo6mr68C7Sh6mTJ7wCeZ28YFHTRAbC2bTWxu7b', '5', '50,000,000,003,207,852,723'],
+          data: [
+            '5ECSqLVnYQCo6mr68C7Sh6mTJ7wCeZ28YFHTRAbC2bTWxu7b',
+            '5',
+            '50,000,000,003,207,852,723',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6152,7 +7972,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5DJF2R8XxEFCuarwfsWTkMp1igh2rpfTeYm9vRKRRmooYjjw', amount: '104,157,307,320' },
+          data: {
+            currencyId: '4',
+            who: '5DJF2R8XxEFCuarwfsWTkMp1igh2rpfTeYm9vRKRRmooYjjw',
+            amount: '104,157,307,320',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -6170,7 +7994,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6205,7 +8035,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6233,7 +8069,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6268,7 +8110,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6282,7 +8130,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5GQuJyoaMvfFpDEzTdBnfccDNtRssauGYUbonRGT8EARGQdX', amount: '96,994,801,504' },
+          data: {
+            currencyId: '4',
+            who: '5GQuJyoaMvfFpDEzTdBnfccDNtRssauGYUbonRGT8EARGQdX',
+            amount: '96,994,801,504',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -6300,7 +8152,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6335,7 +8193,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6349,7 +8213,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5EecWAN3YJzNMhAWFjaiuU1xb6iVryBJanrDvjqEKXJDPjPp', amount: '104,153,675,912' },
+          data: {
+            currencyId: '4',
+            who: '5EecWAN3YJzNMhAWFjaiuU1xb6iVryBJanrDvjqEKXJDPjPp',
+            amount: '104,153,675,912',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -6367,7 +8235,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6402,7 +8276,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6426,13 +8306,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityDeactivated',
           section: 'xyk',
           index: '0x0d06',
-          data: ['5Cicv6EQBbw4a8NEqeTxAQcxgHYY1ZnDfwCAUt3Ucexyo4jc', '5', '274,175,041,938,083,316,166,931'],
+          data: [
+            '5Cicv6EQBbw4a8NEqeTxAQcxgHYY1ZnDfwCAUt3Ucexyo4jc',
+            '5',
+            '274,175,041,938,083,316,166,931',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,084,598,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,084,598,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6446,7 +8336,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5EEyWvXmy6SsozU7obtu8MxugZJTcVJbKn2o7znjsrQajZkR', amount: '112,939,517,452' },
+          data: {
+            currencyId: '4',
+            who: '5EEyWvXmy6SsozU7obtu8MxugZJTcVJbKn2o7znjsrQajZkR',
+            amount: '112,939,517,452',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -6464,7 +8358,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6500,7 +8400,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6526,7 +8432,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6536,24 +8448,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258792,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xda98f5897479af7ffab0cfc5d2d92278d73a4c8eb1a9a86e5bdbb2f473d7a6e5', { Complete: '4,000,000,000' }],
+          data: [
+            '0xda98f5897479af7ffab0cfc5d2d92278d73a4c8eb1a9a86e5bdbb2f473d7a6e5',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x623b482a787f2f806941c6387ee2b87d333138258cb7cc38f40e02d7e238dc0b'],
+          data: [
+            '4,000,000,000',
+            '0x623b482a787f2f806941c6387ee2b87d333138258cb7cc38f40e02d7e238dc0b',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -6577,13 +8502,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5FEnkdRSqDWDUhYLXk2kuyj5jrc2UaT11eMkYFD7dX24yD61', '5', '504,831,685,436,774,246,555'],
+          data: [
+            '5FEnkdRSqDWDUhYLXk2kuyj5jrc2UaT11eMkYFD7dX24yD61',
+            '5',
+            '504,831,685,436,774,246,555',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6607,13 +8542,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5CtUe2WQsTxuq7irgiXxxqmfNmb8oM9JPvN2hAzPEQh37X1F', '5', '2,893,886,965,137,793,184,412'],
+          data: [
+            '5CtUe2WQsTxuq7irgiXxxqmfNmb8oM9JPvN2hAzPEQh37X1F',
+            '5',
+            '2,893,886,965,137,793,184,412',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6648,7 +8593,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6662,7 +8613,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5EHqE5mK7HYEp9KPt2Lo1QqRNm7bn3pLAVXn3asbcsjwr9yP', amount: '111,336,877,480' },
+          data: {
+            currencyId: '4',
+            who: '5EHqE5mK7HYEp9KPt2Lo1QqRNm7bn3pLAVXn3asbcsjwr9yP',
+            amount: '111,336,877,480',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -6680,7 +8635,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6704,13 +8665,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Cicv6EQBbw4a8NEqeTxAQcxgHYY1ZnDfwCAUt3Ucexyo4jc', '5', '275,000,000,017,643,189,976,862'],
+          data: [
+            '5Cicv6EQBbw4a8NEqeTxAQcxgHYY1ZnDfwCAUt3Ucexyo4jc',
+            '5',
+            '275,000,000,017,643,189,976,862',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6748,7 +8719,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,604,106,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,604,106,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6768,7 +8745,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6782,7 +8765,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5EFmg518Uggf27KoTJKf135EaAhdUzZW9pt1ieWkdGbbCFby', amount: '108,079,358,153' },
+          data: {
+            currencyId: '4',
+            who: '5EFmg518Uggf27KoTJKf135EaAhdUzZW9pt1ieWkdGbbCFby',
+            amount: '108,079,358,153',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -6800,7 +8787,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6824,13 +8817,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DAwK551mbYrQ1eG9Vmaqe9CT9yG75Sf7t87UCgMHWoDGydx', '5', '168,848,014,538,789,780,511'],
+          data: [
+            '5DAwK551mbYrQ1eG9Vmaqe9CT9yG75Sf7t87UCgMHWoDGydx',
+            '5',
+            '168,848,014,538,789,780,511',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6840,30 +8843,47 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258824,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5DZuxkzY6SHL7gsf51bD5mHubKnc1B1gwV3kHiWvPMs59qAR', amount: '288,496,000,000' },
+          data: {
+            currencyId: '4',
+            who: '5DZuxkzY6SHL7gsf51bD5mHubKnc1B1gwV3kHiWvPMs59qAR',
+            amount: '288,496,000,000',
+          },
         },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xe4e0a7eb7582ddd3a6a68ad40cedb75d32905d03fa155bf390468e0d28421098', { Complete: '4,000,000,000' }],
+          data: [
+            '0xe4e0a7eb7582ddd3a6a68ad40cedb75d32905d03fa155bf390468e0d28421098',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xfc77c741e411aab4e118cb0a9cbb58dbd72df85a3f112580b134caf900cde18a'],
+          data: [
+            '4,000,000,000',
+            '0xfc77c741e411aab4e118cb0a9cbb58dbd72df85a3f112580b134caf900cde18a',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -6887,13 +8907,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GsdxKrsNJ3Sn9U674yeodJeV9dq1u179vZ2G5MZjToZJdfh', '5', '4,169,455,756,084,452,517,410'],
+          data: [
+            '5GsdxKrsNJ3Sn9U674yeodJeV9dq1u179vZ2G5MZjToZJdfh',
+            '5',
+            '4,169,455,756,084,452,517,410',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -6903,24 +8933,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258849,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x3ca8e10677ab2100c33bc402d1db9a2a8be9f2e1c9141ea1f55a15914112678c', { Complete: '4,000,000,000' }],
+          data: [
+            '0x3ca8e10677ab2100c33bc402d1db9a2a8be9f2e1c9141ea1f55a15914112678c',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x2b2b8362f25d71015cf8a12c287e5568b13c8ac86d698039649267169671a5ab'],
+          data: [
+            '4,000,000,000',
+            '0x2b2b8362f25d71015cf8a12c287e5568b13c8ac86d698039649267169671a5ab',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -6950,7 +8993,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -6980,7 +9029,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7015,7 +9070,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7039,13 +9100,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GbR4UF56veziDBur9yFTGtzkXMPKeiJDjfrRjFRXdMXZkaT', '5', '4,129,289,939,516,962,072,971'],
+          data: [
+            '5GbR4UF56veziDBur9yFTGtzkXMPKeiJDjfrRjFRXdMXZkaT',
+            '5',
+            '4,129,289,939,516,962,072,971',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7059,7 +9130,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5FnW468SuBM5KXdgui3t8YHcUD7YAA3zEcTrbE6tU5V5tNnj', amount: '104,172,451,486' },
+          data: {
+            currencyId: '4',
+            who: '5FnW468SuBM5KXdgui3t8YHcUD7YAA3zEcTrbE6tU5V5tNnj',
+            amount: '104,172,451,486',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -7077,7 +9152,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7112,7 +9193,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7136,13 +9223,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5HHQXuQ1W1BSnrtdYEErJfUzPE6zt7LDQBL7VmK1KvpgjUsz', '5', '8,103,805,700,118,486,261,610'],
+          data: [
+            '5HHQXuQ1W1BSnrtdYEErJfUzPE6zt7LDQBL7VmK1KvpgjUsz',
+            '5',
+            '8,103,805,700,118,486,261,610',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7166,13 +9263,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DV7Q26MNZDyJTmhKit4R4gA4fCTnSUDAm5gqCX1uicU9doR', '5', '25,990,599,053,224,522,317,862'],
+          data: [
+            '5DV7Q26MNZDyJTmhKit4R4gA4fCTnSUDAm5gqCX1uicU9doR',
+            '5',
+            '25,990,599,053,224,522,317,862',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7196,13 +9303,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5E7VsGbRuwYFx9rkBiYStQVe93dCthDXrq7KhUUp3ZJ1fdU3', '5', '2,500,000,000,160,392,636,153'],
+          data: [
+            '5E7VsGbRuwYFx9rkBiYStQVe93dCthDXrq7KhUUp3ZJ1fdU3',
+            '5',
+            '2,500,000,000,160,392,636,153',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7216,7 +9333,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5CLjkPshmSjgDDhEEYpEoSdNp4hFq58yxKKMHgwNrCSWoDcE', amount: '108,076,930,574' },
+          data: {
+            currencyId: '4',
+            who: '5CLjkPshmSjgDDhEEYpEoSdNp4hFq58yxKKMHgwNrCSWoDcE',
+            amount: '108,076,930,574',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -7234,7 +9355,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7248,7 +9375,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5E4obsq88EUMy2kXFbaqqHZz9nbgB9pLHeSPhuf63fo58gai', amount: '122,072,411,746' },
+          data: {
+            currencyId: '4',
+            who: '5E4obsq88EUMy2kXFbaqqHZz9nbgB9pLHeSPhuf63fo58gai',
+            amount: '122,072,411,746',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -7266,7 +9397,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7290,13 +9427,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Ec3wrycb64hrd5E7YDocpGo4Gfw5qtbyEnyP1hp91BvJrRH', '5', '347,187,635,545,520,034,384,894'],
+          data: [
+            '5Ec3wrycb64hrd5E7YDocpGo4Gfw5qtbyEnyP1hp91BvJrRH',
+            '5',
+            '347,187,635,545,520,034,384,894',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7310,7 +9457,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5CUpvJKxJLAaNRxK9AHYkZifQiVPDXG4veZZZheb35DSTs3a', amount: '147,460,029,373' },
+          data: {
+            currencyId: '4',
+            who: '5CUpvJKxJLAaNRxK9AHYkZifQiVPDXG4veZZZheb35DSTs3a',
+            amount: '147,460,029,373',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -7328,7 +9479,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7358,7 +9515,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7372,7 +9535,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5C5SNZsU7RJptaodDHtqpWqQz6heu3Lcm4eJqtySRnQSiVHA', amount: '846,276,121,219' },
+          data: {
+            currencyId: '4',
+            who: '5C5SNZsU7RJptaodDHtqpWqQz6heu3Lcm4eJqtySRnQSiVHA',
+            amount: '846,276,121,219',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -7390,7 +9557,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7414,13 +9587,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GWMp3Zcut5b9spyh6uPkoEw7mgEo387cWg5BuztYNcRT54Q', '5', '4,312,893,251,906,482,686,554'],
+          data: [
+            '5GWMp3Zcut5b9spyh6uPkoEw7mgEo387cWg5BuztYNcRT54Q',
+            '5',
+            '4,312,893,251,906,482,686,554',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7430,7 +9613,12 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258962,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'Endowed',
           section: 'tokens',
@@ -7445,19 +9633,27 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x364aeaf56d8c403031435d807bf6be38f1cb7c2f6183201be33d5079da774fa0', { Complete: '4,000,000,000' }],
+          data: [
+            '0x364aeaf56d8c403031435d807bf6be38f1cb7c2f6183201be33d5079da774fa0',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x1de8f94854c9ee6df4cde6817d987f120fee05f988eab5d8e7a752f37235db76'],
+          data: [
+            '4,000,000,000',
+            '0x1de8f94854c9ee6df4cde6817d987f120fee05f988eab5d8e7a752f37235db76',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -7467,24 +9663,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258977,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x328175e4059d620f6a8214f390d2b98356a3c88f9353601887f67bc7029c27b9', { Complete: '4,000,000,000' }],
+          data: [
+            '0x328175e4059d620f6a8214f390d2b98356a3c88f9353601887f67bc7029c27b9',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xa2ad0b97a228b8ffc95492d296f274e9163ae82e695e9200c45c659fafc9c7d9'],
+          data: [
+            '4,000,000,000',
+            '0xa2ad0b97a228b8ffc95492d296f274e9163ae82e695e9200c45c659fafc9c7d9',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -7498,7 +9707,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5GBtBd6qSLMdj294jsQr1sVXAitxfKFbFE42csJZwi5CEjZD', amount: '75,727,223,321' },
+          data: {
+            currencyId: '4',
+            who: '5GBtBd6qSLMdj294jsQr1sVXAitxfKFbFE42csJZwi5CEjZD',
+            amount: '75,727,223,321',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -7516,7 +9729,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7546,7 +9765,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7582,7 +9807,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7592,24 +9823,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 258985,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x5d8de0d3900dffb6de80afa7ab9a0a4daec7f6631badc0c2b0f371cdeac1e3f2', { Complete: '4,000,000,000' }],
+          data: [
+            '0x5d8de0d3900dffb6de80afa7ab9a0a4daec7f6631badc0c2b0f371cdeac1e3f2',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x637441ab85a9687e82b58cbce2b9f887bfec633e1d0559725c8acfc3ef8d9873'],
+          data: [
+            '4,000,000,000',
+            '0x637441ab85a9687e82b58cbce2b9f887bfec633e1d0559725c8acfc3ef8d9873',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
       [
@@ -7627,13 +9871,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DnTJvepe9bRR7WUT9qNMiiZ2Piqwu4sMqc7pVFbyzrYSksf', '5', '75,255,821,871,901,568,625,738'],
+          data: [
+            '5DnTJvepe9bRR7WUT9qNMiiZ2Piqwu4sMqc7pVFbyzrYSksf',
+            '5',
+            '75,255,821,871,901,568,625,738',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7668,7 +9922,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7688,7 +9948,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7736,7 +10002,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,604,106,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,604,106,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7764,7 +10036,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7790,7 +10068,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
       [
@@ -7814,7 +10098,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7828,7 +10118,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5E4Z7duBk6m27jp8dwsRaqPUE7ogtSf59LqdiWXbpEpM4mjm', amount: '43,427,983,476' },
+          data: {
+            currencyId: '4',
+            who: '5E4Z7duBk6m27jp8dwsRaqPUE7ogtSf59LqdiWXbpEpM4mjm',
+            amount: '43,427,983,476',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -7846,7 +10140,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7860,7 +10160,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5FWc5CJS56W3zkmTFe6nQ8obsLBqj6ojQ8CsBhnURrLKicWY', amount: '45,057,520,494' },
+          data: {
+            currencyId: '4',
+            who: '5FWc5CJS56W3zkmTFe6nQ8obsLBqj6ojQ8CsBhnURrLKicWY',
+            amount: '45,057,520,494',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -7878,7 +10182,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7888,24 +10198,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259040,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xabccaec56d11843d04b5127de45f899766a007068cc689f6260b760f640b3e9b', { Complete: '4,000,000,000' }],
+          data: [
+            '0xabccaec56d11843d04b5127de45f899766a007068cc689f6260b760f640b3e9b',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x441f60fa235bb288880ed0e5970a8fa5644996540d49c917fe778e3cae14f87e'],
+          data: [
+            '4,000,000,000',
+            '0x441f60fa235bb288880ed0e5970a8fa5644996540d49c917fe778e3cae14f87e',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -7931,7 +10254,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7951,12 +10280,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '202,080,155,415,921,856,783',
           },
         },
-        { method: 'RewardsClaimed', section: 'bootstrap', index: '0x3502', data: ['5', '202,080,155,415,921,856,783'] },
+        {
+          method: 'RewardsClaimed',
+          section: 'bootstrap',
+          index: '0x3502',
+          data: ['5', '202,080,155,415,921,856,783'],
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -7980,13 +10320,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5C7uwvsCf3T2yQ9dfRRJodi8BQm8nYmdf1nGyPYCgQWnNzpT', '5', '42,779,769,476,962,745,443,536'],
+          data: [
+            '5C7uwvsCf3T2yQ9dfRRJodi8BQm8nYmdf1nGyPYCgQWnNzpT',
+            '5',
+            '42,779,769,476,962,745,443,536',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8010,13 +10360,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DS5gZyZn2zohwiaTuys4mca8wE2sz4VQkCeiVW8xQ9rutYU', '5', '6,498,021,236,525,741,932,180'],
+          data: [
+            '5DS5gZyZn2zohwiaTuys4mca8wE2sz4VQkCeiVW8xQ9rutYU',
+            '5',
+            '6,498,021,236,525,741,932,180',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8040,13 +10400,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GNVNZPhSV5Mno9yUqpNpLZ1qcUoFA1a4ZC9pFPCZghHfCaj', '5', '415,000,000,026,625,177,601'],
+          data: [
+            '5GNVNZPhSV5Mno9yUqpNpLZ1qcUoFA1a4ZC9pFPCZghHfCaj',
+            '5',
+            '415,000,000,026,625,177,601',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8070,13 +10440,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5HMuedTEAaDvAZLcLByjXWwWmqmceXkWdm4RpiXChEyANxs4', '5', '20,205,518,133,558,272,643,984'],
+          data: [
+            '5HMuedTEAaDvAZLcLByjXWwWmqmceXkWdm4RpiXChEyANxs4',
+            '5',
+            '20,205,518,133,558,272,643,984',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8090,7 +10470,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5GLFk1MiRpUBykD2VmHSF4qvsKj3icngmTyE9ofAmCdMwy1D', amount: '50,167,880,276' },
+          data: {
+            currencyId: '4',
+            who: '5GLFk1MiRpUBykD2VmHSF4qvsKj3icngmTyE9ofAmCdMwy1D',
+            amount: '50,167,880,276',
+          },
         },
         {
           method: 'LiquidityBurned',
@@ -8110,7 +10494,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8148,7 +10538,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,604,106,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,604,106,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8172,13 +10568,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Fe6zUBjQDnYAfi7DEaLV6BDB8fg8bNPaCa7jYmqM4kUN3w1', '5', '228,750,000,014,675,926,208'],
+          data: [
+            '5Fe6zUBjQDnYAfi7DEaLV6BDB8fg8bNPaCa7jYmqM4kUN3w1',
+            '5',
+            '228,750,000,014,675,926,208',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8206,7 +10612,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8242,7 +10654,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8256,169 +10674,268 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5EaErrU1fcHXjpoeVANXfERqdFb6qJ9Jjrb5cPvFdDcwFfNF', '9,863,013,688,767,123,287,671'],
+          data: [
+            '5EaErrU1fcHXjpoeVANXfERqdFb6qJ9Jjrb5cPvFdDcwFfNF',
+            '9,863,013,688,767,123,287,671',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5CBCt39UDbBKusD1nRrA2quBACwKuNSZ1ryZz7CdG31D9KmU', '10,410,958,893,698,630,136,986'],
+          data: [
+            '5CBCt39UDbBKusD1nRrA2quBACwKuNSZ1ryZz7CdG31D9KmU',
+            '10,410,958,893,698,630,136,986',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5DLBpNQrbtFKeJizeo5QuWMibsbEf2K7kixsL8trA5zsCoA9', '2,465,753,422,191,780,821,918'],
+          data: [
+            '5DLBpNQrbtFKeJizeo5QuWMibsbEf2K7kixsL8trA5zsCoA9',
+            '2,465,753,422,191,780,821,918',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5Fgaa9uYoYLX7ZePrzBGvFZ6z7Wxy2SaGJRh9ib1w3mwbG3s', '1,187,214,574,155,251,178,082'],
+          data: [
+            '5Fgaa9uYoYLX7ZePrzBGvFZ6z7Wxy2SaGJRh9ib1w3mwbG3s',
+            '1,187,214,574,155,251,178,082',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5FxNpQPAL9CeEWa2bkL9tgqLR7sSDjx5WkrieM8KcP8xzKbC', '11,232,876,701,095,890,410,959'],
+          data: [
+            '5FxNpQPAL9CeEWa2bkL9tgqLR7sSDjx5WkrieM8KcP8xzKbC',
+            '11,232,876,701,095,890,410,959',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5C8QeA5CdAFoHPtfRkPKva5Wigw3f2hs5g7fEqiYUhnC545Y', '10,502,283,057,990,867,616,438'],
+          data: [
+            '5C8QeA5CdAFoHPtfRkPKva5Wigw3f2hs5g7fEqiYUhnC545Y',
+            '10,502,283,057,990,867,616,438',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5CSikproDLMgCk9oV3SXx4Ga3R1W8FYwENzj9t87DHV1SL3u', '10,867,579,824,748,858,520,548'],
+          data: [
+            '5CSikproDLMgCk9oV3SXx4Ga3R1W8FYwENzj9t87DHV1SL3u',
+            '10,867,579,824,748,858,520,548',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5H96StyhZFMWjXdgh5iW74vV4VFcBHQNayyUYaQrsa1FFrbY', '10,593,607,222,283,105,095,890'],
+          data: [
+            '5H96StyhZFMWjXdgh5iW74vV4VFcBHQNayyUYaQrsa1FFrbY',
+            '10,593,607,222,283,105,095,890',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5EpjXqS6TPBNgD5RuuJD55eVRu3ewQQgULfB6gUPCkj2chsh', '10,410,958,893,698,630,136,986'],
+          data: [
+            '5EpjXqS6TPBNgD5RuuJD55eVRu3ewQQgULfB6gUPCkj2chsh',
+            '10,410,958,893,698,630,136,986',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5DtMwN2UKjHA5kgYhH2TTRUfSx2xqU7NTb12xLebvdvJ7z3x', '11,050,228,262,922,374,465,753'],
+          data: [
+            '5DtMwN2UKjHA5kgYhH2TTRUfSx2xqU7NTb12xLebvdvJ7z3x',
+            '11,050,228,262,922,374,465,753',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5HK7Uey9ngguvABqbfnKmT6v33hfQwYVFSXfRVmixjwtMu1f', '8,127,853,800,091,324,273,973'],
+          data: [
+            '5HK7Uey9ngguvABqbfnKmT6v33hfQwYVFSXfRVmixjwtMu1f',
+            '8,127,853,800,091,324,273,973',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5CZbRcrFHwn1Rycf1HpredmhrjXKgPANM52kbUtx1b63zcro', '2,283,104,984,018,264,876,712'],
+          data: [
+            '5CZbRcrFHwn1Rycf1HpredmhrjXKgPANM52kbUtx1b63zcro',
+            '2,283,104,984,018,264,876,712',
+          ],
         },
         {
           method: 'Rewarded',
           section: 'parachainStaking',
           index: '0x151a',
-          data: ['5DvoL2BNoSm7wRt2tfZ6WW5QFrxm68GLv5SCrPQ4JBLjbvpL', '10,593,607,222,283,105,095,890'],
+          data: [
+            '5DvoL2BNoSm7wRt2tfZ6WW5QFrxm68GLv5SCrPQ4JBLjbvpL',
+            '10,593,607,222,283,105,095,890',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5C8QeA5CdAFoHPtfRkPKva5Wigw3f2hs5g7fEqiYUhnC545Y', '6,666,666,666,666,666,666,667'],
+          data: [
+            '217',
+            '5C8QeA5CdAFoHPtfRkPKva5Wigw3f2hs5g7fEqiYUhnC545Y',
+            '6,666,666,666,666,666,666,667',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5CBCt39UDbBKusD1nRrA2quBACwKuNSZ1ryZz7CdG31D9KmU', '10,000,000,000,000,000,000'],
+          data: [
+            '217',
+            '5CBCt39UDbBKusD1nRrA2quBACwKuNSZ1ryZz7CdG31D9KmU',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5CSikproDLMgCk9oV3SXx4Ga3R1W8FYwENzj9t87DHV1SL3u', '10,000,000,000,000,000,000'],
+          data: [
+            '217',
+            '5CSikproDLMgCk9oV3SXx4Ga3R1W8FYwENzj9t87DHV1SL3u',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5CZbRcrFHwn1Rycf1HpredmhrjXKgPANM52kbUtx1b63zcro', '10,000,000,000,000,000,000'],
+          data: [
+            '217',
+            '5CZbRcrFHwn1Rycf1HpredmhrjXKgPANM52kbUtx1b63zcro',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5DLBpNQrbtFKeJizeo5QuWMibsbEf2K7kixsL8trA5zsCoA9', '333,333,333,333,333,333,333'],
+          data: [
+            '217',
+            '5DLBpNQrbtFKeJizeo5QuWMibsbEf2K7kixsL8trA5zsCoA9',
+            '333,333,333,333,333,333,333',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5DtMwN2UKjHA5kgYhH2TTRUfSx2xqU7NTb12xLebvdvJ7z3x', '10,000,000,000,000,000,000'],
+          data: [
+            '217',
+            '5DtMwN2UKjHA5kgYhH2TTRUfSx2xqU7NTb12xLebvdvJ7z3x',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5DvoL2BNoSm7wRt2tfZ6WW5QFrxm68GLv5SCrPQ4JBLjbvpL', '10,000,000,000,000,000,000'],
+          data: [
+            '217',
+            '5DvoL2BNoSm7wRt2tfZ6WW5QFrxm68GLv5SCrPQ4JBLjbvpL',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5EaErrU1fcHXjpoeVANXfERqdFb6qJ9Jjrb5cPvFdDcwFfNF', '10,000,000,000,000,000,000'],
+          data: [
+            '217',
+            '5EaErrU1fcHXjpoeVANXfERqdFb6qJ9Jjrb5cPvFdDcwFfNF',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5EpjXqS6TPBNgD5RuuJD55eVRu3ewQQgULfB6gUPCkj2chsh', '10,000,000,000,000,000,000'],
+          data: [
+            '217',
+            '5EpjXqS6TPBNgD5RuuJD55eVRu3ewQQgULfB6gUPCkj2chsh',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5Fgaa9uYoYLX7ZePrzBGvFZ6z7Wxy2SaGJRh9ib1w3mwbG3s', '10,000,000,000,000,000,000'],
+          data: [
+            '217',
+            '5Fgaa9uYoYLX7ZePrzBGvFZ6z7Wxy2SaGJRh9ib1w3mwbG3s',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5FxNpQPAL9CeEWa2bkL9tgqLR7sSDjx5WkrieM8KcP8xzKbC', '3,333,333,333,333,333,333,333'],
+          data: [
+            '217',
+            '5FxNpQPAL9CeEWa2bkL9tgqLR7sSDjx5WkrieM8KcP8xzKbC',
+            '3,333,333,333,333,333,333,333',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5H96StyhZFMWjXdgh5iW74vV4VFcBHQNayyUYaQrsa1FFrbY', '10,000,000,000,000,000,000'],
+          data: [
+            '217',
+            '5H96StyhZFMWjXdgh5iW74vV4VFcBHQNayyUYaQrsa1FFrbY',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'CollatorChosen',
           section: 'parachainStaking',
           index: '0x1502',
-          data: ['217', '5HK7Uey9ngguvABqbfnKmT6v33hfQwYVFSXfRVmixjwtMu1f', '10,000,000,000,000,000,000'],
+          data: [
+            '217',
+            '5HK7Uey9ngguvABqbfnKmT6v33hfQwYVFSXfRVmixjwtMu1f',
+            '10,000,000,000,000,000,000',
+          ],
         },
         {
           method: 'SessionIssuanceIssued',
           section: 'issuance',
           index: '0x1300',
-          data: ['216', '136,986,301,479,452,054,794,520', '109,589,040,986,301,369,863,014'],
+          data: [
+            '216',
+            '136,986,301,479,452,054,794,520',
+            '109,589,040,986,301,369,863,014',
+          ],
         },
         {
           method: 'SessionIssuanceRecorded',
           section: 'issuance',
           index: '0x1301',
-          data: ['216', '136,986,301,479,452,054,794,520', '109,589,040,986,301,369,863,014'],
+          data: [
+            '216',
+            '136,986,301,479,452,054,794,520',
+            '109,589,040,986,301,369,863,014',
+          ],
         },
         {
           method: 'NewRound',
@@ -8426,7 +10943,12 @@ export const tradesFirstDay: EventEntry[] = [
           index: '0x1500',
           data: ['259,200', '216', '13', '10,433,333,333,333,333,333,333'],
         },
-        { method: 'NewSession', section: 'session', index: '0x1600', data: { sessionIndex: '216' } },
+        {
+          method: 'NewSession',
+          section: 'session',
+          index: '0x1600',
+          data: { sessionIndex: '216' },
+        },
       ],
     ],
   },
@@ -8441,7 +10963,12 @@ export const tradesFirstDay: EventEntry[] = [
           index: '0x2901',
           data: { budgetRemaining: '1,753,538,107,595,774,548,191' },
         },
-        { method: 'Burnt', section: 'treasury', index: '0x2904', data: { burntFunds: '0' } },
+        {
+          method: 'Burnt',
+          section: 'treasury',
+          index: '0x2904',
+          data: { burntFunds: '0' },
+        },
         {
           method: 'Rollover',
           section: 'treasury',
@@ -8476,7 +11003,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8506,7 +11039,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8530,13 +11069,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5E6uhzz6u4tZZ8juqXWHz6zEbkKPuNhQkGaDc8DsdtJZ5Rxh', '5', '11,756,275,383,608,172,494,773'],
+          data: [
+            '5E6uhzz6u4tZZ8juqXWHz6zEbkKPuNhQkGaDc8DsdtJZ5Rxh',
+            '5',
+            '11,756,275,383,608,172,494,773',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8560,13 +11109,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5H3wxHNETTHsd36tVUtBJonVB768LRNGWpfThyT8aUs9hszs', '5', '7,709,580,874,383,238,287,744'],
+          data: [
+            '5H3wxHNETTHsd36tVUtBJonVB768LRNGWpfThyT8aUs9hszs',
+            '5',
+            '7,709,580,874,383,238,287,744',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8590,13 +11149,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DtfEG17aQxiwovXYGqqZ1KfcsEPSBdUSQhPA1JZWEEhsMeC', '5', '19,789,312,504,160,624,085,850'],
+          data: [
+            '5DtfEG17aQxiwovXYGqqZ1KfcsEPSBdUSQhPA1JZWEEhsMeC',
+            '5',
+            '19,789,312,504,160,624,085,850',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8606,24 +11175,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259274,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xf3d6d21e9e47ecdcfe8e50fcf694e9aefbba4dc49c9fa227ada3fda3ca579f1d', { Complete: '4,000,000,000' }],
+          data: [
+            '0xf3d6d21e9e47ecdcfe8e50fcf694e9aefbba4dc49c9fa227ada3fda3ca579f1d',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x7cf23e7e35d67fed9119d6ef1042a81c884116eac73482c3dfdcd3409d3b9a46'],
+          data: [
+            '4,000,000,000',
+            '0x7cf23e7e35d67fed9119d6ef1042a81c884116eac73482c3dfdcd3409d3b9a46',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -8651,7 +11233,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8675,13 +11263,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DcjT9k3PEExFkhL2ahbLuwiYo9V5qSD6VA3SPAVvCj9XU11', '5', '2,563,990,712,392,455,081,010'],
+          data: [
+            '5DcjT9k3PEExFkhL2ahbLuwiYo9V5qSD6VA3SPAVvCj9XU11',
+            '5',
+            '2,563,990,712,392,455,081,010',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8691,30 +11289,47 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259332,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5CB2b4tPDSCPrVjSyEEvuoYLLfjFr4WNQWQg3F9TGqEKSbRM', amount: '78,496,000,000' },
+          data: {
+            currencyId: '4',
+            who: '5CB2b4tPDSCPrVjSyEEvuoYLLfjFr4WNQWQg3F9TGqEKSbRM',
+            amount: '78,496,000,000',
+          },
         },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xf1e11f66d56433ba4747f170d446ad3dc9a9fd03289c7cbbd252cd9c1ce67652', { Complete: '4,000,000,000' }],
+          data: [
+            '0xf1e11f66d56433ba4747f170d446ad3dc9a9fd03289c7cbbd252cd9c1ce67652',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xbd63ffe9f8c2645c5b45232643ea118ba45c7e398695db53c44287a2e494280b'],
+          data: [
+            '4,000,000,000',
+            '0xbd63ffe9f8c2645c5b45232643ea118ba45c7e398695db53c44287a2e494280b',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -8744,7 +11359,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8768,13 +11389,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5HNpf9ydo2C2TFBS1frahQeNDVdG2QABGckGsBNKxPq44Mgb', '5', '77,937,617,964,298,211,331,881'],
+          data: [
+            '5HNpf9ydo2C2TFBS1frahQeNDVdG2QABGckGsBNKxPq44Mgb',
+            '5',
+            '77,937,617,964,298,211,331,881',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8800,7 +11431,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8810,7 +11447,12 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259353,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'NewAccount',
           section: 'system',
@@ -8831,19 +11473,27 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x84dcfdd12f1538fb073b4793ced5a18f895c0d0b82bce89dd4e6864a369e8c94', { Complete: '4,000,000,000' }],
+          data: [
+            '0x84dcfdd12f1538fb073b4793ced5a18f895c0d0b82bce89dd4e6864a369e8c94',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xa07478aa41c4f98dcacb38761932a63edc7c5acc2a4c4679bee480583e41310d'],
+          data: [
+            '4,000,000,000',
+            '0xa07478aa41c4f98dcacb38761932a63edc7c5acc2a4c4679bee480583e41310d',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -8853,24 +11503,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259361,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xf4446e0d9f0b8318761ac846b3f22093c7a47cade320f986fdb1cc11a49ccccf', { Complete: '4,000,000,000' }],
+          data: [
+            '0xf4446e0d9f0b8318761ac846b3f22093c7a47cade320f986fdb1cc11a49ccccf',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x5e1954519029b004c60c5f9f1d38def60566e2fd6d6baa6c03a2b615dfec06af'],
+          data: [
+            '4,000,000,000',
+            '0x5e1954519029b004c60c5f9f1d38def60566e2fd6d6baa6c03a2b615dfec06af',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -8894,13 +11557,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5G9Es892oATpPDnfGgGFS5McvYnjZpUVdVq9sfcwMVMTtNZC', '5', '24,689,668,399,924,397,513,493'],
+          data: [
+            '5G9Es892oATpPDnfGgGFS5McvYnjZpUVdVq9sfcwMVMTtNZC',
+            '5',
+            '24,689,668,399,924,397,513,493',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8935,7 +11608,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -8971,7 +11650,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9007,7 +11692,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9042,7 +11733,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9052,30 +11749,47 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259404,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5EAHkqd7TSxZqsu3XniQHWvUT6WdmnNUdx2C3TTTrZhvxag4', amount: '978,496,000,000' },
+          data: {
+            currencyId: '4',
+            who: '5EAHkqd7TSxZqsu3XniQHWvUT6WdmnNUdx2C3TTTrZhvxag4',
+            amount: '978,496,000,000',
+          },
         },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x195edef057b04945e760030cd53b5e8cde4bab2b6005a0724be0381f221c28ce', { Complete: '4,000,000,000' }],
+          data: [
+            '0x195edef057b04945e760030cd53b5e8cde4bab2b6005a0724be0381f221c28ce',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x9adfe7d774ed101e0f3f2ee139e1ea6cd6a6f7b5e5910d6da69d011de2438175'],
+          data: [
+            '4,000,000,000',
+            '0x9adfe7d774ed101e0f3f2ee139e1ea6cd6a6f7b5e5910d6da69d011de2438175',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -9101,7 +11815,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9115,7 +11835,11 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'Endowed',
           section: 'tokens',
           index: '0x0a00',
-          data: { currencyId: '4', who: '5EtFuqhtjkkdYXLop3hfxtqn2qh9poBSaDYjYvZq45r8J2Fw', amount: '208,880,515,115' },
+          data: {
+            currencyId: '4',
+            who: '5EtFuqhtjkkdYXLop3hfxtqn2qh9poBSaDYjYvZq45r8J2Fw',
+            amount: '208,880,515,115',
+          },
         },
         {
           method: 'AssetsSwapped',
@@ -9133,7 +11857,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9169,7 +11899,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9193,13 +11929,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5CDmmRXtkK7cSykeEPVYxAKnZYMZaELerWziZsdnGUz2M9hp', '5', '4,670,164,528,826,347,667,576'],
+          data: [
+            '5CDmmRXtkK7cSykeEPVYxAKnZYMZaELerWziZsdnGUz2M9hp',
+            '5',
+            '4,670,164,528,826,347,667,576',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9223,13 +11969,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DqZUyLcdnTCSqUYhJuyeYJW33dj5qvZkZbP4qiGj6oaMvtL', '5', '125,260,934,929,876,720,982,634'],
+          data: [
+            '5DqZUyLcdnTCSqUYhJuyeYJW33dj5qvZkZbP4qiGj6oaMvtL',
+            '5',
+            '125,260,934,929,876,720,982,634',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9264,7 +12020,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9274,24 +12036,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259542,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x236e7c8209fa9561b9d9e724d2bc52383bc76175e559dbe4c4881f0331981d88', { Complete: '4,000,000,000' }],
+          data: [
+            '0x236e7c8209fa9561b9d9e724d2bc52383bc76175e559dbe4c4881f0331981d88',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x13b81847be1ed6c7056a76491ed360f2ee247aeb56cb0266fdecd4a1dc9181c9'],
+          data: [
+            '4,000,000,000',
+            '0x13b81847be1ed6c7056a76491ed360f2ee247aeb56cb0266fdecd4a1dc9181c9',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -9321,7 +12096,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9345,13 +12126,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5Ejuo3oHdsWjePieSsv7p94WytySrxjKsj9uTkSPjeiRxPUb', '5', '1,861,129,126,745,596,456,850'],
+          data: [
+            '5Ejuo3oHdsWjePieSsv7p94WytySrxjKsj9uTkSPjeiRxPUb',
+            '5',
+            '1,861,129,126,745,596,456,850',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9361,24 +12152,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259560,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x9d6598ca91fd844f6f7cbb2defd0c342795b4a39ef23eab751453628bf5fdc1e', { Complete: '4,000,000,000' }],
+          data: [
+            '0x9d6598ca91fd844f6f7cbb2defd0c342795b4a39ef23eab751453628bf5fdc1e',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x4bec23257ed2dadc8291749835439e45c59a45f9850a75a65f13099e0d94c5a6'],
+          data: [
+            '4,000,000,000',
+            '0x4bec23257ed2dadc8291749835439e45c59a45f9850a75a65f13099e0d94c5a6',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -9404,7 +12208,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9414,24 +12224,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259575,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xf51619b193592b36368db6ab035ec8d2cd73adadeb58f285e302ba47420d0133', { Complete: '4,000,000,000' }],
+          data: [
+            '0xf51619b193592b36368db6ab035ec8d2cd73adadeb58f285e302ba47420d0133',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xfe4e7a75f34e5f507d4bf548f7ecbde4ddeb9986d7fe233af3d6542441601ffe'],
+          data: [
+            '4,000,000,000',
+            '0xfe4e7a75f34e5f507d4bf548f7ecbde4ddeb9986d7fe233af3d6542441601ffe',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -9451,7 +12274,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '711,814,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '711,814,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9471,7 +12300,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '711,814,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '711,814,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9507,7 +12342,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9537,7 +12378,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9547,24 +12394,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259616,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x4075b86c222d639f9282ef35c0618cea3450b8bb9cb26bdf4151dd6580750c53', { Complete: '4,000,000,000' }],
+          data: [
+            '0x4075b86c222d639f9282ef35c0618cea3450b8bb9cb26bdf4151dd6580750c53',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x13ee5f379834557ab82e9e41646225b6dfe53615078ed3b3739815fb9afd6d5b'],
+          data: [
+            '4,000,000,000',
+            '0x13ee5f379834557ab82e9e41646225b6dfe53615078ed3b3739815fb9afd6d5b',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -9588,13 +12448,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GTz97KnawgGMTZVBPGFZZj6AVMoYy6GXMkNRNPH7s9tRBdT', '5', '3,790,484,365,054,965,152,155'],
+          data: [
+            '5GTz97KnawgGMTZVBPGFZZj6AVMoYy6GXMkNRNPH7s9tRBdT',
+            '5',
+            '3,790,484,365,054,965,152,155',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9632,7 +12502,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,604,106,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,604,106,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9656,13 +12532,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5HgWw6jMaXnQ2mazQ43mSTxtzFJVxtLCv2Hz9j8YDz87go7f', '5', '668,032,908,208,143,927,311'],
+          data: [
+            '5HgWw6jMaXnQ2mazQ43mSTxtzFJVxtLCv2Hz9j8YDz87go7f',
+            '5',
+            '668,032,908,208,143,927,311',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9686,13 +12572,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5CSYQDLzWifXs3AUAn5JZX1icBsDi4qKmAv2bWHSWqtgSNNX', '5', '3,812,893,251,874,404,159,323'],
+          data: [
+            '5CSYQDLzWifXs3AUAn5JZX1icBsDi4qKmAv2bWHSWqtgSNNX',
+            '5',
+            '3,812,893,251,874,404,159,323',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9702,24 +12598,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259684,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0xce199d245e1f7a87e24292a3ae3d9d79341867a4705d2669015ec21827e4fdea', { Complete: '4,000,000,000' }],
+          data: [
+            '0xce199d245e1f7a87e24292a3ae3d9d79341867a4705d2669015ec21827e4fdea',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xb921f44eda114aaf087d6ba697d24943b78f6939db73bf9ba3a1ec447b25eefe'],
+          data: [
+            '4,000,000,000',
+            '0xb921f44eda114aaf087d6ba697d24943b78f6939db73bf9ba3a1ec447b25eefe',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -9743,13 +12652,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5D7DKdRe1ofwRno1mBpgYMJTUoNoeQpeQkk1bd3a4LSxxSK3', '5', '11,583,859,610,072,633,408,998'],
+          data: [
+            '5D7DKdRe1ofwRno1mBpgYMJTUoNoeQpeQkk1bd3a4LSxxSK3',
+            '5',
+            '11,583,859,610,072,633,408,998',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9779,7 +12698,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9799,12 +12724,23 @@ export const tradesFirstDay: EventEntry[] = [
             amount: '405,000,000,025,983,607,057',
           },
         },
-        { method: 'RewardsClaimed', section: 'bootstrap', index: '0x3502', data: ['5', '405,000,000,025,983,607,057'] },
+        {
+          method: 'RewardsClaimed',
+          section: 'bootstrap',
+          index: '0x3502',
+          data: ['5', '405,000,000,025,983,607,057'],
+        },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9834,7 +12770,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9858,13 +12800,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DvW837eiQpRbSEqtpaefiu5wS5rUVuiL2YVPzAKUtcYcjR9', '5', '1,141,923,798,718,872,700,599'],
+          data: [
+            '5DvW837eiQpRbSEqtpaefiu5wS5rUVuiL2YVPzAKUtcYcjR9',
+            '5',
+            '1,141,923,798,718,872,700,599',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9888,13 +12840,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5GuqpHx6AbomMiQrQ2ThEVESho6AaAGQ26xYLEsy33xRMhx4', '5', '4,062,893,251,890,443,422,938'],
+          data: [
+            '5GuqpHx6AbomMiQrQ2ThEVESho6AaAGQ26xYLEsy33xRMhx4',
+            '5',
+            '4,062,893,251,890,443,422,938',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9918,13 +12880,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5HSy9AaxHHLkAKwjBM8Tw1mfvM1NqbU1TGY1drifwJsi2m3t', '5', '405,000,000,025,983,607,057'],
+          data: [
+            '5HSy9AaxHHLkAKwjBM8Tw1mfvM1NqbU1TGY1drifwJsi2m3t',
+            '5',
+            '405,000,000,025,983,607,057',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9962,7 +12934,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -9998,7 +12976,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10026,7 +13010,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10054,7 +13044,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10080,7 +13076,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10090,24 +13092,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 259977,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x5b42592d3a66d2c6c8cffcb18262982fb469e710ed01509e7756658f98e03667', { Complete: '4,000,000,000' }],
+          data: [
+            '0x5b42592d3a66d2c6c8cffcb18262982fb469e710ed01509e7756658f98e03667',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xc8a74c2e0f4a10a0760e5ba3b6890fe68012a6b586d30a5785b8def4b0a854cd'],
+          data: [
+            '4,000,000,000',
+            '0xc8a74c2e0f4a10a0760e5ba3b6890fe68012a6b586d30a5785b8def4b0a854cd',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -10137,7 +13152,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10172,7 +13193,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10196,13 +13223,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5FW1NXfD9G9NjFD9d2chnd1oEK2PaQ1rHPCam7zqpJCPesYv', '5', '31,634,228,732,210,832,924,258'],
+          data: [
+            '5FW1NXfD9G9NjFD9d2chnd1oEK2PaQ1rHPCam7zqpJCPesYv',
+            '5',
+            '31,634,228,732,210,832,924,258',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10230,7 +13267,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10256,7 +13299,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10266,24 +13315,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 260102,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x1e430e96db4b8f1bfa9b64571614bc15ad1014bc5e658a62b8325987503d9488', { Complete: '4,000,000,000' }],
+          data: [
+            '0x1e430e96db4b8f1bfa9b64571614bc15ad1014bc5e658a62b8325987503d9488',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x0ab79d06f236b7d7ded41239bf197c1c512625e1fa3bf3017ff3bef8036cf80c'],
+          data: [
+            '4,000,000,000',
+            '0x0ab79d06f236b7d7ded41239bf197c1c512625e1fa3bf3017ff3bef8036cf80c',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -10307,13 +13369,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityDeactivated',
           section: 'xyk',
           index: '0x0d06',
-          data: ['5H6EV9P7g4tczfvpW6p6Nn9X3cuHKVsUnuAutoLA4BdUGVDM', '5', '61,683,551,021,345,596,029,085'],
+          data: [
+            '5H6EV9P7g4tczfvpW6p6Nn9X3cuHKVsUnuAutoLA4BdUGVDM',
+            '5',
+            '61,683,551,021,345,596,029,085',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,084,598,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,084,598,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10339,7 +13411,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10374,7 +13452,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,100,000,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,100,000,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10404,7 +13488,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,082,076,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,082,076,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10430,7 +13520,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10454,13 +13550,23 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'LiquidityActivated',
           section: 'xyk',
           index: '0x0d05',
-          data: ['5DhTNuBjPHLsyKUpyrofijoGDEaHrf4kYpyW6zpxC5jPrm4B', '5', '16,127,069,605,603,136,908,086'],
+          data: [
+            '5DhTNuBjPHLsyKUpyrofijoGDEaHrf4kYpyW6zpxC5jPrm4B',
+            '5',
+            '16,127,069,605,603,136,908,086',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '720,204,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '720,204,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10498,7 +13604,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,604,106,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,604,106,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10508,7 +13620,12 @@ export const tradesFirstDay: EventEntry[] = [
     block: 260269,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'Endowed',
           section: 'tokens',
@@ -10523,19 +13640,27 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x2376b96c96423444335f82a52a1dab18d01694727118c728bec5ae7e5806441b', { Complete: '4,000,000,000' }],
+          data: [
+            '0x2376b96c96423444335f82a52a1dab18d01694727118c728bec5ae7e5806441b',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0x9f170b0deecc42a8e613bca26fe29000c90f20e6bba4cceba0656e413784f07c'],
+          data: [
+            '4,000,000,000',
+            '0x9f170b0deecc42a8e613bca26fe29000c90f20e6bba4cceba0656e413784f07c',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -10545,24 +13670,37 @@ export const tradesFirstDay: EventEntry[] = [
     block: 260275,
     events: [
       [
-        { method: 'DownwardMessagesReceived', section: 'parachainSystem', index: '0x0104', data: ['1'] },
+        {
+          method: 'DownwardMessagesReceived',
+          section: 'parachainSystem',
+          index: '0x0104',
+          data: ['1'],
+        },
         {
           method: 'ExecutedDownward',
           section: 'dmpQueue',
           index: '0x2102',
-          data: ['0x2376b96c96423444335f82a52a1dab18d01694727118c728bec5ae7e5806441b', { Complete: '4,000,000,000' }],
+          data: [
+            '0x2376b96c96423444335f82a52a1dab18d01694727118c728bec5ae7e5806441b',
+            { Complete: '4,000,000,000' },
+          ],
         },
         {
           method: 'DownwardMessagesProcessed',
           section: 'parachainSystem',
           index: '0x0105',
-          data: ['4,000,000,000', '0xf96031b4ebf967d0621acdf4eb7ad47c2df310aed11308cce38a58a01437bb1b'],
+          data: [
+            '4,000,000,000',
+            '0xf96031b4ebf967d0621acdf4eb7ad47c2df310aed11308cce38a58a01437bb1b',
+          ],
         },
         {
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: { weight: '0', class: 'Mandatory', paysFee: 'Yes' },
+          },
         },
       ],
     ],
@@ -10610,7 +13748,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,604,106,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,604,106,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10636,7 +13780,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,321,345,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,321,345,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10664,7 +13814,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '2,332,395,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '2,332,395,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],
@@ -10702,7 +13858,13 @@ export const tradesFirstDay: EventEntry[] = [
           method: 'ExtrinsicSuccess',
           section: 'system',
           index: '0x0000',
-          data: { dispatchInfo: { weight: '1,604,106,000', class: 'Normal', paysFee: 'Yes' } },
+          data: {
+            dispatchInfo: {
+              weight: '1,604,106,000',
+              class: 'Normal',
+              paysFee: 'Yes',
+            },
+          },
         },
       ],
     ],

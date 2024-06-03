@@ -1,12 +1,20 @@
-import { rewards24hours, rewardsMonth } from '../src/service/LiquidityStakingService'
+import {
+  rewards24hours,
+  rewardsMonth,
+} from '../src/service/LiquidityStakingService'
 import { describe, it, vi, expect, beforeAll, afterAll } from 'vitest'
-import { ProofOfStakeReward, ResponseRewards } from '../src/repository/StakingRepository'
+import {
+  ProofOfStakeReward,
+  ResponseRewards,
+} from '../src/repository/StakingRepository'
 import moment from 'moment'
 
 describe('[Staking]', () => {
   beforeAll(() => {
     vi.mock('../src/repository/StakingRepository', async () => {
-      const actual = await vi.importActual('../src/repository/StakingRepository')
+      const actual = await vi.importActual(
+        '../src/repository/StakingRepository'
+      )
       return {
         ...actual,
         getDataByAddress: vi.fn().mockImplementation((address: string) => {
@@ -86,14 +94,22 @@ describe('[Staking]', () => {
   })
 
   it('should mock the 24 hours rewards history endpoint', async () => {
-    const expectedResponse: ResponseRewards[] = [{ liquidityTokenId: '8', amountClaimed: '503619012693557062128' }]
-    const results = await rewards24hours('5FFTemNzVqVduFk7n8z7G6qukrnBfTTQRE8EGPbjmtdpz2c1')
+    const expectedResponse: ResponseRewards[] = [
+      { liquidityTokenId: '8', amountClaimed: '503619012693557062128' },
+    ]
+    const results = await rewards24hours(
+      '5FFTemNzVqVduFk7n8z7G6qukrnBfTTQRE8EGPbjmtdpz2c1'
+    )
     expect(results).deep.equal(expectedResponse)
   })
 
   it('should mock the month rewards history endpoint', async () => {
-    const expectedResponse: ResponseRewards[] = [{ liquidityTokenId: '8', amountClaimed: '704238025387114124256' }]
-    const results = await rewardsMonth('5FFTemNzVqVduFk7n8z7G6qukrnBfTTQRE8EGPbjmtdpz2c1')
+    const expectedResponse: ResponseRewards[] = [
+      { liquidityTokenId: '8', amountClaimed: '704238025387114124256' },
+    ]
+    const results = await rewardsMonth(
+      '5FFTemNzVqVduFk7n8z7G6qukrnBfTTQRE8EGPbjmtdpz2c1'
+    )
     expect(results).deep.equal(expectedResponse)
   })
 })
