@@ -1,0 +1,892 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Mangata Stash API",
+    "version": "1.0.0",
+    "description": "Mangata Stash is a service that serves some configurations and also caches some blockchain node information."
+  },
+  "host": "localhost:3000",
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "localhost"
+    },
+    {
+      "url": "https://mangata-stash-dev-dot-direct-pixel-353917.oa.r.appspot.com",
+      "description": "Development"
+    },
+    {
+      "url": "https://mangata-stash-prod-dot-direct-pixel-353917.oa.r.appspot.com",
+      "description": "Production"
+    }
+  ],
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/token/order-buckets": {
+      "get": {
+        "tags": [
+          "Token Order Buckets"
+        ],
+        "summary": "Get the semantic order configuration of listed tokens on Mangata DEX.",
+        "description": "Get the semantic order configuration of listed tokens on Mangata DEX. Result is ordered by bucket rank specified in the configuration.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "buckets": [
+                    {
+                      "bucket": "stables",
+                      "tokens": [
+                        "USDT",
+                        "USDC",
+                        "aUSD"
+                      ]
+                    },
+                    {
+                      "bucket": "bluechips",
+                      "tokens": [
+                        "BTC",
+                        "ETH"
+                      ]
+                    },
+                    {
+                      "bucket": "l0",
+                      "tokens": [
+                        "DOT",
+                        "KSM"
+                      ]
+                    },
+                    {
+                      "bucket": "dextoken",
+                      "tokens": [
+                        "MGA",
+                        "MGX"
+                      ]
+                    },
+                    {
+                      "bucket": "l1",
+                      "tokens": [
+                        "MOVR",
+                        "BNC",
+                        "OAK",
+                        "TUR",
+                        "IMBU"
+                      ]
+                    },
+                    {
+                      "bucket": "l2",
+                      "tokens": [
+                        "MATIC"
+                      ]
+                    },
+                    {
+                      "bucket": "protocols",
+                      "tokens": [
+                        "Solar"
+                      ]
+                    },
+                    {
+                      "bucket": "derivatives",
+                      "tokens": [
+                        "vKSM",
+                        "vsKSM",
+                        "vMOVR",
+                        "vBNC"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/token/list/stats": {
+      "get": {
+        "tags": [
+          "Token List"
+        ],
+        "summary": "List of Tokens listed on Mangata with their stats",
+        "description": "This endpoint retrieves information about tokens listed on Mangata with their stats",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "priceInUSD": {
+                        "type": "string"
+                      },
+                      "volume24hInUSD": {
+                        "type": "string"
+                      },
+                      "liquidity24hInUSD": {
+                        "type": "string"
+                      },
+                      "priceChange24hInPerc": {
+                        "type": "string"
+                      },
+                      "volumeChange24hInPerc": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": [
+                  {
+                    "symbol": "KSM",
+                    "priceInUSD": "19.17",
+                    "volume24hInUSD": "1000.23",
+                    "liquidity24hInUSD": "100000.567",
+                    "priceChange24hInPerc": "2.22",
+                    "volumeChange24hInPerc": "3.33"
+                  },
+                  {
+                    "symbol": "MGX",
+                    "priceInUSD": "0.00045776",
+                    "volume24hInUSD": "1000.23",
+                    "liquidity24hInUSD": "1000.567",
+                    "priceChange24hInPerc": "0.22",
+                    "volumeChange24hInPerc": "1.33"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/token/{symbol}/stats": {
+      "get": {
+        "tags": [
+          "Token List"
+        ],
+        "summary": "Detail of token listed on Mangata with its stats",
+        "description": "This endpoint retrieves detail information about token listed on Mangata with its stats",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "priceInUSD": {
+                      "type": "string"
+                    },
+                    "volume24hInUSD": {
+                      "type": "string"
+                    },
+                    "liquidity24hInUSD": {
+                      "type": "string"
+                    },
+                    "priceChange24hInPerc": {
+                      "type": "string"
+                    },
+                    "volumeChange24hInPerc": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "symbol": "KSM",
+                  "priceInUSD": "19.17",
+                  "volume24hInUSD": "1000.23",
+                  "liquidity24hInUSD": "100000.567",
+                  "priceChange24hInPerc": "2.22",
+                  "volumeChange24hInPerc": "3.33"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/xcm/channels": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/xcm/network": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/xcm/tokens": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/collator/{collatorAddress}/staking/dailyReward": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "collatorAddress",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/collator/{collatorAddress}/staking/apy": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "collatorAddress",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/collators/staking/apy": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/account/{address}/liquid-staking/rewards-history/24h/sum": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/account/{address}/liquid-staking/rewards-history/month/sum": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/price-discovery/{currencySymbol}/": {
+      "get": {
+        "tags": [
+          "Price Discovery"
+        ],
+        "summary": "Get the price of the token on Managata DEX.",
+        "description": "The price will be returned in all tokens including USD.",
+        "parameters": [
+          {
+            "name": "currencySymbol",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "which token or pool to get"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "current_price": {
+                      "type": "object",
+                      "properties": {
+                        "usd": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/price-history/pair/{baseCurrencySymbol}/{targetCurrencySymbol}": {
+      "get": {
+        "tags": [
+          "Price History Pair"
+        ],
+        "summary": "Get the price history of the token pair.",
+        "description": "The price of base asset will be returned in in the target asset.",
+        "parameters": [
+          {
+            "name": "baseCurrencySymbol",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "which token to get as a base"
+          },
+          {
+            "name": "targetCurrencySymbol",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "which token to get as target"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "how many days into history to fetch, number or max, default is max",
+            "type": "string"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "prices": [
+                    [
+                      1685577600000,
+                      "0.000825322989162406"
+                    ],
+                    [
+                      1685664000000,
+                      "0.0008134241430865131"
+                    ]
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/price-history/{currencySymbol}/": {
+      "get": {
+        "tags": [
+          "Price History"
+        ],
+        "summary": "Get the price history of the token.",
+        "description": "The price will be returned in USD.",
+        "parameters": [
+          {
+            "name": "currencySymbol",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "which token or pool to get"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "how many days into history to fetch, number or max, default is max",
+            "type": "string"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "prices": [
+                    [
+                      1685577600000,
+                      "0.000825322989162406"
+                    ],
+                    [
+                      1685664000000,
+                      "0.0008134241430865131"
+                    ]
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/volume-history/pools/{currencySymbol}/": {
+      "get": {
+        "tags": [
+          "Volume History"
+        ],
+        "summary": "Get the trade volume history of the pool. ",
+        "description": "The price will be returned in USD.",
+        "parameters": [
+          {
+            "name": "currencySymbol",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "which token or pool to get"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "how many days into history to fetch, number or max, default is max",
+            "type": "string"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "volumes": [
+                    [
+                      1685577600000,
+                      "991.5151718402558"
+                    ],
+                    [
+                      1685664000000,
+                      "3094.527263206033"
+                    ]
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/volume-history/{currencySymbol}/": {
+      "get": {
+        "tags": [
+          "Volume History"
+        ],
+        "summary": "Get the trade volume history of the token.",
+        "description": "The price will be returned in USD.",
+        "parameters": [
+          {
+            "name": "currencySymbol",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "which token or pool to get"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "how many days into history to fetch, number or max, default is max",
+            "type": "string"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "volumes": [
+                    [
+                      1685577600000,
+                      "991.5151718402558"
+                    ],
+                    [
+                      1685664000000,
+                      "3094.527263206033"
+                    ]
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tvl-history/pools/{currencySymbol}/": {
+      "get": {
+        "tags": [
+          "TVL History"
+        ],
+        "summary": "Get the TVL history of the pool.",
+        "description": "The price will be returned in USD.",
+        "parameters": [
+          {
+            "name": "currencySymbol",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "which token or pool to get"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "how many days into history to fetch, number or max, default is max",
+            "type": "string"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "volumes": [
+                    [
+                      1685577600000,
+                      "991.5151718402558"
+                    ],
+                    [
+                      1685664000000,
+                      "3094.527263206033"
+                    ]
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tvl-history/{currencySymbol}/": {
+      "get": {
+        "tags": [
+          "TVL History"
+        ],
+        "summary": "Get the trade volume history of the token.",
+        "description": "The price will be returned in USD.",
+        "parameters": [
+          {
+            "name": "currencySymbol",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "which token or pool to get"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "how many days into history to fetch, number or max, default is max",
+            "type": "string"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "volumes": [
+                    [
+                      1685577600000,
+                      "991.5151718402558"
+                    ],
+                    [
+                      1685664000000,
+                      "3094.527263206033"
+                    ]
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/coingecko/pairs": {
+      "get": {
+        "tags": [
+          "coingecko"
+        ],
+        "summary": "Details on cryptoassets traded on an exchange.",
+        "description": "This endpoint retrieves information about trading pairs from Exchange",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ticker_id": {
+                        "type": "string"
+                      },
+                      "base": {
+                        "type": "string"
+                      },
+                      "target": {
+                        "type": "string"
+                      },
+                      "pool_id": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": [
+                  {
+                    "ticker_id": "KSM_MGX",
+                    "base": "KSM",
+                    "target": "MGX",
+                    "pool_id": "5"
+                  },
+                  {
+                    "ticker_id": "MGX_TUR",
+                    "base": "MGX",
+                    "target": "TUR",
+                    "pool_id": "8"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/coingecko/tickers": {
+      "get": {
+        "tags": [
+          "coingecko"
+        ],
+        "summary": "The endpoint provides 24-hour pricing and volume information on each market pair available on an exchange.",
+        "description": "This endpoint retrieves information about pricing and volume information from Exchange",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ticker_id": {
+                        "type": "string"
+                      },
+                      "base_currency": {
+                        "type": "string"
+                      },
+                      "target_currency": {
+                        "type": "string"
+                      },
+                      "last_price": {
+                        "type": "string"
+                      },
+                      "base_volume": {
+                        "type": "string"
+                      },
+                      "target_volume": {
+                        "type": "string"
+                      },
+                      "pool_id": {
+                        "type": "string"
+                      },
+                      "liquidity_in_usd": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": [
+                  {
+                    "ticker_id": "KSM_MGX",
+                    "base_currency": "KSM",
+                    "target_currency": "MGX",
+                    "last_price": "41344.060279360743591417",
+                    "base_volume": "37.25709886091373313",
+                    "target_volume": "1027054.0278098086651",
+                    "pool_id": "5",
+                    "liquidity_in_usd": "667688.4072373228"
+                  },
+                  {
+                    "ticker_id": "MGX_TUR",
+                    "base_currency": "MGX",
+                    "target_currency": "TUR",
+                    "last_price": "0.139133601",
+                    "base_volume": "8813.7065083928515899",
+                    "target_volume": "1205.6596913620300336",
+                    "pool_id": "8",
+                    "liquidity_in_usd": "85617.00427908385"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/affirmed-network/list": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/affirmed-token/list": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/account/{address}/token-portfolio": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/coinmarketcap/v1/summary": {
+      "get": {
+        "tags": [
+          "Coinmarketcap"
+        ],
+        "summary": "The endpoint provides summary information on each market pair available on an exchange.",
+        "description": "This endpoint retrieves information about each market pair information from Exchange",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "KSM_MGX": {
+                    "base_id": "4",
+                    "base_name": "Kusama Native",
+                    "base_symbol": "KSM",
+                    "quote_id": "0",
+                    "quote_name": "Mangata",
+                    "quote_symbol": "MGX",
+                    "last_price": "41325.990830608673576993",
+                    "base_volume": "4.2321231321",
+                    "quote_volume": "4111135.2773368904695"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

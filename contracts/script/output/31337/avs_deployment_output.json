@@ -4,7 +4,6 @@
     "avsProxyAdmin": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
     "blsApkRegistry": "0xf5059a5D33d5853360D16C683c16e67980206f36",
     "blsApkRegistryImplementation": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
-    "erc20Mock": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
     "indexRegistry": "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
     "indexRegistryImplementation": "0x9d4454B023096f34B160D6B654540c56A1F81688",
     "registryCoordinator": "0x851356ae760d987E095750cCeb3bC6014560891C",
@@ -20,7 +19,7 @@
   },
   "chainInfo": {
     "chainId": 31337,
-    "deploymentBlock": 18
+    "deploymentBlock": 21
   },
   "permissions": {
     "aggregator": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
