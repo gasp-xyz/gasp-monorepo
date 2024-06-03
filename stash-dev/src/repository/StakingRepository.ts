@@ -25,13 +25,12 @@ export const KEY = PREFIX + 'collator_rewarded'
 export const KEY_ACCOUNT = PREFIX + 'account_rewarded'
 
 export type ResponseAPY = {
-  [liquidityToken: string]: {
-    apy: string
-    collatorAddress: string
-    date: string
-    dateFormat: string
-    timestamp: string
-  }
+  token: string
+  apy: string
+  collatorAddress: string
+  date: string
+  dateFormat: string
+  timestamp: string
 }
 
 export type DailyRewardResponse = {
@@ -82,7 +81,9 @@ export type ProofOfStakeReward = {
   data: ProofOfStakeEntry
 }
 
-const getTimeSeriesRedisData = async (key: string): Promise<string[]> => {
+export const getTimeSeriesRedisData = async (
+  key: string
+): Promise<string[]> => {
   return await timeseries.client.zrangebyscore(key, '-inf', 'inf', 'WITHSCORES')
 }
 
@@ -149,17 +150,15 @@ export function calculateDailyRewards(
 }
 
 export function calculateCollatorApy(sessions: Session[]) {
-  const response = {} as ResponseAPY
+  let response = {} as ResponseAPY
 
   for (const session of sessions) {
     const liquidityTokenId = session.data.liquidityTokenId
 
-    if (response[liquidityTokenId]) {
-      if (
-        session.data.timestamp > parseInt(response[liquidityTokenId].timestamp)
-      ) {
-        // Update the stored entry with the current entry
-        response[liquidityTokenId] = {
+    if (response.token) {
+      if (session.data.timestamp > parseInt(response.timestamp)) {
+        response = {
+          token: liquidityTokenId,
           apy: calculateAnnualPercentageYield(
             new BigNumber(session.data.collatorAccountAmountStakedInMgx),
             new BigNumber(session.data.amountRewarded).multipliedBy(
@@ -173,7 +172,8 @@ export function calculateCollatorApy(sessions: Session[]) {
         }
       }
     } else {
-      response[liquidityTokenId] = {
+      response = {
+        token: liquidityTokenId,
         apy: calculateAnnualPercentageYield(
           new BigNumber(session.data.collatorAccountAmountStakedInMgx),
           new BigNumber(session.data.amountRewarded).multipliedBy(

@@ -11,7 +11,9 @@ describe.skip('Integration Test using Test Containers', function () {
 
   beforeAll(async () => {
     //perhaps we should pull this separatetdly, its a 2GB image. `docker pull p1k1m4n/stash:1`
-    container = await new GenericContainer('mangatasolutions/redis-test-stash:latest')
+    container = await new GenericContainer(
+      'mangatasolutions/redis-test-stash:latest'
+    )
       .withWorkingDir('/')
       .withEntrypoint(['redis-server'])
       .withExposedPorts(6379)
@@ -45,7 +47,10 @@ describe.skip('Integration Test using Test Containers', function () {
             .map((p) => {
               return {
                 id: Number.parseInt(p.id),
-                assets: [Number.parseInt(p.assets[0]), Number.parseInt(p.assets[1])],
+                assets: [
+                  Number.parseInt(p.assets[0]),
+                  Number.parseInt(p.assets[1]),
+                ],
                 block: Number.parseInt(p.block),
                 timestamp: Number.parseInt(p.timestamp),
                 amounts: [new Decimal(p.amounts[0]), new Decimal(p.amounts[1])],
@@ -73,12 +78,16 @@ describe.skip('Integration Test using Test Containers', function () {
       port: 6380,
       host: timeseriesContainer.getHost(),
     })
-    const res = (await redisClientTs.call('TS.RANGE', 'price:asset:0', '1683581142721', '1683581166793')) as [
-      number,
-      string
-    ][]
+    const res = (await redisClientTs.call(
+      'TS.RANGE',
+      'price:asset:0',
+      '1683581142721',
+      '1683581166793'
+    )) as [number, string][]
     res.length.should.be.equal(3)
     const storeValues = res.map(([tsp, price]) => [tsp, new Decimal(price)])
-    storeValues[2][1].toNumber().should.be.greaterThan(storeValues[0][1].toNumber())
+    storeValues[2][1]
+      .toNumber()
+      .should.be.greaterThan(storeValues[0][1].toNumber())
   })
 })

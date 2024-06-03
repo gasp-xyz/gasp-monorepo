@@ -33,22 +33,28 @@ describe('[Token list]', () => {
             resolve(tokenResponses[tokenId] || [])
           })
         }),
-        getLiquidityTokenInUsd: vi.fn().mockImplementation((tokenId: string) => {
-          return new Promise((resolve) => {
-            const volumeTokenResponse = {
-              '0': [[1691366400000, new Decimal('508786.95209646935')]],
-              '4': [[1691366400000, new Decimal('57038.15488204146')]],
-              '7': [[1691366400000, new Decimal('126.74932683307718')]],
-            }
-            resolve(volumeTokenResponse[tokenId] || [])
-          })
-        }),
-        calculate24PriceChange: vi.fn().mockImplementation((tokenPrices: TimestampedAmount[]) => {
-          return new Decimal(2.33).toFixed(2)
-        }),
-        calculate24VolumeChange: vi.fn().mockImplementation((tokenVolumes: TimestampedAmount[]) => {
-          return new Decimal(4.21).toFixed(2)
-        }),
+        getLiquidityTokenInUsd: vi
+          .fn()
+          .mockImplementation((tokenId: string) => {
+            return new Promise((resolve) => {
+              const volumeTokenResponse = {
+                '0': [[1691366400000, new Decimal('508786.95209646935')]],
+                '4': [[1691366400000, new Decimal('57038.15488204146')]],
+                '7': [[1691366400000, new Decimal('126.74932683307718')]],
+              }
+              resolve(volumeTokenResponse[tokenId] || [])
+            })
+          }),
+        calculate24PriceChange: vi
+          .fn()
+          .mockImplementation((tokenPrices: TimestampedAmount[]) => {
+            return new Decimal(2.33).toFixed(2)
+          }),
+        calculate24VolumeChange: vi
+          .fn()
+          .mockImplementation((tokenVolumes: TimestampedAmount[]) => {
+            return new Decimal(4.21).toFixed(2)
+          }),
       }
     })
   })

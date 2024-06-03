@@ -89,13 +89,21 @@ const mockMangata = (urls: string[]) => ({
     },
   },
   rpc: {
-    calculateBuyPrice: (args: { inputReserve: BN; outputReserve: BN; amount: BN }) => {
+    calculateBuyPrice: (args: {
+      inputReserve: BN
+      outputReserve: BN
+      amount: BN
+    }) => {
       const mappingKeys = Object.keys(tokenAmountMapping)
 
       for (const key of mappingKeys) {
-        const [mappingBaseReserve, mappingTargetReserve] = tokenAmountMapping[key]
+        const [mappingBaseReserve, mappingTargetReserve] =
+          tokenAmountMapping[key]
 
-        if (args.inputReserve.eq(mappingTargetReserve) && args.outputReserve.eq(mappingBaseReserve)) {
+        if (
+          args.inputReserve.eq(mappingTargetReserve) &&
+          args.outputReserve.eq(mappingBaseReserve)
+        ) {
           const mockPrices = {
             '4-0': new BN('41375099191776760995251'),
             '0-7': new BN('1395751849'),

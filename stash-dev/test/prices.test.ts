@@ -12,17 +12,30 @@ describe('test pricing processor', () => {
     vi.doMock('../src/repository/PriceRepository', () => ({
       getLatest: vi
         .fn()
-        .mockImplementation((id) => (id === fixtures.BASE ? fixtures.LEN : latests.has(id) ? latests.get(id) : 0)),
+        .mockImplementation((id) =>
+          id === fixtures.BASE
+            ? fixtures.LEN
+            : latests.has(id)
+            ? latests.get(id)
+            : 0
+        ),
       save: vi.fn().mockImplementation(async (poolId, id, prices, latest) => {
         const all = (store.has(id) ? store.get(id) : [])!.concat(prices)
         store.set(id, all)
         latests.set(poolId, latest)
       }),
       get: vi.fn().mockImplementation(async (id, from, to) => {
-        const arr = id === fixtures.BASE ? fixtures.basePrices : !store.has(id) ? [] : store.get(id)
+        const arr =
+          id === fixtures.BASE
+            ? fixtures.basePrices
+            : !store.has(id)
+            ? []
+            : store.get(id)
         return arr!.filter(([t]) => t >= from && t <= to)
       }),
-      saveLatest: vi.fn().mockImplementation((id, latest) => latests.set(id, latest)),
+      saveLatest: vi
+        .fn()
+        .mockImplementation((id, latest) => latests.set(id, latest)),
     }))
     vi.doMock('../src/repository/ChainRepository', () => ({
       getAssets: vi.fn().mockReturnValue(fixtures.assets),
@@ -51,7 +64,9 @@ describe('test pricing processor', () => {
     await prices.initService(fixtures.BASE)
 
     // check that we processed all of the pool entries
-    fixtures.assets.map((asset) => pricesStore.getLatest(asset.id)).should.be.eql([...fixtures.latest.values()])
+    fixtures.assets
+      .map((asset) => pricesStore.getLatest(asset.id))
+      .should.be.eql([...fixtures.latest.values()])
 
     // check len of the processed entries
     //asset_10 (1000 pools)

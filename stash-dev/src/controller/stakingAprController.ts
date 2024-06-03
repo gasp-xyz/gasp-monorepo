@@ -24,3 +24,12 @@ export const apy = async (req: Request, res: Response) => {
     await errorHandler.handle(res, e)
   }
 }
+
+export const collatorsApy = async (req: Request, res: Response) => {
+  try {
+    const apy = await stakingAprService.collatorsApy()
+    res.json(apy)
+  } catch (e) {
+    await errorHandler.handle(res, e)
+  }
+}

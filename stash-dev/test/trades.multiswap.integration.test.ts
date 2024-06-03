@@ -51,17 +51,18 @@ describe('Multiswap test: skip summary event', function () {
         ...actual,
         get: vi.fn().mockImplementation(() => {
           //Dummy price for the timestamp
-          return ([[1689269814386, '1.E-7']] as unknown as [number, string][]).map(([tsp, price]) => [
-            tsp,
-            new Decimal(price),
-          ])
+          return (
+            [[1689269814386, '1.E-7']] as unknown as [number, string][]
+          ).map(([tsp, price]) => [tsp, new Decimal(price)])
         }),
         getLatest: vi.fn().mockReturnValue(1689269814386),
         LIMIT: 100000,
       }
     })
     vi.mock('../src/repository/TradeVolumeRepository', async () => {
-      const actual = await vi.importActual('../src/repository/TradeVolumeRepository')
+      const actual = await vi.importActual(
+        '../src/repository/TradeVolumeRepository'
+      )
       return {
         ...actual,
         getLatest: vi.fn().mockReturnValue(1689269814386),
@@ -84,15 +85,27 @@ describe('Multiswap test: skip summary event', function () {
     })
     let failed = false
     let err = ''
-    await redisClientTs.call('TS.RANGE', 'trades:pool:36', '1689269814386', '1689269814386').catch((error) => {
-      failed = true
-      err = error.message
-    })
+    await redisClientTs
+      .call('TS.RANGE', 'trades:pool:36', '1689269814386', '1689269814386')
+      .catch((error) => {
+        failed = true
+        err = error.message
+      })
     expect(failed).to.be.true
     expect(err).to.be.equal('ERR TSDB: the key does not exist')
 
-    const swap1 = await redisClientTs.call('TS.RANGE', 'trades:pool:32', '1689269814386', '1689269814386')
-    const swap2 = await redisClientTs.call('TS.RANGE', 'trades:pool:5', '1689269814386', '1689269814386')
+    const swap1 = await redisClientTs.call(
+      'TS.RANGE',
+      'trades:pool:32',
+      '1689269814386',
+      '1689269814386'
+    )
+    const swap2 = await redisClientTs.call(
+      'TS.RANGE',
+      'trades:pool:5',
+      '1689269814386',
+      '1689269814386'
+    )
     expect(swap1).not.to.be.empty
     expect(swap2).not.to.be.empty
   })

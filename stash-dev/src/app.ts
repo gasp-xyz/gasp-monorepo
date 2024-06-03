@@ -47,6 +47,7 @@ app.get(
   stakingAprController.dailyReward
 )
 app.get('/collator/:collatorAddress/staking/apy', stakingAprController.apy)
+app.get('/collators/staking/apy', stakingAprController.collatorsApy)
 
 app.get(
   '/account/:address/liquid-staking/rewards-history/24h/sum',
