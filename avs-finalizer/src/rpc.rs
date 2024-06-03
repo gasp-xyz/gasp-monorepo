@@ -32,6 +32,8 @@ struct SignedTaskResponse {
 struct TaskResponseWire {
     #[serde(rename = "ReferenceTaskIndex")]
     pub reference_task_index: u32,
+    #[serde(rename = "operatorsStateHash")]
+    pub operators_state_hash: Bytes32,
     #[serde(rename = "BlockHash")]
     pub block_hash: Bytes32,
     #[serde(rename = "StorageProofHash")]
@@ -44,6 +46,7 @@ impl From<TaskResponse> for TaskResponseWire {
     fn from(value: TaskResponse) -> Self {
         Self {
             reference_task_index: value.reference_task_index,
+            operators_state_hash: value.operators_state_hash,
             block_hash: value.block_hash,
             storage_proof_hash: value.storage_proof_hash,
             pending_state_hash: value.pending_state_hash,

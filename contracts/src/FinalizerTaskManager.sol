@@ -44,10 +44,26 @@ contract FinalizerTaskManager is
     // mapping of task indices to hash of abi.encode(taskResponse, taskResponseMetadata)
     mapping(uint32 => bytes32) public allTaskResponses;
 
+    // mapping of task indices to hash of abi.encode(taskResponse, taskResponseMetadata)
+    mapping(uint32 => TaskStatus) public indexToTaskStatus;
+
+    uint32 lastCompletedTaskCreatedBlock;
+    uint32 lastCompletedTaskNum;
+
     address public aggregator;
     address public generator;
 
     bytes32 latestPendingStateHash;
+
+    // DATA STRUCTURES
+    enum TaskStatus
+    {
+        // default is NOT_INITIALIZED
+        NOT_INITIALIZED,
+        INITIALIZED_BUT_NOT_COMPLETED,
+        CANCELLED,
+        COMPLETED
+    }
 
     /* MODIFIERS */
     modifier onlyAggregator() {
@@ -89,9 +105,20 @@ contract FinalizerTaskManager is
         newTask.taskCreatedBlock = uint32(block.number);
         newTask.quorumThresholdPercentage = quorumThresholdPercentage;
         newTask.quorumNumbers = quorumNumbers;
+        newTask.lastCompletedTaskCreatedBlock = lastCompletedTaskCreatedBlock;
+
+        // Ensure new previous task was either cancelled or completed
+        // Here for now we auto cancel previous task if not completed
+        if (latestTaskNum > 0) {
+            uint32 memory lastTaskNum = latestTaskNum - 1;
+            if (indexToTaskStatus[lastTaskNum] == TaskStatus.INITIALIZED_BUT_NOT_COMPLETED){
+                indexToTaskStatus[lastTaskNum] = TaskStatus.CANCELLED;
+            }
+        }
 
         // store hash of task onchain, emit event, and increase taskNum
         allTaskHashes[latestTaskNum] = keccak256(abi.encode(newTask));
+        indexToTaskStatus[latestTaskNum] = TaskStatus.INITIALIZED_BUT_NOT_COMPLETED;
         emit NewTaskCreated(latestTaskNum, newTask);
         latestTaskNum = latestTaskNum + 1;
     }
@@ -112,6 +139,10 @@ contract FinalizerTaskManager is
             "supplied task does not match the one recorded in the contract"
         );
         // some logical checks
+        require(
+            indexToTaskStatus[taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED_BUT_NOT_COMPLETED,
+            "Aggregator has already responded to the task"
+        );
         require(
             allTaskResponses[taskResponse.referenceTaskIndex] == bytes32(0),
             "Aggregator has already responded to the task"
@@ -155,6 +186,7 @@ contract FinalizerTaskManager is
         }
 
         latestPendingStateHash = taskResponse.pendingStateHash;
+        indexToTaskStatus[taskResponse.referenceTaskIndex] == TaskStatus.COMPLETED;
         // emitting completed event
         emit TaskCompleted(taskResponse.referenceTaskIndex, taskResponse.blockHash);
     }

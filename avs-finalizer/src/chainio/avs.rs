@@ -26,6 +26,10 @@ pub struct AvsContracts {
     task_manager: FinalizerTaskManager<Client>,
     task_manager_sub: FinalizerTaskManager<Provider<Ws>>,
     registry: RegistryCoordinator<Client>,
+    avs_registry_chain_reader: AvsRegistryChainReader,
+    avs_registry_subscriber: AvsRegistryChainSubscriber,
+    operator_info: OperatorInfoServiceInMemory,
+    avs_registry_service_chain_caller: AvsRegistryServiceChainCaller,
     client: Arc<Client>,
     pub ws_client: Arc<Provider<Ws>>,
 }
@@ -57,11 +61,46 @@ impl AvsContracts {
         let task_manager = FinalizerTaskManager::new(task_manager_addr, client.clone());
         let task_manager_sub = FinalizerTaskManager::new(task_manager_addr, ws_client.clone());
 
+        let bls_apk_registry_addr = registry.bls_apk_registry().await?;
+        let stake_registry_addr = registry.stake_registry().await?;
+        let avs_registry_chain_reader = AvsRegistryChainReader::new(
+            bls_apk_registry_addr,
+            config.avs_registry_coordinator_addr,
+            task_manager_addr,
+            stake_registry_addr,
+            config.eth_rpc_url.to_string(),
+        );
+
+        let avs_registry_subscriber = AvsRegistryChainSubscriber::new(config.eth_ws_url.to_string());
+
+        let operators_info = Arc::new(Mutex::new(
+            OperatorInfoServiceInMemory::new(
+                avs_registry_subscriber,
+                avs_registry_chain_reader,
+                config.eth_ws_url.to_string(),
+            )
+            .await,
+        ));
+        let operators_info_clone = Arc::clone(&operators_info);
+        // start the service with a particular block range
+        // from block : 0
+        // to block : 0 means current block , else normal
+        task::spawn(async move {
+            let operators_info = operators_info_clone.lock().await;
+            operators_info.start_service(0, 0).await
+        });
+        
+        let avs_registry_service_chain_caller = AvsRegistryServiceChainCaller::new(avs_registry_chain_reader, operators_info);
+
         Ok(Self {
             service_manager,
             task_manager,
             task_manager_sub,
             registry,
+            avs_registry_chain_reader,
+            avs_registry_subscriber,
+            operator_info,
+            avs_registry_service_chain_caller,
             client,
             ws_client,
         })

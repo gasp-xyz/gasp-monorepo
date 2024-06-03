@@ -25,6 +25,8 @@ use sp_runtime::{generic, OpaqueExtrinsic};
 use std::sync::Arc;
 use tokio::select;
 use tracing::{debug, error, info, instrument};
+use tokio::time::{sleep, Duration};
+use tokio::try_join;
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
@@ -53,7 +55,7 @@ pub struct Operator {
 }
 impl Operator {
     #[instrument(name = "create_operator", skip_all)]
-    pub async fn from_cli(cfg: &CliArgs) -> eyre::Result<Self> {
+    pub async fn from_cli(cfg: &CliArgs) -> eyre::Result<Arc<Self>> {
         let client = Arc::new(build_eth_client(cfg).await?);
         let avs_contracts = AvsContracts::build(cfg, client.clone()).await?;
         let el_contracts = ElContracts::build(cfg, client.clone()).await?;
@@ -67,19 +69,19 @@ impl Operator {
 
         let rpc = Rpc::build(cfg);
 
-        Ok(Self {
+        Ok(Arc::new(Self {
             avs_contracts,
             el_contracts,
             substrate_client_uri: cfg.substrate_rpc_url.to_owned(),
             client,
             bls_keypair: bls_key,
             rpc,
-        })
+        }))
     }
 
     #[instrument(skip_all)]
-    pub async fn watch_new_tasks(&self) -> eyre::Result<()> {
-        let evs = self.avs_contracts.new_task_stream();
+    pub async fn watch_new_tasks(self: Arc<Self>) -> eyre::Result<()> {
+        let evs = self.clone().avs_contracts.new_task_stream();
         let mut stream: stream::EventStream<'_, _, (NewTaskCreatedFilter, LogMeta), _> =
             evs.subscribe_with_meta().await?;
 
@@ -93,11 +95,26 @@ impl Operator {
                     Ok((event, log)) => {
                         debug!("Got new task at: {:?}", log);
                         PendingTransaction::new(log.transaction_hash, self.client.provider()).await?;
-                        info!("Executing a Block for task: {:?}", event);
-                        let proofs = self.execute_block(event.task.block_number.as_u32()).await?;
+                        let event_clone = event.clone();
+                        let self_clone = self.clone();
+                        let execute_block_join_handle = tokio::spawn(async move {
+                            info!("Executing a Block for task: {:?}", event_clone);
+                            self_clone.execute_block(event_clone.task.block_number.as_u32()).await
+
+                        });
+                        let event_clone = event.clone();
+                        let self_clone = self.clone();
+                        let get_operators_state_hash_handle = tokio::spawn(async move {
+                            info!("Get operators state hash: {:?}", event_clone);
+                            self_clone.get_operators_state_hash(event_clone.task.task_created_block).await
+                        });
+                        let (proofs, operators_state_hash) = try_join!(execute_block_join_handle, get_operators_state_hash_handle)?;
+                        let (proofs, operators_state_hash) = (proofs?, operators_state_hash?);
+                        debug!("Operators State Hash {:?}", operators_state_hash);
                         debug!("Block executed successfully {:?}", proofs);
                         let payload = TaskResponse {
                             reference_task_index: event.task_index,
+                            op_data: operators_state_hash,
                             block_hash: proofs.0.as_fixed_bytes().to_owned(),
                             storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
                             pending_state_hash: proofs.2.as_fixed_bytes().to_owned(),
@@ -129,7 +146,7 @@ impl Operator {
     }
 
     pub(crate) async fn execute_block(
-        &self,
+        self: Arc<Self>,
         block_number: BlockNumber,
     ) -> eyre::Result<(H256, H256, H256)> {
         use sc_executor::{sp_wasm_interface::ExtendedHostFunctions, NativeExecutionDispatch};
@@ -143,6 +160,16 @@ impl Operator {
         .await?;
 
         Ok(res)
+    }
+
+    pub(crate) async fn get_operators_state_hash(
+        self: Arc<Self>,
+        x: u32,
+    ) -> eyre::Result<H256> {
+        sleep(Duration::from_millis(1000)).await;
+
+        
+        Ok(H256::repeat_byte(7))
     }
 
     pub(crate) fn operator_id(&self) -> OperatorId {

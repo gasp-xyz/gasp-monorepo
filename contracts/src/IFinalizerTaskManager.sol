@@ -23,6 +23,8 @@ interface IFinalizerTaskManager {
         uint256 blockNumber;
         // used for expiration checks
         uint32 taskCreatedBlock;
+        // The last completed task used as reference block for operator state on other L1s
+        uint32 lastCompletedTaskCreatedBlock;
         // task submitter decides on the criteria for a task to be completed
         // note that this does not mean the task was "correctly" answered
         // task is completed when each quorumNumbers specified here
@@ -38,6 +40,8 @@ interface IFinalizerTaskManager {
     struct TaskResponse {
         // Can be obtained by the operator from the event NewTaskCreated.
         uint32 referenceTaskIndex;
+
+        bytes32 operatorsStateHash;
         // This is the response that the operator has to provide for a finalized block.
         bytes32 blockHash;
         // This is the response that the operator has to provide for a an executed block.
