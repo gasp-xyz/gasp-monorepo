@@ -11,6 +11,7 @@ import type { Option } from "@polkadot/types-codec";
 import type {
 	FrameSystemEventRecord,
 	PalletRolldownMessagesL1Update,
+	PalletRolldownMessagesChain,
 } from "@polkadot/types/lookup";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import type { KeypairType } from "@polkadot/util-crypto/types";
@@ -24,6 +25,13 @@ import {
 	MANGATA_CONTRACT_ADDRESS,
 	ROLLDOWN_EVENT_SECTION,
 } from "../common/constants.js";
+
+
+function getL1ChainType(
+	api: ApiPromise,
+): PalletRolldownMessagesChain {
+  return api.createType('PalletRolldownMessagesChain', L1_CHAIN)
+}
 
 function sleep(timeInMilliseconds: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, timeInMilliseconds));
@@ -97,7 +105,7 @@ async function processDataForL2Update(
 	print(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
 
 	const data = await getUpdateForL2(publicClient, api);
-	// print(`ETH native data : ${util.inspect(data, { depth: null })}`);
+	print(`ETH native data : ${util.inspect(data, { depth: null })}`);
 
 	const encodedData = getEncodedData("getUpdateForL2", data);
 	const nativeL1Update = await getNativeL1Update(api, encodedData);
@@ -125,11 +133,17 @@ async function processPendingRequestsEvents(
 	if (pendingRequestsEvents.length > 0) {
 		pendingRequestsEvents.forEach(async (record: FrameSystemEventRecord) => {
 			record.event.data.forEach(async (data) => {
-				const requestId = (data as unknown as string[])[1];
-				const { start, end } = (data as any)[2] as unknown as {
+				const chain = (data as unknown as string[])[0];
+				const requestId = (data as unknown as string[])[2];
+				const { start, end } = (data as any)[3] as unknown as {
 					start: string;
 					end: string;
 				};
+        if (chain !== L1_CHAIN){
+          console.log(chain, L1_CHAIN);
+          console.log(`ignoring event ${data.toString()} for differnet chain`)
+          return
+        }
 
 				const contractData = await publicClient.readContract({
 					address: MANGATA_CONTRACT_ADDRESS,
@@ -167,9 +181,7 @@ async function getSelectedSequencerWithRights(
 	const selectedSequencerMap =
     await apiAt.query.sequencerStaking.selectedSequencer();
   const selectedMap = JSON.parse(selectedSequencerMap.toString());
-
   const selectedSequencer = selectedMap[L1_CHAIN].toLowerCase();
-  console.log(selectedSequencer)
 
   const isSequencerSelected = selectedSequencer === collatorAddress.toLowerCase();
   const sequencerRights = await apiAt.query.rolldown.sequencersRights(L1_CHAIN);

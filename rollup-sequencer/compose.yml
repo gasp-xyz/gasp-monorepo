@@ -1,5 +1,5 @@
 services:
-  sequencer:
+  sequencer-eth:
     restart: unless-stopped
     image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
     depends_on:
@@ -10,7 +10,25 @@ services:
     build: .
     environment:
       MANGATA_NODE_URL: ${ROLLUP_SEQUENCER_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}
-      ETH_CHAIN_URL: ${ROLLUP_SEQUENCER_ETH_CHAIN_URL:-wss://ethereum.publicnode.com}
+      ETH_CHAIN_URL: ${ROLLUP_SEQUENCER_ETH_CHAIN_URL_ETH:-wss://ethereum.publicnode.com}
       MANGATA_CONTRACT_ADDRESS: ${MANGATA_CONTRACT_ADDRESS:-0x70e0bA845a1A0F2DA3359C97E0285013525FFC49}
-      MNEMONIC: ${ROLLUP_SEQUENCER_MNEMONIC:-'//Bob'}
+      MNEMONIC: ${ROLLUP_SEQUENCER_MNEMONIC_ETH:-'//Bob'}
       BLOCK_NUMBER_DELAY: ${ROLLUP_SEQUENCER_BLOCK_NUMBER_DELAY}
+      L1_CHAIN: ${ROLLUP_SEQUENCER_L1_CHAIN_ETH:-Ethereum}
+
+  sequencer-arb:
+    restart: unless-stopped
+    image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
+    depends_on:
+      eth-contracts-deployment-3:
+        condition: service_completed_successfully
+      node-alice:
+        condition: service_started
+    build: .
+    environment:
+      MANGATA_NODE_URL: ${ROLLUP_SEQUENCER_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}
+      ETH_CHAIN_URL: ${ROLLUP_SEQUENCER_ETH_CHAIN_URL_ARB:-wss://ethereum.publicnode.com}
+      MANGATA_CONTRACT_ADDRESS: ${MANGATA_CONTRACT_ADDRESS:-0x70e0bA845a1A0F2DA3359C97E0285013525FFC49}
+      MNEMONIC: ${ROLLUP_SEQUENCER_MNEMONIC_ARB:-'//Bob'}
+      BLOCK_NUMBER_DELAY: ${ROLLUP_SEQUENCER_BLOCK_NUMBER_DELAY}
+      L1_CHAIN: ${ROLLUP_SEQUENCER_L1_CHAIN_ARB:-Arbitrum}

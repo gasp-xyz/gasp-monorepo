@@ -1,7 +1,7 @@
 import * as util from "node:util";
 import {ApiPromise} from "@polkadot/api";
 import {decodeAbiParameters, publicActions, type PublicClient, type WalletClient} from "viem";
-import {LIMIT, MANGATA_CONTRACT_ADDRESS, ROLLDOWN_ABI, VERBOSE} from "../common/constants.js";
+import {LIMIT, MANGATA_CONTRACT_ADDRESS, ROLLDOWN_ABI, VERBOSE, L1_CHAIN} from "../common/constants.js";
 import {ethAccount, getChain} from "../viem/client.js";
 import {Cancel, L2Update, RequestResult, Withdrawal} from "../common/types.js";
 import {estimateMaxPriorityFeePerGas} from "viem/actions";
@@ -45,7 +45,8 @@ function filterUpdates(l2Update: Array<L2Update>, lastSubmittedId: number) {
 
 
 async function getPendingUpdate(api: ApiPromise, blockHash: Uint8Array) {
-    return await api.rpc.rolldown.pending_l2_requests('Ethereum', blockHash);
+    const chain = api.createType('Chain', L1_CHAIN);
+    return await api.rpc.rolldown.pending_l2_requests(chain, blockHash);
 }
 
 function getDecodedData(methodName: string, pendingUpdates: `0x${string}`): Array<L2Update> {

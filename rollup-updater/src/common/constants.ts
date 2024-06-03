@@ -13,4 +13,5 @@ export const EIGEN_CONTRACT_ADDRESS = configuration.EIGEN_CONTRACT_ADDRESS! as `
 export const MANGATA_CONTRACT_ADDRESS = configuration.MANGATA_CONTRACT_ADDRESS as `0x${string}`;
 export const FINALIZATION_SOURCE = configuration.FINALIZATION_SOURCE;
 export const VERBOSE = Boolean(configuration.VERBOSE);
-export const LIMIT = parseInt(configuration.LIMIT)
+export const LIMIT = parseInt(configuration.LIMIT);
+export const L1_CHAIN = configuration.L1_CHAIN;
