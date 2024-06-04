@@ -97,6 +97,7 @@ pub mod i_finalizer_task_manager {
                                 kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
                                     ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Bytes,
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                 ],),
@@ -134,6 +135,7 @@ pub mod i_finalizer_task_manager {
                                 name: ::std::borrow::ToOwned::to_owned("taskResponse"),
                                 kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
@@ -287,7 +289,7 @@ pub mod i_finalizer_task_manager {
     )]
     #[ethevent(
         name = "NewTaskCreated",
-        abi = "NewTaskCreated(uint32,(uint256,uint32,bytes,uint32))"
+        abi = "NewTaskCreated(uint32,(uint256,uint32,uint32,bytes,uint32))"
     )]
     pub struct NewTaskCreatedFilter {
         #[ethevent(indexed)]
@@ -327,7 +329,7 @@ pub mod i_finalizer_task_manager {
     )]
     #[ethevent(
         name = "TaskResponded",
-        abi = "TaskResponded((uint32,bytes32,bytes32,bytes32),(uint32,bytes32,uint96[],uint96[]))"
+        abi = "TaskResponded((uint32,bytes32,bytes32,bytes32,bytes32),(uint32,bytes32,uint96[],uint96[]))"
     )]
     pub struct TaskRespondedFilter {
         pub task_response: TaskResponse,

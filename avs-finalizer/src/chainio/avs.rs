@@ -1,11 +1,15 @@
 use std::{fmt::Debug, sync::Arc};
 
+use alloy_primitives::{Address as AlloyAddress, U160 as AlloyU160};
 use bindings::{
     finalizer_service_manager::FinalizerServiceManager,
     finalizer_task_manager::{FinalizerTaskManager, NewTaskCreatedFilter},
     registry_coordinator::RegistryCoordinator,
     shared_types::OperatorInfo,
     strategy_manager_storage::{PubkeyRegistrationParams, SignatureWithSaltAndExpiry},
+};
+use eigen_client_avsregistry::{
+    reader::AvsRegistryChainReader, subscriber::AvsRegistryChainSubscriber,
 };
 use ethers::{
     contract::{EthEvent, Event},
@@ -26,10 +30,8 @@ pub struct AvsContracts {
     task_manager: FinalizerTaskManager<Client>,
     task_manager_sub: FinalizerTaskManager<Provider<Ws>>,
     registry: RegistryCoordinator<Client>,
-    avs_registry_chain_reader: AvsRegistryChainReader,
-    avs_registry_subscriber: AvsRegistryChainSubscriber,
-    operator_info: OperatorInfoServiceInMemory,
-    avs_registry_service_chain_caller: AvsRegistryServiceChainCaller,
+    pub avs_registry_chain_reader: AvsRegistryChainReader,
+    pub avs_registry_subscriber: AvsRegistryChainSubscriber,
     client: Arc<Client>,
     pub ws_client: Arc<Provider<Ws>>,
 }
@@ -64,33 +66,21 @@ impl AvsContracts {
         let bls_apk_registry_addr = registry.bls_apk_registry().await?;
         let stake_registry_addr = registry.stake_registry().await?;
         let avs_registry_chain_reader = AvsRegistryChainReader::new(
-            bls_apk_registry_addr,
-            config.avs_registry_coordinator_addr,
-            task_manager_addr,
-            stake_registry_addr,
+            AlloyAddress::from(AlloyU160::from_be_bytes(
+                bls_apk_registry_addr.to_fixed_bytes(),
+            )),
+            AlloyAddress::from(AlloyU160::from_be_bytes(
+                config.avs_registry_coordinator_addr.to_fixed_bytes(),
+            )),
+            AlloyAddress::from(AlloyU160::from_be_bytes(task_manager_addr.to_fixed_bytes())),
+            AlloyAddress::from(AlloyU160::from_be_bytes(
+                stake_registry_addr.to_fixed_bytes(),
+            )),
             config.eth_rpc_url.to_string(),
         );
 
-        let avs_registry_subscriber = AvsRegistryChainSubscriber::new(config.eth_ws_url.to_string());
-
-        let operators_info = Arc::new(Mutex::new(
-            OperatorInfoServiceInMemory::new(
-                avs_registry_subscriber,
-                avs_registry_chain_reader,
-                config.eth_ws_url.to_string(),
-            )
-            .await,
-        ));
-        let operators_info_clone = Arc::clone(&operators_info);
-        // start the service with a particular block range
-        // from block : 0
-        // to block : 0 means current block , else normal
-        task::spawn(async move {
-            let operators_info = operators_info_clone.lock().await;
-            operators_info.start_service(0, 0).await
-        });
-        
-        let avs_registry_service_chain_caller = AvsRegistryServiceChainCaller::new(avs_registry_chain_reader, operators_info);
+        let avs_registry_subscriber =
+            AvsRegistryChainSubscriber::new(config.eth_ws_url.to_string());
 
         Ok(Self {
             service_manager,
@@ -99,8 +89,6 @@ impl AvsContracts {
             registry,
             avs_registry_chain_reader,
             avs_registry_subscriber,
-            operator_info,
-            avs_registry_service_chain_caller,
             client,
             ws_client,
         })

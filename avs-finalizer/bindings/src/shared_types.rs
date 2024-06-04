@@ -126,7 +126,7 @@ pub struct Withdrawal {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
     pub shares: ::std::vec::Vec<::ethers::core::types::U256>,
 }
-///`Task(uint256,uint32,bytes,uint32)`
+///`Task(uint256,uint32,uint32,bytes,uint32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -142,10 +142,11 @@ pub struct Withdrawal {
 pub struct Task {
     pub block_number: ::ethers::core::types::U256,
     pub task_created_block: u32,
+    pub last_completed_task_created_block: u32,
     pub quorum_numbers: ::ethers::core::types::Bytes,
     pub quorum_threshold_percentage: u32,
 }
-///`TaskResponse(uint32,bytes32,bytes32,bytes32)`
+///`TaskResponse(uint32,bytes32,bytes32,bytes32,bytes32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -160,6 +161,7 @@ pub struct Task {
 )]
 pub struct TaskResponse {
     pub reference_task_index: u32,
+    pub operators_state_hash: [u8; 32],
     pub block_hash: [u8; 32],
     pub storage_proof_hash: [u8; 32],
     pub pending_state_hash: [u8; 32],

@@ -1131,6 +1131,7 @@ name = "avs-finalizer"
 version = "0.1.0"
 dependencies = [
  "aes",
+ "alloy-primitives",
  "ark-bn254",
  "ark-ec",
  "ark-ff 0.4.2",
@@ -1138,7 +1139,7 @@ dependencies = [
  "clap",
  "color-eyre",
  "ctr",
- "eigen-services-avsregistry",
+ "eigen-client-avsregistry",
  "eth-keystore",
  "ethers",
  "eyre",
@@ -2766,48 +2767,6 @@ dependencies = [
  "ark-ff 0.4.2",
  "ethers",
  "thiserror",
-]
-
-[[package]]
-name = "eigen-services-avsregistry"
-version = "0.0.1-alpha"
-dependencies = [
- "alloy-primitives",
- "eigen-chainio-utils",
- "eigen-client-avsregistry",
- "eigen-contract-bindings",
- "eigen-crypto-bls",
- "eigen-crypto-bn254",
- "eigen-services-operatorsinfo",
- "eigen-types",
- "eth-keystore",
- "ethers",
- "thiserror",
-]
-
-[[package]]
-name = "eigen-services-operatorsinfo"
-version = "0.0.1-alpha"
-dependencies = [
- "alloy-contract",
- "alloy-primitives",
- "alloy-provider",
- "alloy-rpc-types",
- "alloy-sol-types",
- "alloy-transport-ws",
- "anyhow",
- "eigen-client-avsregistry",
- "eigen-contract-bindings",
- "eigen-crypto-bls",
- "eigen-crypto-bn254",
- "eigen-types",
- "eth-keystore",
- "ethers",
- "eyre",
- "futures-util",
- "thiserror",
- "tokio",
- "tracing",
 ]
 
 [[package]]

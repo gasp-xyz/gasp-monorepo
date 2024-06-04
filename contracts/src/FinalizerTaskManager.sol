@@ -110,7 +110,7 @@ contract FinalizerTaskManager is
         // Ensure new previous task was either cancelled or completed
         // Here for now we auto cancel previous task if not completed
         if (latestTaskNum > 0) {
-            uint32 memory lastTaskNum = latestTaskNum - 1;
+            uint32 lastTaskNum = latestTaskNum - 1;
             if (indexToTaskStatus[lastTaskNum] == TaskStatus.INITIALIZED_BUT_NOT_COMPLETED){
                 indexToTaskStatus[lastTaskNum] = TaskStatus.CANCELLED;
             }
@@ -152,6 +152,8 @@ contract FinalizerTaskManager is
             "Aggregator has responded to the task too late"
         );
 
+        // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED_BUT_NOT_COMPLETED is the last created task)
+
         /* CHECKING SIGNATURES & WHETHER THRESHOLD IS MET OR NOT */
         // calculate message which operators signed
         bytes32 message = keccak256(abi.encode(taskResponse));
@@ -187,6 +189,7 @@ contract FinalizerTaskManager is
 
         latestPendingStateHash = taskResponse.pendingStateHash;
         indexToTaskStatus[taskResponse.referenceTaskIndex] == TaskStatus.COMPLETED;
+        lastCompletedTaskCreatedBlock = task.taskCreatedBlock;
         // emitting completed event
         emit TaskCompleted(taskResponse.referenceTaskIndex, taskResponse.blockHash);
     }

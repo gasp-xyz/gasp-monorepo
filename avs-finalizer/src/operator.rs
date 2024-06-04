@@ -18,15 +18,16 @@ use ethers::{
 use node_executor::ExecutorDispatch;
 use node_primitives::BlockNumber;
 
+use alloy_primitives::Bytes;
 use serde::Serialize;
 use sp_core::H256;
 use sp_runtime::traits::BlakeTwo256;
 use sp_runtime::{generic, OpaqueExtrinsic};
 use std::sync::Arc;
 use tokio::select;
-use tracing::{debug, error, info, instrument};
 use tokio::time::{sleep, Duration};
 use tokio::try_join;
+use tracing::{debug, error, info, instrument};
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
@@ -106,7 +107,7 @@ impl Operator {
                         let self_clone = self.clone();
                         let get_operators_state_hash_handle = tokio::spawn(async move {
                             info!("Get operators state hash: {:?}", event_clone);
-                            self_clone.get_operators_state_hash(event_clone.task.task_created_block).await
+                            self_clone.get_operators_state_hash(event_clone.task.task_created_block, event_clone.task.last_completed_task_created_block).await
                         });
                         let (proofs, operators_state_hash) = try_join!(execute_block_join_handle, get_operators_state_hash_handle)?;
                         let (proofs, operators_state_hash) = (proofs?, operators_state_hash?);
@@ -114,7 +115,7 @@ impl Operator {
                         debug!("Block executed successfully {:?}", proofs);
                         let payload = TaskResponse {
                             reference_task_index: event.task_index,
-                            op_data: operators_state_hash,
+                            operators_state_hash: operators_state_hash.into(),
                             block_hash: proofs.0.as_fixed_bytes().to_owned(),
                             storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
                             pending_state_hash: proofs.2.as_fixed_bytes().to_owned(),
@@ -165,10 +166,19 @@ impl Operator {
     pub(crate) async fn get_operators_state_hash(
         self: Arc<Self>,
         x: u32,
+        y: u32,
     ) -> eyre::Result<H256> {
         sleep(Duration::from_millis(1000)).await;
 
-        
+        let a = self
+            .avs_contracts
+            .avs_registry_chain_reader
+            .get_operators_stake_in_quorums_at_block(x, Bytes::from(vec![0u8]));
+        let b = self
+            .avs_contracts
+            .avs_registry_chain_reader
+            .get_operators_stake_in_quorums_at_block(y, Bytes::from(vec![0u8]));
+
         Ok(H256::repeat_byte(7))
     }
 

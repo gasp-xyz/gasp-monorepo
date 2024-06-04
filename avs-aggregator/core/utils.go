@@ -20,6 +20,10 @@ func AbiEncodeTaskResponse(h *taskmanager.IFinalizerTaskManagerTaskResponse) ([]
 			Type: "uint32",
 		},
 		{
+			Name: "operatorsStateHash",
+			Type: "bytes32",
+		},
+		{
 			Name: "BlockHash",
 			Type: "bytes32",
 		},

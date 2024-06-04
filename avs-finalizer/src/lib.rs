@@ -2,8 +2,8 @@ use chainio::setup_deposits;
 use cli::CliArgs;
 use eyre::{eyre, Ok};
 use operator::Operator;
-use tracing::{info, instrument, warn};
 use std::sync::Arc;
+use tracing::{info, instrument, warn};
 
 mod chainio;
 mod cli;

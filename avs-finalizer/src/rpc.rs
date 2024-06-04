@@ -18,7 +18,7 @@ use tracing::instrument;
 
 type Bytes32 = [u8; 32];
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 struct SignedTaskResponse {
     #[serde(rename = "TaskResponse")]
     task_response: TaskResponseWire,
@@ -28,7 +28,7 @@ struct SignedTaskResponse {
     operator_id: Bytes32,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 struct TaskResponseWire {
     #[serde(rename = "ReferenceTaskIndex")]
     pub reference_task_index: u32,
@@ -54,7 +54,7 @@ impl From<TaskResponse> for TaskResponseWire {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 struct BlsSignatureWire {
     g1_point: G1PointWire,
 }
@@ -70,6 +70,7 @@ impl From<BlsSignature> for BlsSignatureWire {
     }
 }
 
+#[derive(Debug)]
 struct G1PointWire {
     x: <PrivateKey as PrimeField>::BigInt,
     y: <PrivateKey as PrimeField>::BigInt,
@@ -127,6 +128,7 @@ impl Rpc {
         keypair: &BlsKeypair,
     ) -> eyre::Result<Response> {
         let req = create_response(task_response, keypair)?;
+        println!("{:?}", req);
         let json: String = serde_json::to_string(&req)?;
 
         Ok(self.client.post(&self.avs_url).body(json).send().await?)
@@ -139,6 +141,8 @@ fn create_response(task: TaskResponse, keypair: &BlsKeypair) -> eyre::Result<Sig
     let hash = Keccak256::hash(encoded.as_ref());
     let sig = keypair.sign(hash.as_bytes())?;
 
+    println!("{:?}", hash);
+    println!("{:?}", sig);
     Ok(SignedTaskResponse {
         bls_signature: sig.into(),
         task_response: task.into(),

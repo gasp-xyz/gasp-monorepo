@@ -601,6 +601,11 @@ pub mod bls_apk_registry_storage {
                                 indexed: false,
                             },
                             ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
                                 name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
                                 kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
                                 indexed: false,
@@ -617,6 +622,11 @@ pub mod bls_apk_registry_storage {
                             ::ethers::core::abi::ethabi::EventParam {
                                 name: ::std::borrow::ToOwned::to_owned("operator"),
                                 kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operatorId"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
                                 indexed: false,
                             },
                             ::ethers::core::abi::ethabi::EventParam {
@@ -943,10 +953,11 @@ pub mod bls_apk_registry_storage {
     )]
     #[ethevent(
         name = "OperatorAddedToQuorums",
-        abi = "OperatorAddedToQuorums(address,bytes)"
+        abi = "OperatorAddedToQuorums(address,bytes32,bytes)"
     )]
     pub struct OperatorAddedToQuorumsFilter {
         pub operator: ::ethers::core::types::Address,
+        pub operator_id: [u8; 32],
         pub quorum_numbers: ::ethers::core::types::Bytes,
     }
     #[derive(
@@ -963,10 +974,11 @@ pub mod bls_apk_registry_storage {
     )]
     #[ethevent(
         name = "OperatorRemovedFromQuorums",
-        abi = "OperatorRemovedFromQuorums(address,bytes)"
+        abi = "OperatorRemovedFromQuorums(address,bytes32,bytes)"
     )]
     pub struct OperatorRemovedFromQuorumsFilter {
         pub operator: ::ethers::core::types::Address,
+        pub operator_id: [u8; 32],
         pub quorum_numbers: ::ethers::core::types::Bytes,
     }
     ///Container type for all of the contract's events
