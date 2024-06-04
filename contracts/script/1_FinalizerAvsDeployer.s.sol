@@ -80,8 +80,8 @@ contract Deployer is Script, Utils, Test {
         // check that the chainID matches the one in the config
         uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
         uint256 currentChainId = block.chainid;
-        emit log_named_uint("You are deploying on ChainID", currentChainId);
-        require(configChainId == currentChainId, "You are on the wrong chain for this config");
+        emit log_named_uint("You are deploying on ChainID", block.chainid);
+        require(configChainId == block.chainid, "You are on the wrong chain for this config");
 
         address churner = stdJson.readAddress(configData, ".permissions.churner");
         address ejector = stdJson.readAddress(configData, ".permissions.ejector");
@@ -106,10 +106,7 @@ contract Deployer is Script, Utils, Test {
             address[] memory pausers = new address[](2);
             pausers[0] = avsOwner;
             pausers[1] = unpauseMultisig;
-            avsPauserReg = new PauserRegistry(
-                pausers,
-                unpauseMultisig
-            );
+            avsPauserReg = new PauserRegistry(pausers, unpauseMultisig);
         }
 
         /**
@@ -119,31 +116,13 @@ contract Deployer is Script, Utils, Test {
         EmptyContract emptyContract = new EmptyContract();
 
         serviceManager = FinalizerServiceManager(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(avsProxyAdmin),
-                    ""
-                )
-            )
+            address(new TransparentUpgradeableProxy(address(emptyContract), address(avsProxyAdmin), ""))
         );
         taskManager = FinalizerTaskManager(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(avsProxyAdmin),
-                    ""
-                )
-            )
+            address(new TransparentUpgradeableProxy(address(emptyContract), address(avsProxyAdmin), ""))
         );
         registryCoordinator = RegistryCoordinator(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(avsProxyAdmin),
-                    ""
-                )
-            )
+            address(new TransparentUpgradeableProxy(address(emptyContract), address(avsProxyAdmin), ""))
         );
         blsApkRegistry = BLSApkRegistry(
             address(
@@ -184,10 +163,7 @@ contract Deployer is Script, Utils, Test {
         );
 
         // deploy StakeRegistry
-        stakeRegistryImplementation = new StakeRegistry(
-            registryCoordinator,
-            delegation
-        );
+        stakeRegistryImplementation = new StakeRegistry(registryCoordinator, delegation);
 
         // upgrade stake registry proxy to implementation
         avsProxyAdmin.upgrade(
@@ -195,9 +171,7 @@ contract Deployer is Script, Utils, Test {
         );
 
         // deploy BLSApkRegistry
-        blsApkRegistryImplementation = new BLSApkRegistry(
-            registryCoordinator
-        );
+        blsApkRegistryImplementation = new BLSApkRegistry(registryCoordinator);
 
         // upgrade bls pubkey registry proxy to implementation
         avsProxyAdmin.upgrade(
@@ -212,13 +186,9 @@ contract Deployer is Script, Utils, Test {
             TransparentUpgradeableProxy(payable(address(indexRegistry))), address(indexRegistryImplementation)
         );
 
-
         // deploy RegistryCoordinator
         registryCoordinatorImplementation = new RegistryCoordinator(
-            IServiceManager(address(serviceManager)),
-            stakeRegistry,
-            blsApkRegistry,
-            indexRegistry
+            IServiceManager(address(serviceManager)), stakeRegistry, blsApkRegistry, indexRegistry
         );
 
         (
@@ -239,7 +209,7 @@ contract Deployer is Script, Utils, Test {
                 RegistryCoordinator.initialize.selector,
                 avsOwner,
                 churner,
-                ejector,
+                address(serviceManager),
                 avsPauserReg,
                 0,
                 operatorSetParams,
@@ -249,24 +219,27 @@ contract Deployer is Script, Utils, Test {
         );
 
         //deploy serviceManager
-        serviceManagerImplementation = new FinalizerServiceManager(
-            avsDirectory,
-            registryCoordinator,
-            stakeRegistry,
-            IFinalizerTaskManager(address(taskManager))
-        );
+        {
+            uint64 recurrentRegistrationLimit =
+                uint64(stdJson.readUint(configData, ".registryParams.recurrentRegistrationLimit"));
+
+            serviceManagerImplementation = new FinalizerServiceManager(
+                avsDirectory,
+                registryCoordinator,
+                stakeRegistry,
+                IFinalizerTaskManager(address(taskManager)),
+                recurrentRegistrationLimit
+            );
+        }
 
         // upgrade service manager proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(serviceManager))),
             address(serviceManagerImplementation),
-            abi.encodeWithSelector(serviceManager.initialize.selector, avsOwner)
+            abi.encodeWithSelector(serviceManager.initialize.selector, avsOwner, ejector)
         );
 
-        taskManagerImplementation = new FinalizerTaskManager(
-            registryCoordinator,
-            taskResponseWindowBlocks
-        );
+        taskManagerImplementation = new FinalizerTaskManager(registryCoordinator, taskResponseWindowBlocks);
 
         // upgrade task manager proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(
@@ -415,6 +388,7 @@ contract Deployer is Script, Utils, Test {
         IStakeRegistry.StrategyParams[][] memory strategyAndWeightingMultipliers
     ) internal view {
         require(serviceManager.owner() == avsOwner, "serviceManager.owner() != avsOwner");
+        require(serviceManager.ejector() == ejector, "serviceManager.ejector() != ejector");
         require(rolldown.owner() == avsOwner, "rolldown.owner() != avsOwner");
 
 
@@ -423,7 +397,7 @@ contract Deployer is Script, Utils, Test {
         require(rolldown.lastProcessedUpdate_origin_l2() == 0, "rolldown.lastProcessedUpdate_origin_l2 != 0");
 
         require(registryCoordinator.churnApprover() == churner, "registryCoordinator.churner() != churner");
-        require(registryCoordinator.ejector() == ejector, "registryCoordinator.ejector() != ejector");
+        require(registryCoordinator.ejector() == address(serviceManager), "registryCoordinator.ejector() != serviceManager");
         require(
             registryCoordinator.pauserRegistry() == avsPauserReg,
             "registryCoordinator: pauser registry not set correctly"
