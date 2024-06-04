@@ -287,7 +287,7 @@ contract Deployer is Script, Utils, Test {
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeWithSelector(rolldown.initialize.selector, avsPauserReg, avsOwner, chain)
+            abi.encodeWithSelector(rolldown.initialize.selector, avsPauserReg, avsOwner, chain, msg.sender)
         );
 
         // transfer ownership of proxy admin to upgrader

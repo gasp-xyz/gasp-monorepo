@@ -35,7 +35,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         users = utils.createUsers(1);
         rolldown = new Rolldown();
-        rolldown.initialize(avsPauserReg, avsOwner, ChainId.Ethereum);
+        rolldown.initialize(avsPauserReg, avsOwner, ChainId.Ethereum, users[0]);
         ETH_TOKEN_ADDRESS = payable(0x5748395867463837537395739375937493733457);
     }
 
@@ -193,7 +193,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(alice);
         token.approve(address(rolldown), amount);
         rolldown.deposit_erc20(tokenAddress, 10);
-        vm.stopPrank();
 
         Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
         assertEq(l1Update.pendingDeposits.length, 1);
@@ -268,6 +267,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
             1
         );
         assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove[0], 3);
+        vm.stopPrank();
     }
 
     function testIgnoreDuplicatedUpdates() public {
@@ -280,7 +280,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(alice);
         token.approve(address(rolldown), amount);
         rolldown.deposit_erc20(tokenAddress, 10);
-        vm.stopPrank();
 
         Rolldown.L2Update memory l2Update;
         l2Update.cancels = new Rolldown.Cancel[](0);
@@ -297,6 +296,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         rolldown.update_l1_from_l2(l2Update);
         vm.expectRevert("Invalid L2Update");
         rolldown.update_l1_from_l2(l2Update);
+        vm.stopPrank();
     }
 
     function testL1UpdateHashCompatibilityWithMangataNode() public {
@@ -457,7 +457,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         // Act
         vm.startPrank(alice);
         token.transfer(address(rolldown), amount);
-        vm.stopPrank();
         uint256 aliceBalanceBefore = token.balanceOf(alice);
         uint256 contractBalanceBefore = token.balanceOf(address(rolldown));
 
@@ -472,6 +471,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         rolldown.update_l1_from_l2(l2Update);
+        vm.stopPrank();
     }
 
     function testSuccessfulWithdrawalRequest() public {
@@ -547,7 +547,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         token.approve(address(rolldown), 2 * amount);
         rolldown.deposit_erc20(tokenAddress, amount);
         rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
 
         Rolldown.L2Update memory l2Update;
         l2Update.results = new Rolldown.RequestResult[](0);
@@ -563,6 +562,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.expectRevert("Invalid L2Update");
         rolldown.update_l1_from_l2(l2Update);
+        vm.stopPrank();
     }
 
     function testDoNotRejectPartialyKnownL2Update() public {
@@ -576,7 +576,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         token.approve(address(rolldown), 2 * amount);
         rolldown.deposit_erc20(tokenAddress, amount);
         rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
 
         Rolldown.L2Update memory l2Update;
         l2Update.results = new Rolldown.RequestResult[](0);
@@ -606,6 +605,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         rolldown.update_l1_from_l2(partiallyKnownUpdate);
+        vm.stopPrank();
     }
 
     function testAcceptConsecutiveUpdates() public {
@@ -619,7 +619,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         token.approve(address(rolldown), 2 * amount);
         rolldown.deposit_erc20(tokenAddress, amount);
         rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
 
         Rolldown.L2Update memory l2Update;
         l2Update.results = new Rolldown.RequestResult[](2);
@@ -656,6 +655,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         rolldown.update_l1_from_l2(l2Update2);
+        vm.stopPrank();
     }
 
     function testOverlapping() public {
@@ -669,7 +669,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         token.approve(address(rolldown), 2 * amount);
         rolldown.deposit_erc20(tokenAddress, amount);
         rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
 
         Rolldown.L2Update memory l2Update;
         l2Update.results = new Rolldown.RequestResult[](2);
@@ -712,6 +711,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         rolldown.update_l1_from_l2(l2Update2);
+        vm.stopPrank();
     }
 
     function testWithdrawalAlongIndexUpdateWhenWithdrawalProcessedBeforeIndexUpdate()
@@ -727,7 +727,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         token.approve(address(rolldown), 2 * amount);
         rolldown.deposit_erc20(tokenAddress, amount);
         rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
 
         Rolldown.L2Update memory l2Update;
         l2Update.results = new Rolldown.RequestResult[](2);
@@ -771,6 +770,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
                 IRolldownPrimitives.Origin.L1
         );
         assertEq(update.pendingWithdrawalResolutions[0].requestId.id, 4);
+        vm.stopPrank();
     }
 
     function testWithdrawalAlongIndexUpdateWhenWithdrawalProcessedAfterIndexUpdate()
@@ -786,7 +786,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         token.approve(address(rolldown), 2 * amount);
         rolldown.deposit_erc20(tokenAddress, amount);
         rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
 
         Rolldown.L2Update memory l2Update;
         l2Update.results = new Rolldown.RequestResult[](2);
@@ -830,6 +829,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
                 IRolldownPrimitives.Origin.L1
         );
         assertEq(update.pendingWithdrawalResolutions[0].requestId.id, 4);
+        vm.stopPrank();
     }
 
     function testReproduceWithdrawalHandling() public {
@@ -843,7 +843,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         token.approve(address(rolldown), 2 * amount);
         rolldown.deposit_erc20(tokenAddress, amount);
         rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
 
         Rolldown.L2Update memory l2Update;
         l2Update.results = new Rolldown.RequestResult[](2);
@@ -903,6 +902,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
             status: true
         });
         rolldown.update_l1_from_l2(l2Update4);
+        vm.stopPrank();
     }
 
     function testReproduceWithdrawalHandling2() public {
@@ -916,7 +916,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         token.approve(address(rolldown), 2 * amount);
         rolldown.deposit_erc20(tokenAddress, amount);
         rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
 
         Rolldown.L2Update memory l2Update;
         l2Update.results = new Rolldown.RequestResult[](2);
@@ -972,6 +971,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
             status: false
         });
         rolldown.update_l1_from_l2(l2Update3);
+        vm.stopPrank();
     }
 
     function testEveryRequestResultIsIncludedInSingleL2UpdatesToRemoveForOverlappingL2Updates()
@@ -987,7 +987,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         token.approve(address(rolldown), 2 * amount);
         rolldown.deposit_erc20(tokenAddress, amount);
         rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
 
         Rolldown.L2Update memory l2Update;
         l2Update.results = new Rolldown.RequestResult[](1);
@@ -1036,6 +1035,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
             1
         );
         assertEq(l1Update.pendingL2UpdatesToRemove[1].l2UpdatesToRemove[0], 2);
+        vm.stopPrank();
     }
 
     function testUpdateWithWithdrawalAndRequestResult() public {
@@ -1049,7 +1049,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         token.approve(address(rolldown), 2 * amount);
         rolldown.deposit_erc20(tokenAddress, amount);
         rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
 
         Rolldown.L2Update memory l2Update;
         l2Update.results = new Rolldown.RequestResult[](2);
@@ -1090,6 +1089,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
             amount: 8
         });
         rolldown.update_l1_from_l2(l2Update2);
+        vm.stopPrank();
     }
 
     function testNonsuccessfullDepositHandling() public {

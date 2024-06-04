@@ -13,6 +13,8 @@ abstract contract RolldownStorage is IRolldown {
     uint256 public lastProcessedUpdate_origin_l2;
     // Chain identificator
     ChainId public chain;
+    // Chain identificator
+    address public updaterAccount;
 
     mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
     mapping(uint256 => CancelResolution) public cancelResolutions;

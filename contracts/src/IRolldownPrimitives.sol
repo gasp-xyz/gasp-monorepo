@@ -34,6 +34,7 @@ interface IRolldownPrimitives {
     event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
     event EthWithdrawPending(address sender, uint amount);
     event PendingEthWithdrawn(address sender, uint amount);
+    event NewUpdaterSet(address updater);
 
     enum Origin {
         L1,
