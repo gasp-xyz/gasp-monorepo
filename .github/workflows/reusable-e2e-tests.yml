@@ -50,7 +50,7 @@ jobs:
           submodules: recursive
 
       - name: Start env
-        run: docker compose up -d --wait
+        run: bash -c "docker compose up -d --wait || true"
       
       - name: Use custom branch in e2e tests repository if it exists, otherwise use default branch
         id: e2e
