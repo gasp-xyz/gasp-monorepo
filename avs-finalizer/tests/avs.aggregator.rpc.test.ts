@@ -1,8 +1,12 @@
-import { expect, jest, describe, it } from "@jest/globals";
-import { getNewKeys} from "./DockerUtils";
+import {describe, expect, it, jest} from "@jest/globals";
+import {DockerUtils, getNewKeys} from "./DockerUtils";
 
 // @ts-ignore
-import request  from "supertest";
+import request from "supertest";
+import {createPublicClient, webSocket} from "viem";
+import {anvil} from "./ethUtils";
+import {waitFor, waitForOperatorRegistered} from "./operatorUtilities";
+
 jest.setTimeout(1500000);
 
 describe('AVS Aggregator', () => {
@@ -30,14 +34,30 @@ describe('AVS Aggregator', () => {
         expect(response.status).toBe(404);
         expect(response.text).toEqual("task 24 not initialized or already completed\n");
     });
-    it.skip('Rpc test - signature', async () => {
+    it('Rpc test - signature', async () => {
+        const dockerUtils = new DockerUtils();
+        const transport = webSocket(anvil.rpcUrls.default.http[0] , {
+            retryCount: 5,
+        });
+        const publicClient = createPublicClient({
+            transport,
+            chain: anvil,
+        });
+        // opt-in to avoid avs completeness.
+        const POperatorAddress = waitForOperatorRegistered(publicClient as any);
+        await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE, dockerUtils.bigStakeWithWrongAvsPort);
+        await POperatorAddress;
 
         const keys = await getNewKeys();
         console.info("keys: " + JSON.stringify(keys));
+
+        const currTask = await waitFor(publicClient as any, 1, "NewTaskCreated");
+
+        const {taskIndex} = currTask[0].args;
         const json = {
             "TaskResponse":
                 {
-                    "ReferenceTaskIndex": 24,
+                    "ReferenceTaskIndex": taskIndex,
                     "BlockHash": [153, 125, 3, 162, 144, 139, 84, 185, 75, 251, 230, 179, 126, 94, 134, 245, 138, 35, 211, 101, 51, 39, 202, 53, 238, 48, 25, 161, 103, 238, 121, 135],
                     "StorageProofHash": [45, 198, 26, 130, 242, 237, 121, 120, 211, 137, 249, 188, 50, 113, 112, 21, 154, 175, 48, 174, 130, 254, 201, 183, 204, 87, 100, 164, 51, 116, 215, 243],
                     "PendingStateHash": [31, 188, 19, 31, 78, 175, 205, 220, 101, 13, 225, 81, 155, 55, 247, 31, 107, 154, 134, 69, 35, 200, 63, 22, 57, 47, 71, 152, 204, 46, 185, 25]
@@ -52,6 +72,11 @@ describe('AVS Aggregator', () => {
         }
 
         const response = await request("http://localhost:8090").post('/').send(json);
+        await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
+            console.log(result);
+        }).catch((err) => {
+            console.error(err);
+        });
         expect(response.status).toBe(404);
         expect(response.text).toEqual("task 24 not initialized or already completed\n");
     });

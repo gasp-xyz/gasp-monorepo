@@ -76,6 +76,17 @@ export class DockerUtils{
         TESTNET:"true",
         STAKE:"100",
     }
+    bigStakeWithWrongAvsPort : Environment = {
+        RUST_LOG: "info",
+        ETH_RPC_URL:"http://0.0.0.0:8545" ,
+        ETH_WS_URL:"ws://0.0.0.0:8545" ,
+        CHAIN_ID:"31337" ,
+        SUBSTRATE_RPC_URL:"ws://0.0.0.0:9946" ,
+        AVS_RPC_URL:"http://0.0.0.0:6666" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0x851356ae760d987E095750cCeb3bC6014560891C" ,
+        TESTNET:"true",
+        STAKE:"100",
+    }
     corruptedFinalizerLocalEnvironment : Environment = {
         RUST_LOG: "info",
         ETH_RPC_URL:"http://0.0.0.0:8545" ,

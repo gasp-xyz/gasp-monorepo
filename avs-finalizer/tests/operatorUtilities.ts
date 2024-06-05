@@ -95,11 +95,11 @@ export async function waitFor(publicClient: PublicClient, numTasks = 1, eventNam
             onLogs: async (logs) => {
                 if(tasks.length < numTasks) {
                     tasks = tasks.concat(logs);
-                } else {
+                }
+                if(tasks.length >= numTasks){
                     unwatch();
                     resolve(tasks);
                 }
-
             },
         });
     } )
