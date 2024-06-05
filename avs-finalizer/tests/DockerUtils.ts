@@ -6,7 +6,7 @@ import {generateBls12381G2KeyPair} from "@mattrglobal/bbs-signatures";
 
 
 
-async function getNewKeys() {
+export async function getNewKeys() {
     const key = randomBytes(32).toString("hex");
     const keyp =  await generateBls12381G2KeyPair();
     const wbls = Wallet.fromPrivateKey(Buffer.from(keyp.secretKey));
