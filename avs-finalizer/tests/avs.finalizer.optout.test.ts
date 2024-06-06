@@ -1,14 +1,30 @@
-import { jest, describe, it, expect, afterEach } from "@jest/globals";
-import { DockerUtils } from "./DockerUtils";
-import {
-    createPublicClient, defineChain,
-    webSocket,
-} from "viem";
+import {afterEach, describe, expect, it, jest} from "@jest/globals";
+import {DockerUtils} from "./DockerUtils";
+import {createPublicClient, defineChain, webSocket,} from "viem";
 
 // @ts-ignore
-import registryCoordinator from "./abis/RegistryCoordinator.json";
-import {waitFor, waitForOperatorDeRegistered, waitForOperatorRegistered} from "./operatorUtilities";
-const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
+import registryCoordinator from "../../contracts/out/RegistryCoordinator.sol/RegistryCoordinator.json";
+import {toIncludeAllMembers} from "jest-extended";
+
+import {
+    getOperatorId,
+    registryCoordinatorAddress,
+    waitFor,
+    waitForOperatorDeRegistered,
+    waitForOperatorRegistered,
+    waitForTaskResponded
+} from "./operatorUtilities";
+import {
+    getLatestQuorumUpdate,
+    validateBLSApkRegistry,
+    validateOperatorOptInIndexRegistry,
+    validateOperatorOptInStakeRegistry,
+    validateOperatorOptOutIndexRegistry,
+    validateOperatorOptOutStakeRegistry,
+    validateTaskDataFromEvent,
+} from "./validators";
+expect.extend( { toIncludeAllMembers} );
+import 'jest-extended';
 
 
 jest.setTimeout(1500000);
@@ -60,7 +76,7 @@ async function mineEthBlocks(blocks: number) {
 }
 
 describe('AVS Finalizer', () => {
-    it('opt-out', async () => {
+    it('opt-in / opt-out', async () => {
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -81,8 +97,11 @@ describe('AVS Finalizer', () => {
         });
         expect(res).toBe(1);
 
-        const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
+        await validateOperatorOptInStakeRegistry(publicClient, operatorAddress as string);
+        await validateOperatorOptInIndexRegistry(publicClient, operatorAddress as string);
+        const statusBeforeOptOut = await getLatestQuorumUpdate(publicClient);
 
+        const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
         // opt-out
         await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
             console.log(result);
@@ -100,10 +119,15 @@ describe('AVS Finalizer', () => {
         });
         expect(statusAfter).toBe(2);
         const tasks = await waitFor(publicClient, 2, "TaskCompleted");
-        expect(tasks).toHaveLength(2);
+         expect(tasks).toHaveLength(2);
+
+         //Test that after op-out the operator still has the bls keys in the registry
+        await validateBLSApkRegistry(publicClient, operatorAddress as string , await getOperatorId(publicClient, operatorAddress as string) as string);
+        await validateOperatorOptOutStakeRegistry(publicClient, operatorAddress as string);
+        await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
 
     });
-    it('eject', async () => {
+    it('operator that does not respond -> eject', async () => {
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -125,6 +149,8 @@ describe('AVS Finalizer', () => {
         expect(res).toBe(1);
         await dockerUtils.stopContainer();
         await mineEthBlocks(1);
+        const statusBeforeOptOut = await getLatestQuorumUpdate(publicClient);
+
         const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
         // 10s * 2 * 5 = 100s ( every two blocks we produce a task, and at 5th task we eject)
         const deRegistered = await PoperatorDeregisteredAddress;
@@ -138,9 +164,96 @@ describe('AVS Finalizer', () => {
             args: [operatorAddress],
         });
         expect(statusAfter).toBe(2);
+        await validateOperatorOptOutStakeRegistry(publicClient, operatorAddress as string);
+        await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
 
     });
     afterEach(async () => {
+        //try opt-out just in case.
+        await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
+            console.log(result);
+        }).catch((err) => {
+            console.error(err);
+        });
         await dockerUtils.stopContainer();
     });
+
+});
+
+describe("AVS Finalizer - tasks", () => {
+    it('When operator online -> threshold changes && task response is submitted', async () => {
+        dockerUtils = new DockerUtils();
+        const publicClient = getPubClient();
+
+        //let's wait for 5 tasks to avoid quorum numbers from other tests.
+        const taskBefore = await waitForTaskResponded(publicClient, 5).then((tasks) => {
+            return tasks.map( x=> x.args.taskResponseMetadata)
+        })
+        const POperatorAddress = waitForOperatorRegistered(publicClient);
+        await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE, dockerUtils.bigStakeLocalEnvironment);
+        const operatorAddress = await POperatorAddress;
+        console.log("operatorAddress: " + operatorAddress);
+        const taskAfter = await waitForTaskResponded(publicClient, 4).then((tasks) => {
+            expect(tasks).toHaveLength(4);
+            return tasks.map( x=> x.args.taskResponseMetadata)
+        })
+        expect(taskBefore).not.toEqual(taskAfter);
+        const quorumBefore = BigInt(taskBefore[taskBefore.length -1].quroumStakeTotals[0]) ;
+        //used the latest task  event to avoid flakiness [3]
+        const quorumAfter = BigInt(taskAfter[taskAfter.length -1].quroumStakeTotals[0]);
+        const operatorStake = BigInt(dockerUtils.bigStakeLocalEnvironment.STAKE);
+        expect(quorumAfter - quorumBefore).toBe(operatorStake);
+        const pTaskCompleted = waitFor(publicClient, 1, "TaskCompleted");
+        const taskRespondedWithOp = await waitForTaskResponded(publicClient, 1).then((tasks) => {
+            return tasks.map( x=> JSON.parse(JSON.stringify(x)))
+        });
+        const taskCompleted = await pTaskCompleted;
+        expect(taskCompleted).toHaveLength(1);
+        expect(taskCompleted[0].args.taskIndex).toBe(taskRespondedWithOp[0].args.taskResponse.referenceTaskIndex);
+        console.log(taskRespondedWithOp)
+        await validateTaskDataFromEvent(
+            publicClient,
+            taskRespondedWithOp[0].args.taskResponse.referenceTaskIndex,
+            taskRespondedWithOp[0].args.taskResponse,
+            BigInt(taskRespondedWithOp[0].blockNumber),
+            taskRespondedWithOp[0].transactionHash );
+        //opt-out
+        await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
+            console.log(result);
+        }).catch((err) => {
+            console.error(err);
+        });
+        const pTaskCompletedAfterOptOut = waitFor(publicClient, 3, "TaskCompleted");
+        await mineEthBlocks(5);
+        const taskAfterOptOut = await waitForTaskResponded(publicClient, 3).then((tasks) => {
+            return tasks.map( x=> JSON.parse(JSON.stringify(x)))
+        });
+        const taskCompletedAfterOptOut = await pTaskCompletedAfterOptOut;
+        // let's wait for 3 tasks, it can happen that quorum is not updated in the first task
+        const quorumAfterOptOut = BigInt(taskAfterOptOut[2].args.taskResponseMetadata.quroumStakeTotals[0]);
+        expect(quorumAfterOptOut).toBe(quorumBefore);
+
+        //Quorum must be adapted, so it can happen that some tasks are not completed, but at least one must be.
+        //@ts-ignore
+        expect(taskCompletedAfterOptOut.flatMap( x=> x.args.taskIndex)).toIncludeAllMembers(taskAfterOptOut.flatMap( x=> x.args.taskResponse.referenceTaskIndex));
+    });
+    afterEach(async () => {
+        // opt-out
+        await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
+            console.log(result);
+        }).catch((err) => {
+            console.error(err);
+        });
+        await dockerUtils.stopContainer();
+    });
+
+    function getPubClient() {
+        const transport = webSocket("ws://0.0.0.0:8545", {
+            retryCount: 5,
+        });
+        return createPublicClient({
+            transport,
+            chain: anvil3,
+        });
+    }
 });
