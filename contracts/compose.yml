@@ -61,7 +61,7 @@ services:
       - script 
       - script/M2_Deploy_From_Scratch.s.sol
       - --rpc-url
-      - http://arbitrum-stub:8545
+      - http://arbitrum-stub:8546
       - --private-key
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
@@ -79,7 +79,7 @@ services:
       - script 
       - script/0_AnvilSetup.s.sol
       - --rpc-url
-      - http://arbitrum-stub:8545
+      - http://arbitrum-stub:8546
       - --private-key
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
@@ -95,7 +95,7 @@ services:
       - script 
       - script/1_FinalizerAvsDeployer.s.sol:Deployer
       - --rpc-url
-      - http://arbitrum-stub:8545
+      - http://arbitrum-stub:8546
       - --private-key
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
