@@ -90,10 +90,10 @@ jobs:
 
       - name: Get sequencer logs 
         if: success() || failure()
-        run: docker logs rollup-sequencer-1
+        run: docker logs rollup-sequencer-eth-1
       - name: Get updater logs 
         if: success() || failure()
-        run: docker logs rollup-updater-1
+        run: docker logs rollup-updater-eth-1
 
       - name: Test Report
         uses: dorny/test-reporter@v1.8.0
