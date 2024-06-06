@@ -25,8 +25,8 @@ export const KEY = PREFIX + 'collator_rewarded'
 export const KEY_ACCOUNT = PREFIX + 'account_rewarded'
 
 export type ResponseAPY = {
-  token: string
   apy: string
+  token: string
   collatorAddress: string
   date: string
   dateFormat: string
@@ -149,7 +149,52 @@ export function calculateDailyRewards(
   )
 }
 
-export function calculateCollatorApy(sessions: Session[]) {
+export function calculateMultipleCollatorApy(sessions: Session[]) {
+  const response: { [key: string]: ResponseAPY } = {}
+
+  for (const session of sessions) {
+    const liquidityTokenId = session.data.liquidityTokenId
+
+    if (response[liquidityTokenId]) {
+      if (
+        session.data.timestamp > parseInt(response[liquidityTokenId].timestamp)
+      ) {
+        // Update the stored entry with the current entry
+        response[liquidityTokenId] = {
+          apy: calculateAnnualPercentageYield(
+            new BigNumber(session.data.collatorAccountAmountStakedInMgx),
+            new BigNumber(session.data.amountRewarded).multipliedBy(
+              new BigNumber('6')
+            )
+          ).toString(),
+          token: liquidityTokenId,
+          collatorAddress: session.data.collatorAccount,
+          date: moment(session.data.timestamp).format('DD/MM/YYYY'),
+          dateFormat: 'DD/MM/YYYY',
+          timestamp: session.data.timestamp.toString(),
+        }
+      }
+    } else {
+      response[liquidityTokenId] = {
+        apy: calculateAnnualPercentageYield(
+          new BigNumber(session.data.collatorAccountAmountStakedInMgx),
+          new BigNumber(session.data.amountRewarded).multipliedBy(
+            new BigNumber('6')
+          )
+        ).toString(),
+        token: liquidityTokenId,
+        collatorAddress: session.data.collatorAccount,
+        date: moment(session.data.timestamp).format('DD/MM/YYYY'),
+        dateFormat: 'DD/MM/YYYY',
+        timestamp: session.data.timestamp.toString(),
+      }
+    }
+  }
+
+  return Object.values(response)
+}
+
+export function calculateSingleCollatorApy(sessions: Session[]) {
   let response = {} as ResponseAPY
 
   for (const session of sessions) {
