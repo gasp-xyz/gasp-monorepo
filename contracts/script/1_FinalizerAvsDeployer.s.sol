@@ -32,6 +32,10 @@ import "forge-std/console.sol";
 
 // # To deploy and verify our contract
 // forge script script/1_FinalizerAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Deploys finalizer contracts
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contract Deployer is Script, Utils, Test {
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
     string constant _CONFIG_PATH = "deploy.config";
