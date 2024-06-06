@@ -68,7 +68,7 @@ where
     )?;
     let hash = Keccak256::hash_of(&proof);
 
-    let params = rpc_params!("Ethereum",block_hash);
+    let params = rpc_params!("Ethereum", block_hash);
     let update_hash = rpc
         .request::<H256, _>("rolldown_pending_l2_requests_hash", params)
         .await?;
