@@ -1,6 +1,5 @@
 import { NotFoundException } from '../error/Exception.js'
 import {
-  calculateCollatorApy,
   calculateDailyRewards,
   getDataByAddress,
   SessionData,
@@ -8,11 +7,13 @@ import {
   Session,
   getTimeSeriesRedisData,
   KEY,
+  calculateSingleCollatorApy,
+  calculateMultipleCollatorApy,
 } from '../repository/StakingRepository.js'
 
 import { groupDataForCollatorsApy } from '../util/Staking.js'
 
-export const apy = async (collatorAddress: string): Promise<ResponseAPY> => {
+export const apy = async (collatorAddress: string): Promise<ResponseAPY[]> => {
   const collatorSessions: Session[] = await getDataByAddress<SessionData>(
     KEY,
     collatorAddress,
@@ -24,7 +25,7 @@ export const apy = async (collatorAddress: string): Promise<ResponseAPY> => {
       'This collator has not received any rewards as of yet.'
     )
 
-  return calculateCollatorApy(collatorSessions)
+  return calculateMultipleCollatorApy(collatorSessions)
 }
 
 export const collatorsApy = async (): Promise<Session[]> => {
@@ -42,7 +43,7 @@ export const collatorsApy = async (): Promise<Session[]> => {
 
   for (const collator in groupSessions) {
     for (const liquidityTokenId in groupSessions[collator]) {
-      const apy = calculateCollatorApy(
+      const apy = calculateSingleCollatorApy(
         groupSessions[collator][liquidityTokenId]
       )
       collatorsApy.push(apy)
