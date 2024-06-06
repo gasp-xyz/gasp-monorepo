@@ -3,7 +3,7 @@ import {DockerUtils} from "./DockerUtils";
 
 
 export async function getRpcPendingUpdateHash(api : any, blockHash: string) {
-    const result = await api.rpc.rolldown.pending_updates_hash(blockHash);
+    const result = await api.rpc.rolldown.rolldown_pending_l2_requests_hash("Ethereum", blockHash);
     return result.toHuman();
 }
 
