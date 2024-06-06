@@ -1,105 +1,34 @@
 services:
-  eth-contracts-deployment-1:
+  eth-contracts-deployment:
     image: mangatasolutions/avs-contract:local
     build: .
     depends_on:
      - eth-stub
     command:
       - script 
-      - script/M2_Deploy_From_Scratch.s.sol
+      - script/MultiStage.s.sol
       - --rpc-url
       - http://eth-stub:8545
       - --private-key
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
       - --sig
-      - "run(string memory configFile)"
-      - M2_deploy_from_scratch.anvil.config.json
-
-  eth-contracts-deployment-2:
-    image: mangatasolutions/avs-contract:local
-    build: .
-    depends_on:
-      eth-contracts-deployment-1:
-        condition: service_completed_successfully
-    command:
-      - script 
-      - script/0_AnvilSetup.s.sol
-      - --rpc-url
-      - http://eth-stub:8545
-      - --private-key
-      - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-      - --broadcast
-      - -v
-
-  eth-contracts-deployment-3:
-    image: mangatasolutions/avs-contract:local
-    build: .
-    depends_on:
-      eth-contracts-deployment-2:
-        condition: service_completed_successfully
-    command:
-      - script 
-      - script/1_FinalizerAvsDeployer.s.sol:Deployer
-      - --rpc-url
-      - http://eth-stub:8545
-      - --private-key
-      - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-      - --broadcast
-      - -v
     environment:
       EVM_ID: Ethereum
 
-
-  # Arbitrum stub - unused (eigen specific) contracts should be removed
-  arbitrum-contracts-deployment-1:
+  arbitrum-contracts-deployment:
     image: mangatasolutions/avs-contract:local
     build: .
     depends_on:
-     - arbitrum-stub
+     - eth-stub
     command:
       - script 
-      - script/M2_Deploy_From_Scratch.s.sol
+      - script/MultiStage.s.sol
       - --rpc-url
-      - http://arbitrum-stub:8545
+      - http://eth-stub:8545
       - --private-key
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
       - --sig
-      - "run(string memory configFile)"
-      - M2_deploy_from_scratch.anvil.config.json
-
-  arbitrum-contracts-deployment-2:
-    image: mangatasolutions/avs-contract:local
-    build: .
-    depends_on:
-      arbitrum-contracts-deployment-1:
-        condition: service_completed_successfully
-    command:
-      - script 
-      - script/0_AnvilSetup.s.sol
-      - --rpc-url
-      - http://arbitrum-stub:8545
-      - --private-key
-      - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-      - --broadcast
-      - -v
-
-  arbitrum-contracts-deployment-3:
-    image: mangatasolutions/avs-contract:local
-    build: .
-    depends_on:
-      arbitrum-contracts-deployment-2:
-        condition: service_completed_successfully
-    command:
-      - script 
-      - script/1_FinalizerAvsDeployer.s.sol:Deployer
-      - --rpc-url
-      - http://arbitrum-stub:8545
-      - --private-key
-      - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-      - --broadcast
-      - -v
     environment:
-      EVM_ID: Arbitrum
-
+      EVM_ID: Arbitruym

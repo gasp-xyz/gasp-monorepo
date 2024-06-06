@@ -3,7 +3,7 @@ services:
     restart: unless-stopped
     image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
     depends_on:
-      eth-contracts-deployment-3:
+      eth-contracts-deployment:
         condition: service_completed_successfully
       node-alice:
         condition: service_started
@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
     image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
     depends_on:
-      eth-contracts-deployment-3:
+      arbitrum-contracts-deployment:
         condition: service_completed_successfully
       node-alice:
         condition: service_started
