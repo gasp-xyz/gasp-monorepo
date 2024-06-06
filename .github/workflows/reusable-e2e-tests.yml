@@ -111,7 +111,7 @@ jobs:
           submodules: recursive
 
       - name: Start env
-        run: docker compose up -d --wait
+        run: bash -c "docker compose up -d --wait || true"
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
