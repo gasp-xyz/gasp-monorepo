@@ -70,7 +70,7 @@ where
 
     let params = rpc_params!(block_hash);
     let update_hash = rpc
-        .request::<H256, _>("rolldown_pending_updates_hash", params)
+        .request::<H256, _>("rolldown_get_l2_request", params)
         .await?;
 
     Ok((block_hash.into(), hash, update_hash))
