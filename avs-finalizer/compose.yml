@@ -10,7 +10,7 @@ services:
     depends_on:
       eth-stub:
         condition: service_healthy
-      eth-contracts-deployment-3:
+      eth-contracts-deployment:
         condition: service_completed_successfully
     environment:
       - RUST_LOG=info
