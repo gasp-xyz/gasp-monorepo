@@ -50,8 +50,8 @@ jobs:
           submodules: recursive
 
       - name: Start env
-        run: bash -c "docker compose up -d --wait || true"
-      
+        run: docker compose up --wait
+
       - name: Use custom branch in e2e tests repository if it exists, otherwise use default branch
         id: e2e
         run: |
@@ -111,7 +111,7 @@ jobs:
           submodules: recursive
 
       - name: Start env
-        run: bash -c "docker compose up -d --wait || true"
+        run: docker compose up --wait
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -137,6 +137,6 @@ jobs:
 
       - name: Get anvil logs
         if: success() || failure()
-        run: docker logs rollup-anvil-1
+        run: docker logs rollup-eth-stub-1
 
       - run: docker ps
