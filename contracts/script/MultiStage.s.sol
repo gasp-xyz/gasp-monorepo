@@ -33,11 +33,6 @@ contract MultiStage is Script, Utils, Test {
         finalizerDeployer.run();
 
         console.log("################################################################################");
-        console.log("Deploying finalizer contracts");
-        console.log("################################################################################");
-        finalizerDeployer.run();
-
-        console.log("################################################################################");
         console.log("Deploying rolldown contracts");
         console.log("################################################################################");
         rolldownDeployer.run(finalizerDeployer.avsProxyAdmin(), finalizerDeployer.avsPauserReg());
@@ -72,6 +67,9 @@ contract MultiStage is Script, Utils, Test {
         avsProxyAdmin.transferOwnership(avsUpgrader);
         vm.stopBroadcast();
       }else{
+        //TODO: ethereum-prod
+        //TODO: arbitrum-prod
+        //TODO: ...
         console.log("Unsupported variant", variant);
       }
 
