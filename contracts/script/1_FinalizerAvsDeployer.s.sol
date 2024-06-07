@@ -9,6 +9,7 @@ import "@eigenlayer/contracts/core/StrategyManager.sol";
 import "@eigenlayer/contracts/core/Slasher.sol";
 import "@eigenlayer/contracts/core/DelegationManager.sol";
 import "@eigenlayer/test/mocks/EmptyContract.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
 import "@eigenlayer-middleware/src/RegistryCoordinator.sol";
@@ -20,6 +21,7 @@ import {FinalizerServiceManager, IServiceManager} from "../src/FinalizerServiceM
 import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "../src/IFinalizerTaskManager.sol";
 import {Rolldown} from "../src/Rolldown.sol";
+import {IRolldownPrimitives} from "../src/Rolldown.sol";
 
 import {Utils} from "./utils/Utils.sol";
 
@@ -77,6 +79,7 @@ contract Deployer is Script, Utils, Test {
 
         // check that the chainID matches the one in the config
         uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
+        uint256 currentChainId = block.chainid;
         emit log_named_uint("You are deploying on ChainID", block.chainid);
         require(configChainId == block.chainid, "You are on the wrong chain for this config");
 
@@ -246,12 +249,18 @@ contract Deployer is Script, Utils, Test {
         );
 
         rolldownImplementation = new Rolldown();
+        string memory evmId = vm.envString("EVM_ID");
+
+        IRolldownPrimitives.ChainId chain = IRolldownPrimitives.ChainId.Ethereum;
+        if (keccak256(abi.encodePacked(evmId)) == keccak256(abi.encodePacked("Arbitrum"))){
+          chain = IRolldownPrimitives.ChainId.Arbitrum;
+        }
 
         // upgrade rolldown proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeWithSelector(rolldown.initialize.selector, avsPauserReg, avsOwner)
+            abi.encodeWithSelector(rolldown.initialize.selector, avsPauserReg, avsOwner, chain, msg.sender)
         );
 
         // transfer ownership of proxy admin to upgrader

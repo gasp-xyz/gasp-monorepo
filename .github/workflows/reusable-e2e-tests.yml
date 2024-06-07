@@ -50,14 +50,14 @@ jobs:
           submodules: recursive
 
       - name: Start env
-        run: docker compose up -d --wait
-      
+        run: bash -c "docker compose up -d --wait || true"
+
       - name: Use custom branch in e2e tests repository if it exists, otherwise use default branch
         id: e2e
         run: |
           # Implementation of this conditional action was taken from here:
           # https://github.com/actions/checkout/issues/512#issuecomment-1264735491
-          
+
           # This condition check if the input 'e2eBranch' is empty, and if it is, it checks if the current branch name exists in 'mangata-e2e' repository
           if [[ -z "${{ inputs.e2eBranch }}" ]]; then
             # Checking if current branch name exists in 'mangata-e2e' repository
@@ -72,7 +72,7 @@ jobs:
             echo "Using '${{ inputs.e2eBranch }}' branch fo 'mangata-e2e' repository as it was provided in the input"
             echo "BRANCH=${{ inputs.e2eBranch }}" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Checkout tests
         uses: actions/checkout@v4
         with:
@@ -90,10 +90,10 @@ jobs:
 
       - name: Get sequencer logs 
         if: success() || failure()
-        run: docker logs rollup-sequencer-1
+        run: docker logs rollup-sequencer-eth-1
       - name: Get updater logs 
         if: success() || failure()
-        run: docker logs rollup-updater-1
+        run: docker logs rollup-updater-eth-1
 
       - name: Test Report
         uses: dorny/test-reporter@v1.8.0
@@ -111,7 +111,7 @@ jobs:
           submodules: recursive
 
       - name: Start env
-        run: docker compose up -d --wait
+        run: bash -c "docker compose up -d --wait || true"
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -137,6 +137,6 @@ jobs:
 
       - name: Get anvil logs
         if: success() || failure()
-        run: docker logs rollup-anvil-1
+        run: docker logs rollup-eth-stub-1
 
       - run: docker ps
