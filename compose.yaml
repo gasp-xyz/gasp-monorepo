@@ -25,11 +25,11 @@ services:
     image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
     platform: linux/amd64
     ports:
-      - 8546:8545
+      - 8546:8546
     entrypoint: anvil
-    command: --host 0.0.0.0 --disable-block-gas-limit  --balance 1000000000000000000
+    command: --host 0.0.0.0 --disable-block-gas-limit  --balance 1000000000000000000 --port 8546
     healthcheck:
-      test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
+      test: ["CMD", "nc", "-vz", "127.0.0.1", "8546"]
       interval: 2s
       timeout: 10s
       retries: 3
