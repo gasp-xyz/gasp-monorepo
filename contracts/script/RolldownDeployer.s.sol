@@ -97,7 +97,7 @@ contract RolldownDeployer is Script, Utils, Test {
         vm.serializeAddress(deployed_addresses, "avsPauseReg", address(avsPauserReg));
         vm.serializeAddress(deployed_addresses, "rolldown", address(rolldown));
         vm.serializeAddress(deployed_addresses, "rolldownImplementation", address(rolldownImplementation));
-        string memory deployed_addresses_output = vm.serializeAddress(deployed_addresses, "gaspMock", address(erc20Mock));
+        string memory deployed_addresses_output = vm.serializeAddress(deployed_addresses, "gaspErc20Mock", address(erc20Mock));
 
         string memory chain_info = "chainInfo";
         vm.serializeUint(chain_info, "deploymentBlock", block.number);
