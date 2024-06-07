@@ -22,7 +22,6 @@ import { getPublicClient } from "./viem/client.js";
 import { webSocketTransport } from "./viem/transport.js";
 
 async function main() {
-	let lastSubmitted = "";
 	let inProgress = false;
 
 	const publicClient = getPublicClient({ transport: webSocketTransport });
@@ -33,39 +32,36 @@ async function main() {
 
 	let lastRequestId = await getLastRequestId(api);
 
-	await api.derive.chain.subscribeNewHeads(async (header: HeaderExtended) => {
-		const collator = getCollator("ethereum", MNEMONIC);
+  await api.derive.chain.subscribeNewHeads(async (header: HeaderExtended) => {
+    const collator = getCollator("ethereum", MNEMONIC);
     print(`collator address: ${collator.address}`)
-
-		print(`block #${header.number} was authored by ${header.author}`);
-		const { isSequencerSelected, hasSequencerRights, selectedSequencer } =
-			await getSelectedSequencerWithRights(api, collator.address, header.hash);
+    print(`block #${header.number} was authored by ${header.author}`);
+    const { isSequencerSelected, hasSequencerRights, selectedSequencer } =
+      await getSelectedSequencerWithRights(api, collator.address, header.hash);
     print(`me ${collator.address}`);
+    print(`selected : ${selectedSequencer}`);
     print(`is selected ${isSequencerSelected}`);
     print(`rights : ${hasSequencerRights}`);
-    print(`selected : ${selectedSequencer}`);
-		if (isSequencerSelected && hasSequencerRights) {
-			print(`Sequencer selected: ${selectedSequencer}`);
-			try {
-				if (inProgress) {
+    if (isSequencerSelected && hasSequencerRights) {
+      try {
+        if (inProgress) {
+          return;
+        }else{
 					print("In progress, skipping...");
-				} else {
-					inProgress = true;
-				}
-				const { encodedData, nativeL1Update } = await processDataForL2Update(
-					api,
-					publicClient,
-				);
+          inProgress = true;
+        }
+        const nativeL1Update = await processDataForL2Update(
+          api,
+          publicClient,
+        );
 
-        // console.log(`here ${nativeL1Update.unwrap().toString()}`)
 				const filteredUpdates = filterUpdates(
 					nativeL1Update.unwrap(),
 					lastRequestId,
 				);
-        // console.log(filteredUpdates.toString())
 				const requestsCount = countRequests(filteredUpdates);
 
-				if (requestsCount > 0) {
+				if (requestsCount > 0 && getMaxRequestId(filteredUpdates)! > lastRequestId) {
 					const result = await signTx(
 						api,
 						api.tx.rolldown.updateL2FromL1(filteredUpdates),
@@ -74,18 +70,12 @@ async function main() {
 
 					if (isSuccess(result)) {
 						print("L1update was submitted successfully");
-
-						if (lastSubmitted === keccak256(encodedData)) {
 							lastRequestId = getMaxRequestId(filteredUpdates)!;
-						} else {
-							lastSubmitted = keccak256(encodedData);
-							lastRequestId = await getLastRequestId(api);
-						}
 					} else {
 						print("L1update was submitted unsuccessfully");
 					}
 				} else {
-					print(`L1Update was already submitted ${encodedData}`);
+					print(`L1Update with max id == ${lastRequestId} was already submitted`);
 				}
 			} catch (e) {
 				print(e);
