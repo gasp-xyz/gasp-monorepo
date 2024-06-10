@@ -1,5 +1,6 @@
 services:
   updater-eth:
+    restart: unless-stopped
     image: mangatasolutions/rollup-updater:${ROLLUP_UPDATER_VERSION:-local}
     build: .
     depends_on:
@@ -19,6 +20,7 @@ services:
       MANGATA_CONTRACT_ADDRESS: ${MANGATA_CONTRACT_ADDRESS:-0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3}
 
   updater-arb:
+    restart: unless-stopped
     image: mangatasolutions/rollup-updater:${ROLLUP_UPDATER_VERSION:-local}
     build: .
     depends_on:
