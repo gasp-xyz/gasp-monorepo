@@ -98,7 +98,10 @@ async function main() {
 }
 
 main()
-	.then(() => {
-		print("Success");
-	})
-	.catch((e) => console.error("Something went wrong", e));
+  .then(() => {
+    print("Success");
+  })
+  .catch((e) => {
+    console.error("Something went wrong", e);
+    process.exit(1); 
+  })
