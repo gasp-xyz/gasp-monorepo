@@ -84,6 +84,9 @@ jobs:
         working-directory: e2eTests
         run: yarn install
 
+      - name: Docker ps
+        run: docker ps --no-trunc
+
       - name: Run tests
         working-directory: e2eTests
         run: yarn test-rollup
@@ -94,6 +97,9 @@ jobs:
       - name: Get updater logs 
         if: success() || failure()
         run: docker logs rollup-updater-eth-1
+      - name: Get node logs
+        if: success() || failure()
+        run: docker logs rollup-node-alice-1
 
       - name: Test Report
         uses: dorny/test-reporter@v1.8.0
