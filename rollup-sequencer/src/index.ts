@@ -103,5 +103,5 @@ main()
   })
   .catch((e) => {
     console.error("Something went wrong", e);
-    process.exit(0); 
+    process.exit( 1); 
   })

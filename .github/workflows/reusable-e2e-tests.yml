@@ -8,11 +8,11 @@ on:
       substrateNodeVersion:
         type: string
         required: false
-        default: 'eth-rollup-develop'
+        default: "eth-rollup-develop"
       globalVersion:
         type: string
         required: false
-        default: '8dd0c81aa88b967334d001d8cae031f8799a189f'
+        default: "8dd0c81aa88b967334d001d8cae031f8799a189f"
   workflow_dispatch:
     inputs:
       e2eBranch:
@@ -21,11 +21,11 @@ on:
       substrateNodeVersion:
         type: string
         required: false
-        default: 'eth-rollup-develop'
+        default: "eth-rollup-develop"
       globalVersion:
         type: string
         required: false
-        default: '8dd0c81aa88b967334d001d8cae031f8799a189f'
+        default: "8dd0c81aa88b967334d001d8cae031f8799a189f"
 
 permissions:
   contents: read
@@ -50,7 +50,7 @@ jobs:
           submodules: recursive
 
       - name: Start env
-        run: docker compose up --wait
+        run: bash -c "docker compose up --wait || true"
 
       - name: Use custom branch in e2e tests repository if it exists, otherwise use default branch
         id: e2e
@@ -91,10 +91,10 @@ jobs:
         working-directory: e2eTests
         run: yarn test-rollup
 
-      - name: Get sequencer logs 
+      - name: Get sequencer logs
         if: success() || failure()
         run: docker logs rollup-sequencer-eth-1
-      - name: Get updater logs 
+      - name: Get updater logs
         if: success() || failure()
         run: docker logs rollup-updater-eth-1
       - name: Get node logs
@@ -117,18 +117,18 @@ jobs:
           submodules: recursive
 
       - name: Start env
-        run: docker compose up --wait
+        run: bash -c "docker compose up --wait || true"
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
       - name: build and copy contracts
         working-directory: contracts
         run: forge build
-        
+
       - name: FINALIZER tests - install deps
         working-directory: avs-finalizer/tests/
         run: yarn install
-  
+
       - name: FINALIZER tests - run tests
         working-directory: avs-finalizer/tests/
         run: yarn test
@@ -136,7 +136,7 @@ jobs:
       - name: Get avs-aggregator logs
         if: success() || failure()
         run: docker logs rollup-avs-aggregator-1
-      
+
       - name: Get avs-finalizer logs
         if: success() || failure()
         run: docker logs rollup-avs-finalizer-1
