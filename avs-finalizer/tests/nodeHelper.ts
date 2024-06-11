@@ -3,7 +3,7 @@ import {DockerUtils} from "./DockerUtils";
 
 
 export async function getRpcPendingUpdateHash(api : any, blockHash: string) {
-    const result = await api.rpc.rolldown.pending_updates_hash(blockHash);
+    const result = await api.rpc.rolldown.pending_l2_requests_hash("Ethereum", blockHash);
     return result.toHuman();
 }
 
@@ -24,8 +24,25 @@ export async function buildApi() {
                             }
                             ],
                             type: 'Vec<u8>'
+                        },
+                    pending_l2_requests_hash:
+                        {
+                            description: "Get the hash from the node",
+                            params: [
+                                {
+                                    name: 'chain',
+                                    type: 'String'
+                                },
+                                {
+                                    name: 'at',
+                                    type: 'Hash',
+                                    isOptional: true
+                                }
+                            ],
+                            type: 'Vec<u8>'
                         }
-                }
+                },
+
         }
     });
 }

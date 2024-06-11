@@ -4,6 +4,7 @@
 Dockerfile*
 **/target
 !**/target/release/main
+./contracts/script/output/**/*
 ops/**/data
 **/out
 .env
