@@ -32,7 +32,7 @@ describe('AVS Aggregator', () => {
 
         const response = await request("http://localhost:8090").post('/').send(json);
         expect(response.status).toBe(404);
-        expect(response.text).toEqual("task 24 not initialized or already completed\n");
+        expect(response.text).toEqual("task 1 not initialized or already completed\n");
     });
     it('Rpc test - signature', async () => {
         const dockerUtils = new DockerUtils();
@@ -78,7 +78,7 @@ describe('AVS Aggregator', () => {
             console.error(err);
         });
         expect(response.status).toBe(404);
-        expect(response.text).toEqual("task 24 not initialized or already completed\n");
+        expect(response.text).toEqual(`task ${taskIndex} not initialized or already completed\n`);
     });
 
 });
