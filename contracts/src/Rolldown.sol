@@ -21,7 +21,7 @@ contract Rolldown is
     address public constant ETH_TOKEN_ADDRESS =
         0x5748395867463837537395739375937493733457;
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner)
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
         public
         initializer
     {
@@ -30,6 +30,14 @@ contract Rolldown is
         lastProcessedUpdate_origin_l1 = 0;
         counter = 1;
         lastProcessedUpdate_origin_l2 = 0;
+        chain = chainId;
+        updaterAccount = updater;
+    }
+
+    function setUpdater(address updater) external whenNotPaused {
+      require(msg.sender == updaterAccount, "Only active updater can move rights to a new a account");
+      updaterAccount = updater;
+      emit NewUpdaterSet(updaterAccount);
     }
 
     function withdraw_pending_eth(uint256 amount) external whenNotPaused {
@@ -245,10 +253,7 @@ contract Rolldown is
     // TODO
     // Maybe add onlyOwner modifier?  
     function update_l1_from_l2(L2Update calldata inputArray) external whenNotPaused {
-        //1st iteration, security comes from ensuring dedicated acc
-        //Ensure sender is dedic acc
-        // TODO: uncomment & fix UT
-        // require(msg.sender == owner, "Not the owner");
+        require(msg.sender == updaterAccount, "Not the owner");
         require(
             inputArray.results.length >= 1 ||
                 inputArray.cancels.length >= 1 ||
@@ -451,6 +456,7 @@ contract Rolldown is
     ) public view returns (L1Update memory) {
         L1Update memory result;
 
+        result.chain = chain;
         uint256 depositsCounter = 0;
         uint256 withdrawalsCounter = 0;
         uint256 cancelsCounter = 0;

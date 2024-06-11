@@ -33,6 +33,11 @@ import "forge-std/Test.sol";
 
 // # To deploy and verify our contract
 // forge script script/testing/M2_Deploy_From_Scratch.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --sig "run(string memory configFile)" -- M2_deploy_from_scratch.anvil.config.json
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Deploys eigen base infrastructure, not really needed on production environment
+// as eigen contracts are there already
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contract Deployer_M2 is Script, Test {
     Vm cheats = Vm(HEVM_ADDRESS);
 

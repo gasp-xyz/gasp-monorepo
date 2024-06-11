@@ -38,6 +38,9 @@ deploy-avs-contracts-to-anvil-and-save-state: ## Deploy avs
 
 deploy-all-to-anvil-and-save-state: deploy-eigenlayer-contracts-to-anvil-and-save-state deploy-avs-contracts-to-anvil-and-save-state ## deploy eigenlayer and avs contracts 
 
+deploy-alt-l1-contracts-and-save-state:
+	./tests/integration/deploy-alt-l1-contracts-and-save-anvil-state.sh
+
 deploy-all-contracts-and-save-state:
 	./tests/integration/deploy-all-contracts-and-save-anvil-state.sh
 

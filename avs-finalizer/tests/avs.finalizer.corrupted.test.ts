@@ -11,6 +11,7 @@ import {
     optOut, waitFor, waitForNo,
     waitForOperatorRegistered, waitForTaskResponded,
 } from "./operatorUtilities";
+import {validateBLSApkRegistry} from "./validators";
 jest.setTimeout(1500000);
 
 let dockerUtils: DockerUtils;
@@ -65,6 +66,7 @@ describe('Non Corrupted AVS Finalizer', () => {
         const address = await POperatorAddress;
         console.info("Started");
         const operatorId = await getOperatorId(publicClient, address as string);
+        await validateBLSApkRegistry(publicClient, address as string, operatorId);
         // lets wait for some time, to be sure that the operator fully onboard.
         await new Promise(r => setTimeout(r, 10000));
 
@@ -81,3 +83,5 @@ describe('Non Corrupted AVS Finalizer', () => {
         await dockerUtils.stopContainer();
     });
 });
+
+
