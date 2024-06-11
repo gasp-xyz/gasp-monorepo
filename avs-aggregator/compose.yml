@@ -8,7 +8,7 @@ services:
     depends_on:
       eth-stub:
         condition: service_healthy
-      eth-contracts-deployment-3:
+      eth-contracts-deployment:
         condition: service_completed_successfully
     environment:
       - ETH_RPC_URL=${ETH_RPC_URL:-http://eth-stub:8545}

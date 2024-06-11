@@ -63,7 +63,6 @@ async function getNativeL1Update(
 	api: ApiPromise,
 	encodedData: `0x${string}`,
 ): Promise<Option<PalletRolldownMessagesL1Update>> {
-  // console.log(`PAYLOAD: ${encodedData.substring(2)}`)
   return await api.rpc.rolldown.get_native_sequencer_update(encodedData.substring(2));
 }
 
@@ -108,13 +107,7 @@ async function processDataForL2Update(
 	print(`ETH native data : ${util.inspect(data, { depth: null })}`);
 
 	const encodedData = getEncodedData("getUpdateForL2", data);
-	const nativeL1Update = await getNativeL1Update(api, encodedData);
-  // console.log(nativeL1Update.unwrap().chain)
-	// print(`Substrate native data : ${nativeL1Update.toString()}`);
-	return {
-		encodedData,
-		nativeL1Update,
-	};
+	return await getNativeL1Update(api, encodedData);
 }
 
 async function processPendingRequestsEvents(
@@ -139,8 +132,7 @@ async function processPendingRequestsEvents(
 					start: string;
 					end: string;
 				};
-        if (chain !== L1_CHAIN){
-          console.log(chain, L1_CHAIN);
+        if (chain.toString() !== L1_CHAIN){
           console.log(`ignoring event ${data.toString()} for differnet chain`)
           return
         }
