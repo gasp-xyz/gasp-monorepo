@@ -1,0 +1,27 @@
+runtime: nodejs18
+
+service: mangata-stash-rollup-testnet
+
+includes:
+  - app-import-handlers.yaml
+
+env_variables:
+  APP_ENV: rollup-testnet
+  PROJECT_ID: mangata-stash
+  MANGATA_NODE_URL: 'wss://collator-01-ws-rollup-dev.mangata.online'
+  REDIS_HOST: '10.15.245.67'
+  REDIS_PORT: 6379
+  TIMESERIES_HOST: 'redis-14581.c124.us-central1-1.gce.redns.redis-cloud.com'
+  TIMESERIES_PORT: 14581
+  TIMESERIES_PASS: $TIMESERIES_PASS
+  TOKEN_FOR_PRICE_SYMBOL: 'GETH'
+  NODE_ENV: rollup-dev
+  COINGECKO_API_KEY: $COINGECKO_API_KEY
+
+manual_scaling:
+  instances: 1
+
+instance_class: B1
+
+vpc_access_connector:
+  name: 'projects/direct-pixel-353917/locations/europe-west6/connectors/redis-app-engine'

@@ -1,0 +1,61 @@
+name: stash-rollup-dev
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "stash-dev/**/*"
+      - ".github/**/rollup-testnet**"
+
+permissions:
+  contents: 'read'
+  id-token: 'write'
+
+jobs:
+  build:
+    name: Deploy to Google App Angine
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: stash-dev
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+          cache-dependency-path: "./stash-dev/yarn.lock"
+      
+      - run: yarn install --immutable
+      - run: yarn run build
+      - run: yarn run test-ci
+      
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      
+      - uses: google-github-actions/deploy-appengine@v2
+        id: deploy
+        with:
+          project_id: ${{ steps.auth.outputs.project_id }}
+          env_vars: |-
+            TIMESERIES_PASS=${{ secrets.TIMESERIES_PASS_ROLLUP_DEV }}
+            COINGECKO_API_KEY=${{ secrets.COINGECKO_API_KEY }}
+          working_directory: stash-dev
+          deliverables: app-rollup-testnet.yaml
+      
+      # TODO: temporary disable smoke test
+      # - name: smoke test
+      #   run: |
+      #     curl "${{ steps.deploy.outputs.url }}"
+      #     echo "Deployed to ${{ steps.deploy.outputs.url }}"
+
+      # - name: Delete old versions
+      #   # This command deletes all versions except the last 14
+      #   # Ref: https://stackoverflow.com/a/66911696/9645556
+      #   run: gcloud app versions list --service=mangata-stash-rollup-dev --format="value(version.id)" --sort-by="~version.createTime" | tail -n +15 | xargs -r gcloud app versions delete --quiet
