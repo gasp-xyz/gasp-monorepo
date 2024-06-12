@@ -1,4 +1,4 @@
-name: stash-rollup-dev
+name: stash-rollup-testnet
 on:
   workflow_dispatch:
   push:
