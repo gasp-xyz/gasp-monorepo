@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - chore/add-git-workflow-for-deploying-mangata-stash-dev-to-testnet
     paths:
       - "stash-dev/**/*"
       - ".github/**/rollup-testnet**"
@@ -31,23 +32,23 @@ jobs:
       - run: yarn install --immutable
       - run: yarn run build
       - run: yarn run test-ci
-      
-      - uses: google-github-actions/auth@v2
-        id: auth
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
-      
-      - uses: google-github-actions/deploy-appengine@v2
-        id: deploy
-        with:
-          project_id: ${{ steps.auth.outputs.project_id }}
-          env_vars: |-
-            TIMESERIES_PASS=${{ secrets.TIMESERIES_PASS_ROLLUP_DEV }}
-            COINGECKO_API_KEY=${{ secrets.COINGECKO_API_KEY }}
-          working_directory: stash-dev
-          deliverables: app-rollup-testnet.yaml
+#
+#      - uses: google-github-actions/auth@v2
+#        id: auth
+#        with:
+#          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+#          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+#      - uses: google-github-actions/setup-gcloud@v2
+#
+#      - uses: google-github-actions/deploy-appengine@v2
+#        id: deploy
+#        with:
+#          project_id: ${{ steps.auth.outputs.project_id }}
+#          env_vars: |-
+#            TIMESERIES_PASS=${{ secrets.TIMESERIES_PASS_ROLLUP_DEV }}
+#            COINGECKO_API_KEY=${{ secrets.COINGECKO_API_KEY }}
+#          working_directory: stash-dev
+#          deliverables: app-rollup-testnet.yaml
       
       # TODO: temporary disable smoke test
       # - name: smoke test
