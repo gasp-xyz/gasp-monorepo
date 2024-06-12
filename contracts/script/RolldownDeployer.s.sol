@@ -27,28 +27,67 @@ contract RolldownDeployer is Script, Utils, Test {
 
     string public deployConfigPath;
 
-    ProxyAdmin public avsProxyAdmin;
-    PauserRegistry public avsPauserReg;
+    ProxyAdmin public rolldownProxyAdmin;
+    PauserRegistry public rolldownPauserReg;
 
     ERC20Mock public erc20Mock;
     Rolldown public rolldown;
     Rolldown public rolldownImplementation;
-    address public avsOwner;
-    address public avsUpgrader;
+    address public owner;
+    address public upgrader;
     address public updaterAccount;
 
-    function run(ProxyAdmin proxy, PauserRegistry pauser) external {
-      avsPauserReg = pauser;
-      avsProxyAdmin = proxy;
+    function evmPrefixedPath(IRolldownPrimitives.ChainId chain) public view returns (string memory) {
+      string memory evm;
+
+      if (chain == IRolldownPrimitives.ChainId.Ethereum) {
+        evm = "ethereum_";
+      } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
+        evm = "arbitrum_"; 
+      } else {
+        revert("Unsupported chain");
+      }
+
+      return string.concat(evm, _OUTPUT_PATH);
+    }
+
+    function upgrade(IRolldownPrimitives.ChainId chain) external {
+      string memory configData = readInput(evmPrefixedPath(chain));
+      upgrader = stdJson.readAddress(configData, ".permissions.rolldownUpgrader");
+      address proxyAdmin = stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin");
+      address rolldownAddress = stdJson.readAddress(configData, ".addresses.rolldown");
+      rolldownProxyAdmin = ProxyAdmin(proxyAdmin);
+
+      rolldown = Rolldown(rolldownAddress);
+      vm.startBroadcast();
+      rolldownImplementation = new Rolldown();
+
+      // upgrade rolldown proxy to implementation and initialize
+      rolldownProxyAdmin.upgrade(
+        TransparentUpgradeableProxy(payable(address(rolldown))),
+        address(rolldownImplementation)
+      );
+      vm.stopBroadcast();
+
+      _verifyImplementations();
+
+      _writeOutput(chain);
+
+    }
+
+    function run(IRolldownPrimitives.ChainId chain) external {
       string memory configData = readConfig(_CONFIG_PATH);
-      avsOwner = stdJson.readAddress(configData, ".permissions.owner");
-      avsUpgrader = stdJson.readAddress(configData, ".permissions.upgrader");
+      owner = stdJson.readAddress(configData, ".permissions.owner");
+      upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
       updaterAccount = stdJson.readAddress(configData, ".permissions.rolldownUpdater");
 
-      avsProxyAdmin = proxy;
 
-        vm.startBroadcast();
-        erc20Mock = new ERC20Mock();
+      vm.startBroadcast();
+      rolldownProxyAdmin = new ProxyAdmin();
+      address[] memory pausers = new address[](1);
+      pausers[0] = owner;
+      rolldownPauserReg = new PauserRegistry(pausers, owner);
+      erc20Mock = new ERC20Mock();
 
         /**
          * First, deploy upgradeable proxy contracts that **will point** to the implementations. Since the implementation contracts are
@@ -59,24 +98,18 @@ contract RolldownDeployer is Script, Utils, Test {
             address(
                 new TransparentUpgradeableProxy(
                     address(emptyContract),
-                    address(avsProxyAdmin),
+                    address(rolldownProxyAdmin),
                     ""
                 )
             )
         );
         rolldownImplementation = new Rolldown();
 
-        string memory evmId = vm.envString("EVM_ID");
-        IRolldownPrimitives.ChainId chain = IRolldownPrimitives.ChainId.Ethereum;
-        if (keccak256(abi.encodePacked(evmId)) == keccak256(abi.encodePacked("Arbitrum"))){
-          chain = IRolldownPrimitives.ChainId.Arbitrum;
-        }
-
         // upgrade rolldown proxy to implementation and initialize
-        avsProxyAdmin.upgradeAndCall(
+        rolldownProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeWithSelector(rolldown.initialize.selector, avsPauserReg, avsOwner, chain, updaterAccount)
+            abi.encodeWithSelector(rolldown.initialize.selector, rolldownPauserReg, owner, chain, updaterAccount)
         );
 
 
@@ -86,15 +119,15 @@ contract RolldownDeployer is Script, Utils, Test {
         _verifyImplementations();
         _verifyInitalizations();
 
-        _writeOutput();
+        _writeOutput(chain);
     }
 
-    function _writeOutput() internal {
+    function _writeOutput(IRolldownPrimitives.ChainId chain) internal {
         string memory parent_object = "parent object";
 
         string memory deployed_addresses = "addresses";
-        vm.serializeAddress(deployed_addresses, "avsProxyAdmin", address(avsProxyAdmin));
-        vm.serializeAddress(deployed_addresses, "avsPauseReg", address(avsPauserReg));
+        vm.serializeAddress(deployed_addresses, "rolldownProxyAdmin", address(rolldownProxyAdmin));
+        vm.serializeAddress(deployed_addresses, "rolldownPauseReg", address(rolldownPauserReg));
         vm.serializeAddress(deployed_addresses, "rolldown", address(rolldown));
         vm.serializeAddress(deployed_addresses, "rolldownImplementation", address(rolldownImplementation));
         string memory deployed_addresses_output = vm.serializeAddress(deployed_addresses, "gaspErc20Mock", address(erc20Mock));
@@ -104,21 +137,21 @@ contract RolldownDeployer is Script, Utils, Test {
         string memory chain_info_output = vm.serializeUint(chain_info, "chainId", block.chainid);
 
         string memory permissions = "permissions";
-        vm.serializeAddress(permissions, "avsOwner", avsOwner);
-        vm.serializeAddress(permissions, "avsUpgrader", avsUpgrader);
-        string memory permissions_output = vm.serializeAddress(permissions, "updaterAccount", updaterAccount);
+        vm.serializeAddress(permissions, "rolldownOwner", owner);
+        vm.serializeAddress(permissions, "rolldownUpgrader", upgrader);
+        string memory permissions_output = vm.serializeAddress(permissions, "rolldownUpdater", updaterAccount);
 
         vm.serializeString(parent_object, chain_info, chain_info_output);
         vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
         string memory finalJson = vm.serializeString(parent_object, permissions, permissions_output);
         console.logString(finalJson);
-        writeOutput(finalJson, _OUTPUT_PATH);
+        writeOutput(finalJson, evmPrefixedPath(chain));
     }
 
 
     function _verifyImplementations() internal view {
         require(
-            avsProxyAdmin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(rolldown))))
+            rolldownProxyAdmin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(rolldown))))
                 == address(rolldownImplementation),
             "rolldown: implementation set incorrectly"
         );
@@ -126,12 +159,12 @@ contract RolldownDeployer is Script, Utils, Test {
     
     function _verifyInitalizations(
     ) internal view {
-        require(rolldown.owner() == avsOwner, "rolldown.owner() != avsOwner");
+        require(rolldown.owner() == owner, "rolldown.owner() != owner");
         require(rolldown.lastProcessedUpdate_origin_l1() == 0, "rolldown.lastProcessedUpdate_origin_l1 != 0");
         require(rolldown.counter() == 1, "rolldown.counter != 1");
         require(rolldown.lastProcessedUpdate_origin_l2() == 0, "rolldown.lastProcessedUpdate_origin_l2 != 0");
         require(
-            rolldown.pauserRegistry() == avsPauserReg,
+            rolldown.pauserRegistry() == rolldownPauserReg,
             "rolldown: pauser registry not set correctly"
         );
         require(rolldown.paused() == 0, "rolldown: init paused status set incorrectly");
