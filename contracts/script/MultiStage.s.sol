@@ -20,26 +20,35 @@ contract MultiStage is Script, Utils, Test {
         Deployer finalizerDeployer = new Deployer();
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
 
-        console.log("################################################################################");
-        console.log("Deploying eigen layer infra");
-        console.log("################################################################################");
-        eigenDeployer.run("M2_deploy_from_scratch.anvil.config.json");
+        if (rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Ethereum)) {
+          console.log("################################################################################");
+          console.log("Deploying eigen layer infra");
+          console.log("################################################################################");
+          eigenDeployer.run("M2_deploy_from_scratch.anvil.config.json");
 
-        console.log("################################################################################");
-        console.log("Initializing eigen layer infra");
-        console.log("################################################################################");
-        anvilDeployer.run();
+          console.log("################################################################################");
+          console.log("Initializing eigen layer infra");
+          console.log("################################################################################");
+          anvilDeployer.run();
 
-        console.log("################################################################################");
-        console.log("Deploying finalizer contracts");
-        console.log("################################################################################");
-        finalizerDeployer.run();
+          console.log("################################################################################");
+          console.log("Deploying finalizer contracts");
+          console.log("################################################################################");
+          finalizerDeployer.run();
 
-        console.log("################################################################################");
-        console.log("Deploying rolldown contracts");
-        console.log("################################################################################");
-        rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+          console.log("################################################################################");
+          console.log("Deploying rolldown contracts");
+          console.log("################################################################################");
+          rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+        } else {
+          //TODO: 
+          //redeploy finalizer contracts as well
 
+          console.log("################################################################################");
+          console.log("Deploying rolldown contracts");
+          console.log("################################################################################");
+          rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+        }
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("arbitrum-stub"))){
 
@@ -49,17 +58,11 @@ contract MultiStage is Script, Utils, Test {
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
         rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
 
-      }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("arbitrum-stub-upgrade"))){
-        RolldownDeployer rolldownDeployer = new RolldownDeployer();
-        rolldownDeployer.upgrade(IRolldownPrimitives.ChainId.Arbitrum);
-      }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("ethereum-stub-upgrade"))){
-        RolldownDeployer rolldownDeployer = new RolldownDeployer();
-        rolldownDeployer.upgrade(IRolldownPrimitives.ChainId.Ethereum);
       }else{
         //TODO: ethereum-prod
         //TODO: arbitrum-prod
         //TODO: ...
-        console.log("Unsupported variant", variant);
+        revert("Unsupported variant");
       }
     }
 }

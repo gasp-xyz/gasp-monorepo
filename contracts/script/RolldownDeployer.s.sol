@@ -51,7 +51,7 @@ contract RolldownDeployer is Script, Utils, Test {
       return string.concat(evm, _OUTPUT_PATH);
     }
 
-    function upgrade(IRolldownPrimitives.ChainId chain) external {
+    function upgrade(IRolldownPrimitives.ChainId chain) public {
       string memory configData = readInput(evmPrefixedPath(chain));
       upgrader = stdJson.readAddress(configData, ".permissions.rolldownUpgrader");
       address proxyAdmin = stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin");
@@ -75,7 +75,13 @@ contract RolldownDeployer is Script, Utils, Test {
 
     }
 
-    function run(IRolldownPrimitives.ChainId chain) external {
+    function isProxyDeployed(IRolldownPrimitives.ChainId chain) public view returns (bool){
+      string memory configData = readInput(evmPrefixedPath(chain));
+      address proxyAdmin = stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin");
+      return proxyAdmin.code.length == 0;
+    }
+
+    function initialDeployment(IRolldownPrimitives.ChainId chain) public {
       string memory configData = readConfig(_CONFIG_PATH);
       owner = stdJson.readAddress(configData, ".permissions.owner");
       upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
@@ -120,6 +126,16 @@ contract RolldownDeployer is Script, Utils, Test {
         _verifyInitalizations();
 
         _writeOutput(chain);
+    }
+
+    function run(IRolldownPrimitives.ChainId chain) external {
+      if (isProxyDeployed(chain)){
+        console.log("Initial deployment");
+        initialDeployment(chain);
+      }else{
+        console.log("Upgrading proxy");
+        upgrade(chain);
+      }
     }
 
     function _writeOutput(IRolldownPrimitives.ChainId chain) internal {
