@@ -75,6 +75,8 @@ ops/**/data
 
 *.gas-snapshot
 contracts/script/output/*
+**/arbitrum_rolldown_output.json
+**/ethereum_rolldown_output.json
 
 # foundry related ignore
 # reference: https://github.com/PaulRBerg/foundry-template/blob/main/.gitignore
