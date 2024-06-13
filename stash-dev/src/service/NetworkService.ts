@@ -25,6 +25,7 @@ type Network = {
   rpcUrl: string
   nativeToken: NativeToken
   status: Status
+  rolldownContract: string
 }
 
 type AffirmedToken = {
@@ -51,6 +52,7 @@ const defaultNetworks: Array<Network> = [
       symbol: 'default',
     },
     status: Status.APPROVED,
+    rolldownContract: 'default',
   },
 ]
 
