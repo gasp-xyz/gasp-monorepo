@@ -22,6 +22,11 @@ jobs:
         with:
           submodules: true
       
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Install `contracts` deps
+        working-directory: contracts
+        run: forge install
+      
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
