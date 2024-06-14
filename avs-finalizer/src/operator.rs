@@ -6,20 +6,18 @@ use crate::executor::execute::execute_block;
 use crate::rpc::Rpc;
 
 use bindings::{
-    finalizer_task_manager::NewTaskCreatedFilter,
+    finalizer_task_manager::{NewTaskCreatedFilter, Operator as TMOperator},
     shared_types::{G1Point, G2Point, OperatorStateInfo, Task, TaskResponse, QuorumsAdded, QuorumsStakeUpdate, QuorumsApkUpdate, OperatorsAdded, OperatorsQuorumCountUpdate, OperatorsStakeUpdate},
 };
 use ethers::providers::{Middleware, PendingTransaction, SubscriptionStream};
 use ethers::{
     contract::{stream, LogMeta},
     providers::StreamExt,
-    types::Address, abi::AbiDecode
+    types::{Address, U256, Bytes}, abi::AbiDecode
 };
 use node_executor::ExecutorDispatch;
 use node_primitives::BlockNumber;
-use eigen_client_avsregistry::{reader::OperatorStateRetriever};
 
-use alloy_primitives::{Bytes, U256, FixedBytes};
 use serde::Serialize;
 use sp_core::H256;
 use sp_runtime::traits::BlakeTwo256;
@@ -30,8 +28,6 @@ use tokio::time::{sleep, Duration};
 use tokio::try_join;
 use tracing::{debug, error, info, instrument};
 use std::collections::HashMap;
-use alloy_sol_types::SolValue;
-use alloy_primitives::private::alloy_rlp::Decodable;
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
@@ -182,47 +178,59 @@ impl Operator {
     ) -> eyre::Result<OperatorStateInfo> {
 
         // We assume that the quorumNumbers are alteast unique even if not sorted
-        let mut old_quorum_numbers = task.last_completed_task_quorum_numbers;
-        let mut new_quorum_numbers = task.quorum_numbers;
+        let mut old_quorum_numbers = task.last_completed_task_quorum_numbers.into_iter().collect::<Vec<u8>>();
+        let mut new_quorum_numbers = task.quorum_numbers.into_iter().collect::<Vec<u8>>();
         old_quorum_numbers.sort();
         new_quorum_numbers.sort();
 
-        let mut old_task_block = task.last_completed_task_created_block;
-        let mut new_task_block = task.task_created_block;
+        let old_task_block = task.last_completed_task_created_block;
+        let new_task_block = task.task_created_block;
 
-        let chain_reader = self
+        let registry_coordinator_address = &self
         .avs_contracts
-        .avs_registry_chain_reader;
+        .registry_coordinator_address;
+        let registry_coordinator = &self
+        .avs_contracts
+        .registry;
+        let stake_registry = &self
+        .avs_contracts
+        .stake_registry;
+        let bls_apk_registry = &self
+        .avs_contracts
+        .bls_apk_registry;
+        let task_manager = &self
+        .avs_contracts
+        .task_manager;
 
-        let maybe_i = old_quorum_numbers.iter().peekable();
-        let maybe_j = new_quorum_numbers.iter().peekable();
+        let mut maybe_i = old_quorum_numbers.iter().peekable();
+        let mut maybe_j = new_quorum_numbers.iter().peekable();
         
-        let quorums_common: Vec<u8> = Vec::new();
-        let quorums_removed: Vec<u8> = Vec::new();
-        let quorums_added: Vec<QuorumsAdded> = Vec::new();
-        let quorums_apk_update: Vec<QuorumsApkUpdate> = Vec::new();
-        let quorums_stake_update: Vec<QuorumsStakeUpdate> = Vec::new();
+        let mut quorums_common: Vec<u8> = Vec::new();
+        let mut quorums_removed: Vec<u8> = Vec::new();
+        let mut quorums_added: Vec<QuorumsAdded> = Vec::new();
+        let mut quorums_apk_update: Vec<QuorumsApkUpdate> = Vec::new();
+        let mut quorums_stake_update: Vec<QuorumsStakeUpdate> = Vec::new();
         
         loop {
             match (maybe_i.peek(), maybe_j.peek()){
                 (Some(&&i), Some(&&j)) if i == j => {
                     // handle potential update
-                    let old_quorum_apk = chain_reader.get_quorum_apk_at_block(i, old_task_block).await.map_err(|e| Err(e.to_string()).into())?;
-                    let old_quorum_stake = chain_reader.get_quorum_stake_at_block(i, old_task_block).await.map_err(|e| Err(e.to_string()).into())?;
+                    let old_quorum_apk = bls_apk_registry.get_apk(i).block::<u64>(u64::from(old_task_block)).await?;
+                    let old_quorum_stake = stake_registry.get_current_total_stake(i).block(u64::from(old_task_block)).await?;
 
-                    let new_quorum_apk = chain_reader.get_quorum_apk_at_block(i, new_task_block).await.map_err(|e| Err(e.to_string()).into())?;
-                    let new_quorum_stake = chain_reader.get_quorum_stake_at_block(i, new_task_block).await.map_err(|e| Err(e.to_string()).into())?;
+                    let new_quorum_apk = bls_apk_registry.get_apk(i).block(u64::from(new_task_block)).await?;
+                    let new_quorum_stake = stake_registry.get_current_total_stake(i).block(u64::from(new_task_block)).await?;
 
-                    if (old_quorum_apk.X != new_quorum_apk.X) && (old_quorum_apk.Y != new_quorum_apk.Y) {
+                    if old_quorum_apk != new_quorum_apk {
                         quorums_apk_update.push(QuorumsApkUpdate{
                             quorum_number: i,
-                            quorum_apk: G1Point::decode(new_quorum_apk.abi_encode())?
+                            quorum_apk: new_quorum_apk
                         });
                     }
                     if old_quorum_stake != new_quorum_stake{
                         quorums_stake_update.push(QuorumsStakeUpdate{
-                        quorum_number: i,
-                        quorum_stake: new_quorum_stake,
+                            quorum_number: i,
+                            quorum_stake: new_quorum_stake,
                         });
                     }
                     
@@ -247,8 +255,8 @@ impl Operator {
                     // handle quorum number added
                     quorums_added.push(QuorumsAdded{
                         quorum_number: j,
-                        quorum_stake: chain_reader.get_quorum_stake_at_block(j, new_task_block).await.map_err(|e| Err(e.to_string()).into())?,
-                        quorum_apk: G1Point::decode(chain_reader.get_quorum_apk_at_block(j, new_task_block).await.map_err(|e| Err(e.to_string()).into())?.abi_encode())?,
+                        quorum_stake: stake_registry.get_current_total_stake(j).block(u64::from(new_task_block)).await?,
+                        quorum_apk: bls_apk_registry.get_apk(j).block(u64::from(new_task_block)).await?,
                     });
 
                     maybe_j.next();
@@ -271,28 +279,39 @@ impl Operator {
                     quorums_added.push(
                         QuorumsAdded{
                             quorum_number: j,
-                            quorum_stake: chain_reader.get_quorum_stake_at_block(j, new_task_block).await.map_err(|e| Err(e.to_string()).into())?,
-                            quorum_apk: G1Point::decode(chain_reader.get_quorum_apk_at_block(j, new_task_block).await.map_err(|e| Err(e.to_string()).into())?.abi_encode())?,
+                            quorum_stake: stake_registry.get_current_total_stake(j).block(u64::from(new_task_block)).await?,
+                            quorum_apk: bls_apk_registry.get_apk(j).block(u64::from(new_task_block)).await?,
                         }
                     );
                     maybe_j.next();
                 },
+                (None, None) => {
+                    // handle quorum number added
+                    break;
+                },
+                _ => unreachable!()
+
             }
 
         }
 
 
 
-        let old_operators_stake = chain_reader
-            .get_operators_stake_in_quorums_at_block(
+        let old_operators_stake = task_manager
+            .get_operator_state(
+                *registry_coordinator_address,
+                old_quorum_numbers.clone().into(),
                 old_task_block,
-                Bytes::decode(&mut &old_quorum_numbers.abi_encode()[..])?,
-            ).await.map_err(|e| Err(e.to_string()).into())?;
-        let new_operators_stake = chain_reader
-            .get_operators_stake_in_quorums_at_block(new_task_block, Bytes::decode(&mut &new_quorum_numbers.abi_encode()[..])?).await.map_err(|e| Err(e.to_string()).into())?;
+            ).await?;
+        let new_operators_stake = task_manager
+            .get_operator_state(
+                *registry_coordinator_address,
+                new_quorum_numbers.clone().into(),
+                new_task_block,
+            ).await?;
 
-        let mut old_operators_avs_state = self.get_operators_avs_state_at_block(old_operators_stake, Bytes::decode(&mut &old_quorum_numbers.abi_encode()[..])?).await.values().cloned().collect::<Vec<_>>();
-        let mut new_operators_avs_state = self.get_operators_avs_state_at_block(new_operators_stake, Bytes::decode(& mut &new_quorum_numbers.abi_encode()[..])?).await.values().cloned().collect::<Vec<_>>();
+        let mut old_operators_avs_state = self.get_operators_avs_state_at_block(old_operators_stake, old_quorum_numbers.clone().into()).await.values().cloned().collect::<Vec<_>>();
+        let mut new_operators_avs_state = self.get_operators_avs_state_at_block(new_operators_stake, new_quorum_numbers.clone().into()).await.values().cloned().collect::<Vec<_>>();
         
         old_operators_avs_state.sort_by_key(|v| v.operator_id);
         new_operators_avs_state.sort_by_key(|v| v.operator_id);
@@ -300,10 +319,10 @@ impl Operator {
         let maybe_i = old_operators_avs_state.iter().peekable();
         let maybe_j = new_operators_avs_state.iter().peekable();
 
-        let operators_removed: Vec<[u8; 32]> = Vec::new();
-        let operators_added: Vec<OperatorsAdded> = Vec::new(); // Needs to be sorted
-        let operators_quorum_count_update: Vec<OperatorsQuorumCountUpdate> = Vec::new();
-        let operators_stake_update: Vec<OperatorsStakeUpdate> = Vec::new();
+        let mut operators_removed: Vec<[u8; 32]> = Vec::new();
+        let mut operators_added: Vec<OperatorsAdded> = Vec::new(); // Needs to be sorted
+        let mut operators_quorum_count_update: Vec<OperatorsQuorumCountUpdate> = Vec::new();
+        let mut operators_stake_update: Vec<OperatorsStakeUpdate> = Vec::new();
 
         loop {
             match (maybe_i.peek(), maybe_j.peek()){
@@ -448,15 +467,16 @@ impl Operator {
             operators_quorum_count_update: operators_quorum_count_update,
         };
         Ok(operator_state_info)
+        // Ok(Default::default())
     }
 
 
     pub async fn get_operators_avs_state_at_block(
         &self,
-        operators_stakes_in_quorums: Vec<Vec<OperatorStateRetriever::Operator>>,
+        operators_stakes_in_quorums: Vec<Vec<TMOperator>>,
         quorum_nums: Bytes,
-    ) -> HashMap<FixedBytes<32>, CustomOperatorAvsState> {
-        let mut operators_avs_state: HashMap<FixedBytes<32>, CustomOperatorAvsState> = HashMap::new();
+    ) -> HashMap<H256, CustomOperatorAvsState> {
+        let mut operators_avs_state: HashMap<H256, CustomOperatorAvsState> = HashMap::new();
 
         if operators_stakes_in_quorums.len() != quorum_nums.len() {
             // throw error
@@ -466,9 +486,9 @@ impl Operator {
             for operator in &operators_stakes_in_quorums[quorum_id] {
                 let stake_per_quorum = HashMap::new();
                 let avs_state = operators_avs_state
-                    .entry(FixedBytes(*operator.operatorId))
+                    .entry(H256::from(operator.operator_id))
                     .or_insert_with(|| CustomOperatorAvsState {
-                        operator_id: *operator.operatorId,
+                        operator_id: operator.operator_id,
                         stake_per_quorum: stake_per_quorum,
                     });
                 avs_state

@@ -17,12 +17,6 @@ opt-level = 3
 [dependencies]
 bindings = { path = "./bindings" }
 
-eigen-client-avsregistry = {git = "https://github.com/supernovahs/eigensdk-rs", rev = "3e9ce3c29261c4432a8b00ddbc2d15c854b72b84" }
-
-
-alloy-primitives = {version = "0.7.2", features = ["rlp"]}
-alloy-sol-types = "0.7.2"
-
 aes = "0.8.0"
 ark-bn254 = { version = "0.4.0", features = ["std", "curve"] }
 ark-ec = "0.4.2"
@@ -65,6 +59,3 @@ substrate-rpc-client = { git = "https://github.com/mangata-finance/polkadot-sdk"
 node-executor = { package = "node-executor", git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
 node-primitives = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
 futures = "0.3.30"
-
-[patch."https://github.com/supernovahs/eigensdk-rs"]
-eigen-client-avsregistry = {path = "../../eigensdk-rs/crates/chainio/clients/avsregistry"}

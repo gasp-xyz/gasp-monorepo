@@ -1,20 +1,18 @@
 use std::{fmt::Debug, sync::Arc};
 
-use alloy_primitives::{Address as AlloyAddress, U160 as AlloyU160};
 use bindings::{
     finalizer_service_manager::FinalizerServiceManager,
     finalizer_task_manager::{FinalizerTaskManager, NewTaskCreatedFilter},
     registry_coordinator::RegistryCoordinator,
     shared_types::OperatorInfo,
+    stake_registry::StakeRegistry,
+    bls_apk_registry::BLSApkRegistry,
     strategy_manager_storage::{PubkeyRegistrationParams, SignatureWithSaltAndExpiry},
-};
-use eigen_client_avsregistry::{
-    reader::AvsRegistryChainReader, subscriber::AvsRegistryChainSubscriber,
 };
 use ethers::{
     contract::{EthEvent, Event},
     providers::{Provider, Ws},
-    types::{Filter, TransactionReceipt, H256, U64},
+    types::{Address, Filter, TransactionReceipt, H256, U64},
 };
 use eyre::{eyre, Ok, OptionExt};
 
@@ -26,13 +24,14 @@ use crate::{
 use super::{map_revert, Client};
 
 pub struct AvsContracts {
-    service_manager: FinalizerServiceManager<Client>,
-    task_manager: FinalizerTaskManager<Client>,
-    task_manager_sub: FinalizerTaskManager<Provider<Ws>>,
-    registry: RegistryCoordinator<Client>,
-    pub avs_registry_chain_reader: AvsRegistryChainReader,
-    pub avs_registry_subscriber: AvsRegistryChainSubscriber,
-    client: Arc<Client>,
+    pub service_manager: FinalizerServiceManager<Client>,
+    pub task_manager: FinalizerTaskManager<Client>,
+    pub task_manager_sub: FinalizerTaskManager<Provider<Ws>>,
+    pub registry_coordinator_address: Address,
+    pub registry: RegistryCoordinator<Client>,
+    pub stake_registry: StakeRegistry<Client>,
+    pub bls_apk_registry: BLSApkRegistry<Client>,
+    pub client: Arc<Client>,
     pub ws_client: Arc<Provider<Ws>>,
 }
 
@@ -64,31 +63,18 @@ impl AvsContracts {
         let task_manager_sub = FinalizerTaskManager::new(task_manager_addr, ws_client.clone());
 
         let bls_apk_registry_addr = registry.bls_apk_registry().await?;
+        let bls_apk_registry = BLSApkRegistry::new(bls_apk_registry_addr, client.clone());
         let stake_registry_addr = registry.stake_registry().await?;
-        let avs_registry_chain_reader = AvsRegistryChainReader::new(
-            AlloyAddress::from(AlloyU160::from_be_bytes(
-                bls_apk_registry_addr.to_fixed_bytes(),
-            )),
-            AlloyAddress::from(AlloyU160::from_be_bytes(
-                config.avs_registry_coordinator_addr.to_fixed_bytes(),
-            )),
-            AlloyAddress::from(AlloyU160::from_be_bytes(task_manager_addr.to_fixed_bytes())),
-            AlloyAddress::from(AlloyU160::from_be_bytes(
-                stake_registry_addr.to_fixed_bytes(),
-            )),
-            config.eth_rpc_url.to_string(),
-        );
-
-        let avs_registry_subscriber =
-            AvsRegistryChainSubscriber::new(config.eth_ws_url.to_string());
+        let stake_registry = StakeRegistry::new(stake_registry_addr, client.clone());
 
         Ok(Self {
             service_manager,
             task_manager,
             task_manager_sub,
+            registry_coordinator_address: config.avs_registry_coordinator_addr.into(),
             registry,
-            avs_registry_chain_reader,
-            avs_registry_subscriber,
+            stake_registry,
+            bls_apk_registry,
             client,
             ws_client,
         })
