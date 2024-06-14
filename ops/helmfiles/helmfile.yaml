@@ -36,8 +36,8 @@ releases:
           repository: mangatasolutions/anvil
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
-        enablePersistence: {{ .Values.anvilEnablePersistence }}
-        environment: '{{ requiredEnv "ENVIRONMENT" | quote }}-eth'
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        nameOverride: 'anvil-eth'
         envSelector: ethereum-stub
   
   - name: anvil-arb
@@ -49,8 +49,8 @@ releases:
           repository: mangatasolutions/anvil
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
-        enablePersistence: {{ .Values.anvilEnablePersistence }}
-        environment: '{{ requiredEnv "ENVIRONMENT" | quote }}-arb'
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        nameOverride: 'anvil-arb'
         envSelector: arbitrum-stub
 
   - name: avs-aggregator

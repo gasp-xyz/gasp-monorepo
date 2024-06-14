@@ -1,65 +1,74 @@
-{{ $name :=  "anvil" }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ $name }}
+  name: {{ include "anvil.name" . }}
   labels: {{- include "anvil.labels" . | nindent 4 }}
-    service: {{ $name }}
+    service: {{ include "anvil.name" . }}
 spec:
   replicas: 1
   selector:
     matchLabels:
       {{- include "anvil.selectorLabels" . | nindent 6 }}
-      service: {{ $name }}
-  serviceName: {{ $name }}
+      service: {{ include "anvil.name" . }}
+  serviceName: {{ include "anvil.name" . }}
   template:
     metadata:
       labels:
         {{- include "anvil.labels" . | nindent 8 }}
-        service: {{ $name }}
+        service: {{ include "anvil.name" . }}
     spec:
       initContainers:
         - name: init
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
           command: ["/bin/sh"]
-          environment:
+          env:
             - name: ENV_SELECTOR
               value: {{ .Values.envSelector }}
           args:
             - -c
             - |
-              # Start anvil to dump the state
-              anvil --dump-state {{ .Values.dataMountPath }}/anvil-state.json &
+              set -ex
+              if [ ! -f {{ .Values.dataMountPath }}/anvil-state.json ]; then
+                # Start anvil to dump the state
+                anvil --state {{ .Values.dataMountPath }}/anvil-state.json &
 
-              # Deploy all contracts
-              forge script script/MultiStage.s.sol \
-                --rpc-url http://localhost:8545 \
-                --private-key {{ .Values.privateKey }} \
-                --broadcact -v
+                # Deploy all contracts
+                forge script script/MultiStage.s.sol \
+                  --rpc-url http://localhost:8545 \
+                  --private-key {{ .Values.privateKey }} \
+                  --broadcast -v
 
-              # Stop anvil
-              pkill anvil
+                # Stop anvil
+                pkill anvil
+              fi
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.enablePersistence }}
           volumeMounts:
             - mountPath: {{ .Values.dataMountPath }}
               name: data
-      {{- end }}
+          {{- end }}
       containers:
-        - name: {{ $name }}
+        - name: anvil
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
+          command:
+            - anvil
+            - --host
+            - 0.0.0.0
+            - --state
+            - "{{ .Values.dataMountPath }}/anvil-state.json"
           ports:
             - containerPort: 8545
               name: rpc
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.enablePersistence }}
           volumeMounts:
-            {{- if .Values.enablePersistence }}
             - mountPath: {{ .Values.dataMountPath }}
               name: data
-            {{- end }}
+          {{- end }}
   {{- if .Values.enablePersistence }}
   volumeClaimTemplates:
     - metadata:

@@ -2,4 +2,3 @@ finalizerEnableServiceMonitorCollectors: true
 # TODO: blockscout should be disabled for fungible envs
 blockscoutEnabled: true
 remoteCluster: true
-anvilEnablePersistence: true
