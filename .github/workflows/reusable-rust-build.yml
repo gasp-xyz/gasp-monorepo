@@ -10,7 +10,7 @@ on:
         required: true
         type: string
       cache-version:
-        default: 0
+        default: 1
         description: Cache version variable to be used to invalidate cache when needed
         required: false
         type: number
