@@ -11,12 +11,21 @@ import "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
 import "@eigenlayer/contracts/permissions/Pausable.sol";
 import "./GaspMultiRollupServiceStorage.sol";
 
+
+    // Assumptions
+    // An operators BLS keys are unique and do not change for a given AVS
+    // quorum numbers are uint8
+    // Stakes (shares) are uint96  
+
+
 // We require that the minimum stake for all quorums is 1 to avoid issues with stake being 0 but apk registry having the op's g1PubKey. We may not need this? Update apk based on the opIds returned by getter
 // We require that staleStakesForbidden in bls signature checker is true. And that if withdrwal delay block is about 7 days, then task response is atmost about 1day and that on other L1s the staleness is max 3days? But how do we ensure that that other L1s are updated within say 2 days of responding on Eth and if not then brick accordingly? Maybe the updater can do this?
 // Maybe we do not need this - We require qourumNumbers to be static - let's just enforce a check in createNewTask - Maybe an extrinsic to use the check or not - Probably not we need to match on the other L1s
 // Maybe we do not need this - We require Threshold percentage to be static - Let's enforce that too - Maybe an extrinsic to use the check or not - Probably not we need to match on the other L1s
 // Do not init the operator_info service in the finalizer/operator! Do not put all the operator bls keys in the TaskResponse. Only the changes in stuff and the bls keys of the new ops
 // Do not double verify if delta is null
+// We may require to "correct" operator addresses returned from the operatorStateRetriever after the bls key roration is merged. We do not need it before that. We can do this correction by querying pubKeyHashToOperator at the relevant block number (dereg and rereg can't ahhpen in the same block so this at_block qurying should be reliable) 
+// We require that the quorum number be unique, perhaps impl req that they bve sorted so that it can be enforced
 contract GaspMultiRollupService is
     Initializable,
     OwnableUpgradeable,

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "@eigenlayer-middleware/src/libraries/BN254.sol";
+import "./IGaspMultiRollupServicePrimitives.sol";
 
 interface IFinalizerTaskManager {
     // EVENTS
@@ -33,6 +34,9 @@ interface IFinalizerTaskManager {
         bytes quorumNumbers;
         // percentage of quorum's total stake needed to consider task completed
         uint32 quorumThresholdPercentage;
+        // We require these to validate the old state correctly
+        bytes lastCompletedTaskQuorumNumbers;
+        uint32 lastCompletedTaskQuorumThresholdPercentage;
     }
 
     // Task response is hashed and signed by operators.
@@ -40,14 +44,38 @@ interface IFinalizerTaskManager {
     struct TaskResponse {
         // Can be obtained by the operator from the event NewTaskCreated.
         uint32 referenceTaskIndex;
+        Task referenceTask;
 
-        bytes32 operatorsStateHash;
+        OperatorStateInfo operatorsStateInfo;
         // This is the response that the operator has to provide for a finalized block.
         bytes32 blockHash;
         // This is the response that the operator has to provide for a an executed block.
         bytes32 storageProofHash;
         // This is the response that the operator has to provide for a state hash at given block.
         bytes32 pendingStateHash;
+    }
+
+    struct OperatorStateInfo {
+        bool operatorsStateChanged;
+        bool operatorsStateProvided;
+        // uint8 quorumCountUpdate;
+        
+        uint8[] quorumsRemoved;
+        IGaspMultiRollupServicePrimitives.QuorumsAdded[] quorumsAdded;
+        IGaspMultiRollupServicePrimitives.QuorumsStakeUpdate[] quorumsStakeUpdate;
+        IGaspMultiRollupServicePrimitives.QuorumsApkUpdate[] quorumsApkUpdate;
+
+        bytes32[] OperatorsRemoved;
+        IGaspMultiRollupServicePrimitives.OperatorsAdded[] operatorsAdded; // Sorted!
+        IGaspMultiRollupServicePrimitives.OperatorsStakeUpdate[] operatorsStakeUpdate;
+        IGaspMultiRollupServicePrimitives.OperatorsQuorumCountUpdate[] operatorsQuorumCountUpdate;
+
+
+        // IGaspMultiRollupServicePrimitives.QuorumsApkUpdate quorumApkUpdate;
+        // IGaspMultiRollupServicePrimitives.QuorumsStakeUpdate quorumsStakeUpdate;
+        // IGaspMultiRollupServicePrimitives.OperatorStakeUpdate[] OperatorStakeUpdate;
+        // IGaspMultiRollupServicePrimitives.OperatorKeyUpdate[] operatorKeyUpdate;
+        // IGaspMultiRollupServicePrimitives.QuorumOperatorsUpdate[] quorumOperatorsUpdate;
     }
 
     // Extra information related to taskResponse, which is filled inside the contract.

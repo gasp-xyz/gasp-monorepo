@@ -20,7 +20,8 @@ bindings = { path = "./bindings" }
 eigen-client-avsregistry = {git = "https://github.com/supernovahs/eigensdk-rs", rev = "3e9ce3c29261c4432a8b00ddbc2d15c854b72b84" }
 
 
-alloy-primitives = "0.7.2"
+alloy-primitives = {version = "0.7.2", features = ["rlp"]}
+alloy-sol-types = "0.7.2"
 
 aes = "0.8.0"
 ark-bn254 = { version = "0.4.0", features = ["std", "curve"] }
@@ -66,4 +67,4 @@ node-primitives = { git = "https://github.com/mangata-finance/polkadot-sdk", bra
 futures = "0.3.30"
 
 [patch."https://github.com/supernovahs/eigensdk-rs"]
-eigen-client-avsregistry = {path = "../eigensdk-rs/crates/chainio/clients/avsregistry"}
+eigen-client-avsregistry = {path = "../../eigensdk-rs/crates/chainio/clients/avsregistry"}

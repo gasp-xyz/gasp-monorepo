@@ -9,7 +9,7 @@
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct G1Point {
     pub x: ::ethers::core::types::U256,
@@ -26,7 +26,7 @@ pub struct G1Point {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct G2Point {
     pub x: [::ethers::core::types::U256; 2],
@@ -43,7 +43,7 @@ pub struct G2Point {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct ApkUpdate {
     pub apk_hash: [u8; 24],
@@ -61,7 +61,7 @@ pub struct ApkUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct PubkeyRegistrationParams {
     pub pubkey_registration_signature: G1Point,
@@ -79,7 +79,7 @@ pub struct PubkeyRegistrationParams {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct OperatorDetails {
     pub earnings_receiver: ::ethers::core::types::Address,
@@ -97,7 +97,7 @@ pub struct OperatorDetails {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct QueuedWithdrawalParams {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
@@ -115,7 +115,7 @@ pub struct QueuedWithdrawalParams {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct Withdrawal {
     pub staker: ::ethers::core::types::Address,
@@ -126,7 +126,7 @@ pub struct Withdrawal {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
     pub shares: ::std::vec::Vec<::ethers::core::types::U256>,
 }
-///`Task(uint256,uint32,uint32,bytes,uint32)`
+///`OperatorStateInfo(bool,bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[])`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -137,7 +137,32 @@ pub struct Withdrawal {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
+)]
+pub struct OperatorStateInfo {
+    pub operators_state_changed: bool,
+    pub operators_state_provided: bool,
+    pub quorums_removed: ::std::vec::Vec<u8>,
+    pub quorums_added: ::std::vec::Vec<QuorumsAdded>,
+    pub quorums_stake_update: ::std::vec::Vec<QuorumsStakeUpdate>,
+    pub quorums_apk_update: ::std::vec::Vec<QuorumsApkUpdate>,
+    pub operators_removed: ::std::vec::Vec<[u8; 32]>,
+    pub operators_added: ::std::vec::Vec<OperatorsAdded>,
+    pub operators_stake_update: ::std::vec::Vec<OperatorsStakeUpdate>,
+    pub operators_quorum_count_update: ::std::vec::Vec<OperatorsQuorumCountUpdate>,
+}
+///`Task(uint256,uint32,uint32,bytes,uint32,bytes,uint32)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
 )]
 pub struct Task {
     pub block_number: ::ethers::core::types::U256,
@@ -145,8 +170,10 @@ pub struct Task {
     pub last_completed_task_created_block: u32,
     pub quorum_numbers: ::ethers::core::types::Bytes,
     pub quorum_threshold_percentage: u32,
+    pub last_completed_task_quorum_numbers: ::ethers::core::types::Bytes,
+    pub last_completed_task_quorum_threshold_percentage: u32,
 }
-///`TaskResponse(uint32,bytes32,bytes32,bytes32,bytes32)`
+///`TaskResponse(uint32,(uint256,uint32,uint32,bytes,uint32,bytes,uint32),(bool,bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]),bytes32,bytes32,bytes32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -157,11 +184,12 @@ pub struct Task {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct TaskResponse {
     pub reference_task_index: u32,
-    pub operators_state_hash: [u8; 32],
+    pub reference_task: Task,
+    pub operators_state_info: OperatorStateInfo,
     pub block_hash: [u8; 32],
     pub storage_proof_hash: [u8; 32],
     pub pending_state_hash: [u8; 32],
@@ -177,13 +205,119 @@ pub struct TaskResponse {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct TaskResponseMetadata {
     pub task_responsed_block: u32,
     pub hash_of_non_signers: [u8; 32],
     pub quroum_stake_totals: ::std::vec::Vec<u128>,
     pub quroum_stake_signed: ::std::vec::Vec<u128>,
+}
+///`OperatorsAdded(bytes32,uint8[],uint96[],uint8)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct OperatorsAdded {
+    pub operator_id: [u8; 32],
+    pub quorum_for_stakes: ::std::vec::Vec<u8>,
+    pub quorum_stakes: ::std::vec::Vec<u128>,
+    pub quorum_count: u8,
+}
+///`OperatorsQuorumCountUpdate(bytes32,uint8)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct OperatorsQuorumCountUpdate {
+    pub operator_id: [u8; 32],
+    pub quorum_count: u8,
+}
+///`OperatorsStakeUpdate(bytes32,uint8[],uint96[])`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct OperatorsStakeUpdate {
+    pub operator_id: [u8; 32],
+    pub quorum_for_stakes: ::std::vec::Vec<u8>,
+    pub quorum_stakes: ::std::vec::Vec<u128>,
+}
+///`QuorumsAdded(uint8,uint96,(uint256,uint256))`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct QuorumsAdded {
+    pub quorum_number: u8,
+    pub quorum_stake: u128,
+    pub quorum_apk: G1Point,
+}
+///`QuorumsApkUpdate(uint8,(uint256,uint256))`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct QuorumsApkUpdate {
+    pub quorum_number: u8,
+    pub quorum_apk: G1Point,
+}
+///`QuorumsStakeUpdate(uint8,uint96)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct QuorumsStakeUpdate {
+    pub quorum_number: u8,
+    pub quorum_stake: u128,
 }
 ///`OperatorInfo(bytes32,uint8)`
 #[derive(
@@ -196,7 +330,7 @@ pub struct TaskResponseMetadata {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct OperatorInfo {
     pub operator_id: [u8; 32],
@@ -213,7 +347,7 @@ pub struct OperatorInfo {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct OperatorKickParam {
     pub quorum_number: u8,
@@ -230,7 +364,7 @@ pub struct OperatorKickParam {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct OperatorSetParam {
     pub max_operator_count: u32,
@@ -248,7 +382,7 @@ pub struct OperatorSetParam {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct QuorumBitmapUpdate {
     pub update_block_number: u32,
@@ -266,7 +400,7 @@ pub struct QuorumBitmapUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct SignatureWithExpiry {
     pub signature: ::ethers::core::types::Bytes,
@@ -283,7 +417,7 @@ pub struct SignatureWithExpiry {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct SignatureWithSaltAndExpiry {
     pub signature: ::ethers::core::types::Bytes,
@@ -301,7 +435,7 @@ pub struct SignatureWithSaltAndExpiry {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct StakeUpdate {
     pub update_block_number: u32,
@@ -319,7 +453,7 @@ pub struct StakeUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct StrategyParams {
     pub strategy: ::ethers::core::types::Address,
@@ -336,7 +470,7 @@ pub struct StrategyParams {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct DeprecatedStructQueuedWithdrawal {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
@@ -357,7 +491,7 @@ pub struct DeprecatedStructQueuedWithdrawal {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct DeprecatedStructWithdrawerAndNonce {
     pub withdrawer: ::ethers::core::types::Address,
@@ -374,7 +508,7 @@ pub struct DeprecatedStructWithdrawerAndNonce {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct FuzzInterface {
     pub addr: ::ethers::core::types::Address,
@@ -391,7 +525,7 @@ pub struct FuzzInterface {
     Debug,
     PartialEq,
     Eq,
-    Hash,
+    Hash
 )]
 pub struct FuzzSelector {
     pub addr: ::ethers::core::types::Address,

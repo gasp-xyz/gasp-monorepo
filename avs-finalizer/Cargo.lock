@@ -1132,6 +1132,7 @@ version = "0.1.0"
 dependencies = [
  "aes",
  "alloy-primitives",
+ "alloy-sol-types",
  "ark-bn254",
  "ark-ec",
  "ark-ff 0.4.2",

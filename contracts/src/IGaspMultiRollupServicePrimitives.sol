@@ -1,126 +1,69 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+import "@eigenlayer-middleware/src/libraries/BN254.sol";
+
 interface IGaspMultiRollupServicePrimitives {
 
-/*
-    event DepositAcceptedIntoQueue(
-        uint256 requestId,
-        address depositRecipient,
-        address tokenAddress,
-        uint256 amount
-    );
-    event DisputeResolutionAcceptedIntoQueue(
-        uint256 requestId,
-        bool cancelJustified
-    );
-    event WithdrawalResolutionAcceptedIntoQueue(
-        uint256 requestId,
-        bool success
-    );
-    event L2UpdatesToRemovedAcceptedIntoQueue(
-        uint256 requestId,
-        uint256[] l2UpdatesToRemove
-    );
-    event FundsWithdrawn(
-        address withdrawRecipient,
-        address tokenAddress,
-        uint256 amount
-    );
-    event FundsReturned(
-        address depositRecipient,
-        address tokenAddress,
-        uint256 amount
-    );
-    event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
-    event EthWithdrawPending(address sender, uint amount);
-    event PendingEthWithdrawn(address sender, uint amount);
 
-    enum Origin {
-        L1,
-        L2
+    // struct OperatorStakeUpdate{
+    //     address operator;
+    //     QuorumsStakeUpdate quorumsStakeUpdate;
+    // }
+
+    // struct OperatorKeyUpdate {
+    //     address operator;
+    //     BN254.G1Point g1Key;
+    // }
+
+    // struct QuorumsStakeUpdate{
+    //     uint8[] quorumsToUpdate;
+    //     uint96[] qourumsUpdatedStake;
+    // }
+    // struct QuorumsApkUpdate{
+    //     uint8[] quorumsToUpdate;
+    //     BN254.G1Point[] qourumsUpdatedApk;
+    // }
+
+    // struct QuorumOperatorsUpdate{
+    //     uint8 quorumToUpdate;
+    //     // Each entry here must have a corresponding one in 
+    //     address[] operatorAdded;
+    //     address[] operatorRemoved;
+    // }
+
+    struct QuorumsAdded{
+        uint8 quorumNumber;
+        uint96 quorumStake;
+        BN254.G1Point quorumApk;
     }
 
-    struct RequestId {
-        Origin origin;
-        uint256 id;
+    struct QuorumsStakeUpdate{
+        uint8 quorumNumber;
+        uint96 quorumStake;
+    }
+    struct QuorumsApkUpdate{
+        uint8 quorumNumber;
+        BN254.G1Point quorumApk;
     }
 
-    struct Deposit {
-        RequestId requestId;
-        address depositRecipient;
-        address tokenAddress;
-        uint256 amount;
-        uint256 timeStamp;
+    struct OperatorsAdded {
+        bytes32 operatorId;
+        uint8[] quorumForStakes;
+        uint96[] quorumStakes;
+        // Maybe remove and use quorumForStakes.len()?
+        uint8 quorumCount;
     }
 
-    struct L2UpdatesToRemove {
-        RequestId requestId;
-        uint256[] l2UpdatesToRemove;
-        uint256 timeStamp;
+    struct OperatorsStakeUpdate{
+        bytes32 operatorId;
+        uint8[] quorumForStakes;
+        uint96[] quorumStakes;
     }
 
-    struct CancelResolution {
-        RequestId requestId;
-        uint256 l2RequestId;
-        bool cancelJustified;
-        uint256 timeStamp;
+    struct OperatorsQuorumCountUpdate{
+        bytes32 operatorId;
+        uint8 quorumCount;
     }
-
-    struct WithdrawalResolution {
-        RequestId requestId;
-        uint256 l2RequestId;
-        bool status;
-        uint256 timeStamp;
-    }
-
-    struct L1Update {
-        Deposit[] pendingDeposits;
-        CancelResolution[] pendingCancelResolutions;
-        WithdrawalResolution[] pendingWithdrawalResolutions;
-        L2UpdatesToRemove[] pendingL2UpdatesToRemove;
-    } 
-
-    //TODO: should be renamed to RequestType
-    enum UpdateType {
-        DEPOSIT,
-        WITHDRAWAL,
-        WITHDRAWAL_RESOLUTION,
-        INDEX_UPDATE,
-        CANCEL,
-        CANCEL_RESOLUTION
-    }
-
-    struct RequestResult {
-        RequestId requestId;
-        uint256 originRequestId;
-        UpdateType updateType;
-        bool status;
-    }
-
-    struct L2Update {
-        Cancel[] cancels;
-        Withdrawal[] withdrawals;
-        RequestResult[] results;
-    }
-
-    struct Range {
-        uint256 start;
-        uint256 end;
-    }
-
-    struct Cancel {
-        RequestId requestId;
-        Range range;
-        bytes32 hash;
-    }
-
-    struct Withdrawal {
-        RequestId requestId;
-        address withdrawalRecipient;
-        address tokenAddress;
-        uint256 amount;
-    }
-*/
 
 }

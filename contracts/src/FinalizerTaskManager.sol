@@ -48,7 +48,9 @@ contract FinalizerTaskManager is
     mapping(uint32 => TaskStatus) public indexToTaskStatus;
 
     uint32 lastCompletedTaskCreatedBlock;
-    uint32 lastCompletedTaskNum;
+    // uint32 lastCompletedTaskNum;
+    bytes lastCompletedTaskQuorumNumbers;
+    uint32 lastCompletedTaskQuorumThresholdPercentage;
 
     address public aggregator;
     address public generator;
@@ -91,6 +93,8 @@ contract FinalizerTaskManager is
         _transferOwnership(initialOwner);
         aggregator = _aggregator;
         generator = _generator;
+        // lastCompletedTaskQuorumNumbers.push(0) ;
+        // lastCompletedTaskQuorumThresholdPercentage = 66;
     }
 
     /* FUNCTIONS */
@@ -99,6 +103,10 @@ contract FinalizerTaskManager is
         external
         onlyTaskGenerator
     {
+        require(
+            lastCompletedTaskCreatedBlock != block.number && block.number != 0,
+            "Can't create a task in the same block as a completed task"
+        );
         // create a new task struct
         Task memory newTask;
         newTask.blockNumber = blockNumber;
@@ -106,6 +114,8 @@ contract FinalizerTaskManager is
         newTask.quorumThresholdPercentage = quorumThresholdPercentage;
         newTask.quorumNumbers = quorumNumbers;
         newTask.lastCompletedTaskCreatedBlock = lastCompletedTaskCreatedBlock;
+        newTask.lastCompletedTaskQuorumNumbers = lastCompletedTaskQuorumNumbers;
+        newTask.lastCompletedTaskQuorumThresholdPercentage = lastCompletedTaskQuorumThresholdPercentage;
 
         // Ensure new previous task was either cancelled or completed
         // Here for now we auto cancel previous task if not completed
@@ -190,6 +200,8 @@ contract FinalizerTaskManager is
         latestPendingStateHash = taskResponse.pendingStateHash;
         indexToTaskStatus[taskResponse.referenceTaskIndex] == TaskStatus.COMPLETED;
         lastCompletedTaskCreatedBlock = task.taskCreatedBlock;
+        lastCompletedTaskQuorumNumbers = task.quorumNumbers;
+        lastCompletedTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
         // emitting completed event
         emit TaskCompleted(taskResponse.referenceTaskIndex, taskResponse.blockHash);
     }

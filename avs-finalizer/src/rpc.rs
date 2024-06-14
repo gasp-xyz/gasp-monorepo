@@ -4,7 +4,7 @@ use crate::{
 };
 use ark_ec::AffineRepr;
 use ark_ff::PrimeField;
-use bindings::shared_types::TaskResponse;
+use bindings::shared_types::{Task, TaskResponse, OperatorStateInfo};
 use ethers::abi::AbiEncode;
 use reqwest::Response;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
@@ -32,8 +32,10 @@ struct SignedTaskResponse {
 struct TaskResponseWire {
     #[serde(rename = "ReferenceTaskIndex")]
     pub reference_task_index: u32,
-    #[serde(rename = "operatorsStateHash")]
-    pub operators_state_hash: Bytes32,
+    #[serde(rename = "ReferenceTask")]
+    pub reference_task: Task,
+    #[serde(rename = "OperatorStateInfo")]
+    pub operators_state_info: OperatorStateInfo,
     #[serde(rename = "BlockHash")]
     pub block_hash: Bytes32,
     #[serde(rename = "StorageProofHash")]
@@ -46,7 +48,8 @@ impl From<TaskResponse> for TaskResponseWire {
     fn from(value: TaskResponse) -> Self {
         Self {
             reference_task_index: value.reference_task_index,
-            operators_state_hash: value.operators_state_hash,
+            reference_task: value.reference_task,
+            operators_state_info: value.operators_state_info,
             block_hash: value.block_hash,
             storage_proof_hash: value.storage_proof_hash,
             pending_state_hash: value.pending_state_hash,

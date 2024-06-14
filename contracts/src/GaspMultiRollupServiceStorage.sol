@@ -22,22 +22,26 @@ abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
 
 */
 
-    // Assumptions
-    // An operators BLS keys are unique and do not change for a given AVS
-    // quorum numbers are uint8
-    // Stakes (shares) are uint96  
     address public updater;
     IRolldown public rolldown;
 
-    uint32 public latestCompletedTaskNumber;
     bytes32 public latestPendingStateHash;
 
-    uint8 public quorumCount;
+    uint32 public latestCompletedTaskNumber;
+    uint32 public latestCompletedTaskCreatedBlock;
+
+    bytes public quorumNumbers;
+    uint32 public quorumThresholdPercentage;
+    
     mapping(uint8 => uint96) public QuorumToStakes;
-    mapping(bytes32 => mapping(uint8 => uint96)) internal operatorIdAndQuorumToStakes;
+    mapping(bytes32 => mapping(uint8 => uint96)) public operatorAndQuorumToStakes;
 
     mapping(uint8 => BN254.G1Point) public QourumApk;
-    mapping(bytes32 => BN254.G1Point) public OperatorPubKey;
+    // mapping(uint8 => mapping(bytes32 => bool)) public QuorumOperators;
+    mapping(bytes32 => BN254.G1Point) public OperatorIdPubKey;
+    mapping(bytes32 => uint8) public OperatorIdQuorumCount;
+
+    // mapping(bytes32 => address) public OperatorIdToOperator;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
