@@ -12,8 +12,8 @@ secondSequencerEnabled: false
 
 env:
   # rpc
-  ETH_RPC_URL: http://anvil:8545
-  ETH_WS_URL: ws://anvil:8545
+  ETH_RPC_URL: http://anvil-eth:8545
+  ETH_WS_URL: ws://anvil-eth:8545
   SUBSTRATE_RPC_URL: wss://kusama-archive.mangata.online:443
   # contracts
   CHAIN_ID: '31337'
@@ -36,7 +36,7 @@ finalizerEnableServiceMonitorCollectors: false
 finalizerEnvSecrets:
 
 # rollup-updater configs
-updaterEthChainUrl: ws://anvil:8545
+updaterEthChainUrl: ws://anvil-eth:8545
 updaterEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
   EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
@@ -46,7 +46,7 @@ updaterEnv:
 # rollup-sequencer configs
 firstSequencerMnemonic: '0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133'
 secondSequencerMnemonic: 'bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob'
-sequencerEthChainUrl: ws://anvil:8545
+sequencerEthChainUrl: ws://anvil-eth:8545
 sequencerEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
   MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"

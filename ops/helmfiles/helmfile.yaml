@@ -27,7 +27,7 @@ helmDefaults:
   wait: false
 
 releases:
-  - name: anvil
+  - name: anvil-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.anvilEnabled }}
     chart: ../helm-charts/anvil-testnet
@@ -35,9 +35,23 @@ releases:
       - image:
           repository: mangatasolutions/anvil
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
-        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         enablePersistence: {{ .Values.anvilEnablePersistence }}
+        environment: '{{ requiredEnv "ENVIRONMENT" | quote }}-eth'
+        envSelector: ethereum-stub
+  
+  - name: anvil-arb
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.anvilEnabled }}
+    chart: ../helm-charts/anvil-testnet
+    values:
+      - image:
+          repository: mangatasolutions/anvil
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        remoteCluster: {{ .Values.remoteCluster }}
+        enablePersistence: {{ .Values.anvilEnablePersistence }}
+        environment: '{{ requiredEnv "ENVIRONMENT" | quote }}-arb'
+        envSelector: arbitrum-stub
 
   - name: avs-aggregator
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
@@ -130,7 +144,12 @@ releases:
     values:
       - config:
           MIX_ENV: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+          ETHEREUM_JSONRPC_VARIANT: 'geth'
           ETHEREUM_JSONRPC_HTTP_URL: http://anvil:8545
+          ETHEREUM_JSONRPC_WS_URL: ws://anvil:8545
+          ETHEREUM_JSONRPC_TRACE_URL: http://anvil:8545
+        image:
+          tag: 6.6.0
         ingress:
           enabled: true
           ingressClassName: nginx

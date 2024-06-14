@@ -18,16 +18,32 @@ spec:
         {{- include "anvil.labels" . | nindent 8 }}
         service: {{ $name }}
     spec:
-      {{- if .Values.enablePersistence }}
       initContainers:
         - name: init
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
-          command: ["sh", "-c", "cp -R /app/data/* /tmp/ || true"]
+          command: ["/bin/sh"]
+          environment:
+            - name: ENV_SELECTOR
+              value: {{ .Values.envSelector }}
+          args:
+            - -c
+            - |
+              # Start anvil to dump the state
+              anvil --dump-state {{ .Values.dataMountPath }}/anvil-state.json &
+
+              # Deploy all contracts
+              forge script script/MultiStage.s.sol \
+                --rpc-url http://localhost:8545 \
+                --private-key {{ .Values.privateKey }} \
+                --broadcact -v
+
+              # Stop anvil
+              pkill anvil
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - mountPath: /tmp
+            - mountPath: {{ .Values.dataMountPath }}
               name: data
       {{- end }}
       containers:
