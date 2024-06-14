@@ -37,7 +37,7 @@ type QuorumNum = u8;
 #[derive(Clone)]
 pub struct CustomOperatorAvsState {
     pub operator_id: [u8; 32],
-    pub stake_per_quorum: HashMap<QuorumNum, U256>,
+    pub stake_per_quorum: HashMap<QuorumNum, u128>,
 }
 
 #[derive(Debug, Serialize)]
@@ -316,8 +316,8 @@ impl Operator {
         old_operators_avs_state.sort_by_key(|v| v.operator_id);
         new_operators_avs_state.sort_by_key(|v| v.operator_id);
 
-        let maybe_i = old_operators_avs_state.iter().peekable();
-        let maybe_j = new_operators_avs_state.iter().peekable();
+        let mut maybe_i = old_operators_avs_state.iter().peekable();
+        let mut maybe_j = new_operators_avs_state.iter().peekable();
 
         let mut operators_removed: Vec<[u8; 32]> = Vec::new();
         let mut operators_added: Vec<OperatorsAdded> = Vec::new(); // Needs to be sorted
@@ -326,35 +326,35 @@ impl Operator {
 
         loop {
             match (maybe_i.peek(), maybe_j.peek()){
-                (Some(&&i), Some(&&j)) if i.operator_id == j.operator_id => {
+                (Some(&&ref i), Some(&&ref j)) if i.operator_id == j.operator_id => {
                     // handle potential update
 
                     if i.stake_per_quorum.len() != j.stake_per_quorum.len(){
                         operators_quorum_count_update.push(OperatorsQuorumCountUpdate{
                             operator_id: j.operator_id,
-                            quorum_count: j.stake_per_quorum.len().try_into().map_err(|e| Err("Only uint quorums").into())?,
+                            quorum_count: j.stake_per_quorum.len().try_into()?,
                         });
                     }
-                    let operator_stake_update = OperatorsStakeUpdate{
+                    let mut operator_stake_update = OperatorsStakeUpdate{
                         operator_id: j.operator_id,
                         quorum_for_stakes: Default::default(),
                         quorum_stakes: Default::default(),
                     };
-                    for qn in quorums_removed {
-                        operator_stake_update.quorum_for_stakes.push(qn);
+                    for qn in quorums_removed.iter() {
+                        operator_stake_update.quorum_for_stakes.push(*qn);
                         operator_stake_update.quorum_stakes.push(Default::default());
                     }
                     for qn in quorums_added.iter().map(|x| x.quorum_number) {
                         operator_stake_update.quorum_for_stakes.push(qn);
-                        let stake = j.stake_per_quorum.get(&qn).unwrap_or_else(|| {error!("Failed to get operator quorum stake"); &Default::default()});
-                        operator_stake_update.quorum_stakes.push(stake.try_into().map_err(|e| Err("Only uint96 stakes").into())?)
+                        let stake = j.stake_per_quorum.get(&qn).map(u128::to_owned).unwrap_or_else(|| {error!("Failed to get operator quorum stake"); Default::default()});
+                        operator_stake_update.quorum_stakes.push(stake)
                     }
-                    for qn in quorums_common{
-                        let stake_old = i.stake_per_quorum.get(&qn).unwrap_or_else(|| {error!("Failed to get operator quorum stake"); &Default::default()});
-                        let stake_new = j.stake_per_quorum.get(&qn).unwrap_or_else(|| {error!("Failed to get operator quorum stake"); &Default::default()});
+                    for qn in quorums_common.iter(){
+                        let stake_old = i.stake_per_quorum.get(&qn).map(u128::to_owned).unwrap_or_else(|| {error!("Failed to get operator quorum stake"); Default::default()});
+                        let stake_new = j.stake_per_quorum.get(&qn).map(u128::to_owned).unwrap_or_else(|| {error!("Failed to get operator quorum stake"); Default::default()});
                         if stake_old != stake_new {
-                            operator_stake_update.quorum_for_stakes.push(qn);
-                            operator_stake_update.quorum_stakes.push(stake_new.try_into().map_err(|e| Err("Only uint96 stakes").into())?)
+                            operator_stake_update.quorum_for_stakes.push(*qn);
+                            operator_stake_update.quorum_stakes.push(stake_new)
                         }
                     }
                     if !operator_stake_update.quorum_for_stakes.is_empty(){
@@ -362,55 +362,60 @@ impl Operator {
 
                     maybe_i.next(); maybe_j.next();
                 },
-                (Some(&&i), Some(&&j)) if i.operator_id < j.operator_id => {
+                (Some(&&ref i), Some(&&ref j)) if i.operator_id < j.operator_id => {
                     // handle operator removed
                     operators_removed.push(i.operator_id);
                     maybe_i.next();
                 },
-                (Some(&&i), Some(&&j)) if i.operator_id > j.operator_id => {
+                (Some(&&ref i), Some(&&ref j)) if i.operator_id > j.operator_id => {
                     // handle quorum number added
 
-                    let operator_added = OperatorsAdded{
+                    let mut operator_added = OperatorsAdded{
                         operator_id: j.operator_id,
                         quorum_for_stakes: Default::default(),
                         quorum_stakes: Default::default(),
-                        quorum_count: j.stake_per_quorum.len().try_into().map_err(|e| Err("Only uint quorums").into())?,
+                        quorum_count: j.stake_per_quorum.len().try_into()?,
                     };
 
                     for qn in j.stake_per_quorum.keys(){
                         operator_added.quorum_for_stakes.push(*qn);
-                        let stake = j.stake_per_quorum.get(qn).unwrap_or_else(|| {error!("Failed to get operator quorum stake"); &Default::default()});
-                        operator_added.quorum_stakes.push(stake.try_into().map_err(|e| Err("Only uint96 stakes").into())?)
+                        let stake = j.stake_per_quorum.get(qn).map(u128::to_owned).unwrap_or_else(|| {error!("Failed to get operator quorum stake"); Default::default()});
+                        operator_added.quorum_stakes.push(stake)
                     }
 
                     operators_added.push(operator_added);
 
                     maybe_j.next();
                 },
-                (Some(&&i), None) => {
+                (Some(&&ref i), None) => {
                     // handle quorum number removed
                     operators_removed.push(i.operator_id);
                     maybe_i.next();
                 },
-                (None, Some(&&j)) => {
+                (None, Some(&&ref j)) => {
                     // handle operator added
                     
-                    let operator_added = OperatorsAdded{
+                    let mut operator_added = OperatorsAdded{
                         operator_id: j.operator_id,
                         quorum_for_stakes: Default::default(),
                         quorum_stakes: Default::default(),
-                        quorum_count: j.stake_per_quorum.len().try_into().map_err(|e| Err("Only uint quorums").into())?,
+                        quorum_count: j.stake_per_quorum.len().try_into()?,
                     };
 
                     for qn in j.stake_per_quorum.keys(){
                         operator_added.quorum_for_stakes.push(*qn);
-                        let stake = j.stake_per_quorum.get(qn).unwrap_or_else(|| {error!("Failed to get operator quorum stake"); &Default::default()});
-                        operator_added.quorum_stakes.push(stake.try_into().map_err(|e| Err("Only uint96 stakes").into())?)
+                        let stake = j.stake_per_quorum.get(qn).map(u128::to_owned).unwrap_or_else(|| {error!("Failed to get operator quorum stake"); Default::default()});
+                        operator_added.quorum_stakes.push(stake)
                     }
 
                     operators_added.push(operator_added);
                     maybe_j.next();
                 },
+                (None, None) => {
+                    // handle quorum number added
+                    break;
+                },
+                _ => unreachable!()
             }
 
         }
@@ -493,7 +498,7 @@ impl Operator {
                     });
                 avs_state
                     .stake_per_quorum
-                    .insert(*quorum_num, U256::from(operator.stake));
+                    .insert(*quorum_num, u128::from(operator.stake));
             }
         }
 
