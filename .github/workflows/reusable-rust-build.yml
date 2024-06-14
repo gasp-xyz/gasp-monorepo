@@ -4,7 +4,8 @@ on:
       rust-version:
         type: string
         required: false
-        default: stable
+        default: 1.78.0
+
       version:
         description: Version to be assigned to the built image
         required: true

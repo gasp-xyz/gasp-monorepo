@@ -33,7 +33,6 @@ jobs:
     secrets: inherit
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      rust-version: 1.78.0
 
   deploy-frontend-env:
     name: Deploy `frontend` environment
