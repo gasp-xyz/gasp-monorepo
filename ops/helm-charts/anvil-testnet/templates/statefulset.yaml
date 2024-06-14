@@ -31,7 +31,10 @@ spec:
               set -ex
               if [ ! -f {{ .Values.dataMountPath }}/anvil-state.json ]; then
                 # Start anvil to dump the state
-                anvil --state {{ .Values.dataMountPath }}/anvil-state.json &
+                anvil --dump-state {{ .Values.dataMountPath }}/anvil-state.json &
+
+                # anvil needs some time to spin up or it will fail to dump the state correctly for arbitrum
+                sleep 5
 
                 # Deploy all contracts
                 forge script script/MultiStage.s.sol \
@@ -41,42 +44,40 @@ spec:
 
                 # Stop anvil
                 pkill anvil
+              else
+                echo "State file already exists, skipping init"
               fi
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
-          {{- if .Values.enablePersistence }}
           volumeMounts:
             - mountPath: {{ .Values.dataMountPath }}
               name: data
-          {{- end }}
       containers:
         - name: anvil
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
-          command:
-            - anvil
-            - --host
-            - 0.0.0.0
-            - --state
-            - "{{ .Values.dataMountPath }}/anvil-state.json"
+          command: {{ toYaml .Values.command | nindent 12 }}
           ports:
             - containerPort: 8545
               name: rpc
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
-          {{- if .Values.enablePersistence }}
           volumeMounts:
             - mountPath: {{ .Values.dataMountPath }}
               name: data
-          {{- end }}
+      {{- if not .Values.enablePersistence }}
+      volumes:
+        - name: data
+          emptyDir: {}
+      {{- end }}
   {{- if .Values.enablePersistence }}
   volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        storageClassName: {{ .Values.storageClass }}
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: {{ .Values.storageSize }}
+  - metadata:
+      name: data
+    spec:
+      storageClassName: {{ .Values.storageClass }}
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.storageSize }}
   {{- end }}

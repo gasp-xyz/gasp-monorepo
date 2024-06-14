@@ -39,6 +39,7 @@ releases:
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         nameOverride: 'anvil-eth'
         envSelector: ethereum-stub
+        enablePersistence: true
   
   - name: anvil-arb
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
@@ -52,6 +53,7 @@ releases:
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         nameOverride: 'anvil-arb'
         envSelector: arbitrum-stub
+        enablePersistence: true
 
   - name: avs-aggregator
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
