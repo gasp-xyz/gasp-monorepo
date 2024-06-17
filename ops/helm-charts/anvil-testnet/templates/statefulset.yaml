@@ -43,6 +43,7 @@ spec:
 
               # Stop anvil
               pkill anvil
+              sleep 5
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
