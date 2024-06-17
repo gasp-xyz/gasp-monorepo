@@ -29,24 +29,20 @@ spec:
             - -c
             - |
               set -ex
-              if [ ! -f {{ .Values.dataMountPath }}/anvil-state.json ]; then
-                # Start anvil to dump the state
-                anvil --dump-state {{ .Values.dataMountPath }}/anvil-state.json &
+              # Start anvil to dump the state
+              anvil --dump-state {{ .Values.dataMountPath }}/anvil-state.json &
 
-                # anvil needs some time to spin up or it will fail to dump the state correctly for arbitrum
-                sleep 5
+              # anvil needs some time to spin up or it will fail to dump the state correctly for arbitrum
+              sleep 5
 
-                # Deploy all contracts
-                forge script script/MultiStage.s.sol \
-                  --rpc-url http://localhost:8545 \
-                  --private-key {{ .Values.privateKey }} \
-                  --broadcast -v
+              # Deploy all contracts
+              forge script script/MultiStage.s.sol \
+                --rpc-url http://localhost:8545 \
+                --private-key {{ .Values.privateKey }} \
+                --broadcast -v
 
-                # Stop anvil
-                pkill anvil
-              else
-                echo "State file already exists, skipping init"
-              fi
+              # Stop anvil
+              pkill anvil
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
