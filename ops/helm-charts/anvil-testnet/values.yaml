@@ -18,6 +18,7 @@ command:
   - /data/anvil-state.json
   - --state-interval
   - '1'
+  - --steps-tracing
 
 enablePersistence: false
 storageClass: standard
