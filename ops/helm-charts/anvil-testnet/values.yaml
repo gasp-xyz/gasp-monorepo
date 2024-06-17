@@ -16,6 +16,8 @@ command:
   - '0.0.0.0'
   - --state
   - /data/anvil-state.json
+  - --state-interval
+  - '1'
 
 enablePersistence: false
 storageClass: standard
