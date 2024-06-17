@@ -30,7 +30,7 @@ spec:
             - |
               set -ex
               # Start anvil to dump the state
-              anvil --dump-state {{ .Values.dataMountPath }}/anvil-state.json &
+              anvil --state {{ .Values.dataMountPath }}/anvil-state.json &
 
               # anvil needs some time to spin up or it will fail to dump the state correctly for arbitrum
               sleep 5
