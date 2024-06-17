@@ -40,6 +40,7 @@ updaterEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
   EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
   MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
+  FINALIZATION_SOURCE: "relay"
 
 
 # rollup-sequencer configs
