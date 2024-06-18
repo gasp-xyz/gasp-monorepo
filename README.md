@@ -6,7 +6,7 @@ PoC Mangata AVS implementation
 
 ## Dependencies
 
-You will need [foundry](https://book.getfoundry.sh/getting-started/installation) to run local testnet. You will need Rust toolchain to build avs-finalizer binary. And [golang toolchain](https://go.dev/doc/install) with [zap-pretty](https://github.com/maoueh/zap-pretty) to run the aggregator.
+You will need [foundry](https://book.getfoundry.sh/getting-started/installation) to run local testnet env. You will need Rust toolchain to build avs-finalizer binary. And [golang toolchain](https://go.dev/doc/install) with [zap-pretty](https://github.com/maoueh/zap-pretty) to run the aggregator.
 ```
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
