@@ -5,7 +5,7 @@ import {
 import fetch from 'cross-fetch'
 import { Decimal } from 'decimal.js'
 
-const coinGeckoApi = 'https://api.coingecko.com/api/v3'
+const coinGeckoApi = 'https://pro-api.coingecko.com/api/v3'
 
 export const getCoinInfo = async (
   tokenId: string
