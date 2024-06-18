@@ -9,6 +9,7 @@ services:
       node-alice:
         condition: service_started
     environment:
+      CHAIN: "reth"
       L1_CHAIN: "Ethereum"
       MANGATA_NODE_URL: ${ROLLUP_UPDATER_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}
       ETH_CHAIN_URL: ${ROLLUP_UPDATER_ETH_CHAIN_URL:-wss://ethereum.publicnode.com}
@@ -29,6 +30,7 @@ services:
       node-alice:
         condition: service_started
     environment:
+      CHAIN: "reth"
       L1_CHAIN: "Arbitrum"
       MANGATA_NODE_URL: ${ROLLUP_UPDATER_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}
       ETH_CHAIN_URL: ${ROLLUP_UPDATER_ARB_CHAIN_URL:-wss://ethereum.publicnode.com}

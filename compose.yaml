@@ -9,12 +9,16 @@ include:
 
 services:
   eth-stub:
-    image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
+    # image: reth:local-31337
+    image: mangatasolutions/reth:mat-local
+    # image: ghcr.io/paradigmxyz/reth:v1.0.0-rc.1
     platform: linux/amd64
     ports:
       - 8545:8545
-    entrypoint: anvil
-    command: --host 0.0.0.0 --disable-block-gas-limit  --balance 1000000000000000000
+    # entrypoint: anvil
+    command: node --chain=dev  --datadir=/tmp/data --http --http.addr=0.0.0.0 --http.port=8545 --ws --ws.addr=0.0.0.0 --ws.port=8545 --auto-mine
+
+    # --host 0.0.0.0 --disable-block-gas-limit  --balance 1000000000000000000
     healthcheck:
       test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
       interval: 2s
@@ -22,22 +26,25 @@ services:
       retries: 3
 
   arbitrum-stub:
-    image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
+    # image: reth:local-31337
+    # image: reth:local
+    image: mangatasolutions/reth:mat-local
+    # image: ghcr.io/paradigmxyz/reth:v1.0.0-rc.1
     platform: linux/amd64
     ports:
       - 8546:8546
-    entrypoint: anvil
-    command: --host 0.0.0.0 --disable-block-gas-limit  --balance 1000000000000000000 --port 8546
+    # entrypoint: anvil
+    command: node --chain=dev  --datadir=/tmp/data --http --http.addr=0.0.0.0 --http.port=8546 --ws --ws.addr=0.0.0.0 --ws.port=8546 --auto-mine
     healthcheck:
       test: ["CMD", "nc", "-vz", "127.0.0.1", "8546"]
       interval: 2s
       timeout: 10s
       retries: 3
-  
+
   node-alice:
     image: mangatasolutions/rollup-node:${MANGATA_NODE_VERSION:-eth-rollup-develop}
     platform: linux/amd64
-    command: 
+    command:
       - --alith
       - --chain=rollup-local-seq
       - --base-path=/data
@@ -47,11 +54,11 @@ services:
     ports:
       - 9944:9944
       - 30333:30333
-  
+
   node-bob:
     image: mangatasolutions/rollup-node:${MANGATA_NODE_VERSION:-eth-rollup-develop}
     platform: linux/amd64
-    command: 
+    command:
       - --baltathar
       - --chain=rollup-local-seq
       - --base-path=/data
