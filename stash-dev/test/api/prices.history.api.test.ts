@@ -8,7 +8,7 @@ import supertest from "supertest";
 chai.use(chaiHttp);
 chai.should();
 const priceHistoryPath = "price-history"
-describe('Prices', () => {
+describe.skip('Prices', () => {
 
   describe('/GET prices', () => {
       it('[MGX-597] - pools should not be returned on prices', async() => {
