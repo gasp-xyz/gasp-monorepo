@@ -147,9 +147,9 @@ releases:
       - config:
           MIX_ENV: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
           ETHEREUM_JSONRPC_VARIANT: 'geth'
-          ETHEREUM_JSONRPC_HTTP_URL: http://evm-node:8545
-          ETHEREUM_JSONRPC_WS_URL: ws://evm-node:8545
-          ETHEREUM_JSONRPC_TRACE_URL: http://evm-node:8545
+          ETHEREUM_JSONRPC_HTTP_URL: http://evm-node-eth:8545
+          ETHEREUM_JSONRPC_WS_URL: ws://evm-node-eth:8545
+          ETHEREUM_JSONRPC_TRACE_URL: http://evm-node-eth:8545
         image:
           tag: 6.6.0
         ingress:
