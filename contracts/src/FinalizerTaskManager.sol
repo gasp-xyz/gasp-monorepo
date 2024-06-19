@@ -69,13 +69,13 @@ contract FinalizerTaskManager is
 
     /* MODIFIERS */
     modifier onlyAggregator() {
-        require(msg.sender == aggregator, "Aggregator must be the caller");
+        require(msg.sender == aggregator, "Auth0");
         _;
     }
 
     // onlyTaskGenerator is used to restrict createNewTask from only being called by a permissioned entity
     modifier onlyTaskGenerator() {
-        require(msg.sender == generator, "Task generator must be the caller");
+        require(msg.sender == generator, "Auth1");
         _;
     }
 
