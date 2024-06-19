@@ -7,21 +7,21 @@ https://www.replex.io/blog/9-best-practices-and-examples-for-working-with-kubern
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "anvil.name" -}}
+{{- define "app.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "anvil.labels" -}}
-{{ include "anvil.selectorLabels" . }}
+{{- define "app.labels" -}}
+{{ include "app.selectorLabels" . }}
 heritage: {{ .Release.Service }}
 {{- end }}
 
 {{/*
 Selector labels
 */}}
-{{- define "anvil.selectorLabels" -}}
-application: {{ include "anvil.name" . }}
+{{- define "app.selectorLabels" -}}
+application: {{ include "app.name" . }}
 {{- end }}

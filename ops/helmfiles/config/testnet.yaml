@@ -1,6 +1,6 @@
 remoteCluster: true
 
-anvilEnabled: false
+evmNodeEnabled: false
 aggregatorEnabled: true
 finalizerEnabled: true
 secondFinalizerEnabled: false

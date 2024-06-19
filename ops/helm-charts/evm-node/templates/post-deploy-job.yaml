@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "app.name" . }}-post-deploy
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: init
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
+          command: ["/bin/sh"]
+          args:
+            - -c
+            - |
+              set -ex
+              # Deploy all contracts
+              forge script script/MultiStage.s.sol \
+                --rpc-url http://{{ include "app.name" . }}:8545 \
+                --private-key {{ .Values.privateKey }} \
+                --broadcast -v
+          env:
+            - name: ENV_SELECTOR
+              value: {{ .Values.envSelector }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      restartPolicy: Never
+  backoffLimit: 4

@@ -27,31 +27,31 @@ helmDefaults:
   wait: false
 
 releases:
-  - name: anvil-eth
+  - name: evm-node-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.anvilEnabled }}
-    chart: ../helm-charts/anvil-testnet
+    installed: {{ .Values.evmNodeEnabled }}
+    chart: ../helm-charts/evm-node
     values:
       - image:
           repository: mangatasolutions/anvil
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        nameOverride: 'anvil-eth'
+        nameOverride: 'evm-node-eth'
         envSelector: ethereum-stub
         enablePersistence: true
   
-  - name: anvil-arb
+  - name: evm-node-arb
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.anvilEnabled }}
-    chart: ../helm-charts/anvil-testnet
+    chart: ../helm-charts/evm-node
     values:
       - image:
           repository: mangatasolutions/anvil
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        nameOverride: 'anvil-arb'
+        nameOverride: 'evm-node-arb'
         envSelector: arbitrum-stub
         enablePersistence: true
 
@@ -147,9 +147,9 @@ releases:
       - config:
           MIX_ENV: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
           ETHEREUM_JSONRPC_VARIANT: 'geth'
-          ETHEREUM_JSONRPC_HTTP_URL: http://anvil:8545
-          ETHEREUM_JSONRPC_WS_URL: ws://anvil:8545
-          ETHEREUM_JSONRPC_TRACE_URL: http://anvil:8545
+          ETHEREUM_JSONRPC_HTTP_URL: http://evm-node:8545
+          ETHEREUM_JSONRPC_WS_URL: ws://evm-node:8545
+          ETHEREUM_JSONRPC_TRACE_URL: http://evm-node:8545
         image:
           tag: 6.6.0
         ingress:

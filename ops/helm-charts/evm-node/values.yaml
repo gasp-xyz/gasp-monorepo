@@ -1,4 +1,4 @@
-# Default values for anvil.
+# Default values for app.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 environment: local
@@ -10,19 +10,25 @@ remoteCluster: false
 ingressClassName: nginx
 
 dataMountPath: /data
+
+evmNodeImage: 'ghcr.io/paradigmxyz/reth:v1.0.0-rc.1'
 command:
-  - anvil
-  - --host
-  - '0.0.0.0'
-  - --state
-  - /data/anvil-state.json
-  - --state-interval
-  - '1'
-  - --steps-tracing
+  - node
+  - --datadir=/data
+  - --http
+  - --http.addr=0.0.0.0
+  - --http.port=8545
+  - --http.api=all
+  - --http.corsdomain=*
+  - --ws
+  - --ws.addr=0.0.0.0
+  - --ws.port=8546
+  - --ws.api=all
+  - --ws.origins=*
 
 enablePersistence: false
 storageClass: standard
-storageSize: 1Gi
+storageSize: 5Gi
 
 image: 
   repository: mangatasolutions/anvil
