@@ -63,7 +63,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-rollup-clippy-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -121,7 +121,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: cargo-rollup-tests-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-rollup-tests-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -163,7 +163,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: cargo-rollup-compile-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-rollup-compile-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
