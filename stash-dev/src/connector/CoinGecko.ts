@@ -13,11 +13,13 @@ export const getCoinInfo = async (
   if (tokenId == null || tokenId.length <= 0)
     throw new BadRequestException('Missing token ID information.')
 
-  const coinDataResponse = await fetch(coinGeckoApi + '/coins/' + tokenId, {
+  const url = new URL(coinGeckoApi + '/coins/' + tokenId)
+  url.searchParams.append('x_cg_pro_api_key', process.env.COINGECKO_API_KEY!)
+
+  const coinDataResponse = await fetch(url, {
     method: 'get',
     headers: {
       Accept: 'application/json',
-      'x-cg-demo-api-key': process.env.COINGECKO_API_KEY!,
     },
   })
 
@@ -39,16 +41,20 @@ export const getCoinHistory = async (
   if (tokenId == null || tokenId.length <= 0)
     throw new BadRequestException('Missing token ID information.')
 
-  const coinDataResponse = await fetch(
-    `${coinGeckoApi}/coins/${tokenId}/market_chart?vs_currency=${currency}&days=${days}&interval=daily`,
-    {
-      method: 'get',
-      headers: {
-        Accept: 'application/json',
-        'x-cg-demo-api-key': process.env.COINGECKO_API_KEY!,
-      },
-    }
-  )
+  const url = new URL(`${coinGeckoApi}/coins/${tokenId}/market_chart`)
+  url.searchParams.append('vs_currency', currency)
+  url.searchParams.append('days', days.toString())
+  url.searchParams.append('interval', 'daily')
+  url.searchParams.append('x_cg_pro_api_key', process.env.COINGECKO_API_KEY!)
+
+  const headers = {
+    Accept: 'application/json',
+  }
+
+  const coinDataResponse = await fetch(url.toString(), {
+    method: 'get',
+    headers: headers,
+  })
 
   if (coinDataResponse.status !== HttpStatus.OK)
     throw new HttpResponseException(
