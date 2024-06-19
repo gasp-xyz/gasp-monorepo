@@ -21,6 +21,8 @@ environments:
 repositories:
   - name: ethereum-helm-charts
     url: https://ethpandaops.github.io/ethereum-helm-charts
+  - name: mangata-node
+    url: git+https://github.com/mangata-finance/helm-charts@charts?ref=node-v2.3.0
     
 helmDefaults:
   kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
@@ -288,3 +290,41 @@ releases:
               secretName: blockscout-arb-tls
           smart-contract-verifier-http:
             enabled: true
+
+  - name: collator-01
+    installed: {{ .Values.collatorsEnabled }}
+    chart: mangata-node/node
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    values:
+      - collator-values.yaml.gotmpl
+      - # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+        customNodeKey: '5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef'
+        image:
+          tag: eth-rollup-develop
+        bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+        environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+        extraArgs:
+          - --alith
+          - --no-mdns
+          - --reserved-only
+          - --reserved-nodes=/dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+          - --pruning=archive
+  
+  - name: collator-02
+    installed: {{ .Values.collatorsEnabled }}
+    chart: mangata-node/node
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    values:
+      - collator-values.yaml.gotmpl
+      - # Identity ID: 12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+        customNodeKey: 'bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b'
+        image:
+          tag: eth-rollup-develop
+        bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+        environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+        extraArgs:
+          - --baltathar
+          - --no-mdns
+          - --reserved-only
+          - --reserved-nodes=/dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+          - --pruning=archive
