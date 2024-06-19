@@ -14,6 +14,7 @@ dataMountPath: /data
 evmNodeImage: 'ghcr.io/paradigmxyz/reth:v1.0.0-rc.1'
 command:
   - node
+  - --auto-mine
   - --datadir=/data
   - --http
   - --http.addr=0.0.0.0
