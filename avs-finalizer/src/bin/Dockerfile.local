@@ -12,7 +12,7 @@ RUN set -eux && \
 		# apt clean up
 		apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ARG RUST_TOOLCHAIN=stable
+ARG RUST_TOOLCHAIN=1.78
 RUN rustup install $RUST_TOOLCHAIN && rustup default $RUST_TOOLCHAIN && \
 	rustup target add wasm32-unknown-unknown && \
 	rustup component add rust-src rustfmt clippy && \
