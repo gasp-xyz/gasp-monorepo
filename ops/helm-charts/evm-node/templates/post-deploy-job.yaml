@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "contracts-{{ .Values.image.tag | trunc 7 }}-{{ include "app.name" . }}"
+  name: "contracts-{{ .Values.envSelector }}-{{ .Values.image.tag | trunc 7 }}"
   labels:
     {{- include "app.labels" . | nindent 4 }}
   annotations:
