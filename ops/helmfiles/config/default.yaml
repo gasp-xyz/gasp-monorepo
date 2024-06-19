@@ -9,13 +9,13 @@ updaterEnabled: true
 sequencerEnabled: true
 secondSequencerEnabled: false
 
-env:
+envEth:
   # rpc
   ETH_RPC_URL: http://evm-node-eth:8545
   ETH_WS_URL: ws://evm-node-eth:8545
   SUBSTRATE_RPC_URL: wss://kusama-archive.mangata.online:443
   # contracts
-  CHAIN_ID: '31337'
+  CHAIN_ID: '1337'
   AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
   # AVS
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
@@ -27,6 +27,24 @@ env:
   ECDSA_EPHEMERAL_KEY: 'true'
   BLS_EPHEMERAL_KEY: 'true'
 
+envArb:
+  # rpc
+  ETH_RPC_URL: http://evm-node-arb:8545
+  ETH_WS_URL: ws://evm-node-arb:8545
+  SUBSTRATE_RPC_URL: wss://kusama-archive.mangata.online:443
+  # contracts
+  CHAIN_ID: '1337'
+  AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
+  # AVS
+  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
+  AVS_BLOCK_VALIDATION_PERIOD: '5'
+  # OP
+  RUST_LOG: info
+  AVS_RPC_URL: http://avs-aggregator-eth:8090
+  TESTNET: 'true'
+  ECDSA_EPHEMERAL_KEY: 'true'
+  BLS_EPHEMERAL_KEY: 'true'
+
 # tests/keys/aggregator.ecdsa.key.json
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: '{"address":"a0ee7a142d267c1f36714e4a8f75612f20a79720","crypto":{"cipher":"aes-128-ctr","ciphertext":"b0f6f8e3ba33f0b382b080de6661d827181de480f1a4f94bc20d66cb3d585907","cipherparams":{"iv":"4e3f9a8ca6ef8d1cd408e8aaae3c22d2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"c8f9f8cc03913e09cee7e1fd68732fac327576203ab277d740270f1dea82ee7e"},"mac":"353d65850b20d5fdb90ca2385c52e5b57662cb1d906fd58143f20a7720723cf6"},"id":"d3036cc7-d068-4f2f-9667-60aaca660e61","version":3}'
@@ -34,9 +52,9 @@ aggregatorEnvSecrets:
 finalizerEnableServiceMonitorCollectors: false
 finalizerEnvSecrets:
 
-# rollup-updater configs
-updaterEthChainUrl: ws://evm-node-eth:8545
-updaterEnv:
+# rollup-updater-eth configs
+updaterChainUrlEth: ws://evm-node-eth:8545
+updaterEnvEth:
   CHAIN: 'reth'
   MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
   EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
@@ -44,10 +62,28 @@ updaterEnv:
   FINALIZATION_SOURCE: "relay"
 
 
-# rollup-sequencer configs
-firstSequencerMnemonic: '0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133'
-secondSequencerMnemonic: 'bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob'
-sequencerEthChainUrl: ws://evm-node-eth:8545
-sequencerEnv:
+# rollup-sequencer-eth configs
+firstSequencerMnemonicEth: '0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133'
+secondSequencerMnemonicEth: 'bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob'
+sequencerChainUrlEth: ws://evm-node-eth:8545
+sequencerEnvEth:
+  MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
+  MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
+
+# rollup-updater-arb configs
+updaterChainUrlArb: ws://evm-node-arb:8545
+updaterEnvArb:
+  CHAIN: 'reth'
+  MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
+  EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
+  MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
+  FINALIZATION_SOURCE: "relay"
+
+
+# rollup-sequencer-arb configs
+firstSequencerMnemonicArb: '0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133'
+secondSequencerMnemonicArb: 'bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob'
+sequencerChainUrlArb: ws://evm-node-arb:8545
+sequencerEnvArb:
   MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
   MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"

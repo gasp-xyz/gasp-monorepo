@@ -55,7 +55,7 @@ releases:
         envSelector: arbitrum-stub
         enablePersistence: true
 
-  - name: avs-aggregator
+  - name: avs-aggregator-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.aggregatorEnabled }}
     chart: ../helm-charts/rollup-node
@@ -66,9 +66,22 @@ releases:
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.env | toYaml | nindent 10 }}
+        env: {{ .Values.envEth | toYaml | nindent 10 }}
+  
+  - name: avs-aggregator-arb
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.aggregatorEnabled }}
+    chart: ../helm-charts/rollup-node
+    values:
+      - image:
+          repository: mangatasolutions/avs-aggregator
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        remoteCluster: {{ .Values.remoteCluster }}
+        envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        env: {{ .Values.envArb | toYaml | nindent 10 }}
 
-  - name: avs-finalizer
+  - name: avs-finalizer-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.finalizerEnabled }}
     chart: ../helm-charts/rollup-node
@@ -83,8 +96,26 @@ releases:
         prometheus:
           enabled: true
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.env | toYaml | nindent 10 }}
-  - name: avs-finalizer-2
+        env: {{ .Values.envEth | toYaml | nindent 10 }}
+  
+  - name: avs-finalizer-arb
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.finalizerEnabled }}
+    chart: ../helm-charts/rollup-node
+    values:
+      - image:
+          repository: mangatasolutions/avs-finalizer
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        remoteCluster: {{ .Values.remoteCluster }}
+        rpcPort: 9010
+        enableServiceMonitorCollectors: {{ .Values.finalizerEnableServiceMonitorCollectors }}
+        prometheus:
+          enabled: true
+        envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        env: {{ .Values.envArb | toYaml | nindent 10 }}
+  
+  - name: avs-finalizer-eth-2
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.secondFinalizerEnabled }}
     chart: ../helm-charts/rollup-node
@@ -99,9 +130,26 @@ releases:
         prometheus:
           enabled: true
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.env | toYaml | nindent 10 }}
+        env: {{ .Values.envEth | toYaml | nindent 10 }}
+  
+  - name: avs-finalizer-arb-2
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.secondFinalizerEnabled }}
+    chart: ../helm-charts/rollup-node
+    values:
+      - image:
+          repository: mangatasolutions/avs-finalizer
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        remoteCluster: {{ .Values.remoteCluster }}
+        rpcPort: 9010
+        enableServiceMonitorCollectors: {{ .Values.finalizerEnableServiceMonitorCollectors }}
+        prometheus:
+          enabled: true
+        envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        env: {{ .Values.envArb | toYaml | nindent 10 }}
 
-  - name: rollup-updater
+  - name: rollup-updater-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.updaterEnabled }}
     chart: ../helm-charts/rollup-updater
@@ -111,10 +159,23 @@ releases:
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
-        ethChainUrl: {{ .Values.updaterEthChainUrl | fetchSecretValue | quote }}
-        env: {{ .Values.updaterEnv | toYaml | nindent 10 }}
+        ethChainUrl: {{ .Values.updaterChainUrlEth | fetchSecretValue | quote }}
+        env: {{ .Values.updaterEnvEth | toYaml | nindent 10 }}
   
-  - name: rollup-sequencer
+  - name: rollup-updater-arb
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.updaterEnabled }}
+    chart: ../helm-charts/rollup-updater
+    values:
+      - image:
+          repository: mangatasolutions/rollup-updater
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
+        ethChainUrl: {{ .Values.updaterChainUrlArb | fetchSecretValue | quote }}
+        env: {{ .Values.updaterEnvArb | toYaml | nindent 10 }}
+  
+  - name: rollup-sequencer-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.sequencerEnabled }}
     chart: ../helm-charts/rollup-sequencer
@@ -123,10 +184,24 @@ releases:
           repository: mangatasolutions/rollup-sequencer
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        mnemonic: {{ .Values.firstSequencerMnemonic | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerEthChainUrl | fetchSecretValue | quote }}
-        env: {{ .Values.sequencerEnv | toYaml | nindent 10 }}
-  - name: rollup-sequencer-2
+        mnemonic: {{ .Values.firstSequencerMnemonicEth | fetchSecretValue | quote }}
+        ethChainUrl:  {{ .Values.sequencerChainUrlEth | fetchSecretValue | quote }}
+        env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
+
+  - name: rollup-sequencer-arb
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.sequencerEnabled }}
+    chart: ../helm-charts/rollup-sequencer
+    values:
+      - image:
+          repository: mangatasolutions/rollup-sequencer
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        mnemonic: {{ .Values.firstSequencerMnemonicArb | fetchSecretValue | quote }}
+        ethChainUrl:  {{ .Values.sequencerChainUrlArb | fetchSecretValue | quote }}
+        env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
+  
+  - name: rollup-sequencer-eth-2
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.secondSequencerEnabled }}
     chart: ../helm-charts/rollup-sequencer
@@ -135,17 +210,30 @@ releases:
           repository: mangatasolutions/rollup-sequencer
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        mnemonic: {{ .Values.secondSequencerMnemonic | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerEthChainUrl | fetchSecretValue | quote }}
-        env: {{ .Values.sequencerEnv | toYaml | nindent 10 }}
+        mnemonic: {{ .Values.secondSequencerMnemonicEth | fetchSecretValue | quote }}
+        ethChainUrl:  {{ .Values.sequencerChainUrlEth | fetchSecretValue | quote }}
+        env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
+  
+  - name: rollup-sequencer-arb-2
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.secondSequencerEnabled }}
+    chart: ../helm-charts/rollup-sequencer
+    values:
+      - image:
+          repository: mangatasolutions/rollup-sequencer
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        mnemonic: {{ .Values.secondSequencerMnemonicArb | fetchSecretValue | quote }}
+        ethChainUrl:  {{ .Values.sequencerChainUrlArb | fetchSecretValue | quote }}
+        env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
 
-  - name: blockscout
+  - name: blockscoout-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.blockscoutEnabled }}
     chart: ethereum-helm-charts/blockscout
     values:
       - config:
-          MIX_ENV: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+          MIX_ENV: 'rollup-{{ requiredEnv "ENVIRONMENT" }}-eth'
           ETHEREUM_JSONRPC_VARIANT: 'geth'
           ETHEREUM_JSONRPC_HTTP_URL: http://evm-node-eth:8545
           ETHEREUM_JSONRPC_WS_URL: ws://evm-node-eth:8545
@@ -156,16 +244,47 @@ releases:
           enabled: true
           ingressClassName: nginx
           annotations:
-            external-dns.alpha.kubernetes.io/hostname: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}.gasp.xyz
+            external-dns.alpha.kubernetes.io/hostname: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-eth.gasp.xyz
             kubernetes.io/ingress.class: nginx
             kubernetes.io/tls-acme: 'true'
           hosts:
-            - host: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}.gasp.xyz
+            - host: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-eth.gasp.xyz
               paths:
                 - pathType: Prefix
                   path: '/'
           tls:
-            - hosts: ['blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}.gasp.xyz']
-              secretName: blockscout-tls
+            - hosts: ['blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-eth.gasp.xyz']
+              secretName: blockscout-eth-tls
+          smart-contract-verifier-http:
+            enabled: true
+          
+  - name: blockscout-arb
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.blockscoutEnabled }}
+    chart: ethereum-helm-charts/blockscout
+    values:
+      - config:
+          MIX_ENV: 'rollup-{{ requiredEnv "ENVIRONMENT" }}-arb'
+          ETHEREUM_JSONRPC_VARIANT: 'geth'
+          ETHEREUM_JSONRPC_HTTP_URL: http://evm-node-arb:8545
+          ETHEREUM_JSONRPC_WS_URL: ws://evm-node-arb:8545
+          ETHEREUM_JSONRPC_TRACE_URL: http://evm-node-arb:8545
+        image:
+          tag: 6.6.0
+        ingress:
+          enabled: true
+          ingressClassName: nginx
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-arb.gasp.xyz
+            kubernetes.io/ingress.class: nginx
+            kubernetes.io/tls-acme: 'true'
+          hosts:
+            - host: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-arb.gasp.xyz
+              paths:
+                - pathType: Prefix
+                  path: '/'
+          tls:
+            - hosts: ['blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-arb.gasp.xyz']
+              secretName: blockscout-arb-tls
           smart-contract-verifier-http:
             enabled: true
