@@ -22,6 +22,7 @@ spec:
           image: "{{ .Values.evmNodeImage }}"
           imagePullPolicy: Always
           command: {{ toYaml .Values.command | nindent 12 }}
+          args: {{ toYaml .Values.args | nindent 12 }}
           ports:
             - containerPort: 8545
               name: rpc

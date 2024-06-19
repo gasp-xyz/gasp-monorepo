@@ -43,7 +43,7 @@ releases:
   
   - name: evm-node-arb
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.anvilEnabled }}
+    installed: {{ .Values.evmNodeEnabled }}
     chart: ../helm-charts/evm-node
     values:
       - image:
