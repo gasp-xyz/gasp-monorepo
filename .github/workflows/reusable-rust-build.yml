@@ -4,13 +4,14 @@ on:
       rust-version:
         type: string
         required: false
-        default: stable
+        default: 1.78.0
+
       version:
         description: Version to be assigned to the built image
         required: true
         type: string
       cache-version:
-        default: 0
+        default: 1
         description: Cache version variable to be used to invalidate cache when needed
         required: false
         type: number
@@ -34,7 +35,7 @@ jobs:
       - name: Check formatting
         working-directory: avs-finalizer
         run: cargo fmt --all -- --check
-  
+
   clippy-check:
     name: Clippy check
     runs-on: compile-eigen-gke
@@ -47,7 +48,7 @@ jobs:
           override: true
           components: rustfmt, clippy
       - uses: arduino/setup-protoc@v3
-      
+
       - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
@@ -63,7 +64,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
           key: cargo-rollup-clippy-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
-      
+
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         uses: mozilla-actions/sccache-action@v0.0.3
@@ -72,26 +73,26 @@ jobs:
         run: |
           echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-      
+
       - name: Run clippy check
         working-directory: avs-finalizer
         run: cargo clippy -- -D warnings
       # - name: Install cargo check tools
-        # run: |
-          # cargo install --locked cargo-deny || true
-          # cargo install --locked cargo-outdated || true
-          # cargo install --locked cargo-udeps || true
-          # cargo install --locked cargo-audit || true
-          # cargo install --locked cargo-pants || true
+      # run: |
+      # cargo install --locked cargo-deny || true
+      # cargo install --locked cargo-outdated || true
+      # cargo install --locked cargo-udeps || true
+      # cargo install --locked cargo-audit || true
+      # cargo install --locked cargo-pants || true
       # - name: Check
-        # working-directory: avs-finalizer
-        # run: |
-          # cargo deny check
-          # cargo outdated --exit-code 1
-          # cargo udeps
-          # rm -rf ~/.cargo/advisory-db
-          # cargo audit
-          # cargo pants
+      # working-directory: avs-finalizer
+      # run: |
+      # cargo deny check
+      # cargo outdated --exit-code 1
+      # cargo udeps
+      # rm -rf ~/.cargo/advisory-db
+      # cargo audit
+      # cargo pants
 
   tests:
     name: Run tests
@@ -105,7 +106,7 @@ jobs:
           override: true
           components: rustfmt, clippy
       - uses: arduino/setup-protoc@v3
-      
+
       - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
@@ -121,7 +122,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
           key: cargo-rollup-tests-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
-      
+
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         uses: mozilla-actions/sccache-action@v0.0.3
@@ -130,7 +131,7 @@ jobs:
         run: |
           echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-      
+
       - name: Run tests
         working-directory: avs-finalizer
         run: cargo test
@@ -147,7 +148,7 @@ jobs:
           override: true
           components: rustfmt, clippy
       - uses: arduino/setup-protoc@v3
-      
+
       - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
@@ -163,7 +164,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
           key: cargo-rollup-compile-cache-${{ inputs.cache_version }}-${{ hashFiles('**/Cargo.lock') }}
-      
+
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         uses: mozilla-actions/sccache-action@v0.0.3
@@ -172,14 +173,15 @@ jobs:
         run: |
           echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-      
+
       - name: Run cargo build
         working-directory: avs-finalizer
         run: cargo build --release
-      
+
       - name: Create Docker image
         working-directory: avs-finalizer
         run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
           docker buildx build --push --platform linux/amd64 -t mangatasolutions/avs-finalizer:${{ inputs.version }} -f src/bin/Dockerfile .
+
