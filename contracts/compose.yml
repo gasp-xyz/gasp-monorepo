@@ -12,9 +12,16 @@ services:
       - --private-key
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
+      # - --verify
+      # - --verifier
+      # - blockscout
+      # - --verifier-url
+      # - http://host.docker.internal/api
       - --sig
       - "run(string memory configFile)"
       - M2_deploy_from_scratch.anvil.config.json
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
 
   avs-2:
     image: mangatasolutions/avs-contract:local
@@ -30,7 +37,14 @@ services:
       - --private-key
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
+      # - --verify
+      # - --verifier
+      # - blockscout
+      # - --verifier-url
+      # - http://host.docker.internal/api
       - -v
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
 
   avs-3:
     image: mangatasolutions/avs-contract:local
@@ -46,4 +60,11 @@ services:
       - --private-key
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
+      # - --verify
+      # - --verifier
+      # - blockscout
+      # - --verifier-url
+      # - http://host.docker.internal/api
       - -v
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"

@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-
+	// "io"
+	// "strings"
+	// "github.com/ethereum/go-ethereum/accounts/abi"
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core"
 
@@ -47,11 +49,18 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// buf := new(strings.Builder)
+	// io.Copy(buf, req.Body)
+
+	// agg.logger.Info("handler", "req.Body", buf.String())
+
 	var response SignedTaskResponse
 	if err := json.NewDecoder(req.Body).Decode(&response); err != nil {
 		http.Error(w, "Error parsing request body", http.StatusBadRequest)
 		return
 	}
+
+	agg.logger.Info("handler", "response", response)
 
 	if err := agg.ProcessSignedTaskResponse(&response, nil); err != nil {
 		var status int
@@ -60,7 +69,8 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 			status = http.StatusInternalServerError
 		default:
 			switch err.Error() {
-			case blsagg.TaskNotFoundErrorFn(response.TaskResponse.ReferenceTaskIndex).Error():
+			// case blsagg.TaskNotFoundErrorFn(response.TaskResponse.ReferenceTaskIndex).Error():
+			case blsagg.TaskNotFoundErrorFn(0).Error():
 				status = http.StatusNotFound
 			default:
 				status = http.StatusBadRequest
@@ -72,7 +82,7 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 }
 
 type SignedTaskResponse struct {
-	TaskResponse taskmanager.IFinalizerTaskManagerTaskResponse
+	TaskResponse []byte //taskmanager.IFinalizerTaskManagerTaskResponse
 	BlsSignature bls.Signature
 	OperatorId   types.OperatorId
 }
@@ -82,8 +92,41 @@ type SignedTaskResponse struct {
 // rpc framework forces a reply type to exist, so we put bool as a placeholder
 func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskResponse, reply *bool) error {
 	agg.logger.Info("Received signed task response", "response", signedTaskResponse, "operatorId", signedTaskResponse.OperatorId.LogValue())
-	taskIndex := signedTaskResponse.TaskResponse.ReferenceTaskIndex
-	taskResponseDigest, err := core.GetTaskResponseDigest(&signedTaskResponse.TaskResponse)
+	var taskResponse taskmanager.IFinalizerTaskManagerTaskResponse
+	// taskResponseType, err := abi.NewType("tuple", "", []abi.ArgumentMarshaling{
+	// 	{
+	// 		Name: "TaskResponse",
+	// 		Type: "taskmanager.IFinalizerTaskManagerTaskResponse",
+	// 	},
+	// })
+	// arguments := abi.Arguments{
+	// 	{
+	// 		Type: taskResponseType,
+	// 	},
+	// }
+	// unpacked, err := arguments.Unpack(signedTaskResponse.TaskResponse)
+	// arguments.Copy(taskResponse, unpacked)
+	// agg.logger.Info("ProcessSignedTaskResponse", "taskResponseType", taskResponseType)
+
+	parsedAbi, err := taskmanager.ContractFinalizerTaskManagerMetaData.GetAbi()
+	inputParameters := parsedAbi.Methods["respondToTask"].Inputs
+
+	args := inputParameters[1:2]
+	// args := abi.Arguments{inputParameters[1]}
+	// args := parsedAbi.GetArguments(inputParameters[1])
+	agg.logger.Info("ProcessSignedTaskResponse", "inputParameters", inputParameters)
+	agg.logger.Info("ProcessSignedTaskResponse", "args", args)
+	unpacked, err := args.Unpack(signedTaskResponse.TaskResponse)
+	if err != nil {
+		agg.logger.Error("Failed to get task response", "err", err)
+		return TaskResponseDigestNotFoundError500
+	}
+	args.Copy(taskResponse, unpacked)
+	agg.logger.Info("ProcessSignedTaskResponse", "taskResponse", taskResponse)
+
+	// taskResponse := abi.toGoType(0, taskmanager.IFinalizerTaskManagerTaskResponse, signedTaskResponse.TaskResponse)
+	taskIndex := taskResponse.ReferenceTaskIndex
+	taskResponseDigest, err := core.GetTaskResponseDigest(&taskResponse)
 	if err != nil {
 		agg.logger.Error("Failed to get task response digest", "err", err)
 		return TaskResponseDigestNotFoundError500
@@ -97,7 +140,7 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 		agg.taskResponses[taskIndex] = make(map[sdktypes.TaskResponseDigest]taskmanager.IFinalizerTaskManagerTaskResponse)
 	}
 	if _, ok := agg.taskResponses[taskIndex][taskResponseDigest]; !ok {
-		agg.taskResponses[taskIndex][taskResponseDigest] = signedTaskResponse.TaskResponse
+		agg.taskResponses[taskIndex][taskResponseDigest] = taskResponse
 	}
 	agg.taskResponsesMu.Unlock()
 

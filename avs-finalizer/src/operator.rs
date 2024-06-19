@@ -177,6 +177,19 @@ impl Operator {
         task: Task,
     ) -> eyre::Result<OperatorStateInfo> {
 
+        // return Ok(OperatorStateInfo {
+        //     operators_state_changed: true,
+        //     operators_state_provided: false,
+        //     quorums_removed: vec![],
+        //     quorums_added: vec![],
+        //     quorums_stake_update: vec![],
+        //     quorums_apk_update: vec![],
+        //     operators_removed: vec![],
+        //     operators_added: vec![],
+        //     operators_stake_update: vec![],
+        //     operators_quorum_count_update: vec![],
+        // });
+
         // We assume that the quorumNumbers are alteast unique even if not sorted
         let mut old_quorum_numbers = task.last_completed_task_quorum_numbers.into_iter().collect::<Vec<u8>>();
         let mut new_quorum_numbers = task.quorum_numbers.into_iter().collect::<Vec<u8>>();
@@ -471,6 +484,7 @@ impl Operator {
             operators_stake_update: operators_stake_update,
             operators_quorum_count_update: operators_quorum_count_update,
         };
+        println!("{:?}", operator_state_info);
         Ok(operator_state_info)
         // Ok(Default::default())
     }

@@ -70,7 +70,6 @@ interface IFinalizerTaskManager {
         IGaspMultiRollupServicePrimitives.OperatorsStakeUpdate[] operatorsStakeUpdate;
         IGaspMultiRollupServicePrimitives.OperatorsQuorumCountUpdate[] operatorsQuorumCountUpdate;
 
-
         // IGaspMultiRollupServicePrimitives.QuorumsApkUpdate quorumApkUpdate;
         // IGaspMultiRollupServicePrimitives.QuorumsStakeUpdate quorumsStakeUpdate;
         // IGaspMultiRollupServicePrimitives.OperatorStakeUpdate[] OperatorStakeUpdate;
