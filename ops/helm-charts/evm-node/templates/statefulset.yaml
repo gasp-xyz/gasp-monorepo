@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "app.name" . }}
+  labels: {{- include "app.labels" . | nindent 4 }}
+    service: {{ include "app.name" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+      service: {{ include "app.name" . }}
+  serviceName: {{ include "app.name" . }}
+  template:
+    metadata:
+      labels:
+        {{- include "app.labels" . | nindent 8 }}
+        service: {{ include "app.name" . }}
+    spec:
+      containers:
+        - name: node
+          image: "{{ .Values.evmNodeImage }}"
+          imagePullPolicy: Always
+          command: {{ toYaml .Values.command | nindent 12 }}
+          args: {{ toYaml .Values.args | nindent 12 }}
+          ports:
+            - containerPort: 8545
+              name: rpc
+            - containerPort: 8546
+              name: rpc-ws
+          resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: {{ .Values.dataMountPath }}
+              name: data
+      {{- if not .Values.enablePersistence }}
+      volumes:
+        - name: data
+          emptyDir: {}
+      {{- end }}
+  {{- if .Values.enablePersistence }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      storageClassName: {{ .Values.storageClass }}
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.storageSize }}
+  {{- end }}

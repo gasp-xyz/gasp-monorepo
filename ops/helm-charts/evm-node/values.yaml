@@ -1,0 +1,45 @@
+# Default values for app.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+environment: local
+domainZone: gasp.xyz
+nameOverride: ''
+envSelector: ethereum-stub
+privateKey: '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+remoteCluster: false
+ingressClassName: nginx
+
+dataMountPath: /data
+
+evmNodeImage: 'ghcr.io/paradigmxyz/reth:v1.0.0-rc.1'
+command: []
+args:
+  - node
+  - --auto-mine
+  - --datadir=/data
+  - --http
+  - --http.addr=0.0.0.0
+  - --http.port=8545
+  - --http.api=all
+  - --http.corsdomain=*
+  - --ws
+  - --ws.addr=0.0.0.0
+  - --ws.port=8546
+  - --ws.api=all
+  - --ws.origins=*
+
+enablePersistence: false
+storageClass: standard
+storageSize: 5Gi
+
+image: 
+  repository: mangatasolutions/anvil
+  tag: be439052d9ed89109c4dd02b387cdf7cbbcc6870
+
+resources:
+  requests:
+    cpu: 1
+    memory: 100Mi
+  limits:
+    cpu: 2
+    memory: 500Mi

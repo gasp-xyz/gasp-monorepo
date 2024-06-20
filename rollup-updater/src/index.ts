@@ -1,6 +1,5 @@
-import { Mangata } from "@mangata-finance/sdk";
-import "@mangata-finance/types";
-import "@mangata-finance/types";
+import { Mangata } from "gasp-sdk";
+import "gasp-types";
 import "dotenv/config";
 import {
 	EIGEN_ABI,
@@ -107,4 +106,8 @@ async function main() {
 
 main()
 	.then(() => print("Success"))
-	.catch((e) => console.error("Something went wrong", e));
+	.catch((e) => {
+      console.error("Something went wrong", e)
+      process.exit(1);
+    }
+  );

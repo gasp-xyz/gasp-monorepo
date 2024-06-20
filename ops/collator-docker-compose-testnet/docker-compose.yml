@@ -1,48 +1,48 @@
 services:
   collator:
-    image: mangatasolutions/mangata-node:eth-rollup-develop
+    image: mangatasolutions/rollup-node:eth-rollup-develop
     restart: unless-stopped
     platform: linux/amd64
     command:
       - --name=my-collator
-      - --collator
       - --rpc-port=9944
       - --port=30333
-      - --rpc-cors=all
-      - --chain=/etc/testnet-para-chainspec.json
+      - --chain=/etc/chainspec.json
       - --base-path=/data
+      - --rpc-cors=all
       - --unsafe-rpc-external
       - --rpc-methods=unsafe
       - --bootnodes=/dns/collator-01-p2p-rollup-testnet.mangata.online/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-      - --
-      - --chain=/etc/testnet-relay-chainspec.json
-      - --bootnodes=/dns/relay-01-p2p-rollup-testnet.mangata.online/tcp/30333/p2p/12D3KooWHuPE8vcHgd4bWzPG3nKciNj72LaYJTaTtJpEiRzbou87
     volumes:
-      - ./testnet-para-chainspec.json:/etc/testnet-para-chainspec.json
-      - ./testnet-relay-chainspec.json:/etc/testnet-relay-chainspec.json
+      - ./chainspec.json:/etc/chainspec.json
       - ./data:/data
     ports:
       - 9944:9944
 
   sequencer:
-    image: mangatasolutions/rollup-sequencer:f8638a4fb0c9af6883efa175bf680466e0f5990e
+    image: mangatasolutions/rollup-sequencer:5d6f2a4db68e0601f14b3ced43773488efdda164
     restart: unless-stopped
     platform: linux/amd64
     environment:
       MANGATA_NODE_URL: ws://collator:9944
-      ETH_CHAIN_URL: wss://ethereum.publicnode.com
-      MANGATA_CONTRACT_ADDRESS: '0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154'
+      ETH_CHAIN_URL: wss://ethereum-holesky-rpc.publicnode.com
+      MANGATA_CONTRACT_ADDRESS: '0x329D0C4a58B3cEfdb40c5513E155228f6Cc7B6c5'
       MNEMONIC: 'some mnemonic'
+      LIMIT: '500'
 
   # updater:
-  #   image: mangatasolutions/rollup-updater:f8638a4fb0c9af6883efa175bf680466e0f5990e
+  #   image: mangatasolutions/rollup-updater:5d6f2a4db68e0601f14b3ced43773488efdda164
   #   restart: unless-stopped
   #   platform: linux/amd64
   #   environment:
   #     MANGATA_NODE_URL: ws://collator:9944
-  #     ETH_CHAIN_URL: wss://ethereum.publicnode.com
+  #     ETH_CHAIN_URL: wss://ethereum-holesky-rpc.publicnode.com
   #     # Randomly generated key, should not be used for anything
   #     WALLET_PRIVATE_KEY: "15cb3150921ee606d71b9def1b6392c9df1d4fea399cbcca2047d9cf84f44f08"
-  #     EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
-  #     MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
+  #     EIGEN_CONTRACT_ADDRESS: "0x998AaF69F731009d4E2d470E974766F1EB8f5142"
+  #     MANGATA_CONTRACT_ADDRESS: "0x329D0C4a58B3cEfdb40c5513E155228f6Cc7B6c5"
+  #     LIMIT: "25"
+  #     FINALIZATION_SOURCE: "relay"
+  #     CHAIN: "holesky"
+  #     NETWORK: "testnet"
   

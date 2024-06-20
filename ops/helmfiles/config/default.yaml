@@ -1,6 +1,8 @@
 remoteCluster: true
-
-anvilEnabled: true
+collatorsEnabled: true
+collatorImageTag: "eth-rollup-develop"
+evmNodeEnabled: true
+blockscoutEnabled: false
 aggregatorEnabled: true
 finalizerEnabled: true
 secondFinalizerEnabled: false
@@ -8,23 +10,41 @@ updaterEnabled: true
 sequencerEnabled: true
 secondSequencerEnabled: false
 
-env:
+envEth:
   # rpc
-  ETH_RPC_URL: http://anvil:8545
-  ETH_WS_URL: ws://anvil:8545
-  SUBSTRATE_RPC_URL: wss://kusama-archive.mangata.online:443
+  ETH_RPC_URL: http://evm-node-eth:8545
+  ETH_WS_URL: ws://evm-node-eth:8546
+  SUBSTRATE_RPC_URL: ws://collator-01:9944
   # contracts
-  CHAIN_ID: '31337'
+  CHAIN_ID: "1337"
   AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
   # AVS
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  AVS_BLOCK_VALIDATION_PERIOD: '5'
+  AVS_BLOCK_VALIDATION_PERIOD: "5"
   # OP
   RUST_LOG: info
   AVS_RPC_URL: http://avs-aggregator:8090
-  TESTNET: 'true'
-  ECDSA_EPHEMERAL_KEY: 'true'
-  BLS_EPHEMERAL_KEY: 'true'
+  TESTNET: "true"
+  ECDSA_EPHEMERAL_KEY: "true"
+  BLS_EPHEMERAL_KEY: "true"
+
+envArb:
+  # rpc
+  ETH_RPC_URL: http://evm-node-arb:8545
+  ETH_WS_URL: ws://evm-node-arb:8546
+  SUBSTRATE_RPC_URL: ws://collator-01:9944
+  # contracts
+  CHAIN_ID: "1337"
+  AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
+  # AVS
+  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
+  AVS_BLOCK_VALIDATION_PERIOD: "5"
+  # OP
+  RUST_LOG: info
+  AVS_RPC_URL: http://avs-aggregator-eth:8090
+  TESTNET: "true"
+  ECDSA_EPHEMERAL_KEY: "true"
+  BLS_EPHEMERAL_KEY: "true"
 
 # tests/keys/aggregator.ecdsa.key.json
 aggregatorEnvSecrets:
@@ -33,18 +53,42 @@ aggregatorEnvSecrets:
 finalizerEnableServiceMonitorCollectors: false
 finalizerEnvSecrets:
 
-# rollup-updater configs
-updaterEthChainUrl: ws://anvil:8545
-updaterEnv:
-  MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
+# rollup-updater-eth configs
+updaterChainUrlEth: ws://evm-node-eth:8546
+updaterMnemonicEth: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+updaterEnvEth:
+  CHAIN: "reth"
+  L1_CHAIN: "Ethereum"
+  MANGATA_NODE_URL: ws://collator-01:9944
   EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
-  MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
+  MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
+  FINALIZATION_SOURCE: "relay"
 
+# rollup-sequencer-eth configs
+firstSequencerMnemonicEth: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
+secondSequencerMnemonicEth: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
+sequencerChainUrlEth: ws://evm-node-eth:8546
+sequencerEnvEth:
+  L1_CHAIN: "Ethereum"
+  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
 
-# rollup-sequencer configs
-firstSequencerMnemonic: '0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133'
-secondSequencerMnemonic: 'bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob'
-sequencerEthChainUrl: ws://anvil:8545
-sequencerEnv:
-  MANGATA_NODE_URL: wss://collator-01-ws-rococo.mangata.online
-  MANGATA_CONTRACT_ADDRESS: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154"
+# rollup-updater-arb configs
+updaterChainUrlArb: ws://evm-node-arb:8546
+updaterMnemonicArb: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+updaterEnvArb:
+  CHAIN: "reth"
+  L1_CHAIN: "Arbitrum"
+  MANGATA_NODE_URL: ws://collator-01:9944
+  EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
+  MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
+  FINALIZATION_SOURCE: "relay"
+
+# rollup-sequencer-arb configs
+firstSequencerMnemonicArb: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+secondSequencerMnemonicArb: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
+sequencerChainUrlArb: ws://evm-node-arb:8546
+sequencerEnvArb:
+  L1_CHAIN: "Arbitrum"
+  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 
@@ -27,6 +28,11 @@ type AvsWriterer interface {
 		task taskmanager.IFinalizerTaskManagerTask,
 		taskResponse taskmanager.IFinalizerTaskManagerTaskResponse,
 		nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
+	) (*types.Receipt, error)
+	EjectOperators(
+		ctx context.Context,
+		operators []common.Address,
+		quorumNumbers [][]byte,
 	) (*types.Receipt, error)
 }
 
@@ -95,5 +101,26 @@ func (w *AvsWriter) SendAggregatedResponse(ctx context.Context, task taskmanager
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent aggregated response with the AVS's task manager")
+	return receipt, nil
+}
+
+func (w *AvsWriter) EjectOperators(ctx context.Context, operators []common.Address, quorumNumbers[][]uint8) (*types.Receipt, error) {
+	w.logger.Info("sending eject operators with AVS's service manager")
+	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
+	if err != nil {
+		return nil, err
+	}
+	tx, err := w.AvsContractBindings.ServiceManager.EjectOperators(noSendTxOpts, operators, quorumNumbers)
+	if err != nil {
+		w.logger.Errorf("Error assembling RespondToTask tx")
+		return nil, err
+	}
+
+	receipt, err := w.txMgr.Send(ctx, tx)
+	if err != nil {
+		return nil, errors.New("failed to send tx with err: " + err.Error())
+	}
+	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
+	w.logger.Info("sent eject operators with AVS's service manager")
 	return receipt, nil
 }
