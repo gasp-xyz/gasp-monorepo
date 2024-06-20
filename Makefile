@@ -38,6 +38,9 @@ deploy-avs-contracts-to-anvil-and-save-state: ## Deploy avs
 
 deploy-all-to-anvil-and-save-state: deploy-eigenlayer-contracts-to-anvil-and-save-state deploy-avs-contracts-to-anvil-and-save-state ## deploy eigenlayer and avs contracts 
 
+deploy-alt-l1-contracts-and-save-state:
+	./tests/integration/deploy-alt-l1-contracts-and-save-anvil-state.sh
+
 deploy-all-contracts-and-save-state:
 	./tests/integration/deploy-all-contracts-and-save-anvil-state.sh
 
@@ -58,8 +61,7 @@ bindings-rs: ## generates rust bindings
 	cd ./avs-finalizer && cargo fmt
 
 bindings-json: ## generate JS bindings
-	cd ./rolldown-contract && make update-abi
-	cd ./contracts && forge build && cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../rollup-updater/src/FinalizerTaskManager.json
+	cd ./contracts && forge build && cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../rollup-updater/src/FinalizerTaskManager.json && cp out/Rolldown.sol/Rolldown.json ../rollup-updater/src/Rolldown.json && cp out/Rolldown.sol/Rolldown.json ../rollup-sequencer/src/Rolldown.json
 
 bindings: bindings-go bindings-rs bindings-json ## generate all bindings
 
@@ -81,7 +83,7 @@ start-avs-finalizer: ##
 		--stake 50
 
 start-avs-finalizer-testkeys: ## 
-	RUST_LOG=avs_finalizer=debug,ether=trace cargo run --manifest-path=avs-finalizer/Cargo.toml -- \
+	RUST_LOG=avs_finalizer=debug cargo run --manifest-path=avs-finalizer/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
 		--bls-key-file tests/keys/test.bls.key.json \
 		--opt-in-at-startup

@@ -1,13 +1,27 @@
 import {PublicClient} from "viem";
 
 // @ts-ignore
-import registryCoordinator from "./abis/RegistryCoordinator.json";
-
+import registryCoordinator from "../../contracts/out/RegistryCoordinator.sol/RegistryCoordinator.json";
 // @ts-ignore
-import finalizerTaskManager from "./abis/FinalizerTaskManager.json";
+import finalizerTaskManager from "../../contracts/out/FinalizerTaskManager.sol/FinalizerTaskManager.json";
+// @ts-ignore
+import blsApkRegistry from "../../contracts/out/BLSApkRegistryStorage.sol/BLSApkRegistryStorage.json";
+// @ts-ignore
+import stakeRegistry from "../../contracts/out/StakeRegistryStorage.sol/StakeRegistryStorage.json";
+// @ts-ignore
+import indexRegistry from "../../contracts/out/IndexRegistryStorage.sol/IndexRegistryStorage.json";
+//@ts-ignore
+import deploymentJson from "../../contracts/script/output/31337/avs_deployment_output.json";
+
 import {DockerUtils} from "./DockerUtils";
-export const registryCoordinatorAddress = '0x851356ae760d987E095750cCeb3bC6014560891C'
-export const taskManagerAddress = "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8";
+//IF those addresses gets de-sync: call the makefile deploy all save state, to update it , and commit the changes
+export const registryCoordinatorAddress : `0x${string}` = deploymentJson.addresses.registryCoordinator as `0x${string}`;
+export const taskManagerAddress : `0x${string}` = deploymentJson.addresses.taskManager as `0x${string}`;
+export const blsApkRegistryAddress : `0x${string}` = deploymentJson.addresses.blsApkRegistry as `0x${string}`;
+export const stakeRegistryAddress : `0x${string}` = deploymentJson.addresses.stakeRegistry as `0x${string}`;
+export const indexRegistryAddress : `0x${string}` = deploymentJson.addresses.indexRegistry as `0x${string}`;
+
+export const DEFAULT_QUORUM = 0;
 
 export async function waitForOperatorRegistered(publicClient: PublicClient) {
     return new Promise((resolve, _) => {
@@ -56,7 +70,7 @@ export async function waitForOperatorDeRegistered(publicClient: PublicClient) {
     })
 }
 
-export async function getOperatorId(publicClient: PublicClient, operatorAddress: string) {
+export async function getOperatorId(publicClient: any, operatorAddress: string) {
     const res = await publicClient.readContract({
         address: registryCoordinatorAddress,
         abi: registryCoordinator.abi,
@@ -72,7 +86,7 @@ export async function waitForTaskResponded(publicClient: PublicClient, numTasks 
 
 export async function waitFor(publicClient: PublicClient, numTasks = 1, eventName="TaskResponded") : Promise<any[]> {
     let tasks : any[] = [];
-    console.info("Waiting for :" + numTasks + " tasks to be responded to..");
+    console.info("Waiting for :" + numTasks + " tasks to be " + eventName + "..");
     return await  new Promise( (resolve) => {
         const unwatch = publicClient.watchContractEvent({
             abi : finalizerTaskManager.abi,
@@ -93,7 +107,7 @@ export async function waitFor(publicClient: PublicClient, numTasks = 1, eventNam
 
 
 export async function waitForNo(publicClient: PublicClient, waitingTime = 120 , eventName="TaskResponded") : Promise<boolean> {
-    console.info("Waiting for :" + waitingTime + " tasks to be " + eventName + "..");
+    console.info("Waiting for :" + waitingTime + " secs to be " + eventName + "..");
     return await  new Promise( (resolve) => {
         const unwatch = publicClient.watchContractEvent({
             abi : finalizerTaskManager.abi,
@@ -119,5 +133,48 @@ export async function optOut(dockerUtilsInstance: DockerUtils){
         console.error(err);
     });
 }
+
+export async function getEntryFromBlsApkRegistry(publicClient: PublicClient, functionName: string, args: any[]) {
+    const res = await publicClient.readContract({
+        address: blsApkRegistryAddress,
+        abi: blsApkRegistry.abi,
+        functionName: functionName,
+        args: args,
+    });
+    return res as any as string[];
+}
+
+export async function getEntryFromStakeRegistry(publicClient: PublicClient, functionName: string, args: any[]) {
+    const res = await publicClient.readContract({
+        address: stakeRegistryAddress,
+        abi: stakeRegistry.abi,
+        functionName: functionName,
+        args: args,
+    });
+    return res as any as string[];
+}
+
+
+export async function getEntryFromIndexRegistry(publicClient: PublicClient, functionName: string, args: any[]) {
+    const res = await publicClient.readContract({
+        address: indexRegistryAddress,
+        abi: indexRegistry.abi,
+        functionName: functionName,
+        args: args,
+    });
+    return res as any as string[];
+}
+
+export async function getEntryFromTaskManagerRegistry(publicClient: PublicClient, functionName: string, args: any[]) {
+    const res = await publicClient.readContract({
+        address: taskManagerAddress,
+        abi: finalizerTaskManager.abi,
+        functionName: functionName,
+        args: args,
+    });
+    return res as any as string[];
+}
+
+
 // @ts-ignore
 BigInt.prototype.toJSON = function() { return this.toString() }

@@ -1,6 +1,6 @@
 remoteCluster: true
 
-anvilEnabled: false
+evmNodeEnabled: false
 aggregatorEnabled: true
 finalizerEnabled: true
 secondFinalizerEnabled: false
@@ -49,6 +49,7 @@ finalizerEnvSecrets:
 
 #rollup-updater configs
 updaterEthChainUrl: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
+updaterMnemonicEth: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
 updaterEnv:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-testnet.mangata.online
   MANGATA_CONTRACT_ADDRESS: "0x329D0C4a58B3cEfdb40c5513E155228f6Cc7B6c5"

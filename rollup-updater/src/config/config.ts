@@ -15,7 +15,8 @@ const appConfigSchema = z.object({
     MANGATA_NODE_URL: z.string(),
     WALLET_PRIVATE_KEY: z.string(),
     ETH_CHAIN_URL: z.string(),
-    VERBOSE: z.string().default("false")
+    VERBOSE: z.string().default("false"),
+    L1_CHAIN: z.string().default("Ethereum"),
 });
 
 type AppConfig = z.infer<typeof appConfigSchema>;
@@ -34,7 +35,8 @@ function createConfig() {
         MANGATA_NODE_URL: process.env.MANGATA_NODE_URL,
         WALLET_PRIVATE_KEY: process.env.WALLET_PRIVATE_KEY,
         ETH_CHAIN_URL: process.env.ETH_CHAIN_URL,
-        VERBOSE: process.env.VERBOSE
+        VERBOSE: process.env.VERBOSE,
+        L1_CHAIN: process.env.L1_CHAIN!,
     });
 }
 

@@ -6,6 +6,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
@@ -69,23 +70,32 @@ func (k *Kicker) CheckStateAndKick() error {
 		}
 	}
 
+	if len(nonSigningOperatorIds) == 0 {
+		k.logger.Info("No NonSigningOperatorIds found, OAL done")
+		return nil
+	}
+
 	k.logger.Info("OAL check found list of ids", "operatorIds", logIds)
-	// fetch address and eject
+	// fetch addresses and eject
+	quorums := make([][]uint8, 0)
+	addresses := make([]common.Address, 0)
 	for i, key := range nonSigningOperatorIds {
 		address, err := k.ethRpc.Clients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, key)
 		if err != nil {
 			k.logger.Error("Cannot get operator address", "operatorId", logIds[i], "err", err)
 			return err
 		}
-
-		k.logger.Info("Ejecting Operator", "address", address, "id", logIds[i])
-		_, err = k.ethRpc.Clients.AvsRegistryChainWriter.EjectOperator(context.Background(), address, types.QUORUM_NUMBERS)
-		if err != nil {
-			k.logger.Error("Cannot eject operator", "operatorAddress", address, "err", err)
-			return err
-		}
-		k.logger.Info("Operator ejected successfuly", "address", address)
+		addresses = append(addresses, address)
+		quorums = append(quorums, types.QUORUM_NUMBERS.UnderlyingType())
 	}
+
+	k.logger.Info("Ejecting Operators", "address", addresses, "id", logIds)
+	_, err = k.ethRpc.AvsWriter.EjectOperators(context.Background(), addresses, quorums)
+	if err != nil {
+		k.logger.Error("Cannot eject operators", "err", err)
+		return err
+	}
+	k.logger.Info("Operators ejected successfuly")
 
 	return nil
 }

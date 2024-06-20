@@ -24,6 +24,25 @@ export const webSocketTransport = webSocket(ETH_CHAIN_URL, {retryCount: 5});
 export function getChain() {
     if (process.env.CHAIN == "holesky") {
         return holesky
+    } else if (process.env.CHAIN == "reth"){
+        return defineChain({
+            id: 1337,
+            name: "reth",
+            network: "Reth",
+            nativeCurrency: {
+                decimals: 18,
+                name: "Ether",
+                symbol: "ETH",
+            },
+            rpcUrls: {
+                public: {
+                    http: ["ws://127.0.0.1:8545"],
+                },
+                default: {
+                    http: ["ws://127.0.0.1:8545"],
+                },
+            },
+        });
     } else {
         return defineChain({
             id: 31337,

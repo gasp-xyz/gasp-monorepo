@@ -43,18 +43,18 @@ tracing-error = "0.2.0"
 tracing-subscriber = { version = "0.3.18", features = ["json", "env-filter"] }
 
 # Polkadot SDK
-frame-remote-externalities = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
+frame-remote-externalities = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
 
-sc-cli = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
-sc-executor = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
-sp-core = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
-sp-externalities = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
-sp-io = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
-sp-keystore = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
-sp-rpc = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
-sp-runtime = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
-sp-state-machine = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
-substrate-rpc-client = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
+sc-cli = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+sc-executor = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+sp-core = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+sp-externalities = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+sp-io = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+sp-keystore = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+sp-rpc = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+sp-runtime = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+sp-state-machine = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+substrate-rpc-client = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
 
-node-executor = { package = "node-executor", git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
-node-primitives = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
+node-executor = { package = "node-executor", git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+node-primitives = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
