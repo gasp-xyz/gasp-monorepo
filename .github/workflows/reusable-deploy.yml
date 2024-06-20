@@ -69,11 +69,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           env: ${{ env.ENV_REF }}
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
-
-      - name: Delete the fungible env deployment before new one to allow operator to register and not fail
-        if: inputs.env == 'fungible'
-        run: export IMAGE_TAG=${{ inputs.version }} && export ENVIRONMENT=${{ env.ENV_REF }} && helmfile destroy -e fungible
-        working-directory: ops/helmfiles
+      
+      # TODO: To review this step before merging the PR | test
+      # - name: Delete the fungible env deployment before new one to allow operator to register and not fail
+      #   if: inputs.env == 'fungible'
+      #   run: export IMAGE_TAG=${{ inputs.version }} && export ENVIRONMENT=${{ env.ENV_REF }} && helmfile destroy -e fungible
+      #   working-directory: ops/helmfiles
       
       - run: |
           export ENVIRONMENT=${{ env.ENV_REF }}

@@ -93,3 +93,5 @@ out
 /ops/blockscout-docker-compose/services/redis-data
 /ops/blockscout-docker-compose/services/logs
 /ops/blockscout-docker-compose/tmp
+
+.continueignore
