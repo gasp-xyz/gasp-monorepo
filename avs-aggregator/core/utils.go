@@ -4,7 +4,7 @@ import (
 	"math/big"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
-	"github.com/ethereum/go-ethereum/accounts/abi"
+	// "github.com/ethereum/go-ethereum/accounts/abi"
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	"golang.org/x/crypto/sha3"
 )
@@ -13,39 +13,11 @@ import (
 // unclear why abigen doesn't provide this out of the box...
 func AbiEncodeTaskResponse(h *taskmanager.IFinalizerTaskManagerTaskResponse) ([]byte, error) {
 
-	// The order here has to match the field ordering of taskmanager.IFinalizerTaskManagerTaskResponse
-	taskResponseType, err := abi.NewType("tuple", "", []abi.ArgumentMarshaling{
-		{
-			Name: "referenceTaskIndex",
-			Type: "uint32",
-		},
-		{
-			Name: "operatorsStateHash",
-			Type: "bytes32",
-		},
-		{
-			Name: "BlockHash",
-			Type: "bytes32",
-		},
-		{
-			Name: "StorageProofHash",
-			Type: "bytes32",
-		},
-		{
-			Name: "PendingStateHash",
-			Type: "bytes32",
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-	arguments := abi.Arguments{
-		{
-			Type: taskResponseType,
-		},
-	}
+	parsedAbi, err := taskmanager.ContractFinalizerTaskManagerMetaData.GetAbi()
+	inputParameters := parsedAbi.Methods["respondToTask"].Inputs
+	args := inputParameters[1:2]
 
-	bytes, err := arguments.Pack(h)
+	bytes, err := args.Pack(h)
 	if err != nil {
 		return nil, err
 	}

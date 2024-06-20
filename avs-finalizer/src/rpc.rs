@@ -15,13 +15,14 @@ use reqwest_retry::{
 use serde::{ser::SerializeStruct, Serialize};
 use sp_runtime::traits::{Hash, Keccak256};
 use tracing::instrument;
+use sp_core::Bytes;
 
 type Bytes32 = [u8; 32];
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 struct SignedTaskResponse {
-    task_response: Vec<u8>,
+    task_response: Bytes,
     bls_signature: BlsSignatureWire,
     operator_id: Bytes32,
 }
@@ -222,7 +223,7 @@ fn create_response(task: TaskResponse, keypair: &BlsKeypair) -> eyre::Result<Sig
     println!("{:?}", sig);
     Ok(SignedTaskResponse {
         bls_signature: sig.into(),
-        task_response: task.encode(),
+        task_response: task.encode().into(),
         operator_id: keypair.operator_id().to_fixed_bytes(),
     })
 }
