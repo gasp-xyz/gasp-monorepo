@@ -1,6 +1,5 @@
-import { Mangata } from "@mangata-finance/sdk";
-import "@mangata-finance/types";
-import "@mangata-finance/types";
+import { Mangata } from "gasp-sdk";
+import "gasp-types";
 import "dotenv/config";
 import {
 	EIGEN_ABI,
