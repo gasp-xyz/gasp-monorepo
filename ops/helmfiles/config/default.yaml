@@ -1,5 +1,5 @@
 remoteCluster: true
-collatorEnabled: false
+collatorsEnabled: false
 evmNodeEnabled: true
 blockscoutEnabled: false
 aggregatorEnabled: true
