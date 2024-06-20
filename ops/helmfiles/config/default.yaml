@@ -1,5 +1,6 @@
 remoteCluster: true
-collatorEnabled: false
+collatorsEnabled: true
+collatorImageTag: "eth-rollup-develop"
 evmNodeEnabled: true
 blockscoutEnabled: false
 aggregatorEnabled: true
