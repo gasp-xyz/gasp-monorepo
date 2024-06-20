@@ -54,6 +54,7 @@ finalizerEnvSecrets:
 
 # rollup-updater-eth configs
 updaterChainUrlEth: ws://evm-node-eth:8546
+updaterMnemonicEth: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
 updaterEnvEth:
   CHAIN: "reth"
   L1_CHAIN: "Ethereum"
@@ -73,6 +74,7 @@ sequencerEnvEth:
 
 # rollup-updater-arb configs
 updaterChainUrlArb: ws://evm-node-arb:8546
+updaterMnemonicArb: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
 updaterEnvArb:
   CHAIN: "reth"
   L1_CHAIN: "Arbitrum"

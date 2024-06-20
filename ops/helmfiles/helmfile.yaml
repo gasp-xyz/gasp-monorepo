@@ -160,7 +160,7 @@ releases:
           repository: mangatasolutions/rollup-updater
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
+        walletPrivateKey: {{ .Values.updaterMnemonicEth | fetchSecretValue | quote }}
         ethChainUrl: {{ .Values.updaterChainUrlEth | fetchSecretValue | quote }}
         env: {{ .Values.updaterEnvEth | toYaml | nindent 10 }}
   
@@ -173,7 +173,7 @@ releases:
           repository: mangatasolutions/rollup-updater
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
+        walletPrivateKey: {{ .Values.updaterMnemonicArb | fetchSecretValue | quote }}
         ethChainUrl: {{ .Values.updaterChainUrlArb | fetchSecretValue | quote }}
         env: {{ .Values.updaterEnvArb | toYaml | nindent 10 }}
   
