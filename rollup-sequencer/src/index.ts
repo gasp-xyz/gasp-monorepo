@@ -1,5 +1,5 @@
-import { signTx } from "@mangata-finance/sdk";
-import "@mangata-finance/types";
+import { signTx } from "gasp-sdk";
+import "gasp-types";
 import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import "dotenv/config";
 import { keccak256 } from "viem";

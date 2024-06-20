@@ -3,7 +3,7 @@ import {
 	Mangata,
 	type MangataGenericEvent,
 	signTx,
-} from "@mangata-finance/sdk";
+} from "gasp-sdk";
 import { type ApiPromise, Keyring } from "@polkadot/api";
 import type { ApiDecoration } from "@polkadot/api/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
