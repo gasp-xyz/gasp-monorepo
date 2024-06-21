@@ -1,5 +1,5 @@
 finalizerEnableServiceMonitorCollectors: true
 # TODO: blockscout should be disabled for fungible envs
-blockscoutEnabled: true
+blockscoutEnabled: false
 remoteCluster: true
 collatorsEnabled: true

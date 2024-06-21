@@ -1,7 +1,50 @@
 finalizerEnableServiceMonitorCollectors: true
 remoteCluster: true
 
+
 blockscoutEnabled: true
+secondFinalizerEnabled: true
+secondSequencerEnabled: true
+
+
+#####################
+# collator configs #
+#####################
+collatorsEnabled: true
+collator:
+  image:
+    tag: b6f5f6c13ff851bfdfb36d01e0d8d67fe7c5bcc9
+  chain: ''
+  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-local-fd0e82a316c1f0f940211ca76b7de541d6f7689a-raw.json
+  wsHealthExporter:
+    enabled: true
+    image: paritytech/ws-health-exporter:bc071a44-20230830
+    env:
+      WSHE_NODE_MIN_PEERS: 2
+  enablePodMonitoringCollectors: true
+  enableServiceMonitorCollectors: true
+  storageClass: node-data-volume-retain
+  storageSize: 50Gi
+  tolerations:
+    - key: production
+      operator: Equal
+      value: 'true'
+      effect: NoSchedule
+  nodeSelector:
+    production: 'true'
+
+
+# env:
+#   SUBSTRATE_RPC_URL: wss://collator-01-ws-rollup-frontend.mangata.online:443
+
+# updaterEnv:
+#   MANGATA_NODE_URL: wss://collator-01-ws-rollup-frontend.mangata.online
+#   EIGEN_CONTRACT_ADDRESS: "0x9E545E3C0baAB3E08CdfD552C960A1050f373042"
+#   MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
+
+# sequencerEnv:
+#   MANGATA_NODE_URL: wss://collator-01-ws-rollup-frontend.mangata.online
+#   MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
 collatorsEnabled: true
 collatorImageTag: "b6f5f6c13ff851bfdfb36d01e0d8d67fe7c5bcc9"
 
