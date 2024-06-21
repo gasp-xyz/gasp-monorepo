@@ -7,8 +7,10 @@ blockscoutEnabled: false
 # collator configs #
 #####################
 collatorsEnabled: false
-collatorImageTag: "eth-rollup-develop"
 collator:
+  image:
+    repository: mangatasolutions/rollup-node
+    tag: eth-rollup-develop
   chain: rollup-local-seq
   domainZone: gasp.xyz
   command: /app/node
@@ -16,8 +18,6 @@ collator:
   isCollator: false
   disableChainspecGeneration: true
   role: collator
-  image:
-    repository: mangatasolutions/rollup-node
   wsHealthExporter:
     enabled: false
   enablePodMonitoringCollectors: false
