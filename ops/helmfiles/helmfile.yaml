@@ -297,6 +297,7 @@ releases:
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     values:
       - image:
+          repository: {{ .Values.collator.image.repository | quote }}
           tag: {{ .Values.collator.image.tag | quote }}
         environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
         chain: {{ .Values.collator.chain | quote }}
@@ -329,6 +330,7 @@ releases:
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     values:
       - image:
+          repository: {{ .Values.collator.image.repository | quote }}
           tag: {{ .Values.collator.image.tag | quote }}
         environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
         chain: {{ .Values.collator.chain | quote }}
