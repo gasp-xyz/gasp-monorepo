@@ -296,13 +296,27 @@ releases:
     chart: mangata-node/node
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     values:
-      - collator-values.yaml.gotmpl
-      - # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-        customNodeKey: '5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef'
-        image:
-          tag: eth-rollup-develop
-        bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+      - image:
+          repository: {{ .Values.collator.image.repository | quote }}
+          tag: {{ .Values.collator.image.tag | quote }}
         environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+        chain: {{ .Values.collator.chain | quote }}
+        domainZone: {{ .Values.collator.domainZone | quote }}
+        command: {{ .Values.collator.command | quote }}
+        isParachain: {{ .Values.collator.isParachain }}
+        isCollator: {{ .Values.collator.isCollator }}
+        disableChainspecGeneration: {{ .Values.collator.disableChainspecGeneration }}
+        role: {{ .Values.collator.role | quote }}
+        remoteCluster: {{ .Values.remoteCluster }}
+        wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
+        enablePodMonitoringCollectors: {{ .Values.collator.enablePodMonitoringCollectors }}
+        enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
+        storageClass: {{ .Values.collator.storageClass | quote }}
+        storageSize: {{ .Values.collator.storageSize | quote }}
+        resources: {{ .Values.collator.resources | toYaml | nindent 10 }}
+        # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+        customNodeKey: '5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef'
+        bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
         extraArgs:
           - --alith
           - --no-mdns
@@ -315,13 +329,29 @@ releases:
     chart: mangata-node/node
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     values:
-      - collator-values.yaml.gotmpl
-      - # Identity ID: 12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
-        customNodeKey: 'bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b'
-        image:
-          tag: eth-rollup-develop
-        bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+      - image:
+          repository: {{ .Values.collator.image.repository | quote }}
+          tag: {{ .Values.collator.image.tag | quote }}
         environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+        chain: {{ .Values.collator.chain | quote }}
+        domainZone: {{ .Values.collator.domainZone | quote }}
+        command: {{ .Values.collator.command | quote }}
+        isParachain: {{ .Values.collator.isParachain }}
+        isCollator: {{ .Values.collator.isCollator }}
+        disableChainspecGeneration: {{ .Values.collator.disableChainspecGeneration }}
+        role: {{ .Values.collator.role | quote }}
+        remoteCluster: {{ .Values.remoteCluster }}
+        wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
+        enablePodMonitoringCollectors: {{ .Values.collator.enablePodMonitoringCollectors }}
+        enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
+        storageClass: {{ .Values.collator.storageClass | quote }}
+        storageSize: {{ .Values.collator.storageSize | quote }}
+        resources: {{ .Values.collator.resources | toYaml | nindent 10 }}
+        tolerations: {{ .Values.collator.tolerations | toYaml | nindent 10 }}
+        nodeSelector: {{ .Values.collator.nodeSelector | toYaml | nindent 10 }}
+        # Identity ID: 12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+        customNodeKey: 'bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b'
+        bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
         extraArgs:
           - --baltathar
           - --no-mdns
