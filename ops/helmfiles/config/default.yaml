@@ -1,14 +1,43 @@
 remoteCluster: true
-collatorsEnabled: false
+
 evmNodeEnabled: true
 blockscoutEnabled: false
-aggregatorEnabled: true
-finalizerEnabled: true
-secondFinalizerEnabled: false
-updaterEnabled: true
-sequencerEnabled: true
-secondSequencerEnabled: false
 
+#####################
+# collator configs #
+#####################
+collatorsEnabled: false
+collatorImageTag: "eth-rollup-develop"
+collator:
+  chain: rollup-local-seq
+  domainZone: gasp.xyz
+  command: /app/node
+  isParachain: false
+  isCollator: false
+  disableChainspecGeneration: true
+  role: collator
+  image:
+    repository: mangatasolutions/rollup-node
+  wsHealthExporter:
+    enabled: false
+  enablePodMonitoringCollectors: false
+  enableServiceMonitorCollectors: false
+  storageClass: standard
+  storageSize: 5Gi
+  resources:
+    requests:
+      cpu: 0.1
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+  tolerations: []
+  nodeSelector: {}
+
+
+####################
+# evm-node configs #
+####################
 envEth:
   # rpc
   ETH_RPC_URL: http://evm-node-eth:8545
@@ -45,14 +74,27 @@ envArb:
   ECDSA_EPHEMERAL_KEY: "true"
   BLS_EPHEMERAL_KEY: "true"
 
+######################
+# aggregator configs #
+######################
+aggregatorEnabled: true
 # tests/keys/aggregator.ecdsa.key.json
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: '{"address":"a0ee7a142d267c1f36714e4a8f75612f20a79720","crypto":{"cipher":"aes-128-ctr","ciphertext":"b0f6f8e3ba33f0b382b080de6661d827181de480f1a4f94bc20d66cb3d585907","cipherparams":{"iv":"4e3f9a8ca6ef8d1cd408e8aaae3c22d2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"c8f9f8cc03913e09cee7e1fd68732fac327576203ab277d740270f1dea82ee7e"},"mac":"353d65850b20d5fdb90ca2385c52e5b57662cb1d906fd58143f20a7720723cf6"},"id":"d3036cc7-d068-4f2f-9667-60aaca660e61","version":3}'
 
+#####################
+# finalizer configs #
+#####################
+secondFinalizerEnabled: false
+finalizerEnabled: true
 finalizerEnableServiceMonitorCollectors: false
-finalizerEnvSecrets:
+finalizerEnvSecrets: {}
 
-# rollup-updater-eth configs
+###########################
+# rollup-updater configs #
+###########################
+updaterEnabled: true
+
 updaterChainUrlEth: ws://evm-node-eth:8546
 updaterMnemonicEth: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 updaterEnvEth:
@@ -63,16 +105,6 @@ updaterEnvEth:
   MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
   FINALIZATION_SOURCE: "relay"
 
-# rollup-sequencer-eth configs
-firstSequencerMnemonicEth: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
-secondSequencerMnemonicEth: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
-sequencerChainUrlEth: ws://evm-node-eth:8546
-sequencerEnvEth:
-  L1_CHAIN: "Ethereum"
-  MANGATA_NODE_URL: ws://collator-01:9944
-  MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
-
-# rollup-updater-arb configs
 updaterChainUrlArb: ws://evm-node-arb:8546
 updaterMnemonicArb: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 updaterEnvArb:
@@ -83,11 +115,27 @@ updaterEnvArb:
   MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
   FINALIZATION_SOURCE: "relay"
 
-# rollup-sequencer-arb configs
+
+############################
+# rollup-sequencer configs #
+############################
+sequencerEnabled: true
+secondSequencerEnabled: false
+
+
+firstSequencerMnemonicEth: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
+secondSequencerMnemonicEth: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
+sequencerChainUrlEth: ws://evm-node-eth:8546
+sequencerEnvEth:
+  L1_CHAIN: "Ethereum"
+  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
+
 firstSequencerMnemonicArb: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
 secondSequencerMnemonicArb: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
 sequencerChainUrlArb: ws://evm-node-arb:8546
 sequencerEnvArb:
+  CHAIN: "reth"
   L1_CHAIN: "Arbitrum"
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
