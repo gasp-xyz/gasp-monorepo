@@ -26,6 +26,7 @@ import "./GaspMultiRollupServiceStorage.sol";
 // Do not double verify if delta is null
 // We may require to "correct" operator addresses returned from the operatorStateRetriever after the bls key roration is merged. We do not need it before that. We can do this correction by querying pubKeyHashToOperator at the relevant block number (dereg and rereg can't ahhpen in the same block so this at_block qurying should be reliable) 
 // We require that the quorum number be unique, perhaps impl req that they bve sorted so that it can be enforced
+// We currently presume that operators cant change their bls keys, if this changes then we need to alter the eigensdk to kee an in memory store of operatorIs to pubKeys, the current inmemdb has operatorAddr mappings
 contract GaspMultiRollupService is
     Initializable,
     OwnableUpgradeable,

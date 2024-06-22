@@ -205,6 +205,10 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		log = append(log, hex.EncodeToString(id[:]))
 	}
 	agg.logger.Info("Response non signer ids", "nonSignerIds", log)
+	NonSignerPubkeysAddedForOldState := []taskmanager.BN254G1Point{}
+	for _, nonSignerPubkeyOld := range blsAggServiceResp.NonSignerPubkeysAddedForOldState {
+		NonSignerPubkeysAddedForOldState = append(NonSignerPubkeysAddedForOldState, core.ConvertToBN254G1Point(nonSignerPubkeyOld))
+	}
 	quorumApks := []taskmanager.BN254G1Point{}
 	for _, quorumApk := range blsAggServiceResp.QuorumApksG1 {
 		quorumApks = append(quorumApks, core.ConvertToBN254G1Point(quorumApk))
@@ -218,6 +222,10 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		QuorumApkIndices:             blsAggServiceResp.QuorumApkIndices,
 		TotalStakeIndices:            blsAggServiceResp.TotalStakeIndices,
 		NonSignerStakeIndices:        blsAggServiceResp.NonSignerStakeIndices,
+		NonSignerPubkeysIndicesforOperatorIdsRemovedForOldState: blsAggServiceResp.NonSignerPubkeysIndicesforOperatorIdsRemovedForOldState,
+		NonSignerPubkeysAddedForOldState:                        NonSignerPubkeysAddedForOldState,
+		ApkG2forOldState:                                        core.ConvertToBN254G2Point(blsAggServiceResp.OldSignersApkG2),
+		SigmaforOldSate:                                         core.ConvertToBN254G1Point(blsAggServiceResp.OldSignersAggSigG1.G1Point),
 	}
 
 	agg.logger.Info("sending aggregated response onchain.", "taskIndex", blsAggServiceResp.TaskIndex)
@@ -269,8 +277,12 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 	for i, n := range newTask.QuorumNumbers {
 		quorumNums[i] = sdktypes.QuorumNum(n)
 	}
+	lastCompletedTaskQuorumNums := make(sdktypes.QuorumNums, len(newTask.LastCompletedTaskQuorumNumbers))
+	for i, n := range newTask.LastCompletedTaskQuorumNumbers {
+		lastCompletedTaskQuorumNums[i] = sdktypes.QuorumNum(n)
+	}
 	taskTimeToExpiry := time.Second * time.Duration(agg.expiration)
-	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
+	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, quorumNums, newTask.LastCompletedTaskCreatedBlock, lastCompletedTaskQuorumNums, quorumThresholdPercentages, taskTimeToExpiry)
 	agg.logger.Info("Aggregator initialized new task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
 	return nil
 }

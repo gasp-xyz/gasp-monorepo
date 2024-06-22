@@ -126,31 +126,6 @@ pub struct Withdrawal {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
     pub shares: ::std::vec::Vec<::ethers::core::types::U256>,
 }
-///`OperatorStateInfo(bool,bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[])`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct OperatorStateInfo {
-    pub operators_state_changed: bool,
-    pub operators_state_provided: bool,
-    pub quorums_removed: ::std::vec::Vec<u8>,
-    pub quorums_added: ::std::vec::Vec<QuorumsAdded>,
-    pub quorums_stake_update: ::std::vec::Vec<QuorumsStakeUpdate>,
-    pub quorums_apk_update: ::std::vec::Vec<QuorumsApkUpdate>,
-    pub operators_removed: ::std::vec::Vec<[u8; 32]>,
-    pub operators_added: ::std::vec::Vec<OperatorsAdded>,
-    pub operators_stake_update: ::std::vec::Vec<OperatorsStakeUpdate>,
-    pub operators_quorum_count_update: ::std::vec::Vec<OperatorsQuorumCountUpdate>,
-}
 ///`Task(uint256,uint32,uint32,bytes,uint32,bytes,uint32)`
 #[derive(
     Clone,
@@ -173,7 +148,7 @@ pub struct Task {
     pub last_completed_task_quorum_numbers: ::ethers::core::types::Bytes,
     pub last_completed_task_quorum_threshold_percentage: u32,
 }
-///`TaskResponse(uint32,(uint256,uint32,uint32,bytes,uint32,bytes,uint32),(bool,bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]),bytes32,bytes32,bytes32)`
+///`TaskResponse(uint32,bytes32,bytes32,bytes32,bytes32,bytes32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -188,8 +163,8 @@ pub struct Task {
 )]
 pub struct TaskResponse {
     pub reference_task_index: u32,
-    pub reference_task: Task,
-    pub operators_state_info: OperatorStateInfo,
+    pub reference_task_hash: [u8; 32],
+    pub operators_state_info_hash: [u8; 32],
     pub block_hash: [u8; 32],
     pub storage_proof_hash: [u8; 32],
     pub pending_state_hash: [u8; 32],
@@ -212,112 +187,6 @@ pub struct TaskResponseMetadata {
     pub hash_of_non_signers: [u8; 32],
     pub quroum_stake_totals: ::std::vec::Vec<u128>,
     pub quroum_stake_signed: ::std::vec::Vec<u128>,
-}
-///`OperatorsAdded(bytes32,uint8[],uint96[],uint8)`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct OperatorsAdded {
-    pub operator_id: [u8; 32],
-    pub quorum_for_stakes: ::std::vec::Vec<u8>,
-    pub quorum_stakes: ::std::vec::Vec<u128>,
-    pub quorum_count: u8,
-}
-///`OperatorsQuorumCountUpdate(bytes32,uint8)`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct OperatorsQuorumCountUpdate {
-    pub operator_id: [u8; 32],
-    pub quorum_count: u8,
-}
-///`OperatorsStakeUpdate(bytes32,uint8[],uint96[])`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct OperatorsStakeUpdate {
-    pub operator_id: [u8; 32],
-    pub quorum_for_stakes: ::std::vec::Vec<u8>,
-    pub quorum_stakes: ::std::vec::Vec<u128>,
-}
-///`QuorumsAdded(uint8,uint96,(uint256,uint256))`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct QuorumsAdded {
-    pub quorum_number: u8,
-    pub quorum_stake: u128,
-    pub quorum_apk: G1Point,
-}
-///`QuorumsApkUpdate(uint8,(uint256,uint256))`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct QuorumsApkUpdate {
-    pub quorum_number: u8,
-    pub quorum_apk: G1Point,
-}
-///`QuorumsStakeUpdate(uint8,uint96)`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct QuorumsStakeUpdate {
-    pub quorum_number: u8,
-    pub quorum_stake: u128,
 }
 ///`OperatorInfo(bytes32,uint8)`
 #[derive(

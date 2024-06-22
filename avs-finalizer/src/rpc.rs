@@ -4,7 +4,7 @@ use crate::{
 };
 use ark_ec::AffineRepr;
 use ark_ff::PrimeField;
-use bindings::shared_types::{Task, TaskResponse, OperatorStateInfo,*};
+use bindings::{shared_types::{Task, TaskResponse,*},finalizer_task_manager::OperatorStateInfo};
 use ethers::abi::AbiEncode;
 use reqwest::Response;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
@@ -27,19 +27,19 @@ struct SignedTaskResponse {
     operator_id: Bytes32,
 }
 
-#[derive(Serialize, Debug,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,)]
-#[serde(rename_all = "PascalCase")]
-struct TaskResponseWire {
-    pub reference_task_index: u32,
-    pub reference_task: Task,
-    // #[serde(with = "OperatorStateInfoWire")]
-    pub operators_state_info: OperatorStateInfo,
-    pub block_hash: Bytes32,
-    pub storage_proof_hash: Bytes32,
-    pub pending_state_hash: Bytes32,
-}
+// #[derive(Serialize, Debug,
+//     ::ethers::contract::EthAbiType,
+//     ::ethers::contract::EthAbiCodec,)]
+// #[serde(rename_all = "PascalCase")]
+// struct TaskResponseWire {
+//     pub reference_task_index: u32,
+//     pub reference_task: Task,
+//     // #[serde(with = "OperatorStateInfoWire")]
+//     pub operators_state_info: OperatorStateInfo,
+//     pub block_hash: Bytes32,
+//     pub storage_proof_hash: Bytes32,
+//     pub pending_state_hash: Bytes32,
+// }
 
 
 // #[derive(Serialize, Debug)]
@@ -115,18 +115,18 @@ struct TaskResponseWire {
 // }
 
 
-impl From<TaskResponse> for TaskResponseWire {
-    fn from(value: TaskResponse) -> Self {
-        Self {
-            reference_task_index: value.reference_task_index,
-            reference_task: value.reference_task,
-            operators_state_info: value.operators_state_info,
-            block_hash: value.block_hash,
-            storage_proof_hash: value.storage_proof_hash,
-            pending_state_hash: value.pending_state_hash,
-        }
-    }
-}
+// impl From<TaskResponse> for TaskResponseWire {
+//     fn from(value: TaskResponse) -> Self {
+//         Self {
+//             reference_task_index: value.reference_task_index,
+//             reference_task: value.reference_task,
+//             operators_state_info: value.operators_state_info,
+//             block_hash: value.block_hash,
+//             storage_proof_hash: value.storage_proof_hash,
+//             pending_state_hash: value.pending_state_hash,
+//         }
+//     }
+// }
 
 #[derive(Serialize, Debug)]
 struct BlsSignatureWire {

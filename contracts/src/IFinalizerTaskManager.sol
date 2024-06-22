@@ -44,9 +44,9 @@ interface IFinalizerTaskManager {
     struct TaskResponse {
         // Can be obtained by the operator from the event NewTaskCreated.
         uint32 referenceTaskIndex;
-        Task referenceTask;
+        bytes32 referenceTaskHash;
 
-        OperatorStateInfo operatorsStateInfo;
+        bytes32 operatorsStateInfoHash;
         // This is the response that the operator has to provide for a finalized block.
         bytes32 blockHash;
         // This is the response that the operator has to provide for a an executed block.

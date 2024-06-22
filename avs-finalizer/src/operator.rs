@@ -6,8 +6,9 @@ use crate::executor::execute::execute_block;
 use crate::rpc::Rpc;
 
 use bindings::{
-    finalizer_task_manager::{NewTaskCreatedFilter, Operator as TMOperator},
-    shared_types::{G1Point, G2Point, OperatorStateInfo, Task, TaskResponse, QuorumsAdded, QuorumsStakeUpdate, QuorumsApkUpdate, OperatorsAdded, OperatorsQuorumCountUpdate, OperatorsStakeUpdate},
+    finalizer_task_manager::{NewTaskCreatedFilter, Operator as TMOperator,
+        OperatorStateInfo, QuorumsAdded, QuorumsStakeUpdate, QuorumsApkUpdate, OperatorsAdded, OperatorsQuorumCountUpdate, OperatorsStakeUpdate},
+    shared_types::{G1Point, G2Point, Task, TaskResponse},
 };
 use ethers::providers::{Middleware, PendingTransaction, SubscriptionStream};
 use ethers::{
@@ -20,7 +21,7 @@ use node_primitives::BlockNumber;
 
 use serde::Serialize;
 use sp_core::H256;
-use sp_runtime::traits::BlakeTwo256;
+use sp_runtime::traits::{BlakeTwo256, Keccak256, Hash};
 use sp_runtime::{generic, OpaqueExtrinsic};
 use std::sync::Arc;
 use tokio::select;
@@ -28,6 +29,7 @@ use tokio::time::{sleep, Duration};
 use tokio::try_join;
 use tracing::{debug, error, info, instrument};
 use std::collections::HashMap;
+use ethers::abi::AbiEncode;
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
@@ -113,18 +115,18 @@ impl Operator {
                         });
                         let event_clone = event.clone();
                         let self_clone = self.clone();
-                        let get_operators_state_info_handle = tokio::spawn(async move {
+                        let get_operators_state_info_hash_handle = tokio::spawn(async move {
                             info!("Get operators state hash: {:?}", event_clone);
-                            self_clone.get_operators_state_info(event_clone.task).await
+                            self_clone.get_operators_state_info_hash(event_clone.task).await
                         });
-                        let (proofs, operators_state_info) = try_join!(execute_block_join_handle, get_operators_state_info_handle)?;
-                        let (proofs, operators_state_info) = (proofs?, operators_state_info?);
-                        debug!("Operators State Info {:?}", operators_state_info);
+                        let (proofs, operators_state_info_hash) = try_join!(execute_block_join_handle, get_operators_state_info_hash_handle)?;
+                        let (proofs, operators_state_info_hash) = (proofs?, operators_state_info_hash?);
+                        debug!("Operators State Info Hash {:?}", operators_state_info_hash);
                         debug!("Block executed successfully {:?}", proofs);
                         let payload = TaskResponse {
                             reference_task_index: event.task_index,
-                            reference_task: event.task.clone(),
-                            operators_state_info: operators_state_info.into(),
+                            reference_task_hash: Keccak256::hash(event.task.clone().encode().as_ref()).into(),
+                            operators_state_info_hash: operators_state_info_hash,
                             block_hash: proofs.0.as_fixed_bytes().to_owned(),
                             storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
                             pending_state_hash: proofs.2.as_fixed_bytes().to_owned(),
@@ -172,10 +174,10 @@ impl Operator {
         Ok(res)
     }
 
-    pub(crate) async fn get_operators_state_info(
+    pub(crate) async fn get_operators_state_info_hash(
         self: Arc<Self>,
         task: Task,
-    ) -> eyre::Result<OperatorStateInfo> {
+    ) -> eyre::Result<[u8; 32]> {
 
         // return Ok(OperatorStateInfo {
         //     operators_state_changed: true,
@@ -484,8 +486,16 @@ impl Operator {
             operators_stake_update: operators_stake_update,
             operators_quorum_count_update: operators_quorum_count_update,
         };
-        println!("{:?}", operator_state_info);
-        Ok(operator_state_info)
+        // println!("{:?}", operator_state_info);
+        // let encoded = operator_state_info.clone().encode();
+        // println!("{:?}", encoded);
+        // let unencoded = OperatorStateInfo::decode(encoded.clone()).unwrap_or_default();
+        // println!("{:?}", unencoded);
+    
+        // println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! - {:?}", unencoded == operator_state_info);
+
+        let operator_state_info_hash = Keccak256::hash(operator_state_info.encode().as_ref());
+        Ok(operator_state_info_hash.into())
         // Ok(Default::default())
     }
 

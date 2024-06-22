@@ -64,7 +64,7 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	agg.logger.Info("handler", "response", response)
+	// agg.logger.Info("handler", "response", response)
 
 	if err := agg.ProcessSignedTaskResponse(&response, nil); err != nil {
 		var status int
@@ -107,6 +107,7 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 	var taskResponse taskmanager.IFinalizerTaskManagerTaskResponse
 
 	parsedAbi, err := taskmanager.ContractFinalizerTaskManagerMetaData.GetAbi()
+	// replace with dummy function?
 	inputParameters := parsedAbi.Methods["respondToTask"].Inputs
 	args := inputParameters[1:2]
 	agg.logger.Info("ProcessSignedTaskResponse", "inputParameters", inputParameters)

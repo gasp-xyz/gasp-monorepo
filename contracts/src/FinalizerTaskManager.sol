@@ -217,4 +217,7 @@ contract FinalizerTaskManager is
     function getLatestPendingStateHash() external view returns (bytes32) {
         return latestPendingStateHash;
     }
+    
+    function dummyForOperatorStateInfoType(OperatorStateInfo calldata _operatorStateInfo) external view {
+    }
 }
