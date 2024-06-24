@@ -373,7 +373,7 @@ function countRequests(l2Update: PalletRolldownMessagesL1Update) {
 
 async function getLastRequestId(api: ApiPromise) {
 	return Number.parseInt(
-		(await api.query.rolldown.lastProcessedRequestOnL2("Ethereum")).toString(),
+		(await api.query.rolldown.lastProcessedRequestOnL2(L1_CHAIN)).toString(),
 	);
 }
 

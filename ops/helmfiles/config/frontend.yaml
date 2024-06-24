@@ -3,8 +3,8 @@ remoteCluster: true
 
 
 blockscoutEnabled: true
-secondFinalizerEnabled: true
-secondSequencerEnabled: true
+secondFinalizerEnabled: false
+secondSequencerEnabled: false
 
 
 #####################
@@ -14,8 +14,8 @@ collatorsEnabled: true
 collator:
   image:
     tag: b6f5f6c13ff851bfdfb36d01e0d8d67fe7c5bcc9
-  chain: ''
-  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-local-fd0e82a316c1f0f940211ca76b7de541d6f7689a-raw.json
+  chain: rollup-local-seq
+  # customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-local-fd0e82a316c1f0f940211ca76b7de541d6f7689a-raw.json
   wsHealthExporter:
     enabled: true
     image: paritytech/ws-health-exporter:bc071a44-20230830
@@ -28,12 +28,17 @@ collator:
   tolerations:
     - key: production
       operator: Equal
-      value: 'true'
+      value: "true"
       effect: NoSchedule
   nodeSelector:
-    production: 'true'
-
-
+    production: "true"
+  resources:
+    limits:
+      cpu: "4"
+      memory: 12Gi
+    requests:
+      cpu: "4"
+      memory: 12Gi
 # env:
 #   SUBSTRATE_RPC_URL: wss://collator-01-ws-rollup-frontend.mangata.online:443
 
