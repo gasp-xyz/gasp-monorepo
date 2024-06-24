@@ -80,7 +80,17 @@ contract GaspMultiRollupService is
         //     );
         //     return;
         // }
+        
+        // 1. new state on eth old state for alt L1s - req bcoz can't use new state for alt L1s
+        // 2. no new state verification for alt L1 - no point - explain why
+        // 3. we need an external observer to detect differences between alt-l1 task responses and eth task responses and raise alert accordingly
+        // 4. if the this is the first task then don't check sigs
+        // 5. The updater will only be able to update at those blocks that the there is a task for
+        
+        // if the this is the first task then don't check sigs
+        if (latestCompletedTaskCreatedBlock !=0) {
         quorumStakeTotals = checkSignatures(taskResponse.referenceTaskHash, nonSignerStakesAndSignatureForOldState);
+
         QuorumThresholdPercentage = quorumThresholdPercentage;
         // check that signatories own at least a threshold percentage of each quourm
         for (uint256 i = 0; i < quorumNumbers.length; i++) {
@@ -94,6 +104,7 @@ contract GaspMultiRollupService is
                 return;
             }
         }
+        }
 
         for (uint256 i = 0; i < operatorStateInfo.quorumsRemoved.length; i++) {
             delete quorumToStakes[operatorStateInfo.quorumsRemoved[i]];
@@ -105,7 +116,7 @@ contract GaspMultiRollupService is
             qourumApk[operatorStateInfo.quorumsAdded[i].quorumNumber] = operatorStateInfo.quorumsAdded[i].quorumApk;
         }
 
-        for (uint256 i = 0; i < operatorStateInfo.QuorumsStakeUpdate.length; i++) {
+        for (uint256 i = 0; i < operatorStateInfo.quorumsStakeUpdate.length; i++) {
             quorumToStakes[operatorStateInfo.quorumsStakeUpdate[i].quorumNumber] = operatorStateInfo.quorumsStakeUpdate[i].quorumStake;
         }
 
