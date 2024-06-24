@@ -16,6 +16,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 go install github.com/maoueh/zap-pretty@latest
 ```
 
+
 ## Running via make
 
 This simple session illustrates the basic flow of the AVS. The makefile commands are hardcoded for a single avs-finalizer. For more avs-finalizers you would need to modify setup script to distribute mock ERC20 tokens and deposit into AVS per avs-finalizer.
