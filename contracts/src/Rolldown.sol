@@ -40,21 +40,25 @@ contract Rolldown is
       emit NewUpdaterSet(updaterAccount);
     }
 
-    function withdraw_pending_eth(uint256 amount) external whenNotPaused {
+    function withdraw_pending_eth_to_recipient(uint256 amount, address payable recipient) private whenNotPaused {
         require(amount > 0, "Amount must be greater than zero");
-        address payable sender = payable(msg.sender);
-        require(pendingEthWithdrawals[sender] >= amount, "not enough pending withdraw amount");
+        require(pendingEthWithdrawals[recipient] >= amount, "not enough pending withdraw amount");
         require(payable(address(this)).balance >= amount, "not enough eth funds");
 
         // important to set this here before .sendValue
         // to prevent reentrancy
-        pendingEthWithdrawals[sender] -= amount;
+        pendingEthWithdrawals[recipient] -= amount;
 
-        emit PendingEthWithdrawn(sender, amount);
+        emit PendingEthWithdrawn(recipient, amount);
 
         // send value uses call (gas unbounded)
         // and reverts upon failure
-        Address.sendValue(sender, amount);
+        Address.sendValue(recipient, amount);
+    }
+
+
+    function withdraw_pending_eth(uint256 amount) external whenNotPaused {
+      withdraw_pending_eth_to_recipient(amount, payable(msg.sender));
     }
 
     function deposit_eth() external payable whenNotPaused {
@@ -378,7 +382,9 @@ contract Rolldown is
     function process_eth_withdrawal(
         Withdrawal calldata withdrawal
     ) private {
-        bool status = payable(address(this)).balance >= withdrawal.amount;
+        bool enought_funds_in_contract = payable(address(this)).balance >= withdrawal.amount;
+        bool is_account = withdrawal.withdrawalRecipient.code.length == 0;
+        bool status = enought_funds_in_contract && is_account;
         uint256 timeStamp = block.timestamp;
 
         WithdrawalResolution memory resolution = WithdrawalResolution({
@@ -400,6 +406,8 @@ contract Rolldown is
                 withdrawal.withdrawalRecipient,
                 pendingEthWithdrawals[withdrawal.withdrawalRecipient]
             );
+            //TODO:: remove with protocol update
+            withdraw_pending_eth_to_recipient(withdrawal.amount, payable(withdrawal.withdrawalRecipient));
         }
     }
 

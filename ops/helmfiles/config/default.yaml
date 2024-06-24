@@ -1,4 +1,5 @@
 remoteCluster: true
+
 evmNodeEnabled: true
 blockscoutEnabled: false
 

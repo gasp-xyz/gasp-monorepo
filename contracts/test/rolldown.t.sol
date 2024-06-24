@@ -115,39 +115,46 @@ contract RolldownTest is Test, IRolldownPrimitives {
             amount: withdraw_amount
         });
 
+        uint256 aliceBalanceBeforeUpdate = alice.balance;
+
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.WithdrawalResolutionAcceptedIntoQueue(2, true);
         vm.expectEmit(true, true, false, true);
         emit IRolldownPrimitives.EthWithdrawPending(alice, 500);
+        emit IRolldownPrimitives.PendingEthWithdrawn(alice, 500);
         rolldown.update_l1_from_l2(l2Update);
         vm.stopPrank();
 
-        Rolldown.L1Update memory l1UpdateAfterWithdraw = rolldown.getUpdateForL2();
-        assertEq(l1UpdateAfterWithdraw.pendingWithdrawalResolutions.length, 1);
-        assertEq(stdstore
-                    .target(address(rolldown))
-                    .sig(rolldown.pendingEthWithdrawals.selector)
-                    .with_key(alice)
-                    .read_uint(),
-                withdraw_amount);
+        uint256 aliceBalanceAfterUpdate = alice.balance;
+        assertEq(aliceBalanceAfterUpdate - aliceBalanceBeforeUpdate, withdraw_amount);
 
-        uint withdraw_from_pending = 200;
-
-        vm.startPrank(alice);
-        vm.expectEmit(true, true, false, true);
-        emit IRolldownPrimitives.PendingEthWithdrawn(alice, withdraw_from_pending);
-        rolldown.withdraw_pending_eth(withdraw_from_pending);
-        vm.stopPrank();
-
-        assertEq(stdstore
-                    .target(address(rolldown))
-                    .sig(rolldown.pendingEthWithdrawals.selector)
-                    .with_key(alice)
-                    .read_uint(),
-                withdraw_amount - withdraw_from_pending);
-        assertEq(alice.balance - aliceBalanceAfterDeposit, withdraw_from_pending);
-        assertEq(contractBalanceAfterDeposit - contract_address.balance, withdraw_from_pending);
+        //TODO: uncomment when switched to pending withdrawals
+        // Rolldown.L1Update memory l1UpdateAfterWithdraw = rolldown.getUpdateForL2();
+        // assertEq(l1UpdateAfterWithdraw.pendingWithdrawalResolutions.length, 1);
+        // assertEq(stdstore
+        //             .target(address(rolldown))
+        //             .sig(rolldown.pendingEthWithdrawals.selector)
+        //             .with_key(alice)
+        //             .read_uint(),
+        //         withdraw_amount);
+        //
+        // uint withdraw_from_pending = 200;
+        //
+        // vm.startPrank(alice);
+        // vm.expectEmit(true, true, false, true);
+        // emit IRolldownPrimitives.PendingEthWithdrawn(alice, withdraw_from_pending);
+        // rolldown.withdraw_pending_eth(withdraw_from_pending);
+        // vm.stopPrank();
+        //
+        // assertEq(stdstore
+        //             .target(address(rolldown))
+        //             .sig(rolldown.pendingEthWithdrawals.selector)
+        //             .with_key(alice)
+        //             .read_uint(),
+        //         withdraw_amount - withdraw_from_pending);
+        // assertEq(alice.balance - aliceBalanceAfterDeposit, withdraw_from_pending);
+        // assertEq(contractBalanceAfterDeposit - contract_address.balance, withdraw_from_pending);
     }
 
     function testExecuteDeposit() public {
