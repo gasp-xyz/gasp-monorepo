@@ -77,13 +77,13 @@ func (w *AvsWriter) SendNewTaskVerifyBlock(ctx context.Context, blockNumber *big
 	return newTaskCreatedEvent.Task, newTaskCreatedEvent.TaskIndex, nil
 }
 
-func (w *AvsWriter) SendAggregatedResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerTask, taskResponse taskmanager.IFinalizerTaskManagerTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error) {
+func (w *AvsWriter) SendAggregatedResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerTask, taskResponse taskmanager.IFinalizerTaskManagerTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState taskmanager.IGaspMultiRollupServicePrimitivesNonSignerStakesAndSignatureForOldState) (*types.Receipt, error) {
 	w.logger.Info("sending aggregated task response with the AVS's task manager")
 	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
 	if err != nil {
 		return nil, err
 	}
-	tx, err := w.AvsContractBindings.TaskManager.RespondToTask(noSendTxOpts, task, taskResponse, nonSignerStakesAndSignature)
+	tx, err := w.AvsContractBindings.TaskManager.RespondToTask(noSendTxOpts, task, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState)
 	if err != nil {
 		w.logger.Errorf("Error assembling RespondToTask tx")
 		return nil, err

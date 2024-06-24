@@ -32,6 +32,38 @@ interface IGaspMultiRollupServicePrimitives {
     //     address[] operatorRemoved;
     // }
 
+
+    struct NonSignerStakesAndSignatureForOldState {
+        // uint32[] nonSignerPubkeysIndicesforOperatorIdsRemovedForOldState;
+        // BN254.G1Point[] nonSignerPubkeysAddedForOldState;
+        BN254.G1Point[] nonSignerG1PubkeysForOldState;
+        BN254.G2Point apkG2ForOldState;
+        BN254.G1Point sigmaForOldSate;
+    }
+
+
+    struct OperatorStateInfo {
+        bool operatorsStateChanged;
+        bool operatorsStateProvided;
+        // uint8 quorumCountUpdate;
+        
+        uint8[] quorumsRemoved;
+        IGaspMultiRollupServicePrimitives.QuorumsAdded[] quorumsAdded;
+        IGaspMultiRollupServicePrimitives.QuorumsStakeUpdate[] quorumsStakeUpdate;
+        IGaspMultiRollupServicePrimitives.QuorumsApkUpdate[] quorumsApkUpdate;
+
+        bytes32[] OperatorsRemoved;
+        IGaspMultiRollupServicePrimitives.OperatorsAdded[] operatorsAdded; // Sorted!
+        IGaspMultiRollupServicePrimitives.OperatorsStakeUpdate[] operatorsStakeUpdate;
+        IGaspMultiRollupServicePrimitives.OperatorsQuorumCountUpdate[] operatorsQuorumCountUpdate;
+
+        // IGaspMultiRollupServicePrimitives.QuorumsApkUpdate quorumApkUpdate;
+        // IGaspMultiRollupServicePrimitives.QuorumsStakeUpdate quorumsStakeUpdate;
+        // IGaspMultiRollupServicePrimitives.OperatorStakeUpdate[] OperatorStakeUpdate;
+        // IGaspMultiRollupServicePrimitives.OperatorKeyUpdate[] operatorKeyUpdate;
+        // IGaspMultiRollupServicePrimitives.QuorumOperatorsUpdate[] quorumOperatorsUpdate;
+    }
+
     struct QuorumsAdded{
         uint8 quorumNumber;
         uint96 quorumStake;

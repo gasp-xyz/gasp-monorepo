@@ -29,19 +29,19 @@ abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
 
     bytes32 public latestPendingStateHash;
 
-    uint32 public latestCompletedTaskNumber;
+    // uint32 public latestCompletedTaskNumber;
     uint32 public latestCompletedTaskCreatedBlock;
 
     bytes public quorumNumbers;
     uint32 public quorumThresholdPercentage;
     
-    mapping(uint8 => uint96) public QuorumToStakes;
+    mapping(uint8 => uint96) public quorumToStakes;
     mapping(bytes32 => mapping(uint8 => uint96)) public operatorAndQuorumToStakes;
 
-    mapping(uint8 => BN254.G1Point) public QourumApk;
+    mapping(uint8 => BN254.G1Point) public qourumApk;
     // mapping(uint8 => mapping(bytes32 => bool)) public QuorumOperators;
-    mapping(bytes32 => BN254.G1Point) public OperatorIdPubKey;
-    mapping(bytes32 => uint8) public OperatorIdQuorumCount;
+    // mapping(bytes32 => BN254.G1Point) public OperatorIdPubKey;
+    mapping(bytes32 => uint8) public operatorIdQuorumCount;
 
     // mapping(bytes32 => address) public OperatorIdToOperator;
 

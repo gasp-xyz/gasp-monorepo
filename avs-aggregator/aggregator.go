@@ -222,6 +222,9 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		QuorumApkIndices:             blsAggServiceResp.QuorumApkIndices,
 		TotalStakeIndices:            blsAggServiceResp.TotalStakeIndices,
 		NonSignerStakeIndices:        blsAggServiceResp.NonSignerStakeIndices,
+	}
+
+	NonSignerStakesAndSignatureForOldState := taskmanager.IGaspMultiRollupServicePrimitivesNonSignerStakesAndSignatureForOldState{
 		NonSignerPubkeysIndicesforOperatorIdsRemovedForOldState: blsAggServiceResp.NonSignerPubkeysIndicesforOperatorIdsRemovedForOldState,
 		NonSignerPubkeysAddedForOldState:                        NonSignerPubkeysAddedForOldState,
 		ApkG2forOldState:                                        core.ConvertToBN254G2Point(blsAggServiceResp.OldSignersApkG2),
@@ -236,7 +239,7 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 	taskResponse := agg.taskResponses[blsAggServiceResp.TaskIndex][blsAggServiceResp.TaskResponseDigest]
 	agg.taskResponsesMu.RUnlock()
 
-	r, err := agg.ethRpc.AvsWriter.SendAggregatedResponse(context.Background(), task, taskResponse, nonSignerStakesAndSignature)
+	r, err := agg.ethRpc.AvsWriter.SendAggregatedResponse(context.Background(), task, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to respond to task", "task", task, "err", err)
 	}

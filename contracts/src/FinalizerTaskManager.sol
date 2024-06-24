@@ -13,6 +13,7 @@ import {BLSApkRegistry} from "@eigenlayer-middleware/src/BLSApkRegistry.sol";
 import {RegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
 import {BLSSignatureChecker, IRegistryCoordinator} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
 import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
+import "./IGaspMultiRollupServicePrimitives.sol";
 
 import "./IFinalizerTaskManager.sol";
 
@@ -137,7 +138,8 @@ contract FinalizerTaskManager is
     function respondToTask(
         Task calldata task,
         TaskResponse calldata taskResponse,
-        NonSignerStakesAndSignature memory nonSignerStakesAndSignature
+        NonSignerStakesAndSignature memory nonSignerStakesAndSignature,
+        IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState
     ) external onlyAggregator {
         uint32 taskCreatedBlock = task.taskCreatedBlock;
         bytes calldata quorumNumbers = task.quorumNumbers;
