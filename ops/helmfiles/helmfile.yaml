@@ -4,16 +4,13 @@ environments:
      - config/default.yaml
   fungible:
     values:
-     - config/default.yaml
      - config/fungible.yaml
   dev:
     values:
-    - config/default.yaml
-    - config/dev.yaml
+      - config/dev.yaml
   frontend:
     values:
-    - config/default.yaml
-    - config/frontend.yaml
+      - config/frontend.yaml
   testnet:
     values:
      - config/testnet.yaml
@@ -45,7 +42,7 @@ releases:
   
   - name: evm-node-arb
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.evmNodeEnabled }}
+    installed: {{ and .Values.evmNodeEnabled .Values.enableArbitrumServices | toYaml }}
     chart: ../helm-charts/evm-node
     values:
       - image:
@@ -72,7 +69,7 @@ releases:
   
   - name: avs-aggregator-arb
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.aggregatorEnabled }}
+    installed: {{ and .Values.aggregatorEnabled .Values.enableArbitrumServices | toYaml }}
     chart: ../helm-charts/rollup-node
     values:
       - image:
@@ -102,7 +99,7 @@ releases:
   
   - name: avs-finalizer-arb
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.finalizerEnabled }}
+    installed: {{ and .Values.finalizerEnabled .Values.enableArbitrumServices }}
     chart: ../helm-charts/rollup-node
     values:
       - image:
@@ -136,7 +133,7 @@ releases:
   
   - name: avs-finalizer-arb-2
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.secondFinalizerEnabled }}
+    installed: {{ and .Values.secondFinalizerEnabled .Values.enableArbitrumServices }}
     chart: ../helm-charts/rollup-node
     values:
       - image:
@@ -166,7 +163,7 @@ releases:
   
   - name: rollup-updater-arb
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.updaterEnabled }}
+    installed: {{ and .Values.updaterEnabled .Values.enableArbitrumServices }}
     chart: ../helm-charts/rollup-updater
     values:
       - image:
@@ -192,7 +189,7 @@ releases:
 
   - name: rollup-sequencer-arb
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.sequencerEnabled }}
+    installed: {{ and .Values.sequencerEnabled .Values.enableArbitrumServices }}
     chart: ../helm-charts/rollup-sequencer
     values:
       - image:
@@ -218,7 +215,7 @@ releases:
   
   - name: rollup-sequencer-arb-2
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.secondSequencerEnabled }}
+    installed: {{ and .Values.secondSequencerEnabled .Values.enableArbitrumServices }}
     chart: ../helm-charts/rollup-sequencer
     values:
       - image:
@@ -262,7 +259,7 @@ releases:
           
   - name: blockscout-arb
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.blockscoutEnabled }}
+    installed: {{ and .Values.blockscoutEnabled .Values.enableArbitrumServices }}
     chart: ethereum-helm-charts/blockscout
     values:
       - config:
@@ -301,19 +298,20 @@ releases:
           tag: {{ .Values.collator.image.tag | quote }}
         environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
         chain: {{ .Values.collator.chain | quote }}
-        domainZone: {{ .Values.collator.domainZone | quote }}
-        command: {{ .Values.collator.command | quote }}
-        isParachain: {{ .Values.collator.isParachain }}
-        isCollator: {{ .Values.collator.isCollator }}
+        domainZone: gasp.xyz
+        command: '/app/node'
+        isParachain: false
+        isCollator: false
+        role: collator
         disableChainspecGeneration: {{ .Values.collator.disableChainspecGeneration }}
-        role: {{ .Values.collator.role | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
-        enablePodMonitoringCollectors: {{ .Values.collator.enablePodMonitoringCollectors }}
         enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
         storageClass: {{ .Values.collator.storageClass | quote }}
         storageSize: {{ .Values.collator.storageSize | quote }}
-        resources: {{ .Values.collator.resources | toYaml | nindent 10 }}
+        resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
+        tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
+        nodeSelector: {{ .Values | getOrNil "collator.nodeSelector" | toYaml | nindent 10 }}
         # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
         customNodeKey: '5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef'
         bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
@@ -334,21 +332,20 @@ releases:
           tag: {{ .Values.collator.image.tag | quote }}
         environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
         chain: {{ .Values.collator.chain | quote }}
-        domainZone: {{ .Values.collator.domainZone | quote }}
-        command: {{ .Values.collator.command | quote }}
-        isParachain: {{ .Values.collator.isParachain }}
-        isCollator: {{ .Values.collator.isCollator }}
+        domainZone: gasp.xyz
+        command: '/app/node'
+        isParachain: false
+        isCollator: false
+        role: collator
         disableChainspecGeneration: {{ .Values.collator.disableChainspecGeneration }}
-        role: {{ .Values.collator.role | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
-        enablePodMonitoringCollectors: {{ .Values.collator.enablePodMonitoringCollectors }}
         enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
         storageClass: {{ .Values.collator.storageClass | quote }}
         storageSize: {{ .Values.collator.storageSize | quote }}
-        resources: {{ .Values.collator.resources | toYaml | nindent 10 }}
-        tolerations: {{ .Values.collator.tolerations | toYaml | nindent 10 }}
-        nodeSelector: {{ .Values.collator.nodeSelector | toYaml | nindent 10 }}
+        resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
+        tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
+        nodeSelector: {{ .Values | getOrNil "collator.nodeSelector" | toYaml | nindent 10 }}
         # Identity ID: 12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
         customNodeKey: 'bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b'
         bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
