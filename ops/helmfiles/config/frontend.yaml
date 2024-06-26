@@ -88,7 +88,7 @@ aggregatorEnvSecrets:
 #####################
 # finalizer configs #
 #####################
-secondFinalizerEnabled: true
+secondFinalizerEnabled: false
 finalizerEnabled: true
 finalizerEnableServiceMonitorCollectors: true
 finalizerEnvSecrets: {}
@@ -123,7 +123,7 @@ updaterEnvArb:
 # rollup-sequencer configs #
 ############################
 sequencerEnabled: true
-secondSequencerEnabled: true
+secondSequencerEnabled: false
 
 firstSequencerMnemonicEth: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
 secondSequencerMnemonicEth: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
