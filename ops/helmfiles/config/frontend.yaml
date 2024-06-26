@@ -21,10 +21,17 @@ collator:
     image: paritytech/ws-health-exporter:bc071a44-20230830
     env:
       WSHE_NODE_MIN_PEERS: 2
+  resources:
+    limits:
+      cpu: "4"
+      memory: 12Gi
+    requests:
+      cpu: "4"
+      memory: 12Gi
   tolerations:
     - key: production
       operator: Equal
-      value: 'true'
+      value: "true"
       effect: NoSchedule
   nodeSelector:
     production: 'true'
@@ -115,7 +122,6 @@ updaterEnvArb:
 ############################
 sequencerEnabled: true
 secondSequencerEnabled: true
-
 
 firstSequencerMnemonicEth: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
 secondSequencerMnemonicEth: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
