@@ -58,7 +58,24 @@ contract MultiStage is Script, Utils, Test {
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
         rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
 
+      }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("arbitrum-sepolia"))){
+
+        console.log("################################################################################");
+        console.log("Deploying rolldown contracts");
+        console.log("################################################################################");
+        RolldownDeployer rolldownDeployer = new RolldownDeployer();
+        rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
+
+      }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("ethereum-holesky"))){
+
+        console.log("################################################################################");
+        console.log("Deploying rolldown contracts");
+        console.log("################################################################################");
+        RolldownDeployer rolldownDeployer = new RolldownDeployer();
+        rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+
       }else{
+ 
         //TODO: ethereum-prod
         //TODO: arbitrum-prod
         //TODO: ...
