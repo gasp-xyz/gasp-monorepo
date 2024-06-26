@@ -62,18 +62,34 @@ contract Utils is Script {
             return "UNKNOWN";
         }
     }
+    function calculateInputPath(
+        string memory inputfilename
+    ) internal view returns (string memory) {
+        string memory inputdir = string.concat(
+            vm.projectRoot(),
+            "/script/input/"
+        );
+        string memory chaindir = string.concat(vm.toString(block.chainid), "/");
+        string memory file = string.concat(inputfilename, ".json");
+        return string.concat(inputdir, chaindir, file);
+    }
+
+
+    // Forge scripts best practice: https://book.getfoundry.sh/tutorials/best-practices#scripts
+    function inputExists(
+        string memory inputFileName
+    ) internal returns (bool) {
+        string memory input = calculateInputPath(inputFileName);
+        console.log(input);
+        return vm.exists(calculateInputPath(inputFileName));
+    }
+
 
     // Forge scripts best practice: https://book.getfoundry.sh/tutorials/best-practices#scripts
     function readInput(
         string memory inputFileName
     ) internal view returns (string memory) {
-        string memory inputDir = string.concat(
-            vm.projectRoot(),
-            "/script/input/"
-        );
-        string memory chainDir = string.concat(vm.toString(block.chainid), "/");
-        string memory file = string.concat(inputFileName, ".json");
-        return vm.readFile(string.concat(inputDir, chainDir, file));
+        return vm.readFile(calculateInputPath(inputFileName));
     }
 
     function readConfig(
