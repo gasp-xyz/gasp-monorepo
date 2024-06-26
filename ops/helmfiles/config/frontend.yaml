@@ -11,7 +11,7 @@ collator:
   image:
     repository: mangatasolutions/rollup-node
     tag: b6f5f6c13ff851bfdfb36d01e0d8d67fe7c5bcc9
-  chain: ''
+  disableChainspecGeneration: true
   customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-local-fd0e82a316c1f0f940211ca76b7de541d6f7689a-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain

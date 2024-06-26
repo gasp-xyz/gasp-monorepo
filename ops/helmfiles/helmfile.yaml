@@ -300,13 +300,13 @@ releases:
           repository: {{ .Values.collator.image.repository | quote }}
           tag: {{ .Values.collator.image.tag | quote }}
         environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-        chain: {{ .Values.collator.chain | quote }}
+        chain: {{ .Values | getOrNil "collator.chain" }}
+        disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
         domainZone: gasp.xyz
         command: '/app/node'
         isParachain: false
         isCollator: false
         role: collator
-        disableChainspecGeneration: {{ .Values.collator.disableChainspecGeneration }}
         remoteCluster: {{ .Values.remoteCluster }}
         wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
         enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
@@ -334,13 +334,13 @@ releases:
           repository: {{ .Values.collator.image.repository | quote }}
           tag: {{ .Values.collator.image.tag | quote }}
         environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-        chain: {{ .Values.collator.chain | quote }}
+        chain: {{ .Values | getOrNil "collator.chain" }}
+        disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
         domainZone: gasp.xyz
         command: '/app/node'
         isParachain: false
         isCollator: false
         role: collator
-        disableChainspecGeneration: {{ .Values.collator.disableChainspecGeneration }}
         remoteCluster: {{ .Values.remoteCluster }}
         wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
         enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
