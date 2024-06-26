@@ -302,6 +302,7 @@ releases:
         environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
         chain: {{ .Values | getOrNil "collator.chain" }}
         disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
+        customChainspecUrl: {{ .Values | getOrNil "collator.customChainspecUrl" }}
         domainZone: gasp.xyz
         command: '/app/node'
         isParachain: false
@@ -336,6 +337,7 @@ releases:
         environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
         chain: {{ .Values | getOrNil "collator.chain" }}
         disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
+        customChainspecUrl: {{ .Values | getOrNil "collator.customChainspecUrl" }}
         domainZone: gasp.xyz
         command: '/app/node'
         isParachain: false
