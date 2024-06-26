@@ -316,8 +316,6 @@ releases:
         tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
         nodeSelector: {{ .Values | getOrNil "collator.firstCollatorNodeSelector" | toYaml | nindent 10 }}
         # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-        tolerations: {{ .Values.collator.tolerations | toYaml | nindent 10 }}
-        nodeSelector: {{ .Values.collator.nodeSelector | toYaml | nindent 10 }}
         customNodeKey: '5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef'
         bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
         extraArgs:
