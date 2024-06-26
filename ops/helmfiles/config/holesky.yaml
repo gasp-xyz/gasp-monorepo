@@ -1,7 +1,7 @@
 remoteCluster: true
 
-evmNodeEnabled: true
-blockscoutEnabled: true
+evmNodeEnabled: false
+blockscoutEnabled: false
 enableArbitrumServices: true
 
 #####################
@@ -11,12 +11,12 @@ collatorsEnabled: true
 collator:
   image:
     repository: mangatasolutions/rollup-node
-    tag: eth-rollup-develop
-  chain: rollup-local-seq
-  disableChainspecGeneration: true
-  storageClass: standard
-  storageSize: 20Gi
+    tag: b6f5f6c13ff851bfdfb36d01e0d8d67fe7c5bcc9
+  chain: ''
+  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-local-fd0e82a316c1f0f940211ca76b7de541d6f7689a-raw.json
   enableServiceMonitorCollectors: true
+  storageClass: node-data-volume-retain
+  storageSize: 50Gi
   wsHealthExporter:
     enabled: true
     image: paritytech/ws-health-exporter:bc071a44-20230830
@@ -29,9 +29,10 @@ collator:
       effect: NoSchedule
   firstCollatorNodeSelector:
     production: 'true'
+    topology.kubernetes.io/zone: europe-west1-b
   secondCollatorNodeSelector:
     production: 'true'
-
+    topology.kubernetes.io/zone: europe-west1-c
 
 ####################
 # evm-node configs #

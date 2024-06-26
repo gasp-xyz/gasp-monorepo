@@ -26,7 +26,9 @@ collator:
       operator: Equal
       value: 'true'
       effect: NoSchedule
-  nodeSelector:
+  firstCollatorNodeSelector:
+    production: 'true'
+  secondCollatorNodeSelector:
     production: 'true'
 
 ####################
