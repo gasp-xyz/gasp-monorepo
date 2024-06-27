@@ -11,9 +11,9 @@ collatorsEnabled: true
 collator:
   image:
     repository: mangatasolutions/rollup-node
-    tag: b6f5f6c13ff851bfdfb36d01e0d8d67fe7c5bcc9
+    tag: 3a07824d8b8a6ad027424629b814a5edb61654cf
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-local-fd0e82a316c1f0f940211ca76b7de541d6f7689a-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 50Gi
@@ -25,13 +25,13 @@ collator:
   tolerations:
     - key: production
       operator: Equal
-      value: 'true'
+      value: "true"
       effect: NoSchedule
   firstCollatorNodeSelector:
-    production: 'true'
+    production: "true"
     topology.kubernetes.io/zone: europe-west1-b
   secondCollatorNodeSelector:
-    production: 'true'
+    production: "true"
     topology.kubernetes.io/zone: europe-west1-c
 
 ####################
@@ -100,8 +100,8 @@ updaterEnvEth:
   CHAIN: "reth"
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: ws://collator-01:9944
-  EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
-  MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
+  EIGEN_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000"
+  MANGATA_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000"
   FINALIZATION_SOURCE: "relay"
 
 updaterChainUrlArb: ws://evm-node-arb:8546
@@ -110,19 +110,18 @@ updaterEnvArb:
   CHAIN: "reth"
   L1_CHAIN: "Arbitrum"
   MANGATA_NODE_URL: ws://collator-01:9944
-  EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
-  MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
+  EIGEN_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000"
+  MANGATA_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000"
   FINALIZATION_SOURCE: "relay"
-
 
 ############################
 # rollup-sequencer configs #
 ############################
-sequencerEnabled: true
+sequencerEnabled: false
 secondSequencerEnabled: false
 
-
-firstSequencerMnemonicEth: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
+firstSequencerMnemonicEth: "0x0000000000000000000000000000000000000000000000000000000000000000"
+# firstSequencerMnemonicEth: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
 secondSequencerMnemonicEth: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
 sequencerChainUrlEth: ws://evm-node-eth:8546
 sequencerEnvEth:
@@ -130,7 +129,8 @@ sequencerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650"
 
-firstSequencerMnemonicArb: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+firstSequencerMnemonicArb: "0x0000000000000000000000000000000000000000000000000000000000000000"
+# firstSequencerMnemonicArb: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
 secondSequencerMnemonicArb: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
 sequencerChainUrlArb: ws://evm-node-arb:8546
 sequencerEnvArb:
