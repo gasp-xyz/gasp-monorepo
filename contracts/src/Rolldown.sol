@@ -19,7 +19,7 @@ contract Rolldown is
 {
 
     address public constant ETH_TOKEN_ADDRESS =
-        0x5748395867463837537395739375937493733457;
+        0x0000000000000000000000000000000000000001;
 
     function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
         public
