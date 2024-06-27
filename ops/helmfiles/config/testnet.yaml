@@ -1,14 +1,17 @@
 remoteCluster: true
 
 evmNodeEnabled: false
-aggregatorEnabled: true
-finalizerEnabled: true
-secondFinalizerEnabled: false
-updaterEnabled: true
-sequencerEnabled: true
-secondSequencerEnabled: false
+enableArbitrumServices: false
 
-env:
+#####################
+# collator configs #
+#####################
+collatorsEnabled: false
+
+####################
+# evm-node configs #
+####################
+envEth:
   # rpc
   SUBSTRATE_RPC_URL: wss://rollup-testnet-rpc.gasp.xyz:443
   # contracts
@@ -32,12 +35,21 @@ env:
   RUST_LOG: avs=debug
   OPT_IN_AT_STARTUP: 'true'
 
+######################
+# aggregator configs #
+######################
+aggregatorEnabled: true
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-password
   ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
   ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/holesky-wss-rpc-url
 
+#####################
+# finalizer configs #
+#####################
+secondFinalizerEnabled: false
+finalizerEnabled: true
 finalizerEnableServiceMonitorCollectors: true
 finalizerEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-operator-1-ecdsa-key
@@ -47,22 +59,53 @@ finalizerEnvSecrets:
   ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
   ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/holesky-wss-rpc-url
 
-#rollup-updater configs
+###########################
+# rollup-updater configs #
+###########################
+updaterEnabled: true
+
 updaterEthChainUrl: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
 updaterMnemonicEth: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
-updaterEnv:
+updaterEnvEth:
+  L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-testnet.mangata.online
-  MANGATA_CONTRACT_ADDRESS: "0x329D0C4a58B3cEfdb40c5513E155228f6Cc7B6c5"
-  EIGEN_CONTRACT_ADDRESS: "0x998AaF69F731009d4E2d470E974766F1EB8f5142"
+  EIGEN_CONTRACT_ADDRESS: "0x329D0C4a58B3cEfdb40c5513E155228f6Cc7B6c5"
+  MANGATA_CONTRACT_ADDRESS: "0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   CHAIN: "holesky"
   FINALIZATION_SOURCE: "relay"
   LIMIT: "25"
 
-# rollup-sequencer configs
-firstSequencerMnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
-secondSequencerMnemonic: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
-sequencerEthChainUrl: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
-sequencerEnv:
+updaterChainUrlArb: ws://evm-node-arb:8546
+updaterMnemonicArb: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+updaterEnvArb:
+  CHAIN: "reth"
+  L1_CHAIN: "Arbitrum"
+  MANGATA_NODE_URL: ws://collator-01:9944
+  EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
+  MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
+  FINALIZATION_SOURCE: "relay"
+
+
+############################
+# rollup-sequencer configs #
+############################
+sequencerEnabled: true
+secondSequencerEnabled: false
+
+firstSequencerMnemonicEth: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
+secondSequencerMnemonicEth: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
+sequencerChainUrlEth: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
+sequencerEnvEth:
+  L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-testnet.mangata.online
   MANGATA_CONTRACT_ADDRESS: "0x329D0C4a58B3cEfdb40c5513E155228f6Cc7B6c5"
   LIMIT: "500"
+
+firstSequencerMnemonicArb: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+secondSequencerMnemonicArb: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
+sequencerChainUrlArb: ws://evm-node-arb:8546
+sequencerEnvArb:
+  CHAIN: "reth"
+  L1_CHAIN: "Arbitrum"
+  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
