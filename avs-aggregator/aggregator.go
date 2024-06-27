@@ -205,9 +205,9 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		log = append(log, hex.EncodeToString(id[:]))
 	}
 	agg.logger.Info("Response non signer ids", "nonSignerIds", log)
-	NonSignerPubkeysAddedForOldState := []taskmanager.BN254G1Point{}
-	for _, nonSignerPubkeyOld := range blsAggServiceResp.NonSignerPubkeysAddedForOldState {
-		NonSignerPubkeysAddedForOldState = append(NonSignerPubkeysAddedForOldState, core.ConvertToBN254G1Point(nonSignerPubkeyOld))
+	NonSignerG1PubkeysForOldState := []taskmanager.BN254G1Point{}
+	for _, nonSignerPubkeyOld := range blsAggServiceResp.NonSignerG1PubkeysForOldState {
+		NonSignerG1PubkeysForOldState = append(NonSignerG1PubkeysForOldState, core.ConvertToBN254G1Point(nonSignerPubkeyOld))
 	}
 	quorumApks := []taskmanager.BN254G1Point{}
 	for _, quorumApk := range blsAggServiceResp.QuorumApksG1 {
@@ -225,10 +225,9 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 	}
 
 	NonSignerStakesAndSignatureForOldState := taskmanager.IGaspMultiRollupServicePrimitivesNonSignerStakesAndSignatureForOldState{
-		NonSignerPubkeysIndicesforOperatorIdsRemovedForOldState: blsAggServiceResp.NonSignerPubkeysIndicesforOperatorIdsRemovedForOldState,
-		NonSignerPubkeysAddedForOldState:                        NonSignerPubkeysAddedForOldState,
-		ApkG2forOldState:                                        core.ConvertToBN254G2Point(blsAggServiceResp.OldSignersApkG2),
-		SigmaforOldSate:                                         core.ConvertToBN254G1Point(blsAggServiceResp.OldSignersAggSigG1.G1Point),
+		NonSignerG1PubkeysForOldState: NonSignerG1PubkeysForOldState,
+		ApkG2ForOldState:                                        core.ConvertToBN254G2Point(blsAggServiceResp.OldSignersApkG2),
+		SigmaForOldState:                                         core.ConvertToBN254G1Point(blsAggServiceResp.OldSignersAggSigG1.G1Point),
 	}
 
 	agg.logger.Info("sending aggregated response onchain.", "taskIndex", blsAggServiceResp.TaskIndex)

@@ -11,6 +11,7 @@ interface IFinalizerTaskManager {
     // When we have some response from OPs
     // note we want to keep track of responded tasks that did not meet the completion criteria 
     event TaskResponded(
+        uint32 indexed taskIndex,
         TaskResponse taskResponse,
         TaskResponseMetadata taskResponseMetadata
     );
@@ -20,6 +21,8 @@ interface IFinalizerTaskManager {
 
     // STRUCTS
     struct Task {
+        // the task number
+        uint32 taskNum;
         // L2 block number which operators are required to execute and provide proofs for
         uint256 blockNumber;
         // used for expiration checks
@@ -55,27 +58,6 @@ interface IFinalizerTaskManager {
         bytes32 pendingStateHash;
     }
 
-    struct OperatorStateInfo {
-        bool operatorsStateChanged;
-        bool operatorsStateProvided;
-        // uint8 quorumCountUpdate;
-        
-        uint8[] quorumsRemoved;
-        IGaspMultiRollupServicePrimitives.QuorumsAdded[] quorumsAdded;
-        IGaspMultiRollupServicePrimitives.QuorumsStakeUpdate[] quorumsStakeUpdate;
-        IGaspMultiRollupServicePrimitives.QuorumsApkUpdate[] quorumsApkUpdate;
-
-        bytes32[] OperatorsRemoved;
-        IGaspMultiRollupServicePrimitives.OperatorsAdded[] operatorsAdded; // Sorted!
-        IGaspMultiRollupServicePrimitives.OperatorsStakeUpdate[] operatorsStakeUpdate;
-        IGaspMultiRollupServicePrimitives.OperatorsQuorumCountUpdate[] operatorsQuorumCountUpdate;
-
-        // IGaspMultiRollupServicePrimitives.QuorumsApkUpdate quorumApkUpdate;
-        // IGaspMultiRollupServicePrimitives.QuorumsStakeUpdate quorumsStakeUpdate;
-        // IGaspMultiRollupServicePrimitives.OperatorStakeUpdate[] OperatorStakeUpdate;
-        // IGaspMultiRollupServicePrimitives.OperatorKeyUpdate[] operatorKeyUpdate;
-        // IGaspMultiRollupServicePrimitives.QuorumOperatorsUpdate[] quorumOperatorsUpdate;
-    }
 
     // Extra information related to taskResponse, which is filled inside the contract.
     // It thus cannot be signed by operators, so we keep it in a separate struct than TaskResponse

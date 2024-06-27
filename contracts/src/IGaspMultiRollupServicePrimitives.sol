@@ -5,6 +5,10 @@ import "@eigenlayer-middleware/src/libraries/BN254.sol";
 
 interface IGaspMultiRollupServicePrimitives {
 
+    event EigenUpdateProcessed(
+        uint32 taskNumber,
+        uint32 taskCreatedBlock
+    );
 
     // struct OperatorStakeUpdate{
     //     address operator;
@@ -38,13 +42,12 @@ interface IGaspMultiRollupServicePrimitives {
         // BN254.G1Point[] nonSignerPubkeysAddedForOldState;
         BN254.G1Point[] nonSignerG1PubkeysForOldState;
         BN254.G2Point apkG2ForOldState;
-        BN254.G1Point sigmaForOldSate;
+        BN254.G1Point sigmaForOldState;
     }
 
 
     struct OperatorStateInfo {
         bool operatorsStateChanged;
-        bool operatorsStateProvided;
         // uint8 quorumCountUpdate;
         
         uint8[] quorumsRemoved;

@@ -29,7 +29,7 @@ abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
 
     bytes32 public latestPendingStateHash;
 
-    // uint32 public latestCompletedTaskNumber;
+    uint32 public latestCompletedTaskNumber;
     uint32 public latestCompletedTaskCreatedBlock;
 
     bytes public quorumNumbers;

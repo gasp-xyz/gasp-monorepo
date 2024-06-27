@@ -1,0 +1,40 @@
+[workspace]
+members = [
+    "bindings",
+]
+
+[package]
+name = "gasp-syncer"
+version = "0.1.0"
+edition = "2021"
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+
+[dependencies]
+bindings = { path = "./bindings" }
+
+aes = "0.8.0"
+clap = { version = "4.4.8", features = ["derive", "env"] }
+color-eyre = "0.6"
+ctr = "0.9.0"
+eth-keystore = "0.5.0"
+ethers = { version = "2.0", features = ["rustls", "ws"] }
+eyre = "0.6.8"
+hex = { version = "0.4.3", default-features = false }
+log = { version = "0.4.17" }
+rand = "0.8.5"
+scrypt = "0.10.0"
+serde = { version = "1.0.192", features = ["derive"] }
+serde_json = { version = "1.0.85" }
+tokio = { version = "1.37.0", features = ["full"] }
+tracing = "0.1.40"
+tracing-error = "0.2.0"
+tracing-subscriber = { version = "0.3.18", features = ["json", "env-filter"] }
+
+sp-runtime = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
+sp-core = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
+futures = "0.3.30"

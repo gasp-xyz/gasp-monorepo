@@ -476,7 +476,6 @@ impl Operator {
 
         let operator_state_info = OperatorStateInfo {
             operators_state_changed: operators_state_changed,
-            operators_state_provided: true,
             quorums_removed: quorums_removed,
             quorums_added: quorums_added,
             quorums_stake_update: quorums_stake_update,

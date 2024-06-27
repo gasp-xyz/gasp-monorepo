@@ -110,6 +110,7 @@ contract FinalizerTaskManager is
         );
         // create a new task struct
         Task memory newTask;
+        newTask.taskNum = latestTaskNum;
         newTask.blockNumber = blockNumber;
         newTask.taskCreatedBlock = uint32(block.number);
         newTask.quorumThresholdPercentage = quorumThresholdPercentage;
@@ -184,7 +185,7 @@ contract FinalizerTaskManager is
         allTaskResponses[taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
 
         // emitting event
-        emit TaskResponded(taskResponse, taskResponseMetadata);
+        emit TaskResponded(task.taskNum, taskResponse, taskResponseMetadata);
 
         // check that signatories own at least a threshold percentage of each quourm
         for (uint256 i = 0; i < quorumNumbers.length; i++) {
@@ -220,6 +221,6 @@ contract FinalizerTaskManager is
         return latestPendingStateHash;
     }
     
-    function dummyForOperatorStateInfoType(OperatorStateInfo calldata _operatorStateInfo) external view {
+    function dummyForOperatorStateInfoType(IGaspMultiRollupServicePrimitives.OperatorStateInfo calldata _operatorStateInfo) external view {
     }
 }

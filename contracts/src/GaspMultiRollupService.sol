@@ -6,35 +6,24 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/console.sol";
 
+import {BN254} from "@eigenlayer-middleware/src/libraries/BN254.sol";
 import "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
 import "@eigenlayer/contracts/permissions/Pausable.sol";
 import "./GaspMultiRollupServiceStorage.sol";
-
-
-    // Assumptions
-    // An operators BLS keys are unique and do not change for a given AVS
-    // quorum numbers are uint8
-    // Stakes (shares) are uint96  
-
-
-// We require that the minimum stake for all quorums is 1 to avoid issues with stake being 0 but apk registry having the op's g1PubKey. We may not need this? Update apk based on the opIds returned by getter
-// We require that staleStakesForbidden in bls signature checker is true. And that if withdrwal delay block is about 7 days, then task response is atmost about 1day and that on other L1s the staleness is max 3days? But how do we ensure that that other L1s are updated within say 2 days of responding on Eth and if not then brick accordingly? Maybe the updater can do this?
-// Maybe we do not need this - We require qourumNumbers to be static - let's just enforce a check in createNewTask - Maybe an extrinsic to use the check or not - Probably not we need to match on the other L1s
-// Maybe we do not need this - We require Threshold percentage to be static - Let's enforce that too - Maybe an extrinsic to use the check or not - Probably not we need to match on the other L1s
-// Do not init the operator_info service in the finalizer/operator! Do not put all the operator bls keys in the TaskResponse. Only the changes in stuff and the bls keys of the new ops
-// Do not double verify if delta is null
-// We may require to "correct" operator addresses returned from the operatorStateRetriever after the bls key roration is merged. We do not need it before that. We can do this correction by querying pubKeyHashToOperator at the relevant block number (dereg and rereg can't ahhpen in the same block so this at_block qurying should be reliable) 
-// We require that the quorum number be unique, perhaps impl req that they bve sorted so that it can be enforced
-// We currently presume that operators cant change their bls keys, if this changes then we need to alter the eigensdk to kee an in memory store of operatorIs to pubKeys, the current inmemdb has operatorAddr mappings
-// QuorumNumbers need to be sorted? Wait... Do they?
+import "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
+import "./IFinalizerTaskManager.sol";
+ 
 contract GaspMultiRollupService is
     Initializable,
     OwnableUpgradeable,
     Pausable,
     GaspMultiRollupServiceStorage
 {
+    using BN254 for BN254.G1Point;
+
     uint256 internal constant _THRESHOLD_DENOMINATOR = 100;
+    uint256 internal constant PAIRING_EQUALITY_CHECK_GAS = 120000;
 
     function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _updater, IRolldown _rolldown)
         public
@@ -60,7 +49,7 @@ contract GaspMultiRollupService is
         rolldown = _rolldown;
     }
 
-    function process_eigen_update(Task calldata task, TaskResponse calldata taskResponse, NonSignerStakesAndSignatureForOldState calldata nonSignerStakesAndSignatureForOldState, OperatorStateInfo calldata operatorStateInfo){
+    function process_eigen_update(IFinalizerTaskManager.Task calldata task, IFinalizerTaskManager.TaskResponse calldata taskResponse, NonSignerStakesAndSignatureForOldState calldata nonSignerStakesAndSignatureForOldState, OperatorStateInfo calldata operatorStateInfo) public {
 
         // Check if the taskResponse operator_state_info_hash match operatorStateInfo 
 
@@ -81,17 +70,11 @@ contract GaspMultiRollupService is
         //     return;
         // }
         
-        // 1. new state on eth old state for alt L1s - req bcoz can't use new state for alt L1s
-        // 2. no new state verification for alt L1 - no point - explain why
-        // 3. we need an external observer to detect differences between alt-l1 task responses and eth task responses and raise alert accordingly
-        // 4. if the this is the first task then don't check sigs
-        // 5. The updater will only be able to update at those blocks that the there is a task for
-        
         // if the this is the first task then don't check sigs
         if (latestCompletedTaskCreatedBlock !=0) {
-        quorumStakeTotals = checkSignatures(taskResponse.referenceTaskHash, nonSignerStakesAndSignatureForOldState);
+        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals = checkSignatures(taskResponse.referenceTaskHash, nonSignerStakesAndSignatureForOldState);
 
-        QuorumThresholdPercentage = quorumThresholdPercentage;
+        uint32 QuorumThresholdPercentage = quorumThresholdPercentage;
         // check that signatories own at least a threshold percentage of each quourm
         for (uint256 i = 0; i < quorumNumbers.length; i++) {
             // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
@@ -126,7 +109,7 @@ contract GaspMultiRollupService is
 
         for (uint256 i = 0; i < operatorStateInfo.OperatorsRemoved.length; i++) {
             for (uint256 j = 0; j < quorumNumbers.length; i++) {
-               delete operatorAndQuorumToStakes[operatorStateInfo.OperatorsRemoved[i]][quorumNumbers[j]];
+               delete operatorAndQuorumToStakes[operatorStateInfo.OperatorsRemoved[i]][uint8(quorumNumbers[j])];
             }
             delete operatorIdQuorumCount[operatorStateInfo.OperatorsRemoved[i]];
         }
@@ -134,14 +117,14 @@ contract GaspMultiRollupService is
         for (uint256 i = 0; i < operatorStateInfo.operatorsAdded.length; i++) {
             operatorIdQuorumCount[operatorStateInfo.operatorsAdded[i].operatorId] = operatorStateInfo.operatorsAdded[i].quorumCount;
 
-            for (uint256 j = 0; j < operatorStateInfo.operatorsAdded.quorumForStakes.length; j++) {
+            for (uint256 j = 0; j < operatorStateInfo.operatorsAdded[i].quorumForStakes.length; j++) {
                 operatorAndQuorumToStakes[operatorStateInfo.operatorsAdded[i].operatorId][operatorStateInfo.operatorsAdded[i].quorumForStakes[j]] = operatorStateInfo.operatorsAdded[i].quorumStakes[j];
             }
         }
 
         for (uint256 i = 0; i < operatorStateInfo.operatorsStakeUpdate.length; i++) {
 
-            for (uint256 j = 0; j < operatorStateInfo.operatorsStakeUpdate.quorumForStakes.length; j++) {
+            for (uint256 j = 0; j < operatorStateInfo.operatorsStakeUpdate[i].quorumForStakes.length; j++) {
                 operatorAndQuorumToStakes[operatorStateInfo.operatorsStakeUpdate[i].operatorId][operatorStateInfo.operatorsStakeUpdate[i].quorumForStakes[j]] = operatorStateInfo.operatorsStakeUpdate[i].quorumStakes[j];
             }
         }
@@ -151,10 +134,13 @@ contract GaspMultiRollupService is
         }
 
         latestPendingStateHash = taskResponse.pendingStateHash;
-        latestCompletedTaskCreatedBlock = task.quorumNumbers;
+        latestCompletedTaskNumber = task.taskNum;
+        latestCompletedTaskCreatedBlock = task.taskCreatedBlock;
 
         quorumNumbers = task.quorumNumbers;
-        quorumThresholdPercentage = task.taskCreatedBlock;
+        quorumThresholdPercentage = task.quorumThresholdPercentage;
+
+        emit EigenUpdateProcessed(task.taskNum, task.taskCreatedBlock);
         
     }
 
@@ -165,7 +151,7 @@ contract GaspMultiRollupService is
         public 
         view
         returns (
-            QuorumStakeTotals memory
+            IBLSSignatureChecker.QuorumStakeTotals memory
         )
     {
         // This method needs to calculate the aggregate pubkey for all signing operators across
@@ -176,18 +162,18 @@ contract GaspMultiRollupService is
         // negating that pubkey, then adding the aggregate pubkey for each quorum.
         BN254.G1Point memory apk = BN254.G1Point(0, 0);
 
-        uint32 memory quorumNumbersLength = quorumNumbers.length;
+        uint256 quorumNumbersLength = quorumNumbers.length;
 
         // For each quorum, we're also going to query the total stake for all registered operators
         // at the referenceBlockNumber, and derive the stake held by signers by subtracting out
         // stakes held by nonsigners.
-        QuorumStakeTotals memory stakeTotals;
+        IBLSSignatureChecker.QuorumStakeTotals memory stakeTotals;
         stakeTotals.totalStakeForQuorum = new uint96[](quorumNumbersLength);
         stakeTotals.signedStakeForQuorum = new uint96[](quorumNumbersLength);
 
-        nonSignersPubkeyHashes = new bytes32[](params.nonSignerPubkeys.length);
+        bytes32[] memory nonSignersPubkeyHashes = new bytes32[](params.nonSignerG1PubkeysForOldState.length);
 
-        quorumNumber = new uint8;
+        uint8 quorumNumber;
 
         {
 
@@ -227,7 +213,7 @@ contract GaspMultiRollupService is
             
             for (uint256 i = 0; i < quorumNumbersLength; i++) {
 
-                quorumNumber = quorumNumbers[i];
+                quorumNumber = uint8(quorumNumbers[i]);
                 
                 apk = apk.plus(qourumApk[quorumNumber]);
 
@@ -240,7 +226,7 @@ contract GaspMultiRollupService is
                 // if so, load their stake at referenceBlockNumber and subtract it from running stake signed
                 for (uint256 j = 0; j < params.nonSignerG1PubkeysForOldState.length; j++) {
                         stakeTotals.signedStakeForQuorum[i] -=
-                            operatorAndQuorumToStakes[params.nonSignerG1PubkeysForOldState[j]][quorumNumber];
+                            operatorAndQuorumToStakes[nonSignersPubkeyHashes[j]][quorumNumber];
                 }
             }
         }
