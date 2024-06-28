@@ -13,6 +13,9 @@ permissions:
   contents: 'read'
   id-token: 'write'
 
+env:
+    COINGECKO_API_KEY: ${{ secrets.ORG_COINGECKO_API_KEY}}
+
 jobs:
   build:
     name: Deploy to Google App Angine
@@ -49,14 +52,14 @@ jobs:
 #            COINGECKO_API_KEY=${{ secrets.ORG_COINGECKO_API_KEY }}
 #          working_directory: stash-dev
 #          deliverables: app-rollup-dev.yaml
-#
-#      # TODO: temporary disable smoke test
-#      # - name: smoke test
-#      #   run: |
-#      #     curl "${{ steps.deploy.outputs.url }}"
-#      #     echo "Deployed to ${{ steps.deploy.outputs.url }}"
-#
-#      # - name: Delete old versions
-#      #   # This command deletes all versions except the last 14
-#      #   # Ref: https://stackoverflow.com/a/66911696/9645556
-#      #   run: gcloud app versions list --service=mangata-stash-rollup-dev --format="value(version.id)" --sort-by="~version.createTime" | tail -n +15 | xargs -r gcloud app versions delete --quiet
+
+      # TODO: temporary disable smoke test
+      # - name: smoke test
+      #   run: |
+      #     curl "${{ steps.deploy.outputs.url }}"
+      #     echo "Deployed to ${{ steps.deploy.outputs.url }}"
+
+      # - name: Delete old versions
+      #   # This command deletes all versions except the last 14
+      #   # Ref: https://stackoverflow.com/a/66911696/9645556
+      #   run: gcloud app versions list --service=mangata-stash-rollup-dev --format="value(version.id)" --sort-by="~version.createTime" | tail -n +15 | xargs -r gcloud app versions delete --quiet
