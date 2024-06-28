@@ -12,6 +12,9 @@ permissions:
   contents: 'read'
   id-token: 'write'
 
+env:
+COINGECKO_API_KEY: ${{ secrets.ORG_COINGECKO_API_KEY }}
+
 jobs:
   build:
     name: Deploy to Google App Angine
@@ -45,7 +48,6 @@ jobs:
           project_id: ${{ steps.auth.outputs.project_id }}
           env_vars: |-
             TIMESERIES_PASS=${{ secrets.TIMESERIES_PASS_EIGEN }}
-            COINGECKO_API_KEY=${{ secrets.ORG_COINGECKO_API_KEY }}
           working_directory: stash-dev
           deliverables: app-rollup-testnet.yaml
       
