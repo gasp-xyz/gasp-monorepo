@@ -16,7 +16,7 @@ Joi.object({
     )
 })
 
-    describe.skip('APi tests: price-history/pair', () => {
+    describe('APi tests: price-history/pair', () => {
         const pair = "KSM/MGX"
         const reversedPair = "MGX/KSM"
         it("GET pair KSM/MGX validate schema", async () => {
@@ -53,7 +53,7 @@ Joi.object({
         })
     })
 
-    describe.skip('API Errors: price-history/pair', () => {
+    describe('API Errors: price-history/pair', () => {
         it("GET pools/foo: token does not exist Expect validation error", async () => {
             await supertest(app)
                 .get("/price-history/pair/MGX/foo")
