@@ -48,6 +48,7 @@ jobs:
           project_id: ${{ steps.auth.outputs.project_id }}
           env_vars: |-
             TIMESERIES_PASS=${{ secrets.TIMESERIES_PASS_EIGEN }}
+            COINGECKO_API_KEY=${{ secrets.ORG_COINGECKO_API_KEY }}
           working_directory: stash-dev
           deliverables: app-rollup-testnet.yaml
       
