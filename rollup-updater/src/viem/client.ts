@@ -8,7 +8,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import {ETH_CHAIN_URL, WALLET_PRIVATE_KEY} from "../common/constants.js";
-import {holesky} from "viem/chains";
+import {holesky, arbitrumSepolia} from "viem/chains";
 
 export const getPublicClient = (options: PublicClientConfig) => {
     return createPublicClient({ ...options });
@@ -43,6 +43,8 @@ export function getChain() {
                 },
             },
         });
+    } else if (process.env.CHAIN == "arbitrum"){
+        return arbitrumSepolia;
     } else {
         return defineChain({
             id: 31337,

@@ -1,0 +1,18 @@
+{
+  "addresses": {
+    "gaspErc20Mock": "0xB1F013a1e24aaA62b75eF6ca2BEAF0eeAE8A939a",
+    "rolldown": "0x998AaF69F731009d4E2d470E974766F1EB8f5142",
+    "rolldownImplementation": "0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1",
+    "rolldownPauseReg": "0x74CD30e6E572b242b75e5a5e882E2Ca4974f438A",
+    "rolldownProxyAdmin": "0x57D7De361f1D2cFa7E33241A7C8Cbff9BbB25E26"
+  },
+  "chainInfo": {
+    "chainId": 421614,
+    "deploymentBlock": 58877279
+  },
+  "permissions": {
+    "rolldownOwner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "rolldownUpdater": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "rolldownUpgrader": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337"
+  }
+}

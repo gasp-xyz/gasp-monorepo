@@ -95,3 +95,5 @@ out
 /ops/blockscout-docker-compose/tmp
 
 .continueignore
+
+.decrypted*
