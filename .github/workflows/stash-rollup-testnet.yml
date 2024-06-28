@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - chore/fix_and_uncomment_tests/MGX-1221
     paths:
       - "stash-dev/**/*"
       - ".github/**/rollup-testnet**"
