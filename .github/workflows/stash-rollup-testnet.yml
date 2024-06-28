@@ -14,7 +14,7 @@ permissions:
   id-token: 'write'
 
 env:
-COINGECKO_API_KEY: ${{ secrets.ORG_COINGECKO_API_KEY }}
+  COINGECKO_API_KEY: ${{ secrets.ORG_COINGECKO_API_KEY }}
 
 jobs:
   build:
