@@ -19,6 +19,7 @@ Joi.object({
     describe('APi tests: price-history/pair', () => {
         const pair = "KSM/MGX"
         const reversedPair = "MGX/KSM"
+        console.log('Coingecko api key:', process.env.COINGECKO_API_KEY)
         it("GET pair KSM/MGX validate schema", async () => {
             const ksmMgx = await supertest(app)
                 .get("/price-history/pair/" + pair)
