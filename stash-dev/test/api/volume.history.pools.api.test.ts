@@ -7,7 +7,7 @@ import { MAX_DAYS, MAX_INTERVAL } from "./utils";
 
 const ERROR_MSG_POOL_NOT_FOUND = "this must be one of the following values: KSM-MGX, MGX-KSM, MGX-TUR, TUR-MGX";
 
-    describe.skip('APi tests: tvl-history/pools', () => {
+    describe('APi tests: tvl-history/pools', () => {
         const testPool = "KSM-MGX"
         const testPoolReversed = "MGX-KSM"
         it("GET pools/MGX-KSM returns the same as pools/KSM-MGX -> Expect deep equal", async () => {
@@ -36,7 +36,7 @@ const ERROR_MSG_POOL_NOT_FOUND = "this must be one of the following values: KSM-
     describe.todo('Snapshots tests: volume-history/pools', () => {
         //more tests will come...
     })
-    describe.skip('API Errors: volume-history/pools', () => {
+    describe('API Errors: volume-history/pools', () => {
         it("GET pools/foo does not exist -> Expect validation error", async () => {
             await supertest(app)
                 .get("/volume-history/pools/foo")

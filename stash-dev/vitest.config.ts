@@ -15,7 +15,7 @@ export default defineConfig({
       TIMESERIES_HOST: 'localhost',
       TIMESERIES_PORT: '6379',
       TIMESERIES_PASS: '',
-      COINGECKO_API_KEY: '',
+      COINGECKO_API_KEY: process.env.COINGECKO_API_KEY
     },
     coverage: {
       include: ['src/**/*'],
