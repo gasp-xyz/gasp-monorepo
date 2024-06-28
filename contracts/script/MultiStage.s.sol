@@ -20,7 +20,7 @@ contract MultiStage is Script, Utils, Test {
         Deployer finalizerDeployer = new Deployer();
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
 
-        if (rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Ethereum)) {
+        if (!rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Ethereum)) {
           console.log("################################################################################");
           console.log("Deploying eigen layer infra");
           console.log("################################################################################");
