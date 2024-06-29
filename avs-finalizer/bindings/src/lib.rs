@@ -17,6 +17,7 @@ pub mod finalizer_task_manager;
 pub mod finalizer_task_manager_test;
 pub mod gasp_multi_rollup_service;
 pub mod gasp_multi_rollup_service_storage;
+pub mod gasp_multi_rollup_service_test;
 pub mod i_delegation_manager;
 pub mod i_finalizer_task_manager;
 pub mod i_gasp_multi_rollup_service;

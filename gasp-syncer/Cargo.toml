@@ -38,3 +38,4 @@ tracing-subscriber = { version = "0.3.18", features = ["json", "env-filter"] }
 sp-runtime = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
 sp-core = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
 futures = "0.3.30"
+array-bytes = { version = "6.2.0" }

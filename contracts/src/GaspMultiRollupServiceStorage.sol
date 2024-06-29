@@ -26,6 +26,7 @@ abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
     IRolldown public rolldown;
 
     bool public stalled;
+    uint256 public lastUpdateBlockTimestamp;
 
     bytes32 public latestPendingStateHash;
 

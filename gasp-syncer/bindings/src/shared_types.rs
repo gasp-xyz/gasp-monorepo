@@ -143,7 +143,7 @@ pub struct Withdrawal {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
     pub shares: ::std::vec::Vec<::ethers::core::types::U256>,
 }
-///`Task(uint256,uint32,uint32,bytes,uint32,bytes,uint32)`
+///`Task(uint32,uint256,uint32,uint32,bytes,uint32,bytes,uint32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -157,6 +157,7 @@ pub struct Withdrawal {
     Hash
 )]
 pub struct Task {
+    pub task_num: u32,
     pub block_number: ::ethers::core::types::U256,
     pub task_created_block: u32,
     pub last_completed_task_created_block: u32,
@@ -223,7 +224,7 @@ pub struct NonSignerStakesAndSignatureForOldState {
     pub apk_g2_for_old_state: G2Point,
     pub sigma_for_old_state: G1Point,
 }
-///`OperatorStateInfo(bool,bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[])`
+///`OperatorStateInfo(bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[])`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -238,7 +239,6 @@ pub struct NonSignerStakesAndSignatureForOldState {
 )]
 pub struct OperatorStateInfo {
     pub operators_state_changed: bool,
-    pub operators_state_provided: bool,
     pub quorums_removed: ::std::vec::Vec<u8>,
     pub quorums_added: ::std::vec::Vec<QuorumsAdded>,
     pub quorums_stake_update: ::std::vec::Vec<QuorumsStakeUpdate>,

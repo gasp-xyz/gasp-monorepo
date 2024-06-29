@@ -19,7 +19,7 @@ pub async fn start() -> eyre::Result<()> {
     );
     let syncer = Syncer::from_cli(&cli).await?;
 
-    syncer.sync().await?;
+    syncer.sync(&cli).await?;
 
     warn!("Eth websocket listener closed, shutting down.");
 

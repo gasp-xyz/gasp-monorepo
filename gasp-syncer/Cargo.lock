@@ -2113,6 +2113,7 @@ name = "gasp-syncer"
 version = "0.1.0"
 dependencies = [
  "aes",
+ "array-bytes",
  "bindings",
  "clap",
  "color-eyre",

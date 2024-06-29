@@ -75,7 +75,7 @@ func (r *AvsReader) GetTaskRespondedEvents(ctx context.Context, blocksAgo uint32
 	}
 	opts := bind.FilterOpts{Start: currentBlock - uint64(blocksAgo), End: &currentBlock, Context: ctx}
 	r.logger.Debug("Getting FilterTaskResponded", "opts", opts)
-	it, err := r.AvsServiceBindings.TaskManager.FilterTaskResponded(&opts)
+	it, err := r.AvsServiceBindings.TaskManager.FilterTaskResponded(&opts, []uint32{})
 	if err != nil {
 		return nil, err
 	}

@@ -16,11 +16,57 @@ pub mod gasp_multi_rollup_service_storage {
             constructor: ::core::option::Option::None,
             functions: ::core::convert::From::from([
                 (
+                    ::std::borrow::ToOwned::to_owned("lastUpdateBlockTimestamp"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "lastUpdateBlockTimestamp",
+                            ),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
+                                        256usize,
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("latestCompletedTaskCreatedBlock"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
                             name: ::std::borrow::ToOwned::to_owned(
                                 "latestCompletedTaskCreatedBlock",
+                            ),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint32"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("latestCompletedTaskNumber"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "latestCompletedTaskNumber",
                             ),
                             inputs: ::std::vec![],
                             outputs: ::std::vec![
@@ -302,7 +348,31 @@ pub mod gasp_multi_rollup_service_storage {
                     ],
                 ),
             ]),
-            events: ::std::collections::BTreeMap::new(),
+            events: ::core::convert::From::from([
+                (
+                    ::std::borrow::ToOwned::to_owned("EigenUpdateProcessed"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "EigenUpdateProcessed",
+                            ),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("taskNumber"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    indexed: false,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("taskCreatedBlock"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
+                ),
+            ]),
             errors: ::std::collections::BTreeMap::new(),
             receive: false,
             fallback: false,
@@ -351,12 +421,28 @@ pub mod gasp_multi_rollup_service_storage {
                 ),
             )
         }
+        ///Calls the contract's `lastUpdateBlockTimestamp` (0xe61db175) function
+        pub fn last_update_block_timestamp(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::U256> {
+            self.0
+                .method_hash([230, 29, 177, 117], ())
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `latestCompletedTaskCreatedBlock` (0xed5a04fe) function
         pub fn latest_completed_task_created_block(
             &self,
         ) -> ::ethers::contract::builders::ContractCall<M, u32> {
             self.0
                 .method_hash([237, 90, 4, 254], ())
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `latestCompletedTaskNumber` (0xfc765dd5) function
+        pub fn latest_completed_task_number(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, u32> {
+            self.0
+                .method_hash([252, 118, 93, 213], ())
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `latestPendingStateHash` (0x4ae6b203) function
@@ -454,6 +540,26 @@ pub mod gasp_multi_rollup_service_storage {
                 .method_hash([223, 3, 76, 208], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Gets the contract's `EigenUpdateProcessed` event
+        pub fn eigen_update_processed_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            EigenUpdateProcessedFilter,
+        > {
+            self.0.event()
+        }
+        /// Returns an `Event` builder for all the events of this contract.
+        pub fn events(
+            &self,
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            EigenUpdateProcessedFilter,
+        > {
+            self.0.event_with_filter(::core::default::Default::default())
+        }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
     for GaspMultiRollupServiceStorage<M> {
@@ -461,6 +567,41 @@ pub mod gasp_multi_rollup_service_storage {
             Self::new(contract.address(), contract.client())
         }
     }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
+    #[ethevent(
+        name = "EigenUpdateProcessed",
+        abi = "EigenUpdateProcessed(uint32,uint32)"
+    )]
+    pub struct EigenUpdateProcessedFilter {
+        pub task_number: u32,
+        pub task_created_block: u32,
+    }
+    ///Container type for all input parameters for the `lastUpdateBlockTimestamp` function with signature `lastUpdateBlockTimestamp()` and selector `0xe61db175`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
+    #[ethcall(name = "lastUpdateBlockTimestamp", abi = "lastUpdateBlockTimestamp()")]
+    pub struct LastUpdateBlockTimestampCall;
     ///Container type for all input parameters for the `latestCompletedTaskCreatedBlock` function with signature `latestCompletedTaskCreatedBlock()` and selector `0xed5a04fe`
     #[derive(
         Clone,
@@ -479,6 +620,21 @@ pub mod gasp_multi_rollup_service_storage {
         abi = "latestCompletedTaskCreatedBlock()"
     )]
     pub struct LatestCompletedTaskCreatedBlockCall;
+    ///Container type for all input parameters for the `latestCompletedTaskNumber` function with signature `latestCompletedTaskNumber()` and selector `0xfc765dd5`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
+    #[ethcall(name = "latestCompletedTaskNumber", abi = "latestCompletedTaskNumber()")]
+    pub struct LatestCompletedTaskNumberCall;
     ///Container type for all input parameters for the `latestPendingStateHash` function with signature `latestPendingStateHash()` and selector `0x4ae6b203`
     #[derive(
         Clone,
@@ -644,7 +800,9 @@ pub mod gasp_multi_rollup_service_storage {
         Hash
     )]
     pub enum GaspMultiRollupServiceStorageCalls {
+        LastUpdateBlockTimestamp(LastUpdateBlockTimestampCall),
         LatestCompletedTaskCreatedBlock(LatestCompletedTaskCreatedBlockCall),
+        LatestCompletedTaskNumber(LatestCompletedTaskNumberCall),
         LatestPendingStateHash(LatestPendingStateHashCall),
         OperatorAndQuorumToStakes(OperatorAndQuorumToStakesCall),
         OperatorIdQuorumCount(OperatorIdQuorumCountCall),
@@ -661,10 +819,20 @@ pub mod gasp_multi_rollup_service_storage {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
+            if let Ok(decoded) = <LastUpdateBlockTimestampCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
+                return Ok(Self::LastUpdateBlockTimestamp(decoded));
+            }
             if let Ok(decoded) = <LatestCompletedTaskCreatedBlockCall as ::ethers::core::abi::AbiDecode>::decode(
                 data,
             ) {
                 return Ok(Self::LatestCompletedTaskCreatedBlock(decoded));
+            }
+            if let Ok(decoded) = <LatestCompletedTaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
+                return Ok(Self::LatestCompletedTaskNumber(decoded));
             }
             if let Ok(decoded) = <LatestPendingStateHashCall as ::ethers::core::abi::AbiDecode>::decode(
                 data,
@@ -722,7 +890,13 @@ pub mod gasp_multi_rollup_service_storage {
     impl ::ethers::core::abi::AbiEncode for GaspMultiRollupServiceStorageCalls {
         fn encode(self) -> Vec<u8> {
             match self {
+                Self::LastUpdateBlockTimestamp(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::LatestCompletedTaskCreatedBlock(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
+                Self::LatestCompletedTaskNumber(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::LatestPendingStateHash(element) => {
@@ -757,7 +931,13 @@ pub mod gasp_multi_rollup_service_storage {
     impl ::core::fmt::Display for GaspMultiRollupServiceStorageCalls {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
+                Self::LastUpdateBlockTimestamp(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::LatestCompletedTaskCreatedBlock(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
+                Self::LatestCompletedTaskNumber(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::LatestPendingStateHash(element) => {
@@ -781,10 +961,22 @@ pub mod gasp_multi_rollup_service_storage {
             }
         }
     }
+    impl ::core::convert::From<LastUpdateBlockTimestampCall>
+    for GaspMultiRollupServiceStorageCalls {
+        fn from(value: LastUpdateBlockTimestampCall) -> Self {
+            Self::LastUpdateBlockTimestamp(value)
+        }
+    }
     impl ::core::convert::From<LatestCompletedTaskCreatedBlockCall>
     for GaspMultiRollupServiceStorageCalls {
         fn from(value: LatestCompletedTaskCreatedBlockCall) -> Self {
             Self::LatestCompletedTaskCreatedBlock(value)
+        }
+    }
+    impl ::core::convert::From<LatestCompletedTaskNumberCall>
+    for GaspMultiRollupServiceStorageCalls {
+        fn from(value: LatestCompletedTaskNumberCall) -> Self {
+            Self::LatestCompletedTaskNumber(value)
         }
     }
     impl ::core::convert::From<LatestPendingStateHashCall>
@@ -843,6 +1035,20 @@ pub mod gasp_multi_rollup_service_storage {
             Self::Updater(value)
         }
     }
+    ///Container type for all return fields from the `lastUpdateBlockTimestamp` function with signature `lastUpdateBlockTimestamp()` and selector `0xe61db175`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
+    pub struct LastUpdateBlockTimestampReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `latestCompletedTaskCreatedBlock` function with signature `latestCompletedTaskCreatedBlock()` and selector `0xed5a04fe`
     #[derive(
         Clone,
@@ -857,6 +1063,20 @@ pub mod gasp_multi_rollup_service_storage {
         Hash
     )]
     pub struct LatestCompletedTaskCreatedBlockReturn(pub u32);
+    ///Container type for all return fields from the `latestCompletedTaskNumber` function with signature `latestCompletedTaskNumber()` and selector `0xfc765dd5`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
+    pub struct LatestCompletedTaskNumberReturn(pub u32);
     ///Container type for all return fields from the `latestPendingStateHash` function with signature `latestPendingStateHash()` and selector `0x4ae6b203`
     #[derive(
         Clone,

@@ -125,7 +125,11 @@ impl Operator {
                         debug!("Block executed successfully {:?}", proofs);
                         let payload = TaskResponse {
                             reference_task_index: event.task_index,
-                            reference_task_hash: Keccak256::hash(event.task.clone().encode().as_ref()).into(),
+                            reference_task_hash: Keccak256::hash(
+                                vec![0u8;31].into_iter().chain(vec![32u8]).chain(
+                                    event.task.clone().encode().into_iter()
+                                ).collect::<Vec<_>>()
+                                .as_ref()).into(),
                             operators_state_info_hash: operators_state_info_hash,
                             block_hash: proofs.0.as_fixed_bytes().to_owned(),
                             storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
@@ -493,7 +497,9 @@ impl Operator {
     
         // println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! - {:?}", unencoded == operator_state_info);
 
-        let operator_state_info_hash = Keccak256::hash(operator_state_info.encode().as_ref());
+        let operator_state_info_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
+            operator_state_info.clone().encode().into_iter()
+        ).collect::<Vec<_>>().as_ref());
         Ok(operator_state_info_hash.into())
         // Ok(Default::default())
     }

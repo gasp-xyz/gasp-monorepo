@@ -40,9 +40,13 @@ pub struct CliArgs {
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub testnet: bool,
 
-    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit"])]
+    #[arg(long, env, default_value_t = false)]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
-    pub force: bool,
+    pub push_first_init: bool,
+
+    // #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit"])]
+    // #[serde(skip_serializing_if = "std::ops::Not::not")]
+    // pub force: bool,
 
     #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["only_reinit"])]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
@@ -53,14 +57,14 @@ pub struct CliArgs {
     pub only_reinit: bool,
 
     #[command(flatten)]
-    pub root_ecdsa_key: EcdsaKey,
+    pub root_ecdsa_key: RootEcdsaKey,
     #[arg(long, env)]
     #[serde(skip)]
     pub root_ecdsa_key_password: Option<String>,
 }
 
 #[derive(Args, Serialize, Debug)]
-#[group(id = "root", required = true, multiple = false)]
+#[group(required = true, multiple = false)]
 pub struct EcdsaKey {
     #[arg(long, env)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -72,6 +76,21 @@ pub struct EcdsaKey {
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub ecdsa_ephemeral_key: bool,
 }
+
+#[derive(Args, Serialize, Debug)]
+#[group(id = "root", multiple = false)]
+pub struct RootEcdsaKey {
+    #[arg(long, env)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub root_ecdsa_key_file: Option<PathBuf>,
+    #[arg(long, env)]
+    #[serde(skip)]
+    pub root_ecdsa_key_json: Option<String>,
+    #[arg(long, env)]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub root_ecdsa_ephemeral_key: bool,
+}
+
 
 impl CliArgs {
     pub fn build() -> Self {
@@ -104,9 +123,9 @@ impl CliArgs {
 
     pub fn get_root_ecdsa_keystore(&self) -> eyre::Result<EncodedKeystore> {
         get_keystore(
-            &self.root_ecdsa_key.ecdsa_key_file,
-            &self.root_ecdsa_key.ecdsa_key_json,
-            self.root_ecdsa_key.ecdsa_ephemeral_key,
+            &self.root_ecdsa_key.root_ecdsa_key_file,
+            &self.root_ecdsa_key.root_ecdsa_key_json,
+            self.root_ecdsa_key.root_ecdsa_ephemeral_key,
             &self.root_ecdsa_key_password,
         )
     }

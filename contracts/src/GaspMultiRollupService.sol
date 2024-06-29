@@ -61,6 +61,9 @@ contract GaspMultiRollupService is
         require(taskResponse.referenceTaskHash == keccak256(abi.encode(task)), "referenceTaskHash hash mismatch");
         require(taskResponse.operatorsStateInfoHash == keccak256(abi.encode(operatorStateInfo)), "operatorStateInfo hash mismatch");
 
+        require(latestCompletedTaskCreatedBlock + 14400 <= task.taskCreatedBlock, "stale state 0");
+        require(lastUpdateBlockTimestamp + 3 days <= block.timestamp, "stale state 1");
+
         // if (operatorStateInfo.operator_state_changed && !operatorStateInfo.operator_state_provided){
         //     stalled = true;
         //     emit Stalled(
@@ -136,6 +139,7 @@ contract GaspMultiRollupService is
         latestPendingStateHash = taskResponse.pendingStateHash;
         latestCompletedTaskNumber = task.taskNum;
         latestCompletedTaskCreatedBlock = task.taskCreatedBlock;
+        lastUpdateBlockTimestamp = block.timestamp;
 
         quorumNumbers = task.quorumNumbers;
         quorumThresholdPercentage = task.quorumThresholdPercentage;

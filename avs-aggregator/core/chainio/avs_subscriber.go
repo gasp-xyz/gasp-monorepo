@@ -52,7 +52,7 @@ func (s *AvsSubscriber) SubscribeToNewTasks(newTaskCreatedChan chan *taskmanager
 
 func (s *AvsSubscriber) SubscribeToTaskResponses(taskResponseChan chan *taskmanager.ContractFinalizerTaskManagerTaskResponded) event.Subscription {
 	sub, err := s.AvsContractBindings.TaskManager.WatchTaskResponded(
-		&bind.WatchOpts{}, taskResponseChan,
+		&bind.WatchOpts{}, taskResponseChan, []uint32{},
 	)
 	if err != nil {
 		s.logger.Error("Failed to subscribe to TaskResponded events", "err", err)
