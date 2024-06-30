@@ -10,9 +10,9 @@ use bindings::{
 };
 use ethers::providers::{Middleware, PendingTransaction, SubscriptionStream};
 use ethers::{
-    contract::{stream, LogMeta},
+    contract::{EthEvent, stream, LogMeta},
     providers::StreamExt,
-    types::{Address, U256, Bytes}, abi::AbiDecode
+    types::{Address, U256, Bytes, Filter}, abi::AbiDecode
 };
 
 use serde::Serialize;
@@ -42,20 +42,26 @@ pub struct Syncer {
     pub target_client: Arc<TargetClient>,
     avs_contracts: AvsContracts,
     gasp_service_contract: GaspMultiRollupService<TargetClient>,
+    root_gasp_service_contract: Option<GaspMultiRollupService<TargetClient>>,
 }
 impl Syncer {
     #[instrument(name = "create_syncer", skip_all)]
     pub async fn from_cli(cfg: &CliArgs) -> eyre::Result<Arc<Self>> {
-        let (source_client, target_client) = build_clients(cfg).await?;
+        let (source_client, target_client, maybe_root_target_client) = build_clients(cfg).await?;
         let (source_client, target_client) = (Arc::new(source_client), Arc::new(target_client));
         let avs_contracts = AvsContracts::build(cfg, source_client.clone()).await?;
         let gasp_service_contract = GaspMultiRollupService::new(cfg.gasp_service_addr, target_client.clone());
+        let root_gasp_service_contract = if cfg.reinit || cfg.only_reinit{
+        let root_target_client = Arc::new(maybe_root_target_client.expect("should work here"));
+        Some(GaspMultiRollupService::new(cfg.gasp_service_addr, root_target_client.clone()))
+        } else {None};
 
         Ok(Arc::new(Self {
             source_client,
             target_client,
             avs_contracts,
-            gasp_service_contract
+            gasp_service_contract,
+            root_gasp_service_contract
         }))
     }
 
@@ -116,19 +122,18 @@ impl Syncer {
                         println!("{:?}", operators_state_info_hash);
                         println!("{:?}", operators_state_info_hash == call.task_response.operators_state_info_hash.into());
                         
-                        if latest_completed_task_created_block != call.task.last_completed_task_created_block => {
+                        if latest_completed_task_created_block != call.task.last_completed_task_created_block {
                             tracing::error!("missing expected task response {:?}", latest_completed_task_created_block);
                             return Err(eyre!("missing expected task response {:?}", latest_completed_task_created_block))
                         }
 
-                        if call.task.last_completed_task_created_block + 14400 !<= call.task.task_created_block => {
+                        if call.task.last_completed_task_created_block + 14400 <= call.task.task_created_block {
                             tracing::error!("stale old state {:?}", latest_completed_task_created_block);
                             return Err(eyre!("stale old state {:?}", latest_completed_task_created_block))
                         }
                         
-                        let update_txn = self.clone().gasp_service_contract.process_eigen_update(call.task, call.task_response, call.non_signer_stakes_and_signature_for_old_state, operators_state_info);
+                        let update_txn = self.clone().gasp_service_contract.process_eigen_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature_for_old_state, operators_state_info);
                         println!("{:?}", update_txn);
-                        let update_txn_pending = self.clone().gasp_service_contract::send_transaction(update_txn, None);
                         let update_txn_pending = update_txn.send().await;
                         println!("{:?}", update_txn_pending);
                         let update_txn_receipt = update_txn_pending?.await?;
@@ -149,6 +154,101 @@ impl Syncer {
             }
         }
 
+
+        Ok(())
+    }
+
+
+    #[instrument(skip_all)]
+    pub async fn reinit(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
+
+        let latest_completed_task_created_block = self.gasp_service_contract.latest_completed_task_created_block().await?;
+        let latest_completed_task_quorum_numbers = self.gasp_service_contract.quorum_numbers().await?;
+        let latest_completed_task_quorum_threshold_percentage = self.gasp_service_contract.quorum_threshold_percentage().await?;
+
+        let task_num = self.clone().avs_contracts.task_manager.last_completed_task_num().await?;
+        let block_num = self.clone().avs_contracts.task_manager.last_completed_task_created_block().await?;
+
+        // Unfortunately latestTaskNum and LastCompletedTaskNum both start at 0
+        // So if lastCompletedTaskNum is 0 then check if it was infact completed 
+        if task_num.is_zero() {
+            let task_status = self.clone().avs_contracts.task_manager.index_to_task_status(task_num).await?;
+            if task_status != 3 {
+                tracing::error!("no completed tasks for reinit {:?}", latest_completed_task_created_block);
+                return Err(eyre!("no completed tasks for reinit {:?}", latest_completed_task_created_block))
+            }
+        }
+
+        let mut block_events: Vec<NewTaskCreatedFilter> = self.clone().avs_contracts.task_manager.event_with_filter(Filter::new().event(&NewTaskCreatedFilter::abi_signature()).select(u64::from(block_num))).query().await?;
+
+        let mut last_task = match block_events.pop(){
+            Some(e) if e.task_index == task_num => {
+                e.task
+            }
+            _ => {
+                tracing::error!("task not in events for reinit {:?}", task_num);
+                return Err(eyre!("task not in events for reinit {:?}", task_num))
+            }
+        };
+
+        last_task.last_completed_task_created_block = latest_completed_task_created_block;
+        last_task.last_completed_task_quorum_numbers = latest_completed_task_quorum_numbers;
+        last_task.last_completed_task_quorum_threshold_percentage = latest_completed_task_quorum_threshold_percentage;
+
+        let block_events: Vec<TaskRespondedFilter>  = self.clone().avs_contracts.task_manager.event_with_filter(Filter::new().event(&TaskRespondedFilter::abi_signature()).from_block(u64::from(block_num))).query().await?;
+
+        if block_events.len().is_zero(){
+            tracing::error!("missing expected task response {:?}", task_num);
+            return Err(eyre!("missing expected task response {:?}", task_num))
+        }
+
+        if block_events[0].task_index != task_num{
+            tracing::error!("missing expected task response {:?}", task_num);
+            return Err(eyre!("missing expected task response {:?}", task_num))
+        }
+
+        let task_response = block_events[0].task_response.clone();
+
+        // let evs = self.clone().avs_contracts.source_response_stream(block_num);
+        // let mut stream: stream::EventStream<'_, _, (TaskRespondedFilter, LogMeta), _> =
+        //     evs.subscribe_with_meta().await?;
+
+        // // event stream does not finish with `None` after websocket closure, use block subscription for it
+        // let mut blocks: SubscriptionStream<'_, _, _> =
+        //     self.avs_contracts.ws_client.subscribe_blocks().await?;
+
+        // let task_response = TaskResponse::default();
+
+        // loop {
+        //     select! {
+        //         Some(event) = stream.next() => match event {
+        //             Ok((event, log)) => {
+        //                 if task_num != event.taskIndex => {
+        //                     tracing::error!("missing expected task response {:?}", task_num);
+        //                     return Err(eyre!("missing expected task response {:?}", task_num))
+        //                 }
+        //                 task_response = event.taskResponse;
+        //                 break
+        //             }
+        //             Err(e) => tracing::error!("EthWs subscription error {:?}", e),
+        //         },
+        //         block = blocks.next() => {
+        //             if block.is_none() {
+        //                 tracing::error!("missing expected task response no more blocks {:?}", task_num);
+        //                 return Err(eyre!("missing expected task response no more blocks {:?}", task_num))
+        //             }
+        //         }
+        //     }
+        // }
+
+        let operators_state_info = self.clone().get_operators_state_info(last_task.clone()).await?;
+
+        let reinit_txn = self.clone().root_gasp_service_contract.clone().expect("should work in reinit").process_eigen_reinit(last_task, task_response, operators_state_info);
+        println!("{:?}", reinit_txn);
+        let reinit_txn_pending = reinit_txn.send().await;
+        println!("{:?}", reinit_txn_pending);
+        let reinit_txn_receipt = reinit_txn_pending?.await?;
+        println!("{:?}", reinit_txn_receipt);
 
         Ok(())
     }

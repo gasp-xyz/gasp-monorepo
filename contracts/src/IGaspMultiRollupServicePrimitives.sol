@@ -9,6 +9,10 @@ interface IGaspMultiRollupServicePrimitives {
         uint32 taskNumber,
         uint32 taskCreatedBlock
     );
+    event EigenReinitProcessed(
+        uint32 taskNumber,
+        uint32 taskCreatedBlock
+    );
 
     // struct OperatorStakeUpdate{
     //     address operator;
@@ -55,7 +59,7 @@ interface IGaspMultiRollupServicePrimitives {
         IGaspMultiRollupServicePrimitives.QuorumsStakeUpdate[] quorumsStakeUpdate;
         IGaspMultiRollupServicePrimitives.QuorumsApkUpdate[] quorumsApkUpdate;
 
-        bytes32[] OperatorsRemoved;
+        bytes32[] operatorsRemoved;
         IGaspMultiRollupServicePrimitives.OperatorsAdded[] operatorsAdded; // Sorted!
         IGaspMultiRollupServicePrimitives.OperatorsStakeUpdate[] operatorsStakeUpdate;
         IGaspMultiRollupServicePrimitives.OperatorsQuorumCountUpdate[] operatorsQuorumCountUpdate;

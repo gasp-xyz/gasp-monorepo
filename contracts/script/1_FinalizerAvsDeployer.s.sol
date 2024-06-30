@@ -301,6 +301,7 @@ contract Deployer is Script, Utils, Test {
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(gaspMultiRollupService))),
             address(gaspMultiRollupServiceImplementation),
+            // Change owner to avsOwner
             abi.encodeWithSelector(gaspMultiRollupService.initialize.selector, avsPauserReg, avsOwner, aggregator, address(rolldown))
         );
 

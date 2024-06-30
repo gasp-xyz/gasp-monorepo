@@ -48,15 +48,16 @@ contract FinalizerTaskManager is
     // mapping of task indices to hash of abi.encode(taskResponse, taskResponseMetadata)
     mapping(uint32 => TaskStatus) public indexToTaskStatus;
 
-    uint32 lastCompletedTaskCreatedBlock;
+    uint32 public lastCompletedTaskNum;
+    uint32 public lastCompletedTaskCreatedBlock;
     // uint32 lastCompletedTaskNum;
-    bytes lastCompletedTaskQuorumNumbers;
-    uint32 lastCompletedTaskQuorumThresholdPercentage;
+    bytes public lastCompletedTaskQuorumNumbers;
+    uint32 public lastCompletedTaskQuorumThresholdPercentage;
 
     address public aggregator;
     address public generator;
 
-    bytes32 latestPendingStateHash;
+    bytes32 public latestPendingStateHash;
 
     // DATA STRUCTURES
     enum TaskStatus
@@ -205,6 +206,7 @@ contract FinalizerTaskManager is
         lastCompletedTaskCreatedBlock = task.taskCreatedBlock;
         lastCompletedTaskQuorumNumbers = task.quorumNumbers;
         lastCompletedTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
+        lastCompletedTaskNum = task.taskNum;
         // emitting completed event
         emit TaskCompleted(taskResponse.referenceTaskIndex, taskResponse.blockHash);
     }
