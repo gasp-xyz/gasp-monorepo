@@ -2,7 +2,7 @@ import { signTx } from "gasp-sdk";
 import "gasp-types";
 import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import "dotenv/config";
-import { keccak256 } from "viem";
+import { keccak256, BaseError } from "viem";
 import { MANGATA_NODE_URL, MNEMONIC } from "./common/constants.js";
 import {
 	countRequests,
@@ -78,12 +78,18 @@ async function main() {
 					print(`L1Update with max id == ${lastRequestId} was already submitted`);
 				}
 			} catch (e) {
-				print(e);
-				print("The contract function getUpdateForL2 returned no data");
-				// Do nothing with error
-				// Error only appear when we have block where there are no data for getUpdateForL2 at all.
-				// This is only in the very beginning
-				// ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
+        if (e instanceof BaseError) {
+          print("Viem error occured - restarting service");
+          print(e);
+          throw e;
+        }else{
+          print("The contract function getUpdateForL2 returned no data");
+          print(e);
+          // Do nothing with error
+          // Error only appear when we have block where there are no data for getUpdateForL2 at all.
+          // This is only in the very beginning
+          // ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
+        }
 			}
 			inProgress = false;
 		}
