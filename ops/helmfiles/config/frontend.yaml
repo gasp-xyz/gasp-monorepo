@@ -1,5 +1,5 @@
 remoteCluster: true
-
+evmNodeEnabled: true
 blockscoutEnabled: true
 enableArbitrumServices: true
 
@@ -34,9 +34,9 @@ collator:
       value: "true"
       effect: NoSchedule
   firstCollatorNodeSelector:
-    production: 'true'
+    production: "true"
   secondCollatorNodeSelector:
-    production: 'true'
+    production: "true"
 
 ####################
 # evm-node configs #
@@ -117,7 +117,6 @@ updaterEnvArb:
   EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
   MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
   FINALIZATION_SOURCE: "relay"
-
 
 ############################
 # rollup-sequencer configs #
