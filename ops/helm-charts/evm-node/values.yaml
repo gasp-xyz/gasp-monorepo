@@ -11,7 +11,7 @@ ingressClassName: nginx
 
 dataMountPath: /data
 
-evmNodeImage: 'ghcr.io/paradigmxyz/reth:v1.0.0-rc.1'
+evmNodeImage: 'ghcr.io/paradigmxyz/reth:v1.0.0'
 command: []
 args:
   - node

@@ -229,7 +229,7 @@ releases:
         ethChainUrl:  {{ .Values.sequencerChainUrlArb | fetchSecretValue | quote }}
         env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
 
-  - name: blockscoout-eth
+  - name: blockscout-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.blockscoutEnabled }}
     chart: ethereum-helm-charts/blockscout
@@ -238,7 +238,7 @@ releases:
           MIX_ENV: 'rollup-{{ requiredEnv "ENVIRONMENT" }}-eth'
           ETHEREUM_JSONRPC_VARIANT: 'geth'
           ETHEREUM_JSONRPC_HTTP_URL: http://evm-node-eth:8545
-          ETHEREUM_JSONRPC_WS_URL: ws://evm-node-eth:8545
+          ETHEREUM_JSONRPC_WS_URL: ws://evm-node-eth:8546
           ETHEREUM_JSONRPC_TRACE_URL: http://evm-node-eth:8545
         image:
           tag: 6.6.0
@@ -269,7 +269,7 @@ releases:
           MIX_ENV: 'rollup-{{ requiredEnv "ENVIRONMENT" }}-arb'
           ETHEREUM_JSONRPC_VARIANT: 'geth'
           ETHEREUM_JSONRPC_HTTP_URL: http://evm-node-arb:8545
-          ETHEREUM_JSONRPC_WS_URL: ws://evm-node-arb:8545
+          ETHEREUM_JSONRPC_WS_URL: ws://evm-node-arb:8546
           ETHEREUM_JSONRPC_TRACE_URL: http://evm-node-arb:8545
         image:
           tag: 6.6.0
