@@ -1,4 +1,4 @@
-import { fromBN, TokenInfo } from '@mangata-finance/sdk'
+import { fromBN, TokenInfo } from 'gasp-sdk'
 import { BN } from '@polkadot/util'
 import { Decimal } from 'decimal.js'
 import _ from 'lodash'

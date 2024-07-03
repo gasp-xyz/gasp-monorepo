@@ -5,7 +5,7 @@ import { TimestampedAmount } from '../schema/Models.js'
 import { Decimal } from 'decimal.js'
 import * as volumeStore from '../repository/VolumeRepository.js'
 import MangataClient from '../connector/MangataNode.js'
-import { MainTokens } from '@mangata-finance/sdk'
+import { MainTokens } from 'gasp-sdk'
 
 const LAST_INDEX = -1
 const SECOND_ELEMENT_INDEX = 1

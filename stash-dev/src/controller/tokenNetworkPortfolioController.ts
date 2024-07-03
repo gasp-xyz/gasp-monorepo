@@ -4,7 +4,7 @@ import MangataClient from '../connector/MangataNode.js'
 import { BN } from '@polkadot/util'
 import { priceDiscovery } from '../service/PriceDiscoveryService.js'
 import { Decimal } from 'decimal.js'
-import { fromBN } from '@mangata-finance/sdk'
+import { fromBN } from 'gasp-sdk'
 
 export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
   try {
