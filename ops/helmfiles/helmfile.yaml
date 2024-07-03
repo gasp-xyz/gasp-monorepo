@@ -57,7 +57,7 @@ releases:
         envSelector: arbitrum-stub
         enablePersistence: true
 
-  - name: avs-aggregator-eth
+  - name: avs-aggregator
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.aggregatorEnabled }}
     chart: ../helm-charts/rollup-node
@@ -69,21 +69,8 @@ releases:
         remoteCluster: {{ .Values.remoteCluster }}
         envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.envEth | toYaml | nindent 10 }}
-  
-  - name: avs-aggregator-arb
-    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ and .Values.aggregatorEnabled .Values.enableArbitrumServices | toYaml }}
-    chart: ../helm-charts/rollup-node
-    values:
-      - image:
-          repository: mangatasolutions/avs-aggregator
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
-        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        remoteCluster: {{ .Values.remoteCluster }}
-        envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.envArb | toYaml | nindent 10 }}
 
-  - name: avs-finalizer-eth
+  - name: avs-finalizer
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.finalizerEnabled }}
     chart: ../helm-charts/rollup-node
@@ -99,23 +86,6 @@ releases:
           enabled: true
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.envEth | toYaml | nindent 10 }}
-  
-  - name: avs-finalizer-arb
-    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ and .Values.finalizerEnabled .Values.enableArbitrumServices }}
-    chart: ../helm-charts/rollup-node
-    values:
-      - image:
-          repository: mangatasolutions/avs-finalizer
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
-        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        remoteCluster: {{ .Values.remoteCluster }}
-        rpcPort: 9010
-        enableServiceMonitorCollectors: {{ .Values.finalizerEnableServiceMonitorCollectors }}
-        prometheus:
-          enabled: true
-        envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.envArb | toYaml | nindent 10 }}
   
   - name: avs-finalizer-eth-2
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
@@ -133,23 +103,6 @@ releases:
           enabled: true
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.envEth | toYaml | nindent 10 }}
-  
-  - name: avs-finalizer-arb-2
-    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ and .Values.secondFinalizerEnabled .Values.enableArbitrumServices }}
-    chart: ../helm-charts/rollup-node
-    values:
-      - image:
-          repository: mangatasolutions/avs-finalizer
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
-        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        remoteCluster: {{ .Values.remoteCluster }}
-        rpcPort: 9010
-        enableServiceMonitorCollectors: {{ .Values.finalizerEnableServiceMonitorCollectors }}
-        prometheus:
-          enabled: true
-        envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.envArb | toYaml | nindent 10 }}
 
   - name: rollup-updater-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
