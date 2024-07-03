@@ -298,7 +298,6 @@ releases:
   - name: blockscout-arb
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ and .Values.blockscoutEnabled .Values.enableArbitrumServices }}
-    # installed: false
     chart: blockscout/blockscout-stack
     dependencies:
       - chart: bitnami/postgresql
