@@ -8,7 +8,7 @@ includes:
 env_variables:
   APP_ENV: rollup-dev
   PROJECT_ID: mangata-stash
-  MANGATA_NODE_URL: 'wss://collator-01-ws-rollup-dev.mangata.online'
+  MANGATA_NODE_URL: 'wss://collator-01-ws-rollup-frontend.gasp.xyz'
   REDIS_HOST: '10.15.245.67'
   REDIS_PORT: 6379
   TIMESERIES_HOST: 'redis-14581.c124.us-central1-1.gce.redns.redis-cloud.com'

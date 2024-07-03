@@ -61,7 +61,7 @@ contract Rolldown is
       withdraw_pending_eth_to_recipient(amount, payable(msg.sender));
     }
 
-    function deposit_eth() external payable whenNotPaused {
+    function deposit_native() external payable whenNotPaused {
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
         uint amount = msg.value;
@@ -83,6 +83,7 @@ contract Rolldown is
             amount
         );
     }
+
 
     function deposit(address tokenAddress, uint256 amount) public whenNotPaused {
         deposit_erc20(tokenAddress, amount);

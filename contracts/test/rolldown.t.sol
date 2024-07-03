@@ -55,7 +55,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
-        rolldown.deposit_eth{value: amount}();
+        rolldown.deposit_native{value: amount}();
         vm.stopPrank();
 
         Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
@@ -87,7 +87,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
-        rolldown.deposit_eth{value: amount}();
+        rolldown.deposit_native{value: amount}();
         vm.stopPrank();
 
         Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
