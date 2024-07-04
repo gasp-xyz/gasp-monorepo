@@ -71,9 +71,12 @@ jobs:
           ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
           CACHE_FOUND=false
       
-          if gcloud storage cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}" - | zstd -d | tar -xf - -C /; then CACHE_FOUND=true; fi
+          if gcloud storage cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}" - | zstd -d | tar -xf - -C / ; then 
+            CACHE_FOUND=true
+          fi
       
-          echo "cache_found=${CACHE_FOUND}\ncache_key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+          echo "cache_found=${CACHE_FOUND}" >> $GITHUB_OUTPUT
+          echo "cache_key=${CACHE_KEY}" >> $GITHUB_OUTPUT
 
       - name: Install sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -92,7 +95,7 @@ jobs:
         run: cargo clippy -- -D warnings
 
       - name: Upload cargo build cache
-        if: inputs.cache-enabled && steps.cache.outputs.cache_found == 'false' && success()
+        if: inputs.cache-enabled && steps.cache.outputs.cache_found == 'false'
         run: |
           CACHE_KEY="${{ steps.cache.outputs.cache_key }}"
           ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
@@ -141,9 +144,12 @@ jobs:
           ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
           CACHE_FOUND=false
       
-          if gcloud storage cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}" - | zstd -d | tar -xf - -C /; then CACHE_FOUND=true; fi
+          if gcloud storage cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}" - | zstd -d | tar -xf - -C / ; then 
+            CACHE_FOUND=true
+          fi
       
-          echo "cache_found=${CACHE_FOUND}\ncache_key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+          echo "cache_found=${CACHE_FOUND}" >> $GITHUB_OUTPUT
+          echo "cache_key=${CACHE_KEY}" >> $GITHUB_OUTPUT
       
       - name: Install sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -162,7 +168,7 @@ jobs:
         run: cargo test
 
       - name: Upload cargo build cache
-        if: inputs.cache-enabled && steps.cache.outputs.cache_found == 'false' && success()
+        if: inputs.cache-enabled && steps.cache.outputs.cache_found == 'false'
         run: |
           CACHE_KEY="${{ steps.cache.outputs.cache_key }}"
           ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
@@ -210,10 +216,13 @@ jobs:
           CACHE_KEY="${{ env.JOB_CACHE_PREFIX }}-${{ hashFiles('**/Cargo.lock') }}"
           ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
           CACHE_FOUND=false
-
-          if gcloud storage cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}" - | zstd -d | tar -xf - -C /; then CACHE_FOUND=true; fi
-
-          echo "cache_found=${CACHE_FOUND}\ncache_key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+      
+          if gcloud storage cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}" - | zstd -d | tar -xf - -C / ; then 
+            CACHE_FOUND=true
+          fi
+      
+          echo "cache_found=${CACHE_FOUND}" >> $GITHUB_OUTPUT
+          echo "cache_key=${CACHE_KEY}" >> $GITHUB_OUTPUT
 
       - name: Install sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -239,7 +248,7 @@ jobs:
           docker buildx build --push --platform linux/amd64 -t mangatasolutions/avs-finalizer:${{ inputs.version }} -f src/bin/Dockerfile .
               
       - name: Upload cargo build cache
-        if: inputs.cache-enabled && steps.cache.outputs.cache_found == 'false' && success()
+        if: inputs.cache-enabled && steps.cache.outputs.cache_found == 'false'
         run: |
           CACHE_KEY="${{ steps.cache.outputs.cache_key }}"
           ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
