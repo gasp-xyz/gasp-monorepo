@@ -103,14 +103,20 @@ jobs:
           )
 
           # Create a single compressed tar archive
+          echo "Starting compression at $(date)"
+          SECONDS=0
           tar -cf - "${CACHE_PATHS[@]}" | zstd -T0 -19 > "$ARCHIVE_NAME"
+          echo "Compression completed in $SECONDS seconds"
 
           # Get and log the archive size
           ARCHIVE_SIZE=$(du -h "$ARCHIVE_NAME" | cut -f1)
           echo "Archive size: $ARCHIVE_SIZE"
 
           # Upload the single archive to Google Cloud Storage
+          echo "Starting upload at $(date)"
+          SECONDS=0
           gcloud storage cp "$ARCHIVE_NAME" "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}"
+          echo "Upload completed in $SECONDS seconds"
 
           # Clean up the local archive
           rm "$ARCHIVE_NAME"
@@ -178,14 +184,20 @@ jobs:
           )
 
           # Create a single compressed tar archive
+          echo "Starting compression at $(date)"
+          SECONDS=0
           tar -cf - "${CACHE_PATHS[@]}" | zstd -T0 -19 > "$ARCHIVE_NAME"
+          echo "Compression completed in $SECONDS seconds"
 
           # Get and log the archive size
           ARCHIVE_SIZE=$(du -h "$ARCHIVE_NAME" | cut -f1)
           echo "Archive size: $ARCHIVE_SIZE"
 
           # Upload the single archive to Google Cloud Storage
+          echo "Starting upload at $(date)"
+          SECONDS=0
           gcloud storage cp "$ARCHIVE_NAME" "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}"
+          echo "Upload completed in $SECONDS seconds"
 
           # Clean up the local archive
           rm "$ARCHIVE_NAME"
