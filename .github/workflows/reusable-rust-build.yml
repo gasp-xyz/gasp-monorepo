@@ -5,7 +5,6 @@ on:
         type: string
         required: false
         default: 1.78.0
-
       version:
         description: Version to be assigned to the built image
         required: true
@@ -15,6 +14,12 @@ on:
         description: Cache version variable to be used to invalidate cache when needed
         required: false
         type: number
+      cache-enabled:
+        # TODO: to be removed after fixing cache
+        default: false
+        description: Enable caching
+        required: false
+        type: boolean
 
 env:
   SKIP_WASM_BUILD: 1
@@ -54,6 +59,7 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Cache the Cargo dependencies
+        if: inputs.cache-enabled
         uses: mansagroup/gcs-cache-action@v1.0.3
         with:
           bucket: mangata-node-ci-cache
@@ -112,6 +118,7 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Cache the Cargo dependencies
+        if: inputs.cache-enabled
         uses: mansagroup/gcs-cache-action@v1.0.3
         with:
           bucket: mangata-node-ci-cache
@@ -154,6 +161,7 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Cache the Cargo dependencies
+        if: inputs.cache-enabled
         uses: mansagroup/gcs-cache-action@v1.0.3
         with:
           bucket: mangata-node-ci-cache
