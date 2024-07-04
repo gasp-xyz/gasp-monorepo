@@ -59,28 +59,20 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - uses: google-github-actions/setup-gcloud@v2
-      
+
       - name: Cache the Cargo dependencies
         if: inputs.cache-enabled
         id: cache-cargo
         run: |
           CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
-          CACHE_PATHS=(
-            "${{ github.workspace }}/avs-finalizer/target"
-            "$HOME/.cargo/bin/"
-            "$HOME/.cargo/registry/index/"
-            "$HOME/.cargo/registry/cache/"
-            "$HOME/.cargo/git/db/"
-          )
+          ARCHIVE_NAME="cache_archive.tar.zst"
           CACHE_FOUND=false
-      
-          # Download cache
-          for path in "${CACHE_PATHS[@]}"; do
-            if gsutil cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" - | zstd -d | tar -xf - -C / ; then
-              CACHE_FOUND=true
-            fi
-          done
-      
+
+          # Download and extract cache
+          if gcloud storage cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}" - | zstd -d | tar -xf - -C / ; then
+            CACHE_FOUND=true
+          fi
+
           # Set output to indicate if cache was found
           echo "cache_found=${CACHE_FOUND}" >> $GITHUB_OUTPUT
 
@@ -96,11 +88,12 @@ jobs:
       - name: Run clippy check
         working-directory: avs-finalizer
         run: cargo clippy -- -D warnings
-      
+
       - name: Upload new cache
         if: always() && inputs.cache-enabled && steps.cache-cargo.outputs.cache_found == 'false' && success()
         run: |
           CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
+          ARCHIVE_NAME="cache_archive.tar.zst"
           CACHE_PATHS=(
             "${{ github.workspace }}/avs-finalizer/target"
             "$HOME/.cargo/bin/"
@@ -108,10 +101,19 @@ jobs:
             "$HOME/.cargo/registry/cache/"
             "$HOME/.cargo/git/db/"
           )
-      
-          for path in "${CACHE_PATHS[@]}"; do
-            tar -cf - -C / "${path}" | zstd -T0 -19 | gsutil cp - "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" || true
-          done
+
+          # Create a single compressed tar archive
+          tar -cf - "${CACHE_PATHS[@]}" | zstd -T0 -19 > "$ARCHIVE_NAME"
+
+          # Get and log the archive size
+          ARCHIVE_SIZE=$(du -h "$ARCHIVE_NAME" | cut -f1)
+          echo "Archive size: $ARCHIVE_SIZE"
+
+          # Upload the single archive to Google Cloud Storage
+          gcloud storage cp "$ARCHIVE_NAME" "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}"
+
+          # Clean up the local archive
+          rm "$ARCHIVE_NAME"
 
   tests:
     name: Run tests
@@ -132,28 +134,20 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - uses: google-github-actions/setup-gcloud@v2
-      
+
       - name: Cache the Cargo dependencies
         if: inputs.cache-enabled
         id: cache-cargo
         run: |
           CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
-          CACHE_PATHS=(
-            "${{ github.workspace }}/avs-finalizer/target"
-            "$HOME/.cargo/bin/"
-            "$HOME/.cargo/registry/index/"
-            "$HOME/.cargo/registry/cache/"
-            "$HOME/.cargo/git/db/"
-          )
+          ARCHIVE_NAME="cache_archive.tar.zst"
           CACHE_FOUND=false
-      
-          # Download cache
-          for path in "${CACHE_PATHS[@]}"; do
-            if gsutil cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" - | zstd -d | tar -xf - -C / ; then
-              CACHE_FOUND=true
-            fi
-          done
-      
+
+          # Download and extract cache
+          if gcloud storage cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}" - | zstd -d | tar -xf - -C / ; then
+            CACHE_FOUND=true
+          fi
+
           # Set output to indicate if cache was found
           echo "cache_found=${CACHE_FOUND}" >> $GITHUB_OUTPUT
 
@@ -169,11 +163,12 @@ jobs:
       - name: Run tests
         working-directory: avs-finalizer
         run: cargo test
-      
+
       - name: Upload new cache
         if: always() && inputs.cache-enabled && steps.cache-cargo.outputs.cache_found == 'false' && success()
         run: |
           CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
+          ARCHIVE_NAME="cache_archive.tar.zst"
           CACHE_PATHS=(
             "${{ github.workspace }}/avs-finalizer/target"
             "$HOME/.cargo/bin/"
@@ -181,10 +176,19 @@ jobs:
             "$HOME/.cargo/registry/cache/"
             "$HOME/.cargo/git/db/"
           )
-      
-          for path in "${CACHE_PATHS[@]}"; do
-            tar -cf - -C / "${path}" | zstd -T0 -19 | gsutil cp - "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" || true
-          done
+
+          # Create a single compressed tar archive
+          tar -cf - "${CACHE_PATHS[@]}" | zstd -T0 -19 > "$ARCHIVE_NAME"
+
+          # Get and log the archive size
+          ARCHIVE_SIZE=$(du -h "$ARCHIVE_NAME" | cut -f1)
+          echo "Archive size: $ARCHIVE_SIZE"
+
+          # Upload the single archive to Google Cloud Storage
+          gcloud storage cp "$ARCHIVE_NAME" "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}"
+
+          # Clean up the local archive
+          rm "$ARCHIVE_NAME"
 
   build-avs-finalizer-image:
     name: Build avs-finalizer Docker image
@@ -205,28 +209,20 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - uses: google-github-actions/setup-gcloud@v2
-      
+
       - name: Cache the Cargo dependencies
         if: inputs.cache-enabled
         id: cache-cargo
         run: |
           CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
-          CACHE_PATHS=(
-            "${{ github.workspace }}/avs-finalizer/target"
-            "$HOME/.cargo/bin/"
-            "$HOME/.cargo/registry/index/"
-            "$HOME/.cargo/registry/cache/"
-            "$HOME/.cargo/git/db/"
-          )
+          ARCHIVE_NAME="cache_archive.tar.zst"
           CACHE_FOUND=false
-      
-          # Download cache
-          for path in "${CACHE_PATHS[@]}"; do
-            if gsutil cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" - | zstd -d | tar -xf - -C / ; then
-              CACHE_FOUND=true
-            fi
-          done
-      
+
+          # Download and extract cache
+          if gcloud storage cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${ARCHIVE_NAME}" - | zstd -d | tar -xf - -C / ; then
+            CACHE_FOUND=true
+          fi
+
           # Set output to indicate if cache was found
           echo "cache_found=${CACHE_FOUND}" >> $GITHUB_OUTPUT
 
@@ -238,30 +234,3 @@ jobs:
         run: |
           echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-
-      - name: Run cargo build
-        working-directory: avs-finalizer
-        run: cargo build --release
-
-      - name: Create Docker image
-        working-directory: avs-finalizer
-        run: |
-          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
-          docker buildx create --use
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/avs-finalizer:${{ inputs.version }} -f src/bin/Dockerfile .
-      
-      - name: Upload new cache
-        if: always() && inputs.cache-enabled && steps.cache-cargo.outputs.cache_found == 'false' && success()
-        run: |
-          CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
-          CACHE_PATHS=(
-            "${{ github.workspace }}/avs-finalizer/target"
-            "$HOME/.cargo/bin/"
-            "$HOME/.cargo/registry/index/"
-            "$HOME/.cargo/registry/cache/"
-            "$HOME/.cargo/git/db/"
-          )
-      
-          for path in "${CACHE_PATHS[@]}"; do
-            tar -cf - -C / "${path}" | zstd -T0 -19 | gsutil cp - "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" || true
-          done
