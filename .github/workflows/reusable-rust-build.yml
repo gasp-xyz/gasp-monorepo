@@ -75,13 +75,15 @@ jobs:
       
           echo "cache_found=${CACHE_FOUND}\ncache_key=${CACHE_KEY}" >> $GITHUB_OUTPUT
 
-      - name: Run sccache-cache only on non-release runs
+      - name: Install sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
-        uses: mozilla-actions/sccache-action@v0.0.3
-      - name: Set Rust caching env vars only on non-release runs & skip wasm
+        uses: mozilla-actions/sccache-action@v0.0.5
+      - name: Set Rust caching env vars only on non-release run
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         run: |
-          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_KEY_PREFIX=${{ env.JOB_CACHE_PREFIX }}" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
 
       - name: Run clippy check
@@ -142,13 +144,15 @@ jobs:
       
           echo "cache_found=${CACHE_FOUND}\ncache_key=${CACHE_KEY}" >> $GITHUB_OUTPUT
       
-      - name: Run sccache-cache only on non-release runs
+      - name: Install sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
-        uses: mozilla-actions/sccache-action@v0.0.3
-      - name: Set Rust caching env vars only on non-release runs & skip wasm
+        uses: mozilla-actions/sccache-action@v0.0.5
+      - name: Set Rust caching env vars only on non-release run
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         run: |
-          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_KEY_PREFIX=${{ env.JOB_CACHE_PREFIX }}" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
 
       - name: Run tests
@@ -209,13 +213,15 @@ jobs:
 
           echo "cache_found=${CACHE_FOUND}\ncache_key=${CACHE_KEY}" >> $GITHUB_OUTPUT
 
-      - name: Run sccache-cache only on non-release runs
+      - name: Install sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
-        uses: mozilla-actions/sccache-action@v0.0.3
-      - name: Set Rust caching env vars only on non-release runs & skip wasm
+        uses: mozilla-actions/sccache-action@v0.0.5
+      - name: Set Rust caching env vars only on non-release run
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         run: |
-          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_KEY_PREFIX=${{ env.JOB_CACHE_PREFIX }}" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
 
       - name: Run cargo build
