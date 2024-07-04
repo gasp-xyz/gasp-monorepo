@@ -15,8 +15,7 @@ on:
         required: false
         type: number
       cache-enabled:
-        # TODO: to be removed after fixing cache
-        default: false
+        default: true
         description: Enable caching
         required: false
         type: boolean
@@ -60,7 +59,7 @@ jobs:
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Cache the Cargo dependencies
         if: inputs.cache-enabled
-        uses: mansagroup/gcs-cache-action@v1.0.3
+        uses: adambenhassen/gcs-cache-action@35ef085597bc70f322e37548fef6267297b1bb4e
         with:
           bucket: mangata-node-ci-cache
           path: |
@@ -119,7 +118,7 @@ jobs:
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Cache the Cargo dependencies
         if: inputs.cache-enabled
-        uses: mansagroup/gcs-cache-action@v1.0.3
+        uses: adambenhassen/gcs-cache-action@35ef085597bc70f322e37548fef6267297b1bb4e
         with:
           bucket: mangata-node-ci-cache
           path: |
@@ -162,7 +161,7 @@ jobs:
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Cache the Cargo dependencies
         if: inputs.cache-enabled
-        uses: mansagroup/gcs-cache-action@v1.0.3
+        uses: adambenhassen/gcs-cache-action@35ef085597bc70f322e37548fef6267297b1bb4e
         with:
           bucket: mangata-node-ci-cache
           path: |
