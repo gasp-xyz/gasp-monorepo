@@ -90,7 +90,6 @@ jobs:
           echo "SCCACHE_GCS_KEY_PREFIX=${{ env.JOB_CACHE_PREFIX }}" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
           echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
-      - run: sccache --show-stats
 
       - name: Run clippy check
         working-directory: avs-finalizer
@@ -166,7 +165,6 @@ jobs:
           echo "SCCACHE_GCS_KEY_PREFIX=${{ env.JOB_CACHE_PREFIX }}" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
           echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
-      - run: sccache --show-stats
 
       - name: Run tests
         working-directory: avs-finalizer
@@ -242,7 +240,6 @@ jobs:
           echo "SCCACHE_GCS_KEY_PREFIX=${{ env.JOB_CACHE_PREFIX }}" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
           echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
-      - run: sccache --show-stats
 
       - name: Run cargo build
         working-directory: avs-finalizer
