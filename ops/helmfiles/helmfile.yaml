@@ -23,8 +23,6 @@ repositories:
     url: https://ethpandaops.github.io/ethereum-helm-charts
   - name: blockscout
     url: https://blockscout.github.io/helm-charts
-  - name: bitnami
-    url: https://charts.bitnami.com/bitnami
   - name: mangata-node
     url: git+https://github.com/mangata-finance/helm-charts@charts?ref=node-v2.3.0
     
@@ -195,7 +193,7 @@ releases:
     installed: {{ .Values.blockscoutEnabled }}
     chart: blockscout/blockscout-stack
     dependencies:
-      - chart: bitnami/postgresql
+      - chart: oci://registry-1.docker.io/bitnamicharts/postgresql
         version: '12.x.x'
       - chart: ethereum-helm-charts/smart-contract-verifier-http
         version: '0.1.2'
@@ -300,7 +298,7 @@ releases:
     installed: {{ and .Values.blockscoutEnabled .Values.enableArbitrumServices }}
     chart: blockscout/blockscout-stack
     dependencies:
-      - chart: bitnami/postgresql
+      - chart: oci://registry-1.docker.io/bitnamicharts/postgresql
         version: '12.x.x'
       - chart: ethereum-helm-charts/smart-contract-verifier-http
         version: '0.1.2'
