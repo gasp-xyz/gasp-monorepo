@@ -48,8 +48,9 @@ jobs:
       - name: Setup helmfile
         uses: mamezou-tech/setup-helmfile@v1.3.0
         with:
+          helmfile-version: v0.166.0
+          helm-version: v3.15.2
           install-kubectl: no
-          install-helm: no
           additional-helm-plugins: https://github.com/jkroepke/helm-secrets --version v4.1.1,https://github.com/aslafy-z/helm-git --version 0.14.0
       - uses: google-github-actions/auth@v2
         with:
@@ -70,12 +71,6 @@ jobs:
           env: ${{ env.ENV_REF }}
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
       
-      # TODO: To review this step before merging the PR | test
-      # - name: Delete the fungible env deployment before new one to allow operator to register and not fail
-      #   if: inputs.env == 'fungible'
-      #   run: export IMAGE_TAG=${{ inputs.version }} && export ENVIRONMENT=${{ env.ENV_REF }} && helmfile destroy -e fungible
-      #   working-directory: ops/helmfiles
-      
       - run: |
           export ENVIRONMENT=${{ env.ENV_REF }}
           export IMAGE_TAG=${{ inputs.version }}
@@ -83,6 +78,7 @@ jobs:
           # https://dev.to/derlin/helmfile-difference-between-sync-and-apply-helm-3-28o1
           
           export HELM_DIFF_THREE_WAY_MERGE=true
+          helm repo update && helmfile repos
           helmfile apply -e ${{ inputs.env }}
         working-directory: ops/helmfiles
       

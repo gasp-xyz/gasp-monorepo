@@ -30,6 +30,9 @@ spec:
               forge script script/MultiStage.s.sol \
                 --rpc-url http://{{ include "app.name" . }}:8545 \
                 --private-key {{ .Values.privateKey }} \
+                {{- if .Values.verifierEnabled }}
+                --verifier {{ .Values.verifierName }} --verifier-url {{ .Values.verifierUrl | quote }} \
+                {{- end }}
                 --broadcast -v
           env:
             - name: ENV_SELECTOR
