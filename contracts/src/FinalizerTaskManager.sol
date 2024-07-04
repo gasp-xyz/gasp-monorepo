@@ -208,7 +208,7 @@ contract FinalizerTaskManager is
         lastCompletedTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
         lastCompletedTaskNum = task.taskNum;
         // emitting completed event
-        emit TaskCompleted(taskResponse.referenceTaskIndex, taskResponse.blockHash);
+        emit TaskCompleted(taskResponse.referenceTaskIndex, taskResponse.blockHash, taskResponse);
     }
 
     function taskNumber() external view returns (uint32) {

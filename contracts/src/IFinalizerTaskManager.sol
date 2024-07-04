@@ -17,7 +17,8 @@ interface IFinalizerTaskManager {
     );
 
     // When aggregated stake for OP's responses exceeds the required threshold
-    event TaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash);
+    event TaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash,
+        TaskResponse taskResponse);
 
     // STRUCTS
     struct Task {

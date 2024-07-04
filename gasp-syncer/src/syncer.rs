@@ -2,7 +2,7 @@ use crate::chainio::{avs::AvsContracts, build_clients, SourceClient, TargetClien
 use crate::cli::CliArgs;
 
 use bindings::{
-    finalizer_task_manager::{NewTaskCreatedFilter, TaskRespondedFilter, Operator as TMOperator,
+    finalizer_task_manager::{NewTaskCreatedFilter, TaskCompletedFilter, Operator as TMOperator,
         OperatorStateInfo, QuorumsAdded, QuorumsStakeUpdate, QuorumsApkUpdate, OperatorsAdded, OperatorsQuorumCountUpdate, OperatorsStakeUpdate, FinalizerTaskManagerCalls},
     shared_types::{G1Point, G2Point, Task, TaskResponse},
     gasp_multi_rollup_service::GaspMultiRollupService
@@ -78,7 +78,7 @@ impl Syncer {
         }
 
         let evs = self.clone().avs_contracts.source_response_stream(latest_completed_task_created_block);
-        let mut stream: stream::EventStream<'_, _, (TaskRespondedFilter, LogMeta), _> =
+        let mut stream: stream::EventStream<'_, _, (TaskCompletedFilter, LogMeta), _> =
             evs.subscribe_with_meta().await?;
 
         // event stream does not finish with `None` after websocket closure, use block subscription for it
@@ -122,9 +122,16 @@ impl Syncer {
                         println!("{:?}", operators_state_info_hash);
                         println!("{:?}", operators_state_info_hash == call.task_response.operators_state_info_hash.into());
                         
-                        if latest_completed_task_created_block != call.task.last_completed_task_created_block {
+                        if latest_completed_task_created_block < call.task.last_completed_task_created_block {
                             tracing::error!("missing expected task response {:?}", latest_completed_task_created_block);
                             return Err(eyre!("missing expected task response {:?}", latest_completed_task_created_block))
+                        }
+
+                        // This branch is to account for the case where 
+                        // a task is completed in a block and another task is created
+                        // in the same block and then that one is also completed in the same block
+                        if latest_completed_task_created_block > call.task.last_completed_task_created_block {
+                            continue;
                         }
 
                         if call.task.last_completed_task_created_block + 14400 <= call.task.task_created_block {
@@ -195,7 +202,7 @@ impl Syncer {
         last_task.last_completed_task_quorum_numbers = latest_completed_task_quorum_numbers;
         last_task.last_completed_task_quorum_threshold_percentage = latest_completed_task_quorum_threshold_percentage;
 
-        let block_events: Vec<TaskRespondedFilter>  = self.clone().avs_contracts.task_manager.event_with_filter(Filter::new().event(&TaskRespondedFilter::abi_signature()).from_block(u64::from(block_num))).query().await?;
+        let block_events: Vec<TaskCompletedFilter>  = self.clone().avs_contracts.task_manager.event_with_filter(Filter::new().event(&TaskCompletedFilter::abi_signature()).from_block(u64::from(block_num))).query().await?;
 
         if block_events.len().is_zero(){
             tracing::error!("missing expected task response {:?}", task_num);

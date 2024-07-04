@@ -2,7 +2,7 @@ use std::{fmt::Debug, sync::Arc};
 
 use bindings::{
     finalizer_service_manager::FinalizerServiceManager,
-    finalizer_task_manager::{FinalizerTaskManager, NewTaskCreatedFilter, TaskRespondedFilter},
+    finalizer_task_manager::{FinalizerTaskManager, NewTaskCreatedFilter, TaskCompletedFilter},
     registry_coordinator::RegistryCoordinator,
     shared_types::OperatorInfo,
     stake_registry::StakeRegistry,
@@ -80,8 +80,8 @@ impl AvsContracts {
 
     // TODO
     // Maybe add the task cancel event stream to check against that for early  exit
-    pub fn source_response_stream(&self, from_block: u32) -> Event<Arc<Provider<Ws>>, Provider<Ws>, TaskRespondedFilter> {
+    pub fn source_response_stream(&self, from_block: u32) -> Event<Arc<Provider<Ws>>, Provider<Ws>, TaskCompletedFilter> {
         self.task_manager_sub
-            .event_with_filter(Filter::new().event(&TaskRespondedFilter::abi_signature()).from_block(u64::from(from_block)))
+            .event_with_filter(Filter::new().event(&TaskCompletedFilter::abi_signature()).from_block(u64::from(from_block)))
     }
 }
