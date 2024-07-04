@@ -41,6 +41,7 @@ export const withBlocks = async (
   let last = 0
   let current = from
   const unsub = await api.rpc.chain.subscribeFinalizedHeads(async (head) => {
+    console.log('head', head.toHuman())
     const headBlock = await getBlockByHash(api, head.hash)
     last = headBlock.number
     metrics.setBlocks(from, headBlock.number)
@@ -55,6 +56,7 @@ export const withBlocks = async (
 
     store.setBatchMode(current, last)
     const block = await getBlockByNumber(api, current)
+    console.log('got block', block)
     await fn(block)
 
     metrics.tick()
@@ -87,9 +89,14 @@ const getBlockByNumber = async (api: ApiPromise, n: number) => {
 }
 
 const getBlockByHash = async (api: ApiPromise, hash: BlockHash) => {
+  console.log('hash called', hash.toHuman())
   const blockRpc = await api.rpc.chain.getBlock(hash)
+  console.log('hash call ended')
   const apiAt: ApiDecoration<'promise'> = await api.at(hash)
+  console.log('hash api decoration')
+
   const events = await apiAt.query.system.events()
+  console.log('hash vector events')
 
   return mapper(apiAt, blockRpc, events)
 }

@@ -29,7 +29,9 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
 
   if (collatorEvents.length > 0) {
     const toCollatorEvents = collatorEvents.map(async (event) => {
-      const currentSessionIndex = sessionIndex.current.toNumber()
+      const currentSessionIndex = JSON.parse(
+        JSON.stringify(sessionIndex)
+      ).current.toNumber()
       const eventSessionIndex =
         event.event.data.length > 2
           ? Number(event.event.data.toPrimitive()[0])
@@ -83,7 +85,9 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
         block: block.number,
         section: event.event.section,
         method: event.event.method,
-        sessionIndex: sessionIndex.current.toNumber(),
+        sessionIndex: JSON.parse(
+          JSON.stringify(sessionIndex)
+        ).current.toNumber(),
         collatorAccount,
         amountRewarded: rewardsCollatorAmount.multipliedBy(0.8).toFixed(0),
         liquidityTokenId,

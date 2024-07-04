@@ -14,8 +14,10 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
     )
     const portfolioBalance = accountBalances.map(
       async ([storageKey, value]) => {
-        const freeTokens = new BN(value.free.toString())
-        const frozenTokens = new BN(value.frozen.toString())
+        const free = JSON.parse(JSON.stringify(value)).free.toString()
+        const frozen = JSON.parse(JSON.stringify(value)).frozen.toString()
+        const freeTokens = new BN(free)
+        const frozenTokens = new BN(frozen)
         const freeBalance = freeTokens.sub(frozenTokens)
         const tokenId = storageKey.args[1].toString()
         const tokenInfo = (

@@ -38,8 +38,12 @@ const getPools = async (block: Block): Promise<PoolEntry[]> => {
       liquidityAssetsInPool[0].toString(),
       liquidityAssetsInPool[1].toString(),
     ])
+
+    const liquidityPoolIdUnwrapped = JSON.parse(
+      JSON.stringify(liquidityPoolId)
+    ).toNumber()
     const entry: PoolEntry = {
-      id: liquidityPoolId.unwrap().toNumber(),
+      id: liquidityPoolIdUnwrapped,
       amounts: [
         new Decimal(amounts[0].replace(/,/g, '').toString()),
         new Decimal(amounts[1].replace(/,/g, '').toString()),
