@@ -67,6 +67,7 @@ jobs:
         if: inputs.cache-enabled
         id: cache
         run: |
+          set -x
           CACHE_KEY="${{ env.JOB_CACHE_PREFIX }}-${{ hashFiles('**/Cargo.lock') }}"
           ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
           CACHE_FOUND=false
@@ -140,6 +141,7 @@ jobs:
         if: inputs.cache-enabled
         id: cache
         run: |
+          set -x
           CACHE_KEY="${{ env.JOB_CACHE_PREFIX }}-${{ hashFiles('**/Cargo.lock') }}"
           ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
           CACHE_FOUND=false
@@ -213,6 +215,7 @@ jobs:
         if: inputs.cache-enabled
         id: cache
         run: |
+          set -x
           CACHE_KEY="${{ env.JOB_CACHE_PREFIX }}-${{ hashFiles('**/Cargo.lock') }}"
           ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
           CACHE_FOUND=false
