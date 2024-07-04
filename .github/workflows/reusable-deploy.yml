@@ -78,7 +78,7 @@ jobs:
           # https://dev.to/derlin/helmfile-difference-between-sync-and-apply-helm-3-28o1
           
           export HELM_DIFF_THREE_WAY_MERGE=true
-          helmfile repos
+          helm repo update && helmfile repos
           helmfile apply -e ${{ inputs.env }}
         working-directory: ops/helmfiles
       
