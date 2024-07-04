@@ -10,9 +10,7 @@ export const initService = async () => {
   const latestBlock = (await store.getLatest()).block
   // const latestBlock = 3719278
   await blocks.withBlocks(api, latestBlock, async (block) => {
-    console.log('finished with blocks')
     await blocks.processEvents(block)
-    console.log('finished with process events')
 
     await pools.fetchPools(block)
     await staking.processStaking(api, block)

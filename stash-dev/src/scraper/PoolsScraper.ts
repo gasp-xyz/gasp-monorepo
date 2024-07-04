@@ -15,7 +15,9 @@ let assets: Map<string, Asset> = new Map()
 export const fetchPools = async (block: Block): Promise<void> => {
   await initAssets(block)
   const pools = await getPools(block)
-  await store.savePools(pools)
+  if (pools !== null && pools !== undefined && pools.length > 0) {
+    await store.savePools(pools)
+  }
 }
 
 const getPools = async (block: Block): Promise<PoolEntry[]> => {
