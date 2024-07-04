@@ -54,21 +54,35 @@ jobs:
       - uses: arduino/setup-protoc@v3
 
       - uses: google-github-actions/auth@v2
+        id: auth
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      
       - name: Cache the Cargo dependencies
         if: inputs.cache-enabled
-        uses: adambenhassen/gcs-cache-action@35ef085597bc70f322e37548fef6267297b1bb4e
-        with:
-          bucket: mangata-node-ci-cache
-          path: |
-            ${{ github.workspace }}/avs-finalizer/target
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-          key: cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}
+        id: cache-cargo
+        run: |
+          CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
+          CACHE_PATHS=(
+            "${{ github.workspace }}/avs-finalizer/target"
+            "$HOME/.cargo/bin/"
+            "$HOME/.cargo/registry/index/"
+            "$HOME/.cargo/registry/cache/"
+            "$HOME/.cargo/git/db/"
+          )
+          CACHE_FOUND=false
+      
+          # Download cache
+          for path in "${CACHE_PATHS[@]}"; do
+            if gsutil cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" - | zstd -d | tar -xf - -C / ; then
+              CACHE_FOUND=true
+            fi
+          done
+      
+          # Set output to indicate if cache was found
+          echo "cache_found=${CACHE_FOUND}" >> $GITHUB_OUTPUT
 
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -82,22 +96,22 @@ jobs:
       - name: Run clippy check
         working-directory: avs-finalizer
         run: cargo clippy -- -D warnings
-      # - name: Install cargo check tools
-      # run: |
-      # cargo install --locked cargo-deny || true
-      # cargo install --locked cargo-outdated || true
-      # cargo install --locked cargo-udeps || true
-      # cargo install --locked cargo-audit || true
-      # cargo install --locked cargo-pants || true
-      # - name: Check
-      # working-directory: avs-finalizer
-      # run: |
-      # cargo deny check
-      # cargo outdated --exit-code 1
-      # cargo udeps
-      # rm -rf ~/.cargo/advisory-db
-      # cargo audit
-      # cargo pants
+      
+      - name: Upload new cache
+        if: always() && inputs.cache-enabled && steps.cache-cargo.outputs.cache_found == 'false' && success()
+        run: |
+          CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
+          CACHE_PATHS=(
+            "${{ github.workspace }}/avs-finalizer/target"
+            "$HOME/.cargo/bin/"
+            "$HOME/.cargo/registry/index/"
+            "$HOME/.cargo/registry/cache/"
+            "$HOME/.cargo/git/db/"
+          )
+      
+          for path in "${CACHE_PATHS[@]}"; do
+            tar -cf - -C / "${path}" | zstd -T0 -19 | gsutil cp - "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" || true
+          done
 
   tests:
     name: Run tests
@@ -113,21 +127,35 @@ jobs:
       - uses: arduino/setup-protoc@v3
 
       - uses: google-github-actions/auth@v2
+        id: auth
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      
       - name: Cache the Cargo dependencies
         if: inputs.cache-enabled
-        uses: adambenhassen/gcs-cache-action@35ef085597bc70f322e37548fef6267297b1bb4e
-        with:
-          bucket: mangata-node-ci-cache
-          path: |
-            ${{ github.workspace }}/avs-finalizer/target
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-          key: cargo-rollup-tests-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}
+        id: cache-cargo
+        run: |
+          CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
+          CACHE_PATHS=(
+            "${{ github.workspace }}/avs-finalizer/target"
+            "$HOME/.cargo/bin/"
+            "$HOME/.cargo/registry/index/"
+            "$HOME/.cargo/registry/cache/"
+            "$HOME/.cargo/git/db/"
+          )
+          CACHE_FOUND=false
+      
+          # Download cache
+          for path in "${CACHE_PATHS[@]}"; do
+            if gsutil cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" - | zstd -d | tar -xf - -C / ; then
+              CACHE_FOUND=true
+            fi
+          done
+      
+          # Set output to indicate if cache was found
+          echo "cache_found=${CACHE_FOUND}" >> $GITHUB_OUTPUT
 
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -141,6 +169,22 @@ jobs:
       - name: Run tests
         working-directory: avs-finalizer
         run: cargo test
+      
+      - name: Upload new cache
+        if: always() && inputs.cache-enabled && steps.cache-cargo.outputs.cache_found == 'false' && success()
+        run: |
+          CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
+          CACHE_PATHS=(
+            "${{ github.workspace }}/avs-finalizer/target"
+            "$HOME/.cargo/bin/"
+            "$HOME/.cargo/registry/index/"
+            "$HOME/.cargo/registry/cache/"
+            "$HOME/.cargo/git/db/"
+          )
+      
+          for path in "${CACHE_PATHS[@]}"; do
+            tar -cf - -C / "${path}" | zstd -T0 -19 | gsutil cp - "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" || true
+          done
 
   build-avs-finalizer-image:
     name: Build avs-finalizer Docker image
@@ -156,21 +200,35 @@ jobs:
       - uses: arduino/setup-protoc@v3
 
       - uses: google-github-actions/auth@v2
+        id: auth
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      
       - name: Cache the Cargo dependencies
         if: inputs.cache-enabled
-        uses: adambenhassen/gcs-cache-action@35ef085597bc70f322e37548fef6267297b1bb4e
-        with:
-          bucket: mangata-node-ci-cache
-          path: |
-            ${{ github.workspace }}/avs-finalizer/target
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-          key: cargo-rollup-compile-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}
+        id: cache-cargo
+        run: |
+          CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
+          CACHE_PATHS=(
+            "${{ github.workspace }}/avs-finalizer/target"
+            "$HOME/.cargo/bin/"
+            "$HOME/.cargo/registry/index/"
+            "$HOME/.cargo/registry/cache/"
+            "$HOME/.cargo/git/db/"
+          )
+          CACHE_FOUND=false
+      
+          # Download cache
+          for path in "${CACHE_PATHS[@]}"; do
+            if gsutil cp "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" - | zstd -d | tar -xf - -C / ; then
+              CACHE_FOUND=true
+            fi
+          done
+      
+          # Set output to indicate if cache was found
+          echo "cache_found=${CACHE_FOUND}" >> $GITHUB_OUTPUT
 
       - name: Run sccache-cache only on non-release runs
         if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -191,3 +249,19 @@ jobs:
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
           docker buildx build --push --platform linux/amd64 -t mangatasolutions/avs-finalizer:${{ inputs.version }} -f src/bin/Dockerfile .
+      
+      - name: Upload new cache
+        if: always() && inputs.cache-enabled && steps.cache-cargo.outputs.cache_found == 'false' && success()
+        run: |
+          CACHE_KEY="cargo-rollup-clippy-cache-${{ inputs.cache-version }}-${{ hashFiles('**/Cargo.lock') }}"
+          CACHE_PATHS=(
+            "${{ github.workspace }}/avs-finalizer/target"
+            "$HOME/.cargo/bin/"
+            "$HOME/.cargo/registry/index/"
+            "$HOME/.cargo/registry/cache/"
+            "$HOME/.cargo/git/db/"
+          )
+      
+          for path in "${CACHE_PATHS[@]}"; do
+            tar -cf - -C / "${path}" | zstd -T0 -19 | gsutil cp - "gs://mangata-node-ci-cache/${CACHE_KEY}/${path}.tar.zst" || true
+          done
