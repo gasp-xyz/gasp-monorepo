@@ -34,7 +34,7 @@ services:
       L1_CHAIN: ${ROLLUP_SEQUENCER_L1_CHAIN_ARB:-Arbitrum}
 
 
-    sequencer-eth-charlieth:
+  sequencer-eth-charlieth:
     restart: unless-stopped
     image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
     depends_on:
