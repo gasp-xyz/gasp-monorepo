@@ -2,7 +2,7 @@ import { pairs, tickers } from '../src/service/CoingeckoListingService'
 import { describe, expect, it, vi, beforeAll, afterAll } from 'vitest'
 import { Decimal } from 'decimal.js'
 
-vi.mock('@mangata-finance/sdk')
+vi.mock('gasp-sdk')
 
 describe('[CoinGecko listing]', () => {
   beforeAll(() => {

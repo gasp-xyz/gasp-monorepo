@@ -4,7 +4,7 @@ import { TimestampedAmount } from '../src/schema/Models'
 import { tokenDetails, tokenList } from '../src/service/TokenListService'
 import { TokenInfoStats } from '../src/util/Listing'
 
-vi.mock('@mangata-finance/sdk')
+vi.mock('gasp-sdk')
 
 describe('[Token list]', () => {
   beforeAll(() => {
