@@ -25,24 +25,23 @@ jobs:
         working-directory: stash-dev
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'yarn'
           cache-dependency-path: "./stash-dev/yarn.lock"
       
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: mdgreenwald/mozilla-sops-action@v1.6.0
+      
       - run: yarn install --immutable
       - run: yarn run build
-      - run: yarn run test-ci
-
-      # - uses: google-github-actions/auth@v2
-      #   id: auth
-      #   with:
-      #     workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-      #     service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      # - uses: google-github-actions/setup-gcloud@v2
-      # - uses: mdgreenwald/mozilla-sops-action@v1.6.0
+      - run: sops exec-env ${{ env.ENVIRONMENT }}.enc.env yarn run test-ci
 
       # - name: Deploy to Google App Engine
       #   working-directory: stash-dev
