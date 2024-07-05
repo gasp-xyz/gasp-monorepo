@@ -74,7 +74,7 @@ describe('[Token list]', () => {
       priceChange24hInPerc: '2.33',
       volumeChange24hInPerc: '4.21',
     }
-    const result = await tokenDetails('MGX')
+    const result = await tokenDetails('GASP')
     expect(result).deep.equal(expectedResponse)
     expect(result).toHaveProperty('tokenId')
     expect(result).toHaveProperty('tokenName')
@@ -97,7 +97,7 @@ describe('[Token list]', () => {
       priceChange24hInPerc: '2.33',
       volumeChange24hInPerc: '4.21',
     }
-    const result = await tokenDetails('KSM')
+    const result = await tokenDetails('GETH')
     expect(result).deep.equal(expectedResponse)
     expect(result).toHaveProperty('tokenId')
     expect(result).toHaveProperty('tokenName')
