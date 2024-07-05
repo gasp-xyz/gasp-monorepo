@@ -33,7 +33,7 @@ helmDefaults:
 releases:
   - name: evm-node-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.evmNodeEnabled }}
+    installed: {{ .Values.evmNode.enabled }}
     chart: ../helm-charts/evm-node
     values:
       - image:
@@ -46,10 +46,12 @@ releases:
         enablePersistence: true
         verifierEnabled: {{ .Values | get "blockscoutEnabled" false }}
         verifierUrl: 'http://blockscout-eth-blockscout-stack-blockscout-svc:80/api'
+        # If customChainspecUrlEth is not set, the node will use the default chainspec instead
+        customGenesisUrl: {{ .Values | getOrNil "evmNode.customGenesisUrlEth" }}
   
   - name: evm-node-arb
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ and .Values.evmNodeEnabled .Values.enableArbitrumServices | toYaml }}
+    installed: {{ and .Values.evmNode.enabled .Values.enableArbitrumServices | toYaml }}
     chart: ../helm-charts/evm-node
     values:
       - image:
@@ -62,6 +64,8 @@ releases:
         enablePersistence: true
         verifierEnabled: {{ .Values | get "blockscoutEnabled" false }}
         verifierUrl: 'http://blockscout-arb-blockscout-stack-blockscout-svc:80/api'
+        # If customChainspecUrlArb is not set, the node will use the default chainspec instead
+        customChainspecUrl: {{ .Values | getOrNil "evmNode.customGenesisUrlArb" }}
 
   - name: avs-aggregator
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'

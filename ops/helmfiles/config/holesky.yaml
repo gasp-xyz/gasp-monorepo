@@ -1,8 +1,13 @@
 remoteCluster: true
 
-evmNodeEnabled: false
 blockscoutEnabled: false
 enableArbitrumServices: true
+
+####################
+# evm-node configs #
+####################
+evmNode:
+  enabled: false
 
 #####################
 # collator configs #
