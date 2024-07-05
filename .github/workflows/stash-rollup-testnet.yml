@@ -40,7 +40,11 @@ jobs:
       
       - run: yarn install --immutable
       - run: yarn run build
-      - run: sops exec-env ${{ env.ENVIRONMENT }}.enc.env yarn run test-ci
+      - run: sops exec-env ${{ env.ENVIRONMENT }}.enc.env 'yarn run test-ci'
+
+      - name: Deploy to Google App Engine
+        working-directory: stash-dev
+        run: sops exec-env ${{ env.ENVIRONMENT }}.enc.env 'gcloud app deploy app-${{ env.ENVIRONMENT }}.yaml --quiet'
       
       # TODO: temporary disable smoke test
       # - name: smoke test
