@@ -7,8 +7,8 @@ enableArbitrumServices: true
 ####################
 evmNode:
   enabled: true
-  customGenesisUrlEth: 'https://raw.githubusercontent.com/mangata-finance/eigen-layer-monorepo/a2f5af706b5bb8d91475a31acd14550f2559f060/contracts/script/config/holesky-stub.json'
-  customGenesisUrlArb: 'https://raw.githubusercontent.com/mangata-finance/eigen-layer-monorepo/a2f5af706b5bb8d91475a31acd14550f2559f060/contracts/script/config/arbitrum-sepolia-stub.json'
+  customGenesisUrlEth: ''
+  customGenesisUrlArb: ''
 
 #####################
 # collator configs #
