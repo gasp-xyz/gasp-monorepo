@@ -1,3 +1,5 @@
 creation_rules:
   - path_regex: \.yaml$
     gcp_kms: projects/direct-pixel-353917/locations/global/keyRings/sops/cryptoKeys/sops-key
+  - path_regex: \.enc\.env$
+    gcp_kms: projects/direct-pixel-353917/locations/global/keyRings/sops/cryptoKeys/sops-key
