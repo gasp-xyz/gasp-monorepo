@@ -6,7 +6,7 @@ on:
       - main
       - chore/MGX-1238/fix_undefined_property
     paths:
-      - "stash-dev/**/*"
+      - "stash/**/*"
       - ".github/**/rollup-dev**"
 
 permissions:
@@ -22,14 +22,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: stash-dev
+        working-directory: stash
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'yarn'
-          cache-dependency-path: "./stash-dev/yarn.lock"
+          cache-dependency-path: "./stash/yarn.lock"
       
       - uses: google-github-actions/auth@v2
         id: auth
@@ -44,7 +44,7 @@ jobs:
       - run: sops exec-env ${{ env.ENVIRONMENT }}.enc.env 'yarn run test-ci'
 
       # - name: Deploy to Google App Engine
-      #   working-directory: stash-dev
+      #   working-directory: stash
       #   run: sops exec-env ${{ env.ENVIRONMENT }}.enc.env 'gcloud app deploy app-${{ env.ENVIRONMENT }}.yaml --quiet'
       
       # TODO: temporary disable smoke test

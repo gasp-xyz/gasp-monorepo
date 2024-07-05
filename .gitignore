@@ -23,8 +23,8 @@
 # Go workspace file
 # go.work
 coverage.html
-stash-dev/.env
-stash-dev/.env.local
+stash/.env
+stash/.env.local
 
 # log files
 logs.txt
