@@ -37,10 +37,11 @@ spec:
           command: {{ toYaml .Values.command | nindent 12 }}
           args:
           {{- toYaml .Values.args | nindent 12 }}
+          {{- if .Values.enableAutoMine }}
+            - --auto-mine
+          {{- end }}
           {{- if .Values.customGenesisUrl }}
             - --chain=/config/genesis.json
-          {{- else }}
-            - --auto-mine
           {{- end }}
           ports:
             - containerPort: 8545

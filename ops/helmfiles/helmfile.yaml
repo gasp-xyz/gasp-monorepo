@@ -65,7 +65,7 @@ releases:
         verifierEnabled: {{ .Values | get "blockscoutEnabled" false }}
         verifierUrl: 'http://blockscout-arb-blockscout-stack-blockscout-svc:80/api'
         # If customChainspecUrlArb is not set, the node will use the default chainspec instead
-        customChainspecUrl: {{ .Values | getOrNil "evmNode.customGenesisUrlArb" }}
+        customGenesisUrl: {{ .Values | getOrNil "evmNode.customGenesisUrlArb" }}
 
   - name: avs-aggregator
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
