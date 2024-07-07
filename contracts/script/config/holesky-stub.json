@@ -1,6 +1,6 @@
 {
   "config": {
-    "chainId": 17000
+    "chainId": 1337
   },
   "nonce": "0x0",
   "timestamp": "0x6490fdd2",
