@@ -109,7 +109,7 @@ updaterEnabled: true
 updaterChainUrlEth: ws://evm-node-eth:8546
 updaterMnemonicEth: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 updaterEnvEth:
-  CHAIN: "reth"
+  CHAIN: "reth-1337"
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: ws://collator-01:9944
   EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
@@ -119,7 +119,7 @@ updaterEnvEth:
 updaterChainUrlArb: ws://evm-node-arb:8546
 updaterMnemonicArb: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 updaterEnvArb:
-  CHAIN: "reth"
+  CHAIN: "reth-31337"
   L1_CHAIN: "Arbitrum"
   MANGATA_NODE_URL: ws://collator-01:9944
   EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"

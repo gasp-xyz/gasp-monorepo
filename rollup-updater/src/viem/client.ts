@@ -45,7 +45,7 @@ export function getChain() {
         });
     } else if (process.env.CHAIN == "reth-31337"){
         return defineChain({
-            id: 1337,
+            id: 31337,
             name: "reth",
             network: "Reth",
             nativeCurrency: {
