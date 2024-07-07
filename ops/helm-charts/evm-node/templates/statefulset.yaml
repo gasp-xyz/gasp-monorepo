@@ -17,12 +17,32 @@ spec:
         {{- include "app.labels" . | nindent 8 }}
         service: {{ include "app.name" . }}
     spec:
+      {{- if .Values.customGenesisUrl }}
+      initContainers:
+        - name: download-genesis
+          image: curlimages/curl:7.81.0
+          command:
+            - sh
+            - -c
+            - |
+              curl -L {{ .Values.customGenesisUrl }} -o /config/genesis.json
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      {{- end }}
       containers:
         - name: node
           image: "{{ .Values.evmNodeImage }}"
           imagePullPolicy: Always
           command: {{ toYaml .Values.command | nindent 12 }}
-          args: {{ toYaml .Values.args | nindent 12 }}
+          args:
+          {{- toYaml .Values.args | nindent 12 }}
+          {{- if .Values.enableAutoMine }}
+            - --auto-mine
+          {{- end }}
+          {{- if .Values.customGenesisUrl }}
+            - --chain=/config/genesis.json
+          {{- end }}
           ports:
             - containerPort: 8545
               name: rpc
@@ -33,9 +53,18 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.dataMountPath }}
               name: data
+            {{- if .Values.customGenesisUrl }}
+            - name: config
+              mountPath: /config
+            {{- end }}
       {{- if not .Values.enablePersistence }}
       volumes:
         - name: data
+          emptyDir: {}
+      {{- end }}
+      {{- if .Values.customGenesisUrl }}
+      volumes:
+        - name: config
           emptyDir: {}
       {{- end }}
   {{- if .Values.enablePersistence }}

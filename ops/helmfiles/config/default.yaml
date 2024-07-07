@@ -1,8 +1,14 @@
 remoteCluster: true
-
-evmNodeEnabled: true
 blockscoutEnabled: false
 enableArbitrumServices: true
+
+####################
+# evm-node configs #
+####################
+evmNode:
+  enabled: true
+  customGenesisUrlEth: ''
+  customGenesisUrlArb: ''
 
 #####################
 # collator configs #
