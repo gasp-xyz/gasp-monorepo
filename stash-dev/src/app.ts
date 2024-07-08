@@ -86,14 +86,12 @@ app.get(
 app.get('/coingecko/pairs', coingeckoController.pairs)
 app.get('/coingecko/tickers', coingeckoController.tickers)
 
-if (process.env.APP_ENV === 'rollup-dev') {
   app.get('/affirmed-network/list', networkController.networkList)
   app.get('/affirmed-token/list', networkController.tokenList)
   app.get(
     '/account/:address/token-portfolio',
     tokenNetworkPortfolioController.tokenNetworkPortfolio
   )
-}
 
 // Coinmarketcap listing endpoints
 app.get('/coinmarketcap/v1/summary', coinmarketcapController.summary)
