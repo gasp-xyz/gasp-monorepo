@@ -1,6 +1,8 @@
 remoteCluster: true
 
 enableArbitrumServices: false
+blockscoutEnabled: false
+
 
 ####################
 # evm-node configs #
@@ -12,6 +14,33 @@ evmNode:
 # collator configs #
 #####################
 collatorsEnabled: false
+# TODO: Those configs below are not used for this env as collators for it are deployed from `gitops` repository
+# and we are using `gitops` repository for deploying the collators for this env
+collator:
+  image:
+    repository: mangatasolutions/rollup-node
+    tag: 3a07824d8b8a6ad027424629b814a5edb61654cf
+  disableChainspecGeneration: true
+  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
+  enableServiceMonitorCollectors: true
+  storageClass: node-data-volume-retain
+  storageSize: 50Gi
+  wsHealthExporter:
+    enabled: true
+    image: paritytech/ws-health-exporter:bc071a44-20230830
+    env:
+      WSHE_NODE_MIN_PEERS: 2
+  tolerations:
+    - key: production
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+  firstCollatorNodeSelector:
+    production: "true"
+    topology.kubernetes.io/zone: europe-west1-b
+  secondCollatorNodeSelector:
+    production: "true"
+    topology.kubernetes.io/zone: europe-west1-c
 
 ####################
 # evm-node configs #
@@ -45,10 +74,10 @@ envEth:
 ######################
 aggregatorEnabled: true
 aggregatorEnvSecrets:
-  ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-key
-  ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-aggregator-ecdsa-password
-  ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
-  ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/holesky-wss-rpc-url
+  ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetAggregatorEcdsaKeyJson
+  ECDSA_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetAggregatorEcdsaKeyPassword
+  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
+  ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
 
 #####################
 # finalizer configs #
@@ -57,20 +86,20 @@ secondFinalizerEnabled: false
 finalizerEnabled: true
 finalizerEnableServiceMonitorCollectors: true
 finalizerEnvSecrets:
-  ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-operator-1-ecdsa-key
-  ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-operator-1-ecdsa-password
-  BLS_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-operator-1-bls-key
-  BLS_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/eigen-goerli-operator-1-bls-password
-  ETH_RPC_URL: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
-  ETH_WS_URL: ref+gcpsecrets://direct-pixel-353917/holesky-wss-rpc-url
+  ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetFinalizerEcdsaKeyJson
+  ECDSA_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetFinalizerEcdsaKeyPassword
+  BLS_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetFinalizerBlsKeyJson
+  BLS_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetFinalizerBlsKeyPassword
+  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
+  ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
 
 ###########################
 # rollup-updater configs #
 ###########################
 updaterEnabled: true
 
-updaterChainUrlEth: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
-updaterMnemonicEth: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
+updaterChainUrlEth: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
+updaterMnemonicEth: ref+sops://secrets.enc.yaml#/testnetUpdaterMnemonicEth
 updaterEnvEth:
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-testnet.mangata.online
@@ -97,9 +126,9 @@ updaterEnvArb:
 sequencerEnabled: true
 secondSequencerEnabled: false
 
-firstSequencerMnemonicEth: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
-secondSequencerMnemonicEth: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-sequencer-mnemonic
-sequencerChainUrlEth: ref+gcpsecrets://direct-pixel-353917/holesky-https-rpc-url
+firstSequencerMnemonicEth: ref+sops://secrets.enc.yaml#/testnetFirstSequencerMnemonicEth
+secondSequencerMnemonicEth: ref+sops://secrets.enc.yaml#/testnetSecondSequencerMnemonicEth
+sequencerChainUrlEth: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-testnet.mangata.online
