@@ -3,7 +3,7 @@ import {
 	Mangata,
 	type MangataGenericEvent,
 	signTx,
-} from "@mangata-finance/sdk";
+} from "gasp-sdk";
 import { type ApiPromise, Keyring } from "@polkadot/api";
 import type { ApiDecoration } from "@polkadot/api/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
@@ -11,6 +11,7 @@ import type { Option } from "@polkadot/types-codec";
 import type {
 	FrameSystemEventRecord,
 	PalletRolldownMessagesL1Update,
+	PalletRolldownMessagesChain,
 } from "@polkadot/types/lookup";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import type { KeypairType } from "@polkadot/util-crypto/types";
@@ -24,6 +25,13 @@ import {
 	MANGATA_CONTRACT_ADDRESS,
 	ROLLDOWN_EVENT_SECTION,
 } from "../common/constants.js";
+
+
+function getL1ChainType(
+	api: ApiPromise,
+): PalletRolldownMessagesChain {
+  return api.createType('PalletRolldownMessagesChain', L1_CHAIN)
+}
 
 function sleep(timeInMilliseconds: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, timeInMilliseconds));
@@ -55,7 +63,7 @@ async function getNativeL1Update(
 	api: ApiPromise,
 	encodedData: `0x${string}`,
 ): Promise<Option<PalletRolldownMessagesL1Update>> {
-	return await api.rpc.rolldown.get_native_l1_update(encodedData.substring(2));
+  return await api.rpc.rolldown.get_native_sequencer_update(encodedData.substring(2));
 }
 
 async function getEvents(
@@ -78,6 +86,7 @@ async function initReadContractWithRetry(
 		try {
 			return await getUpdateForL2(publicClient, api);
 		} catch (e) {
+      print(`error: ${e}`)
 			print(`${MANGATA_CONTRACT_ADDRESS} contract not found`);
 			await sleep(1000);
 		}
@@ -95,14 +104,10 @@ async function processDataForL2Update(
 	print(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
 
 	const data = await getUpdateForL2(publicClient, api);
-	print(data);
+	print(`ETH native data : ${util.inspect(data, { depth: null })}`);
 
 	const encodedData = getEncodedData("getUpdateForL2", data);
-	const nativeL1Update = await getNativeL1Update(api, encodedData);
-	return {
-		encodedData,
-		nativeL1Update,
-	};
+	return await getNativeL1Update(api, encodedData);
 }
 
 async function processPendingRequestsEvents(
@@ -121,11 +126,16 @@ async function processPendingRequestsEvents(
 	if (pendingRequestsEvents.length > 0) {
 		pendingRequestsEvents.forEach(async (record: FrameSystemEventRecord) => {
 			record.event.data.forEach(async (data) => {
-				const requestId = (data as unknown as string[])[1];
-				const { start, end } = (data as any)[2] as unknown as {
+				const chain = (data as unknown as string[])[0];
+				const requestId = (data as unknown as string[])[2];
+				const { start, end } = (data as any)[3] as unknown as {
 					start: string;
 					end: string;
 				};
+        if (chain.toString() !== L1_CHAIN){
+          console.log(`ignoring event ${data.toString()} for differnet chain`)
+          return
+        }
 
 				const contractData = await publicClient.readContract({
 					address: MANGATA_CONTRACT_ADDRESS,
@@ -136,7 +146,8 @@ async function processPendingRequestsEvents(
 
 				const encodedData = getEncodedData("getPendingRequests", contractData);
 
-				const verified = await api.rpc.rolldown.verify_pending_requests(
+				const verified = await api.rpc.rolldown.verify_sequencer_update(
+          L1_CHAIN,
 					keccak256(encodedData),
 					requestId.toString(),
 				);
@@ -144,7 +155,7 @@ async function processPendingRequestsEvents(
 				if (!verified.toPrimitive()) {
 					await signTx(
 						api,
-						api.tx.rolldown.cancelRequestsFromL1(requestId.toString()),
+						api.tx.rolldown.cancelRequestsFromL1(L1_CHAIN as any, requestId.toString()),
 						collator,
 					);
 				}
@@ -159,27 +170,22 @@ async function getSelectedSequencerWithRights(
 	headerHash: Uint8Array,
 ) {
 	const apiAt = await api.at(headerHash);
-	const selectedSequencer =
-		await apiAt.query.sequencerStaking.selectedSequencer();
-	if (selectedSequencer.isSome) {
-		const isSequencerSelected =
-			u8aToHex(selectedSequencer.unwrap()).toLowerCase() ===
-			collatorAddress.toLowerCase();
-		const sequencerRights =
-			await apiAt.query.rolldown.sequencerRights(collatorAddress);
-		const hasSequencerRights =
-			sequencerRights.unwrap().readRights.toNumber() > 0;
-		return {
-			isSequencerSelected,
-			hasSequencerRights,
-			selectedSequencer: u8aToHex(selectedSequencer.unwrap()).toLowerCase(),
-		};
-	}
-	return {
-		isSequencerSelected: false,
-		hasSequencerRights: false,
-		selectedSequencer: null,
-	};
+	const selectedSequencerMap =
+    await apiAt.query.sequencerStaking.selectedSequencer();
+  const selectedMap = JSON.parse(selectedSequencerMap.toString());
+  const selectedSequencer = selectedMap[L1_CHAIN].toLowerCase();
+
+  const isSequencerSelected = selectedSequencer === collatorAddress.toLowerCase();
+  const sequencerRights = await apiAt.query.rolldown.sequencersRights(L1_CHAIN);
+  let rights = JSON.parse(sequencerRights.toString())[collatorAddress.toLowerCase()]
+  const hasSequencerRights = rights.readRights > 0;
+
+  return {
+    isSequencerSelected,
+    hasSequencerRights,
+    selectedSequencer,
+  };
+
 }
 
 function isSuccess(events: MangataGenericEvent[]) {
@@ -367,7 +373,7 @@ function countRequests(l2Update: PalletRolldownMessagesL1Update) {
 
 async function getLastRequestId(api: ApiPromise) {
 	return Number.parseInt(
-		(await api.query.rolldown.lastProcessedRequestOnL2("Ethereum")).toString(),
+		(await api.query.rolldown.lastProcessedRequestOnL2(L1_CHAIN)).toString(),
 	);
 }
 

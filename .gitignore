@@ -23,6 +23,8 @@
 # Go workspace file
 # go.work
 coverage.html
+stash-dev/.env
+stash-dev/.env.local
 
 # log files
 logs.txt
@@ -41,7 +43,7 @@ gha-creds-*.json
 
 # IDE - VSCode
 .vscode/*
-!.vscode/settings.json
+# !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
@@ -73,6 +75,8 @@ ops/**/data
 
 *.gas-snapshot
 contracts/script/output/*
+**/arbitrum_rolldown_output.json
+**/ethereum_rolldown_output.json
 
 # foundry related ignore
 # reference: https://github.com/PaulRBerg/foundry-template/blob/main/.gitignore
@@ -89,3 +93,7 @@ out
 /ops/blockscout-docker-compose/services/redis-data
 /ops/blockscout-docker-compose/services/logs
 /ops/blockscout-docker-compose/tmp
+
+.continueignore
+
+.decrypted*

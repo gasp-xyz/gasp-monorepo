@@ -4,35 +4,68 @@ environments:
      - config/default.yaml
   fungible:
     values:
-     - config/default.yaml
      - config/fungible.yaml
   dev:
     values:
-    - config/default.yaml
-    - config/dev.yaml
+      - config/dev.yaml
   frontend:
     values:
-    - config/default.yaml
-    - config/frontend.yaml
+      - config/frontend.yaml
   testnet:
     values:
      - config/testnet.yaml
+  holesky:
+    values:
+    - config/holesky.yaml
 ---
+repositories:
+  - name: ethereum-helm-charts
+    url: https://ethpandaops.github.io/ethereum-helm-charts
+  - name: blockscout
+    url: https://blockscout.github.io/helm-charts
+  - name: mangata-node
+    url: git+https://github.com/mangata-finance/helm-charts@charts?ref=node-v2.3.0
+    
 helmDefaults:
   kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
   wait: false
 
 releases:
-  - name: anvil
+  - name: evm-node-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
-    installed: {{ .Values.anvilEnabled }}
-    chart: ../helm-charts/anvil-testnet
+    installed: {{ .Values.evmNode.enabled }}
+    chart: ../helm-charts/evm-node
     values:
       - image:
           repository: mangatasolutions/anvil
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
-        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        nameOverride: 'evm-node-eth'
+        envSelector: ethereum-stub
+        enablePersistence: true
+        verifierEnabled: {{ .Values | get "blockscoutEnabled" false }}
+        verifierUrl: 'http://blockscout-eth-blockscout-stack-blockscout-svc:80/api'
+        # If customChainspecUrlEth is not set, the node will use the default chainspec instead
+        customGenesisUrl: {{ .Values | getOrNil "evmNode.customGenesisUrlEth" }}
+  
+  - name: evm-node-arb
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ and .Values.evmNode.enabled .Values.enableArbitrumServices | toYaml }}
+    chart: ../helm-charts/evm-node
+    values:
+      - image:
+          repository: mangatasolutions/anvil
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        remoteCluster: {{ .Values.remoteCluster }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        nameOverride: 'evm-node-arb'
+        envSelector: arbitrum-stub
+        enablePersistence: true
+        verifierEnabled: {{ .Values | get "blockscoutEnabled" false }}
+        verifierUrl: 'http://blockscout-arb-blockscout-stack-blockscout-svc:80/api'
+        # If customChainspecUrlArb is not set, the node will use the default chainspec instead
+        customGenesisUrl: {{ .Values | getOrNil "evmNode.customGenesisUrlArb" }}
 
   - name: avs-aggregator
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
@@ -45,7 +78,7 @@ releases:
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.env | toYaml | nindent 10 }}
+        env: {{ .Values.envEth | toYaml | nindent 10 }}
 
   - name: avs-finalizer
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
@@ -62,8 +95,9 @@ releases:
         prometheus:
           enabled: true
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.env | toYaml | nindent 10 }}
-  - name: avs-finalizer-2
+        env: {{ .Values.envEth | toYaml | nindent 10 }}
+  
+  - name: avs-finalizer-eth-2
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.secondFinalizerEnabled }}
     chart: ../helm-charts/rollup-node
@@ -78,9 +112,9 @@ releases:
         prometheus:
           enabled: true
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.env | toYaml | nindent 10 }}
+        env: {{ .Values.envEth | toYaml | nindent 10 }}
 
-  - name: rollup-updater
+  - name: rollup-updater-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.updaterEnabled }}
     chart: ../helm-charts/rollup-updater
@@ -89,11 +123,24 @@ releases:
           repository: mangatasolutions/rollup-updater
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        walletPrivateKey: ref+gcpsecrets://direct-pixel-353917/eigen-mangata-updater-private-key
-        ethChainUrl: {{ .Values.updaterEthChainUrl | fetchSecretValue | quote }}
-        env: {{ .Values.updaterEnv | toYaml | nindent 10 }}
+        walletPrivateKey: {{ .Values.updaterMnemonicEth | fetchSecretValue | quote }}
+        ethChainUrl: {{ .Values.updaterChainUrlEth | fetchSecretValue | quote }}
+        env: {{ .Values.updaterEnvEth | toYaml | nindent 10 }}
   
-  - name: rollup-sequencer
+  - name: rollup-updater-arb
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ and .Values.updaterEnabled .Values.enableArbitrumServices }}
+    chart: ../helm-charts/rollup-updater
+    values:
+      - image:
+          repository: mangatasolutions/rollup-updater
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        walletPrivateKey: {{ .Values.updaterMnemonicArb | fetchSecretValue | quote }}
+        ethChainUrl: {{ .Values.updaterChainUrlArb | fetchSecretValue | quote }}
+        env: {{ .Values.updaterEnvArb | toYaml | nindent 10 }}
+  
+  - name: rollup-sequencer-eth
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.sequencerEnabled }}
     chart: ../helm-charts/rollup-sequencer
@@ -102,10 +149,24 @@ releases:
           repository: mangatasolutions/rollup-sequencer
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        mnemonic: {{ .Values.firstSequencerMnemonic | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerEthChainUrl | fetchSecretValue | quote }}
-        env: {{ .Values.sequencerEnv | toYaml | nindent 10 }}
-  - name: rollup-sequencer-2
+        mnemonic: {{ .Values.firstSequencerMnemonicEth | fetchSecretValue | quote }}
+        ethChainUrl:  {{ .Values.sequencerChainUrlEth | fetchSecretValue | quote }}
+        env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
+
+  - name: rollup-sequencer-arb
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ and .Values.sequencerEnabled .Values.enableArbitrumServices }}
+    chart: ../helm-charts/rollup-sequencer
+    values:
+      - image:
+          repository: mangatasolutions/rollup-sequencer
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        mnemonic: {{ .Values.firstSequencerMnemonicArb | fetchSecretValue | quote }}
+        ethChainUrl:  {{ .Values.sequencerChainUrlArb | fetchSecretValue | quote }}
+        env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
+  
+  - name: rollup-sequencer-eth-2
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.secondSequencerEnabled }}
     chart: ../helm-charts/rollup-sequencer
@@ -114,6 +175,299 @@ releases:
           repository: mangatasolutions/rollup-sequencer
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         environment: {{ requiredEnv "ENVIRONMENT" | quote }}
-        mnemonic: {{ .Values.secondSequencerMnemonic | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerEthChainUrl | fetchSecretValue | quote }}
-        env: {{ .Values.sequencerEnv | toYaml | nindent 10 }}
+        mnemonic: {{ .Values.secondSequencerMnemonicEth | fetchSecretValue | quote }}
+        ethChainUrl:  {{ .Values.sequencerChainUrlEth | fetchSecretValue | quote }}
+        env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
+  
+  - name: rollup-sequencer-arb-2
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ and .Values.secondSequencerEnabled .Values.enableArbitrumServices }}
+    chart: ../helm-charts/rollup-sequencer
+    values:
+      - image:
+          repository: mangatasolutions/rollup-sequencer
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        environment: {{ requiredEnv "ENVIRONMENT" | quote }}
+        mnemonic: {{ .Values.secondSequencerMnemonicArb | fetchSecretValue | quote }}
+        ethChainUrl:  {{ .Values.sequencerChainUrlArb | fetchSecretValue | quote }}
+        env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
+
+  - name: blockscout-eth
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ .Values.blockscoutEnabled }}
+    chart: blockscout/blockscout-stack
+    dependencies:
+      - chart: oci://registry-1.docker.io/bitnamicharts/postgresql
+        version: '12.x.x'
+      - chart: ethereum-helm-charts/smart-contract-verifier-http
+        version: '0.1.2'
+    values:
+      - smart-contract-verifier-http:
+          enabled: true
+        postgresql:
+          enabled: true
+          image:
+            registry: docker.io
+            repository: bitnami/postgresql
+            tag: 15.3.0-debian-11-r7
+          pullPolicy: IfNotPresent
+          auth:
+            enablePostgresUser: true
+            postgresPassword: postgres
+            username: postgres
+            password: postgres
+          primary:
+            extendedConfiguration: |
+              max_connections = 1024
+          persistence:
+            enabled: true
+            size: 8Gi
+        config:
+          network:
+            id: 1337
+            name: 'Ether'
+            shortname: 'Ether'
+          testnet: true
+          account:
+            enabled: false
+          prometheus:
+            enabled: false
+        blockscout:
+          image:
+            tag: 6.7.1.commit.1015bfd0
+          env:
+            DATABASE_URL: 'postgresql://postgres:postgres@blockscout-eth-postgresql:5432/blockscout?ssl=false'
+            SECRET_KEY_BASE: RMgI4C1HSkxsEjdhtGMfwAHfyT6CKWXOgzCboJflfSm4jeAlic52io05KB6mqzc5
+            ETHEREUM_JSONRPC_VARIANT: 'geth'
+            ETHEREUM_JSONRPC_HTTP_URL: http://evm-node-eth:8545
+            ETHEREUM_JSONRPC_WS_URL: ws://evm-node-eth:8546
+            ETHEREUM_JSONRPC_TRACE_URL: http://evm-node-eth:8545
+            MICROSERVICE_SC_VERIFIER_ENABLED: true
+            MICROSERVICE_SC_VERIFIER_URL: 'http://blockscout-eth-smart-contract-verifier-http:8050'
+            MICROSERVICE_SC_VERIFIER_TYPE: sc_verifier
+          ingress:
+            enabled: true
+            hostname: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-eth.gasp.xyz
+            annotations:
+              kubernetes.io/ingress.class: nginx
+              kubernetes.io/tls-acme: 'true'
+            className: nginx
+            tls:
+              enabled: true
+        frontend:
+          enabled: true
+          replicaCount: 1
+          image:
+            tag: v1.32.0-alpha.2
+          ingress:
+            enabled: true
+            hostname: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-eth.gasp.xyz
+            annotations:
+              kubernetes.io/ingress.class: nginx
+              kubernetes.io/tls-acme: 'true'
+            className: nginx
+            tls:
+              enabled: true
+          env:
+            NEXT_PUBLIC_API_PROTOCOL: https
+            NEXT_PUBLIC_API_BASE_PATH: '/'
+            NEXT_PUBLIC_APP_PROTOCOL: https
+            NEXT_PUBLIC_HOMEPAGE_CHARTS: "[\"daily_txs\"]"
+            NEXT_PUBLIC_VISUALIZE_API_HOST: https://visualizer.services.blockscout.com/
+            NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL: wss
+            NEXT_PUBLIC_API_SPEC_URL: https://raw.githubusercontent.com/blockscout/blockscout-api-v2-swagger/main/swagger.yaml
+            NEXT_PUBLIC_AD_TEXT_PROVIDER: 'none'
+            NEXT_PUBLIC_AD_BANNER_PROVIDER: 'none'
+        stats:
+          enabled: true
+          env:
+            STATS__SERVER__HTTP__ENABLED: true
+            STATS__SERVER__HTTP__ADDR: '0.0.0.0:8050'
+            STATS__DB_URL: 'postgresql://postgres:postgres@blockscout-eth-postgresql:5432/blockscout-stats?ssl=false'
+            STATS__BLOCKSCOUT_DB_URL: 'postgresql://postgres:postgres@blockscout-eth-postgresql:5432/blockscout?ssl=false'
+            STATS__CREATE_DATABASE: true
+            STATS__RUN_MIGRATIONS: true
+          ingress:
+            enabled: true
+            hostname: stats.blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-eth.gasp.xyz
+            annotations:
+              kubernetes.io/ingress.class: nginx
+              kubernetes.io/tls-acme: 'true'
+            className: nginx
+            tls:
+              enabled: true
+  
+  - name: blockscout-arb
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    installed: {{ and .Values.blockscoutEnabled .Values.enableArbitrumServices }}
+    chart: blockscout/blockscout-stack
+    dependencies:
+      - chart: oci://registry-1.docker.io/bitnamicharts/postgresql
+        version: '12.x.x'
+      - chart: ethereum-helm-charts/smart-contract-verifier-http
+        version: '0.1.2'
+    values:
+      - smart-contract-verifier-http:
+          enabled: true
+        postgresql:
+          enabled: true
+          image:
+            registry: docker.io
+            repository: bitnami/postgresql
+            tag: 15.3.0-debian-11-r7
+          pullPolicy: IfNotPresent
+          auth:
+            enablePostgresUser: true
+            postgresPassword: postgres
+            username: postgres
+            password: postgres
+          primary:
+            extendedConfiguration: |
+              max_connections = 1024
+          persistence:
+            enabled: true
+            size: 8Gi
+        config:
+          network:
+            id: 1337
+            name: 'Arbitrum'
+            shortname: 'Arb'
+          testnet: true
+          account:
+            enabled: false
+          prometheus:
+            enabled: false
+        blockscout:
+          image:
+            tag: 6.7.1.commit.1015bfd0
+          env:
+            DATABASE_URL: 'postgresql://postgres:postgres@blockscout-arb-postgresql:5432/blockscout?ssl=false'
+            SECRET_KEY_BASE: RMgI4C1HSkxsEjdhtGMfwAHfyT6CKWXOgzCboJflfSm4jeAlic52io05KB6mqzc5
+            ETHEREUM_JSONRPC_VARIANT: 'geth'
+            ETHEREUM_JSONRPC_HTTP_URL: http://evm-node-arb:8545
+            ETHEREUM_JSONRPC_WS_URL: ws://evm-node-arb:8546
+            ETHEREUM_JSONRPC_TRACE_URL: http://evm-node-arb:8545
+            MICROSERVICE_SC_VERIFIER_ENABLED: true
+            MICROSERVICE_SC_VERIFIER_URL: 'http://blockscout-arb-smart-contract-verifier-http:8050'
+            MICROSERVICE_SC_VERIFIER_TYPE: sc_verifier
+          ingress:
+            enabled: true
+            hostname: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-arb.gasp.xyz
+            annotations:
+              kubernetes.io/ingress.class: nginx
+              kubernetes.io/tls-acme: 'true'
+            className: nginx
+            tls:
+              enabled: true
+        frontend:
+          enabled: true
+          replicaCount: 1
+          image:
+            tag: v1.32.0-alpha.2
+          ingress:
+            enabled: true
+            hostname: blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-arb.gasp.xyz
+            annotations:
+              kubernetes.io/ingress.class: nginx
+              kubernetes.io/tls-acme: 'true'
+            className: nginx
+            tls:
+              enabled: true
+          env:
+            NEXT_PUBLIC_API_PROTOCOL: https
+            NEXT_PUBLIC_API_BASE_PATH: '/'
+            NEXT_PUBLIC_APP_PROTOCOL: https
+            NEXT_PUBLIC_HOMEPAGE_CHARTS: "[\"daily_txs\"]"
+            NEXT_PUBLIC_VISUALIZE_API_HOST: https://visualizer.services.blockscout.com/
+            NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL: wss
+            NEXT_PUBLIC_API_SPEC_URL: https://raw.githubusercontent.com/blockscout/blockscout-api-v2-swagger/main/swagger.yaml
+            NEXT_PUBLIC_AD_TEXT_PROVIDER: 'none'
+            NEXT_PUBLIC_AD_BANNER_PROVIDER: 'none'
+        stats:
+          enabled: true
+          env:
+            STATS__SERVER__HTTP__ENABLED: true
+            STATS__SERVER__HTTP__ADDR: '0.0.0.0:8050'
+            STATS__DB_URL: 'postgresql://postgres:postgres@blockscout-arb-postgresql:5432/blockscout-stats?ssl=false'
+            STATS__BLOCKSCOUT_DB_URL: 'postgresql://postgres:postgres@blockscout-arb-postgresql:5432/blockscout?ssl=false'
+            STATS__CREATE_DATABASE: true
+            STATS__RUN_MIGRATIONS: true
+          ingress:
+            enabled: true
+            hostname: stats.blockscout.rollup-{{ requiredEnv "ENVIRONMENT" }}-arb.gasp.xyz
+            annotations:
+              kubernetes.io/ingress.class: nginx
+              kubernetes.io/tls-acme: 'true'
+            className: nginx
+            tls:
+              enabled: true
+
+  - name: collator-01
+    installed: {{ .Values.collatorsEnabled }}
+    chart: mangata-node/node
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    values:
+      - image:
+          repository: {{ .Values.collator.image.repository | quote }}
+          tag: {{ .Values.collator.image.tag | quote }}
+        environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+        chain: {{ .Values | getOrNil "collator.chain" }}
+        disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
+        customChainspecUrl: {{ .Values | get "collator.customChainspecUrl" "" }}
+        domainZone: gasp.xyz
+        command: '/app/node'
+        isParachain: false
+        isCollator: false
+        role: collator
+        remoteCluster: {{ .Values.remoteCluster }}
+        wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
+        enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
+        storageClass: {{ .Values.collator.storageClass | quote }}
+        storageSize: {{ .Values.collator.storageSize | quote }}
+        resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
+        tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
+        nodeSelector: {{ .Values | getOrNil "collator.firstCollatorNodeSelector" | toYaml | nindent 10 }}
+        # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+        customNodeKey: '5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef'
+        bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+        extraArgs:
+          - --alith
+          - --no-mdns
+          - --reserved-only
+          - --reserved-nodes=/dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+          - --pruning=archive
+  
+  - name: collator-02
+    installed: {{ .Values.collatorsEnabled }}
+    chart: mangata-node/node
+    namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+    values:
+      - image:
+          repository: {{ .Values.collator.image.repository | quote }}
+          tag: {{ .Values.collator.image.tag | quote }}
+        environment: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
+        chain: {{ .Values | getOrNil "collator.chain" }}
+        disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
+        # customChainspecUrl: {{ .Values | getOrNil "collator.customChainspecUrl" }}
+        domainZone: gasp.xyz
+        command: '/app/node'
+        isParachain: false
+        isCollator: false
+        role: collator
+        remoteCluster: {{ .Values.remoteCluster }}
+        wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
+        enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
+        storageClass: {{ .Values.collator.storageClass | quote }}
+        storageSize: {{ .Values.collator.storageSize | quote }}
+        resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
+        tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
+        nodeSelector: {{ .Values | getOrNil "collator.secondCollatorNodeSelector" | toYaml | nindent 10 }}
+        # Identity ID: 12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+        customNodeKey: 'bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b'
+        bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+        extraArgs:
+          - --baltathar
+          - --no-mdns
+          - --reserved-only
+          - --reserved-nodes=/dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+          - --pruning=archive

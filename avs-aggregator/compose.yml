@@ -6,13 +6,13 @@ services:
       context: ../
       dockerfile: avs-aggregator/cmd/Dockerfile
     depends_on:
-      anvil:
+      eth-stub:
         condition: service_healthy
-      avs-3:
+      eth-contracts-deployment:
         condition: service_completed_successfully
     environment:
-      - ETH_RPC_URL=${ETH_RPC_URL:-http://anvil:8545}
-      - ETH_WS_URL=${ETH_WS_URL:-ws://anvil:8545}
+      - ETH_RPC_URL=${ETH_RPC_URL:-http://eth-stub:8545}
+      - ETH_WS_URL=${ETH_WS_URL:-ws://eth-stub:8545}
       - SUBSTRATE_RPC_URL=${SUBSTRATE_RPC_URL:-ws://collator-01:9944}
       - CHAIN_ID=31337
       - AVS_SERVER_IP_PORT_ADDRESS=0.0.0.0:8090

@@ -19,9 +19,9 @@ contract Rolldown is
 {
 
     address public constant ETH_TOKEN_ADDRESS =
-        0x5748395867463837537395739375937493733457;
+        0x0000000000000000000000000000000000000001;
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner)
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
         public
         initializer
     {
@@ -30,26 +30,38 @@ contract Rolldown is
         lastProcessedUpdate_origin_l1 = 0;
         counter = 1;
         lastProcessedUpdate_origin_l2 = 0;
+        chain = chainId;
+        updaterAccount = updater;
     }
 
-    function withdraw_pending_eth(uint256 amount) external whenNotPaused {
+    function setUpdater(address updater) external whenNotPaused {
+      require(msg.sender == updaterAccount, "Only active updater can move rights to a new a account");
+      updaterAccount = updater;
+      emit NewUpdaterSet(updaterAccount);
+    }
+
+    function withdraw_pending_eth_to_recipient(uint256 amount, address payable recipient) private whenNotPaused {
         require(amount > 0, "Amount must be greater than zero");
-        address payable sender = payable(msg.sender);
-        require(pendingEthWithdrawals[sender] >= amount, "not enough pending withdraw amount");
+        require(pendingEthWithdrawals[recipient] >= amount, "not enough pending withdraw amount");
         require(payable(address(this)).balance >= amount, "not enough eth funds");
 
         // important to set this here before .sendValue
         // to prevent reentrancy
-        pendingEthWithdrawals[sender] -= amount;
+        pendingEthWithdrawals[recipient] -= amount;
 
-        emit PendingEthWithdrawn(sender, amount);
+        emit PendingEthWithdrawn(recipient, amount);
 
         // send value uses call (gas unbounded)
         // and reverts upon failure
-        Address.sendValue(sender, amount);
+        Address.sendValue(recipient, amount);
     }
 
-    function deposit_eth() external payable whenNotPaused {
+
+    function withdraw_pending_eth(uint256 amount) external whenNotPaused {
+      withdraw_pending_eth_to_recipient(amount, payable(msg.sender));
+    }
+
+    function deposit_native() external payable whenNotPaused {
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
         uint amount = msg.value;
@@ -71,6 +83,7 @@ contract Rolldown is
             amount
         );
     }
+
 
     function deposit(address tokenAddress, uint256 amount) public whenNotPaused {
         deposit_erc20(tokenAddress, amount);
@@ -245,10 +258,7 @@ contract Rolldown is
     // TODO
     // Maybe add onlyOwner modifier?  
     function update_l1_from_l2(L2Update calldata inputArray) external whenNotPaused {
-        //1st iteration, security comes from ensuring dedicated acc
-        //Ensure sender is dedic acc
-        // TODO: uncomment & fix UT
-        // require(msg.sender == owner, "Not the owner");
+        require(msg.sender == updaterAccount, "Not the owner");
         require(
             inputArray.results.length >= 1 ||
                 inputArray.cancels.length >= 1 ||
@@ -373,7 +383,9 @@ contract Rolldown is
     function process_eth_withdrawal(
         Withdrawal calldata withdrawal
     ) private {
-        bool status = payable(address(this)).balance >= withdrawal.amount;
+        bool enought_funds_in_contract = payable(address(this)).balance >= withdrawal.amount;
+        bool is_account = withdrawal.withdrawalRecipient.code.length == 0;
+        bool status = enought_funds_in_contract && is_account;
         uint256 timeStamp = block.timestamp;
 
         WithdrawalResolution memory resolution = WithdrawalResolution({
@@ -395,6 +407,8 @@ contract Rolldown is
                 withdrawal.withdrawalRecipient,
                 pendingEthWithdrawals[withdrawal.withdrawalRecipient]
             );
+            //TODO:: remove with protocol update
+            withdraw_pending_eth_to_recipient(withdrawal.amount, payable(withdrawal.withdrawalRecipient));
         }
     }
 
@@ -451,6 +465,7 @@ contract Rolldown is
     ) public view returns (L1Update memory) {
         L1Update memory result;
 
+        result.chain = chain;
         uint256 depositsCounter = 0;
         uint256 withdrawalsCounter = 0;
         uint256 cancelsCounter = 0;

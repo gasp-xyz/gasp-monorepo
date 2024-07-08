@@ -8,7 +8,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import {ETH_CHAIN_URL, WALLET_PRIVATE_KEY} from "../common/constants.js";
-import {holesky} from "viem/chains";
+import {holesky, arbitrumSepolia} from "viem/chains";
 
 export const getPublicClient = (options: PublicClientConfig) => {
     return createPublicClient({ ...options });
@@ -24,6 +24,27 @@ export const webSocketTransport = webSocket(ETH_CHAIN_URL, {retryCount: 5});
 export function getChain() {
     if (process.env.CHAIN == "holesky") {
         return holesky
+    } else if (process.env.CHAIN == "reth"){
+        return defineChain({
+            id: 1337,
+            name: "reth",
+            network: "Reth",
+            nativeCurrency: {
+                decimals: 18,
+                name: "Ether",
+                symbol: "ETH",
+            },
+            rpcUrls: {
+                public: {
+                    http: ["ws://127.0.0.1:8545"],
+                },
+                default: {
+                    http: ["ws://127.0.0.1:8545"],
+                },
+            },
+        });
+    } else if (process.env.CHAIN == "arbitrum"){
+        return arbitrumSepolia;
     } else {
         return defineChain({
             id: 31337,

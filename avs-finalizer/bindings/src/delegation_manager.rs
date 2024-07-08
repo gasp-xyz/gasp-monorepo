@@ -1666,6 +1666,22 @@ pub mod delegation_manager {
                     ],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("setMinWithdrawalDelayBlocks"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("setMinWithdrawalDelayBlocks",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("newMinWithdrawalDelayBlocks",),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("setPauserRegistry"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
@@ -4740,7 +4756,7 @@ pub mod delegation_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "setMinWithdrawalDelayBlocks",
@@ -5237,14 +5253,14 @@ pub mod delegation_manager {
             ) {
                 return Ok(Self::RenounceOwnership(decoded));
             }
-            if let Ok(decoded) = <SetMinWithdrawalDelayBlocksCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <SetMinWithdrawalDelayBlocksCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::SetMinWithdrawalDelayBlocks(decoded));
             }
-            if let Ok(decoded) = <SetPauserRegistryCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <SetPauserRegistryCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::SetPauserRegistry(decoded));
             }
             if let Ok(decoded) = <SetStrategyWithdrawalDelayBlocksCall as ::ethers::core::abi::AbiDecode>::decode(
@@ -5426,15 +5442,11 @@ pub mod delegation_manager {
                 Self::RegisterAsOperator(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::RenounceOwnership(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::RenounceOwnership(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::SetMinWithdrawalDelayBlocks(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::SetPauserRegistry(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::SetPauserRegistry(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::SetStrategyWithdrawalDelayBlocks(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -5559,9 +5571,7 @@ pub mod delegation_manager {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::RenounceOwnership(element) => ::core::fmt::Display::fmt(element, f),
-                Self::SetMinWithdrawalDelayBlocks(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::SetMinWithdrawalDelayBlocks(element) => ::core::fmt::Display::fmt(element, f),
                 Self::SetPauserRegistry(element) => ::core::fmt::Display::fmt(element, f),
                 Self::SetStrategyWithdrawalDelayBlocks(element) => {
                     ::core::fmt::Display::fmt(element, f)
@@ -5812,8 +5822,7 @@ pub mod delegation_manager {
             Self::RenounceOwnership(value)
         }
     }
-    impl ::core::convert::From<SetMinWithdrawalDelayBlocksCall>
-    for DelegationManagerCalls {
+    impl ::core::convert::From<SetMinWithdrawalDelayBlocksCall> for DelegationManagerCalls {
         fn from(value: SetMinWithdrawalDelayBlocksCall) -> Self {
             Self::SetMinWithdrawalDelayBlocks(value)
         }

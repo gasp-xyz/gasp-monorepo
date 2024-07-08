@@ -6,6 +6,7 @@
   "permissions": {
     "owner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
     "upgrader": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "rolldownUpdater": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
     "churner": "0x0000000000000000000000000000000000000000",
     "ejector": "0xd082d8ff9491b5066db6e1e03efb19daaf50de02",
     "aggregator": "0xd082d8ff9491b5066db6e1e03efb19daaf50de02"
@@ -44,5 +45,8 @@
 
   "taskManagerParams": {
     "taskResponseWindowBlocks": 100
+  },
+  "registryParams": {
+    "recurrentRegistrationLimit": 7200
   }
 }

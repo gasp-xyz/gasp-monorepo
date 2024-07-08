@@ -18,8 +18,14 @@ import "forge-std/console.sol";
 
 // # To deploy strategy and setup deposits on Anvil
 // forge script script/0_AnvilSetup.s.sol:AnvilSetup --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast -vvvv
+//
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Configures strategy(token) for the eigen layer. This is only needed in the
+// environment where we are in charge of base eigen layer setup/contracts.
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contract AnvilSetup is Script, Utils, Test {
-    uint256 constant _CHAIN_ID = 31337;
+    uint256 constant ANVIL_CHAIN_ID = 31337;
+    uint256 constant RETH_CHAIN_ID = 1337;
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
     string constant _CONFIG_PATH = "deploy.config";
     string constant _OUTPUT_PATH = "strategy_output";
@@ -51,7 +57,7 @@ contract AnvilSetup is Script, Utils, Test {
         uint256 currentChainId = block.chainid;
         uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
         emit log_named_uint("You are deploying on ChainID", currentChainId);
-        require(configChainId == _CHAIN_ID, "You are on the wrong chain for this config, only Anvil 31337 allowed");
+        require(configChainId == RETH_CHAIN_ID || configChainId == ANVIL_CHAIN_ID, "You are on the wrong chain for this config, only Anvil 31337 allowed");
         require(configChainId == currentChainId, "You are on the wrong chain for this config");
 
         // tests/keys/test.ecdsa.key.json

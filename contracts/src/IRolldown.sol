@@ -7,7 +7,7 @@ interface IRolldown is IRolldownPrimitives {
 
     function withdraw_pending_eth(uint256 amount) external;
 
-    function deposit_eth() external payable;
+    function deposit_native() external payable;
 
     function deposit(address tokenAddress, uint256 amount) external;
 

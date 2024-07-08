@@ -903,6 +903,31 @@ pub mod strategy_manager_mock {
                     ],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("setThirdPartyTransfersForbidden"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("setThirdPartyTransfersForbidden",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("value"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bool"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("sharesToReturn"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
@@ -1151,10 +1176,13 @@ pub mod strategy_manager_mock {
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("thirdPartyTransfersForbidden"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "thirdPartyTransfersForbidden",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("thirdPartyTransfersForbidden",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("contract IStrategy"),
                             ),
                             inputs: ::std::vec![
                                 ::ethers::core::abi::ethabi::Param {
@@ -2956,7 +2984,7 @@ pub mod strategy_manager_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "setThirdPartyTransfersForbidden",
@@ -3218,9 +3246,7 @@ pub mod strategy_manager_mock {
         SetAddresses(SetAddressesCall),
         SetDeposits(SetDepositsCall),
         SetPauserRegistry(SetPauserRegistryCall),
-        SetStakerStrategyListLengthReturnValue(
-            SetStakerStrategyListLengthReturnValueCall,
-        ),
+        SetStakerStrategyListLengthReturnValue(SetStakerStrategyListLengthReturnValueCall),
         SetThirdPartyTransfersForbidden(SetThirdPartyTransfersForbiddenCall),
         SharesToReturn(SharesToReturnCall),
         Slasher(SlasherCall),
@@ -3370,14 +3396,16 @@ pub mod strategy_manager_mock {
             ) {
                 return Ok(Self::SetStakerStrategyListLengthReturnValue(decoded));
             }
-            if let Ok(decoded) = <SetThirdPartyTransfersForbiddenCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <SetThirdPartyTransfersForbiddenCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
                 return Ok(Self::SetThirdPartyTransfersForbidden(decoded));
             }
-            if let Ok(decoded) = <SharesToReturnCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <SharesToReturnCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::SharesToReturn(decoded));
             }
             if let Ok(decoded) = <SlasherCall as ::ethers::core::abi::AbiDecode>::decode(
@@ -3516,9 +3544,7 @@ pub mod strategy_manager_mock {
                 Self::SetThirdPartyTransfersForbidden(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::SharesToReturn(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::SharesToReturn(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::Slasher(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::StakerStrategyListLength(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
@@ -3772,8 +3798,7 @@ pub mod strategy_manager_mock {
             Self::SetStakerStrategyListLengthReturnValue(value)
         }
     }
-    impl ::core::convert::From<SetThirdPartyTransfersForbiddenCall>
-    for StrategyManagerMockCalls {
+    impl ::core::convert::From<SetThirdPartyTransfersForbiddenCall> for StrategyManagerMockCalls {
         fn from(value: SetThirdPartyTransfersForbiddenCall) -> Self {
             Self::SetThirdPartyTransfersForbidden(value)
         }

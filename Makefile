@@ -38,6 +38,9 @@ deploy-avs-contracts-to-anvil-and-save-state: ## Deploy avs
 
 deploy-all-to-anvil-and-save-state: deploy-eigenlayer-contracts-to-anvil-and-save-state deploy-avs-contracts-to-anvil-and-save-state ## deploy eigenlayer and avs contracts 
 
+deploy-alt-l1-contracts-and-save-state:
+	./tests/integration/deploy-alt-l1-contracts-and-save-anvil-state.sh
+
 deploy-all-contracts-and-save-state:
 	./tests/integration/deploy-all-contracts-and-save-anvil-state.sh
 
@@ -81,7 +84,7 @@ start-avs-finalizer: ##
 		--stake 50
 
 start-avs-finalizer-testkeys: ## 
-	RUST_LOG=avs_finalizer=debug,ether=trace cargo run --manifest-path=avs-finalizer/Cargo.toml -- \
+	RUST_LOG=avs_finalizer=debug cargo run --manifest-path=avs-finalizer/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
 		--bls-key-file tests/keys/test.bls.key.json \
 		--opt-in-at-startup

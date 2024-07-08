@@ -9,6 +9,7 @@ import "@eigenlayer/contracts/core/StrategyManager.sol";
 import "@eigenlayer/contracts/core/Slasher.sol";
 import "@eigenlayer/contracts/core/DelegationManager.sol";
 import "@eigenlayer/test/mocks/EmptyContract.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
 import "@eigenlayer-middleware/src/RegistryCoordinator.sol";
@@ -19,8 +20,11 @@ import "@eigenlayer-middleware/src/StakeRegistry.sol";
 import {FinalizerServiceManager, IServiceManager} from "../src/FinalizerServiceManager.sol";
 import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "../src/IFinalizerTaskManager.sol";
+<<<<<<< HEAD
 import {Rolldown} from "../src/Rolldown.sol";
 import {GaspMultiRollupService} from "../src/GaspMultiRollupService.sol";
+=======
+>>>>>>> main
 
 import {Utils} from "./utils/Utils.sol";
 
@@ -31,6 +35,10 @@ import "forge-std/console.sol";
 
 // # To deploy and verify our contract
 // forge script script/1_FinalizerAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Deploys finalizer contracts
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contract Deployer is Script, Utils, Test {
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
     string constant _CONFIG_PATH = "deploy.config";
@@ -48,8 +56,11 @@ contract Deployer is Script, Utils, Test {
     BLSApkRegistry public blsApkRegistry;
     IndexRegistry public indexRegistry;
     StakeRegistry public stakeRegistry;
+<<<<<<< HEAD
     Rolldown public rolldown;
     GaspMultiRollupService public gaspMultiRollupService;
+=======
+>>>>>>> main
 
     //upgradeable contract implementations
     FinalizerServiceManager public serviceManagerImplementation;
@@ -58,8 +69,11 @@ contract Deployer is Script, Utils, Test {
     BLSApkRegistry public blsApkRegistryImplementation;
     IndexRegistry public indexRegistryImplementation;
     StakeRegistry public stakeRegistryImplementation;
+<<<<<<< HEAD
     Rolldown public rolldownImplementation;
     GaspMultiRollupService public gaspMultiRollupServiceImplementation;
+=======
+>>>>>>> main
 
     // EigenLayer Contracts
     DelegationManager public delegation;
@@ -79,10 +93,10 @@ contract Deployer is Script, Utils, Test {
         string memory configData = readConfig(_CONFIG_PATH);
 
         // check that the chainID matches the one in the config
-        uint256 currentChainId = block.chainid;
         uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
-        emit log_named_uint("You are deploying on ChainID", currentChainId);
-        require(configChainId == currentChainId, "You are on the wrong chain for this config");
+        uint256 currentChainId = block.chainid;
+        emit log_named_uint("You are deploying on ChainID", block.chainid);
+        require(configChainId == block.chainid, "You are on the wrong chain for this config");
 
         address churner = stdJson.readAddress(configData, ".permissions.churner");
         address ejector = stdJson.readAddress(configData, ".permissions.ejector");
@@ -107,10 +121,7 @@ contract Deployer is Script, Utils, Test {
             address[] memory pausers = new address[](2);
             pausers[0] = avsOwner;
             pausers[1] = unpauseMultisig;
-            avsPauserReg = new PauserRegistry(
-                pausers,
-                unpauseMultisig
-            );
+            avsPauserReg = new PauserRegistry(pausers, unpauseMultisig);
         }
 
         /**
@@ -120,31 +131,13 @@ contract Deployer is Script, Utils, Test {
         EmptyContract emptyContract = new EmptyContract();
 
         serviceManager = FinalizerServiceManager(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(avsProxyAdmin),
-                    ""
-                )
-            )
+            address(new TransparentUpgradeableProxy(address(emptyContract), address(avsProxyAdmin), ""))
         );
         taskManager = FinalizerTaskManager(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(avsProxyAdmin),
-                    ""
-                )
-            )
+            address(new TransparentUpgradeableProxy(address(emptyContract), address(avsProxyAdmin), ""))
         );
         registryCoordinator = RegistryCoordinator(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(avsProxyAdmin),
-                    ""
-                )
-            )
+            address(new TransparentUpgradeableProxy(address(emptyContract), address(avsProxyAdmin), ""))
         );
         blsApkRegistry = BLSApkRegistry(
             address(
@@ -174,6 +167,7 @@ contract Deployer is Script, Utils, Test {
             )
         );
 
+<<<<<<< HEAD
         rolldown = Rolldown(
             address(
                 new TransparentUpgradeableProxy(
@@ -194,11 +188,10 @@ contract Deployer is Script, Utils, Test {
             )
         );
 
+=======
+>>>>>>> main
         // deploy StakeRegistry
-        stakeRegistryImplementation = new StakeRegistry(
-            registryCoordinator,
-            delegation
-        );
+        stakeRegistryImplementation = new StakeRegistry(registryCoordinator, delegation);
 
         // upgrade stake registry proxy to implementation
         avsProxyAdmin.upgrade(
@@ -206,9 +199,7 @@ contract Deployer is Script, Utils, Test {
         );
 
         // deploy BLSApkRegistry
-        blsApkRegistryImplementation = new BLSApkRegistry(
-            registryCoordinator
-        );
+        blsApkRegistryImplementation = new BLSApkRegistry(registryCoordinator);
 
         // upgrade bls pubkey registry proxy to implementation
         avsProxyAdmin.upgrade(
@@ -223,13 +214,9 @@ contract Deployer is Script, Utils, Test {
             TransparentUpgradeableProxy(payable(address(indexRegistry))), address(indexRegistryImplementation)
         );
 
-
         // deploy RegistryCoordinator
         registryCoordinatorImplementation = new RegistryCoordinator(
-            IServiceManager(address(serviceManager)),
-            stakeRegistry,
-            blsApkRegistry,
-            indexRegistry
+            IServiceManager(address(serviceManager)), stakeRegistry, blsApkRegistry, indexRegistry
         );
 
         (
@@ -250,7 +237,7 @@ contract Deployer is Script, Utils, Test {
                 RegistryCoordinator.initialize.selector,
                 avsOwner,
                 churner,
-                ejector,
+                address(serviceManager),
                 avsPauserReg,
                 0,
                 operatorSetParams,
@@ -260,24 +247,27 @@ contract Deployer is Script, Utils, Test {
         );
 
         //deploy serviceManager
-        serviceManagerImplementation = new FinalizerServiceManager(
-            avsDirectory,
-            registryCoordinator,
-            stakeRegistry,
-            IFinalizerTaskManager(address(taskManager))
-        );
+        {
+            uint64 recurrentRegistrationLimit =
+                uint64(stdJson.readUint(configData, ".registryParams.recurrentRegistrationLimit"));
+
+            serviceManagerImplementation = new FinalizerServiceManager(
+                avsDirectory,
+                registryCoordinator,
+                stakeRegistry,
+                IFinalizerTaskManager(address(taskManager)),
+                recurrentRegistrationLimit
+            );
+        }
 
         // upgrade service manager proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(serviceManager))),
             address(serviceManagerImplementation),
-            abi.encodeWithSelector(serviceManager.initialize.selector, avsOwner)
+            abi.encodeWithSelector(serviceManager.initialize.selector, avsOwner, ejector)
         );
 
-        taskManagerImplementation = new FinalizerTaskManager(
-            registryCoordinator,
-            taskResponseWindowBlocks
-        );
+        taskManagerImplementation = new FinalizerTaskManager(registryCoordinator, taskResponseWindowBlocks);
 
         // upgrade task manager proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(
@@ -286,6 +276,7 @@ contract Deployer is Script, Utils, Test {
             abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator)
         );
 
+<<<<<<< HEAD
         rolldownImplementation = new Rolldown();
 
         // upgrade rolldown proxy to implementation and initialize
@@ -305,6 +296,8 @@ contract Deployer is Script, Utils, Test {
             abi.encodeWithSelector(gaspMultiRollupService.initialize.selector, avsPauserReg, avsOwner, aggregator, address(rolldown))
         );
 
+=======
+>>>>>>> main
         // transfer ownership of proxy admin to upgrader
         avsProxyAdmin.transferOwnership(avsUpgrader);
 
@@ -415,6 +408,7 @@ contract Deployer is Script, Utils, Test {
                 == address(stakeRegistryImplementation),
             "stakeRegistry: implementation set incorrectly"
         );
+<<<<<<< HEAD
         require(
             avsProxyAdmin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(rolldown))))
                 == address(rolldownImplementation),
@@ -425,6 +419,8 @@ contract Deployer is Script, Utils, Test {
                 == address(gaspMultiRollupServiceImplementation),
             "rolldown: implementation set incorrectly"
         );
+=======
+>>>>>>> main
     }
 
     function _verifyInitalizations(
@@ -435,6 +431,7 @@ contract Deployer is Script, Utils, Test {
         IStakeRegistry.StrategyParams[][] memory strategyAndWeightingMultipliers
     ) internal view {
         require(serviceManager.owner() == avsOwner, "serviceManager.owner() != avsOwner");
+<<<<<<< HEAD
         require(rolldown.owner() == avsOwner, "rolldown.owner() != avsOwner");
         require(gaspMultiRollupService.owner() == avsOwner, "gaspMultiRollupService.owner() != avsOwner");
 
@@ -442,20 +439,18 @@ contract Deployer is Script, Utils, Test {
         require(rolldown.lastProcessedUpdate_origin_l1() == 0, "rolldown.lastProcessedUpdate_origin_l1 != 0");
         require(rolldown.counter() == 1, "rolldown.counter != 1");
         require(rolldown.lastProcessedUpdate_origin_l2() == 0, "rolldown.lastProcessedUpdate_origin_l2 != 0");
+=======
+        require(serviceManager.ejector() == ejector, "serviceManager.ejector() != ejector");
+>>>>>>> main
 
         require(registryCoordinator.churnApprover() == churner, "registryCoordinator.churner() != churner");
-        require(registryCoordinator.ejector() == ejector, "registryCoordinator.ejector() != ejector");
+        require(registryCoordinator.ejector() == address(serviceManager), "registryCoordinator.ejector() != serviceManager");
         require(
             registryCoordinator.pauserRegistry() == avsPauserReg,
             "registryCoordinator: pauser registry not set correctly"
         );
         require(registryCoordinator.paused() == 0, "registryCoordinator: init paused status set incorrectly");
 
-        require(
-            rolldown.pauserRegistry() == avsPauserReg,
-            "rolldown: pauser registry not set correctly"
-        );
-        require(rolldown.paused() == 0, "rolldown: init paused status set incorrectly");
 
         require(
             gaspMultiRollupService.pauserRegistry() == avsPauserReg,
@@ -507,10 +502,13 @@ contract Deployer is Script, Utils, Test {
         vm.serializeAddress(deployed_addresses, "avsPauseReg", address(avsPauserReg));
         vm.serializeAddress(deployed_addresses, "serviceManager", address(serviceManager));
         vm.serializeAddress(deployed_addresses, "serviceManagerImplementation", address(serviceManagerImplementation));
+<<<<<<< HEAD
         vm.serializeAddress(deployed_addresses, "rolldown", address(rolldown));
         vm.serializeAddress(deployed_addresses, "rolldownImplementation", address(rolldownImplementation));
         vm.serializeAddress(deployed_addresses, "gaspMultiRollupService", address(gaspMultiRollupService));
         vm.serializeAddress(deployed_addresses, "gaspMultiRollupServiceImplementation", address(gaspMultiRollupServiceImplementation));
+=======
+>>>>>>> main
         vm.serializeAddress(deployed_addresses, "taskManager", address(taskManager));
         vm.serializeAddress(deployed_addresses, "taksManagerImplementation", address(taskManagerImplementation));
         vm.serializeAddress(deployed_addresses, "registryCoordinator", address(registryCoordinator));
