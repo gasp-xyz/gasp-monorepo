@@ -6,22 +6,6 @@
     "avsProxyAdmin": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
     "baseStrategyImplementation": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
     "blsApkRegistry": "0xf5059a5D33d5853360D16C683c16e67980206f36",
-<<<<<<< HEAD
-    "blsApkRegistryImplementation": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf",
-    "gaspMultiRollupService": "0x4826533B4897376654Bb4d4AD88B7faFD0C98528",
-    "gaspMultiRollupServiceImplementation": "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
-    "indexRegistry": "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
-    "indexRegistryImplementation": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
-    "registryCoordinator": "0x851356ae760d987E095750cCeb3bC6014560891C",
-    "registryCoordinatorImplementation": "0x809d550fca64d94Bd9F66E60752A544199cfAC3D",
-    "rolldown": "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49",
-    "rolldownImplementation": "0x82e01223d51Eb87e16A03E24687EDF0F294da6f1",
-    "serviceManager": "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
-    "serviceManagerImplementation": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
-    "stakeRegistry": "0x998abeb3E57409262aE5b751f60747921B33613E",
-    "stakeRegistryImplementation": "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf",
-    "taksManagerImplementation": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
-=======
     "blsApkRegistryImplementation": "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf",
     "delayedWithdrawalRouter": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
     "delayedWithdrawalRouterImplementation": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
@@ -50,7 +34,6 @@
     "strategyManager": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
     "strategyManagerImplementation": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
     "taksManagerImplementation": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
->>>>>>> main
     "taskManager": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
   },
   "chainInfo": {
