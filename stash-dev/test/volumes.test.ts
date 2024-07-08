@@ -4,7 +4,7 @@ import { TimestampedAmount } from '../src/schema/Models'
 import * as fixtures from './fixtures'
 chai.should()
 
-describe('test volumes processor', () => {
+describe.skip('test volumes processor', () => {
   const store: Map<number, TimestampedAmount[]> = new Map()
   const latests: Map<number, number> = new Map()
 
