@@ -20,11 +20,8 @@ import "@eigenlayer-middleware/src/StakeRegistry.sol";
 import {FinalizerServiceManager, IServiceManager} from "../src/FinalizerServiceManager.sol";
 import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "../src/IFinalizerTaskManager.sol";
-<<<<<<< HEAD
 import {Rolldown} from "../src/Rolldown.sol";
 import {GaspMultiRollupService} from "../src/GaspMultiRollupService.sol";
-=======
->>>>>>> main
 
 import {Utils} from "./utils/Utils.sol";
 
@@ -56,11 +53,8 @@ contract Deployer is Script, Utils, Test {
     BLSApkRegistry public blsApkRegistry;
     IndexRegistry public indexRegistry;
     StakeRegistry public stakeRegistry;
-<<<<<<< HEAD
     Rolldown public rolldown;
     GaspMultiRollupService public gaspMultiRollupService;
-=======
->>>>>>> main
 
     //upgradeable contract implementations
     FinalizerServiceManager public serviceManagerImplementation;
@@ -69,11 +63,8 @@ contract Deployer is Script, Utils, Test {
     BLSApkRegistry public blsApkRegistryImplementation;
     IndexRegistry public indexRegistryImplementation;
     StakeRegistry public stakeRegistryImplementation;
-<<<<<<< HEAD
     Rolldown public rolldownImplementation;
     GaspMultiRollupService public gaspMultiRollupServiceImplementation;
-=======
->>>>>>> main
 
     // EigenLayer Contracts
     DelegationManager public delegation;
@@ -167,7 +158,6 @@ contract Deployer is Script, Utils, Test {
             )
         );
 
-<<<<<<< HEAD
         rolldown = Rolldown(
             address(
                 new TransparentUpgradeableProxy(
@@ -188,8 +178,6 @@ contract Deployer is Script, Utils, Test {
             )
         );
 
-=======
->>>>>>> main
         // deploy StakeRegistry
         stakeRegistryImplementation = new StakeRegistry(registryCoordinator, delegation);
 
@@ -276,7 +264,6 @@ contract Deployer is Script, Utils, Test {
             abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator)
         );
 
-<<<<<<< HEAD
         rolldownImplementation = new Rolldown();
 
         // upgrade rolldown proxy to implementation and initialize
@@ -296,8 +283,6 @@ contract Deployer is Script, Utils, Test {
             abi.encodeWithSelector(gaspMultiRollupService.initialize.selector, avsPauserReg, avsOwner, aggregator, address(rolldown))
         );
 
-=======
->>>>>>> main
         // transfer ownership of proxy admin to upgrader
         avsProxyAdmin.transferOwnership(avsUpgrader);
 
@@ -408,7 +393,6 @@ contract Deployer is Script, Utils, Test {
                 == address(stakeRegistryImplementation),
             "stakeRegistry: implementation set incorrectly"
         );
-<<<<<<< HEAD
         require(
             avsProxyAdmin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(rolldown))))
                 == address(rolldownImplementation),
@@ -419,8 +403,6 @@ contract Deployer is Script, Utils, Test {
                 == address(gaspMultiRollupServiceImplementation),
             "rolldown: implementation set incorrectly"
         );
-=======
->>>>>>> main
     }
 
     function _verifyInitalizations(
@@ -431,7 +413,6 @@ contract Deployer is Script, Utils, Test {
         IStakeRegistry.StrategyParams[][] memory strategyAndWeightingMultipliers
     ) internal view {
         require(serviceManager.owner() == avsOwner, "serviceManager.owner() != avsOwner");
-<<<<<<< HEAD
         require(rolldown.owner() == avsOwner, "rolldown.owner() != avsOwner");
         require(gaspMultiRollupService.owner() == avsOwner, "gaspMultiRollupService.owner() != avsOwner");
 
@@ -439,9 +420,6 @@ contract Deployer is Script, Utils, Test {
         require(rolldown.lastProcessedUpdate_origin_l1() == 0, "rolldown.lastProcessedUpdate_origin_l1 != 0");
         require(rolldown.counter() == 1, "rolldown.counter != 1");
         require(rolldown.lastProcessedUpdate_origin_l2() == 0, "rolldown.lastProcessedUpdate_origin_l2 != 0");
-=======
-        require(serviceManager.ejector() == ejector, "serviceManager.ejector() != ejector");
->>>>>>> main
 
         require(registryCoordinator.churnApprover() == churner, "registryCoordinator.churner() != churner");
         require(registryCoordinator.ejector() == address(serviceManager), "registryCoordinator.ejector() != serviceManager");
@@ -502,13 +480,10 @@ contract Deployer is Script, Utils, Test {
         vm.serializeAddress(deployed_addresses, "avsPauseReg", address(avsPauserReg));
         vm.serializeAddress(deployed_addresses, "serviceManager", address(serviceManager));
         vm.serializeAddress(deployed_addresses, "serviceManagerImplementation", address(serviceManagerImplementation));
-<<<<<<< HEAD
         vm.serializeAddress(deployed_addresses, "rolldown", address(rolldown));
         vm.serializeAddress(deployed_addresses, "rolldownImplementation", address(rolldownImplementation));
         vm.serializeAddress(deployed_addresses, "gaspMultiRollupService", address(gaspMultiRollupService));
         vm.serializeAddress(deployed_addresses, "gaspMultiRollupServiceImplementation", address(gaspMultiRollupServiceImplementation));
-=======
->>>>>>> main
         vm.serializeAddress(deployed_addresses, "taskManager", address(taskManager));
         vm.serializeAddress(deployed_addresses, "taksManagerImplementation", address(taskManagerImplementation));
         vm.serializeAddress(deployed_addresses, "registryCoordinator", address(registryCoordinator));

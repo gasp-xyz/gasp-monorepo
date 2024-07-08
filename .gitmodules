@@ -8,6 +8,3 @@
 [submodule "avs-eigensdk-go"]
 	path = avs-eigensdk-go
 	url = https://github.com/mangata-finance/eigensdk-go
-[submodule "eigensdk-rs"]
-	path = eigensdk-rs
-	url = https://github.com/supernovahs/eigensdk-rs

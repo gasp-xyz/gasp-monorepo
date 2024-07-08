@@ -35,7 +35,7 @@ tracing = "0.1.40"
 tracing-error = "0.2.0"
 tracing-subscriber = { version = "0.3.18", features = ["json", "env-filter"] }
 
-sp-runtime = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
-sp-core = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "develop" }
+sp-runtime = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+sp-core = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
 futures = "0.3.30"
 array-bytes = { version = "6.2.0" }

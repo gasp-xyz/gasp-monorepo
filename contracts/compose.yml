@@ -8,36 +8,7 @@ services:
       - script
       - script/MultiStage.s.sol
       - --rpc-url
-<<<<<<< HEAD
-      - http://anvil:8545
-      - --private-key
-      - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-      - --broadcast
-      # - --verify
-      # - --verifier
-      # - blockscout
-      # - --verifier-url
-      # - http://host.docker.internal/api
-      - --sig
-      - "run(string memory configFile)"
-      - M2_deploy_from_scratch.anvil.config.json
-    # extra_hosts:
-    #   - "host.docker.internal:host-gateway"
-
-  avs-2:
-    image: mangatasolutions/avs-contract:local
-    build: .
-    depends_on:
-      avs-1:
-        condition: service_completed_successfully
-    command:
-      - script 
-      - script/0_AnvilSetup.s.sol
-      - --rpc-url
-      - http://anvil:8545
-=======
       - http://eth-stub:8545
->>>>>>> main
       - --private-key
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
@@ -47,13 +18,8 @@ services:
       # - --verifier-url
       # - http://host.docker.internal/api
       - -v
-<<<<<<< HEAD
-    # extra_hosts:
-    #   - "host.docker.internal:host-gateway"
-=======
     environment:
       ENV_SELECTOR: ethereum-stub
->>>>>>> main
 
   arbitrum-contracts-deployment:
     image: mangatasolutions/avs-contract:local
@@ -68,16 +34,5 @@ services:
       - --private-key
       - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
       - --broadcast
-<<<<<<< HEAD
-      # - --verify
-      # - --verifier
-      # - blockscout
-      # - --verifier-url
-      # - http://host.docker.internal/api
-      - -v
-    # extra_hosts:
-    #   - "host.docker.internal:host-gateway"
-=======
     environment:
       ENV_SELECTOR: arbitrum-stub
->>>>>>> main
