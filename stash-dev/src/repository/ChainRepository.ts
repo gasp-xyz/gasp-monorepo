@@ -31,6 +31,9 @@ const setStarterBlock = () => {
     case 'rollup-dev':
       block = ROLLUP_STARTER_BLOCK
       break
+    case 'rollup-testnet':
+      block = ROLLUP_STARTER_BLOCK
+      break
     default:
       throw new Error('Unknown environment: ' + process.env.APP_ENV)
   }
