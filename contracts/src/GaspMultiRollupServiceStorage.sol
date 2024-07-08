@@ -6,21 +6,6 @@ import "./IRolldown.sol";
 import "@eigenlayer-middleware/src/libraries/BN254.sol";
 
 abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
-/*
-    // Counter for mapping key
-    uint256 public counter;
-    // Counter for last processed request to ensure not reading and processing already processed
-    uint256 public lastProcessedUpdate_origin_l1;
-    // Counter for last processed updates comming from l2 to ensure not reading and processing already processed
-    uint256 public lastProcessedUpdate_origin_l2;
-
-    mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
-    mapping(uint256 => CancelResolution) public cancelResolutions;
-    mapping(uint256 => Deposit) internal deposits;
-    mapping(uint256 => L2UpdatesToRemove) internal l2UpdatesToRemove;
-    mapping(address => uint) public pendingEthWithdrawals;   
-
-*/
 
     address public updater;
     IRolldown public rolldown;
