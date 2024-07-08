@@ -3,8 +3,8 @@ import { Codec } from '@polkadot/types/types'
 import { blake2AsHex } from '@polkadot/util-crypto'
 import _ from 'lodash'
 
-export const GETH = 5
-export const KSM = 4
+export const GETH = 1
+export const KSM = 1
 export const BASE_TOKEN = process.env.APP_ENV === 'rollup-dev' ? GETH : KSM
 
 export type CodecOrArray = Codec | Codec[]
