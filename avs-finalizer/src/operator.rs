@@ -183,19 +183,6 @@ impl Operator {
         task: Task,
     ) -> eyre::Result<[u8; 32]> {
 
-        // return Ok(OperatorStateInfo {
-        //     operators_state_changed: true,
-        //     operators_state_provided: false,
-        //     quorums_removed: vec![],
-        //     quorums_added: vec![],
-        //     quorums_stake_update: vec![],
-        //     quorums_apk_update: vec![],
-        //     operators_removed: vec![],
-        //     operators_added: vec![],
-        //     operators_stake_update: vec![],
-        //     operators_quorum_count_update: vec![],
-        // });
-
         // We assume that the quorumNumbers are alteast unique even if not sorted
         let mut old_quorum_numbers = task.last_completed_task_quorum_numbers.into_iter().collect::<Vec<u8>>();
         let mut new_quorum_numbers = task.quorum_numbers.into_iter().collect::<Vec<u8>>();
@@ -260,14 +247,6 @@ impl Operator {
                 (Some(&&i), Some(&&j)) if i < j => {
                     // handle quorum number removed
                     quorums_removed.push(i);
-                    // quorums_apk_update.push(QuorumsApkUpdate{
-                    //     quorum_number: i,
-                    //     quorum_apk: Default::default(),
-                    // });
-                    // quorums_stake_update.push(QuorumsStakeUpdate{
-                    //     quorum_number: i,
-                    //     quorum_stake: Default::default(),
-                    //     });
                     maybe_i.next();
                 },
                 (Some(&&i), Some(&&j)) if i > j => {
@@ -283,14 +262,6 @@ impl Operator {
                 (Some(&&i), None) => {
                     // handle quorum number removed
                     quorums_removed.push(i);
-                    // quorums_apk_update.push(QuorumsApkUpdate{
-                    //     quorum_number: i,
-                    //     quorum_apk: Default::default(),
-                    // });
-                    // quorums_stake_update.push(QuorumsStakeUpdate{
-                    //     quorum_number: i,
-                    //     quorum_stake: Default::default(),
-                    //     });
                     maybe_i.next();
                 },
                 (None, Some(&&j)) => {
@@ -305,7 +276,6 @@ impl Operator {
                     maybe_j.next();
                 },
                 (None, None) => {
-                    // handle quorum number added
                     break;
                 },
                 _ => unreachable!()
@@ -439,42 +409,6 @@ impl Operator {
 
         }
 
-        // quorums removed
-        // A vec of qourums removed
-        // Removes the corresponding quorum to apk map entry
-        // AND Removes the corresponding quorum to stakes map entry
-        // Note whenever a quorum is removed, all the operator's stake map entry for that quorum is also removed
-        // Note whenever a quorum is removed, all the operator's quorumCount map entry is also updated
-        // Note whenever a quorum is removed and an operator that was in it isn't is other quorums anymore either
-        // then such operators are also removed from state
-
-        // quorums added
-        // A Vec<(, )> of quorums added and their quorum apks
-
-        // The one above and the one below can be merged
-        // Nah... Let em be
-
-        // quorums modified
-        // A Vec<(, )> of quorums added and their changed quorums apks
-
-        // OperatorIdPubKey can be updated by the aggregator
-        // The aggregator just needs to provide the g1PubKeys
-        // The corrseponding entries will be checked against the sorted list of "Added OperatorIds" provided from here
-
-        // Provide a sorted list of new operatorIds (to the state)
-        // Mentioed below
-
-        // we have QuorumToStakes update - club with QuorumApks updates above
-
-        // From operator state
-        // We need the operators that have left the state
-        // We need the operators that have been added to the state in sorted order
-        // We need the operators whose stakes or quorum count have been modified
-
-
-        // This contains all operators that must be removed from associated quorum storage
-        // If a quorum is removed
-
         let operators_state_changed = 
         !quorums_removed.is_empty() || !quorums_added.is_empty() || !quorums_apk_update.is_empty() || !quorums_stake_update.is_empty() || !operators_removed.is_empty() || !operators_added.is_empty() || !operators_stake_update.is_empty() || !operators_quorum_count_update.is_empty() || (task.quorum_threshold_percentage != task.last_completed_task_quorum_threshold_percentage);
 
@@ -489,19 +423,11 @@ impl Operator {
             operators_stake_update: operators_stake_update,
             operators_quorum_count_update: operators_quorum_count_update,
         };
-        // println!("{:?}", operator_state_info);
-        // let encoded = operator_state_info.clone().encode();
-        // println!("{:?}", encoded);
-        // let unencoded = OperatorStateInfo::decode(encoded.clone()).unwrap_or_default();
-        // println!("{:?}", unencoded);
-    
-        // println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! - {:?}", unencoded == operator_state_info);
 
         let operator_state_info_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
             operator_state_info.clone().encode().into_iter()
         ).collect::<Vec<_>>().as_ref());
         Ok(operator_state_info_hash.into())
-        // Ok(Default::default())
     }
 
 

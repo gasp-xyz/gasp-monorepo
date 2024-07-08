@@ -4,7 +4,6 @@ import (
 	"math/big"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
-	// "github.com/ethereum/go-ethereum/accounts/abi"
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	"golang.org/x/crypto/sha3"
 )

@@ -109,11 +109,6 @@ contract GaspMultiRollupService is
 
     function process_eigen_update(IFinalizerTaskManager.Task calldata task, IFinalizerTaskManager.TaskResponse calldata taskResponse, NonSignerStakesAndSignatureForOldState calldata nonSignerStakesAndSignatureForOldState, OperatorStateInfo calldata operatorStateInfo) public onlyUpdater {
 
-        // Check if the taskResponse operator_state_info_hash match operatorStateInfo 
-
-        // Check if operators stat has changed, if not then only one verification is required 
-        // If the operators state has changed and and no state was provided then return and emit an event and set state to stalled
-        // If stalled accept forced update and emit event 
 
         require(latestCompletedTaskCreatedBlock == task.lastCompletedTaskCreatedBlock, "reference block hash mismatch");
         require(taskResponse.referenceTaskHash == keccak256(abi.encode(task)), "referenceTaskHash hash mismatch");
@@ -123,14 +118,6 @@ contract GaspMultiRollupService is
         require(latestCompletedTaskCreatedBlock + 14400 > task.taskCreatedBlock, "stale state 0");
         require(lastUpdateBlockTimestamp + 3 days > block.timestamp, "stale state 1");
 
-        // if (operatorStateInfo.operator_state_changed && !operatorStateInfo.operator_state_provided){
-        //     stalled = true;
-        //     emit Stalled(
-        //     task.taskCreatedBlock,
-        //     task.lastCompletedTaskCreatedBlock
-        //     );
-        //     return;
-        // }
         
         // if the this is the first task then don't check sigs
         IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals = checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignatureForOldState);

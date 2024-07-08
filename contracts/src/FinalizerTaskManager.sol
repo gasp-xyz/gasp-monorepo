@@ -95,8 +95,6 @@ contract FinalizerTaskManager is
         _transferOwnership(initialOwner);
         aggregator = _aggregator;
         generator = _generator;
-        // lastCompletedTaskQuorumNumbers.push(0) ;
-        // lastCompletedTaskQuorumThresholdPercentage = 66;
     }
 
     /* FUNCTIONS */
