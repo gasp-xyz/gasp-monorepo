@@ -1,7 +1,7 @@
 name: Pull Request
 on:
   pull_request:
-    types: [opened, synchronize, closed]
+    types: [labeled, opened, synchronize, unlabeled, closed]
 
 permissions:
   contents: write
@@ -39,6 +39,9 @@ jobs:
   
   deploy-fungible:
     name: Deploy fungible environment
+    if: |
+      (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == ':rocket: deploy') ||
+      (github.event_name == 'pull_request' && github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, ':rocket: deploy'))
     needs: [init, build-and-test]
     uses: ./.github/workflows/reusable-deploy.yml
     secrets: inherit
@@ -60,7 +63,9 @@ jobs:
 
   clean-up-fungible:
     name: Delete fungible environment
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    if: |
+      (github.event_name == 'pull_request' && github.event.action == 'unlabeled' && github.event.label.name == ':rocket: deploy') ||
+      (github.event_name == 'pull_request' && github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, ':rocket: deploy'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
