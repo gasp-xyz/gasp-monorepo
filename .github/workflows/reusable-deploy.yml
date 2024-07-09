@@ -71,7 +71,16 @@ jobs:
           env: ${{ env.ENV_REF }}
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
       
-      - run: |
+      - name: Verify configs are correct before deployment
+        run: |
+          # Install kubeconform
+          curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.6/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
+
+          helmfile lint -e fungible
+          helmfile template -e fungible | kubeconform -kubernetes-version 1.28.0 -skip ServiceMonitor -strict
+      
+      - name: Deploy services
+        run: |
           export ENVIRONMENT=${{ env.ENV_REF }}
           export IMAGE_TAG=${{ inputs.version }}
           

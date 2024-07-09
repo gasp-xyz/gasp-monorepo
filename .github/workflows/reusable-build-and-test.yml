@@ -80,7 +80,6 @@ jobs:
       ENVIRONMENT: lint
     steps:
       - uses: actions/checkout@v4
-      
       - name: Setup helmfile
         uses: mamezou-tech/setup-helmfile@v1.3.0
         with:
