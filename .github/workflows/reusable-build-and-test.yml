@@ -13,7 +13,6 @@ permissions:
   id-token: write
 
 jobs:
-
   build-foundry-deployer-image:
     name: Build foundry deployer Docker image with smart contracts code
     runs-on: ubuntu-latest
