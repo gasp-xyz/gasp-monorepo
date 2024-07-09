@@ -195,22 +195,6 @@ pub mod avs_directory {
                     ],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("cancelSalt"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("cancelSalt"),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("salt"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
-                            ),
-                        },],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("delegation"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
@@ -1489,7 +1473,7 @@ pub mod avs_directory {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "cancelSalt", abi = "cancelSalt(bytes32)")]
     pub struct CancelSaltCall {
@@ -1795,7 +1779,9 @@ pub mod avs_directory {
         DomainTypehash(DomainTypehashCall),
         OperatorAvsRegistrationTypehash(OperatorAvsRegistrationTypehashCall),
         AvsOperatorStatus(AvsOperatorStatusCall),
-        CalculateOperatorAVSRegistrationDigestHash(CalculateOperatorAVSRegistrationDigestHashCall),
+        CalculateOperatorAVSRegistrationDigestHash(
+            CalculateOperatorAVSRegistrationDigestHashCall,
+        ),
         CancelSalt(CancelSaltCall),
         Delegation(DelegationCall),
         DeregisterOperatorFromAVS(DeregisterOperatorFromAVSCall),
@@ -1840,10 +1826,14 @@ pub mod avs_directory {
             ) {
                 return Ok(Self::CalculateOperatorAVSRegistrationDigestHash(decoded));
             }
-            if let Ok(decoded) = <CancelSaltCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <CancelSaltCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::CancelSalt(decoded));
             }
-            if let Ok(decoded) = <DelegationCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <DelegationCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::Delegation(decoded));
             }
             if let Ok(decoded) = <DeregisterOperatorFromAVSCall as ::ethers::core::abi::AbiDecode>::decode(
@@ -1944,8 +1934,12 @@ pub mod avs_directory {
                 Self::CalculateOperatorAVSRegistrationDigestHash(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::CancelSalt(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::Delegation(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::CancelSalt(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
+                Self::Delegation(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::DeregisterOperatorFromAVS(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }

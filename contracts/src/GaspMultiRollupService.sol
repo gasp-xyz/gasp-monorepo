@@ -25,14 +25,13 @@ contract GaspMultiRollupService is
     uint256 internal constant _THRESHOLD_DENOMINATOR = 100;
     uint256 internal constant PAIRING_EQUALITY_CHECK_GAS = 120000;
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _updater, IRolldown _rolldown)
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _updater)
         public
         initializer
     {
         _initializePauser(_pauserRegistry, UNPAUSE_ALL);
         _transferOwnership(initialOwner);
         updater = _updater;
-        rolldown = _rolldown;
     }
 
     /* MODIFIERS */
@@ -45,9 +44,6 @@ contract GaspMultiRollupService is
         updater = _updater;
     }
 
-    function set_rolldown(IRolldown _rolldown) public onlyOwner {
-        rolldown = _rolldown;
-    }
 
     function process_eigen_reinit(IFinalizerTaskManager.Task calldata task, IFinalizerTaskManager.TaskResponse calldata taskResponse, OperatorStateInfo calldata operatorStateInfo) public onlyOwner{
 

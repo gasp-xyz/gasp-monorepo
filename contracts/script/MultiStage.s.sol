@@ -3,6 +3,7 @@ import "../script/0_AnvilSetup.s.sol";
 import "../script/1_FinalizerAvsDeployer.s.sol";
 import "../script/M2_Deploy_From_Scratch.s.sol";
 import "../script/RolldownDeployer.s.sol";
+import "../script/GaspMultiRollupServiceDeployer.s.sol";
 import {IRolldownPrimitives} from "../src/Rolldown.sol";
 
 
@@ -57,6 +58,12 @@ contract MultiStage is Script, Utils, Test {
         console.log("################################################################################");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
         rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
+
+        console.log("################################################################################");
+        console.log("Deploying gaspMultiRollupService contracts");
+        console.log("################################################################################");
+        GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
+        gaspMultiRollupServiceDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("arbitrum-sepolia"))){
 

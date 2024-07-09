@@ -7,6 +7,7 @@
     "owner": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
     "upgrader": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
     "rolldownUpdater": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+    "gmrsUpdater": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
     "churner": "0x0000000000000000000000000000000000000000",
     "ejector": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
     "aggregator": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",

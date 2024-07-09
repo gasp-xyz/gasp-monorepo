@@ -478,6 +478,15 @@ checksum = "6b4930d2cb77ce62f89ee5d5289b4ac049559b1c45539271f5ed4fdc7db34545"
 
 [[package]]
 name = "arrayvec"
+version = "0.4.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd9fd44efafa8690358b7408d253adf110036b88f55672a933f01d616ad9b1b9"
+dependencies = [
+ "nodrop",
+]
+
+[[package]]
+name = "arrayvec"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
@@ -666,6 +675,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "46502ad458c9a52b69d4d4d32775c788b7a1b85e8bc9d482d92250fc0e3f8efe"
 dependencies = [
  "digest 0.10.7",
+]
+
+[[package]]
+name = "blake2-rfc"
+version = "0.2.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d6d530bdd2d52966a6d03b7a964add7ae1a288d25214066fd4b600f0f796400"
+dependencies = [
+ "arrayvec 0.4.12",
+ "constant_time_eq 0.1.5",
 ]
 
 [[package]]
@@ -1592,7 +1611,7 @@ dependencies = [
  "fixed-hash",
  "impl-codec",
  "impl-rlp",
- "impl-serde",
+ "impl-serde 0.4.0",
  "scale-info",
  "tiny-keccak",
 ]
@@ -1607,7 +1626,7 @@ dependencies = [
  "fixed-hash",
  "impl-codec",
  "impl-rlp",
- "impl-serde",
+ "impl-serde 0.4.0",
  "primitive-types",
  "scale-info",
  "uint",
@@ -2498,6 +2517,15 @@ dependencies = [
 
 [[package]]
 name = "impl-serde"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4551f042f3438e64dbd6226b20527fc84a6e1fe65688b58746a2f53623f25f5c"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "impl-serde"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ebc88fc67028ae3db0c853baa36269d398d5f45b6982f95549ff5def78c935cd"
@@ -2945,6 +2973,12 @@ name = "new_debug_unreachable"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4a24736216ec316047a1fc4252e27dabb04218aa4a3f37c6e7ddbf1f9782b54"
+
+[[package]]
+name = "nodrop"
+version = "0.1.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72ef4a56884ca558e5ddb05a1d1e7e1bfd9a68d9ed024c21704cc98872dae1bb"
 
 [[package]]
 name = "nohash-hasher"
@@ -3427,7 +3461,7 @@ dependencies = [
  "fixed-hash",
  "impl-codec",
  "impl-rlp",
- "impl-serde",
+ "impl-serde 0.4.0",
  "scale-info",
  "uint",
 ]
@@ -4416,7 +4450,7 @@ dependencies = [
 [[package]]
 name = "sp-application-crypto"
 version = "23.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -4429,7 +4463,7 @@ dependencies = [
 [[package]]
 name = "sp-arithmetic"
 version = "16.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "integer-sqrt",
  "num-traits",
@@ -4443,7 +4477,7 @@ dependencies = [
 [[package]]
 name = "sp-core"
 version = "21.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "array-bytes",
  "arrayvec 0.7.4",
@@ -4457,7 +4491,7 @@ dependencies = [
  "futures",
  "hash-db",
  "hash256-std-hasher",
- "impl-serde",
+ "impl-serde 0.4.0",
  "lazy_static",
  "libsecp256k1",
  "log",
@@ -4491,7 +4525,7 @@ dependencies = [
 [[package]]
 name = "sp-core-hashing"
 version = "9.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "blake2b_simd",
  "byteorder",
@@ -4504,7 +4538,7 @@ dependencies = [
 [[package]]
 name = "sp-debug-derive"
 version = "8.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4514,7 +4548,7 @@ dependencies = [
 [[package]]
 name = "sp-externalities"
 version = "0.19.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "environmental",
  "parity-scale-codec",
@@ -4525,7 +4559,7 @@ dependencies = [
 [[package]]
 name = "sp-io"
 version = "23.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "bytes",
  "ed25519-dalek",
@@ -4549,7 +4583,7 @@ dependencies = [
 [[package]]
 name = "sp-keystore"
 version = "0.27.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "parity-scale-codec",
  "parking_lot",
@@ -4561,7 +4595,7 @@ dependencies = [
 [[package]]
 name = "sp-panic-handler"
 version = "8.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "backtrace",
  "lazy_static",
@@ -4571,13 +4605,16 @@ dependencies = [
 [[package]]
 name = "sp-runtime"
 version = "24.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
+ "blake2-rfc",
  "either",
  "hash256-std-hasher",
+ "impl-serde 0.3.2",
  "impl-trait-for-tuples",
+ "libsecp256k1",
  "log",
  "parity-scale-codec",
  "parity-util-mem",
@@ -4585,6 +4622,7 @@ dependencies = [
  "rand 0.8.5",
  "scale-info",
  "serde",
+ "sha3 0.10.8",
  "sp-application-crypto",
  "sp-arithmetic",
  "sp-core",
@@ -4596,7 +4634,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface"
 version = "17.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "bytes",
  "impl-trait-for-tuples",
@@ -4614,7 +4652,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface-proc-macro"
 version = "11.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "Inflector",
  "proc-macro-crate 1.1.3",
@@ -4626,7 +4664,7 @@ dependencies = [
 [[package]]
 name = "sp-state-machine"
 version = "0.28.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "hash-db",
  "log",
@@ -4647,14 +4685,14 @@ dependencies = [
 [[package]]
 name = "sp-std"
 version = "8.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 
 [[package]]
 name = "sp-storage"
 version = "13.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
- "impl-serde",
+ "impl-serde 0.4.0",
  "parity-scale-codec",
  "ref-cast",
  "serde",
@@ -4665,7 +4703,7 @@ dependencies = [
 [[package]]
 name = "sp-tracing"
 version = "10.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "parity-scale-codec",
  "sp-std",
@@ -4677,7 +4715,7 @@ dependencies = [
 [[package]]
 name = "sp-trie"
 version = "22.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "ahash 0.8.11",
  "hash-db",
@@ -4700,7 +4738,7 @@ dependencies = [
 [[package]]
 name = "sp-wasm-interface"
 version = "14.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "anyhow",
  "impl-trait-for-tuples",
@@ -4713,7 +4751,7 @@ dependencies = [
 [[package]]
 name = "sp-weights"
 version = "20.0.0"
-source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=develop#bcdfff78b9737d3bb1f9741780e7da68a4e531ec"
+source = "git+https://github.com/mangata-finance/polkadot-sdk?branch=eth-rollup-develop#47899a8f1cc66e09863fe9ac069a2014892c4fde"
 dependencies = [
  "parity-scale-codec",
  "scale-info",

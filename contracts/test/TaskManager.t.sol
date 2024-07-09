@@ -9,6 +9,7 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 import {BitmapUtils} from "@eigenlayer-middleware/src/libraries/BitmapUtils.sol";
 import { FinalizerTaskManager } from "../src/FinalizerTaskManager.sol";
 import { IFinalizerTaskManager } from "../src/IFinalizerTaskManager.sol";
+import { IGaspMultiRollupServicePrimitives } from "../src/IGaspMultiRollupServicePrimitives.sol";
 
 import { IBLSSignatureChecker  } from "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
 
@@ -120,6 +121,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
         
         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
+        IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
 
         IFinalizerTaskManager.Task memory newTaskResponse;
         newTaskResponse.blockNumber = 2;
@@ -131,7 +133,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         
         cheats.prank(generator, generator);
         vm.expectRevert("Aggregator must be the caller");
-        tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature);
+        tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
         
     }
     function testCreateAndRespondTaskValidation() public {
@@ -158,6 +160,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
         
         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
+        IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
 
         IFinalizerTaskManager.Task memory newTaskResponse;
         newTaskResponse.blockNumber = 2;
@@ -167,7 +170,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         
         cheats.prank(aggregator, aggregator);
         vm.expectRevert("supplied task does not match the one recorded in the contract");
-        tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature);
+        tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
         
     }
     function getwindowBock() public {
@@ -194,6 +197,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
         
         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
+        IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
 
         IFinalizerTaskManager.Task memory newTaskResponse;
         newTaskResponse.blockNumber = 2;
@@ -205,7 +209,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         
         cheats.prank(aggregator, aggregator);
         vm.expectRevert("BLSSignatureChecker.checkSignatures: empty quorum input");
-        tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature);
+        tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
         
     }
     function testGetTimeWindow() public {
@@ -237,6 +241,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
         
         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
+        IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
 
         IFinalizerTaskManager.Task memory newTaskResponse;
         newTaskResponse.blockNumber = 2;
@@ -246,7 +251,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
         
         cheats.prank(aggregator, aggregator);
         vm.expectRevert("Aggregator has responded to the task too late");
-        tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature);
+        tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
         
     }
     //TODO: Create test for

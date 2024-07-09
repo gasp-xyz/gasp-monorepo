@@ -147,9 +147,6 @@ impl Syncer {
                         println!("{:?}", update_txn_receipt);
 
                         latest_completed_task_created_block = call.task.task_created_block;
-                        // task_number_expected = call.task.task_created_block
-
-                        // return Ok(())
                     }
                     Err(e) => tracing::error!("EthWs subscription error {:?}", e),
                 },
@@ -216,38 +213,6 @@ impl Syncer {
 
         let task_response = block_events[0].task_response.clone();
 
-        // let evs = self.clone().avs_contracts.source_response_stream(block_num);
-        // let mut stream: stream::EventStream<'_, _, (TaskRespondedFilter, LogMeta), _> =
-        //     evs.subscribe_with_meta().await?;
-
-        // // event stream does not finish with `None` after websocket closure, use block subscription for it
-        // let mut blocks: SubscriptionStream<'_, _, _> =
-        //     self.avs_contracts.ws_client.subscribe_blocks().await?;
-
-        // let task_response = TaskResponse::default();
-
-        // loop {
-        //     select! {
-        //         Some(event) = stream.next() => match event {
-        //             Ok((event, log)) => {
-        //                 if task_num != event.taskIndex => {
-        //                     tracing::error!("missing expected task response {:?}", task_num);
-        //                     return Err(eyre!("missing expected task response {:?}", task_num))
-        //                 }
-        //                 task_response = event.taskResponse;
-        //                 break
-        //             }
-        //             Err(e) => tracing::error!("EthWs subscription error {:?}", e),
-        //         },
-        //         block = blocks.next() => {
-        //             if block.is_none() {
-        //                 tracing::error!("missing expected task response no more blocks {:?}", task_num);
-        //                 return Err(eyre!("missing expected task response no more blocks {:?}", task_num))
-        //             }
-        //         }
-        //     }
-        // }
-
         let operators_state_info = self.clone().get_operators_state_info(last_task.clone()).await?;
 
         let reinit_txn = self.clone().root_gasp_service_contract.clone().expect("should work in reinit").process_eigen_reinit(last_task, task_response, operators_state_info);
@@ -259,88 +224,6 @@ impl Syncer {
 
         Ok(())
     }
-
-    // let latest_completed_task_number = self.gasp_service_contract.get_latest_completed_task_number().await?;
-    //     let latest_completed_task_created_block = self.gasp_service_contract.get_latest_completed_task_created_block().await?;
-
-    //     let is_stalled = self.gasp_service_contract.get_is_stalled().await?;
-
-    //     if is_stalled{
-    //         // get the Operator_State_Info from latest_completed_task_created_block on target to the lastCompletedTaskCreatedBlock on source
-    //         // Use root keys to force the state update and unstall
-    //         handle_stall().await?;
-    //     }
-
-    //     // If the syncer passes an update and it fails... stop the syncer
-    //     // Maybe even pause syncing on contract... But this is only necessary if the syncer is decentralized... But the syncer doesn't need to be decentralized
-    //     // So the only expected reason for a stall is update is too big
-    //     continue_sync().await?;
-
-    //     let evs = self.clone().avs_contracts.source_stream();
-    //     let mut stream: stream::EventStream<'_, _, (NewTaskCreatedFilter, LogMeta), _> =
-    //         evs.subscribe_with_meta().await?;
-
-    //     // event stream does not finish with `None` after websocket closure, use block subscription for it
-    //     let mut blocks: SubscriptionStream<'_, _, _> =
-    //         self.avs_contracts.ws_client.subscribe_blocks().await?;
-
-    //     loop {
-    //         select! {
-    //             Some(event) = stream.next() => match event {
-    //                 Ok((event, log)) => {
-    //                     debug!("Got new task at: {:?}", log);
-    //                     PendingTransaction::new(log.transaction_hash, self.client.provider()).await?;
-    //                     let event_clone = event.clone();
-    //                     let self_clone = self.clone();
-    //                     let execute_block_join_handle = tokio::spawn(async move {
-    //                         info!("Executing a Block for task: {:?}", event_clone);
-    //                         self_clone.execute_block(event_clone.task.block_number.as_u32()).await
-
-    //                     });
-    //                     let event_clone = event.clone();
-    //                     let self_clone = self.clone();
-    //                     let get_operators_state_info_hash_handle = tokio::spawn(async move {
-    //                         info!("Get operators state hash: {:?}", event_clone);
-    //                         self_clone.get_operators_state_info_hash(event_clone.task).await
-    //                     });
-    //                     let (proofs, operators_state_info_hash) = try_join!(execute_block_join_handle, get_operators_state_info_hash_handle)?;
-    //                     let (proofs, operators_state_info_hash) = (proofs?, operators_state_info_hash?);
-    //                     debug!("Operators State Info Hash {:?}", operators_state_info_hash);
-    //                     debug!("Block executed successfully {:?}", proofs);
-    //                     let payload = TaskResponse {
-    //                         reference_task_index: event.task_index,
-    //                         reference_task_hash: Keccak256::hash(event.task.clone().encode().as_ref()).into(),
-    //                         operators_state_info_hash: operators_state_info_hash,
-    //                         block_hash: proofs.0.as_fixed_bytes().to_owned(),
-    //                         storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
-    //                         pending_state_hash: proofs.2.as_fixed_bytes().to_owned(),
-    //                     };
-    //                     let response = self
-    //                         .rpc
-    //                         .send_task_response(payload, &self.bls_keypair)
-    //                         .await;
-    //                     match response {
-    //                         Ok(r) => match r.error_for_status_ref() {
-    //                             Err(e) => error!("{} - {}", e, r.text().await?),
-    //                             Ok(_) => info!("Task finished successfuly and sent to AVS service"),
-    //                         },
-    //                         Err(e) => error!("{}", e),
-    //                     }
-    //                 }
-    //                 Err(e) => tracing::error!("EthWs subscription error {:?}", e),
-    //             },
-    //             block = blocks.next() => {
-    //                 if block.is_none() {
-    //                     break
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     // ws provider has internal reconnect, but if it fails we are done
-    //     Ok(())
-    // }
-
 
     pub(crate) async fn get_operators_state_info(
         self: Arc<Self>,

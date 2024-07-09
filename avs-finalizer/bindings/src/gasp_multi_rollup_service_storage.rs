@@ -288,26 +288,6 @@ pub mod gasp_multi_rollup_service_storage {
                     ],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("rolldown"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("rolldown"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("contract IRolldown"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("stalled"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
@@ -533,17 +513,6 @@ pub mod gasp_multi_rollup_service_storage {
         ) -> ::ethers::contract::builders::ContractCall<M, u128> {
             self.0
                 .method_hash([122, 215, 85, 97], p0)
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `rolldown` (0x3d9fb00c) function
-        pub fn rolldown(
-            &self,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
-            self.0
-                .method_hash([61, 159, 176, 12], ())
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `stalled` (0x526e3e64) function
@@ -856,21 +825,6 @@ pub mod gasp_multi_rollup_service_storage {
     )]
     #[ethcall(name = "quorumToStakes", abi = "quorumToStakes(uint8)")]
     pub struct QuorumToStakesCall(pub u8);
-    ///Container type for all input parameters for the `rolldown` function with signature `rolldown()` and selector `0x3d9fb00c`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash
-    )]
-    #[ethcall(name = "rolldown", abi = "rolldown()")]
-    pub struct RolldownCall;
     ///Container type for all input parameters for the `stalled` function with signature `stalled()` and selector `0x526e3e64`
     #[derive(
         Clone,
@@ -923,7 +877,6 @@ pub mod gasp_multi_rollup_service_storage {
         QuorumNumbers(QuorumNumbersCall),
         QuorumThresholdPercentage(QuorumThresholdPercentageCall),
         QuorumToStakes(QuorumToStakesCall),
-        Rolldown(RolldownCall),
         Stalled(StalledCall),
         Updater(UpdaterCall),
     }
@@ -982,11 +935,6 @@ pub mod gasp_multi_rollup_service_storage {
             ) {
                 return Ok(Self::QuorumToStakes(decoded));
             }
-            if let Ok(decoded) = <RolldownCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
-                return Ok(Self::Rolldown(decoded));
-            }
             if let Ok(decoded) = <StalledCall as ::ethers::core::abi::AbiDecode>::decode(
                 data,
             ) {
@@ -1033,9 +981,6 @@ pub mod gasp_multi_rollup_service_storage {
                 Self::QuorumToStakes(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::Rolldown(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
                 Self::Stalled(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::Updater(element) => ::ethers::core::abi::AbiEncode::encode(element),
             }
@@ -1068,7 +1013,6 @@ pub mod gasp_multi_rollup_service_storage {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::QuorumToStakes(element) => ::core::fmt::Display::fmt(element, f),
-                Self::Rolldown(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Stalled(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Updater(element) => ::core::fmt::Display::fmt(element, f),
             }
@@ -1131,11 +1075,6 @@ pub mod gasp_multi_rollup_service_storage {
     for GaspMultiRollupServiceStorageCalls {
         fn from(value: QuorumToStakesCall) -> Self {
             Self::QuorumToStakes(value)
-        }
-    }
-    impl ::core::convert::From<RolldownCall> for GaspMultiRollupServiceStorageCalls {
-        fn from(value: RolldownCall) -> Self {
-            Self::Rolldown(value)
         }
     }
     impl ::core::convert::From<StalledCall> for GaspMultiRollupServiceStorageCalls {
@@ -1291,20 +1230,6 @@ pub mod gasp_multi_rollup_service_storage {
         Hash
     )]
     pub struct QuorumToStakesReturn(pub u128);
-    ///Container type for all return fields from the `rolldown` function with signature `rolldown()` and selector `0x3d9fb00c`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash
-    )]
-    pub struct RolldownReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `stalled` function with signature `stalled()` and selector `0x526e3e64`
     #[derive(
         Clone,

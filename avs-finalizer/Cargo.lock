@@ -762,7 +762,6 @@ dependencies = [
  "ethers",
  "eyre",
  "frame-remote-externalities",
- "futures",
  "hex",
  "log",
  "node-executor",

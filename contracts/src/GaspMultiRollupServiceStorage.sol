@@ -2,13 +2,11 @@
 pragma solidity ^0.8.9;
 
 import "./IGaspMultiRollupService.sol";
-import "./IRolldown.sol";
 import "@eigenlayer-middleware/src/libraries/BN254.sol";
 
 abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
 
     address public updater;
-    IRolldown public rolldown;
 
     bool public stalled;
     uint256 public lastUpdateBlockTimestamp;
