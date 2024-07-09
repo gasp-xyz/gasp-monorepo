@@ -18,7 +18,7 @@ concurrency:
 jobs:
   init:
     name: Set global version
-    if: github.event.action != 'closed'
+    if: github.event.action != 'unlabeled' && github.event.action != 'closed'
     runs-on: ubuntu-latest
     outputs:
       GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
