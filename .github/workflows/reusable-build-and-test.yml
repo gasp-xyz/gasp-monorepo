@@ -68,3 +68,19 @@ jobs:
           docker buildx create --use
           # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
           docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
+
+  helmfile-lint:
+    name: Lint and validate Helmfile configuration
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ inputs.version }}
+      ENVIRONMENT: lint
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install helmfile and kubeconform 
+        run: |
+          curl -Lo helmfile https://github.com/helmfile/helmfile/releases/download/v0.166.0/helmfile_linux_amd64 && chmod +x helmfile && sudo mv helmfile /usr/local/bin/
+          curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.4/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
+      
+      - run: helmfile lint -e fungible
+      - run: helmfile template -e fungible | kubeconform -kubernetes-version 1.28.0 -skip ServiceMonitor
