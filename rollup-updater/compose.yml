@@ -1,6 +1,7 @@
 services:
   updater-eth:
     restart: unless-stopped
+    platform: linux/amd64
     image: mangatasolutions/rollup-updater:${ROLLUP_UPDATER_VERSION:-local}
     build: .
     depends_on:
@@ -21,6 +22,7 @@ services:
 
   updater-arb:
     restart: unless-stopped
+    platform: linux/amd64
     image: mangatasolutions/rollup-updater:${ROLLUP_UPDATER_VERSION:-local}
     build: .
     depends_on:
