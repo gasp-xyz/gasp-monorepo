@@ -13,7 +13,6 @@ permissions:
   id-token: write
 
 jobs:
-
   build-foundry-deployer-image:
     name: Build foundry deployer Docker image with smart contracts code
     runs-on: ubuntu-latest
@@ -69,3 +68,27 @@ jobs:
           docker buildx create --use
           # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
           docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
+
+  helmfile-lint:
+    name: Lint and validate Helmfile configuration
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ops/helmfiles
+    env:
+      IMAGE_TAG: ${{ inputs.version }}
+      ENVIRONMENT: lint
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup helmfile
+        uses: mamezou-tech/setup-helmfile@v1.3.0
+        with:
+          helmfile-version: v0.166.0
+          helm-version: v3.15.2
+          install-kubectl: no
+          additional-helm-plugins: https://github.com/jkroepke/helm-secrets --version v4.1.1,https://github.com/aslafy-z/helm-git --version 0.14.0
+      - name: Install kubeconform 
+        run: curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.6/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
+      
+      - run: helmfile lint -e fungible
+      - run: helmfile template -e fungible | kubeconform -kubernetes-version 1.28.0 -skip ServiceMonitor -strict
