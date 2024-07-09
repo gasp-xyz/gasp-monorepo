@@ -19,7 +19,7 @@ services:
 
   arbitrum-contracts-deployment:
     image: mangatasolutions/avs-contract:local
-    platform: linux/amd6
+    platform: linux/amd64
     build: .
     depends_on:
       - arbitrum-stub
