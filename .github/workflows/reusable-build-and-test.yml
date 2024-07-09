@@ -80,10 +80,16 @@ jobs:
       ENVIRONMENT: lint
     steps:
       - uses: actions/checkout@v4
-      - name: Install helmfile and kubeconform 
-        run: |
-          curl -L https://github.com/helmfile/helmfile/releases/download/v0.166.0/helmfile_0.166.0_linux_amd64.tar.gz | tar xzv && sudo mv helmfile /usr/local/bin/
-          curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.6/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
+      
+      - name: Setup helmfile
+        uses: mamezou-tech/setup-helmfile@v1.3.0
+        with:
+          helmfile-version: v0.166.0
+          helm-version: v3.15.2
+          install-kubectl: no
+          additional-helm-plugins: https://github.com/jkroepke/helm-secrets --version v4.1.1,https://github.com/aslafy-z/helm-git --version 0.14.0
+      - name: Install kubeconform 
+        run: curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.6/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
       
       - run: helmfile lint -e fungible
       - run: helmfile template -e fungible | kubeconform -kubernetes-version 1.28.0 -skip ServiceMonitor -strict
