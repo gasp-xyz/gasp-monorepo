@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: src/bin/Dockerfile.local
-      args:
-        - BINARY_PATH=${AVS_FINALIZER_BINARY_PATH:-target/release/main}
     depends_on:
       eth-stub:
         condition: service_healthy
