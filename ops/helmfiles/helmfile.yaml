@@ -141,6 +141,7 @@ releases:
         env: {{ .Values.updaterEnvArb | toYaml | nindent 10 }}
   
   - name: rollup-sequencer-eth
+    platform: linux/amd64
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.sequencerEnabled }}
     chart: ../helm-charts/rollup-sequencer
@@ -167,6 +168,7 @@ releases:
         env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
   
   - name: rollup-sequencer-eth-2
+    platform: linux/amd64
     namespace: 'rollup-{{ requiredEnv "ENVIRONMENT" }}'
     installed: {{ .Values.secondSequencerEnabled }}
     chart: ../helm-charts/rollup-sequencer
