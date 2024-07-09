@@ -40,8 +40,8 @@ jobs:
   deploy-fungible:
     name: Deploy fungible environment
     if: |
-      (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == ':rocket: deploy') ||
-      (github.event_name == 'pull_request' && github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, ':rocket: deploy'))
+      (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == ':rocket: deploy_fungible') ||
+      (github.event_name == 'pull_request' && github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, ':rocket: deploy_fungible'))
     needs: [init, build-and-test]
     uses: ./.github/workflows/reusable-deploy.yml
     secrets: inherit
@@ -64,8 +64,8 @@ jobs:
   clean-up-fungible:
     name: Delete fungible environment
     if: |
-      (github.event_name == 'pull_request' && github.event.action == 'unlabeled' && github.event.label.name == ':rocket: deploy') ||
-      (github.event_name == 'pull_request' && github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, ':rocket: deploy'))
+      (github.event_name == 'pull_request' && github.event.action == 'unlabeled' && github.event.label.name == ':rocket: deploy_fungible') ||
+      (github.event_name == 'pull_request' && github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, ':rocket: deploy_fungible'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
