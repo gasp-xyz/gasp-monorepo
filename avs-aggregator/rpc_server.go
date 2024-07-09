@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	"fmt"
 	"encoding/hex"
 
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
@@ -107,6 +106,10 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 	}
 	x := abi.ConvertType(unpacked[0], taskResponse)
 	cx, ok := x.(taskmanager.IFinalizerTaskManagerTaskResponse)
+	if !ok {
+		agg.logger.Error("Failed to get task response cx", "cx", cx)
+		return TaskResponseDigestNotFoundError500
+	}
 
 	taskResponse = cx
 
