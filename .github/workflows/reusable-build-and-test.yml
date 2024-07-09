@@ -72,6 +72,9 @@ jobs:
   helmfile-lint:
     name: Lint and validate Helmfile configuration
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ops/helmfiles
     env:
       IMAGE_TAG: ${{ inputs.version }}
       ENVIRONMENT: lint
