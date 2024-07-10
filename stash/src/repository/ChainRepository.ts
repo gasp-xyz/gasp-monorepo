@@ -14,7 +14,7 @@ const keyPool = (id: number) => PREFIX_POOL + id
 
 const FIRST_POOL_BLOCK = 251216
 const BLOCK_DECEMBER_2023 = 3_750_000 // 2 december 2023
-const ROLLUP_STARTER_BLOCK = 80000
+const ROLLUP_STARTER_BLOCK = 0 //8 July 2024
 const BATCH = 300 * 12 * 1000 // ~= 1 hour of blocks
 
 export const LIMIT = 10_000
@@ -29,6 +29,9 @@ const setStarterBlock = () => {
       block = FIRST_POOL_BLOCK
       break
     case 'rollup-dev':
+      block = ROLLUP_STARTER_BLOCK
+      break
+    case 'rollup-testnet':
       block = ROLLUP_STARTER_BLOCK
       break
     default:

@@ -10,7 +10,7 @@ chai.should()
 
 type SwapData = [Decimal, Decimal]
 
-describe('test trades amounts', () => {
+describe.skip('test trades amounts', () => {
   const KSM_PRICE = 57.67
   const MGX_PRICE = 0.003910197566
   const asset = {

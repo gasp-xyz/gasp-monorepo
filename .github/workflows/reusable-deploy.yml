@@ -71,16 +71,27 @@ jobs:
           env: ${{ env.ENV_REF }}
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
       
-      - run: |
+      - name: Verify configs are correct before deployment
+        working-directory: ops/helmfiles
+        run: |
+          # Install kubeconform
+          curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.6/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
+
+          export ENVIRONMENT=${{ env.ENV_REF }} && export IMAGE_TAG=${{ inputs.version }}
+          helmfile lint -e fungible
+          helmfile template -e fungible | kubeconform -kubernetes-version 1.28.0 -skip ServiceMonitor -strict
+      
+      - name: Deploy services
+        working-directory: ops/helmfiles
+        run: |
           export ENVIRONMENT=${{ env.ENV_REF }}
           export IMAGE_TAG=${{ inputs.version }}
           
           # https://dev.to/derlin/helmfile-difference-between-sync-and-apply-helm-3-28o1
-          
           export HELM_DIFF_THREE_WAY_MERGE=true
+          
           helm repo update && helmfile repos
           helmfile apply -e ${{ inputs.env }}
-        working-directory: ops/helmfiles
       
       - name: Update the GitHub Deployment status
         uses: bobheadxi/deployments@v1.4.0
