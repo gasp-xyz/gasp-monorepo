@@ -36,7 +36,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         users = utils.createUsers(1);
         rolldown = new Rolldown();
         rolldown.initialize(avsPauserReg, avsOwner, ChainId.Ethereum, users[0]);
-        ETH_TOKEN_ADDRESS = payable(0x5748395867463837537395739375937493733457);
+        ETH_TOKEN_ADDRESS = payable(0x0000000000000000000000000000000000000001);
     }
 
     function beforeEach() public {}
@@ -413,7 +413,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, false);
+        emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, true);
         rolldown.update_l1_from_l2(l2Update);
         vm.stopPrank();
     }
@@ -447,7 +447,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, true);
+        emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, false);
         rolldown.update_l1_from_l2(l2Update);
         vm.stopPrank();
     }
