@@ -1,7 +1,8 @@
 services:
   updater-eth:
     restart: unless-stopped
-    image: mangatasolutions/rollup-updater:${ROLLUP_UPDATER_VERSION:-local}
+    platform: linux/amd64
+    image: mangatasolutions/rollup-updater:${ROLLUP_UPDATER_VERSION:-local}-eth
     build: .
     depends_on:
       eth-contracts-deployment:
@@ -21,7 +22,8 @@ services:
 
   updater-arb:
     restart: unless-stopped
-    image: mangatasolutions/rollup-updater:${ROLLUP_UPDATER_VERSION:-local}
+    platform: linux/amd64
+    image: mangatasolutions/rollup-updater:${ROLLUP_UPDATER_VERSION:-local}-arb
     build: .
     depends_on:
       arbitrum-contracts-deployment:
