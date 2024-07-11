@@ -4,7 +4,10 @@ use crate::{
 };
 use ark_ec::AffineRepr;
 use ark_ff::PrimeField;
-use bindings::{shared_types::{Task, TaskResponse,*},finalizer_task_manager::OperatorStateInfo};
+use bindings::{
+    finalizer_task_manager::OperatorStateInfo,
+    shared_types::{Task, TaskResponse, *},
+};
 use ethers::abi::AbiEncode;
 use reqwest::Response;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
@@ -13,9 +16,9 @@ use reqwest_retry::{
     RetryTransientMiddleware, Retryable, RetryableStrategy,
 };
 use serde::{ser::SerializeStruct, Serialize};
+use sp_core::Bytes;
 use sp_runtime::traits::{Hash, Keccak256};
 use tracing::instrument;
-use sp_core::Bytes;
 
 type Bytes32 = [u8; 32];
 

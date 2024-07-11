@@ -1,12 +1,12 @@
 use std::{fmt::Debug, sync::Arc};
 
 use bindings::{
+    bls_apk_registry::BLSApkRegistry,
     finalizer_service_manager::FinalizerServiceManager,
     finalizer_task_manager::{FinalizerTaskManager, NewTaskCreatedFilter},
     registry_coordinator::RegistryCoordinator,
     shared_types::OperatorInfo,
     stake_registry::StakeRegistry,
-    bls_apk_registry::BLSApkRegistry,
     strategy_manager_storage::{PubkeyRegistrationParams, SignatureWithSaltAndExpiry},
 };
 use ethers::{

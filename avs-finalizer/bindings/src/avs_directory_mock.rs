@@ -7,7 +7,7 @@ pub use avs_directory_mock::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types,
+    non_camel_case_types
 )]
 pub mod avs_directory_mock {
     pub use super::super::shared_types::*;
@@ -17,264 +17,210 @@ pub mod avs_directory_mock {
             constructor: ::core::option::Option::None,
             functions: ::core::convert::From::from([
                 (
-                    ::std::borrow::ToOwned::to_owned(
-                        "OPERATOR_AVS_REGISTRATION_TYPEHASH",
-                    ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "OPERATOR_AVS_REGISTRATION_TYPEHASH",
+                    ::std::borrow::ToOwned::to_owned("OPERATOR_AVS_REGISTRATION_TYPEHASH"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned(
+                            "OPERATOR_AVS_REGISTRATION_TYPEHASH",
+                        ),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
                             ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned(
-                        "calculateOperatorAVSRegistrationDigestHash",
-                    ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "calculateOperatorAVSRegistrationDigestHash",
+                    ::std::borrow::ToOwned::to_owned("calculateOperatorAVSRegistrationDigestHash"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned(
+                            "calculateOperatorAVSRegistrationDigestHash",
+                        ),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("avs"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("salt"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("expiry"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("avs"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("salt"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("expiry"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("deregisterOperatorFromAVS"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "deregisterOperatorFromAVS",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("deregisterOperatorFromAVS",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("operator"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("operatorSaltIsSpent"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "operatorSaltIsSpent",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("operatorSaltIsSpent",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("salt"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bool"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("salt"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bool"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("registerOperatorToAVS"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "registerOperatorToAVS",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("registerOperatorToAVS",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("address"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("operatorSignature"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
+                                    ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                ],),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned(
+                                        "struct ISignatureUtils.SignatureWithSaltAndExpiry",
                                     ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("operatorSignature"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                        ],
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned(
-                                            "struct ISignatureUtils.SignatureWithSaltAndExpiry",
-                                        ),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("updateAVSMetadataURI"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "updateAVSMetadataURI",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("updateAVSMetadataURI",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("metadataURI"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::String,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("string"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("metadataURI"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::String,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("string"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
                 ),
             ]),
             events: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("AVSMetadataURIUpdated"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "AVSMetadataURIUpdated",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("avs"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("metadataURI"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::String,
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("AVSMetadataURIUpdated",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("avs"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("metadataURI"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::String,
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned(
-                        "OperatorAVSRegistrationStatusUpdated",
-                    ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "OperatorAVSRegistrationStatusUpdated",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("operator"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("avs"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("status"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::borrow::ToOwned::to_owned("OperatorAVSRegistrationStatusUpdated"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned(
+                            "OperatorAVSRegistrationStatusUpdated",
+                        ),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("operator"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("avs"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: true,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("status"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
             ]),
             errors: ::std::collections::BTreeMap::new(),
@@ -283,21 +229,18 @@ pub mod avs_directory_mock {
         }
     }
     ///The parsed JSON ABI of the contract.
-    pub static AVSDIRECTORYMOCK_ABI: ::ethers::contract::Lazy<
-        ::ethers::core::abi::Abi,
-    > = ::ethers::contract::Lazy::new(__abi);
+    pub static AVSDIRECTORYMOCK_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
+        ::ethers::contract::Lazy::new(__abi);
     #[rustfmt::skip]
     const __BYTECODE: &[u8] = b"`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[Pa\x03\x99\x80a\0 `\09`\0\xF3\xFE`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\0bW`\x005`\xE0\x1C\x80c7H#\xB5\x14a\0gW\x80c\x99&\xEE}\x14a\0\x92W\x80c\xA1\x06\x0C\x88\x14a\0\xA6W\x80c\xA3d\xF4\xDA\x14a\0\xCCW\x80c\xA9\x8F\xB3U\x14a\0\xDDW\x80c\xD7\x9A\xCE\xAB\x14a\0\xEBW[`\0\x80\xFD[a\0}a\0u6`\x04a\x01\x0EV[`\0\x92\x91PPV[`@Q\x90\x15\x15\x81R` \x01[`@Q\x80\x91\x03\x90\xF3[a\0\xA4a\0\xA06`\x04a\x01\xA8V[PPV[\0[a\0\xBEa\0\xB46`\x04a\x02\x8DV[`\0\x94\x93PPPPV[`@Q\x90\x81R` \x01a\0\x89V[a\0\xA4a\0\xDA6`\x04a\x02\xCFV[PV[a\0\xA4a\0\xA06`\x04a\x02\xF1V[`\0a\0\xBEV[\x805`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a\x01\tW`\0\x80\xFD[\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a\x01!W`\0\x80\xFD[a\x01*\x83a\0\xF2V[\x94` \x93\x90\x93\x015\x93PPPV[cNH{q`\xE0\x1B`\0R`A`\x04R`$`\0\xFD[`@Q``\x81\x01g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x81\x11\x82\x82\x10\x17\x15a\x01qWa\x01qa\x018V[`@R\x90V[`@Q`\x1F\x82\x01`\x1F\x19\x16\x81\x01g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x81\x11\x82\x82\x10\x17\x15a\x01\xA0Wa\x01\xA0a\x018V[`@R\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a\x01\xBBW`\0\x80\xFD[a\x01\xC4\x83a\0\xF2V[\x91P` \x80\x84\x015g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x82\x11\x15a\x01\xE2W`\0\x80\xFD[\x90\x85\x01\x90``\x82\x88\x03\x12\x15a\x01\xF6W`\0\x80\xFD[a\x01\xFEa\x01NV[\x825\x82\x81\x11\x15a\x02\rW`\0\x80\xFD[\x83\x01`\x1F\x81\x01\x89\x13a\x02\x1EW`\0\x80\xFD[\x805\x83\x81\x11\x15a\x020Wa\x020a\x018V[a\x02B`\x1F\x82\x01`\x1F\x19\x16\x87\x01a\x01wV[\x93P\x80\x84R\x89\x86\x82\x84\x01\x01\x11\x15a\x02XW`\0\x80\xFD[\x80\x86\x83\x01\x87\x86\x017`\0\x86\x82\x86\x01\x01RPP\x81\x81R\x83\x83\x015\x84\x82\x01R`@\x83\x015`@\x82\x01R\x80\x94PPPPP\x92P\x92\x90PV[`\0\x80`\0\x80`\x80\x85\x87\x03\x12\x15a\x02\xA3W`\0\x80\xFD[a\x02\xAC\x85a\0\xF2V[\x93Pa\x02\xBA` \x86\x01a\0\xF2V[\x93\x96\x93\x95PPPP`@\x82\x015\x91``\x015\x90V[`\0` \x82\x84\x03\x12\x15a\x02\xE1W`\0\x80\xFD[a\x02\xEA\x82a\0\xF2V[\x93\x92PPPV[`\0\x80` \x83\x85\x03\x12\x15a\x03\x04W`\0\x80\xFD[\x825g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x82\x11\x15a\x03\x1CW`\0\x80\xFD[\x81\x85\x01\x91P\x85`\x1F\x83\x01\x12a\x030W`\0\x80\xFD[\x815\x81\x81\x11\x15a\x03?W`\0\x80\xFD[\x86` \x82\x85\x01\x01\x11\x15a\x03QW`\0\x80\xFD[` \x92\x90\x92\x01\x96\x91\x95P\x90\x93PPPPV\xFE\xA2dipfsX\"\x12 +\xAB\xDB\xA5\x82}KEh\xA5x\xD2V\xA3|}\xDD\xBB\x03\xBB~\xB7\xAE\xDB\xDB\xE6\x89i\x10\xE1\xEB\xCBdsolcC\0\x08\x0C\x003";
     /// The bytecode of the contract.
-    pub static AVSDIRECTORYMOCK_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
-        __BYTECODE,
-    );
+    pub static AVSDIRECTORYMOCK_BYTECODE: ::ethers::core::types::Bytes =
+        ::ethers::core::types::Bytes::from_static(__BYTECODE);
     #[rustfmt::skip]
     const __DEPLOYED_BYTECODE: &[u8] = b"`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\0bW`\x005`\xE0\x1C\x80c7H#\xB5\x14a\0gW\x80c\x99&\xEE}\x14a\0\x92W\x80c\xA1\x06\x0C\x88\x14a\0\xA6W\x80c\xA3d\xF4\xDA\x14a\0\xCCW\x80c\xA9\x8F\xB3U\x14a\0\xDDW\x80c\xD7\x9A\xCE\xAB\x14a\0\xEBW[`\0\x80\xFD[a\0}a\0u6`\x04a\x01\x0EV[`\0\x92\x91PPV[`@Q\x90\x15\x15\x81R` \x01[`@Q\x80\x91\x03\x90\xF3[a\0\xA4a\0\xA06`\x04a\x01\xA8V[PPV[\0[a\0\xBEa\0\xB46`\x04a\x02\x8DV[`\0\x94\x93PPPPV[`@Q\x90\x81R` \x01a\0\x89V[a\0\xA4a\0\xDA6`\x04a\x02\xCFV[PV[a\0\xA4a\0\xA06`\x04a\x02\xF1V[`\0a\0\xBEV[\x805`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a\x01\tW`\0\x80\xFD[\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a\x01!W`\0\x80\xFD[a\x01*\x83a\0\xF2V[\x94` \x93\x90\x93\x015\x93PPPV[cNH{q`\xE0\x1B`\0R`A`\x04R`$`\0\xFD[`@Q``\x81\x01g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x81\x11\x82\x82\x10\x17\x15a\x01qWa\x01qa\x018V[`@R\x90V[`@Q`\x1F\x82\x01`\x1F\x19\x16\x81\x01g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x81\x11\x82\x82\x10\x17\x15a\x01\xA0Wa\x01\xA0a\x018V[`@R\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a\x01\xBBW`\0\x80\xFD[a\x01\xC4\x83a\0\xF2V[\x91P` \x80\x84\x015g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x82\x11\x15a\x01\xE2W`\0\x80\xFD[\x90\x85\x01\x90``\x82\x88\x03\x12\x15a\x01\xF6W`\0\x80\xFD[a\x01\xFEa\x01NV[\x825\x82\x81\x11\x15a\x02\rW`\0\x80\xFD[\x83\x01`\x1F\x81\x01\x89\x13a\x02\x1EW`\0\x80\xFD[\x805\x83\x81\x11\x15a\x020Wa\x020a\x018V[a\x02B`\x1F\x82\x01`\x1F\x19\x16\x87\x01a\x01wV[\x93P\x80\x84R\x89\x86\x82\x84\x01\x01\x11\x15a\x02XW`\0\x80\xFD[\x80\x86\x83\x01\x87\x86\x017`\0\x86\x82\x86\x01\x01RPP\x81\x81R\x83\x83\x015\x84\x82\x01R`@\x83\x015`@\x82\x01R\x80\x94PPPPP\x92P\x92\x90PV[`\0\x80`\0\x80`\x80\x85\x87\x03\x12\x15a\x02\xA3W`\0\x80\xFD[a\x02\xAC\x85a\0\xF2V[\x93Pa\x02\xBA` \x86\x01a\0\xF2V[\x93\x96\x93\x95PPPP`@\x82\x015\x91``\x015\x90V[`\0` \x82\x84\x03\x12\x15a\x02\xE1W`\0\x80\xFD[a\x02\xEA\x82a\0\xF2V[\x93\x92PPPV[`\0\x80` \x83\x85\x03\x12\x15a\x03\x04W`\0\x80\xFD[\x825g\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x80\x82\x11\x15a\x03\x1CW`\0\x80\xFD[\x81\x85\x01\x91P\x85`\x1F\x83\x01\x12a\x030W`\0\x80\xFD[\x815\x81\x81\x11\x15a\x03?W`\0\x80\xFD[\x86` \x82\x85\x01\x01\x11\x15a\x03QW`\0\x80\xFD[` \x92\x90\x92\x01\x96\x91\x95P\x90\x93PPPPV\xFE\xA2dipfsX\"\x12 +\xAB\xDB\xA5\x82}KEh\xA5x\xD2V\xA3|}\xDD\xBB\x03\xBB~\xB7\xAE\xDB\xDB\xE6\x89i\x10\xE1\xEB\xCBdsolcC\0\x08\x0C\x003";
     /// The deployed bytecode of the contract.
-    pub static AVSDIRECTORYMOCK_DEPLOYED_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
-        __DEPLOYED_BYTECODE,
-    );
+    pub static AVSDIRECTORYMOCK_DEPLOYED_BYTECODE: ::ethers::core::types::Bytes =
+        ::ethers::core::types::Bytes::from_static(__DEPLOYED_BYTECODE);
     pub struct AVSDirectoryMock<M>(::ethers::contract::Contract<M>);
     impl<M> ::core::clone::Clone for AVSDirectoryMock<M> {
         fn clone(&self) -> Self {
@@ -329,13 +272,11 @@ pub mod avs_directory_mock {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(
-                ::ethers::contract::Contract::new(
-                    address.into(),
-                    AVSDIRECTORYMOCK_ABI.clone(),
-                    client,
-                ),
-            )
+            Self(::ethers::contract::Contract::new(
+                address.into(),
+                AVSDIRECTORYMOCK_ABI.clone(),
+                client,
+            ))
         }
         /// Constructs the general purpose `Deployer` instance based on the provided constructor arguments and sends it.
         /// Returns a new instance of a deployer that returns an instance of this contract after sending the transaction
@@ -437,11 +378,8 @@ pub mod avs_directory_mock {
         ///Gets the contract's `AVSMetadataURIUpdated` event
         pub fn avs_metadata_uri_updated_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            AvsmetadataURIUpdatedFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, AvsmetadataURIUpdatedFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `OperatorAVSRegistrationStatusUpdated` event
@@ -457,16 +395,15 @@ pub mod avs_directory_mock {
         /// Returns an `Event` builder for all the events of this contract.
         pub fn events(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            AVSDirectoryMockEvents,
-        > {
-            self.0.event_with_filter(::core::default::Default::default())
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, AVSDirectoryMockEvents>
+        {
+            self.0
+                .event_with_filter(::core::default::Default::default())
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for AVSDirectoryMock<M> {
+        for AVSDirectoryMock<M>
+    {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -481,7 +418,7 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "AVSMetadataURIUpdated",
@@ -502,7 +439,7 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "OperatorAVSRegistrationStatusUpdated",
@@ -524,13 +461,11 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub enum AVSDirectoryMockEvents {
         AvsmetadataURIUpdatedFilter(AvsmetadataURIUpdatedFilter),
-        OperatorAVSRegistrationStatusUpdatedFilter(
-            OperatorAVSRegistrationStatusUpdatedFilter,
-        ),
+        OperatorAVSRegistrationStatusUpdatedFilter(OperatorAVSRegistrationStatusUpdatedFilter),
     }
     impl ::ethers::contract::EthLogDecode for AVSDirectoryMockEvents {
         fn decode_log(
@@ -539,13 +474,9 @@ pub mod avs_directory_mock {
             if let Ok(decoded) = AvsmetadataURIUpdatedFilter::decode_log(log) {
                 return Ok(AVSDirectoryMockEvents::AvsmetadataURIUpdatedFilter(decoded));
             }
-            if let Ok(decoded) = OperatorAVSRegistrationStatusUpdatedFilter::decode_log(
-                log,
-            ) {
+            if let Ok(decoded) = OperatorAVSRegistrationStatusUpdatedFilter::decode_log(log) {
                 return Ok(
-                    AVSDirectoryMockEvents::OperatorAVSRegistrationStatusUpdatedFilter(
-                        decoded,
-                    ),
+                    AVSDirectoryMockEvents::OperatorAVSRegistrationStatusUpdatedFilter(decoded),
                 );
             }
             Err(::ethers::core::abi::Error::InvalidData)
@@ -554,9 +485,7 @@ pub mod avs_directory_mock {
     impl ::core::fmt::Display for AVSDirectoryMockEvents {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
-                Self::AvsmetadataURIUpdatedFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::AvsmetadataURIUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorAVSRegistrationStatusUpdatedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
@@ -568,8 +497,7 @@ pub mod avs_directory_mock {
             Self::AvsmetadataURIUpdatedFilter(value)
         }
     }
-    impl ::core::convert::From<OperatorAVSRegistrationStatusUpdatedFilter>
-    for AVSDirectoryMockEvents {
+    impl ::core::convert::From<OperatorAVSRegistrationStatusUpdatedFilter> for AVSDirectoryMockEvents {
         fn from(value: OperatorAVSRegistrationStatusUpdatedFilter) -> Self {
             Self::OperatorAVSRegistrationStatusUpdatedFilter(value)
         }
@@ -585,7 +513,7 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "OPERATOR_AVS_REGISTRATION_TYPEHASH",
@@ -603,7 +531,7 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "calculateOperatorAVSRegistrationDigestHash",
@@ -626,7 +554,7 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "deregisterOperatorFromAVS",
@@ -646,7 +574,7 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "operatorSaltIsSpent",
@@ -667,7 +595,7 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "registerOperatorToAVS",
@@ -688,7 +616,7 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "updateAVSMetadataURI", abi = "updateAVSMetadataURI(string)")]
     pub struct UpdateAVSMetadataURICall {
@@ -703,13 +631,11 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub enum AVSDirectoryMockCalls {
         OperatorAvsRegistrationTypehash(OperatorAvsRegistrationTypehashCall),
-        CalculateOperatorAVSRegistrationDigestHash(
-            CalculateOperatorAVSRegistrationDigestHashCall,
-        ),
+        CalculateOperatorAVSRegistrationDigestHash(CalculateOperatorAVSRegistrationDigestHashCall),
         DeregisterOperatorFromAVS(DeregisterOperatorFromAVSCall),
         OperatorSaltIsSpent(OperatorSaltIsSpentCall),
         RegisterOperatorToAVS(RegisterOperatorToAVSCall),
@@ -720,9 +646,11 @@ pub mod avs_directory_mock {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded) = <OperatorAvsRegistrationTypehashCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <OperatorAvsRegistrationTypehashCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
                 return Ok(Self::OperatorAvsRegistrationTypehash(decoded));
             }
             if let Ok(decoded) = <CalculateOperatorAVSRegistrationDigestHashCall as ::ethers::core::abi::AbiDecode>::decode(
@@ -730,24 +658,24 @@ pub mod avs_directory_mock {
             ) {
                 return Ok(Self::CalculateOperatorAVSRegistrationDigestHash(decoded));
             }
-            if let Ok(decoded) = <DeregisterOperatorFromAVSCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <DeregisterOperatorFromAVSCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::DeregisterOperatorFromAVS(decoded));
             }
-            if let Ok(decoded) = <OperatorSaltIsSpentCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <OperatorSaltIsSpentCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::OperatorSaltIsSpent(decoded));
             }
-            if let Ok(decoded) = <RegisterOperatorToAVSCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <RegisterOperatorToAVSCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::RegisterOperatorToAVS(decoded));
             }
-            if let Ok(decoded) = <UpdateAVSMetadataURICall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <UpdateAVSMetadataURICall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::UpdateAVSMetadataURI(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -786,29 +714,21 @@ pub mod avs_directory_mock {
                 Self::CalculateOperatorAVSRegistrationDigestHash(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::DeregisterOperatorFromAVS(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::OperatorSaltIsSpent(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::RegisterOperatorToAVS(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::UpdateAVSMetadataURI(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::DeregisterOperatorFromAVS(element) => ::core::fmt::Display::fmt(element, f),
+                Self::OperatorSaltIsSpent(element) => ::core::fmt::Display::fmt(element, f),
+                Self::RegisterOperatorToAVS(element) => ::core::fmt::Display::fmt(element, f),
+                Self::UpdateAVSMetadataURI(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
-    impl ::core::convert::From<OperatorAvsRegistrationTypehashCall>
-    for AVSDirectoryMockCalls {
+    impl ::core::convert::From<OperatorAvsRegistrationTypehashCall> for AVSDirectoryMockCalls {
         fn from(value: OperatorAvsRegistrationTypehashCall) -> Self {
             Self::OperatorAvsRegistrationTypehash(value)
         }
     }
     impl ::core::convert::From<CalculateOperatorAVSRegistrationDigestHashCall>
-    for AVSDirectoryMockCalls {
+        for AVSDirectoryMockCalls
+    {
         fn from(value: CalculateOperatorAVSRegistrationDigestHashCall) -> Self {
             Self::CalculateOperatorAVSRegistrationDigestHash(value)
         }
@@ -844,7 +764,7 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct OperatorAvsRegistrationTypehashReturn(pub [u8; 32]);
     ///Container type for all return fields from the `calculateOperatorAVSRegistrationDigestHash` function with signature `calculateOperatorAVSRegistrationDigestHash(address,address,bytes32,uint256)` and selector `0xa1060c88`
@@ -858,7 +778,7 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct CalculateOperatorAVSRegistrationDigestHashReturn(pub [u8; 32]);
     ///Container type for all return fields from the `operatorSaltIsSpent` function with signature `operatorSaltIsSpent(address,bytes32)` and selector `0x374823b5`
@@ -872,7 +792,7 @@ pub mod avs_directory_mock {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct OperatorSaltIsSpentReturn(pub bool);
 }
