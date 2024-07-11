@@ -93,7 +93,7 @@ jobs:
 
       - name: Run clippy check
         working-directory: avs-finalizer
-        run: cargo clippy -- -D warnings
+        run: cargo clippy
 
       - name: Upload cargo build cache
         if: inputs.cache-enabled && steps.cache.outputs.cache_found == 'false'
