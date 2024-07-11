@@ -11,7 +11,7 @@ import {Rolldown} from "../src/Rolldown.sol";
 
 import {Utils} from "./utils/Utils.sol";
 
-import "../src/ERC20Mock.sol";
+import {Gasp} from "../src/GaspToken.sol";
 
 import "forge-std/Test.sol";
 import "forge-std/Script.sol";
@@ -30,7 +30,7 @@ contract RolldownDeployer is Script, Utils, Test {
     ProxyAdmin public rolldownProxyAdmin;
     PauserRegistry public rolldownPauserReg;
 
-    ERC20Mock public erc20Mock;
+    Gasp public erc20Mock;
     Rolldown public rolldown;
     Rolldown public rolldownImplementation;
     address public owner;
@@ -96,7 +96,7 @@ contract RolldownDeployer is Script, Utils, Test {
       address[] memory pausers = new address[](1);
       pausers[0] = owner;
       rolldownPauserReg = new PauserRegistry(pausers, owner);
-      erc20Mock = new ERC20Mock();
+      erc20Mock = new Gasp();
 
         /**
          * First, deploy upgradeable proxy contracts that **will point** to the implementations. Since the implementation contracts are
