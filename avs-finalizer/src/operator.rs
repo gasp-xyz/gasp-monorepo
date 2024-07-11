@@ -348,7 +348,7 @@ impl Operator {
 
         loop {
             match (maybe_i.peek(), maybe_j.peek()) {
-                (Some(&&ref i), Some(&&ref j)) if i.operator_id == j.operator_id => {
+                (Some(&i), Some(&j)) if i.operator_id == j.operator_id => {
                     // handle potential update
 
                     if i.stake_per_quorum.len() != j.stake_per_quorum.len() {
@@ -407,12 +407,12 @@ impl Operator {
                     maybe_i.next();
                     maybe_j.next();
                 }
-                (Some(&&ref i), Some(&&ref j)) if i.operator_id < j.operator_id => {
+                (Some(&i), Some(&j)) if i.operator_id < j.operator_id => {
                     // handle operator removed
                     operators_removed.push(i.operator_id);
                     maybe_i.next();
                 }
-                (Some(&&ref i), Some(&&ref j)) if i.operator_id > j.operator_id => {
+                (Some(&i), Some(&j)) if i.operator_id > j.operator_id => {
                     // handle quorum number added
 
                     let mut operator_added = OperatorsAdded {
@@ -439,12 +439,12 @@ impl Operator {
 
                     maybe_j.next();
                 }
-                (Some(&&ref i), None) => {
+                (Some(&i), None) => {
                     // handle quorum number removed
                     operators_removed.push(i.operator_id);
                     maybe_i.next();
                 }
-                (None, Some(&&ref j)) => {
+                (None, Some(&j)) => {
                     // handle operator added
 
                     let mut operator_added = OperatorsAdded {
@@ -538,7 +538,7 @@ impl Operator {
             }
         }
 
-        return operators_avs_state;
+        operators_avs_state
     }
 
     pub(crate) fn operator_id(&self) -> OperatorId {

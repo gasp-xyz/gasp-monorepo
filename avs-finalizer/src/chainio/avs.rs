@@ -71,7 +71,7 @@ impl AvsContracts {
             service_manager,
             task_manager,
             task_manager_sub,
-            registry_coordinator_address: config.avs_registry_coordinator_addr.into(),
+            registry_coordinator_address: config.avs_registry_coordinator_addr,
             registry,
             stake_registry,
             bls_apk_registry,
