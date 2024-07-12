@@ -13,7 +13,7 @@ permissions:
   id-token: 'write'
 
 env:
-  ENVIRONMENT: rollup-testnet
+  COINGECKO_API_KEY: ${{ secrets.ORG_COINGECKO_API_KEY }}
 
 jobs:
   build:
@@ -24,28 +24,34 @@ jobs:
         working-directory: stash
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'yarn'
           cache-dependency-path: "./stash/yarn.lock"
-      
+
+      - run: yarn install --immutable
+      - run: yarn run build
+      - run: yarn run test-ci
+
       - uses: google-github-actions/auth@v2
         id: auth
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - uses: google-github-actions/setup-gcloud@v2
-      - uses: mdgreenwald/mozilla-sops-action@v1.6.0
-      
-      - run: yarn install --immutable
-      - run: yarn run build
-      - run: sops exec-env ${{ env.ENVIRONMENT }}.enc.env 'yarn run test-ci'
 
-      - name: Deploy to Google App Engine
-        working-directory: stash
-        run: sops exec-env ${{ env.ENVIRONMENT }}.enc.env 'gcloud app deploy app-${{ env.ENVIRONMENT }}.yaml --quiet'
-      
+      - uses: google-github-actions/deploy-appengine@v2
+        id: deploy
+        with:
+          project_id: ${{ steps.auth.outputs.project_id }}
+          env_vars: |-
+            TIMESERIES_PASS=${{ secrets.TIMESERIES_PASS_EIGEN }}
+            COINGECKO_API_KEY=${{ secrets.ORG_COINGECKO_API_KEY }}
+          working_directory: stash
+          deliverables: app-rollup-testnet.yaml
+
       # TODO: temporary disable smoke test
       # - name: smoke test
       #   run: |
