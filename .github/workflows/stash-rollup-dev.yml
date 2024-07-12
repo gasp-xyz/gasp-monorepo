@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - chore/MGX-1297/revert_sops_secrets
     paths:
       - "stash/**/*"
       - ".github/**/rollup-dev**"
