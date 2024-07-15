@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      # TODO: remove before merge of ci/fix-stash-deployment-MGX-1297
-      - ci/fix-stash-deployment-MGX-1297
     paths:
       - "stash/**/*"
       - ".github/**/rollup-dev**"
@@ -48,9 +46,7 @@ jobs:
         working-directory: stash
         run: |
           sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
-          # gcloud app deploy app.tmp.yaml --quiet
-          # TODO: temporary disable deployment
-          gcloud app deploy app.tmp.yaml --quiet --no-promote
+          gcloud app deploy app.tmp.yaml --quiet
       
       # TODO: temporary disable smoke test
       # - name: smoke test
