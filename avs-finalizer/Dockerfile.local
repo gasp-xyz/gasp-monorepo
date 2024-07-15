@@ -1,4 +1,4 @@
-FROM rust:1.78 as base
+FROM rust:1.78 AS base
 
 RUN set -eux && \
 		apt-get -y update; \
@@ -21,19 +21,23 @@ RUN rustup install $RUST_TOOLCHAIN && rustup default $RUST_TOOLCHAIN && \
 	# removes compilation artifacts cargo install creates (>250M)
 	rm -rf "${CARGO_HOME}/registry" "${CARGO_HOME}/git"
 
-FROM base as planner
+FROM base AS planner
 WORKDIR /app
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM base as cacher
+FROM base AS cacher
 WORKDIR /app
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
-FROM base as builder
+FROM base AS builder
 WORKDIR /app
 COPY . .
+
+# Ensure local build directory would not interfere with the cached one
+RUN rm -rf target
+
 # Copy over the cached dependencies
 COPY --from=cacher /app/target target
 COPY --from=cacher /usr/local/cargo /usr/local/cargo
