@@ -178,12 +178,14 @@ async function getSelectedSequencerWithRights(
   const isSequencerSelected = selectedSequencer === collatorAddress.toLowerCase();
   const sequencerRights = await apiAt.query.rolldown.sequencersRights(L1_CHAIN);
   let rights = JSON.parse(sequencerRights.toString())[collatorAddress.toLowerCase()]
-  const hasSequencerRights = rights.readRights > 0;
+  const hasReadRights = rights.readRights > 0;
+  const hasCancelRights = rights.cancelRights > 0;
 
   return {
     isSequencerSelected,
-    hasSequencerRights,
     selectedSequencer,
+    hasReadRights,
+    hasCancelRights
   };
 
 }

@@ -36,13 +36,14 @@ async function main() {
     const collator = getCollator("ethereum", MNEMONIC);
     print(`collator address: ${collator.address}`)
     print(`block #${header.number} was authored by ${header.author}`);
-    const { isSequencerSelected, hasSequencerRights, selectedSequencer } =
+    const { isSequencerSelected, hasReadRights, hasCancelRights, selectedSequencer } =
       await getSelectedSequencerWithRights(api, collator.address, header.hash);
     print(`me ${collator.address}`);
     print(`selected : ${selectedSequencer}`);
     print(`is selected ${isSequencerSelected}`);
-    print(`rights : ${hasSequencerRights}`);
-    if (isSequencerSelected && hasSequencerRights) {
+    print(`has read rights : ${hasReadRights}`);
+    print(`has cancel rights : ${hasCancelRights}`);
+    if (isSequencerSelected && hasReadRights) {
         if (inProgress) {
           return;
         }else{
@@ -80,12 +81,15 @@ async function main() {
 			inProgress = false;
 		}
 
+  
+  if (hasCancelRights) {
 		await processPendingRequestsEvents(
 			api,
 			publicClient,
 			header.hash,
 			collator,
 		);
+  }
 	});
 }
 
