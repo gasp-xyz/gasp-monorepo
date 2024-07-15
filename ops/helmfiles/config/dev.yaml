@@ -19,6 +19,7 @@ collator:
     tag: eth-rollup-develop
   chain: rollup-local-seq
   disableChainspecGeneration: true
+  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json
   storageClass: standard
   storageSize: 20Gi
   enableServiceMonitorCollectors: true
@@ -33,26 +34,26 @@ collator:
       value: 'true'
       effect: NoSchedule
   collator01:
-    # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-    customNodeKey: '5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef'
-    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+    # Identity ID: 12D3KooWMSVfmcTo6q4nnb9Pw9WFjPh3hW1sqjNi5dUhWDzuKFdj
+    customNodeKey: '749be7f7de592c01db098afb95cb121961ce025e92d8ffeaabb377057cd01555'
+    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWLdCNsgrzW8BiFFwSSxWi8nTp8SNZHTTL9x8Ceokq8quV
     extraArgs:
       - --alith
       - --no-mdns
       - --reserved-only
-      - --reserved-nodes=/dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+      - --reserved-nodes=/dns/collator-02-p2p/tcp/30333/p2p/12D3KooWLdCNsgrzW8BiFFwSSxWi8nTp8SNZHTTL9x8Ceokq8quV
       - --pruning=archive
     nodeSelector: 
       production: 'true'
   collator02:
-    # Identity ID: 12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
-    customNodeKey: 'bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b'
-    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+    # Identity ID: 12D3KooWLdCNsgrzW8BiFFwSSxWi8nTp8SNZHTTL9x8Ceokq8quV
+    customNodeKey: '96d1ece760b2038230f1e78449e879e34e2de637b89a7bbedc22ade73f9c2009'
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWMSVfmcTo6q4nnb9Pw9WFjPh3hW1sqjNi5dUhWDzuKFdj
     extraArgs:
       - --baltathar
       - --no-mdns
       - --reserved-only
-      - --reserved-nodes=/dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+      - --reserved-nodes=/dns/collator-01-p2p/tcp/30333/p2p/12D3KooWMSVfmcTo6q4nnb9Pw9WFjPh3hW1sqjNi5dUhWDzuKFdj
       - --pruning=archive
     nodeSelector: 
       production: 'true'
