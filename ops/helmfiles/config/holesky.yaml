@@ -18,7 +18,7 @@ collator:
     repository: mangatasolutions/rollup-node
     tag: 3a07824d8b8a6ad027424629b814a5edb61654cf
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 50Gi
@@ -34,27 +34,27 @@ collator:
       effect: NoSchedule
   # Node specific collator configs
   collator01:
-    # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-    customNodeKey: '5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef'
-    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+    # Identity ID: 12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
+    customNodeKey: '5f982f7cd04dde558ae7800d4cf2facd0a4e0c64f627db666456ad903077e6da'
+    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWNVGLHURQs8NqYGrLnpoSePh5QPjBqUJDJL8CmNgr4qWN
     extraArgs:
       - --alith
       - --no-mdns
       - --reserved-only
-      - --reserved-nodes=/dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+      - --reserved-nodes=/dns/collator-02-p2p/tcp/30333/p2p/12D3KooWNVGLHURQs8NqYGrLnpoSePh5QPjBqUJDJL8CmNgr4qWN
       - --pruning=archive
     nodeSelector:
       production: "true"
       topology.kubernetes.io/zone: europe-west1-b
   collator02:
-    # Identity ID: 12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
-    customNodeKey: 'bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b'
-    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+    # Identity ID: 12D3KooWNVGLHURQs8NqYGrLnpoSePh5QPjBqUJDJL8CmNgr4qWN
+    customNodeKey: '2747e7dadbc3a7cc50e678a9f264cb385852a8883cac4d4d016afc0b8513a6f9'
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
     extraArgs:
       - --baltathar
       - --no-mdns
       - --reserved-only
-      - --reserved-nodes=/dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+      - --reserved-nodes=/dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
       - --pruning=archive
     nodeSelector:
       production: "true"
