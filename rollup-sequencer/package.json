@@ -23,7 +23,7 @@
     "gasp-types": "0.0.2-eth-rollup-develop.1",
     "@polkadot/api": "^11.1.1",
     "dotenv": "^16.3.1",
-    "viem": "^2.9.2",
+    "viem": "^2.17.4",
     "zod": "^3.22.5"
   }
 }

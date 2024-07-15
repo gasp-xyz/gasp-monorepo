@@ -55,6 +55,7 @@ async function main() {
           publicClient,
         );
 
+
 				const filteredUpdates = filterUpdates(
 					nativeL1Update.unwrap(),
 					lastRequestId,
