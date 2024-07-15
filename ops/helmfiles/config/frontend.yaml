@@ -8,8 +8,8 @@ enableArbitrumServices: true
 ####################
 evmNode:
   enabled: true
-  customGenesisUrlEth: 'https://raw.githubusercontent.com/mangata-finance/eigen-layer-monorepo/a2f5af706b5bb8d91475a31acd14550f2559f060/contracts/script/config/holesky-stub.json'
-  customGenesisUrlArb: 'https://raw.githubusercontent.com/mangata-finance/eigen-layer-monorepo/a2f5af706b5bb8d91475a31acd14550f2559f060/contracts/script/config/arbitrum-sepolia-stub.json'
+  customGenesisUrlEth: "https://raw.githubusercontent.com/mangata-finance/eigen-layer-monorepo/main/contracts/script/config/holesky-stub.json"
+  customGenesisUrlArb: "https://raw.githubusercontent.com/mangata-finance/eigen-layer-monorepo/main/contracts/script/config/arbitrum-sepolia-stub.json"
 
 #####################
 # collator configs #
@@ -18,9 +18,9 @@ collatorsEnabled: true
 collator:
   image:
     repository: mangatasolutions/rollup-node
-    tag: b6f5f6c13ff851bfdfb36d01e0d8d67fe7c5bcc9
+    tag: 3a07824d8b8a6ad027424629b814a5edb61654cf
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-local-fd0e82a316c1f0f940211ca76b7de541d6f7689a-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-node-3a07824d8b8a6ad027424629b814a5edb61654cf-spec-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 50Gi
@@ -109,7 +109,7 @@ updaterEnabled: true
 updaterChainUrlEth: ws://evm-node-eth:8546
 updaterMnemonicEth: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 updaterEnvEth:
-  CHAIN: "reth"
+  CHAIN: "reth-1337"
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: ws://collator-01:9944
   EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
@@ -119,7 +119,7 @@ updaterEnvEth:
 updaterChainUrlArb: ws://evm-node-arb:8546
 updaterMnemonicArb: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 updaterEnvArb:
-  CHAIN: "reth"
+  CHAIN: "reth-31337"
   L1_CHAIN: "Arbitrum"
   MANGATA_NODE_URL: ws://collator-01:9944
   EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
