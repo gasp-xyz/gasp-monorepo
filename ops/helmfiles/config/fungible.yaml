@@ -19,8 +19,6 @@ collator:
     tag: eth-rollup-develop
   chain: rollup-local-seq
   disableChainspecGeneration: true
-  # TODO: Remove after testing
-  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json
   storageClass: standard
   storageSize: 5Gi
   enableServiceMonitorCollectors: true
