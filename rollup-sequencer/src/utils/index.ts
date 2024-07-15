@@ -7,15 +7,16 @@ import {
 import { type ApiPromise, Keyring } from "@polkadot/api";
 import type { ApiDecoration } from "@polkadot/api/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
-import type { Option } from "@polkadot/types-codec";
-import type {
+import { Option } from "@polkadot/types-codec";
+import { Vec } from "@polkadot/types-codec";
+import {
 	FrameSystemEventRecord,
 	PalletRolldownMessagesL1Update,
 	PalletRolldownMessagesChain,
 } from "@polkadot/types/lookup";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import type { KeypairType } from "@polkadot/util-crypto/types";
-import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
+import { type PublicClient, encodeAbiParameters, keccak256, UnauthorizedProviderError } from "viem";
 import {
 	ABI,
 	BLOCK_NUMBER_DELAY,
@@ -82,15 +83,21 @@ async function initReadContractWithRetry(
 	publicClient: PublicClient,
 	api: ApiPromise,
 ) {
+
 	while (true) {
-		try {
-			return await getUpdateForL2(publicClient, api);
-		} catch (e) {
-      print(`error: ${e}`)
-			print(`${MANGATA_CONTRACT_ADDRESS} contract not found`);
-			await sleep(1000);
-		}
-	}
+    const latestBlockNumber = await publicClient.getBlockNumber();
+    const delayedBlockNumber = latestBlockNumber - BigInt(BLOCK_NUMBER_DELAY);
+    const code = await publicClient.getCode({address: MANGATA_CONTRACT_ADDRESS, blockNumber: delayedBlockNumber});
+    console.log(`code ${code}`)
+    if (code !== undefined){
+      break;
+    }else{
+      print(`contract ${MANGATA_CONTRACT_ADDRESS} does not exists yet at block(${delayedBlockNumber}) with BLOCK_NUMBER_DELAY set to ${BLOCK_NUMBER_DELAY}- retrying in 5 seconds`);
+      await sleep(5000);
+    }
+  }
+
+
 }
 
 async function processDataForL2Update(
@@ -98,12 +105,16 @@ async function processDataForL2Update(
 	publicClient: PublicClient,
 ) {
 	const latestBlockNumber = await publicClient.getBlockNumber();
-	const delayedBlockNumber = latestBlockNumber - BigInt(BLOCK_NUMBER_DELAY);
-
 	print(`Latest Block Number: ${latestBlockNumber.toString()}`);
-	print(`Delayed Block Number:  ${delayedBlockNumber.toString()}`);
 
-	const data = await getUpdateForL2(publicClient, api);
+  if (latestBlockNumber < BigInt(BLOCK_NUMBER_DELAY)) {
+    print("not enought block - returning none");
+    const none: Option<PalletRolldownMessagesL1Update> = api.createType("Option<PalletRolldownMessagesL1Update>", "None");
+    return none
+  }
+ 
+  const delayedBlockNumber = latestBlockNumber - BigInt(BLOCK_NUMBER_DELAY);
+	const data = await getUpdateForL2(publicClient, api, delayedBlockNumber);
 	print(`ETH native data : ${util.inspect(data, { depth: null })}`);
 
 	const encodedData = getEncodedData("getUpdateForL2", data);
@@ -137,11 +148,14 @@ async function processPendingRequestsEvents(
           return
         }
 
+        const latestBlockNumber = await publicClient.getBlockNumber();
+
 				const contractData = await publicClient.readContract({
 					address: MANGATA_CONTRACT_ADDRESS,
 					abi: ABI,
 					functionName: "getPendingRequests",
 					args: [start, end],
+          // blockNumber: 
 				});
 
 				const encodedData = getEncodedData("getPendingRequests", contractData);
@@ -381,13 +395,15 @@ function print(data: any) {
 	console.log(util.inspect(data, { depth: null }));
 }
 
-async function getUpdateForL2(publicClient: PublicClient, api: ApiPromise) {
+async function getUpdateForL2(publicClient: PublicClient, api: ApiPromise, blockNumber: bigint) {
 	const lastProcessed =
 		await api.query.rolldown.lastProcessedRequestOnL2(L1_CHAIN);
+  console.log(`BLOCK_NUMBER ${blockNumber}`)
 	const counter = (await publicClient.readContract({
 		address: MANGATA_CONTRACT_ADDRESS,
 		abi: ABI,
 		functionName: "counter",
+    blockNumber
 	})) as bigint;
 
 	const rangeStart = BigInt(lastProcessed.toString()) + 1n;
