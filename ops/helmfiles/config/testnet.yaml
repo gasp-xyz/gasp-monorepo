@@ -37,27 +37,27 @@ collator:
       effect: NoSchedule
   # Node specific collator configs
   collator01:
-    # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-    customNodeKey: '5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef'
-    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+    # Identity ID: 12D3KooWGEYiFvYXmihEk3twaGspjvNrVAjeRWurVnWQS9rBwKkh
+    customNodeKey: 'c8d045a847ec313c6f99d536e11093da8e980ad469f14297403eb6876fcd8f46'
+    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWDNVojr7JY1rvGJAJMQ6U5pV3X3PGmXwjzJaLrfFqCkvW
     extraArgs:
       - --alith
       - --no-mdns
       - --reserved-only
-      - --reserved-nodes=/dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+      - --reserved-nodes=/dns/collator-02-p2p/tcp/30333/p2p/12D3KooWDNVojr7JY1rvGJAJMQ6U5pV3X3PGmXwjzJaLrfFqCkvW
       - --pruning=archive
     nodeSelector:
       production: "true"
       topology.kubernetes.io/zone: europe-west1-b
   collator02:
-    # Identity ID: 12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
-    customNodeKey: 'bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b'
-    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+    # Identity ID: 12D3KooWDNVojr7JY1rvGJAJMQ6U5pV3X3PGmXwjzJaLrfFqCkvW
+    customNodeKey: '20e708b9e15b1f3676fbc10994dd1ea7724c85d36c44bb00868e8dd053ae9128'
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWGEYiFvYXmihEk3twaGspjvNrVAjeRWurVnWQS9rBwKkh
     extraArgs:
       - --baltathar
       - --no-mdns
       - --reserved-only
-      - --reserved-nodes=/dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+      - --reserved-nodes=/dns/collator-01-p2p/tcp/30333/p2p/12D3KooWGEYiFvYXmihEk3twaGspjvNrVAjeRWurVnWQS9rBwKkh
       - --pruning=archive
     nodeSelector:
       production: "true"
