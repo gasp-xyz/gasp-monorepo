@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"sync"
 	"time"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
@@ -22,6 +23,7 @@ import (
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
+	gsrpcrpcchain "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/chain"
 )
 
 // Aggregator sends tasks (numbers to square) onchain, then listens for operator signed TaskResponses.
@@ -166,7 +168,7 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 	agg.logger.Infof("Starting aggregator rpc server.")
 	go agg.startServer(ctx)
 
-	var sub *Subscription
+	var sub *gsrpcrpcchain.NewHeadsSubscription
 	var err error
 	const maxRetries = 5
 	const retryDelay = time.Minute
