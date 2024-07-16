@@ -31,9 +31,6 @@ collator:
     bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWCSxS2DfQNdiw982suJyS5UVQbNMTwM6ChdHVBzCmf3ie
     extraArgs:
       - --alith
-      - --no-mdns
-      - --reserved-only
-      - --reserved-nodes=/dns/collator-02-p2p/tcp/30333/p2p/12D3KooWCSxS2DfQNdiw982suJyS5UVQbNMTwM6ChdHVBzCmf3ie
       - --pruning=archive
   collator02:
     # Identity ID: 12D3KooWCSxS2DfQNdiw982suJyS5UVQbNMTwM6ChdHVBzCmf3ie
@@ -41,9 +38,6 @@ collator:
     bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWSvCQsVEpY5Y6yXneLTdmkuNEK4JPDtuYmkzqG2KvfvsN
     extraArgs:
       - --baltathar
-      - --no-mdns
-      - --reserved-only
-      - --reserved-nodes=/dns/collator-01-p2p/tcp/30333/p2p/12D3KooWSvCQsVEpY5Y6yXneLTdmkuNEK4JPDtuYmkzqG2KvfvsN
       - --pruning=archive
 
 ####################

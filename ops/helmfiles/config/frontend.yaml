@@ -47,9 +47,6 @@ collator:
     bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWB7YXuwmv55wy5UFDe9yRGYJFPk1r3DpFMSyFx5KqMi3G
     extraArgs:
       - --alith
-      - --no-mdns
-      - --reserved-only
-      - --reserved-nodes=/dns/collator-02-p2p/tcp/30333/p2p/12D3KooWB7YXuwmv55wy5UFDe9yRGYJFPk1r3DpFMSyFx5KqMi3G
       - --pruning=archive
     nodeSelector: 
       production: 'true'
@@ -59,9 +56,6 @@ collator:
     bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWJCggfzsr6LAdXSdfgFLxsMtgCq9qSq79vqYtdG2oT8Za
     extraArgs:
       - --baltathar
-      - --no-mdns
-      - --reserved-only
-      - --reserved-nodes=/dns/collator-01-p2p/tcp/30333/p2p/12D3KooWJCggfzsr6LAdXSdfgFLxsMtgCq9qSq79vqYtdG2oT8Za
       - --pruning=archive
     nodeSelector: 
       production: 'true'
