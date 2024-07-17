@@ -20,7 +20,7 @@ collator:
     repository: mangatasolutions/rollup-node
     tag: 3a07824d8b8a6ad027424629b814a5edb61654cf
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-node-3a07824d8b8a6ad027424629b814a5edb61654cf-spec-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-dev-env-chainspecs/rollup-frontend-4d76522-chainspec-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 50Gi
@@ -41,10 +41,24 @@ collator:
       operator: Equal
       value: "true"
       effect: NoSchedule
-  firstCollatorNodeSelector:
-    production: "true"
-  secondCollatorNodeSelector:
-    production: "true"
+  collator01:
+    # Identity ID: 12D3KooWJCggfzsr6LAdXSdfgFLxsMtgCq9qSq79vqYtdG2oT8Za
+    customNodeKey: 'a9a20a5fa298fdd68ae5516c60c060c419e37bae4440d6f52ae3439162522fa2'
+    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWB7YXuwmv55wy5UFDe9yRGYJFPk1r3DpFMSyFx5KqMi3G
+    extraArgs:
+      - --alith
+      - --pruning=archive
+    nodeSelector: 
+      production: 'true'
+  collator02:
+    # Identity ID: 12D3KooWB7YXuwmv55wy5UFDe9yRGYJFPk1r3DpFMSyFx5KqMi3G
+    customNodeKey: 'bf08651f3aa5b9fed7ce2e82a5fce8c31f1889e93e3019476b3052f33d57116f'
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWJCggfzsr6LAdXSdfgFLxsMtgCq9qSq79vqYtdG2oT8Za
+    extraArgs:
+      - --baltathar
+      - --pruning=archive
+    nodeSelector: 
+      production: 'true'
 
 ####################
 # evm-node configs #

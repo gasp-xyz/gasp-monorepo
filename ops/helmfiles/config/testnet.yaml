@@ -35,12 +35,27 @@ collator:
       operator: Equal
       value: "true"
       effect: NoSchedule
-  firstCollatorNodeSelector:
-    production: "true"
-    topology.kubernetes.io/zone: europe-west1-b
-  secondCollatorNodeSelector:
-    production: "true"
-    topology.kubernetes.io/zone: europe-west1-c
+  # Node specific collator configs
+  collator01:
+    # Identity ID: 12D3KooWGEYiFvYXmihEk3twaGspjvNrVAjeRWurVnWQS9rBwKkh
+    customNodeKey: 'c8d045a847ec313c6f99d536e11093da8e980ad469f14297403eb6876fcd8f46'
+    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWDNVojr7JY1rvGJAJMQ6U5pV3X3PGmXwjzJaLrfFqCkvW
+    extraArgs:
+      - --alith
+      - --pruning=archive
+    nodeSelector:
+      production: "true"
+      topology.kubernetes.io/zone: europe-west1-b
+  collator02:
+    # Identity ID: 12D3KooWDNVojr7JY1rvGJAJMQ6U5pV3X3PGmXwjzJaLrfFqCkvW
+    customNodeKey: '20e708b9e15b1f3676fbc10994dd1ea7724c85d36c44bb00868e8dd053ae9128'
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWGEYiFvYXmihEk3twaGspjvNrVAjeRWurVnWQS9rBwKkh
+    extraArgs:
+      - --baltathar
+      - --pruning=archive
+    nodeSelector:
+      production: "true"
+      topology.kubernetes.io/zone: europe-west1-c
 
 ####################
 # evm-node configs #

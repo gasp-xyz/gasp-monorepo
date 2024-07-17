@@ -35,10 +35,17 @@ repositories:
 helmDefaults:
   kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
   wait: false
+  diffArgs:
+    - "--suppress-secrets"
+    - "--suppress" 
+    - "Job"
+  # TODO: To remove after updating Helm charts
+    - "--suppress-output-line-regex"
+    - "(application|component|heritage|service|isP2P|isRpc):.+"
 
 releases:
   - name: evm-node-eth
-    namespace: 'rollup-{{ .Values.environmentName}}'
+    namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.evmNode.enabled }}
     chart: ../helm-charts/evm-node
     values:
@@ -432,16 +439,11 @@ releases:
         storageSize: {{ .Values.collator.storageSize | quote }}
         resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
         tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
-        nodeSelector: {{ .Values | getOrNil "collator.firstCollatorNodeSelector" | toYaml | nindent 10 }}
-        # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-        customNodeKey: '5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef'
-        bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
-        extraArgs:
-          - --alith
-          - --no-mdns
-          - --reserved-only
-          - --reserved-nodes=/dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
-          - --pruning=archive
+        # collator-01 specific configs
+        nodeSelector: {{ .Values | getOrNil "collator.collator01.nodeSelector" | toYaml | nindent 10 }}
+        customNodeKey: {{ .Values.collator.collator01.customNodeKey }}
+        bootnodeAddr: {{ .Values.collator.collator01.bootnodeAddr }}
+        extraArgs: {{ .Values.collator.collator01.extraArgs | toYaml | nindent 10 }}
   
   - name: collator-02
     installed: {{ .Values.collatorsEnabled }}
@@ -454,7 +456,7 @@ releases:
         environment: 'rollup-{{ .Values.environmentName }}'
         chain: {{ .Values | getOrNil "collator.chain" }}
         disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
-        # customChainspecUrl: {{ .Values | getOrNil "collator.customChainspecUrl" }}
+        customChainspecUrl: {{ .Values | get "collator.customChainspecUrl" "" }}
         domainZone: gasp.xyz
         command: '/app/node'
         isParachain: false
@@ -467,13 +469,8 @@ releases:
         storageSize: {{ .Values.collator.storageSize | quote }}
         resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
         tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
-        nodeSelector: {{ .Values | getOrNil "collator.secondCollatorNodeSelector" | toYaml | nindent 10 }}
-        # Identity ID: 12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
-        customNodeKey: 'bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b'
-        bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-        extraArgs:
-          - --baltathar
-          - --no-mdns
-          - --reserved-only
-          - --reserved-nodes=/dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-          - --pruning=archive
+        # collator-02 specific configs
+        nodeSelector: {{ .Values | getOrNil "collator.collator02.nodeSelector" | toYaml | nindent 10 }}
+        customNodeKey: {{ .Values.collator.collator02.customNodeKey }}
+        bootnodeAddr: {{ .Values.collator.collator02.bootnodeAddr }}
+        extraArgs: {{ .Values.collator.collator02.extraArgs | toYaml | nindent 10 }}
