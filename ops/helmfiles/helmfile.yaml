@@ -15,10 +15,6 @@ environments:
     values:
       - environmentName: frontend
       - config/frontend.yaml
-  testnet:
-    values:
-     - environmentName: testnet
-     - config/testnet.yaml
   holesky:
     values:
     - environmentName: holesky
@@ -474,3 +470,23 @@ releases:
         customNodeKey: {{ .Values.collator.collator02.customNodeKey }}
         bootnodeAddr: {{ .Values.collator.collator02.bootnodeAddr }}
         extraArgs: {{ .Values.collator.collator02.extraArgs | toYaml | nindent 10 }}
+
+  - name: holesky-shared-dns-record
+    installed: {{ eq .Values.environmentName "rollup-holesky" }}
+    namespace: rollup-holesky
+    chart: ./shared-dns-record
+    values:
+      - url: 'rollup-holesky-rpc.mangata.online'
+        name: rollup-holesky-rpc
+        serviceSelector:
+          role: rpc
+
+  - name: rpc-shared-dns-record-legacy
+    installed: {{ eq .Values.environmentName "rollup-holesky" }}
+    namespace: rollup-holesky
+    chart: ./shared-dns-record
+    values:
+      - url: 'rollup-testnet-rpc.mangata.online'
+        name: rollup-testnet-rpc
+        serviceSelector:
+          role: rpc

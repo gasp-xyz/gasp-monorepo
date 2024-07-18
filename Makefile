@@ -15,7 +15,7 @@ SKIP_WASM_BUILD=1
 
 ETH_RPC_URL=http://localhost:8545
 ETH_WS_URL=ws://localhost:8545
-SUBSTRATE_RPC_URL=wss://rollup-testnet-rpc.gasp.xyz:443
+SUBSTRATE_RPC_URL=wss://rollup-holesky-rpc.gasp.xyz:443
 AVS_RPC_URL=http://localhost:8090
 AVS_SERVER_IP_PORT_ADDRESS=localhost:8090
 

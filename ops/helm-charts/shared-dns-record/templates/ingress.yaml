@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.name }}-ingress
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.url }}
+    kubernetes.io/tls-acme: 'true'
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{ .Values.url }}
+      http:
+        paths:
+        - pathType: Prefix
+          path: /
+          backend:
+            service:
+              name: {{ .Values.name }}
+              port:
+                number: {{ .Values.port }}
+  tls:
+    - hosts:
+        - {{ .Values.url }}
+      secretName: "{{ .Values.name }}-tls"
