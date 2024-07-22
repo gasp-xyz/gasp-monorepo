@@ -31,14 +31,12 @@
   },
   "dependencies": {
     "@google-cloud/logging-winston": "^5.3.0",
-    "@mangata-finance/sdk": "2.2.1-eth-rollup-develop.27",
-    "@mangata-finance/types": "2.2.3-eth-rollup-develop.34",
-    "@polkadot/api": "10.12.2",
+    "@polkadot/api": "^11.1.1",
     "@polkadot/api-base": "10.12.2",
     "@polkadot/rpc-core": "10.12.2",
     "@polkadot/rpc-provider": "10.12.2",
-    "@polkadot/types": "10.12.2",
-    "@polkadot/types-codec": "10.12.2",
+    "@polkadot/types": "^11.1.1",
+    "@polkadot/types-codec": "11.3.1",
     "@polkadot/util": "^12.3.2",
     "@polkadot/util-crypto": "^12.3.2",
     "async": "^3.2.4",
@@ -55,6 +53,8 @@
     "errorhandler": "1.5.1",
     "express": "4.18.1",
     "express-validator": "6.14.2",
+    "gasp-sdk": "0.0.2-eth-rollup-develop.16",
+    "gasp-types": "0.0.2-eth-rollup-develop.16",
     "ioredis": "^5.3.0",
     "joi": "^17.10.1",
     "lodash": "^4.17.21",
@@ -109,6 +109,12 @@
     "typescript": "4.8.4",
     "vite": "^4.2.1",
     "vitest": "^0.29.7"
+  },
+  "resolutions": {
+    "@polkadot/types-codec": "11.3.1",
+    "@polkadot/types": "^11.1.1",
+    "@polkadot/rpc-core": "11.3.1",
+    "@polkadot/rpc-augment": "11.3.1"
   },
   "prettier": {
     "tabWidth": 2,

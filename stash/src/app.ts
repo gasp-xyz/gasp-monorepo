@@ -1,4 +1,4 @@
-import '@mangata-finance/types'
+import 'gasp-types'
 import express, { Request, Response, json, urlencoded } from 'express'
 import swaggerUI from 'swagger-ui-express'
 import cors from 'cors'
@@ -43,10 +43,10 @@ app.get('/xcm/network', xcmController.network)
 app.get('/xcm/tokens', xcmController.tokens)
 
 app.get(
-  '/collator/:collatorAddress/staking/dailyReward',
+  '/collator/:collatorAddress/staking/dailyReward', //koja je adresa collatora
   stakingAprController.dailyReward
 )
-app.get('/collator/:collatorAddress/staking/apy', stakingAprController.apy)
+app.get('/collator/:collatorAddress/staking/apy', stakingAprController.apy) //koja je adresa collatora
 app.get('/collators/staking/apy', stakingAprController.collatorsApy)
 
 app.get(

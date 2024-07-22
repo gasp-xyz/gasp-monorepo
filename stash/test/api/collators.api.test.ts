@@ -6,7 +6,7 @@ import app from "../../src/app";
 import Joi from 'joi';
 import moment from 'moment'
 import { BN } from '@polkadot/util'
-import { BN_TEN } from '@mangata-finance/sdk'
+import { BN_TEN } from 'gasp-sdk'
 
 const apySchema =
     Joi.object({

@@ -1,4 +1,4 @@
-import { fromBN } from '@mangata-finance/sdk'
+import { fromBN } from 'gasp-sdk'
 import moment from 'moment'
 
 import MangataClient from '../connector/MangataNode.js'
@@ -16,10 +16,6 @@ import {
 
 export const pairs = async () => {
   const assetsInfo = await MangataClient.query.getAssetsInfo()
-  if (process.env.APP_ENV === 'rollup-dev') {
-    delete assetsInfo['7'] // we do not need ETH-GETH pool
-    delete assetsInfo['8'] // we do not need ETH-GASP pool
-  }
   const pools = await poolsWithNonZeroIssuance(assetsInfo)
   const pairs = []
   for (const key in pools) {
@@ -43,10 +39,6 @@ export const pairs = async () => {
 
 export const tickers = async () => {
   const assetsInfo = await MangataClient.query.getAssetsInfo()
-  if (process.env.APP_ENV === 'rollup-dev') {
-    delete assetsInfo['7'] // we do not need ETH-GETH pool
-    delete assetsInfo['8'] // we do not need ETH-GASP pool
-  }
   // We need to filter out pools that have zero issuance.
   // If we don't filter them out, it will create several problems
   // during the calculation process.

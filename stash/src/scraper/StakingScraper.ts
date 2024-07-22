@@ -1,6 +1,6 @@
 import { ApiPromise } from '@polkadot/api'
 import BigNumber from 'bignumber.js'
-
+import { toHuman } from '../util/Chain.js'
 import { calculateAnnualPercentageYieldPerSession } from '../util/Staking.js'
 import { timeseries } from '../connector/RedisConnector.js'
 import {
@@ -25,11 +25,11 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
   const eventsRecord = await apiAt.query.system.events()
   const sessionIndex = await apiAt.query.parachainStaking.round()
 
-  const collatorEvents = getCollatorEvents(eventsRecord)
+  const collatorEvents = getCollatorEvents(toHuman(eventsRecord))
 
   if (collatorEvents.length > 0) {
     const toCollatorEvents = collatorEvents.map(async (event) => {
-      const currentSessionIndex = sessionIndex.current.toNumber()
+      const currentSessionIndex = toHuman(sessionIndex).current.toNumber()
       const eventSessionIndex =
         event.event.data.length > 2
           ? Number(event.event.data.toPrimitive()[0])
@@ -83,7 +83,9 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
         block: block.number,
         section: event.event.section,
         method: event.event.method,
-        sessionIndex: sessionIndex.current.toNumber(),
+        sessionIndex: JSON.parse(
+          JSON.stringify(sessionIndex)
+        ).current.toNumber(),
         collatorAccount,
         amountRewarded: rewardsCollatorAmount.multipliedBy(0.8).toFixed(0),
         liquidityTokenId,
@@ -110,7 +112,7 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
 export const processLiquidStaking = async (api: ApiPromise, block: Block) => {
   const apiAt = await api.at(block.hash)
   const eventsRecord = await apiAt.query.system.events()
-  const liquidStakingEvents = getLiquidStakingEvents(eventsRecord)
+  const liquidStakingEvents = getLiquidStakingEvents(toHuman(eventsRecord))
   if (liquidStakingEvents.length > 0) {
     const toLiquidStakingEvents = liquidStakingEvents.map(async (event) => {
       const data: IEvent<Codec[]>['data'] = event.event.data
@@ -134,6 +136,6 @@ export const processLiquidStaking = async (api: ApiPromise, block: Block) => {
       .map((e) => [e.timestamp, JSON.stringify(e)])
       .flat()
     storeInRedis.length > 0 &&
-      (await timeseries.client.zadd(KEY_ACCOUNT, ...storeInRedis))
+      (await timeseries.client.zadd(KEY_ACCOUNT, ...storeInRedis)) //ovde se cuvaju samo eventovi koji se odnose na account and collator
   }
 }

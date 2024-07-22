@@ -23,9 +23,7 @@ const server = app.listen(app.get('port'), async () => {
 
   await networkService.initService()
 
-  if (process.env.APP_ENV !== 'rollup-dev') {
-    await xcmService.initService()
-  }
+  await xcmService.initService()
 
   logger.info('DB initialized')
 
@@ -34,7 +32,7 @@ const server = app.listen(app.get('port'), async () => {
   const run = 1
   while (run) {
     await new Promise((f) => setTimeout(f, BLOCK_TIME * 10))
-    // await poolRatesService.initService()
+    await poolRatesService.initService()
     await priceService.initService()
     await volumeService.initService()
     await tradesService.initService()

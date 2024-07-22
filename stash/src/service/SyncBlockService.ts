@@ -13,14 +13,14 @@ export const initService = async () => {
   // const latestBlock = 3719278
   await blocks.withBlocks(api, latestBlock, async (block) => {
     try {
-      // await blocks.processEvents(block)
-      // await pools.fetchPools(block)
-      // await staking.processStaking(api, block)
-      // await staking.processLiquidStaking(api, block)
-      // await store.saveLatest({
-      //   timestamp: block.timestamp,
-      //   block: block.number,
-      // })
+      await blocks.processEvents(block)
+      await pools.fetchPools(block)
+      await staking.processStaking(api, block)
+      await staking.processLiquidStaking(api, block)
+      await store.saveLatest({
+        timestamp: block.timestamp,
+        block: block.number,
+      })
     } catch (e) {
       logger.error('Error in processing block: ', e)
     }

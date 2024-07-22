@@ -2,7 +2,7 @@ import { pairs, tickers } from '../src/service/CoingeckoListingService'
 import { describe, expect, it, vi, beforeAll, afterAll } from 'vitest'
 import { Decimal } from 'decimal.js'
 
-vi.mock('@mangata-finance/sdk')
+vi.mock('gasp-sdk')
 
 describe('[CoinGecko listing]', () => {
   beforeAll(() => {
@@ -51,9 +51,30 @@ describe('[CoinGecko listing]', () => {
 
   it('should mock the pairs endpoint method', async () => {
     const expectedResponse = [
-      { ticker_id: 'KSM_MGX', base: 'KSM', target: 'MGX', pool_id: '5' },
-      { ticker_id: 'MGX_TUR', base: 'MGX', target: 'TUR', pool_id: '8' },
-      { ticker_id: 'KSM_TUR', base: 'KSM', target: 'TUR', pool_id: '9' },
+      {
+        ticker_id: 'GASPV2_GETH',
+        base: 'GASPV2',
+        target: 'GETH',
+        pool_id: '5',
+      },
+      {
+        ticker_id: 'L1Asset_GETH',
+        base: 'L1Asset',
+        target: 'GETH',
+        pool_id: '6',
+      },
+      {
+        ticker_id: 'L1Asset_GASPV2',
+        base: 'L1Asset',
+        target: 'GASPV2',
+        pool_id: '7',
+      },
+      {
+        ticker_id: 'GASPV2_L1Asset',
+        base: 'GASPV2',
+        target: 'L1Asset',
+        pool_id: '8',
+      },
     ]
     const results = await pairs()
     expect(results).deep.equal(expectedResponse)
@@ -68,34 +89,44 @@ describe('[CoinGecko listing]', () => {
   it('should mock the tickers endpoint method', async () => {
     const expectedResponse = [
       {
-        ticker_id: 'KSM_MGX',
-        base_currency: 'KSM',
-        target_currency: 'MGX',
-        last_price: '41375.099191776760995251',
-        base_volume: '40.263506880313510874',
-        target_volume: '1659851.9199481527807',
-        pool_id: '5',
-        liquidity_in_usd: '508786.95209646935',
-      },
-      {
-        ticker_id: 'MGX_TUR',
-        base_currency: 'MGX',
-        target_currency: 'TUR',
-        last_price: '0.1395751849',
-        base_volume: '13195.363557291116508',
-        target_volume: '1832.6875337653700768',
+        ticker_id: 'GASPV2_L1Asset',
+        base_currency: 'GASPV2',
+        target_currency: 'L1Asset',
+        last_price: '1.096169573227543269',
+        base_volume: '0',
+        target_volume: '0',
         pool_id: '8',
-        liquidity_in_usd: '57038.15488204146',
+        liquidity_in_usd: '0',
       },
       {
-        ticker_id: 'KSM_TUR',
-        base_currency: 'KSM',
-        target_currency: 'TUR',
-        last_price: '8700.7130012718',
-        base_volume: '8.8509000336977783626',
-        target_volume: '50677.157558869231101',
-        pool_id: '9',
-        liquidity_in_usd: '126.74932683307718',
+        ticker_id: 'L1Asset_GASPV2',
+        base_currency: 'L1Asset',
+        target_currency: 'GASPV2',
+        last_price: '0.936414249525285286',
+        base_volume: '0',
+        target_volume: '0',
+        pool_id: '7',
+        liquidity_in_usd: '0',
+      },
+      {
+        ticker_id: 'GASPV2_GETH',
+        base_currency: 'GASPV2',
+        target_currency: 'GETH',
+        last_price: '0.200555140448054692',
+        base_volume: '0',
+        target_volume: '0',
+        pool_id: '5',
+        liquidity_in_usd: '0',
+      },
+      {
+        ticker_id: 'L1Asset_GETH',
+        base_currency: 'L1Asset',
+        target_currency: 'GETH',
+        last_price: '0',
+        base_volume: '0',
+        target_volume: '0',
+        pool_id: '6',
+        liquidity_in_usd: '0',
       },
     ]
     const results = await tickers()

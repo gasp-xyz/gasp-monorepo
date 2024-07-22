@@ -64,10 +64,8 @@ describe('APi tests: Buckets', () => {
                                     liqToken[1].toString() === token[0].toHuman()[0].toString()))
                         //Exclude tokens with 0 balance
                         .filter((token) => token[1].toHuman() !== "0")
-                        //Exclude tokens with id 2 (dummy token)
-                        .filter((token) => token[0].toHuman()[0].toString() !== "2")
                         .map( (token) => token[0].toHuman()[0].toString());
-                console.log(onlyAssets);
+                console.log('Only assets :' , onlyAssets);
                 for (let i = 0; i < onlyAssets.length ; i++) {
                     const tokenInfo = ( await mangataNode.query.getTokenInfo(onlyAssets[i]));
                     console.log("Validating :" + JSON.stringify(tokenInfo)  + " :: "  + onlyAssets[i]);

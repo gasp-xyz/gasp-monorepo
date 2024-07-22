@@ -1,4 +1,4 @@
-import { fromBN } from '@mangata-finance/sdk'
+import { fromBN } from 'gasp-sdk'
 import moment from 'moment'
 import MangataClient from '../connector/MangataNode.js'
 import { matchInterval } from './PriceDiscoveryService.js'

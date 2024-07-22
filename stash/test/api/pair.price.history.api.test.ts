@@ -5,7 +5,7 @@ import app from "../../src/app";
 import { MAX_DAYS, MAX_INTERVAL } from "./utils";
 import Joi from "joi";
 
-const ERROR_MSG_ASSET_NOT_FOUND = "this must be one of the following values: MGX, KSM, KSM-MGX,";
+const ERROR_MSG_ASSET_NOT_FOUND = "this must be one of the following values: GASPV2, GETH, L1Asset";
 const pricesSchema =
 Joi.object({
     prices: Joi.array().items(
@@ -17,9 +17,9 @@ Joi.object({
 })
 
     describe('APi tests: price-history/pair', () => {
-        const pair = "KSM/MGX"
-        const reversedPair = "MGX/KSM"
-        it("GET pair KSM/MGX validate schema", async () => {
+        const pair = "GASPV2/L1Asset"
+        const reversedPair = "L1Asset/GASPV2"
+        it("GET pair GASPV2/L1Asset validate schema", async () => {
             const ksmMgx = await supertest(app)
                 .get("/price-history/pair/" + pair)
                 .query({
@@ -31,7 +31,7 @@ Joi.object({
             expect(validationResult.error).toBeUndefined();
 
         })
-        it("GET pair KSM/MGX returns same as pair MGX/KSM", async () => {
+        it("GET pair GASPV2/L1Asset returns same as pair L1Asset/GASPV2", async () => {
             const ksmMgx = await supertest(app)
                 .get("/price-history/pair/" + pair)
                 .query({
@@ -56,7 +56,7 @@ Joi.object({
     describe('API Errors: price-history/pair', () => {
         it("GET pools/foo: token does not exist Expect validation error", async () => {
             await supertest(app)
-                .get("/price-history/pair/MGX/foo")
+                .get("/price-history/pair/L1Asset/foo")
                 .query({
                     interval: MAX_INTERVAL,
                     days: MAX_DAYS
@@ -78,7 +78,7 @@ Joi.object({
                 .expect(200)
                 .then((response) => {
                     const poolDoesNotExist = response.body;
-                    expect(poolDoesNotExist.prices).to.be.empty;
+                    expect(poolDoesNotExist.prices).to.be.empty; //todo: ovde dobijam validation error: {"exceptionName":"ValidationError","message":"this must be one of the following values: GASPV2, GETH, L1Asset"}
                 });
         })
     });

@@ -4,30 +4,30 @@ import supertest from "supertest";
 import app from "../../src/app";
 import { MAX_DAYS, MAX_INTERVAL } from "./utils";
 
-const ERROR_MSG_POOL_NOT_FOUND = "this must be one of the following values: KSM-MGX, MGX-KSM, MGX-TUR, TUR-MGX";
+const ERROR_MSG_POOL_NOT_FOUND = "this must be one of the following values: GASPV2-L1Asset, L1Asset-GASPV2, GASPV2-L1Asset-GASPV2, L1Asset-GASPV2-GASPV2, ALL";
 
     describe('APi tests: tvl-history/pools', () => {
-        const testPool = "KSM-MGX"
-        const testPoolReversed = "MGX-KSM"
-        it("GET pools/MGX-KSM returns the same as pools/KSM-MGX -> Expect deep equal", async () => {
-            const ksmMgx = await supertest(app)
+        const testPool = "GASPV2-L1Asset"
+        const testPoolReversed = "L1Asset-GASPV2"
+        it("GET pools/GASPV2-L1Asset returns the same as pools/L1Asset-GASPV2 -> Expect deep equal", async () => {
+            const gaspv2L1Asset = await supertest(app)
                 .get("/tvl-history/pools/" + testPool)
                 .query({
                     interval: MAX_INTERVAL,
                     days: MAX_DAYS
                 })
                 .expect(200)
-            const mgxKsm = await supertest(app)
+            const l1AssetGaspv2 = await supertest(app)
                 .get("/tvl-history/pools/" + testPoolReversed)
                 .query({
                     interval: MAX_INTERVAL,
                     days: MAX_DAYS
                 })
                 .expect(200)
-            expect(ksmMgx.body).to.deep.equal(mgxKsm.body);
-            expect(ksmMgx.body).to.have.property("volumes");
-            expect(ksmMgx.body.volumes).to.be.an("array");
-            expect(ksmMgx.body.volumes[0]).to.have.a.lengthOf(2);
+            expect(gaspv2L1Asset.body).to.deep.equal(l1AssetGaspv2.body);
+            expect(gaspv2L1Asset.body).to.have.property("volumes");
+            expect(gaspv2L1Asset.body.volumes).to.be.an("array");
+            expect(gaspv2L1Asset.body.volumes[0]).to.have.a.lengthOf(2);
         })
     })
 
