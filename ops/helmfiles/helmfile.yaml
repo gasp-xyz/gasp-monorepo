@@ -481,7 +481,8 @@ releases:
           role: collator
 
   - name: rpc-shared-dns-record-testnet
-    installed: {{ eq .Values.environmentName "holesky" }}
+    installed: false
+    # installed: {{ eq .Values.environmentName "holesky" }}
     namespace: 'rollup-{{ .Values.environmentName }}'
     chart: ../helm-charts/shared-dns-record
     values:
@@ -490,7 +491,8 @@ releases:
           role: collator
 
   - name: rpc-shared-dns-record-legacy
-    installed: {{ eq .Values.environmentName "holesky" }}
+    installed: false
+    # installed: {{ eq .Values.environmentName "holesky" }}
     namespace: 'rollup-{{ .Values.environmentName }}'
     chart: ../helm-charts/shared-dns-record
     values:
