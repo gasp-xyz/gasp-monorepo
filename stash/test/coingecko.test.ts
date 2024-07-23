@@ -14,8 +14,9 @@ describe('[CoinGecko listing]', () => {
           return new Promise((resolve) => {
             const volumePoolResponse = {
               '5': [[1691280000000, new Decimal('867.4535759973365')]],
-              '8': [[1691280000000, new Decimal('6.896015943828684')]],
-              '9': [[1690761600000, new Decimal('190.68743584230737')]],
+              '6': [[1691280000000, new Decimal('6.896015943828684')]],
+              '7': [[1690761600000, new Decimal('190.68743584230737')]],
+              '8': [[1690761600000, new Decimal('190.68743584230737')]],
             }
             resolve(volumePoolResponse[poolId] || [])
           })
@@ -23,9 +24,8 @@ describe('[CoinGecko listing]', () => {
         getTokenPrices: vi.fn().mockImplementation((tokenId: string) => {
           return new Promise((resolve) => {
             const tokenResponses = {
-              '4': [[1691280000000, new Decimal('21.54441188086054')]],
+              '1': [[1691280000000, new Decimal('21.54441188086054')]],
               '0': [[1691366400000, new Decimal('0.0005226090144381267')]],
-              '7': [[1691366400000, new Decimal('0.003762788700625028')]],
             }
 
             resolve(tokenResponses[tokenId] || [])
@@ -35,8 +35,9 @@ describe('[CoinGecko listing]', () => {
           return new Promise((resolve) => {
             const volumePoolResponse = {
               '5': [[1691366400000, new Decimal('508786.95209646935')]],
-              '8': [[1691366400000, new Decimal('57038.15488204146')]],
-              '9': [[1691366400000, new Decimal('126.74932683307718')]],
+              '6': [[1691366400000, new Decimal('57038.15488204146')]],
+              '7': [[1691366400000, new Decimal('126.74932683307718')]],
+              '8': [[1691366400000, new Decimal('127.74932683307718')]],
             }
             resolve(volumePoolResponse[poolId] || [])
           })

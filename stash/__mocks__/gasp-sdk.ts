@@ -1,14 +1,14 @@
 import { vi } from 'vitest'
 import { BN } from '@polkadot/util'
-import { fromBN } from '@mangata-finance/sdk'
+import { fromBN } from 'gasp-sdk'
 
 const CUSTOM_ISSUANCE = {
   '0': new BN(100), // Custom issuance for ID 0
-  '4': new BN(200), // Custom issuance for ID 4
+  '1': new BN(200), // Custom issuance for ID 4
   '5': new BN(100), // Custom issuance for ID 0
-  '7': new BN(200), // Custom issuance for ID 4
-  '8': new BN(100), // Custom issuance for ID 0
-  '9': new BN(1000), // Custom issuance for ID 4
+  '6': new BN(100), // Custom issuance for ID 0
+  '7': new BN(1000), // Custom issuance for ID 4
+  '8': new BN(200), // Custom issuance for ID 4
 }
 
 const ASSETS_INFO = {
@@ -16,16 +16,16 @@ const ASSETS_INFO = {
     id: '0',
     chainId: 0,
     decimals: 18,
-    name: 'Mangata',
-    symbol: 'MGX',
+    name: 'Gasp Ethereum',
+    symbol: 'GETH',
     address: '',
   },
-  '4': {
-    id: '4',
+  '1': {
+    id: '1',
     chainId: 0,
-    decimals: 12,
-    name: 'Kusama Native',
-    symbol: 'KSM',
+    decimals: 18,
+    name: 'Gasp V2',
+    symbol: 'GASPV2',
     address: '',
   },
   '5': {
@@ -33,15 +33,23 @@ const ASSETS_INFO = {
     chainId: 0,
     decimals: 18,
     name: 'Liquidity Pool Token',
-    symbol: 'KSM-MGX',
+    symbol: 'GASPV2-GETH',
+    address: '',
+  },
+  '6': {
+    id: '6',
+    chainId: 0,
+    decimals: 18,
+    name: 'Liquidity Pool Token',
+    symbol: 'L1Asset-GETH',
     address: '',
   },
   '7': {
     id: '7',
     chainId: 0,
-    decimals: 10,
-    name: 'Turing native token',
-    symbol: 'TUR',
+    decimals: 18,
+    name: 'Liquidity Pool Token',
+    symbol: 'L1Asset-GASPV2',
     address: '',
   },
   '8': {
@@ -49,23 +57,13 @@ const ASSETS_INFO = {
     chainId: 0,
     decimals: 18,
     name: 'Liquidity Pool Token',
-    symbol: 'MGX-TUR',
-    address: '',
-  },
-  '9': {
-    id: '9',
-    chainId: 0,
-    decimals: 18,
-    name: 'Liquidity Pool Token',
-    symbol: 'KSM-TUR',
+    symbol: 'GASPV2-L1Asset',
     address: '',
   },
 }
 
 const tokenAmountMapping = {
-  '4-0': [new BN('11788919631539815'), new BN('486263164987593456634092965')],
-  '0-7': [new BN('54518136758845743088272528'), new BN('75865507392016543')],
-  '4-7': [new BN('2941582428288'), new BN('168424720224156')],
+  '1-0': [new BN('11788919631539815'), new BN('486263164987593456634092965')],
 }
 
 const mockMangata = (urls: string[]) => ({
@@ -105,9 +103,7 @@ const mockMangata = (urls: string[]) => ({
           args.outputReserve.eq(mappingBaseReserve)
         ) {
           const mockPrices = {
-            '4-0': new BN('41375099191776760995251'),
-            '0-7': new BN('1395751849'),
-            '4-7': new BN('87007130012718'),
+            '1-0': new BN('41375099191776760995251'),
           }
 
           return mockPrices[key]
