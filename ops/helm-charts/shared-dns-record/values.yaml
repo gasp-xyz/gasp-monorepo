@@ -1,4 +1,4 @@
-name: rpc
+nameOverride: ''
 url: ''
 port: 9944
 serviceSelector:

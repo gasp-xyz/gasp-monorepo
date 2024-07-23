@@ -16,7 +16,7 @@ collatorsEnabled: true
 collator:
   image:
     repository: mangatasolutions/rollup-node
-    tag: 3a07824d8b8a6ad027424629b814a5edb61654cf
+    tag: frontend-fix
   disableChainspecGeneration: true
   customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
   enableServiceMonitorCollectors: true
@@ -40,6 +40,7 @@ collator:
     extraArgs:
       - --alith
       - --pruning=archive
+      - --rpc-max-connections=5000
     nodeSelector:
       production: "true"
       topology.kubernetes.io/zone: europe-west1-b
@@ -50,6 +51,7 @@ collator:
     extraArgs:
       - --baltathar
       - --pruning=archive
+      - --rpc-max-connections=5000
     nodeSelector:
       production: "true"
       topology.kubernetes.io/zone: europe-west1-c

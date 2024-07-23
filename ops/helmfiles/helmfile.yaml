@@ -471,22 +471,29 @@ releases:
         bootnodeAddr: {{ .Values.collator.collator02.bootnodeAddr }}
         extraArgs: {{ .Values.collator.collator02.extraArgs | toYaml | nindent 10 }}
 
-  - name: holesky-shared-dns-record
-    installed: {{ eq .Values.environmentName "rollup-holesky" }}
-    namespace: rollup-holesky
-    chart: ./shared-dns-record
+  - name: rpc-shared-dns-record
+    installed: {{ eq .Values.environmentName "holesky" }}
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    chart: ../helm-charts/shared-dns-record
     values:
-      - url: 'rollup-holesky-rpc.mangata.online'
-        name: rollup-holesky-rpc
+      - url: 'rollup-{{ .Values.environmentName }}-rpc.gasp.xyz'
         serviceSelector:
-          role: rpc
+          role: collator
+
+  - name: rpc-shared-dns-record-testnet
+    installed: {{ eq .Values.environmentName "holesky" }}
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    chart: ../helm-charts/shared-dns-record
+    values:
+      - url: 'rollup-testnet-rpc.gasp.xyz'
+        serviceSelector:
+          role: collator
 
   - name: rpc-shared-dns-record-legacy
-    installed: {{ eq .Values.environmentName "rollup-holesky" }}
-    namespace: rollup-holesky
-    chart: ./shared-dns-record
+    installed: {{ eq .Values.environmentName "holesky" }}
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    chart: ../helm-charts/shared-dns-record
     values:
       - url: 'rollup-testnet-rpc.mangata.online'
-        name: rollup-testnet-rpc
         serviceSelector:
-          role: rpc
+          role: collator
