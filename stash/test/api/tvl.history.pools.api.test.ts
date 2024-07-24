@@ -2,9 +2,7 @@ import { chai, describe, expect, it } from "vitest";
 chai.should()
 import supertest from "supertest";
 import app from "../../src/app";
-import { MAX_DAYS, MAX_INTERVAL } from "./utils";
-
-const ERROR_MSG_POOL_NOT_FOUND = "this must be one of the following values: GASPV2-L1Asset, L1Asset-GASPV2, GASPV2-L1Asset-GASPV2, L1Asset-GASPV2-GASPV2, ALL";
+import { MAX_DAYS, MAX_INTERVAL, ERROR_MSG_POOL_NOT_FOUND } from "./utils";
 
     describe('APi tests: tvl-history/pools', () => {
         const testPool = "GASPV2-L1Asset"

@@ -2,10 +2,9 @@ import { chai, describe, expect, it } from "vitest";
 chai.should()
 import supertest from "supertest";
 import app from "../../src/app";
-import { MAX_DAYS, MAX_INTERVAL } from "./utils";
+import { MAX_DAYS, MAX_INTERVAL, ERROR_MSG_PAIR_ASSET_NOT_FOUND } from "./utils";
 import Joi from "joi";
 
-const ERROR_MSG_ASSET_NOT_FOUND = "this must be one of the following values: GASPV2, GETH, L1Asset";
 const pricesSchema =
 Joi.object({
     prices: Joi.array().items(
@@ -65,12 +64,12 @@ Joi.object({
                 .then((response) => {
                     const fooResponse = response.body;
                     expect(fooResponse.exceptionName).to.contain("ValidationError")
-                    expect(fooResponse.message).to.contain(ERROR_MSG_ASSET_NOT_FOUND)
+                    expect(fooResponse.message).to.contain(ERROR_MSG_PAIR_ASSET_NOT_FOUND)
                 });
         })
-        it("GET pools/vsKSM/RMRK: pool that does not exist expect empty", async () => {
+        it("GET pools/GASPV2/GETH: pool that does not exist expect empty", async () => {
             await supertest(app)
-                .get("/price-history/pair/vsKSM/RMRK")
+                .get("/price-history/pair/GASPV2/GETH")
                 .query({
                     interval: MAX_INTERVAL,
                     days: MAX_DAYS
@@ -78,7 +77,7 @@ Joi.object({
                 .expect(200)
                 .then((response) => {
                     const poolDoesNotExist = response.body;
-                    expect(poolDoesNotExist.prices).to.be.empty; //todo: ovde dobijam validation error: {"exceptionName":"ValidationError","message":"this must be one of the following values: GASPV2, GETH, L1Asset"}
+                    expect(poolDoesNotExist.prices).to.be.empty;
                 });
         })
     });

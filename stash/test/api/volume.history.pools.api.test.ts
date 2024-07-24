@@ -3,9 +3,7 @@ import { chai, describe, expect, it } from "vitest";
 chai.should()
 import supertest from "supertest";
 import app from "../../src/app";
-import { MAX_DAYS, MAX_INTERVAL } from "./utils";
-
-const ERROR_MSG_POOL_NOT_FOUND = "this must be one of the following values: GASPV2-GETH, GETH-GASPV2, L1Asset-GETH, GETH-L1Asset, L1Asset-GASPV2, GASPV2-L1Asset, ALL";
+import { MAX_DAYS, MAX_INTERVAL, ERROR_MSG_POOL_NOT_FOUND } from "./utils";
 
     describe('APi tests: tvl-history/pools', () => {
         const testPool = "GASPV2-L1Asset"
@@ -47,6 +45,10 @@ const ERROR_MSG_POOL_NOT_FOUND = "this must be one of the following values: GASP
                 .expect(500)
                 .then((response) => {
                     const fooResponse = response.body;
+                    console.log('fooResponse', fooResponse)
+                    console.log('fooResponse.exceptionName', fooResponse.exceptionName)
+                    console.log('fooResponse.message', fooResponse.message)
+                    console.log('ERROR_MSG_POOL_NOT_FOUND', ERROR_MSG_POOL_NOT_FOUND)
                     expect(fooResponse.exceptionName).to.contain("ValidationError")
                     expect(fooResponse.message).to.contain(ERROR_MSG_POOL_NOT_FOUND)
                 });
