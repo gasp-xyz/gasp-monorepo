@@ -67,9 +67,9 @@ Joi.object({
                     expect(fooResponse.message).to.contain(ERROR_MSG_PAIR_ASSET_NOT_FOUND)
                 });
         })
-        it("GET pools/GASPV2/L1Asset: pool that does not exist expect empty", async () => {
+        it("GET pools/GASPV2/GASPV2: pool that does not exist expect empty", async () => {
             await supertest(app)
-                .get("/price-history/pair/GASPV2/L1Asset")
+                .get("/price-history/pair/GASPV2/GASPV2")
                 .query({
                     interval: MAX_INTERVAL,
                     days: MAX_DAYS
@@ -77,6 +77,7 @@ Joi.object({
                 .expect(200)
                 .then((response) => {
                     const poolDoesNotExist = response.body;
+                    console.log('response,', poolDoesNotExist)
                     expect(poolDoesNotExist.prices).to.be.empty;
                 });
         })
