@@ -28,6 +28,9 @@ const ASSETS_INFO = {
     symbol: 'GASPV2',
     address: '',
   },
+  '2': { id: '2', decimals: 18, name: 'L1Asset', symbol: 'L1Asset' },
+  '3': { id: '3', decimals: 18, name: 'L1Asset', symbol: 'L1Asset' },
+  '4': { id: '4', decimals: 18, name: 'L1Asset', symbol: 'L1Asset' },
   '5': {
     id: '5',
     chainId: 0,

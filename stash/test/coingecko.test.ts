@@ -1,6 +1,7 @@
 import { pairs, tickers } from '../src/service/CoingeckoListingService'
 import { describe, expect, it, vi, beforeAll, afterAll } from 'vitest'
 import { Decimal } from 'decimal.js'
+import app from '../src/app'
 
 vi.mock('gasp-sdk')
 
@@ -90,44 +91,44 @@ describe('[CoinGecko listing]', () => {
   it('should mock the tickers endpoint method', async () => {
     const expectedResponse = [
       {
-        ticker_id: 'GASPV2_L1Asset',
         base_currency: 'GASPV2',
-        target_currency: 'L1Asset',
-        last_price: '1.096169573227543269',
-        base_volume: '0',
-        target_volume: '0',
-        pool_id: '8',
-        liquidity_in_usd: '0',
-      },
-      {
-        ticker_id: 'L1Asset_GASPV2',
-        base_currency: 'L1Asset',
-        target_currency: 'GASPV2',
-        last_price: '0.936414249525285286',
-        base_volume: '0',
-        target_volume: '0',
-        pool_id: '7',
-        liquidity_in_usd: '0',
-      },
-      {
-        ticker_id: 'GASPV2_GETH',
-        base_currency: 'GASPV2',
-        target_currency: 'GETH',
-        last_price: '0.200555140448054692',
-        base_volume: '0',
-        target_volume: '0',
+        base_volume: '40.263506880313510874',
+        last_price: '41375.099191776760995251',
+        liquidity_in_usd: '508786.95209646935',
         pool_id: '5',
-        liquidity_in_usd: '0',
+        target_currency: 'GETH',
+        target_volume: '1659851.9199481527807',
+        ticker_id: 'GASPV2_GETH',
       },
       {
-        ticker_id: 'L1Asset_GETH',
         base_currency: 'L1Asset',
-        target_currency: 'GETH',
-        last_price: '0',
         base_volume: '0',
-        target_volume: '0',
+        last_price: '0',
+        liquidity_in_usd: '57038.15488204146',
         pool_id: '6',
-        liquidity_in_usd: '0',
+        target_currency: 'GETH',
+        target_volume: '13195.363557291116508',
+        ticker_id: 'L1Asset_GETH',
+      },
+      {
+        base_currency: 'L1Asset',
+        base_volume: '0',
+        last_price: '0',
+        liquidity_in_usd: '126.74932683307718',
+        pool_id: '7',
+        target_currency: 'GASPV2',
+        target_volume: '8.8509000336977783626',
+        ticker_id: 'L1Asset_GASPV2',
+      },
+      {
+        base_currency: 'GASPV2',
+        base_volume: '8.8509000336977783626',
+        last_price: '0',
+        liquidity_in_usd: '127.74932683307718',
+        pool_id: '8',
+        target_currency: 'L1Asset',
+        target_volume: '0',
+        ticker_id: 'GASPV2_L1Asset',
       },
     ]
     const results = await tickers()
