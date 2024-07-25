@@ -189,17 +189,12 @@ async function getSelectedSequencerWithRights(
   const selectedMap = JSON.parse(selectedSequencerMap.toString());
   const selectedSequencerRaw = selectedMap[L1_CHAIN];
 
-  var selectedSequencer;
-  var isSequencerSelected;
-  var hasReadRights;
-  var hasCancelRights;
+  var selectedSequencer = null;
+  var isSequencerSelected = false;
+  var hasReadRights = false;
+  var hasCancelRights = false;
 
-  if (selectedSequencerRaw === undefined) {
-	selectedSequencer = null;
-	isSequencerSelected = false;
-	hasReadRights = false;
-	hasCancelRights = false;
-  } else {
+  if (selectedSequencerRaw !== undefined) {
 	selectedSequencer = selectedSequencerRaw.toLowerCase();
 	isSequencerSelected = selectedSequencer === collatorAddress.toLowerCase();
 	const sequencerRights = await apiAt.query.rolldown.sequencersRights(L1_CHAIN);
