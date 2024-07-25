@@ -69,7 +69,7 @@ Joi.object({
         })
         it("GET pools/GASPV2/GETH: pool that does not exist expect empty", async () => {
             await supertest(app)
-                .get("/price-history/pair/GASPV2/GETH")
+                .get("/price-history/pair/GASPV2/L1Asset")
                 .query({
                     interval: MAX_INTERVAL,
                     days: MAX_DAYS
