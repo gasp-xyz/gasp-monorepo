@@ -41,8 +41,8 @@ function validateReturnedDate(date :string, format : string) {
 
 //perhaps those addresses may change when data is upgraded!
 
-const oldCollatorAddress = "5EtT1Psa48f9KSNMZqZgwPj6guNULVeRUzcA9w1Kk8DkP9iZ";
-const collatorAddress =  "5HNnu1WVhPCxdD8uHFoRyZ2qJE8hWQL3aaG8D1gaYhK3j8a7";
+// const oldCollatorAddress = "5EtT1Psa48f9KSNMZqZgwPj6guNULVeRUzcA9w1Kk8DkP9iZ";
+const collatorAddress =  "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
 
 function validateValidApyRange(body) {
     const apy = parseFloat(body.apy)
@@ -50,7 +50,7 @@ function validateValidApyRange(body) {
     expect(apy).to.be.greaterThan(10)
 }
 
-describe.skip('APi tests: Collator apy - dailyRewards', () => {
+describe('APi tests: Collator apy - dailyRewards', () => { //todo: remove skip once we know new collator addresses
     it("GET /collators/dailyReward - no data", async () => {
         await supertest(app)
             .get("/collator/foo/staking/dailyreward")
@@ -69,7 +69,7 @@ describe.skip('APi tests: Collator apy - dailyRewards', () => {
                 expect(response.body.exceptionName).to.equal("NotFoundException")
             });
     })
-    it("GET /collators/apy - collator - OK", async () => {
+    it.skip("GET /collators/apy - collator - OK", async () => {
         await supertest(app)
             .get(`/collator/${collatorAddress}/staking/apy`)
             .expect(200)
@@ -83,7 +83,7 @@ describe.skip('APi tests: Collator apy - dailyRewards', () => {
                 validateValidApyRange(body);
             });
     })
-    it("GET /collators/dailyReward - collator - OK", async () => {
+    it.skip("GET /collators/dailyReward - collator - OK", async () => {
         await supertest(app)
             .get(`/collator/${collatorAddress}/staking/dailyReward`)
             .expect(200)
@@ -99,7 +99,7 @@ describe.skip('APi tests: Collator apy - dailyRewards', () => {
                 expect(rewardValue.toNumber()).gt(5000 );
             });
     })
-    it("GET /collators/apy - old - collator - OK", async () => {
+    it.skip("GET /collators/apy - old - collator - OK", async () => { //todo: gonzalo to check
         await supertest(app)
             .get(`/collator/${ethCollatorAddress}/staking/apy`)
             // .expect(200)
@@ -117,7 +117,7 @@ describe.skip('APi tests: Collator apy - dailyRewards', () => {
                 validateValidApyRange(body);
             });
     })
-    it("GET /collators/dailyReward - old - collator - OK", async () => {
+    it.skip("GET /collators/dailyReward - old - collator - OK", async () => { //todo: gonzalo to check
         await supertest(app)
             .get(`/collator/${oldCollatorAddress}/staking/dailyReward`)
             .expect(200)
