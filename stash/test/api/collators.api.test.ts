@@ -69,7 +69,7 @@ describe('APi tests: Collator apy - dailyRewards', () => { //todo: remove skip o
                 expect(response.body.exceptionName).to.equal("NotFoundException")
             });
     })
-    it.skip("GET /collators/apy - collator - OK", async () => {
+    it.skip("GET /collators/apy - collator - OK", async () => { //todo: remove skip when we have 3d party rewards
         await supertest(app)
             .get(`/collator/${collatorAddress}/staking/apy`)
             .expect(200)
@@ -83,7 +83,7 @@ describe('APi tests: Collator apy - dailyRewards', () => { //todo: remove skip o
                 validateValidApyRange(body);
             });
     })
-    it.skip("GET /collators/dailyReward - collator - OK", async () => {
+    it.skip("GET /collators/dailyReward - collator - OK", async () => { //todo: remove skip when we have 3d party rewards
         await supertest(app)
             .get(`/collator/${collatorAddress}/staking/dailyReward`)
             .expect(200)
