@@ -16,6 +16,7 @@ import "@eigenlayer-middleware/src/RegistryCoordinator.sol";
 import "@eigenlayer-middleware/src/BLSApkRegistry.sol";
 import "@eigenlayer-middleware/src/IndexRegistry.sol";
 import "@eigenlayer-middleware/src/StakeRegistry.sol";
+import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
 
 import {FinalizerServiceManager, IServiceManager} from "../src/FinalizerServiceManager.sol";
 import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
@@ -43,6 +44,12 @@ contract Deployer is Script, Utils, Test {
     PauserRegistry public avsPauserReg;
     address public avsOwner;
     address public avsUpgrader;
+
+    bool public allow_non_root_tm_init;
+    uint32 public taskResponseWindowBlocks;
+
+    // non-upgradable contracts
+    BLSSignatureChecker public blsSignatureChecker;
 
     //upgradeable contracts
     FinalizerServiceManager public serviceManager;
@@ -90,8 +97,10 @@ contract Deployer is Script, Utils, Test {
         avsOwner = stdJson.readAddress(configData, ".permissions.owner");
         avsUpgrader = stdJson.readAddress(configData, ".permissions.upgrader");
 
-        uint32 taskResponseWindowBlocks =
+        taskResponseWindowBlocks =
             uint32(stdJson.readUint(configData, ".taskManagerParams.taskResponseWindowBlocks"));
+
+        allow_non_root_tm_init = stdJson.readBool(configData, ".allow_non_root_tm_init");
 
         // START BROADCAST
         vm.startBroadcast();
@@ -229,13 +238,15 @@ contract Deployer is Script, Utils, Test {
             abi.encodeWithSelector(serviceManager.initialize.selector, avsOwner, ejector)
         );
 
-        taskManagerImplementation = new FinalizerTaskManager(registryCoordinator, taskResponseWindowBlocks);
+        blsSignatureChecker = new BLSSignatureChecker(registryCoordinator);
+
+        taskManagerImplementation = new FinalizerTaskManager();
 
         // upgrade task manager proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(taskManager))),
             address(taskManagerImplementation),
-            abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator)
+            abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator, allow_non_root_tm_init, blsSignatureChecker, taskResponseWindowBlocks)
         );
 
         // transfer ownership of proxy admin to upgrader

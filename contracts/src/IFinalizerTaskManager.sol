@@ -6,6 +6,9 @@ import "./IGaspMultiRollupServicePrimitives.sol";
 
 interface IFinalizerTaskManager {
     // EVENTS
+
+    event BLSSignatureCheckerAddressUpdated(address blsSignatureCheckerAddress);
+
     event NewOpTaskCreated(uint32 indexed taskIndex, OperatorUpdateTask task);
 
     // When we have some response from OPs

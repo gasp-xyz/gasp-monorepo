@@ -12,6 +12,8 @@
     "aggregator": "0xd082d8ff9491b5066db6e1e03efb19daaf50de02"
   },
 
+  "allow_non_root_tm_init": false,
+
   "minimumStakes": [10000000000000000000],
 
   "strategyWeights": [

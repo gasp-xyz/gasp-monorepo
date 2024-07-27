@@ -21,15 +21,16 @@ contract FinalizerTaskManager is
     Initializable,
     OwnableUpgradeable,
     Pausable,
-    BLSSignatureChecker,
     OperatorStateRetriever,
     IFinalizerTaskManager
 {
     using BN254 for BN254.G1Point;
 
+    BLSSignatureChecker public blsSignatureChecker;
+
     /* CONSTANT */
     // The number of blocks from the task initialization within which the aggregator has to respond to
-    uint32 public immutable TASK_RESPONSE_WINDOW_BLOCK;
+    uint32 public TASK_RESPONSE_WINDOW_BLOCK;
     uint256 public constant THRESHOLD_DENOMINATOR = 100;
 
     /* STORAGE */
@@ -90,13 +91,7 @@ contract FinalizerTaskManager is
         _;
     }
 
-    constructor(IRegistryCoordinator _registryCoordinator, uint32 _taskResponseWindowBlock)
-        BLSSignatureChecker(_registryCoordinator)
-    {
-        TASK_RESPONSE_WINDOW_BLOCK = _taskResponseWindowBlock;
-    }
-
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit)
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock)
         public
         initializer
     {
@@ -105,6 +100,13 @@ contract FinalizerTaskManager is
         aggregator = _aggregator;
         generator = _generator;
         allowNonRootInit = _allowNonRootInit;
+        blsSignatureChecker = BLSSignatureChecker(_blsSignatureCheckerAddress);
+        TASK_RESPONSE_WINDOW_BLOCK = _taskResponseWindowBlock;
+    }
+
+    function update_bls_signature_checker_address(address _blsSignatureCheckerAddress) external onlyOwner{
+        blsSignatureChecker = BLSSignatureChecker(_blsSignatureCheckerAddress);
+        emit BLSSignatureCheckerAddressUpdated(_blsSignatureCheckerAddress);
     }
 
     // TODO!!!
@@ -150,7 +152,7 @@ contract FinalizerTaskManager is
     function respondToOpTask(
         OperatorUpdateTask calldata task,
         OperatorUpdateTaskResponse calldata taskResponse,
-        NonSignerStakesAndSignature memory nonSignerStakesAndSignature
+        BLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
     ) external {
         uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
 
@@ -194,12 +196,12 @@ contract FinalizerTaskManager is
         // calculate message which operators signed
         bytes32 message = keccak256(abi.encode(taskResponse));
 
-        QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
+        BLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
 
         if (taskReferenceBlock != 0) {
             // check the BLS signature
             (quorumStakeTotals, hashOfNonSigners) =
-                checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
+                blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
         }
 
         TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
@@ -280,7 +282,7 @@ contract FinalizerTaskManager is
     function respondToRolldownUpdateTask(
         RolldownUpdateTask calldata task,
         RolldownUpdateTaskResponse calldata taskResponse,
-        NonSignerStakesAndSignature memory nonSignerStakesAndSignature
+        BLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
     ) external onlyAggregator {
         uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
         uint32 taskCreatedBlock = task.taskCreatedBlock;
@@ -313,8 +315,8 @@ contract FinalizerTaskManager is
         bytes32 message = keccak256(abi.encode(taskResponse));
 
         // check the BLS signature
-        (QuorumStakeTotals memory quorumStakeTotals, bytes32 hashOfNonSigners) =
-            checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
+        (BLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals, bytes32 hashOfNonSigners) =
+            blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
 
         TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
             uint32(block.number),
