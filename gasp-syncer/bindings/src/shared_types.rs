@@ -68,23 +68,6 @@ pub struct PubkeyRegistrationParams {
     pub pubkey_g1: G1Point,
     pub pubkey_g2: G2Point,
 }
-///`QuorumStakeTotals(uint96[],uint96[])`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct QuorumStakeTotals {
-    pub signed_stake_for_quorum: ::std::vec::Vec<u128>,
-    pub total_stake_for_quorum: ::std::vec::Vec<u128>,
-}
 ///`OperatorDetails(address,address,uint32)`
 #[derive(
     Clone,
@@ -143,7 +126,7 @@ pub struct Withdrawal {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
     pub shares: ::std::vec::Vec<::ethers::core::types::U256>,
 }
-///`Task(uint32,uint256,uint32,uint32,bytes,uint32,bytes,uint32)`
+///`OpTask(uint32,uint32,uint32,bytes,uint32,bytes,uint32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -156,17 +139,16 @@ pub struct Withdrawal {
     Eq,
     Hash
 )]
-pub struct Task {
+pub struct OpTask {
     pub task_num: u32,
-    pub block_number: ::ethers::core::types::U256,
     pub task_created_block: u32,
-    pub last_completed_task_created_block: u32,
+    pub last_completed_op_task_created_block: u32,
     pub quorum_numbers: ::ethers::core::types::Bytes,
     pub quorum_threshold_percentage: u32,
-    pub last_completed_task_quorum_numbers: ::ethers::core::types::Bytes,
-    pub last_completed_task_quorum_threshold_percentage: u32,
+    pub last_completed_op_task_quorum_numbers: ::ethers::core::types::Bytes,
+    pub last_completed_op_task_quorum_threshold_percentage: u32,
 }
-///`TaskResponse(uint32,bytes32,bytes32,bytes32,bytes32,bytes32)`
+///`OpTaskResponse(uint32,bytes32,bytes32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -179,10 +161,48 @@ pub struct Task {
     Eq,
     Hash
 )]
-pub struct TaskResponse {
+pub struct OpTaskResponse {
     pub reference_task_index: u32,
     pub reference_task_hash: [u8; 32],
     pub operators_state_info_hash: [u8; 32],
+}
+///`RdTask(uint32,uint256,uint32,uint32,bytes,uint32)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct RdTask {
+    pub task_num: u32,
+    pub block_number: ::ethers::core::types::U256,
+    pub task_created_block: u32,
+    pub last_completed_op_task_created_block: u32,
+    pub last_completed_op_task_quorum_numbers: ::ethers::core::types::Bytes,
+    pub last_completed_op_task_quorum_threshold_percentage: u32,
+}
+///`RdTaskResponse(uint32,bytes32,bytes32,bytes32,bytes32)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct RdTaskResponse {
+    pub reference_task_index: u32,
+    pub reference_task_hash: [u8; 32],
     pub block_hash: [u8; 32],
     pub storage_proof_hash: [u8; 32],
     pub pending_state_hash: [u8; 32],
@@ -206,154 +226,6 @@ pub struct TaskResponseMetadata {
     pub quroum_stake_totals: ::std::vec::Vec<u128>,
     pub quroum_stake_signed: ::std::vec::Vec<u128>,
 }
-///`NonSignerStakesAndSignatureForOldState((uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256))`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct NonSignerStakesAndSignatureForOldState {
-    pub non_signer_g1_pubkeys_for_old_state: ::std::vec::Vec<G1Point>,
-    pub apk_g2_for_old_state: G2Point,
-    pub sigma_for_old_state: G1Point,
-}
-///`OperatorStateInfo(bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[])`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct OperatorStateInfo {
-    pub operators_state_changed: bool,
-    pub quorums_removed: ::std::vec::Vec<u8>,
-    pub quorums_added: ::std::vec::Vec<QuorumsAdded>,
-    pub quorums_stake_update: ::std::vec::Vec<QuorumsStakeUpdate>,
-    pub quorums_apk_update: ::std::vec::Vec<QuorumsApkUpdate>,
-    pub operators_removed: ::std::vec::Vec<[u8; 32]>,
-    pub operators_added: ::std::vec::Vec<OperatorsAdded>,
-    pub operators_stake_update: ::std::vec::Vec<OperatorsStakeUpdate>,
-    pub operators_quorum_count_update: ::std::vec::Vec<OperatorsQuorumCountUpdate>,
-}
-///`OperatorsAdded(bytes32,uint8[],uint96[],uint8)`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct OperatorsAdded {
-    pub operator_id: [u8; 32],
-    pub quorum_for_stakes: ::std::vec::Vec<u8>,
-    pub quorum_stakes: ::std::vec::Vec<u128>,
-    pub quorum_count: u8,
-}
-///`OperatorsQuorumCountUpdate(bytes32,uint8)`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct OperatorsQuorumCountUpdate {
-    pub operator_id: [u8; 32],
-    pub quorum_count: u8,
-}
-///`OperatorsStakeUpdate(bytes32,uint8[],uint96[])`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct OperatorsStakeUpdate {
-    pub operator_id: [u8; 32],
-    pub quorum_for_stakes: ::std::vec::Vec<u8>,
-    pub quorum_stakes: ::std::vec::Vec<u128>,
-}
-///`QuorumsAdded(uint8,uint96,(uint256,uint256))`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct QuorumsAdded {
-    pub quorum_number: u8,
-    pub quorum_stake: u128,
-    pub quorum_apk: G1Point,
-}
-///`QuorumsApkUpdate(uint8,(uint256,uint256))`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct QuorumsApkUpdate {
-    pub quorum_number: u8,
-    pub quorum_apk: G1Point,
-}
-///`QuorumsStakeUpdate(uint8,uint96)`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct QuorumsStakeUpdate {
-    pub quorum_number: u8,
-    pub quorum_stake: u128,
-}
 ///`OperatorInfo(bytes32,uint8)`
 #[derive(
     Clone,
@@ -370,23 +242,6 @@ pub struct QuorumsStakeUpdate {
 pub struct OperatorInfo {
     pub operator_id: [u8; 32],
     pub status: u8,
-}
-///`OperatorKickParam(uint8,address)`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct OperatorKickParam {
-    pub quorum_number: u8,
-    pub operator: ::ethers::core::types::Address,
 }
 ///`OperatorSetParam(uint32,uint16,uint16)`
 #[derive(
@@ -531,38 +386,4 @@ pub struct DeprecatedStructQueuedWithdrawal {
 pub struct DeprecatedStructWithdrawerAndNonce {
     pub withdrawer: ::ethers::core::types::Address,
     pub nonce: u128,
-}
-///`FuzzInterface(address,string[])`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct FuzzInterface {
-    pub addr: ::ethers::core::types::Address,
-    pub artifacts: ::std::vec::Vec<::std::string::String>,
-}
-///`FuzzSelector(address,bytes4[])`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash
-)]
-pub struct FuzzSelector {
-    pub addr: ::ethers::core::types::Address,
-    pub selectors: ::std::vec::Vec<[u8; 4]>,
 }

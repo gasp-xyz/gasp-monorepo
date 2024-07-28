@@ -11,8 +11,9 @@ import "@eigenlayer-middleware/src/interfaces/IServiceManager.sol";
 
 import {BLSApkRegistry} from "@eigenlayer-middleware/src/BLSApkRegistry.sol";
 import {RegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
-import {BLSSignatureChecker, IRegistryCoordinator} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
+import {BLSSignatureChecker, IRegistryCoordinator, IBLSSignatureChecker, IBLSApkRegistry, IStakeRegistry, IDelegationManager} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
 import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
+
 import "./IGaspMultiRollupServicePrimitives.sol";
 
 import "./IFinalizerTaskManager.sol";
@@ -21,6 +22,7 @@ contract FinalizerTaskManager is
     Initializable,
     OwnableUpgradeable,
     Pausable,
+    IBLSSignatureChecker,
     OperatorStateRetriever,
     IFinalizerTaskManager
 {
@@ -30,7 +32,7 @@ contract FinalizerTaskManager is
 
     /* CONSTANT */
     // The number of blocks from the task initialization within which the aggregator has to respond to
-    uint32 public TASK_RESPONSE_WINDOW_BLOCK;
+    uint32 public taskResponseWindowBlock;
     uint256 public constant THRESHOLD_DENOMINATOR = 100;
 
     /* STORAGE */
@@ -59,6 +61,7 @@ contract FinalizerTaskManager is
     address public generator;
 
     bytes32 public latestPendingStateHash;
+    bytes32 public operatorsStateInfoHash;
 
     bool public allowNonRootInit;
 
@@ -101,16 +104,18 @@ contract FinalizerTaskManager is
         generator = _generator;
         allowNonRootInit = _allowNonRootInit;
         blsSignatureChecker = BLSSignatureChecker(_blsSignatureCheckerAddress);
-        TASK_RESPONSE_WINDOW_BLOCK = _taskResponseWindowBlock;
+        taskResponseWindowBlock = _taskResponseWindowBlock;
     }
 
-    function update_bls_signature_checker_address(address _blsSignatureCheckerAddress) external onlyOwner{
+    function updateBlsSignatureCheckerAddress(address _blsSignatureCheckerAddress) external onlyOwner{
         blsSignatureChecker = BLSSignatureChecker(_blsSignatureCheckerAddress);
         emit BLSSignatureCheckerAddressUpdated(_blsSignatureCheckerAddress);
     }
 
     // TODO!!!
     // DEDUP ALL THIS!
+    // TODO!!!
+    // Reinit func!!
     
     /* FUNCTIONS */
     // NOTE: this function creates new task, assigns it a taskId
@@ -123,12 +128,18 @@ contract FinalizerTaskManager is
             "Can't create a task in the same block as a completed task"
         );
         // create a new task struct
-        OperatorUpdateTask memory newTask;
+        OpTask memory newTask;
         newTask.taskNum = latestOpTaskNum;
         newTask.taskCreatedBlock = uint32(block.number);
         newTask.quorumThresholdPercentage = quorumThresholdPercentage;
         newTask.quorumNumbers = quorumNumbers;
-        newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
+        // This is to help the aggregator function as it currently is while 
+        // being compatible with past op state verficiation
+        if (lastCompletedOpTaskCreatedBlock == 0) {
+            newTask.lastCompletedOpTaskCreatedBlock = uint32(block.number);
+        } else {
+            newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
+        }
         newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
         newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
 
@@ -150,13 +161,14 @@ contract FinalizerTaskManager is
 
     // NOTE: this function responds to existing tasks.
     function respondToOpTask(
-        OperatorUpdateTask calldata task,
-        OperatorUpdateTaskResponse calldata taskResponse,
-        BLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
+        OpTask calldata task,
+        OpTaskResponse calldata taskResponse,
+        IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
     ) external {
+        uint32 referenceTaskIndex = taskResponse.referenceTaskIndex;
         uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
 
-        if (taskReferenceBlock == 0) {
+        if (referenceTaskIndex == 0) {
             if (allowNonRootInit) {
                 require(msg.sender == aggregator, "Auth0");
             } else {
@@ -186,7 +198,7 @@ contract FinalizerTaskManager is
             "Aggregator has already responded to the task"
         );
         require(
-            uint32(block.number) <= taskCreatedBlock + TASK_RESPONSE_WINDOW_BLOCK,
+            uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
             "Aggregator has responded to the task too late"
         );
 
@@ -196,9 +208,9 @@ contract FinalizerTaskManager is
         // calculate message which operators signed
         bytes32 message = keccak256(abi.encode(taskResponse));
 
-        BLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
+        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
 
-        if (taskReferenceBlock != 0) {
+        if (referenceTaskIndex != 0) {
             // check the BLS signature
             (quorumStakeTotals, hashOfNonSigners) =
                 blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
@@ -218,7 +230,7 @@ contract FinalizerTaskManager is
         emit OpTaskResponded(task.taskNum, taskResponse, taskResponseMetadata);
 
 
-        if (taskReferenceBlock != 0) {
+        if (referenceTaskIndex != 0) {
             // check that signatories own at least a threshold percentage of each quourm
             for (uint256 i = 0; i < quorumNumbers.length; i++) {
                 // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
@@ -233,6 +245,7 @@ contract FinalizerTaskManager is
             }
         }
 
+        operatorsStateInfoHash = taskResponse.operatorsStateInfoHash;
         idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.COMPLETED;
         lastCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
         lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
@@ -254,7 +267,7 @@ contract FinalizerTaskManager is
             "Op State uninit"
         );
         // create a new task struct
-        RolldownUpdateTask memory newTask;
+        RdTask memory newTask;
         newTask.taskNum = latestRdTaskNum;
         newTask.blockNumber = blockNumber;
         newTask.taskCreatedBlock = uint32(block.number);
@@ -279,10 +292,10 @@ contract FinalizerTaskManager is
     }
 
     // NOTE: this function responds to existing tasks.
-    function respondToRolldownUpdateTask(
-        RolldownUpdateTask calldata task,
-        RolldownUpdateTaskResponse calldata taskResponse,
-        BLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
+    function respondToRdTask(
+        RdTask calldata task,
+        RdTaskResponse calldata taskResponse,
+        IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
     ) external onlyAggregator {
         uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
         uint32 taskCreatedBlock = task.taskCreatedBlock;
@@ -304,7 +317,7 @@ contract FinalizerTaskManager is
             "Aggregator has already responded to the task"
         );
         require(
-            uint32(block.number) <= taskCreatedBlock + TASK_RESPONSE_WINDOW_BLOCK,
+            uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
             "Aggregator has responded to the task too late"
         );
 
@@ -315,7 +328,7 @@ contract FinalizerTaskManager is
         bytes32 message = keccak256(abi.encode(taskResponse));
 
         // check the BLS signature
-        (BLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals, bytes32 hashOfNonSigners) =
+        (IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals, bytes32 hashOfNonSigners) =
             blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
 
         TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
@@ -352,5 +365,36 @@ contract FinalizerTaskManager is
     }
     
     function dummyForOperatorStateInfoType(IGaspMultiRollupServicePrimitives.OperatorStateInfo calldata _operatorStateInfo) external view {
+    }
+    function dummyForQuorumStakeTotalsType(BLSSignatureChecker.QuorumStakeTotals calldata _quorumStakeTotals) external view {
+    }
+
+    function registryCoordinator() external view returns (IRegistryCoordinator){
+        return blsSignatureChecker.registryCoordinator();
+    }
+    function stakeRegistry() external view returns (IStakeRegistry){
+        return blsSignatureChecker.stakeRegistry();
+    }
+    function blsApkRegistry() external view returns (IBLSApkRegistry){
+        return blsSignatureChecker.blsApkRegistry();
+    }
+    function delegation() external view returns (IDelegationManager){
+        return blsSignatureChecker.delegation();
+    }
+
+    function checkSignatures(
+        bytes32 msgHash, 
+        bytes calldata quorumNumbers,
+        uint32 referenceBlockNumber, 
+        IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
+    ) 
+        external 
+        view
+        returns (
+            QuorumStakeTotals memory,
+            bytes32
+        )
+    {
+        return blsSignatureChecker.checkSignatures(msgHash, quorumNumbers, referenceBlockNumber, nonSignerStakesAndSignature);
     }
 }

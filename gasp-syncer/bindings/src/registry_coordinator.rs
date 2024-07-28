@@ -5059,4 +5059,21 @@ pub mod registry_coordinator {
         Hash
     )]
     pub struct StakeRegistryReturn(pub ::ethers::core::types::Address);
+    ///`OperatorKickParam(uint8,address)`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
+    pub struct OperatorKickParam {
+        pub quorum_number: u8,
+        pub operator: ::ethers::core::types::Address,
+    }
 }

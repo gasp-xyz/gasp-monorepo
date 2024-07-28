@@ -10,11 +10,13 @@ import (
 
 	servicemanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerServiceManager"
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	blsSignatureChecker "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
 )
 
 type AvsServiceBindings struct {
 	TaskManager            *taskmanager.ContractFinalizerTaskManager
 	ServiceManager         *servicemanager.ContractFinalizerServiceManager
+	BlsSignatureChecker         *blsSignatureChecker.ContractBLSSignatureChecker
 	OperatorStateRetriever common.Address
 	ethClient              eth.Client
 	logger                 logging.Logger
@@ -48,9 +50,22 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		return nil, err
 	}
 
+
+	blsSignatureCheckerAddr, err := contractTaskManager.BlsSignatureChecker(&bind.CallOpts{})
+	if err != nil {
+		logger.Error("Failed to fetch TaskManager address", "err", err)
+		return nil, err
+	}
+	contractBlsSignatureChecker, err := blsSignatureChecker.NewContractBLSSignatureChecker(blsSignatureCheckerAddr, ethclient)
+	if err != nil {
+		logger.Error("Failed to fetch IIncredibleSquaringTaskManager contract", "err", err)
+		return nil, err
+	}
+
 	return &AvsServiceBindings{
 		ServiceManager:         contractServiceManager,
 		TaskManager:            contractTaskManager,
+		BlsSignatureChecker:            contractBlsSignatureChecker,
 		OperatorStateRetriever: taskManagerAddr,
 		ethClient:              ethclient,
 		logger:                 logger,

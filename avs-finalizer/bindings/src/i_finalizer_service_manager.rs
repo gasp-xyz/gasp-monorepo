@@ -7,73 +7,82 @@ pub use i_finalizer_service_manager::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types
+    non_camel_case_types,
 )]
 pub mod i_finalizer_service_manager {
     #[allow(deprecated)]
     fn __abi() -> ::ethers::core::abi::Abi {
         ::ethers::core::abi::ethabi::Contract {
             constructor: ::core::option::Option::None,
-            functions: ::core::convert::From::from([(
-                ::std::borrow::ToOwned::to_owned("ejectOperators"),
-                ::std::vec![::ethers::core::abi::ethabi::Function {
-                    name: ::std::borrow::ToOwned::to_owned("ejectOperators"),
-                    inputs: ::std::vec![
-                        ::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("operators"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                ::std::boxed::Box::new(
-                                    ::ethers::core::abi::ethabi::ParamType::Address,
-                                ),
-                            ),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("address[]"),
-                            ),
-                        },
-                        ::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                ::std::boxed::Box::new(
-                                    ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                ),
-                            ),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes[]"),
-                            ),
-                        },
-                    ],
-                    outputs: ::std::vec![],
-                    constant: ::core::option::Option::None,
-                    state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                },],
-            )]),
-            events: ::core::convert::From::from([(
-                ::std::borrow::ToOwned::to_owned("EjectorUpdated"),
-                ::std::vec![::ethers::core::abi::ethabi::Event {
-                    name: ::std::borrow::ToOwned::to_owned("EjectorUpdated"),
-                    inputs: ::std::vec![
-                        ::ethers::core::abi::ethabi::EventParam {
-                            name: ::std::borrow::ToOwned::to_owned("prevEjector"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            indexed: false,
-                        },
-                        ::ethers::core::abi::ethabi::EventParam {
-                            name: ::std::borrow::ToOwned::to_owned("newEjector"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            indexed: false,
+            functions: ::core::convert::From::from([
+                (
+                    ::std::borrow::ToOwned::to_owned("ejectOperators"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("ejectOperators"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("operators"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                        ::std::boxed::Box::new(
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
+                                        ),
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("address[]"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                        ::std::boxed::Box::new(
+                                            ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                        ),
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bytes[]"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
                         },
                     ],
-                    anonymous: false,
-                },],
-            )]),
+                ),
+            ]),
+            events: ::core::convert::From::from([
+                (
+                    ::std::borrow::ToOwned::to_owned("EjectorUpdated"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned("EjectorUpdated"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("prevEjector"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    indexed: false,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("newEjector"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
+                ),
+            ]),
             errors: ::std::collections::BTreeMap::new(),
             receive: false,
             fallback: false,
         }
     }
     ///The parsed JSON ABI of the contract.
-    pub static IFINALIZERSERVICEMANAGER_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
-        ::ethers::contract::Lazy::new(__abi);
+    pub static IFINALIZERSERVICEMANAGER_ABI: ::ethers::contract::Lazy<
+        ::ethers::core::abi::Abi,
+    > = ::ethers::contract::Lazy::new(__abi);
     pub struct IFinalizerServiceManager<M>(::ethers::contract::Contract<M>);
     impl<M> ::core::clone::Clone for IFinalizerServiceManager<M> {
         fn clone(&self) -> Self {
@@ -105,11 +114,13 @@ pub mod i_finalizer_service_manager {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(::ethers::contract::Contract::new(
-                address.into(),
-                IFINALIZERSERVICEMANAGER_ABI.clone(),
-                client,
-            ))
+            Self(
+                ::ethers::contract::Contract::new(
+                    address.into(),
+                    IFINALIZERSERVICEMANAGER_ABI.clone(),
+                    client,
+                ),
+            )
         }
         ///Calls the contract's `ejectOperators` (0x1e25abfd) function
         pub fn eject_operators(
@@ -124,22 +135,26 @@ pub mod i_finalizer_service_manager {
         ///Gets the contract's `EjectorUpdated` event
         pub fn ejector_updated_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, EjectorUpdatedFilter>
-        {
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            EjectorUpdatedFilter,
+        > {
             self.0.event()
         }
         /// Returns an `Event` builder for all the events of this contract.
         pub fn events(
             &self,
-        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, EjectorUpdatedFilter>
-        {
-            self.0
-                .event_with_filter(::core::default::Default::default())
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            EjectorUpdatedFilter,
+        > {
+            self.0.event_with_filter(::core::default::Default::default())
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-        for IFinalizerServiceManager<M>
-    {
+    for IFinalizerServiceManager<M> {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -154,7 +169,7 @@ pub mod i_finalizer_service_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethevent(name = "EjectorUpdated", abi = "EjectorUpdated(address,address)")]
     pub struct EjectorUpdatedFilter {
@@ -172,7 +187,7 @@ pub mod i_finalizer_service_manager {
         Debug,
         PartialEq,
         Eq,
-        Hash,
+        Hash
     )]
     #[ethcall(name = "ejectOperators", abi = "ejectOperators(address[],bytes[])")]
     pub struct EjectOperatorsCall {

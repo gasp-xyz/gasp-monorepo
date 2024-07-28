@@ -13,9 +13,9 @@ import (
 )
 
 type AvsSubscriberer interface {
-	SubscribeToNewTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewTaskCreated) event.Subscription
-	SubscribeToTaskResponses(taskResponseLogs chan *taskmanager.ContractFinalizerTaskManagerTaskResponded) event.Subscription
-	ParseTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerTaskResponded, error)
+	SubscribeToNewRdTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewRdTaskCreated) event.Subscription
+	SubscribeToRdTaskResponses(taskResponseLogs chan *taskmanager.ContractFinalizerTaskManagerRdTaskResponded) event.Subscription
+	ParseRdTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
 }
 
 // Subscribers use a ws connection instead of http connection like Readers
@@ -39,8 +39,8 @@ func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient eth.Client, log
 	}, nil
 }
 
-func (s *AvsSubscriber) SubscribeToNewTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewTaskCreated) event.Subscription {
-	sub, err := s.AvsContractBindings.TaskManager.WatchNewTaskCreated(
+func (s *AvsSubscriber) SubscribeToNewRdTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewRdTaskCreated) event.Subscription {
+	sub, err := s.AvsContractBindings.TaskManager.WatchNewRdTaskCreated(
 		&bind.WatchOpts{}, newTaskCreatedChan, nil,
 	)
 	if err != nil {
@@ -50,9 +50,9 @@ func (s *AvsSubscriber) SubscribeToNewTasks(newTaskCreatedChan chan *taskmanager
 	return sub
 }
 
-func (s *AvsSubscriber) SubscribeToTaskResponses(taskResponseChan chan *taskmanager.ContractFinalizerTaskManagerTaskResponded) event.Subscription {
-	sub, err := s.AvsContractBindings.TaskManager.WatchTaskResponded(
-		&bind.WatchOpts{}, taskResponseChan, []uint32{},
+func (s *AvsSubscriber) SubscribeToRdTaskResponses(taskResponseLogs chan *taskmanager.ContractFinalizerTaskManagerRdTaskResponded) event.Subscription {
+	sub, err := s.AvsContractBindings.TaskManager.WatchRdTaskResponded(
+		&bind.WatchOpts{}, taskResponseLogs, []uint32{},
 	)
 	if err != nil {
 		s.logger.Error("Failed to subscribe to TaskResponded events", "err", err)
@@ -61,6 +61,6 @@ func (s *AvsSubscriber) SubscribeToTaskResponses(taskResponseChan chan *taskmana
 	return sub
 }
 
-func (s *AvsSubscriber) ParseTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerTaskResponded, error) {
-	return s.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseTaskResponded(rawLog)
+func (s *AvsSubscriber) ParseRdTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error) {
+	return s.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseRdTaskResponded(rawLog)
 }

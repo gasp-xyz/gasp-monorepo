@@ -22,6 +22,7 @@ var (
 	TaskNotFoundError400                     = errors.New("400. Task not found")
 	OperatorNotPartOfTaskQuorum400           = errors.New("400. Operator not part of quorum")
 	OperatorNotRegistered400                 = errors.New("400. Operator not registered in AVS")
+	BadTaskResponseError500       = errors.New("500. Bad Task Response")
 	TaskResponseDigestNotFoundError500       = errors.New("500. Failed to get task response digest")
 	UnknownErrorWhileVerifyingSignature400   = errors.New("400. Failed to verify signature")
 	SignatureVerificationFailed400           = errors.New("400. Signature verification failed")
@@ -76,7 +77,8 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 }
 
 type SignedTaskResponse struct {
-	TaskResponse string
+	OpTaskResponse string
+	RdTaskResponse string
 	BlsSignature bls.Signature
 	OperatorId   types.OperatorId
 }
@@ -87,34 +89,95 @@ type SignedTaskResponse struct {
 func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskResponse, reply *bool) error {
 	agg.logger.Info("Received signed task response", "response", signedTaskResponse, "operatorId", signedTaskResponse.OperatorId.LogValue())
 
-	task_response_bytes, err := hex.DecodeString(signedTaskResponse.TaskResponse[2:])
+	op_task_response_bytes, err := hex.DecodeString(signedTaskResponse.OpTaskResponse[2:])
 	if err != nil {
-		agg.logger.Error("Failed to get task_response_bytes", "err", err)
-		return TaskResponseDigestNotFoundError500
+		agg.logger.Error("Failed to get op_task_response_bytes", "err", err)
+		return BadTaskResponseError500
 	}
 
-	var taskResponse taskmanager.IFinalizerTaskManagerTaskResponse
+	rd_task_response_bytes, err := hex.DecodeString(signedTaskResponse.RdTaskResponse[2:])
+	if err != nil {
+		agg.logger.Error("Failed to get rd_task_response_bytes", "err", err)
+		return BadTaskResponseError500
+	}
+
+	if len(op_task_response_bytes) !=0 && len(rd_task_response_bytes) !=0 {
+		agg.logger.Error("Both op and rd task response are popoulated")
+		return BadTaskResponseError500
+	}
+
+	if len(op_task_response_bytes) ==0 && len(rd_task_response_bytes) ==0 {
+		agg.logger.Error("Neither op nor rd task response are popoulated")
+		return BadTaskResponseError500
+	}
+
+	// due to above checks it is one of the two op or rd tasks
+	// so the following should work
+
+	var taskId types.TaskId
+	var genericTaskResponse interface{}
+	var taskResponseDigest [32]byte
 
 	parsedAbi, err := taskmanager.ContractFinalizerTaskManagerMetaData.GetAbi()
-	// TODO replace with dummy function?
-	inputParameters := parsedAbi.Methods["respondToTask"].Inputs
-	args := inputParameters[1:2]
-	unpacked, err := args.Unpack(task_response_bytes)
-	if err != nil {
-		agg.logger.Error("Failed to get task response", "err", err)
-		return TaskResponseDigestNotFoundError500
-	}
-	x := abi.ConvertType(unpacked[0], taskResponse)
-	cx, ok := x.(taskmanager.IFinalizerTaskManagerTaskResponse)
-	if !ok {
-		agg.logger.Error("Failed to get task response cx", "cx", cx)
-		return TaskResponseDigestNotFoundError500
+
+	if len(op_task_response_bytes) !=0 {
+		var taskResponse taskmanager.IFinalizerTaskManagerOpTaskResponse
+	
+		// TODO replace with dummy function?
+		inputParameters := parsedAbi.Methods["respondToOpTask"].Inputs
+		args := inputParameters[1:2]
+		unpacked, err := args.Unpack(op_task_response_bytes)
+		if err != nil {
+			agg.logger.Error("Failed to get task response", "err", err)
+			return TaskResponseDigestNotFoundError500
+		}
+		x := abi.ConvertType(unpacked[0], taskResponse)
+		cx, ok := x.(taskmanager.IFinalizerTaskManagerOpTaskResponse)
+		if !ok {
+			agg.logger.Error("Failed to get task response cx", "cx", cx)
+			return TaskResponseDigestNotFoundError500
+		}
+	
+		taskResponse = cx
+	
+		taskId := types.TaskId{
+			TaskType: types.TaskType(0),
+			TaskIndex: types.TaskIndex(taskResponse.ReferenceTaskIndex),
+			}
+		taskResponseDigest, err = core.GetOpTaskResponseDigest(&taskResponse)
+		genericTaskResponse = taskResponse
+
 	}
 
-	taskResponse = cx
+	if len(rd_task_response_bytes) !=0 {
+		var taskResponse taskmanager.IFinalizerTaskManagerRdTaskResponse
+	
+		// TODO replace with dummy function?
+		inputParameters := parsedAbi.Methods["respondToRdTask"].Inputs
+		args := inputParameters[1:2]
+		unpacked, err := args.Unpack(rd_task_response_bytes)
+		if err != nil {
+			agg.logger.Error("Failed to get task response", "err", err)
+			return TaskResponseDigestNotFoundError500
+		}
+		x := abi.ConvertType(unpacked[0], taskResponse)
+		cx, ok := x.(taskmanager.IFinalizerTaskManagerRdTaskResponse)
+		if !ok {
+			agg.logger.Error("Failed to get task response cx", "cx", cx)
+			return TaskResponseDigestNotFoundError500
+		}
+	
+		taskResponse = cx
+	
+		taskId := types.TaskId{
+			TaskType: types.TaskType(1),
+			TaskIndex: types.TaskIndex(taskResponse.ReferenceTaskIndex),
+			}
+		taskResponseDigest, err = core.GetRdTaskResponseDigest(&taskResponse)
+		genericTaskResponse = taskResponse
 
-	taskIndex := taskResponse.ReferenceTaskIndex
-	taskResponseDigest, err := core.GetTaskResponseDigest(&taskResponse)
+	}
+
 	if err != nil {
 		agg.logger.Error("Failed to get task response digest", "err", err)
 		return TaskResponseDigestNotFoundError500
@@ -124,16 +187,16 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 		return OperatorNotRegistered400
 	}
 	agg.taskResponsesMu.Lock()
-	if _, ok := agg.taskResponses[taskIndex]; !ok {
-		agg.taskResponses[taskIndex] = make(map[sdktypes.TaskResponseDigest]taskmanager.IFinalizerTaskManagerTaskResponse)
+	if _, ok := agg.taskResponses[taskId]; !ok {
+		agg.taskResponses[taskId] = make(map[sdktypes.TaskResponseDigest]interface{})
 	}
-	if _, ok := agg.taskResponses[taskIndex][taskResponseDigest]; !ok {
-		agg.taskResponses[taskIndex][taskResponseDigest] = taskResponse
+	if _, ok := agg.taskResponses[taskId][taskResponseDigest]; !ok {
+		agg.taskResponses[taskId][taskResponseDigest] = genericTaskResponse
 	}
 	agg.taskResponsesMu.Unlock()
 
 	err = agg.blsAggregationService.ProcessNewSignature(
-		context.Background(), taskIndex, taskResponseDigest,
+		context.Background(), taskId, taskResponseDigest,
 		&signedTaskResponse.BlsSignature, signedTaskResponse.OperatorId,
 	)
 	return err

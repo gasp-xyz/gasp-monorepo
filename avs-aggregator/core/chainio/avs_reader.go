@@ -14,6 +14,7 @@ import (
 	logging "github.com/Layr-Labs/eigensdk-go/logging"
 
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	// blsSignatureChecker "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
 )
 
 type AvsReaderer interface {
@@ -21,9 +22,9 @@ type AvsReaderer interface {
 		ctx context.Context, msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
 	) (taskmanager.IBLSSignatureCheckerQuorumStakeTotals, error)
 
-	GetTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerTaskResponded, error)
+	GetRdTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
 
-	GetNonSigningOperatorPubKeys(event taskmanager.ContractFinalizerTaskManagerTaskResponded) ([]*bls.G1Point, error)
+	GetNonSigningOperatorPubKeys(event taskmanager.ContractFinalizerTaskManagerRdTaskResponded) ([]*bls.G1Point, error)
 }
 
 type AvsReader struct {
@@ -65,8 +66,8 @@ func (r *AvsReader) CheckSignatures(
 	return stakeTotalsPerQuorum, nil
 }
 
-func (r *AvsReader) GetTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerTaskResponded, error) {
-	events := []taskmanager.ContractFinalizerTaskManagerTaskResponded{}
+func (r *AvsReader) GetRdTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error) {
+	events := []taskmanager.ContractFinalizerTaskManagerRdTaskResponded{}
 
 	currentBlock, err := r.AvsServiceBindings.ethClient.BlockNumber(ctx)
 	if err != nil {
@@ -74,8 +75,8 @@ func (r *AvsReader) GetTaskRespondedEvents(ctx context.Context, blocksAgo uint32
 		return nil, err
 	}
 	opts := bind.FilterOpts{Start: currentBlock - uint64(blocksAgo), End: &currentBlock, Context: ctx}
-	r.logger.Debug("Getting FilterTaskResponded", "opts", opts)
-	it, err := r.AvsServiceBindings.TaskManager.FilterTaskResponded(&opts, []uint32{})
+	r.logger.Debug("Getting FilterRdTaskResponded", "opts", opts)
+	it, err := r.AvsServiceBindings.TaskManager.FilterRdTaskResponded(&opts, []uint32{})
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func (r *AvsReader) GetTaskRespondedEvents(ctx context.Context, blocksAgo uint32
 	return events, nil
 }
 
-func (r *AvsReader) GetNonSigningOperatorPubKeys(event taskmanager.ContractFinalizerTaskManagerTaskResponded) ([]*bls.G1Point, error) {
+func (r *AvsReader) GetNonSigningOperatorPubKeys(event taskmanager.ContractFinalizerTaskManagerRdTaskResponded) ([]*bls.G1Point, error) {
 	// r.logger.Debug("event.Raw is", "event.Raw", event.Raw)
 
 	// get the nonSignerStakesAndSignature

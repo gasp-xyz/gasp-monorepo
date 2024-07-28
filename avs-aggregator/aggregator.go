@@ -65,9 +65,9 @@ type Aggregator struct {
 	ethRpc           *chainio.EthRpc
 	// aggregation related fields
 	blsAggregationService   blsagg.BlsAggregationService
-	tasks                   map[types.TaskIndex]taskmanager.IFinalizerTaskManagerTask
+	tasks                   map[types.TaskIndex]interface{}
 	tasksMu                 sync.RWMutex
-	taskResponses           map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IFinalizerTaskManagerTaskResponse
+	taskResponses           map[types.TaskIndex]map[sdktypes.TaskResponseDigest]interface{}
 	taskResponsesMu         sync.RWMutex
 	substrateClient         gsrpc.SubstrateAPI
 	taskResponseWindowBlock uint32
@@ -150,8 +150,8 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		serverIpPortAddr:        c.ServerAddressPort,
 		ethRpc:                  ethRpc,
 		blsAggregationService:   blsAggregationService,
-		tasks:                   make(map[types.TaskIndex]taskmanager.IFinalizerTaskManagerTask),
-		taskResponses:           make(map[types.TaskIndex]map[sdktypes.TaskResponseDigest]taskmanager.IFinalizerTaskManagerTaskResponse),
+		tasks:                   make(map[types.TaskId]interface{}),
+		taskResponses:           make(map[types.TaskId]map[sdktypes.TaskResponseDigest]interface{}),
 		substrateClient:         *substrateRpc,
 		taskResponseWindowBlock: taskResponseWindowBlock,
 		blockPeriod:             uint32(c.BlockPeriod),
@@ -224,67 +224,141 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		NonSignerStakeIndices:        blsAggServiceResp.NonSignerStakeIndices,
 	}
 
-	NonSignerStakesAndSignatureForOldState := taskmanager.IGaspMultiRollupServicePrimitivesNonSignerStakesAndSignatureForOldState{
-		NonSignerG1PubkeysForOldState: NonSignerG1PubkeysForOldState,
-		ApkG2ForOldState:                                        core.ConvertToBN254G2Point(blsAggServiceResp.OldSignersApkG2),
-		SigmaForOldState:                                         core.ConvertToBN254G1Point(blsAggServiceResp.OldSignersAggSigG1.G1Point),
-	}
-
-	agg.logger.Info("sending aggregated response onchain.", "taskIndex", blsAggServiceResp.TaskIndex)
+	agg.logger.Info("sending aggregated response onchain.", "TaskId", blsAggServiceResp.TaskId)
 	agg.tasksMu.RLock()
-	task := agg.tasks[blsAggServiceResp.TaskIndex]
+	task := agg.tasks[blsAggServiceResp.TaskId]
 	agg.tasksMu.RUnlock()
 	agg.taskResponsesMu.RLock()
-	taskResponse := agg.taskResponses[blsAggServiceResp.TaskIndex][blsAggServiceResp.TaskResponseDigest]
+	taskResponse := agg.taskResponses[blsAggServiceResp.TaskId][blsAggServiceResp.TaskResponseDigest]
 	agg.taskResponsesMu.RUnlock()
 
-	r, err := agg.ethRpc.AvsWriter.SendAggregatedResponse(context.Background(), task, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState)
-	if err != nil {
-		agg.logger.Error("Aggregator failed to respond to task", "task", task, "err", err)
+	if blsAggServiceResp.TaskId.TaskType == 0 {
+
+		opTask, ok := task.(taskmanager.IFinalizerTaskManagerOpTask)
+		if err != nil {
+			agg.logger.Error("FATAL: Aggregator failed to decode opTask", "task", task)
+			return
+		}
+		opTaskResponse, ok := taskResponse.(taskmanager.IFinalizerTaskManagerOpTaskResponse)
+		if err != nil {
+			agg.logger.Error("FATAL: Aggregator failed to decode opTaskResponse", "taskResponse", taskResponse)
+			return
+		}
+		r, err := agg.ethRpc.AvsWriter.SendAggregatedOpTaskResponse(context.Background(), opTask, opTaskResponse, nonSignerStakesAndSignature)
+		if err != nil {
+			agg.logger.Error("Aggregator failed to respond to task", "task", task, "err", err)
+		}
+		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r)
+
+	} else if blsAggServiceResp.TaskId.TaskType == 1 {
+
+		rdTask, ok := task.(taskmanager.IFinalizerTaskManagerRdTask)
+		if err != nil {
+			agg.logger.Error("FATAL: Aggregator failed to decode rdTask", "task", task)
+			return
+		}
+		rdTaskResponse, ok := taskResponse.(taskmanager.IFinalizerTaskManagerRdTaskResponse)
+		if err != nil {
+			agg.logger.Error("FATAL: Aggregator failed to decode rdTaskResponse", "taskResponse", taskResponse)
+			return
+		}
+		r, err := agg.ethRpc.AvsWriter.SendAggregatedRdTaskResponse(context.Background(), rdTask, rdTaskResponse, nonSignerStakesAndSignature)
+		if err != nil {
+			agg.logger.Error("Aggregator failed to respond to task", "task", task, "err", err)
+		}
+		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r)
+
+	} else {
+		agg.logger.Error("FATAL: Aggregator failed to recognize TaskType", "blsAggServiceResp.TaskId", blsAggServiceResp.TaskId)
+		return
 	}
-	agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r)
+
 }
 
 // sendNewTask sends a new task to the task manager contract, and updates the Task dict struct
 // with the information of operators opted into quorum 0 at the block of task creation.
 func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
-	if blockNumber%agg.blockPeriod != 0 {
+	isRduTask := blockNumber%agg.blockPeriod == 0
+	isOpsTask := blockNumber%agg.blockPeriodOpsTask == 0
+
+	if !isRduTask && !isOpsTask {
 		return nil
 	}
+
+	// Why this check?
 	latest, err := agg.substrateClient.RPC.Chain.GetHeaderLatest()
 	if uint32(latest.Number) != blockNumber || err != nil {
 		return nil
 	}
 
-	agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
-	// Send number to square to the task manager contract
-	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewTaskVerifyBlock(context.Background(), big.NewInt(int64(blockNumber)), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
-	if err != nil {
-		agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
-		return err
+	isOpsInit := agg.ethRpc.AvsReader.AvsServiceBindings.TaskManager.GetLastOpsCheckpoint() != 0
+
+
+	if isOpsTask{
+		agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
+		// Send number to square to the task manager contract
+		newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewOpTask(context.Background(), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
+		if err != nil {
+			agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
+			return err
+		}
+
+		taskId := types.TaskId{
+			TaskType: types.TaskType(0),
+			TaskIndex: types.TaskIndex(taskIndex),
+			}
+
+		agg.tasksMu.Lock()
+		agg.tasks[taskIndex] = newTask
+		agg.tasksMu.Unlock()
+
+		quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.QuorumNumbers))
+		for i, _ := range newTask.QuorumNumbers {
+			quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.QuorumThresholdPercentage)
+		}
+		quorumNums := make(sdktypes.QuorumNums, len(newTask.QuorumNumbers))
+		for i, n := range newTask.QuorumNumbers {
+			quorumNums[i] = sdktypes.QuorumNum(n)
+		}
+		taskTimeToExpiry := time.Second * time.Duration(agg.expiration) * 2
+		agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
+		agg.logger.Info("Aggregator initialized new operator state task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
 	}
 
-	agg.tasksMu.Lock()
-	agg.tasks[taskIndex] = newTask
-	agg.tasksMu.Unlock()
+	if isRduTask && isOpsInit{
+		agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
+		// Send number to square to the task manager contract
+		newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewRdTask(context.Background(), big.NewInt(int64(blockNumber)))
+		if err != nil {
+			agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
+			return err
+		}
 
-	agg.kicker.TriggerNewTask(taskIndex)
-	agg.updater.TriggerNewTask(taskIndex)
+		taskId := types.TaskId{
+			TaskType: types.TaskType(1),
+			TaskIndex: types.TaskIndex(taskIndex),
+			}
 
-	quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.QuorumNumbers))
-	for i, _ := range newTask.QuorumNumbers {
-		quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.QuorumThresholdPercentage)
+		agg.tasksMu.Lock()
+		agg.tasks[taskIndex] = newTask
+		agg.tasksMu.Unlock()
+
+		agg.kicker.TriggerNewTask(taskIndex)
+		agg.updater.TriggerNewTask(taskIndex)
+
+		quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.QuorumNumbers))
+		for i, _ := range newTask.QuorumNumbers {
+			quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.QuorumThresholdPercentage)
+		}
+		quorumNums := make(sdktypes.QuorumNums, len(newTask.QuorumNumbers))
+		for i, n := range newTask.QuorumNumbers {
+			quorumNums[i] = sdktypes.QuorumNum(n)
+		}
+		taskTimeToExpiry := time.Second * time.Duration(agg.expiration)
+		agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, newTask.LastCompletedOpTaskQuorumNumbers, newTask.LastCompletedOpTaskQuorumThresholdPercentage, taskTimeToExpiry)
+		agg.logger.Info("Aggregator initialized new rolldown update task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
 	}
-	quorumNums := make(sdktypes.QuorumNums, len(newTask.QuorumNumbers))
-	for i, n := range newTask.QuorumNumbers {
-		quorumNums[i] = sdktypes.QuorumNum(n)
-	}
-	lastCompletedTaskQuorumNums := make(sdktypes.QuorumNums, len(newTask.LastCompletedTaskQuorumNumbers))
-	for i, n := range newTask.LastCompletedTaskQuorumNumbers {
-		lastCompletedTaskQuorumNums[i] = sdktypes.QuorumNum(n)
-	}
-	taskTimeToExpiry := time.Second * time.Duration(agg.expiration)
-	agg.blsAggregationService.InitializeNewTask(taskIndex, newTask.TaskCreatedBlock, quorumNums, newTask.LastCompletedTaskCreatedBlock, lastCompletedTaskQuorumNums, quorumThresholdPercentages, taskTimeToExpiry)
-	agg.logger.Info("Aggregator initialized new task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
+
+
 	return nil
 }

@@ -9,36 +9,36 @@ interface IFinalizerTaskManager {
 
     event BLSSignatureCheckerAddressUpdated(address blsSignatureCheckerAddress);
 
-    event NewOpTaskCreated(uint32 indexed taskIndex, OperatorUpdateTask task);
+    event NewOpTaskCreated(uint32 indexed taskIndex, OpTask task);
 
     // When we have some response from OPs
     // note we want to keep track of responded tasks that did not meet the completion criteria 
     event OpTaskResponded(
         uint32 indexed taskIndex,
-        OperatorUpdateTaskResponse taskResponse,
+        OpTaskResponse taskResponse,
         TaskResponseMetadata taskResponseMetadata
     );
 
     // When aggregated stake for OP's responses exceeds the required threshold
     event OpTaskCompleted(uint32 indexed taskIndex,
-        OperatorUpdateTaskResponse taskResponse);
+        OpTaskResponse taskResponse);
 
-    event NewRdTaskCreated(uint32 indexed taskIndex, RolldownUpdateTask task);
+    event NewRdTaskCreated(uint32 indexed taskIndex, RdTask task);
 
     // When we have some response from OPs
     // note we want to keep track of responded tasks that did not meet the completion criteria 
     event RdTaskResponded(
         uint32 indexed taskIndex,
-        RolldownUpdateTaskResponse taskResponse,
+        RdTaskResponse taskResponse,
         TaskResponseMetadata taskResponseMetadata
     );
 
     // When aggregated stake for OP's responses exceeds the required threshold
     event RdTaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash,
-        RolldownUpdateTaskResponse taskResponse);
+        RdTaskResponse taskResponse);
 
     // STRUCTS
-    struct OperatorUpdateTask {
+    struct OpTask {
         // the task number
         uint32 taskNum;
         // used for expiration checks
@@ -60,7 +60,7 @@ interface IFinalizerTaskManager {
 
     // Task response is hashed and signed by operators.
     // these signatures are aggregated and sent to the contract as response.
-    struct OperatorUpdateTaskResponse {
+    struct OpTaskResponse {
         // Can be obtained by the operator from the event NewTaskCreated.
         uint32 referenceTaskIndex;
         bytes32 referenceTaskHash;
@@ -68,7 +68,7 @@ interface IFinalizerTaskManager {
         bytes32 operatorsStateInfoHash;
     }
 
-    struct RolldownUpdateTask {
+    struct RdTask {
         // the task number
         uint32 taskNum;
         // L2 block number which operators are required to execute and provide proofs for
@@ -84,7 +84,7 @@ interface IFinalizerTaskManager {
 
     // Task response is hashed and signed by operators.
     // these signatures are aggregated and sent to the contract as response.
-    struct RolldownUpdateTaskResponse {
+    struct RdTaskResponse {
         // Can be obtained by the operator from the event NewTaskCreated.
         uint32 referenceTaskIndex;
         bytes32 referenceTaskHash;
