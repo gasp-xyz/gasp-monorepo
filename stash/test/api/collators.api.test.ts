@@ -49,7 +49,7 @@ function validateValidApyRange(body) {
     expect(apy).to.be.greaterThan(10)
 }
 
-describe('APi tests: Collator apy - dailyRewards', () => { //todo: remove skip once we know new collator addresses
+describe('APi tests: Collator apy - dailyRewards', () => { //todo: remove skip once we have rewards
     it("GET /collators/dailyReward - no data", async () => {
         await supertest(app)
             .get("/collator/foo/staking/dailyreward")
