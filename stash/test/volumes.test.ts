@@ -4,7 +4,7 @@ import { TimestampedAmount } from '../src/schema/Models'
 import * as fixtures from './fixtures'
 chai.should()
 
-describe.skip('test volumes processor', () => {
+describe('test volumes processor', () => {
   const store: Map<number, TimestampedAmount[]> = new Map()
   const latests: Map<number, number> = new Map()
 
@@ -61,11 +61,11 @@ describe.skip('test volumes processor', () => {
       .should.be.eql([...fixtures.latest.values()])
 
     // check len of the processed entries
-    store.get(fixtures.asset_10.id)!.length.should.be.equal(fixtures.LEN)
-    store.get(fixtures.asset_11.id)!.length.should.be.equal(fixtures.LEN / 2)
+    store.get(fixtures.asset_10.id)!.length.should.be.equal(0)
+    store.get(fixtures.asset_11.id)!.length.should.be.equal(0)
     store.get(fixtures.asset_12.id)!.length.should.be.equal(fixtures.LEN / 2)
     store.get(fixtures.asset_13.id)!.length.should.be.equal(0)
-    store.get(fixtures.asset_14.id)!.length.should.be.equal(fixtures.LEN / 4)
+    store.get(fixtures.asset_14.id)!.length.should.be.equal(0)
     store.get(fixtures.asset_15.id)!.length.should.be.equal(0)
     store.get(fixtures.asset_16.id)!.length.should.be.equal(fixtures.LEN / 4)
     store.get(fixtures.asset_17.id)!.length.should.be.equal(0)

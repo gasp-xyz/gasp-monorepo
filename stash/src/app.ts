@@ -1,4 +1,4 @@
-import '@mangata-finance/types'
+import 'gasp-types'
 import express, { Request, Response, json, urlencoded } from 'express'
 import swaggerUI from 'swagger-ui-express'
 import cors from 'cors'

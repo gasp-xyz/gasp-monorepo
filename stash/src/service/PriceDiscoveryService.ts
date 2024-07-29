@@ -1,4 +1,4 @@
-import { fromBN, TokenInfo } from '@mangata-finance/sdk'
+import { fromBN, TokenInfo } from 'gasp-sdk'
 import { BN } from '@polkadot/util'
 import { Decimal } from 'decimal.js'
 import _ from 'lodash'
@@ -19,7 +19,7 @@ import logger from '../util/Logger.js'
 
 const minInSec = 60
 const secInMs = 1000
-const coinGeckoId = process.env.APP_ENV === 'rollup-dev' ? 'ethereum' : 'kusama'
+const coinGeckoId = 'ethereum'
 const tokenForPriceSymbol = process.env.TOKEN_FOR_PRICE_SYMBOL
 
 let baseTokenPrice: CoinGeckoCoinData = null

@@ -13,9 +13,6 @@ import { ZERO } from '../util/Misc.js'
 const ETHEREUM_ID = 'ethereum'
 const ETH_DECIMALS = new Decimal(1e18)
 
-const KUSAMA_ID = 'kusama'
-const KSM_DECIMALS = new Decimal(1e12)
-
 export const initService = async (base: number = BASE_TOKEN) => {
   await prepareKusama()
   await processPrices(base)
@@ -160,26 +157,17 @@ const prepareKusama = async () => {
     return
   }
 
-  const prices = await getCoinHistory(
-    process.env.APP_ENV === 'rollup-dev' ? ETHEREUM_ID : KUSAMA_ID,
-    diff
-  )
+  const prices = await getCoinHistory(ETHEREUM_ID, diff)
 
   await priceStore.save(
     BASE_TOKEN,
     BASE_TOKEN,
-    prices.map((p) => [
-      p.timestamp,
-      p.price.div(
-        process.env.APP_ENV === 'rollup-dev' ? ETH_DECIMALS : KSM_DECIMALS
-      ),
-    ]),
+    prices.map((p) => [p.timestamp, p.price.div(ETH_DECIMALS)]),
     prices.length === 0 ? 0 : _.last(prices).timestamp
   )
   logger.debug(
-    `PriceService: fetched ${
-      process.env.APP_ENV === 'rollup-dev' ? 'ethereum' : 'kusama'
-    } ${prices.length} prices`
+    `PriceService: fetched 'ethereum'
+     ${prices.length} prices`
   )
 }
 
