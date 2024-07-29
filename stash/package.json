@@ -41,6 +41,7 @@
     "@polkadot/util-crypto": "^12.3.2",
     "async": "^3.2.4",
     "async-redis": "^2.0.0",
+    "axios": "^1.7.2",
     "bignumber.js": "^9.1.2",
     "chai": "^4.3.7",
     "chai-http": "^4.4.0",

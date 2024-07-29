@@ -857,6 +857,30 @@
         }
       }
     },
+    "/faucet/requestTokens/{address}/captcha/{captchaToken}/": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "captchaToken",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/coinmarketcap/v1/summary": {
       "get": {
         "tags": [
