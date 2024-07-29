@@ -66,6 +66,18 @@ func (r *AvsReader) CheckSignatures(
 	return stakeTotalsPerQuorum, nil
 }
 
+func (r *AvsReader) LastCompletedOpTaskCreatedBlock(
+	ctx context.Context,
+) (uint32, error) {
+	v, err := r.AvsServiceBindings.TaskManager.LastCompletedOpTaskCreatedBlock(
+		&bind.CallOpts{},
+	)
+	if err != nil {
+		return uint32(0), err
+	}
+	return v, nil
+}
+
 func (r *AvsReader) GetRdTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error) {
 	events := []taskmanager.ContractFinalizerTaskManagerRdTaskResponded{}
 

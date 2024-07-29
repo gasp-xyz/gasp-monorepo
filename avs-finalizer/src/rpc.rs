@@ -6,7 +6,7 @@ use ark_ec::AffineRepr;
 use ark_ff::PrimeField;
 use bindings::{
     finalizer_task_manager::OperatorStateInfo,
-    shared_types::{Task, TaskResponse, *},
+    shared_types::{OpTask, OpTaskResponse, RdTask, RdTaskResponse, *},
 };
 use ethers::abi::AbiEncode;
 use reqwest::Response;
@@ -19,13 +19,15 @@ use serde::{ser::SerializeStruct, Serialize};
 use sp_core::Bytes;
 use sp_runtime::traits::{Hash, Keccak256};
 use tracing::instrument;
+use eyre::eyre;
 
 type Bytes32 = [u8; 32];
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 struct SignedTaskResponse {
-    task_response: Bytes,
+    op_task_response: Bytes,
+    rd_task_response: Bytes,
     bls_signature: BlsSignatureWire,
     operator_id: Bytes32,
 }
@@ -100,25 +102,53 @@ impl Rpc {
     #[instrument(skip(self, keypair))]
     pub async fn send_task_response(
         &self,
-        task_response: TaskResponse,
+        op_task_response: Option<OpTaskResponse>,
+        rd_task_response: Option<RdTaskResponse>,
         keypair: &BlsKeypair,
     ) -> eyre::Result<Response> {
-        let req = create_response(task_response, keypair)?;
+        let req = create_response(op_task_response, rd_task_response, keypair)?;
+        println!("req: {:?}", req);
         let json: String = serde_json::to_string(&req)?;
 
         Ok(self.client.post(&self.avs_url).body(json).send().await?)
     }
 }
 
-fn create_response(task: TaskResponse, keypair: &BlsKeypair) -> eyre::Result<SignedTaskResponse> {
-    let encoded = task.clone().encode();
+fn create_response(op_task_response: Option<OpTaskResponse>, rd_task_response: Option<RdTaskResponse>, keypair: &BlsKeypair) -> eyre::Result<SignedTaskResponse> {
 
-    let hash = Keccak256::hash(encoded.as_ref());
-    let sig = keypair.sign(hash.as_bytes())?;
+    match (op_task_response, rd_task_response){
+        (Some(task), None)=>{
 
-    Ok(SignedTaskResponse {
-        bls_signature: sig.into(),
-        task_response: task.encode().into(),
-        operator_id: keypair.operator_id().to_fixed_bytes(),
-    })
+            let encoded = task.clone().encode();
+
+            let hash = Keccak256::hash(encoded.as_ref());
+            let sig = keypair.sign(hash.as_bytes())?;
+
+            return Ok(SignedTaskResponse {
+                bls_signature: sig.into(),
+                op_task_response: encoded.into(),
+                rd_task_response: vec![].into(),
+                operator_id: keypair.operator_id().to_fixed_bytes(),
+            })
+        },
+        (None, Some(task))=>{
+            let encoded = task.clone().encode();
+        
+            let hash = Keccak256::hash(encoded.as_ref());
+            let sig = keypair.sign(hash.as_bytes())?;
+        
+            Ok(SignedTaskResponse {
+                bls_signature: sig.into(),
+                op_task_response: vec![].into(),
+                rd_task_response: encoded.into(),
+                operator_id: keypair.operator_id().to_fixed_bytes(),
+            })
+        },
+        (None, None)=>{
+            return Err(eyre!("Neither of op and rd task response populated"));
+        },
+        (Some(_), Some(_))=>{
+            return Err(eyre!("Both of op and rd task response populated"));
+        }
+    }
 }

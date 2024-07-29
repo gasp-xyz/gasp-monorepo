@@ -7,11 +7,11 @@ use crate::rpc::Rpc;
 
 use bindings::{
     finalizer_task_manager::{
-        NewTaskCreatedFilter, Operator as TMOperator, OperatorStateInfo, OperatorsAdded,
+        NewOpTaskCreatedFilter, NewRdTaskCreatedFilter, Operator as TMOperator, OperatorStateInfo, OperatorsAdded,
         OperatorsQuorumCountUpdate, OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate,
-        QuorumsStakeUpdate,
+        QuorumsStakeUpdate, FinalizerTaskManagerEvents
     },
-    shared_types::{G1Point, G2Point, Task, TaskResponse},
+    shared_types::{G1Point, G2Point, OpTask, OpTaskResponse, RdTask, RdTaskResponse},
 };
 use ethers::providers::{Middleware, PendingTransaction, SubscriptionStream};
 use ethers::{
@@ -34,6 +34,7 @@ use tokio::select;
 use tokio::time::{sleep, Duration};
 use tokio::try_join;
 use tracing::{debug, error, info, instrument};
+use eyre::eyre;
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
@@ -97,7 +98,7 @@ impl Operator {
     #[instrument(skip_all)]
     pub async fn watch_new_tasks(self: Arc<Self>) -> eyre::Result<()> {
         let evs = self.clone().avs_contracts.new_task_stream();
-        let mut stream: stream::EventStream<'_, _, (NewTaskCreatedFilter, LogMeta), _> =
+        let mut stream: stream::EventStream<'_, _, (FinalizerTaskManagerEvents, LogMeta), _> =
             evs.subscribe_with_meta().await?;
 
         // event stream does not finish with `None` after websocket closure, use block subscription for it
@@ -106,42 +107,46 @@ impl Operator {
 
         loop {
             select! {
-                Some(event) = stream.next() => match event {
-                    Ok((event, log)) => {
+                Some(stream_event) = stream.next() => match stream_event {
+                    Ok((stream_event, log)) => {
                         debug!("Got new task at: {:?}", log);
-                        PendingTransaction::new(log.transaction_hash, self.client.provider()).await?;
-                        let event_clone = event.clone();
-                        let self_clone = self.clone();
-                        let execute_block_join_handle = tokio::spawn(async move {
-                            info!("Executing a Block for task: {:?}", event_clone);
-                            self_clone.execute_block(event_clone.task.block_number.as_u32()).await
-
-                        });
-                        let event_clone = event.clone();
-                        let self_clone = self.clone();
-                        let get_operators_state_info_hash_handle = tokio::spawn(async move {
-                            info!("Get operators state hash: {:?}", event_clone);
-                            self_clone.get_operators_state_info_hash(event_clone.task).await
-                        });
-                        let (proofs, operators_state_info_hash) = try_join!(execute_block_join_handle, get_operators_state_info_hash_handle)?;
-                        let (proofs, operators_state_info_hash) = (proofs?, operators_state_info_hash?);
-                        debug!("Operators State Info Hash {:?}", operators_state_info_hash);
-                        debug!("Block executed successfully {:?}", proofs);
-                        let payload = TaskResponse {
-                            reference_task_index: event.task_index,
-                            reference_task_hash: Keccak256::hash(
-                                vec![0u8;31].into_iter().chain(vec![32u8]).chain(
-                                    event.task.clone().encode().into_iter()
-                                ).collect::<Vec<_>>()
-                                .as_ref()).into(),
-                            operators_state_info_hash: operators_state_info_hash,
-                            block_hash: proofs.0.as_fixed_bytes().to_owned(),
-                            storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
-                            pending_state_hash: proofs.2.as_fixed_bytes().to_owned(),
-                        };
+                        PendingTransaction::new(log.transaction_hash, self.clone().client.provider()).await?;
+                        let mut op_payload: Option<OpTaskResponse> = None;
+                        let mut rd_payload: Option<RdTaskResponse> = None;
+                        match stream_event {
+                            FinalizerTaskManagerEvents::NewOpTaskCreatedFilter(event) => {
+                                let operators_state_info_hash = self.clone().get_operators_state_info_hash(event.task.clone()).await?;
+                                debug!("Operators State Info Hash {:?}", operators_state_info_hash);
+                                op_payload = Some(OpTaskResponse {
+                                    reference_task_index: event.task_index,
+                                    reference_task_hash: Keccak256::hash(
+                                        vec![0u8;31].into_iter().chain(vec![32u8]).chain(
+                                            event.task.clone().encode().into_iter()
+                                        ).collect::<Vec<_>>()
+                                        .as_ref()).into(),
+                                    operators_state_info_hash: operators_state_info_hash,
+                                });
+                            },
+                            FinalizerTaskManagerEvents::NewRdTaskCreatedFilter(event) => {
+                                let proofs = self.clone().execute_block(event.task.block_number.as_u32()).await?;
+                                debug!("Block executed successfully {:?}", proofs);
+                                rd_payload = Some(RdTaskResponse {
+                                    reference_task_index: event.task_index,
+                                    reference_task_hash: Keccak256::hash(
+                                        vec![0u8;31].into_iter().chain(vec![32u8]).chain(
+                                            event.task.clone().encode().into_iter()
+                                        ).collect::<Vec<_>>()
+                                        .as_ref()).into(),
+                                    block_hash: proofs.0.as_fixed_bytes().to_owned(),
+                                    storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
+                                    pending_state_hash: proofs.2.as_fixed_bytes().to_owned(),
+                                });
+                            },
+                            _ => return Err(eyre!("Got unexpected stream event"))
+                        }
                         let response = self
                             .rpc
-                            .send_task_response(payload, &self.bls_keypair)
+                            .send_task_response(op_payload, rd_payload, &self.bls_keypair)
                             .await;
                         match response {
                             Ok(r) => match r.error_for_status_ref() {
@@ -184,18 +189,18 @@ impl Operator {
 
     pub(crate) async fn get_operators_state_info_hash(
         self: Arc<Self>,
-        task: Task,
+        task: OpTask,
     ) -> eyre::Result<[u8; 32]> {
         // We assume that the quorumNumbers are alteast unique even if not sorted
         let mut old_quorum_numbers = task
-            .last_completed_task_quorum_numbers
+            .last_completed_op_task_quorum_numbers
             .into_iter()
             .collect::<Vec<u8>>();
         let mut new_quorum_numbers = task.quorum_numbers.into_iter().collect::<Vec<u8>>();
         old_quorum_numbers.sort();
         new_quorum_numbers.sort();
 
-        let old_task_block = task.last_completed_task_created_block;
+        let old_task_block = task.last_completed_op_task_created_block;
         let new_task_block = task.task_created_block;
 
         let registry_coordinator_address = &self.avs_contracts.registry_coordinator_address;
@@ -487,7 +492,7 @@ impl Operator {
             || !operators_stake_update.is_empty()
             || !operators_quorum_count_update.is_empty()
             || (task.quorum_threshold_percentage
-                != task.last_completed_task_quorum_threshold_percentage);
+                != task.last_completed_op_task_quorum_threshold_percentage);
 
         let operator_state_info = OperatorStateInfo {
             operators_state_changed: operators_state_changed,

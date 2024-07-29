@@ -64,8 +64,7 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 			status = http.StatusInternalServerError
 		default:
 			switch err.Error() {
-			// case blsagg.TaskNotFoundErrorFn(response.TaskResponse.ReferenceTaskIndex).Error():
-			case blsagg.TaskNotFoundErrorFn(0).Error():
+			case blsagg.TaskNotFoundErrorFn().Error():
 				status = http.StatusNotFound
 			default:
 				status = http.StatusBadRequest
@@ -140,11 +139,15 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 	
 		taskResponse = cx
 	
-		taskId := types.TaskId{
+		taskId = types.TaskId{
 			TaskType: types.TaskType(0),
 			TaskIndex: types.TaskIndex(taskResponse.ReferenceTaskIndex),
 			}
 		taskResponseDigest, err = core.GetOpTaskResponseDigest(&taskResponse)
+		if err != nil {
+			agg.logger.Error("Failed to get task response digest", "err", err)
+			return TaskResponseDigestNotFoundError500
+		}
 		genericTaskResponse = taskResponse
 
 	}
@@ -169,19 +172,19 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 	
 		taskResponse = cx
 	
-		taskId := types.TaskId{
+		taskId = types.TaskId{
 			TaskType: types.TaskType(1),
 			TaskIndex: types.TaskIndex(taskResponse.ReferenceTaskIndex),
 			}
 		taskResponseDigest, err = core.GetRdTaskResponseDigest(&taskResponse)
+		if err != nil {
+			agg.logger.Error("Failed to get task response digest", "err", err)
+			return TaskResponseDigestNotFoundError500
+		}
 		genericTaskResponse = taskResponse
 
 	}
 
-	if err != nil {
-		agg.logger.Error("Failed to get task response digest", "err", err)
-		return TaskResponseDigestNotFoundError500
-	}
 	if signedTaskResponse.OperatorId == [32]byte{} {
 		agg.logger.Error("Operator not registered", "err", err)
 		return OperatorNotRegistered400

@@ -165,10 +165,10 @@ contract FinalizerTaskManager is
         OpTaskResponse calldata taskResponse,
         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
     ) external {
-        uint32 referenceTaskIndex = taskResponse.referenceTaskIndex;
+        uint32 isInit = lastCompletedOpTaskCreatedBlock == 0;
         uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
 
-        if (referenceTaskIndex == 0) {
+        if (isInit) {
             if (allowNonRootInit) {
                 require(msg.sender == aggregator, "Auth0");
             } else {
@@ -210,7 +210,7 @@ contract FinalizerTaskManager is
 
         IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
 
-        if (referenceTaskIndex != 0) {
+        if (isInit) {
             // check the BLS signature
             (quorumStakeTotals, hashOfNonSigners) =
                 blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
@@ -230,7 +230,7 @@ contract FinalizerTaskManager is
         emit OpTaskResponded(task.taskNum, taskResponse, taskResponseMetadata);
 
 
-        if (referenceTaskIndex != 0) {
+        if (isInit) {
             // check that signatories own at least a threshold percentage of each quourm
             for (uint256 i = 0; i < quorumNumbers.length; i++) {
                 // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
@@ -253,6 +253,99 @@ contract FinalizerTaskManager is
         lastCompletedOpTaskNum = task.taskNum;
         // emitting completed event
         emit OpTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
+    }
+
+    function forceCreateNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
+        external
+        onlyOwner
+    {
+        require(
+            lastCompletedOpTaskCreatedBlock != block.number && block.number != 0,
+            "Can't create a task in the same block as a completed task"
+        );
+        // create a new task struct
+        OpTask memory newTask;
+        newTask.taskNum = latestOpTaskNum;
+        newTask.taskCreatedBlock = uint32(block.number);
+        newTask.quorumThresholdPercentage = quorumThresholdPercentage;
+        newTask.quorumNumbers = quorumNumbers;
+        // This is to help the aggregator function as it currently is while 
+        // being compatible with past op state verficiation
+        if (lastCompletedOpTaskCreatedBlock == 0) {
+            newTask.lastCompletedOpTaskCreatedBlock = uint32(block.number);
+        } else {
+            newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
+        }
+        newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
+        newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
+
+        // Ensure new previous task was either cancelled or completed
+        // Here for now we auto cancel previous task if not completed
+        if (latestOpTaskNum > 0) {
+            uint32 lastTaskNum = latestOpTaskNum - 1;
+            if (idToTaskStatus[TaskType.OP_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
+                idToTaskStatus[TaskType.OP_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+            }
+        }
+
+        // store hash of task onchain, emit event, and increase taskNum
+        allTaskHashes[TaskType.OP_TASK][latestOpTaskNum] = keccak256(abi.encode(newTask));
+        idToTaskStatus[TaskType.OP_TASK][latestOpTaskNum] = TaskStatus.INITIALIZED;
+        emit NewOpTaskCreated(latestOpTaskNum, newTask);
+        emit NewOpTaskForceCreated(latestOpTaskNum, newTask);
+        latestOpTaskNum = latestOpTaskNum + 1;
+    }
+
+    function forceRespondToOpTask(
+        OpTask calldata task,
+        OpTaskResponse calldata taskResponse
+    ) external onlyOwner {
+        uint32 referenceTaskIndex = taskResponse.referenceTaskIndex;
+        uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
+
+        uint32 taskCreatedBlock = task.taskCreatedBlock;
+        bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
+        uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
+
+        // check that the task is valid, hasn't been responsed yet, and is being responsed in time
+        require(
+            keccak256(abi.encode(task)) == allTaskHashes[TaskType.OP_TASK][taskResponse.referenceTaskIndex],
+            "supplied task does not match the one recorded in the contract"
+        );
+        // some logical checks
+        require(
+            idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
+            "Aggregator has already responded to the task"
+        );
+        require(
+            allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
+            "Aggregator has already responded to the task"
+        );
+        require(
+            uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
+            "Aggregator has responded to the task too late"
+        );
+
+        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
+
+        TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
+            uint32(block.number),
+            hashOfNonSigners,
+            quorumStakeTotals.totalStakeForQuorum,
+            quorumStakeTotals.signedStakeForQuorum
+        );
+        // updating the storage with task responsea
+        allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
+
+        operatorsStateInfoHash = taskResponse.operatorsStateInfoHash;
+        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.COMPLETED;
+        lastCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
+        lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
+        lastCompletedOpTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
+        lastCompletedOpTaskNum = task.taskNum;
+        // emitting completed event
+        emit OpTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
+        emit OpTaskForceCompleted(taskResponse.referenceTaskIndex, taskResponse);
     }
 
 

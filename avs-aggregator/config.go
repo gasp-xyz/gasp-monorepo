@@ -21,6 +21,7 @@ type Config struct {
 
 	ServerAddressPort string
 	BlockPeriod       int
+	BlockPeriodOpsTask       int
 	Expiration        int
 	UpdatePeriod      int
 	DebounceRpc       int
@@ -81,6 +82,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		LogLevel:                   logLevel,
 		ServerAddressPort:          ctx.GlobalString(config.AvsServerPortAddressFlag.Name),
 		BlockPeriod:                ctx.GlobalInt(config.AvsBlockValidationPeriodFlag.Name),
+		BlockPeriodOpsTask:                ctx.GlobalInt(config.AvsOpTaskPeriodFlag.Name),
 		Expiration:                 ctx.GlobalInt(config.AvsTaskExpirationFlag.Name),
 		KickPeriod:                 ctx.GlobalInt(config.AvsKickPeriodFlag.Name),
 		UpdatePeriod:               ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
@@ -109,6 +111,7 @@ var Flags = []cli.Flag{
 	config.EcdsaKeyJsonFlag,
 	config.EcdsaKeyPasswordFlag,
 	config.AvsBlockValidationPeriodFlag,
+	config.AvsOpTaskPeriodFlag,
 	config.AvsKickPeriodFlag,
 	config.AvsUpdateStakePeriodFlag,
 	config.AvsTaskExpirationFlag,

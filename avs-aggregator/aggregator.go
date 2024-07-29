@@ -61,13 +61,14 @@ type Aggregator struct {
 	logger           sdklogging.Logger
 	serverIpPortAddr string
 	blockPeriod      uint32
+	blockPeriodOpsTask uint32
 	expiration       uint32
 	ethRpc           *chainio.EthRpc
 	// aggregation related fields
 	blsAggregationService   blsagg.BlsAggregationService
-	tasks                   map[types.TaskIndex]interface{}
+	tasks                   map[sdktypes.TaskId]interface{}
 	tasksMu                 sync.RWMutex
-	taskResponses           map[types.TaskIndex]map[sdktypes.TaskResponseDigest]interface{}
+	taskResponses           map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{}
 	taskResponsesMu         sync.RWMutex
 	substrateClient         gsrpc.SubstrateAPI
 	taskResponseWindowBlock uint32
@@ -110,7 +111,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, errors.New("config.chainId & ethRpcClient.chainId mismatch")
 	}
 
-	taskResponseWindowBlock, err := ethRpc.AvsWriter.AvsContractBindings.TaskManager.GetTaskResponseWindowBlock(&bind.CallOpts{})
+	taskResponseWindowBlock, err := ethRpc.AvsWriter.AvsContractBindings.TaskManager.TaskResponseWindowBlock(&bind.CallOpts{})
 	if err != nil {
 		logger.Error("Cannot get taskChallengeWindowBlock from TaskManager contract", "err", err)
 		return nil, err
@@ -150,11 +151,12 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		serverIpPortAddr:        c.ServerAddressPort,
 		ethRpc:                  ethRpc,
 		blsAggregationService:   blsAggregationService,
-		tasks:                   make(map[types.TaskId]interface{}),
-		taskResponses:           make(map[types.TaskId]map[sdktypes.TaskResponseDigest]interface{}),
+		tasks:                   make(map[sdktypes.TaskId]interface{}),
+		taskResponses:           make(map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{}),
 		substrateClient:         *substrateRpc,
 		taskResponseWindowBlock: taskResponseWindowBlock,
 		blockPeriod:             uint32(c.BlockPeriod),
+		blockPeriodOpsTask:		 uint32(c.BlockPeriodOpsTask),
 		kicker:                  kicker,
 		updater:                 updater,
 		expiration:              uint32(c.Expiration),
@@ -205,10 +207,6 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		log = append(log, hex.EncodeToString(id[:]))
 	}
 	agg.logger.Info("Response non signer ids", "nonSignerIds", log)
-	NonSignerG1PubkeysForOldState := []taskmanager.BN254G1Point{}
-	for _, nonSignerPubkeyOld := range blsAggServiceResp.NonSignerG1PubkeysForOldState {
-		NonSignerG1PubkeysForOldState = append(NonSignerG1PubkeysForOldState, core.ConvertToBN254G1Point(nonSignerPubkeyOld))
-	}
 	quorumApks := []taskmanager.BN254G1Point{}
 	for _, quorumApk := range blsAggServiceResp.QuorumApksG1 {
 		quorumApks = append(quorumApks, core.ConvertToBN254G1Point(quorumApk))
@@ -235,12 +233,12 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 	if blsAggServiceResp.TaskId.TaskType == 0 {
 
 		opTask, ok := task.(taskmanager.IFinalizerTaskManagerOpTask)
-		if err != nil {
+		if !ok {
 			agg.logger.Error("FATAL: Aggregator failed to decode opTask", "task", task)
 			return
 		}
 		opTaskResponse, ok := taskResponse.(taskmanager.IFinalizerTaskManagerOpTaskResponse)
-		if err != nil {
+		if !ok {
 			agg.logger.Error("FATAL: Aggregator failed to decode opTaskResponse", "taskResponse", taskResponse)
 			return
 		}
@@ -253,12 +251,12 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 	} else if blsAggServiceResp.TaskId.TaskType == 1 {
 
 		rdTask, ok := task.(taskmanager.IFinalizerTaskManagerRdTask)
-		if err != nil {
+		if !ok {
 			agg.logger.Error("FATAL: Aggregator failed to decode rdTask", "task", task)
 			return
 		}
 		rdTaskResponse, ok := taskResponse.(taskmanager.IFinalizerTaskManagerRdTaskResponse)
-		if err != nil {
+		if !ok {
 			agg.logger.Error("FATAL: Aggregator failed to decode rdTaskResponse", "taskResponse", taskResponse)
 			return
 		}
@@ -291,8 +289,13 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 		return nil
 	}
 
-	isOpsInit := agg.ethRpc.AvsReader.AvsServiceBindings.TaskManager.GetLastOpsCheckpoint() != 0
+	lastCompletedOpTaskCreatedBlock, err := agg.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlock(context.Background());
+	if err != nil {
+		agg.logger.Error("Aggregator failed to get LastCompletedOpTaskCreatedBlock", "err", err)
+		return err
+	}
 
+	isOpsInit := lastCompletedOpTaskCreatedBlock != 0
 
 	if isOpsTask{
 		agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
@@ -303,13 +306,13 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 			return err
 		}
 
-		taskId := types.TaskId{
-			TaskType: types.TaskType(0),
-			TaskIndex: types.TaskIndex(taskIndex),
+		taskId := sdktypes.TaskId{
+			TaskType: sdktypes.TaskType(0),
+			TaskIndex: sdktypes.TaskIndex(taskIndex),
 			}
 
 		agg.tasksMu.Lock()
-		agg.tasks[taskIndex] = newTask
+		agg.tasks[taskId] = newTask
 		agg.tasksMu.Unlock()
 
 		quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.QuorumNumbers))
@@ -334,28 +337,28 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 			return err
 		}
 
-		taskId := types.TaskId{
-			TaskType: types.TaskType(1),
-			TaskIndex: types.TaskIndex(taskIndex),
+		taskId := sdktypes.TaskId{
+			TaskType: sdktypes.TaskType(1),
+			TaskIndex: sdktypes.TaskIndex(taskIndex),
 			}
 
 		agg.tasksMu.Lock()
-		agg.tasks[taskIndex] = newTask
+		agg.tasks[taskId] = newTask
 		agg.tasksMu.Unlock()
 
 		agg.kicker.TriggerNewTask(taskIndex)
 		agg.updater.TriggerNewTask(taskIndex)
 
-		quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.QuorumNumbers))
-		for i, _ := range newTask.QuorumNumbers {
-			quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.QuorumThresholdPercentage)
+		quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.LastCompletedOpTaskQuorumNumbers))
+		for i, _ := range newTask.LastCompletedOpTaskQuorumNumbers {
+			quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.LastCompletedOpTaskQuorumThresholdPercentage)
 		}
-		quorumNums := make(sdktypes.QuorumNums, len(newTask.QuorumNumbers))
-		for i, n := range newTask.QuorumNumbers {
+		quorumNums := make(sdktypes.QuorumNums, len(newTask.LastCompletedOpTaskQuorumNumbers))
+		for i, n := range newTask.LastCompletedOpTaskQuorumNumbers {
 			quorumNums[i] = sdktypes.QuorumNum(n)
 		}
 		taskTimeToExpiry := time.Second * time.Duration(agg.expiration)
-		agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, newTask.LastCompletedOpTaskQuorumNumbers, newTask.LastCompletedOpTaskQuorumThresholdPercentage, taskTimeToExpiry)
+		agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
 		agg.logger.Info("Aggregator initialized new rolldown update task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
 	}
 
