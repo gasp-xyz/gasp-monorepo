@@ -41,7 +41,6 @@ function validateReturnedDate(date :string, format : string) {
 
 //perhaps those addresses may change when data is upgraded!
 
-// const oldCollatorAddress = "5EtT1Psa48f9KSNMZqZgwPj6guNULVeRUzcA9w1Kk8DkP9iZ";
 const collatorAddress =  "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
 
 function validateValidApyRange(body) {
@@ -99,7 +98,7 @@ describe('APi tests: Collator apy - dailyRewards', () => { //todo: remove skip o
                 expect(rewardValue.toNumber()).gt(5000 );
             });
     })
-    it.skip("GET /collators/apy - old - collator - OK", async () => { //todo: gonzalo to check
+    it.skip("GET /collators/apy - old - collator - OK", async () => { //todo: qa to fix and remove skip
         await supertest(app)
             .get(`/collator/${ethCollatorAddress}/staking/apy`)
             // .expect(200)
@@ -117,7 +116,7 @@ describe('APi tests: Collator apy - dailyRewards', () => { //todo: remove skip o
                 validateValidApyRange(body);
             });
     })
-    it.skip("GET /collators/dailyReward - old - collator - OK", async () => { //todo: gonzalo to check
+    it.skip("GET /collators/dailyReward - old - collator - OK", async () => { //todo: qa to fix and remove skip
         await supertest(app)
             .get(`/collator/${oldCollatorAddress}/staking/dailyReward`)
             .expect(200)

@@ -77,7 +77,7 @@ describe('test trades processor', () => {
 
     // check len of the processed entries
     // event every 25 block
-    store.get(fixtures.asset_10.id)!.length.should.be.equal(0) //todo: gonzalo to check this, for now test matches the actual data
+    store.get(fixtures.asset_10.id)!.length.should.be.equal(0) //todo: qa to check this, for now test matches the actual data
     store.get(fixtures.asset_11.id)!.length.should.be.equal(0)
     store.get(fixtures.asset_12.id)!.length.should.be.equal(0)
     store.get(fixtures.asset_13.id)!.length.should.be.equal(0)

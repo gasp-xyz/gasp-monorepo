@@ -61,7 +61,7 @@ describe('test volumes processor', () => {
       .should.be.eql([...fixtures.latest.values()])
 
     // check len of the processed entries
-    store.get(fixtures.asset_10.id)!.length.should.be.equal(0) //todo: gonzalo to check this, for now test matches the data
+    store.get(fixtures.asset_10.id)!.length.should.be.equal(0) //todo: qa to check this, for now test matches the data
     store.get(fixtures.asset_11.id)!.length.should.be.equal(0)
     store.get(fixtures.asset_12.id)!.length.should.be.equal(fixtures.LEN / 2)
     store.get(fixtures.asset_13.id)!.length.should.be.equal(0)

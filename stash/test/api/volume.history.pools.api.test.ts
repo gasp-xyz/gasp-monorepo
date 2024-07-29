@@ -45,10 +45,6 @@ import { MAX_DAYS, MAX_INTERVAL, ERROR_MSG_POOL_NOT_FOUND } from "./utils";
                 .expect(500)
                 .then((response) => {
                     const fooResponse = response.body;
-                    console.log('fooResponse', fooResponse)
-                    console.log('fooResponse.exceptionName', fooResponse.exceptionName)
-                    console.log('fooResponse.message', fooResponse.message)
-                    console.log('ERROR_MSG_POOL_NOT_FOUND', ERROR_MSG_POOL_NOT_FOUND)
                     expect(fooResponse.exceptionName).to.contain("ValidationError")
                     expect(fooResponse.message).to.contain(ERROR_MSG_POOL_NOT_FOUND)
                 });

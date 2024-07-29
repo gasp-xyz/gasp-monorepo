@@ -43,10 +43,10 @@ app.get('/xcm/network', xcmController.network)
 app.get('/xcm/tokens', xcmController.tokens)
 
 app.get(
-  '/collator/:collatorAddress/staking/dailyReward', //koja je adresa collatora
+  '/collator/:collatorAddress/staking/dailyReward',
   stakingAprController.dailyReward
 )
-app.get('/collator/:collatorAddress/staking/apy', stakingAprController.apy) //koja je adresa collatora
+app.get('/collator/:collatorAddress/staking/apy', stakingAprController.apy)
 app.get('/collators/staking/apy', stakingAprController.collatorsApy)
 
 app.get(

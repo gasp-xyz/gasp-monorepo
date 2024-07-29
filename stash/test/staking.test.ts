@@ -100,7 +100,7 @@ describe('[Staking]', () => {
         apy: '62.027726047981274135',
         token: '5',
         date: '16/08/2023',
-        collatorAddress: '5ChaosDANFE2q4qH3UnCUJ5ZXHms5TWwsbrx4YXNrwQh2nfk', //todo: gonzalo to check what value we should set here
+        collatorAddress: '5ChaosDANFE2q4qH3UnCUJ5ZXHms5TWwsbrx4YXNrwQh2nfk', //todo: qa to check what value we should set here
         dateFormat: 'DD/MM/YYYY',
         timestamp: '1692208122954',
       }

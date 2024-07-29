@@ -136,6 +136,6 @@ export const processLiquidStaking = async (api: ApiPromise, block: Block) => {
       .map((e) => [e.timestamp, JSON.stringify(e)])
       .flat()
     storeInRedis.length > 0 &&
-      (await timeseries.client.zadd(KEY_ACCOUNT, ...storeInRedis)) //ovde se cuvaju samo eventovi koji se odnose na account and collator
+      (await timeseries.client.zadd(KEY_ACCOUNT, ...storeInRedis))
   }
 }

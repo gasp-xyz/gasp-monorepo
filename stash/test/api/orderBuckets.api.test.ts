@@ -28,7 +28,7 @@ beforeAll(async () => {
     await redis.client.hset(TOKEN_ORDER_BUCKETS_KEY, { ["stables"]: JSON.stringify({"bucket":"stables","rank":1,"tokens":["USDT","USDC","aUSD"]}) })
     await redis.client.hset(TOKEN_ORDER_BUCKETS_KEY, { ["bluechips"]: JSON.stringify({ "bucket": "bluechips", "rank": 2, "tokens": [ "BTC", "ETH" ] }) })
     await redis.client.hset(TOKEN_ORDER_BUCKETS_KEY, { ["l0"]: JSON.stringify({ "bucket": "l0", "rank": 3, "tokens": [ "DOT", "KSM" ] }) })
-    await redis.client.hset(TOKEN_ORDER_BUCKETS_KEY, { ["dextoken"]: JSON.stringify({ "bucket": "dextoken", "rank": 4, "tokens": [ "MGA", "GASPV2", "GETH", "L1Asset" ] }) }) //todo: gonzalo to check all the values in lines 28-35
+    await redis.client.hset(TOKEN_ORDER_BUCKETS_KEY, { ["dextoken"]: JSON.stringify({ "bucket": "dextoken", "rank": 4, "tokens": [ "MGA", "GASPV2", "GETH", "L1Asset" ] }) }) //todo: qa to check all the values in lines 28-35
     await redis.client.hset(TOKEN_ORDER_BUCKETS_KEY, { ["l1"]: JSON.stringify({ "bucket": "l1", "rank": 5, "tokens": [ "MOVR", "BNC", "OAK", "TUR", "IMBU", "ZLK", "RMRK" ] }) })
     await redis.client.hset(TOKEN_ORDER_BUCKETS_KEY, { ["l2"]: JSON.stringify({ "bucket": "l2", "rank": 6, "tokens": [] }) })
     await redis.client.hset(TOKEN_ORDER_BUCKETS_KEY, { ["protocols"]: JSON.stringify({ "bucket": "protocols", "rank": 7, "tokens": [] }) })
@@ -65,7 +65,7 @@ describe('APi tests: Buckets', () => {
                         //Exclude tokens with 0 balance
                         .filter((token) => token[1].toHuman() !== "0")
                         .map( (token) => token[0].toHuman()[0].toString());
-                console.log('Only assets :' , onlyAssets);
+                console.log(onlyAssets);
                 for (let i = 0; i < onlyAssets.length ; i++) {
                     const tokenInfo = ( await mangataNode.query.getTokenInfo(onlyAssets[i]));
                     console.log("Validating :" + JSON.stringify(tokenInfo)  + " :: "  + onlyAssets[i]);

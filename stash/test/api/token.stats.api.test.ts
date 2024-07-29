@@ -47,9 +47,9 @@ describe('APi tests: token stats', () => {
             .then(async(response) => {
                 const allTokens = (await supertest(app).get("/token/list/stats").expect(200)).body;
                 const gaspV2Token = response.body;
-                const onlyKsm = allTokens.filter( (token: { tokenId: any; }) => token.tokenId === gaspV2Token.tokenId);
-                expect(onlyKsm.length).toEqual(1);
-                expect(onlyKsm[0]).toEqual(gaspV2Token);
+                const onlyGaspV2 = allTokens.filter( (token: { tokenId: any; }) => token.tokenId === gaspV2Token.tokenId);
+                expect(onlyGaspV2.length).toEqual(1);
+                expect(onlyGaspV2[0]).toEqual(gaspV2Token);
             })
     })
     it("GET /token/list/stats - List matches with all the tokens with pool", async () => {
@@ -61,7 +61,7 @@ describe('APi tests: token stats', () => {
         pools.forEach( (pool) => {
             const firstTokenId = pool[1].toHuman()[0];
             const secondTokenId = pool[1].toHuman()[1];
-            const excludePool = [ "2" , "3"]; //todo: leave only pool with 0 1 token ids (geth and gaspv2)
+            const excludePool = [ "2" , "3"]; // leave only pool with 0 1 token ids (geth and gaspv2)
             const firstToken = allstats.filter( (token: { tokenId: any; }) => token.tokenId === firstTokenId );
             const secondToken = allstats.filter( (token: { tokenId: any; }) => token.tokenId === secondTokenId );
             console.log( `Token ${firstTokenId} , ${secondTokenId} `)

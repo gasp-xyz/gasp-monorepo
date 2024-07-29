@@ -72,7 +72,7 @@ describe('test pricing processor', () => {
     //asset_10 (1000 pools)
     store.get(1)!.length.should.be.equal(fixtures.LEN)
     // asset_11(500 pools) + asset_18 dependent of 7 (750 prices)
-    store.get(2)!.length.should.be.equal((fixtures.LEN / 4)) //todo: gonzalo to check this
+    store.get(2)!.length.should.be.equal((fixtures.LEN / 4)) //todo: qa to check this
     // dependent on asset 2
     store.get(3)!.length.should.be.equal(0)
     // zeros
