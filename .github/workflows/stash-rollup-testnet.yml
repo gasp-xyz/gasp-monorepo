@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      - chore/MGX-1301/cleanup_and_improvements
-
     paths:
       - "stash/**/*"
       - ".github/**/rollup-testnet**"
@@ -44,11 +42,11 @@ jobs:
       - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
       - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run test-ci'
 
-#      - name: Deploy to Google App Engine
-#        working-directory: stash
-#        run: |
-#          sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
-#          gcloud app deploy app.tmp.yaml --quiet
+      - name: Deploy to Google App Engine
+        working-directory: stash
+        run: |
+          sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
+          gcloud app deploy app.tmp.yaml --quiet
       
       # TODO: temporary disable smoke test
       # - name: smoke test
