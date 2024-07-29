@@ -13,7 +13,7 @@ export const verifyCaptcha = async (captchaToken: string): Promise<boolean> => {
     const payload = {
       secret: process.env.CAPTCHA_SECRET, //comment out this, and uncomment the next line to test with the test token
       // secret: TEST_SECRET,
-      secret: process.env.CAPTCHA_SITEKEY, //comment out this, and uncomment the next line to test with the test token
+      sitekey: process.env.CAPTCHA_SITEKEY, //comment out this, and uncomment the next line to test with the test token
       // sitekey: TEST_SITEKEY,
       response: captchaToken,
     }
