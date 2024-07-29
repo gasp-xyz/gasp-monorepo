@@ -41,8 +41,10 @@ const getPools = async (block: Block): Promise<PoolEntry[]> => {
       liquidityAssetsInPool[0].toString(),
       liquidityAssetsInPool[1].toString(),
     ])
+    const humanLiquidityPoolId = toHuman(liquidityPoolId)
+    const numberLiquidityPoolId = Number(humanLiquidityPoolId)
     const entry: PoolEntry = {
-      id: toHuman(liquidityPoolId).toNumber,
+      id: numberLiquidityPoolId,
       amounts: [
         new Decimal(amounts[0].replace(/,/g, '').toString()),
         new Decimal(amounts[1].replace(/,/g, '').toString()),
