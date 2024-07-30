@@ -1,13 +1,9 @@
 services:
   gasp-syncer:
     image: mangatasolutions/gasp-syncer:${GASP_SYNCER_VERSION:-local}
-    restart: no
     build:
       context: .
-      dockerfile: src/bin/Dockerfile
-      platforms: [linux/amd64]
-      args:
-        - BINARY_PATH=${GASP_SYNCER_BINARY_PATH:-target/release/main}
+      dockerfile: Dockerfile.local
     depends_on:
       eth-stub:
         condition: service_healthy
