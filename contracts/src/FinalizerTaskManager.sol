@@ -137,11 +137,13 @@ contract FinalizerTaskManager is
         // being compatible with past op state verficiation
         if (lastCompletedOpTaskCreatedBlock == 0) {
             newTask.lastCompletedOpTaskCreatedBlock = uint32(block.number);
+            newTask.lastCompletedOpTaskQuorumNumbers = quorumNumbers;
+            newTask.lastCompletedOpTaskQuorumThresholdPercentage = quorumThresholdPercentage;
         } else {
             newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
+            newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
+            newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
         }
-        newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
-        newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
 
         // Ensure new previous task was either cancelled or completed
         // Here for now we auto cancel previous task if not completed
@@ -165,7 +167,7 @@ contract FinalizerTaskManager is
         OpTaskResponse calldata taskResponse,
         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
     ) external {
-        uint32 isInit = lastCompletedOpTaskCreatedBlock == 0;
+        bool isInit = lastCompletedOpTaskCreatedBlock == 0;
         uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
 
         if (isInit) {
@@ -273,11 +275,13 @@ contract FinalizerTaskManager is
         // being compatible with past op state verficiation
         if (lastCompletedOpTaskCreatedBlock == 0) {
             newTask.lastCompletedOpTaskCreatedBlock = uint32(block.number);
+            newTask.lastCompletedOpTaskQuorumNumbers = quorumNumbers;
+            newTask.lastCompletedOpTaskQuorumThresholdPercentage = quorumThresholdPercentage;
         } else {
             newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
+            newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
+            newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
         }
-        newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
-        newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
 
         // Ensure new previous task was either cancelled or completed
         // Here for now we auto cancel previous task if not completed

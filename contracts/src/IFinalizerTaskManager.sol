@@ -10,6 +10,7 @@ interface IFinalizerTaskManager {
     event BLSSignatureCheckerAddressUpdated(address blsSignatureCheckerAddress);
 
     event NewOpTaskCreated(uint32 indexed taskIndex, OpTask task);
+    event NewOpTaskForceCreated(uint32 indexed taskIndex, OpTask task);
 
     // When we have some response from OPs
     // note we want to keep track of responded tasks that did not meet the completion criteria 
@@ -21,6 +22,9 @@ interface IFinalizerTaskManager {
 
     // When aggregated stake for OP's responses exceeds the required threshold
     event OpTaskCompleted(uint32 indexed taskIndex,
+        OpTaskResponse taskResponse);
+
+    event OpTaskForceCompleted(uint32 indexed taskIndex,
         OpTaskResponse taskResponse);
 
     event NewRdTaskCreated(uint32 indexed taskIndex, RdTask task);

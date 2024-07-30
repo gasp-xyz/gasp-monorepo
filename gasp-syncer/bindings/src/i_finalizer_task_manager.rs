@@ -71,6 +71,39 @@ pub mod i_finalizer_task_manager {
                     ],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("NewOpTaskForceCreated"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "NewOpTaskForceCreated",
+                            ),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("taskIndex"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    indexed: true,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("task"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
+                                        ::std::vec![
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                        ],
+                                    ),
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("NewRdTaskCreated"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Event {
@@ -105,6 +138,35 @@ pub mod i_finalizer_task_manager {
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Event {
                             name: ::std::borrow::ToOwned::to_owned("OpTaskCompleted"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("taskIndex"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    indexed: true,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("taskResponse"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
+                                        ::std::vec![
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                        ],
+                                    ),
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("OpTaskForceCompleted"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "OpTaskForceCompleted",
+                            ),
                             inputs: ::std::vec![
                                 ::ethers::core::abi::ethabi::EventParam {
                                     name: ::std::borrow::ToOwned::to_owned("taskIndex"),
@@ -332,6 +394,16 @@ pub mod i_finalizer_task_manager {
         > {
             self.0.event()
         }
+        ///Gets the contract's `NewOpTaskForceCreated` event
+        pub fn new_op_task_force_created_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            NewOpTaskForceCreatedFilter,
+        > {
+            self.0.event()
+        }
         ///Gets the contract's `NewRdTaskCreated` event
         pub fn new_rd_task_created_filter(
             &self,
@@ -349,6 +421,16 @@ pub mod i_finalizer_task_manager {
             ::std::sync::Arc<M>,
             M,
             OpTaskCompletedFilter,
+        > {
+            self.0.event()
+        }
+        ///Gets the contract's `OpTaskForceCompleted` event
+        pub fn op_task_force_completed_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            OpTaskForceCompletedFilter,
         > {
             self.0.event()
         }
@@ -452,6 +534,27 @@ pub mod i_finalizer_task_manager {
         Hash
     )]
     #[ethevent(
+        name = "NewOpTaskForceCreated",
+        abi = "NewOpTaskForceCreated(uint32,(uint32,uint32,uint32,bytes,uint32,bytes,uint32))"
+    )]
+    pub struct NewOpTaskForceCreatedFilter {
+        #[ethevent(indexed)]
+        pub task_index: u32,
+        pub task: OpTask,
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
+    #[ethevent(
         name = "NewRdTaskCreated",
         abi = "NewRdTaskCreated(uint32,(uint32,uint256,uint32,uint32,bytes,uint32))"
     )]
@@ -477,6 +580,27 @@ pub mod i_finalizer_task_manager {
         abi = "OpTaskCompleted(uint32,(uint32,bytes32,bytes32))"
     )]
     pub struct OpTaskCompletedFilter {
+        #[ethevent(indexed)]
+        pub task_index: u32,
+        pub task_response: OpTaskResponse,
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
+    #[ethevent(
+        name = "OpTaskForceCompleted",
+        abi = "OpTaskForceCompleted(uint32,(uint32,bytes32,bytes32))"
+    )]
+    pub struct OpTaskForceCompletedFilter {
         #[ethevent(indexed)]
         pub task_index: u32,
         pub task_response: OpTaskResponse,
@@ -562,8 +686,10 @@ pub mod i_finalizer_task_manager {
     pub enum IFinalizerTaskManagerEvents {
         BlssignatureCheckerAddressUpdatedFilter(BlssignatureCheckerAddressUpdatedFilter),
         NewOpTaskCreatedFilter(NewOpTaskCreatedFilter),
+        NewOpTaskForceCreatedFilter(NewOpTaskForceCreatedFilter),
         NewRdTaskCreatedFilter(NewRdTaskCreatedFilter),
         OpTaskCompletedFilter(OpTaskCompletedFilter),
+        OpTaskForceCompletedFilter(OpTaskForceCompletedFilter),
         OpTaskRespondedFilter(OpTaskRespondedFilter),
         RdTaskCompletedFilter(RdTaskCompletedFilter),
         RdTaskRespondedFilter(RdTaskRespondedFilter),
@@ -584,11 +710,21 @@ pub mod i_finalizer_task_manager {
             if let Ok(decoded) = NewOpTaskCreatedFilter::decode_log(log) {
                 return Ok(IFinalizerTaskManagerEvents::NewOpTaskCreatedFilter(decoded));
             }
+            if let Ok(decoded) = NewOpTaskForceCreatedFilter::decode_log(log) {
+                return Ok(
+                    IFinalizerTaskManagerEvents::NewOpTaskForceCreatedFilter(decoded),
+                );
+            }
             if let Ok(decoded) = NewRdTaskCreatedFilter::decode_log(log) {
                 return Ok(IFinalizerTaskManagerEvents::NewRdTaskCreatedFilter(decoded));
             }
             if let Ok(decoded) = OpTaskCompletedFilter::decode_log(log) {
                 return Ok(IFinalizerTaskManagerEvents::OpTaskCompletedFilter(decoded));
+            }
+            if let Ok(decoded) = OpTaskForceCompletedFilter::decode_log(log) {
+                return Ok(
+                    IFinalizerTaskManagerEvents::OpTaskForceCompletedFilter(decoded),
+                );
             }
             if let Ok(decoded) = OpTaskRespondedFilter::decode_log(log) {
                 return Ok(IFinalizerTaskManagerEvents::OpTaskRespondedFilter(decoded));
@@ -611,10 +747,16 @@ pub mod i_finalizer_task_manager {
                 Self::NewOpTaskCreatedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
+                Self::NewOpTaskForceCreatedFilter(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::NewRdTaskCreatedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::OpTaskCompletedFilter(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
+                Self::OpTaskForceCompletedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::OpTaskRespondedFilter(element) => {
@@ -640,6 +782,12 @@ pub mod i_finalizer_task_manager {
             Self::NewOpTaskCreatedFilter(value)
         }
     }
+    impl ::core::convert::From<NewOpTaskForceCreatedFilter>
+    for IFinalizerTaskManagerEvents {
+        fn from(value: NewOpTaskForceCreatedFilter) -> Self {
+            Self::NewOpTaskForceCreatedFilter(value)
+        }
+    }
     impl ::core::convert::From<NewRdTaskCreatedFilter> for IFinalizerTaskManagerEvents {
         fn from(value: NewRdTaskCreatedFilter) -> Self {
             Self::NewRdTaskCreatedFilter(value)
@@ -648,6 +796,12 @@ pub mod i_finalizer_task_manager {
     impl ::core::convert::From<OpTaskCompletedFilter> for IFinalizerTaskManagerEvents {
         fn from(value: OpTaskCompletedFilter) -> Self {
             Self::OpTaskCompletedFilter(value)
+        }
+    }
+    impl ::core::convert::From<OpTaskForceCompletedFilter>
+    for IFinalizerTaskManagerEvents {
+        fn from(value: OpTaskForceCompletedFilter) -> Self {
+            Self::OpTaskForceCompletedFilter(value)
         }
     }
     impl ::core::convert::From<OpTaskRespondedFilter> for IFinalizerTaskManagerEvents {
