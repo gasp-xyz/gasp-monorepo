@@ -115,13 +115,9 @@ func (w *AvsWriter) SendAggregatedOpTaskResponse(ctx context.Context, task taskm
 	if err != nil {
 		return nil, err
 	}
-	w.logger.Info("assembling RespondToOpTask tx: %x", noSendTxOpts)
-	w.logger.Info("assembling RespondToOpTask tx: %x", task)
-	w.logger.Info("assembling RespondToOpTask tx: %x", taskResponse)
-	w.logger.Info("assembling RespondToOpTask tx: %x", nonSignerStakesAndSignature)
 	tx, err := w.AvsContractBindings.TaskManager.RespondToOpTask(noSendTxOpts, task, taskResponse, nonSignerStakesAndSignature)
 	if err != nil {
-		w.logger.Errorf("Error assembling RespondToOpTask tx", "err", err)
+		w.logger.Errorf("Error assembling RespondToOpTask tx")
 		return nil, err
 	}
 

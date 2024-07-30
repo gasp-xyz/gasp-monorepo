@@ -239,6 +239,10 @@ contract Deployer is Script, Utils, Test {
         );
 
         blsSignatureChecker = new BLSSignatureChecker(registryCoordinator);
+        // This is a hack to set BlsSignatureChecker's staleStakesForbidden flag
+        // We do it this way to avoid forking it...
+        // This hack depends on avsOwner being the same as the deployer...
+        blsSignatureChecker.setStaleStakesForbidden(false);
 
         taskManagerImplementation = new FinalizerTaskManager();
 
