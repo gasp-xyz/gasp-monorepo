@@ -4,7 +4,7 @@ import MangataClient from '../connector/MangataNode.js'
 import { BN } from '@polkadot/util'
 import { priceDiscovery } from '../service/PriceDiscoveryService.js'
 import { Decimal } from 'decimal.js'
-import { fromBN } from '@mangata-finance/sdk'
+import { fromBN } from 'gasp-sdk'
 
 export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
   try {
@@ -14,8 +14,10 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
     )
     const portfolioBalance = accountBalances.map(
       async ([storageKey, value]) => {
-        const freeTokens = new BN(value.free.toString())
-        const frozenTokens = new BN(value.frozen.toString())
+        const free = JSON.parse(JSON.stringify(value)).free.toString()
+        const frozen = JSON.parse(JSON.stringify(value)).frozen.toString()
+        const freeTokens = new BN(free)
+        const frozenTokens = new BN(frozen)
         const freeBalance = freeTokens.sub(frozenTokens)
         const tokenId = storageKey.args[1].toString()
         const tokenInfo = (

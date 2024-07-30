@@ -12,7 +12,7 @@ services:
       - --rpc-cors=all
       - --unsafe-rpc-external
       - --rpc-methods=unsafe
-      - --bootnodes=/dns/collator-01-p2p-rollup-testnet.mangata.online/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+      - --bootnodes=/dns/collator-01-p2p-rollup-holesky.gasp.xyz.online/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
     volumes:
       - ./chainspec.json:/etc/chainspec.json
       - ./data:/data

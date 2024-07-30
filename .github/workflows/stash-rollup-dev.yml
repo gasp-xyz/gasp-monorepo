@@ -39,12 +39,14 @@ jobs:
       - uses: mdgreenwald/mozilla-sops-action@v1.6.0
       
       - run: yarn install --immutable
-      - run: yarn run build
-      - run: sops exec-env ${{ env.ENVIRONMENT }}.enc.env 'yarn run test-ci'
+      - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
+      - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run test-ci'
 
       - name: Deploy to Google App Engine
         working-directory: stash
-        run: sops exec-env ${{ env.ENVIRONMENT }}.enc.env 'gcloud app deploy app-${{ env.ENVIRONMENT }}.yaml --quiet'
+        run: |
+          sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
+          gcloud app deploy app.tmp.yaml --quiet
       
       # TODO: temporary disable smoke test
       # - name: smoke test
@@ -55,4 +57,4 @@ jobs:
       # - name: Delete old versions
       #   # This command deletes all versions except the last 14
       #   # Ref: https://stackoverflow.com/a/66911696/9645556
-      #   run: gcloud app versions list --service=mangata-stash-${{ env.ENVIRONMENT }} --format="value(version.id)" --sort-by="~version.createTime" | tail -n +15 | xargs -r gcloud app versions delete --quiet
+      #   run: gcloud app versions list --service=mangata-stash-${ENVIRONMENT} --format="value(version.id)" --sort-by="~version.createTime" | tail -n +15 | xargs -r gcloud app versions delete --quiet

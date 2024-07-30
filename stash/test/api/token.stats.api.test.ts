@@ -31,9 +31,9 @@ describe('APi tests: token stats', () => {
                 expect(validationResult.error).toBeUndefined();
             });
     })
-    it("GET /token/MGX/stats - Schema validation", async () => {
+    it("GET /token/GASPV2/stats - Schema validation", async () => {
         await supertest(app)
-            .get("/token/MGX/stats")
+            .get("/token/GASPV2/stats")
             .expect(200)
             .then((response) => {
                 const validationResult = tokenSchema.validate(response.body);
@@ -42,14 +42,14 @@ describe('APi tests: token stats', () => {
     });
     it("GET list & GET token stat info matches", async () => {
         await supertest(app)
-            .get("/token/KSM/stats")
+            .get("/token/GASPV2/stats")
             .expect(200)
             .then(async(response) => {
                 const allTokens = (await supertest(app).get("/token/list/stats").expect(200)).body;
-                const ksmToken = response.body;
-                const onlyKsm = allTokens.filter( (token: { tokenId: any; }) => token.tokenId === ksmToken.tokenId);
-                expect(onlyKsm.length).toEqual(1);
-                expect(onlyKsm[0]).toEqual(ksmToken);
+                const gaspV2Token = response.body;
+                const onlyGaspV2 = allTokens.filter( (token: { tokenId: any; }) => token.tokenId === gaspV2Token.tokenId);
+                expect(onlyGaspV2.length).toEqual(1);
+                expect(onlyGaspV2[0]).toEqual(gaspV2Token);
             })
     })
     it("GET /token/list/stats - List matches with all the tokens with pool", async () => {
@@ -61,15 +61,17 @@ describe('APi tests: token stats', () => {
         pools.forEach( (pool) => {
             const firstTokenId = pool[1].toHuman()[0];
             const secondTokenId = pool[1].toHuman()[1];
-            const excludePool = [ "0" , "2"];
+            const excludePool = [ "2" , "3"]; // leave only pool with 0 1 token ids (geth and gaspv2)
             const firstToken = allstats.filter( (token: { tokenId: any; }) => token.tokenId === firstTokenId );
             const secondToken = allstats.filter( (token: { tokenId: any; }) => token.tokenId === secondTokenId );
             console.log( `Token ${firstTokenId} , ${secondTokenId} `)
-            if (!excludePool.includes(firstTokenId) ||  !excludePool.includes(secondTokenId) ) {
+            if (excludePool.includes(firstTokenId) ||  excludePool.includes(secondTokenId) ) {
+                console.log( `Skipped:: ${firstTokenId} , ${secondTokenId} `)
+
+            }
+            else{
                 expect(firstToken.length).toEqual(1);
                 expect(secondToken.length).toEqual(1);
-            }else{
-                console.log( `Skipped:: ${firstTokenId} , ${secondTokenId} `)
             }
         });
     })

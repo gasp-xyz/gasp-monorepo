@@ -3,346 +3,80 @@
 exports[`Snapshots tests: Coingeko > GET /pairs - Schema validation > Pairs 1`] = `
 [
   {
-    "base": "KSM",
+    "base": "GASPV2",
     "pool_id": "5",
-    "target": "MGX",
-    "ticker_id": "KSM_MGX",
+    "target": "GETH",
+    "ticker_id": "GASPV2_GETH",
   },
   {
-    "base": "MGX",
+    "base": "L1Asset",
+    "pool_id": "6",
+    "target": "GETH",
+    "ticker_id": "L1Asset_GETH",
+  },
+  {
+    "base": "L1Asset",
+    "pool_id": "7",
+    "target": "GASPV2",
+    "ticker_id": "L1Asset_GASPV2",
+  },
+  {
+    "base": "GASPV2",
     "pool_id": "8",
-    "target": "TUR",
-    "ticker_id": "MGX_TUR",
-  },
-  {
-    "base": "KSM",
-    "pool_id": "9",
-    "target": "TUR",
-    "ticker_id": "KSM_TUR",
-  },
-  {
-    "base": "MGX",
-    "pool_id": "12",
-    "target": "IMBU",
-    "ticker_id": "MGX_IMBU",
-  },
-  {
-    "base": "IMBU",
-    "pool_id": "13",
-    "target": "KSM",
-    "ticker_id": "IMBU_KSM",
-  },
-  {
-    "base": "MGX",
-    "pool_id": "17",
-    "target": "BNC",
-    "ticker_id": "MGX_BNC",
-  },
-  {
-    "base": "vsKSM",
-    "pool_id": "19",
-    "target": "KSM",
-    "ticker_id": "vsKSM_KSM",
-  },
-  {
-    "base": "vKSM",
-    "pool_id": "21",
-    "target": "KSM",
-    "ticker_id": "vKSM_KSM",
-  },
-  {
-    "base": "ZLK",
-    "pool_id": "27",
-    "target": "MGX",
-    "ticker_id": "ZLK_MGX",
-  },
-  {
-    "base": "KSM",
-    "pool_id": "28",
-    "target": "ZLK",
-    "ticker_id": "KSM_ZLK",
-  },
-  {
-    "base": "KSM",
-    "pool_id": "32",
-    "target": "USDT",
-    "ticker_id": "KSM_USDT",
-  },
-  {
-    "base": "MGX",
-    "pool_id": "33",
-    "target": "RMRK",
-    "ticker_id": "MGX_RMRK",
-  },
-  {
-    "base": "KSM",
-    "pool_id": "34",
-    "target": "RMRK",
-    "ticker_id": "KSM_RMRK",
-  },
-  {
-    "base": "KSM",
-    "pool_id": "42",
-    "target": "BNC",
-    "ticker_id": "KSM_BNC",
-  },
-  {
-    "base": "MGX",
-    "pool_id": "43",
-    "target": "MOVR",
-    "ticker_id": "MGX_MOVR",
-  },
-  {
-    "base": "IMBU",
-    "pool_id": "45",
-    "target": "TUR",
-    "ticker_id": "IMBU_TUR",
-  },
-  {
-    "base": "USDT",
-    "pool_id": "47",
-    "target": "MGX",
-    "ticker_id": "USDT_MGX",
-  },
-  {
-    "base": "TUR",
-    "pool_id": "48",
-    "target": "BNC",
-    "ticker_id": "TUR_BNC",
+    "target": "L1Asset",
+    "ticker_id": "GASPV2_L1Asset",
   },
 ]
 `;
 
 exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 1`] = `
 {
-  "base_currency": "KSM",
+  "base_currency": "GASPV2",
   "base_volume": Any<String>,
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
   "pool_id": "5",
-  "target_currency": "MGX",
+  "target_currency": "GETH",
   "target_volume": Any<String>,
-  "ticker_id": "KSM_MGX",
+  "ticker_id": "GASPV2_GETH",
 }
 `;
 
 exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 2`] = `
 {
-  "base_currency": "MGX",
+  "base_currency": "L1Asset",
   "base_volume": Any<String>,
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
-  "pool_id": "8",
-  "target_currency": "TUR",
+  "pool_id": "6",
+  "target_currency": "GETH",
   "target_volume": Any<String>,
-  "ticker_id": "MGX_TUR",
+  "ticker_id": "L1Asset_GETH",
 }
 `;
 
 exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 3`] = `
 {
-  "base_currency": "KSM",
+  "base_currency": "L1Asset",
   "base_volume": Any<String>,
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
-  "pool_id": "9",
-  "target_currency": "TUR",
+  "pool_id": "7",
+  "target_currency": "GASPV2",
   "target_volume": Any<String>,
-  "ticker_id": "KSM_TUR",
+  "ticker_id": "L1Asset_GASPV2",
 }
 `;
 
 exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 4`] = `
 {
-  "base_currency": "MGX",
+  "base_currency": "GASPV2",
   "base_volume": Any<String>,
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
-  "pool_id": "12",
-  "target_currency": "IMBU",
+  "pool_id": "8",
+  "target_currency": "L1Asset",
   "target_volume": Any<String>,
-  "ticker_id": "MGX_IMBU",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 5`] = `
-{
-  "base_currency": "IMBU",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "13",
-  "target_currency": "KSM",
-  "target_volume": Any<String>,
-  "ticker_id": "IMBU_KSM",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 6`] = `
-{
-  "base_currency": "MGX",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "17",
-  "target_currency": "BNC",
-  "target_volume": Any<String>,
-  "ticker_id": "MGX_BNC",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 7`] = `
-{
-  "base_currency": "vsKSM",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "19",
-  "target_currency": "KSM",
-  "target_volume": Any<String>,
-  "ticker_id": "vsKSM_KSM",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 8`] = `
-{
-  "base_currency": "vKSM",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "21",
-  "target_currency": "KSM",
-  "target_volume": Any<String>,
-  "ticker_id": "vKSM_KSM",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 9`] = `
-{
-  "base_currency": "ZLK",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "27",
-  "target_currency": "MGX",
-  "target_volume": Any<String>,
-  "ticker_id": "ZLK_MGX",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 10`] = `
-{
-  "base_currency": "KSM",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "28",
-  "target_currency": "ZLK",
-  "target_volume": Any<String>,
-  "ticker_id": "KSM_ZLK",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 11`] = `
-{
-  "base_currency": "KSM",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "32",
-  "target_currency": "USDT",
-  "target_volume": Any<String>,
-  "ticker_id": "KSM_USDT",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 12`] = `
-{
-  "base_currency": "MGX",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "33",
-  "target_currency": "RMRK",
-  "target_volume": Any<String>,
-  "ticker_id": "MGX_RMRK",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 13`] = `
-{
-  "base_currency": "KSM",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "34",
-  "target_currency": "RMRK",
-  "target_volume": Any<String>,
-  "ticker_id": "KSM_RMRK",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 14`] = `
-{
-  "base_currency": "KSM",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "42",
-  "target_currency": "BNC",
-  "target_volume": Any<String>,
-  "ticker_id": "KSM_BNC",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 15`] = `
-{
-  "base_currency": "MGX",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "43",
-  "target_currency": "MOVR",
-  "target_volume": Any<String>,
-  "ticker_id": "MGX_MOVR",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 16`] = `
-{
-  "base_currency": "IMBU",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "45",
-  "target_currency": "TUR",
-  "target_volume": Any<String>,
-  "ticker_id": "IMBU_TUR",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 17`] = `
-{
-  "base_currency": "USDT",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "47",
-  "target_currency": "MGX",
-  "target_volume": Any<String>,
-  "ticker_id": "USDT_MGX",
-}
-`;
-
-exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 18`] = `
-{
-  "base_currency": "TUR",
-  "base_volume": Any<String>,
-  "last_price": Any<String>,
-  "liquidity_in_usd": Any<String>,
-  "pool_id": "48",
-  "target_currency": "BNC",
-  "target_volume": Any<String>,
-  "ticker_id": "TUR_BNC",
+  "ticker_id": "GASPV2_L1Asset",
 }
 `;
