@@ -17,7 +17,7 @@ gcloud auth application-default login
 git config --global diff.sopsdiffer.textconv "sops -d --config /dev/null"
 
 # To edit secrets.enc.yaml file run next command
-sops edit secrets.enc.yaml
+sops secrets.enc.yaml
 ```
 
 4. Configure connectin to cluster
@@ -26,17 +26,15 @@ sops edit secrets.enc.yaml
 gcloud container clusters get-credentials mangata-dev-alpha --region europe-west1
 ```
 
-## How to deploy to testnet
+## How to deploy to rollup-holesky
 
 ```bash
-# Set ENVIRONMENT variable to `testnet`
-export ENVIRONMENT=testnet
 # Set image tag to deploy
 export IMAGE_TAG=latest
 
-# Deploy to `testnet` environment
-helmfile sync -e testnet
+# Deploy to `rollup-holesky` environment
+helmfile sync -e holesky
 ```
 
-Aggregator will be available by this URL: <https://rollup-aggregator-testnet.mangata.online/>
-You can find all of the deployed resources in `rollup-testnet` namespace of GKE cluster.
+Aggregator will be available by this URL: <https://rollup-aggregator-holesky.gasp.xyz/>
+You can find all of the deployed resources in `rollup-holesky` namespace of GKE cluster.

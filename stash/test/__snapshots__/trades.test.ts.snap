@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`test trades processor > check trades pricing 1`] = `
+Map {
+  11 => [],
+  12 => [],
+  10 => [],
+  13 => [],
+  14 => [],
+  15 => [],
+  16 => [],
+  17 => [],
+  18 => [],
+}
+`;

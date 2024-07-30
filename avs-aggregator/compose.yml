@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     build:
       context: ../
-      dockerfile: avs-aggregator/cmd/Dockerfile
+      dockerfile: avs-aggregator/Dockerfile
     depends_on:
       eth-stub:
         condition: service_healthy

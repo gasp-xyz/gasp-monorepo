@@ -1,7 +1,15 @@
 remoteCluster: true
-evmNodeEnabled: true
+
 blockscoutEnabled: true
 enableArbitrumServices: true
+
+####################
+# evm-node configs #
+####################
+evmNode:
+  enabled: true
+  customGenesisUrlEth: "https://raw.githubusercontent.com/mangata-finance/eigen-layer-monorepo/main/contracts/script/config/holesky-stub.json"
+  customGenesisUrlArb: "https://raw.githubusercontent.com/mangata-finance/eigen-layer-monorepo/main/contracts/script/config/arbitrum-sepolia-stub.json"
 
 #####################
 # collator configs #
@@ -10,9 +18,9 @@ collatorsEnabled: true
 collator:
   image:
     repository: mangatasolutions/rollup-node
-    tag: b6f5f6c13ff851bfdfb36d01e0d8d67fe7c5bcc9
+    tag: 3a07824d8b8a6ad027424629b814a5edb61654cf
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-local-fd0e82a316c1f0f940211ca76b7de541d6f7689a-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-dev-env-chainspecs/rollup-frontend-4d76522-chainspec-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 50Gi
@@ -33,10 +41,24 @@ collator:
       operator: Equal
       value: "true"
       effect: NoSchedule
-  firstCollatorNodeSelector:
-    production: "true"
-  secondCollatorNodeSelector:
-    production: "true"
+  collator01:
+    # Identity ID: 12D3KooWJCggfzsr6LAdXSdfgFLxsMtgCq9qSq79vqYtdG2oT8Za
+    customNodeKey: 'a9a20a5fa298fdd68ae5516c60c060c419e37bae4440d6f52ae3439162522fa2'
+    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWB7YXuwmv55wy5UFDe9yRGYJFPk1r3DpFMSyFx5KqMi3G
+    extraArgs:
+      - --alith
+      - --pruning=archive
+    nodeSelector: 
+      production: 'true'
+  collator02:
+    # Identity ID: 12D3KooWB7YXuwmv55wy5UFDe9yRGYJFPk1r3DpFMSyFx5KqMi3G
+    customNodeKey: 'bf08651f3aa5b9fed7ce2e82a5fce8c31f1889e93e3019476b3052f33d57116f'
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWJCggfzsr6LAdXSdfgFLxsMtgCq9qSq79vqYtdG2oT8Za
+    extraArgs:
+      - --baltathar
+      - --pruning=archive
+    nodeSelector: 
+      production: 'true'
 
 ####################
 # evm-node configs #
@@ -101,7 +123,7 @@ updaterEnabled: true
 updaterChainUrlEth: ws://evm-node-eth:8546
 updaterMnemonicEth: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 updaterEnvEth:
-  CHAIN: "reth"
+  CHAIN: "reth-1337"
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: ws://collator-01:9944
   EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
@@ -111,7 +133,7 @@ updaterEnvEth:
 updaterChainUrlArb: ws://evm-node-arb:8546
 updaterMnemonicArb: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 updaterEnvArb:
-  CHAIN: "reth"
+  CHAIN: "reth-31337"
   L1_CHAIN: "Arbitrum"
   MANGATA_NODE_URL: ws://collator-01:9944
   EIGEN_CONTRACT_ADDRESS: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"

@@ -1,8 +1,13 @@
 remoteCluster: true
 
-evmNodeEnabled: true
 blockscoutEnabled: true
 enableArbitrumServices: true
+
+####################
+# evm-node configs #
+####################
+evmNode:
+  enabled: true
 
 #####################
 # collator configs #
@@ -14,6 +19,7 @@ collator:
     tag: eth-rollup-develop
   chain: rollup-local-seq
   disableChainspecGeneration: true
+  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json
   storageClass: standard
   storageSize: 20Gi
   enableServiceMonitorCollectors: true
@@ -27,10 +33,24 @@ collator:
       operator: Equal
       value: 'true'
       effect: NoSchedule
-  firstCollatorNodeSelector:
-    production: 'true'
-  secondCollatorNodeSelector:
-    production: 'true'
+  collator01:
+    # Identity ID: 12D3KooWMSVfmcTo6q4nnb9Pw9WFjPh3hW1sqjNi5dUhWDzuKFdj
+    customNodeKey: '749be7f7de592c01db098afb95cb121961ce025e92d8ffeaabb377057cd01555'
+    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWLdCNsgrzW8BiFFwSSxWi8nTp8SNZHTTL9x8Ceokq8quV
+    extraArgs:
+      - --alith
+      - --pruning=archive
+    nodeSelector: 
+      production: 'true'
+  collator02:
+    # Identity ID: 12D3KooWLdCNsgrzW8BiFFwSSxWi8nTp8SNZHTTL9x8Ceokq8quV
+    customNodeKey: '96d1ece760b2038230f1e78449e879e34e2de637b89a7bbedc22ade73f9c2009'
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWMSVfmcTo6q4nnb9Pw9WFjPh3hW1sqjNi5dUhWDzuKFdj
+    extraArgs:
+      - --baltathar
+      - --pruning=archive
+    nodeSelector: 
+      production: 'true'
 
 
 ####################

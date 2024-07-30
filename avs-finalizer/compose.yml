@@ -4,9 +4,7 @@ services:
     restart: unless-stopped
     build:
       context: .
-      dockerfile: src/bin/Dockerfile.local
-      args:
-        - BINARY_PATH=${AVS_FINALIZER_BINARY_PATH:-target/release/main}
+      dockerfile: Dockerfile.local
     depends_on:
       eth-stub:
         condition: service_healthy

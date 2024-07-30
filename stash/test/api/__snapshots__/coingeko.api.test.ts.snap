@@ -1,0 +1,82 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Snapshots tests: Coingeko > GET /pairs - Schema validation > Pairs 1`] = `
+[
+  {
+    "base": "GASPV2",
+    "pool_id": "5",
+    "target": "GETH",
+    "ticker_id": "GASPV2_GETH",
+  },
+  {
+    "base": "L1Asset",
+    "pool_id": "6",
+    "target": "GETH",
+    "ticker_id": "L1Asset_GETH",
+  },
+  {
+    "base": "L1Asset",
+    "pool_id": "7",
+    "target": "GASPV2",
+    "ticker_id": "L1Asset_GASPV2",
+  },
+  {
+    "base": "GASPV2",
+    "pool_id": "8",
+    "target": "L1Asset",
+    "ticker_id": "GASPV2_L1Asset",
+  },
+]
+`;
+
+exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 1`] = `
+{
+  "base_currency": "GASPV2",
+  "base_volume": Any<String>,
+  "last_price": Any<String>,
+  "liquidity_in_usd": Any<String>,
+  "pool_id": "5",
+  "target_currency": "GETH",
+  "target_volume": Any<String>,
+  "ticker_id": "GASPV2_GETH",
+}
+`;
+
+exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 2`] = `
+{
+  "base_currency": "L1Asset",
+  "base_volume": Any<String>,
+  "last_price": Any<String>,
+  "liquidity_in_usd": Any<String>,
+  "pool_id": "6",
+  "target_currency": "GETH",
+  "target_volume": Any<String>,
+  "ticker_id": "L1Asset_GETH",
+}
+`;
+
+exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 3`] = `
+{
+  "base_currency": "L1Asset",
+  "base_volume": Any<String>,
+  "last_price": Any<String>,
+  "liquidity_in_usd": Any<String>,
+  "pool_id": "7",
+  "target_currency": "GASPV2",
+  "target_volume": Any<String>,
+  "ticker_id": "L1Asset_GASPV2",
+}
+`;
+
+exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 4`] = `
+{
+  "base_currency": "GASPV2",
+  "base_volume": Any<String>,
+  "last_price": Any<String>,
+  "liquidity_in_usd": Any<String>,
+  "pool_id": "8",
+  "target_currency": "L1Asset",
+  "target_volume": Any<String>,
+  "ticker_id": "GASPV2_L1Asset",
+}
+`;

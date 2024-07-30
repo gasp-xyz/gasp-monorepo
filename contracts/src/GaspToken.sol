@@ -25,3 +25,6 @@ contract DevToken is MintableERC20 {
     constructor() MintableERC20("GaspDev", "GASPDEV") {}
 }
 
+contract ArbToken is MintableERC20 {
+    constructor() MintableERC20("CrossChain Token", "CCXT") {}
+}

@@ -1,8 +1,14 @@
 remoteCluster: true
-
-evmNodeEnabled: true
 blockscoutEnabled: false
 enableArbitrumServices: true
+
+####################
+# evm-node configs #
+####################
+evmNode:
+  enabled: true
+  customGenesisUrlEth: ''
+  customGenesisUrlArb: ''
 
 #####################
 # collator configs #
@@ -19,7 +25,20 @@ collator:
   storageSize: 5Gi
   wsHealthExporter:
     enabled: false
-
+  collator01:
+    # Identity ID: 12D3KooWSvCQsVEpY5Y6yXneLTdmkuNEK4JPDtuYmkzqG2KvfvsN
+    customNodeKey: 'd43f49e6b8cfc01db16fc84aac9d810f1ad86c9cdb6a177da27ef4c8898312dd'
+    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWCSxS2DfQNdiw982suJyS5UVQbNMTwM6ChdHVBzCmf3ie
+    extraArgs:
+      - --alith
+      - --pruning=archive
+  collator02:
+    # Identity ID: 12D3KooWCSxS2DfQNdiw982suJyS5UVQbNMTwM6ChdHVBzCmf3ie
+    customNodeKey: '7b891c8157c2963f31351e48491597a9a0df65eff2b69de1b28c8c654f857f01'
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWSvCQsVEpY5Y6yXneLTdmkuNEK4JPDtuYmkzqG2KvfvsN
+    extraArgs:
+      - --baltathar
+      - --pruning=archive
 
 ####################
 # evm-node configs #

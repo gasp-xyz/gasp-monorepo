@@ -36,14 +36,14 @@ async function main() {
     const collator = getCollator("ethereum", MNEMONIC);
     print(`collator address: ${collator.address}`)
     print(`block #${header.number} was authored by ${header.author}`);
-    const { isSequencerSelected, hasSequencerRights, selectedSequencer } =
+    const { isSequencerSelected, hasReadRights, hasCancelRights, selectedSequencer } =
       await getSelectedSequencerWithRights(api, collator.address, header.hash);
     print(`me ${collator.address}`);
     print(`selected : ${selectedSequencer}`);
     print(`is selected ${isSequencerSelected}`);
-    print(`rights : ${hasSequencerRights}`);
-    if (isSequencerSelected && hasSequencerRights) {
-      try {
+    print(`has read rights : ${hasReadRights}`);
+    print(`has cancel rights : ${hasCancelRights}`);
+    if (isSequencerSelected && hasReadRights) {
         if (inProgress) {
           return;
         }else{
@@ -54,6 +54,7 @@ async function main() {
           api,
           publicClient,
         );
+
 
 				const filteredUpdates = filterUpdates(
 					nativeL1Update.unwrap(),
@@ -77,29 +78,19 @@ async function main() {
 				} else {
 					print(`L1Update with max id == ${lastRequestId} was already submitted`);
 				}
-			} catch (e) {
-        if (e instanceof BaseError) {
-          print("Viem error occured - restarting service");
-          print(e);
-          throw e;
-        }else{
-          print("The contract function getUpdateForL2 returned no data");
-          print(e);
-          // Do nothing with error
-          // Error only appear when we have block where there are no data for getUpdateForL2 at all.
-          // This is only in the very beginning
-          // ContractFunctionExecutionError: The contract function "getUpdateForL2" returned no data ("0x").
-        }
-			}
+			
 			inProgress = false;
 		}
 
+  
+  if (hasCancelRights) {
 		await processPendingRequestsEvents(
 			api,
 			publicClient,
 			header.hash,
 			collator,
 		);
+  }
 	});
 }
 

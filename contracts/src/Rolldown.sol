@@ -358,7 +358,7 @@ contract Rolldown is
         CancelResolution memory resolution = CancelResolution({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             l2RequestId: cancel.requestId.id,
-            cancelJustified: correct_hash == cancel.hash,
+            cancelJustified: correct_hash != cancel.hash,
             timeStamp: timeStamp
         });
 

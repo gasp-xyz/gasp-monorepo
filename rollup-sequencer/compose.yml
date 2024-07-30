@@ -1,7 +1,8 @@
 services:
   sequencer-eth:
     restart: unless-stopped
-    image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
+    platform: linux/amd64
+    image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}-eth
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully
@@ -18,7 +19,8 @@ services:
 
   sequencer-arb:
     restart: unless-stopped
-    image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
+    platform: linux/amd64
+    image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}-arb
     depends_on:
       arbitrum-contracts-deployment:
         condition: service_completed_successfully
