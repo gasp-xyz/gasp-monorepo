@@ -297,36 +297,6 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 
 	isOpsInit := lastCompletedOpTaskCreatedBlock != 0
 
-	if isOpsTask{
-		agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
-		// Send number to square to the task manager contract
-		newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewOpTask(context.Background(), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
-		if err != nil {
-			agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
-			return err
-		}
-
-		taskId := sdktypes.TaskId{
-			TaskType: sdktypes.TaskType(0),
-			TaskIndex: sdktypes.TaskIndex(taskIndex),
-			}
-
-		agg.tasksMu.Lock()
-		agg.tasks[taskId] = newTask
-		agg.tasksMu.Unlock()
-
-		quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.QuorumNumbers))
-		for i, _ := range newTask.QuorumNumbers {
-			quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.QuorumThresholdPercentage)
-		}
-		quorumNums := make(sdktypes.QuorumNums, len(newTask.QuorumNumbers))
-		for i, n := range newTask.QuorumNumbers {
-			quorumNums[i] = sdktypes.QuorumNum(n)
-		}
-		taskTimeToExpiry := time.Second * time.Duration(agg.expiration) * 2
-		agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
-		agg.logger.Info("Aggregator initialized new operator state task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
-	}
 
 	if isRduTask && isOpsInit{
 		agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
@@ -361,6 +331,38 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 		agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
 		agg.logger.Info("Aggregator initialized new rolldown update task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
 	}
+	
+	if isOpsTask{
+		agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
+		// Send number to square to the task manager contract
+		newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewOpTask(context.Background(), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
+		if err != nil {
+			agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
+			return err
+		}
+
+		taskId := sdktypes.TaskId{
+			TaskType: sdktypes.TaskType(0),
+			TaskIndex: sdktypes.TaskIndex(taskIndex),
+			}
+
+		agg.tasksMu.Lock()
+		agg.tasks[taskId] = newTask
+		agg.tasksMu.Unlock()
+
+		quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.QuorumNumbers))
+		for i, _ := range newTask.QuorumNumbers {
+			quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.QuorumThresholdPercentage)
+		}
+		quorumNums := make(sdktypes.QuorumNums, len(newTask.QuorumNumbers))
+		for i, n := range newTask.QuorumNumbers {
+			quorumNums[i] = sdktypes.QuorumNum(n)
+		}
+		taskTimeToExpiry := time.Second * time.Duration(agg.expiration) * 2
+		agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
+		agg.logger.Info("Aggregator initialized new operator state task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
+	}
+
 
 
 	return nil
