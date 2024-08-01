@@ -350,12 +350,12 @@ func (agg *Aggregator) sendNewTask(blockNumber uint32) error {
 		agg.tasks[taskId] = newTask
 		agg.tasksMu.Unlock()
 
-		quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.QuorumNumbers))
-		for i, _ := range newTask.QuorumNumbers {
-			quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.QuorumThresholdPercentage)
+		quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.LastCompletedOpTaskQuorumNumbers))
+		for i, _ := range newTask.LastCompletedOpTaskQuorumNumbers {
+			quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.LastCompletedOpTaskQuorumThresholdPercentage)
 		}
-		quorumNums := make(sdktypes.QuorumNums, len(newTask.QuorumNumbers))
-		for i, n := range newTask.QuorumNumbers {
+		quorumNums := make(sdktypes.QuorumNums, len(newTask.LastCompletedOpTaskQuorumNumbers))
+		for i, n := range newTask.LastCompletedOpTaskQuorumNumbers {
 			quorumNums[i] = sdktypes.QuorumNum(n)
 		}
 		taskTimeToExpiry := time.Second * time.Duration(agg.expiration) * 2

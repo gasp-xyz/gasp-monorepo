@@ -192,16 +192,35 @@ impl Operator {
         task: OpTask,
     ) -> eyre::Result<[u8; 32]> {
         // We assume that the quorumNumbers are alteast unique even if not sorted
-        let mut old_quorum_numbers = task
+
+        let old_quorum_threshold_percentage = if task.last_completed_op_task_created_block == task.task_created_block{
+            Default::default()
+        }else{
+            task.last_completed_op_task_quorum_threshold_percentage
+        };
+        let new_quorum_threshold_percentage = task.quorum_threshold_percentage;
+
+        let mut old_quorum_numbers = if task.last_completed_op_task_created_block == task.task_created_block{
+            Default::default()
+        }else{
+            task
             .last_completed_op_task_quorum_numbers
             .into_iter()
-            .collect::<Vec<u8>>();
+            .collect::<Vec<u8>>()
+        };
         let mut new_quorum_numbers = task.quorum_numbers.into_iter().collect::<Vec<u8>>();
         old_quorum_numbers.sort();
         new_quorum_numbers.sort();
 
-        let old_task_block = task.last_completed_op_task_created_block;
+        let old_task_block = if task.last_completed_op_task_created_block == task.task_created_block{
+            Default::default()
+        }else{
+            task.last_completed_op_task_created_block
+        };
         let new_task_block = task.task_created_block;
+
+        info!("old_task_block: {:?}", old_task_block);
+        info!("new_task_block: {:?}", new_task_block);
 
         let registry_coordinator_address = &self.avs_contracts.registry_coordinator_address;
         let registry_coordinator = &self.avs_contracts.registry;
@@ -491,8 +510,9 @@ impl Operator {
             || !operators_added.is_empty()
             || !operators_stake_update.is_empty()
             || !operators_quorum_count_update.is_empty()
-            || (task.quorum_threshold_percentage
-                != task.last_completed_op_task_quorum_threshold_percentage);
+            || (old_quorum_threshold_percentage
+                != new_quorum_threshold_percentage)
+            || (old_quorum_numbers != new_quorum_numbers);
 
         let operator_state_info = OperatorStateInfo {
             operators_state_changed: operators_state_changed,
@@ -505,6 +525,8 @@ impl Operator {
             operators_stake_update: operators_stake_update,
             operators_quorum_count_update: operators_quorum_count_update,
         };
+
+        info!("operator_state_info: {:?}", operator_state_info);
 
         let operator_state_info_hash = Keccak256::hash(
             vec![0u8; 31]
