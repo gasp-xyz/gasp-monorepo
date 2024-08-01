@@ -103,7 +103,6 @@ aggregatorEnvSecrets:
 #####################
 # finalizer configs #
 #####################
-secondFinalizerEnabled: true
 finalizerEnabled: true
 finalizerEnableServiceMonitorCollectors: true
 finalizerEnvSecrets: {}
