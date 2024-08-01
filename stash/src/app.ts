@@ -94,9 +94,9 @@ app.get('/coingecko/tickers', coingeckoController.tickers)
     tokenNetworkPortfolioController.tokenNetworkPortfolio
   )
 
-//Captcha endpoints
+//Faucet endpoint
 app.get(
-  '/faucet/requestTokens/:address/captcha/:captchaToken/',
+  '/faucet/requestTokens/:toAddress/captcha/:captcha/',
   faucetController.captcha
 )
 

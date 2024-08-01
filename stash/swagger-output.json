@@ -857,18 +857,18 @@
         }
       }
     },
-    "/faucet/requestTokens/{address}/captcha/{captchaToken}/": {
+    "/faucet/requestTokens/{toAddress}/captcha/{captcha}/": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "address",
+            "name": "toAddress",
             "in": "path",
             "required": true,
             "type": "string"
           },
           {
-            "name": "captchaToken",
+            "name": "captcha",
             "in": "path",
             "required": true,
             "type": "string"

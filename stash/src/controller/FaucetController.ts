@@ -1,21 +1,14 @@
 import * as faucetService from '../service/FaucetService.js'
 import * as errorHandler from '../error/Handler.js'
 import { Request, Response } from 'express'
+import { pathFaucetSchema } from '../schema/FaucetSchema.js'
 
 export const captcha = async (req: Request, res: Response) => {
   try {
-    const data = req.params
-    const address = data.address
-    const captchaToken = data.captchaToken
-    console.log('data', address, captchaToken)
-    const verifiedCaptcha = await faucetService.verifyCaptcha(captchaToken)
-    if (verifiedCaptcha) {
-      console.log('Captcha ok, requesting tokens from ', address)
-      //todo: request tokens from address
-    } else {
-      console.log('Captcha failed')
-    }
-    res.send(verifiedCaptcha)
+    const params = pathFaucetSchema.validateSync(req.params)
+    await faucetService.verifyCaptcha(params.captcha)
+    await faucetService.sendTokens(params.toAddress)
+    res.status(200).send()
   } catch (e) {
     await errorHandler.handle(res, e)
   }
