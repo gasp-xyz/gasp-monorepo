@@ -47,6 +47,7 @@ contract Deployer is Script, Utils, Test {
 
     bool public allow_non_root_tm_init;
     uint32 public taskResponseWindowBlocks;
+    uint32 public minOpTaskResponseWindowBlock;
 
     // non-upgradable contracts
     BLSSignatureChecker public blsSignatureChecker;
