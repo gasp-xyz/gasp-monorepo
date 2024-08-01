@@ -24,7 +24,6 @@ pub struct CliArgs {
     #[arg(long, env)]
     pub target_ws_url: String,
 
-
     #[arg(long, env)]
     pub source_chain_id: u64,
     #[arg(long, env)]
@@ -47,7 +46,6 @@ pub struct CliArgs {
     // #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit"])]
     // #[serde(skip_serializing_if = "std::ops::Not::not")]
     // pub force: bool,
-
     #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["only_reinit"])]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub reinit: bool,
@@ -91,12 +89,12 @@ pub struct RootEcdsaKey {
     pub root_ecdsa_ephemeral_key: bool,
 }
 
-
 impl CliArgs {
     pub fn build() -> Self {
         let args = CliArgs::parse();
         if args.source_chain_id != Chain::AnvilHardhat as u64
-            && args.target_chain_id != Chain::AnvilHardhat as u64 {
+            && args.target_chain_id != Chain::AnvilHardhat as u64
+        {
             let mut cmd = CliArgs::command();
             if args.testnet {
                 cmd.error(
@@ -129,7 +127,6 @@ impl CliArgs {
             &self.root_ecdsa_key_password,
         )
     }
-
 }
 
 fn get_keystore(

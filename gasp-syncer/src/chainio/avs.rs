@@ -1,12 +1,15 @@
 use std::{fmt::Debug, sync::Arc};
 
 use bindings::{
+    bls_apk_registry::BLSApkRegistry,
     finalizer_service_manager::FinalizerServiceManager,
-    finalizer_task_manager::{FinalizerTaskManager, NewOpTaskCreatedFilter, OpTaskCompletedFilter, NewRdTaskCreatedFilter, RdTaskCompletedFilter, FinalizerTaskManagerEvents},
+    finalizer_task_manager::{
+        FinalizerTaskManager, FinalizerTaskManagerEvents, NewOpTaskCreatedFilter,
+        NewRdTaskCreatedFilter, OpTaskCompletedFilter, RdTaskCompletedFilter,
+    },
     registry_coordinator::RegistryCoordinator,
     shared_types::OperatorInfo,
     stake_registry::StakeRegistry,
-    bls_apk_registry::BLSApkRegistry,
     strategy_manager_storage::{PubkeyRegistrationParams, SignatureWithSaltAndExpiry},
 };
 use ethers::{
@@ -16,11 +19,9 @@ use ethers::{
 };
 use eyre::{eyre, Ok, OptionExt};
 
-use crate::{
-    cli::CliArgs,
-};
+use crate::cli::CliArgs;
 
-use super::{SourceClient as Client};
+use super::SourceClient as Client;
 
 pub struct AvsContracts {
     pub service_manager: FinalizerServiceManager<Client>,
@@ -46,7 +47,6 @@ impl Debug for AvsContracts {
 }
 
 impl AvsContracts {
-
     pub async fn build(config: &CliArgs, client: Arc<Client>) -> eyre::Result<Self> {
         let ws_client = Arc::new(Provider::connect(config.source_ws_url.to_owned()).await?);
 
@@ -80,8 +80,17 @@ impl AvsContracts {
 
     // TODO
     // Maybe add the task cancel event stream to check against that for early  exit
-    pub fn source_response_stream(&self, from_block: u32) -> Event<Arc<Provider<Ws>>, Provider<Ws>, FinalizerTaskManagerEvents> {
-        self.task_manager_sub
-            .event_with_filter(Filter::new().events([OpTaskCompletedFilter::abi_signature().to_owned(),RdTaskCompletedFilter::abi_signature().to_owned()]).from_block(u64::from(from_block)))
+    pub fn source_response_stream(
+        &self,
+        from_block: u32,
+    ) -> Event<Arc<Provider<Ws>>, Provider<Ws>, FinalizerTaskManagerEvents> {
+        self.task_manager_sub.event_with_filter(
+            Filter::new()
+                .events([
+                    OpTaskCompletedFilter::abi_signature().to_owned(),
+                    RdTaskCompletedFilter::abi_signature().to_owned(),
+                ])
+                .from_block(u64::from(from_block)),
+        )
     }
 }

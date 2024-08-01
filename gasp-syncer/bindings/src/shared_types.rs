@@ -9,7 +9,7 @@
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct G1Point {
     pub x: ::ethers::core::types::U256,
@@ -26,7 +26,7 @@ pub struct G1Point {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct G2Point {
     pub x: [::ethers::core::types::U256; 2],
@@ -43,7 +43,7 @@ pub struct G2Point {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct ApkUpdate {
     pub apk_hash: [u8; 24],
@@ -61,7 +61,7 @@ pub struct ApkUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct PubkeyRegistrationParams {
     pub pubkey_registration_signature: G1Point,
@@ -79,7 +79,7 @@ pub struct PubkeyRegistrationParams {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct NonSignerStakesAndSignature {
     pub non_signer_quorum_bitmap_indices: ::std::vec::Vec<u32>,
@@ -102,7 +102,7 @@ pub struct NonSignerStakesAndSignature {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct QuorumStakeTotals {
     pub signed_stake_for_quorum: ::std::vec::Vec<u128>,
@@ -119,7 +119,7 @@ pub struct QuorumStakeTotals {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OperatorDetails {
     pub earnings_receiver: ::ethers::core::types::Address,
@@ -137,7 +137,7 @@ pub struct OperatorDetails {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct QueuedWithdrawalParams {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
@@ -155,7 +155,7 @@ pub struct QueuedWithdrawalParams {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct Withdrawal {
     pub staker: ::ethers::core::types::Address,
@@ -177,7 +177,7 @@ pub struct Withdrawal {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OpTask {
     pub task_num: u32,
@@ -199,7 +199,7 @@ pub struct OpTask {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OpTaskResponse {
     pub reference_task_index: u32,
@@ -217,7 +217,7 @@ pub struct OpTaskResponse {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct RdTask {
     pub task_num: u32,
@@ -238,7 +238,7 @@ pub struct RdTask {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct RdTaskResponse {
     pub reference_task_index: u32,
@@ -258,7 +258,7 @@ pub struct RdTaskResponse {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct TaskResponseMetadata {
     pub task_responsed_block: u32,
@@ -277,7 +277,7 @@ pub struct TaskResponseMetadata {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OperatorStateInfo {
     pub operators_state_changed: bool,
@@ -301,7 +301,7 @@ pub struct OperatorStateInfo {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OperatorsAdded {
     pub operator_id: [u8; 32],
@@ -320,7 +320,7 @@ pub struct OperatorsAdded {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OperatorsQuorumCountUpdate {
     pub operator_id: [u8; 32],
@@ -337,7 +337,7 @@ pub struct OperatorsQuorumCountUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OperatorsStakeUpdate {
     pub operator_id: [u8; 32],
@@ -355,7 +355,7 @@ pub struct OperatorsStakeUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct QuorumsAdded {
     pub quorum_number: u8,
@@ -373,7 +373,7 @@ pub struct QuorumsAdded {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct QuorumsApkUpdate {
     pub quorum_number: u8,
@@ -390,7 +390,7 @@ pub struct QuorumsApkUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct QuorumsStakeUpdate {
     pub quorum_number: u8,
@@ -407,7 +407,7 @@ pub struct QuorumsStakeUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OperatorInfo {
     pub operator_id: [u8; 32],
@@ -424,7 +424,7 @@ pub struct OperatorInfo {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct OperatorSetParam {
     pub max_operator_count: u32,
@@ -442,7 +442,7 @@ pub struct OperatorSetParam {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct QuorumBitmapUpdate {
     pub update_block_number: u32,
@@ -460,7 +460,7 @@ pub struct QuorumBitmapUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct SignatureWithExpiry {
     pub signature: ::ethers::core::types::Bytes,
@@ -477,7 +477,7 @@ pub struct SignatureWithExpiry {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct SignatureWithSaltAndExpiry {
     pub signature: ::ethers::core::types::Bytes,
@@ -495,7 +495,7 @@ pub struct SignatureWithSaltAndExpiry {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct StakeUpdate {
     pub update_block_number: u32,
@@ -513,7 +513,7 @@ pub struct StakeUpdate {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct StrategyParams {
     pub strategy: ::ethers::core::types::Address,
@@ -530,7 +530,7 @@ pub struct StrategyParams {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct DeprecatedStructQueuedWithdrawal {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
@@ -551,7 +551,7 @@ pub struct DeprecatedStructQueuedWithdrawal {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct DeprecatedStructWithdrawerAndNonce {
     pub withdrawer: ::ethers::core::types::Address,
@@ -568,7 +568,7 @@ pub struct DeprecatedStructWithdrawerAndNonce {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct FuzzInterface {
     pub addr: ::ethers::core::types::Address,
@@ -585,7 +585,7 @@ pub struct FuzzInterface {
     Debug,
     PartialEq,
     Eq,
-    Hash
+    Hash,
 )]
 pub struct FuzzSelector {
     pub addr: ::ethers::core::types::Address,
