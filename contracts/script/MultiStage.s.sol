@@ -63,7 +63,7 @@ contract MultiStage is Script, Utils, Test {
         console.log("Deploying gaspMultiRollupService contracts");
         console.log("################################################################################");
         GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
-        gaspMultiRollupServiceDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
+        gaspMultiRollupServiceDeployer.run(IRolldownPrimitives.ChainId.Arbitrum, true);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("arbitrum-sepolia"))){
 

@@ -6,7 +6,7 @@ include:
   - path: ./rollup-sequencer/compose.yml
   - path: ./rollup-updater/compose.yml
   - path: ./contracts/compose.yml
-  # - path: ./gasp-syncer/compose.yml
+  - path: ./gasp-syncer/compose.yml
 
 services:
   eth-stub:

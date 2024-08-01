@@ -80,7 +80,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
       return proxyAdmin.code.length > 0;
     }
 
-    function initialDeployment(IRolldownPrimitives.ChainId chain) public {
+    function initialDeployment(IRolldownPrimitives.ChainId chain, bool allowNonRootInit) public {
       string memory configData = readConfig(_CONFIG_PATH);
       owner = stdJson.readAddress(configData, ".permissions.owner");
       upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
@@ -113,7 +113,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
         gmrsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(gmrs))),
             address(gmrsImplementation),
-            abi.encodeWithSelector(gmrs.initialize.selector, gmrsPauserReg, owner, updaterAccount)
+            abi.encodeWithSelector(gmrs.initialize.selector, gmrsPauserReg, owner, updaterAccount, allowNonRootInit)
         );
 
         // end deployment
@@ -125,13 +125,13 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
         _writeOutput(chain);
     }
 
-    function run(IRolldownPrimitives.ChainId chain) external {
+    function run(IRolldownPrimitives.ChainId chain, bool allowNonRootInit) external {
       if (isProxyDeployed(chain)){
         console.log("Upgrading proxy");
         upgrade(chain);
       }else{
         console.log("Initial deployment");
-        initialDeployment(chain);
+        initialDeployment(chain, allowNonRootInit);
       }
     }
 

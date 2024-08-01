@@ -87,8 +87,8 @@ impl AvsContracts {
         self.task_manager_sub.event_with_filter(
             Filter::new()
                 .events([
-                    OpTaskCompletedFilter::abi_signature().to_owned(),
-                    RdTaskCompletedFilter::abi_signature().to_owned(),
+                    OpTaskCompletedFilter::abi_signature().into_owned(),
+                    RdTaskCompletedFilter::abi_signature().into_owned(),
                 ])
                 .from_block(u64::from(from_block)),
         )

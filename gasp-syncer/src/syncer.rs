@@ -152,7 +152,7 @@ impl Syncer {
                                     return Err(eyre!("operators_state_info_hash mismatch {:?}", operators_state_info_hash))
                                 }
 
-                                if latest_completed_op_task_created_block < call.task.last_completed_op_task_created_block {
+                                if latest_completed_op_task_created_block !=0 && latest_completed_op_task_created_block < call.task.last_completed_op_task_created_block {
                                     tracing::error!("missing expected task response {:?}", latest_completed_op_task_created_block);
                                     return Err(eyre!("missing expected task response {:?}", latest_completed_op_task_created_block))
                                 }
@@ -227,6 +227,7 @@ impl Syncer {
                                 println!("{:?}", update_txn_receipt);
 
                             },
+                            _ => return Err(eyre!("Got unexpected stream event"))
                         }
                     }
                     Err(e) => tracing::error!("EthWs subscription error {:?}", e),
@@ -372,14 +373,14 @@ impl Syncer {
     ) -> eyre::Result<OperatorStateInfo> {
         // We assume that the quorumNumbers are alteast unique even if not sorted
         let mut old_quorum_numbers = task
-            .last_completed_task_quorum_numbers
+            .last_completed_op_task_quorum_numbers
             .into_iter()
             .collect::<Vec<u8>>();
         let mut new_quorum_numbers = task.quorum_numbers.into_iter().collect::<Vec<u8>>();
         old_quorum_numbers.sort();
         new_quorum_numbers.sort();
 
-        let old_task_block = task.last_completed_task_created_block;
+        let old_task_block = task.last_completed_op_task_created_block;
         let new_task_block = task.task_created_block;
 
         let registry_coordinator_address = &self.avs_contracts.registry_coordinator_address;
@@ -479,7 +480,6 @@ impl Syncer {
                     maybe_j.next();
                 }
                 (None, None) => {
-                    // handle quorum number added
                     break;
                 }
                 _ => unreachable!(),
@@ -672,7 +672,7 @@ impl Syncer {
             || !operators_stake_update.is_empty()
             || !operators_quorum_count_update.is_empty()
             || (task.quorum_threshold_percentage
-                != task.last_completed_task_quorum_threshold_percentage);
+                != task.last_completed_op_task_quorum_threshold_percentage);
 
         let operator_state_info = OperatorStateInfo {
             operators_state_changed: operators_state_changed,
