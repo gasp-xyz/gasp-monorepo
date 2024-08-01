@@ -321,7 +321,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         l2Update.cancels[0] = IRolldownPrimitives.Cancel({
             requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
             range: IRolldownPrimitives.Range({start: 1, end: 1}),
-            hash: bytes32(keccak256(abi.encode(l1Update)))
+            hash: bytes32(keccak256(abi.encode(l2Update)))
         });
 
         // Act
@@ -331,6 +331,36 @@ contract RolldownTest is Test, IRolldownPrimitives {
         rolldown.update_l1_from_l2(l2Update);
         vm.stopPrank();
     }
+
+    function testIgnoreDuplicatedUpdatesOnlyWithdrawals() public {
+        // Arrange
+        address payable alice = users[0];
+        token = new MyERC20();
+        address tokenAddress = address(token);
+        uint256 amount = 10;
+        deal(tokenAddress, alice, 100 ether);
+        vm.startPrank(alice);
+        token.approve(address(rolldown), amount);
+        rolldown.deposit_erc20(tokenAddress, 10);
+
+        Rolldown.L2Update memory l2Update;
+        l2Update.results = new Rolldown.RequestResult[](0);
+        l2Update.withdrawals = new Rolldown.Withdrawal[](1);
+        l2Update.withdrawals[0] = IRolldownPrimitives.Withdrawal({
+            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+            withdrawalRecipient: alice,
+            tokenAddress: tokenAddress,
+            amount: 1010101010
+        });
+
+        // Act
+        // make sure that executing same request does not alter the state
+        rolldown.update_l1_from_l2(l2Update);
+        vm.expectRevert("Invalid L2Update");
+        rolldown.update_l1_from_l2(l2Update);
+        vm.stopPrank();
+    }
+
 
     function testL1UpdateHashCompatibilityWithMangataNode() public {
         Rolldown.L1Update memory l1Update;
