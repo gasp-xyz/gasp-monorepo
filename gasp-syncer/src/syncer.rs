@@ -2,9 +2,9 @@ use crate::chainio::{avs::AvsContracts, build_clients, SourceClient, TargetClien
 use crate::cli::CliArgs;
 
 use bindings::{
-    finalizer_task_manager::{NewTaskCreatedFilter, TaskCompletedFilter, Operator as TMOperator,
-        OperatorStateInfo, QuorumsAdded, QuorumsStakeUpdate, QuorumsApkUpdate, OperatorsAdded, OperatorsQuorumCountUpdate, OperatorsStakeUpdate, FinalizerTaskManagerCalls},
-    shared_types::{G1Point, G2Point, Task, TaskResponse},
+    finalizer_task_manager::{NewOpTaskCreatedFilter, OpTaskCompletedFilter,NewRdTaskCreatedFilter, RdTaskCompletedFilter, Operator as TMOperator,
+        OperatorStateInfo, QuorumsAdded, QuorumsStakeUpdate, QuorumsApkUpdate, OperatorsAdded, OperatorsQuorumCountUpdate, OperatorsStakeUpdate, FinalizerTaskManagerCalls, FinalizerTaskManagerEvents},
+    shared_types::{G1Point, G2Point, OpTask, OpTaskResponse, RdTask, RdTaskResponse},
     gasp_multi_rollup_service::GaspMultiRollupService
     
 };
@@ -68,17 +68,17 @@ impl Syncer {
     #[instrument(skip_all)]
     pub async fn sync(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
 
-        let latest_completed_task_number = self.gasp_service_contract.latest_completed_task_number().await?;
-        let mut latest_completed_task_created_block = self.gasp_service_contract.latest_completed_task_created_block().await?;
+        let latest_completed_op_task_number = self.gasp_service_contract.latest_completed_op_task_number().await?;
+        let mut latest_completed_op_task_created_block = self.gasp_service_contract.latest_completed_op_task_created_block().await?;
         // let mut task_number_expected = latest_completed_task_number + 1;
 
-        if latest_completed_task_created_block.is_zero() && !cfg.push_first_init{
+        if latest_completed_op_task_created_block.is_zero() && !cfg.push_first_init{
             tracing::error!("target uninit and push_first_init set to false");
             return Err(eyre!("target uninit and push_first_init set to false"))
         }
 
-        let evs = self.clone().avs_contracts.source_response_stream(latest_completed_task_created_block);
-        let mut stream: stream::EventStream<'_, _, (TaskCompletedFilter, LogMeta), _> =
+        let evs = self.clone().avs_contracts.source_response_stream(latest_completed_op_task_created_block);
+        let mut stream: stream::EventStream<'_, _, (FinalizerTaskManagerEvents, LogMeta), _> =
             evs.subscribe_with_meta().await?;
 
         // event stream does not finish with `None` after websocket closure, use block subscription for it
@@ -87,66 +87,129 @@ impl Syncer {
 
         loop {
             select! {
-                Some(event) = stream.next() => match event {
-                    Ok((event, log)) => {
-                        let txn_hash = log.transaction_hash;
-                        let txn = self.clone().avs_contracts.ws_client.get_transaction(txn_hash).await?
-                        .ok_or_else(
-                            || {tracing::error!("missing expected txn {:?}", txn_hash);
-                            eyre!("missing expected txn {:?}", txn_hash)}
-                        )?
-                        ;
-                        println!("{:?}", txn);
-                        let call = match FinalizerTaskManagerCalls::decode(txn.input)?{
-                            FinalizerTaskManagerCalls::RespondToTask(c) => c,
-                            _ => {
-                                tracing::error!("wrong call decoded");
-                                return Err(eyre!("wrong call decoded"))
-                            }
-                        };
-                        println!("{:?}", call);
-                        println!("{:?}", call.task.clone());
-                        println!("encoded - {:?}", call.task.clone().encode());
-                        println!("encoded - {:?}", array_bytes::bytes2hex("0x",call.task.clone().encode()));
-                        let task_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
-                            call.task.clone().encode().into_iter()
-                        ).collect::<Vec<_>>().as_ref());
-                        println!("{:?}", task_hash);
-                        println!("{:?}", task_hash == call.task_response.reference_task_hash.into());
+                Some(stream_event) = stream.next() => match stream_event {
+                    Ok((stream_event, log)) => {
+                        match stream_event {
+                            FinalizerTaskManagerEvents::OpTaskCompletedFilter(event) => {
+                                let txn_hash = log.transaction_hash;
+                                let txn = self.clone().avs_contracts.ws_client.get_transaction(txn_hash).await?
+                                .ok_or_else(
+                                    || {tracing::error!("missing expected txn {:?}", txn_hash);
+                                    eyre!("missing expected txn {:?}", txn_hash)}
+                                )?
+                                ;
+                                println!("{:?}", txn);
+                                let call = match FinalizerTaskManagerCalls::decode(txn.input)?{
+                                    FinalizerTaskManagerCalls::RespondToOpTask(c) => c,
+                                    _ => {
+                                        tracing::error!("wrong call decoded");
+                                        return Err(eyre!("wrong call decoded"))
+                                    }
+                                };
+                                println!("{:?}", call);
+                                println!("{:?}", call.task.clone());
+                                println!("encoded - {:?}", call.task.clone().encode());
+                                println!("encoded - {:?}", array_bytes::bytes2hex("0x",call.task.clone().encode()));
+                                let task_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
+                                    call.task.clone().encode().into_iter()
+                                ).collect::<Vec<_>>().as_ref());
+                                println!("{:?}", task_hash);
+                                println!("{:?}", task_hash == call.task_response.reference_task_hash.into());
 
-                        let operators_state_info = self.clone().get_operators_state_info(call.task.clone()).await?;
-                        println!("{:?}", operators_state_info);
-                        let operators_state_info_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
-                            operators_state_info.clone().encode().into_iter()
-                        ).collect::<Vec<_>>().as_ref());
-                        println!("{:?}", operators_state_info_hash);
-                        println!("{:?}", operators_state_info_hash == call.task_response.operators_state_info_hash.into());
-                        
-                        if latest_completed_task_created_block < call.task.last_completed_task_created_block {
-                            tracing::error!("missing expected task response {:?}", latest_completed_task_created_block);
-                            return Err(eyre!("missing expected task response {:?}", latest_completed_task_created_block))
+                                if task_hash != call.task_response.reference_task_hash.into() {
+                                    tracing::error!("task_hash mismatch {:?}", task_hash);
+                                    return Err(eyre!("task_hash mismatch {:?}", task_hash))
+                                }
+        
+                                let operators_state_info = self.clone().get_operators_state_info(call.task.clone()).await?;
+                                println!("{:?}", operators_state_info);
+                                let operators_state_info_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
+                                    operators_state_info.clone().encode().into_iter()
+                                ).collect::<Vec<_>>().as_ref());
+                                println!("{:?}", operators_state_info_hash);
+                                println!("{:?}", operators_state_info_hash == call.task_response.operators_state_info_hash.into());
+                                
+                                if operators_state_info_hash != call.task_response.operators_state_info_hash.into() {
+                                    tracing::error!("operators_state_info_hash mismatch {:?}", operators_state_info_hash);
+                                    return Err(eyre!("operators_state_info_hash mismatch {:?}", operators_state_info_hash))
+                                }
+
+                                if latest_completed_op_task_created_block < call.task.last_completed_op_task_created_block {
+                                    tracing::error!("missing expected task response {:?}", latest_completed_op_task_created_block);
+                                    return Err(eyre!("missing expected task response {:?}", latest_completed_op_task_created_block))
+                                }
+        
+                                // This branch is to account for the case where 
+                                // a task is completed in a block and another task is created
+                                // in the same block and then that one is also completed in the same block
+                                if latest_completed_op_task_created_block > call.task.last_completed_op_task_created_block {
+                                    continue;
+                                }
+        
+                                if call.task.last_completed_op_task_created_block + 14400 <= call.task.task_created_block {
+                                    tracing::error!("stale old state {:?}", latest_completed_op_task_created_block);
+                                    return Err(eyre!("stale old state {:?}", latest_completed_op_task_created_block))
+                                }
+                                
+                                let update_txn = self.clone().gasp_service_contract.process_eigen_op_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature, operators_state_info);
+                                println!("{:?}", update_txn);
+                                let update_txn_pending = update_txn.send().await;
+                                println!("{:?}", update_txn_pending);
+                                let update_txn_receipt = update_txn_pending?.await?;
+                                println!("{:?}", update_txn_receipt);
+        
+                                latest_completed_op_task_created_block = call.task.task_created_block;
+                            },
+                            FinalizerTaskManagerEvents::RdTaskCompletedFilter(event) => {
+                                let txn_hash = log.transaction_hash;
+                                let txn = self.clone().avs_contracts.ws_client.get_transaction(txn_hash).await?
+                                .ok_or_else(
+                                    || {tracing::error!("missing expected txn {:?}", txn_hash);
+                                    eyre!("missing expected txn {:?}", txn_hash)}
+                                )?
+                                ;
+                                println!("{:?}", txn);
+                                let call = match FinalizerTaskManagerCalls::decode(txn.input)?{
+                                    FinalizerTaskManagerCalls::RespondToRdTask(c) => c,
+                                    _ => {
+                                        tracing::error!("wrong call decoded");
+                                        return Err(eyre!("wrong call decoded"))
+                                    }
+                                };
+                                println!("{:?}", call);
+                                println!("{:?}", call.task.clone());
+                                println!("encoded - {:?}", call.task.clone().encode());
+                                println!("encoded - {:?}", array_bytes::bytes2hex("0x",call.task.clone().encode()));
+                                let task_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
+                                    call.task.clone().encode().into_iter()
+                                ).collect::<Vec<_>>().as_ref());
+                                println!("{:?}", task_hash);
+                                println!("{:?}", task_hash == call.task_response.reference_task_hash.into());
+        
+                                if task_hash != call.task_response.reference_task_hash.into() {
+                                    tracing::error!("task_hash mismatch {:?}", task_hash);
+                                    return Err(eyre!("task_hash mismatch {:?}", task_hash))
+                                }
+        
+                                if latest_completed_op_task_created_block != call.task.last_completed_op_task_created_block {
+                                    tracing::error!("latest_completed_op_task_created_block mismatch {:?}", latest_completed_op_task_created_block);
+                                    return Err(eyre!("latest_completed_op_task_created_block mismatch {:?}", latest_completed_op_task_created_block))
+                                }
+
+                                if call.task.last_completed_op_task_created_block + 14400 <= call.task.task_created_block {
+                                    tracing::error!("stale old state {:?}", latest_completed_op_task_created_block);
+                                    return Err(eyre!("stale old state {:?}", latest_completed_op_task_created_block))
+                                }
+                                
+                                let update_txn = self.clone().gasp_service_contract.process_eigen_rd_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature);
+                                println!("{:?}", update_txn);
+                                let update_txn_pending = update_txn.send().await;
+                                println!("{:?}", update_txn_pending);
+                                let update_txn_receipt = update_txn_pending?.await?;
+                                println!("{:?}", update_txn_receipt);
+        
+                            },
                         }
-
-                        // This branch is to account for the case where 
-                        // a task is completed in a block and another task is created
-                        // in the same block and then that one is also completed in the same block
-                        if latest_completed_task_created_block > call.task.last_completed_task_created_block {
-                            continue;
-                        }
-
-                        if call.task.last_completed_task_created_block + 14400 <= call.task.task_created_block {
-                            tracing::error!("stale old state {:?}", latest_completed_task_created_block);
-                            return Err(eyre!("stale old state {:?}", latest_completed_task_created_block))
-                        }
-                        
-                        let update_txn = self.clone().gasp_service_contract.process_eigen_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature_for_old_state, operators_state_info);
-                        println!("{:?}", update_txn);
-                        let update_txn_pending = update_txn.send().await;
-                        println!("{:?}", update_txn_pending);
-                        let update_txn_receipt = update_txn_pending?.await?;
-                        println!("{:?}", update_txn_receipt);
-
-                        latest_completed_task_created_block = call.task.task_created_block;
                     }
                     Err(e) => tracing::error!("EthWs subscription error {:?}", e),
                 },
@@ -166,24 +229,27 @@ impl Syncer {
     #[instrument(skip_all)]
     pub async fn reinit(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
 
-        let latest_completed_task_created_block = self.gasp_service_contract.latest_completed_task_created_block().await?;
-        let latest_completed_task_quorum_numbers = self.gasp_service_contract.quorum_numbers().await?;
-        let latest_completed_task_quorum_threshold_percentage = self.gasp_service_contract.quorum_threshold_percentage().await?;
+        let latest_completed_op_task_created_block = self.gasp_service_contract.latest_completed_op_task_created_block().await?;
+        let latest_completed_op_task_quorum_numbers = self.gasp_service_contract.quorum_numbers().await?;
+        let latest_completed_op_task_quorum_threshold_percentage = self.gasp_service_contract.quorum_threshold_percentage().await?;
 
-        let task_num = self.clone().avs_contracts.task_manager.last_completed_task_num().await?;
-        let block_num = self.clone().avs_contracts.task_manager.last_completed_task_created_block().await?;
+        // TODO!!
+        // Get the latest block from source chain and query the following three with it!
+        let task_num = self.clone().avs_contracts.task_manager.last_completed_op_task_num().await?;
+        let block_num = self.clone().avs_contracts.task_manager.last_completed_op_task_created_block().await?;
+        let latest_pending_state_hash = self.clone().avs_contracts.task_manager.latest_pending_state_hash().await?;
 
         // Unfortunately latestTaskNum and LastCompletedTaskNum both start at 0
         // So if lastCompletedTaskNum is 0 then check if it was infact completed 
         if task_num.is_zero() {
-            let task_status = self.clone().avs_contracts.task_manager.index_to_task_status(task_num).await?;
-            if task_status != 3 {
-                tracing::error!("no completed tasks for reinit {:?}", latest_completed_task_created_block);
-                return Err(eyre!("no completed tasks for reinit {:?}", latest_completed_task_created_block))
+            let task_status = self.clone().avs_contracts.task_manager.id_to_task_status(0u8, task_num).await?;
+            if task_status != 4 {
+                tracing::error!("no completed tasks for reinit {:?}", latest_completed_op_task_created_block);
+                return Err(eyre!("no completed tasks for reinit {:?}", latest_completed_op_task_created_block))
             }
         }
 
-        let mut block_events: Vec<NewTaskCreatedFilter> = self.clone().avs_contracts.task_manager.event_with_filter(Filter::new().event(&NewTaskCreatedFilter::abi_signature()).select(u64::from(block_num))).query().await?;
+        let mut block_events: Vec<NewOpTaskCreatedFilter> = self.clone().avs_contracts.task_manager.event_with_filter(Filter::new().event(&NewOpTaskCreatedFilter::abi_signature()).select(u64::from(block_num))).query().await?;
 
         let mut last_task = match block_events.pop(){
             Some(e) if e.task_index == task_num => {
@@ -195,11 +261,11 @@ impl Syncer {
             }
         };
 
-        last_task.last_completed_task_created_block = latest_completed_task_created_block;
-        last_task.last_completed_task_quorum_numbers = latest_completed_task_quorum_numbers;
-        last_task.last_completed_task_quorum_threshold_percentage = latest_completed_task_quorum_threshold_percentage;
+        last_task.last_completed_op_task_created_block = latest_completed_op_task_created_block;
+        last_task.last_completed_op_task_quorum_numbers = latest_completed_op_task_quorum_numbers;
+        last_task.last_completed_op_task_quorum_threshold_percentage = latest_completed_op_task_quorum_threshold_percentage;
 
-        let block_events: Vec<TaskCompletedFilter>  = self.clone().avs_contracts.task_manager.event_with_filter(Filter::new().event(&TaskCompletedFilter::abi_signature()).from_block(u64::from(block_num))).query().await?;
+        let block_events: Vec<OpTaskCompletedFilter>  = self.clone().avs_contracts.task_manager.event_with_filter(Filter::new().event(&OpTaskCompletedFilter::abi_signature()).from_block(u64::from(block_num))).query().await?;
 
         if block_events.len().is_zero(){
             tracing::error!("missing expected task response {:?}", task_num);
@@ -215,7 +281,7 @@ impl Syncer {
 
         let operators_state_info = self.clone().get_operators_state_info(last_task.clone()).await?;
 
-        let reinit_txn = self.clone().root_gasp_service_contract.clone().expect("should work in reinit").process_eigen_reinit(last_task, task_response, operators_state_info);
+        let reinit_txn = self.clone().root_gasp_service_contract.clone().expect("should work in reinit").process_eigen_reinit(last_task, operators_state_info, latest_pending_state_hash);
         println!("{:?}", reinit_txn);
         let reinit_txn_pending = reinit_txn.send().await;
         println!("{:?}", reinit_txn_pending);
@@ -227,7 +293,7 @@ impl Syncer {
 
     pub(crate) async fn get_operators_state_info(
         self: Arc<Self>,
-        task: Task,
+        task: OpTask,
     ) -> eyre::Result<OperatorStateInfo> {
 
         // We assume that the quorumNumbers are alteast unique even if not sorted

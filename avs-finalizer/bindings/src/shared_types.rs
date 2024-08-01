@@ -68,6 +68,29 @@ pub struct PubkeyRegistrationParams {
     pub pubkey_g1: G1Point,
     pub pubkey_g2: G2Point,
 }
+///`NonSignerStakesAndSignature(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][])`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct NonSignerStakesAndSignature {
+    pub non_signer_quorum_bitmap_indices: ::std::vec::Vec<u32>,
+    pub non_signer_pubkeys: ::std::vec::Vec<G1Point>,
+    pub quorum_apks: ::std::vec::Vec<G1Point>,
+    pub apk_g2: G2Point,
+    pub sigma: G1Point,
+    pub quorum_apk_indices: ::std::vec::Vec<u32>,
+    pub total_stake_indices: ::std::vec::Vec<u32>,
+    pub non_signer_stake_indices: ::std::vec::Vec<::std::vec::Vec<u32>>,
+}
 ///`QuorumStakeTotals(uint96[],uint96[])`
 #[derive(
     Clone,
@@ -533,4 +556,38 @@ pub struct DeprecatedStructQueuedWithdrawal {
 pub struct DeprecatedStructWithdrawerAndNonce {
     pub withdrawer: ::ethers::core::types::Address,
     pub nonce: u128,
+}
+///`FuzzInterface(address,string[])`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct FuzzInterface {
+    pub addr: ::ethers::core::types::Address,
+    pub artifacts: ::std::vec::Vec<::std::string::String>,
+}
+///`FuzzSelector(address,bytes4[])`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct FuzzSelector {
+    pub addr: ::ethers::core::types::Address,
+    pub selectors: ::std::vec::Vec<[u8; 4]>,
 }

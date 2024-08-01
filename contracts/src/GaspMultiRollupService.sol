@@ -104,7 +104,7 @@ contract GaspMultiRollupService is
         
     }
 
-    function process_eigen_op_update(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, NonSignerStakesAndSignatureForOldState calldata nonSignerStakesAndSignatureForOldState, OperatorStateInfo calldata operatorStateInfo) public {
+    function process_eigen_op_update(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public {
 
 
         bool isInit = latestCompletedOpTaskCreatedBlock == 0;
@@ -129,7 +129,7 @@ contract GaspMultiRollupService is
 
         
         // if the this is the first task then don't check sigs
-        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals = checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignatureForOldState);
+        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals = checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignature);
 
         uint32 QuorumThresholdPercentage = quorumThresholdPercentage;
         // check that signatories own at least a threshold percentage of each quourm
@@ -201,7 +201,7 @@ contract GaspMultiRollupService is
         
     }
 
-    function process_eigen_rd_update(IFinalizerTaskManager.RdTask calldata task, IFinalizerTaskManager.RdTaskResponse calldata taskResponse, NonSignerStakesAndSignatureForOldState calldata nonSignerStakesAndSignatureForOldState) public onlyUpdater {
+    function process_eigen_rd_update(IFinalizerTaskManager.RdTask calldata task, IFinalizerTaskManager.RdTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature) public onlyUpdater {
 
         require(latestCompletedOpTaskCreatedBlock != 0, "Op state uninit");
         require(latestCompletedOpTaskCreatedBlock == task.lastCompletedOpTaskCreatedBlock, "reference block hash mismatch");
@@ -212,7 +212,7 @@ contract GaspMultiRollupService is
 
         
         // if the this is the first task then don't check sigs
-        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals = checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignatureForOldState);
+        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals = checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignature);
 
         uint32 QuorumThresholdPercentage = quorumThresholdPercentage;
         // check that signatories own at least a threshold percentage of each quourm
@@ -236,7 +236,7 @@ contract GaspMultiRollupService is
 
     function checkSignatures(
         bytes32 msgHash,
-        NonSignerStakesAndSignatureForOldState memory params
+        IBLSSignatureChecker.NonSignerStakesAndSignature memory params
     )
         public 
         view
@@ -261,26 +261,26 @@ contract GaspMultiRollupService is
         stakeTotals.totalStakeForQuorum = new uint96[](quorumNumbersLength);
         stakeTotals.signedStakeForQuorum = new uint96[](quorumNumbersLength);
 
-        bytes32[] memory nonSignersPubkeyHashes = new bytes32[](params.nonSignerG1PubkeysForOldState.length);
+        bytes32[] memory nonSignersPubkeyHashes = new bytes32[](params.nonSignerPubkeys.length);
 
         uint8 quorumNumber;
 
         {
 
-            for (uint256 j = 0; j < params.nonSignerG1PubkeysForOldState.length; j++) {
+            for (uint256 j = 0; j < params.nonSignerPubkeys.length; j++) {
                 // The nonsigner's pubkey hash doubles as their operatorId
                 // The check below validates that these operatorIds are sorted (and therefore
                 // free of duplicates)
-                nonSignersPubkeyHashes[j] = params.nonSignerG1PubkeysForOldState[j].hashG1Point();
+                nonSignersPubkeyHashes[j] = params.nonSignerPubkeys[j].hashG1Point();
                 if (j != 0) {
                     require(
                         uint256(nonSignersPubkeyHashes[j]) > uint256(nonSignersPubkeyHashes[j - 1]),
-                        "BLSSignatureChecker.checkSignatures: nonSignerG1PubkeysForOldState not sorted"
+                        "BLSSignatureChecker.checkSignatures: nonSignerPubkeys not sorted"
                     );
                 }
 
                 apk = apk.plus(
-                    params.nonSignerG1PubkeysForOldState[j]
+                    params.nonSignerPubkeys[j]
                         .scalar_mul_tiny(
                             operatorIdQuorumCount[nonSignersPubkeyHashes[j]]
                         )
@@ -314,7 +314,7 @@ contract GaspMultiRollupService is
                 
                 // loop through all nonSigners, checking that they are a part of the quorum via their quorumBitmap
                 // if so, load their stake at referenceBlockNumber and subtract it from running stake signed
-                for (uint256 j = 0; j < params.nonSignerG1PubkeysForOldState.length; j++) {
+                for (uint256 j = 0; j < params.nonSignerPubkeys.length; j++) {
                         stakeTotals.signedStakeForQuorum[i] -=
                             operatorAndQuorumToStakes[nonSignersPubkeyHashes[j]][quorumNumber];
                 }
@@ -325,8 +325,8 @@ contract GaspMultiRollupService is
             (bool pairingSuccessful, bool signatureIsValid) = trySignatureAndApkVerification(
                 msgHash, 
                 apk, 
-                params.apkG2ForOldState, 
-                params.sigmaForOldState
+                params.apkG2, 
+                params.sigma
             );
             require(pairingSuccessful, "BLSSignatureChecker.checkSignatures: pairing precompile call failed");
             require(signatureIsValid, "BLSSignatureChecker.checkSignatures: signature is invalid");

@@ -18,13 +18,6 @@ interface IGaspMultiRollupServicePrimitives {
         uint32 taskCreatedBlock
     );
 
-    struct NonSignerStakesAndSignatureForOldState {
-        BN254.G1Point[] nonSignerG1PubkeysForOldState;
-        BN254.G2Point apkG2ForOldState;
-        BN254.G1Point sigmaForOldState;
-    }
-
-
     struct OperatorStateInfo {
         bool operatorsStateChanged;
         
