@@ -17,11 +17,11 @@ pub mod i_gasp_multi_rollup_service_primitives {
             functions: ::std::collections::BTreeMap::new(),
             events: ::core::convert::From::from([
                 (
-                    ::std::borrow::ToOwned::to_owned("EigenReinitProcessed"),
+                    ::std::borrow::ToOwned::to_owned("EigenOpUpdateProcessed"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Event {
                             name: ::std::borrow::ToOwned::to_owned(
-                                "EigenReinitProcessed",
+                                "EigenOpUpdateProcessed",
                             ),
                             inputs: ::std::vec![
                                 ::ethers::core::abi::ethabi::EventParam {
@@ -40,11 +40,34 @@ pub mod i_gasp_multi_rollup_service_primitives {
                     ],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("EigenUpdateProcessed"),
+                    ::std::borrow::ToOwned::to_owned("EigenRdUpdateProcessed"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Event {
                             name: ::std::borrow::ToOwned::to_owned(
-                                "EigenUpdateProcessed",
+                                "EigenRdUpdateProcessed",
+                            ),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("taskNumber"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    indexed: false,
+                                },
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("taskCreatedBlock"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("EigenReinitProcessed"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "EigenReinitProcessed",
                             ),
                             inputs: ::std::vec![
                                 ::ethers::core::abi::ethabi::EventParam {
@@ -111,6 +134,26 @@ pub mod i_gasp_multi_rollup_service_primitives {
                 ),
             )
         }
+        ///Gets the contract's `EigenOpUpdateProcessed` event
+        pub fn eigen_op_update_processed_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            EigenOpUpdateProcessedFilter,
+        > {
+            self.0.event()
+        }
+        ///Gets the contract's `EigenRdUpdateProcessed` event
+        pub fn eigen_rd_update_processed_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<
+            ::std::sync::Arc<M>,
+            M,
+            EigenRdUpdateProcessedFilter,
+        > {
+            self.0.event()
+        }
         ///Gets the contract's `EigenReinitProcessed` event
         pub fn eigen_reinit_processed_filter(
             &self,
@@ -118,16 +161,6 @@ pub mod i_gasp_multi_rollup_service_primitives {
             ::std::sync::Arc<M>,
             M,
             EigenReinitProcessedFilter,
-        > {
-            self.0.event()
-        }
-        ///Gets the contract's `EigenUpdateProcessed` event
-        pub fn eigen_update_processed_filter(
-            &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            EigenUpdateProcessedFilter,
         > {
             self.0.event()
         }
@@ -161,10 +194,10 @@ pub mod i_gasp_multi_rollup_service_primitives {
         Hash
     )]
     #[ethevent(
-        name = "EigenReinitProcessed",
-        abi = "EigenReinitProcessed(uint32,uint32)"
+        name = "EigenOpUpdateProcessed",
+        abi = "EigenOpUpdateProcessed(uint32,uint32)"
     )]
-    pub struct EigenReinitProcessedFilter {
+    pub struct EigenOpUpdateProcessedFilter {
         pub task_number: u32,
         pub task_created_block: u32,
     }
@@ -181,10 +214,30 @@ pub mod i_gasp_multi_rollup_service_primitives {
         Hash
     )]
     #[ethevent(
-        name = "EigenUpdateProcessed",
-        abi = "EigenUpdateProcessed(uint32,uint32)"
+        name = "EigenRdUpdateProcessed",
+        abi = "EigenRdUpdateProcessed(uint32,uint32)"
     )]
-    pub struct EigenUpdateProcessedFilter {
+    pub struct EigenRdUpdateProcessedFilter {
+        pub task_number: u32,
+        pub task_created_block: u32,
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
+    #[ethevent(
+        name = "EigenReinitProcessed",
+        abi = "EigenReinitProcessed(uint32,uint32)"
+    )]
+    pub struct EigenReinitProcessedFilter {
         pub task_number: u32,
         pub task_created_block: u32,
     }
@@ -200,23 +253,31 @@ pub mod i_gasp_multi_rollup_service_primitives {
         Hash
     )]
     pub enum IGaspMultiRollupServicePrimitivesEvents {
+        EigenOpUpdateProcessedFilter(EigenOpUpdateProcessedFilter),
+        EigenRdUpdateProcessedFilter(EigenRdUpdateProcessedFilter),
         EigenReinitProcessedFilter(EigenReinitProcessedFilter),
-        EigenUpdateProcessedFilter(EigenUpdateProcessedFilter),
     }
     impl ::ethers::contract::EthLogDecode for IGaspMultiRollupServicePrimitivesEvents {
         fn decode_log(
             log: &::ethers::core::abi::RawLog,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::Error> {
-            if let Ok(decoded) = EigenReinitProcessedFilter::decode_log(log) {
+            if let Ok(decoded) = EigenOpUpdateProcessedFilter::decode_log(log) {
                 return Ok(
-                    IGaspMultiRollupServicePrimitivesEvents::EigenReinitProcessedFilter(
+                    IGaspMultiRollupServicePrimitivesEvents::EigenOpUpdateProcessedFilter(
                         decoded,
                     ),
                 );
             }
-            if let Ok(decoded) = EigenUpdateProcessedFilter::decode_log(log) {
+            if let Ok(decoded) = EigenRdUpdateProcessedFilter::decode_log(log) {
                 return Ok(
-                    IGaspMultiRollupServicePrimitivesEvents::EigenUpdateProcessedFilter(
+                    IGaspMultiRollupServicePrimitivesEvents::EigenRdUpdateProcessedFilter(
+                        decoded,
+                    ),
+                );
+            }
+            if let Ok(decoded) = EigenReinitProcessedFilter::decode_log(log) {
+                return Ok(
+                    IGaspMultiRollupServicePrimitivesEvents::EigenReinitProcessedFilter(
                         decoded,
                     ),
                 );
@@ -227,25 +288,34 @@ pub mod i_gasp_multi_rollup_service_primitives {
     impl ::core::fmt::Display for IGaspMultiRollupServicePrimitivesEvents {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
+                Self::EigenOpUpdateProcessedFilter(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
+                Self::EigenRdUpdateProcessedFilter(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::EigenReinitProcessedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::EigenUpdateProcessedFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
             }
+        }
+    }
+    impl ::core::convert::From<EigenOpUpdateProcessedFilter>
+    for IGaspMultiRollupServicePrimitivesEvents {
+        fn from(value: EigenOpUpdateProcessedFilter) -> Self {
+            Self::EigenOpUpdateProcessedFilter(value)
+        }
+    }
+    impl ::core::convert::From<EigenRdUpdateProcessedFilter>
+    for IGaspMultiRollupServicePrimitivesEvents {
+        fn from(value: EigenRdUpdateProcessedFilter) -> Self {
+            Self::EigenRdUpdateProcessedFilter(value)
         }
     }
     impl ::core::convert::From<EigenReinitProcessedFilter>
     for IGaspMultiRollupServicePrimitivesEvents {
         fn from(value: EigenReinitProcessedFilter) -> Self {
             Self::EigenReinitProcessedFilter(value)
-        }
-    }
-    impl ::core::convert::From<EigenUpdateProcessedFilter>
-    for IGaspMultiRollupServicePrimitivesEvents {
-        fn from(value: EigenUpdateProcessedFilter) -> Self {
-            Self::EigenUpdateProcessedFilter(value)
         }
     }
 }

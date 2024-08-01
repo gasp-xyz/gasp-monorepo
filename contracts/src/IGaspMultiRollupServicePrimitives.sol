@@ -5,7 +5,11 @@ import "@eigenlayer-middleware/src/libraries/BN254.sol";
 
 interface IGaspMultiRollupServicePrimitives {
 
-    event EigenUpdateProcessed(
+    event EigenOpUpdateProcessed(
+        uint32 taskNumber,
+        uint32 taskCreatedBlock
+    );
+    event EigenRdUpdateProcessed(
         uint32 taskNumber,
         uint32 taskCreatedBlock
     );

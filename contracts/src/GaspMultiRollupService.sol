@@ -25,13 +25,14 @@ contract GaspMultiRollupService is
     uint256 internal constant _THRESHOLD_DENOMINATOR = 100;
     uint256 internal constant PAIRING_EQUALITY_CHECK_GAS = 120000;
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _updater)
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _updater, bool _allowNonRootInit)
         public
         initializer
     {
         _initializePauser(_pauserRegistry, UNPAUSE_ALL);
         _transferOwnership(initialOwner);
         updater = _updater;
+        allowNonRootInit = _allowNonRootInit;
     }
 
     /* MODIFIERS */
@@ -45,7 +46,7 @@ contract GaspMultiRollupService is
     }
 
 
-    function process_eigen_reinit(IFinalizerTaskManager.Task calldata task, IFinalizerTaskManager.TaskResponse calldata taskResponse, OperatorStateInfo calldata operatorStateInfo) public onlyOwner{
+    function process_eigen_reinit(IFinalizerTaskManager.OpTask calldata task, OperatorStateInfo calldata operatorStateInfo, bytes32 pendingStateHash) public onlyOwner{
 
         for (uint256 i = 0; i < operatorStateInfo.quorumsRemoved.length; i++) {
             delete quorumToStakes[operatorStateInfo.quorumsRemoved[i]];
@@ -91,10 +92,10 @@ contract GaspMultiRollupService is
             operatorIdQuorumCount[operatorStateInfo.operatorsQuorumCountUpdate[i].operatorId] = operatorStateInfo.operatorsQuorumCountUpdate[i].quorumCount;
         }
 
-        latestPendingStateHash = taskResponse.pendingStateHash;
-        latestCompletedTaskNumber = task.taskNum;
-        latestCompletedTaskCreatedBlock = task.taskCreatedBlock;
-        lastUpdateBlockTimestamp = block.timestamp;
+        latestPendingStateHash = pendingStateHash;
+        latestCompletedOpTaskNumber = task.taskNum;
+        latestCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
+        lastOpUpdateBlockTimestamp = block.timestamp;
 
         quorumNumbers = task.quorumNumbers;
         quorumThresholdPercentage = task.quorumThresholdPercentage;
@@ -103,16 +104,28 @@ contract GaspMultiRollupService is
         
     }
 
-    function process_eigen_update(IFinalizerTaskManager.Task calldata task, IFinalizerTaskManager.TaskResponse calldata taskResponse, NonSignerStakesAndSignatureForOldState calldata nonSignerStakesAndSignatureForOldState, OperatorStateInfo calldata operatorStateInfo) public onlyUpdater {
+    function process_eigen_op_update(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, NonSignerStakesAndSignatureForOldState calldata nonSignerStakesAndSignatureForOldState, OperatorStateInfo calldata operatorStateInfo) public {
 
 
-        require(latestCompletedTaskCreatedBlock == task.lastCompletedTaskCreatedBlock, "reference block hash mismatch");
+        bool isInit = latestCompletedOpTaskCreatedBlock == 0;
+
+        if (isInit) {
+            if (allowNonRootInit) {
+                require(msg.sender == updater, "Auth0");
+            } else {
+                require(msg.sender == owner(), "Auth2");
+            }
+        } else {
+            require(msg.sender == updater, "Auth0");
+        }
+
         require(taskResponse.referenceTaskHash == keccak256(abi.encode(task)), "referenceTaskHash hash mismatch");
         require(taskResponse.operatorsStateInfoHash == keccak256(abi.encode(operatorStateInfo)), "operatorStateInfo hash mismatch");
 
-        if (latestCompletedTaskCreatedBlock !=0) {
-        require(latestCompletedTaskCreatedBlock + 14400 > task.taskCreatedBlock, "stale state 0");
-        require(lastUpdateBlockTimestamp + 3 days > block.timestamp, "stale state 1");
+        if (!isInit) {
+        require(latestCompletedOpTaskCreatedBlock == task.lastCompletedOpTaskCreatedBlock, "reference block mismatch");
+        require(latestCompletedOpTaskCreatedBlock + 14400 > task.taskCreatedBlock, "stale state 0");
+        require(lastOpUpdateBlockTimestamp + 3 days > block.timestamp, "stale state 1");
 
         
         // if the this is the first task then don't check sigs
@@ -177,15 +190,47 @@ contract GaspMultiRollupService is
             operatorIdQuorumCount[operatorStateInfo.operatorsQuorumCountUpdate[i].operatorId] = operatorStateInfo.operatorsQuorumCountUpdate[i].quorumCount;
         }
 
-        latestPendingStateHash = taskResponse.pendingStateHash;
-        latestCompletedTaskNumber = task.taskNum;
-        latestCompletedTaskCreatedBlock = task.taskCreatedBlock;
-        lastUpdateBlockTimestamp = block.timestamp;
+        latestCompletedOpTaskNumber = task.taskNum;
+        latestCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
+        lastOpUpdateBlockTimestamp = block.timestamp;
 
         quorumNumbers = task.quorumNumbers;
         quorumThresholdPercentage = task.quorumThresholdPercentage;
 
-        emit EigenUpdateProcessed(task.taskNum, task.taskCreatedBlock);
+        emit EigenOpUpdateProcessed(task.taskNum, task.taskCreatedBlock);
+        
+    }
+
+    function process_eigen_rd_update(IFinalizerTaskManager.RdTask calldata task, IFinalizerTaskManager.RdTaskResponse calldata taskResponse, NonSignerStakesAndSignatureForOldState calldata nonSignerStakesAndSignatureForOldState) public onlyUpdater {
+
+        require(latestCompletedOpTaskCreatedBlock != 0, "Op state uninit");
+        require(latestCompletedOpTaskCreatedBlock == task.lastCompletedOpTaskCreatedBlock, "reference block hash mismatch");
+        require(taskResponse.referenceTaskHash == keccak256(abi.encode(task)), "referenceTaskHash hash mismatch");
+
+        require(latestCompletedOpTaskCreatedBlock + 14400 > task.taskCreatedBlock, "stale state 0");
+        require(lastOpUpdateBlockTimestamp + 3 days > block.timestamp, "stale state 1");
+
+        
+        // if the this is the first task then don't check sigs
+        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals = checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignatureForOldState);
+
+        uint32 QuorumThresholdPercentage = quorumThresholdPercentage;
+        // check that signatories own at least a threshold percentage of each quourm
+        for (uint256 i = 0; i < quorumNumbers.length; i++) {
+            // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
+            // signed stake > total stake
+            if (
+                quorumStakeTotals.signedStakeForQuorum[i] * _THRESHOLD_DENOMINATOR
+                    < quorumStakeTotals.totalStakeForQuorum[i] * uint8(QuorumThresholdPercentage)
+            ) {
+                // "Signatories do not own at least threshold percentage of a quorum"
+                return;
+            }
+        }
+
+        latestPendingStateHash = taskResponse.pendingStateHash;
+
+        emit EigenRdUpdateProcessed(task.taskNum, task.taskCreatedBlock);
         
     }
 

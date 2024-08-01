@@ -68,6 +68,23 @@ pub struct PubkeyRegistrationParams {
     pub pubkey_g1: G1Point,
     pub pubkey_g2: G2Point,
 }
+///`QuorumStakeTotals(uint96[],uint96[])`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct QuorumStakeTotals {
+    pub signed_stake_for_quorum: ::std::vec::Vec<u128>,
+    pub total_stake_for_quorum: ::std::vec::Vec<u128>,
+}
 ///`OperatorDetails(address,address,uint32)`
 #[derive(
     Clone,
@@ -225,6 +242,136 @@ pub struct TaskResponseMetadata {
     pub hash_of_non_signers: [u8; 32],
     pub quroum_stake_totals: ::std::vec::Vec<u128>,
     pub quroum_stake_signed: ::std::vec::Vec<u128>,
+}
+///`OperatorStateInfo(bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[])`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct OperatorStateInfo {
+    pub operators_state_changed: bool,
+    pub quorums_removed: ::std::vec::Vec<u8>,
+    pub quorums_added: ::std::vec::Vec<QuorumsAdded>,
+    pub quorums_stake_update: ::std::vec::Vec<QuorumsStakeUpdate>,
+    pub quorums_apk_update: ::std::vec::Vec<QuorumsApkUpdate>,
+    pub operators_removed: ::std::vec::Vec<[u8; 32]>,
+    pub operators_added: ::std::vec::Vec<OperatorsAdded>,
+    pub operators_stake_update: ::std::vec::Vec<OperatorsStakeUpdate>,
+    pub operators_quorum_count_update: ::std::vec::Vec<OperatorsQuorumCountUpdate>,
+}
+///`OperatorsAdded(bytes32,uint8[],uint96[],uint8)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct OperatorsAdded {
+    pub operator_id: [u8; 32],
+    pub quorum_for_stakes: ::std::vec::Vec<u8>,
+    pub quorum_stakes: ::std::vec::Vec<u128>,
+    pub quorum_count: u8,
+}
+///`OperatorsQuorumCountUpdate(bytes32,uint8)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct OperatorsQuorumCountUpdate {
+    pub operator_id: [u8; 32],
+    pub quorum_count: u8,
+}
+///`OperatorsStakeUpdate(bytes32,uint8[],uint96[])`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct OperatorsStakeUpdate {
+    pub operator_id: [u8; 32],
+    pub quorum_for_stakes: ::std::vec::Vec<u8>,
+    pub quorum_stakes: ::std::vec::Vec<u128>,
+}
+///`QuorumsAdded(uint8,uint96,(uint256,uint256))`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct QuorumsAdded {
+    pub quorum_number: u8,
+    pub quorum_stake: u128,
+    pub quorum_apk: G1Point,
+}
+///`QuorumsApkUpdate(uint8,(uint256,uint256))`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct QuorumsApkUpdate {
+    pub quorum_number: u8,
+    pub quorum_apk: G1Point,
+}
+///`QuorumsStakeUpdate(uint8,uint96)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash
+)]
+pub struct QuorumsStakeUpdate {
+    pub quorum_number: u8,
+    pub quorum_stake: u128,
 }
 ///`OperatorInfo(bytes32,uint8)`
 #[derive(
