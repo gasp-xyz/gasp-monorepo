@@ -86,14 +86,47 @@ aggregatorEnabled: true
 # tests/keys/aggregator.ecdsa.key.json
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: '{"address":"a0ee7a142d267c1f36714e4a8f75612f20a79720","crypto":{"cipher":"aes-128-ctr","ciphertext":"b0f6f8e3ba33f0b382b080de6661d827181de480f1a4f94bc20d66cb3d585907","cipherparams":{"iv":"4e3f9a8ca6ef8d1cd408e8aaae3c22d2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"c8f9f8cc03913e09cee7e1fd68732fac327576203ab277d740270f1dea82ee7e"},"mac":"353d65850b20d5fdb90ca2385c52e5b57662cb1d906fd58143f20a7720723cf6"},"id":"d3036cc7-d068-4f2f-9667-60aaca660e61","version":3}'
+aggregatorEnv:
+  # rpc
+  ETH_RPC_URL: http://evm-node-eth:8545
+  ETH_WS_URL: ws://evm-node-eth:8546
+  SUBSTRATE_RPC_URL: ws://collator-01:9944
+  # contracts
+  CHAIN_ID: "1337"
+  AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
+  # AVS
+  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
+  AVS_BLOCK_VALIDATION_PERIOD: "5"
+  # OP
+  RUST_LOG: info
+  AVS_RPC_URL: http://avs-aggregator:8090
+  TESTNET: "true"
+  ECDSA_EPHEMERAL_KEY: "true"
+  BLS_EPHEMERAL_KEY: "true"
 
 #####################
 # finalizer configs #
 #####################
-secondFinalizerEnabled: false
 finalizerEnabled: true
 finalizerEnableServiceMonitorCollectors: true
 finalizerEnvSecrets: {}
+finalizerEnv:
+  # rpc
+  ETH_RPC_URL: http://evm-node-eth:8545
+  ETH_WS_URL: ws://evm-node-eth:8546
+  SUBSTRATE_RPC_URL: ws://collator-01:9944
+  # contracts
+  CHAIN_ID: "1337"
+  AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
+  # AVS
+  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
+  AVS_BLOCK_VALIDATION_PERIOD: "5"
+  # OP
+  RUST_LOG: info
+  AVS_RPC_URL: http://avs-aggregator:8090
+  TESTNET: "true"
+  ECDSA_EPHEMERAL_KEY: "true"
+  BLS_EPHEMERAL_KEY: "true"
 
 ###########################
 # rollup-updater configs #
