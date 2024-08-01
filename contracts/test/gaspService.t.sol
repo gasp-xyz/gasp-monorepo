@@ -30,16 +30,15 @@ contract GaspMultiRollupServiceTest is Test, IGaspMultiRollupServicePrimitives {
 
         bytes memory lqbytes = new bytes(0);
 
-        IFinalizerTaskManager.Task memory task =
-            IFinalizerTaskManager.Task ({
+        IFinalizerTaskManager.OpTask memory task =
+            IFinalizerTaskManager.OpTask ({
         taskNum :1,
-        blockNumber:20,
         taskCreatedBlock:30,
-        lastCompletedTaskCreatedBlock:0 ,
+        lastCompletedOpTaskCreatedBlock:0 ,
         quorumNumbers: qbytes,
         quorumThresholdPercentage: 66,
-        lastCompletedTaskQuorumNumbers: lqbytes,
-        lastCompletedTaskQuorumThresholdPercentage:0
+        lastCompletedOpTaskQuorumNumbers: lqbytes,
+        lastCompletedOpTaskQuorumThresholdPercentage:0
     });
 
         bytes memory encodedTask =  abi.encode(task);

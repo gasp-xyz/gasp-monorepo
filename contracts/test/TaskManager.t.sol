@@ -19,7 +19,7 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
     FinalizerTaskManager tm;
     FinalizerTaskManager tmImplementation;
 
-    event NewTaskCreated(uint32 indexed taskIndex, FinalizerTaskManager.Task task);
+    event NewOpTaskCreated(uint32 indexed taskIndex, FinalizerTaskManager.OpTask task);
 
     uint32 public constant TASK_RESPONSE_WINDOW_BLOCK = 30;
     address aggregator =
@@ -29,12 +29,14 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
 
     function setUp() public {
         _setUpBLSMockAVSDeployer();
+        
+        blsSignatureChecker = new BLSSignatureChecker(registryCoordinator);
+        // This is a hack to set BlsSignatureChecker's staleStakesForbidden flag
+        // We do it this way to avoid forking it...
+        // This hack depends on avsOwner being the same as the deployer...
+        blsSignatureChecker.setStaleStakesForbidden(false);
 
         tmImplementation = new FinalizerTaskManager(
-            msm.IRegistryCoordinator(
-                address(registryCoordinator)
-            ),
-            TASK_RESPONSE_WINDOW_BLOCK
         );
 
         // Third, upgrade the proxy contracts to use the correct implementation contracts and initialize them.
@@ -48,7 +50,9 @@ contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
                         pauserRegistry,
                         registryCoordinatorOwner,
                         aggregator,
-                        generator
+                        generator,
+                        true,
+                        blsSignatureChecker, TASK_RESPONSE_WINDOW_BLOCK, TASK_RESPONSE_WINDOW_BLOCK
                     )
                 )
             )
