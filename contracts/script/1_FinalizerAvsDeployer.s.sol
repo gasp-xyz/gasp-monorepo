@@ -99,6 +99,8 @@ contract Deployer is Script, Utils, Test {
 
         taskResponseWindowBlocks =
             uint32(stdJson.readUint(configData, ".taskManagerParams.taskResponseWindowBlocks"));
+        minOpTaskResponseWindowBlock =
+            uint32(stdJson.readUint(configData, ".taskManagerParams.minOpTaskResponseWindowBlock"));
 
         allow_non_root_tm_init = stdJson.readBool(configData, ".allow_non_root_tm_init");
 
@@ -250,7 +252,7 @@ contract Deployer is Script, Utils, Test {
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(taskManager))),
             address(taskManagerImplementation),
-            abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator, allow_non_root_tm_init, blsSignatureChecker, taskResponseWindowBlocks)
+            abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator, allow_non_root_tm_init, blsSignatureChecker, taskResponseWindowBlocks, minOpTaskResponseWindowBlock)
         );
 
         // transfer ownership of proxy admin to upgrader

@@ -33,6 +33,7 @@ contract FinalizerTaskManager is
     /* CONSTANT */
     // The number of blocks from the task initialization within which the aggregator has to respond to
     uint32 public taskResponseWindowBlock;
+    uint32 public minOpTaskResponseWindowBlock;
     uint256 public constant THRESHOLD_DENOMINATOR = 100;
 
     /* STORAGE */
@@ -51,6 +52,7 @@ contract FinalizerTaskManager is
 
     mapping(TaskType => mapping(uint32 => TaskStatus)) public idToTaskStatus;
 
+    uint32 public lastOpTaskCreatedBlock;
     uint32 public lastCompletedOpTaskNum;
     uint32 public lastCompletedOpTaskCreatedBlock;
     // uint32 lastCompletedTaskNum;
@@ -94,7 +96,7 @@ contract FinalizerTaskManager is
         _;
     }
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock)
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock)
         public
         initializer
     {
@@ -105,6 +107,7 @@ contract FinalizerTaskManager is
         allowNonRootInit = _allowNonRootInit;
         blsSignatureChecker = BLSSignatureChecker(_blsSignatureCheckerAddress);
         taskResponseWindowBlock = _taskResponseWindowBlock;
+        minOpTaskResponseWindowBlock = _minOpTaskResponseWindowBlock;
     }
 
     function updateBlsSignatureCheckerAddress(address _blsSignatureCheckerAddress) external onlyOwner{
@@ -154,9 +157,17 @@ contract FinalizerTaskManager is
             }
         }
 
+        if (latestRdTaskNum > 0) {
+            uint32 lastTaskNum = latestRdTaskNum - 1;
+            if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
+                idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+            }
+        }
+
         // store hash of task onchain, emit event, and increase taskNum
         allTaskHashes[TaskType.OP_TASK][latestOpTaskNum] = keccak256(abi.encode(newTask));
         idToTaskStatus[TaskType.OP_TASK][latestOpTaskNum] = TaskStatus.INITIALIZED;
+        lastOpTaskCreatedBlock = uint32(block.number);
         emit NewOpTaskCreated(latestOpTaskNum, newTask);
         latestOpTaskNum = latestOpTaskNum + 1;
     }
@@ -292,9 +303,17 @@ contract FinalizerTaskManager is
             }
         }
 
+        if (latestRdTaskNum > 0) {
+            uint32 lastTaskNum = latestRdTaskNum - 1;
+            if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
+                idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+            }
+        }
+
         // store hash of task onchain, emit event, and increase taskNum
         allTaskHashes[TaskType.OP_TASK][latestOpTaskNum] = keccak256(abi.encode(newTask));
         idToTaskStatus[TaskType.OP_TASK][latestOpTaskNum] = TaskStatus.INITIALIZED;
+        lastOpTaskCreatedBlock = uint32(block.number);
         emit NewOpTaskCreated(latestOpTaskNum, newTask);
         emit NewOpTaskForceCreated(latestOpTaskNum, newTask);
         latestOpTaskNum = latestOpTaskNum + 1;
@@ -363,9 +382,11 @@ contract FinalizerTaskManager is
             lastCompletedOpTaskCreatedBlock != 0 && block.number != 0,
             "Op State uninit"
         );
+        uint32 latestRdTaskNumMem = latestRdTaskNum;
+        uint32 latestOpTaskNumMem = latestOpTaskNum;
         // create a new task struct
         RdTask memory newTask;
-        newTask.taskNum = latestRdTaskNum;
+        newTask.taskNum = latestRdTaskNumMem;
         newTask.blockNumber = blockNumber;
         newTask.taskCreatedBlock = uint32(block.number);
         newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
@@ -374,18 +395,29 @@ contract FinalizerTaskManager is
 
         // Ensure new previous task was either cancelled or completed
         // Here for now we auto cancel previous task if not completed
-        if (latestRdTaskNum > 0) {
-            uint32 lastTaskNum = latestRdTaskNum - 1;
+        if (latestRdTaskNumMem > 0) {
+            uint32 lastTaskNum = latestRdTaskNumMem - 1;
             if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
                 idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
             }
         }
 
+        if (latestOpTaskNumMem > 0) {
+            uint32 lastTaskNum = latestOpTaskNumMem - 1;
+            if (idToTaskStatus[TaskType.OP_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
+                require(
+                    uint32(block.number) <= lastOpTaskCreatedBlock + minOpTaskResponseWindowBlock,
+                    "RdTask can't yet cancel the init OpTask"
+                );
+                idToTaskStatus[TaskType.OP_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+            }
+        }
+
         // store hash of task onchain, emit event, and increase taskNum
-        allTaskHashes[TaskType.RD_TASK][latestRdTaskNum] = keccak256(abi.encode(newTask));
-        idToTaskStatus[TaskType.RD_TASK][latestRdTaskNum] = TaskStatus.INITIALIZED;
-        emit NewRdTaskCreated(latestRdTaskNum, newTask);
-        latestRdTaskNum = latestRdTaskNum + 1;
+        allTaskHashes[TaskType.RD_TASK][latestRdTaskNumMem] = keccak256(abi.encode(newTask));
+        idToTaskStatus[TaskType.RD_TASK][latestRdTaskNumMem] = TaskStatus.INITIALIZED;
+        emit NewRdTaskCreated(latestRdTaskNumMem, newTask);
+        latestRdTaskNum = latestRdTaskNumMem + 1;
     }
 
     // NOTE: this function responds to existing tasks.
