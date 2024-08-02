@@ -4,6 +4,10 @@ export const TIMESERIES_HOST_DOCKER_IMAGE_NAME = "mangatasolutions/redis-test-st
 export const REDIS_HOST_DOCKER_IMAGE_NAME = "mangatasolutions/redis-test-stash:latest";
 export const MAX_DAYS="max";
 export const MAX_INTERVAL="day";
+export const ERROR_MSG_POOL_NOT_FOUND = "this must be one of the following values: GASPV2-L1Asset, L1Asset-GASPV2, GASPV2-L1Asset-GASPV2, L1Asset-GASPV2-GASPV2, ALL";
+export const ERROR_MSG_PAIR_ASSET_NOT_FOUND = "this must be one of the following values: GASPV2, L1Asset, GASPV2-GETH, L1Asset-GASPV2";
+
+
 let redisContainer: StartedTestContainer;
 let timeSeriesContainer: StartedTestContainer;
 

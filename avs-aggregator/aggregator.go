@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"sync"
 	"time"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
@@ -22,6 +23,7 @@ import (
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
+	gsrpcrpcchain "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/chain"
 )
 
 // Aggregator sends tasks (numbers to square) onchain, then listens for operator signed TaskResponses.
@@ -168,10 +170,29 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 	agg.logger.Infof("Starting aggregator rpc server.")
 	go agg.startServer(ctx)
 
-	sub, err := agg.substrateClient.RPC.Chain.SubscribeNewHeads()
+	var sub *gsrpcrpcchain.NewHeadsSubscription
+	var err error
+	const maxRetries = 5
+	const retryDelay = time.Minute
+
+	// Loop to retry subscription on error
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		sub, err = agg.substrateClient.RPC.Chain.SubscribeNewHeads()
+		if err == nil {
+			break // Successfully subscribed, exit loop
+		}
+
+		agg.logger.Error("Failed to get new head from substrate, retrying...", "err", err, "attempt", attempt+1)
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-time.After(retryDelay): // Wait before retrying
+			continue
+		}
+	}
+
 	if err != nil {
-		agg.logger.Error("Failed to get new head from substrate", "err", err)
-		panic(err)
+		return fmt.Errorf("failed to subscribe to new heads from substrate after %d attempts: %w", maxRetries, err)
 	}
 	defer sub.Unsubscribe()
 
@@ -189,7 +210,29 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 				continue
 			}
 		case err := <-sub.Err():
-			return err
+			agg.logger.Error("Subscription error, retrying subscription...", "err", err)
+			// Reset the subscription on error
+			sub.Unsubscribe() // Unsubscribe before retrying
+
+			// Retry subscription with a maximum number of attempts
+			for attempt := 0; attempt < maxRetries; attempt++ {
+				sub, err = agg.substrateClient.RPC.Chain.SubscribeNewHeads()
+				if err == nil {
+					break // Successfully subscribed, exit loop
+				}
+
+				agg.logger.Error("Failed to get new head from substrate, retrying...", "err", err, "attempt", attempt+1)
+				select {
+				case <-ctx.Done():
+					return nil
+				case <-time.After(retryDelay): // Wait before retrying
+					continue
+				}
+			}
+
+			if err != nil {
+				return fmt.Errorf("failed to resubscribe to new heads after %d attempts: %w", maxRetries, err)
+			}
 		}
 	}
 }

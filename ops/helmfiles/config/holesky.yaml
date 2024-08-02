@@ -16,9 +16,9 @@ collatorsEnabled: true
 collator:
   image:
     repository: mangatasolutions/rollup-node
-    tag: 3a07824d8b8a6ad027424629b814a5edb61654cf
+    tag: frontend-fix
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 50Gi
@@ -32,12 +32,29 @@ collator:
       operator: Equal
       value: "true"
       effect: NoSchedule
-  firstCollatorNodeSelector:
-    production: "true"
-    topology.kubernetes.io/zone: europe-west1-b
-  secondCollatorNodeSelector:
-    production: "true"
-    topology.kubernetes.io/zone: europe-west1-c
+  # Node specific collator configs
+  collator01:
+    # Identity ID: 12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
+    customNodeKey: '5f982f7cd04dde558ae7800d4cf2facd0a4e0c64f627db666456ad903077e6da'
+    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWNVGLHURQs8NqYGrLnpoSePh5QPjBqUJDJL8CmNgr4qWN
+    extraArgs:
+      - --alith
+      - --pruning=archive
+      - --rpc-max-connections=5000
+    nodeSelector:
+      production: "true"
+      topology.kubernetes.io/zone: europe-west1-b
+  collator02:
+    # Identity ID: 12D3KooWNVGLHURQs8NqYGrLnpoSePh5QPjBqUJDJL8CmNgr4qWN
+    customNodeKey: '2747e7dadbc3a7cc50e678a9f264cb385852a8883cac4d4d016afc0b8513a6f9'
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
+    extraArgs:
+      - --baltathar
+      - --pruning=archive
+      - --rpc-max-connections=5000
+    nodeSelector:
+      production: "true"
+      topology.kubernetes.io/zone: europe-west1-c
 
 ####################
 # evm-node configs #
@@ -81,7 +98,7 @@ envArb:
 ######################
 # aggregator configs #
 ######################
-aggregatorEnabled: true
+aggregatorEnabled: false
 # tests/keys/aggregator.ecdsa.key.json
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: '{"address":"a0ee7a142d267c1f36714e4a8f75612f20a79720","crypto":{"cipher":"aes-128-ctr","ciphertext":"b0f6f8e3ba33f0b382b080de6661d827181de480f1a4f94bc20d66cb3d585907","cipherparams":{"iv":"4e3f9a8ca6ef8d1cd408e8aaae3c22d2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"c8f9f8cc03913e09cee7e1fd68732fac327576203ab277d740270f1dea82ee7e"},"mac":"353d65850b20d5fdb90ca2385c52e5b57662cb1d906fd58143f20a7720723cf6"},"id":"d3036cc7-d068-4f2f-9667-60aaca660e61","version":3}'
@@ -89,8 +106,8 @@ aggregatorEnvSecrets:
 #####################
 # finalizer configs #
 #####################
+finalizerEnabled: false
 secondFinalizerEnabled: false
-finalizerEnabled: true
 finalizerEnableServiceMonitorCollectors: true
 finalizerEnvSecrets: {}
 
@@ -99,7 +116,7 @@ finalizerEnvSecrets: {}
 ###########################
 updaterEnabled: true
 
-updaterChainUrlEth: ref+sops://secrets.enc.yaml#/updaterChainUrlEth
+updaterChainUrlEth: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
 updaterMnemonicEth: ref+sops://secrets.enc.yaml#/updaterMnemonicEth
 updaterEnvEth:
   CHAIN: "holesky"
@@ -109,7 +126,7 @@ updaterEnvEth:
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   FINALIZATION_SOURCE: "relay"
 
-updaterChainUrlArb: ref+sops://secrets.enc.yaml#/updaterChainUrlArb
+updaterChainUrlArb: ref+sops://secrets.enc.yaml#/sepoliaArbitrumHttpsUrl
 updaterMnemonicArb: ref+sops://secrets.enc.yaml#/updaterMnemonicArb
 updaterEnvArb:
   CHAIN: "arbitrum"
@@ -127,7 +144,7 @@ secondSequencerEnabled: false
 
 firstSequencerMnemonicEth: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
 secondSequencerMnemonicEth: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
-sequencerChainUrlEth: ref+sops://secrets.enc.yaml#/updaterChainUrlEth
+sequencerChainUrlEth: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -135,7 +152,7 @@ sequencerEnvEth:
 
 firstSequencerMnemonicArb: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
 secondSequencerMnemonicArb: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
-sequencerChainUrlArb: ref+sops://secrets.enc.yaml#/updaterChainUrlArb
+sequencerChainUrlArb: ref+sops://secrets.enc.yaml#/sepoliaArbitrumHttpsUrl
 sequencerEnvArb:
   L1_CHAIN: "Arbitrum"
   MANGATA_NODE_URL: ws://collator-01:9944

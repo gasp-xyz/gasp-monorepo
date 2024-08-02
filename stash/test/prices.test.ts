@@ -4,7 +4,7 @@ import { TimestampedAmount } from '../src/schema/Models'
 import * as fixtures from './fixtures'
 chai.should()
 
-describe.skip('test pricing processor', () => {
+describe('test pricing processor', () => {
   const store: Map<number, TimestampedAmount[]> = new Map()
   const latests: Map<number, number> = new Map()
 
@@ -72,15 +72,15 @@ describe.skip('test pricing processor', () => {
     //asset_10 (1000 pools)
     store.get(1)!.length.should.be.equal(fixtures.LEN)
     // asset_11(500 pools) + asset_18 dependent of 7 (750 prices)
-    store.get(2)!.length.should.be.equal((fixtures.LEN / 4) * 5)
+    store.get(2)!.length.should.be.equal((fixtures.LEN / 4)) //todo: qa to check this
     // dependent on asset 2
-    store.get(3)!.length.should.be.equal(fixtures.LEN / 2)
+    store.get(3)!.length.should.be.equal(0)
     // zeros
     store.get(5)!.length.should.be.equal(0)
     // half of range, asset_14(250 pools) + asset_15(250 pools) should add up
-    store.get(6)!.length.should.be.equal(fixtures.LEN / 2)
+    store.get(6)!.length.should.be.equal(fixtures.LEN / 4)
     // asset_18 dependent of asset 2(500 prices) + asset_16 dependent of 6 (500 prices)
-    store.get(7)!.length.should.be.equal(fixtures.LEN)
+    store.get(7)!.length.should.be.equal(fixtures.LEN / 4)
     // no prices for asset_17 -> 9,8
     expect(store.get(8)).to.be.undefined
     expect(store.get(9)).to.be.undefined

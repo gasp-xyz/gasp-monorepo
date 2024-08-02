@@ -28,7 +28,7 @@ describe('[Staking]', () => {
                     method: 'Rewarded',
                     sessionIndex: 2490,
                     collatorAccount:
-                      '5ChaosDANFE2q4qH3UnCUJ5ZXHms5TWwsbrx4YXNrwQh2nfk',
+                      '0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac',
                     amountRewarded: '2987444575204336243725',
                     liquidityTokenId: '5',
                     mgxTokenReserve: '496898413547286894785571735',
@@ -49,7 +49,7 @@ describe('[Staking]', () => {
                     method: 'Rewarded',
                     sessionIndex: 2491,
                     collatorAccount:
-                      '5ChaosDANFE2q4qH3UnCUJ5ZXHms5TWwsbrx4YXNrwQh2nfk',
+                      '0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac',
                     amountRewarded: '3049682978959055122100',
                     liquidityTokenId: '5',
                     mgxTokenReserve: '498146385622670707520541430',
@@ -70,7 +70,7 @@ describe('[Staking]', () => {
                     method: 'Rewarded',
                     sessionIndex: 2492,
                     collatorAccount:
-                      '5ChaosDANFE2q4qH3UnCUJ5ZXHms5TWwsbrx4YXNrwQh2nfk',
+                      '0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac',
                     amountRewarded: '2987444575204336243725',
                     liquidityTokenId: '5',
                     mgxTokenReserve: '497880205870442859369772655',
@@ -94,19 +94,19 @@ describe('[Staking]', () => {
     vi.unmock('../src/repository/StakingRepository')
   })
 
-  it.skip('should mock the apy endpoint method', async () => {
+  it('should mock the apy endpoint method', async () => {
     const expectedResponse: ResponseAPY[] = [
       {
         apy: '62.027726047981274135',
-        token: "0",
+        token: '5',
         date: '16/08/2023',
-        collatorAddress: '5ChaosDANFE2q4qH3UnCUJ5ZXHms5TWwsbrx4YXNrwQh2nfk',
+        collatorAddress: '0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac',
         dateFormat: 'DD/MM/YYYY',
         timestamp: '1692208122954',
       }
     ]
     const results = await apy(
-      '5ChaosDANFE2q4qH3UnCUJ5ZXHms5TWwsbrx4YXNrwQh2nfk'
+      '0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac'
     )
     expect(results).deep.equal(expectedResponse)
   })
@@ -122,7 +122,7 @@ describe('[Staking]', () => {
       },
     ]
     const results = await dailyRewards(
-      '5ChaosDANFE2q4qH3UnCUJ5ZXHms5TWwsbrx4YXNrwQh2nfk',
+      '0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac',
       undefined
     )
     expect(results).deep.equal(expectedResponse)

@@ -37,6 +37,7 @@ env:
   DEFAULT_E2E_REPO_BRANCH: eth-rollup-develop
   AVS_AGGREGATOR_VERSION: ${{ inputs.globalVersion }}
   AVS_FINALIZER_VERSION: ${{ inputs.globalVersion }}
+  GASP_SYNCER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_UPDATER_VERSION: ${{ inputs.globalVersion }}
   MANGATA_NODE_VERSION: ${{ inputs.substrateNodeVersion }}
@@ -50,7 +51,7 @@ jobs:
           submodules: recursive
 
       - name: Start env
-        run: bash -c "docker compose up --wait || true"
+        run: docker compose up -d
 
       - name: Use custom branch in e2e tests repository if it exists, otherwise use default branch
         id: e2e
