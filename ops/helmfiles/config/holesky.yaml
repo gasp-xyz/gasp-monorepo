@@ -90,7 +90,7 @@ envArb:
   AVS_BLOCK_VALIDATION_PERIOD: "5"
   # OP
   RUST_LOG: info
-  AVS_RPC_URL: http://avs-aggregator-eth:8090
+  AVS_RPC_URL: http://avs-aggregator:8090
   TESTNET: "true"
   ECDSA_EPHEMERAL_KEY: "true"
   BLS_EPHEMERAL_KEY: "true"
@@ -98,23 +98,68 @@ envArb:
 ######################
 # aggregator configs #
 ######################
-aggregatorEnabled: false
-# tests/keys/aggregator.ecdsa.key.json
+aggregatorEnabled: true
+# Override the image tag provided on deployment from IMAGE_TAG env variable
+aggregatorImageTag: 5d6f2a4db68e0601f14b3ced43773488efdda164
+
 aggregatorEnvSecrets:
-  ECDSA_KEY_JSON: '{"address":"a0ee7a142d267c1f36714e4a8f75612f20a79720","crypto":{"cipher":"aes-128-ctr","ciphertext":"b0f6f8e3ba33f0b382b080de6661d827181de480f1a4f94bc20d66cb3d585907","cipherparams":{"iv":"4e3f9a8ca6ef8d1cd408e8aaae3c22d2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"c8f9f8cc03913e09cee7e1fd68732fac327576203ab277d740270f1dea82ee7e"},"mac":"353d65850b20d5fdb90ca2385c52e5b57662cb1d906fd58143f20a7720723cf6"},"id":"d3036cc7-d068-4f2f-9667-60aaca660e61","version":3}'
+  ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetAggregatorEcdsaKeyJson
+  ECDSA_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetAggregatorEcdsaKeyPassword
+  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
+  ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
+aggregatorEnv:
+  SUBSTRATE_RPC_URL: wss://rollup-holesky-rpc.gasp.xyz:443
+  CHAIN_ID: "17000"
+  AVS_BLOCK_VALIDATION_PERIOD: '100'
+  AVS_DEBOUNCE_RPC: '20'
+  AVS_DEPLOYMENT_BLOCK: '1233400'
+  AVS_KICK_PERIOD: '25'
+  AVS_REGISTRY_COORDINATOR_ADDR: '0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1'
+  AVS_RPC_URL: https://avs-aggregator-rpc-holesky.gasp.xyz
+  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
+  AVS_TASK_EXPIRATION: '300'
+  AVS_UPDATE_STAKE_PERIOD: '150'
+  OPT_IN_AT_STARTUP: 'true'
+  LOG_LEVEL: 'info'
+  RUST_LOG: avs=debug
 
 #####################
 # finalizer configs #
 #####################
-finalizerEnabled: false
-secondFinalizerEnabled: false
+finalizerEnabled: true
+# Override the image tag provided on deployment from IMAGE_TAG env variable
+finalizerImageTag: ba3aaf237234092ad21bf0a4c5ff0f08523ba6f0
+
 finalizerEnableServiceMonitorCollectors: true
-finalizerEnvSecrets: {}
+finalizerEnvSecrets:
+  ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetFinalizerEcdsaKeyJson
+  ECDSA_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetFinalizerEcdsaKeyPassword
+  BLS_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetFinalizerBlsKeyJson
+  BLS_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetFinalizerBlsKeyPassword
+  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
+  ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
+finalizerEnv:
+  SUBSTRATE_RPC_URL: wss://rollup-holesky-rpc.gasp.xyz:443
+  CHAIN_ID: "17000"
+  AVS_BLOCK_VALIDATION_PERIOD: '100'
+  AVS_DEBOUNCE_RPC: '20'
+  AVS_DEPLOYMENT_BLOCK: '1233400'
+  AVS_KICK_PERIOD: '25'
+  AVS_REGISTRY_COORDINATOR_ADDR: '0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1'
+  AVS_RPC_URL: https://avs-aggregator-rpc-holesky.gasp.xyz
+  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
+  AVS_TASK_EXPIRATION: '300'
+  AVS_UPDATE_STAKE_PERIOD: '150'
+  OPT_IN_AT_STARTUP: 'true'
+  LOG_LEVEL: 'info'
+  RUST_LOG: avs=debug,ether=trace
 
 ###########################
 # rollup-updater configs #
 ###########################
 updaterEnabled: true
+# Override the image tag provided on deployment from IMAGE_TAG env variable
+updaterImageTag: 028fcb899a6e4be1be008b0f063f2a9d15bfe07b
 
 updaterChainUrlEth: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
 updaterMnemonicEth: ref+sops://secrets.enc.yaml#/updaterMnemonicEth
@@ -125,6 +170,7 @@ updaterEnvEth:
   EIGEN_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000"
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   FINALIZATION_SOURCE: "relay"
+  LIMIT: "25"
 
 updaterChainUrlArb: ref+sops://secrets.enc.yaml#/sepoliaArbitrumHttpsUrl
 updaterMnemonicArb: ref+sops://secrets.enc.yaml#/updaterMnemonicArb
@@ -135,12 +181,15 @@ updaterEnvArb:
   EIGEN_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000"
   MANGATA_CONTRACT_ADDRESS: "0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   FINALIZATION_SOURCE: "relay"
+  LIMIT: "25"
 
 ############################
 # rollup-sequencer configs #
 ############################
 sequencerEnabled: true
 secondSequencerEnabled: false
+# Override the image tag provided on deployment from IMAGE_TAG env variable
+sequencerImageTag: b4eac04bc26af897711c74a4309d5c659178d75f
 
 firstSequencerMnemonicEth: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
 secondSequencerMnemonicEth: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"

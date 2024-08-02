@@ -32,7 +32,6 @@ helmDefaults:
   kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
   wait: false
   diffArgs:
-    - "--suppress-secrets"
     - "--suppress" 
     - "Job"
   # TODO: To remove after updating Helm charts
@@ -83,11 +82,11 @@ releases:
     values:
       - image:
           repository: mangatasolutions/avs-aggregator
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "aggregatorImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
         remoteCluster: {{ .Values.remoteCluster }}
         envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.envEth | toYaml | nindent 10 }}
+        env: {{ .Values.aggregatorEnv | toYaml | nindent 10 }}
 
   - name: avs-finalizer
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -96,7 +95,7 @@ releases:
     values:
       - image:
           repository: mangatasolutions/avs-finalizer
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "finalizerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
         remoteCluster: {{ .Values.remoteCluster }}
         rpcPort: 9010
@@ -104,24 +103,7 @@ releases:
         prometheus:
           enabled: true
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.envEth | toYaml | nindent 10 }}
-  
-  - name: avs-finalizer-eth-2
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.secondFinalizerEnabled }}
-    chart: ../helm-charts/rollup-node
-    values:
-      - image:
-          repository: mangatasolutions/avs-finalizer
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
-        environment: {{ .Values.environmentName }}
-        remoteCluster: {{ .Values.remoteCluster }}
-        rpcPort: 9010
-        enableServiceMonitorCollectors: {{ .Values.finalizerEnableServiceMonitorCollectors }}
-        prometheus:
-          enabled: true
-        envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.envEth | toYaml | nindent 10 }}
+        env: {{ .Values.finalizerEnv | toYaml | nindent 10 }}
 
   - name: rollup-updater-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -130,7 +112,7 @@ releases:
     values:
       - image:
           repository: mangatasolutions/rollup-updater
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
         walletPrivateKey: {{ .Values.updaterMnemonicEth | fetchSecretValue | quote }}
         ethChainUrl: {{ .Values.updaterChainUrlEth | fetchSecretValue | quote }}
@@ -143,7 +125,7 @@ releases:
     values:
       - image:
           repository: mangatasolutions/rollup-updater
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
         walletPrivateKey: {{ .Values.updaterMnemonicArb | fetchSecretValue | quote }}
         ethChainUrl: {{ .Values.updaterChainUrlArb | fetchSecretValue | quote }}
@@ -156,7 +138,7 @@ releases:
     values:
       - image:
           repository: mangatasolutions/rollup-sequencer
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
         mnemonic: {{ .Values.firstSequencerMnemonicEth | fetchSecretValue | quote }}
         ethChainUrl:  {{ .Values.sequencerChainUrlEth | fetchSecretValue | quote }}
@@ -169,7 +151,7 @@ releases:
     values:
       - image:
           repository: mangatasolutions/rollup-sequencer
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
         mnemonic: {{ .Values.firstSequencerMnemonicArb | fetchSecretValue | quote }}
         ethChainUrl:  {{ .Values.sequencerChainUrlArb | fetchSecretValue | quote }}
@@ -182,7 +164,7 @@ releases:
     values:
       - image:
           repository: mangatasolutions/rollup-sequencer
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
         mnemonic: {{ .Values.secondSequencerMnemonicEth | fetchSecretValue | quote }}
         ethChainUrl:  {{ .Values.sequencerChainUrlEth | fetchSecretValue | quote }}
@@ -195,7 +177,7 @@ releases:
     values:
       - image:
           repository: mangatasolutions/rollup-sequencer
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
         mnemonic: {{ .Values.secondSequencerMnemonicArb | fetchSecretValue | quote }}
         ethChainUrl:  {{ .Values.sequencerChainUrlArb | fetchSecretValue | quote }}
@@ -413,6 +395,7 @@ releases:
 
   - name: collator-01
     installed: {{ .Values.collatorsEnabled }}
+    needs: [collator-02]
     chart: mangata-node/node
     namespace: 'rollup-{{ .Values.environmentName }}'
     values:
@@ -481,8 +464,7 @@ releases:
           role: collator
 
   - name: rpc-shared-dns-record-testnet
-    installed: false
-    # installed: {{ eq .Values.environmentName "holesky" }}
+    installed: {{ eq .Values.environmentName "holesky" }}
     namespace: 'rollup-{{ .Values.environmentName }}'
     chart: ../helm-charts/shared-dns-record
     values:
@@ -491,8 +473,7 @@ releases:
           role: collator
 
   - name: rpc-shared-dns-record-legacy
-    installed: false
-    # installed: {{ eq .Values.environmentName "holesky" }}
+    installed: {{ eq .Values.environmentName "holesky" }}
     namespace: 'rollup-{{ .Values.environmentName }}'
     chart: ../helm-charts/shared-dns-record
     values:
