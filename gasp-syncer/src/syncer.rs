@@ -383,28 +383,30 @@ impl Syncer {
     ) -> eyre::Result<OperatorStateInfo> {
         // We assume that the quorumNumbers are alteast unique even if not sorted
 
-        let old_quorum_threshold_percentage = if task.last_completed_op_task_created_block == task.task_created_block{
-            Default::default()
-        }else{
-            task.last_completed_op_task_quorum_threshold_percentage
-        };
+        let old_quorum_threshold_percentage =
+            if task.last_completed_op_task_created_block == task.task_created_block {
+                Default::default()
+            } else {
+                task.last_completed_op_task_quorum_threshold_percentage
+            };
         let new_quorum_threshold_percentage = task.quorum_threshold_percentage;
-        
-        let mut old_quorum_numbers = if task.last_completed_op_task_created_block == task.task_created_block{
-            Default::default()
-        }else{
-            task
-            .last_completed_op_task_quorum_numbers
-            .into_iter()
-            .collect::<Vec<u8>>()
-        };
+
+        let mut old_quorum_numbers =
+            if task.last_completed_op_task_created_block == task.task_created_block {
+                Default::default()
+            } else {
+                task.last_completed_op_task_quorum_numbers
+                    .into_iter()
+                    .collect::<Vec<u8>>()
+            };
         let mut new_quorum_numbers = task.quorum_numbers.into_iter().collect::<Vec<u8>>();
         old_quorum_numbers.sort();
         new_quorum_numbers.sort();
 
-        let old_task_block = if task.last_completed_op_task_created_block == task.task_created_block{
+        let old_task_block = if task.last_completed_op_task_created_block == task.task_created_block
+        {
             Default::default()
-        }else{
+        } else {
             task.last_completed_op_task_created_block
         };
         let new_task_block = task.task_created_block;
@@ -700,8 +702,7 @@ impl Syncer {
             || !operators_added.is_empty()
             || !operators_stake_update.is_empty()
             || !operators_quorum_count_update.is_empty()
-            || (old_quorum_threshold_percentage
-                != new_quorum_threshold_percentage)
+            || (old_quorum_threshold_percentage != new_quorum_threshold_percentage)
             || (old_quorum_numbers != new_quorum_numbers);
 
         let operator_state_info = OperatorStateInfo {

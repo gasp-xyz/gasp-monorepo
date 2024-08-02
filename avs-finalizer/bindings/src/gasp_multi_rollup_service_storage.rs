@@ -7,7 +7,7 @@ pub use gasp_multi_rollup_service_storage::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types,
+    non_camel_case_types
 )]
 pub mod gasp_multi_rollup_service_storage {
     #[allow(deprecated)]
@@ -17,430 +17,328 @@ pub mod gasp_multi_rollup_service_storage {
             functions: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("allowNonRootInit"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("allowNonRootInit"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bool"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("allowNonRootInit"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bool"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("lastOpUpdateBlockTimestamp"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "lastOpUpdateBlockTimestamp",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("lastOpUpdateBlockTimestamp",),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
                             ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned(
-                        "latestCompletedOpTaskCreatedBlock",
-                    ),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "latestCompletedOpTaskCreatedBlock",
+                    ::std::borrow::ToOwned::to_owned("latestCompletedOpTaskCreatedBlock"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("latestCompletedOpTaskCreatedBlock",),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint32"),
                             ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("latestCompletedOpTaskNumber"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "latestCompletedOpTaskNumber",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("latestCompletedOpTaskNumber",),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint32"),
                             ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("latestCompletedRdTaskNumber"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "latestCompletedRdTaskNumber",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("latestCompletedRdTaskNumber",),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint32"),
                             ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("latestPendingStateHash"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "latestPendingStateHash",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("latestPendingStateHash",),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
                             ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("operatorAndQuorumToStakes"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "operatorAndQuorumToStakes",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("operatorAndQuorumToStakes",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bytes32"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint8"),
+                                ),
+                            },
+                        ],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint96"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("operatorIdQuorumCount"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "operatorIdQuorumCount",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("operatorIdQuorumCount",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes32"),
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("qourumApk"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("qourumApk"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("X"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("Y"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("qourumApk"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
+                            ),
+                        },],
+                        outputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("X"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("Y"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("uint256"),
+                                ),
+                            },
+                        ],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("quorumNumbers"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Bytes,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bytes"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("quorumThresholdPercentage"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "quorumThresholdPercentage",
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("quorumThresholdPercentage",),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint32"),
                             ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("quorumToStakes"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("quorumToStakes"),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint8"),
-                                    ),
-                                },
-                            ],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint96"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("quorumToStakes"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint8"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint96"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("stalled"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("stalled"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bool"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("stalled"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bool"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("updater"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("updater"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("address"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("updater"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
                 ),
             ]),
             events: ::core::convert::From::from([
                 (
                     ::std::borrow::ToOwned::to_owned("EigenOpUpdateProcessed"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "EigenOpUpdateProcessed",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("taskNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    indexed: false,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("taskCreatedBlock"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("EigenOpUpdateProcessed",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("taskNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("taskCreatedBlock"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("EigenRdUpdateProcessed"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "EigenRdUpdateProcessed",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("taskNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    indexed: false,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("taskCreatedBlock"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("EigenRdUpdateProcessed",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("taskNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("taskCreatedBlock"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("EigenReinitProcessed"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Event {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "EigenReinitProcessed",
-                            ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("taskNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    indexed: false,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("taskCreatedBlock"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    indexed: false,
-                                },
-                            ],
-                            anonymous: false,
-                        },
-                    ],
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("EigenReinitProcessed",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("taskNumber"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("taskCreatedBlock"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
                 ),
             ]),
             errors: ::std::collections::BTreeMap::new(),
@@ -483,18 +381,14 @@ pub mod gasp_multi_rollup_service_storage {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(
-                ::ethers::contract::Contract::new(
-                    address.into(),
-                    GASPMULTIROLLUPSERVICESTORAGE_ABI.clone(),
-                    client,
-                ),
-            )
+            Self(::ethers::contract::Contract::new(
+                address.into(),
+                GASPMULTIROLLUPSERVICESTORAGE_ABI.clone(),
+                client,
+            ))
         }
         ///Calls the contract's `allowNonRootInit` (0x0ee0fdbd) function
-        pub fn allow_non_root_init(
-            &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, bool> {
+        pub fn allow_non_root_init(&self) -> ::ethers::contract::builders::ContractCall<M, bool> {
             self.0
                 .method_hash([14, 224, 253, 189], ())
                 .expect("method not found (this should never happen)")
@@ -573,10 +467,7 @@ pub mod gasp_multi_rollup_service_storage {
         ///Calls the contract's `quorumNumbers` (0x2a8414fd) function
         pub fn quorum_numbers(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Bytes,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Bytes> {
             self.0
                 .method_hash([42, 132, 20, 253], ())
                 .expect("method not found (this should never happen)")
@@ -607,10 +498,7 @@ pub mod gasp_multi_rollup_service_storage {
         ///Calls the contract's `updater` (0xdf034cd0) function
         pub fn updater(
             &self,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Address,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
             self.0
                 .method_hash([223, 3, 76, 208], ())
                 .expect("method not found (this should never happen)")
@@ -618,31 +506,22 @@ pub mod gasp_multi_rollup_service_storage {
         ///Gets the contract's `EigenOpUpdateProcessed` event
         pub fn eigen_op_update_processed_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            EigenOpUpdateProcessedFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, EigenOpUpdateProcessedFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `EigenRdUpdateProcessed` event
         pub fn eigen_rd_update_processed_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            EigenRdUpdateProcessedFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, EigenRdUpdateProcessedFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `EigenReinitProcessed` event
         pub fn eigen_reinit_processed_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            EigenReinitProcessedFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, EigenReinitProcessedFilter>
+        {
             self.0.event()
         }
         /// Returns an `Event` builder for all the events of this contract.
@@ -653,11 +532,13 @@ pub mod gasp_multi_rollup_service_storage {
             M,
             GaspMultiRollupServiceStorageEvents,
         > {
-            self.0.event_with_filter(::core::default::Default::default())
+            self.0
+                .event_with_filter(::core::default::Default::default())
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for GaspMultiRollupServiceStorage<M> {
+        for GaspMultiRollupServiceStorage<M>
+    {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -672,7 +553,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "EigenOpUpdateProcessed",
@@ -692,7 +573,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "EigenRdUpdateProcessed",
@@ -712,7 +593,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(
         name = "EigenReinitProcessed",
@@ -731,7 +612,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub enum GaspMultiRollupServiceStorageEvents {
         EigenOpUpdateProcessedFilter(EigenOpUpdateProcessedFilter),
@@ -744,23 +625,17 @@ pub mod gasp_multi_rollup_service_storage {
         ) -> ::core::result::Result<Self, ::ethers::core::abi::Error> {
             if let Ok(decoded) = EigenOpUpdateProcessedFilter::decode_log(log) {
                 return Ok(
-                    GaspMultiRollupServiceStorageEvents::EigenOpUpdateProcessedFilter(
-                        decoded,
-                    ),
+                    GaspMultiRollupServiceStorageEvents::EigenOpUpdateProcessedFilter(decoded),
                 );
             }
             if let Ok(decoded) = EigenRdUpdateProcessedFilter::decode_log(log) {
                 return Ok(
-                    GaspMultiRollupServiceStorageEvents::EigenRdUpdateProcessedFilter(
-                        decoded,
-                    ),
+                    GaspMultiRollupServiceStorageEvents::EigenRdUpdateProcessedFilter(decoded),
                 );
             }
             if let Ok(decoded) = EigenReinitProcessedFilter::decode_log(log) {
                 return Ok(
-                    GaspMultiRollupServiceStorageEvents::EigenReinitProcessedFilter(
-                        decoded,
-                    ),
+                    GaspMultiRollupServiceStorageEvents::EigenReinitProcessedFilter(decoded),
                 );
             }
             Err(::ethers::core::abi::Error::InvalidData)
@@ -775,26 +650,21 @@ pub mod gasp_multi_rollup_service_storage {
                 Self::EigenRdUpdateProcessedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::EigenReinitProcessedFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::EigenReinitProcessedFilter(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
-    impl ::core::convert::From<EigenOpUpdateProcessedFilter>
-    for GaspMultiRollupServiceStorageEvents {
+    impl ::core::convert::From<EigenOpUpdateProcessedFilter> for GaspMultiRollupServiceStorageEvents {
         fn from(value: EigenOpUpdateProcessedFilter) -> Self {
             Self::EigenOpUpdateProcessedFilter(value)
         }
     }
-    impl ::core::convert::From<EigenRdUpdateProcessedFilter>
-    for GaspMultiRollupServiceStorageEvents {
+    impl ::core::convert::From<EigenRdUpdateProcessedFilter> for GaspMultiRollupServiceStorageEvents {
         fn from(value: EigenRdUpdateProcessedFilter) -> Self {
             Self::EigenRdUpdateProcessedFilter(value)
         }
     }
-    impl ::core::convert::From<EigenReinitProcessedFilter>
-    for GaspMultiRollupServiceStorageEvents {
+    impl ::core::convert::From<EigenReinitProcessedFilter> for GaspMultiRollupServiceStorageEvents {
         fn from(value: EigenReinitProcessedFilter) -> Self {
             Self::EigenReinitProcessedFilter(value)
         }
@@ -810,7 +680,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "allowNonRootInit", abi = "allowNonRootInit()")]
     pub struct AllowNonRootInitCall;
@@ -825,9 +695,12 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
-    #[ethcall(name = "lastOpUpdateBlockTimestamp", abi = "lastOpUpdateBlockTimestamp()")]
+    #[ethcall(
+        name = "lastOpUpdateBlockTimestamp",
+        abi = "lastOpUpdateBlockTimestamp()"
+    )]
     pub struct LastOpUpdateBlockTimestampCall;
     ///Container type for all input parameters for the `latestCompletedOpTaskCreatedBlock` function with signature `latestCompletedOpTaskCreatedBlock()` and selector `0x6f0c30a4`
     #[derive(
@@ -840,7 +713,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "latestCompletedOpTaskCreatedBlock",
@@ -858,7 +731,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "latestCompletedOpTaskNumber",
@@ -876,7 +749,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "latestCompletedRdTaskNumber",
@@ -894,7 +767,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "latestPendingStateHash", abi = "latestPendingStateHash()")]
     pub struct LatestPendingStateHashCall;
@@ -909,7 +782,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "operatorAndQuorumToStakes",
@@ -927,7 +800,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "operatorIdQuorumCount", abi = "operatorIdQuorumCount(bytes32)")]
     pub struct OperatorIdQuorumCountCall(pub [u8; 32]);
@@ -942,7 +815,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "qourumApk", abi = "qourumApk(uint8)")]
     pub struct QourumApkCall(pub u8);
@@ -957,7 +830,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "quorumNumbers", abi = "quorumNumbers()")]
     pub struct QuorumNumbersCall;
@@ -972,9 +845,12 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
-    #[ethcall(name = "quorumThresholdPercentage", abi = "quorumThresholdPercentage()")]
+    #[ethcall(
+        name = "quorumThresholdPercentage",
+        abi = "quorumThresholdPercentage()"
+    )]
     pub struct QuorumThresholdPercentageCall;
     ///Container type for all input parameters for the `quorumToStakes` function with signature `quorumToStakes(uint8)` and selector `0x7ad75561`
     #[derive(
@@ -987,7 +863,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "quorumToStakes", abi = "quorumToStakes(uint8)")]
     pub struct QuorumToStakesCall(pub u8);
@@ -1002,7 +878,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "stalled", abi = "stalled()")]
     pub struct StalledCall;
@@ -1017,7 +893,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "updater", abi = "updater()")]
     pub struct UpdaterCall;
@@ -1030,7 +906,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub enum GaspMultiRollupServiceStorageCalls {
         AllowNonRootInit(AllowNonRootInitCall),
@@ -1053,74 +929,69 @@ pub mod gasp_multi_rollup_service_storage {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded) = <AllowNonRootInitCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <AllowNonRootInitCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::AllowNonRootInit(decoded));
             }
-            if let Ok(decoded) = <LastOpUpdateBlockTimestampCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <LastOpUpdateBlockTimestampCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::LastOpUpdateBlockTimestamp(decoded));
             }
-            if let Ok(decoded) = <LatestCompletedOpTaskCreatedBlockCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <LatestCompletedOpTaskCreatedBlockCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
                 return Ok(Self::LatestCompletedOpTaskCreatedBlock(decoded));
             }
-            if let Ok(decoded) = <LatestCompletedOpTaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <LatestCompletedOpTaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::LatestCompletedOpTaskNumber(decoded));
             }
-            if let Ok(decoded) = <LatestCompletedRdTaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <LatestCompletedRdTaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::LatestCompletedRdTaskNumber(decoded));
             }
-            if let Ok(decoded) = <LatestPendingStateHashCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <LatestPendingStateHashCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::LatestPendingStateHash(decoded));
             }
-            if let Ok(decoded) = <OperatorAndQuorumToStakesCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <OperatorAndQuorumToStakesCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::OperatorAndQuorumToStakes(decoded));
             }
-            if let Ok(decoded) = <OperatorIdQuorumCountCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <OperatorIdQuorumCountCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::OperatorIdQuorumCount(decoded));
             }
-            if let Ok(decoded) = <QourumApkCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <QourumApkCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::QourumApk(decoded));
             }
-            if let Ok(decoded) = <QuorumNumbersCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <QuorumNumbersCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::QuorumNumbers(decoded));
             }
-            if let Ok(decoded) = <QuorumThresholdPercentageCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <QuorumThresholdPercentageCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::QuorumThresholdPercentage(decoded));
             }
-            if let Ok(decoded) = <QuorumToStakesCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) =
+                <QuorumToStakesCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::QuorumToStakes(decoded));
             }
-            if let Ok(decoded) = <StalledCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <StalledCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Stalled(decoded));
             }
-            if let Ok(decoded) = <UpdaterCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
+            if let Ok(decoded) = <UpdaterCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Updater(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -1129,9 +1000,7 @@ pub mod gasp_multi_rollup_service_storage {
     impl ::ethers::core::abi::AbiEncode for GaspMultiRollupServiceStorageCalls {
         fn encode(self) -> Vec<u8> {
             match self {
-                Self::AllowNonRootInit(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::AllowNonRootInit(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::LastOpUpdateBlockTimestamp(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -1153,18 +1022,12 @@ pub mod gasp_multi_rollup_service_storage {
                 Self::OperatorIdQuorumCount(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::QourumApk(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::QuorumNumbers(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::QourumApk(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::QuorumNumbers(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::QuorumThresholdPercentage(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::QuorumToStakes(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::QuorumToStakes(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::Stalled(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::Updater(element) => ::ethers::core::abi::AbiEncode::encode(element),
             }
@@ -1174,82 +1037,62 @@ pub mod gasp_multi_rollup_service_storage {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
                 Self::AllowNonRootInit(element) => ::core::fmt::Display::fmt(element, f),
-                Self::LastOpUpdateBlockTimestamp(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::LastOpUpdateBlockTimestamp(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LatestCompletedOpTaskCreatedBlock(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::LatestCompletedOpTaskNumber(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::LatestCompletedRdTaskNumber(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::LatestPendingStateHash(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::OperatorAndQuorumToStakes(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::OperatorIdQuorumCount(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::LatestCompletedOpTaskNumber(element) => ::core::fmt::Display::fmt(element, f),
+                Self::LatestCompletedRdTaskNumber(element) => ::core::fmt::Display::fmt(element, f),
+                Self::LatestPendingStateHash(element) => ::core::fmt::Display::fmt(element, f),
+                Self::OperatorAndQuorumToStakes(element) => ::core::fmt::Display::fmt(element, f),
+                Self::OperatorIdQuorumCount(element) => ::core::fmt::Display::fmt(element, f),
                 Self::QourumApk(element) => ::core::fmt::Display::fmt(element, f),
                 Self::QuorumNumbers(element) => ::core::fmt::Display::fmt(element, f),
-                Self::QuorumThresholdPercentage(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::QuorumThresholdPercentage(element) => ::core::fmt::Display::fmt(element, f),
                 Self::QuorumToStakes(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Stalled(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Updater(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
-    impl ::core::convert::From<AllowNonRootInitCall>
-    for GaspMultiRollupServiceStorageCalls {
+    impl ::core::convert::From<AllowNonRootInitCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: AllowNonRootInitCall) -> Self {
             Self::AllowNonRootInit(value)
         }
     }
-    impl ::core::convert::From<LastOpUpdateBlockTimestampCall>
-    for GaspMultiRollupServiceStorageCalls {
+    impl ::core::convert::From<LastOpUpdateBlockTimestampCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: LastOpUpdateBlockTimestampCall) -> Self {
             Self::LastOpUpdateBlockTimestamp(value)
         }
     }
     impl ::core::convert::From<LatestCompletedOpTaskCreatedBlockCall>
-    for GaspMultiRollupServiceStorageCalls {
+        for GaspMultiRollupServiceStorageCalls
+    {
         fn from(value: LatestCompletedOpTaskCreatedBlockCall) -> Self {
             Self::LatestCompletedOpTaskCreatedBlock(value)
         }
     }
-    impl ::core::convert::From<LatestCompletedOpTaskNumberCall>
-    for GaspMultiRollupServiceStorageCalls {
+    impl ::core::convert::From<LatestCompletedOpTaskNumberCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: LatestCompletedOpTaskNumberCall) -> Self {
             Self::LatestCompletedOpTaskNumber(value)
         }
     }
-    impl ::core::convert::From<LatestCompletedRdTaskNumberCall>
-    for GaspMultiRollupServiceStorageCalls {
+    impl ::core::convert::From<LatestCompletedRdTaskNumberCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: LatestCompletedRdTaskNumberCall) -> Self {
             Self::LatestCompletedRdTaskNumber(value)
         }
     }
-    impl ::core::convert::From<LatestPendingStateHashCall>
-    for GaspMultiRollupServiceStorageCalls {
+    impl ::core::convert::From<LatestPendingStateHashCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: LatestPendingStateHashCall) -> Self {
             Self::LatestPendingStateHash(value)
         }
     }
-    impl ::core::convert::From<OperatorAndQuorumToStakesCall>
-    for GaspMultiRollupServiceStorageCalls {
+    impl ::core::convert::From<OperatorAndQuorumToStakesCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: OperatorAndQuorumToStakesCall) -> Self {
             Self::OperatorAndQuorumToStakes(value)
         }
     }
-    impl ::core::convert::From<OperatorIdQuorumCountCall>
-    for GaspMultiRollupServiceStorageCalls {
+    impl ::core::convert::From<OperatorIdQuorumCountCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: OperatorIdQuorumCountCall) -> Self {
             Self::OperatorIdQuorumCount(value)
         }
@@ -1259,20 +1102,17 @@ pub mod gasp_multi_rollup_service_storage {
             Self::QourumApk(value)
         }
     }
-    impl ::core::convert::From<QuorumNumbersCall>
-    for GaspMultiRollupServiceStorageCalls {
+    impl ::core::convert::From<QuorumNumbersCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: QuorumNumbersCall) -> Self {
             Self::QuorumNumbers(value)
         }
     }
-    impl ::core::convert::From<QuorumThresholdPercentageCall>
-    for GaspMultiRollupServiceStorageCalls {
+    impl ::core::convert::From<QuorumThresholdPercentageCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: QuorumThresholdPercentageCall) -> Self {
             Self::QuorumThresholdPercentage(value)
         }
     }
-    impl ::core::convert::From<QuorumToStakesCall>
-    for GaspMultiRollupServiceStorageCalls {
+    impl ::core::convert::From<QuorumToStakesCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: QuorumToStakesCall) -> Self {
             Self::QuorumToStakes(value)
         }
@@ -1298,7 +1138,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct AllowNonRootInitReturn(pub bool);
     ///Container type for all return fields from the `lastOpUpdateBlockTimestamp` function with signature `lastOpUpdateBlockTimestamp()` and selector `0xf84e91fc`
@@ -1312,7 +1152,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct LastOpUpdateBlockTimestampReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `latestCompletedOpTaskCreatedBlock` function with signature `latestCompletedOpTaskCreatedBlock()` and selector `0x6f0c30a4`
@@ -1326,7 +1166,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct LatestCompletedOpTaskCreatedBlockReturn(pub u32);
     ///Container type for all return fields from the `latestCompletedOpTaskNumber` function with signature `latestCompletedOpTaskNumber()` and selector `0xe2a7cb66`
@@ -1340,7 +1180,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct LatestCompletedOpTaskNumberReturn(pub u32);
     ///Container type for all return fields from the `latestCompletedRdTaskNumber` function with signature `latestCompletedRdTaskNumber()` and selector `0xd03a07b2`
@@ -1354,7 +1194,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct LatestCompletedRdTaskNumberReturn(pub u32);
     ///Container type for all return fields from the `latestPendingStateHash` function with signature `latestPendingStateHash()` and selector `0x4ae6b203`
@@ -1368,7 +1208,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct LatestPendingStateHashReturn(pub [u8; 32]);
     ///Container type for all return fields from the `operatorAndQuorumToStakes` function with signature `operatorAndQuorumToStakes(bytes32,uint8)` and selector `0x499d6fb6`
@@ -1382,7 +1222,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct OperatorAndQuorumToStakesReturn(pub u128);
     ///Container type for all return fields from the `operatorIdQuorumCount` function with signature `operatorIdQuorumCount(bytes32)` and selector `0x430d3b39`
@@ -1396,7 +1236,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct OperatorIdQuorumCountReturn(pub u8);
     ///Container type for all return fields from the `qourumApk` function with signature `qourumApk(uint8)` and selector `0x03d097d2`
@@ -1410,7 +1250,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct QourumApkReturn {
         pub x: ::ethers::core::types::U256,
@@ -1427,7 +1267,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct QuorumNumbersReturn(pub ::ethers::core::types::Bytes);
     ///Container type for all return fields from the `quorumThresholdPercentage` function with signature `quorumThresholdPercentage()` and selector `0x4deabc21`
@@ -1441,7 +1281,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct QuorumThresholdPercentageReturn(pub u32);
     ///Container type for all return fields from the `quorumToStakes` function with signature `quorumToStakes(uint8)` and selector `0x7ad75561`
@@ -1455,7 +1295,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct QuorumToStakesReturn(pub u128);
     ///Container type for all return fields from the `stalled` function with signature `stalled()` and selector `0x526e3e64`
@@ -1469,7 +1309,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct StalledReturn(pub bool);
     ///Container type for all return fields from the `updater` function with signature `updater()` and selector `0xdf034cd0`
@@ -1483,7 +1323,7 @@ pub mod gasp_multi_rollup_service_storage {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct UpdaterReturn(pub ::ethers::core::types::Address);
 }

@@ -7,9 +7,9 @@ use crate::rpc::Rpc;
 
 use bindings::{
     finalizer_task_manager::{
-        NewOpTaskCreatedFilter, NewRdTaskCreatedFilter, Operator as TMOperator, OperatorStateInfo, OperatorsAdded,
-        OperatorsQuorumCountUpdate, OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate,
-        QuorumsStakeUpdate, FinalizerTaskManagerEvents
+        FinalizerTaskManagerEvents, NewOpTaskCreatedFilter, NewRdTaskCreatedFilter,
+        Operator as TMOperator, OperatorStateInfo, OperatorsAdded, OperatorsQuorumCountUpdate,
+        OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate, QuorumsStakeUpdate,
     },
     shared_types::{G1Point, G2Point, OpTask, OpTaskResponse, RdTask, RdTaskResponse},
 };
@@ -24,6 +24,7 @@ use node_executor::ExecutorDispatch;
 use node_primitives::BlockNumber;
 
 use ethers::abi::AbiEncode;
+use eyre::eyre;
 use serde::Serialize;
 use sp_core::H256;
 use sp_runtime::traits::{BlakeTwo256, Hash, Keccak256};
@@ -34,7 +35,6 @@ use tokio::select;
 use tokio::time::{sleep, Duration};
 use tokio::try_join;
 use tracing::{debug, error, info, instrument};
-use eyre::eyre;
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
@@ -193,28 +193,30 @@ impl Operator {
     ) -> eyre::Result<[u8; 32]> {
         // We assume that the quorumNumbers are alteast unique even if not sorted
 
-        let old_quorum_threshold_percentage = if task.last_completed_op_task_created_block == task.task_created_block{
-            Default::default()
-        }else{
-            task.last_completed_op_task_quorum_threshold_percentage
-        };
+        let old_quorum_threshold_percentage =
+            if task.last_completed_op_task_created_block == task.task_created_block {
+                Default::default()
+            } else {
+                task.last_completed_op_task_quorum_threshold_percentage
+            };
         let new_quorum_threshold_percentage = task.quorum_threshold_percentage;
 
-        let mut old_quorum_numbers = if task.last_completed_op_task_created_block == task.task_created_block{
-            Default::default()
-        }else{
-            task
-            .last_completed_op_task_quorum_numbers
-            .into_iter()
-            .collect::<Vec<u8>>()
-        };
+        let mut old_quorum_numbers =
+            if task.last_completed_op_task_created_block == task.task_created_block {
+                Default::default()
+            } else {
+                task.last_completed_op_task_quorum_numbers
+                    .into_iter()
+                    .collect::<Vec<u8>>()
+            };
         let mut new_quorum_numbers = task.quorum_numbers.into_iter().collect::<Vec<u8>>();
         old_quorum_numbers.sort();
         new_quorum_numbers.sort();
 
-        let old_task_block = if task.last_completed_op_task_created_block == task.task_created_block{
+        let old_task_block = if task.last_completed_op_task_created_block == task.task_created_block
+        {
             Default::default()
-        }else{
+        } else {
             task.last_completed_op_task_created_block
         };
         let new_task_block = task.task_created_block;
@@ -510,8 +512,7 @@ impl Operator {
             || !operators_added.is_empty()
             || !operators_stake_update.is_empty()
             || !operators_quorum_count_update.is_empty()
-            || (old_quorum_threshold_percentage
-                != new_quorum_threshold_percentage)
+            || (old_quorum_threshold_percentage != new_quorum_threshold_percentage)
             || (old_quorum_numbers != new_quorum_numbers);
 
         let operator_state_info = OperatorStateInfo {

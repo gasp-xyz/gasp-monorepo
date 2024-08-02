@@ -3,7 +3,10 @@ use std::{fmt::Debug, sync::Arc};
 use bindings::{
     bls_apk_registry::BLSApkRegistry,
     finalizer_service_manager::FinalizerServiceManager,
-    finalizer_task_manager::{FinalizerTaskManager, NewOpTaskCreatedFilter, NewRdTaskCreatedFilter, FinalizerTaskManagerEvents},
+    finalizer_task_manager::{
+        FinalizerTaskManager, FinalizerTaskManagerEvents, NewOpTaskCreatedFilter,
+        NewRdTaskCreatedFilter,
+    },
     registry_coordinator::RegistryCoordinator,
     shared_types::OperatorInfo,
     stake_registry::StakeRegistry,
@@ -80,9 +83,14 @@ impl AvsContracts {
         })
     }
 
-    pub fn new_task_stream(&self) -> Event<Arc<Provider<Ws>>, Provider<Ws>, FinalizerTaskManagerEvents> {
+    pub fn new_task_stream(
+        &self,
+    ) -> Event<Arc<Provider<Ws>>, Provider<Ws>, FinalizerTaskManagerEvents> {
         self.task_manager_sub
-            .event_with_filter(Filter::new().events([NewOpTaskCreatedFilter::abi_signature().into_owned(), NewRdTaskCreatedFilter::abi_signature().into_owned()]))
+            .event_with_filter(Filter::new().events([
+                NewOpTaskCreatedFilter::abi_signature().into_owned(),
+                NewRdTaskCreatedFilter::abi_signature().into_owned(),
+            ]))
     }
 
     pub async fn operator_id(&self) -> eyre::Result<Option<H256>> {

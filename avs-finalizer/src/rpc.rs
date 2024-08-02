@@ -9,6 +9,7 @@ use bindings::{
     shared_types::{OpTask, OpTaskResponse, RdTask, RdTaskResponse, *},
 };
 use ethers::abi::AbiEncode;
+use eyre::eyre;
 use reqwest::Response;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use reqwest_retry::{
@@ -19,7 +20,6 @@ use serde::{ser::SerializeStruct, Serialize};
 use sp_core::Bytes;
 use sp_runtime::traits::{Hash, Keccak256};
 use tracing::instrument;
-use eyre::eyre;
 
 type Bytes32 = [u8; 32];
 
@@ -114,11 +114,13 @@ impl Rpc {
     }
 }
 
-fn create_response(op_task_response: Option<OpTaskResponse>, rd_task_response: Option<RdTaskResponse>, keypair: &BlsKeypair) -> eyre::Result<SignedTaskResponse> {
-
-    match (op_task_response, rd_task_response){
-        (Some(task), None)=>{
-
+fn create_response(
+    op_task_response: Option<OpTaskResponse>,
+    rd_task_response: Option<RdTaskResponse>,
+    keypair: &BlsKeypair,
+) -> eyre::Result<SignedTaskResponse> {
+    match (op_task_response, rd_task_response) {
+        (Some(task), None) => {
             let encoded = task.clone().encode();
 
             let hash = Keccak256::hash(encoded.as_ref());
@@ -129,25 +131,25 @@ fn create_response(op_task_response: Option<OpTaskResponse>, rd_task_response: O
                 op_task_response: encoded.into(),
                 rd_task_response: vec![].into(),
                 operator_id: keypair.operator_id().to_fixed_bytes(),
-            })
-        },
-        (None, Some(task))=>{
+            });
+        }
+        (None, Some(task)) => {
             let encoded = task.clone().encode();
-        
+
             let hash = Keccak256::hash(encoded.as_ref());
             let sig = keypair.sign(hash.as_bytes())?;
-        
+
             Ok(SignedTaskResponse {
                 bls_signature: sig.into(),
                 op_task_response: vec![].into(),
                 rd_task_response: encoded.into(),
                 operator_id: keypair.operator_id().to_fixed_bytes(),
             })
-        },
-        (None, None)=>{
+        }
+        (None, None) => {
             return Err(eyre!("Neither of op and rd task response populated"));
-        },
-        (Some(_), Some(_))=>{
+        }
+        (Some(_), Some(_)) => {
             return Err(eyre!("Both of op and rd task response populated"));
         }
     }
