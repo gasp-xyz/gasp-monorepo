@@ -12,6 +12,7 @@ abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
     bool public allowNonRootInit;
     uint256 public lastOpUpdateBlockTimestamp;
 
+    uint32 public latestCompletedRdTaskNumber;
     bytes32 public latestPendingStateHash;
 
     uint32 public latestCompletedOpTaskNumber;

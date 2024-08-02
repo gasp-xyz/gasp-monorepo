@@ -85,6 +85,10 @@ impl Syncer {
             .gasp_service_contract
             .latest_completed_op_task_created_block()
             .await?;
+        let mut latest_completed_rd_task_number = self
+            .gasp_service_contract
+            .latest_completed_rd_task_number()
+            .await?;
         // let mut task_number_expected = latest_completed_task_number + 1;
 
         if latest_completed_op_task_created_block.is_zero() && !cfg.push_first_init {
@@ -209,6 +213,11 @@ impl Syncer {
                                     return Err(eyre!("task_hash mismatch {:?}", task_hash))
                                 }
 
+                                if latest_completed_rd_task_number !=0 && latest_completed_rd_task_number >= call.task.task_num {
+                                    tracing::error!("stale rd_task {:?}", latest_completed_rd_task_number);
+                                    return Err(eyre!("stale rd_task {:?}", latest_completed_rd_task_number))
+                                }
+
                                 if latest_completed_op_task_created_block != call.task.last_completed_op_task_created_block {
                                     tracing::error!("latest_completed_op_task_created_block mismatch {:?}", latest_completed_op_task_created_block);
                                     return Err(eyre!("latest_completed_op_task_created_block mismatch {:?}", latest_completed_op_task_created_block))
@@ -225,6 +234,7 @@ impl Syncer {
                                 println!("{:?}", update_txn_pending);
                                 let update_txn_receipt = update_txn_pending?.await?;
                                 println!("{:?}", update_txn_receipt);
+                                latest_completed_rd_task_number = call.task.task_num;
 
                             },
                             _ => return Err(eyre!("Got unexpected stream event"))

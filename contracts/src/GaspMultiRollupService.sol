@@ -203,6 +203,7 @@ contract GaspMultiRollupService is
 
     function process_eigen_rd_update(IFinalizerTaskManager.RdTask calldata task, IFinalizerTaskManager.RdTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature) public onlyUpdater {
 
+        require(latestCompletedRdTaskNumber == 0 || latestCompletedRdTaskNumber < task.taskNum, "Stale RdTask");
         require(latestCompletedOpTaskCreatedBlock != 0, "Op state uninit");
         require(latestCompletedOpTaskCreatedBlock == task.lastCompletedOpTaskCreatedBlock, "reference block hash mismatch");
         require(taskResponse.referenceTaskHash == keccak256(abi.encode(task)), "referenceTaskHash hash mismatch");

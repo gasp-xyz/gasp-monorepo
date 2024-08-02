@@ -106,6 +106,28 @@ pub mod gasp_multi_rollup_service_storage {
                     ],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("latestCompletedRdTaskNumber"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "latestCompletedRdTaskNumber",
+                            ),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint32"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("latestPendingStateHash"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
@@ -501,6 +523,14 @@ pub mod gasp_multi_rollup_service_storage {
                 .method_hash([226, 167, 203, 102], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `latestCompletedRdTaskNumber` (0xd03a07b2) function
+        pub fn latest_completed_rd_task_number(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, u32> {
+            self.0
+                .method_hash([208, 58, 7, 178], ())
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `latestPendingStateHash` (0x4ae6b203) function
         pub fn latest_pending_state_hash(
             &self,
@@ -835,6 +865,24 @@ pub mod gasp_multi_rollup_service_storage {
         abi = "latestCompletedOpTaskNumber()"
     )]
     pub struct LatestCompletedOpTaskNumberCall;
+    ///Container type for all input parameters for the `latestCompletedRdTaskNumber` function with signature `latestCompletedRdTaskNumber()` and selector `0xd03a07b2`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
+    #[ethcall(
+        name = "latestCompletedRdTaskNumber",
+        abi = "latestCompletedRdTaskNumber()"
+    )]
+    pub struct LatestCompletedRdTaskNumberCall;
     ///Container type for all input parameters for the `latestPendingStateHash` function with signature `latestPendingStateHash()` and selector `0x4ae6b203`
     #[derive(
         Clone,
@@ -989,6 +1037,7 @@ pub mod gasp_multi_rollup_service_storage {
         LastOpUpdateBlockTimestamp(LastOpUpdateBlockTimestampCall),
         LatestCompletedOpTaskCreatedBlock(LatestCompletedOpTaskCreatedBlockCall),
         LatestCompletedOpTaskNumber(LatestCompletedOpTaskNumberCall),
+        LatestCompletedRdTaskNumber(LatestCompletedRdTaskNumberCall),
         LatestPendingStateHash(LatestPendingStateHashCall),
         OperatorAndQuorumToStakes(OperatorAndQuorumToStakesCall),
         OperatorIdQuorumCount(OperatorIdQuorumCountCall),
@@ -1023,6 +1072,11 @@ pub mod gasp_multi_rollup_service_storage {
                 data,
             ) {
                 return Ok(Self::LatestCompletedOpTaskNumber(decoded));
+            }
+            if let Ok(decoded) = <LatestCompletedRdTaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
+                return Ok(Self::LatestCompletedRdTaskNumber(decoded));
             }
             if let Ok(decoded) = <LatestPendingStateHashCall as ::ethers::core::abi::AbiDecode>::decode(
                 data,
@@ -1087,6 +1141,9 @@ pub mod gasp_multi_rollup_service_storage {
                 Self::LatestCompletedOpTaskNumber(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
+                Self::LatestCompletedRdTaskNumber(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::LatestPendingStateHash(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -1124,6 +1181,9 @@ pub mod gasp_multi_rollup_service_storage {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::LatestCompletedOpTaskNumber(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
+                Self::LatestCompletedRdTaskNumber(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::LatestPendingStateHash(element) => {
@@ -1168,6 +1228,12 @@ pub mod gasp_multi_rollup_service_storage {
     for GaspMultiRollupServiceStorageCalls {
         fn from(value: LatestCompletedOpTaskNumberCall) -> Self {
             Self::LatestCompletedOpTaskNumber(value)
+        }
+    }
+    impl ::core::convert::From<LatestCompletedRdTaskNumberCall>
+    for GaspMultiRollupServiceStorageCalls {
+        fn from(value: LatestCompletedRdTaskNumberCall) -> Self {
+            Self::LatestCompletedRdTaskNumber(value)
         }
     }
     impl ::core::convert::From<LatestPendingStateHashCall>
@@ -1277,6 +1343,20 @@ pub mod gasp_multi_rollup_service_storage {
         Hash
     )]
     pub struct LatestCompletedOpTaskNumberReturn(pub u32);
+    ///Container type for all return fields from the `latestCompletedRdTaskNumber` function with signature `latestCompletedRdTaskNumber()` and selector `0xd03a07b2`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
+    pub struct LatestCompletedRdTaskNumberReturn(pub u32);
     ///Container type for all return fields from the `latestPendingStateHash` function with signature `latestPendingStateHash()` and selector `0x4ae6b203`
     #[derive(
         Clone,
