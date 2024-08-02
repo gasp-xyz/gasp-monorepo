@@ -8,6 +8,14 @@ import { privateKeyToAccount } from 'viem/accounts'
 import Gasp from '../Gasp.json' assert { type: 'json' }
 import { ForbiddenException } from '../error/Exception.js'
 
+interface SimulateTransactionRequest {
+  client: any
+  account: any
+  tokenToSendAddress: any
+  toAddress: string
+  amount: bigint
+}
+
 const VERIFY_URL = 'https://api.hcaptcha.com/siteverify'
 //the two enums below you can use with token 10000000-aaaa-bbbb-cccc-000000000001 to have a test example of success
 const TEST_SECRET = '0x0000000000000000000000000000000000000000'
@@ -42,14 +50,7 @@ export const verifyCaptcha = async (captchaToken: string): Promise<void> => {
 }
 
 export const sendTokens = async (toAddress: string): Promise<void> => {
-  //Check if the address has requested the token more than MAX_REQUESTS times
-  const key = `${TOKEN_REQUEST_PREFIX}${toAddress}`
-  const requestCount = await redis.client.get(key)
-  if (requestCount && Number(requestCount) >= MAX_REQUESTS) {
-    throw new ForbiddenException(
-      `Address ${toAddress} has requested the token more than ${MAX_REQUESTS} times.`
-    )
-  }
+  await checkRequestCount(toAddress)
   const amount = BigInt(10 ** DECIMALS) // 10 GASPV2 tokens
   await send(tokenToSendAddress, toAddress, amount)
   logger.info(`Sent ${amount} tokens to ${toAddress}`)
@@ -57,16 +58,26 @@ export const sendTokens = async (toAddress: string): Promise<void> => {
   logger.info(`Incremented token request count for ${toAddress}`)
 }
 
-export const incrementTokenRequest = async (address: string): Promise<void> => {
+const checkRequestCount = async (toAddress: string): Promise<void> => {
+  const key = `${TOKEN_REQUEST_PREFIX}${toAddress}`
+  const requestCount = await redis.client.get(key)
+  if (requestCount && Number(requestCount) >= MAX_REQUESTS) {
+    throw new ForbiddenException(
+      `Address ${toAddress} has requested the token more than ${MAX_REQUESTS} times.`
+    )
+  }
+}
+
+const incrementTokenRequest = async (address: string): Promise<void> => {
   const key = `${TOKEN_REQUEST_PREFIX}${address}`
   await redis.client.incr(key)
 }
 
-async function send(
+const send = async (
   tokenToSendAddress: any,
   toAddress: string,
   amount: bigint
-) {
+) => {
   // Create a new wallet client
   const client = createWalletClient({
     chain: holesky,
@@ -76,16 +87,27 @@ async function send(
     `0x${process.env.ORIGIN_ACCOUNT_PRIVATE_KEY}`
   )
   logger.info('Sending tokens...')
-  //Simulate the transaction
-  const { request } = await client.simulateContract({
-    account: account,
+  const transaction: SimulateTransactionRequest = {
+    client,
+    account,
+    tokenToSendAddress,
+    toAddress,
+    amount,
+  }
+  const request = await simulateTransaction(transaction)
+  //Execute the transaction
+  return await client.writeContract(request)
+}
+
+const simulateTransaction = async (transaction: SimulateTransactionRequest) => {
+  const { request } = await transaction.client.simulateContract({
+    account: transaction.account,
     chain: holesky,
     abi: Gasp.abi,
-    address: tokenToSendAddress, //tokenToSendAddress is the address of the GASPV2 token
-    args: [toAddress, amount], //toAddress is the address of the account that will receive the tokens
+    address: transaction.tokenToSendAddress,
+    args: [transaction.toAddress, transaction.amount],
     functionName: 'transfer',
   })
   logger.info('Transaction simulation successful, executing transaction...')
-  //Execute the transaction
-  return await client.writeContract(request)
+  return request
 }
