@@ -61,7 +61,7 @@ async function main() {
 		unwatch = publicClient.watchContractEvent({
 			address: EIGEN_CONTRACT_ADDRESS,
 			abi: EIGEN_ABI,
-			eventName: "TaskCompleted",
+			eventName: "RdTaskCompleted",
 			onLogs: async (logs) => {
 				print("Received task notification from L1");
 				for (const log of logs) {
