@@ -17,6 +17,8 @@ env_variables:
   TOKEN_FOR_PRICE_SYMBOL: 'GETH'
   NODE_ENV: rollup-testnet
   COINGECKO_API_KEY: $COINGECKO_API_KEY
+  CAPTCHA_SITEKEY: $CAPTCHA_SITEKEY
+  CAPTCHA_SECRET: $CAPTCHA_SECRET
 
 manual_scaling:
   instances: 1
