@@ -9,7 +9,7 @@ export default defineConfig({
     globalTeardown: 'test/globalTeardown.ts',
     env: {
       APP_ENV: 'rollup-dev',
-      MANGATA_NODE_URL: 'wss://collator-01-ws-rollup-holesky.gasp.xyz',
+      MANGATA_NODE_URL: 'wss://collator-01-ws-rollup-frontend.gasp.xyz',
       REDIS_HOST: 'localhost',
       REDIS_PORT: '6380',
       REDIS_PASS: '',
