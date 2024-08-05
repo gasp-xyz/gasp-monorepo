@@ -859,24 +859,30 @@
     },
     "/faucet/requestTokens/{toAddress}/captcha/{captcha}/": {
       "get": {
-        "description": "",
+        "tags": [
+          "Faucet"
+        ],
+        "summary": "Request tokens from the faucet.",
+        "description": "Request tokens from the faucet by providing the recipient address and passing captcha verification.",
         "parameters": [
           {
             "name": "toAddress",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "The address to receive the tokens"
           },
           {
             "name": "captcha",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Captcha token to verify the request"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Successful response with no content"
           }
         }
       }
