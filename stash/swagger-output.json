@@ -870,7 +870,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "The address to receive the tokens"
+            "description": "The address to receive the tokens (must begin with 0x)"
           },
           {
             "name": "captcha",
@@ -883,6 +883,27 @@
         "responses": {
           "200": {
             "description": "Successful response with no content"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "example": {
+                        "message": "Captcha verification failed. Reason: [error-codes]"
+                      }
+                    },
+                    {
+                      "example": {
+                        "message": "Address [toAddress] has requested the token more than 3 times."
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           }
         }
       }
