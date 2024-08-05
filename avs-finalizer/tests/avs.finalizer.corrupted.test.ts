@@ -37,7 +37,7 @@ describe('Corrupted AVS Finalizer', () => {
         await new Promise(r => setTimeout(r, 10000));
 
         console.info("Corrupted - Operator Address: " + POperatorAddress + " Id " + operatorId);
-        const noCompleted = waitForNo(publicClient, 120, "TaskCompleted");
+        const noCompleted = waitForNo(publicClient, 120, "RdTaskCompleted");
         const responded = waitForTaskResponded(publicClient, 1);
         const [response, isNoCompleted] = await Promise.all([responded, noCompleted]);
         expect(response.length).toBeGreaterThan(0);
@@ -71,7 +71,7 @@ describe('Non Corrupted AVS Finalizer', () => {
         await new Promise(r => setTimeout(r, 10000));
 
         console.info("Operator Address: " + POperatorAddress + " Id " + operatorId);
-        const completed = waitFor(publicClient, 1, "TaskCompleted");
+        const completed = waitFor(publicClient, 1, "RdTaskCompleted");
         const responded = waitForTaskResponded(publicClient, 1);
         const [response, completedResponse] = await Promise.all([responded, completed]);
         expect(response.length).toBeGreaterThan(0);

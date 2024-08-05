@@ -1,6 +1,6 @@
 import {afterEach, describe, expect, it, jest} from "@jest/globals";
 import {DockerUtils} from "./DockerUtils";
-import {createPublicClient, defineChain, webSocket,} from "viem";
+import {createPublicClient, defineChain, PublicClient, webSocket,} from "viem";
 
 // @ts-ignore
 import registryCoordinator from "../../contracts/out/RegistryCoordinator.sol/RegistryCoordinator.json";
@@ -85,10 +85,10 @@ describe('AVS Finalizer', () => {
             transport,
             chain: anvil3,
         });
-        const POperatorAddress = waitForOperatorRegistered(publicClient);
+        const POperatorAddress = waitForOperatorRegistered(publicClient as PublicClient);
         await dockerUtils.startContainer();
         const operatorAddress = await POperatorAddress;
-        console.log("operatorAddress: " + operatorAddress);
+        await waitFor(publicClient, 1, "NewOpTaskCreated");
         const res = await publicClient.readContract({
             address: registryCoordinatorAddress,
             abi: registryCoordinator.abi,
@@ -118,7 +118,7 @@ describe('AVS Finalizer', () => {
             args: [operatorAddress],
         });
         expect(statusAfter).toBe(2);
-        const tasks = await waitFor(publicClient, 2, "TaskCompleted");
+        const tasks = await waitFor(publicClient, 2, "RdTaskCompleted");
          expect(tasks).toHaveLength(2);
 
          //Test that after op-out the operator still has the bls keys in the registry
@@ -203,7 +203,7 @@ describe("AVS Finalizer - tasks", () => {
         const quorumAfter = BigInt(taskAfter[taskAfter.length -1].quroumStakeTotals[0]);
         const operatorStake = BigInt(dockerUtils.bigStakeLocalEnvironment.STAKE);
         expect(quorumAfter - quorumBefore).toBe(operatorStake);
-        const pTaskCompleted = waitFor(publicClient, 1, "TaskCompleted");
+        const pTaskCompleted = waitFor(publicClient, 1, "RdTaskCompleted");
         const taskRespondedWithOp = await waitForTaskResponded(publicClient, 1).then((tasks) => {
             return tasks.map( x=> JSON.parse(JSON.stringify(x)))
         });
@@ -223,7 +223,7 @@ describe("AVS Finalizer - tasks", () => {
         }).catch((err) => {
             console.error(err);
         });
-        const pTaskCompletedAfterOptOut = waitFor(publicClient, 3, "TaskCompleted");
+        const pTaskCompletedAfterOptOut = waitFor(publicClient, 3, "RdTaskCompleted");
         await mineEthBlocks(5);
         const taskAfterOptOut = await waitForTaskResponded(publicClient, 3).then((tasks) => {
             return tasks.map( x=> JSON.parse(JSON.stringify(x)))
