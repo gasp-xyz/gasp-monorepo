@@ -154,6 +154,7 @@ contract FinalizerTaskManager is
             uint32 lastTaskNum = latestOpTaskNum - 1;
             if (idToTaskStatus[TaskType.OP_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
                 idToTaskStatus[TaskType.OP_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+                emit OpTaskCancelled(lastTaskNum);
             }
         }
 
@@ -161,6 +162,7 @@ contract FinalizerTaskManager is
             uint32 lastTaskNum = latestRdTaskNum - 1;
             if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
                 idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+                emit RdTaskCancelled(lastTaskNum);
             }
         }
 
@@ -300,6 +302,7 @@ contract FinalizerTaskManager is
             uint32 lastTaskNum = latestOpTaskNum - 1;
             if (idToTaskStatus[TaskType.OP_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
                 idToTaskStatus[TaskType.OP_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+                emit OpTaskCancelled(lastTaskNum);
             }
         }
 
@@ -307,6 +310,7 @@ contract FinalizerTaskManager is
             uint32 lastTaskNum = latestRdTaskNum - 1;
             if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
                 idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+                emit RdTaskCancelled(lastTaskNum);
             }
         }
 
@@ -399,6 +403,7 @@ contract FinalizerTaskManager is
             uint32 lastTaskNum = latestRdTaskNumMem - 1;
             if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
                 idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+                emit RdTaskCancelled(lastTaskNum);
             }
         }
 
@@ -410,6 +415,7 @@ contract FinalizerTaskManager is
                     "RdTask can't yet cancel the init OpTask"
                 );
                 idToTaskStatus[TaskType.OP_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+                emit OpTaskCancelled(lastTaskNum);
             }
         }
 

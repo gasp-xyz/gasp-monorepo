@@ -9,6 +9,7 @@ interface IFinalizerTaskManager {
 
     event BLSSignatureCheckerAddressUpdated(address blsSignatureCheckerAddress);
 
+    event OpTaskCancelled(uint32 indexed taskIndex);
     event NewOpTaskCreated(uint32 indexed taskIndex, OpTask task);
     event NewOpTaskForceCreated(uint32 indexed taskIndex, OpTask task);
 
@@ -27,6 +28,7 @@ interface IFinalizerTaskManager {
     event OpTaskForceCompleted(uint32 indexed taskIndex,
         OpTaskResponse taskResponse);
 
+    event RdTaskCancelled(uint32 indexed taskIndex);
     event NewRdTaskCreated(uint32 indexed taskIndex, RdTask task);
 
     // When we have some response from OPs

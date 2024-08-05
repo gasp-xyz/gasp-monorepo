@@ -32,7 +32,7 @@
   ],
   "taskManagerParams": {
     "taskResponseWindowBlocks": 10,
-    "minOpTaskResponseWindowBlock": 5
+    "minOpTaskResponseWindowBlock": 10
   },
   "registryParams": {
     "recurrentRegistrationLimit": 10

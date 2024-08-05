@@ -58,7 +58,8 @@ bindings-go: ## generates contract bindings
 
 bindings-rs: ## generates rust bindings
 	forge bind --bindings-path ./avs-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX}
-	# cd ./avs-finalizer && cargo fmt
+	cd ./avs-finalizer && cargo fmt
+	cd ./gasp-syncer && cargo fmt
 	cp -rf ./avs-finalizer/bindings ./gasp-syncer/
 
 bindings-json: ## generate JS bindings
