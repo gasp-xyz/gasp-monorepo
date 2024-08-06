@@ -2,9 +2,11 @@ pragma solidity ^0.8.9;
 import {Rolldown} from "../src/Rolldown.sol";
 import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
 import "forge-std/console.sol";
+import "forge-std/StdJson.sol";
 import {Utilities, MyERC20} from "./utils/Utilities.sol";
 import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract RolldownTest is Test, IRolldownPrimitives {
     using stdStorage for StdStorage;
@@ -1243,4 +1245,23 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(root_hash, rolldown.calculate_root(0x6666666666666666666666666666666666666666666666666666666666666666, 6, proof, 7));
     }
 
+    function testMerkleProofs() public {
+      string memory config_data = vm.readFile("data.json");
+      uint256 test_cases_amount = stdJson.readUint(config_data, ".cases_count");
+
+      for (uint256 i = 0; i < test_cases_amount ; ++i) {
+        console.log("TEST case: ", i);
+        uint256 leavePos = stdJson.readUint(config_data, string.concat(".cases.[", Strings.toString(i), "].leave_pos"));
+        bytes32 leaveHash = stdJson.readBytes32(config_data, string.concat(".cases.[", Strings.toString(i),"].leave_hash"));
+        bytes32 expectedRoot = stdJson.readBytes32(config_data, string.concat(".cases.[", Strings.toString(i),"].expected_root"));
+        bytes32[] memory proof = stdJson.readBytes32Array(config_data, string.concat(".cases.[", Strings.toString(i), "].proof"));
+        bytes32[] memory leaves = stdJson.readBytes32Array(config_data, string.concat(".cases.[", Strings.toString(i), "].leaves"));
+
+        assertEq(
+          rolldown.calculate_root(leaveHash, uint32(leavePos), proof, uint32(leaves.length)),
+          expectedRoot
+        );
+      }
+
+    }
 }

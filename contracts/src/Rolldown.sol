@@ -30,26 +30,26 @@ contract Rolldown is
             tmp = tmp / 2;
             levels += 1;
         }
-        console.log("levels: %s", levels);
-        console.log("leaves_count: %s", leaves_count);
+        // console.log("levels: %s", levels);
+        // console.log("leaves_count: %s", leaves_count);
         return calculate_root_impl(levels, leave_idx, leave_hash, proof, 0, leaves_count - 1);
     }
 
     // fn calculate_root_impl(level: usize, pos: usize, mut hash: [u8; 32], mut proofs:  Vec<[u8; 32]>, max_index: usize) -> [u8; 32] {
     // TODO: change hashing to keccak256
     function calculate_root_impl(uint32 level, uint32 pos, bytes32 hash, bytes32[] calldata proofs, uint32 proof_idx, uint32 max_index) public returns (bytes32) {
-      console.log("level %s", level);
+      // console.log("level %s", level);
       if (pos % 2 == 0) {
         //left
         if (pos == max_index) {
-          console.log("promoted");
+          // console.log("promoted");
           // promoted node
         }else{
-          console.log("left");
+          // console.log("left");
           hash = sha256(abi.encodePacked(hash, proofs[proof_idx++]));
         }
       } else {
-        console.log("right");
+        // console.log("right");
         hash = sha256(abi.encodePacked(proofs[proof_idx++], hash));
       }
 
