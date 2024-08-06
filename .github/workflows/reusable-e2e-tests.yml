@@ -45,9 +45,6 @@ env:
 jobs:
   run-e2e-tests:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        test: [ "test-opt-out", "test-corrupted"  ]
 
     steps:
       - uses: actions/checkout@v4
@@ -94,7 +91,7 @@ jobs:
 
       - name: Run tests
         working-directory: e2eTests
-        run: yarn ${{ matrix.test }}
+        run: yarn test-rollup
 
       - name: Get sequencer logs
         if: success() || failure()
@@ -116,6 +113,9 @@ jobs:
 
   run-avs-tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test: [ "test-opt-out", "test-corrupted" ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -136,7 +136,7 @@ jobs:
 
       - name: FINALIZER tests - run tests
         working-directory: avs-finalizer/tests/
-        run: yarn test
+        run: yarn ${{ matrix.test }}
 
       - name: Get avs-aggregator logs
         if: success() || failure()
