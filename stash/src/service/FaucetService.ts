@@ -20,7 +20,7 @@ const VERIFY_URL = 'https://api.hcaptcha.com/siteverify'
 const TOKEN_REQUEST_PREFIX = 'token_request:'
 const MAX_REQUESTS = 3
 const DECIMALS = 19 //18 decimals == 1 token, 19 == 10 tokens
-const tokenToSendAddress = process.env.GASPV2_TOKEN_ADDRESS
+const tokenToSendAddress = '0x' + process.env.GASPV2_TOKEN_ADDRESS
 
 export const verifyCaptcha = async (captchaToken: string): Promise<void> => {
   const payload = {
