@@ -21,6 +21,45 @@ contract Rolldown is
     address public constant ETH_TOKEN_ADDRESS =
         0x0000000000000000000000000000000000000001;
 
+    
+    function calculate_root(bytes32 leave_hash, uint32 leave_idx, bytes32[] calldata proof, uint32 leaves_count) public returns (bytes32) {
+        uint32 levels = 0;
+        // println!("s: {}", s);
+        uint32 tmp = leaves_count;
+        while (tmp > 0) {
+            tmp = tmp / 2;
+            levels += 1;
+        }
+        console.log("levels: %s", levels);
+        console.log("leaves_count: %s", leaves_count);
+        return calculate_root_impl(levels, leave_idx, leave_hash, proof, 0, leaves_count - 1);
+    }
+
+    // fn calculate_root_impl(level: usize, pos: usize, mut hash: [u8; 32], mut proofs:  Vec<[u8; 32]>, max_index: usize) -> [u8; 32] {
+    // TODO: change hashing to keccak256
+    function calculate_root_impl(uint32 level, uint32 pos, bytes32 hash, bytes32[] calldata proofs, uint32 proof_idx, uint32 max_index) public returns (bytes32) {
+      console.log("level %s", level);
+      if (pos % 2 == 0) {
+        //left
+        if (pos == max_index) {
+          console.log("promoted");
+          // promoted node
+        }else{
+          console.log("left");
+          hash = sha256(abi.encodePacked(hash, proofs[proof_idx++]));
+        }
+      } else {
+        console.log("right");
+        hash = sha256(abi.encodePacked(proofs[proof_idx++], hash));
+      }
+
+      if (level == 1) {
+        return hash;
+      }else{
+        return calculate_root_impl(level-1, pos/2, hash, proofs, proof_idx, max_index/2);
+      }
+    }
+
     function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
         public
         initializer

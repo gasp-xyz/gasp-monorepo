@@ -1170,4 +1170,77 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(aliceBalanceBefore - aliceBalanceAfterDepositUpdate, 10);
         assertEq(contractAfterDepositUpdate - contractBalanceBefore, 10);
     }
+
+    function testVerifyBalancedMerkleRoot() public {
+      //                                   ROOT
+      //                      /                             \
+      //                     /                               \
+      //            /             \                    /              \
+      //           /               \                  /                \
+      //      /      \          /     \           /      \          /     \
+      //     /        \        /       \         /        \        /       \
+      // 0x00..00 0x11..11 0x22..22 0x33..33 0x44..44 0x55..55 0x66..66 0x77.77
+
+        bytes32 root_hash = 0xe5246a769c1b3e68c6b7ad3ebb2975f25f239a7fcf0ba5518965350818ccb41d;
+        bytes32[] memory proof = new bytes32[](3);
+
+        proof[0] = 0x1111111111111111111111111111111111111111111111111111111111111111;
+        proof[1] = 0xc8e5ff41fdd4ca636d8fa244e9600532589f5023c7c17c3e02f7e0fa743e7fe1;
+        proof[2] = 0x16336f1cc4047d02d8d679db47c9bfba3fa20946359692b6bcf7e19491a9c2ad;
+        assertEq(root_hash, rolldown.calculate_root(0x0000000000000000000000000000000000000000000000000000000000000000, 0, proof, 8));
+        proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+
+        proof[1] = 0xc8e5ff41fdd4ca636d8fa244e9600532589f5023c7c17c3e02f7e0fa743e7fe1;
+        proof[2] = 0x16336f1cc4047d02d8d679db47c9bfba3fa20946359692b6bcf7e19491a9c2ad;
+        assertEq(root_hash, rolldown.calculate_root(0x1111111111111111111111111111111111111111111111111111111111111111, 1, proof, 8));
+
+        proof[0] = 0x3333333333333333333333333333333333333333333333333333333333333333;
+        proof[1] = 0x8878b15a7d6a3a4f464e8f9f42591dbc0cf4bedea0ec309003d2b2ee53655ef8;
+        proof[2] = 0x16336f1cc4047d02d8d679db47c9bfba3fa20946359692b6bcf7e19491a9c2ad;
+        assertEq(root_hash, rolldown.calculate_root(0x2222222222222222222222222222222222222222222222222222222222222222, 2, proof, 8));
+
+        proof[0] = 0x2222222222222222222222222222222222222222222222222222222222222222;
+        proof[1] = 0x8878b15a7d6a3a4f464e8f9f42591dbc0cf4bedea0ec309003d2b2ee53655ef8;
+        proof[2] = 0x16336f1cc4047d02d8d679db47c9bfba3fa20946359692b6bcf7e19491a9c2ad;
+        assertEq(root_hash, rolldown.calculate_root(0x3333333333333333333333333333333333333333333333333333333333333333, 3, proof, 8));
+
+        proof[0] = 0x5555555555555555555555555555555555555555555555555555555555555555;
+        proof[1] = 0xd97c01a61ac2fc9039d811d6066e880b53635c2b582086fcdfbb91c4720f43cd;
+        proof[2] = 0x88162e1092549a7a540a1cd48634f24f4cf5a235e356ee36ce58cf84d3012195;
+        assertEq(root_hash, rolldown.calculate_root(0x4444444444444444444444444444444444444444444444444444444444444444, 4, proof, 8));
+
+        proof[0] = 0x4444444444444444444444444444444444444444444444444444444444444444;
+        proof[1] = 0xd97c01a61ac2fc9039d811d6066e880b53635c2b582086fcdfbb91c4720f43cd;
+        proof[2] = 0x88162e1092549a7a540a1cd48634f24f4cf5a235e356ee36ce58cf84d3012195;
+        assertEq(root_hash, rolldown.calculate_root(0x5555555555555555555555555555555555555555555555555555555555555555, 5, proof, 8));
+
+        proof[0] = 0x7777777777777777777777777777777777777777777777777777777777777777;
+        proof[1] = 0x96bc917d05134ba810b71de80ffafc1e302f0174b9393de8e6d6d197a68289c1;
+        proof[2] = 0x88162e1092549a7a540a1cd48634f24f4cf5a235e356ee36ce58cf84d3012195;
+        assertEq(root_hash, rolldown.calculate_root(0x6666666666666666666666666666666666666666666666666666666666666666, 6, proof, 8));
+
+        proof[0] = 0x6666666666666666666666666666666666666666666666666666666666666666;
+        proof[1] = 0x96bc917d05134ba810b71de80ffafc1e302f0174b9393de8e6d6d197a68289c1;
+        proof[2] = 0x88162e1092549a7a540a1cd48634f24f4cf5a235e356ee36ce58cf84d3012195;
+        assertEq(root_hash, rolldown.calculate_root(0x7777777777777777777777777777777777777777777777777777777777777777, 7, proof, 8));
+    }
+
+    function testVerifyUnBalancedMerkleRoot1() public {
+      //                                   ROOT
+      //                      /                             \
+      //                     /                               \
+      //            /             \                    /              \
+      //           /               \                  /                \
+      //      /      \          /     \           /      \          /     \
+      //     /        \        /       \         /        \        /       \
+      // 0x00..00 0x11..11 0x22..22 0x33..33 0x44..44 0x55..55 0x66..66
+      //
+        bytes32 root_hash = 0x02e9b35f399b6bb91416ff79750b7cb9225f0fa94d9d0241ff8deef9a77297e8;
+        bytes32[] memory proof = new bytes32[](3);
+
+        proof[0] = 0x96bc917d05134ba810b71de80ffafc1e302f0174b9393de8e6d6d197a68289c1;
+        proof[1] = 0x88162e1092549a7a540a1cd48634f24f4cf5a235e356ee36ce58cf84d3012195;
+        assertEq(root_hash, rolldown.calculate_root(0x6666666666666666666666666666666666666666666666666666666666666666, 6, proof, 7));
+    }
+
 }
