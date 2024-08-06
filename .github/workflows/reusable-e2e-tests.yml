@@ -45,6 +45,10 @@ env:
 jobs:
   run-e2e-tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test: [ "test-opt-out", "test-corrupted"  ]
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -90,7 +94,7 @@ jobs:
 
       - name: Run tests
         working-directory: e2eTests
-        run: yarn test-rollup
+        run: yarn ${{ matrix.test }}
 
       - name: Get sequencer logs
         if: success() || failure()
