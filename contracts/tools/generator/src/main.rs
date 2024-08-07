@@ -1,8 +1,24 @@
+
 use hex_literal::hex;
 use hex as hex_encoder;
-use rs_merkle::{MerkleProof, MerkleTree, algorithms::Sha256};
+use rs_merkle::{MerkleProof, MerkleTree, algorithms::Sha256, Hasher};
 use serde::{Serialize, Serializer};
 use serde_json;
+use sha3::{Keccak256, Digest};
+
+#[derive(Clone)]
+pub struct Keccak256Hasher {}
+
+impl Hasher for Keccak256Hasher {
+    type Hash = [u8; 32];
+
+    fn hash(data: &[u8]) -> [u8; 32] {
+        let mut output = [0u8; 32];
+        let hash = Keccak256::digest(&data[..]);
+        output.copy_from_slice(&hash[..]);
+        output
+    }
+}
 
 #[derive(Debug)]
 struct Hash32([u8; 32]);
@@ -63,7 +79,7 @@ fn main() {
         };
 
         for i in 1..=8 {
-            let merkle_tree = MerkleTree::<Sha256>::from_leaves(
+            let merkle_tree = MerkleTree::<Keccak256Hasher>::from_leaves(
                 &leaves[0..i]
             );
 
