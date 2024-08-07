@@ -2,9 +2,11 @@ pragma solidity ^0.8.9;
 import {Rolldown} from "../src/Rolldown.sol";
 import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
 import "forge-std/console.sol";
+import "forge-std/StdJson.sol";
 import {Utilities, MyERC20} from "./utils/Utilities.sol";
 import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract RolldownTest is Test, IRolldownPrimitives {
     using stdStorage for StdStorage;
@@ -1169,5 +1171,97 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(contractAfterDeposit - contractBalanceBefore, 10);
         assertEq(aliceBalanceBefore - aliceBalanceAfterDepositUpdate, 10);
         assertEq(contractAfterDepositUpdate - contractBalanceBefore, 10);
+    }
+
+    function testVerifyBalancedMerkleRoot() public {
+      //                                   ROOT
+      //                      /                             \
+      //                     /                               \
+      //            /             \                    /              \
+      //           /               \                  /                \
+      //      /      \          /     \           /      \          /     \
+      //     /        \        /       \         /        \        /       \
+      // 0x00..00 0x11..11 0x22..22 0x33..33 0x44..44 0x55..55 0x66..66 0x77.77
+
+        bytes32 root_hash = 0x36e4d0b08be66e3c82af50073c3f2833ac26cb61026c0c16d2d58230d8682998;
+        bytes32[] memory proof = new bytes32[](3);
+
+        proof[0] = 0x1111111111111111111111111111111111111111111111111111111111111111;
+        proof[1] = 0xf3357627f4934d47fe409005b05c900777a6d97ec3788304e2d9c7b4d322cd4d;
+        proof[2] = 0x9aaa5fc7595410234204542d86b85ce74d07a1f98d62d1bbf23f1c2378cc3089;
+        assertEq(root_hash, rolldown.calculate_root(0x0000000000000000000000000000000000000000000000000000000000000000, 0, proof, 8));
+
+        proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+        proof[1] = 0xf3357627f4934d47fe409005b05c900777a6d97ec3788304e2d9c7b4d322cd4d;
+        proof[2] = 0x9aaa5fc7595410234204542d86b85ce74d07a1f98d62d1bbf23f1c2378cc3089;
+        assertEq(root_hash, rolldown.calculate_root(0x1111111111111111111111111111111111111111111111111111111111111111, 1, proof, 8));
+
+        proof[0] = 0x3333333333333333333333333333333333333333333333333333333333333333;
+        proof[1] = 0x8e4b8e18156a1c7271055ce5b7ef53bb370294ebd631a3b95418a92da46e681f;
+        proof[2] = 0x9aaa5fc7595410234204542d86b85ce74d07a1f98d62d1bbf23f1c2378cc3089;
+        assertEq(root_hash, rolldown.calculate_root(0x2222222222222222222222222222222222222222222222222222222222222222, 2, proof, 8));
+
+        proof[0] = 0x2222222222222222222222222222222222222222222222222222222222222222;
+        proof[1] = 0x8e4b8e18156a1c7271055ce5b7ef53bb370294ebd631a3b95418a92da46e681f;
+        proof[2] = 0x9aaa5fc7595410234204542d86b85ce74d07a1f98d62d1bbf23f1c2378cc3089;
+        assertEq(root_hash, rolldown.calculate_root(0x3333333333333333333333333333333333333333333333333333333333333333, 3, proof, 8));
+
+        proof[0] = 0x5555555555555555555555555555555555555555555555555555555555555555;
+        proof[1] = 0x37df8a86dbd0a06a5a6720079d9a4ce5a5a5c93198607ca71402d78b7db2869e;
+        proof[2] = 0xd287edfff411d3b45e9c7bf7186d7e9d44fa2a0fe36d85154165da0a1d7ce5bd;
+        assertEq(root_hash, rolldown.calculate_root(0x4444444444444444444444444444444444444444444444444444444444444444, 4, proof, 8));
+
+        proof[0] = 0x4444444444444444444444444444444444444444444444444444444444444444;
+        proof[1] = 0x37df8a86dbd0a06a5a6720079d9a4ce5a5a5c93198607ca71402d78b7db2869e;
+        proof[2] = 0xd287edfff411d3b45e9c7bf7186d7e9d44fa2a0fe36d85154165da0a1d7ce5bd;
+        assertEq(root_hash, rolldown.calculate_root(0x5555555555555555555555555555555555555555555555555555555555555555, 5, proof, 8));
+
+        proof[0] = 0x7777777777777777777777777777777777777777777777777777777777777777;
+        proof[1] = 0x60c25b70d66af589f985b3cf4732585b8f7ecea5df88cb12368650edfe7e6f50;
+        proof[2] = 0xd287edfff411d3b45e9c7bf7186d7e9d44fa2a0fe36d85154165da0a1d7ce5bd;
+        assertEq(root_hash, rolldown.calculate_root(0x6666666666666666666666666666666666666666666666666666666666666666, 6, proof, 8));
+
+        proof[0] = 0x6666666666666666666666666666666666666666666666666666666666666666;
+        proof[1] = 0x60c25b70d66af589f985b3cf4732585b8f7ecea5df88cb12368650edfe7e6f50;
+        proof[2] = 0xd287edfff411d3b45e9c7bf7186d7e9d44fa2a0fe36d85154165da0a1d7ce5bd;
+        assertEq(root_hash, rolldown.calculate_root(0x7777777777777777777777777777777777777777777777777777777777777777, 7, proof, 8));
+    }
+
+    function testVerifyUnBalancedMerkleRoot1() public {
+      //                                   ROOT
+      //                      /                             \
+      //                     /                               \
+      //            /             \                    /              \
+      //           /               \                  /                \
+      //      /      \          /     \           /      \          /     \
+      //     /        \        /       \         /        \        /       \
+      // 0x00..00 0x11..11 0x22..22 0x33..33 0x44..44 0x55..55 0x66..66
+      //
+        bytes32 root_hash = 0x018f1011ee4add9a8c0e73b4909158862437ec4aadcc6ca697b357f49425e9ad;
+        bytes32[] memory proof = new bytes32[](3);
+
+        proof[0] = 0x60c25b70d66af589f985b3cf4732585b8f7ecea5df88cb12368650edfe7e6f50;
+        proof[1] = 0xd287edfff411d3b45e9c7bf7186d7e9d44fa2a0fe36d85154165da0a1d7ce5bd;
+        assertEq(root_hash, rolldown.calculate_root(0x6666666666666666666666666666666666666666666666666666666666666666, 6, proof, 7));
+    }
+
+    function testMerkleProofs() public {
+      string memory config_data = vm.readFile("./test/merkle-verificaction-testdata.json");
+      uint256 test_cases_amount = stdJson.readUint(config_data, ".cases_count");
+
+      for (uint256 i = 0; i < test_cases_amount ; ++i) {
+        console.log("TEST case: ", i);
+        uint256 leavePos = stdJson.readUint(config_data, string.concat(".cases.[", Strings.toString(i), "].leave_pos"));
+        bytes32 leaveHash = stdJson.readBytes32(config_data, string.concat(".cases.[", Strings.toString(i),"].leave_hash"));
+        bytes32 expectedRoot = stdJson.readBytes32(config_data, string.concat(".cases.[", Strings.toString(i),"].expected_root"));
+        bytes32[] memory proof = stdJson.readBytes32Array(config_data, string.concat(".cases.[", Strings.toString(i), "].proof"));
+        bytes32[] memory leaves = stdJson.readBytes32Array(config_data, string.concat(".cases.[", Strings.toString(i), "].leaves"));
+
+        assertEq(
+          rolldown.calculate_root(leaveHash, uint32(leavePos), proof, uint32(leaves.length)),
+          expectedRoot
+        );
+      }
+
     }
 }

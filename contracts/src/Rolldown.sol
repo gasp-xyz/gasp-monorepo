@@ -21,6 +21,35 @@ contract Rolldown is
     address public constant ETH_TOKEN_ADDRESS =
         0x0000000000000000000000000000000000000001;
 
+    // TODO: move to separate modoule/contract
+    function calculate_root(bytes32 leave_hash, uint32 leave_idx, bytes32[] calldata proof, uint32 leaves_count) pure public returns (bytes32) {
+      uint32 levels = 0;
+      uint32 tmp = leaves_count;
+      while (tmp > 0) {
+        tmp = tmp / 2;
+        levels += 1;
+      }
+      return calculate_root_impl(levels, leave_idx, leave_hash, proof, 0, leaves_count - 1);
+    }
+
+    function calculate_root_impl(uint32 level, uint32 pos, bytes32 hash, bytes32[] calldata proofs, uint32 proof_idx, uint32 max_index) pure public returns (bytes32) {
+      if (pos % 2 == 0) {
+        if (pos == max_index) {
+          // promoted node
+        }else{
+          hash = keccak256(abi.encodePacked(hash, proofs[proof_idx++]));
+        }
+      } else {
+        hash = keccak256(abi.encodePacked(proofs[proof_idx++], hash));
+      }
+
+      if (level == 1) {
+        return hash;
+      }else{
+        return calculate_root_impl(level-1, pos/2, hash, proofs, proof_idx, max_index/2);
+      }
+    }
+
     function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
         public
         initializer
