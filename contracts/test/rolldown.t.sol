@@ -508,319 +508,50 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(l1Update.pendingWithdrawalResolutions.length, 1);
     }
 
-    // TODO: 
-    // function testAcceptOnlyConsecutive() public {
-    //     // Arrange
-    //     address payable alice = users[0];
-    //     token = new MyERC20();
-    //     address tokenAddress = address(token);
-    //     uint256 amount = 1000;
-    //     deal(tokenAddress, alice, 2 * amount);
-    //     vm.startPrank(alice);
-    //     token.approve(address(rolldown), 2 * amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //
-    //     Rolldown.L2Update memory l2Update;
-    //     l2Update.results = new Rolldown.RequestResult[](0);
-    //     l2Update.withdrawals = new Rolldown.Withdrawal[](1);
-    //     l2Update.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-    //         requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-    //         withdrawalRecipient: alice,
-    //         tokenAddress: tokenAddress,
-    //         amount: 1000
-    //     });
-    //     rolldown.update_l1_from_l2(l2Update);
-    //
-    //     Rolldown.L2Update memory partiallyKnownUpdate;
-    //     partiallyKnownUpdate.results = new Rolldown.RequestResult[](0);
-    //     partiallyKnownUpdate.withdrawals = new Rolldown.Withdrawal[](2);
-    //     partiallyKnownUpdate.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-    //         requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-    //         withdrawalRecipient: alice,
-    //         tokenAddress: tokenAddress,
-    //         amount: 1000
-    //     });
-    //     partiallyKnownUpdate.withdrawals[1] = IRolldownPrimitives.Withdrawal({
-    //         requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-    //         withdrawalRecipient: alice,
-    //         tokenAddress: tokenAddress,
-    //         amount: 1000
-    //     });
-    //
-    //     rolldown.update_l1_from_l2(partiallyKnownUpdate);
-    //     vm.stopPrank();
-    // }
+    function testAcceptOnlyConsecutiveUpdatesWithoutGaps() public {
+        vm.startPrank(ALICE);
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 1}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 2, end: 2}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 2, end: 10}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 9, end: 11}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 12}));
+        vm.stopPrank();
+    }
 
+    function testRejectUpdateWithoutNewRequests() public {
+        vm.startPrank(ALICE);
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 10}));
+        vm.stopPrank();
 
-    // function testDoNotRejectPartialyKnownL2Update() public {
-    //     // Arrange
-    //     address payable alice = users[0];
-    //     token = new MyERC20();
-    //     address tokenAddress = address(token);
-    //     uint256 amount = 1000;
-    //     deal(tokenAddress, alice, 2 * amount);
-    //     vm.startPrank(alice);
-    //     token.approve(address(rolldown), 2 * amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //
-    //     Rolldown.L2Update memory l2Update;
-    //     l2Update.results = new Rolldown.RequestResult[](0);
-    //     l2Update.withdrawals = new Rolldown.Withdrawal[](1);
-    //     l2Update.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-    //         requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-    //         withdrawalRecipient: alice,
-    //         tokenAddress: tokenAddress,
-    //         amount: 1000
-    //     });
-    //     rolldown.update_l1_from_l2(l2Update);
-    //
-    //     Rolldown.L2Update memory partiallyKnownUpdate;
-    //     partiallyKnownUpdate.results = new Rolldown.RequestResult[](0);
-    //     partiallyKnownUpdate.withdrawals = new Rolldown.Withdrawal[](2);
-    //     partiallyKnownUpdate.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-    //         requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-    //         withdrawalRecipient: alice,
-    //         tokenAddress: tokenAddress,
-    //         amount: 1000
-    //     });
-    //     partiallyKnownUpdate.withdrawals[1] = IRolldownPrimitives.Withdrawal({
-    //         requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-    //         withdrawalRecipient: alice,
-    //         tokenAddress: tokenAddress,
-    //         amount: 1000
-    //     });
-    //
-    //     rolldown.update_l1_from_l2(partiallyKnownUpdate);
-    //     vm.stopPrank();
-    // }
+        vm.startPrank(ALICE);
+        vm.expectRevert("Update brings no new data");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 9, end: 9}));
+        vm.stopPrank();
 
-    // function testAcceptConsecutiveUpdates() public {
-    //     // Arrange
-    //     address payable alice = users[0];
-    //     token = new MyERC20();
-    //     address tokenAddress = address(token);
-    //     uint256 amount = 1000;
-    //     deal(tokenAddress, alice, 2 * amount);
-    //     vm.startPrank(alice);
-    //     token.approve(address(rolldown), 2 * amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //
-    //     Rolldown.L2Update memory l2Update;
-    //     l2Update.results = new Rolldown.RequestResult[](2);
-    //     l2Update.results[0] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 1,
-    //         updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-    //         status: true
-    //     });
-    //     l2Update.results[1] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 2,
-    //         updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-    //         status: false
-    //     });
-    //
-    //     rolldown.update_l1_from_l2(l2Update);
-    //
-    //     Rolldown.L2Update memory l2Update2;
-    //     l2Update2.withdrawals = new Rolldown.Withdrawal[](1);
-    //     l2Update2.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-    //         requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-    //         withdrawalRecipient: alice,
-    //         tokenAddress: tokenAddress,
-    //         amount: 1000
-    //     });
-    //
-    //     l2Update2.results = new Rolldown.RequestResult[](1);
-    //     l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 4, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 3,
-    //         updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-    //         status: true
-    //     });
-    //
-    //     rolldown.update_l1_from_l2(l2Update2);
-    //     vm.stopPrank();
-    // }
- 
-    // function testOverlapping() public {
-    //     // Arrange
-    //     address payable alice = users[0];
-    //     token = new MyERC20();
-    //     address tokenAddress = address(token);
-    //     uint256 amount = 1000;
-    //     deal(tokenAddress, alice, 2 * amount);
-    //     vm.startPrank(alice);
-    //     token.approve(address(rolldown), 2 * amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //
-    //     Rolldown.L2Update memory l2Update;
-    //     l2Update.results = new Rolldown.RequestResult[](2);
-    //     l2Update.results[0] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 1,
-    //         updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-    //         status: true
-    //     });
-    //     l2Update.results[1] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 2,
-    //         updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-    //         status: false
-    //     });
-    //
-    //     rolldown.update_l1_from_l2(l2Update);
-    //
-    //     Rolldown.L2Update memory l2Update2;
-    //     l2Update2.withdrawals = new Rolldown.Withdrawal[](1);
-    //     l2Update2.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-    //         requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-    //         withdrawalRecipient: alice,
-    //         tokenAddress: tokenAddress,
-    //         amount: 1000
-    //     });
-    //
-    //     l2Update2.results = new Rolldown.RequestResult[](2);
-    //     l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 1,
-    //         updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-    //         status: true
-    //     });
-    //     l2Update2.results[1] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 2,
-    //         updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-    //         status: false
-    //     });
-    //
-    //     rolldown.update_l1_from_l2(l2Update2);
-    //     vm.stopPrank();
-    // }
+        vm.startPrank(ALICE);
+        vm.expectRevert("Update brings no new data");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 9}));
+        vm.stopPrank();
+
+        vm.startPrank(ALICE);
+        vm.expectRevert("Update brings no new data");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 10}));
+        vm.stopPrank();
+
+    }
+
+    function testRejectUpdateWithGaps() public {
+        vm.startPrank(ALICE);
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 10}));
+        vm.stopPrank();
+
+        vm.startPrank(ALICE);
+        vm.expectRevert("Previous update missing");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 12, end: 12}));
+        vm.stopPrank();
+
+    }
    
-    //
-    // function testWithdrawalAlongIndexUpdateWhenWithdrawalProcessedBeforeIndexUpdate()
-    //     public
-    // {
-    //     // Arrange
-    //     address payable alice = users[0];
-    //     token = new MyERC20();
-    //     address tokenAddress = address(token);
-    //     uint256 amount = 1000;
-    //     deal(tokenAddress, alice, 2 * amount);
-    //     vm.startPrank(alice);
-    //     token.approve(address(rolldown), 2 * amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //
-    //     Rolldown.L2Update memory l2Update;
-    //     l2Update.results = new Rolldown.RequestResult[](2);
-    //     l2Update.results[0] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 1,
-    //         updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-    //         status: true
-    //     });
-    //     l2Update.results[1] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 2,
-    //         updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-    //         status: false
-    //     });
-    //
-    //     rolldown.update_l1_from_l2(l2Update);
-    //
-    //     Rolldown.L2Update memory l2Update2;
-    //     l2Update2.withdrawals = new Rolldown.Withdrawal[](1);
-    //     l2Update2.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-    //         requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-    //         withdrawalRecipient: alice,
-    //         tokenAddress: tokenAddress,
-    //         amount: 1000
-    //     });
-    //
-    //     l2Update2.results = new Rolldown.RequestResult[](1);
-    //     l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 4, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 3,
-    //         updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-    //         status: true
-    //     });
-    //
-    //     rolldown.update_l1_from_l2(l2Update2);
-    //     Rolldown.L1Update memory update = rolldown.getUpdateForL2();
-    //     assertEq(update.pendingWithdrawalResolutions.length, 1);
-    //     assert(
-    //         update.pendingWithdrawalResolutions[0].requestId.origin ==
-    //             IRolldownPrimitives.Origin.L1
-    //     );
-    //     assertEq(update.pendingWithdrawalResolutions[0].requestId.id, 4);
-    //     vm.stopPrank();
-    // }
-
-    // function testWithdrawalAlongIndexUpdateWhenWithdrawalProcessedAfterIndexUpdate()
-    //     public
-    // {
-    //     // Arrange
-    //     address payable alice = users[0];
-    //     token = new MyERC20();
-    //     address tokenAddress = address(token);
-    //     uint256 amount = 1000;
-    //     deal(tokenAddress, alice, 2 * amount);
-    //     vm.startPrank(alice);
-    //     token.approve(address(rolldown), 2 * amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //     rolldown.deposit_erc20(tokenAddress, amount);
-    //
-    //     Rolldown.L2Update memory l2Update;
-    //     l2Update.results = new Rolldown.RequestResult[](2);
-    //     l2Update.results[0] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 1,
-    //         updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-    //         status: true
-    //     });
-    //     l2Update.results[1] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 2,
-    //         updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-    //         status: false
-    //     });
-    //
-    //     rolldown.update_l1_from_l2(l2Update);
-    //
-    //     Rolldown.L2Update memory l2Update2;
-    //     l2Update2.withdrawals = new Rolldown.Withdrawal[](1);
-    //     l2Update2.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-    //         requestId: IRolldownPrimitives.RequestId({id: 4, origin: IRolldownPrimitives.Origin.L2}),
-    //         withdrawalRecipient: alice,
-    //         tokenAddress: tokenAddress,
-    //         amount: 1000
-    //     });
-    //
-    //     l2Update2.results = new Rolldown.RequestResult[](1);
-    //     l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-    //         requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-    //         originRequestId: 3,
-    //         updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-    //         status: true
-    //     });
-    //
-    //     rolldown.update_l1_from_l2(l2Update2);
-    //     Rolldown.L1Update memory update = rolldown.getUpdateForL2();
-    //     assertEq(update.pendingWithdrawalResolutions.length, 1);
-    //     assert(
-    //         update.pendingWithdrawalResolutions[0].requestId.origin ==
-    //             IRolldownPrimitives.Origin.L1
-    //     );
-    //     assertEq(update.pendingWithdrawalResolutions[0].requestId.id, 4);
-    //     vm.stopPrank();
-    // }
- 
     function testVerifyBalancedMerkleRoot() public {
       //                                   ROOT
       //                      /                             \

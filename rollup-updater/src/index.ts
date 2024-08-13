@@ -6,9 +6,10 @@ import {
 	EIGEN_CONTRACT_ADDRESS,
 	FINALIZATION_SOURCE,
 	MANGATA_NODE_URL,
+  DEV_MODE,
 } from "./common/constants.js";
 import "./util/polyfill.js";
-import { print, sendUpdateToL1 } from "./util/utils.js";
+import { print, sendUpdateToL1, closeWithdrawals, getLatestRequestIdSubmittedToL1} from "./util/utils.js";
 import {
 	ethAccount,
 	getChain,
@@ -30,6 +31,7 @@ async function main() {
 
 	let unwatch: any;
 	let inProgress = false;
+  let latestRequestIdSubmittedToL1 = 0n;
 
 	if (FINALIZATION_SOURCE === "relay") {
 		unwatch = await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
@@ -37,26 +39,24 @@ async function main() {
 				inProgress = true;
 				print(`Chain is at block: #${header.number}`);
 
-				const txHash = await sendUpdateToL1(
+        if (DEV_MODE !== "false") {
+          console.log("DEV_MODE is enabled. Withdrawals will be autoamtically executed");
+          latestRequestIdSubmittedToL1 = await closeWithdrawals(api, walletClient, publicClient, latestRequestIdSubmittedToL1);
+        }
+
+				await sendUpdateToL1(
 					api,
 					walletClient,
 					publicClient,
 					header.hash,
 				);
-				if (txHash) {
-					const result = await publicClient.waitForTransactionReceipt({
-						hash: txHash,
-					});
-					print(
-						`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
-					);
-				}
 				inProgress = false;
 			} else {
 				print(`Chain is at block: #${header.number} - tx pending`);
 			}
 		});
 	} else {
+
 		print("Subscribing to eth events");
 		unwatch = publicClient.watchContractEvent({
 			address: EIGEN_CONTRACT_ADDRESS,
@@ -65,20 +65,12 @@ async function main() {
 			onLogs: async (logs) => {
 				print("Received task notification from L1");
 				for (const log of logs) {
-					const txHash = await sendUpdateToL1(
+					 await sendUpdateToL1(
 						api,
 						walletClient,
 						publicClient,
 						(log as any).args.blockHash,
 					);
-					if (txHash) {
-						const result = await publicClient.waitForTransactionReceipt({
-							hash: txHash,
-						});
-						print(
-							`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
-						);
-					}
 				}
 			},
 		});

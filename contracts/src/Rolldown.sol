@@ -289,7 +289,7 @@ contract Rolldown is
         require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
 
         bytes32 withdrawal_hash = keccak256(abi.encode(withdrawal));
-        require(processedL2Requests[withdrawal_hash] == false, "Already processed");
+        require(processedL2Requests[withdrawal.requestId.id] == false, "Already processed");
 
         uint32 leaves_count = uint32(r.end - r.start + 1);
         uint32 pos = uint32(withdrawal.requestId.id - r.start);
@@ -298,15 +298,30 @@ contract Rolldown is
           "Invalid proof"
         );
         process_l2_update_withdrawal(withdrawal);
-        processedL2Requests[merkle_root] = true;
+        processedL2Requests[withdrawal.requestId.id] = true;
     }
+    function find_l2_batch(uint256 requestId) view public returns (Range memory) {
+        require(requestId <= lastProcessedUpdate_origin_l2, "Invalid request id");
+        if (roots.length == 0) {
+            return Range({start: 0, end: 0});
+        }
+
+        for (uint256 i = roots.length - 1; i >= 0; i--) {
+          if ( requestId >= merkleRootRange[roots[i]].start && requestId <= merkleRootRange[roots[i]].end) {
+            return merkleRootRange[roots[i]];
+          }
+        }
+
+        return Range({start: 0, end: 0});
+    }
+
 
     function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public {
         Range memory r = merkleRootRange[merkle_root];
         require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
 
         bytes32 cancel_hash = keccak256(abi.encode(cancel));
-        require(processedL2Requests[cancel_hash] == false, "Already processed");
+        require(processedL2Requests[cancel.requestId.id] == false, "Already processed");
         uint32 leaves_count = uint32(r.end - r.start + 1);
         uint32 pos = uint32(r.start - cancel.requestId.id);
         require(
@@ -314,7 +329,7 @@ contract Rolldown is
           "Invalid proof"
         );
         process_l2_update_cancels(cancel);
-        processedL2Requests[cancel_hash] = true;
+        processedL2Requests[cancel.requestId.id] = true;
     }
 
     // TODO:
@@ -322,53 +337,12 @@ contract Rolldown is
     // - verify that range is correct and belongs to particular merkle_root
     function update_l1_from_l2(bytes32 merkle_root, Range calldata range /*,TaskResponse calldata response ??? */) external whenNotPaused {
         require(msg.sender == updaterAccount, "Not the owner");
-        require(range.end > lastProcessedUpdate_origin_l2, "Not the owner");
+        require(range.end > lastProcessedUpdate_origin_l2, "Update brings no new data");
+        require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
         require(range.end >= range.start, "Invalid range");
-
         roots.push(merkle_root);
         merkleRootRange[merkle_root] = range;
         lastProcessedUpdate_origin_l2 = range.end;
-        // TODO: : create event sth like RequestProcessed
-        
-        //
-        // require(
-        //     inputArray.results.length >= 1 ||
-        //         inputArray.cancels.length >= 1 ||
-        //         inputArray.withdrawals.length >= 1,
-        //     "Array must have at least 1 update"
-        // );
-        // (uint256 firstId, uint256 lastId) = getRequestsRange(inputArray);
-        // require(firstId != 0, "Invalid L2Update");
-        // require(
-        //     firstId <= lastProcessedUpdate_origin_l2 + 1,
-        //     "Invalid L2Update"
-        // );
-        // require(lastId > lastProcessedUpdate_origin_l2, "Invalid L2Update");
-        //
-        // UpdateType[] memory order = getOrderOfRequestsOriginatingOnL2(
-        //     firstId,
-        //     inputArray
-        // );
-        //
-        // uint256[]
-        //     memory l2UpdatesToBeRemoved = process_l2_update_requests_results(
-        //         order,
-        //         inputArray.results
-        //     );
-        //
-        // processRequestsOriginatingOnL2(order, inputArray);
-        //
-        // // Create a new array with the correct size
-        // if (l2UpdatesToBeRemoved.length > 0) {
-        //     uint256 rid = counter++;
-        //     l2UpdatesToRemove[rid] = L2UpdatesToRemove({
-        //         requestId: RequestId({origin: Origin.L1, id: rid}),
-        //         l2UpdatesToRemove: l2UpdatesToBeRemoved,
-        //         timeStamp: block.timestamp
-        //     });
-        //     lastProcessedUpdate_origin_l1 += l2UpdatesToBeRemoved.length;
-        //     emit L2UpdatesToRemovedAcceptedIntoQueue(rid, l2UpdatesToBeRemoved);
-        // }
     }
 
 
