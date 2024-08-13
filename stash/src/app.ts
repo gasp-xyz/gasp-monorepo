@@ -14,6 +14,7 @@ import * as liquidStakingController from './controller/liquidStakingController.j
 import * as networkController from './controller/networkController.js'
 import * as tokenNetworkPortfolioController from './controller/tokenNetworkPortfolioController.js'
 import * as faucetController from './controller/FaucetController.js'
+import * as tracingController from './controller/TracingController.js'
 
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
@@ -87,17 +88,52 @@ app.get(
 app.get('/coingecko/pairs', coingeckoController.pairs)
 app.get('/coingecko/tickers', coingeckoController.tickers)
 
-  app.get('/affirmed-network/list', networkController.networkList)
-  app.get('/affirmed-token/list', networkController.tokenList)
-  app.get(
-    '/account/:address/token-portfolio',
-    tokenNetworkPortfolioController.tokenNetworkPortfolio
-  )
+app.get('/affirmed-network/list', networkController.networkList)
+app.get('/affirmed-token/list', networkController.tokenList)
+app.get(
+  '/account/:address/token-portfolio',
+  tokenNetworkPortfolioController.tokenNetworkPortfolio
+)
 
 //Faucet endpoint
 app.get(
   '/faucet/requestTokens/:toAddress/captcha/:captcha/',
   faucetController.captcha
+)
+
+// Tracing endpoints
+app.post('/tracing/tx/start', async (req: Request, res: Response) => {
+  await tracingController.startTracing(req.body, res)
+})
+app.get(
+  '/tracing/tx/:txHashOrEntityId',
+  async (req: Request, res: Response) => {
+    await tracingController.getTransactionStatusByTxHashOrEntityId(req, res)
+  }
+)
+app.get(
+  '/tracing/tx/listByAddress/:address',
+  async (req: Request, res: Response) => {
+    await tracingController.getAllTransactionsByAddress(req, res)
+  }
+)
+app.get(
+  '/tracing/tx/listByAddress/:address/:status',
+  async (req: Request, res: Response) => {
+    await tracingController.getAllTransactionsByAddressAndStatus(req, res)
+  }
+)
+app.get(
+  '/tracing/tx/findByEntityId/:entityId',
+  async (req: Request, res: Response) => {
+    await tracingController.getATransactionByEntityId(req, res)
+  }
+)
+app.get(
+  '/tracing/tx/findByTxHash/:txHash',
+  async (req: Request, res: Response) => {
+    await tracingController.getATransactionByTxHash(req, res)
+  }
 )
 
 // Coinmarketcap listing endpoints
