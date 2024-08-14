@@ -13,6 +13,19 @@ permissions:
   id-token: write
 
 jobs:
+  foundry-tests:
+    name: Build foundry deployer Docker image with smart contracts code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Run forge tests
+        working-directory: contracts
+        run: forge test
+
   build-foundry-deployer-image:
     name: Build foundry deployer Docker image with smart contracts code
     runs-on: ubuntu-latest
@@ -20,12 +33,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      
+
       - uses: foundry-rs/foundry-toolchain@v1
       - name: Install `contracts` deps
         working-directory: contracts
         run: forge install
-      
+
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
@@ -87,8 +100,8 @@ jobs:
           helm-version: v3.15.2
           install-kubectl: no
           additional-helm-plugins: https://github.com/jkroepke/helm-secrets --version v4.1.1,https://github.com/aslafy-z/helm-git --version 0.14.0
-      - name: Install kubeconform 
+      - name: Install kubeconform
         run: curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.6/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
-      
+
       - run: helmfile lint -e fungible
       - run: helmfile template -e fungible | kubeconform -kubernetes-version 1.28.0 -skip ServiceMonitor -strict
