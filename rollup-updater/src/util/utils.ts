@@ -5,6 +5,10 @@ import {LIMIT, MANGATA_CONTRACT_ADDRESS, ROLLDOWN_METADATA, ROLLDOWN_ABI, L1_CHA
 import {ethAccount, getChain} from "../viem/client.js";
 import {Cancel, L2Update, RequestResult, Withdrawal} from "../common/types.js";
 import {estimateMaxPriorityFeePerGas} from "viem/actions";
+import type { Option } from '@polkadot/types-codec';
+import type { ITuple } from '@polkadot/types-codec/types';
+import type { PalletRolldownL2Request } from '@polkadot/types/lookup';
+import type { H256 } from '@polkadot/types/interfaces/runtime';
 
 
 export function getMinRequestId(l2Update: Array<L2Update>) {
@@ -184,6 +188,14 @@ async function isL2RequestAlreadyExecuted(
     }));
 }
 
+async function isWithdrawal(
+    api: ApiPromise,
+    requestId: bigint
+) {
+  let request   = await api.query.rolldown.l2Requests(L1_CHAIN, {origin:'L2', id:requestId})!;
+  return (request as Option<ITuple<[PalletRolldownL2Request, H256]>>).unwrap()[0].isWithdrawal;
+}
+
 
 export async function closeWithdrawals(
     api: ApiPromise,
@@ -207,6 +219,10 @@ export async function closeWithdrawals(
     }
 
     for (let withdrawalRequestId of indexes){
+      if (await isWithdrawal(api, withdrawalRequestId)){
+        continue;
+      }
+
       if (await isL2RequestAlreadyExecuted(publicClient, withdrawalRequestId)){
         console.log(`withdrawal ${withdrawalRequestId} already executed - ignoring...`);
         continue;

@@ -18,6 +18,7 @@ import {
 	webSocketTransport,
 } from "./viem/client.js";
 
+
 async function main() {
 	const api = await Mangata.instance([MANGATA_NODE_URL]).api();
 	const publicClient = getPublicClient({
@@ -44,12 +45,12 @@ async function main() {
           latestRequestIdSubmittedToL1 = await closeWithdrawals(api, walletClient, publicClient, latestRequestIdSubmittedToL1);
         }
 
-				await sendUpdateToL1(
-					api,
-					walletClient,
-					publicClient,
-					header.hash,
-				);
+				// await sendUpdateToL1(
+				// 	api,
+				// 	walletClient,
+				// 	publicClient,
+				// 	header.hash,
+				// );
 				inProgress = false;
 			} else {
 				print(`Chain is at block: #${header.number} - tx pending`);
