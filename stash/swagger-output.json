@@ -857,6 +857,57 @@
         }
       }
     },
+    "/faucet/requestTokens/{toAddress}/captcha/{captcha}/": {
+      "get": {
+        "tags": [
+          "Faucet"
+        ],
+        "summary": "Request tokens from the faucet.",
+        "description": "Request tokens from the faucet by providing the recipient address and passing captcha verification.",
+        "parameters": [
+          {
+            "name": "toAddress",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The address to receive the tokens (must begin with 0x)"
+          },
+          {
+            "name": "captcha",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Captcha token to verify the request"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with no content"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "example": {
+                        "message": "Captcha verification failed. Reason: [error-codes]"
+                      }
+                    },
+                    {
+                      "example": {
+                        "message": "Address [toAddress] has requested the token more than 3 times."
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/coinmarketcap/v1/summary": {
       "get": {
         "tags": [

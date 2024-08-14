@@ -551,7 +551,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.stopPrank();
 
     }
-   
+
     function testVerifyBalancedMerkleRoot() public {
       //                                   ROOT
       //                      /                             \
@@ -641,7 +641,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
           expectedRoot
         );
       }
-    }
 
-    
+    }
 }

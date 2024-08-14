@@ -5,11 +5,13 @@ import {
   HttpResponseException,
   NotEnoughException,
   NotFoundException,
+  ForbiddenException,
 } from './Exception.js'
 import logger from '../util/Logger.js'
 
 export abstract class HttpStatusConstants {
   static readonly BAD_REQUEST: number = 400
+  static readonly FORBIDDEN: number = 403
   static readonly NOT_FOUND: number = 404
   static readonly CONFLICT: number = 409
   static readonly RESOURCE_EXHAUSTED: number = 429
@@ -39,6 +41,10 @@ export const handle = async (res: Response, error: Error): Promise<void> => {
       res
         .status(HttpStatusConstants.RESOURCE_EXHAUSTED)
         .json(errorToPayload(error))
+      break
+    case error instanceof ForbiddenException:
+      logger.debug(error.message, error)
+      res.status(HttpStatusConstants.FORBIDDEN).json(errorToPayload(error))
       break
     default:
       logger.error(error.message, error)
