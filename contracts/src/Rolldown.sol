@@ -113,7 +113,6 @@ contract Rolldown is
         );
     }
 
-
     function deposit(address tokenAddress, uint256 amount) public whenNotPaused {
         deposit_erc20(tokenAddress, amount);
     }
@@ -160,130 +159,6 @@ contract Rolldown is
         return a > b ? a : b;
     }
 
-    function getRequestsRange(
-        L2Update calldata update
-    ) private returns (uint256, uint256) {
-        uint256 firstId;
-        unchecked {
-            firstId = uint256(0) - 1;
-        }
-        uint256 lastId = 0;
-
-        if (update.cancels.length > 0) {
-            firstId = min(update.cancels[0].requestId.id, firstId);
-            lastId = max(
-                update.cancels[update.cancels.length - 1].requestId.id,
-                lastId
-            );
-        }
-
-        if (update.withdrawals.length > 0) {
-            firstId = min(update.withdrawals[0].requestId.id, firstId);
-            lastId = max(
-                update.withdrawals[update.withdrawals.length - 1].requestId.id,
-                lastId
-            );
-        }
-
-        if (update.results.length > 0) {
-            firstId = min(update.results[0].requestId.id, firstId);
-            lastId = max(
-                update.results[update.results.length - 1].requestId.id,
-                lastId
-            );
-        }
-
-        return (firstId, lastId);
-    }
-
-    function getOrderOfRequestsOriginatingOnL2(
-        uint256 firstId,
-        L2Update calldata update
-    ) private returns (UpdateType[] memory) {
-        if (
-            update.results.length == 0 &&
-            update.cancels.length == 0 &&
-            update.withdrawals.length == 0
-        ) {
-            return new UpdateType[](0);
-        }
-
-        uint256 withdrawalId = 0;
-        uint256 cancelId = 0;
-        uint256 resultId = 0;
-        uint256 orderId = 0;
-        uint256 updatesAmount = update.cancels.length +
-            update.withdrawals.length +
-            update.results.length;
-        UpdateType[] memory order = new UpdateType[](updatesAmount);
-
-        for (uint256 i = firstId; i < firstId + updatesAmount; i++) {
-            if (
-                withdrawalId < update.withdrawals.length &&
-                update.withdrawals[withdrawalId].requestId.id == i
-            ) {
-                order[orderId] = UpdateType.WITHDRAWAL;
-                withdrawalId++;
-                orderId++;
-            } else if (
-                cancelId < update.cancels.length &&
-                update.cancels[cancelId].requestId.id == i
-            ) {
-                order[orderId] = UpdateType.CANCEL;
-                cancelId++;
-                orderId++;
-            } else if (
-                resultId < update.results.length &&
-                update.results[resultId].requestId.id == i
-            ) {
-                order[orderId] = UpdateType.INDEX_UPDATE;
-                resultId++;
-                orderId++;
-            } else {
-                console.log("requests not in order");
-                revert("invalide L2Update");
-            }
-        }
-        return order;
-    }
-
-    function processRequestsOriginatingOnL2(
-        UpdateType[] memory order,
-        L2Update calldata inputArray
-    ) private {
-        uint256 cancelId = 0;
-        uint256 withdrawalId = 0;
-        uint256 resultsId = 0;
-
-        for (uint256 i = 0; i < order.length; i++) {
-            if (order[i] == UpdateType.WITHDRAWAL) {
-                Withdrawal calldata withdrawal = inputArray.withdrawals[
-                    withdrawalId++
-                ];
-                if (withdrawal.requestId.id <= lastProcessedUpdate_origin_l2) {
-                    continue;
-                }
-                process_l2_update_withdrawal(withdrawal);
-                lastProcessedUpdate_origin_l2++;
-            } else if (order[i] == UpdateType.CANCEL) {
-                Cancel calldata cancel = inputArray.cancels[cancelId++];
-                if (cancel.requestId.id <= lastProcessedUpdate_origin_l2) {
-                    continue;
-                }
-                process_l2_update_cancels(cancel);
-                lastProcessedUpdate_origin_l2++;
-            } else if (order[i] == UpdateType.INDEX_UPDATE) {
-                RequestResult calldata result = inputArray.results[resultsId++];
-                if (result.requestId.id <= lastProcessedUpdate_origin_l2) {
-                    continue;
-                }
-                lastProcessedUpdate_origin_l2++;
-            } else {
-                revert("unknown update type");
-            }
-        }
-    }
-
     function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public {
         Range memory r = merkleRootRange[merkle_root];
         require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
@@ -300,6 +175,7 @@ contract Rolldown is
         process_l2_update_withdrawal(withdrawal);
         processedL2Requests[withdrawal.requestId.id] = true;
     }
+
     function find_l2_batch(uint256 requestId) view public returns (Range memory) {
         require(requestId <= lastProcessedUpdate_origin_l2, "Invalid request id");
         if (roots.length == 0) {
@@ -314,7 +190,6 @@ contract Rolldown is
 
         return Range({start: 0, end: 0});
     }
-
 
     function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public {
         Range memory r = merkleRootRange[merkle_root];
@@ -345,52 +220,6 @@ contract Rolldown is
         lastProcessedUpdate_origin_l2 = range.end;
     }
 
-
-    function process_l2_update_requests_results(
-        UpdateType[] memory order,
-        RequestResult[] calldata results
-    ) private returns (uint256[] memory) {
-        if (results.length == 0) {
-            return new uint256[](0);
-        }
-        uint256 updatesToBeRemovedCounter = 0;
-        uint256[] memory l2UpdatesToBeRemovedTemp = new uint256[](
-            results.length
-        );
-        uint256 updatesCnt = 0;
-
-        for (uint256 idx = 0; idx < order.length; idx++) {
-            if (order[idx] == UpdateType.INDEX_UPDATE) {
-                RequestResult memory element = results[updatesCnt++];
-                if (element.requestId.id <= lastProcessedUpdate_origin_l2) {
-                    continue;
-                }
-                if (
-                    element.updateType == UpdateType.DEPOSIT ||
-                    element.updateType == UpdateType.INDEX_UPDATE ||
-                    element.updateType == UpdateType.CANCEL_RESOLUTION ||
-                    element.updateType == UpdateType.WITHDRAWAL_RESOLUTION
-                ) {
-                    l2UpdatesToBeRemovedTemp[updatesToBeRemovedCounter++] = (
-                        element.originRequestId
-                    );
-                } else {
-                    revert("unknown request type");
-                }
-            }
-        }
-
-        uint256[] memory l2UpdatesToBeRemoved = new uint256[](
-            updatesToBeRemovedCounter
-        );
-
-        for (uint256 i = 0; i < updatesToBeRemovedCounter; i++) {
-            l2UpdatesToBeRemoved[i] = l2UpdatesToBeRemovedTemp[i];
-        }
-
-        return l2UpdatesToBeRemoved;
-    }
-
     function process_l2_update_cancels(Cancel calldata cancel) private {
         L1Update memory pending = getPendingRequests(
             cancel.range.start,
@@ -413,9 +242,7 @@ contract Rolldown is
         );
     }
 
-    function process_l2_update_withdrawal(
-        Withdrawal calldata withdrawal
-    ) private {
+    function process_l2_update_withdrawal( Withdrawal calldata withdrawal) private {
         if (withdrawal.tokenAddress == ETH_TOKEN_ADDRESS){
             process_eth_withdrawal(withdrawal);
         }
@@ -424,9 +251,7 @@ contract Rolldown is
         }
     }
 
-    function process_eth_withdrawal(
-        Withdrawal calldata withdrawal
-    ) private {
+    function process_eth_withdrawal( Withdrawal calldata withdrawal) private {
         bool enought_funds_in_contract = payable(address(this)).balance >= withdrawal.amount;
         bool is_account = withdrawal.withdrawalRecipient.code.length == 0;
         bool status = enought_funds_in_contract && is_account;
@@ -456,9 +281,7 @@ contract Rolldown is
         }
     }
 
-    function process_erc20_withdrawal(
-        Withdrawal calldata withdrawal
-    ) private {
+    function process_erc20_withdrawal( Withdrawal calldata withdrawal) private {
         IERC20 token = IERC20(withdrawal.tokenAddress);
         bool status = token.balanceOf(address(this)) >= withdrawal.amount;
         uint256 timeStamp = block.timestamp;
@@ -482,23 +305,6 @@ contract Rolldown is
                 withdrawal.withdrawalRecipient,
                 withdrawal.tokenAddress,
                 withdrawal.amount
-            );
-        }
-    }
-
-    function process_l2_update_deposit(
-        RequestResult memory depositResult
-    ) private {
-        if (!depositResult.status) {
-            uint256 requestId = depositResult.requestId.id;
-            Deposit memory theDeposit = deposits[requestId];
-            IERC20 token = IERC20(theDeposit.tokenAddress);
-            token.transfer(theDeposit.depositRecipient, theDeposit.amount);
-
-            emit FundsReturned(
-                theDeposit.depositRecipient,
-                theDeposit.tokenAddress,
-                theDeposit.amount
             );
         }
     }
