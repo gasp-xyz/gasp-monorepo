@@ -9,6 +9,10 @@ const transactionSchema = new Schema(
     status: { type: 'string' },
     created: { type: 'number' },
     updated: { type: 'number' },
+    type: { type: 'string' },
+    amount: { type: 'number' },
+    asset_chainId: { type: 'string' },
+    asset_address: { type: 'string' },
   },
   {
     dataStructure: 'JSON',

@@ -6,10 +6,16 @@ interface TraceTransactionRequest {
   address: string
 }
 
-export const startTracingTransaction = async (
-  traceRequest: TraceTransactionRequest
-): Promise<object> => {
-  const { txHash, address } = traceRequest
+export const startTracingTransaction = async (traceRequest: {
+  amount: number
+  address: string
+  asset_address: string
+  type: string
+  txHash: string
+  asset_chainId: string
+}): Promise<object> => {
+  const { txHash, address, type, amount, asset_chainId, asset_address } =
+    traceRequest
   const timestamp = new Date().toISOString()
   const status = 'L1_INITIATED'
 
@@ -20,6 +26,10 @@ export const startTracingTransaction = async (
     created: Date.parse(timestamp),
     updated: Date.parse(timestamp),
     status,
+    type,
+    amount,
+    asset_chainId,
+    asset_address,
   }
 
   try {

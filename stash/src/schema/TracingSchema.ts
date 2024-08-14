@@ -9,6 +9,16 @@ export const startTracingSchema = yup.object().shape({
     .string()
     .required('address is required')
     .matches(/^0x/, 'address must begin with 0x'),
+  type: yup.string().required('type is required'),
+  amount: yup.number().required('amount is required'),
+  asset_chainId: yup
+    .string()
+    .required('asset_chainId is required')
+    .matches(/^0x/, 'txHash must begin with 0x'),
+  asset_address: yup
+    .string()
+    .required('asset_address is required')
+    .matches(/^0x/, 'txHash must begin with 0x'),
 })
 
 export const getStatusByTxHashOrEntityIdSchema = yup.object().shape({

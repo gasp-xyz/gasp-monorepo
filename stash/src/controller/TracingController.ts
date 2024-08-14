@@ -18,13 +18,34 @@ import {
 import * as errorHandler from '../error/Handler.js'
 
 export const startTracing = async (
-  body: { txHash: string; address: string },
+  body: {
+    txHash: string
+    address: string
+    type: string
+    amount: number
+    asset_chainId: string
+    asset_address: string
+  },
   res: Response
 ): Promise<object> => {
-  const { txHash, address } = body
+  const { txHash, address, type, amount, asset_chainId, asset_address } = body
   try {
-    await startTracingSchema.validate({ txHash, address })
-    const transaction = await startTracingTransaction({ txHash, address })
+    await startTracingSchema.validate({
+      txHash,
+      address,
+      type,
+      amount,
+      asset_chainId,
+      asset_address,
+    })
+    const transaction = await startTracingTransaction({
+      txHash,
+      address,
+      type,
+      amount,
+      asset_chainId,
+      asset_address,
+    })
     console.log('object from startTracingTransaction', transaction)
     return res.json({ transaction })
   } catch (e) {
