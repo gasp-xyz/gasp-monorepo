@@ -24,8 +24,10 @@ export const watchDepositAcceptedIntoQueue = async (
     onLogs: async (logs: any) => {
       logger.info('Received DepositAcceptedIntoQueue event')
       for (const log of logs) {
-        const { transactionHash } = log
+        const { transactionHash, requestId } = log
         logger.info('transactionHash is:', transactionHash)
+        logger.info('requestId is:', requestId)
+
         const existingTransaction = await transactionRepository
           .search()
           .where('txHash')
@@ -33,6 +35,7 @@ export const watchDepositAcceptedIntoQueue = async (
           .returnFirst() //todo: we should have only one transaction with the same hash
         if (existingTransaction.length > 0) {
           existingTransaction.status = L1_CONFIRMED_STATUS
+          existingTransaction.requestId = requestId
           await transactionRepository.save(existingTransaction)
           logger.info('Transaction status updated:', existingTransaction)
           return
