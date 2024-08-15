@@ -1,15 +1,16 @@
 import { type PublicClientConfig, createPublicClient, webSocket } from 'viem'
 import Rolldown from '../Rolldown.json' assert { type: 'json' }
 import { transactionRepository } from '../repository/TransactionRepository.js'
-import logger from '../util/Logger.js'
+import process from 'node:process'
 export const L1_CONFIRMED_STATUS = 'L1_CONFIRMED'
-const contractAddress = '0x${process.env.CONTRACT_ADDRESS}'
 
 export const watchDepositAcceptedIntoQueue = async (
   api: any,
   chainUrl: string,
   chain: any
 ) => {
+  console.log('Received DepositAcceptedIntoQueue event')
+  console.log('scanning events:, chainUrl:', chainUrl, chain)
   const webSocketTransport = webSocket(chainUrl, { retryCount: 5 })
 
   const publicClient = getPublicClient({
@@ -18,29 +19,26 @@ export const watchDepositAcceptedIntoQueue = async (
   })
 
   const unwatch = publicClient.watchContractEvent({
-    address: contractAddress,
+    address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
     abi: Rolldown.abi,
     eventName: 'DepositAcceptedIntoQueue',
-    onLogs: async (logs: any) => {
-      logger.info('Received DepositAcceptedIntoQueue event')
+    onLogs: async (logs) => {
+      console.log('Received DepositAcceptedIntoQueue event')
       for (const log of logs) {
-        const { transactionHash, requestId } = log
-        logger.info('transactionHash is:', transactionHash)
-        logger.info('requestId is:', requestId)
-
+        const { transactionHash } = log
         const existingTransaction = await transactionRepository
           .search()
           .where('txHash')
           .equals(transactionHash)
           .returnFirst() //todo: we should have only one transaction with the same hash
-        if (existingTransaction.length > 0) {
+        if (existingTransaction) {
           existingTransaction.status = L1_CONFIRMED_STATUS
-          existingTransaction.requestId = requestId
+          existingTransaction.requestId = (log as any).args.requestId
           await transactionRepository.save(existingTransaction)
-          logger.info('Transaction status updated:', existingTransaction)
+          console.log('Transaction status updated:', existingTransaction)
           return
         }
-        logger.info('Accepted log object:', log)
+        console.log('Accepted log object:', log)
       }
     },
   })
