@@ -3,7 +3,7 @@ import { transactionRepository } from '../repository/TransactionRepository.js'
 
 interface TraceTransactionRequest {
   txHash: string
-  address: string
+  address: string //todo: add new fields and use that everywhere
 }
 
 export const startTracingTransaction = async (traceRequest: {
