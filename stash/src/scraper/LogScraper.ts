@@ -1,4 +1,4 @@
-import { type PublicClientConfig, createPublicClient, webSocket } from 'viem'
+import { type PublicClientConfig, createPublicClient, http } from 'viem'
 import Rolldown from '../Rolldown.json' assert { type: 'json' }
 import { transactionRepository } from '../repository/TransactionRepository.js'
 import process from 'node:process'
@@ -11,10 +11,9 @@ export const watchDepositAcceptedIntoQueue = async (
 ) => {
   console.log('Received DepositAcceptedIntoQueue event')
   console.log('scanning events:, chainUrl:', chainUrl, chain)
-  const webSocketTransport = webSocket(chainUrl, { retryCount: 5 })
 
   const publicClient = getPublicClient({
-    transport: webSocketTransport,
+    transport: http(chainUrl),
     chain: chain,
   })
 
