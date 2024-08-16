@@ -11,19 +11,12 @@ export const startTracingTransaction = async (traceRequest: {
   address: string
   asset_address: string
   type: string
-  network: string
+  chain: string
   txHash: string
   asset_chainId: string
 }): Promise<object> => {
-  const {
-    txHash,
-    address,
-    type,
-    network,
-    amount,
-    asset_chainId,
-    asset_address,
-  } = traceRequest
+  const { txHash, address, type, chain, amount, asset_chainId, asset_address } =
+    traceRequest
   const timestamp = new Date().toISOString()
   const status = 'L1_INITIATED'
 
@@ -35,7 +28,7 @@ export const startTracingTransaction = async (traceRequest: {
     updated: Date.parse(timestamp),
     status,
     type,
-    network,
+    chain,
     amount,
     asset_chainId,
     asset_address,

@@ -2,6 +2,9 @@ import { type PublicClientConfig, createPublicClient, http } from 'viem'
 import Rolldown from '../Rolldown.json' assert { type: 'json' }
 import { transactionRepository } from '../repository/TransactionRepository.js'
 import process from 'node:process'
+import { ApiPromise } from '@polkadot/api'
+import { redis } from '../connector/RedisConnector.js'
+
 export const L1_CONFIRMED_STATUS = 'L1_CONFIRMED'
 
 export const watchDepositAcceptedIntoQueue = async (
@@ -34,6 +37,8 @@ export const watchDepositAcceptedIntoQueue = async (
         if (existingTransaction) {
           existingTransaction.status = L1_CONFIRMED_STATUS
           existingTransaction.requestId = Number((log as any).args.requestId)
+          const timestamp = new Date().toISOString()
+          existingTransaction.updated = Date.parse(timestamp)
           await transactionRepository.save(existingTransaction)
           console.log('Transaction status updated:', existingTransaction)
           return
@@ -65,4 +70,97 @@ export const watchDepositAcceptedIntoQueue = async (
 
 export const getPublicClient = (options: PublicClientConfig) => {
   return createPublicClient({ ...options })
+}
+
+//Query last processed request on L2 for deposits
+
+let keepProcessing = true
+
+export const stopProcessingRequests = () => {
+  keepProcessing = false
+}
+
+export const processRequests = async (api: ApiPromise, l1Chain: string) => {
+  const unwatch = () => {
+    // Add logic to unwatch events if necessary
+  }
+
+  // Handle process termination to unwatch events
+  process.on('SIGINT', async () => {
+    console.error('Stopping the L2 query process..., SIGINT signal')
+    stopProcessingRequests()
+    unwatch() // Unsubscribe from event watching
+    process.exit()
+  })
+
+  process.on('SIGTERM', async () => {
+    console.error('Stopping the L2 query process..., SIGTERM signal')
+    stopProcessingRequests()
+    unwatch() // Unsubscribe from event watching
+    process.exit()
+  })
+
+  process.on('SIGHUP', async () => {
+    console.error('Stopping the L2 query process..., SIGHUP signal')
+    stopProcessingRequests()
+    unwatch() // Unsubscribe from event watching
+    process.exit()
+  })
+
+  while (keepProcessing) {
+    try {
+      const lastProcessedRequestId = Number.parseInt(
+        (await api.query.rolldown.lastProcessedRequestOnL2(l1Chain)).toString()
+      )
+      console.log('lastProcessedRequestId', lastProcessedRequestId)
+      const lastSavedProcessedRequestId = await getLastProcessedRequestId(
+        l1Chain
+      )
+      console.log('lastsavedprocessedrequestid', lastSavedProcessedRequestId)
+      const transactionsToProcess = await transactionRepository
+        .search()
+        .where('chain')
+        .equals(l1Chain)
+        .and('requestId')
+        .gte(lastSavedProcessedRequestId)
+        .and('requestId')
+        .lte(lastProcessedRequestId)
+        .return.all()
+
+      console.log('transactions to process', transactionsToProcess)
+      for (const transaction of transactionsToProcess) {
+        transaction.status = 'PROCESSED'
+        const timestamp = new Date().toISOString()
+        transaction.updated = Date.parse(timestamp)
+        await transactionRepository.save(transaction)
+        // Save the lastProcessedRequestId in the database
+      }
+      await saveLastProcessedRequestId(l1Chain, lastProcessedRequestId) //we are saving the last processed request id unrelated if we had transactions to update
+
+      console.log(
+        `Processed ${transactionsToProcess.length} requests from ID ${lastSavedProcessedRequestId} to ID ${lastProcessedRequestId} on chain ${l1Chain}`
+      )
+    } catch (error) {
+      console.error('Error processing requests:', error)
+    }
+
+    // Delay to avoid overwhelming the system
+    await new Promise((resolve) => setTimeout(resolve, 5000))
+  }
+}
+const saveLastProcessedRequestId = async (
+  l1Chain: string,
+  lastProcessedRequestId: number
+) => {
+  await redis.client.set(
+    `transaction:${l1Chain}:latest`,
+    lastProcessedRequestId.toString()
+  )
+}
+
+const getLastProcessedRequestId = async (
+  l1Chain: string
+): Promise<number | null> => {
+  const result = await redis.client.get(`transaction:${l1Chain}:latest`)
+  return result ? Number(result) : 0 // Return 0 and start updating statuses from the block 0
 }

@@ -10,7 +10,7 @@ const transactionSchema = new Schema(
     created: { type: 'number' },
     updated: { type: 'number' },
     type: { type: 'string' },
-    network: { type: 'string' },
+    chain: { type: 'string' },
     amount: { type: 'string' },
     asset_chainId: { type: 'string' },
     asset_address: { type: 'string' },

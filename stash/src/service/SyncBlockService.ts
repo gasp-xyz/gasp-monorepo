@@ -3,7 +3,10 @@ import * as store from '../repository/ChainRepository.js'
 import * as blocks from '../scraper/BlockScraper.js'
 import * as pools from '../scraper/PoolsScraper.js'
 import * as staking from '../scraper/StakingScraper.js'
-import { watchDepositAcceptedIntoQueue } from '../scraper/LogScraper.js'
+import {
+  watchDepositAcceptedIntoQueue,
+  processRequests,
+} from '../scraper/LogScraper.js'
 import logger from '../util/Logger.js'
 import { holesky, arbitrumSepolia } from 'viem/chains'
 export const initService = async () => {
@@ -16,6 +19,12 @@ export const initService = async () => {
     process.env.ARBITRUM_SEPOLIA_CHAIN_URL,
     arbitrumSepolia
   )
+
+  //Start querying L2 for processed transactions
+  await Promise.all([
+    processRequests(api, 'Arbitrum'),
+    processRequests(api, 'Ethereum'),
+  ])
 
   const latestBlock = (await store.getLatest()).block
   // const latestBlock = 3719278
