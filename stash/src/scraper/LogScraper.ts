@@ -30,9 +30,10 @@ export const watchDepositAcceptedIntoQueue = async (
           .where('txHash')
           .equals(transactionHash)
           .returnFirst() //todo: we should have only one transaction with the same hash
+
         if (existingTransaction) {
           existingTransaction.status = L1_CONFIRMED_STATUS
-          existingTransaction.requestId = (log as any).args.requestId.toString()
+          existingTransaction.requestId = Number((log as any).args.requestId)
           await transactionRepository.save(existingTransaction)
           console.log('Transaction status updated:', existingTransaction)
           return

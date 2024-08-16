@@ -7,26 +7,35 @@ interface TraceTransactionRequest {
 }
 
 export const startTracingTransaction = async (traceRequest: {
-  amount: number
+  amount: string
   address: string
   asset_address: string
   type: string
+  network: string
   txHash: string
   asset_chainId: string
 }): Promise<object> => {
-  const { txHash, address, type, amount, asset_chainId, asset_address } =
-    traceRequest
+  const {
+    txHash,
+    address,
+    type,
+    network,
+    amount,
+    asset_chainId,
+    asset_address,
+  } = traceRequest
   const timestamp = new Date().toISOString()
   const status = 'L1_INITIATED'
 
   const transactionData = {
-    requestId: '', //this is requestId we get from L1, empty when we start tracing
+    requestId: null, //this is requestId we get from L1, empty when we start tracing
     txHash,
     address,
     created: Date.parse(timestamp),
     updated: Date.parse(timestamp),
     status,
     type,
+    network,
     amount,
     asset_chainId,
     asset_address,

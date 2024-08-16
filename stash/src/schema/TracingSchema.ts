@@ -10,7 +10,14 @@ export const startTracingSchema = yup.object().shape({
     .required('address is required')
     .matches(/^0x/, 'address must begin with 0x'),
   type: yup.string().required('type is required'),
-  amount: yup.number().required('amount is required'),
+  network: yup
+    .string()
+    .required('network is required')
+    .oneOf(
+      ['ethereum', 'arbitrum'],
+      'network must be either "ethereum" or "arbitrum"'
+    ),
+  amount: yup.string().required('amount is required'),
   asset_chainId: yup
     .string()
     .required('asset_chainId is required')

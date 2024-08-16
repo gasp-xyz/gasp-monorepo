@@ -22,18 +22,28 @@ export const startTracing = async (
     txHash: string
     address: string
     type: string
-    amount: number
+    network: string
+    amount: string
     asset_chainId: string
     asset_address: string
   },
   res: Response
 ): Promise<object> => {
-  const { txHash, address, type, amount, asset_chainId, asset_address } = body
+  const {
+    txHash,
+    address,
+    type,
+    network,
+    amount,
+    asset_chainId,
+    asset_address,
+  } = body
   try {
     await startTracingSchema.validate({
       txHash,
       address,
       type,
+      network,
       amount,
       asset_chainId,
       asset_address,
@@ -42,6 +52,7 @@ export const startTracing = async (
       txHash,
       address,
       type,
+      network,
       amount,
       asset_chainId,
       asset_address,
