@@ -22,6 +22,11 @@ jobs:
           submodules: true
 
       - uses: foundry-rs/foundry-toolchain@v1
+      - name: Install `contracts` deps
+        working-directory: contracts
+        run: forge install
+
+      - uses: foundry-rs/foundry-toolchain@v1
       - name: Run forge tests
         working-directory: contracts
         run: forge test
