@@ -11,48 +11,12 @@ import type { PalletRolldownL2Request } from '@polkadot/types/lookup';
 import type { H256 } from '@polkadot/types/interfaces/runtime';
 
 
-export function getMinRequestId(l2Update: Array<L2Update>) {
-    let minId = Math.min(...[
-        l2Update[0].withdrawals,
-        l2Update[0].cancels,
-        l2Update[0].results
-    ].flat()
-        .map(function(item) {
-            return Number(item.requestId.id);
-        }))
-
-    return minId === Infinity ? null : minId
-}
-
 export async function getLatestRequestIdSubmittedToL1(publicClient: PublicClient) {
     return (await publicClient.readContract({
         address: MANGATA_CONTRACT_ADDRESS,
         abi: ROLLDOWN_ABI,
         functionName: "lastProcessedUpdate_origin_l2",
     })) as bigint;
-}
-
-function filterUpdates(l2Update: Array<L2Update>, lastSubmittedId: number) {
-
-    l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem: Withdrawal) => elem.requestId.id > lastSubmittedId);
-    l2Update[0].cancels = l2Update[0].cancels.filter((elem: Cancel) => elem.requestId.id > lastSubmittedId);
-    l2Update[0].results = l2Update[0].results.filter((elem: RequestResult) =>  elem.requestId.id > lastSubmittedId);
-
-    const minId = getMinRequestId(l2Update);
-    if (minId == null) {
-        return l2Update;
-    }
-
-    const maxAmountOfUpdates = LIMIT
-    if (maxAmountOfUpdates > 0) {
-        l2Update[0].withdrawals = l2Update[0].withdrawals.filter((elem: Withdrawal) => elem.requestId.id < BigInt(minId + maxAmountOfUpdates));
-        l2Update[0].cancels = l2Update[0].cancels.filter((elem: Cancel) => elem.requestId.id < BigInt(minId + maxAmountOfUpdates));
-        l2Update[0].results = l2Update[0].results.filter((elem: RequestResult) => elem.requestId.id < BigInt(minId + maxAmountOfUpdates));
-        return l2Update;
-    } else {
-        return l2Update;
-    }
-
 }
 
 async function getLastBatchId(api: ApiPromise, blockHash: Uint8Array) {
@@ -91,25 +55,6 @@ async function findBatchWithNewUpdates(api: ApiPromise, publicClient: PublicClie
     return null;
 }
 
-
-
-async function getPendingUpdate(api: ApiPromise, blockHash: Uint8Array) {
-    const chain = api.createType('Chain', L1_CHAIN);
-    return await api.rpc.rolldown.pending_l2_requests(chain, blockHash);
-}
-
-function getDecodedData(methodName: string, pendingUpdates: `0x${string}`): Array<L2Update> {
-    return decodeAbiParameters(
-        ROLLDOWN_ABI.find((e: any) => e.name === methodName)!.inputs,
-        pendingUpdates,
-    ) as unknown as Array<L2Update>;
-}
-
-function getCountRequest(l2Update: Array<L2Update>) {
-    return l2Update[0].withdrawals.length +
-        l2Update[0].cancels.length +
-        l2Update[0].results.length;
-}
 
 async function estimateGasInWei(publicClient: PublicClient) {
     // https://www.blocknative.com/blog/eip-1559-fees
@@ -219,7 +164,8 @@ export async function closeWithdrawals(
     }
 
     for (let withdrawalRequestId of indexes){
-      if (await isWithdrawal(api, withdrawalRequestId)){
+      if (!(await isWithdrawal(api, withdrawalRequestId))){
+        console.log(`ignroing non withdrawal ${withdrawalRequestId} request ...`);
         continue;
       }
 
