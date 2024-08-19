@@ -209,6 +209,14 @@ pub mod i_finalizer_task_manager {
                     },],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("PauseTrackingOpState"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("PauseTrackingOpState",),
+                        inputs: ::std::vec![],
+                        anonymous: false,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("RdTaskCancelled"),
                     ::std::vec![::ethers::core::abi::ethabi::Event {
                         name: ::std::borrow::ToOwned::to_owned("RdTaskCancelled"),
@@ -290,6 +298,18 @@ pub mod i_finalizer_task_manager {
                                 indexed: false,
                             },
                         ],
+                        anonymous: false,
+                    },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("ResumeTrackingOpState"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("ResumeTrackingOpState",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
+                            name: ::std::borrow::ToOwned::to_owned("resetTrackedQuorums",),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                            indexed: false,
+                        },],
                         anonymous: false,
                     },],
                 ),
@@ -398,6 +418,13 @@ pub mod i_finalizer_task_manager {
         {
             self.0.event()
         }
+        ///Gets the contract's `PauseTrackingOpState` event
+        pub fn pause_tracking_op_state_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, PauseTrackingOpStateFilter>
+        {
+            self.0.event()
+        }
         ///Gets the contract's `RdTaskCancelled` event
         pub fn rd_task_cancelled_filter(
             &self,
@@ -416,6 +443,13 @@ pub mod i_finalizer_task_manager {
         pub fn rd_task_responded_filter(
             &self,
         ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, RdTaskRespondedFilter>
+        {
+            self.0.event()
+        }
+        ///Gets the contract's `ResumeTrackingOpState` event
+        pub fn resume_tracking_op_state_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, ResumeTrackingOpStateFilter>
         {
             self.0.event()
         }
@@ -610,6 +644,20 @@ pub mod i_finalizer_task_manager {
         Eq,
         Hash,
     )]
+    #[ethevent(name = "PauseTrackingOpState", abi = "PauseTrackingOpState()")]
+    pub struct PauseTrackingOpStateFilter;
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
     #[ethevent(name = "RdTaskCancelled", abi = "RdTaskCancelled(uint32)")]
     pub struct RdTaskCancelledFilter {
         #[ethevent(indexed)]
@@ -660,6 +708,22 @@ pub mod i_finalizer_task_manager {
         pub task_response: RdTaskResponse,
         pub task_response_metadata: TaskResponseMetadata,
     }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethevent(name = "ResumeTrackingOpState", abi = "ResumeTrackingOpState(bool)")]
+    pub struct ResumeTrackingOpStateFilter {
+        pub reset_tracked_quorums: bool,
+    }
     ///Container type for all of the contract's events
     #[derive(
         Clone,
@@ -680,9 +744,11 @@ pub mod i_finalizer_task_manager {
         OpTaskCompletedFilter(OpTaskCompletedFilter),
         OpTaskForceCompletedFilter(OpTaskForceCompletedFilter),
         OpTaskRespondedFilter(OpTaskRespondedFilter),
+        PauseTrackingOpStateFilter(PauseTrackingOpStateFilter),
         RdTaskCancelledFilter(RdTaskCancelledFilter),
         RdTaskCompletedFilter(RdTaskCompletedFilter),
         RdTaskRespondedFilter(RdTaskRespondedFilter),
+        ResumeTrackingOpStateFilter(ResumeTrackingOpStateFilter),
     }
     impl ::ethers::contract::EthLogDecode for IFinalizerTaskManagerEvents {
         fn decode_log(
@@ -718,6 +784,11 @@ pub mod i_finalizer_task_manager {
             if let Ok(decoded) = OpTaskRespondedFilter::decode_log(log) {
                 return Ok(IFinalizerTaskManagerEvents::OpTaskRespondedFilter(decoded));
             }
+            if let Ok(decoded) = PauseTrackingOpStateFilter::decode_log(log) {
+                return Ok(IFinalizerTaskManagerEvents::PauseTrackingOpStateFilter(
+                    decoded,
+                ));
+            }
             if let Ok(decoded) = RdTaskCancelledFilter::decode_log(log) {
                 return Ok(IFinalizerTaskManagerEvents::RdTaskCancelledFilter(decoded));
             }
@@ -726,6 +797,11 @@ pub mod i_finalizer_task_manager {
             }
             if let Ok(decoded) = RdTaskRespondedFilter::decode_log(log) {
                 return Ok(IFinalizerTaskManagerEvents::RdTaskRespondedFilter(decoded));
+            }
+            if let Ok(decoded) = ResumeTrackingOpStateFilter::decode_log(log) {
+                return Ok(IFinalizerTaskManagerEvents::ResumeTrackingOpStateFilter(
+                    decoded,
+                ));
             }
             Err(::ethers::core::abi::Error::InvalidData)
         }
@@ -743,9 +819,11 @@ pub mod i_finalizer_task_manager {
                 Self::OpTaskCompletedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OpTaskForceCompletedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OpTaskRespondedFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::PauseTrackingOpStateFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RdTaskCancelledFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RdTaskCompletedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RdTaskRespondedFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::ResumeTrackingOpStateFilter(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
@@ -791,6 +869,11 @@ pub mod i_finalizer_task_manager {
             Self::OpTaskRespondedFilter(value)
         }
     }
+    impl ::core::convert::From<PauseTrackingOpStateFilter> for IFinalizerTaskManagerEvents {
+        fn from(value: PauseTrackingOpStateFilter) -> Self {
+            Self::PauseTrackingOpStateFilter(value)
+        }
+    }
     impl ::core::convert::From<RdTaskCancelledFilter> for IFinalizerTaskManagerEvents {
         fn from(value: RdTaskCancelledFilter) -> Self {
             Self::RdTaskCancelledFilter(value)
@@ -804,6 +887,11 @@ pub mod i_finalizer_task_manager {
     impl ::core::convert::From<RdTaskRespondedFilter> for IFinalizerTaskManagerEvents {
         fn from(value: RdTaskRespondedFilter) -> Self {
             Self::RdTaskRespondedFilter(value)
+        }
+    }
+    impl ::core::convert::From<ResumeTrackingOpStateFilter> for IFinalizerTaskManagerEvents {
+        fn from(value: ResumeTrackingOpStateFilter) -> Self {
+            Self::ResumeTrackingOpStateFilter(value)
         }
     }
 }

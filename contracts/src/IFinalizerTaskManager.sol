@@ -7,6 +7,9 @@ import "./IGaspMultiRollupServicePrimitives.sol";
 interface IFinalizerTaskManager {
     // EVENTS
 
+    event PauseTrackingOpState();
+    event ResumeTrackingOpState(bool resetTrackedQuorums);
+
     event BLSSignatureCheckerAddressUpdated(address blsSignatureCheckerAddress);
 
     event OpTaskCancelled(uint32 indexed taskIndex);

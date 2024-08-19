@@ -15,7 +15,6 @@ import {BLSSignatureChecker, IRegistryCoordinator, IBLSSignatureChecker, IBLSApk
 import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
 
 import "./IGaspMultiRollupServicePrimitives.sol";
-
 import "./IFinalizerTaskManager.sol";
 
 contract FinalizerTaskManager is
@@ -29,6 +28,7 @@ contract FinalizerTaskManager is
     using BN254 for BN254.G1Point;
 
     BLSSignatureChecker public blsSignatureChecker;
+    address public operatorStateRetreiver;
 
     /* CONSTANT */
     // The number of blocks from the task initialization within which the aggregator has to respond to
@@ -96,7 +96,7 @@ contract FinalizerTaskManager is
         _;
     }
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock)
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock, address _operatorStateRetreiver)
         public
         initializer
     {
@@ -106,8 +106,23 @@ contract FinalizerTaskManager is
         generator = _generator;
         allowNonRootInit = _allowNonRootInit;
         blsSignatureChecker = BLSSignatureChecker(_blsSignatureCheckerAddress);
+        operatorStateRetreiver = _operatorStateRetreiver;
         taskResponseWindowBlock = _taskResponseWindowBlock;
         minOpTaskResponseWindowBlock = _minOpTaskResponseWindowBlock;
+    }
+
+    function pauseTrackingOpState()
+        public
+        onlyOwner
+    {
+        emit PauseTrackingOpState();
+    }
+
+    function resumeTrackingQuorums(bool resetTrackedQuorums)
+        public
+        onlyOwner
+    {
+        emit ResumeTrackingOpState(resetTrackedQuorums);
     }
 
     function updateBlsSignatureCheckerAddress(address _blsSignatureCheckerAddress) external onlyOwner{

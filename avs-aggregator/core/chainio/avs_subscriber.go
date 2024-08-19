@@ -16,6 +16,8 @@ type AvsSubscriberer interface {
 	SubscribeToNewRdTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewRdTaskCreated) event.Subscription
 	SubscribeToRdTaskResponses(taskResponseLogs chan *taskmanager.ContractFinalizerTaskManagerRdTaskResponded) event.Subscription
 	ParseRdTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
+	SubscribeToOpTaskCompleted(opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) event.Subscription
+	SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState) event.Subscription 
 }
 
 // Subscribers use a ws connection instead of http connection like Readers
@@ -58,6 +60,28 @@ func (s *AvsSubscriber) SubscribeToRdTaskResponses(taskResponseLogs chan *taskma
 		s.logger.Error("Failed to subscribe to TaskResponded events", "err", err)
 	}
 	s.logger.Infof("Subscribed to TaskResponded events")
+	return sub
+}
+
+func (s *AvsSubscriber) SubscribeToOpTaskCompleted(fromBlock uint64,opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) event.Subscription {
+	sub, err := s.AvsContractBindings.TaskManager.WatchOpTaskCompleted(
+		&bind.WatchOpts{Start: fromBlock}, opTaskCompletionLogs, []uint32{},
+	)
+	if err != nil {
+		s.logger.Error("Failed to subscribe to OpTaskCompleted events", "err", err)
+	}
+	s.logger.Infof("Subscribed to OpTaskCompleted events")
+	return sub
+}
+
+func (s *AvsSubscriber) SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState) event.Subscription {
+	sub, err := s.AvsContractBindings.TaskManager.WatchResumeTrackingOpState(
+		&bind.WatchOpts{}, resumeLogs, []uint32{},
+	)
+	if err != nil {
+		s.logger.Error("Failed to subscribe to ResumeTrackingOpState events", "err", err)
+	}
+	s.logger.Infof("Subscribed to ResumeTrackingOpState events")
 	return sub
 }
 

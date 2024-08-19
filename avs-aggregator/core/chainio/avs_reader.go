@@ -15,6 +15,10 @@ import (
 
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	// blsSignatureChecker "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
+	opstateretriever "github.com/Layr-Labs/eigensdk-go/contracts/bindings/OperatorStateRetriever"
+
+	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
+	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
 )
 
 type AvsReaderer interface {
@@ -169,4 +173,67 @@ func (r *AvsReader) GetNonSigningOperatorPubKeys(event taskmanager.ContractFinal
 
 	// r.logger.Debug("nonSigningOperatorPubKeys", "nonSigningOperatorPubKeys", nonSigningOperatorPubKeys)
 	return nonSigningOperatorPubKeys, nil
+}
+
+func (r *AvsReader) GetOperatorsFromIds(
+	opts *bind.CallOpts,
+	registryCoordinatorAddr common.Address,
+	operatorIds []types.OperatorId,
+) ([]common.Address, error) {
+	operators, err := r.AvsServiceBindings.TaskManager.GetOperatorsFromIds(opts, registryCoordinatorAddr, operatorIds)
+	if err != nil {
+		r.logger.Error("Cannot get operators from ids", "err", err)
+		return nil, err
+	}
+	return operators, nil
+}
+
+
+func (r *AvsReader) GetOperatorsStakesForQuorum(
+	opts *bind.CallOpts,
+	registryCoordinatorAddr common.Address,
+	quorumNumbers sdktypes.QuorumNums,
+	operatorAddr []common.Address,
+) ([][]opstateretriever.OperatorStateRetrieverOperator, error) {
+	operatorStakes, err := r.AvsServiceBindings.TaskManager.GetOperatorsStakesForQuorum(
+		opts,
+		registryCoordinatorAddr,
+		quorumNumbers.UnderlyingType(),
+		operatorAddr)
+	if err != nil {
+		return nil, types.WrapError(errors.New("Failed to get operators state"), err)
+	}
+	return operatorStakes, nil
+}
+
+
+func (r *AvsReader) GetTypedOperatorsStakesForQuorumAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers types.QuorumNums, operatorAddr []common.Address, blockNumber sdktypes.BlockNum) (map[sdktypes.OperatorId]sdktypes.OperatorAvsState, error) {
+	operatorsAvsState := make(map[types.OperatorId]types.OperatorAvsState)
+	operatorsStakesInQuorums, err := r.GetOperatorsStakesForQuorum(&bind.CallOpts{Context: ctx, big.NewInt(blockNumber)}, registryCoordinatorAddr, quorumNumbers, operatorAddr)
+	if err != nil {
+		return nil, types.WrapError(errors.New("Failed to get operator state"), err)
+	}
+	numquorums := len(quorumNumbers)
+	if len(operatorsStakesInQuorums) != numquorums {
+		ar.logger.Fatal("Number of quorums returned from GetOperatorsStakeInQuorumsAtBlock does not match number of quorums requested. Probably pointing to old contract or wrong implementation.", "service", "AvsRegistryServiceChainCaller")
+	}
+
+	for quorumIdx, quorumNum := range quorumNumbers {
+		for _, operator := range operatorsStakesInQuorums[quorumIdx] {
+			if operatorAvsState, ok := operatorsAvsState[operator.OperatorId]; ok {
+				operatorsAvsState[operator.OperatorId].StakePerQuorum[quorumNum] = operator.Stake
+			} else {
+				stakePerQuorum := make(map[sdktypes.QuorumNum]sdktypes.StakeAmount)
+				stakePerQuorum[quorumNum] = operator.Stake
+				operatorsAvsState[operator.OperatorId] = sdktypes.OperatorAvsState{
+					OperatorId:     operator.OperatorId,
+					StakePerQuorum: stakePerQuorum,
+					BlockNumber:    blockNumber,
+				}
+				operatorsAvsState[operator.OperatorId].StakePerQuorum[quorumNum] = operator.Stake
+			}
+		}
+	}
+
+	return operatorsAvsState, nil
 }
