@@ -32,6 +32,8 @@ export const watchDepositAcceptedIntoQueue = async (
           .search()
           .where('txHash')
           .equals(transactionHash)
+          .and('type')
+          .equals('deposit')
           .returnFirst() //todo: we should have only one transaction with the same hash
 
         if (existingTransaction) {
@@ -114,13 +116,17 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
       )
       console.log('lastProcessedRequestId', lastProcessedRequestId)
       const lastSavedProcessedRequestId = await getLastProcessedRequestId(
-        l1Chain
+        //we separate the last processed request id by type (deposit, withdrawal) and l1 chain
+        l1Chain,
+        'deposit'
       )
       console.log('lastsavedprocessedrequestid', lastSavedProcessedRequestId)
       const transactionsToProcess = await transactionRepository
         .search()
         .where('chain')
         .equals(l1Chain)
+        .and('type')
+        .equals('deposit')
         .and('requestId')
         .gte(lastSavedProcessedRequestId)
         .and('requestId')
@@ -135,7 +141,11 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
         await transactionRepository.save(transaction)
         // Save the lastProcessedRequestId in the database
       }
-      await saveLastProcessedRequestId(l1Chain, lastProcessedRequestId) //we are saving the last processed request id unrelated if we had transactions to update
+      await saveLastProcessedRequestId(
+        l1Chain,
+        lastProcessedRequestId,
+        'deposit'
+      ) //we are saving the last processed request id unrelated if we had transactions to update
 
       console.log(
         `Processed ${transactionsToProcess.length} requests from ID ${lastSavedProcessedRequestId} to ID ${lastProcessedRequestId} on chain ${l1Chain}`
@@ -150,17 +160,19 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
 }
 const saveLastProcessedRequestId = async (
   l1Chain: string,
-  lastProcessedRequestId: number
+  lastProcessedRequestId: number,
+  type: string
 ) => {
   await redis.client.set(
-    `transaction:${l1Chain}:latest`,
+    `transaction:${type}:${l1Chain}:latest`,
     lastProcessedRequestId.toString()
   )
 }
 
 const getLastProcessedRequestId = async (
-  l1Chain: string
+  l1Chain: string,
+  type: string
 ): Promise<number | null> => {
-  const result = await redis.client.get(`transaction:${l1Chain}:latest`)
+  const result = await redis.client.get(`transaction:${type}:${l1Chain}:latest`)
   return result ? Number(result) : 0 // Return 0 and start updating statuses from the block 0
 }

@@ -18,7 +18,12 @@ export const startTracingTransaction = async (traceRequest: {
   const { txHash, address, type, chain, amount, asset_chainId, asset_address } =
     traceRequest
   const timestamp = new Date().toISOString()
-  const status = 'L1_INITIATED'
+  const status =
+    type === 'deposit'
+      ? 'L1_INITIATED'
+      : type === 'withdrawal'
+      ? 'L2_INITIATED'
+      : 'UNKNOWN'
 
   const transactionData = {
     requestId: null, //this is requestId we get from L1, empty when we start tracing
