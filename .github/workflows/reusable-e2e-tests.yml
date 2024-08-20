@@ -8,7 +8,7 @@ on:
       substrateNodeVersion:
         type: string
         required: false
-        default: "eth-rollup-develop"
+        default: "eth-rollup-develop-fast"
       globalVersion:
         type: string
         required: false
