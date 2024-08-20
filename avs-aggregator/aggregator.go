@@ -177,7 +177,8 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 	agg.logger.Infof("Starting aggregator.")
 	agg.logger.Infof("Starting aggregator rpc server.")
 	go agg.startServer(ctx)
-	go agg.opStateUpdater.startAsyncOpStateUpdater(ctx)
+	sendNewOpTaskC := make(chan types.SendNewOpTaskType)
+	go agg.opStateUpdater.startAsyncOpStateUpdater(ctx, sendNewOpTaskC)
 
 	var sub *gsrpcrpcchain.NewHeadsSubscription
 	var err error
@@ -222,14 +223,14 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 			OpTask, err := agg.sendNewOpTask()
 			if err != nil {
 				// we log the errors inside sendNewTask() so here we just continue to the next task
-				sendNewOpTask.SendNewOpTaskReturnC <- types.SendNewOpTaskReturnC{
-					TriggerOpStateUpdateError: err
+				sendNewOpTask.SendNewOpTaskReturnC <- types.SendNewOpTaskReturn{
+					SendNewOpTaskError: err,
 				}
 				continue
 			}
-			sendNewOpTask.SendNewOpTaskReturnC <- types.SendNewOpTaskReturnC{
+			sendNewOpTask.SendNewOpTaskReturnC <- types.SendNewOpTaskReturn{
 				OpTask: OpTask,
-				TriggerOpStateUpdateError: nil
+				SendNewOpTaskError: nil,
 			}
 		case err := <-sub.Err():
 			agg.logger.Error("Subscription error, retrying subscription...", "err", err)
@@ -340,12 +341,12 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 
 func (agg *Aggregator) sendNewOpTask() (taskmanager.IFinalizerTaskManagerOpTask, error) {
 
-	agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
+	agg.logger.Info("Aggregator sending new task")
 	// Send number to square to the task manager contract
 	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewOpTask(context.Background(), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
-		return err
+		return newTask, err
 	}
 
 	taskId := sdktypes.TaskId{
@@ -367,7 +368,7 @@ func (agg *Aggregator) sendNewOpTask() (taskmanager.IFinalizerTaskManagerOpTask,
 	}
 	taskTimeToExpiry := time.Second * time.Duration(agg.expiration) * 2
 	agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
-	agg.logger.Info("Aggregator initialized new operator state task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
+	agg.logger.Info("Aggregator initialized new operator state task", "task index", taskIndex, "expiry", taskTimeToExpiry)
 
 	return newTask, nil
 }

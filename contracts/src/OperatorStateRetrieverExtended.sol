@@ -12,7 +12,7 @@ import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRe
  * @title OperatorStateRetriever with view functions that allow to retrieve the state of an AVSs registry system.
  * @author Layr Labs Inc.
  */
-contract OperatorStateRetreiverExtended is OperatorStateRetriever {
+contract OperatorStateRetrieverExtended is OperatorStateRetriever {
     using BitmapUtils for *;
 
     function operatorStakeForQuorum(IRegistryCoordinator registryCoordinator, uint8 quorumNumber, address operator) public virtual view returns (uint96, bool) {

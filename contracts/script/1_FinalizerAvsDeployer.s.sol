@@ -21,7 +21,7 @@ import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecke
 import {FinalizerServiceManager, IServiceManager} from "../src/FinalizerServiceManager.sol";
 import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "../src/IFinalizerTaskManager.sol";
-import {OperatorStateRetreiverExtended} from "../src/OperatorStateRetreiverExtended.sol";
+import {OperatorStateRetrieverExtended} from "../src/OperatorStateRetrieverExtended.sol";
 
 import {Utils} from "./utils/Utils.sol";
 
@@ -52,7 +52,7 @@ contract Deployer is Script, Utils, Test {
 
     // non-upgradable contracts
     BLSSignatureChecker public blsSignatureChecker;
-    OperatorStateRetreiverExtended public operatorStateRetreiverExtended;
+    OperatorStateRetrieverExtended public operatorStateRetreiverExtended;
 
     //upgradeable contracts
     FinalizerServiceManager public serviceManager;
@@ -251,7 +251,7 @@ contract Deployer is Script, Utils, Test {
 
         taskManagerImplementation = new FinalizerTaskManager();
 
-        operatorStateRetreiverExtended = new OperatorStateRetreiverExtended();
+        operatorStateRetreiverExtended = new OperatorStateRetrieverExtended();
 
         // upgrade task manager proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(

@@ -13,6 +13,7 @@ import (
 	blsSignatureChecker "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
 	delegationManager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/DelegationManager"
 	stakeRegistry "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/StakeRegistry"
+	operatorStateRetrieverExtended "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/OperatorStateRetrieverExtended"
 )
 
 type AvsServiceBindings struct {
@@ -22,7 +23,12 @@ type AvsServiceBindings struct {
 	BlsSignatureChecker         *blsSignatureChecker.ContractBLSSignatureChecker
 	StakeRegistry 			*stakeRegistry.ContractStakeRegistry
 	DelegationManager      *delegationManager.ContractDelegationManager
+	OperatorStateRetrieverExtended *operatorStateRetrieverExtended.ContractOperatorStateRetrieverExtended
 	OperatorStateRetriever common.Address
+	DelegationManagerAddress common.Address
+	TaskManagerAddress common.Address
+	StakeRegistryAddress common.Address 
+	RegistryCoordinatorAddress common.Address
 	ethClient              eth.Client
 	logger                 logging.Logger
 }
@@ -90,6 +96,17 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		return nil, err
 	}
 
+	operatorStateRetrieverExtendedAddr, err := contractTaskManager.OperatorStateRetrieverExtended(&bind.CallOpts{})
+	if err != nil {
+		logger.Error("Failed to fetch OperatorStateRetrieverExtended address", "err", err)
+		return nil, err
+	}
+	contractOperatorStateRetrieverExtended, err := operatorStateRetrieverExtended.NewContractOperatorStateRetrieverExtended(operatorStateRetrieverExtendedAddr, ethclient)
+	if err != nil {
+		logger.Error("Failed to fetch OperatorStateRetrieverExtended contract", "err", err)
+		return nil, err
+	}
+
 	return &AvsServiceBindings{
 		RegistryCoordinator: contractRegistryCoordinator,
 		ServiceManager:         contractServiceManager,
@@ -97,7 +114,12 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		BlsSignatureChecker:            contractBlsSignatureChecker,
 		StakeRegistry:            contractStakeRegistry,
 		DelegationManager:            contractDelegationManager,
+		OperatorStateRetrieverExtended: contractOperatorStateRetrieverExtended,
 		OperatorStateRetriever: taskManagerAddr,
+		DelegationManagerAddress: delegationManagerAddr,
+		TaskManagerAddress: taskManagerAddr,
+		StakeRegistryAddress: stakeRegistryAddr,
+		RegistryCoordinatorAddress: registryCoordinatorAddr,
 		ethClient:              ethclient,
 		logger:                 logger,
 	}, nil

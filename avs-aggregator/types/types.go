@@ -35,7 +35,7 @@ type TriggerOpStateUpdatePing struct{
 	TriggerOpStateUpdateErrorC chan error `json:"-"`
 }
 
-type sendNewOpTaskType struct{
+type SendNewOpTaskType struct{
 	SendNewOpTaskReturnC chan SendNewOpTaskReturn `json:"-"`
 }
 
@@ -51,6 +51,6 @@ type OperatorAvsState struct {
 }
 
 type QuorumStakeDiff struct{
-	posDiff sdktypes.StakeAmount
-	negDiff sdktypes.StakeAmount
+	PosDiff sdktypes.StakeAmount
+	NegDiff sdktypes.StakeAmount
 }

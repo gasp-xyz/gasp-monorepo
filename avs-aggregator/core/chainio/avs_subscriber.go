@@ -63,26 +63,26 @@ func (s *AvsSubscriber) SubscribeToRdTaskResponses(taskResponseLogs chan *taskma
 	return sub
 }
 
-func (s *AvsSubscriber) SubscribeToOpTaskCompleted(fromBlock uint64,opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) event.Subscription {
+func (s *AvsSubscriber) SubscribeToOpTaskCompleted(fromBlock uint64,opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) (event.Subscription, error) {
 	sub, err := s.AvsContractBindings.TaskManager.WatchOpTaskCompleted(
-		&bind.WatchOpts{Start: fromBlock}, opTaskCompletionLogs, []uint32{},
+		&bind.WatchOpts{Start: &fromBlock}, opTaskCompletionLogs, []uint32{},
 	)
 	if err != nil {
 		s.logger.Error("Failed to subscribe to OpTaskCompleted events", "err", err)
 	}
 	s.logger.Infof("Subscribed to OpTaskCompleted events")
-	return sub
+	return sub, err
 }
 
-func (s *AvsSubscriber) SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState) event.Subscription {
+func (s *AvsSubscriber) SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState) (event.Subscription, error) {
 	sub, err := s.AvsContractBindings.TaskManager.WatchResumeTrackingOpState(
-		&bind.WatchOpts{}, resumeLogs, []uint32{},
+		&bind.WatchOpts{}, resumeLogs,
 	)
 	if err != nil {
 		s.logger.Error("Failed to subscribe to ResumeTrackingOpState events", "err", err)
 	}
 	s.logger.Infof("Subscribed to ResumeTrackingOpState events")
-	return sub
+	return sub, err
 }
 
 func (s *AvsSubscriber) ParseRdTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error) {
