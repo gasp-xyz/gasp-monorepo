@@ -11,8 +11,9 @@ contract MyERC20 is ERC20 {
         this;
     }
     function mint(address recipient) public {
-        _mint(recipient, 1.0 * 10 ^ 18 );
+        _mint(recipient, 1 * 10 ** 18 );
     }
+
 }
 
 //common utilities for forge tests
