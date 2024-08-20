@@ -16,6 +16,7 @@ const appConfigSchema = z.object({
     WALLET_PRIVATE_KEY: z.string(),
     ETH_CHAIN_URL: z.string(),
     VERBOSE: z.string().default("false"),
+    DEV_MODE: z.string().default("false"),
     L1_CHAIN: z.string().default("Ethereum"),
 });
 
@@ -36,6 +37,7 @@ function createConfig() {
         WALLET_PRIVATE_KEY: process.env.WALLET_PRIVATE_KEY,
         ETH_CHAIN_URL: process.env.ETH_CHAIN_URL,
         VERBOSE: process.env.VERBOSE,
+        DEV_MODE: process.env.DEV_MODE,
         L1_CHAIN: process.env.L1_CHAIN!,
     });
 }

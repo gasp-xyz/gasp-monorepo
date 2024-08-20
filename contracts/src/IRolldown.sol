@@ -15,7 +15,11 @@ interface IRolldown is IRolldownPrimitives {
 
     function getUpdateForL2() external view returns (L1Update memory) ;
 
-    function update_l1_from_l2(L2Update calldata inputArray) external;
+    function update_l1_from_l2(bytes32 merkle_root, Range calldata range ) external;
+
+    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) external;
+
+    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) external;
 
     function getPendingRequests(
         uint256 start,
