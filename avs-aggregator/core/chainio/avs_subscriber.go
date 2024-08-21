@@ -10,6 +10,7 @@ import (
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	stakeRegistry "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/StakeRegistry"
 )
 
 type AvsSubscriberer interface {
@@ -82,6 +83,17 @@ func (s *AvsSubscriber) SubscribeToResumeTrackingOpState(resumeLogs chan *taskma
 		s.logger.Error("Failed to subscribe to ResumeTrackingOpState events", "err", err)
 	}
 	s.logger.Infof("Subscribed to ResumeTrackingOpState events")
+	return sub, err
+}
+
+func (s *AvsSubscriber) SubscribeToOperatorStakeUpdate(opts bind.WatchOpts, updateLogs chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate) (event.Subscription, error) {
+	sub, err := s.AvsContractBindings.StakeRegistry.WatchOperatorStakeUpdate(
+		&opts, updateLogs, [][32]byte{},
+	)
+	if err != nil {
+		s.logger.Error("Failed to subscribe to OperatorStakeUpdate events", "err", err)
+	}
+	s.logger.Infof("Subscribed to OperatorStakeUpdate events")
 	return sub, err
 }
 
