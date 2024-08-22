@@ -83,6 +83,18 @@ func (r *AvsReader) LastCompletedOpTaskCreatedBlock(
 	return v, nil
 }
 
+func (r *AvsReader) LastCompletedOpTaskCreatedBlockAtBlock(
+	ctx context.Context, atBlock uint64,
+) (uint32, error) {
+	v, err := r.AvsServiceBindings.TaskManager.LastCompletedOpTaskCreatedBlock(
+		&bind.CallOpts{BlockNumber: big.NewInt(int64(atBlock))},
+	)
+	if err != nil {
+		return uint32(0), err
+	}
+	return v, nil
+}
+
 func (r *AvsReader) GetRdTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error) {
 	events := []taskmanager.ContractFinalizerTaskManagerRdTaskResponded{}
 

@@ -18,7 +18,7 @@ type AvsSubscriberer interface {
 	SubscribeToRdTaskResponses(taskResponseLogs chan *taskmanager.ContractFinalizerTaskManagerRdTaskResponded) event.Subscription
 	ParseRdTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
 	SubscribeToOpTaskCompleted(opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) event.Subscription
-	SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState) event.Subscription 
+	SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState, fromBlock uint32) event.Subscription 
 }
 
 // Subscribers use a ws connection instead of http connection like Readers
@@ -75,9 +75,9 @@ func (s *AvsSubscriber) SubscribeToOpTaskCompleted(fromBlock uint64,opTaskComple
 	return sub, err
 }
 
-func (s *AvsSubscriber) SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState) (event.Subscription, error) {
+func (s *AvsSubscriber) SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState, fromBlock uint64) (event.Subscription, error) {
 	sub, err := s.AvsContractBindings.TaskManager.WatchResumeTrackingOpState(
-		&bind.WatchOpts{}, resumeLogs,
+		&bind.WatchOpts{Start: &fromBlock}, resumeLogs,
 	)
 	if err != nil {
 		s.logger.Error("Failed to subscribe to ResumeTrackingOpState events", "err", err)
