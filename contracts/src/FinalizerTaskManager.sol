@@ -54,6 +54,8 @@ contract FinalizerTaskManager is
 
     uint32 public lastOpTaskCreatedBlock;
     uint32 public lastCompletedOpTaskNum;
+    // If zero then no opTask has yet been completed
+    // And hence no reference opState has been established
     uint32 public lastCompletedOpTaskCreatedBlock;
     // uint32 lastCompletedTaskNum;
     bytes public lastCompletedOpTaskQuorumNumbers;
