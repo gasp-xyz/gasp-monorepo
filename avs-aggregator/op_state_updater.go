@@ -145,26 +145,18 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 					isQuorumTracked := false
 					for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
-						osu.logger.Info("Hello 2 ")
 						if uint8(quorum) == event.QuorumNumber {
-							osu.logger.Info("Hello 3")
 							isQuorumTracked = true
 							break loop
 						}
 					}
 
-					osu.logger.Info("Hello 4")
 					if isQuorumTracked {
-						osu.logger.Info("Hello")
 						break loop
 					}
-					osu.logger.Info("Hello 7")
 				}
-				osu.logger.Info("Hello 8")
 			}
-			osu.logger.Info("qqqq")
 			sub.Unsubscribe()
-			osu.logger.Info("qqqq1123")
 		}
 	} else {
 		osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
@@ -173,6 +165,8 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		osu.getCheckpointedOpState(osu.checkpointedBlock)
 		osu.getCurrentOpState(osu.atBlock)
 	}
+
+	time.Sleep(2 * time.Minute)
 
 	// Prepare the subscription
 	query := ethereum.FilterQuery{
@@ -186,14 +180,10 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		},
 	}
 
-	osu.logger.Info("Hi 1")
-
 	for {
 
-		osu.logger.Info("Hi 2")
 	loop20:
 		for {
-			osu.logger.Info("Hi 3")
 			switch {
 			case osu.paused == true:
 				{
