@@ -249,9 +249,9 @@ contract Deployer is Script, Utils, Test {
         // This hack depends on avsOwner being the same as the deployer...
         blsSignatureChecker.setStaleStakesForbidden(false);
 
-        taskManagerImplementation = new FinalizerTaskManager();
-
         operatorStateRetreiverExtended = new OperatorStateRetrieverExtended();
+        
+        taskManagerImplementation = new FinalizerTaskManager();
 
         // upgrade task manager proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(

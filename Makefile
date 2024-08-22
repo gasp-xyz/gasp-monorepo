@@ -41,6 +41,9 @@ deploy-all-to-anvil-and-save-state: deploy-eigenlayer-contracts-to-anvil-and-sav
 deploy-alt-l1-contracts-and-save-state:
 	./tests/integration/deploy-alt-l1-contracts-and-save-anvil-state.sh
 
+deploy-all-contracts-via-multistage-and-save-state:
+	./tests/integration/deploy-all-contracts-via-multistage-and-save-anvil-state.sh
+
 deploy-all-contracts-and-save-state:
 	./tests/integration/deploy-all-contracts-and-save-anvil-state.sh
 

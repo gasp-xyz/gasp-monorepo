@@ -74,6 +74,7 @@ type Aggregator struct {
 	taskResponsesMu         sync.RWMutex
 	substrateClient         gsrpc.SubstrateAPI
 	taskResponseWindowBlock uint32
+	asyncOpStateUpdaterError error
 
 	kicker  *Kicker
 	updater *StakeUpdate
@@ -178,7 +179,8 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 	agg.logger.Infof("Starting aggregator rpc server.")
 	go agg.startServer(ctx)
 	sendNewOpTaskC := make(chan types.SendNewOpTaskType)
-	go agg.opStateUpdater.startAsyncOpStateUpdater(ctx, sendNewOpTaskC)
+	asyncOpStateUpdaterErrorC := make(chan error)
+	go agg.opStateUpdater.startAsyncOpStateUpdater(ctx, sendNewOpTaskC, asyncOpStateUpdaterErrorC)
 
 	var sub *gsrpcrpcchain.NewHeadsSubscription
 	var err error
@@ -208,12 +210,16 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 
 	for {
 		select {
+		case asyncOpStateUpdaterError := <-asyncOpStateUpdaterErrorC:
+			agg.asyncOpStateUpdaterError = asyncOpStateUpdaterError
+			agg.logger.Error("asyncOpStateUpdater has crashed with the following error", "err", asyncOpStateUpdaterError)
 		case <-ctx.Done():
 			return nil
 		case blsAggServiceResp := <-agg.blsAggregationService.GetResponseChannel():
 			agg.logger.Info("Received response from blsAggregationService", "blsAggServiceResp", blsAggServiceResp)
 			agg.sendAggregatedResponseToContract(blsAggServiceResp)
 		case head := <-sub.Chan():
+			// agg.logger.Info("Received new substrate header", "head.Number", head.Number)
 			err := agg.maybeSendNewRdTask(uint32(head.Number))
 			if err != nil {
 				// we log the errors inside sendNewTask() so here we just continue to the next task
@@ -376,6 +382,11 @@ func (agg *Aggregator) sendNewOpTask() (taskmanager.IFinalizerTaskManagerOpTask,
 // sendNewTask sends a new task to the task manager contract, and updates the Task dict struct
 // with the information of operators opted into quorum 0 at the block of task creation.
 func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
+
+	if agg.asyncOpStateUpdaterError != nil{
+		agg.logger.Error("asyncOpStateUpdater has crashed with the following error - but aggregator is still processing rdTasks", "err", agg.asyncOpStateUpdaterError)
+	}
+
 	isRduTask := blockNumber%agg.blockPeriod == 0
 
 	if !isRduTask {
