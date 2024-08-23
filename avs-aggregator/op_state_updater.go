@@ -181,7 +181,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 	time.Sleep(2 * time.Minute)
 
 	// Prepare the subscription
-	query := ethereum.FilterQuery{
+	baseQuery := ethereum.FilterQuery{
 		Addresses: []common.Address{delegationManagerContractAddress, stakeRegistryContractAddress, taskManagerContractAddress},
 		Topics: [][]common.Hash{
 			[]common.Hash{
@@ -358,22 +358,46 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 		// Subscribe
 		logs := make(chan ethtypes.Log)
-		iquery := query
+		iquery := baseQuery
 		iquery.FromBlock = big.NewInt(int64(osu.atBlock + 1))
-		sub, err := osu.ethRpc.Clients.EthWsClient.SubscribeFilterLogs(context.Background(), query, logs)
+
+
+		var sub ethereum.Subscription
+		var err error
+		const maxRetries = 5
+		const retryDelay = time.Minute
+
+		// Loop to retry subscription on error
+		for attempt := 0; attempt < maxRetries; attempt++ {
+			sub, err = osu.ethRpc.Clients.EthWsClient.SubscribeFilterLogs(context.Background(), iquery, logs)
+			if err == nil {
+				break // Successfully subscribed, exit loop
+			}
+
+			osu.logger.Error("Failed to get new head from substrate, retrying...", "err", err, "attempt", attempt+1)
+			select {
+			case <-ctx.Done():
+				return nil
+			case <-time.After(retryDelay): // Wait before retrying
+				continue
+			}
+		}
 		if err != nil {
-			return fmt.Errorf("failed to subscribe to logs: %v", err)
+			return fmt.Errorf("failed to subscribe to new heads from substrate after %d attempts: %w", maxRetries, err)
 		}
 		defer sub.Unsubscribe()
 
 		// watch the subscription
-	watchTriggersLoop:
+	watchForTriggersLoop:
 		for {
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
 			case err := <-sub.Err():
-				osu.logger.Fatalf("Subscription error: %v", err)
+				// We do this so because the subscription will start from  atBlock+1
+				osu.atBlock = osu.atBlock - 1
+				osu.logger.Error("watchForTriggersLoop subscription error: %v - retrying atBlock %v", err, osu.atBlock)
+				break watchForTriggersLoop
 			case vLog := <-logs:
 				fmt.Printf("Received log: %+v\n", vLog)
 				switch {
@@ -386,12 +410,12 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						if err != nil {
 							osu.logger.Error("Failed to ParseOperatorSharesIncreased - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break watchTriggersLoop
+							break watchForTriggersLoop
 						}
 						osu.processOpDelegationStateChange(ContractDelegationManagerOperatorSharesIncreased.Operator, uint32(vLog.BlockNumber))
 
 						if osu.paused || osu.triggerOpStateUpdate {
-							break watchTriggersLoop
+							break watchForTriggersLoop
 						}
 					}
 				case vLog.Address == delegationManagerContractAddress && vLog.Topics[0] == getEventID(delegationManagerAbi, "OperatorSharesDecreased"):
@@ -403,12 +427,12 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						if err != nil {
 							osu.logger.Error("Failed to ParseOperatorSharesDecreased - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break watchTriggersLoop
+							break watchForTriggersLoop
 						}
 						osu.processOpDelegationStateChange(ContractDelegationManagerOperatorSharesDecreased.Operator, uint32(vLog.BlockNumber))
 
 						if osu.paused || osu.triggerOpStateUpdate {
-							break watchTriggersLoop
+							break watchForTriggersLoop
 						}
 					}
 				case vLog.Address == stakeRegistryContractAddress && vLog.Topics[0] == getEventID(stakeRegistryAbi, "OperatorStakeUpdate"):
@@ -420,12 +444,12 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						if err != nil {
 							osu.logger.Error("Failed to ParseOperatorStakeUpdate - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break watchTriggersLoop
+							break watchForTriggersLoop
 						}
 						osu.processOpStakeRegistryStateChange(ContractStakeRegistryOperatorStakeUpdate.OperatorId, sdktypes.QuorumNum(ContractStakeRegistryOperatorStakeUpdate.QuorumNumber), ContractStakeRegistryOperatorStakeUpdate.Stake, uint32(vLog.BlockNumber))
 
 						if osu.paused || osu.triggerOpStateUpdate {
-							break watchTriggersLoop
+							break watchForTriggersLoop
 						}
 					}
 				case vLog.Address == stakeRegistryContractAddress && vLog.Topics[0] == getEventID(stakeRegistryAbi, "StrategyMultiplierUpdated"):
@@ -437,11 +461,11 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						if err != nil {
 							osu.logger.Error("Failed to ParseStrategyMultiplierUpdated - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break watchTriggersLoop
+							break watchForTriggersLoop
 						}
 						osu.logger.Info("Pausing trackingOpState upon event trigger", "trigger", ContractStakeRegistryStrategyMultiplierUpdated)
 						osu.paused = true
-						break watchTriggersLoop
+						break watchForTriggersLoop
 					}
 				case vLog.Address == stakeRegistryContractAddress && vLog.Topics[0] == getEventID(stakeRegistryAbi, "MinimumStakeForQuorumUpdated"):
 					{
@@ -452,11 +476,11 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						if err != nil {
 							osu.logger.Error("Failed to ParseMinimumStakeForQuorumUpdated - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break watchTriggersLoop
+							break watchForTriggersLoop
 						}
 						osu.logger.Info("Pausing trackingOpState upon event trigger", "trigger", ContractStakeRegistryMinimumStakeForQuorumUpdated)
 						osu.paused = true
-						break watchTriggersLoop
+						break watchForTriggersLoop
 					}
 				case vLog.Address == taskManagerContractAddress && vLog.Topics[0] == getEventID(taskmanagerAbi, "PauseTrackingOpState"):
 					{
@@ -467,11 +491,11 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						if err != nil {
 							osu.logger.Error("Failed to ParsePauseTrackingOpState - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break watchTriggersLoop
+							break watchForTriggersLoop
 						}
 						osu.logger.Info("Pausing trackingOpState upon event trigger", "trigger", ContractFinalizerTaskManagerPauseTrackingOpState)
 						osu.paused = true
-						break watchTriggersLoop
+						break watchForTriggersLoop
 					}
 				case vLog.Address == taskManagerContractAddress && vLog.Topics[0] == getEventID(taskmanagerAbi, "OpTaskCompleted"):
 					{
@@ -482,7 +506,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						if err != nil {
 							osu.logger.Error("Failed to OpTaskCompleted - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break watchTriggersLoop
+							break watchForTriggersLoop
 						}
 
 						osu.logger.Info("Received OpTaskCompleted", "event", ContractFinalizerTaskManagerOpTaskCompleted)
@@ -495,7 +519,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
 
 						osu.updateOpStates()
-						break watchTriggersLoop
+						break watchForTriggersLoop
 					}
 				}
 			}
