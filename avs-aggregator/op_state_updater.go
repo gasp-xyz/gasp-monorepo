@@ -42,8 +42,8 @@ type OpStateUpdater struct {
 	triggerOpStateUpdate          bool
 	resetTrackedQuorums           bool
 	paused                        bool
-	pauseReasonV				  string
-	lastOpStateUpdateTime		  time.Time
+	pauseReasonV                  string
+	lastOpStateUpdateTime         time.Time
 	errorC                        chan error
 	ethRpc                        *chainio.EthRpc
 	avsRegistryService            *avsregistry.AvsRegistryServiceChainCaller
@@ -68,8 +68,8 @@ func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, avsRegistr
 		triggerOpStateUpdate:          false,
 		resetTrackedQuorums:           false,
 		paused:                        false,
-		pauseReasonV:				   "",
-		lastOpStateUpdateTime:		   time.Time{},
+		pauseReasonV:                  "",
+		lastOpStateUpdateTime:         time.Time{},
 	}, nil
 }
 
@@ -134,7 +134,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 		if len(Ids) == 0 {
 			eventC := make(chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate)
-			fromBlock:= currentBlock+1
+			fromBlock := currentBlock + 1
 			sub, err := osu.ethRpc.AvsSubscriber.SubscribeToOperatorStakeUpdate(bind.WatchOpts{Start: &fromBlock}, eventC)
 			if err != nil {
 				return fmt.Errorf("failed to subscribe to logs: %v", err)
@@ -168,7 +168,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		}
 	} else {
 		// If atleast 1 opTask was completed we have an opState
-		// So we get the lastCompletedOpTaskCreatedBlock and start reading 
+		// So we get the lastCompletedOpTaskCreatedBlock and start reading
 		// events from that point on...
 		osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
 		osu.atBlock = lastCompletedOpTaskCreatedBlock
@@ -177,7 +177,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 	}
 
 	// We need this here to let the finalizer subscribe
-	// or the first opTask goes unanswered and the agg stalls 
+	// or the first opTask goes unanswered and the agg stalls
 	time.Sleep(2 * time.Minute)
 
 	// Prepare the subscription
@@ -210,7 +210,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				watchForResumeLoop:
 					for {
 						select {
-						case <-ticker.C :
+						case <-ticker.C:
 							osu.logger.Info("The OpStateUpdater is paused due to: %v", osu.pauseReasonV)
 						case <-ctx.Done():
 							return ctx.Err()
@@ -245,7 +245,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					// Timer here to check if the last triggerOpStateUpdate was not too recent
 					// We don't want sm1 changing stakes in the early stages of the project
 					// to cost us a lot of eth
-					if time.Since(osu.lastOpStateUpdateTime)<time.Hour{
+					if time.Since(osu.lastOpStateUpdateTime) < time.Hour {
 						osu.paused = true
 						continue
 					}
@@ -366,7 +366,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		}
 		defer sub.Unsubscribe()
 
-	// watch the subscription
+		// watch the subscription
 	watchTriggersLoop:
 		for {
 			select {
@@ -534,14 +534,14 @@ func (osu *OpStateUpdater) updateOperatorIdsToBeUpdated() error {
 
 func (osu *OpStateUpdater) updateOpStates() error {
 
-	// We get the relevant avs and eigen state at the 
+	// We get the relevant avs and eigen state at the
 	// checkpointed block and if we require an opStateUpdate
 	// we pause because if since the time that avs stake was updated
 	// to the time the opTask was completed the stake has changed enough
 	// to trip the thresholds - that's extraordinary
-	// and we should not auto create tasks here to prevent 
+	// and we should not auto create tasks here to prevent
 	// some guy from changing his stake a lot in the early days of the mainnet
-	// to cost us a lot of eth 
+	// to cost us a lot of eth
 	osu.getCheckpointedOpState(osu.checkpointedBlock)
 	osu.getCurrentOpState(osu.atBlock)
 	osu.checkQuorumThresholds()
