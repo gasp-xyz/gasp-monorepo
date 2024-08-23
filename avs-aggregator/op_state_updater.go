@@ -42,6 +42,8 @@ type OpStateUpdater struct {
 	triggerOpStateUpdate          bool
 	resetTrackedQuorums           bool
 	paused                        bool
+	pauseReasonV				  string
+	lastOpStateUpdateTime		  time.Time
 	errorC                        chan error
 	ethRpc                        *chainio.EthRpc
 	avsRegistryService            *avsregistry.AvsRegistryServiceChainCaller
@@ -66,6 +68,8 @@ func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, avsRegistr
 		triggerOpStateUpdate:          false,
 		resetTrackedQuorums:           false,
 		paused:                        false,
+		pauseReasonV:				   "",
+		lastOpStateUpdateTime:		   time.Time{},
 	}, nil
 }
 
@@ -83,6 +87,9 @@ func getEventID(abi *abi.ABI, eventName string) common.Hash {
 func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNewOpTaskC chan types.SendNewOpTaskType, errorC chan error) error {
 	osu.logger.Infof("Starting aggregator startAsyncOpStateUpdater")
 
+	// This is the errorC which we will send to incase we
+	// encounter an error we can't proceed past
+	// This error will be stored on the aggregator
 	osu.errorC = errorC
 
 	delegationManagerContractAddress := osu.ethRpc.AvsReader.AvsServiceBindings.DelegationManagerAddress
@@ -100,9 +107,13 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 	}
 
 	if lastCompletedOpTaskCreatedBlock == 0 {
+		// Since we don't have an opTask yet
+		// We want to reset/refresh all tracked quorums and then create an opTask
+		// We do this as soon as we enter the main loop and then into the control loop
 		osu.triggerOpStateUpdate = true
 		osu.resetTrackedQuorums = true
 
+		// Wait here till atleast 1 operator has registered
 		// So that on local testnet the finalizer can register
 		currentBlock, err := osu.ethRpc.Clients.EthHttpClient.BlockNumber(context.Background())
 		if err != nil {
@@ -130,7 +141,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 			}
 			defer sub.Unsubscribe()
 
-		loop:
+		waitForRegisterLoop:
 			for {
 				select {
 				case <-ctx.Done():
@@ -144,25 +155,29 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
 						if uint8(quorum) == event.QuorumNumber {
 							isQuorumTracked = true
-							break loop
+							break waitForRegisterLoop
 						}
 					}
 
 					if isQuorumTracked {
-						break loop
+						break waitForRegisterLoop
 					}
 				}
 			}
 			sub.Unsubscribe()
 		}
 	} else {
+		// If atleast 1 opTask was completed we have an opState
+		// So we get the lastCompletedOpTaskCreatedBlock and start reading 
+		// events from that point on...
 		osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
 		osu.atBlock = lastCompletedOpTaskCreatedBlock
 
-		osu.getCheckpointedOpState(osu.checkpointedBlock)
-		osu.getCurrentOpState(osu.atBlock)
+		osu.updateOpStates()
 	}
 
+	// We need this here to let the finalizer subscribe
+	// or the first opTask goes unanswered and the agg stalls 
 	time.Sleep(2 * time.Minute)
 
 	// Prepare the subscription
@@ -179,7 +194,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 	for {
 
-	loop20:
+	controlLoop:
 		for {
 			switch {
 			case osu.paused == true:
@@ -190,10 +205,13 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						return fmt.Errorf("failed to subscribe to logs: %v", err)
 					}
 					defer sub.Unsubscribe()
-
-				loop30:
+					ticker := time.NewTicker(time.Minute)
+					defer ticker.Stop()
+				watchForResumeLoop:
 					for {
 						select {
+						case <-ticker.C :
+							osu.logger.Info("The OpStateUpdater is paused due to: %v", osu.pauseReasonV)
 						case <-ctx.Done():
 							return ctx.Err()
 						case err := <-sub.Err():
@@ -212,32 +230,38 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 								}
 								osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
 								osu.atBlock = uint32(event.Raw.BlockNumber)
-								osu.getCheckpointedOpState(osu.checkpointedBlock)
-								osu.getCurrentOpState(osu.atBlock)
 
-								osu.quorumDiff = make(map[sdktypes.QuorumNum]types.QuorumStakeDiff)
-								osu.quorumsToBeUpdated = make(map[sdktypes.QuorumNum]bool)
+								osu.updateOpStates()
+
 							}
 							osu.paused = false
-							break loop30
+							break watchForResumeLoop
 						}
 					}
 					sub.Unsubscribe()
 				}
 			case osu.triggerOpStateUpdate:
 				{
-					// TODO: Add timer here to check if the last triggerOpStateUpdate was not too recent 
+					// Timer here to check if the last triggerOpStateUpdate was not too recent
+					// We don't want sm1 changing stakes in the early stages of the project
+					// to cost us a lot of eth
+					if time.Since(osu.lastOpStateUpdateTime)<time.Hour{
+						osu.paused = true
+						continue
+					}
 
 					osu.logger.Info("Triggering OpState update")
 
+					// Only two ways of triggerOpStateUpdate
+					// Either via resetTrackedQuorums or via checkQuorumThresholds
+					// The former doesn't require quorumDiff and quorumsToBeUpdated
+					// The later will always have it
 					if osu.resetTrackedQuorums {
 						osu.logger.Info("Resetting (updating) all tracked quorum's OpState")
 						err := osu.UpdateStakeFull()
 						if err != nil {
 							osu.logger.Error("Failed to UpdateStakeFull")
 							osu.paused = true
-							osu.resetTrackedQuorums = false
-							osu.triggerOpStateUpdate = false
 							continue
 						}
 						osu.resetTrackedQuorums = false
@@ -246,14 +270,12 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						if err != nil {
 							osu.logger.Error("Failed to UpdateStake")
 							osu.paused = true
-							osu.resetTrackedQuorums = false
-							osu.triggerOpStateUpdate = false
 							continue
 						}
 					}
 
-					osu.quorumDiff = make(map[sdktypes.QuorumNum]types.QuorumStakeDiff)
 					osu.operatorIdsToBeUpdated = make(map[sdktypes.OperatorId]bool)
+					osu.quorumDiff = make(map[sdktypes.QuorumNum]types.QuorumStakeDiff)
 					osu.quorumsToBeUpdated = make(map[sdktypes.QuorumNum]bool)
 
 					sendNewOpTaskReturnC := make(chan types.SendNewOpTaskReturn)
@@ -286,7 +308,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						timer := time.NewTimer(time.Hour)
 						defer timer.Stop()
 
-					loop31:
+					watchForOpTaskCompletedLoop:
 						for {
 							select {
 							case <-ctx.Done():
@@ -295,7 +317,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 								osu.logger.Fatalf("Subscription error: %v", err)
 							case <-timer.C:
 								osu.paused = true
-								break loop31
+								break watchForOpTaskCompletedLoop
 							case event := <-eventC:
 								{
 									osu.logger.Info("Received OpTaskCompleted event: %v", eventC)
@@ -303,7 +325,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 									if sendNewOpTaskReturn.OpTask.TaskCreatedBlock < event.TaskIndex {
 										osu.logger.Error("Failed to get the OpTaskCompleted event", "TaskIndex", sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
 										osu.paused = true
-										break loop31
+										break watchForOpTaskCompletedLoop
 									}
 
 									// This branch is to account for the case where
@@ -318,27 +340,19 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 									osu.checkpointedBlock = sendNewOpTaskReturn.OpTask.TaskCreatedBlock
 									osu.atBlock = sendNewOpTaskReturn.OpTask.TaskCreatedBlock
 
-									osu.getCheckpointedOpState(osu.checkpointedBlock)
-									osu.getCurrentOpState(osu.atBlock)
-
-									break loop31
+									break watchForOpTaskCompletedLoop
 								}
 							}
 						}
 						sub.Unsubscribe()
 						osu.triggerOpStateUpdate = false
-						osu.checkQuorumThresholds()
-						if osu.triggerOpStateUpdate {
-							osu.paused = true
-						}
-						if osu.isAnyQuorumInCheckpointedAvsStateEmpty() {
-							osu.paused = true
-						}
+
+						osu.updateOpStates()
 					}
 
 				}
 			default:
-				break loop20
+				break controlLoop
 			}
 		}
 
@@ -353,7 +367,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		defer sub.Unsubscribe()
 
 	// watch the subscription
-	loop21:
+	watchTriggersLoop:
 		for {
 			select {
 			case <-ctx.Done():
@@ -366,105 +380,109 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				case vLog.Address == delegationManagerContractAddress && vLog.Topics[0] == getEventID(delegationManagerAbi, "OperatorSharesIncreased"):
 					{
 						fmt.Printf("Event %s from contract %s\n", "OperatorSharesIncreased", vLog.Address.Hex())
+						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractDelegationManagerOperatorSharesIncreased, err := osu.ethRpc.AvsReader.AvsServiceBindings.DelegationManager.ContractDelegationManagerFilterer.ParseOperatorSharesIncreased(vLog)
 						if err != nil {
 							osu.logger.Error("Failed to ParseOperatorSharesIncreased - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break loop21
+							break watchTriggersLoop
 						}
 						osu.processOpDelegationStateChange(ContractDelegationManagerOperatorSharesIncreased.Operator, uint32(vLog.BlockNumber))
 
 						if osu.paused || osu.triggerOpStateUpdate {
-							break loop21
+							break watchTriggersLoop
 						}
 					}
 				case vLog.Address == delegationManagerContractAddress && vLog.Topics[0] == getEventID(delegationManagerAbi, "OperatorSharesDecreased"):
 					{
 						fmt.Printf("Event %s from contract %s\n", "OperatorSharesDecreased", vLog.Address.Hex())
+						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractDelegationManagerOperatorSharesDecreased, err := osu.ethRpc.AvsReader.AvsServiceBindings.DelegationManager.ContractDelegationManagerFilterer.ParseOperatorSharesDecreased(vLog)
 						if err != nil {
 							osu.logger.Error("Failed to ParseOperatorSharesDecreased - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break loop21
+							break watchTriggersLoop
 						}
 						osu.processOpDelegationStateChange(ContractDelegationManagerOperatorSharesDecreased.Operator, uint32(vLog.BlockNumber))
 
 						if osu.paused || osu.triggerOpStateUpdate {
-							break loop21
+							break watchTriggersLoop
 						}
 					}
 				case vLog.Address == stakeRegistryContractAddress && vLog.Topics[0] == getEventID(stakeRegistryAbi, "OperatorStakeUpdate"):
 					{
 						fmt.Printf("Event %s from contract %s\n", "OperatorStakeUpdate", vLog.Address.Hex())
+						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractStakeRegistryOperatorStakeUpdate, err := osu.ethRpc.AvsReader.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseOperatorStakeUpdate(vLog)
 						if err != nil {
 							osu.logger.Error("Failed to ParseOperatorStakeUpdate - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break loop21
+							break watchTriggersLoop
 						}
 						osu.processOpStakeRegistryStateChange(ContractStakeRegistryOperatorStakeUpdate.OperatorId, sdktypes.QuorumNum(ContractStakeRegistryOperatorStakeUpdate.QuorumNumber), ContractStakeRegistryOperatorStakeUpdate.Stake, uint32(vLog.BlockNumber))
 
 						if osu.paused || osu.triggerOpStateUpdate {
-							break loop21
+							break watchTriggersLoop
 						}
 					}
 				case vLog.Address == stakeRegistryContractAddress && vLog.Topics[0] == getEventID(stakeRegistryAbi, "StrategyMultiplierUpdated"):
 					{
 						fmt.Printf("Event %s from contract %s\n", "StrategyMultiplierUpdated", vLog.Address.Hex())
+						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractStakeRegistryStrategyMultiplierUpdated, err := osu.ethRpc.AvsReader.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseStrategyMultiplierUpdated(vLog)
 						if err != nil {
 							osu.logger.Error("Failed to ParseStrategyMultiplierUpdated - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break loop21
+							break watchTriggersLoop
 						}
 						osu.logger.Info("Pausing trackingOpState upon event trigger", "trigger", ContractStakeRegistryStrategyMultiplierUpdated)
 						osu.paused = true
-						osu.atBlock = uint32(vLog.BlockNumber)
-						break loop21
+						break watchTriggersLoop
 					}
 				case vLog.Address == stakeRegistryContractAddress && vLog.Topics[0] == getEventID(stakeRegistryAbi, "MinimumStakeForQuorumUpdated"):
 					{
 						fmt.Printf("Event %s from contract %s\n", "MinimumStakeForQuorumUpdated", vLog.Address.Hex())
+						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractStakeRegistryMinimumStakeForQuorumUpdated, err := osu.ethRpc.AvsReader.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseMinimumStakeForQuorumUpdated(vLog)
 						if err != nil {
 							osu.logger.Error("Failed to ParseMinimumStakeForQuorumUpdated - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break loop21
+							break watchTriggersLoop
 						}
 						osu.logger.Info("Pausing trackingOpState upon event trigger", "trigger", ContractStakeRegistryMinimumStakeForQuorumUpdated)
 						osu.paused = true
-						osu.atBlock = uint32(vLog.BlockNumber)
-						break loop21
+						break watchTriggersLoop
 					}
 				case vLog.Address == taskManagerContractAddress && vLog.Topics[0] == getEventID(taskmanagerAbi, "PauseTrackingOpState"):
 					{
 						fmt.Printf("Event %s from contract %s\n", "PauseTrackingOpState", vLog.Address.Hex())
+						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractFinalizerTaskManagerPauseTrackingOpState, err := osu.ethRpc.AvsReader.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParsePauseTrackingOpState(vLog)
 						if err != nil {
 							osu.logger.Error("Failed to ParsePauseTrackingOpState - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break loop21
+							break watchTriggersLoop
 						}
 						osu.logger.Info("Pausing trackingOpState upon event trigger", "trigger", ContractFinalizerTaskManagerPauseTrackingOpState)
 						osu.paused = true
-						osu.atBlock = uint32(vLog.BlockNumber)
-						break loop21
+						break watchTriggersLoop
 					}
 				case vLog.Address == taskManagerContractAddress && vLog.Topics[0] == getEventID(taskmanagerAbi, "OpTaskCompleted"):
 					{
 						fmt.Printf("Event %s from contract %s\n", "OpTaskCompleted", vLog.Address.Hex())
+						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractFinalizerTaskManagerOpTaskCompleted, err := osu.ethRpc.AvsReader.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseOpTaskCompleted(vLog)
 						if err != nil {
 							osu.logger.Error("Failed to OpTaskCompleted - Pausing trackingOpState", "err", err)
 							osu.paused = true
-							break loop21
+							break watchTriggersLoop
 						}
 
 						osu.logger.Info("Received OpTaskCompleted", "event", ContractFinalizerTaskManagerOpTaskCompleted)
@@ -476,10 +494,8 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						}
 						osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
 
-						osu.atBlock = uint32(vLog.BlockNumber)
-						osu.getCheckpointedOpState(osu.checkpointedBlock)
-						osu.getCurrentOpState(osu.atBlock)
-						break loop21
+						osu.updateOpStates()
+						break watchTriggersLoop
 					}
 				}
 			}
@@ -487,6 +503,60 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		sub.Unsubscribe()
 	}
 
+}
+
+func (osu *OpStateUpdater) updateOperatorIdsToBeUpdated() error {
+
+	osu.operatorIdsToBeUpdated = make(map[sdktypes.OperatorId]bool)
+
+	for operatorId, _ := range osu.checkpointedAvsOpState {
+		for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
+			updatedStake := osu.currentOpState[operatorId].StakePerQuorum[quorum]
+			prevStake := osu.checkpointedAvsOpState[operatorId].StakePerQuorum[quorum]
+			if prevStake.Cmp(updatedStake) != 0 {
+				osu.operatorIdsToBeUpdated[operatorId] = true
+			}
+		}
+	}
+
+	for operatorId, _ := range osu.currentOpState {
+		for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
+			updatedStake := osu.currentOpState[operatorId].StakePerQuorum[quorum]
+			prevStake := osu.checkpointedAvsOpState[operatorId].StakePerQuorum[quorum]
+			if prevStake.Cmp(updatedStake) != 0 {
+				osu.operatorIdsToBeUpdated[operatorId] = true
+			}
+		}
+	}
+
+	return nil
+}
+
+func (osu *OpStateUpdater) updateOpStates() error {
+
+	// We get the relevant avs and eigen state at the 
+	// checkpointed block and if we require an opStateUpdate
+	// we pause because if since the time that avs stake was updated
+	// to the time the opTask was completed the stake has changed enough
+	// to trip the thresholds - that's extraordinary
+	// and we should not auto create tasks here to prevent 
+	// some guy from changing his stake a lot in the early days of the mainnet
+	// to cost us a lot of eth 
+	osu.getCheckpointedOpState(osu.checkpointedBlock)
+	osu.getCurrentOpState(osu.atBlock)
+	osu.checkQuorumThresholds()
+	if osu.triggerOpStateUpdate {
+		osu.paused = true
+	}
+	if osu.isAnyQuorumInCheckpointedAvsStateEmpty() {
+		osu.paused = true
+	}
+
+	// We update operatorIdsToBeUpdated here because
+	// of possible eigen state changes since the last avs state update
+	// till the the checkpoint
+	osu.updateOperatorIdsToBeUpdated()
+	return nil
 }
 
 func (osu *OpStateUpdater) getCheckpointedOpState(atBlock sdktypes.BlockNum) error {
@@ -562,7 +632,6 @@ func (osu *OpStateUpdater) processOpStakeRegistryStateChange(operatorId sdktypes
 		// maybe unnecessary here
 		osu.operatorIdsToBeUpdated[operatorId] = true
 		osu.checkQuorumThresholds()
-		osu.atBlock = blockNumber
 	}
 	return nil
 }
@@ -585,7 +654,6 @@ func (osu *OpStateUpdater) processOpDelegationStateChange(operator common.Addres
 
 		osu.operatorIdsToBeUpdated[operatorId] = true
 		osu.checkQuorumThresholds()
-		osu.atBlock = blockNumber
 	}
 
 	return nil
@@ -608,8 +676,6 @@ func (osu *OpStateUpdater) applyOpStateUpdate(opStateUpdate map[sdktypes.Operato
 }
 
 func (osu *OpStateUpdater) checkQuorumThresholds() error {
-	// TODO
-	// Maybe just pass in the quorumDiff rather than update state...
 	osu.makeQuorumsStakeDiff()
 	osu.checkQuorumsStakeDiff()
 	return nil
