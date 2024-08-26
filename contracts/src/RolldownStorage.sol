@@ -16,10 +16,12 @@ abstract contract RolldownStorage is IRolldown {
     // Chain identificator
     address public updaterAccount;
 
-    mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
+    // NOTE: PR DESC
+    // mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
     mapping(uint256 => CancelResolution) public cancelResolutions;
     mapping(uint256 => Deposit) internal deposits;
-    mapping(uint256 => L2UpdatesToRemove) internal l2UpdatesToRemove;
+    // NOTE: PR DESC
+    // mapping(uint256 => L2UpdatesToRemove) internal l2UpdatesToRemove;
     mapping(address => uint) public pendingEthWithdrawals;   
 
     // TODO: check how to align __gap array size

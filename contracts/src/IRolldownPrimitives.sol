@@ -32,8 +32,9 @@ interface IRolldownPrimitives {
         uint256 amount
     );
     event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
-    event EthWithdrawPending(address sender, uint amount);
-    event PendingEthWithdrawn(address sender, uint amount);
+    // NOTE: PR DESC
+    // event EthWithdrawPending(address sender, uint amount);
+    // event PendingEthWithdrawn(address sender, uint amount);
     event NewUpdaterSet(address updater);
 
     enum Origin {
@@ -59,10 +60,24 @@ interface IRolldownPrimitives {
         uint256 timeStamp;
     }
 
+    // NOTE: PR DESC
+    // struct L2UpdatesToRemove {
+    //     RequestId requestId;
+    //     uint256[] l2UpdatesToRemove;
+    //     uint256 timeStamp;
+    // }
+
     struct CancelResolution {
         RequestId requestId;
         uint256 l2RequestId;
         bool cancelJustified;
+        uint256 timeStamp;
+    }
+
+    struct WithdrawalResolution {
+        RequestId requestId;
+        uint256 l2RequestId;
+        bool status;
         uint256 timeStamp;
     }
 
@@ -72,11 +87,34 @@ interface IRolldownPrimitives {
         ChainId chain;
         Deposit[] pendingDeposits;
         CancelResolution[] pendingCancelResolutions;
+        // NOTE: PR DESC
+        // WithdrawalResolution[] pendingWithdrawalResolutions;
+        // L2UpdatesToRemove[] pendingL2UpdatesToRemove;
+    } 
+
+    // NOTE: PR DESC
+    ////TODO: should be renamed to RequestType
+    //enum UpdateType {
+    //    DEPOSIT,
+    //    WITHDRAWAL,
+    //    WITHDRAWAL_RESOLUTION,
+    //    INDEX_UPDATE,
+    //    CANCEL,
+    //    CANCEL_RESOLUTION
+    //}
+
+    struct RequestResult {
+        RequestId requestId;
+        uint256 originRequestId;
+        // NOTE: PR DESC
+        // UpdateType updateType;
+        bool status;
     }
 
-    struct FailedDepositResolution {
-      RequestId requestId;
-      uint256 originRequestId;
+    struct L2Update {
+        Cancel[] cancels;
+        Withdrawal[] withdrawals;
+        RequestResult[] results;
     }
 
     struct Cancel {
