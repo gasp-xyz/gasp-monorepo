@@ -3,7 +3,8 @@
 pragma solidity =0.8.12;
 
 import { FinalizerServiceManager } from "../../src/FinalizerServiceManager.sol";
-
+import { TestUtils } from "./TestUtils.sol";
+import "forge-std/StdJson.sol";
 import "forge-std/Test.sol";
 
 contract IntegrationEjectorAdminRuleTest is Test {
@@ -12,18 +13,19 @@ contract IntegrationEjectorAdminRuleTest is Test {
 
    function testEjectorCanBeResetByOwner() public {
 
-        FinalizerServiceManager fsm ;
-        fsm = FinalizerServiceManager(address(0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9));
-        address ejectorAddr = fsm.ejector();
-        emit log_address(ejectorAddr);
-        address tu = address(deployer);
-        deal(tu, 100 ether);
-        vm.startBroadcast(tu);
-        fsm.setEjector(tu);
-        vm.stopBroadcast();
-        address ejectorAddr2 = fsm.ejector();
-        emit log_address(ejectorAddr2);
+         address tu = address(deployer);
 
+         FinalizerServiceManager fsm  = FinalizerServiceManager(stdJson.readAddress(new TestUtils().getRollDownConfigFileEth(), ".addresses.serviceManager"));
+         address ejectorAddr = fsm.ejector();
+         emit log_address(ejectorAddr);
+
+         vm.startBroadcast(tu);
+         fsm.setEjector(tu);
+         vm.stopBroadcast();
+         
+         address ejectorAddr2 = fsm.ejector();
+         emit log_address(ejectorAddr2);
+         assert(ejectorAddr != ejectorAddr2);
 
    }
 }
