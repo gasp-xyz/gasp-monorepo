@@ -104,7 +104,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 	lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlock(context.Background())
 	if err != nil {
-		osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v", err) 
+		osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v", err)
 		return
 	}
 
@@ -122,14 +122,14 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		// So that on local testnet the finalizer can register
 		currentBlock, err := osu.ethRpc.Clients.EthHttpClient.BlockNumber(context.Background())
 		if err != nil {
-			osu.errorC <- fmt.Errorf("OpStateUpdater failed to get BlockNumber: err: %v", err) 
+			osu.errorC <- fmt.Errorf("OpStateUpdater failed to get BlockNumber: err: %v", err)
 			return
 		}
 		Ids := make(map[sdktypes.OperatorId]bool)
 		for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
 			operatorIds, err := osu.ethRpc.Clients.AvsRegistryChainReader.GetOperatorIdList(&bind.CallOpts{}, quorum, uint32(currentBlock))
 			if err != nil {
-				osu.errorC <- fmt.Errorf("OpStateUpdater failed to GetOperatorIdList: err: %v", err) 
+				osu.errorC <- fmt.Errorf("OpStateUpdater failed to GetOperatorIdList: err: %v", err)
 				return
 			}
 			for _, opId := range operatorIds {
@@ -144,7 +144,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 			fromBlock := currentBlock + 1
 			sub, err := osu.ethRpc.AvsSubscriber.SubscribeToOperatorStakeUpdate(bind.WatchOpts{Start: &fromBlock}, eventC)
 			if err != nil {
-				osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToOperatorStakeUpdate: err: %v, start: %v", err, fromBlock) 
+				osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToOperatorStakeUpdate: err: %v, start: %v", err, fromBlock)
 				return
 			}
 			defer sub.Unsubscribe()
@@ -156,7 +156,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					osu.errorC <- ctx.Err()
 					return
 				case err := <-sub.Err():
-					osu.errorC <- fmt.Errorf("OpStateUpdater encountered subscription error in waitForRegisterLoop: err: %v", err) 
+					osu.errorC <- fmt.Errorf("OpStateUpdater encountered subscription error in waitForRegisterLoop: err: %v", err)
 					return
 				case event := <-eventC:
 					osu.logger.Info("Received operatorStakeUpdate event: %v", eventC)
@@ -187,7 +187,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 		osu.updateOpStates()
 		if err != nil {
-			osu.errorC <- fmt.Errorf("OpStateUpdater failed to updateOpStates: err: %v, checkpointedBlock: %v, atBlock: %v", err, osu.checkpointedBlock, osu.atBlock) 
+			osu.errorC <- fmt.Errorf("OpStateUpdater failed to updateOpStates: err: %v, checkpointedBlock: %v, atBlock: %v", err, osu.checkpointedBlock, osu.atBlock)
 			return
 		}
 	}
@@ -248,7 +248,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 								osu.logger.Debug("Getting states at the checkpoint and at the resume event block", "lastCompletedOpTaskCreatedBlock", lastCompletedOpTaskCreatedBlock, "atBlock", uint32(event.Raw.BlockNumber))
 								lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), uint64(event.Raw.BlockNumber))
 								if err != nil {
-									osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", event.Raw.BlockNumber) 
+									osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", event.Raw.BlockNumber)
 									return
 								}
 								osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
@@ -256,7 +256,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 								osu.updateOpStates()
 								if err != nil {
-									osu.errorC <- fmt.Errorf("OpStateUpdater failed to updateOpStates: err: %v, checkpointedBlock: %v, atBlock: %v", err, osu.checkpointedBlock, osu.atBlock) 
+									osu.errorC <- fmt.Errorf("OpStateUpdater failed to updateOpStates: err: %v, checkpointedBlock: %v, atBlock: %v", err, osu.checkpointedBlock, osu.atBlock)
 									return
 								}
 
@@ -304,7 +304,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						osu.logger.Info("OpStateUpdater UpdateStake")
 						err := osu.UpdateStake()
 						if err != nil {
-							osu.errorC <- fmt.Errorf("OpStateUpdater failed to UpdateStake: err: %v, atBlock: %v", err, osu.atBlock) 
+							osu.errorC <- fmt.Errorf("OpStateUpdater failed to UpdateStake: err: %v, atBlock: %v", err, osu.atBlock)
 							return
 						}
 					}
@@ -392,7 +392,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 						osu.updateOpStates()
 						if err != nil {
-							osu.errorC <- fmt.Errorf("OpStateUpdater failed to updateOpStates: err: %v, checkpointedBlock: %v, atBlock: %v", err, osu.checkpointedBlock, osu.atBlock) 
+							osu.errorC <- fmt.Errorf("OpStateUpdater failed to updateOpStates: err: %v, checkpointedBlock: %v, atBlock: %v", err, osu.checkpointedBlock, osu.atBlock)
 							return
 						}
 					}
@@ -403,13 +403,12 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 			}
 		}
 
-		osu.logger.Info("OpStateUpdater Listening to trigger events", "osu.atBlock + 1", osu.atBlock + 1)
+		osu.logger.Info("OpStateUpdater Listening to trigger events", "osu.atBlock + 1", osu.atBlock+1)
 
 		// Subscribe
 		logs := make(chan ethtypes.Log)
 		iquery := baseQuery
 		iquery.FromBlock = big.NewInt(int64(osu.atBlock + 1))
-
 
 		var sub ethereum.Subscription
 		var err error
@@ -437,7 +436,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 			return
 		}
 		defer sub.Unsubscribe()
-		osu.logger.Info("OpStateUpdater Subscribed to trigger events", "osu.atBlock + 1", osu.atBlock + 1)
+		osu.logger.Info("OpStateUpdater Subscribed to trigger events", "osu.atBlock + 1", osu.atBlock+1)
 
 		// watch the subscription
 	watchForTriggersLoop:
@@ -574,14 +573,14 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 						lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), vLog.BlockNumber)
 						if err != nil {
-							osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", vLog.BlockNumber) 
+							osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", vLog.BlockNumber)
 							return
 						}
 						osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
 
 						osu.updateOpStates()
 						if err != nil {
-							osu.errorC <- fmt.Errorf("OpStateUpdater failed to updateOpStates: err: %v, checkpointedBlock: %v, atBlock: %v", err, osu.checkpointedBlock, osu.atBlock) 
+							osu.errorC <- fmt.Errorf("OpStateUpdater failed to updateOpStates: err: %v, checkpointedBlock: %v, atBlock: %v", err, osu.checkpointedBlock, osu.atBlock)
 							return
 						}
 						break watchForTriggersLoop
@@ -631,11 +630,11 @@ func (osu *OpStateUpdater) updateOpStates() error {
 	// to cost us a lot of eth
 	var err error
 	err = osu.getCheckpointedOpState(osu.checkpointedBlock)
-	if err!=nil{
+	if err != nil {
 		return err
 	}
 	err = osu.getCurrentOpState(osu.atBlock)
-	if err!=nil{
+	if err != nil {
 		return err
 	}
 	osu.checkQuorumThresholds()
@@ -658,7 +657,7 @@ func (osu *OpStateUpdater) updateOpStates() error {
 func (osu *OpStateUpdater) getCheckpointedOpState(atBlock sdktypes.BlockNum) error {
 	checkpointedAvsOpState, err := osu.ethRpc.AvsReader.GetOperatorsAvsStateAtBlock(context.Background(), osu.ethRpc.AvsReader.AvsServiceBindings.RegistryCoordinatorAddress, types.TRACKED_QUORUM_NUMBERS, atBlock)
 	if err != nil {
-		ierr := fmt.Errorf("OpStateUpdater failed to getCheckpointedOpState: err: %v, atBlock: %v", err, atBlock) 
+		ierr := fmt.Errorf("OpStateUpdater failed to getCheckpointedOpState: err: %v, atBlock: %v", err, atBlock)
 		osu.logger.Error(ierr.Error())
 		return ierr
 	}
@@ -685,7 +684,7 @@ func (osu *OpStateUpdater) getCurrentOpState(atBlock sdktypes.BlockNum) error {
 	for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
 		operatorIds, err := osu.ethRpc.Clients.AvsRegistryChainReader.GetOperatorIdList(&bind.CallOpts{}, quorum, uint32(atBlock))
 		if err != nil {
-			ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorIdList: err: %v, atBlock: %v", err, atBlock) 
+			ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorIdList: err: %v, atBlock: %v", err, atBlock)
 			osu.logger.Error(ierr.Error())
 			return ierr
 		}
@@ -701,14 +700,14 @@ func (osu *OpStateUpdater) getCurrentOpState(atBlock sdktypes.BlockNum) error {
 
 	operatorAddresses, err := osu.ethRpc.AvsReader.GetOperatorsFromIds(&bind.CallOpts{Context: context.Background(), BlockNumber: big.NewInt(int64(atBlock))}, osu.ethRpc.AvsReader.AvsServiceBindings.RegistryCoordinatorAddress, keys)
 	if err != nil {
-		ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorsFromIds: err: %v, atBlock: %v", err, atBlock) 
+		ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorsFromIds: err: %v, atBlock: %v", err, atBlock)
 		osu.logger.Error(ierr.Error())
 		return ierr
 	}
 
 	opState, err := osu.ethRpc.AvsReader.GetTypedOperatorsStakesForQuorumAtBlock(context.Background(), osu.ethRpc.AvsReader.AvsServiceBindings.RegistryCoordinatorAddress, types.TRACKED_QUORUM_NUMBERS, operatorAddresses, atBlock)
 	if err != nil {
-		ierr := fmt.Errorf("OpStateUpdater failed to GetTypedOperatorsStakesForQuorumAtBlock: err: %v, atBlock: %v", err, atBlock) 
+		ierr := fmt.Errorf("OpStateUpdater failed to GetTypedOperatorsStakesForQuorumAtBlock: err: %v, atBlock: %v", err, atBlock)
 		osu.logger.Error(ierr.Error())
 		return ierr
 	}
@@ -755,19 +754,19 @@ func (osu *OpStateUpdater) processOpDelegationStateChange(operator common.Addres
 
 	operatorId, err := osu.ethRpc.Clients.AvsRegistryChainReader.GetOperatorId(&bind.CallOpts{}, operator)
 	if err != nil {
-		ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorId: err: %v, operator: %v, atBlock: %v", err, operator, blockNumber) 
+		ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorId: err: %v, operator: %v, atBlock: %v", err, operator, blockNumber)
 		osu.logger.Error(ierr.Error())
 		return ierr
 	}
 	if bytes.Equal(operatorId[:], types.ZERO_OPERATOR_ID[:]) {
-		ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorId: err: zero operatorId, operator: %v, atBlock: %v", operator, blockNumber) 
+		ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorId: err: zero operatorId, operator: %v, atBlock: %v", operator, blockNumber)
 		osu.logger.Error(ierr.Error())
 		return ierr
 	}
 	if _, ok := osu.currentOpState[operatorId]; ok {
 		opStateUpdate, err := osu.ethRpc.AvsReader.GetTypedOperatorsStakesForQuorumAtBlock(context.Background(), osu.ethRpc.AvsReader.AvsServiceBindings.RegistryCoordinatorAddress, types.TRACKED_QUORUM_NUMBERS, []common.Address{operator}, blockNumber)
 		if err != nil {
-			ierr := fmt.Errorf("OpStateUpdater failed to GetTypedOperatorsStakesForQuorumAtBlock: err: %v, operator: %v, atBlock: %v", err, operator, blockNumber) 
+			ierr := fmt.Errorf("OpStateUpdater failed to GetTypedOperatorsStakesForQuorumAtBlock: err: %v, operator: %v, atBlock: %v", err, operator, blockNumber)
 			osu.logger.Error(ierr.Error())
 			return ierr
 		}
@@ -884,7 +883,7 @@ func (osu *OpStateUpdater) UpdateStateForEntireQuorums(quorumNums sdktypes.Quoru
 
 	currentBlock, err := osu.ethRpc.Clients.EthHttpClient.BlockNumber(context.Background())
 	if err != nil {
-		ierr := fmt.Errorf("OpStateUpdater failed to get BlockNumber: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, quorumNums) 
+		ierr := fmt.Errorf("OpStateUpdater failed to get BlockNumber: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, quorumNums)
 		osu.logger.Error(ierr.Error())
 		return ierr
 	}
@@ -893,14 +892,14 @@ func (osu *OpStateUpdater) UpdateStateForEntireQuorums(quorumNums sdktypes.Quoru
 	for _, qn := range quorumNums {
 		operatorIds, err := osu.ethRpc.Clients.AvsRegistryChainReader.GetOperatorIdList(&bind.CallOpts{}, qn, uint32(currentBlock))
 		if err != nil {
-			ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorIdList: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, qn) 
+			ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorIdList: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, qn)
 			osu.logger.Error(ierr.Error())
 			return ierr
 		}
 
 		operatorAdrresses0, err := osu.ethRpc.AvsReader.GetOperatorsFromIds(&bind.CallOpts{}, osu.ethRpc.AvsReader.AvsServiceBindings.RegistryCoordinatorAddress, operatorIds)
 		if err != nil {
-			ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorsFromIds: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, qn) 
+			ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorsFromIds: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, qn)
 			osu.logger.Error(ierr.Error())
 			return ierr
 		}
@@ -917,7 +916,7 @@ func (osu *OpStateUpdater) UpdateStateForEntireQuorums(quorumNums sdktypes.Quoru
 
 	_, err = osu.ethRpc.Clients.AvsRegistryChainWriter.UpdateStakesOfEntireOperatorSetForQuorums(context.Background(), operatorAddresses, quorumNums)
 	if err != nil {
-		ierr := fmt.Errorf("OpStateUpdater failed to UpdateStakesOfEntireOperatorSetForQuorums: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, quorumNums) 
+		ierr := fmt.Errorf("OpStateUpdater failed to UpdateStakesOfEntireOperatorSetForQuorums: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, quorumNums)
 		osu.logger.Error(ierr.Error())
 		return ierr
 	}
@@ -938,14 +937,14 @@ func (osu *OpStateUpdater) UpdateStateForOperatorIds(operatorIds []sdktypes.Oper
 
 	operatorAdrresses, err := osu.ethRpc.AvsReader.GetOperatorsFromIds(&bind.CallOpts{}, osu.ethRpc.AvsReader.AvsServiceBindings.RegistryCoordinatorAddress, operatorIds)
 	if err != nil {
-		ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorsFromIds: err: %v", err) 
+		ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorsFromIds: err: %v", err)
 		osu.logger.Error(ierr.Error())
 		return ierr
 	}
 
 	_, err = osu.ethRpc.Clients.AvsRegistryChainWriter.UpdateStakesOfOperatorSubsetForAllQuorums(context.Background(), operatorAdrresses)
 	if err != nil {
-		ierr := fmt.Errorf("OpStateUpdater failed to UpdateStakesOfOperatorSubsetForAllQuorums: err: %v", err) 
+		ierr := fmt.Errorf("OpStateUpdater failed to UpdateStakesOfOperatorSubsetForAllQuorums: err: %v", err)
 		osu.logger.Error(ierr.Error())
 		return ierr
 	}
