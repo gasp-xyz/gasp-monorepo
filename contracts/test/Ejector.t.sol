@@ -8,7 +8,7 @@ import "forge-std/Test.sol";
 
 contract EjectorAdminRulesTest is Test {
 
-   string deployer = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+   address deployer = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
 
    function testInitialized() public {
 
