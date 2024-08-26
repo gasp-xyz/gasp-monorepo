@@ -33,7 +33,6 @@ jobs:
 
       - name: Run forge tests - Integration folder
         run: |
-          pkill anvil 
           make start-anvil-and-deploy
           cd contracts
           forge test  -vvv --fork-url=http://localhost:8545 --match-contract 'Integration'
