@@ -276,7 +276,6 @@ contract Rolldown is
                 withdrawal.withdrawalRecipient,
                 pendingEthWithdrawals[withdrawal.withdrawalRecipient]
             );
-            //TODO:: remove with protocol update
             withdraw_pending_eth_to_recipient(withdrawal.amount, payable(withdrawal.withdrawalRecipient));
         }
     }

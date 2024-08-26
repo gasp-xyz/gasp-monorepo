@@ -46,17 +46,16 @@ interface IRolldownPrimitives {
         uint256 id;
     }
 
+    struct Range {
+        uint256 start;
+        uint256 end;
+    }
+
     struct Deposit {
         RequestId requestId;
         address depositRecipient;
         address tokenAddress;
         uint256 amount;
-        uint256 timeStamp;
-    }
-
-    struct L2UpdatesToRemove {
-        RequestId requestId;
-        uint256[] l2UpdatesToRemove;
         uint256 timeStamp;
     }
 
@@ -67,49 +66,17 @@ interface IRolldownPrimitives {
         uint256 timeStamp;
     }
 
-    struct WithdrawalResolution {
-        RequestId requestId;
-        uint256 l2RequestId;
-        bool status;
-        uint256 timeStamp;
-    }
-
 		enum ChainId{ Ethereum, Arbitrum }
 
     struct L1Update {
         ChainId chain;
         Deposit[] pendingDeposits;
         CancelResolution[] pendingCancelResolutions;
-        WithdrawalResolution[] pendingWithdrawalResolutions;
-        L2UpdatesToRemove[] pendingL2UpdatesToRemove;
-    } 
-
-    //TODO: should be renamed to RequestType
-    enum UpdateType {
-        DEPOSIT,
-        WITHDRAWAL,
-        WITHDRAWAL_RESOLUTION,
-        INDEX_UPDATE,
-        CANCEL,
-        CANCEL_RESOLUTION
     }
 
-    struct RequestResult {
-        RequestId requestId;
-        uint256 originRequestId;
-        UpdateType updateType;
-        bool status;
-    }
-
-    struct L2Update {
-        Cancel[] cancels;
-        Withdrawal[] withdrawals;
-        RequestResult[] results;
-    }
-
-    struct Range {
-        uint256 start;
-        uint256 end;
+    struct FailedDepositResolution {
+      RequestId requestId;
+      uint256 originRequestId;
     }
 
     struct Cancel {
