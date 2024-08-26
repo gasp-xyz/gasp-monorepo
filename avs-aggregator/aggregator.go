@@ -77,7 +77,6 @@ type Aggregator struct {
 	asyncOpStateUpdaterError error
 
 	kicker  *Kicker
-	updater *StakeUpdate
 	opStateUpdater *OpStateUpdater
 }
 
@@ -144,11 +143,6 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		logger.Error("Cannot create operator active list filter", "err", err)
 		return nil, err
 	}
-	updater, err := NewStakeUpdate(logger, *ethRpc, uint32(c.UpdatePeriod), uint32(c.BlockPeriod))
-	if err != nil {
-		logger.Error("Cannot create operator stakes updateer", "err", err)
-		return nil, err
-	}
 
 	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, avsRegistryService)
 	if err != nil {
@@ -168,7 +162,6 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		blockPeriod:             uint32(c.BlockPeriod),
 		blockPeriodOpsTask:		 uint32(c.BlockPeriodOpsTask),
 		kicker:                  kicker,
-		updater:                 updater,
 		opStateUpdater:			 opStateUpdater,
 		expiration:              uint32(c.Expiration),
 	}, nil
@@ -427,7 +420,6 @@ func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 		agg.tasksMu.Unlock()
 
 		agg.kicker.TriggerNewTask(taskIndex)
-		// agg.updater.TriggerNewTask(taskIndex)
 
 		quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.LastCompletedOpTaskQuorumNumbers))
 		for i, _ := range newTask.LastCompletedOpTaskQuorumNumbers {
