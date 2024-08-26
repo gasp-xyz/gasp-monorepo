@@ -27,9 +27,22 @@ jobs:
         run: forge install
 
       - uses: foundry-rs/foundry-toolchain@v1
-      - name: Run forge tests
+      - name: Run forge tests - Contract
         working-directory: contracts
-        run: forge test
+        run: forge test --no-match-contract 'Integration'
+
+      - name: Run forge tests - Integration folder
+        run: |
+          pkill anvil 
+          make start-anvil-and-deploy
+          cd contracts
+          forge test  -vvv --fork-url=http://localhost:8545 --match-contract 'Integration'
+      
+      - name: kill anvil
+        if: success() || failure()
+        run: |
+          pkill anvil 
+
 
   build-foundry-deployer-image:
     name: Build foundry deployer Docker image with smart contracts code
