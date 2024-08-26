@@ -22,7 +22,8 @@ abstract contract RolldownStorage is IRolldown {
     mapping(uint256 => Deposit) internal deposits;
     // NOTE: PR DESC
     // mapping(uint256 => L2UpdatesToRemove) internal l2UpdatesToRemove;
-    mapping(address => uint) public pendingEthWithdrawals;   
+    // NOTE: PR DESC
+    // mapping(address => uint) public pendingEthWithdrawals;   
 
     // TODO: check how to align __gap array size
     mapping(bytes32 => Range) public merkleRootRange;   

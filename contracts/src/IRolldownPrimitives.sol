@@ -9,32 +9,58 @@ interface IRolldownPrimitives {
         address tokenAddress,
         uint256 amount
     );
+
     event DisputeResolutionAcceptedIntoQueue(
         uint256 requestId,
         bool cancelJustified
     );
-    event WithdrawalResolutionAcceptedIntoQueue(
-        uint256 requestId,
-        bool success
-    );
-    event L2UpdatesToRemovedAcceptedIntoQueue(
-        uint256 requestId,
-        uint256[] l2UpdatesToRemove
-    );
-    event FundsWithdrawn(
-        address withdrawRecipient,
-        address tokenAddress,
-        uint256 amount
-    );
-    event FundsReturned(
-        address depositRecipient,
-        address tokenAddress,
-        uint256 amount
-    );
-    event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
+
+    // NOTE: PR DESC
+    // event WithdrawalResolutionAcceptedIntoQueue(
+    //     uint256 requestId,
+    //     bool success
+    // );
+ 
+    // NOTE: PR DESC
+    // event L2UpdatesToRemovedAcceptedIntoQueue(
+    //     uint256 requestId,
+    //     uint256[] l2UpdatesToRemove
+    // );
+    // NOTE: PR DESC
+    // event FundsWithdrawn(
+    //     address withdrawRecipient,
+    //     address tokenAddress,
+    //     uint256 amount
+    // );
+    // NOTE: PR DESC
+    // event FundsReturned(
+    //     address depositRecipient,
+    //     address tokenAddress,
+    //     uint256 amount
+    // );
+
+    // NOTE: PR DESC
+    // event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
+
     // NOTE: PR DESC
     // event EthWithdrawPending(address sender, uint amount);
-    // event PendingEthWithdrawn(address sender, uint amount);
+    
+    event NativeTokensWithdrawn(
+      address sender,
+      uint256 amount
+    );
+
+    event ERC20TokensWithdrawn(
+      address sender, 
+      address token_address, 
+      uint256 amount
+    );
+
+    event WithdrawalClosed(
+      uint256 requestId,
+      bytes32 withdrawalHash
+    );
+
     event NewUpdaterSet(address updater);
 
     enum Origin {
@@ -74,12 +100,13 @@ interface IRolldownPrimitives {
         uint256 timeStamp;
     }
 
-    struct WithdrawalResolution {
-        RequestId requestId;
-        uint256 l2RequestId;
-        bool status;
-        uint256 timeStamp;
-    }
+    // NOTE: PR DESC
+    // struct WithdrawalResolution {
+    //     RequestId requestId;
+    //     uint256 l2RequestId;
+    //     bool status;
+    //     uint256 timeStamp;
+    // }
 
 		enum ChainId{ Ethereum, Arbitrum }
 
@@ -111,11 +138,12 @@ interface IRolldownPrimitives {
         bool status;
     }
 
-    struct L2Update {
-        Cancel[] cancels;
-        Withdrawal[] withdrawals;
-        RequestResult[] results;
-    }
+    // NOTE: PR DESC
+    // struct L2Update {
+    //     Cancel[] cancels;
+    //     Withdrawal[] withdrawals;
+    //     RequestResult[] results;
+    // }
 
     struct Cancel {
         RequestId requestId;
@@ -125,7 +153,7 @@ interface IRolldownPrimitives {
 
     struct Withdrawal {
         RequestId requestId;
-        address withdrawalRecipient;
+        address recipient;
         address tokenAddress;
         uint256 amount;
     }
