@@ -42,7 +42,7 @@ jobs:
 
   clippy-check:
     name: Clippy check
-    runs-on: compile-eigen-gke
+    runs-on: compile-gke
     env:
       JOB_CACHE_PREFIX: cargo-rollup-clippy-job-build-cache-${{ inputs.cache-version }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
@@ -117,7 +117,7 @@ jobs:
 
   tests:
     name: Run tests
-    runs-on: compile-eigen-gke
+    runs-on: compile-gke
     env:
       JOB_CACHE_PREFIX: cargo-rollup-tests-job-cache-${{ inputs.cache-version }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
@@ -286,7 +286,7 @@ jobs:
     #   JOB_CACHE_PREFIX: docker-buildx-cache-finalizer-${{ matrix.platform.name }}-${{ inputs.cache-version }}
     #   CACHE_ARCHIVE_NAME: cache_archive.tar.zst
     #   DOCKER_IMAGE_REPOSITORY: mangatasolutions/avs-finalizer
-    runs-on: compile-eigen-gke
+    runs-on: compile-gke
     env:
       JOB_CACHE_PREFIX: docker-buildx-cache-finalizer-multi-${{ inputs.cache-version }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
