@@ -1,15 +1,13 @@
 services:
   avs-finalizer:
+    build: .
     image: mangatasolutions/avs-finalizer:${AVS_FINALIZER_VERSION:-local}
     restart: unless-stopped
-    build:
-      context: .
-      dockerfile: Dockerfile.local
-    depends_on:
-      eth-stub:
-        condition: service_healthy
-      eth-contracts-deployment:
-        condition: service_completed_successfully
+    # depends_on:
+    #   eth-stub:
+    #     condition: service_healthy
+    #   eth-contracts-deployment:
+    #     condition: service_completed_successfully
     environment:
       - RUST_LOG=info
       - ETH_RPC_URL=${ETH_RPC_URL:-http://eth-stub:8545}

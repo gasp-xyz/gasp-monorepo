@@ -2,7 +2,9 @@
 .github
 .vscode
 Dockerfile*
-**/target
-!**/target/**/main
 ops/**/data
 .env
+
+target
+# **/target
+# !**/target/**/main
