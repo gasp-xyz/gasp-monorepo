@@ -216,7 +216,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 			switch {
 			case osu.paused == true:
 				{
-					osu.logger.Info("OpStateUpdater is paused", pauseReasonV, osu.pauseReasonV)
+					osu.logger.Info("OpStateUpdater is paused", "pauseReasonV", osu.pauseReasonV)
 					osu.logger.Info("OpStateUpdater waiting for resume event")
 					eventC := make(chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState)
 					sub, err := osu.ethRpc.AvsSubscriber.SubscribeToResumeTrackingOpState(eventC, uint64(osu.atBlock+1))
