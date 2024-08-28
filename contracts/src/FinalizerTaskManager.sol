@@ -134,8 +134,6 @@ contract FinalizerTaskManager is
 
     // TODO!!!
     // DEDUP ALL THIS!
-    // TODO!!!
-    // Reinit func!!
     
     /* FUNCTIONS */
     // NOTE: this function creates new task, assigns it a taskId

@@ -51,7 +51,7 @@ contract OperatorStateRetrieverExtended is OperatorStateRetriever {
         Operator[][] memory operators = new Operator[][](quorumNumbers.length);
         for (uint256 i = 0; i < quorumNumbers.length; i++) {
             uint8 quorumNumber = uint8(quorumNumbers[i]);
-            bytes memory quorumBytes;
+            bytes memory quorumBytes = new bytes(1);
             quorumBytes[0] = quorumNumbers[i];
             operators[i] = new Operator[](operatorsAddr.length);
             for (uint256 j = 0; j < operatorsAddr.length; j++) {
