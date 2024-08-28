@@ -616,11 +616,11 @@ func (osu *OpStateUpdater) updateOperatorIdsToBeUpdated() {
 	for operatorId, _ := range osu.checkpointedAvsOpState {
 		for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
 			updatedStake := osu.currentOpState[operatorId].StakePerQuorum[quorum]
-			if updatedStake == nil{
+			if updatedStake == nil {
 				updatedStake = big.NewInt(0)
 			}
 			prevStake := osu.checkpointedAvsOpState[operatorId].StakePerQuorum[quorum]
-			if prevStake == nil{
+			if prevStake == nil {
 				prevStake = big.NewInt(0)
 			}
 			if prevStake.Cmp(updatedStake) != 0 {
@@ -632,11 +632,11 @@ func (osu *OpStateUpdater) updateOperatorIdsToBeUpdated() {
 	for operatorId, _ := range osu.currentOpState {
 		for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
 			updatedStake := osu.currentOpState[operatorId].StakePerQuorum[quorum]
-			if updatedStake == nil{
+			if updatedStake == nil {
 				updatedStake = big.NewInt(0)
 			}
 			prevStake := osu.checkpointedAvsOpState[operatorId].StakePerQuorum[quorum]
-			if prevStake == nil{
+			if prevStake == nil {
 				prevStake = big.NewInt(0)
 			}
 			if prevStake.Cmp(updatedStake) != 0 {
@@ -755,7 +755,7 @@ func (osu *OpStateUpdater) isAnyQuorumInCheckpointedAvsStateEmpty() bool {
 		stake := big.NewInt(0)
 		for _, opState := range osu.checkpointedAvsOpState {
 			opQuorumStake := opState.StakePerQuorum[quorum]
-			if opQuorumStake == nil{
+			if opQuorumStake == nil {
 				opQuorumStake = big.NewInt(0)
 			}
 			stake.Add(stake, opQuorumStake)
@@ -799,7 +799,7 @@ func (osu *OpStateUpdater) processOpStakeRegistryStateChange(operatorId sdktypes
 		}
 
 		if currentOpState, ok := osu.currentOpState[operatorId]; ok {
-			if currentOpState.StakePerQuorum == nil{
+			if currentOpState.StakePerQuorum == nil {
 				currentOpState.StakePerQuorum = make(map[sdktypes.QuorumNum]sdktypes.StakeAmount)
 				osu.currentOpState[operatorId] = currentOpState
 			}
@@ -875,7 +875,7 @@ func (osu *OpStateUpdater) updateCheckpointedAvsQuorumStakes() {
 	for operatorId, _ := range osu.checkpointedAvsOpState {
 		for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
 			stake := osu.currentOpState[operatorId].StakePerQuorum[quorum]
-			if stake == nil{
+			if stake == nil {
 				stake = big.NewInt(0)
 			}
 			osu.checkpointedAvsQuorumStakes[quorum].Add(osu.checkpointedAvsQuorumStakes[quorum], stake)
@@ -900,11 +900,11 @@ func (osu *OpStateUpdater) makeQuorumsStakeDiff() {
 	for operatorId, _ := range osu.checkpointedAvsOpState {
 		for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
 			updatedStake := osu.currentOpState[operatorId].StakePerQuorum[quorum]
-			if updatedStake == nil{
+			if updatedStake == nil {
 				updatedStake = big.NewInt(0)
 			}
 			prevStake := osu.checkpointedAvsOpState[operatorId].StakePerQuorum[quorum]
-			if prevStake == nil{
+			if prevStake == nil {
 				prevStake = big.NewInt(0)
 			}
 			if prevStake.Cmp(updatedStake) == 1 {
@@ -917,11 +917,11 @@ func (osu *OpStateUpdater) makeQuorumsStakeDiff() {
 	for operatorId, _ := range osu.currentOpState {
 		for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
 			updatedStake := osu.currentOpState[operatorId].StakePerQuorum[quorum]
-			if updatedStake == nil{
+			if updatedStake == nil {
 				updatedStake = big.NewInt(0)
 			}
 			prevStake := osu.checkpointedAvsOpState[operatorId].StakePerQuorum[quorum]
-			if prevStake == nil{
+			if prevStake == nil {
 				prevStake = big.NewInt(0)
 			}
 			if prevStake.Cmp(updatedStake) == -1 {
