@@ -5,8 +5,6 @@ import "./IRolldownPrimitives.sol";
 
 interface IRolldown is IRolldownPrimitives {
 
-    function withdraw_pending_eth(uint256 amount) external;
-
     function deposit_native() external payable;
 
     function deposit(address tokenAddress, uint256 amount) external;
