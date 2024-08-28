@@ -20,7 +20,7 @@ use ethers::{
 };
 
 use ethers::abi::AbiEncode;
-use eyre::eyre;
+use eyre::{eyre, OptionExt};
 use serde::Serialize;
 use sp_core::H256;
 use sp_runtime::traits::{BlakeTwo256, Hash, Keccak256, Zero};
@@ -44,6 +44,7 @@ pub struct CustomOperatorAvsState {
 pub struct Syncer {
     pub source_client: Arc<SourceClient>,
     pub target_client: Arc<TargetClient>,
+    pub root_target_client: Option<Arc<TargetClient>>,
     avs_contracts: AvsContracts,
     gasp_service_contract: GaspMultiRollupService<TargetClient>,
     root_gasp_service_contract: Option<GaspMultiRollupService<TargetClient>>,
@@ -56,8 +57,9 @@ impl Syncer {
         let avs_contracts = AvsContracts::build(cfg, source_client.clone()).await?;
         let gasp_service_contract =
             GaspMultiRollupService::new(cfg.gasp_service_addr, target_client.clone());
+        let maybe_arc_root_target_client = maybe_root_target_client.map(|x| Arc::new(x));
         let root_gasp_service_contract = if cfg.reinit || cfg.only_reinit {
-            let root_target_client = Arc::new(maybe_root_target_client.expect("should work here"));
+            let root_target_client = maybe_arc_root_target_client.clone().expect("should work here");
             Some(GaspMultiRollupService::new(
                 cfg.gasp_service_addr,
                 root_target_client.clone(),
@@ -69,6 +71,7 @@ impl Syncer {
         Ok(Arc::new(Self {
             source_client,
             target_client,
+            root_target_client: maybe_arc_root_target_client,
             avs_contracts,
             gasp_service_contract,
             root_gasp_service_contract,
@@ -333,6 +336,10 @@ impl Syncer {
         last_task.last_completed_op_task_quorum_threshold_percentage =
             latest_completed_op_task_quorum_threshold_percentage;
 
+        // TODO
+        // Maybe remove this whole block it is not needed here
+        // in the current impl
+        /*From here*/
         let block_events: Vec<OpTaskCompletedFilter> = self
             .clone()
             .avs_contracts
@@ -350,12 +357,133 @@ impl Syncer {
             return Err(eyre!("missing expected task response {:?}", task_num));
         }
 
+        // TODO
+        // This will incorrectly fail if an opTask was completed in the same
+        // block that the opTask we are looking for was created in
+        // Modify this to match how it is handled elsewhere...
+        // Ignored for now since this whole block is unnecessary...
         if block_events[0].task_index != task_num {
             tracing::error!("missing expected task response {:?}", task_num);
             return Err(eyre!("missing expected task response {:?}", task_num));
         }
 
         let task_response = block_events[0].task_response.clone();
+        /*To here*/
+
+        let operators_state_info = self
+            .clone()
+            .get_operators_state_info(last_task.clone())
+            .await?;
+
+        let reinit_txn = self
+            .clone()
+            .root_gasp_service_contract
+            .clone()
+            .expect("should work in reinit")
+            .process_eigen_reinit(last_task, operators_state_info, latest_pending_state_hash);
+        println!("{:?}", reinit_txn);
+        let reinit_txn_pending = reinit_txn.send().await;
+        println!("{:?}", reinit_txn_pending);
+        let reinit_txn_receipt = reinit_txn_pending?.await?;
+        println!("{:?}", reinit_txn_receipt);
+
+        Ok(())
+    }
+
+
+    #[instrument(skip_all)]
+    pub async fn reinit_eth(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
+        // Get the root_target_client here, this should exist at this point
+        let root_target_client = self.root_target_client.clone().ok_or_eyre("failed to unwrap maybe_root_target_client")?;
+
+        // Build the root_task_manager here using the address from the source avs_contracts
+        let task_manager_addr = self.avs_contracts.task_manager.address();
+        let task_manager = FinalizerTaskManager::new(task_manager_addr, root_target_client.clone());
+
+        let update_txn = self.clone().gasp_service_contract.process_eigen_rd_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature);
+        println!("{:?}", update_txn);
+        let update_txn_pending = update_txn.send().await;
+        println!("{:?}", update_txn_pending);
+        let update_txn_receipt = update_txn_pending?.await?;
+        println!("{:?}", update_txn_receipt);
+
+        let latest_completed_op_task_created_block = self
+            .gasp_service_contract
+            .latest_completed_op_task_created_block()
+            .await?;
+        let latest_completed_op_task_quorum_numbers =
+            self.gasp_service_contract.quorum_numbers().await?;
+        let latest_completed_op_task_quorum_threshold_percentage = self
+            .gasp_service_contract
+            .quorum_threshold_percentage()
+            .await?;
+
+        // TODO!!
+        // Get the latest block from source chain and query the following three with it!
+        let task_num = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .last_completed_op_task_num()
+            .await?;
+        let block_num = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .last_completed_op_task_created_block()
+            .await?;
+        let latest_pending_state_hash = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .latest_pending_state_hash()
+            .await?;
+
+        // Unfortunately latestTaskNum and LastCompletedTaskNum both start at 0
+        // So if lastCompletedTaskNum is 0 then check if it was infact completed
+        if task_num.is_zero() {
+            let task_status = self
+                .clone()
+                .avs_contracts
+                .task_manager
+                .id_to_task_status(0u8, task_num)
+                .await?;
+            if task_status != 4 {
+                tracing::error!(
+                    "no completed tasks for reinit {:?}",
+                    latest_completed_op_task_created_block
+                );
+                return Err(eyre!(
+                    "no completed tasks for reinit {:?}",
+                    latest_completed_op_task_created_block
+                ));
+            }
+        }
+
+        let mut block_events: Vec<NewOpTaskCreatedFilter> = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .event_with_filter(
+                Filter::new()
+                    .event(&NewOpTaskCreatedFilter::abi_signature())
+                    .select(u64::from(block_num)),
+            )
+            .query()
+            .await?;
+
+        let mut last_task = match block_events.pop() {
+            Some(e) if e.task_index == task_num => e.task,
+            _ => {
+                tracing::error!("task not in events for reinit {:?}", task_num);
+                return Err(eyre!("task not in events for reinit {:?}", task_num));
+            }
+        };
+
+        last_task.last_completed_op_task_created_block = latest_completed_op_task_created_block;
+        last_task.last_completed_op_task_quorum_numbers = latest_completed_op_task_quorum_numbers;
+        last_task.last_completed_op_task_quorum_threshold_percentage =
+            latest_completed_op_task_quorum_threshold_percentage;
 
         let operators_state_info = self
             .clone()

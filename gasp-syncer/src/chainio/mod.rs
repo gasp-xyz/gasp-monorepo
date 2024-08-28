@@ -39,7 +39,7 @@ pub(crate) async fn build_clients(
         TargetClient::new_with_provider_chain(nonce, wallet.with_chain_id(cfg.target_chain_id))
             .await?;
 
-    let root_target_client = if cfg.reinit || cfg.only_reinit {
+    let root_target_client = if cfg.reinit || cfg.only_reinit || cfg.only_reinit_eth {
         let root_provider: Provider<Http> = MW::try_from(cfg.target_rpc_url.clone())?;
         info!("Eth Wallet decryting...");
         let root_wallet = cfg.get_root_ecdsa_keystore()?.into_wallet()?;

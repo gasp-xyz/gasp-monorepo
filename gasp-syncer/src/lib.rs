@@ -12,18 +12,25 @@ mod syncer;
 pub async fn start() -> eyre::Result<()> {
     let cli = CliArgs::build();
     info!(
-        "Creating a new Operator from {}",
+        "Creating a new Syncer from {}",
         serde_json::to_string_pretty(&cli)?
     );
     let syncer = Syncer::from_cli(&cli).await?;
 
-    if cli.reinit {
-        syncer.clone().reinit(&cli).await?;
-        syncer.sync(&cli).await?;
-    } else if cli.only_reinit {
-        syncer.reinit(&cli).await?;
-    } else {
-        syncer.sync(&cli).await?;
+    match (){
+        _ if cli.reinit => {
+            syncer.clone().reinit(&cli).await?;
+            syncer.sync(&cli).await?;
+        },
+        _ if cli.only_reinit => {
+            syncer.reinit(&cli).await?;
+        },
+        _ if cli.only_reinit_eth => {
+            syncer.reinit_eth(&cli).await?;
+        }
+        _ => {
+            syncer.sync(&cli).await?;
+        }
     }
 
     warn!("Eth websocket listener closed, shutting down.");
