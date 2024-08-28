@@ -8,9 +8,7 @@ on:
       substrateNodeVersion:
         type: string
         required: false
-        # NOTE: revert
-        # default: "eth-rollup-develop-fast"
-        default: "feature-remove-request-results-fast"
+        default: "eth-rollup-develop-fast"
       globalVersion:
         type: string
         required: false
