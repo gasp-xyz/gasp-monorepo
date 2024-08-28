@@ -204,6 +204,9 @@ describe('AVS Finalizer', () => {
         await validateOperatorOptInStakeRegistry(publicClient, operatorAddress as string);
         await validateOperatorOptInIndexRegistry(publicClient, operatorAddress as string);
         await thirdContainer.stopContainer();
+        //we need to wait for it being de-registered
+        await waitForOperatorDeRegistered(publicClient);
+
     });
     afterEach(async () => {
         //try opt-out just in case.
