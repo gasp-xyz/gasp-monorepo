@@ -41,6 +41,7 @@
     "@polkadot/util-crypto": "^12.3.2",
     "async": "^3.2.4",
     "async-redis": "^2.0.0",
+    "axios": "^1.7.2",
     "bignumber.js": "^9.1.2",
     "chai": "^4.3.7",
     "chai-http": "^4.4.0",
@@ -63,6 +64,7 @@
     "redlock": "^5.0.0-beta.2",
     "rimraf": "^3.0.2",
     "swagger-ui-express": "^5.0.0",
+    "viem": "^2.18.6",
     "winston": "3.8.2",
     "yup": "^1.1.1"
   },
@@ -106,7 +108,7 @@
     "swagger-autogen": "latest",
     "testcontainers": "^9.11.0",
     "ts-node": "10.9.1",
-    "typescript": "4.8.4",
+    "typescript": "5.0.4",
     "vite": "^4.2.1",
     "vitest": "^0.29.7"
   },

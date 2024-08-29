@@ -5,8 +5,6 @@ import "dotenv/config";
 import { keccak256, BaseError } from "viem";
 import { MANGATA_NODE_URL, MNEMONIC } from "./common/constants.js";
 import {
-	countRequests,
-	filterUpdates,
 	getApi,
 	getCollator,
 	getLastRequestId,
@@ -55,23 +53,24 @@ async function main() {
           publicClient,
         );
 
+        if (nativeL1Update === null) {
+          inProgress = false;
+          return;
+        }
 
-				const filteredUpdates = filterUpdates(
-					nativeL1Update.unwrap(),
-					lastRequestId,
-				);
-				const requestsCount = countRequests(filteredUpdates);
+        let maxRequestId = getMaxRequestId(nativeL1Update);
 
-				if (requestsCount > 0 && getMaxRequestId(filteredUpdates)! > lastRequestId) {
+        console.log(`maxRequestId: ${maxRequestId}`);
+				if (maxRequestId > lastRequestId) {
 					const result = await signTx(
 						api,
-						api.tx.rolldown.updateL2FromL1(filteredUpdates),
+						api.tx.rolldown.updateL2FromL1(nativeL1Update),
 						collator,
 					);
 
 					if (isSuccess(result)) {
 						print("L1update was submitted successfully");
-							lastRequestId = getMaxRequestId(filteredUpdates)!;
+							lastRequestId = maxRequestId;
 					} else {
 						print("L1update was submitted unsuccessfully");
 					}
