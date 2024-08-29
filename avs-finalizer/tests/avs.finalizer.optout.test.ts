@@ -230,7 +230,7 @@ describe('AVS Finalizer', () => {
             });
             await thirdContainer.stopContainer();
         }catch (e) {
-            console.info("Opt-out failed, probably the container is not running" + e.toString());
+            console.info("Opt-out failed, probably the container is not running");
         }
 
     });
