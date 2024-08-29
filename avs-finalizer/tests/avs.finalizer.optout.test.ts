@@ -48,6 +48,8 @@ const anvil3 = defineChain({
     },
 });
 let dockerUtils: DockerUtils;
+let secContainer: DockerUtils;
+let thirdContainer: DockerUtils;
 
 async function mineEthBlocks(blocks: number) {
     for (let i = 0; i < blocks; i++) {
@@ -127,7 +129,7 @@ describe('AVS Finalizer', () => {
         await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
 
     });
-    it('operator that does not respond -> eject', async () => {
+    it('operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )', async () => {
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -137,7 +139,7 @@ describe('AVS Finalizer', () => {
             chain: anvil3,
         });
         const POperatorAddress = waitForOperatorRegistered(publicClient);
-        await dockerUtils.startContainer();
+        const { edcsa , bls } =  await dockerUtils.startContainer();
         const operatorAddress = await POperatorAddress;
         console.log("operatorAddress: " + operatorAddress);
         const res = await publicClient.readContract({
@@ -166,16 +168,71 @@ describe('AVS Finalizer', () => {
         expect(statusAfter).toBe(2);
         await validateOperatorOptOutStakeRegistry(publicClient, operatorAddress as string);
         await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
+        console.log("Re-Register STEP: operatorAddress: " + operatorAddress);
+
+        //re-register
+        secContainer = new DockerUtils();
+        const errMessage = "Contract call reverted with message: ServiceManager.registerOperatorToAVS: minimum blocks elapsed limit for recurrent registration not met";
+        await secContainer.startContainer(undefined, undefined, { edcsa , bls } , errMessage );
+        //validate still in opt-out
+        const statusAfterReRegister = await publicClient.readContract({
+            address: registryCoordinatorAddress,
+            abi: registryCoordinator.abi,
+            functionName: "getOperatorStatus",
+            args: [operatorAddress],
+        });
+        expect(statusAfterReRegister).toBe(2);
+        await validateOperatorOptOutStakeRegistry(publicClient, operatorAddress as string);
+        await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
+
+        await secContainer.stopContainer();
+
+        await mineEthBlocks(10);
+        console.log("After-Waiting and Re-Register STEP: operatorAddress: " + operatorAddress);
+
+        //re-register again
+        thirdContainer = new DockerUtils();
+        await thirdContainer.startContainer(undefined, undefined, { edcsa , bls });
+        const statusAfterWaitingAndReJoined = await publicClient.readContract({
+            address: registryCoordinatorAddress,
+            abi: registryCoordinator.abi,
+            functionName: "getOperatorStatus",
+            args: [operatorAddress],
+        });
+        console.log("Validate status - OK " + operatorAddress);
+        expect(statusAfterWaitingAndReJoined).toBe(1);
+        await validateOperatorOptInStakeRegistry(publicClient, operatorAddress as string);
+        await validateOperatorOptInIndexRegistry(publicClient, operatorAddress as string);
+        await thirdContainer.stopContainer();
+        //we need to wait for it being de-registered
+        await waitForOperatorDeRegistered(publicClient);
 
     });
     afterEach(async () => {
         //try opt-out just in case.
-        await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
-            console.log(result);
-        }).catch((err) => {
-            console.error(err);
-        });
-        await dockerUtils.stopContainer();
+        try {
+            await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
+                console.log(result);
+            }).catch((err) => {
+                console.error(err);
+            });
+            await dockerUtils.stopContainer();
+            await secContainer.container?.exec("./main opt-out-avs").then((result) => {
+                console.log(result);
+            }).catch((err) => {
+                console.error(err);
+            });
+            await secContainer.stopContainer();
+            await thirdContainer.container?.exec("./main opt-out-avs").then((result) => {
+                console.log(result);
+            }).catch((err) => {
+                console.error(err);
+            });
+            await thirdContainer.stopContainer();
+        }catch (e) {
+            console.info("Opt-out failed, probably the container is not running");
+        }
+
     });
 
 });
