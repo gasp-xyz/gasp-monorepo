@@ -1,7 +1,7 @@
 pragma solidity ^0.8.9;
 import {Rolldown} from "../src/Rolldown.sol";
-import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
 import "forge-std/console.sol";
+import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
 import "forge-std/StdJson.sol";
 import {Utilities, MyERC20} from "./utils/Utilities.sol";
 import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
@@ -74,7 +74,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         // Assert
         assertEq(l1Update.pendingDeposits.length, 1);
         assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
         assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
         assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
         assertEq(l1Update.pendingDeposits[0].amount, amount);
@@ -115,7 +114,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
           requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-          withdrawalRecipient: recipient,
+          recipient: recipient,
           tokenAddress: address(token),
           amount: amount
         });
@@ -132,14 +131,11 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.WithdrawalResolutionAcceptedIntoQueue(1, true);
-        emit IRolldownPrimitives.FundsWithdrawn(recipient, address(token), amount);
+        emit IRolldownPrimitives.ERC20TokensWithdrawn(recipient, address(token), amount);
+        emit IRolldownPrimitives.WithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
         assertEq(token.balanceOf(recipient), amount);
-
-        Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
-        assertEq(l1Update.pendingWithdrawalResolutions.length, 1);
     }
 
     function testExecuteWithdrawErc20WithWrongHash() public {
@@ -149,7 +145,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
           requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-          withdrawalRecipient: recipient,
+          recipient: recipient,
           tokenAddress: address(token),
           amount: amount
         });
@@ -195,7 +191,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
       // Assert
       assertEq(l1Update.pendingDeposits.length, 1);
       assertEq(l1Update.pendingCancelResolutions.length, 0);
-      assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
       assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
       assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
       assertEq(l1Update.pendingDeposits[0].amount, amount);
@@ -210,21 +205,21 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
        Withdrawal memory withdrawalBob1 = IRolldownPrimitives.Withdrawal({
          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-         withdrawalRecipient: BOB,
+         recipient: BOB,
          tokenAddress: address(token),
          amount: amount
        });
 
        Withdrawal memory withdrawalBob2 = IRolldownPrimitives.Withdrawal({
          requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-         withdrawalRecipient: BOB,
+         recipient: BOB,
          tokenAddress: address(token),
          amount: amount
        });
 
        Withdrawal memory withdrawalCharlie = IRolldownPrimitives.Withdrawal({
          requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-         withdrawalRecipient: CHARLIE,
+         recipient: CHARLIE,
          tokenAddress: address(token),
          amount: amount
        });
@@ -234,7 +229,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
          range: Range({start: 1, end: 1}),
          hash: 0x0000000000000000000000000000000000000000000000000000000000000000
        });
-  
+
       //                             hash(hash(0, 1), hash(2, 3)) // AKA Merkle Root
       //                     /                                        \
       //                    /                                          \
@@ -287,13 +282,13 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
       vm.startPrank(ALICE);
       vm.expectEmit(true, true, true, true);
-      emit IRolldownPrimitives.FundsWithdrawn(CHARLIE, address(token), 12345);
+      emit IRolldownPrimitives.ERC20TokensWithdrawn(CHARLIE, address(token), 12345);
       rolldown.close_withdrawal(withdrawalCharlie, merkle_root, proof_withdrawalCharlie);
       vm.stopPrank();
 
       vm.startPrank(CHARLIE);
       vm.expectEmit(true, true, true, true);
-      emit IRolldownPrimitives.FundsWithdrawn(BOB, address(token), 12345);
+      emit IRolldownPrimitives.ERC20TokensWithdrawn(BOB, address(token), 12345);
       rolldown.close_withdrawal(withdrawalBob1, merkle_root, proof_withdrawalBob1);
       vm.stopPrank();
 
@@ -306,7 +301,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
           requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-          withdrawalRecipient: recipient,
+          recipient: recipient,
           tokenAddress: address(token),
           amount: amount
         });
@@ -331,12 +326,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         Rolldown.L1Update memory l1Update;
         l1Update.chain = ChainId.Ethereum;
         l1Update.pendingDeposits = new Rolldown.Deposit[](1);
-        l1Update.pendingL2UpdatesToRemove = new Rolldown.L2UpdatesToRemove[](1);
         l1Update.pendingCancelResolutions = new Rolldown.CancelResolution[](1);
-        l1Update
-            .pendingWithdrawalResolutions = new Rolldown.WithdrawalResolution[](
-            1
-        );
 
         l1Update.pendingDeposits[0] = IRolldownPrimitives.Deposit({
             requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L1}),
@@ -353,60 +343,14 @@ contract RolldownTest is Test, IRolldownPrimitives {
             timeStamp: 2
         });
 
-        l1Update.pendingWithdrawalResolutions[0] = IRolldownPrimitives
-            .WithdrawalResolution({
-                requestId: IRolldownPrimitives.RequestId({
-                    id: 9,
-                    origin: IRolldownPrimitives.Origin.L1
-                }),
-                l2RequestId: 10,
-                status: true,
-                timeStamp: 3
-            });
-
         uint256[] memory l2UpdatesToRemove = new uint256[](1);
         l2UpdatesToRemove[0] = 13;
-        l1Update.pendingL2UpdatesToRemove[0] = IRolldownPrimitives.L2UpdatesToRemove({
-            requestId: IRolldownPrimitives.RequestId({id: 12, origin: IRolldownPrimitives.Origin.L1}),
-            l2UpdatesToRemove: l2UpdatesToRemove,
-            timeStamp: 4
-        });
+
 
         assertEq(
             keccak256(abi.encode(l1Update)),
-            0x3c1e43a559da200b6b94ab0efb9f273b653242cb014efe2310807ff26d1db2d1
+            0xaf1c7908d0762a131c827a13d9a6afde3e6f1a4a842d96708935d57fc2a0af7a
         );
-    }
-
-    function testL2UpdateHashCompatibilityWithMangataNode() public {
-        // TODO: add such  a test on substrate side
-        Rolldown.L2Update memory l2Update;
-        l2Update.cancels = new Rolldown.Cancel[](1);
-        l2Update.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update.results = new Rolldown.RequestResult[](1);
-
-        l2Update.cancels[0] = IRolldownPrimitives.Cancel({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            range: IRolldownPrimitives.Range({start: 2, end: 3}),
-            hash: 0x0000000000000000000000000000000000000000000000000000000000000004
-        });
-
-        l2Update.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 5, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: 0x0000000000000000000000000000000000000006,
-            tokenAddress: 0x0000000000000000000000000000000000000007,
-            amount: 8
-        });
-
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 9, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 10,
-            updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-            status: true
-        });
-
-        bytes32 l2Hash = 0x86056ca0e2dd30bb80627000335bd10a2a57699f532e665260ffebb55047544f;
-        assertEq(keccak256(abi.encode(l2Update)), l2Hash);
     }
 
     function testCancelWithNonMatchingHashResultsWithUnjustifiedStatus()
@@ -482,7 +426,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
           requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-          withdrawalRecipient: recipient,
+          recipient: recipient,
           tokenAddress: address(token),
           amount: amount
         });
@@ -498,14 +442,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(token.balanceOf(recipient), 0);
 
         vm.startPrank(ALICE);
-        vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.WithdrawalResolutionAcceptedIntoQueue(1, false);
+        vm.expectRevert("Not enough funds in contract");
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
         assertEq(token.balanceOf(recipient), 0);
-
-        Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
-        assertEq(l1Update.pendingWithdrawalResolutions.length, 1);
     }
 
     function testAcceptOnlyConsecutiveUpdatesWithoutGaps() public {

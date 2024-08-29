@@ -1,12 +1,6 @@
 name: stash-rollup-testnet
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "stash/**/*"
-      - ".github/**/rollup-testnet**"
 
 permissions:
   contents: 'read'

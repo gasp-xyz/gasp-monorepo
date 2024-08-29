@@ -69,27 +69,6 @@ contract Rolldown is
       emit NewUpdaterSet(updaterAccount);
     }
 
-    function withdraw_pending_eth_to_recipient(uint256 amount, address payable recipient) private whenNotPaused {
-        require(amount > 0, "Amount must be greater than zero");
-        require(pendingEthWithdrawals[recipient] >= amount, "not enough pending withdraw amount");
-        require(payable(address(this)).balance >= amount, "not enough eth funds");
-
-        // important to set this here before .sendValue
-        // to prevent reentrancy
-        pendingEthWithdrawals[recipient] -= amount;
-
-        emit PendingEthWithdrawn(recipient, amount);
-
-        // send value uses call (gas unbounded)
-        // and reverts upon failure
-        Address.sendValue(recipient, amount);
-    }
-
-
-    function withdraw_pending_eth(uint256 amount) external whenNotPaused {
-      withdraw_pending_eth_to_recipient(amount, payable(msg.sender));
-    }
-
     function deposit_native() external payable whenNotPaused {
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
@@ -249,64 +228,32 @@ contract Rolldown is
         else {
             process_erc20_withdrawal(withdrawal);
         }
+
+        emit WithdrawalClosed(
+          withdrawal.requestId.id,
+          keccak256(abi.encode(withdrawal))
+        );
+
     }
 
     function process_eth_withdrawal( Withdrawal calldata withdrawal) private {
-        bool enought_funds_in_contract = payable(address(this)).balance >= withdrawal.amount;
-        bool is_account = withdrawal.withdrawalRecipient.code.length == 0;
-        bool status = enought_funds_in_contract && is_account;
-        uint256 timeStamp = block.timestamp;
-
-        WithdrawalResolution memory resolution = WithdrawalResolution({
-            requestId: RequestId({origin: Origin.L1, id: counter++}),
-            l2RequestId: withdrawal.requestId.id,
-            status: status,
-            timeStamp: timeStamp
-        });
-
-        withdrawalResolutions[resolution.requestId.id] = resolution;
-        emit WithdrawalResolutionAcceptedIntoQueue(
-            resolution.requestId.id,
-            status
-        );
-
-        if (status) {
-            pendingEthWithdrawals[withdrawal.withdrawalRecipient] += withdrawal.amount;
-            emit EthWithdrawPending(
-                withdrawal.withdrawalRecipient,
-                pendingEthWithdrawals[withdrawal.withdrawalRecipient]
-            );
-            //TODO:: remove with protocol update
-            withdraw_pending_eth_to_recipient(withdrawal.amount, payable(withdrawal.withdrawalRecipient));
-        }
+        require(payable(address(this)).balance >= withdrawal.amount, "Not enough funds in contract");
+        require(withdrawal.amount > 0, "Amount must be greater than zero");
+        Address.sendValue(payable(withdrawal.recipient), withdrawal.amount);
+        emit NativeTokensWithdrawn(withdrawal.recipient, withdrawal.amount);
     }
 
     function process_erc20_withdrawal( Withdrawal calldata withdrawal) private {
         IERC20 token = IERC20(withdrawal.tokenAddress);
-        bool status = token.balanceOf(address(this)) >= withdrawal.amount;
-        uint256 timeStamp = block.timestamp;
+        require(token.balanceOf(address(this)) >= withdrawal.amount, "Not enough funds in contract");
+        require(withdrawal.amount > 0, "Amount must be greater than zero");
 
-        WithdrawalResolution memory resolution = WithdrawalResolution({
-            requestId: RequestId({origin: Origin.L1, id: counter++}),
-            l2RequestId: withdrawal.requestId.id,
-            status: status,
-            timeStamp: timeStamp
-        });
-
-        withdrawalResolutions[resolution.requestId.id] = resolution;
-        emit WithdrawalResolutionAcceptedIntoQueue(
-            resolution.requestId.id,
-            status
+        token.transfer(withdrawal.recipient, withdrawal.amount);
+        emit ERC20TokensWithdrawn(
+          withdrawal.recipient,
+          withdrawal.tokenAddress,
+          withdrawal.amount
         );
-
-        if (status) {
-            token.transfer(withdrawal.withdrawalRecipient, withdrawal.amount);
-            emit FundsWithdrawn(
-                withdrawal.withdrawalRecipient,
-                withdrawal.tokenAddress,
-                withdrawal.amount
-            );
-        }
     }
 
     function getPendingRequests(
@@ -317,17 +264,11 @@ contract Rolldown is
 
         result.chain = chain;
         uint256 depositsCounter = 0;
-        uint256 withdrawalsCounter = 0;
         uint256 cancelsCounter = 0;
-        uint256 updatesToBeRemovedCounter = 0;
 
         for (uint256 requestId = start; requestId <= end; requestId++) {
             if (deposits[requestId].requestId.id != 0) {
                 depositsCounter++;
-            } else if (l2UpdatesToRemove[requestId].requestId.id != 0) {
-                updatesToBeRemovedCounter++;
-            } else if (withdrawalResolutions[requestId].requestId.id != 0) {
-                withdrawalsCounter++;
             } else if (cancelResolutions[requestId].requestId.id != 0) {
                 cancelsCounter++;
             }
@@ -335,29 +276,13 @@ contract Rolldown is
 
         result.pendingDeposits = new Deposit[](depositsCounter);
         result.pendingCancelResolutions = new CancelResolution[](cancelsCounter);
-        result.pendingWithdrawalResolutions = new WithdrawalResolution[](
-            withdrawalsCounter
-        );
-        result.pendingL2UpdatesToRemove = new L2UpdatesToRemove[](
-            updatesToBeRemovedCounter
-        );
 
-        withdrawalsCounter = 0;
         depositsCounter = 0;
         cancelsCounter = 0;
-        updatesToBeRemovedCounter = 0;
 
         for (uint256 requestId = start; requestId <= end; requestId++) {
             if (deposits[requestId].requestId.id > 0) {
                 result.pendingDeposits[depositsCounter++] = deposits[requestId];
-            } else if (withdrawalResolutions[requestId].requestId.id > 0) {
-                result.pendingWithdrawalResolutions[
-                    withdrawalsCounter++
-                ] = withdrawalResolutions[requestId];
-            } else if (l2UpdatesToRemove[requestId].requestId.id > 0) {
-                result.pendingL2UpdatesToRemove[
-                    updatesToBeRemovedCounter++
-                ] = l2UpdatesToRemove[requestId];
             } else if (cancelResolutions[requestId].l2RequestId > 0) {
                 result.pendingCancelResolutions[
                     cancelsCounter++
