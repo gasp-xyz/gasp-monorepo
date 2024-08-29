@@ -21,6 +21,7 @@ import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecke
 import {FinalizerServiceManager, IServiceManager} from "../src/FinalizerServiceManager.sol";
 import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "../src/IFinalizerTaskManager.sol";
+import {OperatorStateRetrieverExtended} from "../src/OperatorStateRetrieverExtended.sol";
 
 import {Utils} from "./utils/Utils.sol";
 
@@ -51,6 +52,7 @@ contract Deployer is Script, Utils, Test {
 
     // non-upgradable contracts
     BLSSignatureChecker public blsSignatureChecker;
+    OperatorStateRetrieverExtended public operatorStateRetreiverExtended;
 
     //upgradeable contracts
     FinalizerServiceManager public serviceManager;
@@ -247,13 +249,15 @@ contract Deployer is Script, Utils, Test {
         // This hack depends on avsOwner being the same as the deployer...
         blsSignatureChecker.setStaleStakesForbidden(false);
 
+        operatorStateRetreiverExtended = new OperatorStateRetrieverExtended();
+        
         taskManagerImplementation = new FinalizerTaskManager();
 
         // upgrade task manager proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(taskManager))),
             address(taskManagerImplementation),
-            abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator, allow_non_root_tm_init, blsSignatureChecker, taskResponseWindowBlocks, minOpTaskResponseWindowBlock)
+            abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator, allow_non_root_tm_init, blsSignatureChecker, taskResponseWindowBlocks, minOpTaskResponseWindowBlock, operatorStateRetreiverExtended)
         );
 
         // transfer ownership of proxy admin to upgrader

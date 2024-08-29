@@ -17,14 +17,14 @@ pub async fn start() -> eyre::Result<()> {
     );
     let syncer = Syncer::from_cli(&cli).await?;
 
-    match (){
+    match () {
         _ if cli.reinit => {
             syncer.clone().reinit(&cli).await?;
             syncer.sync(&cli).await?;
-        },
+        }
         _ if cli.only_reinit => {
             syncer.reinit(&cli).await?;
-        },
+        }
         _ if cli.only_reinit_eth => {
             syncer.reinit_eth(&cli).await?;
         }

@@ -10,12 +10,15 @@ import (
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	stakeRegistry "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/StakeRegistry"
 )
 
 type AvsSubscriberer interface {
 	SubscribeToNewRdTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewRdTaskCreated) event.Subscription
 	SubscribeToRdTaskResponses(taskResponseLogs chan *taskmanager.ContractFinalizerTaskManagerRdTaskResponded) event.Subscription
 	ParseRdTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
+	SubscribeToOpTaskCompleted(opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) event.Subscription
+	SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState, fromBlock uint32) event.Subscription 
 }
 
 // Subscribers use a ws connection instead of http connection like Readers
@@ -59,6 +62,39 @@ func (s *AvsSubscriber) SubscribeToRdTaskResponses(taskResponseLogs chan *taskma
 	}
 	s.logger.Infof("Subscribed to TaskResponded events")
 	return sub
+}
+
+func (s *AvsSubscriber) SubscribeToOpTaskCompleted(fromBlock uint64,opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) (event.Subscription, error) {
+	sub, err := s.AvsContractBindings.TaskManager.WatchOpTaskCompleted(
+		&bind.WatchOpts{Start: &fromBlock}, opTaskCompletionLogs, []uint32{},
+	)
+	if err != nil {
+		s.logger.Error("Failed to subscribe to OpTaskCompleted events", "err", err)
+	}
+	s.logger.Infof("Subscribed to OpTaskCompleted events")
+	return sub, err
+}
+
+func (s *AvsSubscriber) SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState, fromBlock uint64) (event.Subscription, error) {
+	sub, err := s.AvsContractBindings.TaskManager.WatchResumeTrackingOpState(
+		&bind.WatchOpts{Start: &fromBlock}, resumeLogs,
+	)
+	if err != nil {
+		s.logger.Error("Failed to subscribe to ResumeTrackingOpState events", "err", err)
+	}
+	s.logger.Infof("Subscribed to ResumeTrackingOpState events")
+	return sub, err
+}
+
+func (s *AvsSubscriber) SubscribeToOperatorStakeUpdate(opts bind.WatchOpts, updateLogs chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate) (event.Subscription, error) {
+	sub, err := s.AvsContractBindings.StakeRegistry.WatchOperatorStakeUpdate(
+		&opts, updateLogs, [][32]byte{},
+	)
+	if err != nil {
+		s.logger.Error("Failed to subscribe to OperatorStakeUpdate events", "err", err)
+	}
+	s.logger.Infof("Subscribed to OperatorStakeUpdate events")
+	return sub, err
 }
 
 func (s *AvsSubscriber) ParseRdTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error) {

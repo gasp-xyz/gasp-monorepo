@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 	"strings"
+	"errors"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -15,6 +16,10 @@ import (
 
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	// blsSignatureChecker "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
+	// opstateretriever "github.com/Layr-Labs/eigensdk-go/contracts/bindings/OperatorStateRetriever"
+
+	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
+	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
 )
 
 type AvsReaderer interface {
@@ -71,6 +76,18 @@ func (r *AvsReader) LastCompletedOpTaskCreatedBlock(
 ) (uint32, error) {
 	v, err := r.AvsServiceBindings.TaskManager.LastCompletedOpTaskCreatedBlock(
 		&bind.CallOpts{},
+	)
+	if err != nil {
+		return uint32(0), err
+	}
+	return v, nil
+}
+
+func (r *AvsReader) LastCompletedOpTaskCreatedBlockAtBlock(
+	ctx context.Context, atBlock uint64,
+) (uint32, error) {
+	v, err := r.AvsServiceBindings.TaskManager.LastCompletedOpTaskCreatedBlock(
+		&bind.CallOpts{BlockNumber: big.NewInt(int64(atBlock))},
 	)
 	if err != nil {
 		return uint32(0), err
@@ -169,4 +186,101 @@ func (r *AvsReader) GetNonSigningOperatorPubKeys(event taskmanager.ContractFinal
 
 	// r.logger.Debug("nonSigningOperatorPubKeys", "nonSigningOperatorPubKeys", nonSigningOperatorPubKeys)
 	return nonSigningOperatorPubKeys, nil
+}
+
+func (r *AvsReader) GetOperatorsFromIds(
+	opts *bind.CallOpts,
+	registryCoordinatorAddr common.Address,
+	operatorIds []sdktypes.OperatorId,
+) ([]common.Address, error) {
+	operatorIdsBytes := make([][32]byte, len(operatorIds))
+	for i, id := range operatorIds {
+		operatorIdsBytes[i] = id
+	}
+	operators, err := r.AvsServiceBindings.OperatorStateRetrieverExtended.GetOperatorsFromIds(opts, registryCoordinatorAddr, operatorIdsBytes)
+	if err != nil {
+		r.logger.Error("Cannot get operators from ids", "err", err)
+		return nil, err
+	}
+	return operators, nil
+}
+
+
+// func (r *AvsReader) GetOperatorsStakesForQuorum(
+// 	opts *bind.CallOpts,
+// 	registryCoordinatorAddr common.Address,
+// 	quorumNumbers sdktypes.QuorumNums,
+// 	operatorAddr []common.Address,
+// ) ([][]opstateretriever.OperatorStateRetrieverOperator, error) {
+// 	operatorStakes, err := r.AvsServiceBindings.OperatorStateRetrieverExtended.GetOperatorsStakesForQuorum(
+// 		opts,
+// 		registryCoordinatorAddr,
+// 		quorumNumbers.UnderlyingType(),
+// 		operatorAddr)
+// 	if err != nil {
+// 		return nil, sdktypes.WrapError(errors.New("Failed to get operators state"), err)
+// 	}
+// 	return operatorStakes, nil
+// }
+
+func (r *AvsReader) GetTypedOperatorsStakesForQuorumAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers sdktypes.QuorumNums, operatorAddr []common.Address, blockNumber sdktypes.BlockNum) (map[sdktypes.OperatorId]types.OperatorAvsState, error) {
+	operatorsAvsState := make(map[sdktypes.OperatorId]types.OperatorAvsState)
+	operatorsStakesInQuorums, err := r.AvsServiceBindings.OperatorStateRetrieverExtended.GetOperatorsStakesForQuorum(&bind.CallOpts{Context: ctx, BlockNumber: big.NewInt(int64(blockNumber))}, registryCoordinatorAddr, quorumNumbers.UnderlyingType(), operatorAddr)
+	if err != nil {
+		return nil, sdktypes.WrapError(errors.New("Failed to get operator state"), err)
+	}
+	numquorums := len(quorumNumbers)
+	if len(operatorsStakesInQuorums) != numquorums {
+		r.logger.Fatal("Number of quorums returned from GetOperatorsStakeInQuorumsAtBlock does not match number of quorums requested. Probably pointing to old contract or wrong implementation.", "service", "AvsRegistryServiceChainCaller")
+	}
+
+	for quorumIdx, quorumNum := range quorumNumbers {
+		for _, operator := range operatorsStakesInQuorums[quorumIdx] {
+			if _, ok := operatorsAvsState[operator.OperatorId]; ok {
+				operatorsAvsState[operator.OperatorId].StakePerQuorum[quorumNum] = operator.Stake
+			} else {
+				stakePerQuorum := make(map[sdktypes.QuorumNum]sdktypes.StakeAmount)
+				operatorsAvsState[operator.OperatorId] = types.OperatorAvsState{
+					OperatorId:     operator.OperatorId,
+					Operator:   operator.Operator,
+					StakePerQuorum: stakePerQuorum,
+				}
+				operatorsAvsState[operator.OperatorId].StakePerQuorum[quorumNum] = operator.Stake
+			}
+		}
+	}
+
+	return operatorsAvsState, nil
+}
+
+
+func (r *AvsReader) GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers sdktypes.QuorumNums, blockNumber sdktypes.BlockNum) (map[sdktypes.OperatorId]types.OperatorAvsState, error) {
+	operatorsAvsState := make(map[sdktypes.OperatorId]types.OperatorAvsState)
+	// Get operator state for each quorum by querying BLSOperatorStateRetriever (this call is why this service implementation is called ChainCaller)
+	operatorsStakesInQuorums, err := r.AvsServiceBindings.OperatorStateRetrieverExtended.GetOperatorState(&bind.CallOpts{Context: ctx}, registryCoordinatorAddr, quorumNumbers.UnderlyingType(), blockNumber)
+	if err != nil {
+		return nil, sdktypes.WrapError(errors.New("Failed to get operator state"), err)
+	}
+	numquorums := len(quorumNumbers)
+	if len(operatorsStakesInQuorums) != numquorums {
+		r.logger.Fatal("Number of quorums returned from GetOperatorsStakeInQuorumsAtBlock does not match number of quorums requested. Probably pointing to old contract or wrong implementation.", "service", "AvsRegistryServiceChainCaller")
+	}
+
+	for quorumIdx, quorumNum := range quorumNumbers {
+		for _, operator := range operatorsStakesInQuorums[quorumIdx] {
+			if _, ok := operatorsAvsState[operator.OperatorId]; ok {
+				operatorsAvsState[operator.OperatorId].StakePerQuorum[quorumNum] = operator.Stake
+			} else {
+				stakePerQuorum := make(map[sdktypes.QuorumNum]sdktypes.StakeAmount)
+				operatorsAvsState[operator.OperatorId] = types.OperatorAvsState{
+					OperatorId:     operator.OperatorId,
+					Operator:   operator.Operator,
+					StakePerQuorum: stakePerQuorum,
+				}
+				operatorsAvsState[operator.OperatorId].StakePerQuorum[quorumNum] = operator.Stake
+			}
+		}
+	}
+
+	return operatorsAvsState, nil
 }

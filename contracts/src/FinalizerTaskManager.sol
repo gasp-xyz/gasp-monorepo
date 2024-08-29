@@ -15,7 +15,6 @@ import {BLSSignatureChecker, IRegistryCoordinator, IBLSSignatureChecker, IBLSApk
 import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
 
 import "./IGaspMultiRollupServicePrimitives.sol";
-
 import "./IFinalizerTaskManager.sol";
 
 contract FinalizerTaskManager is
@@ -29,6 +28,7 @@ contract FinalizerTaskManager is
     using BN254 for BN254.G1Point;
 
     BLSSignatureChecker public blsSignatureChecker;
+    address public operatorStateRetrieverExtended;
 
     /* CONSTANT */
     // The number of blocks from the task initialization within which the aggregator has to respond to
@@ -54,6 +54,8 @@ contract FinalizerTaskManager is
 
     uint32 public lastOpTaskCreatedBlock;
     uint32 public lastCompletedOpTaskNum;
+    // If zero then no opTask has yet been completed
+    // And hence no reference opState has been established
     uint32 public lastCompletedOpTaskCreatedBlock;
     // uint32 lastCompletedTaskNum;
     bytes public lastCompletedOpTaskQuorumNumbers;
@@ -96,7 +98,7 @@ contract FinalizerTaskManager is
         _;
     }
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock)
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock, address _operatorStateRetrieverExtended)
         public
         initializer
     {
@@ -106,8 +108,23 @@ contract FinalizerTaskManager is
         generator = _generator;
         allowNonRootInit = _allowNonRootInit;
         blsSignatureChecker = BLSSignatureChecker(_blsSignatureCheckerAddress);
+        operatorStateRetrieverExtended = _operatorStateRetrieverExtended;
         taskResponseWindowBlock = _taskResponseWindowBlock;
         minOpTaskResponseWindowBlock = _minOpTaskResponseWindowBlock;
+    }
+
+    function pauseTrackingOpState()
+        public
+        onlyOwner
+    {
+        emit PauseTrackingOpState();
+    }
+
+    function resumeTrackingQuorums(bool resetTrackedQuorums)
+        public
+        onlyOwner
+    {
+        emit ResumeTrackingOpState(resetTrackedQuorums);
     }
 
     function updateBlsSignatureCheckerAddress(address _blsSignatureCheckerAddress) external onlyOwner{
@@ -117,8 +134,6 @@ contract FinalizerTaskManager is
 
     // TODO!!!
     // DEDUP ALL THIS!
-    // TODO!!!
-    // Reinit func!!
     
     /* FUNCTIONS */
     // NOTE: this function creates new task, assigns it a taskId

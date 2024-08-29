@@ -105,6 +105,8 @@ impl Operator {
         let mut blocks: SubscriptionStream<'_, _, _> =
             self.avs_contracts.ws_client.subscribe_blocks().await?;
 
+        info!("Subscribed to events - now watching subscription");
+
         loop {
             select! {
                 Some(stream_event) = stream.next() => match stream_event {

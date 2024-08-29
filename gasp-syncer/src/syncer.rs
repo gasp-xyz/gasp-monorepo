@@ -3,10 +3,11 @@ use crate::cli::CliArgs;
 
 use bindings::{
     finalizer_task_manager::{
-        FinalizerTaskManager, FinalizerTaskManagerCalls, FinalizerTaskManagerEvents, NewOpTaskCreatedFilter,
-        NewRdTaskCreatedFilter, OpTaskCompletedFilter, Operator as TMOperator, OperatorStateInfo,
-        OperatorsAdded, OperatorsQuorumCountUpdate, OperatorsStakeUpdate, QuorumsAdded,
-        QuorumsApkUpdate, QuorumsStakeUpdate, RdTaskCompletedFilter
+        FinalizerTaskManager, FinalizerTaskManagerCalls, FinalizerTaskManagerEvents,
+        NewOpTaskCreatedFilter, NewRdTaskCreatedFilter, OpTaskCompletedFilter,
+        Operator as TMOperator, OperatorStateInfo, OperatorsAdded, OperatorsQuorumCountUpdate,
+        OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate, QuorumsStakeUpdate,
+        RdTaskCompletedFilter,
     },
     gasp_multi_rollup_service::GaspMultiRollupService,
     shared_types::{G1Point, G2Point, OpTask, OpTaskResponse, RdTask, RdTaskResponse},
@@ -14,7 +15,7 @@ use bindings::{
 use ethers::providers::{Middleware, PendingTransaction, SubscriptionStream};
 use ethers::{
     abi::AbiDecode,
-    contract::{stream, EthEvent, LogMeta, EthLogDecode},
+    contract::{stream, EthEvent, EthLogDecode, LogMeta},
     providers::StreamExt,
     types::{Address, Bytes, Filter, U256},
 };
@@ -71,7 +72,9 @@ impl Syncer {
             GaspMultiRollupService::new(cfg.gasp_service_addr, target_client.clone());
         let maybe_arc_root_target_client = maybe_root_target_client.map(|x| Arc::new(x));
         let root_gasp_service_contract = if cfg.reinit || cfg.only_reinit {
-            let root_target_client = maybe_arc_root_target_client.clone().expect("should work here");
+            let root_target_client = maybe_arc_root_target_client
+                .clone()
+                .expect("should work here");
             Some(GaspMultiRollupService::new(
                 cfg.gasp_service_addr,
                 root_target_client.clone(),
@@ -408,18 +411,20 @@ impl Syncer {
         Ok(())
     }
 
-
     #[instrument(skip_all)]
     pub async fn reinit_eth(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
         // Get the root_target_client here, this should exist at this point
-        let root_target_client = self.root_target_client.clone().ok_or_eyre("failed to unwrap root_target_client")?;
+        let root_target_client = self
+            .root_target_client
+            .clone()
+            .ok_or_eyre("failed to unwrap root_target_client")?;
 
         // Build the root_task_manager here using the address from the source avs_contracts
         let task_manager_addr = self.avs_contracts.task_manager.address();
         let task_manager = FinalizerTaskManager::new(task_manager_addr, root_target_client.clone());
 
         // Create a new opTask via forceCreateNewOpTask
-        
+
         // TODO
         // Put the quorum_threshold_percentage and quorum_numbers into constants properly somewhere
         // Maybe put default values in the TaskManager contract itself
@@ -429,39 +434,54 @@ impl Syncer {
         println!("{:?}", force_task_txn_pending);
         let force_task_txn_receipt = force_task_txn_pending?.await?;
         println!("{:?}", force_task_txn_receipt);
-        let force_task_txn_receipt = force_task_txn_receipt.ok_or_eyre("force_task_txn_receipt is None")?;
+        let force_task_txn_receipt =
+            force_task_txn_receipt.ok_or_eyre("force_task_txn_receipt is None")?;
         let new_op_task_created_event = force_task_txn_receipt.logs.into_iter().find_map(|r| {
-            if let Ok(FinalizerTaskManagerEvents::NewOpTaskCreatedFilter(decoded)) = FinalizerTaskManagerEvents::decode_log(&r.into()){
+            if let Ok(FinalizerTaskManagerEvents::NewOpTaskCreatedFilter(decoded)) =
+                FinalizerTaskManagerEvents::decode_log(&r.into())
+            {
                 Some(decoded)
             } else {
                 None
             }
         });
 
-        let new_op_task_created_event = new_op_task_created_event.ok_or_eyre("new_op_task_created_event is None")?;
+        let new_op_task_created_event =
+            new_op_task_created_event.ok_or_eyre("new_op_task_created_event is None")?;
 
         let task = new_op_task_created_event.task;
 
         let operators_state_info = self.clone().get_operators_state_info(task.clone()).await?;
         println!("{:?}", operators_state_info);
-        let operators_state_info_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
-            operators_state_info.clone().encode().into_iter()
-        ).collect::<Vec<_>>().as_ref());
+        let operators_state_info_hash = Keccak256::hash(
+            vec![0u8; 31]
+                .into_iter()
+                .chain(vec![32u8])
+                .chain(operators_state_info.clone().encode().into_iter())
+                .collect::<Vec<_>>()
+                .as_ref(),
+        );
         println!("{:?}", operators_state_info_hash);
 
-        let task_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
-            task.clone().encode().into_iter()
-        ).collect::<Vec<_>>().as_ref());
-
+        let task_hash = Keccak256::hash(
+            vec![0u8; 31]
+                .into_iter()
+                .chain(vec![32u8])
+                .chain(task.clone().encode().into_iter())
+                .collect::<Vec<_>>()
+                .as_ref(),
+        );
 
         // Respond to the opTask via forceRespondToOpTask
 
-        let force_respond_txn = task_manager.force_respond_to_op_task(task,
-            OpTaskResponse{
+        let force_respond_txn = task_manager.force_respond_to_op_task(
+            task,
+            OpTaskResponse {
                 reference_task_index: new_op_task_created_event.task_index,
                 reference_task_hash: task_hash.into(),
                 operators_state_info_hash: operators_state_info_hash.into(),
-        });
+            },
+        );
         println!("{:?}", force_respond_txn);
         let force_respond_txn_pending = force_respond_txn.send().await;
         println!("{:?}", force_respond_txn_pending);

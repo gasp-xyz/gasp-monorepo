@@ -78,7 +78,7 @@ async function mineEthBlocks(blocks: number) {
 }
 
 describe('AVS Finalizer', () => {
-    it('opt-in / opt-out', async () => {
+    it.only('opt-in / opt-out', async () => {
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -90,7 +90,9 @@ describe('AVS Finalizer', () => {
         const POperatorAddress = waitForOperatorRegistered(publicClient as PublicClient);
         await dockerUtils.startContainer();
         const operatorAddress = await POperatorAddress;
-        await waitFor(publicClient, 1, "NewOpTaskCreated");
+        console.info("Waiting for opTaskCreated Event...");
+        await waitFor(publicClient, 1, "NewRdTaskCreated");
+        console.info("...Done waiting for opTaskCreated Event");
         const res = await publicClient.readContract({
             address: registryCoordinatorAddress,
             abi: registryCoordinator.abi,
@@ -104,6 +106,7 @@ describe('AVS Finalizer', () => {
         const statusBeforeOptOut = await getLatestQuorumUpdate(publicClient);
 
         const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
+        console.info("Opting out...");
         // opt-out
         await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
             console.log(result);
@@ -111,6 +114,7 @@ describe('AVS Finalizer', () => {
             console.error(err);
         });
         const deRegistered = await PoperatorDeregisteredAddress;
+        console.info("...Done waiting for deregistration");
         expect(deRegistered).toBe(operatorAddress);
 
         const statusAfter = await publicClient.readContract({
