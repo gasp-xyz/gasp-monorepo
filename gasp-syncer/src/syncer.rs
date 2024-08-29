@@ -6,7 +6,7 @@ use bindings::{
         FinalizerTaskManager, FinalizerTaskManagerCalls, FinalizerTaskManagerEvents, NewOpTaskCreatedFilter,
         NewRdTaskCreatedFilter, OpTaskCompletedFilter, Operator as TMOperator, OperatorStateInfo,
         OperatorsAdded, OperatorsQuorumCountUpdate, OperatorsStakeUpdate, QuorumsAdded,
-        QuorumsApkUpdate, QuorumsStakeUpdate, RdTaskCompletedFilter,
+        QuorumsApkUpdate, QuorumsStakeUpdate, RdTaskCompletedFilter
     },
     gasp_multi_rollup_service::GaspMultiRollupService,
     shared_types::{G1Point, G2Point, OpTask, OpTaskResponse, RdTask, RdTaskResponse},
@@ -14,7 +14,7 @@ use bindings::{
 use ethers::providers::{Middleware, PendingTransaction, SubscriptionStream};
 use ethers::{
     abi::AbiDecode,
-    contract::{stream, EthEvent, LogMeta},
+    contract::{stream, EthEvent, LogMeta, EthLogDecode},
     providers::StreamExt,
     types::{Address, Bytes, Filter, U256},
 };
@@ -31,6 +31,18 @@ use tokio::select;
 use tokio::time::{sleep, Duration};
 use tokio::try_join;
 use tracing::{debug, error, info, instrument};
+
+// TODO
+// In addition to reinit we could also have a function in the syncer that would cherry pick the task and its response
+// to be admin forced on the alt-l1. We could either provide the taskIndex as the input or we can provide number of tasks to
+// sync or we can provide the block number (taskCreatedBlock) to sync to...
+// But rdTasks and opTasks make this fairly annoying to do...
+
+// TODO!!
+// Check the receipt status!
+
+// TODO!
+// Maybe also check logs.removed?
 
 type QuorumNum = u8;
 
@@ -126,6 +138,10 @@ impl Syncer {
                                 println!("{:?}", txn);
                                 let call = match FinalizerTaskManagerCalls::decode(txn.input)?{
                                     FinalizerTaskManagerCalls::RespondToOpTask(c) => c,
+                                    FinalizerTaskManagerCalls::ForceRespondToOpTask(_) => {
+                                        tracing::error!("The call that resulted in the OpTaskCompleted event was a ForceRespondToOpTask call. This cannot be synced without a admin reinit");
+                                        return Err(eyre!("The call that resulted in the OpTaskCompleted event was a ForceRespondToOpTask call. This cannot be synced without a admin reinit"))
+                                    }
                                     _ => {
                                         tracing::error!("wrong call decoded");
                                         return Err(eyre!("wrong call decoded"))
@@ -299,6 +315,8 @@ impl Syncer {
                 .task_manager
                 .id_to_task_status(0u8, task_num)
                 .await?;
+            // TODO
+            // Use a constant for the enum variant index
             if task_status != 4 {
                 tracing::error!(
                     "no completed tasks for reinit {:?}",
@@ -394,113 +412,61 @@ impl Syncer {
     #[instrument(skip_all)]
     pub async fn reinit_eth(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
         // Get the root_target_client here, this should exist at this point
-        let root_target_client = self.root_target_client.clone().ok_or_eyre("failed to unwrap maybe_root_target_client")?;
+        let root_target_client = self.root_target_client.clone().ok_or_eyre("failed to unwrap root_target_client")?;
 
         // Build the root_task_manager here using the address from the source avs_contracts
         let task_manager_addr = self.avs_contracts.task_manager.address();
         let task_manager = FinalizerTaskManager::new(task_manager_addr, root_target_client.clone());
 
-        // let update_txn = self.clone().gasp_service_contract.process_eigen_rd_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature);
-        // println!("{:?}", update_txn);
-        // let update_txn_pending = update_txn.send().await;
-        // println!("{:?}", update_txn_pending);
-        // let update_txn_receipt = update_txn_pending?.await?;
-        // println!("{:?}", update_txn_receipt);
+        // Create a new opTask via forceCreateNewOpTask
+        
+        // TODO
+        // Put the quorum_threshold_percentage and quorum_numbers into constants properly somewhere
+        // Maybe put default values in the TaskManager contract itself
+        let force_task_txn = task_manager.force_create_new_op_task(66u32, vec![0u8].into());
+        println!("{:?}", force_task_txn);
+        let force_task_txn_pending = force_task_txn.send().await;
+        println!("{:?}", force_task_txn_pending);
+        let force_task_txn_receipt = force_task_txn_pending?.await?;
+        println!("{:?}", force_task_txn_receipt);
+        let force_task_txn_receipt = force_task_txn_receipt.ok_or_eyre("force_task_txn_receipt is None")?;
+        let new_op_task_created_event = force_task_txn_receipt.logs.into_iter().find_map(|r| {
+            if let Ok(FinalizerTaskManagerEvents::NewOpTaskCreatedFilter(decoded)) = FinalizerTaskManagerEvents::decode_log(&r.into()){
+                Some(decoded)
+            } else {
+                None
+            }
+        });
 
-        // let latest_completed_op_task_created_block = self
-        //     .gasp_service_contract
-        //     .latest_completed_op_task_created_block()
-        //     .await?;
-        // let latest_completed_op_task_quorum_numbers =
-        //     self.gasp_service_contract.quorum_numbers().await?;
-        // let latest_completed_op_task_quorum_threshold_percentage = self
-        //     .gasp_service_contract
-        //     .quorum_threshold_percentage()
-        //     .await?;
+        let new_op_task_created_event = new_op_task_created_event.ok_or_eyre("new_op_task_created_event is None")?;
 
-        // // TODO!!
-        // // Get the latest block from source chain and query the following three with it!
-        // let task_num = self
-        //     .clone()
-        //     .avs_contracts
-        //     .task_manager
-        //     .last_completed_op_task_num()
-        //     .await?;
-        // let block_num = self
-        //     .clone()
-        //     .avs_contracts
-        //     .task_manager
-        //     .last_completed_op_task_created_block()
-        //     .await?;
-        // let latest_pending_state_hash = self
-        //     .clone()
-        //     .avs_contracts
-        //     .task_manager
-        //     .latest_pending_state_hash()
-        //     .await?;
+        let task = new_op_task_created_event.task;
 
-        // // Unfortunately latestTaskNum and LastCompletedTaskNum both start at 0
-        // // So if lastCompletedTaskNum is 0 then check if it was infact completed
-        // if task_num.is_zero() {
-        //     let task_status = self
-        //         .clone()
-        //         .avs_contracts
-        //         .task_manager
-        //         .id_to_task_status(0u8, task_num)
-        //         .await?;
-        //     if task_status != 4 {
-        //         tracing::error!(
-        //             "no completed tasks for reinit {:?}",
-        //             latest_completed_op_task_created_block
-        //         );
-        //         return Err(eyre!(
-        //             "no completed tasks for reinit {:?}",
-        //             latest_completed_op_task_created_block
-        //         ));
-        //     }
-        // }
+        let operators_state_info = self.clone().get_operators_state_info(task.clone()).await?;
+        println!("{:?}", operators_state_info);
+        let operators_state_info_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
+            operators_state_info.clone().encode().into_iter()
+        ).collect::<Vec<_>>().as_ref());
+        println!("{:?}", operators_state_info_hash);
 
-        // let mut block_events: Vec<NewOpTaskCreatedFilter> = self
-        //     .clone()
-        //     .avs_contracts
-        //     .task_manager
-        //     .event_with_filter(
-        //         Filter::new()
-        //             .event(&NewOpTaskCreatedFilter::abi_signature())
-        //             .select(u64::from(block_num)),
-        //     )
-        //     .query()
-        //     .await?;
+        let task_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
+            task.clone().encode().into_iter()
+        ).collect::<Vec<_>>().as_ref());
 
-        // let mut last_task = match block_events.pop() {
-        //     Some(e) if e.task_index == task_num => e.task,
-        //     _ => {
-        //         tracing::error!("task not in events for reinit {:?}", task_num);
-        //         return Err(eyre!("task not in events for reinit {:?}", task_num));
-        //     }
-        // };
 
-        // last_task.last_completed_op_task_created_block = latest_completed_op_task_created_block;
-        // last_task.last_completed_op_task_quorum_numbers = latest_completed_op_task_quorum_numbers;
-        // last_task.last_completed_op_task_quorum_threshold_percentage =
-        //     latest_completed_op_task_quorum_threshold_percentage;
+        // Respond to the opTask via forceRespondToOpTask
 
-        // let operators_state_info = self
-        //     .clone()
-        //     .get_operators_state_info(last_task.clone())
-        //     .await?;
-
-        // let reinit_txn = self
-        //     .clone()
-        //     .root_gasp_service_contract
-        //     .clone()
-        //     .expect("should work in reinit")
-        //     .process_eigen_reinit(last_task, operators_state_info, latest_pending_state_hash);
-        // println!("{:?}", reinit_txn);
-        // let reinit_txn_pending = reinit_txn.send().await;
-        // println!("{:?}", reinit_txn_pending);
-        // let reinit_txn_receipt = reinit_txn_pending?.await?;
-        // println!("{:?}", reinit_txn_receipt);
+        let force_respond_txn = task_manager.force_respond_to_op_task(task,
+            OpTaskResponse{
+                reference_task_index: new_op_task_created_event.task_index,
+                reference_task_hash: task_hash.into(),
+                operators_state_info_hash: operators_state_info_hash.into(),
+        });
+        println!("{:?}", force_respond_txn);
+        let force_respond_txn_pending = force_respond_txn.send().await;
+        println!("{:?}", force_respond_txn_pending);
+        let force_respond_txn_receipt = force_respond_txn_pending?.await?;
+        println!("{:?}", force_respond_txn_receipt);
 
         Ok(())
     }
