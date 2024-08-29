@@ -37,6 +37,7 @@ env:
   DEFAULT_E2E_REPO_BRANCH: eth-rollup-develop
   AVS_AGGREGATOR_VERSION: ${{ inputs.globalVersion }}
   AVS_FINALIZER_VERSION: ${{ inputs.globalVersion }}
+  GASP_SYNCER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_UPDATER_VERSION: ${{ inputs.globalVersion }}
   MANGATA_NODE_VERSION: ${{ inputs.substrateNodeVersion }}
@@ -44,13 +45,14 @@ env:
 jobs:
   run-e2e-tests:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Start env
-        run: bash -c "docker compose up --wait || true"
+        run: docker compose up -d
 
       - name: Use custom branch in e2e tests repository if it exists, otherwise use default branch
         id: e2e
@@ -111,6 +113,9 @@ jobs:
 
   run-avs-tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test: [ "test-opt-out", "test-corrupted" ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -131,7 +136,7 @@ jobs:
 
       - name: FINALIZER tests - run tests
         working-directory: avs-finalizer/tests/
-        run: yarn test
+        run: yarn ${{ matrix.test }}
 
       - name: Get avs-aggregator logs
         if: success() || failure()

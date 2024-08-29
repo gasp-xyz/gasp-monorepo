@@ -59,17 +59,38 @@ type IBLSSignatureCheckerQuorumStakeTotals struct {
 	TotalStakeForQuorum  []*big.Int
 }
 
-// IFinalizerTaskManagerTask is an auto generated low-level Go binding around an user-defined struct.
-type IFinalizerTaskManagerTask struct {
-	BlockNumber               *big.Int
-	TaskCreatedBlock          uint32
-	QuorumNumbers             []byte
-	QuorumThresholdPercentage uint32
+// IFinalizerTaskManagerOpTask is an auto generated low-level Go binding around an user-defined struct.
+type IFinalizerTaskManagerOpTask struct {
+	TaskNum                                      uint32
+	TaskCreatedBlock                             uint32
+	LastCompletedOpTaskCreatedBlock              uint32
+	QuorumNumbers                                []byte
+	QuorumThresholdPercentage                    uint32
+	LastCompletedOpTaskQuorumNumbers             []byte
+	LastCompletedOpTaskQuorumThresholdPercentage uint32
 }
 
-// IFinalizerTaskManagerTaskResponse is an auto generated low-level Go binding around an user-defined struct.
-type IFinalizerTaskManagerTaskResponse struct {
+// IFinalizerTaskManagerOpTaskResponse is an auto generated low-level Go binding around an user-defined struct.
+type IFinalizerTaskManagerOpTaskResponse struct {
+	ReferenceTaskIndex     uint32
+	ReferenceTaskHash      [32]byte
+	OperatorsStateInfoHash [32]byte
+}
+
+// IFinalizerTaskManagerRdTask is an auto generated low-level Go binding around an user-defined struct.
+type IFinalizerTaskManagerRdTask struct {
+	TaskNum                                      uint32
+	BlockNumber                                  *big.Int
+	TaskCreatedBlock                             uint32
+	LastCompletedOpTaskCreatedBlock              uint32
+	LastCompletedOpTaskQuorumNumbers             []byte
+	LastCompletedOpTaskQuorumThresholdPercentage uint32
+}
+
+// IFinalizerTaskManagerRdTaskResponse is an auto generated low-level Go binding around an user-defined struct.
+type IFinalizerTaskManagerRdTaskResponse struct {
 	ReferenceTaskIndex uint32
+	ReferenceTaskHash  [32]byte
 	BlockHash          [32]byte
 	StorageProofHash   [32]byte
 	PendingStateHash   [32]byte
@@ -81,6 +102,59 @@ type IFinalizerTaskManagerTaskResponseMetadata struct {
 	HashOfNonSigners   [32]byte
 	QuroumStakeTotals  []*big.Int
 	QuroumStakeSigned  []*big.Int
+}
+
+// IGaspMultiRollupServicePrimitivesOperatorStateInfo is an auto generated low-level Go binding around an user-defined struct.
+type IGaspMultiRollupServicePrimitivesOperatorStateInfo struct {
+	OperatorsStateChanged      bool
+	QuorumsRemoved             []uint8
+	QuorumsAdded               []IGaspMultiRollupServicePrimitivesQuorumsAdded
+	QuorumsStakeUpdate         []IGaspMultiRollupServicePrimitivesQuorumsStakeUpdate
+	QuorumsApkUpdate           []IGaspMultiRollupServicePrimitivesQuorumsApkUpdate
+	OperatorsRemoved           [][32]byte
+	OperatorsAdded             []IGaspMultiRollupServicePrimitivesOperatorsAdded
+	OperatorsStakeUpdate       []IGaspMultiRollupServicePrimitivesOperatorsStakeUpdate
+	OperatorsQuorumCountUpdate []IGaspMultiRollupServicePrimitivesOperatorsQuorumCountUpdate
+}
+
+// IGaspMultiRollupServicePrimitivesOperatorsAdded is an auto generated low-level Go binding around an user-defined struct.
+type IGaspMultiRollupServicePrimitivesOperatorsAdded struct {
+	OperatorId      [32]byte
+	QuorumForStakes []uint8
+	QuorumStakes    []*big.Int
+	QuorumCount     uint8
+}
+
+// IGaspMultiRollupServicePrimitivesOperatorsQuorumCountUpdate is an auto generated low-level Go binding around an user-defined struct.
+type IGaspMultiRollupServicePrimitivesOperatorsQuorumCountUpdate struct {
+	OperatorId  [32]byte
+	QuorumCount uint8
+}
+
+// IGaspMultiRollupServicePrimitivesOperatorsStakeUpdate is an auto generated low-level Go binding around an user-defined struct.
+type IGaspMultiRollupServicePrimitivesOperatorsStakeUpdate struct {
+	OperatorId      [32]byte
+	QuorumForStakes []uint8
+	QuorumStakes    []*big.Int
+}
+
+// IGaspMultiRollupServicePrimitivesQuorumsAdded is an auto generated low-level Go binding around an user-defined struct.
+type IGaspMultiRollupServicePrimitivesQuorumsAdded struct {
+	QuorumNumber uint8
+	QuorumStake  *big.Int
+	QuorumApk    BN254G1Point
+}
+
+// IGaspMultiRollupServicePrimitivesQuorumsApkUpdate is an auto generated low-level Go binding around an user-defined struct.
+type IGaspMultiRollupServicePrimitivesQuorumsApkUpdate struct {
+	QuorumNumber uint8
+	QuorumApk    BN254G1Point
+}
+
+// IGaspMultiRollupServicePrimitivesQuorumsStakeUpdate is an auto generated low-level Go binding around an user-defined struct.
+type IGaspMultiRollupServicePrimitivesQuorumsStakeUpdate struct {
+	QuorumNumber uint8
+	QuorumStake  *big.Int
 }
 
 // OperatorStateRetrieverCheckSignaturesIndices is an auto generated low-level Go binding around an user-defined struct.
@@ -100,8 +174,8 @@ type OperatorStateRetrieverOperator struct {
 
 // ContractFinalizerTaskManagerMetaData contains all meta data concerning the ContractFinalizerTaskManager contract.
 var ContractFinalizerTaskManagerMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"constructor\",\"inputs\":[{\"name\":\"_registryCoordinator\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"},{\"name\":\"_taskResponseWindowBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"aggregator\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"allTaskHashes\",\"inputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"allTaskResponses\",\"inputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"blsApkRegistry\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIBLSApkRegistry\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"checkSignatures\",\"inputs\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"referenceBlockNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"params\",\"type\":\"tuple\",\"internalType\":\"structIBLSSignatureChecker.NonSignerStakesAndSignature\",\"components\":[{\"name\":\"nonSignerQuorumBitmapIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerPubkeys\",\"type\":\"tuple[]\",\"internalType\":\"structBN254.G1Point[]\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"quorumApks\",\"type\":\"tuple[]\",\"internalType\":\"structBN254.G1Point[]\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"apkG2\",\"type\":\"tuple\",\"internalType\":\"structBN254.G2Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"},{\"name\":\"Y\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"}]},{\"name\":\"sigma\",\"type\":\"tuple\",\"internalType\":\"structBN254.G1Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"quorumApkIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"totalStakeIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerStakeIndices\",\"type\":\"uint32[][]\",\"internalType\":\"uint32[][]\"}]}],\"outputs\":[{\"name\":\"\",\"type\":\"tuple\",\"internalType\":\"structIBLSSignatureChecker.QuorumStakeTotals\",\"components\":[{\"name\":\"signedStakeForQuorum\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"},{\"name\":\"totalStakeForQuorum\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"}]},{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"createNewTask\",\"inputs\":[{\"name\":\"blockNumber\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"quorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"delegation\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIDelegationManager\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"generator\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getCheckSignaturesIndices\",\"inputs\":[{\"name\":\"registryCoordinator\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"},{\"name\":\"referenceBlockNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"nonSignerOperatorIds\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}],\"outputs\":[{\"name\":\"\",\"type\":\"tuple\",\"internalType\":\"structOperatorStateRetriever.CheckSignaturesIndices\",\"components\":[{\"name\":\"nonSignerQuorumBitmapIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"quorumApkIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"totalStakeIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerStakeIndices\",\"type\":\"uint32[][]\",\"internalType\":\"uint32[][]\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getLatestPendingStateHash\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getOperatorState\",\"inputs\":[{\"name\":\"registryCoordinator\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"blockNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"tuple[][]\",\"internalType\":\"structOperatorStateRetriever.Operator[][]\",\"components\":[{\"name\":\"operator\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"operatorId\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"stake\",\"type\":\"uint96\",\"internalType\":\"uint96\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getOperatorState\",\"inputs\":[{\"name\":\"registryCoordinator\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"},{\"name\":\"operatorId\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blockNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"\",\"type\":\"tuple[][]\",\"internalType\":\"structOperatorStateRetriever.Operator[][]\",\"components\":[{\"name\":\"operator\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"operatorId\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"stake\",\"type\":\"uint96\",\"internalType\":\"uint96\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getQuorumBitmapsAtBlockNumber\",\"inputs\":[{\"name\":\"registryCoordinator\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"},{\"name\":\"operatorIds\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"},{\"name\":\"blockNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\",\"internalType\":\"uint256[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getTaskResponseWindowBlock\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"initialize\",\"inputs\":[{\"name\":\"_pauserRegistry\",\"type\":\"address\",\"internalType\":\"contractIPauserRegistry\"},{\"name\":\"initialOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_aggregator\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_generator\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"latestTaskNum\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"pause\",\"inputs\":[{\"name\":\"newPausedStatus\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"pauseAll\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"paused\",\"inputs\":[{\"name\":\"index\",\"type\":\"uint8\",\"internalType\":\"uint8\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"paused\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"pauserRegistry\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIPauserRegistry\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"registryCoordinator\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"respondToTask\",\"inputs\":[{\"name\":\"task\",\"type\":\"tuple\",\"internalType\":\"structIFinalizerTaskManager.Task\",\"components\":[{\"name\":\"blockNumber\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"taskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"quorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"taskResponse\",\"type\":\"tuple\",\"internalType\":\"structIFinalizerTaskManager.TaskResponse\",\"components\":[{\"name\":\"referenceTaskIndex\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"blockHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"storageProofHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"pendingStateHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"nonSignerStakesAndSignature\",\"type\":\"tuple\",\"internalType\":\"structIBLSSignatureChecker.NonSignerStakesAndSignature\",\"components\":[{\"name\":\"nonSignerQuorumBitmapIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerPubkeys\",\"type\":\"tuple[]\",\"internalType\":\"structBN254.G1Point[]\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"quorumApks\",\"type\":\"tuple[]\",\"internalType\":\"structBN254.G1Point[]\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"apkG2\",\"type\":\"tuple\",\"internalType\":\"structBN254.G2Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"},{\"name\":\"Y\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"}]},{\"name\":\"sigma\",\"type\":\"tuple\",\"internalType\":\"structBN254.G1Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"quorumApkIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"totalStakeIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerStakeIndices\",\"type\":\"uint32[][]\",\"internalType\":\"uint32[][]\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"setPauserRegistry\",\"inputs\":[{\"name\":\"newPauserRegistry\",\"type\":\"address\",\"internalType\":\"contractIPauserRegistry\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"setStaleStakesForbidden\",\"inputs\":[{\"name\":\"value\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"stakeRegistry\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIStakeRegistry\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"staleStakesForbidden\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"taskNumber\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"trySignatureAndApkVerification\",\"inputs\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"apk\",\"type\":\"tuple\",\"internalType\":\"structBN254.G1Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"apkG2\",\"type\":\"tuple\",\"internalType\":\"structBN254.G2Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"},{\"name\":\"Y\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"}]},{\"name\":\"sigma\",\"type\":\"tuple\",\"internalType\":\"structBN254.G1Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]}],\"outputs\":[{\"name\":\"pairingSuccessful\",\"type\":\"bool\",\"internalType\":\"bool\"},{\"name\":\"siganatureIsValid\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"unpause\",\"inputs\":[{\"name\":\"newPausedStatus\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"uint8\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"NewTaskCreated\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"},{\"name\":\"task\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.Task\",\"components\":[{\"name\":\"blockNumber\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"taskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"quorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Paused\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newPausedStatus\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"PauserRegistrySet\",\"inputs\":[{\"name\":\"pauserRegistry\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"contractIPauserRegistry\"},{\"name\":\"newPauserRegistry\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"contractIPauserRegistry\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"StaleStakesForbiddenUpdate\",\"inputs\":[{\"name\":\"value\",\"type\":\"bool\",\"indexed\":false,\"internalType\":\"bool\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"TaskCompleted\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"},{\"name\":\"blockHash\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"TaskResponded\",\"inputs\":[{\"name\":\"taskResponse\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.TaskResponse\",\"components\":[{\"name\":\"referenceTaskIndex\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"blockHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"storageProofHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"pendingStateHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"taskResponseMetadata\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.TaskResponseMetadata\",\"components\":[{\"name\":\"taskResponsedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"hashOfNonSigners\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"quroumStakeTotals\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"},{\"name\":\"quroumStakeSigned\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Unpaused\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newPausedStatus\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"}],\"anonymous\":false}]",
-	Bin: "0x6101206040523480156200001257600080fd5b50604051620057d1380380620057d18339810160408190526200003591620001f7565b81806001600160a01b03166080816001600160a01b031681525050806001600160a01b031663683048356040518163ffffffff1660e01b8152600401602060405180830381865afa1580156200008f573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190620000b591906200023e565b6001600160a01b031660a0816001600160a01b031681525050806001600160a01b0316635df459466040518163ffffffff1660e01b8152600401602060405180830381865afa1580156200010d573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906200013391906200023e565b6001600160a01b031660c0816001600160a01b03168152505060a0516001600160a01b031663df5cf7236040518163ffffffff1660e01b8152600401602060405180830381865afa1580156200018d573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190620001b391906200023e565b6001600160a01b031660e052506097805460ff1916600117905563ffffffff16610100525062000265565b6001600160a01b0381168114620001f457600080fd5b50565b600080604083850312156200020b57600080fd5b82516200021881620001de565b602084015190925063ffffffff811681146200023357600080fd5b809150509250929050565b6000602082840312156200025157600080fd5b81516200025e81620001de565b9392505050565b60805160a05160c05160e051610100516154e8620002e96000396000818161051e0152612cfd0152600081816104d4015261213601526000818161038f01526123190152600081816103b6015281816124ef01526126b10152600081816103f001528181610d8501528181611e0101528181611f9901526121d301526154e86000f3fe608060405234801561001057600080fd5b50600436106101fb5760003560e01c80636b92787e1161011a5780638da5cb5b116100ad578063e4e3ad771161007c578063e4e3ad77146104f6578063f2fde38b14610509578063f5c9899d1461051c578063f8c8765e14610542578063fabc1cbc1461055557600080fd5b80638da5cb5b14610490578063b98d0908146104a1578063cefdc1d4146104ae578063df5cf723146104cf57600080fd5b806372d18e8d116100e957806372d18e8d1461043b5780637afa1eed1461045a578063886f11951461046d5780638b00ce7c1461048057600080fd5b80636b92787e146103d85780636d14a987146103eb5780636efb463614610412578063715018a61461043357600080fd5b8063416c7e5e116101925780635c155662116101615780635c155662146103625780635c975abb146103825780635df459461461038a57806368304835146103b157600080fd5b8063416c7e5e146102f45780634f739f7414610307578063595c6a67146103275780635ac86ab71461032f57600080fd5b8063245a7bfc116101ce578063245a7bfc146102695780632cb223d5146102945780632d89f6fc146102b45780633563b0d1146102d457600080fd5b80630373408d1461020057806310d67a2f14610217578063136439dd1461022c578063171f1d5b1461023f575b600080fd5b60ce545b6040519081526020015b60405180910390f35b61022a610225366004614084565b610568565b005b61022a61023a3660046140a1565b610624565b61025261024d36600461421f565b610763565b60408051921515835290151560208301520161020e565b60cc5461027c906001600160a01b031681565b6040516001600160a01b03909116815260200161020e565b6102046102a236600461428d565b60cb6020526000908152604090205481565b6102046102c236600461428d565b60ca6020526000908152604090205481565b6102e76102e23660046142aa565b6108ed565b60405161020e9190614405565b61022a61030236600461442d565b610d83565b61031a610315366004614492565b610ef8565b60405161020e9190614596565b61022a61161e565b61035261033d366004614660565b606654600160ff9092169190911b9081161490565b604051901515815260200161020e565b6103756103703660046146a0565b6116e5565b60405161020e9190614751565b606654610204565b61027c7f000000000000000000000000000000000000000000000000000000000000000081565b61027c7f000000000000000000000000000000000000000000000000000000000000000081565b61022a6103e6366004614795565b6118ad565b61027c7f000000000000000000000000000000000000000000000000000000000000000081565b610425610420366004614a6c565b611a4e565b60405161020e929190614b2c565b61022a612966565b60c95463ffffffff165b60405163ffffffff909116815260200161020e565b60cd5461027c906001600160a01b031681565b60655461027c906001600160a01b031681565b60c9546104459063ffffffff1681565b6033546001600160a01b031661027c565b6097546103529060ff1681565b6104c16104bc366004614b75565b61297a565b60405161020e929190614bb7565b61027c7f000000000000000000000000000000000000000000000000000000000000000081565b61022a610504366004614bf0565b612b0c565b61022a610517366004614084565b612f86565b7f0000000000000000000000000000000000000000000000000000000000000000610445565b61022a610550366004614c64565b612ffc565b61022a6105633660046140a1565b61314d565b606560009054906101000a90046001600160a01b03166001600160a01b031663eab66d7a6040518163ffffffff1660e01b8152600401602060405180830381865afa1580156105bb573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906105df9190614cc0565b6001600160a01b0316336001600160a01b0316146106185760405162461bcd60e51b815260040161060f90614cdd565b60405180910390fd5b610621816132a9565b50565b60655460405163237dfb4760e11b81523360048201526001600160a01b03909116906346fbf68e90602401602060405180830381865afa15801561066c573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906106909190614d27565b6106ac5760405162461bcd60e51b815260040161060f90614d44565b606654818116146107255760405162461bcd60e51b815260206004820152603860248201527f5061757361626c652e70617573653a20696e76616c696420617474656d70742060448201527f746f20756e70617573652066756e6374696f6e616c6974790000000000000000606482015260840161060f565b606681905560405181815233907fab40a374bc51de372200a8bc981af8c9ecdc08dfdaef0bb6e09f88f3c616ef3d906020015b60405180910390a250565b60008060007f30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001878760000151886020015188600001516000600281106107ab576107ab614d8c565b60200201518951600160200201518a602001516000600281106107d0576107d0614d8c565b60200201518b602001516001600281106107ec576107ec614d8c565b602090810291909101518c518d8301516040516108499a99989796959401988952602089019790975260408801959095526060870193909352608086019190915260a085015260c084015260e08301526101008201526101200190565b6040516020818303038152906040528051906020012060001c61086c9190614da2565b90506108df61088561087e88846133a0565b8690613437565b61088d6134cb565b6108d56108c6856108c0604080518082018252600080825260209182015281518083019092526001825260029082015290565b906133a0565b6108cf8c61358b565b90613437565b886201d4c061361b565b909890975095505050505050565b60606000846001600160a01b031663683048356040518163ffffffff1660e01b8152600401602060405180830381865afa15801561092f573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906109539190614cc0565b90506000856001600160a01b0316639e9923c26040518163ffffffff1660e01b8152600401602060405180830381865afa158015610995573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906109b99190614cc0565b90506000866001600160a01b0316635df459466040518163ffffffff1660e01b8152600401602060405180830381865afa1580156109fb573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610a1f9190614cc0565b9050600086516001600160401b03811115610a3c57610a3c6140ba565b604051908082528060200260200182016040528015610a6f57816020015b6060815260200190600190039081610a5a5790505b50905060005b8751811015610d77576000888281518110610a9257610a92614d8c565b0160200151604051638902624560e01b815260f89190911c6004820181905263ffffffff8a16602483015291506000906001600160a01b03871690638902624590604401600060405180830381865afa158015610af3573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f19168201604052610b1b9190810190614dc4565b905080516001600160401b03811115610b3657610b366140ba565b604051908082528060200260200182016040528015610b8157816020015b6040805160608101825260008082526020808301829052928201528252600019909201910181610b545790505b50848481518110610b9457610b94614d8c565b602002602001018190525060005b8151811015610d61576040518060600160405280876001600160a01b03166347b314e8858581518110610bd757610bd7614d8c565b60200260200101516040518263ffffffff1660e01b8152600401610bfd91815260200190565b602060405180830381865afa158015610c1a573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610c3e9190614cc0565b6001600160a01b03168152602001838381518110610c5e57610c5e614d8c565b60200260200101518152602001896001600160a01b031663fa28c627858581518110610c8c57610c8c614d8c565b60209081029190910101516040516001600160e01b031960e084901b168152600481019190915260ff8816602482015263ffffffff8f166044820152606401602060405180830381865afa158015610ce8573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610d0c9190614e54565b6001600160601b0316815250858581518110610d2a57610d2a614d8c565b60200260200101518281518110610d4357610d43614d8c565b60200260200101819052508080610d5990614e93565b915050610ba2565b5050508080610d6f90614e93565b915050610a75565b50979650505050505050565b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316638da5cb5b6040518163ffffffff1660e01b8152600401602060405180830381865afa158015610de1573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610e059190614cc0565b6001600160a01b0316336001600160a01b031614610eb15760405162461bcd60e51b815260206004820152605c60248201527f424c535369676e6174757265436865636b65722e6f6e6c79436f6f7264696e6160448201527f746f724f776e65723a2063616c6c6572206973206e6f7420746865206f776e6560648201527f72206f6620746865207265676973747279436f6f7264696e61746f7200000000608482015260a40161060f565b6097805460ff19168215159081179091556040519081527f40e4ed880a29e0f6ddce307457fb75cddf4feef7d3ecb0301bfdf4976a0e2dfc9060200160405180910390a150565b610f236040518060800160405280606081526020016060815260200160608152602001606081525090565b6000876001600160a01b031663683048356040518163ffffffff1660e01b8152600401602060405180830381865afa158015610f63573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610f879190614cc0565b9050610fb46040518060800160405280606081526020016060815260200160608152602001606081525090565b6040516361c8a12f60e11b81526001600160a01b038a169063c391425e90610fe4908b9089908990600401614eae565b600060405180830381865afa158015611001573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526110299190810190614ef8565b81526040516340e03a8160e11b81526001600160a01b038316906381c075029061105b908b908b908b90600401614faf565b600060405180830381865afa158015611078573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526110a09190810190614ef8565b6040820152856001600160401b038111156110bd576110bd6140ba565b6040519080825280602002602001820160405280156110f057816020015b60608152602001906001900390816110db5790505b50606082015260005b60ff811687111561152f576000856001600160401b0381111561111e5761111e6140ba565b604051908082528060200260200182016040528015611147578160200160208202803683370190505b5083606001518360ff168151811061116157611161614d8c565b602002602001018190525060005b8681101561142f5760008c6001600160a01b03166304ec63518a8a8581811061119a5761119a614d8c565b905060200201358e886000015186815181106111b8576111b8614d8c565b60200260200101516040518463ffffffff1660e01b81526004016111f59392919092835263ffffffff918216602084015216604082015260600190565b602060405180830381865afa158015611212573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906112369190614fd8565b90506001600160c01b0381166112da5760405162461bcd60e51b815260206004820152605c60248201527f4f70657261746f7253746174655265747269657665722e676574436865636b5360448201527f69676e617475726573496e64696365733a206f70657261746f72206d7573742060648201527f6265207265676973746572656420617420626c6f636b6e756d62657200000000608482015260a40161060f565b8a8a8560ff168181106112ef576112ef614d8c565b6001600160c01b03841692013560f81c9190911c60019081161415905061141c57856001600160a01b031663dd9846b98a8a8581811061133157611331614d8c565b905060200201358d8d8860ff1681811061134d5761134d614d8c565b6040516001600160e01b031960e087901b1681526004810194909452919091013560f81c60248301525063ffffffff8f166044820152606401602060405180830381865afa1580156113a3573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906113c79190615001565b85606001518560ff16815181106113e0576113e0614d8c565b602002602001015184815181106113f9576113f9614d8c565b63ffffffff909216602092830291909101909101528261141881614e93565b9350505b508061142781614e93565b91505061116f565b506000816001600160401b0381111561144a5761144a6140ba565b604051908082528060200260200182016040528015611473578160200160208202803683370190505b50905060005b828110156114f45784606001518460ff168151811061149a5761149a614d8c565b602002602001015181815181106114b3576114b3614d8c565b60200260200101518282815181106114cd576114cd614d8c565b63ffffffff90921660209283029190910190910152806114ec81614e93565b915050611479565b508084606001518460ff168151811061150f5761150f614d8c565b6020026020010181905250505080806115279061501e565b9150506110f9565b506000896001600160a01b0316635df459466040518163ffffffff1660e01b8152600401602060405180830381865afa158015611570573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906115949190614cc0565b60405163354952a360e21b81529091506001600160a01b0382169063d5254a8c906115c7908b908b908e9060040161503e565b600060405180830381865afa1580156115e4573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f1916820160405261160c9190810190614ef8565b60208301525098975050505050505050565b60655460405163237dfb4760e11b81523360048201526001600160a01b03909116906346fbf68e90602401602060405180830381865afa158015611666573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061168a9190614d27565b6116a65760405162461bcd60e51b815260040161060f90614d44565b600019606681905560405190815233907fab40a374bc51de372200a8bc981af8c9ecdc08dfdaef0bb6e09f88f3c616ef3d9060200160405180910390a2565b60606000846001600160a01b031663c391425e84866040518363ffffffff1660e01b8152600401611717929190615068565b600060405180830381865afa158015611734573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f1916820160405261175c9190810190614ef8565b9050600084516001600160401b03811115611779576117796140ba565b6040519080825280602002602001820160405280156117a2578160200160208202803683370190505b50905060005b85518110156118a357866001600160a01b03166304ec63518783815181106117d2576117d2614d8c565b6020026020010151878685815181106117ed576117ed614d8c565b60200260200101516040518463ffffffff1660e01b815260040161182a9392919092835263ffffffff918216602084015216604082015260600190565b602060405180830381865afa158015611847573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061186b9190614fd8565b6001600160c01b031682828151811061188657611886614d8c565b60209081029190910101528061189b81614e93565b9150506117a8565b5095945050505050565b60cd546001600160a01b031633146119115760405162461bcd60e51b815260206004820152602160248201527f5461736b2067656e657261746f72206d757374206265207468652063616c6c656044820152603960f91b606482015260840161060f565b611948604051806080016040528060008152602001600063ffffffff16815260200160608152602001600063ffffffff1681525090565b84815263ffffffff438116602080840191909152908516606083015260408051601f8501839004830281018301909152838152908490849081908401838280828437600092019190915250505050604080830191909152516119ae9082906020016150bc565b60408051601f19818403018152828252805160209182012060c9805463ffffffff908116600090815260ca90945293909220555416907f1695b8d06ec800b4615e745cfb5bd00c1f2875615d42925c3b5afa543bb24c4890611a119084906150bc565b60405180910390a260c954611a2d9063ffffffff166001615147565b60c9805463ffffffff191663ffffffff929092169190911790555050505050565b6040805180820190915260608082526020820152600084611ac55760405162461bcd60e51b8152602060048201526037602482015260008051602061549383398151915260448201527f7265733a20656d7074792071756f72756d20696e707574000000000000000000606482015260840161060f565b60408301515185148015611add575060a08301515185145b8015611aed575060c08301515185145b8015611afd575060e08301515185145b611b675760405162461bcd60e51b8152602060048201526041602482015260008051602061549383398151915260448201527f7265733a20696e7075742071756f72756d206c656e677468206d69736d6174636064820152600d60fb1b608482015260a40161060f565b82515160208401515114611bdf5760405162461bcd60e51b815260206004820152604460248201819052600080516020615493833981519152908201527f7265733a20696e707574206e6f6e7369676e6572206c656e677468206d69736d6064820152630c2e8c6d60e31b608482015260a40161060f565b4363ffffffff168463ffffffff1610611c4e5760405162461bcd60e51b815260206004820152603c602482015260008051602061549383398151915260448201527f7265733a20696e76616c6964207265666572656e636520626c6f636b00000000606482015260840161060f565b6040805180820182526000808252602080830191909152825180840190935260608084529083015290866001600160401b03811115611c8f57611c8f6140ba565b604051908082528060200260200182016040528015611cb8578160200160208202803683370190505b506020820152866001600160401b03811115611cd657611cd66140ba565b604051908082528060200260200182016040528015611cff578160200160208202803683370190505b50815260408051808201909152606080825260208201528560200151516001600160401b03811115611d3357611d336140ba565b604051908082528060200260200182016040528015611d5c578160200160208202803683370190505b5081526020860151516001600160401b03811115611d7c57611d7c6140ba565b604051908082528060200260200182016040528015611da5578160200160208202803683370190505b5081602001819052506000611e778a8a8080601f0160208091040260200160405190810160405280939291908181526020018383808284376000920191909152505060408051639aa1653d60e01b815290516001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000169350639aa1653d925060048083019260209291908290030181865afa158015611e4e573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611e72919061516f565b61383f565b905060005b87602001515181101561211257611ec188602001518281518110611ea257611ea2614d8c565b6020026020010151805160009081526020918201519091526040902090565b83602001518281518110611ed757611ed7614d8c565b60209081029190910101528015611f97576020830151611ef860018361518c565b81518110611f0857611f08614d8c565b602002602001015160001c83602001518281518110611f2957611f29614d8c565b602002602001015160001c11611f97576040805162461bcd60e51b815260206004820152602481019190915260008051602061549383398151915260448201527f7265733a206e6f6e5369676e65725075626b657973206e6f7420736f72746564606482015260840161060f565b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03166304ec635184602001518381518110611fdc57611fdc614d8c565b60200260200101518b8b600001518581518110611ffb57611ffb614d8c565b60200260200101516040518463ffffffff1660e01b81526004016120389392919092835263ffffffff918216602084015216604082015260600190565b602060405180830381865afa158015612055573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906120799190614fd8565b6001600160c01b03168360000151828151811061209857612098614d8c565b6020026020010181815250506120fe61087e6120d284866000015185815181106120c4576120c4614d8c565b6020026020010151166138d2565b8a6020015184815181106120e8576120e8614d8c565b60200260200101516138fd90919063ffffffff16565b94508061210a81614e93565b915050611e7c565b505061211d836139e1565b60975490935060ff166000816121345760006121b6565b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663c448feb86040518163ffffffff1660e01b8152600401602060405180830381865afa158015612192573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906121b691906151a3565b905060005b8a811015612835578215612317578963ffffffff16827f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663249a0c428f8f8681811061221257612212614d8c565b60405160e085901b6001600160e01b031916815292013560f81c600483015250602401602060405180830381865afa158015612252573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061227691906151a3565b61228091906151bc565b10156123175760405162461bcd60e51b8152602060048201526066602482015260008051602061549383398151915260448201527f7265733a205374616b6552656769737472792075706461746573206d7573742060648201527f62652077697468696e207769746864726177616c44656c6179426c6f636b732060848201526577696e646f7760d01b60a482015260c40161060f565b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03166368bccaac8d8d8481811061235857612358614d8c565b9050013560f81c60f81b60f81c8c8c60a00151858151811061237c5761237c614d8c565b60209081029190910101516040516001600160e01b031960e086901b16815260ff909316600484015263ffffffff9182166024840152166044820152606401602060405180830381865afa1580156123d8573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906123fc91906151d4565b6001600160401b03191661241f8a604001518381518110611ea257611ea2614d8c565b67ffffffffffffffff1916146124bb5760405162461bcd60e51b8152602060048201526061602482015260008051602061549383398151915260448201527f7265733a2071756f72756d41706b206861736820696e2073746f72616765206460648201527f6f6573206e6f74206d617463682070726f76696465642071756f72756d2061706084820152606b60f81b60a482015260c40161060f565b6124eb896040015182815181106124d4576124d4614d8c565b60200260200101518761343790919063ffffffff16565b95507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663c8294c568d8d8481811061252e5761252e614d8c565b9050013560f81c60f81b60f81c8c8c60c00151858151811061255257612552614d8c565b60209081029190910101516040516001600160e01b031960e086901b16815260ff909316600484015263ffffffff9182166024840152166044820152606401602060405180830381865afa1580156125ae573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906125d29190614e54565b856020015182815181106125e8576125e8614d8c565b6001600160601b0390921660209283029190910182015285015180518290811061261457612614614d8c565b60200260200101518560000151828151811061263257612632614d8c565b60200260200101906001600160601b031690816001600160601b0316815250506000805b8a6020015151811015612820576126aa8660000151828151811061267c5761267c614d8c565b60200260200101518f8f8681811061269657612696614d8c565b600192013560f81c9290921c811614919050565b1561280e577f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663f2be94ae8f8f868181106126f0576126f0614d8c565b9050013560f81c60f81b60f81c8e8960200151858151811061271457612714614d8c565b60200260200101518f60e00151888151811061273257612732614d8c565b6020026020010151878151811061274b5761274b614d8c565b60209081029190910101516040516001600160e01b031960e087901b16815260ff909416600485015263ffffffff92831660248501526044840191909152166064820152608401602060405180830381865afa1580156127af573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906127d39190614e54565b87518051859081106127e7576127e7614d8c565b602002602001018181516127fb91906151ff565b6001600160601b03169052506001909101905b8061281881614e93565b915050612656565b5050808061282d90614e93565b9150506121bb565b50505060008061284f8c868a606001518b60800151610763565b91509150816128c05760405162461bcd60e51b8152602060048201526043602482015260008051602061549383398151915260448201527f7265733a2070616972696e6720707265636f6d70696c652063616c6c206661696064820152621b195960ea1b608482015260a40161060f565b806129215760405162461bcd60e51b8152602060048201526039602482015260008051602061549383398151915260448201527f7265733a207369676e617475726520697320696e76616c696400000000000000606482015260840161060f565b5050600087826020015160405160200161293c929190615227565b60408051808303601f190181529190528051602090910120929b929a509198505050505050505050565b61296e613a7c565b6129786000613ad6565b565b60408051600180825281830190925260009160609183916020808301908036833701905050905084816000815181106129b5576129b5614d8c565b60209081029190910101526040516361c8a12f60e11b81526000906001600160a01b0388169063c391425e906129f19088908690600401615068565b600060405180830381865afa158015612a0e573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f19168201604052612a369190810190614ef8565b600081518110612a4857612a48614d8c565b60209081029190910101516040516304ec635160e01b81526004810188905263ffffffff87811660248301529091166044820181905291506000906001600160a01b038916906304ec635190606401602060405180830381865afa158015612ab4573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190612ad89190614fd8565b6001600160c01b031690506000612aee82613b28565b905081612afc8a838a6108ed565b9550955050505050935093915050565b60cc546001600160a01b03163314612b665760405162461bcd60e51b815260206004820152601d60248201527f41676772656761746f72206d757374206265207468652063616c6c6572000000604482015260640161060f565b6000612b78604085016020860161428d565b9050366000612b8a604087018761526f565b90925090506000612ba1608088016060890161428d565b905060ca6000612bb4602089018961428d565b63ffffffff1663ffffffff1681526020019081526020016000205487604051602001612be091906152b5565b6040516020818303038152906040528051906020012014612c695760405162461bcd60e51b815260206004820152603d60248201527f737570706c696564207461736b20646f6573206e6f74206d617463682074686560448201527f206f6e65207265636f7264656420696e2074686520636f6e7472616374000000606482015260840161060f565b600060cb81612c7b60208a018a61428d565b63ffffffff1663ffffffff1681526020019081526020016000205414612cf85760405162461bcd60e51b815260206004820152602c60248201527f41676772656761746f722068617320616c726561647920726573706f6e64656460448201526b20746f20746865207461736b60a01b606482015260840161060f565b612d227f000000000000000000000000000000000000000000000000000000000000000085615147565b63ffffffff164363ffffffff161115612d935760405162461bcd60e51b815260206004820152602d60248201527f41676772656761746f722068617320726573706f6e64656420746f207468652060448201526c7461736b20746f6f206c61746560981b606482015260840161060f565b600086604051602001612da69190615388565b604051602081830303815290604052805190602001209050600080612dce8387878a8c611a4e565b6040805160808101825263ffffffff43168152602080820184905280850151828401528451606083015291519395509193509091612e10918c91849101615396565b6040516020818303038152906040528051906020012060cb60008c6000016020810190612e3d919061428d565b63ffffffff1663ffffffff168152602001908152602001600020819055507fb6b77f791d125b1522410ab3adf6a5ea133c836a193ce67ed29c129ca1d8f5c08a82604051612e8c929190615396565b60405180910390a160005b86811015612f2d578560ff1684602001518281518110612eb957612eb9614d8c565b6020026020010151612ecb9190615402565b6001600160601b0316606485600001518381518110612eec57612eec614d8c565b60200260200101516001600160601b0316612f079190615431565b1015612f1b57505050505050505050505050565b80612f2581614e93565b915050612e97565b5060608a013560ce5560208a01803590612f47908c61428d565b63ffffffff167f8378be8a33cf3a493910a16e275cd96af4f048c5eb1a2c2962d4066e697fea8060405160405180910390a35050505050505050505050565b612f8e613a7c565b6001600160a01b038116612ff35760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b606482015260840161060f565b61062181613ad6565b600054610100900460ff161580801561301c5750600054600160ff909116105b806130365750303b158015613036575060005460ff166001145b6130995760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b606482015260840161060f565b6000805460ff1916600117905580156130bc576000805461ff0019166101001790555b6130c7856000613bf4565b6130d084613ad6565b60cc80546001600160a01b038086166001600160a01b03199283161790925560cd8054928516929091169190911790558015613146576000805461ff0019169055604051600181527f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb38474024989060200160405180910390a15b5050505050565b606560009054906101000a90046001600160a01b03166001600160a01b031663eab66d7a6040518163ffffffff1660e01b8152600401602060405180830381865afa1580156131a0573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906131c49190614cc0565b6001600160a01b0316336001600160a01b0316146131f45760405162461bcd60e51b815260040161060f90614cdd565b6066541981196066541916146132725760405162461bcd60e51b815260206004820152603860248201527f5061757361626c652e756e70617573653a20696e76616c696420617474656d7060448201527f7420746f2070617573652066756e6374696f6e616c6974790000000000000000606482015260840161060f565b606681905560405181815233907f3582d1828e26bf56bd801502bc021ac0bc8afb57c826e4986b45593c8fad389c90602001610758565b6001600160a01b0381166133375760405162461bcd60e51b815260206004820152604960248201527f5061757361626c652e5f73657450617573657252656769737472793a206e657760448201527f50617573657252656769737472792063616e6e6f7420626520746865207a65726064820152686f206164647265737360b81b608482015260a40161060f565b606554604080516001600160a01b03928316815291831660208301527f6e9fcd539896fca60e8b0f01dd580233e48a6b0f7df013b89ba7f565869acdb6910160405180910390a1606580546001600160a01b0319166001600160a01b0392909216919091179055565b60408051808201909152600080825260208201526133bc613f95565b835181526020808501519082015260408082018490526000908360608460076107d05a03fa90508080156133ef576133f1565bfe5b508061342f5760405162461bcd60e51b815260206004820152600d60248201526c1958cb5b5d5b0b59985a5b1959609a1b604482015260640161060f565b505092915050565b6040805180820190915260008082526020820152613453613fb3565b835181526020808501518183015283516040808401919091529084015160608301526000908360808460066107d05a03fa90508080156133ef57508061342f5760405162461bcd60e51b815260206004820152600d60248201526c1958cb5859190b59985a5b1959609a1b604482015260640161060f565b6134d3613fd1565b50604080516080810182527f198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c28183019081527f1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed6060830152815281518083019092527f275dc4a288d1afb3cbb1ac09187524c7db36395df7be3b99e673b13a075a65ec82527f1d9befcd05a5323e6da4d435f3b617cdb3af83285c2df711ef39c01571827f9d60208381019190915281019190915290565b6040805180820190915260008082526020820152600080806135bb60008051602061547383398151915286614da2565b90505b6135c781613cde565b9093509150600080516020615473833981519152828309831415613601576040805180820190915290815260208101919091529392505050565b6000805160206154738339815191526001820890506135be565b60408051808201825286815260208082018690528251808401909352868352820184905260009182919061364d613ff6565b60005b6002811015613812576000613666826006615431565b905084826002811061367a5761367a614d8c565b6020020151518361368c8360006151bc565b600c811061369c5761369c614d8c565b60200201528482600281106136b3576136b3614d8c565b602002015160200151838260016136ca91906151bc565b600c81106136da576136da614d8c565b60200201528382600281106136f1576136f1614d8c565b60200201515151836137048360026151bc565b600c811061371457613714614d8c565b602002015283826002811061372b5761372b614d8c565b60200201515160016020020151836137448360036151bc565b600c811061375457613754614d8c565b602002015283826002811061376b5761376b614d8c565b60200201516020015160006002811061378657613786614d8c565b6020020151836137978360046151bc565b600c81106137a7576137a7614d8c565b60200201528382600281106137be576137be614d8c565b6020020151602001516001600281106137d9576137d9614d8c565b6020020151836137ea8360056151bc565b600c81106137fa576137fa614d8c565b6020020152508061380a81614e93565b915050613650565b5061381b614015565b60006020826101808560088cfa9151919c9115159b50909950505050505050505050565b60008061384b84613d60565b9050808360ff166001901b116138c95760405162461bcd60e51b815260206004820152603f60248201527f4269746d61705574696c732e6f72646572656442797465734172726179546f4260448201527f69746d61703a206269746d61702065786365656473206d61782076616c756500606482015260840161060f565b90505b92915050565b6000805b82156138cc576138e760018461518c565b90921691806138f581615450565b9150506138d6565b60408051808201909152600080825260208201526102008261ffff16106139595760405162461bcd60e51b815260206004820152601060248201526f7363616c61722d746f6f2d6c6172676560801b604482015260640161060f565b8161ffff166001141561396d5750816138cc565b6040805180820190915260008082526020820181905284906001905b8161ffff168661ffff16106139d657600161ffff871660ff83161c811614156139b9576139b68484613437565b93505b6139c38384613437565b92506201fffe600192831b169101613989565b509195945050505050565b60408051808201909152600080825260208201528151158015613a0657506020820151155b15613a24575050604080518082019091526000808252602082015290565b6040518060400160405280836000015181526020016000805160206154738339815191528460200151613a579190614da2565b613a6f9060008051602061547383398151915261518c565b905292915050565b919050565b6033546001600160a01b031633146129785760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572604482015260640161060f565b603380546001600160a01b038381166001600160a01b0319831681179093556040519116919082907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e090600090a35050565b6060600080613b36846138d2565b61ffff166001600160401b03811115613b5157613b516140ba565b6040519080825280601f01601f191660200182016040528015613b7b576020820181803683370190505b5090506000805b825182108015613b93575061010081105b15613bea576001811b935085841615613bda578060f81b838381518110613bbc57613bbc614d8c565b60200101906001600160f81b031916908160001a9053508160010191505b613be381614e93565b9050613b82565b5090949350505050565b6065546001600160a01b0316158015613c1557506001600160a01b03821615155b613c975760405162461bcd60e51b815260206004820152604760248201527f5061757361626c652e5f696e697469616c697a655061757365723a205f696e6960448201527f7469616c697a6550617573657228292063616e206f6e6c792062652063616c6c6064820152666564206f6e636560c81b608482015260a40161060f565b606681905560405181815233907fab40a374bc51de372200a8bc981af8c9ecdc08dfdaef0bb6e09f88f3c616ef3d9060200160405180910390a2613cda826132a9565b5050565b60008080600080516020615473833981519152600360008051602061547383398151915286600080516020615473833981519152888909090890506000613d54827f0c19139cb84c680a6e14116da060561765e05aa45a1c72a34f082305b61f3f52600080516020615473833981519152613eed565b91959194509092505050565b600061010082511115613de95760405162461bcd60e51b8152602060048201526044602482018190527f4269746d61705574696c732e6f72646572656442797465734172726179546f42908201527f69746d61703a206f7264657265644279746573417272617920697320746f6f206064820152636c6f6e6760e01b608482015260a40161060f565b8151613df757506000919050565b60008083600081518110613e0d57613e0d614d8c565b0160200151600160f89190911c81901b92505b8451811015613ee457848181518110613e3b57613e3b614d8c565b0160200151600160f89190911c1b9150828211613ed05760405162461bcd60e51b815260206004820152604760248201527f4269746d61705574696c732e6f72646572656442797465734172726179546f4260448201527f69746d61703a206f72646572656442797465734172726179206973206e6f74206064820152661bdc99195c995960ca1b608482015260a40161060f565b91811791613edd81614e93565b9050613e20565b50909392505050565b600080613ef8614015565b613f00614033565b602080825281810181905260408201819052606082018890526080820187905260a082018690528260c08360056107d05a03fa92508280156133ef575082613f8a5760405162461bcd60e51b815260206004820152601a60248201527f424e3235342e6578704d6f643a2063616c6c206661696c757265000000000000604482015260640161060f565b505195945050505050565b60405180606001604052806003906020820280368337509192915050565b60405180608001604052806004906020820280368337509192915050565b6040518060400160405280613fe4614051565b8152602001613ff1614051565b905290565b604051806101800160405280600c906020820280368337509192915050565b60405180602001604052806001906020820280368337509192915050565b6040518060c001604052806006906020820280368337509192915050565b60405180604001604052806002906020820280368337509192915050565b6001600160a01b038116811461062157600080fd5b60006020828403121561409657600080fd5b81356138c98161406f565b6000602082840312156140b357600080fd5b5035919050565b634e487b7160e01b600052604160045260246000fd5b604080519081016001600160401b03811182821017156140f2576140f26140ba565b60405290565b60405161010081016001600160401b03811182821017156140f2576140f26140ba565b604051601f8201601f191681016001600160401b0381118282101715614143576141436140ba565b604052919050565b60006040828403121561415d57600080fd5b6141656140d0565b9050813581526020820135602082015292915050565b600082601f83011261418c57600080fd5b604051604081018181106001600160401b03821117156141ae576141ae6140ba565b80604052508060408401858111156141c557600080fd5b845b818110156139d65780358352602092830192016141c7565b6000608082840312156141f157600080fd5b6141f96140d0565b9050614205838361417b565b8152614214836040840161417b565b602082015292915050565b600080600080610120858703121561423657600080fd5b84359350614247866020870161414b565b925061425686606087016141df565b91506142658660e0870161414b565b905092959194509250565b63ffffffff8116811461062157600080fd5b8035613a7781614270565b60006020828403121561429f57600080fd5b81356138c981614270565b6000806000606084860312156142bf57600080fd5b83356142ca8161406f565b92506020848101356001600160401b03808211156142e757600080fd5b818701915087601f8301126142fb57600080fd5b81358181111561430d5761430d6140ba565b61431f601f8201601f1916850161411b565b9150808252888482850101111561433557600080fd5b808484018584013760008482840101525080945050505061435860408501614282565b90509250925092565b600081518084526020808501808196508360051b810191508286016000805b868110156143f7578385038a52825180518087529087019087870190845b818110156143e257835180516001600160a01b031684528a8101518b8501526040908101516001600160601b0316908401529289019260609092019160010161439e565b50509a87019a95505091850191600101614380565b509298975050505050505050565b6020815260006144186020830184614361565b9392505050565b801515811461062157600080fd5b60006020828403121561443f57600080fd5b81356138c98161441f565b60008083601f84011261445c57600080fd5b5081356001600160401b0381111561447357600080fd5b60208301915083602082850101111561448b57600080fd5b9250929050565b600080600080600080608087890312156144ab57600080fd5b86356144b68161406f565b955060208701356144c681614270565b945060408701356001600160401b03808211156144e257600080fd5b6144ee8a838b0161444a565b9096509450606089013591508082111561450757600080fd5b818901915089601f83011261451b57600080fd5b81358181111561452a57600080fd5b8a60208260051b850101111561453f57600080fd5b6020830194508093505050509295509295509295565b600081518084526020808501945080840160005b8381101561458b57815163ffffffff1687529582019590820190600101614569565b509495945050505050565b6000602080835283516080828501526145b260a0850182614555565b905081850151601f19808684030160408701526145cf8383614555565b925060408701519150808684030160608701526145ec8383614555565b60608801518782038301608089015280518083529194508501925084840190600581901b8501860160005b828110156146435784878303018452614631828751614555565b95880195938801939150600101614617565b509998505050505050505050565b60ff8116811461062157600080fd5b60006020828403121561467257600080fd5b81356138c981614651565b60006001600160401b03821115614696576146966140ba565b5060051b60200190565b6000806000606084860312156146b557600080fd5b83356146c08161406f565b92506020848101356001600160401b038111156146dc57600080fd5b8501601f810187136146ed57600080fd5b80356147006146fb8261467d565b61411b565b81815260059190911b8201830190838101908983111561471f57600080fd5b928401925b8284101561473d57833582529284019290840190614724565b809650505050505061435860408501614282565b6020808252825182820181905260009190848201906040850190845b818110156147895783518352928401929184019160010161476d565b50909695505050505050565b600080600080606085870312156147ab57600080fd5b8435935060208501356147bd81614270565b925060408501356001600160401b038111156147d857600080fd5b6147e48782880161444a565b95989497509550505050565b600082601f83011261480157600080fd5b813560206148116146fb8361467d565b82815260059290921b8401810191818101908684111561483057600080fd5b8286015b8481101561485457803561484781614270565b8352918301918301614834565b509695505050505050565b600082601f83011261487057600080fd5b813560206148806146fb8361467d565b82815260069290921b8401810191818101908684111561489f57600080fd5b8286015b84811015614854576148b5888261414b565b8352918301916040016148a3565b600082601f8301126148d457600080fd5b813560206148e46146fb8361467d565b82815260059290921b8401810191818101908684111561490357600080fd5b8286015b848110156148545780356001600160401b038111156149265760008081fd5b6149348986838b01016147f0565b845250918301918301614907565b6000610180828403121561495557600080fd5b61495d6140f8565b905081356001600160401b038082111561497657600080fd5b614982858386016147f0565b8352602084013591508082111561499857600080fd5b6149a48583860161485f565b602084015260408401359150808211156149bd57600080fd5b6149c98583860161485f565b60408401526149db85606086016141df565b60608401526149ed8560e0860161414b565b6080840152610120840135915080821115614a0757600080fd5b614a13858386016147f0565b60a0840152610140840135915080821115614a2d57600080fd5b614a39858386016147f0565b60c0840152610160840135915080821115614a5357600080fd5b50614a60848285016148c3565b60e08301525092915050565b600080600080600060808688031215614a8457600080fd5b8535945060208601356001600160401b0380821115614aa257600080fd5b614aae89838a0161444a565b909650945060408801359150614ac382614270565b90925060608701359080821115614ad957600080fd5b50614ae688828901614942565b9150509295509295909350565b600081518084526020808501945080840160005b8381101561458b5781516001600160601b031687529582019590820190600101614b07565b6040815260008351604080840152614b476080840182614af3565b90506020850151603f19848303016060850152614b648282614af3565b925050508260208301529392505050565b600080600060608486031215614b8a57600080fd5b8335614b958161406f565b9250602084013591506040840135614bac81614270565b809150509250925092565b828152604060208201526000614bd06040830184614361565b949350505050565b600060808284031215614bea57600080fd5b50919050565b600080600060c08486031215614c0557600080fd5b83356001600160401b0380821115614c1c57600080fd5b614c2887838801614bd8565b9450614c378760208801614bd8565b935060a0860135915080821115614c4d57600080fd5b50614c5a86828701614942565b9150509250925092565b60008060008060808587031215614c7a57600080fd5b8435614c858161406f565b93506020850135614c958161406f565b92506040850135614ca58161406f565b91506060850135614cb58161406f565b939692955090935050565b600060208284031215614cd257600080fd5b81516138c98161406f565b6020808252602a908201527f6d73672e73656e646572206973206e6f74207065726d697373696f6e6564206160408201526939903ab73830bab9b2b960b11b606082015260800190565b600060208284031215614d3957600080fd5b81516138c98161441f565b60208082526028908201527f6d73672e73656e646572206973206e6f74207065726d697373696f6e6564206160408201526739903830bab9b2b960c11b606082015260800190565b634e487b7160e01b600052603260045260246000fd5b600082614dbf57634e487b7160e01b600052601260045260246000fd5b500690565b60006020808385031215614dd757600080fd5b82516001600160401b03811115614ded57600080fd5b8301601f81018513614dfe57600080fd5b8051614e0c6146fb8261467d565b81815260059190911b82018301908381019087831115614e2b57600080fd5b928401925b82841015614e4957835182529284019290840190614e30565b979650505050505050565b600060208284031215614e6657600080fd5b81516001600160601b03811681146138c957600080fd5b634e487b7160e01b600052601160045260246000fd5b6000600019821415614ea757614ea7614e7d565b5060010190565b63ffffffff84168152604060208201819052810182905260006001600160fb1b03831115614edb57600080fd5b8260051b8085606085013760009201606001918252509392505050565b60006020808385031215614f0b57600080fd5b82516001600160401b03811115614f2157600080fd5b8301601f81018513614f3257600080fd5b8051614f406146fb8261467d565b81815260059190911b82018301908381019087831115614f5f57600080fd5b928401925b82841015614e49578351614f7781614270565b82529284019290840190614f64565b81835281816020850137506000828201602090810191909152601f909101601f19169091010190565b63ffffffff84168152604060208201526000614fcf604083018486614f86565b95945050505050565b600060208284031215614fea57600080fd5b81516001600160c01b03811681146138c957600080fd5b60006020828403121561501357600080fd5b81516138c981614270565b600060ff821660ff81141561503557615035614e7d565b60010192915050565b604081526000615052604083018587614f86565b905063ffffffff83166020830152949350505050565b60006040820163ffffffff851683526020604081850152818551808452606086019150828701935060005b818110156150af57845183529383019391830191600101615093565b5090979650505050505050565b6000602080835283518184015263ffffffff8185015116604084015260408401516080606085015280518060a086015260005b8181101561510b5782810184015186820160c0015283016150ef565b8181111561511d57600060c083880101525b50606086015163ffffffff811660808701529250601f01601f19169390930160c001949350505050565b600063ffffffff80831681851680830382111561516657615166614e7d565b01949350505050565b60006020828403121561518157600080fd5b81516138c981614651565b60008282101561519e5761519e614e7d565b500390565b6000602082840312156151b557600080fd5b5051919050565b600082198211156151cf576151cf614e7d565b500190565b6000602082840312156151e657600080fd5b815167ffffffffffffffff19811681146138c957600080fd5b60006001600160601b038381169083168181101561521f5761521f614e7d565b039392505050565b63ffffffff60e01b8360e01b1681526000600482018351602080860160005b8381101561526257815185529382019390820190600101615246565b5092979650505050505050565b6000808335601e1984360301811261528657600080fd5b8301803591506001600160401b038211156152a057600080fd5b60200191503681900382131561448b57600080fd5b6020815281356020820152600060208301356152d081614270565b63ffffffff81166040840152506040830135601e198436030181126152f457600080fd5b830180356001600160401b0381111561530c57600080fd5b80360385131561531b57600080fd5b6080606085015261533360a085018260208501614f86565b91505061534260608501614282565b63ffffffff81166080850152509392505050565b803561536181614270565b63ffffffff1682526020818101359083015260408082013590830152606090810135910152565b608081016138cc8284615356565b6153a08184615356565b60a0608082015263ffffffff82511660a0820152602082015160c082015260006040830151608060e08401526153da610120840182614af3565b90506060840151609f19848303016101008501526153f88282614af3565b9695505050505050565b60006001600160601b038083168185168183048111821515161561542857615428614e7d565b02949350505050565b600081600019048311821515161561544b5761544b614e7d565b500290565b600061ffff8083168181141561546857615468614e7d565b600101939250505056fe30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47424c535369676e6174757265436865636b65722e636865636b5369676e617475a2646970667358221220b10039e976d5dde5e4b407e25e093bd764578137a60f9e3ee7e47f00266cce2b64736f6c634300080c0033",
+	ABI: "[{\"type\":\"function\",\"name\":\"THRESHOLD_DENOMINATOR\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"aggregator\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"allTaskHashes\",\"inputs\":[{\"name\":\"\",\"type\":\"uint8\",\"internalType\":\"enumFinalizerTaskManager.TaskType\"},{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"allTaskResponses\",\"inputs\":[{\"name\":\"\",\"type\":\"uint8\",\"internalType\":\"enumFinalizerTaskManager.TaskType\"},{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"allowNonRootInit\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"blsApkRegistry\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIBLSApkRegistry\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"blsSignatureChecker\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractBLSSignatureChecker\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"checkSignatures\",\"inputs\":[{\"name\":\"msgHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"referenceBlockNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"nonSignerStakesAndSignature\",\"type\":\"tuple\",\"internalType\":\"structIBLSSignatureChecker.NonSignerStakesAndSignature\",\"components\":[{\"name\":\"nonSignerQuorumBitmapIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerPubkeys\",\"type\":\"tuple[]\",\"internalType\":\"structBN254.G1Point[]\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"quorumApks\",\"type\":\"tuple[]\",\"internalType\":\"structBN254.G1Point[]\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"apkG2\",\"type\":\"tuple\",\"internalType\":\"structBN254.G2Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"},{\"name\":\"Y\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"}]},{\"name\":\"sigma\",\"type\":\"tuple\",\"internalType\":\"structBN254.G1Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"quorumApkIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"totalStakeIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerStakeIndices\",\"type\":\"uint32[][]\",\"internalType\":\"uint32[][]\"}]}],\"outputs\":[{\"name\":\"\",\"type\":\"tuple\",\"internalType\":\"structIBLSSignatureChecker.QuorumStakeTotals\",\"components\":[{\"name\":\"signedStakeForQuorum\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"},{\"name\":\"totalStakeForQuorum\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"}]},{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"createNewOpTask\",\"inputs\":[{\"name\":\"quorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"createNewRdTask\",\"inputs\":[{\"name\":\"blockNumber\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"delegation\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIDelegationManager\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"dummyForOperatorStateInfoType\",\"inputs\":[{\"name\":\"_operatorStateInfo\",\"type\":\"tuple\",\"internalType\":\"structIGaspMultiRollupServicePrimitives.OperatorStateInfo\",\"components\":[{\"name\":\"operatorsStateChanged\",\"type\":\"bool\",\"internalType\":\"bool\"},{\"name\":\"quorumsRemoved\",\"type\":\"uint8[]\",\"internalType\":\"uint8[]\"},{\"name\":\"quorumsAdded\",\"type\":\"tuple[]\",\"internalType\":\"structIGaspMultiRollupServicePrimitives.QuorumsAdded[]\",\"components\":[{\"name\":\"quorumNumber\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"quorumStake\",\"type\":\"uint96\",\"internalType\":\"uint96\"},{\"name\":\"quorumApk\",\"type\":\"tuple\",\"internalType\":\"structBN254.G1Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]}]},{\"name\":\"quorumsStakeUpdate\",\"type\":\"tuple[]\",\"internalType\":\"structIGaspMultiRollupServicePrimitives.QuorumsStakeUpdate[]\",\"components\":[{\"name\":\"quorumNumber\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"quorumStake\",\"type\":\"uint96\",\"internalType\":\"uint96\"}]},{\"name\":\"quorumsApkUpdate\",\"type\":\"tuple[]\",\"internalType\":\"structIGaspMultiRollupServicePrimitives.QuorumsApkUpdate[]\",\"components\":[{\"name\":\"quorumNumber\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"quorumApk\",\"type\":\"tuple\",\"internalType\":\"structBN254.G1Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]}]},{\"name\":\"operatorsRemoved\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"},{\"name\":\"operatorsAdded\",\"type\":\"tuple[]\",\"internalType\":\"structIGaspMultiRollupServicePrimitives.OperatorsAdded[]\",\"components\":[{\"name\":\"operatorId\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"quorumForStakes\",\"type\":\"uint8[]\",\"internalType\":\"uint8[]\"},{\"name\":\"quorumStakes\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"},{\"name\":\"quorumCount\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]},{\"name\":\"operatorsStakeUpdate\",\"type\":\"tuple[]\",\"internalType\":\"structIGaspMultiRollupServicePrimitives.OperatorsStakeUpdate[]\",\"components\":[{\"name\":\"operatorId\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"quorumForStakes\",\"type\":\"uint8[]\",\"internalType\":\"uint8[]\"},{\"name\":\"quorumStakes\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"}]},{\"name\":\"operatorsQuorumCountUpdate\",\"type\":\"tuple[]\",\"internalType\":\"structIGaspMultiRollupServicePrimitives.OperatorsQuorumCountUpdate[]\",\"components\":[{\"name\":\"operatorId\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"quorumCount\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]}]}],\"outputs\":[],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"dummyForQuorumStakeTotalsType\",\"inputs\":[{\"name\":\"_quorumStakeTotals\",\"type\":\"tuple\",\"internalType\":\"structIBLSSignatureChecker.QuorumStakeTotals\",\"components\":[{\"name\":\"signedStakeForQuorum\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"},{\"name\":\"totalStakeForQuorum\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"}]}],\"outputs\":[],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"forceCreateNewOpTask\",\"inputs\":[{\"name\":\"quorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"forceRespondToOpTask\",\"inputs\":[{\"name\":\"task\",\"type\":\"tuple\",\"internalType\":\"structIFinalizerTaskManager.OpTask\",\"components\":[{\"name\":\"taskNum\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"taskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"quorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskQuorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"lastCompletedOpTaskQuorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"taskResponse\",\"type\":\"tuple\",\"internalType\":\"structIFinalizerTaskManager.OpTaskResponse\",\"components\":[{\"name\":\"referenceTaskIndex\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"referenceTaskHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"operatorsStateInfoHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"generator\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getCheckSignaturesIndices\",\"inputs\":[{\"name\":\"registryCoordinator\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"},{\"name\":\"referenceBlockNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"nonSignerOperatorIds\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}],\"outputs\":[{\"name\":\"\",\"type\":\"tuple\",\"internalType\":\"structOperatorStateRetriever.CheckSignaturesIndices\",\"components\":[{\"name\":\"nonSignerQuorumBitmapIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"quorumApkIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"totalStakeIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerStakeIndices\",\"type\":\"uint32[][]\",\"internalType\":\"uint32[][]\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getOperatorState\",\"inputs\":[{\"name\":\"registryCoordinator\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"blockNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"tuple[][]\",\"internalType\":\"structOperatorStateRetriever.Operator[][]\",\"components\":[{\"name\":\"operator\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"operatorId\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"stake\",\"type\":\"uint96\",\"internalType\":\"uint96\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getOperatorState\",\"inputs\":[{\"name\":\"registryCoordinator\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"},{\"name\":\"operatorId\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blockNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"\",\"type\":\"tuple[][]\",\"internalType\":\"structOperatorStateRetriever.Operator[][]\",\"components\":[{\"name\":\"operator\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"operatorId\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"stake\",\"type\":\"uint96\",\"internalType\":\"uint96\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getQuorumBitmapsAtBlockNumber\",\"inputs\":[{\"name\":\"registryCoordinator\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"},{\"name\":\"operatorIds\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"},{\"name\":\"blockNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\",\"internalType\":\"uint256[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"idToTaskStatus\",\"inputs\":[{\"name\":\"\",\"type\":\"uint8\",\"internalType\":\"enumFinalizerTaskManager.TaskType\"},{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint8\",\"internalType\":\"enumFinalizerTaskManager.TaskStatus\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"initialize\",\"inputs\":[{\"name\":\"_pauserRegistry\",\"type\":\"address\",\"internalType\":\"contractIPauserRegistry\"},{\"name\":\"initialOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_aggregator\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_generator\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_allowNonRootInit\",\"type\":\"bool\",\"internalType\":\"bool\"},{\"name\":\"_blsSignatureCheckerAddress\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_taskResponseWindowBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"_minOpTaskResponseWindowBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"_operatorStateRetrieverExtended\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"lastCompletedOpTaskCreatedBlock\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"lastCompletedOpTaskNum\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"lastCompletedOpTaskQuorumNumbers\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"lastCompletedOpTaskQuorumThresholdPercentage\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"lastOpTaskCreatedBlock\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"latestOpTaskNum\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"latestPendingStateHash\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"latestRdTaskNum\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"minOpTaskResponseWindowBlock\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"operatorStateRetrieverExtended\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"operatorsStateInfoHash\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"pause\",\"inputs\":[{\"name\":\"newPausedStatus\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"pauseAll\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"pauseTrackingOpState\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"paused\",\"inputs\":[{\"name\":\"index\",\"type\":\"uint8\",\"internalType\":\"uint8\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"paused\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"pauserRegistry\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIPauserRegistry\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"registryCoordinator\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"respondToOpTask\",\"inputs\":[{\"name\":\"task\",\"type\":\"tuple\",\"internalType\":\"structIFinalizerTaskManager.OpTask\",\"components\":[{\"name\":\"taskNum\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"taskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"quorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskQuorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"lastCompletedOpTaskQuorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"taskResponse\",\"type\":\"tuple\",\"internalType\":\"structIFinalizerTaskManager.OpTaskResponse\",\"components\":[{\"name\":\"referenceTaskIndex\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"referenceTaskHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"operatorsStateInfoHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"nonSignerStakesAndSignature\",\"type\":\"tuple\",\"internalType\":\"structIBLSSignatureChecker.NonSignerStakesAndSignature\",\"components\":[{\"name\":\"nonSignerQuorumBitmapIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerPubkeys\",\"type\":\"tuple[]\",\"internalType\":\"structBN254.G1Point[]\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"quorumApks\",\"type\":\"tuple[]\",\"internalType\":\"structBN254.G1Point[]\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"apkG2\",\"type\":\"tuple\",\"internalType\":\"structBN254.G2Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"},{\"name\":\"Y\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"}]},{\"name\":\"sigma\",\"type\":\"tuple\",\"internalType\":\"structBN254.G1Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"quorumApkIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"totalStakeIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerStakeIndices\",\"type\":\"uint32[][]\",\"internalType\":\"uint32[][]\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"respondToRdTask\",\"inputs\":[{\"name\":\"task\",\"type\":\"tuple\",\"internalType\":\"structIFinalizerTaskManager.RdTask\",\"components\":[{\"name\":\"taskNum\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"blockNumber\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"taskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskQuorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"lastCompletedOpTaskQuorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"taskResponse\",\"type\":\"tuple\",\"internalType\":\"structIFinalizerTaskManager.RdTaskResponse\",\"components\":[{\"name\":\"referenceTaskIndex\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"referenceTaskHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blockHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"storageProofHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"pendingStateHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"nonSignerStakesAndSignature\",\"type\":\"tuple\",\"internalType\":\"structIBLSSignatureChecker.NonSignerStakesAndSignature\",\"components\":[{\"name\":\"nonSignerQuorumBitmapIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerPubkeys\",\"type\":\"tuple[]\",\"internalType\":\"structBN254.G1Point[]\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"quorumApks\",\"type\":\"tuple[]\",\"internalType\":\"structBN254.G1Point[]\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"apkG2\",\"type\":\"tuple\",\"internalType\":\"structBN254.G2Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"},{\"name\":\"Y\",\"type\":\"uint256[2]\",\"internalType\":\"uint256[2]\"}]},{\"name\":\"sigma\",\"type\":\"tuple\",\"internalType\":\"structBN254.G1Point\",\"components\":[{\"name\":\"X\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"Y\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"name\":\"quorumApkIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"totalStakeIndices\",\"type\":\"uint32[]\",\"internalType\":\"uint32[]\"},{\"name\":\"nonSignerStakeIndices\",\"type\":\"uint32[][]\",\"internalType\":\"uint32[][]\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"resumeTrackingQuorums\",\"inputs\":[{\"name\":\"resetTrackedQuorums\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"setPauserRegistry\",\"inputs\":[{\"name\":\"newPauserRegistry\",\"type\":\"address\",\"internalType\":\"contractIPauserRegistry\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"stakeRegistry\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractIStakeRegistry\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"taskResponseWindowBlock\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"unpause\",\"inputs\":[{\"name\":\"newPausedStatus\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"updateBlsSignatureCheckerAddress\",\"inputs\":[{\"name\":\"_blsSignatureCheckerAddress\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"event\",\"name\":\"BLSSignatureCheckerAddressUpdated\",\"inputs\":[{\"name\":\"blsSignatureCheckerAddress\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"uint8\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"NewOpTaskCreated\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"},{\"name\":\"task\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.OpTask\",\"components\":[{\"name\":\"taskNum\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"taskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"quorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskQuorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"lastCompletedOpTaskQuorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"NewOpTaskForceCreated\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"},{\"name\":\"task\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.OpTask\",\"components\":[{\"name\":\"taskNum\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"taskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"quorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"quorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskQuorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"lastCompletedOpTaskQuorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"NewRdTaskCreated\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"},{\"name\":\"task\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.RdTask\",\"components\":[{\"name\":\"taskNum\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"blockNumber\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"taskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskCreatedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"lastCompletedOpTaskQuorumNumbers\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"lastCompletedOpTaskQuorumThresholdPercentage\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OpTaskCancelled\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OpTaskCompleted\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"},{\"name\":\"taskResponse\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.OpTaskResponse\",\"components\":[{\"name\":\"referenceTaskIndex\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"referenceTaskHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"operatorsStateInfoHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OpTaskForceCompleted\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"},{\"name\":\"taskResponse\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.OpTaskResponse\",\"components\":[{\"name\":\"referenceTaskIndex\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"referenceTaskHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"operatorsStateInfoHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OpTaskResponded\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"},{\"name\":\"taskResponse\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.OpTaskResponse\",\"components\":[{\"name\":\"referenceTaskIndex\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"referenceTaskHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"operatorsStateInfoHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"taskResponseMetadata\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.TaskResponseMetadata\",\"components\":[{\"name\":\"taskResponsedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"hashOfNonSigners\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"quroumStakeTotals\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"},{\"name\":\"quroumStakeSigned\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"PauseTrackingOpState\",\"inputs\":[],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Paused\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newPausedStatus\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"PauserRegistrySet\",\"inputs\":[{\"name\":\"pauserRegistry\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"contractIPauserRegistry\"},{\"name\":\"newPauserRegistry\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"contractIPauserRegistry\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"RdTaskCancelled\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"RdTaskCompleted\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"},{\"name\":\"blockHash\",\"type\":\"bytes32\",\"indexed\":true,\"internalType\":\"bytes32\"},{\"name\":\"taskResponse\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.RdTaskResponse\",\"components\":[{\"name\":\"referenceTaskIndex\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"referenceTaskHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blockHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"storageProofHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"pendingStateHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"RdTaskResponded\",\"inputs\":[{\"name\":\"taskIndex\",\"type\":\"uint32\",\"indexed\":true,\"internalType\":\"uint32\"},{\"name\":\"taskResponse\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.RdTaskResponse\",\"components\":[{\"name\":\"referenceTaskIndex\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"referenceTaskHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"blockHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"storageProofHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"pendingStateHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"taskResponseMetadata\",\"type\":\"tuple\",\"indexed\":false,\"internalType\":\"structIFinalizerTaskManager.TaskResponseMetadata\",\"components\":[{\"name\":\"taskResponsedBlock\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"hashOfNonSigners\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"quroumStakeTotals\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"},{\"name\":\"quroumStakeSigned\",\"type\":\"uint96[]\",\"internalType\":\"uint96[]\"}]}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"ResumeTrackingOpState\",\"inputs\":[{\"name\":\"resetTrackedQuorums\",\"type\":\"bool\",\"indexed\":false,\"internalType\":\"bool\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"StaleStakesForbiddenUpdate\",\"inputs\":[{\"name\":\"value\",\"type\":\"bool\",\"indexed\":false,\"internalType\":\"bool\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Unpaused\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newPausedStatus\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"}],\"anonymous\":false}]",
+	Bin: "0x608060405234801561001057600080fd5b50615e4f80620000216000396000f3fe608060405234801561001057600080fd5b50600436106102f15760003560e01c80635df459461161019d5780638fc8729a116100e9578063cefdc1d4116100a2578063ef0244581161007c578063ef02445814610709578063f2fde38b14610711578063f5640cf814610724578063fabc1cbc1461073757600080fd5b8063cefdc1d4146106d0578063df5cf723146106f1578063e70c2623146106f957600080fd5b80638fc8729a14610634578063a69563a91461064b578063adfcb04814610662578063b3ea184e1461066b578063bf2315ed1461067e578063c987de8e146106b957600080fd5b8063723114ab116101565780637afdd54b116101305780637afdd54b146105ed5780638380acbd146105fd578063886f1195146106105780638da5cb5b1461062357600080fd5b8063723114ab146105bf57806379badf73146105d25780637afa1eed146105da57600080fd5b80635df459461461056b57806368304835146105735780636d14a9871461057b5780636e125ff4146105835780636efb463614610596578063715018a6146105b757600080fd5b80633563b0d11161025c578063516a722711610215578063595c6a67116101ef578063595c6a67146105185780635ac86ab7146105205780635c155662146105435780635c975abb1461056357600080fd5b8063516a7227146104e0578063537a2929146104f357806354d127de1461050a57600080fd5b80633563b0d11461044a57806341789d571461046a57806345265b7a146104965780634ae6b203146104a75780634d7a7116146104b05780634f739f74146104c057600080fd5b8063191aac7a116102ae578063191aac7a1461039f5780631ac27297146103b25780631c178e9c146103dd578063245a7bfc146104085780632830e8f9146104225780632d4713db1461043757600080fd5b806301a3f013146102f657806305c6b6631461030b5780630ee0fdbd1461031e57806310d67a2f14610340578063136439dd1461035357806313f815ed14610366575b600080fd5b610309610304366004614278565b61074a565b005b6103096103193660046146dd565b610bdb565b60a35461032b9060ff1681565b60405190151581526020015b60405180910390f35b61030961034e36600461477a565b6111a0565b61030961036136600461479e565b611250565b6103916103743660046147b7565b609a60209081526000928352604080842090915290825290205481565b604051908152602001610337565b6103096103ad366004614802565b61138f565b6103916103c03660046147b7565b609b60209081526000928352604080842090915290825290205481565b6097546103f0906001600160a01b031681565b6040516001600160a01b039091168152602001610337565b609f546103f090600160201b90046001600160a01b031681565b61042a6113d0565b604051610337919061486c565b61030961044536600461487f565b61145e565b61045d61045836600461493b565b611628565b6040516103379190614a96565b60985461048190600160e01b900463ffffffff1681565b60405163ffffffff9091168152602001610337565b6103096104a4366004614aa9565b50565b61039160a15481565b609d546104819063ffffffff1681565b6104d36104ce366004614b2b565b611abe565b6040516103379190614c84565b6103096104ee366004614d02565b6121e4565b609d5461048190600160401b900463ffffffff1681565b6103096104a4366004614d6c565b6103096128dc565b61032b61052e366004614da7565b606654600160ff9092169190911b9081161490565b610556610551366004614dca565b6129a3565b6040516103379190614e76565b606654610391565b6103f0612b6b565b6103f0612bde565b6103f0612c28565b610309610591366004614eba565b612c72565b6105a96105a4366004614f0e565b6130e6565b604051610337929190614fce565b610309613186565b6103096105cd36600461477a565b61319a565b6103096131f0565b60a0546103f0906001600160a01b031681565b6099546104819063ffffffff1681565b6098546103f0906001600160a01b031681565b6065546103f0906001600160a01b031681565b6033546001600160a01b03166103f0565b609d5461048190600160201b900463ffffffff1681565b60985461048190600160a01b900463ffffffff1681565b61039160a25481565b61030961067936600461479e565b613223565b6106ac61068c3660046147b7565b609c60209081526000928352604080842090915290825290205460ff1681565b604051610337919061502d565b60985461048190600160c01b900463ffffffff1681565b6106e36106de366004615055565b61363c565b604051610337929190615097565b6103f06137ce565b609f546104819063ffffffff1681565b610391606481565b61030961071f36600461477a565b613818565b610309610732366004614eba565b61388e565b61030961074536600461479e565b613ccf565b610752613e2b565b600061076160208301836150b8565b9050600061077560608501604086016150b8565b9050600061078960408601602087016150b8565b905036600061079b60a08801886150d5565b909250905060006107b260e0890160c08a016150b8565b6000808052609a6020908152919250600080516020615dda833981519152916107dd908a018a6150b8565b63ffffffff1663ffffffff16815260200190815260200160002054886040516020016108099190615189565b60405160208183030381529060405280519060200120146108455760405162461bcd60e51b815260040161083c90615263565b60405180910390fd5b6000808052609c6020908152600191600080516020615dfa83398151915291610870908b018b6150b8565b63ffffffff16815260208101919091526040016000205460ff16600481111561089b5761089b615017565b146108b85760405162461bcd60e51b815260040161083c906152c0565b6000808052609b60209081527f10afac9233b4ccc54d6404ffc1cf3b47515a2b8edbf675d15eddce05a027dcbd9082906108f4908b018b6150b8565b63ffffffff1663ffffffff168152602001908152602001600020541461092c5760405162461bcd60e51b815260040161083c906152c0565b60985461094690600160a01b900463ffffffff1685615322565b63ffffffff164363ffffffff1611156109715760405162461bcd60e51b815260040161083c9061534a565b60408051808201909152606080825260208201526040805160808101825263ffffffff4316815260006020808301829052848101518385015284516060840152925190926109c3918c91849101615407565b60408051601f1981840301815291905280516020918201206000808052609b835290917f10afac9233b4ccc54d6404ffc1cf3b47515a2b8edbf675d15eddce05a027dcbd9190610a15908e018e6150b8565b63ffffffff16815260208082019290925260409081016000908120939093558c013560a255818052609c8152600491600080516020615dfa83398151915291610a60908e018e6150b8565b63ffffffff16815260208101919091526040016000205460ff166004811115610a8b57610a8b615017565b50610a9e905060408c0160208d016150b8565b609d805463ffffffff92909216600160401b0263ffffffff60401b19909216919091179055610ad060608c018c6150d5565b610adc91609e916141b5565b50610aed60a08c0160808d016150b8565b609f805463ffffffff191663ffffffff92909216919091179055610b1460208c018c6150b8565b609d805463ffffffff92909216600160201b0267ffffffff0000000019909216919091179055610b4760208b018b6150b8565b63ffffffff167fff2908483d74b6b70053dd473260acf1b09e0ba0781bf94100bb8277581749de8b604051610b7c9190615427565b60405180910390a2610b9160208b018b6150b8565b63ffffffff167fdf22f3558e4841b63d77179546b3eae63e4e343bbe752746b093162bc526be4c8b604051610bc69190615427565b60405180910390a25050505050505050505050565b609f54600160201b90046001600160a01b03163314610c0c5760405162461bcd60e51b815260040161083c90615435565b6000610c1e60808501606086016150b8565b90506000610c3260608601604087016150b8565b9050366000610c4460808801886150d5565b90925090506000610c5b60c0890160a08a016150b8565b60016000908152609a60209081529192507f5b542b52981c4f2fa9965514d5bb7f37f1b7bc0902a6a4dc6b04dc05be85586b91610c9a908a018a6150b8565b63ffffffff1663ffffffff1681526020019081526020016000205488604051602001610cc69190615454565b6040516020818303038152906040528051906020012014610cf95760405162461bcd60e51b815260040161083c90615263565b60016000818152609c6020908152600080516020615dba8339815191529190610d24908b018b6150b8565b63ffffffff16815260208101919091526040016000205460ff166004811115610d4f57610d4f615017565b14610d6c5760405162461bcd60e51b815260040161083c906152c0565b60016000908152609b60209081527f298c800d0881dd208d705ebc03eb18189f38118259f27dd43b4c60d61c607e87908290610daa908b018b6150b8565b63ffffffff1663ffffffff1681526020019081526020016000205414610de25760405162461bcd60e51b815260040161083c906152c0565b609854610dfc90600160a01b900463ffffffff1685615322565b63ffffffff164363ffffffff161115610e275760405162461bcd60e51b815260040161083c9061534a565b600087604051602001610e3a919061552e565b604051602081830303815290604052805190602001209050600080609760009054906101000a90046001600160a01b03166001600160a01b0316636efb46368488888c8e6040518663ffffffff1660e01b8152600401610e9e9594939291906155c6565b600060405180830381865afa158015610ebb573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f19168201604052610ee3919081019061573d565b6040805160808101825263ffffffff43168152602080820184905280850151828401528451606083015291519395509193509091610f25918d918491016157d9565b60408051601f19818403018152919052805160209182012060016000908152609b835290917f298c800d0881dd208d705ebc03eb18189f38118259f27dd43b4c60d61c607e879190610f79908f018f6150b8565b63ffffffff1681526020810191909152604001600020556003609c6000600180811115610fa857610fa8615017565b815260200190815260200160002060008d6000016020810190610fcb91906150b8565b63ffffffff16815260208101919091526040016000205460ff166004811115610ff657610ff6615017565b50611006905060208d018d6150b8565b63ffffffff167f07ba8d7c4209c14e6d2ed5fd4542e9d8f47e1af3da0cbd9c50e2d0d3e87dfff08c8360405161103d9291906157d9565b60405180910390a260005b868110156110df578560ff168460200151828151811061106a5761106a6157f9565b602002602001015161107c919061580f565b6001600160601b031660648560000151838151811061109d5761109d6157f9565b60200260200101516001600160601b03166110b8919061583e565b10156110cd5750505050505050505050505050565b806110d78161585d565b915050611048565b5060808b013560a15560016000908152609c6020908152600491600080516020615dba83398151915291611115908f018f6150b8565b63ffffffff16815260208101919091526040016000205460ff16600481111561114057611140615017565b505060408b013561115460208d018d6150b8565b63ffffffff167f02046773dfd0e022ab6bf68cb07d73f080f87a4b82f7a4fccfe7d919d6c4ecb48d604051611189919061552e565b60405180910390a35050505050505050505b505050565b606560009054906101000a90046001600160a01b03166001600160a01b031663eab66d7a6040518163ffffffff1660e01b8152600401602060405180830381865afa1580156111f3573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906112179190615878565b6001600160a01b0316336001600160a01b0316146112475760405162461bcd60e51b815260040161083c90615895565b6104a481613e85565b60655460405163237dfb4760e11b81523360048201526001600160a01b03909116906346fbf68e90602401602060405180830381865afa158015611298573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906112bc91906158df565b6112d85760405162461bcd60e51b815260040161083c906158fc565b606654818116146113515760405162461bcd60e51b815260206004820152603860248201527f5061757361626c652e70617573653a20696e76616c696420617474656d70742060448201527f746f20756e70617573652066756e6374696f6e616c6974790000000000000000606482015260840161083c565b606681905560405181815233907fab40a374bc51de372200a8bc981af8c9ecdc08dfdaef0bb6e09f88f3c616ef3d906020015b60405180910390a250565b611397613e2b565b60405181151581527f6af4ae1f481aff20ce571abd65375b67b22359883a823d1ddf4bd8f2879ff7ba906020015b60405180910390a150565b609e80546113dd90615944565b80601f016020809104026020016040519081016040528092919081815260200182805461140990615944565b80156114565780601f1061142b57610100808354040283529160200191611456565b820191906000526020600020905b81548152906001019060200180831161143957829003601f168201915b505050505081565b600054610100900460ff161580801561147e5750600054600160ff909116105b806114985750303b158015611498575060005460ff166001145b6114fb5760405162461bcd60e51b815260206004820152602e60248201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160448201526d191e481a5b9a5d1a585b1a5e995960921b606482015260840161083c565b6000805460ff19166001179055801561151e576000805461ff0019166101001790555b6115298a6000613f7c565b61153289614066565b609f80546001600160a01b03808b16600160201b02640100000000600160c01b03199092169190911790915560a080548983166001600160a01b03199182161790915560a3805489151560ff199091161790556097805488841692169190911790556098805463ffffffff868116600160c01b0263ffffffff60c01b19918916600160a01b026001600160c01b0319909316948716949094179190911716919091179055801561161c576000805461ff0019169055604051600181527f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb38474024989060200160405180910390a15b50505050505050505050565b60606000846001600160a01b031663683048356040518163ffffffff1660e01b8152600401602060405180830381865afa15801561166a573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061168e9190615878565b90506000856001600160a01b0316639e9923c26040518163ffffffff1660e01b8152600401602060405180830381865afa1580156116d0573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906116f49190615878565b90506000866001600160a01b0316635df459466040518163ffffffff1660e01b8152600401602060405180830381865afa158015611736573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061175a9190615878565b9050600086516001600160401b03811115611777576117776142c6565b6040519080825280602002602001820160405280156117aa57816020015b60608152602001906001900390816117955790505b50905060005b8751811015611ab25760008882815181106117cd576117cd6157f9565b0160200151604051638902624560e01b815260f89190911c6004820181905263ffffffff8a16602483015291506000906001600160a01b03871690638902624590604401600060405180830381865afa15801561182e573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526118569190810190615979565b905080516001600160401b03811115611871576118716142c6565b6040519080825280602002602001820160405280156118bc57816020015b604080516060810182526000808252602080830182905292820152825260001990920191018161188f5790505b508484815181106118cf576118cf6157f9565b602002602001018190525060005b8151811015611a9c576040518060600160405280876001600160a01b03166347b314e8858581518110611912576119126157f9565b60200260200101516040518263ffffffff1660e01b815260040161193891815260200190565b602060405180830381865afa158015611955573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906119799190615878565b6001600160a01b03168152602001838381518110611999576119996157f9565b60200260200101518152602001896001600160a01b031663fa28c6278585815181106119c7576119c76157f9565b60209081029190910101516040516001600160e01b031960e084901b168152600481019190915260ff8816602482015263ffffffff8f166044820152606401602060405180830381865afa158015611a23573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611a479190615a09565b6001600160601b0316815250858581518110611a6557611a656157f9565b60200260200101518281518110611a7e57611a7e6157f9565b60200260200101819052508080611a949061585d565b9150506118dd565b5050508080611aaa9061585d565b9150506117b0565b50979650505050505050565b611ae96040518060800160405280606081526020016060815260200160608152602001606081525090565b6000876001600160a01b031663683048356040518163ffffffff1660e01b8152600401602060405180830381865afa158015611b29573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611b4d9190615878565b9050611b7a6040518060800160405280606081526020016060815260200160608152602001606081525090565b6040516361c8a12f60e11b81526001600160a01b038a169063c391425e90611baa908b9089908990600401615a24565b600060405180830381865afa158015611bc7573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f19168201604052611bef9190810190615a6e565b81526040516340e03a8160e11b81526001600160a01b038316906381c0750290611c21908b908b908b90600401615afc565b600060405180830381865afa158015611c3e573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f19168201604052611c669190810190615a6e565b6040820152856001600160401b03811115611c8357611c836142c6565b604051908082528060200260200182016040528015611cb657816020015b6060815260200190600190039081611ca15790505b50606082015260005b60ff81168711156120f5576000856001600160401b03811115611ce457611ce46142c6565b604051908082528060200260200182016040528015611d0d578160200160208202803683370190505b5083606001518360ff1681518110611d2757611d276157f9565b602002602001018190525060005b86811015611ff55760008c6001600160a01b03166304ec63518a8a85818110611d6057611d606157f9565b905060200201358e88600001518681518110611d7e57611d7e6157f9565b60200260200101516040518463ffffffff1660e01b8152600401611dbb9392919092835263ffffffff918216602084015216604082015260600190565b602060405180830381865afa158015611dd8573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611dfc9190615b1c565b90506001600160c01b038116611ea05760405162461bcd60e51b815260206004820152605c60248201527f4f70657261746f7253746174655265747269657665722e676574436865636b5360448201527f69676e617475726573496e64696365733a206f70657261746f72206d7573742060648201527f6265207265676973746572656420617420626c6f636b6e756d62657200000000608482015260a40161083c565b8a8a8560ff16818110611eb557611eb56157f9565b6001600160c01b03841692013560f81c9190911c600190811614159050611fe257856001600160a01b031663dd9846b98a8a85818110611ef757611ef76157f9565b905060200201358d8d8860ff16818110611f1357611f136157f9565b6040516001600160e01b031960e087901b1681526004810194909452919091013560f81c60248301525063ffffffff8f166044820152606401602060405180830381865afa158015611f69573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611f8d9190615b45565b85606001518560ff1681518110611fa657611fa66157f9565b60200260200101518481518110611fbf57611fbf6157f9565b63ffffffff9092166020928302919091019091015282611fde8161585d565b9350505b5080611fed8161585d565b915050611d35565b506000816001600160401b03811115612010576120106142c6565b604051908082528060200260200182016040528015612039578160200160208202803683370190505b50905060005b828110156120ba5784606001518460ff1681518110612060576120606157f9565b60200260200101518181518110612079576120796157f9565b6020026020010151828281518110612093576120936157f9565b63ffffffff90921660209283029190910190910152806120b28161585d565b91505061203f565b508084606001518460ff16815181106120d5576120d56157f9565b6020026020010181905250505080806120ed90615b62565b915050611cbf565b506000896001600160a01b0316635df459466040518163ffffffff1660e01b8152600401602060405180830381865afa158015612136573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061215a9190615878565b60405163354952a360e21b81529091506001600160a01b0382169063d5254a8c9061218d908b908b908e90600401615b82565b600060405180830381865afa1580156121aa573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526121d29190810190615a6e565b60208301525098975050505050505050565b609d54600160401b900463ffffffff1615600061220760608601604087016150b8565b905081156122925760a35460ff161561225057609f54600160201b90046001600160a01b0316331461224b5760405162461bcd60e51b815260040161083c90615435565b6122c3565b6033546001600160a01b0316331461224b5760405162461bcd60e51b815260206004820152600560248201526420baba341960d91b604482015260640161083c565b609f54600160201b90046001600160a01b031633146122c35760405162461bcd60e51b815260040161083c90615435565b60006122d560408701602088016150b8565b90503660006122e760a08901896150d5565b909250905060006122fe60e08a0160c08b016150b8565b6000808052609a6020908152919250600080516020615dda83398151915291612329908b018b6150b8565b63ffffffff1663ffffffff16815260200190815260200160002054896040516020016123559190615189565b60405160208183030381529060405280519060200120146123885760405162461bcd60e51b815260040161083c90615263565b6000808052609c6020908152600191600080516020615dfa833981519152916123b3908c018c6150b8565b63ffffffff16815260208101919091526040016000205460ff1660048111156123de576123de615017565b146123fb5760405162461bcd60e51b815260040161083c906152c0565b6000808052609b60209081527f10afac9233b4ccc54d6404ffc1cf3b47515a2b8edbf675d15eddce05a027dcbd908290612437908c018c6150b8565b63ffffffff1663ffffffff168152602001908152602001600020541461246f5760405162461bcd60e51b815260040161083c906152c0565b60985461248990600160a01b900463ffffffff1685615322565b63ffffffff164363ffffffff1611156124b45760405162461bcd60e51b815260040161083c9061534a565b6000886040516020016124c79190615427565b60408051601f19818403018152828252805160209182012083830190925260608084529083015291506000881561258c57609760009054906101000a90046001600160a01b03166001600160a01b0316636efb46368488888c8f6040518663ffffffff1660e01b81526004016125419594939291906155c6565b600060405180830381865afa15801561255e573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f19168201604052612586919081019061573d565b90925090505b6040805160808101825263ffffffff431681526020808201849052848101518284015284516060830152915190916125c8918e91849101615407565b60408051808303601f190181529190528051602090910120609b600080815260200190815260200160002060008e600001602081019061260891906150b8565b63ffffffff1681526020810191909152604001600020556003609c600080600181111561263757612637615017565b815260200190815260200160002060008e600001602081019061265a91906150b8565b63ffffffff16815260208101919091526040016000205460ff16600481111561268557612685615017565b50612695905060208e018e6150b8565b63ffffffff167f47adacb0b6bbd726ae39ac6c006cca1c2006c9aedaa882dcba7c4804db7c41ce8d836040516126cc929190615407565b60405180910390a289156127775760005b86811015612775578560ff16846020015182815181106126ff576126ff6157f9565b6020026020010151612711919061580f565b6001600160601b0316606485600001518381518110612732576127326157f9565b60200260200101516001600160601b031661274d919061583e565b1015612763575050505050505050505050505050565b8061276d8161585d565b9150506126dd565b505b60408c013560a2556004609c600080815260200190815260200160002060008e60000160208101906127a991906150b8565b63ffffffff16815260208101919091526040016000205460ff1660048111156127d4576127d4615017565b506127e7905060408e0160208f016150b8565b609d805463ffffffff92909216600160401b0263ffffffff60401b1990921691909117905561281960608e018e6150d5565b61282591609e916141b5565b5061283660a08e0160808f016150b8565b609f805463ffffffff191663ffffffff9290921691909117905561285d60208e018e6150b8565b609d805463ffffffff92909216600160201b0267ffffffff000000001990921691909117905561289060208d018d6150b8565b63ffffffff167fff2908483d74b6b70053dd473260acf1b09e0ba0781bf94100bb8277581749de8d6040516128c59190615427565b60405180910390a250505050505050505050505050565b60655460405163237dfb4760e11b81523360048201526001600160a01b03909116906346fbf68e90602401602060405180830381865afa158015612924573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061294891906158df565b6129645760405162461bcd60e51b815260040161083c906158fc565b600019606681905560405190815233907fab40a374bc51de372200a8bc981af8c9ecdc08dfdaef0bb6e09f88f3c616ef3d9060200160405180910390a2565b60606000846001600160a01b031663c391425e84866040518363ffffffff1660e01b81526004016129d5929190615bac565b600060405180830381865afa1580156129f2573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f19168201604052612a1a9190810190615a6e565b9050600084516001600160401b03811115612a3757612a376142c6565b604051908082528060200260200182016040528015612a60578160200160208202803683370190505b50905060005b8551811015612b6157866001600160a01b03166304ec6351878381518110612a9057612a906157f9565b602002602001015187868581518110612aab57612aab6157f9565b60200260200101516040518463ffffffff1660e01b8152600401612ae89392919092835263ffffffff918216602084015216604082015260600190565b602060405180830381865afa158015612b05573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190612b299190615b1c565b6001600160c01b0316828281518110612b4457612b446157f9565b602090810291909101015280612b598161585d565b915050612a66565b5095945050505050565b60975460408051632efa2ca360e11b815290516000926001600160a01b031691635df459469160048083019260209291908290030181865afa158015612bb5573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190612bd99190615878565b905090565b60975460408051636830483560e01b815290516000926001600160a01b03169163683048359160048083019260209291908290030181865afa158015612bb5573d6000803e3d6000fd5b60975460408051636d14a98760e01b815290516000926001600160a01b031691636d14a9879160048083019260209291908290030181865afa158015612bb5573d6000803e3d6000fd5b60a0546001600160a01b03163314612cb45760405162461bcd60e51b8152602060048201526005602482015264417574683160d81b604482015260640161083c565b609d5463ffffffff600160401b909104164314801590612cd357504315155b612cef5760405162461bcd60e51b815260040161083c90615c00565b6040805160e0810182526000818301819052606080830181905260a083015260c0820152609854600160e01b900463ffffffff908116825243811660208084019190915290861660808301528251601f850182900482028101820190935283835290919084908490819084018382808284376000920191909152505050506060820152609d54600160401b900463ffffffff16612dde5763ffffffff431660408083019190915280516020601f850181900481028201810190925283815290849084908190840183828082843760009201919091525050505060a082015263ffffffff841660c0820152612e92565b609d54600160401b900463ffffffff166040820152609e8054612e0090615944565b80601f0160208091040260200160405190810160405280929190818152602001828054612e2c90615944565b8015612e795780601f10612e4e57610100808354040283529160200191612e79565b820191906000526020600020905b815481529060010190602001808311612e5c57829003601f168201915b505050505060a0820152609f5463ffffffff1660c08201525b609854600160e01b900463ffffffff1615612f3957609854600090612ec690600190600160e01b900463ffffffff16615c5d565b63ffffffff81166000908152600080516020615dfa833981519152602052604090205490915060019060ff166004811115612f0357612f03615017565b1415612f375763ffffffff81166000908152600080516020615dfa83398151915260205260409020805460ff191660021790555b505b60995463ffffffff1615612fd257609954600090612f5f9060019063ffffffff16615c5d565b63ffffffff81166000908152600080516020615dba833981519152602052604090205490915060019060ff166004811115612f9c57612f9c615017565b1415612fd05763ffffffff81166000908152600080516020615dba83398151915260205260409020805460ff191660021790555b505b80604051602001612fe39190615c82565b60408051601f1981840301815282825280516020918201206098805463ffffffff600160e01b9182900481166000908152600080516020615dda833981519152865286812094909455825482900481168452600080516020615dfa833981519152909452939091208054600160ff19909116179055609d805463ffffffff1916438416179055549190910416907ffaf4b2054479d0f83e909b73cde2a6cb18ec2a93ba8ad5a62329001c86b1f3ea9061309d908490615c82565b60405180910390a26098546130c090600160e01b900463ffffffff166001615322565b6098601c6101000a81548163ffffffff021916908363ffffffff16021790555050505050565b604080518082019091526060808252602082015260975460405163377da31b60e11b81526000916001600160a01b031690636efb463690613133908a908a908a908a908a906004016155c6565b600060405180830381865afa158015613150573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f19168201604052613178919081019061573d565b915091509550959350505050565b61318e613e2b565b6131986000614066565b565b6131a2613e2b565b609780546001600160a01b0319166001600160a01b0383169081179091556040519081527f901a654dc830c94e8a12c9a3bc0a92ac11b5cf28046ca8d190691cdaf5209016906020016113c5565b6131f8613e2b565b6040517f4d60154266b2ea0c8f091d257eac5abc941c46cb54d0c3069a830f6339fe1da190600090a1565b60a0546001600160a01b031633146132655760405162461bcd60e51b8152602060048201526005602482015264417574683160d81b604482015260640161083c565b609d54600160401b900463ffffffff161580159061328257504315155b6132c05760405162461bcd60e51b815260206004820152600f60248201526e13dc0814dd185d19481d5b9a5b9a5d608a1b604482015260640161083c565b6099546098546040805160c0810182526000606080830191909152608082015263ffffffff9384168082526020820186905243851692820192909252609f54841660a0820152609e80549294600160e01b90940490931692909161332390615944565b80601f016020809104026020016040519081016040528092919081815260200182805461334f90615944565b801561339c5780601f106133715761010080835404028352916020019161339c565b820191906000526020600020905b81548152906001019060200180831161337f57829003601f168201915b50505050506080820152609d54600160401b900463ffffffff90811660608301528316156134445760006133d1600185615c5d565b63ffffffff81166000908152600080516020615dba833981519152602052604090205490915060019060ff16600481111561340e5761340e615017565b14156134425763ffffffff81166000908152600080516020615dba83398151915260205260409020805460ff191660021790555b505b63ffffffff82161561355b57600061345d600184615c5d565b63ffffffff81166000908152600080516020615dfa833981519152602052604090205490915060019060ff16600481111561349a5761349a615017565b141561355957609854609d546134c09163ffffffff600160c01b90910481169116615322565b63ffffffff164363ffffffff16111561352b5760405162461bcd60e51b815260206004820152602760248201527f52645461736b2063616e2774207965742063616e63656c2074686520696e6974604482015266204f705461736b60c81b606482015260840161083c565b63ffffffff81166000908152600080516020615dfa83398151915260205260409020805460ff191660021790555b505b8060405160200161356c9190615d18565b60408051601f19818403018152828252805160209182012063ffffffff871660008181527f5b542b52981c4f2fa9965514d5bb7f37f1b7bc0902a6a4dc6b04dc05be85586b845284812092909255600080516020615dba83398151915290925291909120805460ff19166001179055907f161faa5d92f6bf0262139c57c87ca6cc60e5b3c9c3341dc175cec97a2516cc7d90613609908490615d18565b60405180910390a261361c836001615322565b6099805463ffffffff191663ffffffff9290921691909117905550505050565b6040805160018082528183019092526000916060918391602080830190803683370190505090508481600081518110613677576136776157f9565b60209081029190910101526040516361c8a12f60e11b81526000906001600160a01b0388169063c391425e906136b39088908690600401615bac565b600060405180830381865afa1580156136d0573d6000803e3d6000fd5b505050506040513d6000823e601f3d908101601f191682016040526136f89190810190615a6e565b60008151811061370a5761370a6157f9565b60209081029190910101516040516304ec635160e01b81526004810188905263ffffffff87811660248301529091166044820181905291506000906001600160a01b038916906304ec635190606401602060405180830381865afa158015613776573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061379a9190615b1c565b6001600160c01b0316905060006137b0826140b8565b9050816137be8a838a611628565b9550955050505050935093915050565b6097546040805163df5cf72360e01b815290516000926001600160a01b03169163df5cf7239160048083019260209291908290030181865afa158015612bb5573d6000803e3d6000fd5b613820613e2b565b6001600160a01b0381166138855760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b606482015260840161083c565b6104a481614066565b613896613e2b565b609d5463ffffffff600160401b9091041643148015906138b557504315155b6138d15760405162461bcd60e51b815260040161083c90615c00565b6040805160e0810182526000818301819052606080830181905260a083015260c0820152609854600160e01b900463ffffffff908116825243811660208084019190915290861660808301528251601f850182900482028101820190935283835290919084908490819084018382808284376000920191909152505050506060820152609d54600160401b900463ffffffff166139c05763ffffffff431660408083019190915280516020601f850181900481028201810190925283815290849084908190840183828082843760009201919091525050505060a082015263ffffffff841660c0820152613a74565b609d54600160401b900463ffffffff166040820152609e80546139e290615944565b80601f0160208091040260200160405190810160405280929190818152602001828054613a0e90615944565b8015613a5b5780601f10613a3057610100808354040283529160200191613a5b565b820191906000526020600020905b815481529060010190602001808311613a3e57829003601f168201915b505050505060a0820152609f5463ffffffff1660c08201525b609854600160e01b900463ffffffff1615613b1b57609854600090613aa890600190600160e01b900463ffffffff16615c5d565b63ffffffff81166000908152600080516020615dfa833981519152602052604090205490915060019060ff166004811115613ae557613ae5615017565b1415613b195763ffffffff81166000908152600080516020615dfa83398151915260205260409020805460ff191660021790555b505b60995463ffffffff1615613bb457609954600090613b419060019063ffffffff16615c5d565b63ffffffff81166000908152600080516020615dba833981519152602052604090205490915060019060ff166004811115613b7e57613b7e615017565b1415613bb25763ffffffff81166000908152600080516020615dba83398151915260205260409020805460ff191660021790555b505b80604051602001613bc59190615c82565b60408051601f1981840301815282825280516020918201206098805463ffffffff600160e01b9182900481166000908152600080516020615dda833981519152865286812094909455825482900481168452600080516020615dfa833981519152909452939091208054600160ff19909116179055609d805463ffffffff1916438416179055549190910416907ffaf4b2054479d0f83e909b73cde2a6cb18ec2a93ba8ad5a62329001c86b1f3ea90613c7f908490615c82565b60405180910390a26098601c9054906101000a900463ffffffff1663ffffffff167fdc5ba3b66ec6491b585b3f13698ed711aa829071f43300d6ede6dba67e28d75f8260405161309d9190615c82565b606560009054906101000a90046001600160a01b03166001600160a01b031663eab66d7a6040518163ffffffff1660e01b8152600401602060405180830381865afa158015613d22573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190613d469190615878565b6001600160a01b0316336001600160a01b031614613d765760405162461bcd60e51b815260040161083c90615895565b606654198119606654191614613df45760405162461bcd60e51b815260206004820152603860248201527f5061757361626c652e756e70617573653a20696e76616c696420617474656d7060448201527f7420746f2070617573652066756e6374696f6e616c6974790000000000000000606482015260840161083c565b606681905560405181815233907f3582d1828e26bf56bd801502bc021ac0bc8afb57c826e4986b45593c8fad389c90602001611384565b6033546001600160a01b031633146131985760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572604482015260640161083c565b6001600160a01b038116613f135760405162461bcd60e51b815260206004820152604960248201527f5061757361626c652e5f73657450617573657252656769737472793a206e657760448201527f50617573657252656769737472792063616e6e6f7420626520746865207a65726064820152686f206164647265737360b81b608482015260a40161083c565b606554604080516001600160a01b03928316815291831660208301527f6e9fcd539896fca60e8b0f01dd580233e48a6b0f7df013b89ba7f565869acdb6910160405180910390a1606580546001600160a01b0319166001600160a01b0392909216919091179055565b6065546001600160a01b0316158015613f9d57506001600160a01b03821615155b61401f5760405162461bcd60e51b815260206004820152604760248201527f5061757361626c652e5f696e697469616c697a655061757365723a205f696e6960448201527f7469616c697a6550617573657228292063616e206f6e6c792062652063616c6c6064820152666564206f6e636560c81b608482015260a40161083c565b606681905560405181815233907fab40a374bc51de372200a8bc981af8c9ecdc08dfdaef0bb6e09f88f3c616ef3d9060200160405180910390a261406282613e85565b5050565b603380546001600160a01b038381166001600160a01b0319831681179093556040519116919082907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e090600090a35050565b60606000806140c684614184565b61ffff166001600160401b038111156140e1576140e16142c6565b6040519080825280601f01601f19166020018201604052801561410b576020820181803683370190505b5090506000805b825182108015614123575061010081105b1561417a576001811b93508584161561416a578060f81b83838151811061414c5761414c6157f9565b60200101906001600160f81b031916908160001a9053508160010191505b6141738161585d565b9050614112565b5090949350505050565b6000805b82156141af57614199600184615d80565b90921691806141a781615d97565b915050614188565b92915050565b8280546141c190615944565b90600052602060002090601f0160209004810192826141e35760008555614229565b82601f106141fc5782800160ff19823516178555614229565b82800160010185558215614229579182015b8281111561422957823582559160200191906001019061420e565b50614235929150614239565b5090565b5b80821115614235576000815560010161423a565b600060e0828403121561426057600080fd5b50919050565b60006060828403121561426057600080fd5b6000806080838503121561428b57600080fd5b82356001600160401b038111156142a157600080fd5b6142ad8582860161424e565b9250506142bd8460208501614266565b90509250929050565b634e487b7160e01b600052604160045260246000fd5b604080519081016001600160401b03811182821017156142fe576142fe6142c6565b60405290565b60405161010081016001600160401b03811182821017156142fe576142fe6142c6565b604051601f8201601f191681016001600160401b038111828210171561434f5761434f6142c6565b604052919050565b60006001600160401b03821115614370576143706142c6565b5060051b60200190565b63ffffffff811681146104a457600080fd5b80356143978161437a565b919050565b600082601f8301126143ad57600080fd5b813560206143c26143bd83614357565b614327565b82815260059290921b840181019181810190868411156143e157600080fd5b8286015b848110156144055780356143f88161437a565b83529183019183016143e5565b509695505050505050565b60006040828403121561442257600080fd5b61442a6142dc565b9050813581526020820135602082015292915050565b600082601f83011261445157600080fd5b813560206144616143bd83614357565b82815260069290921b8401810191818101908684111561448057600080fd5b8286015b84811015614405576144968882614410565b835291830191604001614484565b600082601f8301126144b557600080fd5b6144bd6142dc565b8060408401858111156144cf57600080fd5b845b818110156144e95780358452602093840193016144d1565b509095945050505050565b60006080828403121561450657600080fd5b61450e6142dc565b905061451a83836144a4565b815261452983604084016144a4565b602082015292915050565b600082601f83011261454557600080fd5b813560206145556143bd83614357565b82815260059290921b8401810191818101908684111561457457600080fd5b8286015b848110156144055780356001600160401b038111156145975760008081fd5b6145a58986838b010161439c565b845250918301918301614578565b600061018082840312156145c657600080fd5b6145ce614304565b905081356001600160401b03808211156145e757600080fd5b6145f38583860161439c565b8352602084013591508082111561460957600080fd5b61461585838601614440565b6020840152604084013591508082111561462e57600080fd5b61463a85838601614440565b604084015261464c85606086016144f4565b606084015261465e8560e08601614410565b608084015261012084013591508082111561467857600080fd5b6146848583860161439c565b60a084015261014084013591508082111561469e57600080fd5b6146aa8583860161439c565b60c08401526101608401359150808211156146c457600080fd5b506146d184828501614534565b60e08301525092915050565b600080600083850360e08112156146f357600080fd5b84356001600160401b038082111561470a57600080fd5b9086019060c0828903121561471e57600080fd5b81955060a0601f198401121561473357600080fd5b60208701945060c087013592508083111561474d57600080fd5b505061475b868287016145b3565b9150509250925092565b6001600160a01b03811681146104a457600080fd5b60006020828403121561478c57600080fd5b813561479781614765565b9392505050565b6000602082840312156147b057600080fd5b5035919050565b600080604083850312156147ca57600080fd5b8235600281106147d957600080fd5b915060208301356147e98161437a565b809150509250929050565b80151581146104a457600080fd5b60006020828403121561481457600080fd5b8135614797816147f4565b6000815180845260005b8181101561484557602081850181015186830182015201614829565b81811115614857576000602083870101525b50601f01601f19169290920160200192915050565b602081526000614797602083018461481f565b60008060008060008060008060006101208a8c03121561489e57600080fd5b89356148a981614765565b985060208a01356148b981614765565b975060408a01356148c981614765565b965060608a01356148d981614765565b955060808a01356148e9816147f4565b945060a08a01356148f981614765565b935060c08a01356149098161437a565b925060e08a01356149198161437a565b91506101008a013561492a81614765565b809150509295985092959850929598565b60008060006060848603121561495057600080fd5b833561495b81614765565b92506020848101356001600160401b038082111561497857600080fd5b818701915087601f83011261498c57600080fd5b81358181111561499e5761499e6142c6565b6149b0601f8201601f19168501614327565b915080825288848285010111156149c657600080fd5b80848401858401376000848284010152508094505050506149e96040850161438c565b90509250925092565b600081518084526020808501808196508360051b810191508286016000805b86811015614a88578385038a52825180518087529087019087870190845b81811015614a7357835180516001600160a01b031684528a8101518b8501526040908101516001600160601b03169084015292890192606090920191600101614a2f565b50509a87019a95505091850191600101614a11565b509298975050505050505050565b60208152600061479760208301846149f2565b600060208284031215614abb57600080fd5b81356001600160401b03811115614ad157600080fd5b82016040818503121561479757600080fd5b60008083601f840112614af557600080fd5b5081356001600160401b03811115614b0c57600080fd5b602083019150836020828501011115614b2457600080fd5b9250929050565b60008060008060008060808789031215614b4457600080fd5b8635614b4f81614765565b95506020870135614b5f8161437a565b945060408701356001600160401b0380821115614b7b57600080fd5b614b878a838b01614ae3565b90965094506060890135915080821115614ba057600080fd5b818901915089601f830112614bb457600080fd5b813581811115614bc357600080fd5b8a60208260051b8501011115614bd857600080fd5b6020830194508093505050509295509295509295565b600081518084526020808501945080840160005b83811015614c2457815163ffffffff1687529582019590820190600101614c02565b509495945050505050565b600081518084526020808501808196508360051b8101915082860160005b85811015614c77578284038952614c65848351614bee565b98850198935090840190600101614c4d565b5091979650505050505050565b602081526000825160806020840152614ca060a0840182614bee565b90506020840151601f1980858403016040860152614cbe8383614bee565b92506040860151915080858403016060860152614cdb8383614bee565b9250606086015191508085840301608086015250614cf98282614c2f565b95945050505050565b600080600060a08486031215614d1757600080fd5b83356001600160401b0380821115614d2e57600080fd5b614d3a8783880161424e565b9450614d498760208801614266565b93506080860135915080821115614d5f57600080fd5b5061475b868287016145b3565b600060208284031215614d7e57600080fd5b81356001600160401b03811115614d9457600080fd5b8201610120818503121561479757600080fd5b600060208284031215614db957600080fd5b813560ff8116811461479757600080fd5b600080600060608486031215614ddf57600080fd5b8335614dea81614765565b92506020848101356001600160401b03811115614e0657600080fd5b8501601f81018713614e1757600080fd5b8035614e256143bd82614357565b81815260059190911b82018301908381019089831115614e4457600080fd5b928401925b82841015614e6257833582529284019290840190614e49565b80965050505050506149e96040850161438c565b6020808252825182820181905260009190848201906040850190845b81811015614eae57835183529284019291840191600101614e92565b50909695505050505050565b600080600060408486031215614ecf57600080fd5b8335614eda8161437a565b925060208401356001600160401b03811115614ef557600080fd5b614f0186828701614ae3565b9497909650939450505050565b600080600080600060808688031215614f2657600080fd5b8535945060208601356001600160401b0380821115614f4457600080fd5b614f5089838a01614ae3565b909650945060408801359150614f658261437a565b90925060608701359080821115614f7b57600080fd5b50614f88888289016145b3565b9150509295509295909350565b600081518084526020808501945080840160005b83811015614c245781516001600160601b031687529582019590820190600101614fa9565b6040815260008351604080840152614fe96080840182614f95565b90506020850151603f198483030160608501526150068282614f95565b925050508260208301529392505050565b634e487b7160e01b600052602160045260246000fd5b602081016005831061504f57634e487b7160e01b600052602160045260246000fd5b91905290565b60008060006060848603121561506a57600080fd5b833561507581614765565b925060208401359150604084013561508c8161437a565b809150509250925092565b8281526040602082015260006150b060408301846149f2565b949350505050565b6000602082840312156150ca57600080fd5b81356147978161437a565b6000808335601e198436030181126150ec57600080fd5b8301803591506001600160401b0382111561510657600080fd5b602001915036819003821315614b2457600080fd5b6000808335601e1984360301811261513257600080fd5b83016020810192503590506001600160401b0381111561515157600080fd5b803603831315614b2457600080fd5b81835281816020850137506000828201602090810191909152601f909101601f19169091010190565b602081526000823561519a8161437a565b63ffffffff811660208401525060208301356151b58161437a565b63ffffffff81166040840152506151ce6040840161438c565b63ffffffff81166060840152506151e8606084018461511b565b60e060808501526151fe61010085018284615160565b91505061520d6080850161438c565b63ffffffff811660a08501525061522760a085018561511b565b848303601f190160c086015261523e838284615160565b9250505061524e60c0850161438c565b63ffffffff811660e08501525b509392505050565b6020808252603d908201527f737570706c696564207461736b20646f6573206e6f74206d617463682074686560408201527f206f6e65207265636f7264656420696e2074686520636f6e7472616374000000606082015260800190565b6020808252602c908201527f41676772656761746f722068617320616c726561647920726573706f6e64656460408201526b20746f20746865207461736b60a01b606082015260800190565b634e487b7160e01b600052601160045260246000fd5b600063ffffffff8083168185168083038211156153415761534161530c565b01949350505050565b6020808252602d908201527f41676772656761746f722068617320726573706f6e64656420746f207468652060408201526c7461736b20746f6f206c61746560981b606082015260800190565b80356153a28161437a565b63ffffffff16825260208181013590830152604090810135910152565b63ffffffff81511682526020810151602083015260006040820151608060408501526153ee6080850182614f95565b905060608301518482036060860152614cf98282614f95565b6154118184615397565b6080606082015260006150b060808301846153bf565b606081016141af8284615397565b602080825260059082015264041757468360dc1b604082015260600190565b60208152600082356154658161437a565b63ffffffff8082166020850152602085013560408501526040850135915061548c8261437a565b8082166060850152606085013591506154a48261437a565b80821660808501526154b9608086018661511b565b925060c060a08601526154d060e086018483615160565b92505060a08501356154e18161437a565b1660c0939093019290925250919050565b80356154fd8161437a565b63ffffffff168252602081810135908301526040808201359083015260608082013590830152608090810135910152565b60a081016141af82846154f2565b600081518084526020808501945080840160005b83811015614c245761556d87835180518252602090810151910152565b6040969096019590820190600101615550565b8060005b60028110156155a3578151845260209384019390910190600101615584565b50505050565b6155b4828251615580565b602081015161119b6040840182615580565b8581526080602082015260006155e0608083018688615160565b63ffffffff851660408401528281036060840152610180845181835261560882840182614bee565b91505060208501518282036020840152615622828261553c565b9150506040850151828203604084015261563c828261553c565b915050606085015161565160608401826155a9565b506080850151805160e08401526020015161010083015260a08501518282036101208401526156808282614bee565b91505060c085015182820361014084015261569b8282614bee565b91505060e08501518282036101608401526156b68282614c2f565b9a9950505050505050505050565b80516001600160601b038116811461439757600080fd5b600082601f8301126156ec57600080fd5b815160206156fc6143bd83614357565b82815260059290921b8401810191818101908684111561571b57600080fd5b8286015b8481101561440557615730816156c4565b835291830191830161571f565b6000806040838503121561575057600080fd5b82516001600160401b038082111561576757600080fd5b908401906040828703121561577b57600080fd5b6157836142dc565b82518281111561579257600080fd5b61579e888286016156db565b8252506020830151828111156157b357600080fd5b6157bf888286016156db565b602083015250809450505050602083015190509250929050565b6157e381846154f2565b60c060a082015260006150b060c08301846153bf565b634e487b7160e01b600052603260045260246000fd5b60006001600160601b03808316818516818304811182151516156158355761583561530c565b02949350505050565b60008160001904831182151516156158585761585861530c565b500290565b60006000198214156158715761587161530c565b5060010190565b60006020828403121561588a57600080fd5b815161479781614765565b6020808252602a908201527f6d73672e73656e646572206973206e6f74207065726d697373696f6e6564206160408201526939903ab73830bab9b2b960b11b606082015260800190565b6000602082840312156158f157600080fd5b8151614797816147f4565b60208082526028908201527f6d73672e73656e646572206973206e6f74207065726d697373696f6e6564206160408201526739903830bab9b2b960c11b606082015260800190565b600181811c9082168061595857607f821691505b6020821081141561426057634e487b7160e01b600052602260045260246000fd5b6000602080838503121561598c57600080fd5b82516001600160401b038111156159a257600080fd5b8301601f810185136159b357600080fd5b80516159c16143bd82614357565b81815260059190911b820183019083810190878311156159e057600080fd5b928401925b828410156159fe578351825292840192908401906159e5565b979650505050505050565b600060208284031215615a1b57600080fd5b614797826156c4565b63ffffffff84168152604060208201819052810182905260006001600160fb1b03831115615a5157600080fd5b8260051b8085606085013760009201606001918252509392505050565b60006020808385031215615a8157600080fd5b82516001600160401b03811115615a9757600080fd5b8301601f81018513615aa857600080fd5b8051615ab66143bd82614357565b81815260059190911b82018301908381019087831115615ad557600080fd5b928401925b828410156159fe578351615aed8161437a565b82529284019290840190615ada565b63ffffffff84168152604060208201526000614cf9604083018486615160565b600060208284031215615b2e57600080fd5b81516001600160c01b038116811461479757600080fd5b600060208284031215615b5757600080fd5b81516147978161437a565b600060ff821660ff811415615b7957615b7961530c565b60010192915050565b604081526000615b96604083018587615160565b905063ffffffff83166020830152949350505050565b60006040820163ffffffff851683526020604081850152818551808452606086019150828701935060005b81811015615bf357845183529383019391830191600101615bd7565b5090979650505050505050565b60208082526039908201527f43616e2774206372656174652061207461736b20696e207468652073616d652060408201527f626c6f636b206173206120636f6d706c65746564207461736b00000000000000606082015260800190565b600063ffffffff83811690831681811015615c7a57615c7a61530c565b039392505050565b60208152600063ffffffff80845116602084015280602085015116604084015280604085015116606084015250606083015160e06080840152615cc961010084018261481f565b90506080840151615ce260a085018263ffffffff169052565b5060a0840151838203601f190160c0850152615cfe828261481f565b91505060c084015161525b60e085018263ffffffff169052565b60208152600063ffffffff80845116602084015260208401516040840152806040850151166060840152806060850151166080840152608084015160c060a0850152615d6760e085018261481f565b90508160a08601511660c0850152809250505092915050565b600082821015615d9257615d9261530c565b500390565b600061ffff80831681811415615daf57615daf61530c565b600101939250505056fe759fbb3c7535ea6cd791a268d7e54d5bf43408007315741bf51b70650b77f6a5be6620bd3346e5d7f8387fbec0981aa0d6289d22efa7c935f9ef6841bf2a98c721d5695aeb71770b4b420e85352fe1a012fa06ae92de02f7ee513765e0afa023a2646970667358221220c668c9908719426bfa52d6a8cc9b54638c90e96c2d886585876d70b30948052b64736f6c634300080c0033",
 }
 
 // ContractFinalizerTaskManagerABI is the input ABI used to generate the binding from.
@@ -113,7 +187,7 @@ var ContractFinalizerTaskManagerABI = ContractFinalizerTaskManagerMetaData.ABI
 var ContractFinalizerTaskManagerBin = ContractFinalizerTaskManagerMetaData.Bin
 
 // DeployContractFinalizerTaskManager deploys a new Ethereum contract, binding an instance of ContractFinalizerTaskManager to it.
-func DeployContractFinalizerTaskManager(auth *bind.TransactOpts, backend bind.ContractBackend, _registryCoordinator common.Address, _taskResponseWindowBlock uint32) (common.Address, *types.Transaction, *ContractFinalizerTaskManager, error) {
+func DeployContractFinalizerTaskManager(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *ContractFinalizerTaskManager, error) {
 	parsed, err := ContractFinalizerTaskManagerMetaData.GetAbi()
 	if err != nil {
 		return common.Address{}, nil, nil, err
@@ -122,7 +196,7 @@ func DeployContractFinalizerTaskManager(auth *bind.TransactOpts, backend bind.Co
 		return common.Address{}, nil, nil, errors.New("GetABI returned nil")
 	}
 
-	address, tx, contract, err := bind.DeployContract(auth, *parsed, common.FromHex(ContractFinalizerTaskManagerBin), backend, _registryCoordinator, _taskResponseWindowBlock)
+	address, tx, contract, err := bind.DeployContract(auth, *parsed, common.FromHex(ContractFinalizerTaskManagerBin), backend)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -271,6 +345,37 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorRaw) 
 	return _ContractFinalizerTaskManager.Contract.contract.Transact(opts, method, params...)
 }
 
+// THRESHOLDDENOMINATOR is a free data retrieval call binding the contract method 0xef024458.
+//
+// Solidity: function THRESHOLD_DENOMINATOR() view returns(uint256)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) THRESHOLDDENOMINATOR(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "THRESHOLD_DENOMINATOR")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// THRESHOLDDENOMINATOR is a free data retrieval call binding the contract method 0xef024458.
+//
+// Solidity: function THRESHOLD_DENOMINATOR() view returns(uint256)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) THRESHOLDDENOMINATOR() (*big.Int, error) {
+	return _ContractFinalizerTaskManager.Contract.THRESHOLDDENOMINATOR(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// THRESHOLDDENOMINATOR is a free data retrieval call binding the contract method 0xef024458.
+//
+// Solidity: function THRESHOLD_DENOMINATOR() view returns(uint256)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) THRESHOLDDENOMINATOR() (*big.Int, error) {
+	return _ContractFinalizerTaskManager.Contract.THRESHOLDDENOMINATOR(&_ContractFinalizerTaskManager.CallOpts)
+}
+
 // Aggregator is a free data retrieval call binding the contract method 0x245a7bfc.
 //
 // Solidity: function aggregator() view returns(address)
@@ -302,12 +407,12 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) 
 	return _ContractFinalizerTaskManager.Contract.Aggregator(&_ContractFinalizerTaskManager.CallOpts)
 }
 
-// AllTaskHashes is a free data retrieval call binding the contract method 0x2d89f6fc.
+// AllTaskHashes is a free data retrieval call binding the contract method 0x13f815ed.
 //
-// Solidity: function allTaskHashes(uint32 ) view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) AllTaskHashes(opts *bind.CallOpts, arg0 uint32) ([32]byte, error) {
+// Solidity: function allTaskHashes(uint8 , uint32 ) view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) AllTaskHashes(opts *bind.CallOpts, arg0 uint8, arg1 uint32) ([32]byte, error) {
 	var out []interface{}
-	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "allTaskHashes", arg0)
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "allTaskHashes", arg0, arg1)
 
 	if err != nil {
 		return *new([32]byte), err
@@ -319,26 +424,26 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) AllTask
 
 }
 
-// AllTaskHashes is a free data retrieval call binding the contract method 0x2d89f6fc.
+// AllTaskHashes is a free data retrieval call binding the contract method 0x13f815ed.
 //
-// Solidity: function allTaskHashes(uint32 ) view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) AllTaskHashes(arg0 uint32) ([32]byte, error) {
-	return _ContractFinalizerTaskManager.Contract.AllTaskHashes(&_ContractFinalizerTaskManager.CallOpts, arg0)
+// Solidity: function allTaskHashes(uint8 , uint32 ) view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) AllTaskHashes(arg0 uint8, arg1 uint32) ([32]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.AllTaskHashes(&_ContractFinalizerTaskManager.CallOpts, arg0, arg1)
 }
 
-// AllTaskHashes is a free data retrieval call binding the contract method 0x2d89f6fc.
+// AllTaskHashes is a free data retrieval call binding the contract method 0x13f815ed.
 //
-// Solidity: function allTaskHashes(uint32 ) view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) AllTaskHashes(arg0 uint32) ([32]byte, error) {
-	return _ContractFinalizerTaskManager.Contract.AllTaskHashes(&_ContractFinalizerTaskManager.CallOpts, arg0)
+// Solidity: function allTaskHashes(uint8 , uint32 ) view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) AllTaskHashes(arg0 uint8, arg1 uint32) ([32]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.AllTaskHashes(&_ContractFinalizerTaskManager.CallOpts, arg0, arg1)
 }
 
-// AllTaskResponses is a free data retrieval call binding the contract method 0x2cb223d5.
+// AllTaskResponses is a free data retrieval call binding the contract method 0x1ac27297.
 //
-// Solidity: function allTaskResponses(uint32 ) view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) AllTaskResponses(opts *bind.CallOpts, arg0 uint32) ([32]byte, error) {
+// Solidity: function allTaskResponses(uint8 , uint32 ) view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) AllTaskResponses(opts *bind.CallOpts, arg0 uint8, arg1 uint32) ([32]byte, error) {
 	var out []interface{}
-	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "allTaskResponses", arg0)
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "allTaskResponses", arg0, arg1)
 
 	if err != nil {
 		return *new([32]byte), err
@@ -350,18 +455,49 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) AllTask
 
 }
 
-// AllTaskResponses is a free data retrieval call binding the contract method 0x2cb223d5.
+// AllTaskResponses is a free data retrieval call binding the contract method 0x1ac27297.
 //
-// Solidity: function allTaskResponses(uint32 ) view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) AllTaskResponses(arg0 uint32) ([32]byte, error) {
-	return _ContractFinalizerTaskManager.Contract.AllTaskResponses(&_ContractFinalizerTaskManager.CallOpts, arg0)
+// Solidity: function allTaskResponses(uint8 , uint32 ) view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) AllTaskResponses(arg0 uint8, arg1 uint32) ([32]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.AllTaskResponses(&_ContractFinalizerTaskManager.CallOpts, arg0, arg1)
 }
 
-// AllTaskResponses is a free data retrieval call binding the contract method 0x2cb223d5.
+// AllTaskResponses is a free data retrieval call binding the contract method 0x1ac27297.
 //
-// Solidity: function allTaskResponses(uint32 ) view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) AllTaskResponses(arg0 uint32) ([32]byte, error) {
-	return _ContractFinalizerTaskManager.Contract.AllTaskResponses(&_ContractFinalizerTaskManager.CallOpts, arg0)
+// Solidity: function allTaskResponses(uint8 , uint32 ) view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) AllTaskResponses(arg0 uint8, arg1 uint32) ([32]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.AllTaskResponses(&_ContractFinalizerTaskManager.CallOpts, arg0, arg1)
+}
+
+// AllowNonRootInit is a free data retrieval call binding the contract method 0x0ee0fdbd.
+//
+// Solidity: function allowNonRootInit() view returns(bool)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) AllowNonRootInit(opts *bind.CallOpts) (bool, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "allowNonRootInit")
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// AllowNonRootInit is a free data retrieval call binding the contract method 0x0ee0fdbd.
+//
+// Solidity: function allowNonRootInit() view returns(bool)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) AllowNonRootInit() (bool, error) {
+	return _ContractFinalizerTaskManager.Contract.AllowNonRootInit(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// AllowNonRootInit is a free data retrieval call binding the contract method 0x0ee0fdbd.
+//
+// Solidity: function allowNonRootInit() view returns(bool)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) AllowNonRootInit() (bool, error) {
+	return _ContractFinalizerTaskManager.Contract.AllowNonRootInit(&_ContractFinalizerTaskManager.CallOpts)
 }
 
 // BlsApkRegistry is a free data retrieval call binding the contract method 0x5df45946.
@@ -395,12 +531,43 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) 
 	return _ContractFinalizerTaskManager.Contract.BlsApkRegistry(&_ContractFinalizerTaskManager.CallOpts)
 }
 
+// BlsSignatureChecker is a free data retrieval call binding the contract method 0x1c178e9c.
+//
+// Solidity: function blsSignatureChecker() view returns(address)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) BlsSignatureChecker(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "blsSignatureChecker")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// BlsSignatureChecker is a free data retrieval call binding the contract method 0x1c178e9c.
+//
+// Solidity: function blsSignatureChecker() view returns(address)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) BlsSignatureChecker() (common.Address, error) {
+	return _ContractFinalizerTaskManager.Contract.BlsSignatureChecker(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// BlsSignatureChecker is a free data retrieval call binding the contract method 0x1c178e9c.
+//
+// Solidity: function blsSignatureChecker() view returns(address)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) BlsSignatureChecker() (common.Address, error) {
+	return _ContractFinalizerTaskManager.Contract.BlsSignatureChecker(&_ContractFinalizerTaskManager.CallOpts)
+}
+
 // CheckSignatures is a free data retrieval call binding the contract method 0x6efb4636.
 //
-// Solidity: function checkSignatures(bytes32 msgHash, bytes quorumNumbers, uint32 referenceBlockNumber, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) params) view returns((uint96[],uint96[]), bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) CheckSignatures(opts *bind.CallOpts, msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, params IBLSSignatureCheckerNonSignerStakesAndSignature) (IBLSSignatureCheckerQuorumStakeTotals, [32]byte, error) {
+// Solidity: function checkSignatures(bytes32 msgHash, bytes quorumNumbers, uint32 referenceBlockNumber, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) view returns((uint96[],uint96[]), bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) CheckSignatures(opts *bind.CallOpts, msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (IBLSSignatureCheckerQuorumStakeTotals, [32]byte, error) {
 	var out []interface{}
-	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "checkSignatures", msgHash, quorumNumbers, referenceBlockNumber, params)
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "checkSignatures", msgHash, quorumNumbers, referenceBlockNumber, nonSignerStakesAndSignature)
 
 	if err != nil {
 		return *new(IBLSSignatureCheckerQuorumStakeTotals), *new([32]byte), err
@@ -415,16 +582,16 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) CheckSi
 
 // CheckSignatures is a free data retrieval call binding the contract method 0x6efb4636.
 //
-// Solidity: function checkSignatures(bytes32 msgHash, bytes quorumNumbers, uint32 referenceBlockNumber, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) params) view returns((uint96[],uint96[]), bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) CheckSignatures(msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, params IBLSSignatureCheckerNonSignerStakesAndSignature) (IBLSSignatureCheckerQuorumStakeTotals, [32]byte, error) {
-	return _ContractFinalizerTaskManager.Contract.CheckSignatures(&_ContractFinalizerTaskManager.CallOpts, msgHash, quorumNumbers, referenceBlockNumber, params)
+// Solidity: function checkSignatures(bytes32 msgHash, bytes quorumNumbers, uint32 referenceBlockNumber, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) view returns((uint96[],uint96[]), bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) CheckSignatures(msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (IBLSSignatureCheckerQuorumStakeTotals, [32]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.CheckSignatures(&_ContractFinalizerTaskManager.CallOpts, msgHash, quorumNumbers, referenceBlockNumber, nonSignerStakesAndSignature)
 }
 
 // CheckSignatures is a free data retrieval call binding the contract method 0x6efb4636.
 //
-// Solidity: function checkSignatures(bytes32 msgHash, bytes quorumNumbers, uint32 referenceBlockNumber, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) params) view returns((uint96[],uint96[]), bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) CheckSignatures(msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, params IBLSSignatureCheckerNonSignerStakesAndSignature) (IBLSSignatureCheckerQuorumStakeTotals, [32]byte, error) {
-	return _ContractFinalizerTaskManager.Contract.CheckSignatures(&_ContractFinalizerTaskManager.CallOpts, msgHash, quorumNumbers, referenceBlockNumber, params)
+// Solidity: function checkSignatures(bytes32 msgHash, bytes quorumNumbers, uint32 referenceBlockNumber, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) view returns((uint96[],uint96[]), bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) CheckSignatures(msgHash [32]byte, quorumNumbers []byte, referenceBlockNumber uint32, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (IBLSSignatureCheckerQuorumStakeTotals, [32]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.CheckSignatures(&_ContractFinalizerTaskManager.CallOpts, msgHash, quorumNumbers, referenceBlockNumber, nonSignerStakesAndSignature)
 }
 
 // Delegation is a free data retrieval call binding the contract method 0xdf5cf723.
@@ -456,6 +623,64 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) Delega
 // Solidity: function delegation() view returns(address)
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) Delegation() (common.Address, error) {
 	return _ContractFinalizerTaskManager.Contract.Delegation(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// DummyForOperatorStateInfoType is a free data retrieval call binding the contract method 0x54d127de.
+//
+// Solidity: function dummyForOperatorStateInfoType((bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) _operatorStateInfo) view returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) DummyForOperatorStateInfoType(opts *bind.CallOpts, _operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo) error {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "dummyForOperatorStateInfoType", _operatorStateInfo)
+
+	if err != nil {
+		return err
+	}
+
+	return err
+
+}
+
+// DummyForOperatorStateInfoType is a free data retrieval call binding the contract method 0x54d127de.
+//
+// Solidity: function dummyForOperatorStateInfoType((bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) _operatorStateInfo) view returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) DummyForOperatorStateInfoType(_operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo) error {
+	return _ContractFinalizerTaskManager.Contract.DummyForOperatorStateInfoType(&_ContractFinalizerTaskManager.CallOpts, _operatorStateInfo)
+}
+
+// DummyForOperatorStateInfoType is a free data retrieval call binding the contract method 0x54d127de.
+//
+// Solidity: function dummyForOperatorStateInfoType((bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) _operatorStateInfo) view returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) DummyForOperatorStateInfoType(_operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo) error {
+	return _ContractFinalizerTaskManager.Contract.DummyForOperatorStateInfoType(&_ContractFinalizerTaskManager.CallOpts, _operatorStateInfo)
+}
+
+// DummyForQuorumStakeTotalsType is a free data retrieval call binding the contract method 0x45265b7a.
+//
+// Solidity: function dummyForQuorumStakeTotalsType((uint96[],uint96[]) _quorumStakeTotals) view returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) DummyForQuorumStakeTotalsType(opts *bind.CallOpts, _quorumStakeTotals IBLSSignatureCheckerQuorumStakeTotals) error {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "dummyForQuorumStakeTotalsType", _quorumStakeTotals)
+
+	if err != nil {
+		return err
+	}
+
+	return err
+
+}
+
+// DummyForQuorumStakeTotalsType is a free data retrieval call binding the contract method 0x45265b7a.
+//
+// Solidity: function dummyForQuorumStakeTotalsType((uint96[],uint96[]) _quorumStakeTotals) view returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) DummyForQuorumStakeTotalsType(_quorumStakeTotals IBLSSignatureCheckerQuorumStakeTotals) error {
+	return _ContractFinalizerTaskManager.Contract.DummyForQuorumStakeTotalsType(&_ContractFinalizerTaskManager.CallOpts, _quorumStakeTotals)
+}
+
+// DummyForQuorumStakeTotalsType is a free data retrieval call binding the contract method 0x45265b7a.
+//
+// Solidity: function dummyForQuorumStakeTotalsType((uint96[],uint96[]) _quorumStakeTotals) view returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) DummyForQuorumStakeTotalsType(_quorumStakeTotals IBLSSignatureCheckerQuorumStakeTotals) error {
+	return _ContractFinalizerTaskManager.Contract.DummyForQuorumStakeTotalsType(&_ContractFinalizerTaskManager.CallOpts, _quorumStakeTotals)
 }
 
 // Generator is a free data retrieval call binding the contract method 0x7afa1eed.
@@ -518,37 +743,6 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) GetChe
 // Solidity: function getCheckSignaturesIndices(address registryCoordinator, uint32 referenceBlockNumber, bytes quorumNumbers, bytes32[] nonSignerOperatorIds) view returns((uint32[],uint32[],uint32[],uint32[][]))
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) GetCheckSignaturesIndices(registryCoordinator common.Address, referenceBlockNumber uint32, quorumNumbers []byte, nonSignerOperatorIds [][32]byte) (OperatorStateRetrieverCheckSignaturesIndices, error) {
 	return _ContractFinalizerTaskManager.Contract.GetCheckSignaturesIndices(&_ContractFinalizerTaskManager.CallOpts, registryCoordinator, referenceBlockNumber, quorumNumbers, nonSignerOperatorIds)
-}
-
-// GetLatestPendingStateHash is a free data retrieval call binding the contract method 0x0373408d.
-//
-// Solidity: function getLatestPendingStateHash() view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) GetLatestPendingStateHash(opts *bind.CallOpts) ([32]byte, error) {
-	var out []interface{}
-	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "getLatestPendingStateHash")
-
-	if err != nil {
-		return *new([32]byte), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
-
-	return out0, err
-
-}
-
-// GetLatestPendingStateHash is a free data retrieval call binding the contract method 0x0373408d.
-//
-// Solidity: function getLatestPendingStateHash() view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) GetLatestPendingStateHash() ([32]byte, error) {
-	return _ContractFinalizerTaskManager.Contract.GetLatestPendingStateHash(&_ContractFinalizerTaskManager.CallOpts)
-}
-
-// GetLatestPendingStateHash is a free data retrieval call binding the contract method 0x0373408d.
-//
-// Solidity: function getLatestPendingStateHash() view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) GetLatestPendingStateHash() ([32]byte, error) {
-	return _ContractFinalizerTaskManager.Contract.GetLatestPendingStateHash(&_ContractFinalizerTaskManager.CallOpts)
 }
 
 // GetOperatorState is a free data retrieval call binding the contract method 0x3563b0d1.
@@ -645,12 +839,43 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) 
 	return _ContractFinalizerTaskManager.Contract.GetQuorumBitmapsAtBlockNumber(&_ContractFinalizerTaskManager.CallOpts, registryCoordinator, operatorIds, blockNumber)
 }
 
-// GetTaskResponseWindowBlock is a free data retrieval call binding the contract method 0xf5c9899d.
+// IdToTaskStatus is a free data retrieval call binding the contract method 0xbf2315ed.
 //
-// Solidity: function getTaskResponseWindowBlock() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) GetTaskResponseWindowBlock(opts *bind.CallOpts) (uint32, error) {
+// Solidity: function idToTaskStatus(uint8 , uint32 ) view returns(uint8)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) IdToTaskStatus(opts *bind.CallOpts, arg0 uint8, arg1 uint32) (uint8, error) {
 	var out []interface{}
-	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "getTaskResponseWindowBlock")
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "idToTaskStatus", arg0, arg1)
+
+	if err != nil {
+		return *new(uint8), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint8)).(*uint8)
+
+	return out0, err
+
+}
+
+// IdToTaskStatus is a free data retrieval call binding the contract method 0xbf2315ed.
+//
+// Solidity: function idToTaskStatus(uint8 , uint32 ) view returns(uint8)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) IdToTaskStatus(arg0 uint8, arg1 uint32) (uint8, error) {
+	return _ContractFinalizerTaskManager.Contract.IdToTaskStatus(&_ContractFinalizerTaskManager.CallOpts, arg0, arg1)
+}
+
+// IdToTaskStatus is a free data retrieval call binding the contract method 0xbf2315ed.
+//
+// Solidity: function idToTaskStatus(uint8 , uint32 ) view returns(uint8)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) IdToTaskStatus(arg0 uint8, arg1 uint32) (uint8, error) {
+	return _ContractFinalizerTaskManager.Contract.IdToTaskStatus(&_ContractFinalizerTaskManager.CallOpts, arg0, arg1)
+}
+
+// LastCompletedOpTaskCreatedBlock is a free data retrieval call binding the contract method 0x537a2929.
+//
+// Solidity: function lastCompletedOpTaskCreatedBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LastCompletedOpTaskCreatedBlock(opts *bind.CallOpts) (uint32, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "lastCompletedOpTaskCreatedBlock")
 
 	if err != nil {
 		return *new(uint32), err
@@ -662,26 +887,26 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) GetTask
 
 }
 
-// GetTaskResponseWindowBlock is a free data retrieval call binding the contract method 0xf5c9899d.
+// LastCompletedOpTaskCreatedBlock is a free data retrieval call binding the contract method 0x537a2929.
 //
-// Solidity: function getTaskResponseWindowBlock() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) GetTaskResponseWindowBlock() (uint32, error) {
-	return _ContractFinalizerTaskManager.Contract.GetTaskResponseWindowBlock(&_ContractFinalizerTaskManager.CallOpts)
+// Solidity: function lastCompletedOpTaskCreatedBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) LastCompletedOpTaskCreatedBlock() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LastCompletedOpTaskCreatedBlock(&_ContractFinalizerTaskManager.CallOpts)
 }
 
-// GetTaskResponseWindowBlock is a free data retrieval call binding the contract method 0xf5c9899d.
+// LastCompletedOpTaskCreatedBlock is a free data retrieval call binding the contract method 0x537a2929.
 //
-// Solidity: function getTaskResponseWindowBlock() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) GetTaskResponseWindowBlock() (uint32, error) {
-	return _ContractFinalizerTaskManager.Contract.GetTaskResponseWindowBlock(&_ContractFinalizerTaskManager.CallOpts)
+// Solidity: function lastCompletedOpTaskCreatedBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LastCompletedOpTaskCreatedBlock() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LastCompletedOpTaskCreatedBlock(&_ContractFinalizerTaskManager.CallOpts)
 }
 
-// LatestTaskNum is a free data retrieval call binding the contract method 0x8b00ce7c.
+// LastCompletedOpTaskNum is a free data retrieval call binding the contract method 0x8fc8729a.
 //
-// Solidity: function latestTaskNum() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LatestTaskNum(opts *bind.CallOpts) (uint32, error) {
+// Solidity: function lastCompletedOpTaskNum() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LastCompletedOpTaskNum(opts *bind.CallOpts) (uint32, error) {
 	var out []interface{}
-	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "latestTaskNum")
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "lastCompletedOpTaskNum")
 
 	if err != nil {
 		return *new(uint32), err
@@ -693,18 +918,297 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LatestT
 
 }
 
-// LatestTaskNum is a free data retrieval call binding the contract method 0x8b00ce7c.
+// LastCompletedOpTaskNum is a free data retrieval call binding the contract method 0x8fc8729a.
 //
-// Solidity: function latestTaskNum() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) LatestTaskNum() (uint32, error) {
-	return _ContractFinalizerTaskManager.Contract.LatestTaskNum(&_ContractFinalizerTaskManager.CallOpts)
+// Solidity: function lastCompletedOpTaskNum() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) LastCompletedOpTaskNum() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LastCompletedOpTaskNum(&_ContractFinalizerTaskManager.CallOpts)
 }
 
-// LatestTaskNum is a free data retrieval call binding the contract method 0x8b00ce7c.
+// LastCompletedOpTaskNum is a free data retrieval call binding the contract method 0x8fc8729a.
 //
-// Solidity: function latestTaskNum() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LatestTaskNum() (uint32, error) {
-	return _ContractFinalizerTaskManager.Contract.LatestTaskNum(&_ContractFinalizerTaskManager.CallOpts)
+// Solidity: function lastCompletedOpTaskNum() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LastCompletedOpTaskNum() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LastCompletedOpTaskNum(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LastCompletedOpTaskQuorumNumbers is a free data retrieval call binding the contract method 0x2830e8f9.
+//
+// Solidity: function lastCompletedOpTaskQuorumNumbers() view returns(bytes)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LastCompletedOpTaskQuorumNumbers(opts *bind.CallOpts) ([]byte, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "lastCompletedOpTaskQuorumNumbers")
+
+	if err != nil {
+		return *new([]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([]byte)).(*[]byte)
+
+	return out0, err
+
+}
+
+// LastCompletedOpTaskQuorumNumbers is a free data retrieval call binding the contract method 0x2830e8f9.
+//
+// Solidity: function lastCompletedOpTaskQuorumNumbers() view returns(bytes)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) LastCompletedOpTaskQuorumNumbers() ([]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.LastCompletedOpTaskQuorumNumbers(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LastCompletedOpTaskQuorumNumbers is a free data retrieval call binding the contract method 0x2830e8f9.
+//
+// Solidity: function lastCompletedOpTaskQuorumNumbers() view returns(bytes)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LastCompletedOpTaskQuorumNumbers() ([]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.LastCompletedOpTaskQuorumNumbers(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LastCompletedOpTaskQuorumThresholdPercentage is a free data retrieval call binding the contract method 0xe70c2623.
+//
+// Solidity: function lastCompletedOpTaskQuorumThresholdPercentage() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LastCompletedOpTaskQuorumThresholdPercentage(opts *bind.CallOpts) (uint32, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "lastCompletedOpTaskQuorumThresholdPercentage")
+
+	if err != nil {
+		return *new(uint32), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint32)).(*uint32)
+
+	return out0, err
+
+}
+
+// LastCompletedOpTaskQuorumThresholdPercentage is a free data retrieval call binding the contract method 0xe70c2623.
+//
+// Solidity: function lastCompletedOpTaskQuorumThresholdPercentage() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) LastCompletedOpTaskQuorumThresholdPercentage() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LastCompletedOpTaskQuorumThresholdPercentage(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LastCompletedOpTaskQuorumThresholdPercentage is a free data retrieval call binding the contract method 0xe70c2623.
+//
+// Solidity: function lastCompletedOpTaskQuorumThresholdPercentage() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LastCompletedOpTaskQuorumThresholdPercentage() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LastCompletedOpTaskQuorumThresholdPercentage(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LastOpTaskCreatedBlock is a free data retrieval call binding the contract method 0x4d7a7116.
+//
+// Solidity: function lastOpTaskCreatedBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LastOpTaskCreatedBlock(opts *bind.CallOpts) (uint32, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "lastOpTaskCreatedBlock")
+
+	if err != nil {
+		return *new(uint32), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint32)).(*uint32)
+
+	return out0, err
+
+}
+
+// LastOpTaskCreatedBlock is a free data retrieval call binding the contract method 0x4d7a7116.
+//
+// Solidity: function lastOpTaskCreatedBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) LastOpTaskCreatedBlock() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LastOpTaskCreatedBlock(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LastOpTaskCreatedBlock is a free data retrieval call binding the contract method 0x4d7a7116.
+//
+// Solidity: function lastOpTaskCreatedBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LastOpTaskCreatedBlock() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LastOpTaskCreatedBlock(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LatestOpTaskNum is a free data retrieval call binding the contract method 0x41789d57.
+//
+// Solidity: function latestOpTaskNum() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LatestOpTaskNum(opts *bind.CallOpts) (uint32, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "latestOpTaskNum")
+
+	if err != nil {
+		return *new(uint32), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint32)).(*uint32)
+
+	return out0, err
+
+}
+
+// LatestOpTaskNum is a free data retrieval call binding the contract method 0x41789d57.
+//
+// Solidity: function latestOpTaskNum() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) LatestOpTaskNum() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LatestOpTaskNum(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LatestOpTaskNum is a free data retrieval call binding the contract method 0x41789d57.
+//
+// Solidity: function latestOpTaskNum() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LatestOpTaskNum() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LatestOpTaskNum(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LatestPendingStateHash is a free data retrieval call binding the contract method 0x4ae6b203.
+//
+// Solidity: function latestPendingStateHash() view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LatestPendingStateHash(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "latestPendingStateHash")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// LatestPendingStateHash is a free data retrieval call binding the contract method 0x4ae6b203.
+//
+// Solidity: function latestPendingStateHash() view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) LatestPendingStateHash() ([32]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.LatestPendingStateHash(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LatestPendingStateHash is a free data retrieval call binding the contract method 0x4ae6b203.
+//
+// Solidity: function latestPendingStateHash() view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LatestPendingStateHash() ([32]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.LatestPendingStateHash(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LatestRdTaskNum is a free data retrieval call binding the contract method 0x7afdd54b.
+//
+// Solidity: function latestRdTaskNum() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LatestRdTaskNum(opts *bind.CallOpts) (uint32, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "latestRdTaskNum")
+
+	if err != nil {
+		return *new(uint32), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint32)).(*uint32)
+
+	return out0, err
+
+}
+
+// LatestRdTaskNum is a free data retrieval call binding the contract method 0x7afdd54b.
+//
+// Solidity: function latestRdTaskNum() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) LatestRdTaskNum() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LatestRdTaskNum(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LatestRdTaskNum is a free data retrieval call binding the contract method 0x7afdd54b.
+//
+// Solidity: function latestRdTaskNum() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LatestRdTaskNum() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LatestRdTaskNum(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// MinOpTaskResponseWindowBlock is a free data retrieval call binding the contract method 0xc987de8e.
+//
+// Solidity: function minOpTaskResponseWindowBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) MinOpTaskResponseWindowBlock(opts *bind.CallOpts) (uint32, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "minOpTaskResponseWindowBlock")
+
+	if err != nil {
+		return *new(uint32), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint32)).(*uint32)
+
+	return out0, err
+
+}
+
+// MinOpTaskResponseWindowBlock is a free data retrieval call binding the contract method 0xc987de8e.
+//
+// Solidity: function minOpTaskResponseWindowBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) MinOpTaskResponseWindowBlock() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.MinOpTaskResponseWindowBlock(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// MinOpTaskResponseWindowBlock is a free data retrieval call binding the contract method 0xc987de8e.
+//
+// Solidity: function minOpTaskResponseWindowBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) MinOpTaskResponseWindowBlock() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.MinOpTaskResponseWindowBlock(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// OperatorStateRetrieverExtended is a free data retrieval call binding the contract method 0x8380acbd.
+//
+// Solidity: function operatorStateRetrieverExtended() view returns(address)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) OperatorStateRetrieverExtended(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "operatorStateRetrieverExtended")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// OperatorStateRetrieverExtended is a free data retrieval call binding the contract method 0x8380acbd.
+//
+// Solidity: function operatorStateRetrieverExtended() view returns(address)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) OperatorStateRetrieverExtended() (common.Address, error) {
+	return _ContractFinalizerTaskManager.Contract.OperatorStateRetrieverExtended(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// OperatorStateRetrieverExtended is a free data retrieval call binding the contract method 0x8380acbd.
+//
+// Solidity: function operatorStateRetrieverExtended() view returns(address)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) OperatorStateRetrieverExtended() (common.Address, error) {
+	return _ContractFinalizerTaskManager.Contract.OperatorStateRetrieverExtended(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// OperatorsStateInfoHash is a free data retrieval call binding the contract method 0xadfcb048.
+//
+// Solidity: function operatorsStateInfoHash() view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) OperatorsStateInfoHash(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "operatorsStateInfoHash")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// OperatorsStateInfoHash is a free data retrieval call binding the contract method 0xadfcb048.
+//
+// Solidity: function operatorsStateInfoHash() view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) OperatorsStateInfoHash() ([32]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.OperatorsStateInfoHash(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// OperatorsStateInfoHash is a free data retrieval call binding the contract method 0xadfcb048.
+//
+// Solidity: function operatorsStateInfoHash() view returns(bytes32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) OperatorsStateInfoHash() ([32]byte, error) {
+	return _ContractFinalizerTaskManager.Contract.OperatorsStateInfoHash(&_ContractFinalizerTaskManager.CallOpts)
 }
 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
@@ -893,43 +1397,12 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) 
 	return _ContractFinalizerTaskManager.Contract.StakeRegistry(&_ContractFinalizerTaskManager.CallOpts)
 }
 
-// StaleStakesForbidden is a free data retrieval call binding the contract method 0xb98d0908.
+// TaskResponseWindowBlock is a free data retrieval call binding the contract method 0xa69563a9.
 //
-// Solidity: function staleStakesForbidden() view returns(bool)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) StaleStakesForbidden(opts *bind.CallOpts) (bool, error) {
+// Solidity: function taskResponseWindowBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) TaskResponseWindowBlock(opts *bind.CallOpts) (uint32, error) {
 	var out []interface{}
-	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "staleStakesForbidden")
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// StaleStakesForbidden is a free data retrieval call binding the contract method 0xb98d0908.
-//
-// Solidity: function staleStakesForbidden() view returns(bool)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) StaleStakesForbidden() (bool, error) {
-	return _ContractFinalizerTaskManager.Contract.StaleStakesForbidden(&_ContractFinalizerTaskManager.CallOpts)
-}
-
-// StaleStakesForbidden is a free data retrieval call binding the contract method 0xb98d0908.
-//
-// Solidity: function staleStakesForbidden() view returns(bool)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) StaleStakesForbidden() (bool, error) {
-	return _ContractFinalizerTaskManager.Contract.StaleStakesForbidden(&_ContractFinalizerTaskManager.CallOpts)
-}
-
-// TaskNumber is a free data retrieval call binding the contract method 0x72d18e8d.
-//
-// Solidity: function taskNumber() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) TaskNumber(opts *bind.CallOpts) (uint32, error) {
-	var out []interface{}
-	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "taskNumber")
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "taskResponseWindowBlock")
 
 	if err != nil {
 		return *new(uint32), err
@@ -941,105 +1414,123 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) TaskNum
 
 }
 
-// TaskNumber is a free data retrieval call binding the contract method 0x72d18e8d.
+// TaskResponseWindowBlock is a free data retrieval call binding the contract method 0xa69563a9.
 //
-// Solidity: function taskNumber() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) TaskNumber() (uint32, error) {
-	return _ContractFinalizerTaskManager.Contract.TaskNumber(&_ContractFinalizerTaskManager.CallOpts)
+// Solidity: function taskResponseWindowBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) TaskResponseWindowBlock() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.TaskResponseWindowBlock(&_ContractFinalizerTaskManager.CallOpts)
 }
 
-// TaskNumber is a free data retrieval call binding the contract method 0x72d18e8d.
+// TaskResponseWindowBlock is a free data retrieval call binding the contract method 0xa69563a9.
 //
-// Solidity: function taskNumber() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) TaskNumber() (uint32, error) {
-	return _ContractFinalizerTaskManager.Contract.TaskNumber(&_ContractFinalizerTaskManager.CallOpts)
+// Solidity: function taskResponseWindowBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) TaskResponseWindowBlock() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.TaskResponseWindowBlock(&_ContractFinalizerTaskManager.CallOpts)
 }
 
-// TrySignatureAndApkVerification is a free data retrieval call binding the contract method 0x171f1d5b.
+// CreateNewOpTask is a paid mutator transaction binding the contract method 0x6e125ff4.
 //
-// Solidity: function trySignatureAndApkVerification(bytes32 msgHash, (uint256,uint256) apk, (uint256[2],uint256[2]) apkG2, (uint256,uint256) sigma) view returns(bool pairingSuccessful, bool siganatureIsValid)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) TrySignatureAndApkVerification(opts *bind.CallOpts, msgHash [32]byte, apk BN254G1Point, apkG2 BN254G2Point, sigma BN254G1Point) (struct {
-	PairingSuccessful bool
-	SiganatureIsValid bool
-}, error) {
-	var out []interface{}
-	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "trySignatureAndApkVerification", msgHash, apk, apkG2, sigma)
-
-	outstruct := new(struct {
-		PairingSuccessful bool
-		SiganatureIsValid bool
-	})
-	if err != nil {
-		return *outstruct, err
-	}
-
-	outstruct.PairingSuccessful = *abi.ConvertType(out[0], new(bool)).(*bool)
-	outstruct.SiganatureIsValid = *abi.ConvertType(out[1], new(bool)).(*bool)
-
-	return *outstruct, err
-
+// Solidity: function createNewOpTask(uint32 quorumThresholdPercentage, bytes quorumNumbers) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) CreateNewOpTask(opts *bind.TransactOpts, quorumThresholdPercentage uint32, quorumNumbers []byte) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "createNewOpTask", quorumThresholdPercentage, quorumNumbers)
 }
 
-// TrySignatureAndApkVerification is a free data retrieval call binding the contract method 0x171f1d5b.
+// CreateNewOpTask is a paid mutator transaction binding the contract method 0x6e125ff4.
 //
-// Solidity: function trySignatureAndApkVerification(bytes32 msgHash, (uint256,uint256) apk, (uint256[2],uint256[2]) apkG2, (uint256,uint256) sigma) view returns(bool pairingSuccessful, bool siganatureIsValid)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) TrySignatureAndApkVerification(msgHash [32]byte, apk BN254G1Point, apkG2 BN254G2Point, sigma BN254G1Point) (struct {
-	PairingSuccessful bool
-	SiganatureIsValid bool
-}, error) {
-	return _ContractFinalizerTaskManager.Contract.TrySignatureAndApkVerification(&_ContractFinalizerTaskManager.CallOpts, msgHash, apk, apkG2, sigma)
+// Solidity: function createNewOpTask(uint32 quorumThresholdPercentage, bytes quorumNumbers) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) CreateNewOpTask(quorumThresholdPercentage uint32, quorumNumbers []byte) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.CreateNewOpTask(&_ContractFinalizerTaskManager.TransactOpts, quorumThresholdPercentage, quorumNumbers)
 }
 
-// TrySignatureAndApkVerification is a free data retrieval call binding the contract method 0x171f1d5b.
+// CreateNewOpTask is a paid mutator transaction binding the contract method 0x6e125ff4.
 //
-// Solidity: function trySignatureAndApkVerification(bytes32 msgHash, (uint256,uint256) apk, (uint256[2],uint256[2]) apkG2, (uint256,uint256) sigma) view returns(bool pairingSuccessful, bool siganatureIsValid)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) TrySignatureAndApkVerification(msgHash [32]byte, apk BN254G1Point, apkG2 BN254G2Point, sigma BN254G1Point) (struct {
-	PairingSuccessful bool
-	SiganatureIsValid bool
-}, error) {
-	return _ContractFinalizerTaskManager.Contract.TrySignatureAndApkVerification(&_ContractFinalizerTaskManager.CallOpts, msgHash, apk, apkG2, sigma)
+// Solidity: function createNewOpTask(uint32 quorumThresholdPercentage, bytes quorumNumbers) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) CreateNewOpTask(quorumThresholdPercentage uint32, quorumNumbers []byte) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.CreateNewOpTask(&_ContractFinalizerTaskManager.TransactOpts, quorumThresholdPercentage, quorumNumbers)
 }
 
-// CreateNewTask is a paid mutator transaction binding the contract method 0x6b92787e.
+// CreateNewRdTask is a paid mutator transaction binding the contract method 0xb3ea184e.
 //
-// Solidity: function createNewTask(uint256 blockNumber, uint32 quorumThresholdPercentage, bytes quorumNumbers) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) CreateNewTask(opts *bind.TransactOpts, blockNumber *big.Int, quorumThresholdPercentage uint32, quorumNumbers []byte) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.contract.Transact(opts, "createNewTask", blockNumber, quorumThresholdPercentage, quorumNumbers)
+// Solidity: function createNewRdTask(uint256 blockNumber) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) CreateNewRdTask(opts *bind.TransactOpts, blockNumber *big.Int) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "createNewRdTask", blockNumber)
 }
 
-// CreateNewTask is a paid mutator transaction binding the contract method 0x6b92787e.
+// CreateNewRdTask is a paid mutator transaction binding the contract method 0xb3ea184e.
 //
-// Solidity: function createNewTask(uint256 blockNumber, uint32 quorumThresholdPercentage, bytes quorumNumbers) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) CreateNewTask(blockNumber *big.Int, quorumThresholdPercentage uint32, quorumNumbers []byte) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.CreateNewTask(&_ContractFinalizerTaskManager.TransactOpts, blockNumber, quorumThresholdPercentage, quorumNumbers)
+// Solidity: function createNewRdTask(uint256 blockNumber) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) CreateNewRdTask(blockNumber *big.Int) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.CreateNewRdTask(&_ContractFinalizerTaskManager.TransactOpts, blockNumber)
 }
 
-// CreateNewTask is a paid mutator transaction binding the contract method 0x6b92787e.
+// CreateNewRdTask is a paid mutator transaction binding the contract method 0xb3ea184e.
 //
-// Solidity: function createNewTask(uint256 blockNumber, uint32 quorumThresholdPercentage, bytes quorumNumbers) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) CreateNewTask(blockNumber *big.Int, quorumThresholdPercentage uint32, quorumNumbers []byte) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.CreateNewTask(&_ContractFinalizerTaskManager.TransactOpts, blockNumber, quorumThresholdPercentage, quorumNumbers)
+// Solidity: function createNewRdTask(uint256 blockNumber) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) CreateNewRdTask(blockNumber *big.Int) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.CreateNewRdTask(&_ContractFinalizerTaskManager.TransactOpts, blockNumber)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xf8c8765e.
+// ForceCreateNewOpTask is a paid mutator transaction binding the contract method 0xf5640cf8.
 //
-// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) Initialize(opts *bind.TransactOpts, _pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.contract.Transact(opts, "initialize", _pauserRegistry, initialOwner, _aggregator, _generator)
+// Solidity: function forceCreateNewOpTask(uint32 quorumThresholdPercentage, bytes quorumNumbers) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) ForceCreateNewOpTask(opts *bind.TransactOpts, quorumThresholdPercentage uint32, quorumNumbers []byte) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "forceCreateNewOpTask", quorumThresholdPercentage, quorumNumbers)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xf8c8765e.
+// ForceCreateNewOpTask is a paid mutator transaction binding the contract method 0xf5640cf8.
 //
-// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.Initialize(&_ContractFinalizerTaskManager.TransactOpts, _pauserRegistry, initialOwner, _aggregator, _generator)
+// Solidity: function forceCreateNewOpTask(uint32 quorumThresholdPercentage, bytes quorumNumbers) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) ForceCreateNewOpTask(quorumThresholdPercentage uint32, quorumNumbers []byte) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.ForceCreateNewOpTask(&_ContractFinalizerTaskManager.TransactOpts, quorumThresholdPercentage, quorumNumbers)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xf8c8765e.
+// ForceCreateNewOpTask is a paid mutator transaction binding the contract method 0xf5640cf8.
 //
-// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.Initialize(&_ContractFinalizerTaskManager.TransactOpts, _pauserRegistry, initialOwner, _aggregator, _generator)
+// Solidity: function forceCreateNewOpTask(uint32 quorumThresholdPercentage, bytes quorumNumbers) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) ForceCreateNewOpTask(quorumThresholdPercentage uint32, quorumNumbers []byte) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.ForceCreateNewOpTask(&_ContractFinalizerTaskManager.TransactOpts, quorumThresholdPercentage, quorumNumbers)
+}
+
+// ForceRespondToOpTask is a paid mutator transaction binding the contract method 0x01a3f013.
+//
+// Solidity: function forceRespondToOpTask((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) ForceRespondToOpTask(opts *bind.TransactOpts, task IFinalizerTaskManagerOpTask, taskResponse IFinalizerTaskManagerOpTaskResponse) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "forceRespondToOpTask", task, taskResponse)
+}
+
+// ForceRespondToOpTask is a paid mutator transaction binding the contract method 0x01a3f013.
+//
+// Solidity: function forceRespondToOpTask((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) ForceRespondToOpTask(task IFinalizerTaskManagerOpTask, taskResponse IFinalizerTaskManagerOpTaskResponse) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.ForceRespondToOpTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse)
+}
+
+// ForceRespondToOpTask is a paid mutator transaction binding the contract method 0x01a3f013.
+//
+// Solidity: function forceRespondToOpTask((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) ForceRespondToOpTask(task IFinalizerTaskManagerOpTask, taskResponse IFinalizerTaskManagerOpTaskResponse) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.ForceRespondToOpTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse)
+}
+
+// Initialize is a paid mutator transaction binding the contract method 0x2d4713db.
+//
+// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock, address _operatorStateRetrieverExtended) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) Initialize(opts *bind.TransactOpts, _pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address, _allowNonRootInit bool, _blsSignatureCheckerAddress common.Address, _taskResponseWindowBlock uint32, _minOpTaskResponseWindowBlock uint32, _operatorStateRetrieverExtended common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "initialize", _pauserRegistry, initialOwner, _aggregator, _generator, _allowNonRootInit, _blsSignatureCheckerAddress, _taskResponseWindowBlock, _minOpTaskResponseWindowBlock, _operatorStateRetrieverExtended)
+}
+
+// Initialize is a paid mutator transaction binding the contract method 0x2d4713db.
+//
+// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock, address _operatorStateRetrieverExtended) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address, _allowNonRootInit bool, _blsSignatureCheckerAddress common.Address, _taskResponseWindowBlock uint32, _minOpTaskResponseWindowBlock uint32, _operatorStateRetrieverExtended common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.Initialize(&_ContractFinalizerTaskManager.TransactOpts, _pauserRegistry, initialOwner, _aggregator, _generator, _allowNonRootInit, _blsSignatureCheckerAddress, _taskResponseWindowBlock, _minOpTaskResponseWindowBlock, _operatorStateRetrieverExtended)
+}
+
+// Initialize is a paid mutator transaction binding the contract method 0x2d4713db.
+//
+// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock, address _operatorStateRetrieverExtended) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address, _allowNonRootInit bool, _blsSignatureCheckerAddress common.Address, _taskResponseWindowBlock uint32, _minOpTaskResponseWindowBlock uint32, _operatorStateRetrieverExtended common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.Initialize(&_ContractFinalizerTaskManager.TransactOpts, _pauserRegistry, initialOwner, _aggregator, _generator, _allowNonRootInit, _blsSignatureCheckerAddress, _taskResponseWindowBlock, _minOpTaskResponseWindowBlock, _operatorStateRetrieverExtended)
 }
 
 // Pause is a paid mutator transaction binding the contract method 0x136439dd.
@@ -1084,6 +1575,27 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSessi
 	return _ContractFinalizerTaskManager.Contract.PauseAll(&_ContractFinalizerTaskManager.TransactOpts)
 }
 
+// PauseTrackingOpState is a paid mutator transaction binding the contract method 0x79badf73.
+//
+// Solidity: function pauseTrackingOpState() returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) PauseTrackingOpState(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "pauseTrackingOpState")
+}
+
+// PauseTrackingOpState is a paid mutator transaction binding the contract method 0x79badf73.
+//
+// Solidity: function pauseTrackingOpState() returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) PauseTrackingOpState() (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.PauseTrackingOpState(&_ContractFinalizerTaskManager.TransactOpts)
+}
+
+// PauseTrackingOpState is a paid mutator transaction binding the contract method 0x79badf73.
+//
+// Solidity: function pauseTrackingOpState() returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) PauseTrackingOpState() (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.PauseTrackingOpState(&_ContractFinalizerTaskManager.TransactOpts)
+}
+
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
 //
 // Solidity: function renounceOwnership() returns()
@@ -1105,25 +1617,67 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSessi
 	return _ContractFinalizerTaskManager.Contract.RenounceOwnership(&_ContractFinalizerTaskManager.TransactOpts)
 }
 
-// RespondToTask is a paid mutator transaction binding the contract method 0xe4e3ad77.
+// RespondToOpTask is a paid mutator transaction binding the contract method 0x516a7227.
 //
-// Solidity: function respondToTask((uint256,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) RespondToTask(opts *bind.TransactOpts, task IFinalizerTaskManagerTask, taskResponse IFinalizerTaskManagerTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.contract.Transact(opts, "respondToTask", task, taskResponse, nonSignerStakesAndSignature)
+// Solidity: function respondToOpTask((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) RespondToOpTask(opts *bind.TransactOpts, task IFinalizerTaskManagerOpTask, taskResponse IFinalizerTaskManagerOpTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "respondToOpTask", task, taskResponse, nonSignerStakesAndSignature)
 }
 
-// RespondToTask is a paid mutator transaction binding the contract method 0xe4e3ad77.
+// RespondToOpTask is a paid mutator transaction binding the contract method 0x516a7227.
 //
-// Solidity: function respondToTask((uint256,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) RespondToTask(task IFinalizerTaskManagerTask, taskResponse IFinalizerTaskManagerTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.RespondToTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse, nonSignerStakesAndSignature)
+// Solidity: function respondToOpTask((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) RespondToOpTask(task IFinalizerTaskManagerOpTask, taskResponse IFinalizerTaskManagerOpTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.RespondToOpTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse, nonSignerStakesAndSignature)
 }
 
-// RespondToTask is a paid mutator transaction binding the contract method 0xe4e3ad77.
+// RespondToOpTask is a paid mutator transaction binding the contract method 0x516a7227.
 //
-// Solidity: function respondToTask((uint256,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) RespondToTask(task IFinalizerTaskManagerTask, taskResponse IFinalizerTaskManagerTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.RespondToTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse, nonSignerStakesAndSignature)
+// Solidity: function respondToOpTask((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) RespondToOpTask(task IFinalizerTaskManagerOpTask, taskResponse IFinalizerTaskManagerOpTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.RespondToOpTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse, nonSignerStakesAndSignature)
+}
+
+// RespondToRdTask is a paid mutator transaction binding the contract method 0x05c6b663.
+//
+// Solidity: function respondToRdTask((uint32,uint256,uint32,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) RespondToRdTask(opts *bind.TransactOpts, task IFinalizerTaskManagerRdTask, taskResponse IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "respondToRdTask", task, taskResponse, nonSignerStakesAndSignature)
+}
+
+// RespondToRdTask is a paid mutator transaction binding the contract method 0x05c6b663.
+//
+// Solidity: function respondToRdTask((uint32,uint256,uint32,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) RespondToRdTask(task IFinalizerTaskManagerRdTask, taskResponse IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.RespondToRdTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse, nonSignerStakesAndSignature)
+}
+
+// RespondToRdTask is a paid mutator transaction binding the contract method 0x05c6b663.
+//
+// Solidity: function respondToRdTask((uint32,uint256,uint32,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) RespondToRdTask(task IFinalizerTaskManagerRdTask, taskResponse IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.RespondToRdTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse, nonSignerStakesAndSignature)
+}
+
+// ResumeTrackingQuorums is a paid mutator transaction binding the contract method 0x191aac7a.
+//
+// Solidity: function resumeTrackingQuorums(bool resetTrackedQuorums) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) ResumeTrackingQuorums(opts *bind.TransactOpts, resetTrackedQuorums bool) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "resumeTrackingQuorums", resetTrackedQuorums)
+}
+
+// ResumeTrackingQuorums is a paid mutator transaction binding the contract method 0x191aac7a.
+//
+// Solidity: function resumeTrackingQuorums(bool resetTrackedQuorums) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) ResumeTrackingQuorums(resetTrackedQuorums bool) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.ResumeTrackingQuorums(&_ContractFinalizerTaskManager.TransactOpts, resetTrackedQuorums)
+}
+
+// ResumeTrackingQuorums is a paid mutator transaction binding the contract method 0x191aac7a.
+//
+// Solidity: function resumeTrackingQuorums(bool resetTrackedQuorums) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) ResumeTrackingQuorums(resetTrackedQuorums bool) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.ResumeTrackingQuorums(&_ContractFinalizerTaskManager.TransactOpts, resetTrackedQuorums)
 }
 
 // SetPauserRegistry is a paid mutator transaction binding the contract method 0x10d67a2f.
@@ -1145,27 +1699,6 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) SetPau
 // Solidity: function setPauserRegistry(address newPauserRegistry) returns()
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) SetPauserRegistry(newPauserRegistry common.Address) (*types.Transaction, error) {
 	return _ContractFinalizerTaskManager.Contract.SetPauserRegistry(&_ContractFinalizerTaskManager.TransactOpts, newPauserRegistry)
-}
-
-// SetStaleStakesForbidden is a paid mutator transaction binding the contract method 0x416c7e5e.
-//
-// Solidity: function setStaleStakesForbidden(bool value) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) SetStaleStakesForbidden(opts *bind.TransactOpts, value bool) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.contract.Transact(opts, "setStaleStakesForbidden", value)
-}
-
-// SetStaleStakesForbidden is a paid mutator transaction binding the contract method 0x416c7e5e.
-//
-// Solidity: function setStaleStakesForbidden(bool value) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) SetStaleStakesForbidden(value bool) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.SetStaleStakesForbidden(&_ContractFinalizerTaskManager.TransactOpts, value)
-}
-
-// SetStaleStakesForbidden is a paid mutator transaction binding the contract method 0x416c7e5e.
-//
-// Solidity: function setStaleStakesForbidden(bool value) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) SetStaleStakesForbidden(value bool) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.SetStaleStakesForbidden(&_ContractFinalizerTaskManager.TransactOpts, value)
 }
 
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
@@ -1208,6 +1741,161 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) Unpaus
 // Solidity: function unpause(uint256 newPausedStatus) returns()
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) Unpause(newPausedStatus *big.Int) (*types.Transaction, error) {
 	return _ContractFinalizerTaskManager.Contract.Unpause(&_ContractFinalizerTaskManager.TransactOpts, newPausedStatus)
+}
+
+// UpdateBlsSignatureCheckerAddress is a paid mutator transaction binding the contract method 0x723114ab.
+//
+// Solidity: function updateBlsSignatureCheckerAddress(address _blsSignatureCheckerAddress) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) UpdateBlsSignatureCheckerAddress(opts *bind.TransactOpts, _blsSignatureCheckerAddress common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "updateBlsSignatureCheckerAddress", _blsSignatureCheckerAddress)
+}
+
+// UpdateBlsSignatureCheckerAddress is a paid mutator transaction binding the contract method 0x723114ab.
+//
+// Solidity: function updateBlsSignatureCheckerAddress(address _blsSignatureCheckerAddress) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) UpdateBlsSignatureCheckerAddress(_blsSignatureCheckerAddress common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.UpdateBlsSignatureCheckerAddress(&_ContractFinalizerTaskManager.TransactOpts, _blsSignatureCheckerAddress)
+}
+
+// UpdateBlsSignatureCheckerAddress is a paid mutator transaction binding the contract method 0x723114ab.
+//
+// Solidity: function updateBlsSignatureCheckerAddress(address _blsSignatureCheckerAddress) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) UpdateBlsSignatureCheckerAddress(_blsSignatureCheckerAddress common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.UpdateBlsSignatureCheckerAddress(&_ContractFinalizerTaskManager.TransactOpts, _blsSignatureCheckerAddress)
+}
+
+// ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdatedIterator is returned from FilterBLSSignatureCheckerAddressUpdated and is used to iterate over the raw logs and unpacked data for BLSSignatureCheckerAddressUpdated events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdatedIterator struct {
+	Event *ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdated represents a BLSSignatureCheckerAddressUpdated event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdated struct {
+	BlsSignatureCheckerAddress common.Address
+	Raw                        types.Log // Blockchain specific contextual infos
+}
+
+// FilterBLSSignatureCheckerAddressUpdated is a free log retrieval operation binding the contract event 0x901a654dc830c94e8a12c9a3bc0a92ac11b5cf28046ca8d190691cdaf5209016.
+//
+// Solidity: event BLSSignatureCheckerAddressUpdated(address blsSignatureCheckerAddress)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterBLSSignatureCheckerAddressUpdated(opts *bind.FilterOpts) (*ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdatedIterator, error) {
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "BLSSignatureCheckerAddressUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdatedIterator{contract: _ContractFinalizerTaskManager.contract, event: "BLSSignatureCheckerAddressUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchBLSSignatureCheckerAddressUpdated is a free log subscription operation binding the contract event 0x901a654dc830c94e8a12c9a3bc0a92ac11b5cf28046ca8d190691cdaf5209016.
+//
+// Solidity: event BLSSignatureCheckerAddressUpdated(address blsSignatureCheckerAddress)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchBLSSignatureCheckerAddressUpdated(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "BLSSignatureCheckerAddressUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdated)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "BLSSignatureCheckerAddressUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseBLSSignatureCheckerAddressUpdated is a log parse operation binding the contract event 0x901a654dc830c94e8a12c9a3bc0a92ac11b5cf28046ca8d190691cdaf5209016.
+//
+// Solidity: event BLSSignatureCheckerAddressUpdated(address blsSignatureCheckerAddress)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseBLSSignatureCheckerAddressUpdated(log types.Log) (*ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdated, error) {
+	event := new(ContractFinalizerTaskManagerBLSSignatureCheckerAddressUpdated)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "BLSSignatureCheckerAddressUpdated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
 }
 
 // ContractFinalizerTaskManagerInitializedIterator is returned from FilterInitialized and is used to iterate over the raw logs and unpacked data for Initialized events raised by the ContractFinalizerTaskManager contract.
@@ -1344,9 +2032,9 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Parse
 	return event, nil
 }
 
-// ContractFinalizerTaskManagerNewTaskCreatedIterator is returned from FilterNewTaskCreated and is used to iterate over the raw logs and unpacked data for NewTaskCreated events raised by the ContractFinalizerTaskManager contract.
-type ContractFinalizerTaskManagerNewTaskCreatedIterator struct {
-	Event *ContractFinalizerTaskManagerNewTaskCreated // Event containing the contract specifics and raw log
+// ContractFinalizerTaskManagerNewOpTaskCreatedIterator is returned from FilterNewOpTaskCreated and is used to iterate over the raw logs and unpacked data for NewOpTaskCreated events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerNewOpTaskCreatedIterator struct {
+	Event *ContractFinalizerTaskManagerNewOpTaskCreated // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1360,7 +2048,7 @@ type ContractFinalizerTaskManagerNewTaskCreatedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *ContractFinalizerTaskManagerNewTaskCreatedIterator) Next() bool {
+func (it *ContractFinalizerTaskManagerNewOpTaskCreatedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1369,7 +2057,7 @@ func (it *ContractFinalizerTaskManagerNewTaskCreatedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(ContractFinalizerTaskManagerNewTaskCreated)
+			it.Event = new(ContractFinalizerTaskManagerNewOpTaskCreated)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1384,7 +2072,7 @@ func (it *ContractFinalizerTaskManagerNewTaskCreatedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(ContractFinalizerTaskManagerNewTaskCreated)
+		it.Event = new(ContractFinalizerTaskManagerNewOpTaskCreated)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1400,52 +2088,52 @@ func (it *ContractFinalizerTaskManagerNewTaskCreatedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *ContractFinalizerTaskManagerNewTaskCreatedIterator) Error() error {
+func (it *ContractFinalizerTaskManagerNewOpTaskCreatedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *ContractFinalizerTaskManagerNewTaskCreatedIterator) Close() error {
+func (it *ContractFinalizerTaskManagerNewOpTaskCreatedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// ContractFinalizerTaskManagerNewTaskCreated represents a NewTaskCreated event raised by the ContractFinalizerTaskManager contract.
-type ContractFinalizerTaskManagerNewTaskCreated struct {
+// ContractFinalizerTaskManagerNewOpTaskCreated represents a NewOpTaskCreated event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerNewOpTaskCreated struct {
 	TaskIndex uint32
-	Task      IFinalizerTaskManagerTask
+	Task      IFinalizerTaskManagerOpTask
 	Raw       types.Log // Blockchain specific contextual infos
 }
 
-// FilterNewTaskCreated is a free log retrieval operation binding the contract event 0x1695b8d06ec800b4615e745cfb5bd00c1f2875615d42925c3b5afa543bb24c48.
+// FilterNewOpTaskCreated is a free log retrieval operation binding the contract event 0xfaf4b2054479d0f83e909b73cde2a6cb18ec2a93ba8ad5a62329001c86b1f3ea.
 //
-// Solidity: event NewTaskCreated(uint32 indexed taskIndex, (uint256,uint32,bytes,uint32) task)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterNewTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerNewTaskCreatedIterator, error) {
+// Solidity: event NewOpTaskCreated(uint32 indexed taskIndex, (uint32,uint32,uint32,bytes,uint32,bytes,uint32) task)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerNewOpTaskCreatedIterator, error) {
 
 	var taskIndexRule []interface{}
 	for _, taskIndexItem := range taskIndex {
 		taskIndexRule = append(taskIndexRule, taskIndexItem)
 	}
 
-	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "NewTaskCreated", taskIndexRule)
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "NewOpTaskCreated", taskIndexRule)
 	if err != nil {
 		return nil, err
 	}
-	return &ContractFinalizerTaskManagerNewTaskCreatedIterator{contract: _ContractFinalizerTaskManager.contract, event: "NewTaskCreated", logs: logs, sub: sub}, nil
+	return &ContractFinalizerTaskManagerNewOpTaskCreatedIterator{contract: _ContractFinalizerTaskManager.contract, event: "NewOpTaskCreated", logs: logs, sub: sub}, nil
 }
 
-// WatchNewTaskCreated is a free log subscription operation binding the contract event 0x1695b8d06ec800b4615e745cfb5bd00c1f2875615d42925c3b5afa543bb24c48.
+// WatchNewOpTaskCreated is a free log subscription operation binding the contract event 0xfaf4b2054479d0f83e909b73cde2a6cb18ec2a93ba8ad5a62329001c86b1f3ea.
 //
-// Solidity: event NewTaskCreated(uint32 indexed taskIndex, (uint256,uint32,bytes,uint32) task)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchNewTaskCreated(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerNewTaskCreated, taskIndex []uint32) (event.Subscription, error) {
+// Solidity: event NewOpTaskCreated(uint32 indexed taskIndex, (uint32,uint32,uint32,bytes,uint32,bytes,uint32) task)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchNewOpTaskCreated(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerNewOpTaskCreated, taskIndex []uint32) (event.Subscription, error) {
 
 	var taskIndexRule []interface{}
 	for _, taskIndexItem := range taskIndex {
 		taskIndexRule = append(taskIndexRule, taskIndexItem)
 	}
 
-	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "NewTaskCreated", taskIndexRule)
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "NewOpTaskCreated", taskIndexRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1455,8 +2143,8 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Watch
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(ContractFinalizerTaskManagerNewTaskCreated)
-				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "NewTaskCreated", log); err != nil {
+				event := new(ContractFinalizerTaskManagerNewOpTaskCreated)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "NewOpTaskCreated", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1477,12 +2165,882 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Watch
 	}), nil
 }
 
-// ParseNewTaskCreated is a log parse operation binding the contract event 0x1695b8d06ec800b4615e745cfb5bd00c1f2875615d42925c3b5afa543bb24c48.
+// ParseNewOpTaskCreated is a log parse operation binding the contract event 0xfaf4b2054479d0f83e909b73cde2a6cb18ec2a93ba8ad5a62329001c86b1f3ea.
 //
-// Solidity: event NewTaskCreated(uint32 indexed taskIndex, (uint256,uint32,bytes,uint32) task)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseNewTaskCreated(log types.Log) (*ContractFinalizerTaskManagerNewTaskCreated, error) {
-	event := new(ContractFinalizerTaskManagerNewTaskCreated)
-	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "NewTaskCreated", log); err != nil {
+// Solidity: event NewOpTaskCreated(uint32 indexed taskIndex, (uint32,uint32,uint32,bytes,uint32,bytes,uint32) task)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseNewOpTaskCreated(log types.Log) (*ContractFinalizerTaskManagerNewOpTaskCreated, error) {
+	event := new(ContractFinalizerTaskManagerNewOpTaskCreated)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "NewOpTaskCreated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractFinalizerTaskManagerNewOpTaskForceCreatedIterator is returned from FilterNewOpTaskForceCreated and is used to iterate over the raw logs and unpacked data for NewOpTaskForceCreated events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerNewOpTaskForceCreatedIterator struct {
+	Event *ContractFinalizerTaskManagerNewOpTaskForceCreated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerNewOpTaskForceCreatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerNewOpTaskForceCreated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerNewOpTaskForceCreated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerNewOpTaskForceCreatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerNewOpTaskForceCreatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerNewOpTaskForceCreated represents a NewOpTaskForceCreated event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerNewOpTaskForceCreated struct {
+	TaskIndex uint32
+	Task      IFinalizerTaskManagerOpTask
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterNewOpTaskForceCreated is a free log retrieval operation binding the contract event 0xdc5ba3b66ec6491b585b3f13698ed711aa829071f43300d6ede6dba67e28d75f.
+//
+// Solidity: event NewOpTaskForceCreated(uint32 indexed taskIndex, (uint32,uint32,uint32,bytes,uint32,bytes,uint32) task)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterNewOpTaskForceCreated(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerNewOpTaskForceCreatedIterator, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "NewOpTaskForceCreated", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerNewOpTaskForceCreatedIterator{contract: _ContractFinalizerTaskManager.contract, event: "NewOpTaskForceCreated", logs: logs, sub: sub}, nil
+}
+
+// WatchNewOpTaskForceCreated is a free log subscription operation binding the contract event 0xdc5ba3b66ec6491b585b3f13698ed711aa829071f43300d6ede6dba67e28d75f.
+//
+// Solidity: event NewOpTaskForceCreated(uint32 indexed taskIndex, (uint32,uint32,uint32,bytes,uint32,bytes,uint32) task)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchNewOpTaskForceCreated(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerNewOpTaskForceCreated, taskIndex []uint32) (event.Subscription, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "NewOpTaskForceCreated", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerNewOpTaskForceCreated)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "NewOpTaskForceCreated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseNewOpTaskForceCreated is a log parse operation binding the contract event 0xdc5ba3b66ec6491b585b3f13698ed711aa829071f43300d6ede6dba67e28d75f.
+//
+// Solidity: event NewOpTaskForceCreated(uint32 indexed taskIndex, (uint32,uint32,uint32,bytes,uint32,bytes,uint32) task)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseNewOpTaskForceCreated(log types.Log) (*ContractFinalizerTaskManagerNewOpTaskForceCreated, error) {
+	event := new(ContractFinalizerTaskManagerNewOpTaskForceCreated)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "NewOpTaskForceCreated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractFinalizerTaskManagerNewRdTaskCreatedIterator is returned from FilterNewRdTaskCreated and is used to iterate over the raw logs and unpacked data for NewRdTaskCreated events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerNewRdTaskCreatedIterator struct {
+	Event *ContractFinalizerTaskManagerNewRdTaskCreated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerNewRdTaskCreatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerNewRdTaskCreated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerNewRdTaskCreated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerNewRdTaskCreatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerNewRdTaskCreatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerNewRdTaskCreated represents a NewRdTaskCreated event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerNewRdTaskCreated struct {
+	TaskIndex uint32
+	Task      IFinalizerTaskManagerRdTask
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterNewRdTaskCreated is a free log retrieval operation binding the contract event 0x161faa5d92f6bf0262139c57c87ca6cc60e5b3c9c3341dc175cec97a2516cc7d.
+//
+// Solidity: event NewRdTaskCreated(uint32 indexed taskIndex, (uint32,uint256,uint32,uint32,bytes,uint32) task)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerNewRdTaskCreatedIterator, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "NewRdTaskCreated", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerNewRdTaskCreatedIterator{contract: _ContractFinalizerTaskManager.contract, event: "NewRdTaskCreated", logs: logs, sub: sub}, nil
+}
+
+// WatchNewRdTaskCreated is a free log subscription operation binding the contract event 0x161faa5d92f6bf0262139c57c87ca6cc60e5b3c9c3341dc175cec97a2516cc7d.
+//
+// Solidity: event NewRdTaskCreated(uint32 indexed taskIndex, (uint32,uint256,uint32,uint32,bytes,uint32) task)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchNewRdTaskCreated(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerNewRdTaskCreated, taskIndex []uint32) (event.Subscription, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "NewRdTaskCreated", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerNewRdTaskCreated)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "NewRdTaskCreated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseNewRdTaskCreated is a log parse operation binding the contract event 0x161faa5d92f6bf0262139c57c87ca6cc60e5b3c9c3341dc175cec97a2516cc7d.
+//
+// Solidity: event NewRdTaskCreated(uint32 indexed taskIndex, (uint32,uint256,uint32,uint32,bytes,uint32) task)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseNewRdTaskCreated(log types.Log) (*ContractFinalizerTaskManagerNewRdTaskCreated, error) {
+	event := new(ContractFinalizerTaskManagerNewRdTaskCreated)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "NewRdTaskCreated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractFinalizerTaskManagerOpTaskCancelledIterator is returned from FilterOpTaskCancelled and is used to iterate over the raw logs and unpacked data for OpTaskCancelled events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerOpTaskCancelledIterator struct {
+	Event *ContractFinalizerTaskManagerOpTaskCancelled // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerOpTaskCancelledIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerOpTaskCancelled)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerOpTaskCancelled)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerOpTaskCancelledIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerOpTaskCancelledIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerOpTaskCancelled represents a OpTaskCancelled event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerOpTaskCancelled struct {
+	TaskIndex uint32
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterOpTaskCancelled is a free log retrieval operation binding the contract event 0xd6a4e0ff9f3a053708757c7a124abee31ced61f43f17e6e1cf11943ec59e6071.
+//
+// Solidity: event OpTaskCancelled(uint32 indexed taskIndex)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterOpTaskCancelled(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerOpTaskCancelledIterator, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "OpTaskCancelled", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerOpTaskCancelledIterator{contract: _ContractFinalizerTaskManager.contract, event: "OpTaskCancelled", logs: logs, sub: sub}, nil
+}
+
+// WatchOpTaskCancelled is a free log subscription operation binding the contract event 0xd6a4e0ff9f3a053708757c7a124abee31ced61f43f17e6e1cf11943ec59e6071.
+//
+// Solidity: event OpTaskCancelled(uint32 indexed taskIndex)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchOpTaskCancelled(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerOpTaskCancelled, taskIndex []uint32) (event.Subscription, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "OpTaskCancelled", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerOpTaskCancelled)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "OpTaskCancelled", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseOpTaskCancelled is a log parse operation binding the contract event 0xd6a4e0ff9f3a053708757c7a124abee31ced61f43f17e6e1cf11943ec59e6071.
+//
+// Solidity: event OpTaskCancelled(uint32 indexed taskIndex)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseOpTaskCancelled(log types.Log) (*ContractFinalizerTaskManagerOpTaskCancelled, error) {
+	event := new(ContractFinalizerTaskManagerOpTaskCancelled)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "OpTaskCancelled", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractFinalizerTaskManagerOpTaskCompletedIterator is returned from FilterOpTaskCompleted and is used to iterate over the raw logs and unpacked data for OpTaskCompleted events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerOpTaskCompletedIterator struct {
+	Event *ContractFinalizerTaskManagerOpTaskCompleted // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerOpTaskCompletedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerOpTaskCompleted)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerOpTaskCompleted)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerOpTaskCompletedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerOpTaskCompletedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerOpTaskCompleted represents a OpTaskCompleted event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerOpTaskCompleted struct {
+	TaskIndex    uint32
+	TaskResponse IFinalizerTaskManagerOpTaskResponse
+	Raw          types.Log // Blockchain specific contextual infos
+}
+
+// FilterOpTaskCompleted is a free log retrieval operation binding the contract event 0xff2908483d74b6b70053dd473260acf1b09e0ba0781bf94100bb8277581749de.
+//
+// Solidity: event OpTaskCompleted(uint32 indexed taskIndex, (uint32,bytes32,bytes32) taskResponse)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterOpTaskCompleted(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerOpTaskCompletedIterator, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "OpTaskCompleted", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerOpTaskCompletedIterator{contract: _ContractFinalizerTaskManager.contract, event: "OpTaskCompleted", logs: logs, sub: sub}, nil
+}
+
+// WatchOpTaskCompleted is a free log subscription operation binding the contract event 0xff2908483d74b6b70053dd473260acf1b09e0ba0781bf94100bb8277581749de.
+//
+// Solidity: event OpTaskCompleted(uint32 indexed taskIndex, (uint32,bytes32,bytes32) taskResponse)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchOpTaskCompleted(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerOpTaskCompleted, taskIndex []uint32) (event.Subscription, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "OpTaskCompleted", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerOpTaskCompleted)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "OpTaskCompleted", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseOpTaskCompleted is a log parse operation binding the contract event 0xff2908483d74b6b70053dd473260acf1b09e0ba0781bf94100bb8277581749de.
+//
+// Solidity: event OpTaskCompleted(uint32 indexed taskIndex, (uint32,bytes32,bytes32) taskResponse)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseOpTaskCompleted(log types.Log) (*ContractFinalizerTaskManagerOpTaskCompleted, error) {
+	event := new(ContractFinalizerTaskManagerOpTaskCompleted)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "OpTaskCompleted", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractFinalizerTaskManagerOpTaskForceCompletedIterator is returned from FilterOpTaskForceCompleted and is used to iterate over the raw logs and unpacked data for OpTaskForceCompleted events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerOpTaskForceCompletedIterator struct {
+	Event *ContractFinalizerTaskManagerOpTaskForceCompleted // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerOpTaskForceCompletedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerOpTaskForceCompleted)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerOpTaskForceCompleted)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerOpTaskForceCompletedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerOpTaskForceCompletedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerOpTaskForceCompleted represents a OpTaskForceCompleted event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerOpTaskForceCompleted struct {
+	TaskIndex    uint32
+	TaskResponse IFinalizerTaskManagerOpTaskResponse
+	Raw          types.Log // Blockchain specific contextual infos
+}
+
+// FilterOpTaskForceCompleted is a free log retrieval operation binding the contract event 0xdf22f3558e4841b63d77179546b3eae63e4e343bbe752746b093162bc526be4c.
+//
+// Solidity: event OpTaskForceCompleted(uint32 indexed taskIndex, (uint32,bytes32,bytes32) taskResponse)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterOpTaskForceCompleted(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerOpTaskForceCompletedIterator, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "OpTaskForceCompleted", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerOpTaskForceCompletedIterator{contract: _ContractFinalizerTaskManager.contract, event: "OpTaskForceCompleted", logs: logs, sub: sub}, nil
+}
+
+// WatchOpTaskForceCompleted is a free log subscription operation binding the contract event 0xdf22f3558e4841b63d77179546b3eae63e4e343bbe752746b093162bc526be4c.
+//
+// Solidity: event OpTaskForceCompleted(uint32 indexed taskIndex, (uint32,bytes32,bytes32) taskResponse)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchOpTaskForceCompleted(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerOpTaskForceCompleted, taskIndex []uint32) (event.Subscription, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "OpTaskForceCompleted", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerOpTaskForceCompleted)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "OpTaskForceCompleted", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseOpTaskForceCompleted is a log parse operation binding the contract event 0xdf22f3558e4841b63d77179546b3eae63e4e343bbe752746b093162bc526be4c.
+//
+// Solidity: event OpTaskForceCompleted(uint32 indexed taskIndex, (uint32,bytes32,bytes32) taskResponse)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseOpTaskForceCompleted(log types.Log) (*ContractFinalizerTaskManagerOpTaskForceCompleted, error) {
+	event := new(ContractFinalizerTaskManagerOpTaskForceCompleted)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "OpTaskForceCompleted", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractFinalizerTaskManagerOpTaskRespondedIterator is returned from FilterOpTaskResponded and is used to iterate over the raw logs and unpacked data for OpTaskResponded events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerOpTaskRespondedIterator struct {
+	Event *ContractFinalizerTaskManagerOpTaskResponded // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerOpTaskRespondedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerOpTaskResponded)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerOpTaskResponded)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerOpTaskRespondedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerOpTaskRespondedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerOpTaskResponded represents a OpTaskResponded event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerOpTaskResponded struct {
+	TaskIndex            uint32
+	TaskResponse         IFinalizerTaskManagerOpTaskResponse
+	TaskResponseMetadata IFinalizerTaskManagerTaskResponseMetadata
+	Raw                  types.Log // Blockchain specific contextual infos
+}
+
+// FilterOpTaskResponded is a free log retrieval operation binding the contract event 0x47adacb0b6bbd726ae39ac6c006cca1c2006c9aedaa882dcba7c4804db7c41ce.
+//
+// Solidity: event OpTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterOpTaskResponded(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerOpTaskRespondedIterator, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "OpTaskResponded", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerOpTaskRespondedIterator{contract: _ContractFinalizerTaskManager.contract, event: "OpTaskResponded", logs: logs, sub: sub}, nil
+}
+
+// WatchOpTaskResponded is a free log subscription operation binding the contract event 0x47adacb0b6bbd726ae39ac6c006cca1c2006c9aedaa882dcba7c4804db7c41ce.
+//
+// Solidity: event OpTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchOpTaskResponded(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerOpTaskResponded, taskIndex []uint32) (event.Subscription, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "OpTaskResponded", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerOpTaskResponded)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "OpTaskResponded", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseOpTaskResponded is a log parse operation binding the contract event 0x47adacb0b6bbd726ae39ac6c006cca1c2006c9aedaa882dcba7c4804db7c41ce.
+//
+// Solidity: event OpTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseOpTaskResponded(log types.Log) (*ContractFinalizerTaskManagerOpTaskResponded, error) {
+	event := new(ContractFinalizerTaskManagerOpTaskResponded)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "OpTaskResponded", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -1636,6 +3194,139 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Watch
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseOwnershipTransferred(log types.Log) (*ContractFinalizerTaskManagerOwnershipTransferred, error) {
 	event := new(ContractFinalizerTaskManagerOwnershipTransferred)
 	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractFinalizerTaskManagerPauseTrackingOpStateIterator is returned from FilterPauseTrackingOpState and is used to iterate over the raw logs and unpacked data for PauseTrackingOpState events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerPauseTrackingOpStateIterator struct {
+	Event *ContractFinalizerTaskManagerPauseTrackingOpState // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerPauseTrackingOpStateIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerPauseTrackingOpState)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerPauseTrackingOpState)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerPauseTrackingOpStateIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerPauseTrackingOpStateIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerPauseTrackingOpState represents a PauseTrackingOpState event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerPauseTrackingOpState struct {
+	Raw types.Log // Blockchain specific contextual infos
+}
+
+// FilterPauseTrackingOpState is a free log retrieval operation binding the contract event 0x4d60154266b2ea0c8f091d257eac5abc941c46cb54d0c3069a830f6339fe1da1.
+//
+// Solidity: event PauseTrackingOpState()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterPauseTrackingOpState(opts *bind.FilterOpts) (*ContractFinalizerTaskManagerPauseTrackingOpStateIterator, error) {
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "PauseTrackingOpState")
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerPauseTrackingOpStateIterator{contract: _ContractFinalizerTaskManager.contract, event: "PauseTrackingOpState", logs: logs, sub: sub}, nil
+}
+
+// WatchPauseTrackingOpState is a free log subscription operation binding the contract event 0x4d60154266b2ea0c8f091d257eac5abc941c46cb54d0c3069a830f6339fe1da1.
+//
+// Solidity: event PauseTrackingOpState()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchPauseTrackingOpState(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerPauseTrackingOpState) (event.Subscription, error) {
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "PauseTrackingOpState")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerPauseTrackingOpState)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "PauseTrackingOpState", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParsePauseTrackingOpState is a log parse operation binding the contract event 0x4d60154266b2ea0c8f091d257eac5abc941c46cb54d0c3069a830f6339fe1da1.
+//
+// Solidity: event PauseTrackingOpState()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParsePauseTrackingOpState(log types.Log) (*ContractFinalizerTaskManagerPauseTrackingOpState, error) {
+	event := new(ContractFinalizerTaskManagerPauseTrackingOpState)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "PauseTrackingOpState", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -1922,6 +3613,584 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Parse
 	return event, nil
 }
 
+// ContractFinalizerTaskManagerRdTaskCancelledIterator is returned from FilterRdTaskCancelled and is used to iterate over the raw logs and unpacked data for RdTaskCancelled events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerRdTaskCancelledIterator struct {
+	Event *ContractFinalizerTaskManagerRdTaskCancelled // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerRdTaskCancelledIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerRdTaskCancelled)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerRdTaskCancelled)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerRdTaskCancelledIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerRdTaskCancelledIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerRdTaskCancelled represents a RdTaskCancelled event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerRdTaskCancelled struct {
+	TaskIndex uint32
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterRdTaskCancelled is a free log retrieval operation binding the contract event 0x0bf46bfca6e2137d35b893c295add8c33bcfbffafdef93252cb51aed7538ba0c.
+//
+// Solidity: event RdTaskCancelled(uint32 indexed taskIndex)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterRdTaskCancelled(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerRdTaskCancelledIterator, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "RdTaskCancelled", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerRdTaskCancelledIterator{contract: _ContractFinalizerTaskManager.contract, event: "RdTaskCancelled", logs: logs, sub: sub}, nil
+}
+
+// WatchRdTaskCancelled is a free log subscription operation binding the contract event 0x0bf46bfca6e2137d35b893c295add8c33bcfbffafdef93252cb51aed7538ba0c.
+//
+// Solidity: event RdTaskCancelled(uint32 indexed taskIndex)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchRdTaskCancelled(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerRdTaskCancelled, taskIndex []uint32) (event.Subscription, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "RdTaskCancelled", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerRdTaskCancelled)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "RdTaskCancelled", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRdTaskCancelled is a log parse operation binding the contract event 0x0bf46bfca6e2137d35b893c295add8c33bcfbffafdef93252cb51aed7538ba0c.
+//
+// Solidity: event RdTaskCancelled(uint32 indexed taskIndex)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseRdTaskCancelled(log types.Log) (*ContractFinalizerTaskManagerRdTaskCancelled, error) {
+	event := new(ContractFinalizerTaskManagerRdTaskCancelled)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "RdTaskCancelled", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractFinalizerTaskManagerRdTaskCompletedIterator is returned from FilterRdTaskCompleted and is used to iterate over the raw logs and unpacked data for RdTaskCompleted events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerRdTaskCompletedIterator struct {
+	Event *ContractFinalizerTaskManagerRdTaskCompleted // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerRdTaskCompletedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerRdTaskCompleted)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerRdTaskCompleted)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerRdTaskCompletedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerRdTaskCompletedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerRdTaskCompleted represents a RdTaskCompleted event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerRdTaskCompleted struct {
+	TaskIndex    uint32
+	BlockHash    [32]byte
+	TaskResponse IFinalizerTaskManagerRdTaskResponse
+	Raw          types.Log // Blockchain specific contextual infos
+}
+
+// FilterRdTaskCompleted is a free log retrieval operation binding the contract event 0x02046773dfd0e022ab6bf68cb07d73f080f87a4b82f7a4fccfe7d919d6c4ecb4.
+//
+// Solidity: event RdTaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterRdTaskCompleted(opts *bind.FilterOpts, taskIndex []uint32, blockHash [][32]byte) (*ContractFinalizerTaskManagerRdTaskCompletedIterator, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+	var blockHashRule []interface{}
+	for _, blockHashItem := range blockHash {
+		blockHashRule = append(blockHashRule, blockHashItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "RdTaskCompleted", taskIndexRule, blockHashRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerRdTaskCompletedIterator{contract: _ContractFinalizerTaskManager.contract, event: "RdTaskCompleted", logs: logs, sub: sub}, nil
+}
+
+// WatchRdTaskCompleted is a free log subscription operation binding the contract event 0x02046773dfd0e022ab6bf68cb07d73f080f87a4b82f7a4fccfe7d919d6c4ecb4.
+//
+// Solidity: event RdTaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchRdTaskCompleted(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerRdTaskCompleted, taskIndex []uint32, blockHash [][32]byte) (event.Subscription, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+	var blockHashRule []interface{}
+	for _, blockHashItem := range blockHash {
+		blockHashRule = append(blockHashRule, blockHashItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "RdTaskCompleted", taskIndexRule, blockHashRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerRdTaskCompleted)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "RdTaskCompleted", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRdTaskCompleted is a log parse operation binding the contract event 0x02046773dfd0e022ab6bf68cb07d73f080f87a4b82f7a4fccfe7d919d6c4ecb4.
+//
+// Solidity: event RdTaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseRdTaskCompleted(log types.Log) (*ContractFinalizerTaskManagerRdTaskCompleted, error) {
+	event := new(ContractFinalizerTaskManagerRdTaskCompleted)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "RdTaskCompleted", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractFinalizerTaskManagerRdTaskRespondedIterator is returned from FilterRdTaskResponded and is used to iterate over the raw logs and unpacked data for RdTaskResponded events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerRdTaskRespondedIterator struct {
+	Event *ContractFinalizerTaskManagerRdTaskResponded // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerRdTaskRespondedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerRdTaskResponded)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerRdTaskResponded)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerRdTaskRespondedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerRdTaskRespondedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerRdTaskResponded represents a RdTaskResponded event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerRdTaskResponded struct {
+	TaskIndex            uint32
+	TaskResponse         IFinalizerTaskManagerRdTaskResponse
+	TaskResponseMetadata IFinalizerTaskManagerTaskResponseMetadata
+	Raw                  types.Log // Blockchain specific contextual infos
+}
+
+// FilterRdTaskResponded is a free log retrieval operation binding the contract event 0x07ba8d7c4209c14e6d2ed5fd4542e9d8f47e1af3da0cbd9c50e2d0d3e87dfff0.
+//
+// Solidity: event RdTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterRdTaskResponded(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerRdTaskRespondedIterator, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "RdTaskResponded", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerRdTaskRespondedIterator{contract: _ContractFinalizerTaskManager.contract, event: "RdTaskResponded", logs: logs, sub: sub}, nil
+}
+
+// WatchRdTaskResponded is a free log subscription operation binding the contract event 0x07ba8d7c4209c14e6d2ed5fd4542e9d8f47e1af3da0cbd9c50e2d0d3e87dfff0.
+//
+// Solidity: event RdTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchRdTaskResponded(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerRdTaskResponded, taskIndex []uint32) (event.Subscription, error) {
+
+	var taskIndexRule []interface{}
+	for _, taskIndexItem := range taskIndex {
+		taskIndexRule = append(taskIndexRule, taskIndexItem)
+	}
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "RdTaskResponded", taskIndexRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerRdTaskResponded)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "RdTaskResponded", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRdTaskResponded is a log parse operation binding the contract event 0x07ba8d7c4209c14e6d2ed5fd4542e9d8f47e1af3da0cbd9c50e2d0d3e87dfff0.
+//
+// Solidity: event RdTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseRdTaskResponded(log types.Log) (*ContractFinalizerTaskManagerRdTaskResponded, error) {
+	event := new(ContractFinalizerTaskManagerRdTaskResponded)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "RdTaskResponded", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractFinalizerTaskManagerResumeTrackingOpStateIterator is returned from FilterResumeTrackingOpState and is used to iterate over the raw logs and unpacked data for ResumeTrackingOpState events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerResumeTrackingOpStateIterator struct {
+	Event *ContractFinalizerTaskManagerResumeTrackingOpState // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerResumeTrackingOpStateIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerResumeTrackingOpState)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerResumeTrackingOpState)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerResumeTrackingOpStateIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerResumeTrackingOpStateIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerResumeTrackingOpState represents a ResumeTrackingOpState event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerResumeTrackingOpState struct {
+	ResetTrackedQuorums bool
+	Raw                 types.Log // Blockchain specific contextual infos
+}
+
+// FilterResumeTrackingOpState is a free log retrieval operation binding the contract event 0x6af4ae1f481aff20ce571abd65375b67b22359883a823d1ddf4bd8f2879ff7ba.
+//
+// Solidity: event ResumeTrackingOpState(bool resetTrackedQuorums)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterResumeTrackingOpState(opts *bind.FilterOpts) (*ContractFinalizerTaskManagerResumeTrackingOpStateIterator, error) {
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "ResumeTrackingOpState")
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerResumeTrackingOpStateIterator{contract: _ContractFinalizerTaskManager.contract, event: "ResumeTrackingOpState", logs: logs, sub: sub}, nil
+}
+
+// WatchResumeTrackingOpState is a free log subscription operation binding the contract event 0x6af4ae1f481aff20ce571abd65375b67b22359883a823d1ddf4bd8f2879ff7ba.
+//
+// Solidity: event ResumeTrackingOpState(bool resetTrackedQuorums)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchResumeTrackingOpState(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerResumeTrackingOpState) (event.Subscription, error) {
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "ResumeTrackingOpState")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerResumeTrackingOpState)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "ResumeTrackingOpState", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseResumeTrackingOpState is a log parse operation binding the contract event 0x6af4ae1f481aff20ce571abd65375b67b22359883a823d1ddf4bd8f2879ff7ba.
+//
+// Solidity: event ResumeTrackingOpState(bool resetTrackedQuorums)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseResumeTrackingOpState(log types.Log) (*ContractFinalizerTaskManagerResumeTrackingOpState, error) {
+	event := new(ContractFinalizerTaskManagerResumeTrackingOpState)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "ResumeTrackingOpState", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
 // ContractFinalizerTaskManagerStaleStakesForbiddenUpdateIterator is returned from FilterStaleStakesForbiddenUpdate and is used to iterate over the raw logs and unpacked data for StaleStakesForbiddenUpdate events raised by the ContractFinalizerTaskManager contract.
 type ContractFinalizerTaskManagerStaleStakesForbiddenUpdateIterator struct {
 	Event *ContractFinalizerTaskManagerStaleStakesForbiddenUpdate // Event containing the contract specifics and raw log
@@ -2050,294 +4319,6 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Watch
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseStaleStakesForbiddenUpdate(log types.Log) (*ContractFinalizerTaskManagerStaleStakesForbiddenUpdate, error) {
 	event := new(ContractFinalizerTaskManagerStaleStakesForbiddenUpdate)
 	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "StaleStakesForbiddenUpdate", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// ContractFinalizerTaskManagerTaskCompletedIterator is returned from FilterTaskCompleted and is used to iterate over the raw logs and unpacked data for TaskCompleted events raised by the ContractFinalizerTaskManager contract.
-type ContractFinalizerTaskManagerTaskCompletedIterator struct {
-	Event *ContractFinalizerTaskManagerTaskCompleted // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *ContractFinalizerTaskManagerTaskCompletedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(ContractFinalizerTaskManagerTaskCompleted)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(ContractFinalizerTaskManagerTaskCompleted)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *ContractFinalizerTaskManagerTaskCompletedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *ContractFinalizerTaskManagerTaskCompletedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// ContractFinalizerTaskManagerTaskCompleted represents a TaskCompleted event raised by the ContractFinalizerTaskManager contract.
-type ContractFinalizerTaskManagerTaskCompleted struct {
-	TaskIndex uint32
-	BlockHash [32]byte
-	Raw       types.Log // Blockchain specific contextual infos
-}
-
-// FilterTaskCompleted is a free log retrieval operation binding the contract event 0x8378be8a33cf3a493910a16e275cd96af4f048c5eb1a2c2962d4066e697fea80.
-//
-// Solidity: event TaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterTaskCompleted(opts *bind.FilterOpts, taskIndex []uint32, blockHash [][32]byte) (*ContractFinalizerTaskManagerTaskCompletedIterator, error) {
-
-	var taskIndexRule []interface{}
-	for _, taskIndexItem := range taskIndex {
-		taskIndexRule = append(taskIndexRule, taskIndexItem)
-	}
-	var blockHashRule []interface{}
-	for _, blockHashItem := range blockHash {
-		blockHashRule = append(blockHashRule, blockHashItem)
-	}
-
-	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "TaskCompleted", taskIndexRule, blockHashRule)
-	if err != nil {
-		return nil, err
-	}
-	return &ContractFinalizerTaskManagerTaskCompletedIterator{contract: _ContractFinalizerTaskManager.contract, event: "TaskCompleted", logs: logs, sub: sub}, nil
-}
-
-// WatchTaskCompleted is a free log subscription operation binding the contract event 0x8378be8a33cf3a493910a16e275cd96af4f048c5eb1a2c2962d4066e697fea80.
-//
-// Solidity: event TaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchTaskCompleted(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerTaskCompleted, taskIndex []uint32, blockHash [][32]byte) (event.Subscription, error) {
-
-	var taskIndexRule []interface{}
-	for _, taskIndexItem := range taskIndex {
-		taskIndexRule = append(taskIndexRule, taskIndexItem)
-	}
-	var blockHashRule []interface{}
-	for _, blockHashItem := range blockHash {
-		blockHashRule = append(blockHashRule, blockHashItem)
-	}
-
-	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "TaskCompleted", taskIndexRule, blockHashRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(ContractFinalizerTaskManagerTaskCompleted)
-				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "TaskCompleted", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseTaskCompleted is a log parse operation binding the contract event 0x8378be8a33cf3a493910a16e275cd96af4f048c5eb1a2c2962d4066e697fea80.
-//
-// Solidity: event TaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseTaskCompleted(log types.Log) (*ContractFinalizerTaskManagerTaskCompleted, error) {
-	event := new(ContractFinalizerTaskManagerTaskCompleted)
-	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "TaskCompleted", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// ContractFinalizerTaskManagerTaskRespondedIterator is returned from FilterTaskResponded and is used to iterate over the raw logs and unpacked data for TaskResponded events raised by the ContractFinalizerTaskManager contract.
-type ContractFinalizerTaskManagerTaskRespondedIterator struct {
-	Event *ContractFinalizerTaskManagerTaskResponded // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *ContractFinalizerTaskManagerTaskRespondedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(ContractFinalizerTaskManagerTaskResponded)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(ContractFinalizerTaskManagerTaskResponded)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *ContractFinalizerTaskManagerTaskRespondedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *ContractFinalizerTaskManagerTaskRespondedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// ContractFinalizerTaskManagerTaskResponded represents a TaskResponded event raised by the ContractFinalizerTaskManager contract.
-type ContractFinalizerTaskManagerTaskResponded struct {
-	TaskResponse         IFinalizerTaskManagerTaskResponse
-	TaskResponseMetadata IFinalizerTaskManagerTaskResponseMetadata
-	Raw                  types.Log // Blockchain specific contextual infos
-}
-
-// FilterTaskResponded is a free log retrieval operation binding the contract event 0xb6b77f791d125b1522410ab3adf6a5ea133c836a193ce67ed29c129ca1d8f5c0.
-//
-// Solidity: event TaskResponded((uint32,bytes32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterTaskResponded(opts *bind.FilterOpts) (*ContractFinalizerTaskManagerTaskRespondedIterator, error) {
-
-	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "TaskResponded")
-	if err != nil {
-		return nil, err
-	}
-	return &ContractFinalizerTaskManagerTaskRespondedIterator{contract: _ContractFinalizerTaskManager.contract, event: "TaskResponded", logs: logs, sub: sub}, nil
-}
-
-// WatchTaskResponded is a free log subscription operation binding the contract event 0xb6b77f791d125b1522410ab3adf6a5ea133c836a193ce67ed29c129ca1d8f5c0.
-//
-// Solidity: event TaskResponded((uint32,bytes32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchTaskResponded(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerTaskResponded) (event.Subscription, error) {
-
-	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "TaskResponded")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(ContractFinalizerTaskManagerTaskResponded)
-				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "TaskResponded", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseTaskResponded is a log parse operation binding the contract event 0xb6b77f791d125b1522410ab3adf6a5ea133c836a193ce67ed29c129ca1d8f5c0.
-//
-// Solidity: event TaskResponded((uint32,bytes32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseTaskResponded(log types.Log) (*ContractFinalizerTaskManagerTaskResponded, error) {
-	event := new(ContractFinalizerTaskManagerTaskResponded)
-	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "TaskResponded", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

@@ -24,7 +24,7 @@ export class DockerUtils{
     constructor() {
         this.container = undefined;
         this.containerName = "";
-        this.FINALIZER_IMAGE = "mangatasolutions/avs-finalizer:" + ( process.env.AVS_FINALIZER_VERSION || 'local' );
+        this.FINALIZER_IMAGE = "mangatasolutions/avs-finalizer:" + ( process.env.AVS_FINALIZER_VERSION || '1c466c93b9f55debaab8af4502737076de0a6729' );
         console.info("Using image: " + this.FINALIZER_IMAGE);
     }
     async startContainer(image: string = this.FINALIZER_IMAGE, env = this.finalizerLocalEnvironment, opKeys : Partial<operatorKeys>  = {}, logMessage = "Testnet setup sucessfully, starting AVS verification") {
@@ -73,7 +73,7 @@ export class DockerUtils{
         AVS_RPC_URL:"http://0.0.0.0:8090" ,
         AVS_REGISTRY_COORDINATOR_ADDR:"0x851356ae760d987E095750cCeb3bC6014560891C" ,
         TESTNET:"true",
-        STAKE:"32",
+        STAKE:"60",
     }
     bigStakeLocalEnvironment : Environment = {
         RUST_LOG: "info",

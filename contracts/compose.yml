@@ -13,6 +13,11 @@ services:
       - --private-key
       - '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
       - --broadcast
+      # - --verify
+      # - --verifier
+      # - blockscout
+      # - --verifier-url
+      # - http://host.docker.internal/api
       - -v
     environment:
       ENV_SELECTOR: ethereum-stub
