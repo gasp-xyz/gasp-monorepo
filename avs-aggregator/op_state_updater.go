@@ -874,7 +874,7 @@ func (osu *OpStateUpdater) updateCheckpointedAvsQuorumStakes() {
 
 	for operatorId, _ := range osu.checkpointedAvsOpState {
 		for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
-			stake := osu.currentOpState[operatorId].StakePerQuorum[quorum]
+			stake := osu.checkpointedAvsOpState[operatorId].StakePerQuorum[quorum]
 			if stake == nil {
 				stake = big.NewInt(0)
 			}
