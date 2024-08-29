@@ -4,7 +4,10 @@ import { randomBytes } from "crypto";
 import Wallet from 'ethereumjs-wallet'
 import {generateBls12381G2KeyPair} from "@mattrglobal/bbs-signatures";
 
-
+interface operatorKeys {
+    edcsa: string,
+    bls: string
+}
 
 async function getNewKeys() {
     const key = randomBytes(32).toString("hex");
@@ -24,19 +27,26 @@ export class DockerUtils{
         this.FINALIZER_IMAGE = "mangatasolutions/avs-finalizer:" + ( process.env.AVS_FINALIZER_VERSION || '1c466c93b9f55debaab8af4502737076de0a6729' );
         console.info("Using image: " + this.FINALIZER_IMAGE);
     }
-    async startContainer(image: string = this.FINALIZER_IMAGE, env = this.finalizerLocalEnvironment) {
+    async startContainer(image: string = this.FINALIZER_IMAGE, env = this.finalizerLocalEnvironment, opKeys : Partial<operatorKeys>  = {}, logMessage = "Testnet setup sucessfully, starting AVS verification") {
         this.containerName = image;
         const json = await getNewKeys();
-        console.info("keys: " + JSON.stringify(json));
         env.ECDSA_KEY_JSON =  JSON.stringify(json.edcsa);
         env.BLS_KEY_JSON =  JSON.stringify(json.bls);
+        if(opKeys.edcsa){
+            env.ECDSA_KEY_JSON = opKeys.edcsa!;
+        }
+        if(opKeys.bls){
+            env.BLS_KEY_JSON = opKeys.bls!;
+        }
+        const name = "rollup-avs-finalizer-TEST-" + randomBytes(4).toString("hex")
+        console.info("name" + name + "keys: " + env.ECDSA_KEY_JSON  + env.BLS_KEY_JSON );
         console.info("Starting container: " + image);
         if(!this.container){
             this.container = await new GenericContainer(image)
-                .withWaitStrategy(Wait.forLogMessage("Testnet setup sucessfully, starting AVS verification"))
+                .withWaitStrategy(Wait.forLogMessage(logMessage))
                 .withEnvironment(env)
                 .withNetworkMode("host")
-                .withName("rollup-avs-finalizer-TEST-" + randomBytes(4).toString("hex"))
+                .withName(name)
                 .withLogConsumer(stream => {
                     stream.on("data", line => console.debug(line));
                     stream.on("err", line => console.debug(line));
@@ -46,7 +56,7 @@ export class DockerUtils{
         }else{
             console.info("Container already started: " + this.container.getName());
         }
-        return this.container;
+        return { container: this.container , edcsa: env.ECDSA_KEY_JSON , bls: env.BLS_KEY_JSON };
     }
     async stopContainer() {
         console.info("Stopping container .... " + this.containerName);

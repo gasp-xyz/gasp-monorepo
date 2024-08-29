@@ -13,6 +13,7 @@ import * as stakingAprController from './controller/stakingAprController.js'
 import * as liquidStakingController from './controller/liquidStakingController.js'
 import * as networkController from './controller/networkController.js'
 import * as tokenNetworkPortfolioController from './controller/tokenNetworkPortfolioController.js'
+import * as faucetController from './controller/FaucetController.js'
 
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
@@ -92,6 +93,12 @@ app.get('/coingecko/tickers', coingeckoController.tickers)
     '/account/:address/token-portfolio',
     tokenNetworkPortfolioController.tokenNetworkPortfolio
   )
+
+//Faucet endpoint
+app.get(
+  '/faucet/requestTokens/:toAddress/captcha/:captcha/',
+  faucetController.captcha
+)
 
 // Coinmarketcap listing endpoints
 app.get('/coinmarketcap/v1/summary', coinmarketcapController.summary)

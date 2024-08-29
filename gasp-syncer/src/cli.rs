@@ -43,6 +43,13 @@ pub struct CliArgs {
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub push_first_init: bool,
 
+    /// To use this please set both the source and target chain
+    /// to the eth chain. The gasp_service_addr can be ignored
+    // This can be improved later on...
+    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit, only_reinit, push_first_init"])]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub only_reinit_eth: bool,
+
     // #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit"])]
     // #[serde(skip_serializing_if = "std::ops::Not::not")]
     // pub force: bool,
@@ -50,7 +57,7 @@ pub struct CliArgs {
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub reinit: bool,
 
-    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit"])]
+    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit, push_first_init"])]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub only_reinit: bool,
 

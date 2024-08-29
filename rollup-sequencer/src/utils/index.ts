@@ -109,8 +109,7 @@ async function processDataForL2Update(
 
   if (latestBlockNumber < BigInt(BLOCK_NUMBER_DELAY)) {
     print("not enought block - returning none");
-    const none: Option<PalletRolldownMessagesL1Update> = api.createType("Option<PalletRolldownMessagesL1Update>", "None");
-    return none
+    return null
   }
  
   const delayedBlockNumber = latestBlockNumber - BigInt(BLOCK_NUMBER_DELAY);
@@ -118,7 +117,7 @@ async function processDataForL2Update(
 	print(`ETH native data : ${util.inspect(data, { depth: null })}`);
 
 	const encodedData = getEncodedData("getUpdateForL2", data);
-	return await getNativeL1Update(api, encodedData);
+	return (await getNativeL1Update(api, encodedData)).unwrap();
 }
 
 async function processPendingRequestsEvents(
@@ -219,184 +218,31 @@ function isSuccess(events: MangataGenericEvent[]) {
 	);
 }
 
-function getRequestIds(
-	l2update: PalletRolldownMessagesL1Update,
-	type:
-		| "pendingCancelResolutions"
-		| "pendingWithdrawalResolutions"
-		| "pendingL2UpdatesToRemove"
-		| "pendingDeposits",
-) {
-	return l2update[type].map((item) => item.requestId.id.toNumber());
+function maxBigInt(...args: bigint[]) {
+    return args.reduce((max, current) => current > max ? current : max);
 }
 
-function getMinMaxRequestId(requestIds: Array<number>, type: "min" | "max") {
-	if (type === "min") {
-		return Math.min(...requestIds);
-	}
-	return Math.max(...requestIds);
-}
-
-function getMinRequestId(l2Update: PalletRolldownMessagesL1Update) {
-	const pendingCancelResolutionsRequestIds = getRequestIds(
-		l2Update,
-		"pendingCancelResolutions",
-	);
-
-	const pendingWithdrawalResolutionsRequestIds = getRequestIds(
-		l2Update,
-		"pendingWithdrawalResolutions",
-	);
-
-	const pendingL2UpdatesToRemoveRequestIds = getRequestIds(
-		l2Update,
-		"pendingL2UpdatesToRemove",
-	);
-
-	const pendingDepositsRequestIds = getRequestIds(l2Update, "pendingDeposits");
-
-	const minId = getMinMaxRequestId(
-		[
-			Math.min(...pendingCancelResolutionsRequestIds),
-			Math.min(...pendingWithdrawalResolutionsRequestIds),
-			Math.min(...pendingL2UpdatesToRemoveRequestIds),
-			Math.min(...pendingDepositsRequestIds),
-		],
-		"min",
-	);
-
-	return minId === Number.POSITIVE_INFINITY ? null : minId;
-}
 
 function getMaxRequestId(l2Update: PalletRolldownMessagesL1Update) {
-	const pendingCancelResolutionsRequestIds = getRequestIds(
-		l2Update,
-		"pendingCancelResolutions",
-	);
+	const pendingCancelResolutionsRequestIds = l2Update.pendingCancelResolutions.map((r) => BigInt(r.requestId.id.toString()));
+	const pendingDepositsRequestIds = l2Update.pendingDeposits.map((r) => BigInt(r.requestId.id.toString()));
 
-	const pendingWithdrawalResolutionsRequestIds = getRequestIds(
-		l2Update,
-		"pendingWithdrawalResolutions",
-	);
-
-	const pendingL2UpdatesToRemoveRequestIds = getRequestIds(
-		l2Update,
-		"pendingL2UpdatesToRemove",
-	);
-
-	const pendingDepositsRequestIds = getRequestIds(l2Update, "pendingDeposits");
-
-	const maxId = getMinMaxRequestId(
-		[
-			Math.max(...pendingCancelResolutionsRequestIds),
-			Math.max(...pendingWithdrawalResolutionsRequestIds),
-			Math.max(...pendingL2UpdatesToRemoveRequestIds),
-			Math.max(...pendingDepositsRequestIds),
-		],
-		"max",
-	);
-
-	return maxId === Number.POSITIVE_INFINITY ? null : maxId;
+  return maxBigInt( 0n , ...pendingCancelResolutionsRequestIds, ...pendingDepositsRequestIds);
 }
 
-function filterUpdates(
-	l2Update: PalletRolldownMessagesL1Update,
-	lastRequestId: number,
-) {
-	const minId = getMinRequestId(l2Update);
-	if (minId === null) {
-		return l2Update;
-	}
-	const firstRequestId = Math.max(minId, lastRequestId + 1);
+function countRequests(l2Update: PalletRolldownMessagesL1Update | null) {
+  if (l2Update === null){
+    return 0
+  }
 
-	while (
-		l2Update.pendingDeposits.length > 0 &&
-		l2Update.pendingDeposits[0].requestId.id.toNumber() < firstRequestId
-	) {
-		l2Update.pendingDeposits.shift();
-	}
-
-	while (
-		l2Update.pendingCancelResolutions.length > 0 &&
-		l2Update.pendingCancelResolutions[0].requestId.id.toNumber() <
-			firstRequestId
-	) {
-		l2Update.pendingCancelResolutions.shift();
-	}
-
-	while (
-		l2Update.pendingWithdrawalResolutions.length > 0 &&
-		l2Update.pendingWithdrawalResolutions[0].requestId.id.toNumber() <
-			firstRequestId
-	) {
-		l2Update.pendingWithdrawalResolutions.shift();
-	}
-
-	while (
-		l2Update.pendingL2UpdatesToRemove.length > 0 &&
-		l2Update.pendingL2UpdatesToRemove[0].requestId.id.toNumber() <
-			firstRequestId
-	) {
-		l2Update.pendingL2UpdatesToRemove.shift();
-	}
-
-	const maxAmountOfUpdates = Number.parseInt(LIMIT);
-
-	if (maxAmountOfUpdates > 0) {
-		const lastRequestId = firstRequestId + maxAmountOfUpdates;
-
-		while (
-			l2Update.pendingDeposits.length > 0 &&
-			l2Update.pendingDeposits[
-				l2Update.pendingDeposits.length - 1
-			].requestId.id.toNumber() > lastRequestId
-		) {
-			l2Update.pendingDeposits.pop();
-		}
-
-		while (
-			l2Update.pendingCancelResolutions.length > 0 &&
-			l2Update.pendingCancelResolutions[
-				l2Update.pendingCancelResolutions.length - 1
-			].requestId.id.toNumber() > lastRequestId
-		) {
-			l2Update.pendingCancelResolutions.pop();
-		}
-
-		while (
-			l2Update.pendingWithdrawalResolutions.length > 0 &&
-			l2Update.pendingWithdrawalResolutions[
-				l2Update.pendingWithdrawalResolutions.length - 1
-			].requestId.id.toNumber() > lastRequestId
-		) {
-			l2Update.pendingWithdrawalResolutions.pop();
-		}
-
-		while (
-			l2Update.pendingL2UpdatesToRemove.length > 0 &&
-			l2Update.pendingL2UpdatesToRemove[
-				l2Update.pendingL2UpdatesToRemove.length - 1
-			].requestId.id.toNumber() > lastRequestId
-		) {
-			l2Update.pendingL2UpdatesToRemove.pop();
-		}
-
-		return l2Update;
-	}
-	return l2Update;
-}
-
-function countRequests(l2Update: PalletRolldownMessagesL1Update) {
-	return (
-		l2Update.pendingCancelResolutions.length +
-		l2Update.pendingWithdrawalResolutions.length +
-		l2Update.pendingL2UpdatesToRemove.length +
-		l2Update.pendingDeposits.length
+	return(
+		l2Update.pendingDeposits.length +
+		l2Update.pendingCancelResolutions.length
 	);
 }
 
 async function getLastRequestId(api: ApiPromise) {
-	return Number.parseInt(
+	return BigInt(
 		(await api.query.rolldown.lastProcessedRequestOnL2(L1_CHAIN)).toString(),
 	);
 }
@@ -439,7 +285,6 @@ export {
 	isSuccess,
 	getCollator,
 	countRequests,
-	filterUpdates,
 	getEncodedData,
 	getMaxRequestId,
 	getLastRequestId,
