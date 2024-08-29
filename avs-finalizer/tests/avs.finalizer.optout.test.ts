@@ -210,24 +210,29 @@ describe('AVS Finalizer', () => {
     });
     afterEach(async () => {
         //try opt-out just in case.
-        await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
-            console.log(result);
-        }).catch((err) => {
-            console.error(err);
-        });
-        await dockerUtils.stopContainer();
-        await secContainer.container?.exec("./main opt-out-avs").then((result) => {
-            console.log(result);
-        }).catch((err) => {
-            console.error(err);
-        });
-        await secContainer.stopContainer();
-        await thirdContainer.container?.exec("./main opt-out-avs").then((result) => {
-            console.log(result);
-        }).catch((err) => {
-            console.error(err);
-        });
-        await thirdContainer.stopContainer();
+        try {
+            await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
+                console.log(result);
+            }).catch((err) => {
+                console.error(err);
+            });
+            await dockerUtils.stopContainer();
+            await secContainer.container?.exec("./main opt-out-avs").then((result) => {
+                console.log(result);
+            }).catch((err) => {
+                console.error(err);
+            });
+            await secContainer.stopContainer();
+            await thirdContainer.container?.exec("./main opt-out-avs").then((result) => {
+                console.log(result);
+            }).catch((err) => {
+                console.error(err);
+            });
+            await thirdContainer.stopContainer();
+        }catch (e) {
+            console.info("Opt-out failed, probably the container is not running" + e.toString());
+        }
+
     });
 
 });
