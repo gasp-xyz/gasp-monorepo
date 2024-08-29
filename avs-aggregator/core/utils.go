@@ -4,44 +4,19 @@ import (
 	"math/big"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	"golang.org/x/crypto/sha3"
 )
 
 // this hardcodes abi.encode() for taskmanager.IFinalizerTaskManagerTaskResponse
 // unclear why abigen doesn't provide this out of the box...
-func AbiEncodeTaskResponse(h *taskmanager.IFinalizerTaskManagerTaskResponse) ([]byte, error) {
+func AbiEncodeOpTaskResponse(h *taskmanager.IFinalizerTaskManagerOpTaskResponse) ([]byte, error) {
 
-	// The order here has to match the field ordering of taskmanager.IFinalizerTaskManagerTaskResponse
-	taskResponseType, err := abi.NewType("tuple", "", []abi.ArgumentMarshaling{
-		{
-			Name: "referenceTaskIndex",
-			Type: "uint32",
-		},
-		{
-			Name: "BlockHash",
-			Type: "bytes32",
-		},
-		{
-			Name: "StorageProofHash",
-			Type: "bytes32",
-		},
-		{
-			Name: "PendingStateHash",
-			Type: "bytes32",
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-	arguments := abi.Arguments{
-		{
-			Type: taskResponseType,
-		},
-	}
+	parsedAbi, err := taskmanager.ContractFinalizerTaskManagerMetaData.GetAbi()
+	inputParameters := parsedAbi.Methods["respondToOpTask"].Inputs
+	args := inputParameters[1:2]
 
-	bytes, err := arguments.Pack(h)
+	bytes, err := args.Pack(h)
 	if err != nil {
 		return nil, err
 	}
@@ -50,9 +25,41 @@ func AbiEncodeTaskResponse(h *taskmanager.IFinalizerTaskManagerTaskResponse) ([]
 }
 
 // GetTaskResponseDigest returns the hash of the TaskResponse, which is what operators sign over
-func GetTaskResponseDigest(h *taskmanager.IFinalizerTaskManagerTaskResponse) ([32]byte, error) {
+func GetOpTaskResponseDigest(h *taskmanager.IFinalizerTaskManagerOpTaskResponse) ([32]byte, error) {
 
-	encodeTaskResponseByte, err := AbiEncodeTaskResponse(h)
+	encodeTaskResponseByte, err := AbiEncodeOpTaskResponse(h)
+	if err != nil {
+		return [32]byte{}, err
+	}
+
+	var taskResponseDigest [32]byte
+	hasher := sha3.NewLegacyKeccak256()
+	hasher.Write(encodeTaskResponseByte)
+	copy(taskResponseDigest[:], hasher.Sum(nil)[:32])
+
+	return taskResponseDigest, nil
+}
+
+// this hardcodes abi.encode() for taskmanager.IFinalizerTaskManagerTaskResponse
+// unclear why abigen doesn't provide this out of the box...
+func AbiEncodeRdTaskResponse(h *taskmanager.IFinalizerTaskManagerRdTaskResponse) ([]byte, error) {
+
+	parsedAbi, err := taskmanager.ContractFinalizerTaskManagerMetaData.GetAbi()
+	inputParameters := parsedAbi.Methods["respondToRdTask"].Inputs
+	args := inputParameters[1:2]
+
+	bytes, err := args.Pack(h)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
+}
+
+// GetTaskResponseDigest returns the hash of the TaskResponse, which is what operators sign over
+func GetRdTaskResponseDigest(h *taskmanager.IFinalizerTaskManagerRdTaskResponse) ([32]byte, error) {
+
+	encodeTaskResponseByte, err := AbiEncodeRdTaskResponse(h)
 	if err != nil {
 		return [32]byte{}, err
 	}
