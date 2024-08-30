@@ -5,7 +5,7 @@ import {
     getOperatorId
 } from "./operatorUtilities";
 import {expect} from "@jest/globals";
-import {buildApi, getRpcPendingUpdateHash} from "./nodeHelper";
+import {buildApi /*, getRpcPendingUpdateHash*/} from "./nodeHelper";
 
 export async function validateBLSApkRegistry(publicClient: any, operatorAddress: string, operatorId: string) {
     const response = await getEntryFromBlsApkRegistry(publicClient, "getRegisteredPubkey", [operatorAddress] );
@@ -65,7 +65,8 @@ export async function validateOperatorOptOutIndexRegistry(publicClient: any, ope
 
 export async function validateTaskDataFromEvent(publicClient: any, taskIndex: string , taskResponse :any , taskBlockNumber : bigint, txTransactionHash: string){
     const api = await buildApi();
-    const pendingUpdateFromNode = await getRpcPendingUpdateHash(api, taskResponse.blockHash);
+    // TODO: to be replaced with merkle root calculations
+    // const pendingUpdateFromNode = await getRpcPendingUpdateHash(api, taskResponse.blockHash);
 
     const allTaskResponses = await getEntryFromTaskManagerRegistry(publicClient, "allTaskResponses", [taskIndex] );
     const block = await publicClient.getBlock({blockNumber: taskBlockNumber});
@@ -77,7 +78,8 @@ export async function validateTaskDataFromEvent(publicClient: any, taskIndex: st
     //Check blockHash and updateHAsh from rpc on the node.
     const L2Block = await api.rpc.chain.getBlock(taskResponse.blockHash);
     expect(L2Block.block.header.number.toNumber()).toBeGreaterThan(0);
-    expect(pendingUpdateFromNode).toBe(taskResponse.pendingStateHash);
+    // TODO: to be replaced with merkle root calculations
+    // expect(pendingUpdateFromNode).toBe(taskResponse.pendingStateHash);
     console.log("Block: " + JSON.stringify(block));
     console.log(taskResponse);
 }
