@@ -25,6 +25,7 @@ import {
 } from "./validators";
 expect.extend( { toIncludeAllMembers} );
 import 'jest-extended';
+import {StartedTestContainer} from "testcontainers";
 
 
 jest.setTimeout(1500000);
@@ -77,8 +78,25 @@ async function mineEthBlocks(blocks: number) {
 
 }
 
+async function waitForOperatorToSubmitATask(opContainer: StartedTestContainer) {
+    //wait for operator send an task response correctly ( to be fully onboard )
+    console.info("Waiting for a task submitted by the operator");
+    return new Promise((resolve) => {
+        opContainer.logs().then((stream) => {
+            stream.on("data", (line) => {
+                if (line.toString().includes("Task finished successfuly and sent to AVS service")) {
+                    console.info("Task submitted correctly by operator")
+                    resolve(true);
+                }
+            });
+        });
+    }).then(() => {
+        console.info("...Done waiting for operator to submit a task");
+    });
+}
+
 describe('AVS Finalizer', () => {
-    it.only('opt-in / opt-out', async () => {
+    it('opt-in / opt-out', async () => {
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -88,8 +106,11 @@ describe('AVS Finalizer', () => {
             chain: anvil3,
         });
         const POperatorAddress = waitForOperatorRegistered(publicClient as PublicClient);
-        await dockerUtils.startContainer();
+        const {container : opContainer } =  await dockerUtils.startContainer();
         const operatorAddress = await POperatorAddress;
+
+        await waitForOperatorToSubmitATask(opContainer);
+
         console.info("Waiting for opTaskCreated Event...");
         await waitFor(publicClient, 1, "NewRdTaskCreated");
         console.info("...Done waiting for opTaskCreated Event");
@@ -143,9 +164,10 @@ describe('AVS Finalizer', () => {
             chain: anvil3,
         });
         const POperatorAddress = waitForOperatorRegistered(publicClient);
-        const { edcsa , bls } =  await dockerUtils.startContainer();
+        const { container : opContainer, edcsa , bls } =  await dockerUtils.startContainer();
         const operatorAddress = await POperatorAddress;
         console.log("operatorAddress: " + operatorAddress);
+        await waitForOperatorToSubmitATask(opContainer);
         const res = await publicClient.readContract({
             address: registryCoordinatorAddress,
             abi: registryCoordinator.abi,
@@ -196,7 +218,7 @@ describe('AVS Finalizer', () => {
 
         //re-register again
         thirdContainer = new DockerUtils();
-        await thirdContainer.startContainer(undefined, undefined, { edcsa , bls });
+        const { container: opContainer3 } = await thirdContainer.startContainer(undefined, undefined, { edcsa , bls });
         const statusAfterWaitingAndReJoined = await publicClient.readContract({
             address: registryCoordinatorAddress,
             abi: registryCoordinator.abi,
@@ -204,6 +226,7 @@ describe('AVS Finalizer', () => {
             args: [operatorAddress],
         });
         console.log("Validate status - OK " + operatorAddress);
+        await waitForOperatorToSubmitATask(opContainer3);
         expect(statusAfterWaitingAndReJoined).toBe(1);
         await validateOperatorOptInStakeRegistry(publicClient, operatorAddress as string);
         await validateOperatorOptInIndexRegistry(publicClient, operatorAddress as string);
@@ -242,7 +265,7 @@ describe('AVS Finalizer', () => {
 });
 //TODO: Unskip when the syncer is in place.
 describe.skip("AVS Finalizer - tasks", () => {
-    it.skip('When operator online -> threshold changes && task response is submitted', async () => {
+    it('When operator online -> threshold changes && task response is submitted', async () => {
         dockerUtils = new DockerUtils();
         const publicClient = getPubClient();
 
@@ -251,9 +274,10 @@ describe.skip("AVS Finalizer - tasks", () => {
             return tasks.map( x=> x.args.taskResponseMetadata)
         })
         const POperatorAddress = waitForOperatorRegistered(publicClient);
-        await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE, dockerUtils.bigStakeLocalEnvironment);
+        const {container: opContainer }  = await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE, dockerUtils.bigStakeLocalEnvironment);
         const operatorAddress = await POperatorAddress;
         console.log("operatorAddress: " + operatorAddress);
+        await waitForOperatorToSubmitATask(opContainer);
         const taskAfter = await waitForTaskResponded(publicClient, 4).then((tasks) => {
             expect(tasks).toHaveLength(4);
             return tasks.map( x=> x.args.taskResponseMetadata)

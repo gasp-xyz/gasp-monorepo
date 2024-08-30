@@ -24,7 +24,7 @@ export class DockerUtils{
     constructor() {
         this.container = undefined;
         this.containerName = "";
-        this.FINALIZER_IMAGE = "mangatasolutions/avs-finalizer:" + ( process.env.AVS_FINALIZER_VERSION || '1c466c93b9f55debaab8af4502737076de0a6729' );
+        this.FINALIZER_IMAGE = "mangatasolutions/avs-finalizer:" + ( process.env.AVS_FINALIZER_VERSION || 'local' );
         console.info("Using image: " + this.FINALIZER_IMAGE);
     }
     async startContainer(image: string = this.FINALIZER_IMAGE, env = this.finalizerLocalEnvironment, opKeys : Partial<operatorKeys>  = {}, logMessage = "Testnet setup sucessfully, starting AVS verification") {
