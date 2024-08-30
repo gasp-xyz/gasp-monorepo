@@ -87,6 +87,15 @@ var (
 		EnvVar:   "AVS_DEBOUNCE_RPC",
 	}
 
+	// Aggregator OpStateUpdaterFlags
+	AvsMinOpUpdateInterval = cli.IntFlag{
+		Name:     "avs-min-op-update-interval",
+		Usage:    "Min time that needs to pass for an opTask since the last opTask (in minutes)",
+		Required: false,
+		Value:    60,
+		EnvVar:   "AVS_MIN_OP_UPDATE_INTERVAL",
+	}
+
 	// Deployment
 	AvsRegistryCoordinatorFlag = cli.StringFlag{
 		Name:     "avs-registry-coordinator-addr",
