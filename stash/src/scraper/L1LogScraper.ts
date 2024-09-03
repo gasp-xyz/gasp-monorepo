@@ -1,12 +1,11 @@
 import { type PublicClientConfig, createPublicClient, http } from 'viem'
-import Rolldown from '../RolldownAbi.json' assert { type: 'json' }
+import RolldownContract from '../Rolldown.json' assert { type: 'json' }
 import { transactionRepository } from '../repository/TransactionRepository.js'
 import process from 'node:process'
 import { ApiPromise } from '@polkadot/api'
 import { redis } from '../connector/RedisConnector.js'
 import { setTimeout } from 'timers/promises'
 import logger from '../util/Logger.js'
-
 
 export const L1_CONFIRMED_STATUS = 'L1_CONFIRMED'
 export const L1_INITIATED_STATUS = 'L1_INITIATED'
@@ -36,7 +35,7 @@ export const watchDepositAcceptedIntoQueue = async (
       )
       const logs = await publicClient.getContractEvents({
         address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
-        abi: Rolldown.abi,
+        abi: RolldownContract.abi,
         eventName: 'DepositAcceptedIntoQueue',
         fromBlock,
         toBlock,
