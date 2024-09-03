@@ -1,0 +1,1211 @@
+{"abi":[
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "requestId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "depositRecipient",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "tokenAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "DepositAcceptedIntoQueue",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "requestId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "cancelJustified",
+                "type": "bool"
+            }
+        ],
+        "name": "DisputeResolutionAcceptedIntoQueue",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "EthWithdrawPending",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "depositRecipient",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "tokenAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "FundsReturned",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "withdrawRecipient",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "tokenAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "FundsWithdrawn",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint8",
+                "name": "version",
+                "type": "uint8"
+            }
+        ],
+        "name": "Initialized",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "requestId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[]",
+                "name": "l2UpdatesToRemove",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "L2UpdatesToRemovedAcceptedIntoQueue",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "updater",
+                "type": "address"
+            }
+        ],
+        "name": "NewUpdaterSet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newPausedStatus",
+                "type": "uint256"
+            }
+        ],
+        "name": "Paused",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "contract IPauserRegistry",
+                "name": "pauserRegistry",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "contract IPauserRegistry",
+                "name": "newPauserRegistry",
+                "type": "address"
+            }
+        ],
+        "name": "PauserRegistrySet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "PendingEthWithdrawn",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newPausedStatus",
+                "type": "uint256"
+            }
+        ],
+        "name": "Unpaused",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "requestId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "success",
+                "type": "bool"
+            }
+        ],
+        "name": "WithdrawalResolutionAcceptedIntoQueue",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "cancelHash",
+                "type": "bytes32"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "calculatedHash",
+                "type": "bytes32"
+            }
+        ],
+        "name": "cancelAndCalculatedHash",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "ETH_TOKEN_ADDRESS",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "cancelResolutions",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "enum IRolldownPrimitives.Origin",
+                        "name": "origin",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct IRolldownPrimitives.RequestId",
+                "name": "requestId",
+                "type": "tuple"
+            },
+            {
+                "internalType": "uint256",
+                "name": "l2RequestId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "cancelJustified",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "timeStamp",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "chain",
+        "outputs": [
+            {
+                "internalType": "enum IRolldownPrimitives.ChainId",
+                "name": "",
+                "type": "uint8"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "counter",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "tokenAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "deposit",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "tokenAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "deposit_erc20",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "deposit_eth",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "start",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "end",
+                "type": "uint256"
+            }
+        ],
+        "name": "getPendingRequests",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "enum IRolldownPrimitives.ChainId",
+                        "name": "chain",
+                        "type": "uint8"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "enum IRolldownPrimitives.Origin",
+                                        "name": "origin",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.RequestId",
+                                "name": "requestId",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "depositRecipient",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddress",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "amount",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "timeStamp",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct IRolldownPrimitives.Deposit[]",
+                        "name": "pendingDeposits",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "enum IRolldownPrimitives.Origin",
+                                        "name": "origin",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.RequestId",
+                                "name": "requestId",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "l2RequestId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "cancelJustified",
+                                "type": "bool"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "timeStamp",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct IRolldownPrimitives.CancelResolution[]",
+                        "name": "pendingCancelResolutions",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "enum IRolldownPrimitives.Origin",
+                                        "name": "origin",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.RequestId",
+                                "name": "requestId",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "l2RequestId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "status",
+                                "type": "bool"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "timeStamp",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct IRolldownPrimitives.WithdrawalResolution[]",
+                        "name": "pendingWithdrawalResolutions",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "enum IRolldownPrimitives.Origin",
+                                        "name": "origin",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.RequestId",
+                                "name": "requestId",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "l2UpdatesToRemove",
+                                "type": "uint256[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "timeStamp",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct IRolldownPrimitives.L2UpdatesToRemove[]",
+                        "name": "pendingL2UpdatesToRemove",
+                        "type": "tuple[]"
+                    }
+                ],
+                "internalType": "struct IRolldownPrimitives.L1Update",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getUpdateForL2",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "enum IRolldownPrimitives.ChainId",
+                        "name": "chain",
+                        "type": "uint8"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "enum IRolldownPrimitives.Origin",
+                                        "name": "origin",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.RequestId",
+                                "name": "requestId",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "depositRecipient",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddress",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "amount",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "timeStamp",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct IRolldownPrimitives.Deposit[]",
+                        "name": "pendingDeposits",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "enum IRolldownPrimitives.Origin",
+                                        "name": "origin",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.RequestId",
+                                "name": "requestId",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "l2RequestId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "cancelJustified",
+                                "type": "bool"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "timeStamp",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct IRolldownPrimitives.CancelResolution[]",
+                        "name": "pendingCancelResolutions",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "enum IRolldownPrimitives.Origin",
+                                        "name": "origin",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.RequestId",
+                                "name": "requestId",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "l2RequestId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "status",
+                                "type": "bool"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "timeStamp",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct IRolldownPrimitives.WithdrawalResolution[]",
+                        "name": "pendingWithdrawalResolutions",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "enum IRolldownPrimitives.Origin",
+                                        "name": "origin",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.RequestId",
+                                "name": "requestId",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "l2UpdatesToRemove",
+                                "type": "uint256[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "timeStamp",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct IRolldownPrimitives.L2UpdatesToRemove[]",
+                        "name": "pendingL2UpdatesToRemove",
+                        "type": "tuple[]"
+                    }
+                ],
+                "internalType": "struct IRolldownPrimitives.L1Update",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract IPauserRegistry",
+                "name": "_pauserRegistry",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "initialOwner",
+                "type": "address"
+            },
+            {
+                "internalType": "enum IRolldownPrimitives.ChainId",
+                "name": "chainId",
+                "type": "uint8"
+            },
+            {
+                "internalType": "address",
+                "name": "updater",
+                "type": "address"
+            }
+        ],
+        "name": "initialize",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "lastProcessedUpdate_origin_l1",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "lastProcessedUpdate_origin_l2",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "newPausedStatus",
+                "type": "uint256"
+            }
+        ],
+        "name": "pause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "pauseAll",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint8",
+                "name": "index",
+                "type": "uint8"
+            }
+        ],
+        "name": "paused",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "paused",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "pauserRegistry",
+        "outputs": [
+            {
+                "internalType": "contract IPauserRegistry",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "pendingEthWithdrawals",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract IPauserRegistry",
+                "name": "newPauserRegistry",
+                "type": "address"
+            }
+        ],
+        "name": "setPauserRegistry",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "updater",
+                "type": "address"
+            }
+        ],
+        "name": "setUpdater",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "newPausedStatus",
+                "type": "uint256"
+            }
+        ],
+        "name": "unpause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "enum IRolldownPrimitives.Origin",
+                                        "name": "origin",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.RequestId",
+                                "name": "requestId",
+                                "type": "tuple"
+                            },
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "start",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "end",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.Range",
+                                "name": "range",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "bytes32",
+                                "name": "hash",
+                                "type": "bytes32"
+                            }
+                        ],
+                        "internalType": "struct IRolldownPrimitives.Cancel[]",
+                        "name": "cancels",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "enum IRolldownPrimitives.Origin",
+                                        "name": "origin",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.RequestId",
+                                "name": "requestId",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "withdrawalRecipient",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddress",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "amount",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct IRolldownPrimitives.Withdrawal[]",
+                        "name": "withdrawals",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "enum IRolldownPrimitives.Origin",
+                                        "name": "origin",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IRolldownPrimitives.RequestId",
+                                "name": "requestId",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "originRequestId",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "enum IRolldownPrimitives.UpdateType",
+                                "name": "updateType",
+                                "type": "uint8"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "status",
+                                "type": "bool"
+                            }
+                        ],
+                        "internalType": "struct IRolldownPrimitives.RequestResult[]",
+                        "name": "results",
+                        "type": "tuple[]"
+                    }
+                ],
+                "internalType": "struct IRolldownPrimitives.L2Update",
+                "name": "inputArray",
+                "type": "tuple"
+            }
+        ],
+        "name": "update_l1_from_l2",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "updaterAccount",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "withdraw_pending_eth",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "withdrawalResolutions",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "enum IRolldownPrimitives.Origin",
+                        "name": "origin",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct IRolldownPrimitives.RequestId",
+                "name": "requestId",
+                "type": "tuple"
+            },
+            {
+                "internalType": "uint256",
+                "name": "l2RequestId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "status",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "timeStamp",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]}

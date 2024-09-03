@@ -1,7 +1,7 @@
 import { Schema } from 'redis-om'
 
 const transactionSchema = new Schema(
-  'transaction',
+  'transactions',
   {
     address: { type: 'string' },
     txHash: { type: 'string' },

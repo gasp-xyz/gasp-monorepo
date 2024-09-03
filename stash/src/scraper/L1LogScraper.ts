@@ -1,47 +1,57 @@
 import { type PublicClientConfig, createPublicClient, http } from 'viem'
-import Rolldown from '../Rolldown.json' assert { type: 'json' }
+import Rolldown from '../RolldownAbi.json' assert { type: 'json' }
 import { transactionRepository } from '../repository/TransactionRepository.js'
 import process from 'node:process'
 import { ApiPromise } from '@polkadot/api'
 import { redis } from '../connector/RedisConnector.js'
+import { setTimeout } from 'timers/promises'
+import logger from '../util/Logger.js'
+
 
 export const L1_CONFIRMED_STATUS = 'L1_CONFIRMED'
+export const L1_INITIATED_STATUS = 'L1_INITIATED'
+
+const keepProcessing = true
 
 export const watchDepositAcceptedIntoQueue = async (
   api: any,
   chainUrl: string,
-  chain: any
+  chain: any,
+  chainName: string
 ) => {
-  console.log('Received DepositAcceptedIntoQueue event')
-  console.log('scanning events:, chainUrl:', chainUrl, chain)
-
   const publicClient = getPublicClient({
     transport: http(chainUrl),
     chain: chain,
   })
 
-  const fromBlock = await getLastProcessedRequestId(chain, 'deposit')
-  const toBlock = await api.rpc.chain
-    .getHeader()
-    .then((header) => header.number.toNumber())
-
-  const unwatch = publicClient.getContractEvents({
-    address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
-    abi: Rolldown.abi,
-    eventName: 'DepositAcceptedIntoQueue',
-    fromBlock,
-    toBlock,
-    onLogs: async (logs) => {
-      console.log('Received DepositAcceptedIntoQueue event')
+  while (keepProcessing) {
+    try {
+      const toBlock = await publicClient.getBlockNumber()
+      let fromBlock = await getLastProcessedBlock(chainName, 'deposit')
+      if (fromBlock === 0n) {
+        fromBlock = toBlock
+      }
+      logger.info(
+        `chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`
+      )
+      const logs = await publicClient.getContractEvents({
+        address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
+        abi: Rolldown.abi,
+        eventName: 'DepositAcceptedIntoQueue',
+        fromBlock,
+        toBlock,
+      })
       for (const log of logs) {
-        const { transactionHash } = log
+        const { transactionHash, blockNumber } = log
         const existingTransaction = await transactionRepository
           .search()
           .where('txHash')
           .equals(transactionHash)
           .and('type')
           .equals('deposit')
-          .returnFirst() //todo: we should have only one transaction with the same hash
+          .and('status')
+          .equals(L1_INITIATED_STATUS)
+          .returnFirst()
 
         if (existingTransaction) {
           existingTransaction.status = L1_CONFIRMED_STATUS
@@ -49,81 +59,25 @@ export const watchDepositAcceptedIntoQueue = async (
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
           await transactionRepository.save(existingTransaction)
-          console.log('Transaction status updated:', existingTransaction)
-          return
+          logger.info('Transaction status updated:', existingTransaction)
         }
-        // console.log('Accepted log object:', log)
+        await saveLastProcessedBlock(chainName, blockNumber, 'deposit') //saving the last processed block
       }
-    },
-  })
-
-  // Handle process termination to unwatch events
-  process.on('SIGINT', async () => {
-    console.error('Stopping the process..., SIGINT signal')
-    unwatch() // Unsubscribe from event watching
-    process.exit()
-  })
-
-  process.on('SIGTERM', async () => {
-    console.error('Stopping the process..., SIGTERM signal')
-    unwatch() // Unsubscribe from event watching
-    process.exit()
-  })
-
-  process.on('SIGHUP', async () => {
-    console.error('Stopping the process..., SIGHUP signal')
-    unwatch() // Unsubscribe from event watching
-    process.exit()
-  })
-}
-
-export const getPublicClient = (options: PublicClientConfig) => {
-  return createPublicClient({ ...options })
-}
-
-//Query last processed request on L2 for deposits
-
-let keepProcessing = true
-
-export const stopProcessingRequests = () => {
-  keepProcessing = false
+      await saveLastProcessedBlock(chainName, toBlock, 'deposit') //if in the range of fromBlock and toBlock we didn't find any event, we save the last block
+    } catch (error) {
+      logger.error('Error in watchDepositAcceptedIntoQueue loop:', error)
+    }
+    await setTimeout(5000)
+  }
 }
 
 export const processRequests = async (api: ApiPromise, l1Chain: string) => {
-  const unwatch = () => {
-    // Add logic to unwatch events if necessary
-  }
-
-  // Handle process termination to unwatch events
-  process.on('SIGINT', async () => {
-    console.error('Stopping the L2 query process..., SIGINT signal')
-    stopProcessingRequests()
-    unwatch() // Unsubscribe from event watching
-    process.exit()
-  })
-
-  process.on('SIGTERM', async () => {
-    console.error('Stopping the L2 query process..., SIGTERM signal')
-    stopProcessingRequests()
-    unwatch() // Unsubscribe from event watching
-    process.exit()
-  })
-
-  process.on('SIGHUP', async () => {
-    console.error('Stopping the L2 query process..., SIGHUP signal')
-    stopProcessingRequests()
-    unwatch() // Unsubscribe from event watching
-    process.exit()
-  })
-
   while (keepProcessing) {
-    //info: this stays the same
     try {
       const lastProcessedRequestId = Number.parseInt(
         (await api.query.rolldown.lastProcessedRequestOnL2(l1Chain)).toString()
       )
       const lastSavedProcessedRequestId = await getLastProcessedRequestId(
-        //we separate the last processed request id by type (deposit, withdrawal) and l1 chain
         l1Chain,
         'deposit'
       )
@@ -144,33 +98,37 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
         const timestamp = new Date().toISOString()
         transaction.updated = Date.parse(timestamp)
         await transactionRepository.save(transaction)
-        // Save the lastProcessedRequestId in the database
       }
       await saveLastProcessedRequestId(
+        //even if we don't have any transaction to process, we save the last processed request id
         l1Chain,
         lastProcessedRequestId,
         'deposit'
-      ) //we are saving the last processed request id unrelated if we had transactions to update
-
-      // console.log(
-      //   `Processed ${transactionsToProcess.length} requests from ID ${lastSavedProcessedRequestId} to ID ${lastProcessedRequestId} on chain ${l1Chain}`
-      // )
+      )
     } catch (error) {
-      console.error('Error processing requests:', error)
+      logger.error('Error processing requests:', error)
     }
 
     // Delay to avoid overwhelming the system
-    await new Promise((resolve) => setTimeout(resolve, 5000))
+    await setTimeout(5000)
   }
+}
+
+export const getPublicClient = (options: PublicClientConfig) => {
+  return createPublicClient({ ...options })
 }
 const saveLastProcessedRequestId = async (
   l1Chain: string,
   lastProcessedRequestId: number,
   type: string
 ) => {
-  await redis.client.set(
-    `transaction:${type}:${l1Chain}:latest`,
+  await redis.client.hset(
+    `tx:${type}:${l1Chain}`,
+    'lastRequestId',
     lastProcessedRequestId.toString()
+  )
+  logger.info(
+    `Last processed requestId ${lastProcessedRequestId} for chain ${l1Chain} saved`
   )
 }
 
@@ -178,6 +136,32 @@ const getLastProcessedRequestId = async (
   l1Chain: string,
   type: string
 ): Promise<number | null> => {
-  const result = await redis.client.get(`transaction:${type}:${l1Chain}:latest`)
-  return result ? Number(result) : 0 // Return 0 and start updating statuses from the block 0
+  const result = await redis.client.hget(
+    `tx:${type}:${l1Chain}`,
+    'lastRequestId'
+  )
+  return result ? Number(result) : 0
+}
+
+const saveLastProcessedBlock = async (
+  l1Chain: string,
+  lastProcessedBlock: bigint,
+  type: string
+) => {
+  await redis.client.hset(
+    `tx:${type}:${l1Chain}`,
+    'lastBlock',
+    lastProcessedBlock.toString()
+  )
+  logger.info(
+    `Last processed block ${lastProcessedBlock} saved for chain ${l1Chain}`
+  )
+}
+
+const getLastProcessedBlock = async (
+  l1Chain: string,
+  type: string
+): Promise<bigint | null> => {
+  const result = await redis.client.hget(`tx:${type}:${l1Chain}`, 'lastBlock')
+  return result ? BigInt(result) : 0n
 }

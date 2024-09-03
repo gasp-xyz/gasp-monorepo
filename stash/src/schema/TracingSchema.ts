@@ -44,7 +44,3 @@ export const getAllTransactionsByAddressAndStatusSchema = yup.object().shape({
 export const getTransactionByEntityIdSchema = yup.object().shape({
   entityId: yup.string().required('entityId is required'),
 })
-
-export const getTransactionByTxHashSchema = yup.object().shape({
-  txHash: yup.string().required('txHash is required'),
-})
