@@ -6,6 +6,7 @@ include:
   - path: ./rollup-sequencer/compose.yml
   - path: ./rollup-updater/compose.yml
   - path: ./contracts/compose.yml
+  - path: ./gasp-syncer/compose.yml
 
 services:
   eth-stub:
@@ -14,7 +15,7 @@ services:
     ports:
       - 8545:8545
     entrypoint: anvil
-    command: --host 0.0.0.0 --balance 1000000000000000000
+    command: --host 0.0.0.0 --balance 1000000000000000000 #-b 2
     healthcheck:
       test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
       interval: 2s

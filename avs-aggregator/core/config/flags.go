@@ -51,6 +51,13 @@ var (
 		Value:    4,
 		EnvVar:   "AVS_BLOCK_VALIDATION_PERIOD",
 	}
+	AvsOpTaskPeriodFlag = cli.IntFlag{
+		Name:     "avs-op-task-period",
+		Usage:    "Period of op task per block produced on L2",
+		Required: false,
+		Value:    16,
+		EnvVar:   "AVS_OP_TASK_PERIOD",
+	}
 	AvsTaskExpirationFlag = cli.IntFlag{
 		Name:     "avs-task-expiration",
 		Usage:    "Expiration of task in seconds",
@@ -78,6 +85,15 @@ var (
 		Required: false,
 		Value:    5,
 		EnvVar:   "AVS_DEBOUNCE_RPC",
+	}
+
+	// Aggregator OpStateUpdaterFlags
+	AvsMinOpUpdateInterval = cli.IntFlag{
+		Name:     "avs-min-op-update-interval",
+		Usage:    "Min time that needs to pass for an opTask since the last opTask (in minutes)",
+		Required: false,
+		Value:    60,
+		EnvVar:   "AVS_MIN_OP_UPDATE_INTERVAL",
 	}
 
 	// Deployment
