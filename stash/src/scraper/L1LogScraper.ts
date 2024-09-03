@@ -20,10 +20,17 @@ export const watchDepositAcceptedIntoQueue = async (
     chain: chain,
   })
 
-  const unwatch = publicClient.watchContractEvent({
+  const fromBlock = await getLastProcessedRequestId(chain, 'deposit')
+  const toBlock = await api.rpc.chain
+    .getHeader()
+    .then((header) => header.number.toNumber())
+
+  const unwatch = publicClient.getContractEvents({
     address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
     abi: Rolldown.abi,
     eventName: 'DepositAcceptedIntoQueue',
+    fromBlock,
+    toBlock,
     onLogs: async (logs) => {
       console.log('Received DepositAcceptedIntoQueue event')
       for (const log of logs) {
@@ -45,7 +52,7 @@ export const watchDepositAcceptedIntoQueue = async (
           console.log('Transaction status updated:', existingTransaction)
           return
         }
-        console.log('Accepted log object:', log)
+        // console.log('Accepted log object:', log)
       }
     },
   })
@@ -110,17 +117,16 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
   })
 
   while (keepProcessing) {
+    //info: this stays the same
     try {
       const lastProcessedRequestId = Number.parseInt(
         (await api.query.rolldown.lastProcessedRequestOnL2(l1Chain)).toString()
       )
-      console.log('lastProcessedRequestId', lastProcessedRequestId)
       const lastSavedProcessedRequestId = await getLastProcessedRequestId(
         //we separate the last processed request id by type (deposit, withdrawal) and l1 chain
         l1Chain,
         'deposit'
       )
-      console.log('lastsavedprocessedrequestid', lastSavedProcessedRequestId)
       const transactionsToProcess = await transactionRepository
         .search()
         .where('chain')
@@ -133,7 +139,6 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
         .lte(lastProcessedRequestId)
         .return.all()
 
-      console.log('transactions to process', transactionsToProcess)
       for (const transaction of transactionsToProcess) {
         transaction.status = 'PROCESSED'
         const timestamp = new Date().toISOString()
@@ -147,9 +152,9 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
         'deposit'
       ) //we are saving the last processed request id unrelated if we had transactions to update
 
-      console.log(
-        `Processed ${transactionsToProcess.length} requests from ID ${lastSavedProcessedRequestId} to ID ${lastProcessedRequestId} on chain ${l1Chain}`
-      )
+      // console.log(
+      //   `Processed ${transactionsToProcess.length} requests from ID ${lastSavedProcessedRequestId} to ID ${lastProcessedRequestId} on chain ${l1Chain}`
+      // )
     } catch (error) {
       console.error('Error processing requests:', error)
     }

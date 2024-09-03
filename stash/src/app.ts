@@ -102,38 +102,27 @@ app.get(
 )
 
 // Tracing endpoints
-app.post('/tracing/tx/start', async (req: Request, res: Response) => {
-  await tracingController.startTracing(req.body, res)
-})
+app.post('/tracing/tx/start', tracingController.startTracing)
+
 app.get(
   '/tracing/tx/:txHashOrEntityId',
-  async (req: Request, res: Response) => {
-    await tracingController.getTransactionStatusByTxHashOrEntityId(req, res)
-  }
+  tracingController.getTransactionStatusByTxHashOrEntityId
 )
+
 app.get(
   '/tracing/tx/listByAddress/:address',
-  async (req: Request, res: Response) => {
-    await tracingController.getAllTransactionsByAddress(req, res)
-  }
+  tracingController.getAllTransactionsByAddress
 )
+
 app.get(
   '/tracing/tx/listByAddress/:address/:status',
-  async (req: Request, res: Response) => {
-    await tracingController.getAllTransactionsByAddressAndStatus(req, res)
-  }
+  tracingController.getAllTransactionsByAddressAndStatus
 )
+
 app.get(
   '/tracing/tx/findByEntityId/:entityId',
-  async (req: Request, res: Response) => {
-    await tracingController.getATransactionByEntityId(req, res)
-  }
-)
-app.get(
-  '/tracing/tx/findByTxHash/:txHash',
-  async (req: Request, res: Response) => {
-    await tracingController.getATransactionByTxHash(req, res)
-  }
+
+  tracingController.getATransactionByEntityId
 )
 
 // Coinmarketcap listing endpoints
