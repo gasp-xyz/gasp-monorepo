@@ -110,8 +110,6 @@ jobs:
       - name: Run clippy check
         working-directory: ${{ inputs.service-folder }}
         run: cargo clippy
-        working-directory: avs-finalizer
-        run: cargo clippy
 
       - name: Upload cargo build cache
         if: inputs.cache-enabled && steps.cache.outputs.cache_found == 'false'
