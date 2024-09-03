@@ -44,12 +44,13 @@ type OpStateUpdater struct {
 	paused                        bool
 	pauseReasonV                  string
 	lastOpStateUpdateTime         time.Time
+	triggerOpStateUpdateWindow    time.Duration
 	errorC                        chan error
 	ethRpc                        *chainio.EthRpc
 	avsRegistryService            *avsregistry.AvsRegistryServiceChainCaller
 }
 
-func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, avsRegistryService *avsregistry.AvsRegistryServiceChainCaller) (*OpStateUpdater, error) {
+func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, avsRegistryService *avsregistry.AvsRegistryServiceChainCaller, minOpUpdateInterval int) (*OpStateUpdater, error) {
 	return &OpStateUpdater{
 		logger:                        logger,
 		ethRpc:                        ethRpc,
@@ -70,6 +71,7 @@ func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, avsRegistr
 		paused:                        false,
 		pauseReasonV:                  "",
 		lastOpStateUpdateTime:         time.Time{},
+		triggerOpStateUpdateWindow:    time.Duration(minOpUpdateInterval) * time.Minute,
 	}, nil
 }
 
@@ -273,9 +275,9 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					// Timer here to check if the last triggerOpStateUpdate was not too recent
 					// We don't want sm1 changing stakes in the early stages of the project
 					// to cost us a lot of eth
-					if time.Since(osu.lastOpStateUpdateTime) < time.Hour {
+					if time.Since(osu.lastOpStateUpdateTime) < osu.triggerOpStateUpdateWindow {
 						osu.paused = true
-						osu.pauseReasonV = fmt.Sprintf("OpStateUpdater osu.triggerOpStateUpdate called again too soon: since: %v, now: %v", osu.lastOpStateUpdateTime, time.Now)
+						osu.pauseReasonV = fmt.Sprintf("OpStateUpdater osu.triggerOpStateUpdate called again too soon: since: %v, now: %v", osu.lastOpStateUpdateTime, time.Now())
 						continue
 					}
 
@@ -403,7 +405,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 							}
 						}
 						sub.Unsubscribe()
-						osu.triggerOpStateUpdate = false
+						osu.lastOpStateUpdateTime = time.Now()
 						osu.logger.Debug("OpStateUpdater done waiting for opTask to complete")
 
 						err = osu.updateOpStates()

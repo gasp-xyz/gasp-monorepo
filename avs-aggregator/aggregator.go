@@ -144,7 +144,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, avsRegistryService)
+	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, avsRegistryService, c.MinOpUpdateInterval)
 	if err != nil {
 		logger.Error("Cannot create operator stakes updateer", "err", err)
 		return nil, err

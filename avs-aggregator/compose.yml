@@ -23,6 +23,7 @@ services:
       - ECDSA_EPHEMERAL_KEY=true
       - BLS_EPHEMERAL_KEY=true
       - AVS_KICK_PERIOD=5
+      - AVS_MIN_OP_UPDATE_INTERVAL=1
     ports:
       - "8090:8090"
   
