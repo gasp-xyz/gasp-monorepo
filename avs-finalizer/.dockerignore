@@ -1,10 +1,12 @@
 .git
 .github
 .vscode
-Dockerfile*
+Dockerfile
 ops/**/data
 .env
 
 target
 # **/target
 # !**/target/**/main
+
+tmp
