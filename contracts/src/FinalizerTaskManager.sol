@@ -68,7 +68,7 @@ contract FinalizerTaskManager is
 
     bool public isTaskPending;
 
-    mapping(uint8 => uint32) public chainRdBatchNonce;
+    mapping(IRolldown.ChainId => uint32) public chainRdBatchNonce;
 
     // TODO
     // Maybe skip storing this
