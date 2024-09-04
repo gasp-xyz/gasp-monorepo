@@ -52,7 +52,7 @@ contract GaspMultiRollupService is
       emit RolldownTargetUpdated(address(_rolldown));
     }
 
-    function process_eigen_reinit(IFinalizerTaskManager.OpTask calldata task, OperatorStateInfo calldata operatorStateInfo, bytes32[] calldata merkleRoots, IRolldown.Range[] calldata ranges) public onlyOwner{
+    function process_eigen_reinit(IFinalizerTaskManager.OpTask calldata task, OperatorStateInfo calldata operatorStateInfo, bytes32[] calldata merkleRoots, IRolldown.Range[] calldata ranges, uint32 lastBatchId) public onlyOwner{
 
         require(merkleRoots.length == ranges.length, "rdUpdate info length mismatch");
 
@@ -110,6 +110,7 @@ contract GaspMultiRollupService is
         for (uint256 i = 0; i < merkleRoots.length; i++) {
             rolldown.update_l1_from_l2(merkleRoots[i], ranges[i]);
         }
+        chainRdBatchNonce = lastBatchId + 1;
 
         emit EigenReinitProcessed(task.taskNum, task.taskCreatedBlock);
         
@@ -214,6 +215,8 @@ contract GaspMultiRollupService is
 
     function process_eigen_rd_update(IFinalizerTaskManager.RdTask calldata task, IFinalizerTaskManager.RdTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature) public onlyUpdater {
 
+        require(taskResponse.batchId == chainRdBatchNonce, "chainRdBatchNonce mismatch"); 
+
         require(latestCompletedRdTaskNumber == 0 || latestCompletedRdTaskNumber < task.taskNum, "Stale RdTask");
         require(latestCompletedOpTaskCreatedBlock != 0, "Op state uninit");
         require(latestCompletedOpTaskCreatedBlock == task.lastCompletedOpTaskCreatedBlock, "reference block hash mismatch");
@@ -244,6 +247,7 @@ contract GaspMultiRollupService is
         range.start = taskResponse.rangeStart;
         range.end = taskResponse.rangeEnd;
         rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
+        chainRdBatchNonce = taskResponse.batchId + 1;
 
         emit EigenRdUpdateProcessed(task.taskNum, task.taskCreatedBlock);
         

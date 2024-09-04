@@ -207,20 +207,20 @@ contract FinalizerTaskManager is
         // check that the task is valid, hasn't been responsed yet, and is being responsed in time
         require(
             keccak256(abi.encode(task)) == allTaskHashes[TaskType.OP_TASK][taskResponse.referenceTaskIndex],
-            "supplied task does not match the one recorded in the contract"
+            "Task mismatch"
         );
         // some logical checks
         require(
             idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Aggregator has already responded to the task"
+            "Not Init state"
         );
         require(
             allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
-            "Aggregator has already responded to the task"
+            "Alrdy Resp"
         );
         require(
             uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Aggregator has responded to the task too late"
+            "Too late"
         );
 
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
@@ -335,20 +335,20 @@ contract FinalizerTaskManager is
         // check that the task is valid, hasn't been responsed yet, and is being responsed in time
         require(
             keccak256(abi.encode(task)) == allTaskHashes[TaskType.OP_TASK][taskResponse.referenceTaskIndex],
-            "supplied task does not match the one recorded in the contract"
+            "Task mismatch"
         );
         // some logical checks
         require(
             idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Aggregator has already responded to the task"
+            "Not Init state"
         );
         require(
             allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
-            "Aggregator has already responded to the task"
+            "Alrdy Resp"
         );
         require(
             uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Aggregator has responded to the task too late"
+            "Too late"
         );
 
         IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
@@ -427,20 +427,20 @@ contract FinalizerTaskManager is
         // check that the task is valid, hasn't been responsed yet, and is being responsed in time
         require(
             keccak256(abi.encode(task)) == allTaskHashes[TaskType.RD_TASK][taskResponse.referenceTaskIndex],
-            "supplied task does not match the one recorded in the contract"
+            "Task mismatch"
         );
         // some logical checks
         require(
             idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Aggregator has already responded to the task"
+            "Not Init state"
         );
         require(
             allTaskResponses[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
-            "Aggregator has already responded to the task"
+            "Alrdy Resp"
         );
         require(
             uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Aggregator has responded to the task too late"
+            "Too late"
         );
 
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
@@ -490,6 +490,7 @@ contract FinalizerTaskManager is
         range.start = taskResponse.rangeStart;
         range.end = taskResponse.rangeEnd;
         rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
+        chainRdBatchNonce[taskResponse.chainId] = taskResponse.batchId + 1;
 
         // emitting completed event
         emit RdTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
