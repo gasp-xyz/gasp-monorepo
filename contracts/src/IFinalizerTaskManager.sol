@@ -43,10 +43,28 @@ interface IFinalizerTaskManager {
     );
 
     // When aggregated stake for OP's responses exceeds the required threshold
-    event RdTaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash,
+    event RdTaskCompleted(uint32 indexed taskIndex,
         RdTaskResponse taskResponse);
 
-    // STRUCTS
+    event RolldownTargetUpdated(address rolldownAddress);
+
+    // DATA STRUCTURES
+    enum TaskStatus
+    {
+        // default is NOT_INITIALIZED
+        NOT_INITIALIZED,
+        INITIALIZED,
+        CANCELLED,
+        RESPONDED,
+        COMPLETED
+    }
+    enum TaskType
+    {
+        // default is OpTask
+        OP_TASK,
+        RD_TASK
+    }
+    
     struct OpTask {
         // the task number
         uint32 taskNum;
@@ -80,8 +98,8 @@ interface IFinalizerTaskManager {
     struct RdTask {
         // the task number
         uint32 taskNum;
-        // L2 block number which operators are required to execute and provide proofs for
-        uint256 blockNumber;
+        uint8 chainIndex;
+        uint32 batchId;
         // used for expiration checks
         uint32 taskCreatedBlock;
         // The last completed task used as reference block for operator state on other L1s
@@ -98,12 +116,12 @@ interface IFinalizerTaskManager {
         uint32 referenceTaskIndex;
         bytes32 referenceTaskHash;
 
-        // This is the response that the operator has to provide for a finalized block.
-        bytes32 blockHash;
-        // This is the response that the operator has to provide for a an executed block.
-        bytes32 storageProofHash;
-        // This is the response that the operator has to provide for a state hash at given block.
-        bytes32 pendingStateHash;
+        uint8 chainIndex;
+        uint32 batchId;
+        bytes32 rdUpdate;
+        uint256 rangeStart;
+        uint256 rangeEnd;
+        address updater;
     }
 
 

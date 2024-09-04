@@ -3,8 +3,12 @@ pragma solidity ^0.8.9;
 
 import "./IGaspMultiRollupService.sol";
 import "@eigenlayer-middleware/src/libraries/BN254.sol";
+import {IRolldown} from "./IRolldown.sol";
 
 abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
+
+
+    IRolldown public rolldown;
 
     address public updater;
 
@@ -13,7 +17,6 @@ abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
     uint256 public lastOpUpdateBlockTimestamp;
 
     uint32 public latestCompletedRdTaskNumber;
-    bytes32 public latestPendingStateHash;
 
     uint32 public latestCompletedOpTaskNumber;
     uint32 public latestCompletedOpTaskCreatedBlock;

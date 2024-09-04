@@ -18,6 +18,8 @@ interface IGaspMultiRollupServicePrimitives {
         uint32 taskCreatedBlock
     );
 
+    event RolldownTargetUpdated(address rolldownAddress);
+
     struct OperatorStateInfo {
         bool operatorsStateChanged;
         

@@ -13,6 +13,7 @@ import "@eigenlayer/contracts/permissions/Pausable.sol";
 import "./GaspMultiRollupServiceStorage.sol";
 import "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
 import "./IFinalizerTaskManager.sol";
+import {IRolldown} from "./IRolldown.sol";
  
 contract GaspMultiRollupService is
     Initializable,
@@ -25,7 +26,7 @@ contract GaspMultiRollupService is
     uint256 internal constant _THRESHOLD_DENOMINATOR = 100;
     uint256 internal constant PAIRING_EQUALITY_CHECK_GAS = 120000;
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _updater, bool _allowNonRootInit)
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _updater, bool _allowNonRootInit, IRolldown _rolldown)
         public
         initializer
     {
@@ -33,6 +34,7 @@ contract GaspMultiRollupService is
         _transferOwnership(initialOwner);
         updater = _updater;
         allowNonRootInit = _allowNonRootInit;
+        rolldown = _rolldown;
     }
 
     /* MODIFIERS */
@@ -45,8 +47,14 @@ contract GaspMultiRollupService is
         updater = _updater;
     }
 
+    function setRolldown(IRolldown _rolldown) external whenNotPaused onlyOwner {
+      rolldown = _rolldown;
+      emit RolldownTargetUpdated(address(_rolldown));
+    }
 
-    function process_eigen_reinit(IFinalizerTaskManager.OpTask calldata task, OperatorStateInfo calldata operatorStateInfo, bytes32 pendingStateHash) public onlyOwner{
+    function process_eigen_reinit(IFinalizerTaskManager.OpTask calldata task, OperatorStateInfo calldata operatorStateInfo, bytes32[] calldata merkleRoots, IRolldown.Range[] calldata ranges) public onlyOwner{
+
+        require(merkleRoots.length == ranges.length, "rdUpdate info length mismatch");
 
         for (uint256 i = 0; i < operatorStateInfo.quorumsRemoved.length; i++) {
             delete quorumToStakes[operatorStateInfo.quorumsRemoved[i]];
@@ -92,7 +100,6 @@ contract GaspMultiRollupService is
             operatorIdQuorumCount[operatorStateInfo.operatorsQuorumCountUpdate[i].operatorId] = operatorStateInfo.operatorsQuorumCountUpdate[i].quorumCount;
         }
 
-        latestPendingStateHash = pendingStateHash;
         latestCompletedOpTaskNumber = task.taskNum;
         latestCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
         lastOpUpdateBlockTimestamp = block.timestamp;
@@ -100,11 +107,15 @@ contract GaspMultiRollupService is
         quorumNumbers = task.quorumNumbers;
         quorumThresholdPercentage = task.quorumThresholdPercentage;
 
+        for (uint256 i = 0; i < merkleRoots.length; i++) {
+            rolldown.update_l1_from_l2(merkleRoots[i], ranges[i]);
+        }
+
         emit EigenReinitProcessed(task.taskNum, task.taskCreatedBlock);
         
     }
 
-    function process_eigen_op_update(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public {
+    function process_eigen_op_update(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public onlyUpdater  {
 
 
         bool isInit = latestCompletedOpTaskCreatedBlock == 0;
@@ -141,7 +152,7 @@ contract GaspMultiRollupService is
                     < quorumStakeTotals.totalStakeForQuorum[i] * uint8(QuorumThresholdPercentage)
             ) {
                 // "Signatories do not own at least threshold percentage of a quorum"
-                return;
+                revert("Failed to meet quorum");
             }
         }
         }
@@ -225,11 +236,14 @@ contract GaspMultiRollupService is
                     < quorumStakeTotals.totalStakeForQuorum[i] * uint8(QuorumThresholdPercentage)
             ) {
                 // "Signatories do not own at least threshold percentage of a quorum"
-                return;
+                revert("Failed to meet quorum");
             }
         }
 
-        latestPendingStateHash = taskResponse.pendingStateHash;
+        IRolldown.Range memory range;
+        range.start = taskResponse.rangeStart;
+        range.end = taskResponse.rangeEnd;
+        rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
 
         emit EigenRdUpdateProcessed(task.taskNum, task.taskCreatedBlock);
         
