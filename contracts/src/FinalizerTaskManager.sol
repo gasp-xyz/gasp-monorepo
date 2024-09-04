@@ -132,19 +132,14 @@ contract FinalizerTaskManager is
     // DEDUP ALL THIS!
     
     /* FUNCTIONS */
-    NOTE: this function creates new task, assigns it a taskId
-    function createNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
-        external
-        onlyTaskGenerator
+    function _createNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
+        internal
     {
         require(
             lastCompletedOpTaskCreatedBlock != block.number && block.number != 0,
-            "Can't create a task in the same block as a completed task"
+            "Can't in lastCompletedOpTaskCreatedBlock"
         );
-        require(
-            isTaskPending == false,
-            "Task already pending"
-        );
+
         // create a new task struct
         OpTask memory newTask;
         newTask.taskNum = latestOpTaskNum;
@@ -170,6 +165,17 @@ contract FinalizerTaskManager is
         isTaskPending = true;
         emit NewOpTaskCreated(latestOpTaskNum, newTask);
         latestOpTaskNum = latestOpTaskNum + 1;
+    }
+
+    function createNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
+        external
+        onlyTaskGenerator
+    {
+        require(
+            isTaskPending == false,
+            "Task already pending"
+        );
+        _createNewOpTask(quorumThresholdPercentage, quorumNumbers);
     }
 
     // NOTE: this function responds to existing tasks.
@@ -271,13 +277,8 @@ contract FinalizerTaskManager is
         emit OpTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
     }
 
-    function forceCancelPendingTasks()
-        external
-        onlyOwner
-    {
-        require(
-                isTaskPending == true, "No task pending");
-
+    function _cancelPendingTasks()
+    internal {
         if (latestOpTaskNum > 0) {
             uint32 lastTaskNum = latestOpTaskNum - 1;
             if (idToTaskStatus[TaskType.OP_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
@@ -296,60 +297,25 @@ contract FinalizerTaskManager is
         isTaskPending = false;
     }
 
+    function forceCancelPendingTasks()
+        external
+        onlyOwner
+    {
+        require(isTaskPending == true, "No task pending");
+        _cancelPendingTasks();
+    }
+
     function forceCreateNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
         external
         onlyOwner
     {
-        require(
-            lastCompletedOpTaskCreatedBlock != block.number && block.number != 0,
-            "Can't create a task in the same block as a completed task"
-        );
-        // create a new task struct
-        OpTask memory newTask;
-        newTask.taskNum = latestOpTaskNum;
-        newTask.taskCreatedBlock = uint32(block.number);
-        newTask.quorumThresholdPercentage = quorumThresholdPercentage;
-        newTask.quorumNumbers = quorumNumbers;
-        // This is to help the aggregator function as it currently is while 
-        // being compatible with past op state verficiation
-        if (lastCompletedOpTaskCreatedBlock == 0) {
-            newTask.lastCompletedOpTaskCreatedBlock = uint32(block.number);
-            newTask.lastCompletedOpTaskQuorumNumbers = quorumNumbers;
-            newTask.lastCompletedOpTaskQuorumThresholdPercentage = quorumThresholdPercentage;
-        } else {
-            newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
-            newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
-            newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
-        }
-
         if (isTaskPending) {
-        // Ensure new previous task was either cancelled or completed
-        // Here for now we auto cancel previous task if not completed
-        if (latestOpTaskNum > 0) {
-            uint32 lastTaskNum = latestOpTaskNum - 1;
-            if (idToTaskStatus[TaskType.OP_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
-                idToTaskStatus[TaskType.OP_TASK][lastTaskNum] = TaskStatus.CANCELLED;
-                // emit OpTaskCancelled(lastTaskNum);
-            }
+        _cancelPendingTasks();
         }
 
-        if (latestRdTaskNum > 0) {
-            uint32 lastTaskNum = latestRdTaskNum - 1;
-            if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
-                idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
-                // emit RdTaskCancelled(lastTaskNum);
-            }
-        }
-        }
+        _createNewOpTask(quorumThresholdPercentage, quorumNumbers);
 
-        // store hash of task onchain, emit event, and increase taskNum
-        allTaskHashes[TaskType.OP_TASK][latestOpTaskNum] = keccak256(abi.encode(newTask));
-        idToTaskStatus[TaskType.OP_TASK][latestOpTaskNum] = TaskStatus.INITIALIZED;
-        lastOpTaskCreatedBlock = uint32(block.number);
-        isTaskPending = true;
-        emit NewOpTaskCreated(latestOpTaskNum, newTask);
-        emit NewOpTaskForceCreated(latestOpTaskNum, newTask);
-        latestOpTaskNum = latestOpTaskNum + 1;
+        emit NewOpTaskForceCreated();
     }
 
     function forceRespondToOpTask(

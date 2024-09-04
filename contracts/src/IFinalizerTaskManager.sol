@@ -14,7 +14,7 @@ interface IFinalizerTaskManager {
 
     event OpTaskCancelled(uint32 indexed taskIndex);
     event NewOpTaskCreated(uint32 indexed taskIndex, OpTask task);
-    event NewOpTaskForceCreated(uint32 indexed taskIndex, OpTask task);
+    event NewOpTaskForceCreated();
 
     // When we have some response from OPs
     // note we want to keep track of responded tasks that did not meet the completion criteria 
