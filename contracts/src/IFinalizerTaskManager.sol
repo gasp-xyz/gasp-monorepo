@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "@eigenlayer-middleware/src/libraries/BN254.sol";
 import "./IGaspMultiRollupServicePrimitives.sol";
+import {IRolldown} from "./IRolldown.sol";
 
 interface IFinalizerTaskManager {
     // EVENTS
@@ -98,7 +99,7 @@ interface IFinalizerTaskManager {
     struct RdTask {
         // the task number
         uint32 taskNum;
-        uint8 chainIndex;
+        IRolldown.ChainId chainId;
         uint32 batchId;
         // used for expiration checks
         uint32 taskCreatedBlock;
@@ -116,7 +117,7 @@ interface IFinalizerTaskManager {
         uint32 referenceTaskIndex;
         bytes32 referenceTaskHash;
 
-        uint8 chainIndex;
+        IRolldown.ChainId chainId;
         uint32 batchId;
         bytes32 rdUpdate;
         uint256 rangeStart;

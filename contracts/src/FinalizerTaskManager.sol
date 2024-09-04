@@ -376,8 +376,7 @@ contract FinalizerTaskManager is
 
 
     /* FUNCTIONS */
-    // NOTE: this function creates new task, assigns it a taskId
-    function createNewRdTask(uint8 chainIndex, uint32 batchId)
+    function createNewRdTask(IRolldown.ChainId chainId, uint32 batchId)
         external
         onlyTaskGenerator
     {
@@ -394,7 +393,7 @@ contract FinalizerTaskManager is
         // create a new task struct
         RdTask memory newTask;
         newTask.taskNum = latestRdTaskNumMem;
-        newTask.chainIndex = chainIndex;
+        newTask.chainId = chainId;
         newTask.batchId = batchId;
         newTask.taskCreatedBlock = uint32(block.number);
         newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
@@ -422,7 +421,7 @@ contract FinalizerTaskManager is
 
         // TODO
         // Maybe this belongs in createNewRdTask
-        require(taskResponse.batchId == chainRdBatchNonce[taskResponse.chainIndex], "chainRdBatchNonce mismatch"); 
+        require(taskResponse.batchId == chainRdBatchNonce[taskResponse.chainId], "chainRdBatchNonce mismatch"); 
         require(
                 isTaskPending == true, "No task pending");
         // check that the task is valid, hasn't been responsed yet, and is being responsed in time
