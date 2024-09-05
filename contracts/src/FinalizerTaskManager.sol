@@ -245,7 +245,7 @@ contract FinalizerTaskManager is
         );
         // updating the storage with task responsea
         allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
-        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.RESPONDED;
+        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = TaskStatus.RESPONDED;
 
         // emitting event
         emit OpTaskResponded(task.taskNum, taskResponse, taskResponseMetadata);
@@ -268,7 +268,7 @@ contract FinalizerTaskManager is
         }
 
         operatorsStateInfoHash = taskResponse.operatorsStateInfoHash;
-        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.COMPLETED;
+        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = TaskStatus.COMPLETED;
         lastCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
         lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
         lastCompletedOpTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
@@ -363,7 +363,7 @@ contract FinalizerTaskManager is
         allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
 
         operatorsStateInfoHash = taskResponse.operatorsStateInfoHash;
-        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.COMPLETED;
+        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = TaskStatus.COMPLETED;
         lastCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
         lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
         lastCompletedOpTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
@@ -461,7 +461,7 @@ contract FinalizerTaskManager is
         );
         // updating the storage with task responses
         allTaskResponses[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
-        idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == TaskStatus.RESPONDED;
+        idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = TaskStatus.RESPONDED;
 
         // TODO
         // Optimize the following
@@ -484,7 +484,7 @@ contract FinalizerTaskManager is
             }
         }
 
-        idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == TaskStatus.COMPLETED;
+        idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = TaskStatus.COMPLETED;
 
         IRolldown.Range memory range;
         range.start = taskResponse.rangeStart;
