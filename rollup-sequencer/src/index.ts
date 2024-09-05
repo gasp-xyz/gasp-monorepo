@@ -81,14 +81,14 @@ async function main() {
 			inProgress = false;
 		}
 
-  
-  if (hasCancelRights) {
+  if (hasCancelRights && !inProgress){
+    inProgress = true;
 		await processPendingRequestsEvents(
 			api,
 			publicClient,
-			header.hash,
 			collator,
 		);
+    inProgress = false;
   }
 	});
 }
