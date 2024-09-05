@@ -75,6 +75,8 @@ type Aggregator struct {
 	substrateClient         gsrpc.SubstrateAPI
 	taskResponseWindowBlock uint32
 	asyncOpStateUpdaterError error
+	inProcessTaskMutex      sync.RWMutex
+	inProcessTask           sdktypes.TaskId
 
 	kicker  *Kicker
 	opStateUpdater *OpStateUpdater
@@ -210,13 +212,16 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 			return nil
 		case blsAggServiceResp := <-agg.blsAggregationService.GetResponseChannel():
 			agg.logger.Info("Received response from blsAggregationService", "blsAggServiceResp", blsAggServiceResp)
-			agg.sendAggregatedResponseToContract(blsAggServiceResp)
+			err := agg.sendAggregatedResponseToContract(blsAggServiceResp)
+			if err != nil{
+				return fmt.Errorf("sendAggregatedResponseToContract err: %v", err)
+			}
 		case head := <-sub.Chan():
 			// agg.logger.Info("Received new substrate header", "head.Number", head.Number)
 			err := agg.maybeSendNewRdTask(uint32(head.Number))
 			if err != nil {
-				// we log the errors inside sendNewTask() so here we just continue to the next task
-				continue
+				// We return here because if we can't send out an rdTask then we should stop the aggregator
+				return err
 			}
 		case sendNewOpTask := <-sendNewOpTaskC:
 			OpTask, err := agg.sendNewOpTask()
@@ -225,6 +230,9 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 				sendNewOpTask.SendNewOpTaskReturnC <- types.SendNewOpTaskReturn{
 					SendNewOpTaskError: err,
 				}
+				// If there is an error with creating a new OpTask then
+				// just continue because the task was never sent and so we do not care about
+				// inProcessTask here
 				continue
 			}
 			sendNewOpTask.SendNewOpTaskReturnC <- types.SendNewOpTaskReturn{
@@ -261,8 +269,7 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 
 func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg.BlsAggregationServiceResponse) {
 	if blsAggServiceResp.Err != nil && blsAggServiceResp.Err != blsagg.TaskExpiredError {
-		agg.logger.Warn("bls aggregation error", "err", blsAggServiceResp.Err)
-		return
+		return fmt.Error("bls aggregation error", "err", blsAggServiceResp.Err)
 	}
 	nonSignerPubkeys := []taskmanager.BN254G1Point{}
 	log := []string{}
@@ -287,6 +294,14 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		NonSignerStakeIndices:        blsAggServiceResp.NonSignerStakeIndices,
 	}
 
+	defer agg.inProcessTaskMutex.Unlock()
+	// We can hard expect that here we will get only what we expect
+	// since the signedTaskResponseC is deleted before another response can be accepted via select
+	if blsAggServiceResp.TaskId != agg.inProcessTask{
+		// This is not the task we were expecting so don't even send it
+		return fmt.Error("FATAL: blsAggServiceResp.TaskId != agg.inProcessTask", "blsAggServiceResp.TaskId", blsAggServiceResp.TaskId, "agg.inProcessTask", agg.inProcessTask)
+	}
+
 	agg.logger.Info("sending aggregated response onchain.", "TaskId", blsAggServiceResp.TaskId)
 	agg.tasksMu.RLock()
 	task := agg.tasks[blsAggServiceResp.TaskId]
@@ -299,17 +314,15 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 
 		opTask, ok := task.(taskmanager.IFinalizerTaskManagerOpTask)
 		if !ok {
-			agg.logger.Error("FATAL: Aggregator failed to decode opTask", "task", task)
-			return
+			return fmt.Error("FATAL: Aggregator failed to decode opTask", "task", task)
 		}
 		opTaskResponse, ok := taskResponse.(taskmanager.IFinalizerTaskManagerOpTaskResponse)
 		if !ok {
-			agg.logger.Error("FATAL: Aggregator failed to decode opTaskResponse", "taskResponse", taskResponse)
-			return
+			return fmt.Error("FATAL: Aggregator failed to decode opTaskResponse", "taskResponse", taskResponse)
 		}
 		r, err := agg.ethRpc.AvsWriter.SendAggregatedOpTaskResponse(context.Background(), opTask, opTaskResponse, nonSignerStakesAndSignature)
 		if err != nil {
-			agg.logger.Error("Aggregator failed to respond to task", "task", task, "err", err)
+			return fmt.Error("Aggregator failed to respond to task", "task", task, "err", err)
 		}
 		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r)
 
@@ -317,34 +330,47 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 
 		rdTask, ok := task.(taskmanager.IFinalizerTaskManagerRdTask)
 		if !ok {
-			agg.logger.Error("FATAL: Aggregator failed to decode rdTask", "task", task)
-			return
+			return fmt.Error("FATAL: Aggregator failed to decode rdTask", "task", task)
 		}
 		rdTaskResponse, ok := taskResponse.(taskmanager.IFinalizerTaskManagerRdTaskResponse)
 		if !ok {
-			agg.logger.Error("FATAL: Aggregator failed to decode rdTaskResponse", "taskResponse", taskResponse)
-			return
+			return fmt.Error("FATAL: Aggregator failed to decode rdTaskResponse", "taskResponse", taskResponse)
 		}
 		r, err := agg.ethRpc.AvsWriter.SendAggregatedRdTaskResponse(context.Background(), rdTask, rdTaskResponse, nonSignerStakesAndSignature)
 		if err != nil {
-			agg.logger.Error("Aggregator failed to respond to task", "task", task, "err", err)
+			return fmt.Error("Aggregator failed to respond to task", "task", task, "err", err)
 		}
 		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r)
 
 	} else {
-		agg.logger.Error("FATAL: Aggregator failed to recognize TaskType", "blsAggServiceResp.TaskId", blsAggServiceResp.TaskId)
-		return
+		return fmt.Error("FATAL: Aggregator failed to recognize TaskType", "blsAggServiceResp.TaskId", blsAggServiceResp.TaskId)
 	}
 
 }
 
 func (agg *Aggregator) sendNewOpTask() (taskmanager.IFinalizerTaskManagerOpTask, error) {
 
-	agg.logger.Info("Aggregator sending new task")
+	agg.logger.Debug("Aggregator waiting for inProcessTaskMutex.Lock() for OpTask")
+	agg.inProcessTaskMutex.Lock()
+
+	// Make sure that the taskManager is ready to accept another task
+	isTaskPending, err := osu.ethRpc.AvsReader.IsTaskPending(context.Background())
+	if err != nil {
+		return fmt.Errorf("Aggregator failed to IsTaskPending: err: %v", err)
+	}
+	if isTaskPending {
+		agg.logger.Fatal("Aggregator in sendNewOpTask got inProcessTaskMutex but isTaskPending is true!!!")
+		return fmt.Error("Aggregator in sendNewOpTask got inProcessTaskMutex but isTaskPending is true!!!")
+	}
+
+	agg.logger.Info("Aggregator sending new OpTask")
 	// Send number to square to the task manager contract
 	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewOpTask(context.Background(), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
+		// Unlock inProcessTaskMutex so that the osu can send the error back to the agg
+		// crashing the osu but letting the rdTasks go on...
+		agg.inProcessTaskMutex.Unlock()
 		return newTask, err
 	}
 
@@ -352,6 +378,8 @@ func (agg *Aggregator) sendNewOpTask() (taskmanager.IFinalizerTaskManagerOpTask,
 		TaskType: sdktypes.TaskType(0),
 		TaskIndex: sdktypes.TaskIndex(taskIndex),
 		}
+
+	agg.inProcessTask = taskId
 
 	agg.tasksMu.Lock()
 	agg.tasks[taskId] = newTask
@@ -402,7 +430,21 @@ func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 
 
 	if isRduTask && isOpsInit{
-		agg.logger.Info("Aggregator sending new task", "block number", blockNumber)
+		agg.logger.Debug("Aggregator waiting for inProcessTaskMutex.Lock() for RdTask")
+		agg.inProcessTaskMutex.Lock()
+
+
+		// Make sure that the taskManager is ready to accept another task
+		isTaskPending, err := osu.ethRpc.AvsReader.IsTaskPending(context.Background())
+		if err != nil {
+			return fmt.Errorf("Aggregator failed to IsTaskPending: err: %v", err)
+		}
+		if isTaskPending {
+			agg.logger.Fatal("Aggregator in sendNewOpTask got inProcessTaskMutex but isTaskPending is true!!!")
+			return fmt.Error("Aggregator in sendNewOpTask got inProcessTaskMutex but isTaskPending is true!!!")
+		}
+
+		agg.logger.Info("Aggregator sending new RdTask", "block number", blockNumber)
 		// Send number to square to the task manager contract
 		newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewRdTask(context.Background(), big.NewInt(int64(blockNumber)))
 		if err != nil {
@@ -414,6 +456,8 @@ func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 			TaskType: sdktypes.TaskType(1),
 			TaskIndex: sdktypes.TaskIndex(taskIndex),
 			}
+
+		agg.inProcessTask = taskId
 
 		agg.tasksMu.Lock()
 		agg.tasks[taskId] = newTask

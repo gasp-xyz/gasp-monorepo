@@ -71,6 +71,18 @@ func (r *AvsReader) CheckSignatures(
 	return stakeTotalsPerQuorum, nil
 }
 
+func (r *AvsReader) IsTaskPending(
+	ctx context.Context,
+) (bool, error) {
+	v, err := r.AvsServiceBindings.TaskManager.IsTaskPending(
+		&bind.CallOpts{},
+	)
+	if err != nil {
+		return false, err
+	}
+	return v, nil
+}
+
 func (r *AvsReader) LastCompletedOpTaskCreatedBlock(
 	ctx context.Context,
 ) (uint32, error) {

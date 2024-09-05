@@ -72,6 +72,9 @@ func (w *AvsWriter) SendNewOpTask(ctx context.Context, quorumThresholdPercentage
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
 	}
+	if r.status == 0{
+		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, errors.New("Txn failed with status failure (0): " + r)
+	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
 	newTaskCreatedEvent, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewOpTaskCreated(*receipt.Logs[0])
@@ -99,6 +102,9 @@ func (w *AvsWriter) SendNewRdTask(ctx context.Context, blockNumber *big.Int) (ta
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
 	}
+	if r.status == 0{
+		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, errors.New("Txn failed with status failure (0): " + r)
+	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
 	newTaskCreatedEvent, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewRdTaskCreated(*receipt.Logs[0])
@@ -125,6 +131,9 @@ func (w *AvsWriter) SendAggregatedOpTaskResponse(ctx context.Context, task taskm
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
 	}
+	if r.status == 0{
+		return nil, errors.New("Txn failed with status failure (0): " + r)
+	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent aggregated response with the AVS's task manager")
 	return receipt, nil
@@ -147,6 +156,9 @@ func (w *AvsWriter) SendAggregatedRdTaskResponse(ctx context.Context, task taskm
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
 	}
+	if r.status == 0{
+		return nil, errors.New("Txn failed with status failure (0): " + r)
+	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent aggregated response with the AVS's task manager")
 	return receipt, nil
@@ -167,6 +179,9 @@ func (w *AvsWriter) EjectOperators(ctx context.Context, operators []common.Addre
 	receipt, err := w.txMgr.Send(ctx, tx)
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
+	}
+	if r.status == 0{
+		return nil, errors.New("Txn failed with status failure (0): " + r)
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent eject operators with AVS's service manager")
