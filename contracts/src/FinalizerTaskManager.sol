@@ -231,7 +231,7 @@ contract FinalizerTaskManager is
 
         IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
 
-        if (isInit) {
+        if (!isInit) {
             // check the BLS signature
             (quorumStakeTotals, hashOfNonSigners) =
                 blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
