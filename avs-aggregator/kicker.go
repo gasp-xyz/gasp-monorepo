@@ -39,7 +39,7 @@ func (k *Kicker) CheckStateAndKick() error {
 	k.logger.Info("Running Operator Active List check")
 	// get N last TaskResponses
 	// our block ~= eth block time, so this should roughly match; new task for every Nth block * evry Mth task to kick
-	events, err := k.ethRpc.AvsReader.GetTaskRespondedEvents(context.Background(), k.kickPeriod*k.blockPeriod)
+	events, err := k.ethRpc.AvsReader.GetRdTaskRespondedEvents(context.Background(), k.kickPeriod*k.blockPeriod)
 	if err != nil {
 		k.logger.Error("Cannot get list of past TaskResponded events", "err", err)
 		return err

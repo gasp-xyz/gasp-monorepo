@@ -2,27 +2,58 @@
 pragma solidity ^0.8.9;
 
 import "@eigenlayer-middleware/src/libraries/BN254.sol";
+import "./IGaspMultiRollupServicePrimitives.sol";
 
 interface IFinalizerTaskManager {
     // EVENTS
-    event NewTaskCreated(uint32 indexed taskIndex, Task task);
+
+    event PauseTrackingOpState();
+    event ResumeTrackingOpState(bool resetTrackedQuorums);
+
+    event BLSSignatureCheckerAddressUpdated(address blsSignatureCheckerAddress);
+
+    event OpTaskCancelled(uint32 indexed taskIndex);
+    event NewOpTaskCreated(uint32 indexed taskIndex, OpTask task);
+    event NewOpTaskForceCreated(uint32 indexed taskIndex, OpTask task);
 
     // When we have some response from OPs
     // note we want to keep track of responded tasks that did not meet the completion criteria 
-    event TaskResponded(
-        TaskResponse taskResponse,
+    event OpTaskResponded(
+        uint32 indexed taskIndex,
+        OpTaskResponse taskResponse,
         TaskResponseMetadata taskResponseMetadata
     );
 
     // When aggregated stake for OP's responses exceeds the required threshold
-    event TaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash);
+    event OpTaskCompleted(uint32 indexed taskIndex,
+        OpTaskResponse taskResponse);
+
+    event OpTaskForceCompleted(uint32 indexed taskIndex,
+        OpTaskResponse taskResponse);
+
+    event RdTaskCancelled(uint32 indexed taskIndex);
+    event NewRdTaskCreated(uint32 indexed taskIndex, RdTask task);
+
+    // When we have some response from OPs
+    // note we want to keep track of responded tasks that did not meet the completion criteria 
+    event RdTaskResponded(
+        uint32 indexed taskIndex,
+        RdTaskResponse taskResponse,
+        TaskResponseMetadata taskResponseMetadata
+    );
+
+    // When aggregated stake for OP's responses exceeds the required threshold
+    event RdTaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash,
+        RdTaskResponse taskResponse);
 
     // STRUCTS
-    struct Task {
-        // L2 block number which operators are required to execute and provide proofs for
-        uint256 blockNumber;
+    struct OpTask {
+        // the task number
+        uint32 taskNum;
         // used for expiration checks
         uint32 taskCreatedBlock;
+        // The last completed task used as reference block for operator state on other L1s
+        uint32 lastCompletedOpTaskCreatedBlock;
         // task submitter decides on the criteria for a task to be completed
         // note that this does not mean the task was "correctly" answered
         // task is completed when each quorumNumbers specified here
@@ -31,13 +62,42 @@ interface IFinalizerTaskManager {
         bytes quorumNumbers;
         // percentage of quorum's total stake needed to consider task completed
         uint32 quorumThresholdPercentage;
+        // We require these to validate the old state correctly
+        bytes lastCompletedOpTaskQuorumNumbers;
+        uint32 lastCompletedOpTaskQuorumThresholdPercentage;
     }
 
     // Task response is hashed and signed by operators.
     // these signatures are aggregated and sent to the contract as response.
-    struct TaskResponse {
+    struct OpTaskResponse {
         // Can be obtained by the operator from the event NewTaskCreated.
         uint32 referenceTaskIndex;
+        bytes32 referenceTaskHash;
+
+        bytes32 operatorsStateInfoHash;
+    }
+
+    struct RdTask {
+        // the task number
+        uint32 taskNum;
+        // L2 block number which operators are required to execute and provide proofs for
+        uint256 blockNumber;
+        // used for expiration checks
+        uint32 taskCreatedBlock;
+        // The last completed task used as reference block for operator state on other L1s
+        uint32 lastCompletedOpTaskCreatedBlock;
+        // We require these to validate the old state correctly
+        bytes lastCompletedOpTaskQuorumNumbers;
+        uint32 lastCompletedOpTaskQuorumThresholdPercentage;
+    }
+
+    // Task response is hashed and signed by operators.
+    // these signatures are aggregated and sent to the contract as response.
+    struct RdTaskResponse {
+        // Can be obtained by the operator from the event NewTaskCreated.
+        uint32 referenceTaskIndex;
+        bytes32 referenceTaskHash;
+
         // This is the response that the operator has to provide for a finalized block.
         bytes32 blockHash;
         // This is the response that the operator has to provide for a an executed block.
@@ -45,6 +105,7 @@ interface IFinalizerTaskManager {
         // This is the response that the operator has to provide for a state hash at given block.
         bytes32 pendingStateHash;
     }
+
 
     // Extra information related to taskResponse, which is filled inside the contract.
     // It thus cannot be signed by operators, so we keep it in a separate struct than TaskResponse
@@ -59,16 +120,5 @@ interface IFinalizerTaskManager {
     }
 
     // FUNCTIONS
-    // NOTE: this function creates new task.
-    function createNewTask(
-        uint256 blockNumber,
-        uint32 quorumThresholdPercentage,
-        bytes calldata quorumNumbers
-    ) external;
 
-    /// @notice Returns the current 'taskNumber' for the middleware
-    function taskNumber() external view returns (uint32);
-
-    /// @notice Returns the TASK_RESPONSE_WINDOW_BLOCK
-    function getTaskResponseWindowBlock() external view returns (uint32);
 }

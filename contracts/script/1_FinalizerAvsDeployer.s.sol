@@ -16,10 +16,12 @@ import "@eigenlayer-middleware/src/RegistryCoordinator.sol";
 import "@eigenlayer-middleware/src/BLSApkRegistry.sol";
 import "@eigenlayer-middleware/src/IndexRegistry.sol";
 import "@eigenlayer-middleware/src/StakeRegistry.sol";
+import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
 
 import {FinalizerServiceManager, IServiceManager} from "../src/FinalizerServiceManager.sol";
 import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "../src/IFinalizerTaskManager.sol";
+import {OperatorStateRetrieverExtended} from "../src/OperatorStateRetrieverExtended.sol";
 
 import {Utils} from "./utils/Utils.sol";
 
@@ -43,6 +45,14 @@ contract Deployer is Script, Utils, Test {
     PauserRegistry public avsPauserReg;
     address public avsOwner;
     address public avsUpgrader;
+
+    bool public allow_non_root_tm_init;
+    uint32 public taskResponseWindowBlocks;
+    uint32 public minOpTaskResponseWindowBlock;
+
+    // non-upgradable contracts
+    BLSSignatureChecker public blsSignatureChecker;
+    OperatorStateRetrieverExtended public operatorStateRetreiverExtended;
 
     //upgradeable contracts
     FinalizerServiceManager public serviceManager;
@@ -90,8 +100,12 @@ contract Deployer is Script, Utils, Test {
         avsOwner = stdJson.readAddress(configData, ".permissions.owner");
         avsUpgrader = stdJson.readAddress(configData, ".permissions.upgrader");
 
-        uint32 taskResponseWindowBlocks =
+        taskResponseWindowBlocks =
             uint32(stdJson.readUint(configData, ".taskManagerParams.taskResponseWindowBlocks"));
+        minOpTaskResponseWindowBlock =
+            uint32(stdJson.readUint(configData, ".taskManagerParams.minOpTaskResponseWindowBlock"));
+
+        allow_non_root_tm_init = stdJson.readBool(configData, ".allow_non_root_tm_init");
 
         // START BROADCAST
         vm.startBroadcast();
@@ -229,13 +243,21 @@ contract Deployer is Script, Utils, Test {
             abi.encodeWithSelector(serviceManager.initialize.selector, avsOwner, ejector)
         );
 
-        taskManagerImplementation = new FinalizerTaskManager(registryCoordinator, taskResponseWindowBlocks);
+        blsSignatureChecker = new BLSSignatureChecker(registryCoordinator);
+        // This is a hack to set BlsSignatureChecker's staleStakesForbidden flag
+        // We do it this way to avoid forking it...
+        // This hack depends on avsOwner being the same as the deployer...
+        blsSignatureChecker.setStaleStakesForbidden(false);
+
+        operatorStateRetreiverExtended = new OperatorStateRetrieverExtended();
+        
+        taskManagerImplementation = new FinalizerTaskManager();
 
         // upgrade task manager proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(taskManager))),
             address(taskManagerImplementation),
-            abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator)
+            abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator, allow_non_root_tm_init, blsSignatureChecker, taskResponseWindowBlocks, minOpTaskResponseWindowBlock, operatorStateRetreiverExtended)
         );
 
         // transfer ownership of proxy admin to upgrader
