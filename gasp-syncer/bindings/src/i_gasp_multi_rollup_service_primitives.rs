@@ -73,6 +73,18 @@ pub mod i_gasp_multi_rollup_service_primitives {
                         anonymous: false,
                     },],
                 ),
+                (
+                    ::std::borrow::ToOwned::to_owned("RolldownTargetUpdated"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("RolldownTargetUpdated",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
+                            name: ::std::borrow::ToOwned::to_owned("rolldownAddress"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            indexed: false,
+                        },],
+                        anonymous: false,
+                    },],
+                ),
             ]),
             errors: ::std::collections::BTreeMap::new(),
             receive: false,
@@ -138,6 +150,13 @@ pub mod i_gasp_multi_rollup_service_primitives {
         pub fn eigen_reinit_processed_filter(
             &self,
         ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, EigenReinitProcessedFilter>
+        {
+            self.0.event()
+        }
+        ///Gets the contract's `RolldownTargetUpdated` event
+        pub fn rolldown_target_updated_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, RolldownTargetUpdatedFilter>
         {
             self.0.event()
         }
@@ -220,6 +239,22 @@ pub mod i_gasp_multi_rollup_service_primitives {
         pub task_number: u32,
         pub task_created_block: u32,
     }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethevent(name = "RolldownTargetUpdated", abi = "RolldownTargetUpdated(address)")]
+    pub struct RolldownTargetUpdatedFilter {
+        pub rolldown_address: ::ethers::core::types::Address,
+    }
     ///Container type for all of the contract's events
     #[derive(
         Clone,
@@ -235,6 +270,7 @@ pub mod i_gasp_multi_rollup_service_primitives {
         EigenOpUpdateProcessedFilter(EigenOpUpdateProcessedFilter),
         EigenRdUpdateProcessedFilter(EigenRdUpdateProcessedFilter),
         EigenReinitProcessedFilter(EigenReinitProcessedFilter),
+        RolldownTargetUpdatedFilter(RolldownTargetUpdatedFilter),
     }
     impl ::ethers::contract::EthLogDecode for IGaspMultiRollupServicePrimitivesEvents {
         fn decode_log(
@@ -255,6 +291,11 @@ pub mod i_gasp_multi_rollup_service_primitives {
                     IGaspMultiRollupServicePrimitivesEvents::EigenReinitProcessedFilter(decoded),
                 );
             }
+            if let Ok(decoded) = RolldownTargetUpdatedFilter::decode_log(log) {
+                return Ok(
+                    IGaspMultiRollupServicePrimitivesEvents::RolldownTargetUpdatedFilter(decoded),
+                );
+            }
             Err(::ethers::core::abi::Error::InvalidData)
         }
     }
@@ -268,6 +309,7 @@ pub mod i_gasp_multi_rollup_service_primitives {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::EigenReinitProcessedFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::RolldownTargetUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
@@ -288,6 +330,13 @@ pub mod i_gasp_multi_rollup_service_primitives {
     impl ::core::convert::From<EigenReinitProcessedFilter> for IGaspMultiRollupServicePrimitivesEvents {
         fn from(value: EigenReinitProcessedFilter) -> Self {
             Self::EigenReinitProcessedFilter(value)
+        }
+    }
+    impl ::core::convert::From<RolldownTargetUpdatedFilter>
+        for IGaspMultiRollupServicePrimitivesEvents
+    {
+        fn from(value: RolldownTargetUpdatedFilter) -> Self {
+            Self::RolldownTargetUpdatedFilter(value)
         }
     }
 }

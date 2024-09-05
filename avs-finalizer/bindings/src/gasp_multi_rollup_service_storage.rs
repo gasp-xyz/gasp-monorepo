@@ -32,6 +32,22 @@ pub mod gasp_multi_rollup_service_storage {
                     },],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("chainRdBatchNonce"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("chainRdBatchNonce"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint32"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("lastOpUpdateBlockTimestamp"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("lastOpUpdateBlockTimestamp",),
@@ -89,22 +105,6 @@ pub mod gasp_multi_rollup_service_storage {
                             kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                             internal_type: ::core::option::Option::Some(
                                 ::std::borrow::ToOwned::to_owned("uint32"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("latestPendingStateHash"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("latestPendingStateHash",),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
                             ),
                         },],
                         constant: ::core::option::Option::None,
@@ -250,6 +250,22 @@ pub mod gasp_multi_rollup_service_storage {
                     },],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("rolldown"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("rolldown"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("contract IRolldown"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("stalled"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("stalled"),
@@ -340,6 +356,18 @@ pub mod gasp_multi_rollup_service_storage {
                         anonymous: false,
                     },],
                 ),
+                (
+                    ::std::borrow::ToOwned::to_owned("RolldownTargetUpdated"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("RolldownTargetUpdated",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
+                            name: ::std::borrow::ToOwned::to_owned("rolldownAddress"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            indexed: false,
+                        },],
+                        anonymous: false,
+                    },],
+                ),
             ]),
             errors: ::std::collections::BTreeMap::new(),
             receive: false,
@@ -393,6 +421,12 @@ pub mod gasp_multi_rollup_service_storage {
                 .method_hash([14, 224, 253, 189], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `chainRdBatchNonce` (0xdeb4037d) function
+        pub fn chain_rd_batch_nonce(&self) -> ::ethers::contract::builders::ContractCall<M, u32> {
+            self.0
+                .method_hash([222, 180, 3, 125], ())
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `lastOpUpdateBlockTimestamp` (0xf84e91fc) function
         pub fn last_op_update_block_timestamp(
             &self,
@@ -423,14 +457,6 @@ pub mod gasp_multi_rollup_service_storage {
         ) -> ::ethers::contract::builders::ContractCall<M, u32> {
             self.0
                 .method_hash([208, 58, 7, 178], ())
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `latestPendingStateHash` (0x4ae6b203) function
-        pub fn latest_pending_state_hash(
-            &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
-            self.0
-                .method_hash([74, 230, 178, 3], ())
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `operatorAndQuorumToStakes` (0x499d6fb6) function
@@ -489,6 +515,14 @@ pub mod gasp_multi_rollup_service_storage {
                 .method_hash([122, 215, 85, 97], p0)
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `rolldown` (0x3d9fb00c) function
+        pub fn rolldown(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
+            self.0
+                .method_hash([61, 159, 176, 12], ())
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `stalled` (0x526e3e64) function
         pub fn stalled(&self) -> ::ethers::contract::builders::ContractCall<M, bool> {
             self.0
@@ -521,6 +555,13 @@ pub mod gasp_multi_rollup_service_storage {
         pub fn eigen_reinit_processed_filter(
             &self,
         ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, EigenReinitProcessedFilter>
+        {
+            self.0.event()
+        }
+        ///Gets the contract's `RolldownTargetUpdated` event
+        pub fn rolldown_target_updated_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, RolldownTargetUpdatedFilter>
         {
             self.0.event()
         }
@@ -603,6 +644,22 @@ pub mod gasp_multi_rollup_service_storage {
         pub task_number: u32,
         pub task_created_block: u32,
     }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethevent(name = "RolldownTargetUpdated", abi = "RolldownTargetUpdated(address)")]
+    pub struct RolldownTargetUpdatedFilter {
+        pub rolldown_address: ::ethers::core::types::Address,
+    }
     ///Container type for all of the contract's events
     #[derive(
         Clone,
@@ -618,6 +675,7 @@ pub mod gasp_multi_rollup_service_storage {
         EigenOpUpdateProcessedFilter(EigenOpUpdateProcessedFilter),
         EigenRdUpdateProcessedFilter(EigenRdUpdateProcessedFilter),
         EigenReinitProcessedFilter(EigenReinitProcessedFilter),
+        RolldownTargetUpdatedFilter(RolldownTargetUpdatedFilter),
     }
     impl ::ethers::contract::EthLogDecode for GaspMultiRollupServiceStorageEvents {
         fn decode_log(
@@ -638,6 +696,11 @@ pub mod gasp_multi_rollup_service_storage {
                     GaspMultiRollupServiceStorageEvents::EigenReinitProcessedFilter(decoded),
                 );
             }
+            if let Ok(decoded) = RolldownTargetUpdatedFilter::decode_log(log) {
+                return Ok(
+                    GaspMultiRollupServiceStorageEvents::RolldownTargetUpdatedFilter(decoded),
+                );
+            }
             Err(::ethers::core::abi::Error::InvalidData)
         }
     }
@@ -651,6 +714,7 @@ pub mod gasp_multi_rollup_service_storage {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::EigenReinitProcessedFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::RolldownTargetUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
@@ -669,6 +733,11 @@ pub mod gasp_multi_rollup_service_storage {
             Self::EigenReinitProcessedFilter(value)
         }
     }
+    impl ::core::convert::From<RolldownTargetUpdatedFilter> for GaspMultiRollupServiceStorageEvents {
+        fn from(value: RolldownTargetUpdatedFilter) -> Self {
+            Self::RolldownTargetUpdatedFilter(value)
+        }
+    }
     ///Container type for all input parameters for the `allowNonRootInit` function with signature `allowNonRootInit()` and selector `0x0ee0fdbd`
     #[derive(
         Clone,
@@ -684,6 +753,21 @@ pub mod gasp_multi_rollup_service_storage {
     )]
     #[ethcall(name = "allowNonRootInit", abi = "allowNonRootInit()")]
     pub struct AllowNonRootInitCall;
+    ///Container type for all input parameters for the `chainRdBatchNonce` function with signature `chainRdBatchNonce()` and selector `0xdeb4037d`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "chainRdBatchNonce", abi = "chainRdBatchNonce()")]
+    pub struct ChainRdBatchNonceCall;
     ///Container type for all input parameters for the `lastOpUpdateBlockTimestamp` function with signature `lastOpUpdateBlockTimestamp()` and selector `0xf84e91fc`
     #[derive(
         Clone,
@@ -756,21 +840,6 @@ pub mod gasp_multi_rollup_service_storage {
         abi = "latestCompletedRdTaskNumber()"
     )]
     pub struct LatestCompletedRdTaskNumberCall;
-    ///Container type for all input parameters for the `latestPendingStateHash` function with signature `latestPendingStateHash()` and selector `0x4ae6b203`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "latestPendingStateHash", abi = "latestPendingStateHash()")]
-    pub struct LatestPendingStateHashCall;
     ///Container type for all input parameters for the `operatorAndQuorumToStakes` function with signature `operatorAndQuorumToStakes(bytes32,uint8)` and selector `0x499d6fb6`
     #[derive(
         Clone,
@@ -867,6 +936,21 @@ pub mod gasp_multi_rollup_service_storage {
     )]
     #[ethcall(name = "quorumToStakes", abi = "quorumToStakes(uint8)")]
     pub struct QuorumToStakesCall(pub u8);
+    ///Container type for all input parameters for the `rolldown` function with signature `rolldown()` and selector `0x3d9fb00c`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "rolldown", abi = "rolldown()")]
+    pub struct RolldownCall;
     ///Container type for all input parameters for the `stalled` function with signature `stalled()` and selector `0x526e3e64`
     #[derive(
         Clone,
@@ -910,17 +994,18 @@ pub mod gasp_multi_rollup_service_storage {
     )]
     pub enum GaspMultiRollupServiceStorageCalls {
         AllowNonRootInit(AllowNonRootInitCall),
+        ChainRdBatchNonce(ChainRdBatchNonceCall),
         LastOpUpdateBlockTimestamp(LastOpUpdateBlockTimestampCall),
         LatestCompletedOpTaskCreatedBlock(LatestCompletedOpTaskCreatedBlockCall),
         LatestCompletedOpTaskNumber(LatestCompletedOpTaskNumberCall),
         LatestCompletedRdTaskNumber(LatestCompletedRdTaskNumberCall),
-        LatestPendingStateHash(LatestPendingStateHashCall),
         OperatorAndQuorumToStakes(OperatorAndQuorumToStakesCall),
         OperatorIdQuorumCount(OperatorIdQuorumCountCall),
         QourumApk(QourumApkCall),
         QuorumNumbers(QuorumNumbersCall),
         QuorumThresholdPercentage(QuorumThresholdPercentageCall),
         QuorumToStakes(QuorumToStakesCall),
+        Rolldown(RolldownCall),
         Stalled(StalledCall),
         Updater(UpdaterCall),
     }
@@ -933,6 +1018,11 @@ pub mod gasp_multi_rollup_service_storage {
                 <AllowNonRootInitCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::AllowNonRootInit(decoded));
+            }
+            if let Ok(decoded) =
+                <ChainRdBatchNonceCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::ChainRdBatchNonce(decoded));
             }
             if let Ok(decoded) =
                 <LastOpUpdateBlockTimestampCall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -955,11 +1045,6 @@ pub mod gasp_multi_rollup_service_storage {
                 <LatestCompletedRdTaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::LatestCompletedRdTaskNumber(decoded));
-            }
-            if let Ok(decoded) =
-                <LatestPendingStateHashCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::LatestPendingStateHash(decoded));
             }
             if let Ok(decoded) =
                 <OperatorAndQuorumToStakesCall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -988,6 +1073,9 @@ pub mod gasp_multi_rollup_service_storage {
             {
                 return Ok(Self::QuorumToStakes(decoded));
             }
+            if let Ok(decoded) = <RolldownCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+                return Ok(Self::Rolldown(decoded));
+            }
             if let Ok(decoded) = <StalledCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Stalled(decoded));
             }
@@ -1001,6 +1089,7 @@ pub mod gasp_multi_rollup_service_storage {
         fn encode(self) -> Vec<u8> {
             match self {
                 Self::AllowNonRootInit(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::ChainRdBatchNonce(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::LastOpUpdateBlockTimestamp(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -1011,9 +1100,6 @@ pub mod gasp_multi_rollup_service_storage {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::LatestCompletedRdTaskNumber(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::LatestPendingStateHash(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::OperatorAndQuorumToStakes(element) => {
@@ -1028,6 +1114,7 @@ pub mod gasp_multi_rollup_service_storage {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::QuorumToStakes(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::Rolldown(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::Stalled(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::Updater(element) => ::ethers::core::abi::AbiEncode::encode(element),
             }
@@ -1037,19 +1124,20 @@ pub mod gasp_multi_rollup_service_storage {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
                 Self::AllowNonRootInit(element) => ::core::fmt::Display::fmt(element, f),
+                Self::ChainRdBatchNonce(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LastOpUpdateBlockTimestamp(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LatestCompletedOpTaskCreatedBlock(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::LatestCompletedOpTaskNumber(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LatestCompletedRdTaskNumber(element) => ::core::fmt::Display::fmt(element, f),
-                Self::LatestPendingStateHash(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorAndQuorumToStakes(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorIdQuorumCount(element) => ::core::fmt::Display::fmt(element, f),
                 Self::QourumApk(element) => ::core::fmt::Display::fmt(element, f),
                 Self::QuorumNumbers(element) => ::core::fmt::Display::fmt(element, f),
                 Self::QuorumThresholdPercentage(element) => ::core::fmt::Display::fmt(element, f),
                 Self::QuorumToStakes(element) => ::core::fmt::Display::fmt(element, f),
+                Self::Rolldown(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Stalled(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Updater(element) => ::core::fmt::Display::fmt(element, f),
             }
@@ -1058,6 +1146,11 @@ pub mod gasp_multi_rollup_service_storage {
     impl ::core::convert::From<AllowNonRootInitCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: AllowNonRootInitCall) -> Self {
             Self::AllowNonRootInit(value)
+        }
+    }
+    impl ::core::convert::From<ChainRdBatchNonceCall> for GaspMultiRollupServiceStorageCalls {
+        fn from(value: ChainRdBatchNonceCall) -> Self {
+            Self::ChainRdBatchNonce(value)
         }
     }
     impl ::core::convert::From<LastOpUpdateBlockTimestampCall> for GaspMultiRollupServiceStorageCalls {
@@ -1080,11 +1173,6 @@ pub mod gasp_multi_rollup_service_storage {
     impl ::core::convert::From<LatestCompletedRdTaskNumberCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: LatestCompletedRdTaskNumberCall) -> Self {
             Self::LatestCompletedRdTaskNumber(value)
-        }
-    }
-    impl ::core::convert::From<LatestPendingStateHashCall> for GaspMultiRollupServiceStorageCalls {
-        fn from(value: LatestPendingStateHashCall) -> Self {
-            Self::LatestPendingStateHash(value)
         }
     }
     impl ::core::convert::From<OperatorAndQuorumToStakesCall> for GaspMultiRollupServiceStorageCalls {
@@ -1117,6 +1205,11 @@ pub mod gasp_multi_rollup_service_storage {
             Self::QuorumToStakes(value)
         }
     }
+    impl ::core::convert::From<RolldownCall> for GaspMultiRollupServiceStorageCalls {
+        fn from(value: RolldownCall) -> Self {
+            Self::Rolldown(value)
+        }
+    }
     impl ::core::convert::From<StalledCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: StalledCall) -> Self {
             Self::Stalled(value)
@@ -1141,6 +1234,20 @@ pub mod gasp_multi_rollup_service_storage {
         Hash,
     )]
     pub struct AllowNonRootInitReturn(pub bool);
+    ///Container type for all return fields from the `chainRdBatchNonce` function with signature `chainRdBatchNonce()` and selector `0xdeb4037d`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct ChainRdBatchNonceReturn(pub u32);
     ///Container type for all return fields from the `lastOpUpdateBlockTimestamp` function with signature `lastOpUpdateBlockTimestamp()` and selector `0xf84e91fc`
     #[derive(
         Clone,
@@ -1197,20 +1304,6 @@ pub mod gasp_multi_rollup_service_storage {
         Hash,
     )]
     pub struct LatestCompletedRdTaskNumberReturn(pub u32);
-    ///Container type for all return fields from the `latestPendingStateHash` function with signature `latestPendingStateHash()` and selector `0x4ae6b203`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct LatestPendingStateHashReturn(pub [u8; 32]);
     ///Container type for all return fields from the `operatorAndQuorumToStakes` function with signature `operatorAndQuorumToStakes(bytes32,uint8)` and selector `0x499d6fb6`
     #[derive(
         Clone,
@@ -1298,6 +1391,20 @@ pub mod gasp_multi_rollup_service_storage {
         Hash,
     )]
     pub struct QuorumToStakesReturn(pub u128);
+    ///Container type for all return fields from the `rolldown` function with signature `rolldown()` and selector `0x3d9fb00c`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct RolldownReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `stalled` function with signature `stalled()` and selector `0x526e3e64`
     #[derive(
         Clone,

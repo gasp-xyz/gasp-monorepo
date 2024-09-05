@@ -430,6 +430,11 @@ func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 
 
 	if isRduTask && isOpsInit{
+
+		// Check if on gasp any L1 has any new batches
+		
+
+
 		agg.logger.Debug("Aggregator waiting for inProcessTaskMutex.Lock() for RdTask")
 		agg.inProcessTaskMutex.Lock()
 
