@@ -86,13 +86,13 @@ func (w *AvsWriter) SendNewOpTask(ctx context.Context, quorumThresholdPercentage
 }
 
 // returns the tx receipt, as well as the task index (which it gets from parsing the tx receipt logs)
-func (w *AvsWriter) SendNewRdTask(ctx context.Context, blockNumber *big.Int) (taskmanager.IFinalizerTaskManagerRdTask, uint32, error) {
+func (w *AvsWriter) SendNewRdTask(ctx context.Context, chainToUpdate uint8, chainBatchIdToUpdate uint32) (taskmanager.IFinalizerTaskManagerRdTask, uint32, error) {
 	w.logger.Info("creating new task with AVS's task manager")
 	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, err
 	}
-	tx, err := w.AvsContractBindings.TaskManager.CreateNewRdTask(noSendTxOpts, blockNumber)
+	tx, err := w.AvsContractBindings.TaskManager.CreateNewRdTask(noSendTxOpts, chainToUpdate, chainBatchIdToUpdate)
 	if err != nil {
 		w.logger.Errorf("Error assembling CreateNewRdTask tx")
 		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, err

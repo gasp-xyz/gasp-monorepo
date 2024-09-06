@@ -95,6 +95,20 @@ func (r *AvsReader) LastCompletedOpTaskCreatedBlock(
 	return v, nil
 }
 
+func (r *AvsReader) ChainRdBatchNonce(
+	ctx context.Context,
+	chainIndex uint8
+) (uint32, error) {
+	v, err := r.AvsServiceBindings.TaskManager.ChainRdBatchNonce(
+		&bind.CallOpts{},
+		chainIndex
+	)
+	if err != nil {
+		return uint32(0), err
+	}
+	return v, nil
+}
+
 func (r *AvsReader) LastCompletedOpTaskCreatedBlockAtBlock(
 	ctx context.Context, atBlock uint64,
 ) (uint32, error) {

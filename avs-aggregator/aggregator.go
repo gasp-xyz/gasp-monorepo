@@ -433,7 +433,49 @@ func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 
 		// Check if on gasp any L1 has any new batches
 		
+		atBlockHash, err := agg.substrateClient.RPC.Chain.GetBlockHash(uint64(blockNumber))
+		if err != nil {
+			return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetBlockHash: err: %v", err)
+		}
 
+		meta, err := agg.substrateClient.RPC.State.GetMetadata(atBlockHash)
+		if err != nil {
+			return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetBlockHash: err: %v", err)
+		}
+
+		var substrateL2RequestsBatchLast SubstrateL2RequestsBatchLast
+		var isUpdate bool
+		var chainToUpdate uin8
+		var chainBatchIdToUpdate uint32
+
+		key, err := types.CreateStorageKey(meta, "Rolldown", "L2RequestsBatchLast", nil, nil)
+		if err != nil {
+			return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to CreateStorageKey: err: %v", err)
+		}
+
+		ok, err := agg.RPC.State.GetStorage(key, substrateL2RequestsBatchLast, atBlockHash)
+		if (ok == false || err != nil) {
+			return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetStorage: err: %v", err)
+		}
+
+		for i, lastBatchByL1 := range substrateL2RequestsBatchLast{
+			
+			chainRdBatchNonce, err := osu.ethRpc.AvsReader.ChainRdBatchNonce(context.Background(), lastBatchByL1.Key)
+			if err != nil {
+				return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to ChainRdBatchNonce: err: %v", err)
+			}
+
+			if uint64(lastBatchByL1.Value.BatchId.Int64()) >= chainRdBatchNonce {
+				isUpdate = true
+				chainToUpdate = lastBatchByL1.Key
+				chainBatchIdToUpdate = chainRdBatchNonce
+				break
+			}
+		}
+
+		if !isUpdate{
+			return nil
+		}
 
 		agg.logger.Debug("Aggregator waiting for inProcessTaskMutex.Lock() for RdTask")
 		agg.inProcessTaskMutex.Lock()
@@ -451,7 +493,7 @@ func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 
 		agg.logger.Info("Aggregator sending new RdTask", "block number", blockNumber)
 		// Send number to square to the task manager contract
-		newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewRdTask(context.Background(), big.NewInt(int64(blockNumber)))
+		newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewRdTask(context.Background(), chainToUpdate, chainBatchIdToUpdate)
 		if err != nil {
 			agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
 			return err
