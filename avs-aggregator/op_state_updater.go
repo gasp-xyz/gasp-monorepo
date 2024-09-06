@@ -376,17 +376,22 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 									// Similar to how we do it when we see an OpTaskCompleted event when watching
 									// triggers
 									if sendNewOpTaskReturn.OpTask.TaskNum < event.TaskIndex {
-										osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event has task: %v", event)
-										osu.errorC <- fmt.Errorf("Failed to get the expected OpTaskCompleted event: taskIndex: %v", sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
-										return
+										osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event has task with higher than expted taskIndex: %v", event)
+										lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), event.Raw.BlockNumber)
+										if err != nil {
+											osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", event.Raw.BlockNumber)
+											return
+										}
+										osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
+										osu.atBlock = uint32(event.Raw.BlockNumber)
 									}
 
 									// This branch is to account for the case where
 									// a task is completed in a block and another task is created
 									// in the same block and then that one is also completed in the same block
-									if sendNewOpTaskReturn.OpTask.TaskNum > event.TaskIndex {
+									else if sendNewOpTaskReturn.OpTask.TaskNum > event.TaskIndex {
 										continue
-									}
+									} else {
 
 									osu.logger.Info("OpStateUpdater - Got the expected OpTaskCompleted event", "TaskIndex", sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
 
@@ -398,8 +403,8 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 									// triggers
 									// In any case when we come to the OpTaskCompleted event it will do the above anyway
 									osu.checkpointedBlock = sendNewOpTaskReturn.OpTask.TaskCreatedBlock
-									osu.atBlock = sendNewOpTaskReturn.OpTask.TaskCreatedBlock
-
+									osu.atBlock = uint32(event.Raw.BlockNumber)
+									}
 									break watchForOpTaskCompletedLoop
 								}
 							}

@@ -75,8 +75,8 @@ type Aggregator struct {
 	substrateClient         gsrpc.SubstrateAPI
 	taskResponseWindowBlock uint32
 	asyncOpStateUpdaterError error
-	inProcessTaskMutex      sync.RWMutex
-	inProcessTask           sdktypes.TaskId
+	retryNumber             uint8
+	maxRetryNumber          uint8
 
 	kicker  *Kicker
 	opStateUpdater *OpStateUpdater
@@ -210,12 +210,6 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 			agg.logger.Error("asyncOpStateUpdater has crashed with the following error", "err", asyncOpStateUpdaterError)
 		case <-ctx.Done():
 			return nil
-		case blsAggServiceResp := <-agg.blsAggregationService.GetResponseChannel():
-			agg.logger.Info("Received response from blsAggregationService", "blsAggServiceResp", blsAggServiceResp)
-			err := agg.sendAggregatedResponseToContract(blsAggServiceResp)
-			if err != nil{
-				return fmt.Errorf("sendAggregatedResponseToContract err: %v", err)
-			}
 		case head := <-sub.Chan():
 			// agg.logger.Info("Received new substrate header", "head.Number", head.Number)
 			err := agg.maybeSendNewRdTask(uint32(head.Number))
@@ -230,10 +224,9 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 				sendNewOpTask.SendNewOpTaskReturnC <- types.SendNewOpTaskReturn{
 					SendNewOpTaskError: err,
 				}
-				// If there is an error with creating a new OpTask then
-				// just continue because the task was never sent and so we do not care about
-				// inProcessTask here
-				continue
+				// Since we want serial processingwe abort here
+				// The above errC is unnecessary
+				return err
 			}
 			sendNewOpTask.SendNewOpTaskReturnC <- types.SendNewOpTaskReturn{
 				OpTask: OpTask,
@@ -264,10 +257,11 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 				return fmt.Errorf("failed to resubscribe to new heads after %d attempts: %w", maxRetries, err)
 			}
 		}
+		}
 	}
 }
 
-func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg.BlsAggregationServiceResponse) {
+func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg.BlsAggregationServiceResponse, expectedTaskId taskId) (bool, error) {
 	if blsAggServiceResp.Err != nil && blsAggServiceResp.Err != blsagg.TaskExpiredError {
 		return fmt.Error("bls aggregation error", "err", blsAggServiceResp.Err)
 	}
@@ -294,12 +288,11 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		NonSignerStakeIndices:        blsAggServiceResp.NonSignerStakeIndices,
 	}
 
-	defer agg.inProcessTaskMutex.Unlock()
 	// We can hard expect that here we will get only what we expect
 	// since the signedTaskResponseC is deleted before another response can be accepted via select
-	if blsAggServiceResp.TaskId != agg.inProcessTask{
+	if blsAggServiceResp.TaskId != expectedTaskId{
 		// This is not the task we were expecting so don't even send it
-		return fmt.Error("FATAL: blsAggServiceResp.TaskId != agg.inProcessTask", "blsAggServiceResp.TaskId", blsAggServiceResp.TaskId, "agg.inProcessTask", agg.inProcessTask)
+		return fmt.Error("FATAL: blsAggServiceResp.TaskId != expectedTaskId", "blsAggServiceResp.TaskId", blsAggServiceResp.TaskId, "expectedTaskId", expectedTaskId)
 	}
 
 	agg.logger.Info("sending aggregated response onchain.", "TaskId", blsAggServiceResp.TaskId)
@@ -324,7 +317,19 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		if err != nil {
 			return fmt.Error("Aggregator failed to respond to task", "task", task, "err", err)
 		}
-		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r)
+		var success bool
+		for _, log := range r.Logs{
+			_, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseOpTaskCompleted(log)
+			if err == nil {
+				success = true
+			}
+		}
+		if success == true{
+			return true, nil
+		} else {
+			return false, nil
+		}
+		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r, "success", success)
 
 	} else if blsAggServiceResp.TaskId.TaskType == 1 {
 
@@ -340,46 +345,65 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		if err != nil {
 			return fmt.Error("Aggregator failed to respond to task", "task", task, "err", err)
 		}
-		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r)
+		var success bool
+		for _, log := range r.Logs{
+			_, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseRdTaskCompleted(log)
+			if err == nil {
+				success = true
+			}
+		}
+		if success == true{
+			return true, nil
+		} else {
+			return false, nil
+		}
+		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r, "success", success)
 
 	} else {
 		return fmt.Error("FATAL: Aggregator failed to recognize TaskType", "blsAggServiceResp.TaskId", blsAggServiceResp.TaskId)
 	}
 
+	return true, nil
+
 }
 
-func (agg *Aggregator) sendNewOpTask() (taskmanager.IFinalizerTaskManagerOpTask, error) {
+func (agg *Aggregator) continuePendingOpTask(newTask taskmanager.IFinalizerTaskManagerOpTask, taskId sdktypes.TaskId ) (taskmanager.IFinalizerTaskManagerOpTask, error) {
 
-	agg.logger.Debug("Aggregator waiting for inProcessTaskMutex.Lock() for OpTask")
-	agg.inProcessTaskMutex.Lock()
+	success, err:=agg.processCreatedOpTask(newTask, taskId)
+	if err != nil{
+		return nil, fmt.Errorf("sendAggregatedResponseToContract err: %v", err)
+	}
+	return success, nil
+}
 
+
+func (agg *Aggregator) createOpTask()(newTask taskmanager.IFinalizerTaskManagerOpTask, taskId sdktypes.TaskId, error) {
 	// Make sure that the taskManager is ready to accept another task
 	isTaskPending, err := osu.ethRpc.AvsReader.IsTaskPending(context.Background())
 	if err != nil {
-		return fmt.Errorf("Aggregator failed to IsTaskPending: err: %v", err)
+		return nil, fmt.Errorf("Aggregator failed to IsTaskPending: err: %v", err)
 	}
 	if isTaskPending {
-		agg.logger.Fatal("Aggregator in sendNewOpTask got inProcessTaskMutex but isTaskPending is true!!!")
-		return fmt.Error("Aggregator in sendNewOpTask got inProcessTaskMutex but isTaskPending is true!!!")
+		return nil, fmt.Error("Aggregator in createOpTask but isTaskPending is true!!!")
 	}
 
 	agg.logger.Info("Aggregator sending new OpTask")
 	// Send number to square to the task manager contract
-	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewOpTask(context.Background(), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
+	newTask, taskIndex, err = agg.ethRpc.AvsWriter.SendNewOpTask(context.Background(), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
-		// Unlock inProcessTaskMutex so that the osu can send the error back to the agg
-		// crashing the osu but letting the rdTasks go on...
-		agg.inProcessTaskMutex.Unlock()
-		return newTask, err
+		return nil, err
 	}
 
 	taskId := sdktypes.TaskId{
 		TaskType: sdktypes.TaskType(0),
 		TaskIndex: sdktypes.TaskIndex(taskIndex),
 		}
+	return newTask, taskId, nil
+}
 
-	agg.inProcessTask = taskId
+
+func (agg *Aggregator) processCreatedOpTask(newTask taskmanager.IFinalizerTaskManagerOpTask, taskId sdktypes.TaskId ) (bool, error) {
 
 	agg.tasksMu.Lock()
 	agg.tasks[taskId] = newTask
@@ -397,12 +421,106 @@ func (agg *Aggregator) sendNewOpTask() (taskmanager.IFinalizerTaskManagerOpTask,
 	agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
 	agg.logger.Info("Aggregator initialized new operator state task", "task index", taskIndex, "expiry", taskTimeToExpiry)
 
+
+	// wait here synchronously
+	agg.logger.Info("Aggregator in maybeSendNewRdTask waiting for response from blsagg", "taskId", taskId)
+	blsAggServiceResp := <-agg.blsAggregationService.GetResponseChannel():
+	agg.logger.Info("Received response from blsAggregationService", "blsAggServiceResp", blsAggServiceResp)
+	success, err = agg.sendAggregatedResponseToContract(blsAggServiceResp, taskId)
+	if err != nil{
+		return nil, fmt.Errorf("sendAggregatedResponseToContract err: %v", err)
+	}
+
+	return success, nil
+}
+
+func (agg *Aggregator) startNewOpTask() (taskmanager.IFinalizerTaskManagerOpTask, error) {
+
+	var success bool
+	var newTask taskmanager.IFinalizerTaskManagerOpTask
+	for attempt := 0; attempt < 3; attempt++ {
+	
+		newTask, taskId, err := agg.createOpTask()
+		if err != nil {
+			return nil, fmt.Error("Aggregator failed to createOpTask", "err", err)
+		}
+
+		success, err = agg.processCreatedOpTask(newTask, taskId)
+		if err != nil {
+			return nil, fmt.Error("Aggregator failed to processCreatedOpTask", "err", err)
+		}
+		if success {
+			break;
+		}
+	}
+	if success!=true{
+		return nil, fmt.Errorf("Aggregator failed to succesfully complete opTask after 3 attempts", "newTask", newTask)
+	}
 	return newTask, nil
+	
+}
+
+func (agg *Aggregator) createRdTask(chainToUpdate uint8, chainBatchIdToUpdate uint32)(newTask taskmanager.IFinalizerTaskManagerRdTask, taskId sdktypes.TaskId, error) {
+	// Make sure that the taskManager is ready to accept another task
+	isTaskPending, err := osu.ethRpc.AvsReader.IsTaskPending(context.Background())
+	if err != nil {
+		return fmt.Errorf("Aggregator failed to IsTaskPending: err: %v", err)
+	}
+	if isTaskPending {
+		return fmt.Error("Aggregator in createRdTask with isTaskPending true!!!")
+	}
+
+	agg.logger.Info("Aggregator sending new RdTask", "block number", blockNumber)
+	// Send number to square to the task manager contract
+	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewRdTask(context.Background(), chainToUpdate, chainBatchIdToUpdate)
+	if err != nil {
+		agg.logger.Error("Aggregator failed to SendNewRdTask", "err", err)
+		return err
+	}
+
+	taskId := sdktypes.TaskId{
+		TaskType: sdktypes.TaskType(1),
+		TaskIndex: sdktypes.TaskIndex(taskIndex),
+		}
+	
+	return newTask, taskId, nil
+}
+
+func (agg *Aggregator) processCreatedRdTask(newTask taskmanager.IFinalizerTaskManagerRdTask, taskId sdktypes.TaskId ) (bool, error) {
+	agg.tasksMu.Lock()
+	agg.tasks[taskId] = newTask
+	agg.tasksMu.Unlock()
+
+	agg.kicker.TriggerNewTask(taskId.TaskIndex)
+
+	quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.LastCompletedOpTaskQuorumNumbers))
+	for i, _ := range newTask.LastCompletedOpTaskQuorumNumbers {
+		quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.LastCompletedOpTaskQuorumThresholdPercentage)
+	}
+	quorumNums := make(sdktypes.QuorumNums, len(newTask.LastCompletedOpTaskQuorumNumbers))
+	for i, n := range newTask.LastCompletedOpTaskQuorumNumbers {
+		quorumNums[i] = sdktypes.QuorumNum(n)
+	}
+	taskTimeToExpiry := time.Second * time.Duration(agg.expiration)
+	agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
+	agg.logger.Info("Aggregator initialized new rolldown update task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
+
+
+	// wait here synchronously
+	agg.logger.Info("Aggregator in maybeSendNewRdTask waiting for response from blsagg", "taskId", taskId)
+	blsAggServiceResp := <-agg.blsAggregationService.GetResponseChannel():
+	agg.logger.Info("Received response from blsAggregationService", "blsAggServiceResp", blsAggServiceResp)
+	success, err = agg.sendAggregatedResponseToContract(blsAggServiceResp, taskId)
+	if err != nil{
+		return fmt.Errorf("sendAggregatedResponseToContract err: %v", err)
+	}
+
+	return success, nil
 }
 
 // sendNewTask sends a new task to the task manager contract, and updates the Task dict struct
 // with the information of operators opted into quorum 0 at the block of task creation.
-func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
+func (agg *Aggregator) maybeSendNewRdTask(isRetry bool, blockNumber uint32) error {
 
 	if agg.asyncOpStateUpdaterError != nil{
 		agg.logger.Error("asyncOpStateUpdater has crashed with the following error - but aggregator is still processing rdTasks", "err", agg.asyncOpStateUpdaterError)
@@ -428,41 +546,78 @@ func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 
 	isOpsInit := lastCompletedOpTaskCreatedBlock != 0
 
-
 	if isRduTask && isOpsInit{
+
+		isUpdate, chainToUpdate, chainBatchIdToUpdate, err = agg.getL1BatchUpdateInfo(blockNumber)
+		if err != nil {
+			return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to getL1BatchUpdateInfo: err: %v", err)
+		}
+
+		if !isUpdate{
+			agg.logger.Info("Aggregator in maybeSendNewRdTask found no new updates at", "block number", blockNumber)
+			return nil
+		}
+
+		var success bool
+		for attempt := 0; attempt < 3; attempt++ {
+		agg.logger.Info("Aggregator new RdTask", "block number", blockNumber, "attempt", attempt)
+
+		newTask, taskId, err := agg.createRdTask(chainToUpdate, chainBatchIdToUpdate)
+		if err != nil{
+			return fmt.Errorf("Aggregator failed to createRdTask: err: %v", err)
+		}
+
+		success, err := agg.processCreatedRdTask(newTask, taskId)
+		if err != nil{
+			return fmt.Errorf("Aggregator failed to processCreatedRdTask: err: %v", err)
+		}
+		if success {
+			break;
+		}
+		}
+		if success!=true{
+			return fmt.Errorf("Aggregator failed to succesfully complete rdTask after 3 attempts", "chainToUpdate", chainToUpdate, "chainBatchIdToUpdate", chainBatchIdToUpdate)
+		}
+	}
+
+	return nil
+}
+
+
+func (agg *Aggregator) getL1BatchUpdateInfo(blockNumber uint32) (bool, uint8, uint32, error) {
 
 		// Check if on gasp any L1 has any new batches
 		
 		atBlockHash, err := agg.substrateClient.RPC.Chain.GetBlockHash(uint64(blockNumber))
 		if err != nil {
-			return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetBlockHash: err: %v", err)
+			return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetBlockHash: err: %v", err)
 		}
 
 		meta, err := agg.substrateClient.RPC.State.GetMetadata(atBlockHash)
 		if err != nil {
-			return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetBlockHash: err: %v", err)
+			return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetBlockHash: err: %v", err)
 		}
 
 		var substrateL2RequestsBatchLast SubstrateL2RequestsBatchLast
 		var isUpdate bool
-		var chainToUpdate uin8
+		var chainToUpdate uint8
 		var chainBatchIdToUpdate uint32
 
 		key, err := types.CreateStorageKey(meta, "Rolldown", "L2RequestsBatchLast", nil, nil)
 		if err != nil {
-			return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to CreateStorageKey: err: %v", err)
+			return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to CreateStorageKey: err: %v", err)
 		}
 
 		ok, err := agg.RPC.State.GetStorage(key, substrateL2RequestsBatchLast, atBlockHash)
 		if (ok == false || err != nil) {
-			return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetStorage: err: %v", err)
+			return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetStorage: err: %v", err)
 		}
 
 		for i, lastBatchByL1 := range substrateL2RequestsBatchLast{
 			
 			chainRdBatchNonce, err := osu.ethRpc.AvsReader.ChainRdBatchNonce(context.Background(), lastBatchByL1.Key)
 			if err != nil {
-				return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to ChainRdBatchNonce: err: %v", err)
+				return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to ChainRdBatchNonce: err: %v", err)
 			}
 
 			if uint64(lastBatchByL1.Value.BatchId.Int64()) >= chainRdBatchNonce {
@@ -473,57 +628,5 @@ func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 			}
 		}
 
-		if !isUpdate{
-			return nil
-		}
-
-		agg.logger.Debug("Aggregator waiting for inProcessTaskMutex.Lock() for RdTask")
-		agg.inProcessTaskMutex.Lock()
-
-
-		// Make sure that the taskManager is ready to accept another task
-		isTaskPending, err := osu.ethRpc.AvsReader.IsTaskPending(context.Background())
-		if err != nil {
-			return fmt.Errorf("Aggregator failed to IsTaskPending: err: %v", err)
-		}
-		if isTaskPending {
-			agg.logger.Fatal("Aggregator in sendNewOpTask got inProcessTaskMutex but isTaskPending is true!!!")
-			return fmt.Error("Aggregator in sendNewOpTask got inProcessTaskMutex but isTaskPending is true!!!")
-		}
-
-		agg.logger.Info("Aggregator sending new RdTask", "block number", blockNumber)
-		// Send number to square to the task manager contract
-		newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewRdTask(context.Background(), chainToUpdate, chainBatchIdToUpdate)
-		if err != nil {
-			agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
-			return err
-		}
-
-		taskId := sdktypes.TaskId{
-			TaskType: sdktypes.TaskType(1),
-			TaskIndex: sdktypes.TaskIndex(taskIndex),
-			}
-
-		agg.inProcessTask = taskId
-
-		agg.tasksMu.Lock()
-		agg.tasks[taskId] = newTask
-		agg.tasksMu.Unlock()
-
-		agg.kicker.TriggerNewTask(taskIndex)
-
-		quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.LastCompletedOpTaskQuorumNumbers))
-		for i, _ := range newTask.LastCompletedOpTaskQuorumNumbers {
-			quorumThresholdPercentages[i] = sdktypes.QuorumThresholdPercentage(newTask.LastCompletedOpTaskQuorumThresholdPercentage)
-		}
-		quorumNums := make(sdktypes.QuorumNums, len(newTask.LastCompletedOpTaskQuorumNumbers))
-		for i, n := range newTask.LastCompletedOpTaskQuorumNumbers {
-			quorumNums[i] = sdktypes.QuorumNum(n)
-		}
-		taskTimeToExpiry := time.Second * time.Duration(agg.expiration)
-		agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
-		agg.logger.Info("Aggregator initialized new rolldown update task", "block number", blockNumber, "task index", taskIndex, "expiry", taskTimeToExpiry)
-	}
-
-	return nil
+		return isUpdate, chainToUpdate, chainBatchIdToUpdate, nil
 }
