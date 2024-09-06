@@ -3,8 +3,13 @@ import "dotenv/config";
 import { signTx } from "gasp-sdk";
 import "gasp-types";
 import { BaseError, keccak256 } from "viem";
-import { MANGATA_NODE_URL, MNEMONIC } from "./common/constants.js";
 import {
+	MANGATA_NODE_URL,
+	MNEMONIC,
+	WATCHDOG_PERIOD,
+} from "./common/constants.js";
+import {
+	WatchDog,
 	getApi,
 	getCollator,
 	getLastRequestId,
@@ -20,15 +25,33 @@ import { getPublicClient } from "./viem/client.js";
 import { webSocketTransport } from "./viem/transport.js";
 
 async function main() {
+	const SECONDS_30 = 30 * 1000;
+	const SECONDS_1 = 1 * 1000;
+	const watchdogL1 = new WatchDog("L1", WATCHDOG_PERIOD);
+	const watchdogL2 = new WatchDog("L1", WATCHDOG_PERIOD);
 	let inProgress = false;
 
 	const publicClient = getPublicClient({ transport: webSocketTransport });
-
 	const api = await getApi(MANGATA_NODE_URL);
-
 	await initReadContractWithRetry(publicClient, api);
-
 	let lastRequestId = await getLastRequestId(api);
+
+	setInterval(async () => {
+		watchdogL1.check();
+		watchdogL2.check();
+	}, SECONDS_1);
+
+	setInterval(async () => {
+		await api.query.system
+			.number()
+			.then((blockNr) => watchdogL1.feed(blockNr.toString()));
+	}, SECONDS_30);
+
+	setInterval(async () => {
+		await publicClient
+			.getBlockNumber()
+			.then((block) => watchdogL2.feed(block.toString()));
+	}, SECONDS_30);
 
 	await api.derive.chain.subscribeNewHeads(async (header: HeaderExtended) => {
 		const collator = getCollator("ethereum", MNEMONIC);
