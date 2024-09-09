@@ -5,10 +5,14 @@ import {LIMIT, MANGATA_CONTRACT_ADDRESS, ROLLDOWN_METADATA, ROLLDOWN_ABI, L1_CHA
 import {ethAccount, getChain} from "../viem/client.js";
 import {Cancel, L2Update, RequestResult, Withdrawal} from "../common/types.js";
 import {estimateMaxPriorityFeePerGas} from "viem/actions";
-import type { Option } from '@polkadot/types-codec';
+import type { Option, u128, u32, BTreeMap  } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { PalletRolldownL2Request } from '@polkadot/types/lookup';
 import type { H256 } from '@polkadot/types/interfaces/runtime';
+import type {
+  SpRuntimeAccountAccountId20,
+	PalletRolldownMessagesChain,
+} from "@polkadot/types/lookup";
 
 
 export async function getLatestRequestIdSubmittedToL1(publicClient: PublicClient) {
@@ -23,11 +27,11 @@ async function getLastBatchId(api: ApiPromise, blockHash: Uint8Array) {
     const chain = api.createType('Chain', L1_CHAIN);
     let apiAt = await api.at(blockHash);
     let last_batch = await apiAt.query.rolldown.l2RequestsBatchLast();
-    let specificL1LastBatch = last_batch.toHuman()[L1_CHAIN];
+    let specificL1LastBatch = last_batch.get(chain);
     if (specificL1LastBatch == undefined ){
-      return null
+        return null
     }else{
-        return (specificL1LastBatch as any)[1];
+        return specificL1LastBatch[1].toBigInt()
     }
 }
 
@@ -42,13 +46,25 @@ async function findBatchWithNewUpdates(api: ApiPromise, publicClient: PublicClie
     const nextRequestId = lastSubmittedId + 1n;
 
     while (batchId > 0) {
-      let batch = await api.query.rolldown.l2RequestsBatch([L1_CHAIN, batchId]);
-      let rangeStart = BigInt((batch.toHuman() as any)[1][0]);
-      let rangeStop = BigInt((batch.toHuman() as any)[1][1]);
+      const chain: PalletRolldownMessagesChain = api.createType('PalletRolldownMessagesChain', L1_CHAIN);
+      let batch: Option<ITuple<[u32, ITuple<[u128, u128]>, SpRuntimeAccountAccountId20]>> = await api.query.rolldown.l2RequestsBatch([chain, batchId]);
+
+      batchId -= 1n;
+      if (batch.isNone){
+        continue;
+      }
+
+      let rangeStart = batch.value[1][0].toBigInt();
+      let rangeStop = batch.value[1][1].toBigInt();
+
+
       if (rangeStart <= nextRequestId && rangeStop >= nextRequestId) {
         return [rangeStart, rangeStop];
       }
-      batchId -= 1;
+
+      if (rangeStart < nextRequestId && rangeStop < nextRequestId){
+        return null;
+      }
     }
 
     console.log(`couldnt find any batch with requestId: ${nextRequestId}`);
