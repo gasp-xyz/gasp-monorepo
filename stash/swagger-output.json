@@ -908,6 +908,187 @@
         }
       }
     },
+    "/tracing/tx/start": {
+      "post": {
+        "tags": [
+          "Tracing"
+        ],
+        "summary": "Start tracing a transaction.",
+        "description": "Start tracing a transaction by providing transaction details.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Transaction details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "txHash": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "address": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "chain": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "amount": {
+                  "type": "string",
+                  "example": "number"
+                },
+                "asset_chainId": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "asset_address": {
+                  "type": "string",
+                  "example": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with transaction details"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/tracing/tx/{txHashOrEntityId}": {
+      "get": {
+        "tags": [
+          "Tracing"
+        ],
+        "summary": "Get transaction status by txHash or entityId.",
+        "description": "Get the status of a transaction by providing the transaction hash or entity ID.",
+        "parameters": [
+          {
+            "name": "txHashOrEntityId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Transaction hash or entity ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with transaction status"
+          },
+          "404": {
+            "description": "Transaction not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/tracing/tx/listByAddress/{address}": {
+      "get": {
+        "tags": [
+          "Tracing"
+        ],
+        "summary": "Get all transactions by address.",
+        "description": "Get all transactions associated with a specific address.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Address to get transactions for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with transactions"
+          },
+          "404": {
+            "description": "No transactions found for this address"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/tracing/tx/listByAddress/{address}/{status}": {
+      "get": {
+        "tags": [
+          "Tracing"
+        ],
+        "summary": "Get all transactions by address and status.",
+        "description": "Get all transactions associated with a specific address and status.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Address to get transactions for"
+          },
+          {
+            "name": "status",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Status of the transactions to filter by"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with transactions"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/tracing/tx/findByEntityId/{entityId}": {
+      "get": {
+        "tags": [
+          "Tracing"
+        ],
+        "summary": "Get a transaction by entityId.",
+        "description": "Get a specific transaction by providing the entity ID.",
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Entity ID of the transaction"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with transaction details"
+          },
+          "404": {
+            "description": "Transaction not found for this entityId"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/coinmarketcap/v1/summary": {
       "get": {
         "tags": [
