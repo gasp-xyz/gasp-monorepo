@@ -57,7 +57,6 @@ envEth:
   # OP
   RUST_LOG: info
   AVS_RPC_URL: http://avs-aggregator:8090
-  TESTNET: "true"
   ECDSA_EPHEMERAL_KEY: "true"
   BLS_EPHEMERAL_KEY: "true"
 
@@ -75,7 +74,6 @@ envArb:
   # OP
   RUST_LOG: info
   AVS_RPC_URL: http://avs-aggregator-eth:8090
-  TESTNET: "true"
   ECDSA_EPHEMERAL_KEY: "true"
   BLS_EPHEMERAL_KEY: "true"
 
@@ -121,9 +119,11 @@ finalizerEnv:
   # OP
   RUST_LOG: info
   AVS_RPC_URL: http://avs-aggregator:8090
-  TESTNET: "true"
   ECDSA_EPHEMERAL_KEY: "true"
   BLS_EPHEMERAL_KEY: "true"
+  # rollup-node configs
+  ROLLUP_NODE_CHAIN: rollup-local-seq
+  ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
 
 ###########################
 # rollup-updater configs #
