@@ -4,8 +4,11 @@ import * as blocks from '../scraper/BlockScraper.js'
 import * as pools from '../scraper/PoolsScraper.js'
 import * as staking from '../scraper/StakingScraper.js'
 import logger from '../util/Logger.js'
+
 export const initService = async () => {
+  console.log('init service called')
   const api = await MangataClient.api()
+
   const latestBlock = (await store.getLatest()).block
   // const latestBlock = 3719278
   await blocks.withBlocks(api, latestBlock, async (block) => {

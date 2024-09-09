@@ -2,7 +2,6 @@ import 'dotenv/config'
 import app from './app.js'
 import * as priceService from './processing/PriceProcessorService.js'
 import * as blockService from './service/SyncBlockService.js'
-import * as syncTransactionsService from './service/SyncTransactionsService.js'
 import * as tokenService from './service/TokenService.js'
 import * as xcmService from './service/XcmNetworkService.js'
 import * as networkService from './service/NetworkService.js'
@@ -29,8 +28,6 @@ const server = app.listen(app.get('port'), async () => {
   logger.info('DB initialized')
 
   blockService.initService()
-
-  syncTransactionsService.initService()
 
   const run = 1
   while (run) {
