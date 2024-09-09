@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math/big"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
 	gethcommon "github.com/ethereum/go-ethereum/common"
@@ -72,8 +73,8 @@ func (w *AvsWriter) SendNewOpTask(ctx context.Context, quorumThresholdPercentage
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
 	}
-	if r.status == 0{
-		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, errors.New("Txn failed with status failure (0): " + r)
+	if receipt.Status == 0{
+		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
@@ -102,8 +103,8 @@ func (w *AvsWriter) SendNewRdTask(ctx context.Context, chainToUpdate uint8, chai
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
 	}
-	if r.status == 0{
-		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, errors.New("Txn failed with status failure (0): " + r)
+	if receipt.Status == 0{
+		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
@@ -131,8 +132,8 @@ func (w *AvsWriter) SendAggregatedOpTaskResponse(ctx context.Context, task taskm
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
 	}
-	if r.status == 0{
-		return nil, errors.New("Txn failed with status failure (0): " + r)
+	if receipt.Status == 0{
+		return nil, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent aggregated response with the AVS's task manager")
@@ -156,8 +157,8 @@ func (w *AvsWriter) SendAggregatedRdTaskResponse(ctx context.Context, task taskm
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
 	}
-	if r.status == 0{
-		return nil, errors.New("Txn failed with status failure (0): " + r)
+	if receipt.Status == 0{
+		return nil, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent aggregated response with the AVS's task manager")
@@ -180,8 +181,8 @@ func (w *AvsWriter) EjectOperators(ctx context.Context, operators []common.Addre
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
 	}
-	if r.status == 0{
-		return nil, errors.New("Txn failed with status failure (0): " + r)
+	if receipt.Status == 0{
+		return nil, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent eject operators with AVS's service manager")

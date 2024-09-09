@@ -4,7 +4,7 @@ import (
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/ethereum/go-ethereum/common"
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
-	gsrpcrpcchain "github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	gsrpctypes "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 // TODO: Hardcoded for now
@@ -60,19 +60,19 @@ type QuorumStakeDiff struct{
 }
 
 type SubstrateL2RequestsBatchLastItem struct {
-	Key: U8
-	Value: SubstrateL2RequestsBatchLastValue
+	Key gsrpctypes.U8
+	Value SubstrateL2RequestsBatchLastValue
 }
 
 type SubstrateL2RequestsBatchLastValue struct {
-	BlockNumber: U32
-	BatchId: U128
-	BatchRange: SubstrateL2RequestsBatchLastRange
+	BlockNumber gsrpctypes.U32
+	BatchId gsrpctypes.U128
+	BatchRange SubstrateL2RequestsBatchLastRange
 }
 
 type SubstrateL2RequestsBatchLastRange struct {
-	Start: U128
-	End: U128
+	Start gsrpctypes.U128
+	End gsrpctypes.U128
 }
 
 type SubstrateL2RequestsBatchLast = []SubstrateL2RequestsBatchLastItem

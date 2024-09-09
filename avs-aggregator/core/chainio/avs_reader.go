@@ -147,12 +147,12 @@ func (r *AvsReader) LastRdTaskCreatedBlock(
 func (r *AvsReader) IdToTaskStatus(
 	ctx context.Context,
 	taskType uint8,
-	taskIndex uint32
+	taskIndex uint32,
 ) (uint8, error) {
 	v, err := r.AvsServiceBindings.TaskManager.IdToTaskStatus(
 		&bind.CallOpts{},
 		taskType,
-		taskIndex
+		taskIndex,
 	)
 	if err != nil {
 		return uint8(0), err
@@ -162,11 +162,11 @@ func (r *AvsReader) IdToTaskStatus(
 
 func (r *AvsReader) ChainRdBatchNonce(
 	ctx context.Context,
-	chainIndex uint8
+	chainIndex uint8,
 ) (uint32, error) {
 	v, err := r.AvsServiceBindings.TaskManager.ChainRdBatchNonce(
 		&bind.CallOpts{},
-		chainIndex
+		chainIndex,
 	)
 	if err != nil {
 		return uint32(0), err
