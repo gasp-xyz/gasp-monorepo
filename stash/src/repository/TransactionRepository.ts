@@ -1,9 +1,9 @@
 import { Client } from 'redis-om'
 import { transactionSchema } from '../model/Transaction.js'
-import { getRedisUrl } from '../connector/RedisConnector.js'
+import { getTimeseriesUrl } from '../connector/RedisConnector.js'
 
 const client = new Client()
-await client.open(getRedisUrl())
+await client.open(getTimeseriesUrl())
 
 const transactionRepository = client.fetchRepository(transactionSchema)
 

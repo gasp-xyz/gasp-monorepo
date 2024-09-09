@@ -3,7 +3,7 @@ import RolldownContract from '../Rolldown.json' assert { type: 'json' }
 import { transactionRepository } from '../repository/TransactionRepository.js'
 import process from 'node:process'
 import { ApiPromise } from '@polkadot/api'
-import { redis } from '../connector/RedisConnector.js'
+import { timeseries } from '../connector/RedisConnector.js'
 import { setTimeout } from 'timers/promises'
 import logger from '../util/Logger.js'
 
@@ -121,7 +121,7 @@ const saveLastProcessedRequestId = async (
   lastProcessedRequestId: number,
   type: string
 ) => {
-  await redis.client.hset(
+  await timeseries.client.hset(
     `tx:${type}:${l1Chain}`,
     'lastRequestId',
     lastProcessedRequestId.toString()
@@ -135,7 +135,7 @@ const getLastProcessedRequestId = async (
   l1Chain: string,
   type: string
 ): Promise<number | null> => {
-  const result = await redis.client.hget(
+  const result = await timeseries.client.hget(
     `tx:${type}:${l1Chain}`,
     'lastRequestId'
   )
@@ -147,7 +147,7 @@ const saveLastProcessedBlock = async (
   lastProcessedBlock: bigint,
   type: string
 ) => {
-  await redis.client.hset(
+  await timeseries.client.hset(
     `tx:${type}:${l1Chain}`,
     'lastBlock',
     lastProcessedBlock.toString()
@@ -161,6 +161,9 @@ const getLastProcessedBlock = async (
   l1Chain: string,
   type: string
 ): Promise<bigint | null> => {
-  const result = await redis.client.hget(`tx:${type}:${l1Chain}`, 'lastBlock')
+  const result = await timeseries.client.hget(
+    `tx:${type}:${l1Chain}`,
+    'lastBlock'
+  )
   return result ? BigInt(result) : 0n
 }
