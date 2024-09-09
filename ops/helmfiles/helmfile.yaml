@@ -91,17 +91,12 @@ releases:
   - name: avs-finalizer
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.finalizerEnabled }}
-    chart: ../helm-charts/rollup-node
+    chart: ../helm-charts/avs-finalizer
     values:
       - image:
           repository: mangatasolutions/avs-finalizer
           tag: {{ .Values | get "finalizerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
-        remoteCluster: {{ .Values.remoteCluster }}
-        rpcPort: 9010
-        enableServiceMonitorCollectors: {{ .Values.finalizerEnableServiceMonitorCollectors }}
-        prometheus:
-          enabled: true
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.finalizerEnv | toYaml | nindent 10 }}
 
