@@ -390,7 +390,6 @@ releases:
 
   - name: collator-01
     installed: {{ .Values.collatorsEnabled }}
-    needs: [collator-02]
     chart: mangata-node/node
     namespace: 'rollup-{{ .Values.environmentName }}'
     values:
@@ -421,6 +420,7 @@ releases:
   
   - name: collator-02
     installed: {{ .Values.collatorsEnabled }}
+    needs: [collator-01]
     chart: mangata-node/node
     namespace: 'rollup-{{ .Values.environmentName }}'
     values:
