@@ -8,6 +8,7 @@ export const appConfigSchema = z.object({
 	MNEMONIC: z.string(),
 	LIMIT: z.string().default("10"),
 	L1_CHAIN: z.string().default("Ethereum"),
+	WATCHDOG: z.string().default("0"),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;
@@ -25,5 +26,6 @@ export function createConfig() {
 		MNEMONIC: process.env.MNEMONIC!,
 		LIMIT: process.env.LIMIT!,
 		L1_CHAIN: process.env.L1_CHAIN!,
+		WATCHDOG: process.env.WATCHDOG!,
 	});
 }

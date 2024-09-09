@@ -321,6 +321,43 @@ async function getUpdateForL2(
 	});
 }
 
+class WatchDog {
+	elapsed: number;
+	period: number;
+	name: string;
+	value: string;
+
+	constructor(name: string, timeoutS: number) {
+		this.name = name;
+		this.period = timeoutS * 1000;
+		this.elapsed = 0;
+		this.value = "";
+		this.reset();
+	}
+
+	reset() {
+		this.elapsed = Date.now() + this.period;
+	}
+
+	feed(val: string) {
+		if (val !== this.value) {
+			this.value = val;
+			this.reset();
+		}
+	}
+
+	check() {
+		if (this.isElapsed()) {
+			console.info(this.name, "watchdog expired");
+			process.exit(1);
+		}
+	}
+
+	isElapsed() {
+		return this.period > 0 && Date.now() > this.elapsed;
+	}
+}
+
 export {
 	print,
 	sleep,
@@ -337,4 +374,5 @@ export {
 	initReadContractWithRetry,
 	processPendingRequestsEvents,
 	getSelectedSequencerWithRights,
+	WatchDog,
 };
