@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/console.sol";
@@ -17,6 +18,7 @@ contract Rolldown is
     Pausable,
     RolldownStorage
 {
+    using SafeERC20 for IERC20;
 
     address public constant ETH_TOKEN_ADDRESS =
         0x0000000000000000000000000000000000000001;
@@ -102,10 +104,7 @@ contract Rolldown is
         address depositRecipient = msg.sender;
 
         IERC20 token = IERC20(tokenAddress);
-        require(
-            token.transferFrom(msg.sender, address(this), amount),
-            "Token transfer failed"
-        );
+        token.safeTransferFrom(msg.sender, address(this), amount);
 
         uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
@@ -248,7 +247,7 @@ contract Rolldown is
         require(token.balanceOf(address(this)) >= withdrawal.amount, "Not enough funds in contract");
         require(withdrawal.amount > 0, "Amount must be greater than zero");
 
-        token.transfer(withdrawal.recipient, withdrawal.amount);
+        token.safeTransfer(withdrawal.recipient, withdrawal.amount);
         emit ERC20TokensWithdrawn(
           withdrawal.recipient,
           withdrawal.tokenAddress,
