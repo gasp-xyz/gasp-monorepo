@@ -16,5 +16,6 @@ export const ROLLDOWN_EVENT_SECTION = "rolldown";
 export const L1_READ_STORED_EVENT_METHOD = "L1ReadStored";
 export const LIMIT = configuration.LIMIT;
 export const L1_CHAIN = configuration.L1_CHAIN;
+export const WATCHDOG_PERIOD = Number(configuration.WATCHDOG);
 
 export const ABI = rolldownAbi.abi;
