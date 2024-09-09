@@ -1,0 +1,140 @@
+{
+	"info": {
+		"_postman_id": "d5a365ed-8d28-4b31-ae8e-03607c61bfb3",
+		"name": "Tracing collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36395820",
+		"_collection_link": "https://gasp77.postman.co/workspace/GASP-Workspace~0284ceb5-a521-4b91-b1b5-aeb16ce16070/collection/36395820-d5a365ed-8d28-4b31-ae8e-03607c61bfb3?action=share&source=collection_link&creator=36395820"
+	},
+	"item": [
+		{
+			"name": "Start tracing",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"entityId\", jsonData.transaction.entityId);",
+							"pm.environment.set(\"address\", jsonData.transaction.address);",
+							"pm.environment.set(\"txHash\", jsonData.transaction.txHash);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"txHash\": \"0x101\",\n  \"address\": \"0x102\",\n  \"type\": \"deposit\", //deposit or withdrawal\n  \"chain\": \"Arbitrum\", //send Ethereum or Arbitrum\n  \"amount\": \"400000000000000000\",\n  \"asset_chainId\": \"0x106\",\n  \"asset_address\": \"0x107\"\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/tracing/tx/start",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tracing",
+						"tx",
+						"start"
+					]
+				},
+				"description": "Tracing collection"
+			},
+			"response": []
+		},
+		{
+			"name": "Get status by hash or entityId",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/tracing/tx/{{entityId}}",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tracing",
+						"tx",
+						"{{entityId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all for address",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/tracing/tx/listByAddress/{{address}}",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tracing",
+						"tx",
+						"listByAddress",
+						"{{address}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get transactions by address and status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/tracing/tx/listByAddress/{{address}}/{{status}}",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tracing",
+						"tx",
+						"listByAddress",
+						"{{address}}",
+						"{{status}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get transaction by entityId",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/tracing/tx/findByEntityId/{{entityId}}",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tracing",
+						"tx",
+						"findByEntityId",
+						"{{entityId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
