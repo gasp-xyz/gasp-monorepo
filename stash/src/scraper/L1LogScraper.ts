@@ -30,9 +30,9 @@ export const watchDepositAcceptedIntoQueue = async (
       if (fromBlock === 0n) {
         fromBlock = toBlock
       }
-      logger.info(
-        `chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`
-      )
+      logger.info({
+        message: `chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
+      })
       const logs = await publicClient.getContractEvents({
         address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
         abi: RolldownContract.abi,
@@ -58,13 +58,19 @@ export const watchDepositAcceptedIntoQueue = async (
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
           await transactionRepository.save(existingTransaction)
-          logger.info('Transaction status updated:', existingTransaction)
+          logger.info({
+            message: 'Transaction status updated:',
+            transaction: existingTransaction,
+          })
         }
         await saveLastProcessedBlock(chainName, blockNumber, 'deposit') //saving the last processed block
       }
-      await saveLastProcessedBlock(chainName, toBlock, 'deposit') //if in the range of fromBlock and toBlock we didn't find any event, we save the last block
+      await saveLastProcessedBlock(chainName, toBlock, 'deposit') //even if in the range of fromBlock and toBlock we didn't find any event, we save the last block
     } catch (error) {
-      logger.error('Error in watchDepositAcceptedIntoQueue loop:', error)
+      logger.error({
+        message: 'Error in watchDepositAcceptedIntoQueue loop:',
+        error: error,
+      })
     }
     await setTimeout(5000)
   }
@@ -107,7 +113,6 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
     } catch (error) {
       logger.error('Error processing requests:', error)
     }
-
     // Delay to avoid overwhelming the system
     await setTimeout(5000)
   }

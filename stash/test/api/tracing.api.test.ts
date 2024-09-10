@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeAll } from "vitest";
 import supertest from "supertest";
 import app from '../../src/app';
+import logger from "../../src/util/Logger";
 
 let transactionData: any;
 
@@ -44,7 +45,7 @@ describe('TracingController', () => {
                     .expect(200);
                 expect(response.body).toHaveProperty('status');
             } catch (error) {
-                console.error('Error in get transaction status by txHash or entityId:', error.message);
+                logger.error('Error in get transaction status by txHash or entityId:', error.message);
                 throw error;
             }
         });
@@ -54,7 +55,6 @@ describe('TracingController', () => {
                 const response = await supertest(app)
                     .get(`/tracing/tx/listByAddress/${transactionData.transaction.address}`)
                     .expect(200);
-                console.log('response body', response.body);
                 expect(response.body).toHaveProperty('transactions');
                 expect(response.body.transactions).toBeInstanceOf(Array);
                 expect(response.body.transactions[0]).toHaveProperty('address', transactionData.transaction.address);
@@ -69,7 +69,7 @@ describe('TracingController', () => {
                 expect(response.body.transactions[0]).toHaveProperty('type', transactionData.transaction.type);
                 expect(response.body.transactions[0]).toHaveProperty('updated');
             } catch (error) {
-                console.error('Error in get all transactions by address:', error.message);
+                logger.error('Error in get all transactions by address:', error.message);
                 throw error;
             }
         });
@@ -82,9 +82,8 @@ describe('TracingController', () => {
                 expect(response.body).toBeInstanceOf(Array);
                 expect(response.body[0]).toHaveProperty('address', transactionData.transaction.address);
                 expect(response.body[0]).toHaveProperty('status', 'L1_INITIATED');
-                console.log('tb', response.body);
             } catch (error) {
-                console.error('Error in get all transactions by address and status:', error.message);
+                logger.error('Error in get all transactions by address and status:', error.message);
                 throw error;
             }
         });
@@ -96,7 +95,7 @@ describe('TracingController', () => {
                     .expect(200);
                 expect(response.body).toHaveProperty('transaction');
             } catch (error) {
-                console.error('Error in find a transaction by entityId:', error.message);
+                logger.error('Error in find a transaction by entityId:', error.message);
                 throw error;
             }
         });

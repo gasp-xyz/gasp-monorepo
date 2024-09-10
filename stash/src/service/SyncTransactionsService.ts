@@ -28,9 +28,9 @@ export const initService = async () => {
   ]).then((results) => {
     results.forEach((result) => {
       if (result.status === 'fulfilled') {
-        console.log('Promise fulfilled:', result.value)
+        logger.log('Promise fulfilled:', result.value)
       } else {
-        console.error('Promise rejected:', result.reason)
+        logger.error('Promise rejected:', result.reason)
       }
     })
   })

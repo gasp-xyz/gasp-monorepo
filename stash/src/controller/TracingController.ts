@@ -65,7 +65,6 @@ export const startTracing = async (req: Request, res: Response) => {
       asset_chainId,
       asset_address,
     })
-    console.log('object from startTracingTransaction', transaction)
     return res.json({ transaction })
   } catch (e) {
     await errorHandler.handle(res, e)
@@ -176,9 +175,8 @@ export const getAllTransactionsByAddressAndStatus = async (
    }
   */
   const { address, status } = req.params
-  console.log('req.params', req.params)
   try {
-    await getAllTransactionsByAddressAndStatusSchema.validate({
+    getAllTransactionsByAddressAndStatusSchema.validate({
       address,
       status,
     })
@@ -217,7 +215,7 @@ export const getATransactionByEntityId = async (
    }
   */
   const { entityId } = req.params
-  await getTransactionByEntityIdSchema.validate({ entityId })
+  getTransactionByEntityIdSchema.validate({ entityId })
   try {
     const transaction = await getTransactionByEntityId(entityId)
     if (transaction) {

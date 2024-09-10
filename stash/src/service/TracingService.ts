@@ -3,18 +3,17 @@ import { transactionRepository } from '../repository/TransactionRepository.js'
 
 interface TraceTransactionRequest {
   txHash: string
-  address: string //todo: add new fields and use that everywhere
-}
-
-export const startTracingTransaction = async (traceRequest: {
-  amount: string
   address: string
+  amount: string
   asset_address: string
   type: string
   chain: string
-  txHash: string
   asset_chainId: string
-}): Promise<object> => {
+}
+
+export const startTracingTransaction = async (
+  traceRequest: TraceTransactionRequest
+): Promise<object> => {
   const { txHash, address, type, chain, amount, asset_chainId, asset_address } =
     traceRequest
   const timestamp = new Date().toISOString()
@@ -28,7 +27,7 @@ export const startTracingTransaction = async (traceRequest: {
   }
 
   const transactionData = {
-    requestId: null, //this is requestId we get from L1, empty when we start tracing
+    requestId: null, //requestId we get from L1, empty when we start tracing
     txHash,
     address,
     created: Date.parse(timestamp),
