@@ -24,14 +24,20 @@ export async function getLatestRequestIdSubmittedToL1(publicClient: PublicClient
 }
 
 async function getLastBatchId(api: ApiPromise, blockHash: Uint8Array) {
-    const chain = api.createType('Chain', L1_CHAIN);
+    const chain: PalletRolldownMessagesChain = api.createType('PalletRolldownMessagesChain', L1_CHAIN);
     let apiAt = await api.at(blockHash);
     let last_batch = await apiAt.query.rolldown.l2RequestsBatchLast();
-    let specificL1LastBatch = last_batch.get(chain);
-    if (specificL1LastBatch == undefined ){
-        return null
-    }else{
-        return specificL1LastBatch[1].toBigInt()
+
+    // NOTE: looks like === is not implemented for PalletRolldownMessagesChain
+    // therefore its not possible to query valu from map using .get(chain) query ;<
+    let found = Array.from(last_batch.keys()).findIndex( (key) => {
+      return key.toString() === chain.toString();
+    });
+
+    if (found == -1){
+      return null;
+    } else {
+      return Array.from(last_batch.values())[found][1].toBigInt();
     }
 }
 
