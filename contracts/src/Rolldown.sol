@@ -199,6 +199,7 @@ contract Rolldown is
         roots.push(merkle_root);
         merkleRootRange[merkle_root] = range;
         lastProcessedUpdate_origin_l2 = range.end;
+        emit L2UpdateAccepted(merkle_root, range);
     }
 
     function process_l2_update_cancels(Cancel calldata cancel) private {

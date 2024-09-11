@@ -107,6 +107,28 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.stopPrank();
     }
 
+    function testUpdateL1FromL2TriggersEvent() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        token.mint(address(rolldown));
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: address(token),
+          amount: amount
+        });
+
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.L2UpdateAccepted(merkle_root, Range({start: 1, end: 1}));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+    }
+
     function testExecuteWithdrawErc20() public {
         address recipient = 0x0000000000000000000000000000000000000006;
         uint256 amount = 123456;
