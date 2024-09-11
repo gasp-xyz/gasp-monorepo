@@ -35,6 +35,7 @@ use tokio::select;
 use tokio::time::{sleep, Duration};
 use tokio::try_join;
 use tracing::{debug, error, info, instrument};
+use substrate_rpc_client::{rpc_params, ws_client, ClientT};
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
@@ -130,19 +131,14 @@ impl Operator {
                                 });
                             },
                             FinalizerTaskManagerEvents::NewRdTaskCreatedFilter(event) => {
-                                let proofs = self.clone().execute_block(event.task.block_number.as_u32()).await?;
-                                debug!("Block executed successfully {:?}", proofs);
-                                rd_payload = Some(RdTaskResponse {
-                                    reference_task_index: event.task_index,
-                                    reference_task_hash: Keccak256::hash(
-                                        vec![0u8;31].into_iter().chain(vec![32u8]).chain(
-                                            event.task.clone().encode().into_iter()
-                                        ).collect::<Vec<_>>()
-                                        .as_ref()).into(),
-                                    block_hash: proofs.0.as_fixed_bytes().to_owned(),
-                                    storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
-                                    pending_state_hash: proofs.2.as_fixed_bytes().to_owned(),
-                                });
+                                let mut rd_payload = self.clone().get_rd_update(event.task.clone()).await?;
+                                debug!("rd_payload: {:?}", rd_payload);
+                                rd_payload.reference_task_index = event.task_index;
+                                rd_payload.reference_task_hash = Keccak256::hash(
+                                    vec![0u8;31].into_iter().chain(vec![32u8]).chain(
+                                        event.task.clone().encode().into_iter()
+                                    ).collect::<Vec<_>>()
+                                    .as_ref()).into();
                             },
                             _ => return Err(eyre!("Got unexpected stream event"))
                         }
@@ -172,6 +168,57 @@ impl Operator {
         Ok(())
     }
 
+
+    pub(crate) async fn get_rd_update(
+        self: Arc<Self>,
+        rd_task: RdTask,
+    ) -> eyre::Result<RdTaskResponse> {
+
+        type StorageItemKeyType = (u8, u128);
+
+        info!("get_rd_update - rd_task: {:?}", rd_task);
+
+        let rpc = ws_client(self.substrate_client_uri.clone()).await.map_err(|e| eyre!(e))?;
+        let two_x_hash_pallet = sp_io::hashing::twox_128(b"Rolldown");
+        let two_x_hash_storage_item = sp_io::hashing::twox_128(b"L2RequestsBatch");
+        let storage_item_key: StorageItemKeyType = (rd_task.chain_id, rd_task.batch_id.into());
+        let storage_item_key_encoded = storage_item_key.encode();
+
+        let mut storage_item_key_hashed = sp_io::hashing::blake2_128(&storage_item_key_encoded[..]).to_vec();
+        storage_item_key_hashed.extend_from_slice(&storage_item_key_encoded[..]);
+
+        let mut storage_key = Vec::<u8>::new();
+        storage_key.extend_from_slice(&two_x_hash_pallet[..]);
+        storage_key.extend_from_slice(&two_x_hash_storage_item[..]);
+        storage_key.extend_from_slice(&storage_item_key_hashed[..]);
+
+
+        info!("get_rd_update - storage_key: {:?}", storage_key);
+
+        let params = rpc_params!(&storage_key[..]);
+        let (created_block_number, (range_start, range_end), updater) = rpc
+            .request::<(u32, (u128, u128), [u8; 20]), _>("state_getStorage", params)
+            .await?;
+
+        let params = rpc_params!(rd_task.chain_id, (range_start, range_end));
+        let rd_update = rpc
+            .request::<H256, _>("rolldown_get_merkle_root", params)
+            .await?;
+
+        let partial_rd_task_response = RdTaskResponse {
+            reference_task_index: Default::default(),
+            reference_task_hash: Default::default(),
+            chain_id: rd_task.chain_id,
+            batch_id: rd_task.batch_id,
+            rd_update: rd_update.into(),
+            range_start: range_start.into(),
+            range_end: range_end.into(),
+            updater: updater.into(),
+        };
+
+        Ok(partial_rd_task_response)
+    }
+    
     pub(crate) async fn execute_block(
         self: Arc<Self>,
         block_number: BlockNumber,

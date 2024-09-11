@@ -58,3 +58,5 @@ substrate-rpc-client = { git = "https://github.com/mangata-finance/polkadot-sdk"
 
 node-executor = { package = "node-executor", git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
 node-primitives = { git = "https://github.com/mangata-finance/polkadot-sdk", branch = "eth-rollup-develop" }
+
+codec = { package = "parity-scale-codec", version = "3.6.1", default-features = false, features = ["derive"] }

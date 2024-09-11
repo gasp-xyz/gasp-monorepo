@@ -767,6 +767,7 @@ dependencies = [
  "node-executor",
  "node-primitives",
  "num-bigint",
+ "parity-scale-codec",
  "rand 0.8.5",
  "reqwest",
  "reqwest-middleware",
