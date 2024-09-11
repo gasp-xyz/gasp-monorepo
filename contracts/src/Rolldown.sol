@@ -178,7 +178,7 @@ contract Rolldown is
         bytes32 cancel_hash = keccak256(abi.encode(cancel));
         require(processedL2Requests[cancel.requestId.id] == false, "Already processed");
         uint32 leaves_count = uint32(r.end - r.start + 1);
-        uint32 pos = uint32(r.start - cancel.requestId.id);
+        uint32 pos = uint32(cancel.requestId.id - r.start);
         require(
           calculate_root(cancel_hash, pos, proof, leaves_count) == merkle_root,
           "Invalid proof"

@@ -298,7 +298,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
       vm.startPrank(CHARLIE);
       vm.expectEmit(true, true, true, true);
-      emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(cancel.requestId.id, true);
+      emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(cancel.requestId.id, false);
       rolldown.close_cancel(cancel, merkle_root, toBytes32Array([node_2, node_01]));
       vm.stopPrank();
 
