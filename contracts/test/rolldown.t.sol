@@ -200,8 +200,16 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
 
      function testAcceptUpdateWithMultipleWithdrawals() public {
-       uint256 amount = 12345; 
-      token.mint(address(rolldown));
+        uint256 amount = 12345; 
+        token.mint(ALICE);
+
+        token.mint(address(rolldown));
+        vm.startPrank(ALICE);
+        token.approve(address(rolldown), amount);
+        rolldown.deposit_erc20(address(token), amount);
+        vm.stopPrank();
+
+        L1Update memory l1Update = rolldown.getPendingRequests(1,1);
 
        Withdrawal memory withdrawalBob1 = IRolldownPrimitives.Withdrawal({
          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
@@ -227,7 +235,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
        Cancel memory cancel = IRolldownPrimitives.Cancel({
          requestId: IRolldownPrimitives.RequestId({id: 4, origin: IRolldownPrimitives.Origin.L1}),
          range: Range({start: 1, end: 1}),
-         hash: 0x0000000000000000000000000000000000000000000000000000000000000000
+         hash: keccak256(abi.encode(l1Update))
        });
 
       //                             hash(hash(0, 1), hash(2, 3)) // AKA Merkle Root
@@ -266,10 +274,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
       proof_withdrawalCharlie[0] = node_3;
       proof_withdrawalCharlie[1] = node_01;
 
-      // bytes32[] memory proof_cancel = new bytes32[](2);
-      // proof_cancel[0] = node_2;
-      // proof_cancel[1] = node_01;
-
       vm.startPrank(ALICE);
       rolldown.update_l1_from_l2(merkle_root, IRolldownPrimitives.Range({start: 1, end: 4}));
       vm.stopPrank();
@@ -291,6 +295,13 @@ contract RolldownTest is Test, IRolldownPrimitives {
       emit IRolldownPrimitives.ERC20TokensWithdrawn(BOB, address(token), 12345);
       rolldown.close_withdrawal(withdrawalBob1, merkle_root, proof_withdrawalBob1);
       vm.stopPrank();
+
+      vm.startPrank(CHARLIE);
+      vm.expectEmit(true, true, true, true);
+      emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(cancel.requestId.id, true);
+      rolldown.close_cancel(cancel, merkle_root, toBytes32Array([node_2, node_01]));
+      vm.stopPrank();
+
 
      }
 
@@ -320,6 +331,12 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.expectRevert("Already processed");
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
+
+        assertEq(token.balanceOf(recipient), 123456);        
+        assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
+        assertTrue(rolldown.processedL2Requests(1));
+        assertFalse(rolldown.processedL2Requests(2));
+
     }
 
     function testL1UpdateHashCompatibilityWithMangataNode() public {
@@ -466,12 +483,17 @@ contract RolldownTest is Test, IRolldownPrimitives {
         bytes32[] memory proofs = new bytes32[](0);
         assertEq(token.balanceOf(recipient), 0);
 
+        assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
+
         vm.startPrank(ALICE);
         vm.expectRevert("Not enough funds in contract");
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
         assertEq(token.balanceOf(recipient), 0);
-
+        
+        assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
+        assertFalse(rolldown.processedL2Requests(1));
+        assertFalse(rolldown.processedL2Requests(2));
         L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,2);
         assertEq(l1UpdateBefore.pendingDeposits.length, 0);
         assertEq(l1UpdateBefore.pendingCancelResolutions.length, 0);
@@ -525,19 +547,28 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         vm.expectRevert("Update brings no new data");
-        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 9, end: 9}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000001, IRolldownPrimitives.Range({start: 9, end: 9}));
         vm.stopPrank();
 
         vm.startPrank(ALICE);
         vm.expectRevert("Update brings no new data");
-        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 9}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000002, IRolldownPrimitives.Range({start: 1, end: 9}));
         vm.stopPrank();
 
         vm.startPrank(ALICE);
         vm.expectRevert("Update brings no new data");
-        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 10}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000003, IRolldownPrimitives.Range({start: 1, end: 10}));
         vm.stopPrank();
 
+        vm.startPrank(ALICE);
+        vm.expectRevert("Update brings no new data");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000004, IRolldownPrimitives.Range({start: 10, end: 10}));
+        vm.stopPrank();
+
+        vm.startPrank(ALICE);
+        vm.expectRevert("Update brings no new data");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000005, IRolldownPrimitives.Range({start: 1, end: 1}));
+        vm.stopPrank();
     }
 
     function testRejectUpdateWithGaps() public {
@@ -643,4 +674,12 @@ contract RolldownTest is Test, IRolldownPrimitives {
       }
 
     }
+
+
+    function toBytes32Array(bytes32[2] memory input) internal pure returns (bytes32[] memory) {
+        bytes32[] memory result = new bytes32[](2);
+        result[0] = input[0];
+        result[1] = input[1];
+    return result;
+}
 }
