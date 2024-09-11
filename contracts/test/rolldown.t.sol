@@ -359,30 +359,43 @@ contract RolldownTest is Test, IRolldownPrimitives {
       uint256 amount = 123456;
       token.mint(ALICE);
 
-        Cancel memory cancel = IRolldownPrimitives.Cancel({
-          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-          range: IRolldownPrimitives.Range({start: 1, end: 1}),
-          hash: 0x0000000000000000000000000000000000000000000000000000000000000000
-        });
+      Cancel memory cancel = IRolldownPrimitives.Cancel({
+        requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+        range: IRolldownPrimitives.Range({start: 1, end: 1}),
+        hash: 0x0000000000000000000000000000000000000000000000000000000000000000
+      });
 
-        vm.startPrank(ALICE);
-        token.approve(address(rolldown), amount);
-        rolldown.deposit_erc20(address(token), amount);
-        vm.stopPrank();
+      vm.startPrank(ALICE);
+      token.approve(address(rolldown), amount);
+      rolldown.deposit_erc20(address(token), amount);
+      vm.stopPrank();
 
-        vm.startPrank(ALICE);
-        // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = keccak256(abi.encode(cancel));
-        bytes32[] memory proofs = new bytes32[](0);
-        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
-        vm.stopPrank();
+      vm.startPrank(ALICE);
+      // merkle_root of tree with single element is just that single element
+      bytes32 merkle_root = keccak256(abi.encode(cancel));
+      bytes32[] memory proofs = new bytes32[](0);
+      Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+      rolldown.update_l1_from_l2(merkle_root, range);
+      vm.stopPrank();
 
-        vm.startPrank(ALICE);
-        vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, true);
-        rolldown.close_cancel(cancel, merkle_root, proofs);
-        vm.stopPrank();
+      L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,2);
+      assertEq(l1UpdateBefore.pendingDeposits.length, 1);
+      assertEq(l1UpdateBefore.pendingCancelResolutions.length, 0);
+
+      vm.startPrank(ALICE);
+      vm.expectEmit(true, true, true, true);
+      emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, true);
+      rolldown.close_cancel(cancel, merkle_root, proofs);
+      vm.stopPrank();
+
+          
+      //validate pendingL2requests        
+      L1Update memory l1UpdateAfter = rolldown.getPendingRequests(1,2);
+      assertEq(l1UpdateAfter.pendingDeposits.length, 1);
+      assertEq(l1UpdateAfter.pendingCancelResolutions.length, 1);
+      assertEq(l1UpdateAfter.pendingCancelResolutions[0].l2RequestId, 1);
+      assertEq(l1UpdateAfter.pendingCancelResolutions[0].cancelJustified, true);
+      assertTrue(rolldown.processedL2Requests(1));
     }
 
     function testCancelResolutionWithMatchingHashResultsWithJustifiedStatus()
@@ -413,11 +426,23 @@ contract RolldownTest is Test, IRolldownPrimitives {
         rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
 
+        L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,2);
+        assertEq(l1UpdateBefore.pendingDeposits.length, 1);
+        assertEq(l1UpdateBefore.pendingCancelResolutions.length, 0);
+
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, false);
         rolldown.close_cancel(cancel, merkle_root, proofs);
         vm.stopPrank();
+    
+        //validate pendingL2requests        
+        L1Update memory l1UpdateAfter = rolldown.getPendingRequests(1,2);
+        assertEq(l1UpdateAfter.pendingDeposits.length, 1);
+        assertEq(l1UpdateAfter.pendingCancelResolutions.length, 1);
+        assertEq(l1UpdateAfter.pendingCancelResolutions[0].l2RequestId, 1);
+        assertEq(l1UpdateAfter.pendingCancelResolutions[0].cancelJustified, false);
+        assertTrue(rolldown.processedL2Requests(1));
     }
 
     function testUnsuccessfulWithdrawalRequest() public {
@@ -446,6 +471,11 @@ contract RolldownTest is Test, IRolldownPrimitives {
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
         assertEq(token.balanceOf(recipient), 0);
+
+        L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,2);
+        assertEq(l1UpdateBefore.pendingDeposits.length, 0);
+        assertEq(l1UpdateBefore.pendingCancelResolutions.length, 0);
+
     }
 
     function testAcceptOnlyConsecutiveUpdatesWithoutGaps() public {
@@ -455,7 +485,37 @@ contract RolldownTest is Test, IRolldownPrimitives {
         rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 2, end: 10}));
         rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 9, end: 11}));
         rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 12}));
+
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000001, IRolldownPrimitives.Range({start: 2, end: 13}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000002, IRolldownPrimitives.Range({start: 12, end: 14}));
+
         vm.stopPrank();
+      // validate storage & getters after updates
+      uint256 lastId = 14;
+      assertEq(rolldown.lastProcessedUpdate_origin_l2(), lastId);
+      bytes32 expectedRoot = 0x0000000000000000000000000000000000000000000000000000000000000001;
+      (uint256 start, uint256 end)  = rolldown.merkleRootRange(expectedRoot);
+      assertEq(start, 2);
+      assertEq(end, 13);
+      
+      for (uint256 i = 1; i <= lastId; i++) {
+          assertFalse(rolldown.processedL2Requests(i), "L2 must be unprocessed");
+      }
+      //New update win over old updates
+      Range memory range0 = rolldown.find_l2_batch(3);
+      assertEq(range0.start, 2);
+      assertEq(range0.end, 13);
+
+      Range memory range1 = rolldown.find_l2_batch(12);
+      assertEq(range1.start, 12);
+      assertEq(range1.end, 14);
+
+      vm.expectRevert("Invalid request id");
+      Range memory range2 = rolldown.find_l2_batch(66);
+      assertEq(range2.start, 0);
+      assertEq(range2.end, 0);
+      
+      
     }
 
     function testRejectUpdateWithoutNewRequests() public {
