@@ -54,15 +54,15 @@ describe('[CoinGecko listing]', () => {
   it('should mock the pairs endpoint method', async () => {
     const expectedResponse = [
       {
-        ticker_id: 'GASPV2_GETH',
+        ticker_id: 'GASPV2_ETH',
         base: 'GASPV2',
-        target: 'GETH',
+        target: 'ETH',
         pool_id: '5',
       },
       {
-        ticker_id: 'L1Asset_GETH',
+        ticker_id: 'L1Asset_ETH',
         base: 'L1Asset',
-        target: 'GETH',
+        target: 'ETH',
         pool_id: '6',
       },
       {
@@ -96,9 +96,9 @@ describe('[CoinGecko listing]', () => {
         last_price: '41375.099191776760995251',
         liquidity_in_usd: '508786.95209646935',
         pool_id: '5',
-        target_currency: 'GETH',
+        target_currency: 'ETH',
         target_volume: '1659851.9199481527807',
-        ticker_id: 'GASPV2_GETH',
+        ticker_id: 'GASPV2_ETH',
       },
       {
         base_currency: 'L1Asset',
@@ -106,9 +106,9 @@ describe('[CoinGecko listing]', () => {
         last_price: '0',
         liquidity_in_usd: '57038.15488204146',
         pool_id: '6',
-        target_currency: 'GETH',
+        target_currency: 'ETH',
         target_volume: '13195.363557291116508',
-        ticker_id: 'L1Asset_GETH',
+        ticker_id: 'L1Asset_ETH',
       },
       {
         base_currency: 'L1Asset',
