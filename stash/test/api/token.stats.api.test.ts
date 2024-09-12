@@ -61,7 +61,7 @@ describe('APi tests: token stats', () => {
         pools.forEach( (pool) => {
             const firstTokenId = pool[1].toHuman()[0];
             const secondTokenId = pool[1].toHuman()[1];
-            const excludePool = [ "2" , "3"]; // leave only pool with 0 1 token ids (geth and gaspv2)
+            const excludePool = [ "2" , "3"]; // leave only pool with 0 1 token ids (eth and gaspv2)
             const firstToken = allstats.filter( (token: { tokenId: any; }) => token.tokenId === firstTokenId );
             const secondToken = allstats.filter( (token: { tokenId: any; }) => token.tokenId === secondTokenId );
             console.log( `Token ${firstTokenId} , ${secondTokenId} `)
