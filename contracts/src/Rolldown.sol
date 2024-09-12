@@ -77,6 +77,7 @@ contract Rolldown is
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
         uint amount = msg.value;
+        uint256 ferryTip = 0;
 
         uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
@@ -84,7 +85,8 @@ contract Rolldown is
             depositRecipient: depositRecipient,
             tokenAddress: ETH_TOKEN_ADDRESS,
             amount: amount,
-            timeStamp: timeStamp
+            timeStamp: timeStamp,
+            ferryTip: ferryTip
         });
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
@@ -92,7 +94,8 @@ contract Rolldown is
             depositRequest.requestId.id,
             depositRecipient,
             ETH_TOKEN_ADDRESS,
-            amount
+            amount,
+            ferryTip
         );
     }
 
@@ -107,6 +110,7 @@ contract Rolldown is
 
         IERC20 token = IERC20(tokenAddress);
         token.safeTransferFrom(msg.sender, address(this), amount);
+        uint256 ferryTip = 0;
 
         uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
@@ -114,7 +118,8 @@ contract Rolldown is
             depositRecipient: depositRecipient,
             tokenAddress: tokenAddress,
             amount: amount,
-            timeStamp: timeStamp
+            timeStamp: timeStamp,
+            ferryTip: ferryTip
         });
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
@@ -122,7 +127,8 @@ contract Rolldown is
             depositRequest.requestId.id,
             depositRecipient,
             tokenAddress,
-            amount
+            amount,
+            ferryTip
         );
     }
 

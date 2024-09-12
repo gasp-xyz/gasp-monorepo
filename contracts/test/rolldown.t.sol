@@ -54,6 +54,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         // Arrange
         address payable alice = users[0];
         uint256 amount = 10;
+        uint256 fee = 0;
         address payable tokenAddress = payable(ETH_TOKEN_ADDRESS);
         address payable contract_address = payable(address(rolldown));
         deal(alice, 100 ether);
@@ -63,7 +64,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         // Act
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount, fee);
         rolldown.deposit_native{value: amount}();
         vm.stopPrank();
 
@@ -84,12 +85,13 @@ contract RolldownTest is Test, IRolldownPrimitives {
     function deposit_native_emits_event() public {
         address payable alice = users[0];
         uint256 amount = 1000;
+        uint256 fee = 0;
         address payable tokenAddress = payable(ETH_TOKEN_ADDRESS);
 
         // Act
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount, fee);
         rolldown.deposit_native{value: amount}();
         vm.stopPrank();
     }
@@ -98,11 +100,12 @@ contract RolldownTest is Test, IRolldownPrimitives {
         address payable alice = users[0];
         uint256 amount = 1000;
         address payable tokenAddress = payable(ETH_TOKEN_ADDRESS);
+        uint256 fee = 0;
 
         // Act
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount, fee);
         rolldown.deposit_erc20(tokenAddress, amount);
         vm.stopPrank();
     }
@@ -116,7 +119,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
           requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
           recipient: recipient,
           tokenAddress: address(token),
-          amount: amount
+          amount: amount,
+          ferryTip: 0
         });
 
         bytes32 merkle_root = keccak256(abi.encode(withdrawal));
@@ -138,7 +142,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
           requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
           recipient: recipient,
           tokenAddress: address(token),
-          amount: amount
+          amount: amount,
+          ferryTip: 0
         });
 
         vm.startPrank(ALICE);
@@ -169,7 +174,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
           requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
           recipient: recipient,
           tokenAddress: address(token),
-          amount: amount
+          amount: amount,
+          ferryTip: 0
         });
 
         vm.startPrank(ALICE);
@@ -194,6 +200,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
       token = new MyERC20();
       address tokenAddress = address(token);
       uint256 amount = 10;
+      uint256 fee = 0;
       deal(tokenAddress, alice, 100 ether);
       uint256 aliceBalanceBefore = token.balanceOf(alice);
       uint256 contractBalanceBefore = token.balanceOf(address(rolldown));
@@ -202,7 +209,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
       vm.startPrank(alice);
       token.approve(address(rolldown), amount);
       vm.expectEmit(true, true, true, true);
-      emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
+      emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount, fee);
       rolldown.deposit_erc20(tokenAddress, 10);
       vm.stopPrank();
 
@@ -229,21 +236,24 @@ contract RolldownTest is Test, IRolldownPrimitives {
          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
          recipient: BOB,
          tokenAddress: address(token),
-         amount: amount
+         amount: amount,
+         ferryTip: 0
        });
 
        Withdrawal memory withdrawalBob2 = IRolldownPrimitives.Withdrawal({
          requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
          recipient: BOB,
          tokenAddress: address(token),
-         amount: amount
+         amount: amount,
+         ferryTip: 0
        });
 
        Withdrawal memory withdrawalCharlie = IRolldownPrimitives.Withdrawal({
          requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
          recipient: CHARLIE,
          tokenAddress: address(token),
-         amount: amount
+         amount: amount,
+         ferryTip: 0
        });
 
        Cancel memory cancel = IRolldownPrimitives.Cancel({
@@ -325,7 +335,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
           requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
           recipient: recipient,
           tokenAddress: address(token),
-          amount: amount
+          amount: amount,
+          ferryTip: 0
         });
 
         vm.startPrank(ALICE);
@@ -355,7 +366,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
             depositRecipient: 0x0000000000000000000000000000000000000002,
             tokenAddress: 0x0000000000000000000000000000000000000003,
             amount: 4,
-            timeStamp: 1
+            timeStamp: 1,
+            ferryTip: 0
         });
 
         l1Update.pendingCancelResolutions[0] = IRolldownPrimitives.CancelResolution({
@@ -371,7 +383,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         assertEq(
             keccak256(abi.encode(l1Update)),
-            0xaf1c7908d0762a131c827a13d9a6afde3e6f1a4a842d96708935d57fc2a0af7a
+            0x68e72614919768cae8e3cdcc417cd406d59b61ff3b0efaad1bd5b3982a128f36
         );
     }
 
@@ -450,7 +462,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
           requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
           recipient: recipient,
           tokenAddress: address(token),
-          amount: amount
+          amount: amount,
+          ferryTip: 0
         });
 
         vm.startPrank(ALICE);

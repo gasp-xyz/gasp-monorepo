@@ -7,7 +7,8 @@ interface IRolldownPrimitives {
         uint256 requestId,
         address depositRecipient,
         address tokenAddress,
-        uint256 amount
+        uint256 amount,
+        uint256 ferryTip
     );
 
     event DisputeResolutionAcceptedIntoQueue(
@@ -59,6 +60,7 @@ interface IRolldownPrimitives {
         address tokenAddress;
         uint256 amount;
         uint256 timeStamp;
+        uint256 ferryTip;
     }
 
     struct CancelResolution {
@@ -93,6 +95,7 @@ interface IRolldownPrimitives {
         address recipient;
         address tokenAddress;
         uint256 amount;
+        uint256 ferryTip;
     }
 
 }
