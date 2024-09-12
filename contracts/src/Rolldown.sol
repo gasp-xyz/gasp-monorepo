@@ -73,7 +73,15 @@ contract Rolldown is
       emit NewUpdaterSet(updaterAccount);
     }
 
-    function deposit_native() external payable whenNotPaused {
+    function deposit_native() external payable nonReentrant whenNotPaused {
+      deposit_native_with_tip(0);
+    }
+
+    function deposit_native(uint256 ferryTip) external payable nonReentrant whenNotPaused {
+      deposit_native_with_tip(ferryTip);
+    }
+
+    function deposit_native_with_tip(uint256 ferryTip) private {
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
         uint amount = msg.value;
@@ -99,18 +107,29 @@ contract Rolldown is
         );
     }
 
-    function deposit(address tokenAddress, uint256 amount) public whenNotPaused {
-        deposit_erc20(tokenAddress, amount);
+    function deposit(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant  {
+        deposit_erc20_with_tip(tokenAddress, amount, 0);
+    }
+
+    function deposit(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant  {
+        deposit_erc20_with_tip(tokenAddress, amount, ferryTip);
     }
 
     function deposit_erc20(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
+        deposit_erc20_with_tip(tokenAddress, amount, 0);
+    }
+
+    function deposit_erc20(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
+        deposit_erc20_with_tip(tokenAddress, amount, ferryTip);
+    }
+
+    function deposit_erc20_with_tip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
         address depositRecipient = msg.sender;
 
         IERC20 token = IERC20(tokenAddress);
         token.safeTransferFrom(msg.sender, address(this), amount);
-        uint256 ferryTip = 0;
 
         uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
