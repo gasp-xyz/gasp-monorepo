@@ -9,7 +9,7 @@ use bindings::{
         OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate, QuorumsStakeUpdate,
         RdTaskCompletedFilter,
     },
-    gasp_multi_rollup_service::GaspMultiRollupService,
+    gasp_multi_rollup_service::{GaspMultiRollupService, Range},
     shared_types::{G1Point, G2Point, OpTask, OpTaskResponse, RdTask, RdTaskResponse},
 };
 use ethers::providers::{Middleware, PendingTransaction, SubscriptionStream};
@@ -57,6 +57,7 @@ pub struct CustomOperatorAvsState {
 pub struct Syncer {
     pub source_client: Arc<SourceClient>,
     pub target_client: Arc<TargetClient>,
+    pub target_chain_index: u8,
     pub root_target_client: Option<Arc<TargetClient>>,
     avs_contracts: AvsContracts,
     gasp_service_contract: GaspMultiRollupService<TargetClient>,
@@ -82,10 +83,12 @@ impl Syncer {
         } else {
             None
         };
+        let target_chain_index = cfg.target_chain_index;
 
         Ok(Arc::new(Self {
             source_client,
             target_client,
+            target_chain_index,
             root_target_client: maybe_arc_root_target_client,
             avs_contracts,
             gasp_service_contract,
@@ -190,17 +193,18 @@ impl Syncer {
                                     continue;
                                 }
 
-                                if call.task.last_completed_op_task_created_block + 14400 <= call.task.task_created_block {
-                                    tracing::error!("stale old state {:?}", latest_completed_op_task_created_block);
-                                    return Err(eyre!("stale old state {:?}", latest_completed_op_task_created_block))
-                                }
-
                                 let update_txn = self.clone().gasp_service_contract.process_eigen_op_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature, operators_state_info);
                                 println!("{:?}", update_txn);
                                 let update_txn_pending = update_txn.send().await;
                                 println!("{:?}", update_txn_pending);
                                 let update_txn_receipt = update_txn_pending?.await?;
                                 println!("{:?}", update_txn_receipt);
+                                match update_txn_receipt.clone().ok_or_eyre("failed to unwrap update_txn_receipt")?.status{
+                                    Some(status) if status.is_zero()=>{
+                                        return Err(eyre!("update_txn failed {:?}", update_txn_receipt))
+                                    }
+                                    _=>{}
+                                }
 
                                 latest_completed_op_task_created_block = call.task.task_created_block;
                             },
@@ -230,24 +234,22 @@ impl Syncer {
                                 println!("{:?}", task_hash);
                                 println!("{:?}", task_hash == call.task_response.reference_task_hash.into());
 
+                                if call.task.chain_id != self.target_chain_index{
+                                    continue;
+                                }
+
                                 if task_hash != call.task_response.reference_task_hash.into() {
                                     tracing::error!("task_hash mismatch {:?}", task_hash);
                                     return Err(eyre!("task_hash mismatch {:?}", task_hash))
                                 }
 
                                 if latest_completed_rd_task_number !=0 && latest_completed_rd_task_number >= call.task.task_num {
-                                    tracing::error!("stale rd_task {:?}", latest_completed_rd_task_number);
-                                    return Err(eyre!("stale rd_task {:?}", latest_completed_rd_task_number))
+                                    continue;
                                 }
 
                                 if latest_completed_op_task_created_block != call.task.last_completed_op_task_created_block {
                                     tracing::error!("latest_completed_op_task_created_block mismatch {:?}", latest_completed_op_task_created_block);
                                     return Err(eyre!("latest_completed_op_task_created_block mismatch {:?}", latest_completed_op_task_created_block))
-                                }
-
-                                if call.task.last_completed_op_task_created_block + 14400 <= call.task.task_created_block {
-                                    tracing::error!("stale old state {:?}", latest_completed_op_task_created_block);
-                                    return Err(eyre!("stale old state {:?}", latest_completed_op_task_created_block))
                                 }
 
                                 let update_txn = self.clone().gasp_service_contract.process_eigen_rd_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature);
@@ -256,6 +258,13 @@ impl Syncer {
                                 println!("{:?}", update_txn_pending);
                                 let update_txn_receipt = update_txn_pending?.await?;
                                 println!("{:?}", update_txn_receipt);
+                                match update_txn_receipt.clone().ok_or_eyre("failed to unwrap update_txn_receipt")?.status{
+                                    Some(status) if status.is_zero()=>{
+                                        return Err(eyre!("update_txn failed {:?}", update_txn_receipt))
+                                    }
+                                    _=>{}
+                                }
+
                                 latest_completed_rd_task_number = call.task.task_num;
 
                             },
@@ -277,36 +286,49 @@ impl Syncer {
 
     #[instrument(skip_all)]
     pub async fn reinit(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
+        let alt_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
         let latest_completed_op_task_created_block = self
             .gasp_service_contract
             .latest_completed_op_task_created_block()
+            .block(alt_block_number)
             .await?;
-        let latest_completed_op_task_quorum_numbers =
-            self.gasp_service_contract.quorum_numbers().await?;
+        let latest_completed_op_task_quorum_numbers = self
+            .gasp_service_contract
+            .quorum_numbers()
+            .block(alt_block_number)
+            .await?;
         let latest_completed_op_task_quorum_threshold_percentage = self
             .gasp_service_contract
             .quorum_threshold_percentage()
+            .block(alt_block_number)
             .await?;
-
+        let latest_completed_rd_task_number = self
+            .gasp_service_contract
+            .latest_completed_rd_task_number()
+            .block(alt_block_number)
+            .await?;
+        let chain_rd_batch_nonce = self
+            .gasp_service_contract
+            .chain_rd_batch_nonce()
+            .block(alt_block_number)
+            .await?;
+            
         // TODO!!
         // Get the latest block from source chain and query the following three with it!
+        let eth_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
         let task_num = self
             .clone()
             .avs_contracts
             .task_manager
             .last_completed_op_task_num()
+            .block(eth_block_number)
             .await?;
         let block_num = self
             .clone()
             .avs_contracts
             .task_manager
             .last_completed_op_task_created_block()
-            .await?;
-        let latest_pending_state_hash = self
-            .clone()
-            .avs_contracts
-            .task_manager
-            .latest_pending_state_hash()
+            .block(eth_block_number)
             .await?;
 
         // Unfortunately latestTaskNum and LastCompletedTaskNum both start at 0
@@ -357,39 +379,11 @@ impl Syncer {
         last_task.last_completed_op_task_quorum_threshold_percentage =
             latest_completed_op_task_quorum_threshold_percentage;
 
-        // TODO
-        // Maybe remove this whole block it is not needed here
-        // in the current impl
-        /*From here*/
-        let block_events: Vec<OpTaskCompletedFilter> = self
+
+        let (merkle_roots, ranges, last_batch_id) = self
             .clone()
-            .avs_contracts
-            .task_manager
-            .event_with_filter(
-                Filter::new()
-                    .event(&OpTaskCompletedFilter::abi_signature())
-                    .from_block(u64::from(block_num)),
-            )
-            .query()
+            .get_cumulative_rd_update(chain_rd_batch_nonce, latest_completed_rd_task_number, eth_block_number, latest_completed_op_task_created_block)
             .await?;
-
-        if block_events.len().is_zero() {
-            tracing::error!("missing expected task response {:?}", task_num);
-            return Err(eyre!("missing expected task response {:?}", task_num));
-        }
-
-        // TODO
-        // This will incorrectly fail if an opTask was completed in the same
-        // block that the opTask we are looking for was created in
-        // Modify this to match how it is handled elsewhere...
-        // Ignored for now since this whole block is unnecessary...
-        if block_events[0].task_index != task_num {
-            tracing::error!("missing expected task response {:?}", task_num);
-            return Err(eyre!("missing expected task response {:?}", task_num));
-        }
-
-        let task_response = block_events[0].task_response.clone();
-        /*To here*/
 
         let operators_state_info = self
             .clone()
@@ -401,7 +395,7 @@ impl Syncer {
             .root_gasp_service_contract
             .clone()
             .expect("should work in reinit")
-            .process_eigen_reinit(last_task, operators_state_info, latest_pending_state_hash);
+            .process_eigen_reinit(last_task, operators_state_info, merkle_roots, ranges, last_batch_id);
         println!("{:?}", reinit_txn);
         let reinit_txn_pending = reinit_txn.send().await;
         println!("{:?}", reinit_txn_pending);
@@ -489,6 +483,63 @@ impl Syncer {
         println!("{:?}", force_respond_txn_receipt);
 
         Ok(())
+    }
+
+    pub(crate) async fn get_cumulative_rd_update(
+        self: Arc<Self>,
+        chain_rd_batch_nonce: u32,
+        latest_completed_rd_task_number: u32,
+        eth_block_number: u64,
+        latest_completed_op_task_created_block: u32
+    ) -> eyre::Result<(Vec<[u8; 32]>, Vec<Range>, u32)> {
+
+        let mut merkle_roots: Vec<[u8; 32]> = Default::default();
+        let mut ranges: Vec<Range> = Default::default();
+        let mut expected_rd_task_number = latest_completed_rd_task_number + 1;
+        let mut expected_batch_id = chain_rd_batch_nonce;
+
+        let mut events: Vec<RdTaskCompletedFilter> = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .event_with_filter(
+                Filter::new()
+                    .event(&RdTaskCompletedFilter::abi_signature())
+                    .from_block(u64::from(latest_completed_op_task_created_block))
+                    .to_block(u64::from(eth_block_number)),
+            )
+            .query()
+            .await?;
+
+        for event in events{
+            if latest_completed_rd_task_number >= event.task_response.reference_task_index{
+                continue;
+            }
+            if event.task_response.reference_task_index > expected_rd_task_number {
+                tracing::error!("missing expected_rd_task_number {:?}", expected_rd_task_number);
+                return Err(eyre!("missing expected_rd_task_number {:?}", expected_rd_task_number));
+            }
+
+            // Here expected_rd_task_number == event.task_response.reference_task_index
+            if event.task_response.chain_id == self.target_chain_index {
+                
+                if expected_batch_id != event.task_response.batch_id{
+                    tracing::error!("missing expected_batch_id {:?}", expected_batch_id);
+                    return Err(eyre!("missing expected_batch_id {:?}", expected_batch_id));
+                }
+                merkle_roots.push(event.task_response.rd_update);
+                ranges.push(Range{start: event.task_response.range_start, end: event.task_response.range_end});
+                expected_batch_id = expected_batch_id + 1;
+            }
+
+            expected_rd_task_number = expected_rd_task_number + 1;
+
+        }
+
+        let last_batch_id = expected_batch_id.saturating_sub(1);
+
+        Ok((merkle_roots, ranges, last_batch_id))
+
     }
 
     pub(crate) async fn get_operators_state_info(

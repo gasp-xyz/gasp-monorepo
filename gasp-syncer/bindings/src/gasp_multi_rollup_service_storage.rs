@@ -32,6 +32,24 @@ pub mod gasp_multi_rollup_service_storage {
                     },],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("chainId"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("chainId"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned(
+                                    "enum IRolldownPrimitives.ChainId",
+                                ),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("chainRdBatchNonce"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("chainRdBatchNonce"),
@@ -421,6 +439,12 @@ pub mod gasp_multi_rollup_service_storage {
                 .method_hash([14, 224, 253, 189], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `chainId` (0x9a8a0592) function
+        pub fn chain_id(&self) -> ::ethers::contract::builders::ContractCall<M, u8> {
+            self.0
+                .method_hash([154, 138, 5, 146], ())
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `chainRdBatchNonce` (0xdeb4037d) function
         pub fn chain_rd_batch_nonce(&self) -> ::ethers::contract::builders::ContractCall<M, u32> {
             self.0
@@ -753,6 +777,21 @@ pub mod gasp_multi_rollup_service_storage {
     )]
     #[ethcall(name = "allowNonRootInit", abi = "allowNonRootInit()")]
     pub struct AllowNonRootInitCall;
+    ///Container type for all input parameters for the `chainId` function with signature `chainId()` and selector `0x9a8a0592`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "chainId", abi = "chainId()")]
+    pub struct ChainIdCall;
     ///Container type for all input parameters for the `chainRdBatchNonce` function with signature `chainRdBatchNonce()` and selector `0xdeb4037d`
     #[derive(
         Clone,
@@ -994,6 +1033,7 @@ pub mod gasp_multi_rollup_service_storage {
     )]
     pub enum GaspMultiRollupServiceStorageCalls {
         AllowNonRootInit(AllowNonRootInitCall),
+        ChainId(ChainIdCall),
         ChainRdBatchNonce(ChainRdBatchNonceCall),
         LastOpUpdateBlockTimestamp(LastOpUpdateBlockTimestampCall),
         LatestCompletedOpTaskCreatedBlock(LatestCompletedOpTaskCreatedBlockCall),
@@ -1018,6 +1058,9 @@ pub mod gasp_multi_rollup_service_storage {
                 <AllowNonRootInitCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::AllowNonRootInit(decoded));
+            }
+            if let Ok(decoded) = <ChainIdCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+                return Ok(Self::ChainId(decoded));
             }
             if let Ok(decoded) =
                 <ChainRdBatchNonceCall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -1089,6 +1132,7 @@ pub mod gasp_multi_rollup_service_storage {
         fn encode(self) -> Vec<u8> {
             match self {
                 Self::AllowNonRootInit(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::ChainId(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::ChainRdBatchNonce(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::LastOpUpdateBlockTimestamp(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
@@ -1124,6 +1168,7 @@ pub mod gasp_multi_rollup_service_storage {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
                 Self::AllowNonRootInit(element) => ::core::fmt::Display::fmt(element, f),
+                Self::ChainId(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ChainRdBatchNonce(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LastOpUpdateBlockTimestamp(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LatestCompletedOpTaskCreatedBlock(element) => {
@@ -1146,6 +1191,11 @@ pub mod gasp_multi_rollup_service_storage {
     impl ::core::convert::From<AllowNonRootInitCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: AllowNonRootInitCall) -> Self {
             Self::AllowNonRootInit(value)
+        }
+    }
+    impl ::core::convert::From<ChainIdCall> for GaspMultiRollupServiceStorageCalls {
+        fn from(value: ChainIdCall) -> Self {
+            Self::ChainId(value)
         }
     }
     impl ::core::convert::From<ChainRdBatchNonceCall> for GaspMultiRollupServiceStorageCalls {
@@ -1234,6 +1284,20 @@ pub mod gasp_multi_rollup_service_storage {
         Hash,
     )]
     pub struct AllowNonRootInitReturn(pub bool);
+    ///Container type for all return fields from the `chainId` function with signature `chainId()` and selector `0x9a8a0592`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct ChainIdReturn(pub u8);
     ///Container type for all return fields from the `chainRdBatchNonce` function with signature `chainRdBatchNonce()` and selector `0xdeb4037d`
     #[derive(
         Clone,

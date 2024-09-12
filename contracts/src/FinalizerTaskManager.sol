@@ -390,7 +390,6 @@ contract FinalizerTaskManager is
             "Op State uninit"
         );
         uint32 latestRdTaskNumMem = latestRdTaskNum;
-        uint32 latestOpTaskNumMem = latestOpTaskNum;
         // create a new task struct
         RdTask memory newTask;
         newTask.taskNum = latestRdTaskNumMem;

@@ -31,11 +31,11 @@ use sp_runtime::traits::{BlakeTwo256, Hash, Keccak256};
 use sp_runtime::{generic, OpaqueExtrinsic};
 use std::collections::HashMap;
 use std::sync::Arc;
+use substrate_rpc_client::{rpc_params, ws_client, ClientT};
 use tokio::select;
 use tokio::time::{sleep, Duration};
 use tokio::try_join;
 use tracing::{debug, error, info, instrument};
-use substrate_rpc_client::{rpc_params, ws_client, ClientT};
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
@@ -168,23 +168,24 @@ impl Operator {
         Ok(())
     }
 
-
     pub(crate) async fn get_rd_update(
         self: Arc<Self>,
         rd_task: RdTask,
     ) -> eyre::Result<RdTaskResponse> {
-
         type StorageItemKeyType = (u8, u128);
 
-        info!("get_rd_update - rd_task: {:?}", rd_task);
+        debug!("get_rd_update - rd_task: {:?}", rd_task);
 
-        let rpc = ws_client(self.substrate_client_uri.clone()).await.map_err(|e| eyre!(e))?;
+        let rpc = ws_client(self.substrate_client_uri.clone())
+            .await
+            .map_err(|e| eyre!(e))?;
         let two_x_hash_pallet = sp_io::hashing::twox_128(b"Rolldown");
         let two_x_hash_storage_item = sp_io::hashing::twox_128(b"L2RequestsBatch");
         let storage_item_key: StorageItemKeyType = (rd_task.chain_id, rd_task.batch_id.into());
         let storage_item_key_encoded = storage_item_key.encode();
 
-        let mut storage_item_key_hashed = sp_io::hashing::blake2_128(&storage_item_key_encoded[..]).to_vec();
+        let mut storage_item_key_hashed =
+            sp_io::hashing::blake2_128(&storage_item_key_encoded[..]).to_vec();
         storage_item_key_hashed.extend_from_slice(&storage_item_key_encoded[..]);
 
         let mut storage_key = Vec::<u8>::new();
@@ -192,8 +193,7 @@ impl Operator {
         storage_key.extend_from_slice(&two_x_hash_storage_item[..]);
         storage_key.extend_from_slice(&storage_item_key_hashed[..]);
 
-
-        info!("get_rd_update - storage_key: {:?}", storage_key);
+        debug!("get_rd_update - storage_key: {:?}", storage_key);
 
         let params = rpc_params!(&storage_key[..]);
         let (created_block_number, (range_start, range_end), updater) = rpc
@@ -218,7 +218,7 @@ impl Operator {
 
         Ok(partial_rd_task_response)
     }
-    
+
     pub(crate) async fn execute_block(
         self: Arc<Self>,
         block_number: BlockNumber,

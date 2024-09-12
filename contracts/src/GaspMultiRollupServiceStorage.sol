@@ -10,6 +10,7 @@ abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
 
     IRolldown public rolldown;
     uint32 public chainRdBatchNonce;
+    IRolldown.ChainId public chainId;
 
     address public updater;
 
