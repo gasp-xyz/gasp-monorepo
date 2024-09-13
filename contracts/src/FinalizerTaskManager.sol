@@ -188,16 +188,7 @@ contract FinalizerTaskManager is
         bool isInit = lastCompletedOpTaskCreatedBlock == 0;
         uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
 
-        if (isInit) {
-            if (allowNonRootInit) {
-                require(msg.sender == aggregator, "Auth0");
-            } else {
-                require(msg.sender == owner(), "Auth2");
-            }
-        } else {
-            require(msg.sender == aggregator, "Auth0");
-        }
-
+        require(!isInit || allowNonRootInit, "use root init");
 
         uint32 taskCreatedBlock = task.taskCreatedBlock;
         bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
@@ -232,11 +223,9 @@ contract FinalizerTaskManager is
 
         IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
 
-        if (!isInit) {
-            // check the BLS signature
-            (quorumStakeTotals, hashOfNonSigners) =
-                blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
-        }
+        // check the BLS signature
+        (quorumStakeTotals, hashOfNonSigners) =
+            blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
 
         TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
             uint32(block.number),
@@ -253,18 +242,16 @@ contract FinalizerTaskManager is
 
         isTaskPending = false;
 
-        if (isInit) {
-            // check that signatories own at least a threshold percentage of each quourm
-            for (uint256 i = 0; i < quorumNumbers.length; i++) {
-                // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
-                // signed stake > total stake
-                if (
-                    quorumStakeTotals.signedStakeForQuorum[i] * THRESHOLD_DENOMINATOR
-                        < quorumStakeTotals.totalStakeForQuorum[i] * uint8(quorumThresholdPercentage)
-                ) {
-                    // "Signatories do not own at least threshold percentage of a quorum"
-                    return;
-                }
+        // check that signatories own at least a threshold percentage of each quourm
+        for (uint256 i = 0; i < quorumNumbers.length; i++) {
+            // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
+            // signed stake > total stake
+            if (
+                quorumStakeTotals.signedStakeForQuorum[i] * THRESHOLD_DENOMINATOR
+                    < quorumStakeTotals.totalStakeForQuorum[i] * uint8(quorumThresholdPercentage)
+            ) {
+                // "Signatories do not own at least threshold percentage of a quorum"
+                return;
             }
         }
 
