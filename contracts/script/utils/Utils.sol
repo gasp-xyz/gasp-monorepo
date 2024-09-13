@@ -7,6 +7,7 @@ import "../../src/ERC20Mock.sol";
 
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";
+import {IRolldownPrimitives} from "../../src/Rolldown.sol";
 
 contract Utils is Script {
     // Note that this fct will only work for the ERC20Mock that has a public mint function
@@ -140,7 +141,7 @@ contract Utils is Script {
         vm.writeJson(outputJson, outputFilePath);
     }
 
-    function evmPrefixedPath(IRolldownPrimitives.ChainId chain, string path) public view returns (string memory) {
+    function evmPrefixedPath(IRolldownPrimitives.ChainId chain, string memory path) public view returns (string memory) {
       string memory evm;
 
       if (chain == IRolldownPrimitives.ChainId.Ethereum) {

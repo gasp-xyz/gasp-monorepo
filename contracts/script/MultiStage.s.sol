@@ -4,13 +4,13 @@ import "../script/1_FinalizerAvsDeployer.s.sol";
 import "../script/M2_Deploy_From_Scratch.s.sol";
 import "../script/RolldownDeployer.s.sol";
 import "../script/GaspMultiRollupServiceDeployer.s.sol";
+import "../src/IRolldown.sol";
 import {IRolldownPrimitives} from "../src/Rolldown.sol";
 import {Utils} from "./utils/Utils.sol";
 
 import "forge-std/StdJson.sol";
 
 contract MultiStage is Script, Utils, Test {
-    string constant _CONFIG_PATH = "deploy.config";
 
     function deployRolldown() private {
     }
@@ -54,25 +54,25 @@ contract MultiStage is Script, Utils, Test {
         }
 
 
-        Rolldown public rolldown;
-        FinalizerTaskManager public taskManager;
-        address public avsOwner;
+        Rolldown rolldown;
+        FinalizerTaskManager taskManager;
+        address avsOwner;
 
-        string constant _EIGEN_OUTPUT_PATH = "avs_deployment_output";
+        string memory _EIGEN_OUTPUT_PATH = "avs_deployment_output";
         string memory eigenlayerDeployedContracts = readOutput(_EIGEN_OUTPUT_PATH);
         taskManager = FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
 
-        string constant _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
+        string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
         string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Ethereum, _ROLLDOWN_OUTPUT_PATH));
         rolldown = Rolldown(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown"));
 
-        string constant _CONFIG_PATH = "deploy.config";
+        string memory _CONFIG_PATH = "deploy.config";
         string memory configData = readConfig(_CONFIG_PATH);
         avsOwner = stdJson.readAddress(configData, ".permissions.owner");
 
         vm.startBroadcast(avsOwner);
 
-        taskManager.setRolldown(address(rolldown));
+        taskManager.setRolldown(IRolldown(address(rolldown)));
         rolldown.setUpdater(address(taskManager));
 
         vm.stopBroadcast();
@@ -93,25 +93,25 @@ contract MultiStage is Script, Utils, Test {
         gaspMultiRollupServiceDeployer.run(IRolldownPrimitives.ChainId.Arbitrum, true);
 
 
-        Rolldown public rolldown;
-        GaspMultiRollupService public gmrs;
-        address public avsOwner;
+        Rolldown rolldown;
+        GaspMultiRollupService gmrs;
+        address avsOwner;
 
-        string constant _GMRS_OUTPUT_PATH = "gmrs_output";
+        string memory _GMRS_OUTPUT_PATH = "gmrs_output";
         string memory gmrsDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Arbitrum, _GMRS_OUTPUT_PATH));
         gmrs = GaspMultiRollupService(stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs"));
 
-        string constant _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
+        string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
         string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Arbitrum, _ROLLDOWN_OUTPUT_PATH));
         rolldown = Rolldown(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown"));
 
-        string constant _CONFIG_PATH = "deploy.config";
+        string memory _CONFIG_PATH = "deploy.config";
         string memory configData = readConfig(_CONFIG_PATH);
         avsOwner = stdJson.readAddress(configData, ".permissions.owner");
 
         vm.startBroadcast(avsOwner);
 
-        gmrs.setRolldown(address(rolldown));
+        gmrs.setRolldown(IRolldown(address(rolldown)));
         rolldown.setUpdater(address(gmrs));
 
         vm.stopBroadcast();
