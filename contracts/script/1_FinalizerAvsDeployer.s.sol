@@ -48,11 +48,11 @@ contract Deployer is Script, Utils, Test {
 
     bool public allow_non_root_tm_init;
     uint32 public taskResponseWindowBlocks;
-    uint32 public minOpTaskResponseWindowBlock;
 
     // non-upgradable contracts
     BLSSignatureChecker public blsSignatureChecker;
     OperatorStateRetrieverExtended public operatorStateRetreiverExtended;
+    address public dummy_rolldown_address;
 
     //upgradeable contracts
     FinalizerServiceManager public serviceManager;
@@ -102,8 +102,6 @@ contract Deployer is Script, Utils, Test {
 
         taskResponseWindowBlocks =
             uint32(stdJson.readUint(configData, ".taskManagerParams.taskResponseWindowBlocks"));
-        minOpTaskResponseWindowBlock =
-            uint32(stdJson.readUint(configData, ".taskManagerParams.minOpTaskResponseWindowBlock"));
 
         allow_non_root_tm_init = stdJson.readBool(configData, ".allow_non_root_tm_init");
 
@@ -257,7 +255,7 @@ contract Deployer is Script, Utils, Test {
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(taskManager))),
             address(taskManagerImplementation),
-            abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator, allow_non_root_tm_init, blsSignatureChecker, taskResponseWindowBlocks, minOpTaskResponseWindowBlock, operatorStateRetreiverExtended)
+            abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator, allow_non_root_tm_init, blsSignatureChecker, taskResponseWindowBlocks, operatorStateRetreiverExtended, dummy_rolldown_address)
         );
 
         // transfer ownership of proxy admin to upgrader

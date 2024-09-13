@@ -74,6 +74,18 @@ contract Utils is Script {
         return string.concat(inputdir, chaindir, file);
     }
 
+    function calculateOutputPath(
+        string memory outputfilename
+    ) internal view returns (string memory) {
+        string memory outputdir = string.concat(
+            vm.projectRoot(),
+            "/script/output/"
+        );
+        string memory chaindir = string.concat(vm.toString(block.chainid), "/");
+        string memory file = string.concat(outputfilename, ".json");
+        return string.concat(outputdir, chaindir, file);
+    }
+
 
     // Forge scripts best practice: https://book.getfoundry.sh/tutorials/best-practices#scripts
     function inputExists(
@@ -90,6 +102,12 @@ contract Utils is Script {
         string memory inputFileName
     ) internal view returns (string memory) {
         return vm.readFile(calculateInputPath(inputFileName));
+    }
+
+    function readOutput(
+        string memory outputFileName
+    ) internal view returns (string memory) {
+        return vm.readFile(calculateOutputPath(outputFileName));
     }
 
     function readConfig(
@@ -120,5 +138,19 @@ contract Utils is Script {
             ".json"
         );
         vm.writeJson(outputJson, outputFilePath);
+    }
+
+    function evmPrefixedPath(IRolldownPrimitives.ChainId chain, string path) public view returns (string memory) {
+      string memory evm;
+
+      if (chain == IRolldownPrimitives.ChainId.Ethereum) {
+        evm = "ethereum_";
+      } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
+        evm = "arbitrum_"; 
+      } else {
+        revert("Unsupported chain");
+      }
+
+      return string.concat(evm, path);
     }
 }
