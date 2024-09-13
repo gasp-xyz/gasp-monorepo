@@ -63,7 +63,7 @@ func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, avsRegistr
 		quorumDiff:                    make(map[sdktypes.QuorumNum]types.QuorumStakeDiff),
 		operatorIdsToBeUpdated:        make(map[sdktypes.OperatorId]bool),
 		quorumsToBeUpdated:            make(map[sdktypes.QuorumNum]bool),
-		quorumPosPercThreshold:        50,
+		quorumPosPercThreshold:        20,
 		quorumNegPercThreshold:        20,
 		updateFullQuorumThresholdPerc: 30,
 		triggerOpStateUpdate:          false,
