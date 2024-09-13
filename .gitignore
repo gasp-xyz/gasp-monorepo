@@ -81,6 +81,7 @@ ops/**/data
 cache
 coverage
 output
+!contracts/script/output
 out
 !broadcast
 **/broadcast/*
