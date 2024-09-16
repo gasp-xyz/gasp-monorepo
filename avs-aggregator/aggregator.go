@@ -482,8 +482,8 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 				success = true
 			}
 		}
-		return success, nil
 		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r, "success", success)
+		return success, nil
 
 	} else if blsAggServiceResp.TaskId.TaskType == 1 {
 
@@ -506,8 +506,8 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 				success = true
 			}
 		}
-		return success, nil
 		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r, "success", success)
+		return success, nil
 
 	} else {
 		return false, fmt.Errorf("FATAL: Aggregator failed to recognize TaskType, blsAggServiceResp.TaskId: %v", blsAggServiceResp.TaskId)
@@ -704,9 +704,11 @@ func (agg *Aggregator) createAndProcessOpTask(maxAttempts uint8) (taskmanager.IF
 
 	var success bool
 	var newTask taskmanager.IFinalizerTaskManagerOpTask
+	var taskId sdktypes.TaskId
+	var err error
 	for attempt := 0; attempt < int(maxAttempts); attempt++ {
 	
-		newTask, taskId, err := agg.createOpTask()
+		newTask, taskId, err = agg.createOpTask()
 		if err != nil {
 			return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to createOpTask, err: %v", err)
 		}
@@ -728,15 +730,18 @@ func (agg *Aggregator) createAndProcessOpTask(maxAttempts uint8) (taskmanager.IF
 
 func (agg *Aggregator) createAndProcessRdTask(chainToUpdate uint8, chainBatchIdToUpdate uint32, maxAttempts uint8) (error) {
 	var success bool
+	var newTask taskmanager.IFinalizerTaskManagerRdTask
+	var taskId sdktypes.TaskId
+	var err error
 	for attempt := 0; attempt < int(maxAttempts); attempt++ {
 	agg.logger.Info("Aggregator new RdTask", "chainToUpdate", chainToUpdate, "chainBatchIdToUpdate", chainBatchIdToUpdate, "attempt", attempt)
 
-	newTask, taskId, err := agg.createRdTask(chainToUpdate, chainBatchIdToUpdate)
+	newTask, taskId, err = agg.createRdTask(chainToUpdate, chainBatchIdToUpdate)
 	if err != nil{
 		return fmt.Errorf("Aggregator failed to createRdTask: err: %v", err)
 	}
 
-	success, err := agg.processCreatedRdTask(newTask, taskId)
+	success, err = agg.processCreatedRdTask(newTask, taskId)
 	if err != nil{
 		return fmt.Errorf("Aggregator failed to processCreatedRdTask: err: %v", err)
 	}
@@ -745,7 +750,7 @@ func (agg *Aggregator) createAndProcessRdTask(chainToUpdate uint8, chainBatchIdT
 	}
 	}
 	if success!=true{
-		return fmt.Errorf("Aggregator failed to succesfully complete rdTask after 3 attempts", "chainToUpdate", chainToUpdate, "chainBatchIdToUpdate", chainBatchIdToUpdate)
+		return fmt.Errorf("Aggregator failed to succesfully complete rdTask after 3 attempts, chainToUpdate: %v, chainBatchIdToUpdate: %v", chainToUpdate, chainBatchIdToUpdate)
 	}
 	return nil
 }
@@ -761,7 +766,7 @@ func (agg *Aggregator) getL1BatchUpdateInfo(blockNumber uint32) (bool, uint8, ui
 
 		meta, err := agg.substrateClient.RPC.State.GetMetadata(atBlockHash)
 		if err != nil {
-			return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetBlockHash: err: %v", err)
+			return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetMetadata: err: %v", err)
 		}
 
 		var substrateL2RequestsBatchLast types.SubstrateL2RequestsBatchLast
@@ -774,10 +779,29 @@ func (agg *Aggregator) getL1BatchUpdateInfo(blockNumber uint32) (bool, uint8, ui
 			return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to CreateStorageKey: err: %v", err)
 		}
 
-		ok, err := agg.substrateClient.RPC.State.GetStorage(key, substrateL2RequestsBatchLast, atBlockHash)
-		if (ok == false || err != nil) {
+		agg.logger.Debug("Aggregator in maybeSendNewRdTask after CreateStorageKey", "key", hex.EncodeToString(key))
+
+		raw, err := agg.substrateClient.RPC.State.GetStorageRaw(key, atBlockHash)
+		if err != nil {
 			return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetStorage: err: %v", err)
 		}
+
+		agg.logger.Debug("Aggregator in maybeSendNewRdTask after GetStorageRaw", "raw", raw)
+
+		ok, err := agg.substrateClient.RPC.State.GetStorage(key, &substrateL2RequestsBatchLast, atBlockHash)
+		if err != nil {
+			return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to GetStorage: err: %v", err)
+		}
+
+		if !ok {
+			agg.logger.Debug("Aggregator in maybeSendNewRdTask after GetStorage", "ok", ok)
+			return false, 0, 0, nil
+		}
+
+		// if substrateL2RequestsBatchLast == nil {
+		// 	agg.logger.Debug("Aggregator in maybeSendNewRdTask after GetStorage", "substrateL2RequestsBatchLast", substrateL2RequestsBatchLast)
+		// 	return false, 0, 0, nil
+		// }
 
 		for _, lastBatchByL1 := range substrateL2RequestsBatchLast{
 			
@@ -789,7 +813,11 @@ func (agg *Aggregator) getL1BatchUpdateInfo(blockNumber uint32) (bool, uint8, ui
 			if uint64(lastBatchByL1.Value.BatchId.Int64()) >= uint64(chainRdBatchNonce) {
 				isUpdate = true
 				chainToUpdate = uint8(lastBatchByL1.Key)
-				chainBatchIdToUpdate = chainRdBatchNonce
+				if chainRdBatchNonce == 0 {
+					chainBatchIdToUpdate = 1
+				} else {
+					chainBatchIdToUpdate = chainRdBatchNonce
+				}
 				break
 			}
 		}

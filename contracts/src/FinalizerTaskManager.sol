@@ -409,7 +409,7 @@ contract FinalizerTaskManager is
 
         // TODO
         // Maybe this belongs in createNewRdTask
-        require(taskResponse.batchId == chainRdBatchNonce[taskResponse.chainId], "chainRdBatchNonce mismatch"); 
+        require(chainRdBatchNonce[taskResponse.chainId] ==0 || taskResponse.batchId == chainRdBatchNonce[taskResponse.chainId], "chainRdBatchNonce mismatch"); 
         require(
                 isTaskPending == true, "No task pending");
         // check that the task is valid, hasn't been responsed yet, and is being responsed in time

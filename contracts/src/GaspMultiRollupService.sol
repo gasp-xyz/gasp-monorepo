@@ -36,6 +36,7 @@ contract GaspMultiRollupService is
         allowNonRootInit = _allowNonRootInit;
         rolldown = _rolldown;
         chainId = _chainId;
+        chainRdBatchNonce = 1;
     }
 
     /* MODIFIERS */
