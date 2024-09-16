@@ -2,9 +2,10 @@ import { Request, Response } from 'express'
 import * as errorHandler from '../error/Handler.js'
 import MangataClient from '../connector/MangataNode.js'
 import { BN } from '@polkadot/util'
-import { priceDiscovery, getAsset } from '../service/PriceDiscoveryService.js'
+import { priceDiscovery } from '../service/PriceDiscoveryService.js'
 import { Decimal } from 'decimal.js'
 import { fromBN } from 'gasp-sdk'
+import logger from '../util/Logger.js'
 
 export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
   try {
@@ -21,7 +22,6 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
         const frozenTokens = new BN(frozen)
         const freeBalance = freeTokens.sub(frozenTokens)
         const tokenId = storageKey.args[1].toString()
-        console.log('storage key', storageKey.args[1].toString())
         const tokenInfo = (
           await api.query.assetRegistry.metadata(tokenId)
         ).toHuman() as {
@@ -33,7 +33,7 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
           tokenBalanceInUsd = (await priceDiscovery(tokenInfo.symbol))
             .current_price['usd']
         } catch (error) {
-          console.error('Error fetching token balance in USD:', error)
+          logger.error('Error fetching token balance in USD:', error)
           tokenBalanceInUsd = '0'
         }
 
