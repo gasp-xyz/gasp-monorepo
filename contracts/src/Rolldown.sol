@@ -193,11 +193,13 @@ contract Rolldown is
     function update_l1_from_l2(bytes32 merkle_root, Range calldata range /*,TaskResponse calldata response ??? */) external whenNotPaused {
         require(msg.sender == updaterAccount, "Not the owner");
         require(range.end > lastProcessedUpdate_origin_l2, "Update brings no new data");
+        require(range.start > 0 , "range id must be greater than 0");
         require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
         require(range.end >= range.start, "Invalid range");
         roots.push(merkle_root);
         merkleRootRange[merkle_root] = range;
         lastProcessedUpdate_origin_l2 = range.end;
+        emit L2UpdateAccepted(merkle_root, range);
     }
 
     function process_l2_update_cancels(Cancel calldata cancel) private {
