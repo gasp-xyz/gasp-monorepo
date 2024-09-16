@@ -527,7 +527,7 @@ releases:
     values:
       - url: 'rollup-{{ .Values.environmentName }}-rpc.gasp.xyz'
         serviceSelector:
-          role: collator
+          role: rpc
 
   - name: rpc-shared-dns-record-testnet
     installed: {{ eq .Values.environmentName "holesky" }}
@@ -536,7 +536,7 @@ releases:
     values:
       - url: 'rollup-testnet-rpc.gasp.xyz'
         serviceSelector:
-          role: collator
+          role: rpc
 
   - name: rpc-shared-dns-record-legacy
     installed: {{ eq .Values.environmentName "holesky" }}
@@ -545,4 +545,4 @@ releases:
     values:
       - url: 'rollup-testnet-rpc.mangata.online'
         serviceSelector:
-          role: collator
+          role: rpc
