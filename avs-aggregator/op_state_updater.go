@@ -351,6 +351,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						timer := time.NewTimer(time.Hour)
 						defer timer.Stop()
 
+						osu.logger.Debug("OpStateUpdater waiting for opTask to complete - 2")
 					watchForOpTaskCompletedLoop:
 						for {
 							select {

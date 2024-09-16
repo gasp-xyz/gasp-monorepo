@@ -312,7 +312,7 @@ impl Syncer {
             .chain_rd_batch_nonce()
             .block(alt_block_number)
             .await?;
-            
+
         // TODO!!
         // Get the latest block from source chain and query the following three with it!
         let eth_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
@@ -379,10 +379,14 @@ impl Syncer {
         last_task.last_completed_op_task_quorum_threshold_percentage =
             latest_completed_op_task_quorum_threshold_percentage;
 
-
         let (merkle_roots, ranges, last_batch_id) = self
             .clone()
-            .get_cumulative_rd_update(chain_rd_batch_nonce, latest_completed_rd_task_number, eth_block_number, latest_completed_op_task_created_block)
+            .get_cumulative_rd_update(
+                chain_rd_batch_nonce,
+                latest_completed_rd_task_number,
+                eth_block_number,
+                latest_completed_op_task_created_block,
+            )
             .await?;
 
         let operators_state_info = self
@@ -395,7 +399,13 @@ impl Syncer {
             .root_gasp_service_contract
             .clone()
             .expect("should work in reinit")
-            .process_eigen_reinit(last_task, operators_state_info, merkle_roots, ranges, last_batch_id);
+            .process_eigen_reinit(
+                last_task,
+                operators_state_info,
+                merkle_roots,
+                ranges,
+                last_batch_id,
+            );
         println!("{:?}", reinit_txn);
         let reinit_txn_pending = reinit_txn.send().await;
         println!("{:?}", reinit_txn_pending);
@@ -490,9 +500,8 @@ impl Syncer {
         chain_rd_batch_nonce: u32,
         latest_completed_rd_task_number: u32,
         eth_block_number: u64,
-        latest_completed_op_task_created_block: u32
+        latest_completed_op_task_created_block: u32,
     ) -> eyre::Result<(Vec<[u8; 32]>, Vec<Range>, u32)> {
-
         let mut merkle_roots: Vec<[u8; 32]> = Default::default();
         let mut ranges: Vec<Range> = Default::default();
         let mut expected_rd_task_number = latest_completed_rd_task_number + 1;
@@ -511,35 +520,41 @@ impl Syncer {
             .query()
             .await?;
 
-        for event in events{
-            if latest_completed_rd_task_number >= event.task_response.reference_task_index{
+        for event in events {
+            if latest_completed_rd_task_number >= event.task_response.reference_task_index {
                 continue;
             }
             if event.task_response.reference_task_index > expected_rd_task_number {
-                tracing::error!("missing expected_rd_task_number {:?}", expected_rd_task_number);
-                return Err(eyre!("missing expected_rd_task_number {:?}", expected_rd_task_number));
+                tracing::error!(
+                    "missing expected_rd_task_number {:?}",
+                    expected_rd_task_number
+                );
+                return Err(eyre!(
+                    "missing expected_rd_task_number {:?}",
+                    expected_rd_task_number
+                ));
             }
 
             // Here expected_rd_task_number == event.task_response.reference_task_index
             if event.task_response.chain_id == self.target_chain_index {
-                
-                if expected_batch_id != event.task_response.batch_id{
+                if expected_batch_id != event.task_response.batch_id {
                     tracing::error!("missing expected_batch_id {:?}", expected_batch_id);
                     return Err(eyre!("missing expected_batch_id {:?}", expected_batch_id));
                 }
                 merkle_roots.push(event.task_response.rd_update);
-                ranges.push(Range{start: event.task_response.range_start, end: event.task_response.range_end});
+                ranges.push(Range {
+                    start: event.task_response.range_start,
+                    end: event.task_response.range_end,
+                });
                 expected_batch_id = expected_batch_id + 1;
             }
 
             expected_rd_task_number = expected_rd_task_number + 1;
-
         }
 
         let last_batch_id = expected_batch_id.saturating_sub(1);
 
         Ok((merkle_roots, ranges, last_batch_id))
-
     }
 
     pub(crate) async fn get_operators_state_info(
