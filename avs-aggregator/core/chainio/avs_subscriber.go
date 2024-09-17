@@ -64,9 +64,20 @@ func (s *AvsSubscriber) SubscribeToRdTaskResponses(taskResponseLogs chan *taskma
 	return sub
 }
 
-func (s *AvsSubscriber) SubscribeToOpTaskCompleted(fromBlock uint64,opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) (event.Subscription, error) {
+func (s *AvsSubscriber) SubscribeToOpTaskCompleted(opts bind.WatchOpts, opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) (event.Subscription, error) {
 	sub, err := s.AvsContractBindings.TaskManager.WatchOpTaskCompleted(
-		&bind.WatchOpts{Start: &fromBlock}, opTaskCompletionLogs, []uint32{},
+		&opts, opTaskCompletionLogs, []uint32{},
+	)
+	if err != nil {
+		s.logger.Error("Failed to subscribe to OpTaskCompleted events", "err", err)
+	}
+	s.logger.Infof("Subscribed to OpTaskCompleted events")
+	return sub, err
+}
+
+func (s *AvsSubscriber) SubscribeToNewOpTaskCreated(opts bind.WatchOpts, opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerNewOpTaskCreated) (event.Subscription, error) {
+	sub, err := s.AvsContractBindings.TaskManager.WatchNewOpTaskCreated(
+		&opts, opTaskCompletionLogs, []uint32{},
 	)
 	if err != nil {
 		s.logger.Error("Failed to subscribe to OpTaskCompleted events", "err", err)

@@ -139,6 +139,51 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		}
 
 		if len(Ids) == 0 {
+
+			osu.logger.Debug("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+			fromBlock1x := uint64(1)
+			fromBlock1 := uint64(1)
+			// fromBlock1 := currentBlock + 1
+			eventC1x := make(chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate)
+			sub1x, err := osu.ethRpc.AvsSubscriber.SubscribeToOperatorStakeUpdate(bind.WatchOpts{Start: &fromBlock1x, Context: context.Background()}, eventC1x)
+			if err != nil {
+				osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToOperatorStakeUpdate: err: %v, start: %v", err, fromBlock1x)
+				return
+			}
+			event1x := <-eventC1x
+			osu.logger.Debugf("OpStateUpdater event1x: %v", event1x)
+			sub1x.Unsubscribe()
+			sub1x.Unsubscribe()
+			sub1x.Unsubscribe()
+			sub1x.Unsubscribe()
+			// time.Sleep(5 * time.Minute)
+			eventC1 := make(chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate)
+			sub1, err := osu.ethRpc.AvsSubscriber.SubscribeToOperatorStakeUpdate(bind.WatchOpts{Start: &fromBlock1, Context: context.Background()}, eventC1)
+			if err != nil {
+				osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToOperatorStakeUpdate: err: %v, start: %v", err, fromBlock1)
+				return
+			}
+			// loopLoop:
+			// for {
+			// 	select {
+			// 	case <-ctx.Done():
+			// 		osu.errorC <- ctx.Err()
+			// 		return
+			// 	case err := <-sub1.Err():
+			// 		osu.errorC <- fmt.Errorf("OpStateUpdater encountered subscription error in waitForRegisterLoop: err: %v", err)
+			// 		return
+			// 	case 
+				event1 := <-eventC1
+				// :
+					osu.logger.Debugf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!OpStateUpdater eventC")
+					osu.logger.Debugf("OpStateUpdater event1: %v", event1)
+			// 		break loopLoop
+			// 	}
+			// }
+			sub1.Unsubscribe()
+			// sub1x.Unsubscribe()
+			osu.logger.Debug("An operator registered")
+
 			osu.logger.Debug("No operators registered yet")
 			osu.logger.Debug("Waiting for atleast 1 operator to register")
 			eventC := make(chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate)
@@ -176,7 +221,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				}
 			}
 			sub.Unsubscribe()
-			osu.logger.Debug("An operator registered")
+
 		}
 	} else {
 		osu.logger.Debug("Getting state at the checkpoint", "lastCompletedOpTaskCreatedBlock", lastCompletedOpTaskCreatedBlock)
@@ -339,13 +384,38 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						osu.errorC <- sendNewOpTaskReturn.SendNewOpTaskError
 						return
 					} else {
-						osu.logger.Debug("OpStateUpdater waiting for opTask to complete")
-						eventC := make(chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted)
-						sub, err := osu.ethRpc.AvsSubscriber.SubscribeToOpTaskCompleted(uint64(sendNewOpTaskReturn.OpTask.TaskCreatedBlock), eventC)
+
+						block := uint64(sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
+						EndBlock := uint64(block+5)
+						eventIter, err := osu.ethRpc.AvsReader.AvsServiceBindings.TaskManager.FilterOpTaskCompleted(
+							&bind.FilterOpts{Start: uint64(block), End:&EndBlock, Context: context.Background()}, []uint32{},
+						)
 						if err != nil {
-							osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToOpTaskCompleted: err: %v, atBlock: %v", err, sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
+							osu.errorC <- fmt.Errorf("Aggregator failed to FilterOpTaskCompleted: err: %v", err)
 							return
 						}
+
+						osu.logger.Debugf("OpStateUpdater waiting for opTask to complete, event: %v", eventIter.Event)
+						eventIterBool := eventIter.Next()
+						if eventIterBool == false {
+							osu.errorC <- fmt.Errorf("Aggregator failed to find the opTask")
+							return
+						}
+						osu.logger.Debugf("OpStateUpdater waiting for opTask to complete, event: %v", eventIter.Event)
+
+
+						osu.logger.Debug("OpStateUpdater waiting for opTask to complete")
+						
+						eventC := make(chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate)
+						fromBlock := uint64(1)
+						sub, err := osu.ethRpc.AvsSubscriber.SubscribeToOperatorStakeUpdate(bind.WatchOpts{Start: &fromBlock}, eventC)
+						if err != nil {
+							osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToOperatorStakeUpdate: err: %v, start: %v", err, fromBlock)
+							return
+						}
+						event := <-eventC
+						osu.logger.Debugf("OpStateUpdater eventC: %v", event)
+
 						defer sub.Unsubscribe()
 
 						timer := time.NewTimer(time.Hour)
@@ -354,6 +424,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						osu.logger.Debug("OpStateUpdater waiting for opTask to complete - 2")
 					watchForOpTaskCompletedLoop:
 						for {
+							osu.logger.Debug("OpStateUpdater waiting for opTask to complete - 3")
 							select {
 							case <-ctx.Done():
 								osu.errorC <- ctx.Err()
@@ -367,44 +438,45 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 							case event := <-eventC:
 								{
 									osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event: %v", event)
+									osu.errorC <- fmt.Errorf("Found it!")
+									return
+									// // TODO
+									// // If get an OpTaskCompleted event with taskIndex higher than
+									// // what we expect then perhaps our expected task didn't complete
+									// // And another one was init and then completed so, we shouldn't
+									// // error out here instead set the osu.checkpointedBlock and osu.atBlock
+									// // then break out of the loop and let updateOpStates update accordingly
+									// // Similar to how we do it when we see an OpTaskCompleted event when watching
+									// // triggers
+									// if sendNewOpTaskReturn.OpTask.TaskNum < event.TaskIndex {
+									// 	osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event has task with higher than expted taskIndex: %v", event)
+									// 	lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), event.Raw.BlockNumber)
+									// 	if err != nil {
+									// 		osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", event.Raw.BlockNumber)
+									// 		return
+									// 	}
+									// 	osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
+									// 	osu.atBlock = uint32(event.Raw.BlockNumber)
+									// } else if sendNewOpTaskReturn.OpTask.TaskNum > event.TaskIndex {
 
-									// TODO
-									// If get an OpTaskCompleted event with taskIndex higher than
-									// what we expect then perhaps our expected task didn't complete
-									// And another one was init and then completed so, we shouldn't
-									// error out here instead set the osu.checkpointedBlock and osu.atBlock
-									// then break out of the loop and let updateOpStates update accordingly
-									// Similar to how we do it when we see an OpTaskCompleted event when watching
-									// triggers
-									if sendNewOpTaskReturn.OpTask.TaskNum < event.TaskIndex {
-										osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event has task with higher than expted taskIndex: %v", event)
-										lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), event.Raw.BlockNumber)
-										if err != nil {
-											osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", event.Raw.BlockNumber)
-											return
-										}
-										osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
-										osu.atBlock = uint32(event.Raw.BlockNumber)
-									} else if sendNewOpTaskReturn.OpTask.TaskNum > event.TaskIndex {
+									// // This branch is to account for the case where
+									// // a task is completed in a block and another task is created
+									// // in the same block and then that one is also completed in the same block
+									// 	continue
+									// } else {
 
-									// This branch is to account for the case where
-									// a task is completed in a block and another task is created
-									// in the same block and then that one is also completed in the same block
-										continue
-									} else {
+									// osu.logger.Info("OpStateUpdater - Got the expected OpTaskCompleted event", "TaskIndex", sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
 
-									osu.logger.Info("OpStateUpdater - Got the expected OpTaskCompleted event", "TaskIndex", sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
-
-									// TODO
-									// Since we are here upon observing an OpTaskCompleted event
-									// probably should set atBlock to the current block (at which we
-									// found the OpTaskCompleted event) rather than the OpTask.TaskCreatedBlock
-									// Similar to how we do it when we see an OpTaskCompleted event when watching
-									// triggers
-									// In any case when we come to the OpTaskCompleted event it will do the above anyway
-									osu.checkpointedBlock = sendNewOpTaskReturn.OpTask.TaskCreatedBlock
-									osu.atBlock = uint32(event.Raw.BlockNumber)
-									}
+									// // TODO
+									// // Since we are here upon observing an OpTaskCompleted event
+									// // probably should set atBlock to the current block (at which we
+									// // found the OpTaskCompleted event) rather than the OpTask.TaskCreatedBlock
+									// // Similar to how we do it when we see an OpTaskCompleted event when watching
+									// // triggers
+									// // In any case when we come to the OpTaskCompleted event it will do the above anyway
+									// osu.checkpointedBlock = sendNewOpTaskReturn.OpTask.TaskCreatedBlock
+									// osu.atBlock = uint32(event.Raw.BlockNumber)
+									// }
 									break watchForOpTaskCompletedLoop
 								}
 							}

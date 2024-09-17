@@ -175,10 +175,11 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 	agg.logger.Infof("Starting aggregator rpc server.")
 	go agg.startServer(ctx)
 
-	err := agg.checkAndProcessPendingTasks()
-	if err != nil{
-		return fmt.Errorf("Aggregator failed to checkAndProcessPendingTasks: err: %v", err)
-	}
+	var err error
+	// err := agg.checkAndProcessPendingTasks()
+	// if err != nil{
+	// 	return fmt.Errorf("Aggregator failed to checkAndProcessPendingTasks: err: %v", err)
+	// }
 
 	sendNewOpTaskC := make(chan types.SendNewOpTaskType)
 	asyncOpStateUpdaterErrorC := make(chan error)
@@ -481,6 +482,20 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 			if err == nil {
 				success = true
 			}
+		}
+
+		block := uint64(r.BlockNumber.Int64())
+		EndBlock := uint64(block)
+		eventIter, err := agg.ethRpc.AvsReader.AvsServiceBindings.TaskManager.FilterOpTaskCompleted(
+			&bind.FilterOpts{Start: uint64(block), End:&EndBlock, Context: context.Background()}, []uint32{},
+		)
+		if err != nil {
+			return false, fmt.Errorf("Aggregator failed to FilterNewOpTaskCreated: err: %v", err)
+		}
+
+		eventIterBool := eventIter.Next()
+		if eventIterBool == false {
+			return false, fmt.Errorf("Aggregator failed to find the opTask")
 		}
 		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r, "success", success)
 		return success, nil
@@ -797,11 +812,6 @@ func (agg *Aggregator) getL1BatchUpdateInfo(blockNumber uint32) (bool, uint8, ui
 			agg.logger.Debug("Aggregator in maybeSendNewRdTask after GetStorage", "ok", ok)
 			return false, 0, 0, nil
 		}
-
-		// if substrateL2RequestsBatchLast == nil {
-		// 	agg.logger.Debug("Aggregator in maybeSendNewRdTask after GetStorage", "substrateL2RequestsBatchLast", substrateL2RequestsBatchLast)
-		// 	return false, 0, 0, nil
-		// }
 
 		for _, lastBatchByL1 := range substrateL2RequestsBatchLast{
 			

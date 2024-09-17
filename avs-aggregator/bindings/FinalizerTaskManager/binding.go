@@ -7,6 +7,7 @@ import (
 	"errors"
 	"math/big"
 	"strings"
+	"fmt"
 
 	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -2808,6 +2809,8 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Watch
 		taskIndexRule = append(taskIndexRule, taskIndexItem)
 	}
 
+	fmt.Println("OpStateUpdater WatchOpTaskCompleted", opts, *opts, opts.Start, *opts.Start, taskIndexRule)
+
 	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "OpTaskCompleted", taskIndexRule)
 	if err != nil {
 		return nil, err
@@ -2817,6 +2820,8 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Watch
 		for {
 			select {
 			case log := <-logs:
+
+				fmt.Println("Got", log)
 				// New log arrived, parse the event and forward to the user
 				event := new(ContractFinalizerTaskManagerOpTaskCompleted)
 				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "OpTaskCompleted", log); err != nil {
