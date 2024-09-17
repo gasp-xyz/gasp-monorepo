@@ -165,18 +165,7 @@ contract Rolldown is
     }
 
     function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
-        Range memory r = merkleRootRange[merkle_root];
-        require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
-
-        bytes32 withdrawal_hash = keccak256(abi.encode(withdrawal));
-        require(processedL2Requests[withdrawal.requestId.id] == false, "Already processed");
-
-        uint32 leaves_count = uint32(r.end - r.start + 1);
-        uint32 pos = uint32(withdrawal.requestId.id - r.start);
-        require(
-          calculate_root(withdrawal_hash, pos, proof, leaves_count) == merkle_root,
-          "Invalid proof"
-        );
+        verify_request_proof(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)), merkle_root, proof);
         process_l2_update_withdrawal(withdrawal);
         processedL2Requests[withdrawal.requestId.id] = true;
     }
@@ -194,20 +183,25 @@ contract Rolldown is
         }
 
         return Range({start: 0, end: 0});
+
     }
 
-    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+    function verify_request_proof(uint256 requestId, bytes32 request_hash, bytes32 merkle_root, bytes32[] calldata proof) private view {
         Range memory r = merkleRootRange[merkle_root];
         require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
 
-        bytes32 cancel_hash = keccak256(abi.encode(cancel));
-        require(processedL2Requests[cancel.requestId.id] == false, "Already processed");
+        require(processedL2Requests[requestId] == false, "Already processed");
+
         uint32 leaves_count = uint32(r.end - r.start + 1);
-        uint32 pos = uint32(r.start - cancel.requestId.id);
+        uint32 pos = uint32(requestId - r.start);
         require(
-          calculate_root(cancel_hash, pos, proof, leaves_count) == merkle_root,
+          calculate_root(request_hash, pos, proof, leaves_count) == merkle_root,
           "Invalid proof"
         );
+    }
+
+    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+        verify_request_proof(cancel.requestId.id, keccak256(abi.encode(cancel)), merkle_root, proof);
         process_l2_update_cancels(cancel);
         processedL2Requests[cancel.requestId.id] = true;
     }
