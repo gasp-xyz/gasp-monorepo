@@ -18,7 +18,7 @@ describe('Prices', () => {
         .then((response) => {
           const invalidTokenNameResponse = response.body;
           expect(invalidTokenNameResponse.exceptionName).to.contain("ValidationError")
-          expect(invalidTokenNameResponse.message).to.contain("this must be one of the following values: GASPV2, L1Asset, GASPV2-GETH, L1Asset-GASPV2")
+          expect(invalidTokenNameResponse.message).to.contain("this must be one of the following values: GASPV2, L1Asset, GASPV2-ETH, L1Asset-GASPV2")
         });
     });
   });

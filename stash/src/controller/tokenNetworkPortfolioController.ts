@@ -5,6 +5,7 @@ import { BN } from '@polkadot/util'
 import { priceDiscovery } from '../service/PriceDiscoveryService.js'
 import { Decimal } from 'decimal.js'
 import { fromBN } from 'gasp-sdk'
+import logger from '../util/Logger.js'
 
 export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
   try {
@@ -14,9 +15,10 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
     )
     const portfolioBalance = accountBalances.map(
       async ([storageKey, value]) => {
-        const free = JSON.parse(JSON.stringify(value)).free.toString()
+        const free = JSON.parse(JSON.stringify(value.toHuman())).free.toString()
+        const freeWithoutCommas = free.replace(/,/g, '')
         const frozen = JSON.parse(JSON.stringify(value)).frozen.toString()
-        const freeTokens = new BN(free)
+        const freeTokens = new BN(freeWithoutCommas)
         const frozenTokens = new BN(frozen)
         const freeBalance = freeTokens.sub(frozenTokens)
         const tokenId = storageKey.args[1].toString()
@@ -25,8 +27,15 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
         ).toHuman() as {
           symbol: string
         }
-        const tokenBalanceInUsd = (await priceDiscovery(tokenInfo.symbol))
-          .current_price['usd']
+
+        let tokenBalanceInUsd: string
+        try {
+          tokenBalanceInUsd = (await priceDiscovery(tokenInfo.symbol))
+            .current_price['usd']
+        } catch (error) {
+          logger.error('Error fetching token balance in USD:', error)
+          tokenBalanceInUsd = '0'
+        }
 
         new Decimal(freeBalance.toString()).mul(new Decimal(tokenBalanceInUsd))
         return {
