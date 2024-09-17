@@ -63,6 +63,12 @@ interface IRolldownPrimitives {
         uint256 ferryTip;
     }
 
+    struct FailedDepositResolution {
+      RequestId requestId;
+      uint256 originRequestId;
+      address ferry;
+    }
+
     struct CancelResolution {
         RequestId requestId;
         uint256 l2RequestId;
