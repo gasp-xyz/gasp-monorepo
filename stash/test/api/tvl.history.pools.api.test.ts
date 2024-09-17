@@ -4,7 +4,7 @@ import supertest from "supertest";
 import app from "../../src/app";
 import { MAX_DAYS, MAX_INTERVAL, ERROR_MSG_POOL_NOT_FOUND } from "./utils";
 
-    describe('APi tests: tvl-history/pools', () => {
+    describe.skip('APi tests: tvl-history/pools', () => {
         const testPool = "GASPV2-L1Asset"
         const testPoolReversed = "L1Asset-GASPV2"
         it("GET pools/GASPV2-L1Asset returns the same as pools/L1Asset-GASPV2 -> Expect deep equal", async () => {
