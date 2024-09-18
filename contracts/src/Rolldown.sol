@@ -25,6 +25,8 @@ contract Rolldown is
     address public constant NATIVE_TOKEN_ADDRESS =
         0x0000000000000000000000000000000000000001;
 
+    address public constant CLOSED = 0x1111111111111111111111111111111111111111;
+
     // TODO: move to separate modoule/contract
     function calculate_root(bytes32 leave_hash, uint32 leave_idx, bytes32[] calldata proof, uint32 leaves_count) pure public returns (bytes32) {
       uint32 levels = 0;
@@ -170,8 +172,8 @@ contract Rolldown is
       uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
       bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
 
-      require(ferriedL2Requests[withdrawalHash] == address(0), "Already ferried");
-      ferriedL2Requests[withdrawalHash] = msg.sender;
+      require(processedL2Requests[withdrawalHash] == address(0), "Already ferried");
+      processedL2Requests[withdrawalHash] = msg.sender;
 
       if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
         // console.log(msg.value);
@@ -204,9 +206,9 @@ contract Rolldown is
         verify_request_proof(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)), merkle_root, proof);
         bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
 
-        address ferryAddress = ferriedL2Requests[withdrawalHash];
+        address ferryAddress = processedL2Requests[withdrawalHash];
         bool isFerried = ferryAddress != address(0);
-        processedL2Requests[withdrawal.requestId.id] = true;
+        processedL2Requests[withdrawalHash] = CLOSED;
 
         if ( !isFerried ){
 
@@ -261,7 +263,7 @@ contract Rolldown is
         Range memory r = merkleRootRange[merkle_root];
         require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
 
-        require(processedL2Requests[requestId] == false, "Already processed");
+        require(processedL2Requests[request_hash] != CLOSED, "Already processed");
 
         uint32 leaves_count = uint32(r.end - r.start + 1);
         uint32 pos = uint32(requestId - r.start);
@@ -272,15 +274,17 @@ contract Rolldown is
     }
 
     function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
-        verify_request_proof(cancel.requestId.id, keccak256(abi.encode(cancel)), merkle_root, proof);
+        bytes32 hash = keccak256(abi.encode(cancel));
+        verify_request_proof(cancel.requestId.id, hash, merkle_root, proof);
         process_l2_update_cancels(cancel);
-        processedL2Requests[cancel.requestId.id] = true;
+        processedL2Requests[hash] = CLOSED;
     }
 
     function close_deposit_refund(FailedDepositResolution calldata failedDeposit, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+        bytes32 hash = keccak256(abi.encode(failedDeposit));
         verify_request_proof(failedDeposit.requestId.id, keccak256(abi.encode(failedDeposit)), merkle_root, proof);
         process_l2_update_failed_deposit(failedDeposit);
-        processedL2Requests[failedDeposit.requestId.id] = true;
+        processedL2Requests[hash] = CLOSED;
     }
 
     function process_l2_update_failed_deposit(FailedDepositResolution calldata failedDeposit) private {

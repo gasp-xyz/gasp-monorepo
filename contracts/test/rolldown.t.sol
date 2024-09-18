@@ -1120,7 +1120,4 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(ALICE.balance, aliceBefore);
     }
 
-    //TODO: store withdrawals by hash and not id
-    //TODO: reproduce in test ^^
-
 }
