@@ -85,7 +85,6 @@ contract Rolldown is
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
         uint amount = msg.value;
-        uint256 ferryTip = 0;
 
         uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
@@ -206,6 +205,34 @@ contract Rolldown is
         processedL2Requests[cancel.requestId.id] = true;
     }
 
+    function close_deposit_refund(FailedDepositResolution calldata failedDeposit, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+        verify_request_proof(failedDeposit.requestId.id, keccak256(abi.encode(failedDeposit)), merkle_root, proof);
+        process_l2_update_failed_deposit(failedDeposit);
+        processedL2Requests[failedDeposit.requestId.id] = true;
+    }
+
+    function process_l2_update_failed_deposit(FailedDepositResolution calldata failedDeposit) private {
+        Deposit storage originDeposit = deposits[failedDeposit.originRequestId];
+        address recipient = originDeposit.depositRecipient;
+
+        if (failedDeposit.ferry != address(0)) {
+          recipient = failedDeposit.ferry;
+        }
+
+        if (originDeposit.tokenAddress == ETH_TOKEN_ADDRESS) {
+              process_eth_withdrawal(recipient, originDeposit.amount);
+        } else {
+              process_erc20_withdrawal(recipient, originDeposit.tokenAddress, originDeposit.amount);
+        }
+
+        emit FailedDepositResolutionClosed(
+          failedDeposit.requestId.id,
+          failedDeposit.originRequestId,
+          keccak256(abi.encode(failedDeposit))
+        );
+    }
+
+
     // TODO:
     // - verify that merkle_root is correct (passing TaskResponse along with the merkle root?)
     // - verify that range is correct and belongs to particular merkle_root
@@ -245,36 +272,43 @@ contract Rolldown is
 
     function process_l2_update_withdrawal( Withdrawal calldata withdrawal) private {
         if (withdrawal.tokenAddress == ETH_TOKEN_ADDRESS){
-            process_eth_withdrawal(withdrawal);
+            process_eth_withdrawal(withdrawal.recipient, withdrawal.amount);
         }
         else {
-            process_erc20_withdrawal(withdrawal);
+            process_erc20_withdrawal(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount);
         }
 
         emit WithdrawalClosed(
           withdrawal.requestId.id,
           keccak256(abi.encode(withdrawal))
         );
-
     }
 
-    function process_eth_withdrawal( Withdrawal calldata withdrawal) private {
-        require(payable(address(this)).balance >= withdrawal.amount, "Not enough funds in contract");
-        require(withdrawal.amount > 0, "Amount must be greater than zero");
-        Address.sendValue(payable(withdrawal.recipient), withdrawal.amount);
-        emit NativeTokensWithdrawn(withdrawal.recipient, withdrawal.amount);
+    function process_eth_withdrawal(
+        address recipient,
+        uint256 amount
+    ) private {
+        require(payable(address(this)).balance >= amount, "Not enough funds in contract");
+        require(amount > 0, "Amount must be greater than zero");
+        emit NativeTokensWithdrawn(recipient, amount);
+        Address.sendValue(payable(recipient), amount);
     }
 
-    function process_erc20_withdrawal( Withdrawal calldata withdrawal) private {
-        IERC20 token = IERC20(withdrawal.tokenAddress);
-        require(token.balanceOf(address(this)) >= withdrawal.amount, "Not enough funds in contract");
-        require(withdrawal.amount > 0, "Amount must be greater than zero");
 
-        token.safeTransfer(withdrawal.recipient, withdrawal.amount);
+    function process_erc20_withdrawal(
+        address recipient,
+        address tokenAddress,
+        uint256 amount
+    ) private {
+        IERC20 token = IERC20(tokenAddress);
+        require(token.balanceOf(address(this)) >= amount, "Not enough funds in contract");
+        require(amount > 0, "Amount must be greater than zero");
+
+        token.safeTransfer(recipient, amount);
         emit ERC20TokensWithdrawn(
-          withdrawal.recipient,
-          withdrawal.tokenAddress,
-          withdrawal.amount
+          recipient,
+          tokenAddress,
+          amount
         );
     }
 

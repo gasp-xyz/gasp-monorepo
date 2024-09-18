@@ -32,6 +32,12 @@ interface IRolldownPrimitives {
       bytes32 withdrawalHash
     );
 
+    event FailedDepositResolutionClosed(
+      uint256 requestId,
+      uint256 originDepositId,
+      bytes32 failedDespotiResolutionHash
+    );
+
     event L2UpdateAccepted(
       bytes32 root,
       Range range
