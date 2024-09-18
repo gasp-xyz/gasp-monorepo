@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"sort"
 	"time"
+	"runtime"
 
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	ethereum "github.com/ethereum/go-ethereum"
@@ -176,6 +177,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				}
 			}
 			sub.Unsubscribe()
+			runtime.GC()
 			osu.logger.Debug("An operator registered")
 		}
 	} else {
@@ -268,6 +270,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					}
 					osu.logger.Info("OpStateUpdater received resume event")
 					sub.Unsubscribe()
+					runtime.GC()
 				}
 			case osu.triggerOpStateUpdate:
 				{
@@ -410,6 +413,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 							}
 						}
 						sub.Unsubscribe()
+						runtime.GC()
 						osu.lastOpStateUpdateTime = time.Now()
 						osu.logger.Debug("OpStateUpdater done waiting for opTask to complete")
 
@@ -612,6 +616,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 			}
 		}
 		sub.Unsubscribe()
+		runtime.GC()
 	}
 
 }
