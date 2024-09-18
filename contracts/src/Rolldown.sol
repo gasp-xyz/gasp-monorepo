@@ -165,7 +165,7 @@ contract Rolldown is
         return a > b ? a : b;
     }
 
-    function ferry_withdrawal(Withdrawal calldata withdrawal) public whenNotPaused nonReentrant {
+    function ferry_withdrawal(Withdrawal calldata withdrawal) payable public whenNotPaused nonReentrant {
       require(withdrawal.ferryTip <= withdrawal.amount, "Tip exceeds deposited amount");
       uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
       bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
@@ -174,7 +174,10 @@ contract Rolldown is
       ferriedL2Requests[withdrawalHash] = msg.sender;
 
       if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
-        require(msg.sender.balance >= ferriedAmount, "Not enough funds");
+        // console.log(msg.value);
+        // console.log(ferriedAmount);
+        require(msg.value > 0, "Native token not sent");
+        require(msg.value == ferriedAmount, "Sent amount should exactly match withdrawal.amount - withdrawal.ferryTip");
         payable(withdrawal.recipient).transfer(ferriedAmount);
         emit WithdrawalFerried(
           withdrawal.requestId.id,
@@ -186,7 +189,7 @@ contract Rolldown is
       } else {
         IERC20 token = IERC20(withdrawal.tokenAddress);
         require(token.balanceOf(address(msg.sender)) >= ferriedAmount, "Not enough funds");
-        token.transfer(withdrawal.recipient, ferriedAmount);
+        token.transferFrom(msg.sender, withdrawal.recipient, ferriedAmount);
         emit WithdrawalFerried(
           withdrawal.requestId.id,
           ferriedAmount,
@@ -222,10 +225,10 @@ contract Rolldown is
         }else{
 
           if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
-            send_native_and_emit_event(ferryAddress, withdrawal.ferryTip);
+            send_native_and_emit_event(ferryAddress, withdrawal.amount);
           }
           else {
-            send_erc20_and_emit_event(ferryAddress, withdrawal.tokenAddress, withdrawal.ferryTip);
+            send_erc20_and_emit_event(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
           }
 
           emit FerriedWithdrawalClosed(

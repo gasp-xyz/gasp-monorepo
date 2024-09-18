@@ -934,6 +934,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         uint256 amount = 123456;
         uint256 ferryTip = 10;
         token.mint(address(rolldown));
+        token.mint(address(ALICE));
 
         Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
           requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
@@ -942,6 +943,19 @@ contract RolldownTest is Test, IRolldownPrimitives {
           amount: amount,
           ferryTip: ferryTip 
         });
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+        uint256 ferryBefore = token.balanceOf(ALICE);
+
+        vm.startPrank(ALICE);
+        token.approve(address(rolldown), amount - ferryTip);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.WithdrawalFerried(withdrawal.requestId.id, amount - ferryTip, recipient, ALICE, withdrawalHash);
+        rolldown.ferry_withdrawal(withdrawal);
+        vm.stopPrank();
+
+        assertEq(token.balanceOf(recipient), amount - ferryTip);
+        assertEq(token.balanceOf(ALICE), ferryBefore - amount + ferryTip);
 
         vm.startPrank(ALICE);
         // merkle_root of tree with single element is just that single element
@@ -951,15 +965,162 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
-        assertEq(token.balanceOf(recipient), 0);
 
+        uint256 aliceBefore = token.balanceOf(ALICE);
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.ERC20TokensWithdrawn(recipient, address(token), amount);
+        emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
         emit IRolldownPrimitives.WithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
-        assertEq(token.balanceOf(recipient), amount);
+
+        assertEq(token.balanceOf(ALICE), ferryBefore + ferryTip);
     }
+
+    // NOTE: how to handle ferries without ferry fee, they can they be considered close?
+    function testFerryWithdrawalErc20WithoutTip() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        token.mint(address(rolldown));
+        token.mint(address(ALICE));
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: address(token),
+          amount: amount,
+          ferryTip: 0 
+        });
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+        uint256 ferryBefore = token.balanceOf(ALICE);
+
+        vm.startPrank(ALICE);
+        token.approve(address(rolldown), amount);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.WithdrawalFerried(withdrawal.requestId.id, amount, recipient, ALICE, withdrawalHash);
+        rolldown.ferry_withdrawal(withdrawal);
+        vm.stopPrank();
+
+        assertEq(token.balanceOf(recipient), amount);
+        assertEq(token.balanceOf(ALICE), ferryBefore - amount);
+
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        // uint256 aliceBefore = token.balanceOf(ALICE);
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
+        emit IRolldownPrimitives.WithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(token.balanceOf(ALICE), ferryBefore);
+    }
+
+
+    function testFerryWithdrawalNativeWithTip() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        uint256 ferryTip = 10;
+        deal(address(rolldown), 999999 ether);
+        deal(ALICE, 123466 ether);
+        uint256 aliceBefore = ALICE.balance;
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: NATIVE_TOKEN_ADDRESS,
+          amount: amount,
+          ferryTip: ferryTip 
+        });
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+        uint256 ferryBefore = ALICE.balance;
+
+        vm.startPrank(ALICE);
+        // token.approve(address(rolldown), amount - ferryTip);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.WithdrawalFerried(withdrawal.requestId.id, amount - ferryTip, recipient, ALICE, withdrawalHash);
+        rolldown.ferry_withdrawal{value: amount - ferryTip}(withdrawal);
+        vm.stopPrank();
+
+        assertEq(recipient.balance, amount - ferryTip);
+        assertEq(ALICE.balance, ferryBefore - amount + ferryTip);
+
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
+        emit IRolldownPrimitives.FerriedWithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(ALICE.balance, aliceBefore + ferryTip);
+    }
+
+    function testFerryWithdrawalNativeWithoutTip() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        deal(address(rolldown), 999999 ether);
+        deal(ALICE, 123466 ether);
+        uint256 aliceBefore = ALICE.balance;
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: NATIVE_TOKEN_ADDRESS,
+          amount: amount,
+          ferryTip: 0 
+        });
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+        uint256 ferryBefore = ALICE.balance;
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.WithdrawalFerried(withdrawal.requestId.id, amount, recipient, ALICE, withdrawalHash);
+        rolldown.ferry_withdrawal{value: amount}(withdrawal);
+        vm.stopPrank();
+
+        assertEq(recipient.balance, amount);
+        assertEq(ALICE.balance, ferryBefore - amount);
+
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
+        emit IRolldownPrimitives.FerriedWithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(ALICE.balance, aliceBefore);
+    }
+
+    //TODO: store withdrawals by hash and not id
+    //TODO: reproduce in test ^^
 
 }
