@@ -927,4 +927,39 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(ALICE.balance, aliceBefore);
         assertEq(ferry.balance, amount);
     }
+
+
+    function testFerryWithdrawalErc20WithTip() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        uint256 ferryTip = 10;
+        token.mint(address(rolldown));
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: address(token),
+          amount: amount,
+          ferryTip: ferryTip 
+        });
+
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+        assertEq(token.balanceOf(recipient), 0);
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.ERC20TokensWithdrawn(recipient, address(token), amount);
+        emit IRolldownPrimitives.WithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
+        assertEq(token.balanceOf(recipient), amount);
+    }
+
 }
