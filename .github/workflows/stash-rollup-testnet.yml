@@ -2,9 +2,10 @@ name: stash-rollup-testnet
 on:
   workflow_dispatch:
     inputs:
-      description: 'Branch to deploy from'
-      required: true
-      default: 'main'
+      branch:
+        description: 'Branch to deploy from'
+        required: true
+        default: 'main'
 
 permissions:
   contents: 'read'
