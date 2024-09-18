@@ -32,6 +32,19 @@ interface IRolldownPrimitives {
       bytes32 withdrawalHash
     );
 
+    event FerriedWithdrawalClosed(
+      uint256 requestId,
+      bytes32 withdrawalHash
+    );
+
+    event WithdrawalFerried(
+      uint256 requestId,
+      uint256 amount,
+      address recipient,
+      address ferry,
+      bytes32 withdrawalHash
+    );
+
     event FailedDepositResolutionClosed(
       uint256 requestId,
       uint256 originDepositId,

@@ -22,7 +22,7 @@ contract Rolldown is
 {
     using SafeERC20 for IERC20;
 
-    address public constant ETH_TOKEN_ADDRESS =
+    address public constant NATIVE_TOKEN_ADDRESS =
         0x0000000000000000000000000000000000000001;
 
     // TODO: move to separate modoule/contract
@@ -82,6 +82,7 @@ contract Rolldown is
     }
 
     function deposit_native_with_tip(uint256 ferryTip) private {
+        require(ferryTip <= msg.value, "Tip exceeds deposited amount");
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
         uint amount = msg.value;
@@ -90,7 +91,7 @@ contract Rolldown is
         Deposit memory depositRequest = Deposit({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
-            tokenAddress: ETH_TOKEN_ADDRESS,
+            tokenAddress: NATIVE_TOKEN_ADDRESS,
             amount: amount,
             timeStamp: timeStamp,
             ferryTip: ferryTip
@@ -100,7 +101,7 @@ contract Rolldown is
         emit DepositAcceptedIntoQueue(
             depositRequest.requestId.id,
             depositRecipient,
-            ETH_TOKEN_ADDRESS,
+            NATIVE_TOKEN_ADDRESS,
             amount,
             ferryTip
         );
@@ -123,6 +124,7 @@ contract Rolldown is
     }
 
     function deposit_erc20_with_tip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
+        require(ferryTip <= amount, "Tip exceeds deposited amount");
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
         address depositRecipient = msg.sender;
@@ -163,10 +165,77 @@ contract Rolldown is
         return a > b ? a : b;
     }
 
+    function ferry_withdrawal(Withdrawal calldata withdrawal) public whenNotPaused nonReentrant {
+      require(withdrawal.ferryTip <= withdrawal.amount, "Tip exceeds deposited amount");
+      uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
+      bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+      require(ferriedL2Requests[withdrawalHash] == address(0), "Already ferried");
+      ferriedL2Requests[withdrawalHash] = msg.sender;
+
+      if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
+        require(msg.sender.balance >= ferriedAmount, "Not enough funds");
+        payable(withdrawal.recipient).transfer(ferriedAmount);
+        emit WithdrawalFerried(
+          withdrawal.requestId.id,
+          ferriedAmount,
+          withdrawal.recipient,
+          msg.sender,
+          withdrawalHash
+        );
+      } else {
+        IERC20 token = IERC20(withdrawal.tokenAddress);
+        require(token.balanceOf(address(msg.sender)) >= ferriedAmount, "Not enough funds");
+        token.transfer(withdrawal.recipient, ferriedAmount);
+        emit WithdrawalFerried(
+          withdrawal.requestId.id,
+          ferriedAmount,
+          withdrawal.recipient,
+          msg.sender,
+          withdrawalHash
+        );
+      }
+    }
+
     function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
         verify_request_proof(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)), merkle_root, proof);
-        process_l2_update_withdrawal(withdrawal);
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+        address ferryAddress = ferriedL2Requests[withdrawalHash];
+        bool isFerried = ferryAddress != address(0);
         processedL2Requests[withdrawal.requestId.id] = true;
+
+        if ( !isFerried ){
+
+          if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
+            send_native_and_emit_event(withdrawal.recipient, withdrawal.amount);
+          }
+          else {
+            send_erc20_and_emit_event(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount);
+          }
+
+          emit WithdrawalClosed(
+            withdrawal.requestId.id,
+            keccak256(abi.encode(withdrawal))
+          );
+
+        }else{
+
+          if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
+            send_native_and_emit_event(ferryAddress, withdrawal.ferryTip);
+          }
+          else {
+            send_erc20_and_emit_event(ferryAddress, withdrawal.tokenAddress, withdrawal.ferryTip);
+          }
+
+          emit FerriedWithdrawalClosed(
+            withdrawal.requestId.id,
+            keccak256(abi.encode(withdrawal))
+          );
+
+        }
+
+
     }
 
     function find_l2_batch(uint256 requestId) view public returns (Range memory) {
@@ -219,10 +288,10 @@ contract Rolldown is
           recipient = failedDeposit.ferry;
         }
 
-        if (originDeposit.tokenAddress == ETH_TOKEN_ADDRESS) {
-              process_eth_withdrawal(recipient, originDeposit.amount);
+        if (originDeposit.tokenAddress == NATIVE_TOKEN_ADDRESS) {
+              send_native_and_emit_event(recipient, originDeposit.amount);
         } else {
-              process_erc20_withdrawal(recipient, originDeposit.tokenAddress, originDeposit.amount);
+              send_erc20_and_emit_event(recipient, originDeposit.tokenAddress, originDeposit.amount);
         }
 
         emit FailedDepositResolutionClosed(
@@ -270,21 +339,7 @@ contract Rolldown is
         );
     }
 
-    function process_l2_update_withdrawal( Withdrawal calldata withdrawal) private {
-        if (withdrawal.tokenAddress == ETH_TOKEN_ADDRESS){
-            process_eth_withdrawal(withdrawal.recipient, withdrawal.amount);
-        }
-        else {
-            process_erc20_withdrawal(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount);
-        }
-
-        emit WithdrawalClosed(
-          withdrawal.requestId.id,
-          keccak256(abi.encode(withdrawal))
-        );
-    }
-
-    function process_eth_withdrawal(
+    function send_native_and_emit_event(
         address recipient,
         uint256 amount
     ) private {
@@ -295,7 +350,7 @@ contract Rolldown is
     }
 
 
-    function process_erc20_withdrawal(
+    function send_erc20_and_emit_event(
         address recipient,
         address tokenAddress,
         uint256 amount

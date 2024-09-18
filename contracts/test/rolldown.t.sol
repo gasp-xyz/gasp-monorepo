@@ -17,7 +17,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
     address payable BOB;
     address payable CHARLIE;
     MyERC20 internal token;
-    address payable internal ETH_TOKEN_ADDRESS;
+    address payable internal NATIVE_TOKEN_ADDRESS;
 
     function setUp() public {
         address payable[] memory admins;
@@ -44,7 +44,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         CHARLIE = users[2];
         rolldown = new Rolldown();
         rolldown.initialize(avsPauserReg, avsOwner, ChainId.Ethereum, users[0]);
-        ETH_TOKEN_ADDRESS = payable(0x0000000000000000000000000000000000000001);
+        NATIVE_TOKEN_ADDRESS = payable(0x0000000000000000000000000000000000000001);
         token = new MyERC20();
     }
 
@@ -55,7 +55,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         address payable alice = users[0];
         uint256 amount = 10;
         uint256 fee = 0;
-        address payable tokenAddress = payable(ETH_TOKEN_ADDRESS);
+        address payable tokenAddress = payable(NATIVE_TOKEN_ADDRESS);
         address payable contract_address = payable(address(rolldown));
         deal(alice, 100 ether);
         uint256 aliceBalanceBefore = alice.balance;
@@ -86,7 +86,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         address payable alice = users[0];
         uint256 amount = 1000;
         uint256 fee = 0;
-        address payable tokenAddress = payable(ETH_TOKEN_ADDRESS);
+        address payable tokenAddress = payable(NATIVE_TOKEN_ADDRESS);
 
         // Act
         vm.startPrank(alice);
@@ -99,7 +99,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
     function deposit_erc20_emits_event() public {
         address payable alice = users[0];
         uint256 amount = 1000;
-        address payable tokenAddress = payable(ETH_TOKEN_ADDRESS);
+        address payable tokenAddress = payable(NATIVE_TOKEN_ADDRESS);
         uint256 fee = 0;
 
         // Act
@@ -786,7 +786,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, ETH_TOKEN_ADDRESS, amount, 0);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, NATIVE_TOKEN_ADDRESS, amount, 0);
         rolldown.deposit_native{value: amount}();
         vm.stopPrank();
 
@@ -822,7 +822,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, ETH_TOKEN_ADDRESS, amount, fee);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, NATIVE_TOKEN_ADDRESS, amount, fee);
         rolldown.deposit_native{value: amount}(fee);
         vm.stopPrank();
 
@@ -858,7 +858,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, ETH_TOKEN_ADDRESS, amount, 0);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, NATIVE_TOKEN_ADDRESS, amount, 0);
         rolldown.deposit_native{value: amount}();
         vm.stopPrank();
 
@@ -897,7 +897,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, ETH_TOKEN_ADDRESS, amount, fee);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, NATIVE_TOKEN_ADDRESS, amount, fee);
         rolldown.deposit_native{value: amount}(fee);
         vm.stopPrank();
 
