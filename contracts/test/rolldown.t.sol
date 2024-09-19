@@ -355,38 +355,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.stopPrank();
     }
 
-    function testL1UpdateHashCompatibilityWithMangataNode() public {
-        Rolldown.L1Update memory l1Update;
-        l1Update.chain = ChainId.Ethereum;
-        l1Update.pendingDeposits = new Rolldown.Deposit[](1);
-        l1Update.pendingCancelResolutions = new Rolldown.CancelResolution[](1);
-
-        l1Update.pendingDeposits[0] = IRolldownPrimitives.Deposit({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L1}),
-            depositRecipient: 0x0000000000000000000000000000000000000002,
-            tokenAddress: 0x0000000000000000000000000000000000000003,
-            amount: 4,
-            timeStamp: 1,
-            ferryTip: 0
-        });
-
-        l1Update.pendingCancelResolutions[0] = IRolldownPrimitives.CancelResolution({
-            requestId: IRolldownPrimitives.RequestId({id: 6, origin: IRolldownPrimitives.Origin.L1}),
-            l2RequestId: 7,
-            cancelJustified: true,
-            timeStamp: 2
-        });
-
-        uint256[] memory l2UpdatesToRemove = new uint256[](1);
-        l2UpdatesToRemove[0] = 13;
-
-
-        assertEq(
-            keccak256(abi.encode(l1Update)),
-            0x68e72614919768cae8e3cdcc417cd406d59b61ff3b0efaad1bd5b3982a128f36
-        );
-    }
-
     function testCancelWithNonMatchingHashResultsWithUnjustifiedStatus()
         public
     {
@@ -1119,5 +1087,87 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         assertEq(ALICE.balance, aliceBefore);
     }
+
+    /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    /// NOTE: Below hash values should not be ever chaned, there are comaptible test implemented in mangata to node
+    /// to ensure abi compatibility between L1 & L2
+    /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    function testL1UpdateHashCompatibilityWithMangataNode() public {
+        Rolldown.L1Update memory l1Update;
+        l1Update.chain = ChainId.Ethereum;
+        l1Update.pendingDeposits = new Rolldown.Deposit[](1);
+        l1Update.pendingCancelResolutions = new Rolldown.CancelResolution[](1);
+
+        l1Update.pendingDeposits[0] = IRolldownPrimitives.Deposit({
+            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L1}),
+            depositRecipient: 0x1111111111111111111111111111111111111111,
+            tokenAddress: 0x2222222222222222222222222222222222222222,
+            amount: 123456,
+            timeStamp: 987,
+            ferryTip: 321987
+        });
+
+        l1Update.pendingCancelResolutions[0] = IRolldownPrimitives.CancelResolution({
+            requestId: IRolldownPrimitives.RequestId({id: 123, origin: IRolldownPrimitives.Origin.L1}),
+            l2RequestId: 123456,
+            cancelJustified: true,
+            timeStamp: 987
+        });
+
+        uint256[] memory l2UpdatesToRemove = new uint256[](1);
+        l2UpdatesToRemove[0] = 13;
+
+
+        assertEq(
+            keccak256(abi.encode(l1Update)),
+            0x663fa3ddfe64659f67b2728637936fa8d21f18ef96c07dec110cdd8f45be6fee
+        );
+    }
+
+    function testChainWithMangataNode() public {
+
+        assertEq(
+            keccak256(abi.encode(ChainId.Ethereum)),
+            0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563
+        );
+
+        assertEq(
+            keccak256(abi.encode(ChainId.Arbitrum)),
+            0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6
+        );
+    }
+
+    function testWithdrawalHash() public {
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+            requestId: IRolldownPrimitives.RequestId({id: 123, origin: IRolldownPrimitives.Origin.L2}),
+            recipient: address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF),
+            tokenAddress: 0x1f1f1F1f1F1f1f1F1F1F1f1F1f1F1f1F1F1F1F1F,
+            amount: 123456,
+            ferryTip: 465789
+        });
+
+
+        assertEq(
+            keccak256(abi.encode(withdrawal)),
+            0xa931da68c445f23b06a72768d07a3513f85c0118ff80f6e284117a221869ae8b
+        );
+    }
+
+    function testDepositResolutionHashMatches() public {
+
+        FailedDepositResolution memory failedDeposit = FailedDepositResolution({
+            requestId: IRolldownPrimitives.RequestId({id: 123, origin: IRolldownPrimitives.Origin.L1}),
+            originRequestId: 1234,
+            ferry: 0xb5b5B5b5B5b5B5B5B5B5B5b5B5B5B5b5B5B5b5b5
+        });
+
+
+        assertEq(
+            keccak256(abi.encode(failedDeposit)),
+            0xd3def31efb42dd99500c389f59115f0eef5e008db0ee0a81562ef3acbe02eece
+        );
+
+    }
+
 
 }
