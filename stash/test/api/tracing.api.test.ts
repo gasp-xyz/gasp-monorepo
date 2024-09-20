@@ -114,9 +114,10 @@ describe('TracingController', () => {
                 const response = await supertest(app)
                     .get(`/tracing/tx/listByAddress/${transactionData.transaction.address}/L1_INITIATED`)
                     .expect(200);
-                expect(response.body).toBeInstanceOf(Array);
-                expect(response.body[0]).toHaveProperty('address', transactionData.transaction.address);
-                expect(response.body[0]).toHaveProperty('status', 'L1_INITIATED');
+                expect(response.body).toHaveProperty('transactions');
+                expect(response.body.transactions).toBeInstanceOf(Array);
+                expect(response.body.transactions[0]).toHaveProperty('address', transactionData.transaction.address);
+                expect(response.body.transactions[0]).toHaveProperty('status', 'L1_INITIATED');
             } catch (error) {
                 logger.error('Error in get all transactions by address and status:', error.message);
                 throw error;
