@@ -37,8 +37,8 @@ async function main() {
 	let lastRequestId = await getLastRequestId(api);
 
 	setInterval(async () => {
-		watchdogL1.check();
 		watchdogL2.check();
+		watchdogL1.check();
 	}, SECONDS_1);
 
 	setInterval(async () => {
@@ -86,13 +86,13 @@ async function main() {
 				return;
 			}
 
-			const maxRequestId = getMaxRequestId(nativeL1Update);
+			const maxRequestId = getMaxRequestId(nativeL1Update.update);
 
 			console.log(`maxRequestId: ${maxRequestId}`);
 			if (maxRequestId > lastRequestId) {
 				const result = await signTx(
 					api,
-					api.tx.rolldown.updateL2FromL1(nativeL1Update),
+					api.tx.rolldown.updateL2FromL1Unsafe(nativeL1Update.update),
 					collator,
 				);
 
