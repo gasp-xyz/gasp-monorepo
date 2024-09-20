@@ -59,6 +59,9 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
       - uses: mdgreenwald/mozilla-sops-action@v1.6.0
 
+      - run: yarn install --immutable
+      - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
+
       - name: Deploy to Google App Engine
         run: |
           sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
