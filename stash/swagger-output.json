@@ -1054,6 +1054,9 @@
           "200": {
             "description": "Successful response with transactions"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
