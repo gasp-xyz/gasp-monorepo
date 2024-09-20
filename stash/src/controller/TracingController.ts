@@ -184,7 +184,11 @@ export const getAllTransactionsByAddressAndStatus = async (
       address,
       status
     )
-    res.status(200).json(transactions)
+    if (transactions.length > 0) {
+      res.status(200).send({ transactions })
+    } else {
+      res.status(404).send({ error: 'No transactions found for this address' })
+    }
   } catch (e) {
     await errorHandler.handle(res, e)
   }

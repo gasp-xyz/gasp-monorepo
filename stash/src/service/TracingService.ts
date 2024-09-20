@@ -114,7 +114,7 @@ export const getTransactionByEntityId = async (
   entityId: string
 ): Promise<object | null> => {
   const transactionsByEntityId = await transactionRepository.fetch(entityId)
-  if (transactionsByEntityId) {
+  if (transactionsByEntityId && 'txHash' in transactionsByEntityId) {
     return transactionsByEntityId
   }
   return null
