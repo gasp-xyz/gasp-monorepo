@@ -146,7 +146,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				Addresses: []common.Address{stakeRegistryContractAddress},
 				Topics: [][]common.Hash{
 					[]common.Hash{
-						getEventID(taskmanagerAbi, "OperatorStakeUpdate"),
+						getEventID(stakeRegistryAbi, "OperatorStakeUpdate"),
 					},
 				},
 				FromBlock: big.NewInt(int64(fromBlock)),
@@ -704,6 +704,8 @@ func (osu *OpStateUpdater) updateOpStates() error {
 	// and we should not auto create tasks here to prevent
 	// some guy from changing his stake a lot in the early days of the mainnet
 	// to cost us a lot of eth
+
+	osu.triggerOpStateUpdate = false
 	var err error
 	osu.logger.Debug("OpStateUpdater - getCheckpointedOpState")
 	err = osu.getCheckpointedOpState(osu.checkpointedBlock)
