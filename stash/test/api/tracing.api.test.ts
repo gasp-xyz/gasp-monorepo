@@ -52,39 +52,6 @@ describe('TracingController', () => {
             }
         });
 
-        it('should return an error when geting tx status using wrong txHash', async () => {
-            const wrongTxHash = generateRandomHash()
-            const response = await supertest(app)
-            .get(`/tracing/tx/${wrongTxHash}`)
-            .expect(404);
-            expect(response.body).toEqual(expect.objectContaining({error: 'Transaction not found'}));
-        });
-
-        it('should return an error when getting all txs using wrong address', async () => {
-            const wrongAddress = generateRandomAddress();
-            const response = await supertest(app)
-            .get(`/tracing/tx/listByAddress/${wrongAddress}`)
-            .expect(404);
-            expect(response.body).toEqual(expect.objectContaining({error: 'No transactions found for this address'}));
-        });
-
-        it.skip('should return an error when getting tx using wrong address and status', async () => {
-            const wrongAddress = generateRandomAddress();
-            const wrongStatus = 'RANDOM_STATUS';
-            const response = await supertest(app)
-            .get(`/tracing/tx/listByAddress/${wrongAddress}/${wrongStatus}`)
-            .expect(404);
-            expect(response.body).toEqual(expect.objectContaining({error: 'No transactions found for this address'}));
-        });
-
-        it.skip('should return an error when getting tx using wrong entityId', async () => {
-            const wrongEntityId = generateRandomAddress();
-            const response = await supertest(app)
-            .get(`/tracing/tx/findByEntityId/${wrongEntityId}`)
-            .expect(404);
-            expect(response.body).toEqual(expect.objectContaining({error: 'No transactions found for this address'}));
-        });
-
         it('should get all transactions by address', async () => {
             try {
                 const response = await supertest(app)
@@ -136,4 +103,38 @@ describe('TracingController', () => {
             }
         });
     });
+
+    describe('Negative scenarios', () => {
+        it('should return an error when geting tx status using wrong txHash', async () => {
+            const wrongTxHash = generateRandomHash()
+            const response = await supertest(app)
+            .get(`/tracing/tx/${wrongTxHash}`)
+            .expect(404);
+            expect(response.body).toEqual(expect.objectContaining({error: 'Transaction not found'}));
+        });
+
+        it('should return an error when getting all txs using wrong address', async () => {
+            const wrongAddress = generateRandomAddress();
+            const response = await supertest(app)
+            .get(`/tracing/tx/listByAddress/${wrongAddress}`)
+            .expect(404);
+            expect(response.body).toEqual(expect.objectContaining({error: 'No transactions found for this address'}));
+        });
+
+        it('should return an error when getting tx using wrong address and correct status', async () => {
+            const wrongAddress = generateRandomAddress();
+            const response = await supertest(app)
+            .get(`/tracing/tx/listByAddress/${wrongAddress}/L1_INITIATED`)
+            .expect(404);
+            expect(response.body).toEqual(expect.objectContaining({error: 'No transactions found for this address'}));
+        });
+
+        it('should return an error when getting tx using wrong entityId', async () => {
+            const wrongEntityId = '00000000001111111111WWWWWW';
+            const response = await supertest(app)
+            .get(`/tracing/tx/findByEntityId/${wrongEntityId}`)
+            .expect(404);
+            expect(response.body).toEqual(expect.objectContaining({error: 'Transaction not found for this entityId'}));
+        });
+    })
 });
