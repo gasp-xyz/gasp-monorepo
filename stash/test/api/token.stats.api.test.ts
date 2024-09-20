@@ -56,12 +56,13 @@ describe('APi tests: token stats', () => {
         const sdk = MangataClient;
         const api = await sdk.api();
         const pools = await api.query.xyk.liquidityPools.entries();
+        console.log('Pools:', pools);
         const allstats = (await supertest(app)
             .get("/token/list/stats")).body;
         pools.forEach( (pool) => {
             const firstTokenId = pool[1].toHuman()[0];
             const secondTokenId = pool[1].toHuman()[1];
-            const excludePool = [ "2" , "3", "9", "16"]; // leave only pool with 0 1 token ids (eth and gaspv2)
+            const excludePool = [ "2" , "3", "9", "15", "16"]; // leave only pool with 0 1 token ids (eth and gaspv2)
             const firstToken = allstats.filter( (token: { tokenId: any; }) => token.tokenId === firstTokenId );
             const secondToken = allstats.filter( (token: { tokenId: any; }) => token.tokenId === secondTokenId );
             console.log( `Token ${firstTokenId} , ${secondTokenId} `)
