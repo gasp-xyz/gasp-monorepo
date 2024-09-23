@@ -39,7 +39,8 @@ FROM debian:stable-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y supervisor && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y supervisor && rm -rf /var/lib/apt/lists/* && \
+	mkdir -p /var/log/rollup-node
 
 ADD https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json /app/holesky-chainspec.json
 COPY --from=builder /app/main /app/finalizer
@@ -75,13 +76,15 @@ COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	stdout_logfile_maxbytes=0
 	stderr_logfile=/dev/stderr
 	stderr_logfile_maxbytes=0
+	priority=20
 
 	[program:rollup-node]
 	command=/app/rollup-node --chain=%(ENV_ROLLUP_NODE_CHAIN)s --bootnodes=%(ENV_ROLLUP_NODE_BOOTNODE)s --base-path=%(ENV_ROLLUP_NODE_BASE_PATH)s --pruning=archive
-	stdout_logfile=/dev/stdout
-	stdout_logfile_maxbytes=0
-	stderr_logfile=/dev/stderr
-	stderr_logfile_maxbytes=0
+	stdout_logfile=/var/log/rollup-node/combined.log
+	stdout_logfile_maxbytes=50MB
+	stdout_logfile_backups=1
+	redirect_stderr=true
+	priority=10
 EOF
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
