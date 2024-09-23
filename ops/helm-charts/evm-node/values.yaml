@@ -16,7 +16,7 @@ verifierUrl: 'http://blockscout-eth-blockscout-stack-blockscout-svc:80/api'
 
 dataMountPath: /data
 
-evmNodeImage: 'ghcr.io/paradigmxyz/reth:v1.0.0'
+evmNodeImage: 'ghcr.io/paradigmxyz/reth:v1.0.7'
 command: []
 args:
   - node
