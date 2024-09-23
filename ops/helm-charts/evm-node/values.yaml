@@ -38,7 +38,7 @@ storageClass: standard
 storageSize: 5Gi
 
 image: 
-  repository: mangatasolutions/anvil
+  repository: mangatasolutions/gasp-contracts
   tag: be439052d9ed89109c4dd02b387cdf7cbbcc6870
 
 resources:

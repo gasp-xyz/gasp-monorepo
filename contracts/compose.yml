@@ -1,6 +1,6 @@
 services:
   eth-contracts-deployment:
-    image: mangatasolutions/avs-contract:local-eth
+    image: mangatasolutions/gasp-contracts:local-eth
     platform: linux/amd64
     build: .
     depends_on:
@@ -23,7 +23,7 @@ services:
       ENV_SELECTOR: ethereum-stub
 
   arbitrum-contracts-deployment:
-    image: mangatasolutions/avs-contract:local-arb
+    image: mangatasolutions/gasp-contracts:local-arb
     platform: linux/amd64
     build: .
     depends_on:

@@ -45,7 +45,7 @@ releases:
     chart: ../helm-charts/evm-node
     values:
       - image:
-          repository: mangatasolutions/anvil
+          repository: mangatasolutions/gasp-contracts
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
@@ -63,7 +63,7 @@ releases:
     chart: ../helm-charts/evm-node
     values:
       - image:
-          repository: mangatasolutions/anvil
+          repository: mangatasolutions/gasp-contracts
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
