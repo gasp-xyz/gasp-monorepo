@@ -19,7 +19,7 @@ collator:
     repository: mangatasolutions/rollup-node
     tag: frontend-fix
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 50Gi
@@ -100,7 +100,6 @@ finalizerEnvSecrets:
   ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
 finalizerEnv:
-  SUBSTRATE_RPC_URL: ws://rpc-shared-dns-record:9944
   CHAIN_ID: "17000"
   AVS_BLOCK_VALIDATION_PERIOD: '100'
   AVS_DEBOUNCE_RPC: '20'
@@ -115,7 +114,7 @@ finalizerEnv:
   LOG_LEVEL: 'info'
   RUST_LOG: avs=debug,ether=trace
   # rollup-node configs
-  ROLLUP_NODE_CHAIN: rollup-local-seq
+  ROLLUP_NODE_CHAIN: /app/holesky-chainspec.json
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
 
 ###########################

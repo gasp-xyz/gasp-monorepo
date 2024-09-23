@@ -42,7 +42,12 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y supervisor && rm -rf /var/lib/apt/lists/* && \
 	mkdir -p /var/log/rollup-node
 
-ADD https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json /app/holesky-chainspec.json
+# Add pre-generated chainspecs from `chainspec` repo
+ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-dev-env-chainspecs/rollup-fungible-73344bd-raw.json /app/fungible-chainspec.json
+ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json /app/dev-chainspec.json
+ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-dev-env-chainspecs/rollup-frontend-4d76522-chainspec-raw.json /app/frontend-chainspec.json
+ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json /app/holesky-chainspec.json
+
 COPY --from=builder /app/main /app/finalizer
 COPY --from=rollup-node-image /app/node /app/rollup-node
 

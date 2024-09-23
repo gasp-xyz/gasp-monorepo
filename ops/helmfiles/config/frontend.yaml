@@ -21,7 +21,7 @@ collator:
     repository: mangatasolutions/rollup-node
     tag: 3a07824d8b8a6ad027424629b814a5edb61654cf
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-dev-env-chainspecs/rollup-frontend-4d76522-chainspec-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-dev-env-chainspecs/rollup-frontend-4d76522-chainspec-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 50Gi
@@ -72,7 +72,6 @@ aggregatorEnv:
   # rpc
   ETH_RPC_URL: http://evm-node-eth:8545
   ETH_WS_URL: ws://evm-node-eth:8546
-  SUBSTRATE_RPC_URL: ws://collator-01:9944
   # contracts
   CHAIN_ID: "1337"
   AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
@@ -105,7 +104,7 @@ finalizerEnv:
   ECDSA_EPHEMERAL_KEY: "true"
   BLS_EPHEMERAL_KEY: "true"
   # rollup-node configs
-  ROLLUP_NODE_CHAIN: rollup-local-seq
+  ROLLUP_NODE_CHAIN: /app/frontend-chainspec.json
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWJCggfzsr6LAdXSdfgFLxsMtgCq9qSq79vqYtdG2oT8Za
 
 ###########################
