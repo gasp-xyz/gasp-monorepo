@@ -39,8 +39,10 @@ FROM debian:stable-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y supervisor && rm -rf /var/lib/apt/lists/* && \
-	mkdir -p /var/log/rollup-node
+RUN apt-get update && \
+    apt-get install -y supervisor wait-for-it && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /var/log/rollup-node
 
 # Add pre-generated chainspecs from `chainspec` repo
 ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-dev-env-chainspecs/rollup-fungible-73344bd-raw.json /app/fungible-chainspec.json
@@ -76,20 +78,25 @@ COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	nodaemon=true
 
 	[program:finalizer]
-	command=/app/finalizer
-	stdout_logfile=/dev/stdout
-	stdout_logfile_maxbytes=0
-	stderr_logfile=/dev/stderr
-	stderr_logfile_maxbytes=0
-	priority=20
+	command = bash -c "wait-for-it ${SUBSTRATE_RPC_URL#*//} -t 300 -- /app/finalizer || kill -s SIGINT `cat supervisord.pid`"
+	stopasgroup = true
+	autorestart = false
+	stdout_logfile = /dev/stdout
+	stdout_logfile_maxbytes = 0
+	stderr_logfile = /dev/stderr
+	stderr_logfile_maxbytes = 0
+	# Start after rollup-node
+	priority = 20
 
 	[program:rollup-node]
-	command=/app/rollup-node --chain=%(ENV_ROLLUP_NODE_CHAIN)s --bootnodes=%(ENV_ROLLUP_NODE_BOOTNODE)s --base-path=%(ENV_ROLLUP_NODE_BASE_PATH)s --pruning=archive
-	stdout_logfile=/var/log/rollup-node/combined.log
-	stdout_logfile_maxbytes=50MB
-	stdout_logfile_backups=1
-	redirect_stderr=true
-	priority=10
+	command = bash -c "/app/rollup-node --chain=%(ENV_ROLLUP_NODE_CHAIN)s --bootnodes=%(ENV_ROLLUP_NODE_BOOTNODE)s --base-path=%(ENV_ROLLUP_NODE_BASE_PATH)s --pruning=archive || kill -s SIGINT `cat supervisord.pid`"
+	stopasgroup = true
+	autorestart = false
+	stdout_logfile = /var/log/rollup-node/combined.log
+	stdout_logfile_maxbytes = 50MB
+	stdout_logfile_backups = 1
+	redirect_stderr = true
+	priority = 10
 EOF
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
