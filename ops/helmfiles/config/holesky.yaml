@@ -13,6 +13,7 @@ evmNode:
 # collator configs #
 #####################
 collatorsEnabled: true
+collatorRpcNodesEnabled: true
 collator:
   image:
     repository: mangatasolutions/rollup-node
@@ -40,7 +41,7 @@ collator:
     extraArgs:
       - --alith
       - --pruning=archive
-      - --rpc-max-connections=5000
+      - --rpc-max-connections=8000
     nodeSelector:
       production: "true"
       topology.kubernetes.io/zone: europe-west1-b
@@ -108,14 +109,14 @@ aggregatorEnvSecrets:
   ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
 aggregatorEnv:
-  SUBSTRATE_RPC_URL: wss://rollup-holesky-rpc.gasp.xyz:443
+  SUBSTRATE_RPC_URL: ws://rpc-shared-dns-record:9944
   CHAIN_ID: "17000"
   AVS_BLOCK_VALIDATION_PERIOD: '100'
   AVS_DEBOUNCE_RPC: '20'
   AVS_DEPLOYMENT_BLOCK: '1233400'
   AVS_KICK_PERIOD: '25'
   AVS_REGISTRY_COORDINATOR_ADDR: '0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1'
-  AVS_RPC_URL: https://avs-aggregator-rpc-holesky.gasp.xyz
+  AVS_RPC_URL: http://avs-aggregator:8090
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_TASK_EXPIRATION: '300'
   AVS_UPDATE_STAKE_PERIOD: '150'
@@ -139,14 +140,14 @@ finalizerEnvSecrets:
   ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
 finalizerEnv:
-  SUBSTRATE_RPC_URL: wss://rollup-holesky-rpc.gasp.xyz:443
+  SUBSTRATE_RPC_URL: ws://rpc-shared-dns-record:9944
   CHAIN_ID: "17000"
   AVS_BLOCK_VALIDATION_PERIOD: '100'
   AVS_DEBOUNCE_RPC: '20'
   AVS_DEPLOYMENT_BLOCK: '1233400'
   AVS_KICK_PERIOD: '25'
   AVS_REGISTRY_COORDINATOR_ADDR: '0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1'
-  AVS_RPC_URL: https://avs-aggregator-rpc-holesky.gasp.xyz
+  AVS_RPC_URL: http://avs-aggregator:8090
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_TASK_EXPIRATION: '300'
   AVS_UPDATE_STAKE_PERIOD: '150'
@@ -166,7 +167,7 @@ updaterMnemonicEth: ref+sops://secrets.enc.yaml#/updaterMnemonicEth
 updaterEnvEth:
   CHAIN: "holesky"
   L1_CHAIN: "Ethereum"
-  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_NODE_URL: ws://rpc-shared-dns-record:9944
   EIGEN_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000"
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   FINALIZATION_SOURCE: "relay"
@@ -177,7 +178,7 @@ updaterMnemonicArb: ref+sops://secrets.enc.yaml#/updaterMnemonicArb
 updaterEnvArb:
   CHAIN: "arbitrum"
   L1_CHAIN: "Arbitrum"
-  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_NODE_URL: ws://rpc-shared-dns-record:9944
   EIGEN_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000"
   MANGATA_CONTRACT_ADDRESS: "0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   FINALIZATION_SOURCE: "relay"
@@ -196,7 +197,7 @@ secondSequencerMnemonicEth: "bottom drive obey lake curtain smoke basket hold ra
 sequencerChainUrlEth: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
-  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_NODE_URL: ws://rpc-shared-dns-record:9944
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   LIMIT: "100"
 
@@ -205,7 +206,7 @@ secondSequencerMnemonicArb: "bottom drive obey lake curtain smoke basket hold ra
 sequencerChainUrlArb: ref+sops://secrets.enc.yaml#/sepoliaArbitrumHttpsUrl
 sequencerEnvArb:
   L1_CHAIN: "Arbitrum"
-  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_NODE_URL: ws://rpc-shared-dns-record:9944
   MANGATA_CONTRACT_ADDRESS: "0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   LIMIT: "100"
   

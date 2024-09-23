@@ -10,6 +10,7 @@ services:
         condition: service_started
     build: .
     environment:
+      WATCHDOG: 3600
       MANGATA_NODE_URL: ${ROLLUP_SEQUENCER_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}
       ETH_CHAIN_URL: ${ROLLUP_SEQUENCER_ETH_CHAIN_URL_ETH:-wss://ethereum.publicnode.com}
       MANGATA_CONTRACT_ADDRESS: ${MANGATA_CONTRACT_ADDRESS:-0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc}
@@ -28,6 +29,7 @@ services:
         condition: service_started
     build: .
     environment:
+      WATCHDOG: 3600
       MANGATA_NODE_URL: ${ROLLUP_SEQUENCER_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}
       ETH_CHAIN_URL: ${ROLLUP_SEQUENCER_ETH_CHAIN_URL_ARB:-wss://ethereum.publicnode.com}
       MANGATA_CONTRACT_ADDRESS: ${MANGATA_CONTRACT_ADDRESS:-0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9}

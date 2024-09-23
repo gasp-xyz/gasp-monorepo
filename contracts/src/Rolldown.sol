@@ -2,6 +2,8 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/console.sol";
@@ -15,8 +17,10 @@ contract Rolldown is
     Initializable,
     OwnableUpgradeable,
     Pausable,
-    RolldownStorage
+    RolldownStorage,
+    ReentrancyGuard
 {
+    using SafeERC20 for IERC20;
 
     address public constant ETH_TOKEN_ADDRESS =
         0x0000000000000000000000000000000000000001;
@@ -96,16 +100,13 @@ contract Rolldown is
         deposit_erc20(tokenAddress, amount);
     }
 
-    function deposit_erc20(address tokenAddress, uint256 amount) public whenNotPaused {
+    function deposit_erc20(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
         address depositRecipient = msg.sender;
 
         IERC20 token = IERC20(tokenAddress);
-        require(
-            token.transferFrom(msg.sender, address(this), amount),
-            "Token transfer failed"
-        );
+        token.safeTransferFrom(msg.sender, address(this), amount);
 
         uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
@@ -138,7 +139,7 @@ contract Rolldown is
         return a > b ? a : b;
     }
 
-    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public {
+    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
         Range memory r = merkleRootRange[merkle_root];
         require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
 
@@ -170,7 +171,7 @@ contract Rolldown is
         return Range({start: 0, end: 0});
     }
 
-    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public {
+    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
         Range memory r = merkleRootRange[merkle_root];
         require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
 
@@ -192,11 +193,13 @@ contract Rolldown is
     function update_l1_from_l2(bytes32 merkle_root, Range calldata range /*,TaskResponse calldata response ??? */) external whenNotPaused {
         require(msg.sender == updaterAccount, "Not the owner");
         require(range.end > lastProcessedUpdate_origin_l2, "Update brings no new data");
+        require(range.start > 0 , "range id must be greater than 0");
         require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
         require(range.end >= range.start, "Invalid range");
         roots.push(merkle_root);
         merkleRootRange[merkle_root] = range;
         lastProcessedUpdate_origin_l2 = range.end;
+        emit L2UpdateAccepted(merkle_root, range);
     }
 
     function process_l2_update_cancels(Cancel calldata cancel) private {
@@ -248,7 +251,7 @@ contract Rolldown is
         require(token.balanceOf(address(this)) >= withdrawal.amount, "Not enough funds in contract");
         require(withdrawal.amount > 0, "Amount must be greater than zero");
 
-        token.transfer(withdrawal.recipient, withdrawal.amount);
+        token.safeTransfer(withdrawal.recipient, withdrawal.amount);
         emit ERC20TokensWithdrawn(
           withdrawal.recipient,
           withdrawal.tokenAddress,

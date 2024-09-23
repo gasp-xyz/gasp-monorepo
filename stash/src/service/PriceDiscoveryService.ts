@@ -124,7 +124,7 @@ export const priceDiscovery = async (
 
   for (const currency in baseTokenPrice.market_data.current_price) {
     results[currency] =
-      currencySymbol === 'GETH'
+      currencySymbol === 'ETH'
         ? new Decimal(1)
             .times(baseTokenPrice.market_data.current_price[currency])
             .toString()
