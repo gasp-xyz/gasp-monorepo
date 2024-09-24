@@ -16,14 +16,9 @@ import { Mangata, type MangataGenericEvent, signTx } from "gasp-sdk";
 import "gasp-types";
 
 import type { H256 } from "@polkadot/types/interfaces/runtime";
-import { hexToU8a, u8aToHex } from "@polkadot/util";
+import { hexToU8a } from "@polkadot/util";
 import type { KeypairType } from "@polkadot/util-crypto/types";
-import {
-	type PublicClient,
-	UnauthorizedProviderError,
-	encodeAbiParameters,
-	keccak256,
-} from "viem";
+import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
 import {
 	ABI,
 	BLOCK_NUMBER_DELAY,
@@ -123,7 +118,12 @@ async function processDataForL2Update(
 	print(`ETH native data : ${util.inspect(data, { depth: null })}`);
 
 	const encodedData = getEncodedData("getUpdateForL2", data);
-	return (await getNativeL1Update(api, encodedData)).unwrap();
+	console.info(`encodedData: ${encodedData}`);
+	const hash = keccak256(encodedData);
+	return {
+		update: (await getNativeL1Update(api, encodedData)).unwrap(),
+		updateHash: hash,
+	};
 }
 
 async function getL1ReadHash(
