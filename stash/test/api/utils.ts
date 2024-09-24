@@ -1,4 +1,5 @@
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import * as crypto from 'crypto'
 
 export const TIMESERIES_HOST_DOCKER_IMAGE_NAME = "mangatasolutions/redis-test-stash_ts:v2";
 export const REDIS_HOST_DOCKER_IMAGE_NAME = "mangatasolutions/redis-test-stash:latest";
@@ -46,4 +47,18 @@ export async function initBothContainers() {
         console.error(e);
         throw e;
     }
+}
+
+export function generateRandomHash(): string {
+    const randomBytes = crypto.randomBytes(32);
+    const hash = '0x' + crypto.createHash('sha256').update(randomBytes).digest('hex');
+
+    return hash;
+}
+
+export function generateRandomAddress(): string {
+    const randomBytes = crypto.randomBytes(20);
+    const address = '0x' + randomBytes.toString('hex');
+
+    return address;
 }
