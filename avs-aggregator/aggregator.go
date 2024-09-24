@@ -286,21 +286,37 @@ func (agg *Aggregator) checkAndProcessPendingTasks() (error) {
 		return fmt.Errorf("Aggregator failed to LatestRdTaskNum: err: %v", err)
 	}
 
-	latestOpTaskStatus, err := agg.ethRpc.AvsReader.IdToTaskStatus(context.Background(), sdktypes.TaskType(0), latestOpTaskNum)
-	if err != nil {
-		return fmt.Errorf("Aggregator failed to IdToTaskStatus: err: %v", err)
-	}
-	latestRdTaskStatus, err := agg.ethRpc.AvsReader.IdToTaskStatus(context.Background(), sdktypes.TaskType(1), latestRdTaskNum)
-	if err != nil {
-		return fmt.Errorf("Aggregator failed to IdToTaskStatus: err: %v", err)
+	var isOpTaskPending bool
+	var isRdTaskPending bool
+
+	if latestOpTaskNum != 0 {
+		latestOpTaskNum = latestOpTaskNum - 1
+		latestOpTaskStatus, err := agg.ethRpc.AvsReader.IdToTaskStatus(context.Background(), sdktypes.TaskType(0), latestOpTaskNum)
+		if err != nil {
+			return fmt.Errorf("Aggregator failed to IdToTaskStatus: err: %v", err)
+		}
+		if latestOpTaskStatus == types.TASK_STATUS_INITIALIZED {
+			isOpTaskPending = true
+		}
 	}
 
+	if latestRdTaskNum != 0 {
+		latestRdTaskNum = latestRdTaskNum - 1
+		latestRdTaskStatus, err := agg.ethRpc.AvsReader.IdToTaskStatus(context.Background(), sdktypes.TaskType(1), latestRdTaskNum)
+		if err != nil {
+			return fmt.Errorf("Aggregator failed to IdToTaskStatus: err: %v", err)
+		}
+		if latestRdTaskStatus == types.TASK_STATUS_INITIALIZED {
+			isRdTaskPending = true
+		}
+	}
+	
 	switch{
-	case latestOpTaskStatus == types.TASK_STATUS_INITIALIZED && latestRdTaskStatus == types.TASK_STATUS_INITIALIZED:
-		return fmt.Errorf("Both latestOpTaskStatus and latestRdTaskStatus are INITIALIZED")
-	case latestOpTaskStatus != types.TASK_STATUS_INITIALIZED && latestRdTaskStatus != types.TASK_STATUS_INITIALIZED:
-		return fmt.Errorf("Both latestOpTaskStatus and latestRdTaskStatus are NOT INITIALIZED but isTaskPending is true!")
-	case latestOpTaskStatus == types.TASK_STATUS_INITIALIZED && latestRdTaskStatus != types.TASK_STATUS_INITIALIZED:
+	case isOpTaskPending && isRdTaskPending:
+		return fmt.Errorf("Both latestOpTaskStatus and latestRdTaskStatus are Pending")
+	case !isOpTaskPending && !isRdTaskPending:
+		return fmt.Errorf("Both latestOpTaskStatus and latestRdTaskStatus are NOT Pending but isTaskPending is true!")
+	case isOpTaskPending && !isRdTaskPending:
 		{
 			lastOpTaskCreatedBlock, err := agg.ethRpc.AvsReader.LastOpTaskCreatedBlock(context.Background())
 			if err != nil {
@@ -311,7 +327,7 @@ func (agg *Aggregator) checkAndProcessPendingTasks() (error) {
 				return fmt.Errorf("Aggregator failed to getAndProcessPendingRdTask: err: %v", err)
 			}
 		}
-	case latestOpTaskStatus != types.TASK_STATUS_INITIALIZED && latestRdTaskStatus == types.TASK_STATUS_INITIALIZED:
+	case !isOpTaskPending && isRdTaskPending:
 		{
 			lastRdTaskCreatedBlock, err := agg.ethRpc.AvsReader.LastRdTaskCreatedBlock(context.Background())
 			if err != nil {
