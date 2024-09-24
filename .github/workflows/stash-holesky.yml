@@ -1,4 +1,4 @@
-name: stash-rollup-testnet
+name: stash-holesky
 on:
   workflow_dispatch:
 
@@ -7,7 +7,7 @@ permissions:
   id-token: 'write'
 
 env:
-  ENVIRONMENT: rollup-testnet
+  ENVIRONMENT: holesky
 
 jobs:
   build:
@@ -64,4 +64,4 @@ jobs:
       # - name: Delete old versions
       #   # This command deletes all versions except the last 14
       #   # Ref: https://stackoverflow.com/a/66911696/9645556
-      #   run: gcloud app versions list --service=mangata-stash-rollup-dev --format="value(version.id)" --sort-by="~version.createTime" | tail -n +15 | xargs -r gcloud app versions delete --quiet
+      #   run: gcloud app versions list --service=mangata-stash-holesky --format="value(version.id)" --sort-by="~version.createTime" | tail -n +15 | xargs -r gcloud app versions delete --quiet

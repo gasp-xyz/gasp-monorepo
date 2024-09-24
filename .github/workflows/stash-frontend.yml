@@ -1,4 +1,4 @@
-name: stash-rollup-dev
+name: stash-frontend
 on:
   workflow_dispatch:
   push:
@@ -6,14 +6,14 @@ on:
       - main
     paths:
       - "stash/**/*"
-      - ".github/**/rollup-dev**"
+      - ".github/**/frontend**"
 
 permissions:
   contents: 'read'
   id-token: 'write'
 
 env:
-  ENVIRONMENT: rollup-dev
+  ENVIRONMENT: frontend
 
 jobs:
   build:
