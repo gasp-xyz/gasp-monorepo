@@ -6,10 +6,13 @@ import "./IRolldownPrimitives.sol";
 interface IRolldown is IRolldownPrimitives {
 
     function deposit_native() external payable;
+    function deposit_native(uint256 ferryTip) external payable;
 
     function deposit(address tokenAddress, uint256 amount) external;
+    function deposit(address tokenAddress, uint256 amount, uint256 ferryTip) external;
 
     function deposit_erc20(address tokenAddress, uint256 amount) external;
+    function deposit_erc20(address tokenAddress, uint256 amount, uint256 ferryTip) external;
 
     function getUpdateForL2() external view returns (L1Update memory) ;
 
