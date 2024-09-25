@@ -6,10 +6,10 @@ Stash is a service that serves some configurations and also caches some blockcha
 
 
 ### Hosts
-| Environment                                                                           | URL                                                                   |
-|---------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
-| [ROLLUP-DEV](https://mangata-stash-rollup-dev-dot-direct-pixel-353917.oa.r.appspot.com)     | `https://mangata-stash-rollup-dev-dot-direct-pixel-353917.oa.r.appspot.com` |
-| [ROLLUP-TESTNET](https://mangata-stash-rollup-testnet-dot-direct-pixel-353917.oa.r.appspot.com) | `https://mangata-stash-rollup-testnet-dot-direct-pixel-353917.oa.r.appspot.com`  |
+| Environment                                                                              | URL                                                                   |
+|------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| [FRONTEND](https://mangata-stash-rollup-dev-dot-direct-pixel-353917.oa.r.appspot.com)    | `https://mangata-stash-rollup-dev-dot-direct-pixel-353917.oa.r.appspot.com` |
+| [HOLESKY](https://mangata-stash-rollup-testnet-dot-direct-pixel-353917.oa.r.appspot.com) | `https://mangata-stash-rollup-testnet-dot-direct-pixel-353917.oa.r.appspot.com`  |
 
 ### API documentation
 To access the public API, refer to the ```[HOST]/doc``` endpoint, where you'll find comprehensive documentation for our services.
@@ -18,7 +18,7 @@ This resource provides detailed information about our available API functionalit
 
 ### Postman collections
 The `api/` can be imported into Postman to use the API cals.
-Setup the `$host` env to rollup-dev & rollup-testnet, or replace it with actual URL in the API address bar.
+Setup the `$host` env to frontent & holesky, or replace it with actual URL in the API address bar.
 Collection contains scripts to visualize the response data in a graph.
 Script is defined in the `Tests` tab of the request section, and graph is in the `Body -> Visualize` tab in the response section.
 
@@ -70,11 +70,11 @@ Data in this service are managed by
 
 `gcloud compute ssh port-forward-vm --zone=europe-west6-a -- -N -L 6379:REPLACE_WITH_REDIS_INERNAL_IP:6379`
 
-### ROLLUP-DEV
+### FRONTEND
 
 `10.15.245.67`
 
-### ROLLUP-TESTNET
+### HOLESKY
 
 `10.37.94.163`
 
@@ -91,5 +91,5 @@ gcloud auth application-default login
 git config --global diff.sopsdiffer.textconv "sops -d --config /dev/null"
 
 # To edit secrets.enc.yaml file run next command
-sops rollup-dev.enc.env
+sops frontend.enc.env
 ```

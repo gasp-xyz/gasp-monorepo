@@ -6,8 +6,6 @@ includes:
   - app-import-handlers.yaml
 
 env_variables:
-  APP_ENV: frontend
-  PROJECT_ID: gasp-stash
   MANGATA_NODE_URL: 'wss://collator-01-ws-rollup-frontend.gasp.xyz'
   REDIS_HOST: '10.15.245.67'
   REDIS_PORT: 6379
@@ -15,7 +13,6 @@ env_variables:
   TIMESERIES_PORT: 14581
   TIMESERIES_PASS: $TIMESERIES_PASS
   TOKEN_FOR_PRICE_SYMBOL: 'ETH'
-  NODE_ENV: rollup-dev
   COINGECKO_API_KEY: $COINGECKO_API_KEY
   CAPTCHA_SITEKEY: $CAPTCHA_SITEKEY
   CAPTCHA_SECRET: $CAPTCHA_SECRET
