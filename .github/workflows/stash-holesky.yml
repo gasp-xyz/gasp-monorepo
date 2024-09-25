@@ -54,14 +54,3 @@ jobs:
         run: |
           sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
           gcloud app deploy app.tmp.yaml --quiet
-
-      # TODO: temporary disable smoke test
-      # - name: smoke test
-      #   run: |
-      #     curl "${{ steps.deploy.outputs.url }}"
-      #     echo "Deployed to ${{ steps.deploy.outputs.url }}"
-
-      # - name: Delete old versions
-      #   # This command deletes all versions except the last 14
-      #   # Ref: https://stackoverflow.com/a/66911696/9645556
-      #   run: gcloud app versions list --service=mangata-stash-holesky --format="value(version.id)" --sort-by="~version.createTime" | tail -n +15 | xargs -r gcloud app versions delete --quiet
