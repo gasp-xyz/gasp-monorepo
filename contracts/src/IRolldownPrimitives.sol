@@ -7,7 +7,8 @@ interface IRolldownPrimitives {
         uint256 requestId,
         address depositRecipient,
         address tokenAddress,
-        uint256 amount
+        uint256 amount,
+        uint256 ferryTip
     );
 
     event DisputeResolutionAcceptedIntoQueue(
@@ -29,6 +30,25 @@ interface IRolldownPrimitives {
     event WithdrawalClosed(
       uint256 requestId,
       bytes32 withdrawalHash
+    );
+
+    event FerriedWithdrawalClosed(
+      uint256 requestId,
+      bytes32 withdrawalHash
+    );
+
+    event WithdrawalFerried(
+      uint256 requestId,
+      uint256 amount,
+      address recipient,
+      address ferry,
+      bytes32 withdrawalHash
+    );
+
+    event FailedDepositResolutionClosed(
+      uint256 requestId,
+      uint256 originDepositId,
+      bytes32 failedDespotiResolutionHash
     );
 
     event L2UpdateAccepted(
@@ -59,6 +79,13 @@ interface IRolldownPrimitives {
         address tokenAddress;
         uint256 amount;
         uint256 timeStamp;
+        uint256 ferryTip;
+    }
+
+    struct FailedDepositResolution {
+      RequestId requestId;
+      uint256 originRequestId;
+      address ferry;
     }
 
     struct CancelResolution {
@@ -93,6 +120,7 @@ interface IRolldownPrimitives {
         address recipient;
         address tokenAddress;
         uint256 amount;
+        uint256 ferryTip;
     }
 
 }
