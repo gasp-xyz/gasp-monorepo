@@ -17,6 +17,7 @@ import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRe
 import "./IGaspMultiRollupServicePrimitives.sol";
 import "./IFinalizerTaskManager.sol";
 import {IRolldown} from "./IRolldown.sol";
+import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
 
 contract FinalizerTaskManager is
     Initializable,
@@ -474,10 +475,13 @@ contract FinalizerTaskManager is
 
         idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = TaskStatus.COMPLETED;
 
-        IRolldown.Range memory range;
-        range.start = taskResponse.rangeStart;
-        range.end = taskResponse.rangeEnd;
-        rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
+        IRolldown.ChainId ethChainId = IRolldownPrimitives.ChainId.Ethereum;
+        if (taskResponse.chainId == ethChainId){
+            IRolldown.Range memory range;
+            range.start = taskResponse.rangeStart;
+            range.end = taskResponse.rangeEnd;
+            rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
+        }
         chainRdBatchNonce[taskResponse.chainId] = taskResponse.batchId + 1;
 
         // emitting completed event
