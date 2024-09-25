@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sort"
 	"time"
+	"math/big"
 
 	// lots of poor naming in go-ethereum 👾
 	"github.com/ethereum/go-ethereum"
@@ -21,7 +22,11 @@ import (
 // Note that users need WebSockets when calling ethclient.DialContext, because
 // subscriptions won't work with regular HTTP RPC.
 type StreamReader struct {
-	Backend ethereum.LogFilterer // blockchain connection
+	Backend interface{
+		ethereum.LogFilterer
+		ethereum.ChainReader
+		ethereum.BlockNumberReader
+	} // blockchain connection
 
 	// limit for a subscription request (defaults to 2 s)
 	SubscribeTimeout time.Duration
@@ -31,6 +36,7 @@ type StreamReader struct {
 	// idle time on which no new content can be assumed
 	// (defaults to 500 ms)
 	ReceiveExpire time.Duration
+	filterLimit uint64
 }
 
 // // EventsWithHistory resolves all logs matching eventType.
@@ -88,7 +94,7 @@ func (r *StreamReader) linkHistory(ctx context.Context, stream <-chan chain.Log,
 	}
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-	history, err := r.Backend.FilterLogs(ctx, *q)
+	history, err := r.GetLogs(ctx, q)
 	if err != nil {
 		return nil, fmt.Errorf("etherstream: historic logs unavailable: %w", err)
 	}
@@ -134,6 +140,75 @@ func Order(a, b *chain.Log) int {
 		diff = bytes.Compare(b.TxHash[:], a.TxHash[:])
 	}
 	return diff
+}
+
+func (r StreamReader) GetLogs(ctx context.Context, q *ethereum.FilterQuery) ([]chain.Log, error) {
+	if r.filterLimit == 0{
+		r.filterLimit = 5000
+	}
+
+	var c uint64
+	var err error
+	if q.ToBlock == nil {
+		c, err = r.Backend.BlockNumber(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("etherstream: BlockNumber failed: %w", err)
+		}
+	} else {
+		if q.ToBlock.Sign() >= 0 {
+			c = uint64(q.ToBlock.Int64())
+		} else {
+			h, err := r.Backend.HeaderByNumber(ctx, q.ToBlock)
+			if err != nil {
+				return nil, fmt.Errorf("etherstream: HeaderByNumber failed: %w", err)
+			}
+			c = uint64(h.Number.Int64())
+		}
+	}
+
+	var s uint64
+	if q.FromBlock == nil {
+		s = 0
+	} else {
+		s = uint64(q.FromBlock.Int64())
+	}
+
+	var acc []chain.Log
+	if c == 0{
+		return acc, nil
+	}
+	if s>c{
+		return acc, nil
+	}
+
+	iq := *q
+	iq.FromBlock = big.NewInt(int64(s))
+	lim := uint64(iq.FromBlock.Int64()) + r.filterLimit - 1
+	if c <= lim {
+		iq.ToBlock = big.NewInt(int64(c))
+	} else {
+		iq.ToBlock = big.NewInt(int64(lim))
+	} 
+	
+	for {
+		logs, err := r.Backend.FilterLogs(ctx, iq)
+		if err != nil {
+			return nil, fmt.Errorf("etherstream: GetLogs failed: %w", err)
+		}
+		acc = append(acc, logs...)
+		if uint64(iq.ToBlock.Int64()) == c{
+			break
+		}
+		f := uint64(iq.ToBlock.Int64()) + 1
+		iq.FromBlock = big.NewInt(int64(f))
+		lim := uint64(iq.FromBlock.Int64()) + r.filterLimit - 1
+		if c <= lim {
+			iq.ToBlock = big.NewInt(int64(c))
+		} else {
+			iq.ToBlock = big.NewInt(int64(lim))
+		} 
+	}
+	return acc, nil
 }
 
 func (r StreamReader) StreamQueryWithHistory(ctx context.Context, q *ethereum.FilterQuery) (chan chain.Log, ethereum.Subscription, error) {

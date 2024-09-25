@@ -470,7 +470,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		osu.logger.Info("OpStateUpdater Listening to trigger events", "osu.atBlock + 1", osu.atBlock+1)
 
 		// Subscribe
-		logs := make(chan ethtypes.Log)
+		var logs chan ethtypes.Log
 		iquery := baseQuery
 		iquery.FromBlock = big.NewInt(int64(osu.atBlock + 1))
 
@@ -481,7 +481,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 		// Loop to retry subscription on error
 		for attempt := 0; attempt < maxRetries; attempt++ {
-			sub, err = osu.ethRpc.Clients.EthWsClient.SubscribeFilterLogs(context.Background(), iquery, logs)
+			logs, sub, err = osu.ethRpc.AvsSubscriber.StreamSubscriber.StreamQueryWithHistory(context.Background(), &iquery)
 			if err == nil {
 				break // Successfully subscribed, exit loop
 			}
