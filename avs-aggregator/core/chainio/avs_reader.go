@@ -71,11 +71,102 @@ func (r *AvsReader) CheckSignatures(
 	return stakeTotalsPerQuorum, nil
 }
 
+func (r *AvsReader) IsTaskPending(
+	ctx context.Context,
+) (bool, error) {
+	v, err := r.AvsServiceBindings.TaskManager.IsTaskPending(
+		&bind.CallOpts{},
+	)
+	if err != nil {
+		return false, err
+	}
+	return v, nil
+}
+
 func (r *AvsReader) LastCompletedOpTaskCreatedBlock(
 	ctx context.Context,
 ) (uint32, error) {
 	v, err := r.AvsServiceBindings.TaskManager.LastCompletedOpTaskCreatedBlock(
 		&bind.CallOpts{},
+	)
+	if err != nil {
+		return uint32(0), err
+	}
+	return v, nil
+}
+
+func (r *AvsReader) LatestOpTaskNum(
+	ctx context.Context,
+) (uint32, error) {
+	v, err := r.AvsServiceBindings.TaskManager.LatestOpTaskNum(
+		&bind.CallOpts{},
+	)
+	if err != nil {
+		return uint32(0), err
+	}
+	return v, nil
+}
+
+func (r *AvsReader) LatestRdTaskNum(
+	ctx context.Context,
+) (uint32, error) {
+	v, err := r.AvsServiceBindings.TaskManager.LatestRdTaskNum(
+		&bind.CallOpts{},
+	)
+	if err != nil {
+		return uint32(0), err
+	}
+	return v, nil
+}
+
+func (r *AvsReader) LastOpTaskCreatedBlock(
+	ctx context.Context,
+) (uint32, error) {
+	v, err := r.AvsServiceBindings.TaskManager.LastOpTaskCreatedBlock(
+		&bind.CallOpts{},
+	)
+	if err != nil {
+		return uint32(0), err
+	}
+	return v, nil
+}
+
+func (r *AvsReader) LastRdTaskCreatedBlock(
+	ctx context.Context,
+) (uint32, error) {
+	v, err := r.AvsServiceBindings.TaskManager.LastRdTaskCreatedBlock(
+		&bind.CallOpts{},
+	)
+	if err != nil {
+		return uint32(0), err
+	}
+	return v, nil
+}
+
+
+func (r *AvsReader) IdToTaskStatus(
+	ctx context.Context,
+	taskType uint8,
+	taskIndex uint32,
+) (uint8, error) {
+	v, err := r.AvsServiceBindings.TaskManager.IdToTaskStatus(
+		&bind.CallOpts{},
+		taskType,
+		taskIndex,
+	)
+	if err != nil {
+		return uint8(0), err
+	}
+	return v, nil
+}
+
+func (r *AvsReader) ChainRdBatchNonce(
+	ctx context.Context,
+	chainIndex uint8,
+) (uint32, error) {
+	v, err := r.AvsServiceBindings.TaskManager.ChainRdBatchNonce(
+		&bind.CallOpts{},
+		chainIndex,
 	)
 	if err != nil {
 		return uint32(0), err

@@ -60,26 +60,7 @@ pub mod i_finalizer_task_manager {
                     ::std::borrow::ToOwned::to_owned("NewOpTaskForceCreated"),
                     ::std::vec![::ethers::core::abi::ethabi::Event {
                         name: ::std::borrow::ToOwned::to_owned("NewOpTaskForceCreated",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("taskIndex"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                indexed: true,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("task"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                ],),
-                                indexed: false,
-                            },
-                        ],
+                        inputs: ::std::vec![],
                         anonymous: false,
                     },],
                 ),
@@ -97,7 +78,8 @@ pub mod i_finalizer_task_manager {
                                 name: ::std::borrow::ToOwned::to_owned("task"),
                                 kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Bytes,
@@ -239,18 +221,16 @@ pub mod i_finalizer_task_manager {
                                 indexed: true,
                             },
                             ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("blockHash"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                                indexed: true,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
                                 name: ::std::borrow::ToOwned::to_owned("taskResponse"),
                                 kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Address,
                                 ],),
                                 indexed: false,
                             },
@@ -273,9 +253,12 @@ pub mod i_finalizer_task_manager {
                                 kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Address,
                                 ],),
                                 indexed: false,
                             },
@@ -308,6 +291,18 @@ pub mod i_finalizer_task_manager {
                         inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
                             name: ::std::borrow::ToOwned::to_owned("resetTrackedQuorums",),
                             kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                            indexed: false,
+                        },],
+                        anonymous: false,
+                    },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("RolldownTargetUpdated"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("RolldownTargetUpdated",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
+                            name: ::std::borrow::ToOwned::to_owned("rolldownAddress"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
                             indexed: false,
                         },],
                         anonymous: false,
@@ -453,6 +448,13 @@ pub mod i_finalizer_task_manager {
         {
             self.0.event()
         }
+        ///Gets the contract's `RolldownTargetUpdated` event
+        pub fn rolldown_target_updated_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, RolldownTargetUpdatedFilter>
+        {
+            self.0.event()
+        }
         /// Returns an `Event` builder for all the events of this contract.
         pub fn events(
             &self,
@@ -521,15 +523,8 @@ pub mod i_finalizer_task_manager {
         Eq,
         Hash,
     )]
-    #[ethevent(
-        name = "NewOpTaskForceCreated",
-        abi = "NewOpTaskForceCreated(uint32,(uint32,uint32,uint32,bytes,uint32,bytes,uint32))"
-    )]
-    pub struct NewOpTaskForceCreatedFilter {
-        #[ethevent(indexed)]
-        pub task_index: u32,
-        pub task: OpTask,
-    }
+    #[ethevent(name = "NewOpTaskForceCreated", abi = "NewOpTaskForceCreated()")]
+    pub struct NewOpTaskForceCreatedFilter;
     #[derive(
         Clone,
         ::ethers::contract::EthEvent,
@@ -544,7 +539,7 @@ pub mod i_finalizer_task_manager {
     )]
     #[ethevent(
         name = "NewRdTaskCreated",
-        abi = "NewRdTaskCreated(uint32,(uint32,uint256,uint32,uint32,bytes,uint32))"
+        abi = "NewRdTaskCreated(uint32,(uint32,uint8,uint32,uint32,uint32,bytes,uint32))"
     )]
     pub struct NewRdTaskCreatedFilter {
         #[ethevent(indexed)]
@@ -677,13 +672,11 @@ pub mod i_finalizer_task_manager {
     )]
     #[ethevent(
         name = "RdTaskCompleted",
-        abi = "RdTaskCompleted(uint32,bytes32,(uint32,bytes32,bytes32,bytes32,bytes32))"
+        abi = "RdTaskCompleted(uint32,(uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address))"
     )]
     pub struct RdTaskCompletedFilter {
         #[ethevent(indexed)]
         pub task_index: u32,
-        #[ethevent(indexed)]
-        pub block_hash: [u8; 32],
         pub task_response: RdTaskResponse,
     }
     #[derive(
@@ -700,7 +693,7 @@ pub mod i_finalizer_task_manager {
     )]
     #[ethevent(
         name = "RdTaskResponded",
-        abi = "RdTaskResponded(uint32,(uint32,bytes32,bytes32,bytes32,bytes32),(uint32,bytes32,uint96[],uint96[]))"
+        abi = "RdTaskResponded(uint32,(uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address),(uint32,bytes32,uint96[],uint96[]))"
     )]
     pub struct RdTaskRespondedFilter {
         #[ethevent(indexed)]
@@ -723,6 +716,22 @@ pub mod i_finalizer_task_manager {
     #[ethevent(name = "ResumeTrackingOpState", abi = "ResumeTrackingOpState(bool)")]
     pub struct ResumeTrackingOpStateFilter {
         pub reset_tracked_quorums: bool,
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethevent(name = "RolldownTargetUpdated", abi = "RolldownTargetUpdated(address)")]
+    pub struct RolldownTargetUpdatedFilter {
+        pub rolldown_address: ::ethers::core::types::Address,
     }
     ///Container type for all of the contract's events
     #[derive(
@@ -749,6 +758,7 @@ pub mod i_finalizer_task_manager {
         RdTaskCompletedFilter(RdTaskCompletedFilter),
         RdTaskRespondedFilter(RdTaskRespondedFilter),
         ResumeTrackingOpStateFilter(ResumeTrackingOpStateFilter),
+        RolldownTargetUpdatedFilter(RolldownTargetUpdatedFilter),
     }
     impl ::ethers::contract::EthLogDecode for IFinalizerTaskManagerEvents {
         fn decode_log(
@@ -803,6 +813,11 @@ pub mod i_finalizer_task_manager {
                     decoded,
                 ));
             }
+            if let Ok(decoded) = RolldownTargetUpdatedFilter::decode_log(log) {
+                return Ok(IFinalizerTaskManagerEvents::RolldownTargetUpdatedFilter(
+                    decoded,
+                ));
+            }
             Err(::ethers::core::abi::Error::InvalidData)
         }
     }
@@ -824,6 +839,7 @@ pub mod i_finalizer_task_manager {
                 Self::RdTaskCompletedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RdTaskRespondedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ResumeTrackingOpStateFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::RolldownTargetUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
@@ -892,6 +908,11 @@ pub mod i_finalizer_task_manager {
     impl ::core::convert::From<ResumeTrackingOpStateFilter> for IFinalizerTaskManagerEvents {
         fn from(value: ResumeTrackingOpStateFilter) -> Self {
             Self::ResumeTrackingOpStateFilter(value)
+        }
+    }
+    impl ::core::convert::From<RolldownTargetUpdatedFilter> for IFinalizerTaskManagerEvents {
+        fn from(value: RolldownTargetUpdatedFilter) -> Self {
+            Self::RolldownTargetUpdatedFilter(value)
         }
     }
 }

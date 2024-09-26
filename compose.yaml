@@ -4,7 +4,7 @@ include:
   - path: ./avs-aggregator/compose.yml
   - path: ./avs-finalizer/compose.yml
   - path: ./rollup-sequencer/compose.yml
-  - path: ./rollup-updater/compose.yml
+#  - path: ./rollup-updater/compose.yml
   - path: ./contracts/compose.yml
   - path: ./gasp-syncer/compose.yml
 

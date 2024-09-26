@@ -26,6 +26,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
 
     ProxyAdmin public gmrsProxyAdmin;
     PauserRegistry public gmrsPauserReg;
+    address public dummy_rolldown_address;
 
     GaspMultiRollupService public gmrs;
     GaspMultiRollupService public gmrsImplementation;
@@ -113,7 +114,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
         gmrsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(gmrs))),
             address(gmrsImplementation),
-            abi.encodeWithSelector(gmrs.initialize.selector, gmrsPauserReg, owner, updaterAccount, allowNonRootInit)
+            abi.encodeWithSelector(gmrs.initialize.selector, gmrsPauserReg, owner, updaterAccount, allowNonRootInit, dummy_rolldown_address, chain)
         );
 
         // end deployment
