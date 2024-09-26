@@ -26,6 +26,7 @@ import {
 expect.extend( { toIncludeAllMembers} );
 import 'jest-extended';
 import {StartedTestContainer} from "testcontainers";
+import {createAWithdrawWithManualBatch} from "./nodeHelper";
 
 
 jest.setTimeout(1500000);
@@ -98,6 +99,7 @@ async function waitForOperatorToSubmitATask(opContainer: StartedTestContainer) {
 
 describe('AVS Finalizer', () => {
     it.only('opt-in / opt-out', async () => {
+        const chain = "Ethereum";
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -109,8 +111,10 @@ describe('AVS Finalizer', () => {
         const POperatorAddress = waitForOperatorRegistered(publicClient as PublicClient);
         const {container : opContainer } =  await dockerUtils.startContainer();
         const operatorAddress = await POperatorAddress;
+        await createAWithdrawWithManualBatch(chain);
         await waitForOperatorToSubmitATask(opContainer);
         console.info("Waiting for opTaskCreated Event...");
+        await createAWithdrawWithManualBatch(chain);
         await waitFor(publicClient, 1, "NewRdTaskCreated");
         console.info("...Done waiting for opTaskCreated Event");
         const res = await publicClient.readContract({
@@ -144,6 +148,7 @@ describe('AVS Finalizer', () => {
             args: [operatorAddress],
         });
         expect(statusAfter).toBe(2);
+        await createAWithdrawWithManualBatch(chain, 2);
         const tasks = await waitFor(publicClient, 2, "RdTaskCompleted");
          expect(tasks).toHaveLength(2);
 

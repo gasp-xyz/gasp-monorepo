@@ -1,7 +1,8 @@
 import {GenericContainer, StartedTestContainer, Wait} from "testcontainers";
 import {Environment} from "testcontainers/build/types";
 import { randomBytes } from "crypto";
-import Wallet from 'ethereumjs-wallet'
+//@ts-ignore
+import  { Wallet } from '@ethereumjs/wallet'
 import {generateBls12381G2KeyPair} from "@mattrglobal/bbs-signatures";
 
 interface operatorKeys {
@@ -12,8 +13,8 @@ interface operatorKeys {
 async function getNewKeys() {
     const key = randomBytes(32).toString("hex");
     const keyp =  await generateBls12381G2KeyPair();
-    const wbls = Wallet.fromPrivateKey(Buffer.from(keyp.secretKey));
-    const wecdsa = Wallet.fromPrivateKey(Buffer.from(key, 'hex'));
+    const wbls =   Wallet.fromPrivateKey(Buffer.from(keyp.secretKey));
+    const wecdsa =  Wallet.fromPrivateKey(Buffer.from(key, 'hex'));
     return  { edcsa : await  wecdsa.toV3(""), bls:  await wbls.toV3("") };
 }
 
