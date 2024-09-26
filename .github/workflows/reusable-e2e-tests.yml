@@ -137,6 +137,9 @@ jobs:
         working-directory: avs-finalizer/tests/
         run: yarn install
 
+      - name: wait 4 minutes for agg to warm up
+        run: sleep 240s
+
       - name: FINALIZER tests - run tests
         working-directory: avs-finalizer/tests/
         run: yarn ${{ matrix.test }}
