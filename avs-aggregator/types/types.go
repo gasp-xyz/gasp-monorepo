@@ -4,6 +4,7 @@ import (
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/ethereum/go-ethereum/common"
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	gsrpctypes "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 // TODO: Hardcoded for now
@@ -23,6 +24,8 @@ var TRACKED_QUORUM_NUMBERS = QUORUM_NUMBERS
 // we only use a single quorum (quorum 0)
 var QUORUM_NUMBERS = sdktypes.QuorumNums{QUORUM_NUMBER}
 var QUORUM_NUMBER = sdktypes.QuorumNum(0)
+
+const TASK_STATUS_INITIALIZED = uint8(1)
 
 // type BlockNumber = uint32
 type TaskIndex = uint32
@@ -55,3 +58,21 @@ type QuorumStakeDiff struct{
 	PosDiff sdktypes.StakeAmount
 	NegDiff sdktypes.StakeAmount
 }
+
+type SubstrateL2RequestsBatchLastItem struct {
+	Key gsrpctypes.U8
+	Value SubstrateL2RequestsBatchLastValue
+}
+
+type SubstrateL2RequestsBatchLastValue struct {
+	BlockNumber gsrpctypes.U32
+	BatchId gsrpctypes.U128
+	BatchRange SubstrateL2RequestsBatchLastRange
+}
+
+type SubstrateL2RequestsBatchLastRange struct {
+	Start gsrpctypes.U128
+	End gsrpctypes.U128
+}
+
+type SubstrateL2RequestsBatchLast = []SubstrateL2RequestsBatchLastItem

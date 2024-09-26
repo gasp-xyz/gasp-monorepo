@@ -206,7 +206,7 @@ pub struct OpTaskResponse {
     pub reference_task_hash: [u8; 32],
     pub operators_state_info_hash: [u8; 32],
 }
-///`RdTask(uint32,uint256,uint32,uint32,bytes,uint32)`
+///`RdTask(uint32,uint8,uint32,uint32,uint32,bytes,uint32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -221,13 +221,14 @@ pub struct OpTaskResponse {
 )]
 pub struct RdTask {
     pub task_num: u32,
-    pub block_number: ::ethers::core::types::U256,
+    pub chain_id: u8,
+    pub batch_id: u32,
     pub task_created_block: u32,
     pub last_completed_op_task_created_block: u32,
     pub last_completed_op_task_quorum_numbers: ::ethers::core::types::Bytes,
     pub last_completed_op_task_quorum_threshold_percentage: u32,
 }
-///`RdTaskResponse(uint32,bytes32,bytes32,bytes32,bytes32)`
+///`RdTaskResponse(uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -243,9 +244,12 @@ pub struct RdTask {
 pub struct RdTaskResponse {
     pub reference_task_index: u32,
     pub reference_task_hash: [u8; 32],
-    pub block_hash: [u8; 32],
-    pub storage_proof_hash: [u8; 32],
-    pub pending_state_hash: [u8; 32],
+    pub chain_id: u8,
+    pub batch_id: u32,
+    pub rd_update: [u8; 32],
+    pub range_start: ::ethers::core::types::U256,
+    pub range_end: ::ethers::core::types::U256,
+    pub updater: ::ethers::core::types::Address,
 }
 ///`TaskResponseMetadata(uint32,bytes32,uint96[],uint96[])`
 #[derive(
