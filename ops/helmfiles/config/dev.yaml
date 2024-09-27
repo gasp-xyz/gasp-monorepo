@@ -19,7 +19,7 @@ collator:
     repository: mangatasolutions/rollup-node
     tag: eth-rollup-develop
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json
   storageClass: standard
   storageSize: 20Gi
   enableServiceMonitorCollectors: true

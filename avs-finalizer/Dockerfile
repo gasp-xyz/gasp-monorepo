@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG ROLLUP_NODE_VERSION=761b67eacf03f2f13ca34202be50e3a3f0c25ef8
+ARG ROLLUP_NODE_VERSION=26de25adc6ecbfba763eb4ac12489e8cd50ee496
 FROM mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION} AS rollup-node-image
 
 FROM rust:1.78 AS builder
@@ -45,9 +45,9 @@ RUN apt-get update && \
     mkdir -p /var/log/rollup-node
 
 # Add pre-generated chainspecs from `chainspec` repo
-ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-dev-env-chainspecs/rollup-fungible-73344bd-raw.json /app/fungible-chainspec.json
-ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json /app/dev-chainspec.json
-ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-dev-env-chainspecs/rollup-frontend-4d76522-chainspec-raw.json /app/frontend-chainspec.json
+ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json /app/fungible-chainspec.json
+ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json /app/dev-chainspec.json
+ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-frontend-4d76522-chainspec-raw.json /app/frontend-chainspec.json
 ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json /app/holesky-chainspec.json
 
 COPY --from=builder /app/main /app/finalizer
