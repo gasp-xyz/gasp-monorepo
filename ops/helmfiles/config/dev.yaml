@@ -83,7 +83,6 @@ aggregatorEnv:
 finalizerEnabled: true
 finalizerEnvSecrets: {}
 finalizerEnv:
-  TESTNET: "true"
     # rpc
   ETH_RPC_URL: http://evm-node-eth:8545
   ETH_WS_URL: ws://evm-node-eth:8546
