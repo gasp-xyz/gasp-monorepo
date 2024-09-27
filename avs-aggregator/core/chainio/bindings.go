@@ -13,6 +13,7 @@ import (
 	blsSignatureChecker "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
 	delegationManager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/DelegationManager"
 	stakeRegistry "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/StakeRegistry"
+	indexRegistry "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/IndexRegistry"
 	operatorStateRetrieverExtended "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/OperatorStateRetrieverExtended"
 )
 
@@ -22,6 +23,7 @@ type AvsServiceBindings struct {
 	ServiceManager         *servicemanager.ContractFinalizerServiceManager
 	BlsSignatureChecker         *blsSignatureChecker.ContractBLSSignatureChecker
 	StakeRegistry 			*stakeRegistry.ContractStakeRegistry
+	IndexRegistry          *indexRegistry.ContractIndexRegistry 
 	DelegationManager      *delegationManager.ContractDelegationManager
 	OperatorStateRetrieverExtended *operatorStateRetrieverExtended.ContractOperatorStateRetrieverExtended
 	OperatorStateRetriever common.Address
@@ -84,6 +86,17 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		logger.Error("Failed to fetch StakeRegistry contract", "err", err)
 		return nil, err
 	}
+	
+	indexRegistryAddr, err := contractRegistryCoordinator.IndexRegistry(&bind.CallOpts{})
+	if err != nil {
+		logger.Error("Failed to fetch IndexRegistry address", "err", err)
+		return nil, err
+	}
+	contractIndexRegistry, err := indexRegistry.NewContractIndexRegistry(indexRegistryAddr, ethclient)
+	if err != nil {
+		logger.Error("Failed to fetch IndexRegistry contract", "err", err)
+		return nil, err
+	}
 
 	delegationManagerAddr, err := contractStakeRegistry.Delegation(&bind.CallOpts{})
 	if err != nil {
@@ -113,6 +126,7 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		TaskManager:            contractTaskManager,
 		BlsSignatureChecker:            contractBlsSignatureChecker,
 		StakeRegistry:            contractStakeRegistry,
+		IndexRegistry:            contractIndexRegistry,
 		DelegationManager:            contractDelegationManager,
 		OperatorStateRetrieverExtended: contractOperatorStateRetrieverExtended,
 		OperatorStateRetriever: taskManagerAddr,

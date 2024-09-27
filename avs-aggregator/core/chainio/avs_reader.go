@@ -284,3 +284,20 @@ func (r *AvsReader) GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoo
 
 	return operatorsAvsState, nil
 }
+
+func (r *AvsReader) GetOperatorIdList(
+	opts *bind.CallOpts,
+	quorum types.QuorumNum,
+	blockNumber uint32,
+) ([]types.OperatorId, error) {
+	ids, err := r.AvsServiceBindings.IndexRegistry.GetOperatorListAtBlockNumber(opts, quorum.UnderlyingType(), blockNumber)
+	if err != nil {
+		r.logger.Error("Cannot get operator list", "err", err)
+		return nil, err
+	}
+	operatorIds := make([]types.OperatorId, 0)
+	for _, id := range ids {
+		operatorIds = append(operatorIds, id)
+	}
+	return operatorIds, nil
+}
