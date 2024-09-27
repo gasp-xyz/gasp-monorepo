@@ -29,6 +29,8 @@ spec:
         {{- include "node.labels" . | nindent 8 }}
         service: {{ include "node.name" . }}
     spec:
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
       {{- if .Values.extraInitContainers }}
       initContainers:
         {{- with .Values.extraInitContainers }}

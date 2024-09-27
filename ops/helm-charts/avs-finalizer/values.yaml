@@ -35,6 +35,11 @@ data:
   # -- (string) If set, create a clone of the volume (using volumeClaimTemplates.dataSource.PersistentVolumeClaim) and use it to store chain data
   # kubernetesVolumeToClone:
 
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
 resources: {}
   # requests:
   #   cpu: 200m

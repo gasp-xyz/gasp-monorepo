@@ -42,7 +42,9 @@ WORKDIR /app
 RUN apt-get update && \
     apt-get install -y supervisor wait-for-it && \
     rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /var/log/rollup-node
+    mkdir -p /var/log/rollup-node /data && \
+    useradd -m -s /bin/bash appuser && \
+    chown -R appuser:appuser /app /var/log/rollup-node /data
 
 # Add pre-generated chainspecs from `chainspec` repo
 ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json /app/fungible-chainspec.json
@@ -76,6 +78,7 @@ ENV SUBSTRATE_RPC_URL='ws://127.0.0.1:9944' \
 COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	[supervisord]
 	nodaemon=true
+	user=appuser
 
 	# Reference: https://github.com/Supervisor/supervisor/issues/712#issuecomment-396553685 
 	[program:finalizer]
@@ -99,5 +102,7 @@ COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	redirect_stderr = true
 	priority = 10
 EOF
+
+USER appuser
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
