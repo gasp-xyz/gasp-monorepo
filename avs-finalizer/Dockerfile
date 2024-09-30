@@ -47,18 +47,19 @@ RUN apt-get update && \
     chown -R appuser:appuser /app /var/log/rollup-node /data
 
 # Add pre-generated chainspecs from `chainspec` repo
-ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json /app/fungible-chainspec.json
-ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json /app/dev-chainspec.json
-ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-frontend-4d76522-chainspec-raw.json /app/frontend-chainspec.json
-ADD https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json /app/holesky-chainspec.json
+ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json /app/fungible-chainspec.json
+ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json /app/dev-chainspec.json
+ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-frontend-4d76522-chainspec-raw.json /app/frontend-chainspec.json
+ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json /app/holesky-chainspec.json
 
-COPY --from=builder /app/main /app/finalizer
-COPY --from=rollup-node-image /app/node /app/rollup-node
+COPY --chown=appuser:appuser --from=builder /app/main /app/finalizer
+COPY --chown=appuser:appuser --from=rollup-node-image /app/node /app/rollup-node
 
 # rollup-node default env vars for connecting to rollup-holesky testnet
 ENV ROLLUP_NODE_CHAIN=/app/holesky-chainspec.json \
 		ROLLUP_NODE_BOOTNODE=/dns/collator-01-p2p-rollup-holesky.gasp.xyz/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK \
-		ROLLUP_NODE_BASE_PATH=/data
+		ROLLUP_NODE_BASE_PATH=/data \
+		ROLLUP_RUST_LOG=info,substrate=warn
 
 # avs-finalizer default env vars for connecting to rollup-holesky testnet
 ENV SUBSTRATE_RPC_URL='ws://127.0.0.1:9944' \
@@ -96,10 +97,15 @@ COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	command = bash -c "/app/rollup-node --chain=%(ENV_ROLLUP_NODE_CHAIN)s --bootnodes=%(ENV_ROLLUP_NODE_BOOTNODE)s --base-path=%(ENV_ROLLUP_NODE_BASE_PATH)s --pruning=archive || kill -s SIGINT `cat supervisord.pid`"
 	stopasgroup = true
 	autorestart = false
-	stdout_logfile = /var/log/rollup-node/combined.log
-	stdout_logfile_maxbytes = 50MB
-	stdout_logfile_backups = 1
-	redirect_stderr = true
+	stdout_logfile = /dev/stdout
+	stdout_logfile_maxbytes = 0
+	stderr_logfile = /dev/stderr
+	stderr_logfile_maxbytes = 0
+	# stdout_logfile = /var/log/rollup-node/combined.log
+	# stdout_logfile_maxbytes = 50MB
+	# stdout_logfile_backups = 1
+	# redirect_stderr = true
+	environment = RUST_LOG="%(ENV_ROLLUP_RUST_LOG)s"
 	priority = 10
 EOF
 
