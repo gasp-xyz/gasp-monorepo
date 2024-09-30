@@ -66,14 +66,8 @@ ENV SUBSTRATE_RPC_URL='ws://127.0.0.1:9944' \
 		ETH_RPC_URL='https://ethereum-holesky-rpc.publicnode.com' \
 		ETH_WS_URL='wss://ethereum-holesky-rpc.publicnode.com' \
 		CHAIN_ID='17000' \
-		AVS_BLOCK_VALIDATION_PERIOD='100' \
-    AVS_DEBOUNCE_RPC='20' \
-    AVS_DEPLOYMENT_BLOCK='1233400' \
-    AVS_KICK_PERIOD='25' \
     AVS_REGISTRY_COORDINATOR_ADDR='0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1' \
     AVS_RPC_URL='https://avs-aggregator-holesky.gasp.xyz/' \
-    AVS_TASK_EXPIRATION='300' \
-    AVS_UPDATE_STAKE_PERIOD='150' \
     OPT_IN_AT_STARTUP='true'
 
 COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
