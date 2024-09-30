@@ -13,6 +13,7 @@ evmNode:
 # collator configs #
 #####################
 collatorsEnabled: true
+collatorRpcNodesEnabled: false
 collator:
   image:
     repository: mangatasolutions/rollup-node

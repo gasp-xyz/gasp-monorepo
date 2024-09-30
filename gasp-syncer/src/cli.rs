@@ -29,6 +29,9 @@ pub struct CliArgs {
     #[arg(long, env)]
     pub target_chain_id: u64,
 
+    #[arg(long, env)]
+    pub target_chain_index: u8,
+
     #[command(flatten)]
     pub ecdsa_key: EcdsaKey,
     #[arg(long, env)]

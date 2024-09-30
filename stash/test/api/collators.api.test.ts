@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { chai, describe, expect, it } from "vitest";
-chai.should()
+import { describe, expect, it } from "vitest";
 import supertest from "supertest";
 import app from "../../src/app";
 import Joi from 'joi';

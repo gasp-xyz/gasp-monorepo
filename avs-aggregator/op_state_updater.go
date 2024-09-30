@@ -63,7 +63,7 @@ func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, avsRegistr
 		quorumDiff:                    make(map[sdktypes.QuorumNum]types.QuorumStakeDiff),
 		operatorIdsToBeUpdated:        make(map[sdktypes.OperatorId]bool),
 		quorumsToBeUpdated:            make(map[sdktypes.QuorumNum]bool),
-		quorumPosPercThreshold:        50,
+		quorumPosPercThreshold:        20,
 		quorumNegPercThreshold:        20,
 		updateFullQuorumThresholdPerc: 30,
 		triggerOpStateUpdate:          false,
@@ -141,9 +141,17 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		if len(Ids) == 0 {
 			osu.logger.Debug("No operators registered yet")
 			osu.logger.Debug("Waiting for atleast 1 operator to register")
-			eventC := make(chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate)
 			fromBlock := currentBlock + 1
-			sub, err := osu.ethRpc.AvsSubscriber.SubscribeToOperatorStakeUpdate(bind.WatchOpts{Start: &fromBlock}, eventC)
+			query := ethereum.FilterQuery{
+				Addresses: []common.Address{stakeRegistryContractAddress},
+				Topics: [][]common.Hash{
+					[]common.Hash{
+						getEventID(stakeRegistryAbi, "OperatorStakeUpdate"),
+					},
+				},
+				FromBlock: big.NewInt(int64(fromBlock)),
+			}
+			rawLogsC, sub, err := osu.ethRpc.AvsSubscriber.StreamSubscriber.StreamQueryWithHistory(context.Background(), &query)
 			if err != nil {
 				osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToOperatorStakeUpdate: err: %v, start: %v", err, fromBlock)
 				return
@@ -159,8 +167,13 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				case err := <-sub.Err():
 					osu.errorC <- fmt.Errorf("OpStateUpdater encountered subscription error in waitForRegisterLoop: err: %v", err)
 					return
-				case event := <-eventC:
-					osu.logger.Info("Received operatorStakeUpdate event:", "event", eventC)
+				case vLog := <-rawLogsC:
+					event, err := osu.ethRpc.AvsReader.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseOperatorStakeUpdate(vLog)
+					if err != nil {
+						osu.errorC <- fmt.Errorf("Failed to ParseOpTaskCompleted: err: %v, atBlock: %v", err, vLog.BlockNumber)
+						return
+					}
+					osu.logger.Info("Received operatorStakeUpdate event:", "event", event)
 
 					isQuorumTracked := false
 					for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
@@ -219,8 +232,17 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				{
 					osu.logger.Info("OpStateUpdater is paused", "pauseReasonV", osu.pauseReasonV)
 					osu.logger.Info("OpStateUpdater waiting for resume event")
-					eventC := make(chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState)
-					sub, err := osu.ethRpc.AvsSubscriber.SubscribeToResumeTrackingOpState(eventC, uint64(osu.atBlock+1))
+
+					query := ethereum.FilterQuery{
+						Addresses: []common.Address{taskManagerContractAddress},
+						Topics: [][]common.Hash{
+							[]common.Hash{
+								getEventID(taskmanagerAbi, "ResumeTrackingOpState"),
+							},
+						},
+						FromBlock: big.NewInt(int64(osu.atBlock+1)),
+					}
+					rawLogsC, sub, err := osu.ethRpc.AvsSubscriber.StreamSubscriber.StreamQueryWithHistory(context.Background(), &query)
 					if err != nil {
 						osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToResumeTrackingOpState: err: %v, atBlock+1: %v", err, osu.checkpointedBlock, osu.atBlock+1)
 						return
@@ -239,8 +261,13 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						case err := <-sub.Err():
 							osu.errorC <- fmt.Errorf("OpStateUpdater encountered subscription error in watchForResumeLoop: err: %v", err)
 							return
-						case event := <-eventC:
-							osu.logger.Info("Received resume event: %v", eventC)
+						case vLog := <-rawLogsC:
+							event, err := osu.ethRpc.AvsReader.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseResumeTrackingOpState(vLog)
+							if err != nil {
+								osu.errorC <- fmt.Errorf("Failed to ParseResumeTrackingOpState: err: %v, atBlock: %v", err, vLog.BlockNumber)
+								return
+							}
+							osu.logger.Info("Received resume event: %v", event)
 							if event.ResetTrackedQuorums {
 								osu.logger.Debug("OpStateUpdater received resume event with resetTrackedQuorums = true")
 								osu.resetTrackedQuorums = true
@@ -340,8 +367,17 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						return
 					} else {
 						osu.logger.Debug("OpStateUpdater waiting for opTask to complete")
-						eventC := make(chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted)
-						sub, err := osu.ethRpc.AvsSubscriber.SubscribeToOpTaskCompleted(uint64(sendNewOpTaskReturn.OpTask.TaskCreatedBlock), eventC)
+
+						query := ethereum.FilterQuery{
+							Addresses: []common.Address{taskManagerContractAddress},
+							Topics: [][]common.Hash{
+								[]common.Hash{
+									getEventID(taskmanagerAbi, "OpTaskCompleted"),
+								},
+							},
+							FromBlock: big.NewInt(int64(sendNewOpTaskReturn.OpTask.TaskCreatedBlock)),
+						}
+						rawLogsC, sub, err := osu.ethRpc.AvsSubscriber.StreamSubscriber.StreamQueryWithHistory(context.Background(), &query)
 						if err != nil {
 							osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToOpTaskCompleted: err: %v, atBlock: %v", err, sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
 							return
@@ -351,6 +387,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						timer := time.NewTimer(time.Hour)
 						defer timer.Stop()
 
+						osu.logger.Debug("OpStateUpdater waiting for opTask to complete - 2")
 					watchForOpTaskCompletedLoop:
 						for {
 							select {
@@ -363,8 +400,13 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 							case <-timer.C:
 								osu.errorC <- fmt.Errorf("OpStateUpdater timed out in watchForOpTaskCompletedLoop")
 								return
-							case event := <-eventC:
+							case vLog := <-rawLogsC:
 								{
+									event, err := osu.ethRpc.AvsReader.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseOpTaskCompleted(vLog)
+									if err != nil {
+										osu.errorC <- fmt.Errorf("Failed to ParseOpTaskCompleted: err: %v, atBlock: %v", err, vLog.BlockNumber)
+										return
+									}
 									osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event: %v", event)
 
 									// TODO
@@ -376,17 +418,21 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 									// Similar to how we do it when we see an OpTaskCompleted event when watching
 									// triggers
 									if sendNewOpTaskReturn.OpTask.TaskNum < event.TaskIndex {
-										osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event has task: %v", event)
-										osu.errorC <- fmt.Errorf("Failed to get the expected OpTaskCompleted event: taskIndex: %v", sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
-										return
-									}
+										osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event has task with higher than expted taskIndex: %v", event)
+										lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), event.Raw.BlockNumber)
+										if err != nil {
+											osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", event.Raw.BlockNumber)
+											return
+										}
+										osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
+										osu.atBlock = uint32(event.Raw.BlockNumber)
+									} else if sendNewOpTaskReturn.OpTask.TaskNum > event.TaskIndex {
 
 									// This branch is to account for the case where
 									// a task is completed in a block and another task is created
 									// in the same block and then that one is also completed in the same block
-									if sendNewOpTaskReturn.OpTask.TaskNum > event.TaskIndex {
 										continue
-									}
+									} else {
 
 									osu.logger.Info("OpStateUpdater - Got the expected OpTaskCompleted event", "TaskIndex", sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
 
@@ -398,8 +444,8 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 									// triggers
 									// In any case when we come to the OpTaskCompleted event it will do the above anyway
 									osu.checkpointedBlock = sendNewOpTaskReturn.OpTask.TaskCreatedBlock
-									osu.atBlock = sendNewOpTaskReturn.OpTask.TaskCreatedBlock
-
+									osu.atBlock = uint32(event.Raw.BlockNumber)
+									}
 									break watchForOpTaskCompletedLoop
 								}
 							}
@@ -424,7 +470,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		osu.logger.Info("OpStateUpdater Listening to trigger events", "osu.atBlock + 1", osu.atBlock+1)
 
 		// Subscribe
-		logs := make(chan ethtypes.Log)
+		var logs chan ethtypes.Log
 		iquery := baseQuery
 		iquery.FromBlock = big.NewInt(int64(osu.atBlock + 1))
 
@@ -435,7 +481,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 		// Loop to retry subscription on error
 		for attempt := 0; attempt < maxRetries; attempt++ {
-			sub, err = osu.ethRpc.Clients.EthWsClient.SubscribeFilterLogs(context.Background(), iquery, logs)
+			logs, sub, err = osu.ethRpc.AvsSubscriber.StreamSubscriber.StreamQueryWithHistory(context.Background(), &iquery)
 			if err == nil {
 				break // Successfully subscribed, exit loop
 			}
@@ -658,6 +704,8 @@ func (osu *OpStateUpdater) updateOpStates() error {
 	// and we should not auto create tasks here to prevent
 	// some guy from changing his stake a lot in the early days of the mainnet
 	// to cost us a lot of eth
+
+	osu.triggerOpStateUpdate = false
 	var err error
 	osu.logger.Debug("OpStateUpdater - getCheckpointedOpState")
 	err = osu.getCheckpointedOpState(osu.checkpointedBlock)
