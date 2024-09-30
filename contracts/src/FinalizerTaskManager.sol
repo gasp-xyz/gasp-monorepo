@@ -16,6 +16,8 @@ import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRe
 
 import "./IGaspMultiRollupServicePrimitives.sol";
 import "./IFinalizerTaskManager.sol";
+import {IRolldown} from "./IRolldown.sol";
+import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
 
 contract FinalizerTaskManager is
     Initializable,
@@ -33,7 +35,6 @@ contract FinalizerTaskManager is
     /* CONSTANT */
     // The number of blocks from the task initialization within which the aggregator has to respond to
     uint32 public taskResponseWindowBlock;
-    uint32 public minOpTaskResponseWindowBlock;
     uint256 public constant THRESHOLD_DENOMINATOR = 100;
 
     /* STORAGE */
@@ -53,6 +54,7 @@ contract FinalizerTaskManager is
     mapping(TaskType => mapping(uint32 => TaskStatus)) public idToTaskStatus;
 
     uint32 public lastOpTaskCreatedBlock;
+    uint32 public lastRdTaskCreatedBlock;
     uint32 public lastCompletedOpTaskNum;
     // If zero then no opTask has yet been completed
     // And hence no reference opState has been established
@@ -64,27 +66,18 @@ contract FinalizerTaskManager is
     address public aggregator;
     address public generator;
 
-    bytes32 public latestPendingStateHash;
+    IRolldown public rolldown;
+
+    bool public isTaskPending;
+
+    mapping(IRolldown.ChainId => uint32) public chainRdBatchNonce;
+
+    // TODO
+    // Maybe skip storing this
     bytes32 public operatorsStateInfoHash;
 
     bool public allowNonRootInit;
 
-    // DATA STRUCTURES
-    enum TaskStatus
-    {
-        // default is NOT_INITIALIZED
-        NOT_INITIALIZED,
-        INITIALIZED,
-        CANCELLED,
-        RESPONDED,
-        COMPLETED
-    }
-    enum TaskType
-    {
-        // default is OpTask
-        OP_TASK,
-        RD_TASK
-    }
 
     /* MODIFIERS */
     modifier onlyAggregator() {
@@ -98,7 +91,7 @@ contract FinalizerTaskManager is
         _;
     }
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock, address _operatorStateRetrieverExtended)
+    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, address _operatorStateRetrieverExtended, IRolldown _rolldown)
         public
         initializer
     {
@@ -110,7 +103,12 @@ contract FinalizerTaskManager is
         blsSignatureChecker = BLSSignatureChecker(_blsSignatureCheckerAddress);
         operatorStateRetrieverExtended = _operatorStateRetrieverExtended;
         taskResponseWindowBlock = _taskResponseWindowBlock;
-        minOpTaskResponseWindowBlock = _minOpTaskResponseWindowBlock;
+        rolldown = _rolldown;
+    }
+
+    function setRolldown(IRolldown _rolldown) external whenNotPaused onlyOwner {
+      rolldown = _rolldown;
+      emit RolldownTargetUpdated(address(_rolldown));
     }
 
     function pauseTrackingOpState()
@@ -136,15 +134,14 @@ contract FinalizerTaskManager is
     // DEDUP ALL THIS!
     
     /* FUNCTIONS */
-    // NOTE: this function creates new task, assigns it a taskId
-    function createNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
-        external
-        onlyTaskGenerator
+    function _createNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
+        internal
     {
         require(
             lastCompletedOpTaskCreatedBlock != block.number && block.number != 0,
-            "Can't create a task in the same block as a completed task"
+            "Can't in lastCompletedOpTaskCreatedBlock"
         );
+
         // create a new task struct
         OpTask memory newTask;
         newTask.taskNum = latestOpTaskNum;
@@ -163,30 +160,24 @@ contract FinalizerTaskManager is
             newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
         }
 
-        // Ensure new previous task was either cancelled or completed
-        // Here for now we auto cancel previous task if not completed
-        if (latestOpTaskNum > 0) {
-            uint32 lastTaskNum = latestOpTaskNum - 1;
-            if (idToTaskStatus[TaskType.OP_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
-                idToTaskStatus[TaskType.OP_TASK][lastTaskNum] = TaskStatus.CANCELLED;
-                // emit OpTaskCancelled(lastTaskNum);
-            }
-        }
-
-        if (latestRdTaskNum > 0) {
-            uint32 lastTaskNum = latestRdTaskNum - 1;
-            if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
-                idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
-                // emit RdTaskCancelled(lastTaskNum);
-            }
-        }
-
         // store hash of task onchain, emit event, and increase taskNum
         allTaskHashes[TaskType.OP_TASK][latestOpTaskNum] = keccak256(abi.encode(newTask));
         idToTaskStatus[TaskType.OP_TASK][latestOpTaskNum] = TaskStatus.INITIALIZED;
         lastOpTaskCreatedBlock = uint32(block.number);
+        isTaskPending = true;
         emit NewOpTaskCreated(latestOpTaskNum, newTask);
         latestOpTaskNum = latestOpTaskNum + 1;
+    }
+
+    function createNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
+        external
+        onlyTaskGenerator
+    {
+        require(
+            isTaskPending == false,
+            "Task already pending"
+        );
+        _createNewOpTask(quorumThresholdPercentage, quorumNumbers);
     }
 
     // NOTE: this function responds to existing tasks.
@@ -198,38 +189,31 @@ contract FinalizerTaskManager is
         bool isInit = lastCompletedOpTaskCreatedBlock == 0;
         uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
 
-        if (isInit) {
-            if (allowNonRootInit) {
-                require(msg.sender == aggregator, "Auth0");
-            } else {
-                require(msg.sender == owner(), "Auth2");
-            }
-        } else {
-            require(msg.sender == aggregator, "Auth0");
-        }
-
+        require(!isInit || allowNonRootInit, "use root init");
 
         uint32 taskCreatedBlock = task.taskCreatedBlock;
         bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
         uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
 
+        require(
+                isTaskPending == true, "No task pending");
         // check that the task is valid, hasn't been responsed yet, and is being responsed in time
         require(
             keccak256(abi.encode(task)) == allTaskHashes[TaskType.OP_TASK][taskResponse.referenceTaskIndex],
-            "supplied task does not match the one recorded in the contract"
+            "Task mismatch"
         );
         // some logical checks
         require(
             idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Aggregator has already responded to the task"
+            "Not Init state"
         );
         require(
             allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
-            "Aggregator has already responded to the task"
+            "Alrdy Resp"
         );
         require(
             uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Aggregator has responded to the task too late"
+            "Too late"
         );
 
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
@@ -240,11 +224,9 @@ contract FinalizerTaskManager is
 
         IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
 
-        if (isInit) {
-            // check the BLS signature
-            (quorumStakeTotals, hashOfNonSigners) =
-                blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
-        }
+        // check the BLS signature
+        (quorumStakeTotals, hashOfNonSigners) =
+            blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
 
         TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
             uint32(block.number),
@@ -254,29 +236,28 @@ contract FinalizerTaskManager is
         );
         // updating the storage with task responsea
         allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
-        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.RESPONDED;
+        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = TaskStatus.RESPONDED;
 
         // emitting event
         emit OpTaskResponded(task.taskNum, taskResponse, taskResponseMetadata);
 
+        isTaskPending = false;
 
-        if (isInit) {
-            // check that signatories own at least a threshold percentage of each quourm
-            for (uint256 i = 0; i < quorumNumbers.length; i++) {
-                // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
-                // signed stake > total stake
-                if (
-                    quorumStakeTotals.signedStakeForQuorum[i] * THRESHOLD_DENOMINATOR
-                        < quorumStakeTotals.totalStakeForQuorum[i] * uint8(quorumThresholdPercentage)
-                ) {
-                    // "Signatories do not own at least threshold percentage of a quorum"
-                    return;
-                }
+        // check that signatories own at least a threshold percentage of each quourm
+        for (uint256 i = 0; i < quorumNumbers.length; i++) {
+            // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
+            // signed stake > total stake
+            if (
+                quorumStakeTotals.signedStakeForQuorum[i] * THRESHOLD_DENOMINATOR
+                    < quorumStakeTotals.totalStakeForQuorum[i] * uint8(quorumThresholdPercentage)
+            ) {
+                // "Signatories do not own at least threshold percentage of a quorum"
+                return;
             }
         }
 
         operatorsStateInfoHash = taskResponse.operatorsStateInfoHash;
-        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.COMPLETED;
+        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = TaskStatus.COMPLETED;
         lastCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
         lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
         lastCompletedOpTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
@@ -285,39 +266,13 @@ contract FinalizerTaskManager is
         emit OpTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
     }
 
-    function forceCreateNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
-        external
-        onlyOwner
-    {
-        require(
-            lastCompletedOpTaskCreatedBlock != block.number && block.number != 0,
-            "Can't create a task in the same block as a completed task"
-        );
-        // create a new task struct
-        OpTask memory newTask;
-        newTask.taskNum = latestOpTaskNum;
-        newTask.taskCreatedBlock = uint32(block.number);
-        newTask.quorumThresholdPercentage = quorumThresholdPercentage;
-        newTask.quorumNumbers = quorumNumbers;
-        // This is to help the aggregator function as it currently is while 
-        // being compatible with past op state verficiation
-        if (lastCompletedOpTaskCreatedBlock == 0) {
-            newTask.lastCompletedOpTaskCreatedBlock = uint32(block.number);
-            newTask.lastCompletedOpTaskQuorumNumbers = quorumNumbers;
-            newTask.lastCompletedOpTaskQuorumThresholdPercentage = quorumThresholdPercentage;
-        } else {
-            newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
-            newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
-            newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
-        }
-
-        // Ensure new previous task was either cancelled or completed
-        // Here for now we auto cancel previous task if not completed
+    function _cancelPendingTasks()
+    internal {
         if (latestOpTaskNum > 0) {
             uint32 lastTaskNum = latestOpTaskNum - 1;
             if (idToTaskStatus[TaskType.OP_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
                 idToTaskStatus[TaskType.OP_TASK][lastTaskNum] = TaskStatus.CANCELLED;
-                // emit OpTaskCancelled(lastTaskNum);
+                emit OpTaskCancelled(lastTaskNum);
             }
         }
 
@@ -325,17 +280,31 @@ contract FinalizerTaskManager is
             uint32 lastTaskNum = latestRdTaskNum - 1;
             if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
                 idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
-                // emit RdTaskCancelled(lastTaskNum);
+                emit RdTaskCancelled(lastTaskNum);
             }
         }
+        isTaskPending = false;
+    }
 
-        // store hash of task onchain, emit event, and increase taskNum
-        allTaskHashes[TaskType.OP_TASK][latestOpTaskNum] = keccak256(abi.encode(newTask));
-        idToTaskStatus[TaskType.OP_TASK][latestOpTaskNum] = TaskStatus.INITIALIZED;
-        lastOpTaskCreatedBlock = uint32(block.number);
-        emit NewOpTaskCreated(latestOpTaskNum, newTask);
-        emit NewOpTaskForceCreated(latestOpTaskNum, newTask);
-        latestOpTaskNum = latestOpTaskNum + 1;
+    function forceCancelPendingTasks()
+        external
+        onlyOwner
+    {
+        require(isTaskPending == true, "No task pending");
+        _cancelPendingTasks();
+    }
+
+    function forceCreateNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
+        external
+        onlyOwner
+    {
+        if (isTaskPending) {
+        _cancelPendingTasks();
+        }
+
+        _createNewOpTask(quorumThresholdPercentage, quorumNumbers);
+
+        emit NewOpTaskForceCreated();
     }
 
     function forceRespondToOpTask(
@@ -349,23 +318,26 @@ contract FinalizerTaskManager is
         bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
         uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
 
+
+        require(
+                isTaskPending == true, "No task pending");
         // check that the task is valid, hasn't been responsed yet, and is being responsed in time
         require(
             keccak256(abi.encode(task)) == allTaskHashes[TaskType.OP_TASK][taskResponse.referenceTaskIndex],
-            "supplied task does not match the one recorded in the contract"
+            "Task mismatch"
         );
         // some logical checks
         require(
             idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Aggregator has already responded to the task"
+            "Not Init state"
         );
         require(
             allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
-            "Aggregator has already responded to the task"
+            "Alrdy Resp"
         );
         require(
             uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Aggregator has responded to the task too late"
+            "Too late"
         );
 
         IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
@@ -380,11 +352,12 @@ contract FinalizerTaskManager is
         allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
 
         operatorsStateInfoHash = taskResponse.operatorsStateInfoHash;
-        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.COMPLETED;
+        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = TaskStatus.COMPLETED;
         lastCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
         lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
         lastCompletedOpTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
         lastCompletedOpTaskNum = task.taskNum;
+        isTaskPending = false;
         // emitting completed event
         emit OpTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
         emit OpTaskForceCompleted(taskResponse.referenceTaskIndex, taskResponse);
@@ -392,51 +365,34 @@ contract FinalizerTaskManager is
 
 
     /* FUNCTIONS */
-    // NOTE: this function creates new task, assigns it a taskId
-    function createNewRdTask(uint256 blockNumber)
+    function createNewRdTask(IRolldown.ChainId chainId, uint32 batchId)
         external
         onlyTaskGenerator
     {
+        require(
+            isTaskPending == false,
+            "Task already pending"
+        );
         require(
             lastCompletedOpTaskCreatedBlock != 0 && block.number != 0,
             "Op State uninit"
         );
         uint32 latestRdTaskNumMem = latestRdTaskNum;
-        uint32 latestOpTaskNumMem = latestOpTaskNum;
         // create a new task struct
         RdTask memory newTask;
         newTask.taskNum = latestRdTaskNumMem;
-        newTask.blockNumber = blockNumber;
+        newTask.chainId = chainId;
+        newTask.batchId = batchId;
         newTask.taskCreatedBlock = uint32(block.number);
         newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
         newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
         newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
 
-        // Ensure new previous task was either cancelled or completed
-        // Here for now we auto cancel previous task if not completed
-        if (latestRdTaskNumMem > 0) {
-            uint32 lastTaskNum = latestRdTaskNumMem - 1;
-            if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
-                idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
-                // emit RdTaskCancelled(lastTaskNum);
-            }
-        }
-
-        if (latestOpTaskNumMem > 0) {
-            uint32 lastTaskNum = latestOpTaskNumMem - 1;
-            if (idToTaskStatus[TaskType.OP_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
-                require(
-                    uint32(block.number) <= lastOpTaskCreatedBlock + minOpTaskResponseWindowBlock,
-                    "RdTask can't yet cancel the init OpTask"
-                );
-                idToTaskStatus[TaskType.OP_TASK][lastTaskNum] = TaskStatus.CANCELLED;
-                // emit OpTaskCancelled(lastTaskNum);
-            }
-        }
-
         // store hash of task onchain, emit event, and increase taskNum
         allTaskHashes[TaskType.RD_TASK][latestRdTaskNumMem] = keccak256(abi.encode(newTask));
         idToTaskStatus[TaskType.RD_TASK][latestRdTaskNumMem] = TaskStatus.INITIALIZED;
+        lastRdTaskCreatedBlock = uint32(block.number);
+        isTaskPending = true;
         emit NewRdTaskCreated(latestRdTaskNumMem, newTask);
         latestRdTaskNum = latestRdTaskNumMem + 1;
     }
@@ -452,23 +408,28 @@ contract FinalizerTaskManager is
         bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
         uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
 
+        // TODO
+        // Maybe this belongs in createNewRdTask
+        require(chainRdBatchNonce[taskResponse.chainId] ==0 || taskResponse.batchId == chainRdBatchNonce[taskResponse.chainId], "chainRdBatchNonce mismatch"); 
+        require(
+                isTaskPending == true, "No task pending");
         // check that the task is valid, hasn't been responsed yet, and is being responsed in time
         require(
             keccak256(abi.encode(task)) == allTaskHashes[TaskType.RD_TASK][taskResponse.referenceTaskIndex],
-            "supplied task does not match the one recorded in the contract"
+            "Task mismatch"
         );
         // some logical checks
         require(
             idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Aggregator has already responded to the task"
+            "Not Init state"
         );
         require(
             allTaskResponses[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
-            "Aggregator has already responded to the task"
+            "Alrdy Resp"
         );
         require(
             uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Aggregator has responded to the task too late"
+            "Too late"
         );
 
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
@@ -489,10 +450,15 @@ contract FinalizerTaskManager is
         );
         // updating the storage with task responses
         allTaskResponses[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
-        idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == TaskStatus.RESPONDED;
+        idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = TaskStatus.RESPONDED;
+
+        // TODO
+        // Optimize the following
 
         // emitting event
         emit RdTaskResponded(task.taskNum, taskResponse, taskResponseMetadata);
+
+        isTaskPending = false;
 
         // check that signatories own at least a threshold percentage of each quourm
         for (uint256 i = 0; i < quorumNumbers.length; i++) {
@@ -507,11 +473,19 @@ contract FinalizerTaskManager is
             }
         }
 
-        latestPendingStateHash = taskResponse.pendingStateHash;
-        idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == TaskStatus.COMPLETED;
+        idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = TaskStatus.COMPLETED;
+
+        IRolldown.ChainId ethChainId = IRolldownPrimitives.ChainId.Ethereum;
+        if (taskResponse.chainId == ethChainId){
+            IRolldown.Range memory range;
+            range.start = taskResponse.rangeStart;
+            range.end = taskResponse.rangeEnd;
+            rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
+        }
+        chainRdBatchNonce[taskResponse.chainId] = taskResponse.batchId + 1;
 
         // emitting completed event
-        emit RdTaskCompleted(taskResponse.referenceTaskIndex, taskResponse.blockHash, taskResponse);
+        emit RdTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
     }
     
     function dummyForOperatorStateInfoType(IGaspMultiRollupServicePrimitives.OperatorStateInfo calldata _operatorStateInfo) external view {

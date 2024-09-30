@@ -69,8 +69,7 @@ contract Rolldown is
         updaterAccount = updater;
     }
 
-    function setUpdater(address updater) external whenNotPaused {
-      require(msg.sender == updaterAccount, "Only active updater can move rights to a new a account");
+    function setUpdater(address updater) external onlyOwner whenNotPaused {
       updaterAccount = updater;
       emit NewUpdaterSet(updaterAccount);
     }

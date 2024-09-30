@@ -13,13 +13,6 @@ import (
 	stakeRegistry "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/StakeRegistry"
 )
 
-type AvsSubscriberer interface {
-	SubscribeToNewRdTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewRdTaskCreated) event.Subscription
-	SubscribeToRdTaskResponses(taskResponseLogs chan *taskmanager.ContractFinalizerTaskManagerRdTaskResponded) event.Subscription
-	ParseRdTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
-	SubscribeToOpTaskCompleted(opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) event.Subscription
-	SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState, fromBlock uint32) event.Subscription 
-}
 
 // Subscribers use a ws connection instead of http connection like Readers
 // kind of stupid that the geth client doesn't have a unified interface for both...
@@ -27,6 +20,7 @@ type AvsSubscriberer interface {
 // with the http connection... seems very very stupid. Am I missing something?
 type AvsSubscriber struct {
 	AvsContractBindings *AvsServiceBindings
+	StreamSubscriber *StreamReader
 	logger              sdklogging.Logger
 }
 
@@ -36,8 +30,12 @@ func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient eth.Client, log
 		logger.Errorf("Failed to create contract bindings", "err", err)
 		return nil, err
 	}
+	streamSubscriber := StreamReader{
+		Backend: ethclient,
+	}
 	return &AvsSubscriber{
 		AvsContractBindings: avsContractBindings,
+		StreamSubscriber:  &streamSubscriber,
 		logger:              logger,
 	}, nil
 }
@@ -64,9 +62,9 @@ func (s *AvsSubscriber) SubscribeToRdTaskResponses(taskResponseLogs chan *taskma
 	return sub
 }
 
-func (s *AvsSubscriber) SubscribeToOpTaskCompleted(fromBlock uint64,opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) (event.Subscription, error) {
+func (s *AvsSubscriber) SubscribeToOpTaskCompleted(opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) (event.Subscription, error) {
 	sub, err := s.AvsContractBindings.TaskManager.WatchOpTaskCompleted(
-		&bind.WatchOpts{Start: &fromBlock}, opTaskCompletionLogs, []uint32{},
+		&bind.WatchOpts{}, opTaskCompletionLogs, []uint32{},
 	)
 	if err != nil {
 		s.logger.Error("Failed to subscribe to OpTaskCompleted events", "err", err)
@@ -75,9 +73,9 @@ func (s *AvsSubscriber) SubscribeToOpTaskCompleted(fromBlock uint64,opTaskComple
 	return sub, err
 }
 
-func (s *AvsSubscriber) SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState, fromBlock uint64) (event.Subscription, error) {
+func (s *AvsSubscriber) SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState) (event.Subscription, error) {
 	sub, err := s.AvsContractBindings.TaskManager.WatchResumeTrackingOpState(
-		&bind.WatchOpts{Start: &fromBlock}, resumeLogs,
+		&bind.WatchOpts{}, resumeLogs,
 	)
 	if err != nil {
 		s.logger.Error("Failed to subscribe to ResumeTrackingOpState events", "err", err)
@@ -86,9 +84,9 @@ func (s *AvsSubscriber) SubscribeToResumeTrackingOpState(resumeLogs chan *taskma
 	return sub, err
 }
 
-func (s *AvsSubscriber) SubscribeToOperatorStakeUpdate(opts bind.WatchOpts, updateLogs chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate) (event.Subscription, error) {
+func (s *AvsSubscriber) SubscribeToOperatorStakeUpdate(updateLogs chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate) (event.Subscription, error) {
 	sub, err := s.AvsContractBindings.StakeRegistry.WatchOperatorStakeUpdate(
-		&opts, updateLogs, [][32]byte{},
+		&bind.WatchOpts{}, updateLogs, [][32]byte{},
 	)
 	if err != nil {
 		s.logger.Error("Failed to subscribe to OperatorStakeUpdate events", "err", err)
