@@ -1,12 +1,12 @@
 package chainio
 
 import (
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	regcoord "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RegistryCoordinator"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	servicemanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerServiceManager"
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
@@ -31,11 +31,11 @@ type AvsServiceBindings struct {
 	TaskManagerAddress common.Address
 	StakeRegistryAddress common.Address 
 	RegistryCoordinatorAddress common.Address
-	ethClient              eth.Client
+	ethClient              *ethclient.Client
 	logger                 logging.Logger
 }
 
-func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth.Client, logger logging.Logger) (*AvsServiceBindings, error) {
+func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient *ethclient.Client, logger logging.Logger) (*AvsServiceBindings, error) {
 	contractRegistryCoordinator, err := regcoord.NewContractRegistryCoordinator(registryCoordinatorAddr, ethclient)
 	if err != nil {
 		return nil, err

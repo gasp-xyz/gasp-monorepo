@@ -6,11 +6,12 @@ import (
 	"strings"
 	"errors"
 
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
+	"github.com/Layr-Labs/eigensdk-go/utils"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	logging "github.com/Layr-Labs/eigensdk-go/logging"
 
@@ -41,7 +42,7 @@ var _ AvsReaderer = (*AvsReader)(nil)
 
 func NewAvsReaderFromConfig(
 	registry common.Address,
-	ethClient eth.Client,
+	ethClient *ethclient.Client,
 	logger logging.Logger,
 ) (*AvsReader, error) {
 	avsServiceBindings, err := NewAvsServiceBindings(registry, ethClient, logger)
@@ -318,7 +319,7 @@ func (r *AvsReader) GetTypedOperatorsStakesForQuorumAtBlock(ctx context.Context,
 	operatorsAvsState := make(map[sdktypes.OperatorId]types.OperatorAvsState)
 	operatorsStakesInQuorums, err := r.AvsServiceBindings.OperatorStateRetrieverExtended.GetOperatorsStakesForQuorum(&bind.CallOpts{Context: ctx, BlockNumber: big.NewInt(int64(blockNumber))}, registryCoordinatorAddr, quorumNumbers.UnderlyingType(), operatorAddr)
 	if err != nil {
-		return nil, sdktypes.WrapError(errors.New("Failed to get operator state"), err)
+		return nil, utils.WrapError(errors.New("Failed to get operator state"), err)
 	}
 	numquorums := len(quorumNumbers)
 	if len(operatorsStakesInQuorums) != numquorums {
@@ -350,7 +351,7 @@ func (r *AvsReader) GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoo
 	// Get operator state for each quorum by querying BLSOperatorStateRetriever (this call is why this service implementation is called ChainCaller)
 	operatorsStakesInQuorums, err := r.AvsServiceBindings.OperatorStateRetrieverExtended.GetOperatorState(&bind.CallOpts{Context: ctx}, registryCoordinatorAddr, quorumNumbers.UnderlyingType(), blockNumber)
 	if err != nil {
-		return nil, sdktypes.WrapError(errors.New("Failed to get operator state"), err)
+		return nil, utils.WrapError(errors.New("Failed to get operator state"), err)
 	}
 	numquorums := len(quorumNumbers)
 	if len(operatorsStakesInQuorums) != numquorums {
@@ -378,15 +379,15 @@ func (r *AvsReader) GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoo
 
 func (r *AvsReader) GetOperatorIdList(
 	opts *bind.CallOpts,
-	quorum types.QuorumNum,
+	quorum sdktypes.QuorumNum,
 	blockNumber uint32,
-) ([]types.OperatorId, error) {
+) ([]sdktypes.OperatorId, error) {
 	ids, err := r.AvsServiceBindings.IndexRegistry.GetOperatorListAtBlockNumber(opts, quorum.UnderlyingType(), blockNumber)
 	if err != nil {
 		r.logger.Error("Cannot get operator list", "err", err)
 		return nil, err
 	}
-	operatorIds := make([]types.OperatorId, 0)
+	operatorIds := make([]sdktypes.OperatorId, 0)
 	for _, id := range ids {
 		operatorIds = append(operatorIds, id)
 	}

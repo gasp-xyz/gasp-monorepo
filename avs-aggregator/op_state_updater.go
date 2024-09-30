@@ -47,14 +47,12 @@ type OpStateUpdater struct {
 	triggerOpStateUpdateWindow    time.Duration
 	errorC                        chan error
 	ethRpc                        *chainio.EthRpc
-	avsRegistryService            *avsregistry.AvsRegistryServiceChainCaller
 }
 
-func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, avsRegistryService *avsregistry.AvsRegistryServiceChainCaller, minOpUpdateInterval int) (*OpStateUpdater, error) {
+func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, minOpUpdateInterval int) (*OpStateUpdater, error) {
 	return &OpStateUpdater{
 		logger:                        logger,
 		ethRpc:                        ethRpc,
-		avsRegistryService:            avsRegistryService,
 		checkpointedAvsQuorumStakes:   make(map[sdktypes.QuorumNum]sdktypes.StakeAmount),
 		checkpointedAvsOpState:        make(map[sdktypes.OperatorId]types.OperatorAvsState),
 		currentOpState:                make(map[sdktypes.OperatorId]types.OperatorAvsState),
