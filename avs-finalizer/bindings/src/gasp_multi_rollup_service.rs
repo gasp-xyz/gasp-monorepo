@@ -37,6 +37,48 @@ pub mod gasp_multi_rollup_service {
                     ],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("chainId"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("chainId"),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned(
+                                            "enum IRolldownPrimitives.ChainId",
+                                        ),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("chainRdBatchNonce"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("chainRdBatchNonce"),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint32"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("checkSignatures"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
@@ -193,6 +235,22 @@ pub mod gasp_multi_rollup_service {
                                         ::std::borrow::ToOwned::to_owned("bool"),
                                     ),
                                 },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("_rolldown"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IRolldown"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("_chainId"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned(
+                                            "enum IRolldownPrimitives.ChainId",
+                                        ),
+                                    ),
+                                },
                             ],
                             outputs: ::std::vec![],
                             constant: ::core::option::Option::None,
@@ -284,30 +342,6 @@ pub mod gasp_multi_rollup_service {
                                     kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     internal_type: ::core::option::Option::Some(
                                         ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("latestPendingStateHash"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "latestPendingStateHash",
-                            ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
                                     ),
                                 },
                             ],
@@ -507,11 +541,11 @@ pub mod gasp_multi_rollup_service {
                     ],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("process_eigen_op_update"),
+                    ::std::borrow::ToOwned::to_owned("processEigenOpUpdate"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
                             name: ::std::borrow::ToOwned::to_owned(
-                                "process_eigen_op_update",
+                                "processEigenOpUpdate",
                             ),
                             inputs: ::std::vec![
                                 ::ethers::core::abi::ethabi::Param {
@@ -749,11 +783,11 @@ pub mod gasp_multi_rollup_service {
                     ],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("process_eigen_rd_update"),
+                    ::std::borrow::ToOwned::to_owned("processEigenRdUpdate"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
                             name: ::std::borrow::ToOwned::to_owned(
-                                "process_eigen_rd_update",
+                                "processEigenRdUpdate",
                             ),
                             inputs: ::std::vec![
                                 ::ethers::core::abi::ethabi::Param {
@@ -761,7 +795,8 @@ pub mod gasp_multi_rollup_service {
                                     kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
                                         ::std::vec![
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::Bytes,
@@ -780,9 +815,12 @@ pub mod gasp_multi_rollup_service {
                                         ::std::vec![
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
                                         ],
                                     ),
                                     internal_type: ::core::option::Option::Some(
@@ -879,12 +917,10 @@ pub mod gasp_multi_rollup_service {
                     ],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("process_eigen_reinit"),
+                    ::std::borrow::ToOwned::to_owned("processEigenReinit"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "process_eigen_reinit",
-                            ),
+                            name: ::std::borrow::ToOwned::to_owned("processEigenReinit"),
                             inputs: ::std::vec![
                                 ::ethers::core::abi::ethabi::Param {
                                     name: ::std::borrow::ToOwned::to_owned("task"),
@@ -1019,12 +1055,39 @@ pub mod gasp_multi_rollup_service {
                                     ),
                                 },
                                 ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("pendingStateHash"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
+                                    name: ::std::borrow::ToOwned::to_owned("merkleRoots"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                        ::std::boxed::Box::new(
+                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                        ),
                                     ),
                                     internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
+                                        ::std::borrow::ToOwned::to_owned("bytes32[]"),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("ranges"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Array(
+                                        ::std::boxed::Box::new(
+                                            ::ethers::core::abi::ethabi::ParamType::Tuple(
+                                                ::std::vec![
+                                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                                ],
+                                            ),
+                                        ),
+                                    ),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned(
+                                            "struct IRolldownPrimitives.Range[]",
+                                        ),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("lastBatchId"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint32"),
                                     ),
                                 },
                             ],
@@ -1156,6 +1219,26 @@ pub mod gasp_multi_rollup_service {
                     ],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("rolldown"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("rolldown"),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IRolldown"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("setPauserRegistry"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
@@ -1176,10 +1259,30 @@ pub mod gasp_multi_rollup_service {
                     ],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("set_updater"),
+                    ::std::borrow::ToOwned::to_owned("setRolldown"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned("set_updater"),
+                            name: ::std::borrow::ToOwned::to_owned("setRolldown"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("_rolldown"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IRolldown"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("setUpdater"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("setUpdater"),
                             inputs: ::std::vec![
                                 ::ethers::core::abi::ethabi::Param {
                                     name: ::std::borrow::ToOwned::to_owned("_updater"),
@@ -1517,6 +1620,24 @@ pub mod gasp_multi_rollup_service {
                     ],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("RolldownTargetUpdated"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "RolldownTargetUpdated",
+                            ),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("rolldownAddress"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("Unpaused"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Event {
@@ -1640,6 +1761,18 @@ pub mod gasp_multi_rollup_service {
                 .method_hash([14, 224, 253, 189], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `chainId` (0x9a8a0592) function
+        pub fn chain_id(&self) -> ::ethers::contract::builders::ContractCall<M, u8> {
+            self.0
+                .method_hash([154, 138, 5, 146], ())
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `chainRdBatchNonce` (0xdeb4037d) function
+        pub fn chain_rd_batch_nonce(&self) -> ::ethers::contract::builders::ContractCall<M, u32> {
+            self.0
+                .method_hash([222, 180, 3, 125], ())
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `checkSignatures` (0x7d978897) function
         pub fn check_signatures(
             &self,
@@ -1650,18 +1783,27 @@ pub mod gasp_multi_rollup_service {
                 .method_hash([125, 151, 136, 151], (msg_hash, params))
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `initialize` (0xfecf9734) function
+        ///Calls the contract's `initialize` (0x30c47d8e) function
         pub fn initialize(
             &self,
             pauser_registry: ::ethers::core::types::Address,
             initial_owner: ::ethers::core::types::Address,
             updater: ::ethers::core::types::Address,
             allow_non_root_init: bool,
+            rolldown: ::ethers::core::types::Address,
+            chain_id: u8,
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash(
-                    [254, 207, 151, 52],
-                    (pauser_registry, initial_owner, updater, allow_non_root_init),
+                    [48, 196, 125, 142],
+                    (
+                        pauser_registry,
+                        initial_owner,
+                        updater,
+                        allow_non_root_init,
+                        rolldown,
+                        chain_id,
+                    ),
                 )
                 .expect("method not found (this should never happen)")
         }
@@ -1695,14 +1837,6 @@ pub mod gasp_multi_rollup_service {
         ) -> ::ethers::contract::builders::ContractCall<M, u32> {
             self.0
                 .method_hash([208, 58, 7, 178], ())
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `latestPendingStateHash` (0x4ae6b203) function
-        pub fn latest_pending_state_hash(
-            &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
-            self.0
-                .method_hash([74, 230, 178, 3], ())
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `operatorAndQuorumToStakes` (0x499d6fb6) function
@@ -1772,7 +1906,7 @@ pub mod gasp_multi_rollup_service {
                 .method_hash([136, 111, 17, 149], ())
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `process_eigen_op_update` (0x232b8e98) function
+        ///Calls the contract's `processEigenOpUpdate` (0x34fadbea) function
         pub fn process_eigen_op_update(
             &self,
             task: OpTask,
@@ -1782,7 +1916,7 @@ pub mod gasp_multi_rollup_service {
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash(
-                    [35, 43, 142, 152],
+                    [52, 250, 219, 234],
                     (
                         task,
                         task_response,
@@ -1792,7 +1926,7 @@ pub mod gasp_multi_rollup_service {
                 )
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `process_eigen_rd_update` (0x79a0a853) function
+        ///Calls the contract's `processEigenRdUpdate` (0xed39e502) function
         pub fn process_eigen_rd_update(
             &self,
             task: RdTask,
@@ -1801,22 +1935,30 @@ pub mod gasp_multi_rollup_service {
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash(
-                    [121, 160, 168, 83],
+                    [237, 57, 229, 2],
                     (task, task_response, non_signer_stakes_and_signature),
                 )
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `process_eigen_reinit` (0xd093867f) function
+        ///Calls the contract's `processEigenReinit` (0x2635e74e) function
         pub fn process_eigen_reinit(
             &self,
             task: OpTask,
             operator_state_info: OperatorStateInfo,
-            pending_state_hash: [u8; 32],
+            merkle_roots: ::std::vec::Vec<[u8; 32]>,
+            ranges: ::std::vec::Vec<Range>,
+            last_batch_id: u32,
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash(
-                    [208, 147, 134, 127],
-                    (task, operator_state_info, pending_state_hash),
+                    [38, 53, 231, 78],
+                    (
+                        task,
+                        operator_state_info,
+                        merkle_roots,
+                        ranges,
+                        last_batch_id,
+                    ),
                 )
                 .expect("method not found (this should never happen)")
         }
@@ -1863,6 +2005,14 @@ pub mod gasp_multi_rollup_service {
                 .method_hash([113, 80, 24, 166], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `rolldown` (0x3d9fb00c) function
+        pub fn rolldown(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
+            self.0
+                .method_hash([61, 159, 176, 12], ())
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `setPauserRegistry` (0x10d67a2f) function
         pub fn set_pauser_registry(
             &self,
@@ -1872,13 +2022,22 @@ pub mod gasp_multi_rollup_service {
                 .method_hash([16, 214, 122, 47], new_pauser_registry)
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `set_updater` (0x124648c9) function
+        ///Calls the contract's `setRolldown` (0xfdc15de8) function
+        pub fn set_rolldown(
+            &self,
+            rolldown: ::ethers::core::types::Address,
+        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
+            self.0
+                .method_hash([253, 193, 93, 232], rolldown)
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `setUpdater` (0x9d54f419) function
         pub fn set_updater(
             &self,
             updater: ::ethers::core::types::Address,
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
-                .method_hash([18, 70, 72, 201], updater)
+                .method_hash([157, 84, 244, 25], updater)
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `stalled` (0x526e3e64) function
@@ -1970,6 +2129,13 @@ pub mod gasp_multi_rollup_service {
         pub fn pauser_registry_set_filter(
             &self,
         ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, PauserRegistrySetFilter>
+        {
+            self.0.event()
+        }
+        ///Gets the contract's `RolldownTargetUpdated` event
+        pub fn rolldown_target_updated_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, RolldownTargetUpdatedFilter>
         {
             self.0.event()
         }
@@ -2140,6 +2306,22 @@ pub mod gasp_multi_rollup_service {
         Eq,
         Hash,
     )]
+    #[ethevent(name = "RolldownTargetUpdated", abi = "RolldownTargetUpdated(address)")]
+    pub struct RolldownTargetUpdatedFilter {
+        pub rolldown_address: ::ethers::core::types::Address,
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
     #[ethevent(name = "Unpaused", abi = "Unpaused(address,uint256)")]
     pub struct UnpausedFilter {
         #[ethevent(indexed)]
@@ -2165,6 +2347,7 @@ pub mod gasp_multi_rollup_service {
         OwnershipTransferredFilter(OwnershipTransferredFilter),
         PausedFilter(PausedFilter),
         PauserRegistrySetFilter(PauserRegistrySetFilter),
+        RolldownTargetUpdatedFilter(RolldownTargetUpdatedFilter),
         UnpausedFilter(UnpausedFilter),
     }
     impl ::ethers::contract::EthLogDecode for GaspMultiRollupServiceEvents {
@@ -2202,6 +2385,11 @@ pub mod gasp_multi_rollup_service {
                     decoded,
                 ));
             }
+            if let Ok(decoded) = RolldownTargetUpdatedFilter::decode_log(log) {
+                return Ok(GaspMultiRollupServiceEvents::RolldownTargetUpdatedFilter(
+                    decoded,
+                ));
+            }
             if let Ok(decoded) = UnpausedFilter::decode_log(log) {
                 return Ok(GaspMultiRollupServiceEvents::UnpausedFilter(decoded));
             }
@@ -2222,6 +2410,7 @@ pub mod gasp_multi_rollup_service {
                 Self::OwnershipTransferredFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::PausedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::PauserRegistrySetFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::RolldownTargetUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::UnpausedFilter(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
@@ -2261,6 +2450,11 @@ pub mod gasp_multi_rollup_service {
             Self::PauserRegistrySetFilter(value)
         }
     }
+    impl ::core::convert::From<RolldownTargetUpdatedFilter> for GaspMultiRollupServiceEvents {
+        fn from(value: RolldownTargetUpdatedFilter) -> Self {
+            Self::RolldownTargetUpdatedFilter(value)
+        }
+    }
     impl ::core::convert::From<UnpausedFilter> for GaspMultiRollupServiceEvents {
         fn from(value: UnpausedFilter) -> Self {
             Self::UnpausedFilter(value)
@@ -2281,6 +2475,36 @@ pub mod gasp_multi_rollup_service {
     )]
     #[ethcall(name = "allowNonRootInit", abi = "allowNonRootInit()")]
     pub struct AllowNonRootInitCall;
+    ///Container type for all input parameters for the `chainId` function with signature `chainId()` and selector `0x9a8a0592`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "chainId", abi = "chainId()")]
+    pub struct ChainIdCall;
+    ///Container type for all input parameters for the `chainRdBatchNonce` function with signature `chainRdBatchNonce()` and selector `0xdeb4037d`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "chainRdBatchNonce", abi = "chainRdBatchNonce()")]
+    pub struct ChainRdBatchNonceCall;
     ///Container type for all input parameters for the `checkSignatures` function with signature `checkSignatures(bytes32,(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))` and selector `0x7d978897`
     #[derive(
         Clone,
@@ -2302,7 +2526,7 @@ pub mod gasp_multi_rollup_service {
         pub msg_hash: [u8; 32],
         pub params: NonSignerStakesAndSignature,
     }
-    ///Container type for all input parameters for the `initialize` function with signature `initialize(address,address,address,bool)` and selector `0xfecf9734`
+    ///Container type for all input parameters for the `initialize` function with signature `initialize(address,address,address,bool,address,uint8)` and selector `0x30c47d8e`
     #[derive(
         Clone,
         ::ethers::contract::EthCall,
@@ -2315,12 +2539,17 @@ pub mod gasp_multi_rollup_service {
         Eq,
         Hash,
     )]
-    #[ethcall(name = "initialize", abi = "initialize(address,address,address,bool)")]
+    #[ethcall(
+        name = "initialize",
+        abi = "initialize(address,address,address,bool,address,uint8)"
+    )]
     pub struct InitializeCall {
         pub pauser_registry: ::ethers::core::types::Address,
         pub initial_owner: ::ethers::core::types::Address,
         pub updater: ::ethers::core::types::Address,
         pub allow_non_root_init: bool,
+        pub rolldown: ::ethers::core::types::Address,
+        pub chain_id: u8,
     }
     ///Container type for all input parameters for the `lastOpUpdateBlockTimestamp` function with signature `lastOpUpdateBlockTimestamp()` and selector `0xf84e91fc`
     #[derive(
@@ -2394,21 +2623,6 @@ pub mod gasp_multi_rollup_service {
         abi = "latestCompletedRdTaskNumber()"
     )]
     pub struct LatestCompletedRdTaskNumberCall;
-    ///Container type for all input parameters for the `latestPendingStateHash` function with signature `latestPendingStateHash()` and selector `0x4ae6b203`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "latestPendingStateHash", abi = "latestPendingStateHash()")]
-    pub struct LatestPendingStateHashCall;
     ///Container type for all input parameters for the `operatorAndQuorumToStakes` function with signature `operatorAndQuorumToStakes(bytes32,uint8)` and selector `0x499d6fb6`
     #[derive(
         Clone,
@@ -2536,7 +2750,7 @@ pub mod gasp_multi_rollup_service {
     )]
     #[ethcall(name = "pauserRegistry", abi = "pauserRegistry()")]
     pub struct PauserRegistryCall;
-    ///Container type for all input parameters for the `process_eigen_op_update` function with signature `process_eigen_op_update((uint32,uint32,uint32,bytes,uint32,bytes,uint32),(uint32,bytes32,bytes32),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]),(bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]))` and selector `0x232b8e98`
+    ///Container type for all input parameters for the `processEigenOpUpdate` function with signature `processEigenOpUpdate((uint32,uint32,uint32,bytes,uint32,bytes,uint32),(uint32,bytes32,bytes32),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]),(bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]))` and selector `0x34fadbea`
     #[derive(
         Clone,
         ::ethers::contract::EthCall,
@@ -2550,8 +2764,8 @@ pub mod gasp_multi_rollup_service {
         Hash,
     )]
     #[ethcall(
-        name = "process_eigen_op_update",
-        abi = "process_eigen_op_update((uint32,uint32,uint32,bytes,uint32,bytes,uint32),(uint32,bytes32,bytes32),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]),(bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]))"
+        name = "processEigenOpUpdate",
+        abi = "processEigenOpUpdate((uint32,uint32,uint32,bytes,uint32,bytes,uint32),(uint32,bytes32,bytes32),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]),(bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]))"
     )]
     pub struct ProcessEigenOpUpdateCall {
         pub task: OpTask,
@@ -2559,7 +2773,7 @@ pub mod gasp_multi_rollup_service {
         pub non_signer_stakes_and_signature: NonSignerStakesAndSignature,
         pub operator_state_info: OperatorStateInfo,
     }
-    ///Container type for all input parameters for the `process_eigen_rd_update` function with signature `process_eigen_rd_update((uint32,uint256,uint32,uint32,bytes,uint32),(uint32,bytes32,bytes32,bytes32,bytes32),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))` and selector `0x79a0a853`
+    ///Container type for all input parameters for the `processEigenRdUpdate` function with signature `processEigenRdUpdate((uint32,uint8,uint32,uint32,uint32,bytes,uint32),(uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))` and selector `0xed39e502`
     #[derive(
         Clone,
         ::ethers::contract::EthCall,
@@ -2573,15 +2787,15 @@ pub mod gasp_multi_rollup_service {
         Hash,
     )]
     #[ethcall(
-        name = "process_eigen_rd_update",
-        abi = "process_eigen_rd_update((uint32,uint256,uint32,uint32,bytes,uint32),(uint32,bytes32,bytes32,bytes32,bytes32),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))"
+        name = "processEigenRdUpdate",
+        abi = "processEigenRdUpdate((uint32,uint8,uint32,uint32,uint32,bytes,uint32),(uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))"
     )]
     pub struct ProcessEigenRdUpdateCall {
         pub task: RdTask,
         pub task_response: RdTaskResponse,
         pub non_signer_stakes_and_signature: NonSignerStakesAndSignature,
     }
-    ///Container type for all input parameters for the `process_eigen_reinit` function with signature `process_eigen_reinit((uint32,uint32,uint32,bytes,uint32,bytes,uint32),(bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]),bytes32)` and selector `0xd093867f`
+    ///Container type for all input parameters for the `processEigenReinit` function with signature `processEigenReinit((uint32,uint32,uint32,bytes,uint32,bytes,uint32),(bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]),bytes32[],(uint256,uint256)[],uint32)` and selector `0x2635e74e`
     #[derive(
         Clone,
         ::ethers::contract::EthCall,
@@ -2595,13 +2809,15 @@ pub mod gasp_multi_rollup_service {
         Hash,
     )]
     #[ethcall(
-        name = "process_eigen_reinit",
-        abi = "process_eigen_reinit((uint32,uint32,uint32,bytes,uint32,bytes,uint32),(bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]),bytes32)"
+        name = "processEigenReinit",
+        abi = "processEigenReinit((uint32,uint32,uint32,bytes,uint32,bytes,uint32),(bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]),bytes32[],(uint256,uint256)[],uint32)"
     )]
     pub struct ProcessEigenReinitCall {
         pub task: OpTask,
         pub operator_state_info: OperatorStateInfo,
-        pub pending_state_hash: [u8; 32],
+        pub merkle_roots: ::std::vec::Vec<[u8; 32]>,
+        pub ranges: ::std::vec::Vec<Range>,
+        pub last_batch_id: u32,
     }
     ///Container type for all input parameters for the `qourumApk` function with signature `qourumApk(uint8)` and selector `0x03d097d2`
     #[derive(
@@ -2681,6 +2897,21 @@ pub mod gasp_multi_rollup_service {
     )]
     #[ethcall(name = "renounceOwnership", abi = "renounceOwnership()")]
     pub struct RenounceOwnershipCall;
+    ///Container type for all input parameters for the `rolldown` function with signature `rolldown()` and selector `0x3d9fb00c`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "rolldown", abi = "rolldown()")]
+    pub struct RolldownCall;
     ///Container type for all input parameters for the `setPauserRegistry` function with signature `setPauserRegistry(address)` and selector `0x10d67a2f`
     #[derive(
         Clone,
@@ -2698,7 +2929,7 @@ pub mod gasp_multi_rollup_service {
     pub struct SetPauserRegistryCall {
         pub new_pauser_registry: ::ethers::core::types::Address,
     }
-    ///Container type for all input parameters for the `set_updater` function with signature `set_updater(address)` and selector `0x124648c9`
+    ///Container type for all input parameters for the `setRolldown` function with signature `setRolldown(address)` and selector `0xfdc15de8`
     #[derive(
         Clone,
         ::ethers::contract::EthCall,
@@ -2711,7 +2942,24 @@ pub mod gasp_multi_rollup_service {
         Eq,
         Hash,
     )]
-    #[ethcall(name = "set_updater", abi = "set_updater(address)")]
+    #[ethcall(name = "setRolldown", abi = "setRolldown(address)")]
+    pub struct SetRolldownCall {
+        pub rolldown: ::ethers::core::types::Address,
+    }
+    ///Container type for all input parameters for the `setUpdater` function with signature `setUpdater(address)` and selector `0x9d54f419`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "setUpdater", abi = "setUpdater(address)")]
     pub struct SetUpdaterCall {
         pub updater: ::ethers::core::types::Address,
     }
@@ -2815,13 +3063,14 @@ pub mod gasp_multi_rollup_service {
     )]
     pub enum GaspMultiRollupServiceCalls {
         AllowNonRootInit(AllowNonRootInitCall),
+        ChainId(ChainIdCall),
+        ChainRdBatchNonce(ChainRdBatchNonceCall),
         CheckSignatures(CheckSignaturesCall),
         Initialize(InitializeCall),
         LastOpUpdateBlockTimestamp(LastOpUpdateBlockTimestampCall),
         LatestCompletedOpTaskCreatedBlock(LatestCompletedOpTaskCreatedBlockCall),
         LatestCompletedOpTaskNumber(LatestCompletedOpTaskNumberCall),
         LatestCompletedRdTaskNumber(LatestCompletedRdTaskNumberCall),
-        LatestPendingStateHash(LatestPendingStateHashCall),
         OperatorAndQuorumToStakes(OperatorAndQuorumToStakesCall),
         OperatorIdQuorumCount(OperatorIdQuorumCountCall),
         Owner(OwnerCall),
@@ -2838,7 +3087,9 @@ pub mod gasp_multi_rollup_service {
         QuorumThresholdPercentage(QuorumThresholdPercentageCall),
         QuorumToStakes(QuorumToStakesCall),
         RenounceOwnership(RenounceOwnershipCall),
+        Rolldown(RolldownCall),
         SetPauserRegistry(SetPauserRegistryCall),
+        SetRolldown(SetRolldownCall),
         SetUpdater(SetUpdaterCall),
         Stalled(StalledCall),
         TransferOwnership(TransferOwnershipCall),
@@ -2855,6 +3106,14 @@ pub mod gasp_multi_rollup_service {
                 <AllowNonRootInitCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::AllowNonRootInit(decoded));
+            }
+            if let Ok(decoded) = <ChainIdCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+                return Ok(Self::ChainId(decoded));
+            }
+            if let Ok(decoded) =
+                <ChainRdBatchNonceCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::ChainRdBatchNonce(decoded));
             }
             if let Ok(decoded) =
                 <CheckSignaturesCall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -2885,11 +3144,6 @@ pub mod gasp_multi_rollup_service {
                 <LatestCompletedRdTaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::LatestCompletedRdTaskNumber(decoded));
-            }
-            if let Ok(decoded) =
-                <LatestPendingStateHashCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::LatestPendingStateHash(decoded));
             }
             if let Ok(decoded) =
                 <OperatorAndQuorumToStakesCall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -2960,10 +3214,16 @@ pub mod gasp_multi_rollup_service {
             {
                 return Ok(Self::RenounceOwnership(decoded));
             }
+            if let Ok(decoded) = <RolldownCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+                return Ok(Self::Rolldown(decoded));
+            }
             if let Ok(decoded) =
                 <SetPauserRegistryCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::SetPauserRegistry(decoded));
+            }
+            if let Ok(decoded) = <SetRolldownCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+                return Ok(Self::SetRolldown(decoded));
             }
             if let Ok(decoded) = <SetUpdaterCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::SetUpdater(decoded));
@@ -2994,6 +3254,8 @@ pub mod gasp_multi_rollup_service {
         fn encode(self) -> Vec<u8> {
             match self {
                 Self::AllowNonRootInit(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::ChainId(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::ChainRdBatchNonce(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::CheckSignatures(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::Initialize(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::LastOpUpdateBlockTimestamp(element) => {
@@ -3006,9 +3268,6 @@ pub mod gasp_multi_rollup_service {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::LatestCompletedRdTaskNumber(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::LatestPendingStateHash(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::OperatorAndQuorumToStakes(element) => {
@@ -3039,7 +3298,9 @@ pub mod gasp_multi_rollup_service {
                 }
                 Self::QuorumToStakes(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::RenounceOwnership(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::Rolldown(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::SetPauserRegistry(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::SetRolldown(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::SetUpdater(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::Stalled(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::TransferOwnership(element) => ::ethers::core::abi::AbiEncode::encode(element),
@@ -3055,6 +3316,8 @@ pub mod gasp_multi_rollup_service {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
                 Self::AllowNonRootInit(element) => ::core::fmt::Display::fmt(element, f),
+                Self::ChainId(element) => ::core::fmt::Display::fmt(element, f),
+                Self::ChainRdBatchNonce(element) => ::core::fmt::Display::fmt(element, f),
                 Self::CheckSignatures(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Initialize(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LastOpUpdateBlockTimestamp(element) => ::core::fmt::Display::fmt(element, f),
@@ -3063,7 +3326,6 @@ pub mod gasp_multi_rollup_service {
                 }
                 Self::LatestCompletedOpTaskNumber(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LatestCompletedRdTaskNumber(element) => ::core::fmt::Display::fmt(element, f),
-                Self::LatestPendingStateHash(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorAndQuorumToStakes(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorIdQuorumCount(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Owner(element) => ::core::fmt::Display::fmt(element, f),
@@ -3080,7 +3342,9 @@ pub mod gasp_multi_rollup_service {
                 Self::QuorumThresholdPercentage(element) => ::core::fmt::Display::fmt(element, f),
                 Self::QuorumToStakes(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RenounceOwnership(element) => ::core::fmt::Display::fmt(element, f),
+                Self::Rolldown(element) => ::core::fmt::Display::fmt(element, f),
                 Self::SetPauserRegistry(element) => ::core::fmt::Display::fmt(element, f),
+                Self::SetRolldown(element) => ::core::fmt::Display::fmt(element, f),
                 Self::SetUpdater(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Stalled(element) => ::core::fmt::Display::fmt(element, f),
                 Self::TransferOwnership(element) => ::core::fmt::Display::fmt(element, f),
@@ -3095,6 +3359,16 @@ pub mod gasp_multi_rollup_service {
     impl ::core::convert::From<AllowNonRootInitCall> for GaspMultiRollupServiceCalls {
         fn from(value: AllowNonRootInitCall) -> Self {
             Self::AllowNonRootInit(value)
+        }
+    }
+    impl ::core::convert::From<ChainIdCall> for GaspMultiRollupServiceCalls {
+        fn from(value: ChainIdCall) -> Self {
+            Self::ChainId(value)
+        }
+    }
+    impl ::core::convert::From<ChainRdBatchNonceCall> for GaspMultiRollupServiceCalls {
+        fn from(value: ChainRdBatchNonceCall) -> Self {
+            Self::ChainRdBatchNonce(value)
         }
     }
     impl ::core::convert::From<CheckSignaturesCall> for GaspMultiRollupServiceCalls {
@@ -3125,11 +3399,6 @@ pub mod gasp_multi_rollup_service {
     impl ::core::convert::From<LatestCompletedRdTaskNumberCall> for GaspMultiRollupServiceCalls {
         fn from(value: LatestCompletedRdTaskNumberCall) -> Self {
             Self::LatestCompletedRdTaskNumber(value)
-        }
-    }
-    impl ::core::convert::From<LatestPendingStateHashCall> for GaspMultiRollupServiceCalls {
-        fn from(value: LatestPendingStateHashCall) -> Self {
-            Self::LatestPendingStateHash(value)
         }
     }
     impl ::core::convert::From<OperatorAndQuorumToStakesCall> for GaspMultiRollupServiceCalls {
@@ -3212,9 +3481,19 @@ pub mod gasp_multi_rollup_service {
             Self::RenounceOwnership(value)
         }
     }
+    impl ::core::convert::From<RolldownCall> for GaspMultiRollupServiceCalls {
+        fn from(value: RolldownCall) -> Self {
+            Self::Rolldown(value)
+        }
+    }
     impl ::core::convert::From<SetPauserRegistryCall> for GaspMultiRollupServiceCalls {
         fn from(value: SetPauserRegistryCall) -> Self {
             Self::SetPauserRegistry(value)
+        }
+    }
+    impl ::core::convert::From<SetRolldownCall> for GaspMultiRollupServiceCalls {
+        fn from(value: SetRolldownCall) -> Self {
+            Self::SetRolldown(value)
         }
     }
     impl ::core::convert::From<SetUpdaterCall> for GaspMultiRollupServiceCalls {
@@ -3261,6 +3540,34 @@ pub mod gasp_multi_rollup_service {
         Hash,
     )]
     pub struct AllowNonRootInitReturn(pub bool);
+    ///Container type for all return fields from the `chainId` function with signature `chainId()` and selector `0x9a8a0592`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct ChainIdReturn(pub u8);
+    ///Container type for all return fields from the `chainRdBatchNonce` function with signature `chainRdBatchNonce()` and selector `0xdeb4037d`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct ChainRdBatchNonceReturn(pub u32);
     ///Container type for all return fields from the `checkSignatures` function with signature `checkSignatures(bytes32,(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))` and selector `0x7d978897`
     #[derive(
         Clone,
@@ -3331,20 +3638,6 @@ pub mod gasp_multi_rollup_service {
         Hash,
     )]
     pub struct LatestCompletedRdTaskNumberReturn(pub u32);
-    ///Container type for all return fields from the `latestPendingStateHash` function with signature `latestPendingStateHash()` and selector `0x4ae6b203`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct LatestPendingStateHashReturn(pub [u8; 32]);
     ///Container type for all return fields from the `operatorAndQuorumToStakes` function with signature `operatorAndQuorumToStakes(bytes32,uint8)` and selector `0x499d6fb6`
     #[derive(
         Clone,
@@ -3488,6 +3781,20 @@ pub mod gasp_multi_rollup_service {
         Hash,
     )]
     pub struct QuorumToStakesReturn(pub u128);
+    ///Container type for all return fields from the `rolldown` function with signature `rolldown()` and selector `0x3d9fb00c`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct RolldownReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `stalled` function with signature `stalled()` and selector `0x526e3e64`
     #[derive(
         Clone,
@@ -3533,4 +3840,21 @@ pub mod gasp_multi_rollup_service {
         Hash,
     )]
     pub struct UpdaterReturn(pub ::ethers::core::types::Address);
+    ///`Range(uint256,uint256)`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct Range {
+        pub start: ::ethers::core::types::U256,
+        pub end: ::ethers::core::types::U256,
+    }
 }

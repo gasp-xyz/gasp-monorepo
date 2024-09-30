@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math/big"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
 	gethcommon "github.com/ethereum/go-ethereum/common"
@@ -72,6 +73,9 @@ func (w *AvsWriter) SendNewOpTask(ctx context.Context, quorumThresholdPercentage
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
 	}
+	if receipt.Status == 0{
+		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
+	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
 	newTaskCreatedEvent, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewOpTaskCreated(*receipt.Logs[0])
@@ -83,13 +87,13 @@ func (w *AvsWriter) SendNewOpTask(ctx context.Context, quorumThresholdPercentage
 }
 
 // returns the tx receipt, as well as the task index (which it gets from parsing the tx receipt logs)
-func (w *AvsWriter) SendNewRdTask(ctx context.Context, blockNumber *big.Int) (taskmanager.IFinalizerTaskManagerRdTask, uint32, error) {
+func (w *AvsWriter) SendNewRdTask(ctx context.Context, chainToUpdate uint8, chainBatchIdToUpdate uint32) (taskmanager.IFinalizerTaskManagerRdTask, uint32, error) {
 	w.logger.Info("creating new task with AVS's task manager")
 	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, err
 	}
-	tx, err := w.AvsContractBindings.TaskManager.CreateNewRdTask(noSendTxOpts, blockNumber)
+	tx, err := w.AvsContractBindings.TaskManager.CreateNewRdTask(noSendTxOpts, chainToUpdate, chainBatchIdToUpdate)
 	if err != nil {
 		w.logger.Errorf("Error assembling CreateNewRdTask tx")
 		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, err
@@ -98,6 +102,9 @@ func (w *AvsWriter) SendNewRdTask(ctx context.Context, blockNumber *big.Int) (ta
 	receipt, err := w.txMgr.Send(ctx, tx)
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
+	}
+	if receipt.Status == 0{
+		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
@@ -125,6 +132,9 @@ func (w *AvsWriter) SendAggregatedOpTaskResponse(ctx context.Context, task taskm
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
 	}
+	if receipt.Status == 0{
+		return nil, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
+	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent aggregated response with the AVS's task manager")
 	return receipt, nil
@@ -147,6 +157,9 @@ func (w *AvsWriter) SendAggregatedRdTaskResponse(ctx context.Context, task taskm
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
 	}
+	if receipt.Status == 0{
+		return nil, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
+	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent aggregated response with the AVS's task manager")
 	return receipt, nil
@@ -167,6 +180,9 @@ func (w *AvsWriter) EjectOperators(ctx context.Context, operators []common.Addre
 	receipt, err := w.txMgr.Send(ctx, tx)
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
+	}
+	if receipt.Status == 0{
+		return nil, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent eject operators with AVS's service manager")

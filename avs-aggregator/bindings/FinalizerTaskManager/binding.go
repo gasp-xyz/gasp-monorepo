@@ -80,7 +80,8 @@ type IFinalizerTaskManagerOpTaskResponse struct {
 // IFinalizerTaskManagerRdTask is an auto generated low-level Go binding around an user-defined struct.
 type IFinalizerTaskManagerRdTask struct {
 	TaskNum                                      uint32
-	BlockNumber                                  *big.Int
+	ChainId                                      uint8
+	BatchId                                      uint32
 	TaskCreatedBlock                             uint32
 	LastCompletedOpTaskCreatedBlock              uint32
 	LastCompletedOpTaskQuorumNumbers             []byte
@@ -91,9 +92,12 @@ type IFinalizerTaskManagerRdTask struct {
 type IFinalizerTaskManagerRdTaskResponse struct {
 	ReferenceTaskIndex uint32
 	ReferenceTaskHash  [32]byte
-	BlockHash          [32]byte
-	StorageProofHash   [32]byte
-	PendingStateHash   [32]byte
+	ChainId            uint8
+	BatchId            uint32
+	RdUpdate           [32]byte
+	RangeStart         *big.Int
+	RangeEnd           *big.Int
+	Updater            common.Address
 }
 
 // IFinalizerTaskManagerTaskResponseMetadata is an auto generated low-level Go binding around an user-defined struct.
@@ -562,6 +566,37 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) 
 	return _ContractFinalizerTaskManager.Contract.BlsSignatureChecker(&_ContractFinalizerTaskManager.CallOpts)
 }
 
+// ChainRdBatchNonce is a free data retrieval call binding the contract method 0x930390d9.
+//
+// Solidity: function chainRdBatchNonce(uint8 ) view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) ChainRdBatchNonce(opts *bind.CallOpts, arg0 uint8) (uint32, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "chainRdBatchNonce", arg0)
+
+	if err != nil {
+		return *new(uint32), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint32)).(*uint32)
+
+	return out0, err
+
+}
+
+// ChainRdBatchNonce is a free data retrieval call binding the contract method 0x930390d9.
+//
+// Solidity: function chainRdBatchNonce(uint8 ) view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) ChainRdBatchNonce(arg0 uint8) (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.ChainRdBatchNonce(&_ContractFinalizerTaskManager.CallOpts, arg0)
+}
+
+// ChainRdBatchNonce is a free data retrieval call binding the contract method 0x930390d9.
+//
+// Solidity: function chainRdBatchNonce(uint8 ) view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) ChainRdBatchNonce(arg0 uint8) (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.ChainRdBatchNonce(&_ContractFinalizerTaskManager.CallOpts, arg0)
+}
+
 // CheckSignatures is a free data retrieval call binding the contract method 0x6efb4636.
 //
 // Solidity: function checkSignatures(bytes32 msgHash, bytes quorumNumbers, uint32 referenceBlockNumber, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) view returns((uint96[],uint96[]), bytes32)
@@ -932,6 +967,37 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) 
 	return _ContractFinalizerTaskManager.Contract.IdToTaskStatus(&_ContractFinalizerTaskManager.CallOpts, arg0, arg1)
 }
 
+// IsTaskPending is a free data retrieval call binding the contract method 0x36f78ed8.
+//
+// Solidity: function isTaskPending() view returns(bool)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) IsTaskPending(opts *bind.CallOpts) (bool, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "isTaskPending")
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// IsTaskPending is a free data retrieval call binding the contract method 0x36f78ed8.
+//
+// Solidity: function isTaskPending() view returns(bool)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) IsTaskPending() (bool, error) {
+	return _ContractFinalizerTaskManager.Contract.IsTaskPending(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// IsTaskPending is a free data retrieval call binding the contract method 0x36f78ed8.
+//
+// Solidity: function isTaskPending() view returns(bool)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) IsTaskPending() (bool, error) {
+	return _ContractFinalizerTaskManager.Contract.IsTaskPending(&_ContractFinalizerTaskManager.CallOpts)
+}
+
 // LastCompletedOpTaskCreatedBlock is a free data retrieval call binding the contract method 0x537a2929.
 //
 // Solidity: function lastCompletedOpTaskCreatedBlock() view returns(uint32)
@@ -1087,6 +1153,37 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) 
 	return _ContractFinalizerTaskManager.Contract.LastOpTaskCreatedBlock(&_ContractFinalizerTaskManager.CallOpts)
 }
 
+// LastRdTaskCreatedBlock is a free data retrieval call binding the contract method 0x8c82af5e.
+//
+// Solidity: function lastRdTaskCreatedBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LastRdTaskCreatedBlock(opts *bind.CallOpts) (uint32, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "lastRdTaskCreatedBlock")
+
+	if err != nil {
+		return *new(uint32), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint32)).(*uint32)
+
+	return out0, err
+
+}
+
+// LastRdTaskCreatedBlock is a free data retrieval call binding the contract method 0x8c82af5e.
+//
+// Solidity: function lastRdTaskCreatedBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) LastRdTaskCreatedBlock() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LastRdTaskCreatedBlock(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// LastRdTaskCreatedBlock is a free data retrieval call binding the contract method 0x8c82af5e.
+//
+// Solidity: function lastRdTaskCreatedBlock() view returns(uint32)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LastRdTaskCreatedBlock() (uint32, error) {
+	return _ContractFinalizerTaskManager.Contract.LastRdTaskCreatedBlock(&_ContractFinalizerTaskManager.CallOpts)
+}
+
 // LatestOpTaskNum is a free data retrieval call binding the contract method 0x41789d57.
 //
 // Solidity: function latestOpTaskNum() view returns(uint32)
@@ -1118,37 +1215,6 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) 
 	return _ContractFinalizerTaskManager.Contract.LatestOpTaskNum(&_ContractFinalizerTaskManager.CallOpts)
 }
 
-// LatestPendingStateHash is a free data retrieval call binding the contract method 0x4ae6b203.
-//
-// Solidity: function latestPendingStateHash() view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) LatestPendingStateHash(opts *bind.CallOpts) ([32]byte, error) {
-	var out []interface{}
-	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "latestPendingStateHash")
-
-	if err != nil {
-		return *new([32]byte), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
-
-	return out0, err
-
-}
-
-// LatestPendingStateHash is a free data retrieval call binding the contract method 0x4ae6b203.
-//
-// Solidity: function latestPendingStateHash() view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) LatestPendingStateHash() ([32]byte, error) {
-	return _ContractFinalizerTaskManager.Contract.LatestPendingStateHash(&_ContractFinalizerTaskManager.CallOpts)
-}
-
-// LatestPendingStateHash is a free data retrieval call binding the contract method 0x4ae6b203.
-//
-// Solidity: function latestPendingStateHash() view returns(bytes32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LatestPendingStateHash() ([32]byte, error) {
-	return _ContractFinalizerTaskManager.Contract.LatestPendingStateHash(&_ContractFinalizerTaskManager.CallOpts)
-}
-
 // LatestRdTaskNum is a free data retrieval call binding the contract method 0x7afdd54b.
 //
 // Solidity: function latestRdTaskNum() view returns(uint32)
@@ -1178,37 +1244,6 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) Latest
 // Solidity: function latestRdTaskNum() view returns(uint32)
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) LatestRdTaskNum() (uint32, error) {
 	return _ContractFinalizerTaskManager.Contract.LatestRdTaskNum(&_ContractFinalizerTaskManager.CallOpts)
-}
-
-// MinOpTaskResponseWindowBlock is a free data retrieval call binding the contract method 0xc987de8e.
-//
-// Solidity: function minOpTaskResponseWindowBlock() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) MinOpTaskResponseWindowBlock(opts *bind.CallOpts) (uint32, error) {
-	var out []interface{}
-	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "minOpTaskResponseWindowBlock")
-
-	if err != nil {
-		return *new(uint32), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(uint32)).(*uint32)
-
-	return out0, err
-
-}
-
-// MinOpTaskResponseWindowBlock is a free data retrieval call binding the contract method 0xc987de8e.
-//
-// Solidity: function minOpTaskResponseWindowBlock() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) MinOpTaskResponseWindowBlock() (uint32, error) {
-	return _ContractFinalizerTaskManager.Contract.MinOpTaskResponseWindowBlock(&_ContractFinalizerTaskManager.CallOpts)
-}
-
-// MinOpTaskResponseWindowBlock is a free data retrieval call binding the contract method 0xc987de8e.
-//
-// Solidity: function minOpTaskResponseWindowBlock() view returns(uint32)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) MinOpTaskResponseWindowBlock() (uint32, error) {
-	return _ContractFinalizerTaskManager.Contract.MinOpTaskResponseWindowBlock(&_ContractFinalizerTaskManager.CallOpts)
 }
 
 // OperatorStateRetrieverExtended is a free data retrieval call binding the contract method 0x8380acbd.
@@ -1428,6 +1463,37 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) 
 	return _ContractFinalizerTaskManager.Contract.RegistryCoordinator(&_ContractFinalizerTaskManager.CallOpts)
 }
 
+// Rolldown is a free data retrieval call binding the contract method 0x3d9fb00c.
+//
+// Solidity: function rolldown() view returns(address)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCaller) Rolldown(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _ContractFinalizerTaskManager.contract.Call(opts, &out, "rolldown")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// Rolldown is a free data retrieval call binding the contract method 0x3d9fb00c.
+//
+// Solidity: function rolldown() view returns(address)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) Rolldown() (common.Address, error) {
+	return _ContractFinalizerTaskManager.Contract.Rolldown(&_ContractFinalizerTaskManager.CallOpts)
+}
+
+// Rolldown is a free data retrieval call binding the contract method 0x3d9fb00c.
+//
+// Solidity: function rolldown() view returns(address)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerCallerSession) Rolldown() (common.Address, error) {
+	return _ContractFinalizerTaskManager.Contract.Rolldown(&_ContractFinalizerTaskManager.CallOpts)
+}
+
 // StakeRegistry is a free data retrieval call binding the contract method 0x68304835.
 //
 // Solidity: function stakeRegistry() view returns(address)
@@ -1511,25 +1577,46 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSessi
 	return _ContractFinalizerTaskManager.Contract.CreateNewOpTask(&_ContractFinalizerTaskManager.TransactOpts, quorumThresholdPercentage, quorumNumbers)
 }
 
-// CreateNewRdTask is a paid mutator transaction binding the contract method 0xb3ea184e.
+// CreateNewRdTask is a paid mutator transaction binding the contract method 0x6f254819.
 //
-// Solidity: function createNewRdTask(uint256 blockNumber) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) CreateNewRdTask(opts *bind.TransactOpts, blockNumber *big.Int) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.contract.Transact(opts, "createNewRdTask", blockNumber)
+// Solidity: function createNewRdTask(uint8 chainId, uint32 batchId) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) CreateNewRdTask(opts *bind.TransactOpts, chainId uint8, batchId uint32) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "createNewRdTask", chainId, batchId)
 }
 
-// CreateNewRdTask is a paid mutator transaction binding the contract method 0xb3ea184e.
+// CreateNewRdTask is a paid mutator transaction binding the contract method 0x6f254819.
 //
-// Solidity: function createNewRdTask(uint256 blockNumber) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) CreateNewRdTask(blockNumber *big.Int) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.CreateNewRdTask(&_ContractFinalizerTaskManager.TransactOpts, blockNumber)
+// Solidity: function createNewRdTask(uint8 chainId, uint32 batchId) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) CreateNewRdTask(chainId uint8, batchId uint32) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.CreateNewRdTask(&_ContractFinalizerTaskManager.TransactOpts, chainId, batchId)
 }
 
-// CreateNewRdTask is a paid mutator transaction binding the contract method 0xb3ea184e.
+// CreateNewRdTask is a paid mutator transaction binding the contract method 0x6f254819.
 //
-// Solidity: function createNewRdTask(uint256 blockNumber) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) CreateNewRdTask(blockNumber *big.Int) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.CreateNewRdTask(&_ContractFinalizerTaskManager.TransactOpts, blockNumber)
+// Solidity: function createNewRdTask(uint8 chainId, uint32 batchId) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) CreateNewRdTask(chainId uint8, batchId uint32) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.CreateNewRdTask(&_ContractFinalizerTaskManager.TransactOpts, chainId, batchId)
+}
+
+// ForceCancelPendingTasks is a paid mutator transaction binding the contract method 0x60202fc0.
+//
+// Solidity: function forceCancelPendingTasks() returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) ForceCancelPendingTasks(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "forceCancelPendingTasks")
+}
+
+// ForceCancelPendingTasks is a paid mutator transaction binding the contract method 0x60202fc0.
+//
+// Solidity: function forceCancelPendingTasks() returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) ForceCancelPendingTasks() (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.ForceCancelPendingTasks(&_ContractFinalizerTaskManager.TransactOpts)
+}
+
+// ForceCancelPendingTasks is a paid mutator transaction binding the contract method 0x60202fc0.
+//
+// Solidity: function forceCancelPendingTasks() returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) ForceCancelPendingTasks() (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.ForceCancelPendingTasks(&_ContractFinalizerTaskManager.TransactOpts)
 }
 
 // ForceCreateNewOpTask is a paid mutator transaction binding the contract method 0xf5640cf8.
@@ -1574,25 +1661,25 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSessi
 	return _ContractFinalizerTaskManager.Contract.ForceRespondToOpTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x2d4713db.
+// Initialize is a paid mutator transaction binding the contract method 0xde434838.
 //
-// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock, address _operatorStateRetrieverExtended) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) Initialize(opts *bind.TransactOpts, _pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address, _allowNonRootInit bool, _blsSignatureCheckerAddress common.Address, _taskResponseWindowBlock uint32, _minOpTaskResponseWindowBlock uint32, _operatorStateRetrieverExtended common.Address) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.contract.Transact(opts, "initialize", _pauserRegistry, initialOwner, _aggregator, _generator, _allowNonRootInit, _blsSignatureCheckerAddress, _taskResponseWindowBlock, _minOpTaskResponseWindowBlock, _operatorStateRetrieverExtended)
+// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, address _operatorStateRetrieverExtended, address _rolldown) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) Initialize(opts *bind.TransactOpts, _pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address, _allowNonRootInit bool, _blsSignatureCheckerAddress common.Address, _taskResponseWindowBlock uint32, _operatorStateRetrieverExtended common.Address, _rolldown common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "initialize", _pauserRegistry, initialOwner, _aggregator, _generator, _allowNonRootInit, _blsSignatureCheckerAddress, _taskResponseWindowBlock, _operatorStateRetrieverExtended, _rolldown)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x2d4713db.
+// Initialize is a paid mutator transaction binding the contract method 0xde434838.
 //
-// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock, address _operatorStateRetrieverExtended) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address, _allowNonRootInit bool, _blsSignatureCheckerAddress common.Address, _taskResponseWindowBlock uint32, _minOpTaskResponseWindowBlock uint32, _operatorStateRetrieverExtended common.Address) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.Initialize(&_ContractFinalizerTaskManager.TransactOpts, _pauserRegistry, initialOwner, _aggregator, _generator, _allowNonRootInit, _blsSignatureCheckerAddress, _taskResponseWindowBlock, _minOpTaskResponseWindowBlock, _operatorStateRetrieverExtended)
+// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, address _operatorStateRetrieverExtended, address _rolldown) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address, _allowNonRootInit bool, _blsSignatureCheckerAddress common.Address, _taskResponseWindowBlock uint32, _operatorStateRetrieverExtended common.Address, _rolldown common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.Initialize(&_ContractFinalizerTaskManager.TransactOpts, _pauserRegistry, initialOwner, _aggregator, _generator, _allowNonRootInit, _blsSignatureCheckerAddress, _taskResponseWindowBlock, _operatorStateRetrieverExtended, _rolldown)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x2d4713db.
+// Initialize is a paid mutator transaction binding the contract method 0xde434838.
 //
-// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, uint32 _minOpTaskResponseWindowBlock, address _operatorStateRetrieverExtended) returns()
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address, _allowNonRootInit bool, _blsSignatureCheckerAddress common.Address, _taskResponseWindowBlock uint32, _minOpTaskResponseWindowBlock uint32, _operatorStateRetrieverExtended common.Address) (*types.Transaction, error) {
-	return _ContractFinalizerTaskManager.Contract.Initialize(&_ContractFinalizerTaskManager.TransactOpts, _pauserRegistry, initialOwner, _aggregator, _generator, _allowNonRootInit, _blsSignatureCheckerAddress, _taskResponseWindowBlock, _minOpTaskResponseWindowBlock, _operatorStateRetrieverExtended)
+// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _aggregator, address _generator, bool _allowNonRootInit, address _blsSignatureCheckerAddress, uint32 _taskResponseWindowBlock, address _operatorStateRetrieverExtended, address _rolldown) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _aggregator common.Address, _generator common.Address, _allowNonRootInit bool, _blsSignatureCheckerAddress common.Address, _taskResponseWindowBlock uint32, _operatorStateRetrieverExtended common.Address, _rolldown common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.Initialize(&_ContractFinalizerTaskManager.TransactOpts, _pauserRegistry, initialOwner, _aggregator, _generator, _allowNonRootInit, _blsSignatureCheckerAddress, _taskResponseWindowBlock, _operatorStateRetrieverExtended, _rolldown)
 }
 
 // Pause is a paid mutator transaction binding the contract method 0x136439dd.
@@ -1700,23 +1787,23 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSessi
 	return _ContractFinalizerTaskManager.Contract.RespondToOpTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse, nonSignerStakesAndSignature)
 }
 
-// RespondToRdTask is a paid mutator transaction binding the contract method 0x05c6b663.
+// RespondToRdTask is a paid mutator transaction binding the contract method 0xe72ddf10.
 //
-// Solidity: function respondToRdTask((uint32,uint256,uint32,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+// Solidity: function respondToRdTask((uint32,uint8,uint32,uint32,uint32,bytes,uint32) task, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) RespondToRdTask(opts *bind.TransactOpts, task IFinalizerTaskManagerRdTask, taskResponse IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
 	return _ContractFinalizerTaskManager.contract.Transact(opts, "respondToRdTask", task, taskResponse, nonSignerStakesAndSignature)
 }
 
-// RespondToRdTask is a paid mutator transaction binding the contract method 0x05c6b663.
+// RespondToRdTask is a paid mutator transaction binding the contract method 0xe72ddf10.
 //
-// Solidity: function respondToRdTask((uint32,uint256,uint32,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+// Solidity: function respondToRdTask((uint32,uint8,uint32,uint32,uint32,bytes,uint32) task, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) RespondToRdTask(task IFinalizerTaskManagerRdTask, taskResponse IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
 	return _ContractFinalizerTaskManager.Contract.RespondToRdTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse, nonSignerStakesAndSignature)
 }
 
-// RespondToRdTask is a paid mutator transaction binding the contract method 0x05c6b663.
+// RespondToRdTask is a paid mutator transaction binding the contract method 0xe72ddf10.
 //
-// Solidity: function respondToRdTask((uint32,uint256,uint32,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+// Solidity: function respondToRdTask((uint32,uint8,uint32,uint32,uint32,bytes,uint32) task, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) RespondToRdTask(task IFinalizerTaskManagerRdTask, taskResponse IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
 	return _ContractFinalizerTaskManager.Contract.RespondToRdTask(&_ContractFinalizerTaskManager.TransactOpts, task, taskResponse, nonSignerStakesAndSignature)
 }
@@ -1761,6 +1848,27 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) SetPau
 // Solidity: function setPauserRegistry(address newPauserRegistry) returns()
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) SetPauserRegistry(newPauserRegistry common.Address) (*types.Transaction, error) {
 	return _ContractFinalizerTaskManager.Contract.SetPauserRegistry(&_ContractFinalizerTaskManager.TransactOpts, newPauserRegistry)
+}
+
+// SetRolldown is a paid mutator transaction binding the contract method 0xfdc15de8.
+//
+// Solidity: function setRolldown(address _rolldown) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactor) SetRolldown(opts *bind.TransactOpts, _rolldown common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.contract.Transact(opts, "setRolldown", _rolldown)
+}
+
+// SetRolldown is a paid mutator transaction binding the contract method 0xfdc15de8.
+//
+// Solidity: function setRolldown(address _rolldown) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerSession) SetRolldown(_rolldown common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.SetRolldown(&_ContractFinalizerTaskManager.TransactOpts, _rolldown)
+}
+
+// SetRolldown is a paid mutator transaction binding the contract method 0xfdc15de8.
+//
+// Solidity: function setRolldown(address _rolldown) returns()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerTransactorSession) SetRolldown(_rolldown common.Address) (*types.Transaction, error) {
+	return _ContractFinalizerTaskManager.Contract.SetRolldown(&_ContractFinalizerTaskManager.TransactOpts, _rolldown)
 }
 
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
@@ -2308,39 +2416,27 @@ func (it *ContractFinalizerTaskManagerNewOpTaskForceCreatedIterator) Close() err
 
 // ContractFinalizerTaskManagerNewOpTaskForceCreated represents a NewOpTaskForceCreated event raised by the ContractFinalizerTaskManager contract.
 type ContractFinalizerTaskManagerNewOpTaskForceCreated struct {
-	TaskIndex uint32
-	Task      IFinalizerTaskManagerOpTask
-	Raw       types.Log // Blockchain specific contextual infos
+	Raw types.Log // Blockchain specific contextual infos
 }
 
-// FilterNewOpTaskForceCreated is a free log retrieval operation binding the contract event 0xdc5ba3b66ec6491b585b3f13698ed711aa829071f43300d6ede6dba67e28d75f.
+// FilterNewOpTaskForceCreated is a free log retrieval operation binding the contract event 0x4ee987e5f1be19cabfb1a243e5c423889f060f33266753953ff0cf9db89966ab.
 //
-// Solidity: event NewOpTaskForceCreated(uint32 indexed taskIndex, (uint32,uint32,uint32,bytes,uint32,bytes,uint32) task)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterNewOpTaskForceCreated(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerNewOpTaskForceCreatedIterator, error) {
+// Solidity: event NewOpTaskForceCreated()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterNewOpTaskForceCreated(opts *bind.FilterOpts) (*ContractFinalizerTaskManagerNewOpTaskForceCreatedIterator, error) {
 
-	var taskIndexRule []interface{}
-	for _, taskIndexItem := range taskIndex {
-		taskIndexRule = append(taskIndexRule, taskIndexItem)
-	}
-
-	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "NewOpTaskForceCreated", taskIndexRule)
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "NewOpTaskForceCreated")
 	if err != nil {
 		return nil, err
 	}
 	return &ContractFinalizerTaskManagerNewOpTaskForceCreatedIterator{contract: _ContractFinalizerTaskManager.contract, event: "NewOpTaskForceCreated", logs: logs, sub: sub}, nil
 }
 
-// WatchNewOpTaskForceCreated is a free log subscription operation binding the contract event 0xdc5ba3b66ec6491b585b3f13698ed711aa829071f43300d6ede6dba67e28d75f.
+// WatchNewOpTaskForceCreated is a free log subscription operation binding the contract event 0x4ee987e5f1be19cabfb1a243e5c423889f060f33266753953ff0cf9db89966ab.
 //
-// Solidity: event NewOpTaskForceCreated(uint32 indexed taskIndex, (uint32,uint32,uint32,bytes,uint32,bytes,uint32) task)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchNewOpTaskForceCreated(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerNewOpTaskForceCreated, taskIndex []uint32) (event.Subscription, error) {
+// Solidity: event NewOpTaskForceCreated()
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchNewOpTaskForceCreated(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerNewOpTaskForceCreated) (event.Subscription, error) {
 
-	var taskIndexRule []interface{}
-	for _, taskIndexItem := range taskIndex {
-		taskIndexRule = append(taskIndexRule, taskIndexItem)
-	}
-
-	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "NewOpTaskForceCreated", taskIndexRule)
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "NewOpTaskForceCreated")
 	if err != nil {
 		return nil, err
 	}
@@ -2372,9 +2468,9 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Watch
 	}), nil
 }
 
-// ParseNewOpTaskForceCreated is a log parse operation binding the contract event 0xdc5ba3b66ec6491b585b3f13698ed711aa829071f43300d6ede6dba67e28d75f.
+// ParseNewOpTaskForceCreated is a log parse operation binding the contract event 0x4ee987e5f1be19cabfb1a243e5c423889f060f33266753953ff0cf9db89966ab.
 //
-// Solidity: event NewOpTaskForceCreated(uint32 indexed taskIndex, (uint32,uint32,uint32,bytes,uint32,bytes,uint32) task)
+// Solidity: event NewOpTaskForceCreated()
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseNewOpTaskForceCreated(log types.Log) (*ContractFinalizerTaskManagerNewOpTaskForceCreated, error) {
 	event := new(ContractFinalizerTaskManagerNewOpTaskForceCreated)
 	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "NewOpTaskForceCreated", log); err != nil {
@@ -2458,9 +2554,9 @@ type ContractFinalizerTaskManagerNewRdTaskCreated struct {
 	Raw       types.Log // Blockchain specific contextual infos
 }
 
-// FilterNewRdTaskCreated is a free log retrieval operation binding the contract event 0x161faa5d92f6bf0262139c57c87ca6cc60e5b3c9c3341dc175cec97a2516cc7d.
+// FilterNewRdTaskCreated is a free log retrieval operation binding the contract event 0x584637a8f9d0f91a80c9f709b2b09d7db1d770fc7294e20d9d2495c378586cd2.
 //
-// Solidity: event NewRdTaskCreated(uint32 indexed taskIndex, (uint32,uint256,uint32,uint32,bytes,uint32) task)
+// Solidity: event NewRdTaskCreated(uint32 indexed taskIndex, (uint32,uint8,uint32,uint32,uint32,bytes,uint32) task)
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerNewRdTaskCreatedIterator, error) {
 
 	var taskIndexRule []interface{}
@@ -2475,9 +2571,9 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Filte
 	return &ContractFinalizerTaskManagerNewRdTaskCreatedIterator{contract: _ContractFinalizerTaskManager.contract, event: "NewRdTaskCreated", logs: logs, sub: sub}, nil
 }
 
-// WatchNewRdTaskCreated is a free log subscription operation binding the contract event 0x161faa5d92f6bf0262139c57c87ca6cc60e5b3c9c3341dc175cec97a2516cc7d.
+// WatchNewRdTaskCreated is a free log subscription operation binding the contract event 0x584637a8f9d0f91a80c9f709b2b09d7db1d770fc7294e20d9d2495c378586cd2.
 //
-// Solidity: event NewRdTaskCreated(uint32 indexed taskIndex, (uint32,uint256,uint32,uint32,bytes,uint32) task)
+// Solidity: event NewRdTaskCreated(uint32 indexed taskIndex, (uint32,uint8,uint32,uint32,uint32,bytes,uint32) task)
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchNewRdTaskCreated(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerNewRdTaskCreated, taskIndex []uint32) (event.Subscription, error) {
 
 	var taskIndexRule []interface{}
@@ -2517,9 +2613,9 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Watch
 	}), nil
 }
 
-// ParseNewRdTaskCreated is a log parse operation binding the contract event 0x161faa5d92f6bf0262139c57c87ca6cc60e5b3c9c3341dc175cec97a2516cc7d.
+// ParseNewRdTaskCreated is a log parse operation binding the contract event 0x584637a8f9d0f91a80c9f709b2b09d7db1d770fc7294e20d9d2495c378586cd2.
 //
-// Solidity: event NewRdTaskCreated(uint32 indexed taskIndex, (uint32,uint256,uint32,uint32,bytes,uint32) task)
+// Solidity: event NewRdTaskCreated(uint32 indexed taskIndex, (uint32,uint8,uint32,uint32,uint32,bytes,uint32) task)
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseNewRdTaskCreated(log types.Log) (*ContractFinalizerTaskManagerNewRdTaskCreated, error) {
 	event := new(ContractFinalizerTaskManagerNewRdTaskCreated)
 	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "NewRdTaskCreated", log); err != nil {
@@ -3889,47 +3985,38 @@ func (it *ContractFinalizerTaskManagerRdTaskCompletedIterator) Close() error {
 // ContractFinalizerTaskManagerRdTaskCompleted represents a RdTaskCompleted event raised by the ContractFinalizerTaskManager contract.
 type ContractFinalizerTaskManagerRdTaskCompleted struct {
 	TaskIndex    uint32
-	BlockHash    [32]byte
 	TaskResponse IFinalizerTaskManagerRdTaskResponse
 	Raw          types.Log // Blockchain specific contextual infos
 }
 
-// FilterRdTaskCompleted is a free log retrieval operation binding the contract event 0x02046773dfd0e022ab6bf68cb07d73f080f87a4b82f7a4fccfe7d919d6c4ecb4.
+// FilterRdTaskCompleted is a free log retrieval operation binding the contract event 0x1797ca59e06ea4a0efe10ac0fb51b58c8acf5cfedbc15fae51c10021dcb906e6.
 //
-// Solidity: event RdTaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterRdTaskCompleted(opts *bind.FilterOpts, taskIndex []uint32, blockHash [][32]byte) (*ContractFinalizerTaskManagerRdTaskCompletedIterator, error) {
+// Solidity: event RdTaskCompleted(uint32 indexed taskIndex, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterRdTaskCompleted(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerRdTaskCompletedIterator, error) {
 
 	var taskIndexRule []interface{}
 	for _, taskIndexItem := range taskIndex {
 		taskIndexRule = append(taskIndexRule, taskIndexItem)
 	}
-	var blockHashRule []interface{}
-	for _, blockHashItem := range blockHash {
-		blockHashRule = append(blockHashRule, blockHashItem)
-	}
 
-	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "RdTaskCompleted", taskIndexRule, blockHashRule)
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "RdTaskCompleted", taskIndexRule)
 	if err != nil {
 		return nil, err
 	}
 	return &ContractFinalizerTaskManagerRdTaskCompletedIterator{contract: _ContractFinalizerTaskManager.contract, event: "RdTaskCompleted", logs: logs, sub: sub}, nil
 }
 
-// WatchRdTaskCompleted is a free log subscription operation binding the contract event 0x02046773dfd0e022ab6bf68cb07d73f080f87a4b82f7a4fccfe7d919d6c4ecb4.
+// WatchRdTaskCompleted is a free log subscription operation binding the contract event 0x1797ca59e06ea4a0efe10ac0fb51b58c8acf5cfedbc15fae51c10021dcb906e6.
 //
-// Solidity: event RdTaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse)
-func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchRdTaskCompleted(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerRdTaskCompleted, taskIndex []uint32, blockHash [][32]byte) (event.Subscription, error) {
+// Solidity: event RdTaskCompleted(uint32 indexed taskIndex, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchRdTaskCompleted(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerRdTaskCompleted, taskIndex []uint32) (event.Subscription, error) {
 
 	var taskIndexRule []interface{}
 	for _, taskIndexItem := range taskIndex {
 		taskIndexRule = append(taskIndexRule, taskIndexItem)
 	}
-	var blockHashRule []interface{}
-	for _, blockHashItem := range blockHash {
-		blockHashRule = append(blockHashRule, blockHashItem)
-	}
 
-	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "RdTaskCompleted", taskIndexRule, blockHashRule)
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "RdTaskCompleted", taskIndexRule)
 	if err != nil {
 		return nil, err
 	}
@@ -3961,9 +4048,9 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Watch
 	}), nil
 }
 
-// ParseRdTaskCompleted is a log parse operation binding the contract event 0x02046773dfd0e022ab6bf68cb07d73f080f87a4b82f7a4fccfe7d919d6c4ecb4.
+// ParseRdTaskCompleted is a log parse operation binding the contract event 0x1797ca59e06ea4a0efe10ac0fb51b58c8acf5cfedbc15fae51c10021dcb906e6.
 //
-// Solidity: event RdTaskCompleted(uint32 indexed taskIndex, bytes32 indexed blockHash, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse)
+// Solidity: event RdTaskCompleted(uint32 indexed taskIndex, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse)
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseRdTaskCompleted(log types.Log) (*ContractFinalizerTaskManagerRdTaskCompleted, error) {
 	event := new(ContractFinalizerTaskManagerRdTaskCompleted)
 	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "RdTaskCompleted", log); err != nil {
@@ -4048,9 +4135,9 @@ type ContractFinalizerTaskManagerRdTaskResponded struct {
 	Raw                  types.Log // Blockchain specific contextual infos
 }
 
-// FilterRdTaskResponded is a free log retrieval operation binding the contract event 0x07ba8d7c4209c14e6d2ed5fd4542e9d8f47e1af3da0cbd9c50e2d0d3e87dfff0.
+// FilterRdTaskResponded is a free log retrieval operation binding the contract event 0x82e5c8e9447510b867d248c892385ba34fa6c2d4c4c26ff6868499ae4027f2c6.
 //
-// Solidity: event RdTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
+// Solidity: event RdTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterRdTaskResponded(opts *bind.FilterOpts, taskIndex []uint32) (*ContractFinalizerTaskManagerRdTaskRespondedIterator, error) {
 
 	var taskIndexRule []interface{}
@@ -4065,9 +4152,9 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Filte
 	return &ContractFinalizerTaskManagerRdTaskRespondedIterator{contract: _ContractFinalizerTaskManager.contract, event: "RdTaskResponded", logs: logs, sub: sub}, nil
 }
 
-// WatchRdTaskResponded is a free log subscription operation binding the contract event 0x07ba8d7c4209c14e6d2ed5fd4542e9d8f47e1af3da0cbd9c50e2d0d3e87dfff0.
+// WatchRdTaskResponded is a free log subscription operation binding the contract event 0x82e5c8e9447510b867d248c892385ba34fa6c2d4c4c26ff6868499ae4027f2c6.
 //
-// Solidity: event RdTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
+// Solidity: event RdTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchRdTaskResponded(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerRdTaskResponded, taskIndex []uint32) (event.Subscription, error) {
 
 	var taskIndexRule []interface{}
@@ -4107,9 +4194,9 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Watch
 	}), nil
 }
 
-// ParseRdTaskResponded is a log parse operation binding the contract event 0x07ba8d7c4209c14e6d2ed5fd4542e9d8f47e1af3da0cbd9c50e2d0d3e87dfff0.
+// ParseRdTaskResponded is a log parse operation binding the contract event 0x82e5c8e9447510b867d248c892385ba34fa6c2d4c4c26ff6868499ae4027f2c6.
 //
-// Solidity: event RdTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
+// Solidity: event RdTaskResponded(uint32 indexed taskIndex, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse, (uint32,bytes32,uint96[],uint96[]) taskResponseMetadata)
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseRdTaskResponded(log types.Log) (*ContractFinalizerTaskManagerRdTaskResponded, error) {
 	event := new(ContractFinalizerTaskManagerRdTaskResponded)
 	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "RdTaskResponded", log); err != nil {
@@ -4247,6 +4334,140 @@ func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) Watch
 func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseResumeTrackingOpState(log types.Log) (*ContractFinalizerTaskManagerResumeTrackingOpState, error) {
 	event := new(ContractFinalizerTaskManagerResumeTrackingOpState)
 	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "ResumeTrackingOpState", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractFinalizerTaskManagerRolldownTargetUpdatedIterator is returned from FilterRolldownTargetUpdated and is used to iterate over the raw logs and unpacked data for RolldownTargetUpdated events raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerRolldownTargetUpdatedIterator struct {
+	Event *ContractFinalizerTaskManagerRolldownTargetUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractFinalizerTaskManagerRolldownTargetUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractFinalizerTaskManagerRolldownTargetUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractFinalizerTaskManagerRolldownTargetUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractFinalizerTaskManagerRolldownTargetUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractFinalizerTaskManagerRolldownTargetUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractFinalizerTaskManagerRolldownTargetUpdated represents a RolldownTargetUpdated event raised by the ContractFinalizerTaskManager contract.
+type ContractFinalizerTaskManagerRolldownTargetUpdated struct {
+	RolldownAddress common.Address
+	Raw             types.Log // Blockchain specific contextual infos
+}
+
+// FilterRolldownTargetUpdated is a free log retrieval operation binding the contract event 0x2f20cf1bda67739044c5bf577353970c3dbc183b2c7274d1e8584a1026923267.
+//
+// Solidity: event RolldownTargetUpdated(address rolldownAddress)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) FilterRolldownTargetUpdated(opts *bind.FilterOpts) (*ContractFinalizerTaskManagerRolldownTargetUpdatedIterator, error) {
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.FilterLogs(opts, "RolldownTargetUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &ContractFinalizerTaskManagerRolldownTargetUpdatedIterator{contract: _ContractFinalizerTaskManager.contract, event: "RolldownTargetUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchRolldownTargetUpdated is a free log subscription operation binding the contract event 0x2f20cf1bda67739044c5bf577353970c3dbc183b2c7274d1e8584a1026923267.
+//
+// Solidity: event RolldownTargetUpdated(address rolldownAddress)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) WatchRolldownTargetUpdated(opts *bind.WatchOpts, sink chan<- *ContractFinalizerTaskManagerRolldownTargetUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _ContractFinalizerTaskManager.contract.WatchLogs(opts, "RolldownTargetUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractFinalizerTaskManagerRolldownTargetUpdated)
+				if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "RolldownTargetUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRolldownTargetUpdated is a log parse operation binding the contract event 0x2f20cf1bda67739044c5bf577353970c3dbc183b2c7274d1e8584a1026923267.
+//
+// Solidity: event RolldownTargetUpdated(address rolldownAddress)
+func (_ContractFinalizerTaskManager *ContractFinalizerTaskManagerFilterer) ParseRolldownTargetUpdated(log types.Log) (*ContractFinalizerTaskManagerRolldownTargetUpdated, error) {
+	event := new(ContractFinalizerTaskManagerRolldownTargetUpdated)
+	if err := _ContractFinalizerTaskManager.contract.UnpackLog(event, "RolldownTargetUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

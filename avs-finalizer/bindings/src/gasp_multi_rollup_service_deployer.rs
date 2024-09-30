@@ -127,28 +127,76 @@ pub mod gasp_multi_rollup_service_deployer {
                     },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("evmPrefixedPath"),
+                    ::std::borrow::ToOwned::to_owned("dummy_rolldown_address"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("evmPrefixedPath"),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("chain"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned(
-                                    "enum IRolldownPrimitives.ChainId",
-                                ),
-                            ),
-                        },],
+                        name: ::std::borrow::ToOwned::to_owned("dummy_rolldown_address",),
+                        inputs: ::std::vec![],
                         outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
                             name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::String,
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
                             internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("string"),
+                                ::std::borrow::ToOwned::to_owned("address"),
                             ),
                         },],
                         constant: ::core::option::Option::None,
                         state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
                     },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("evmPrefixedPath"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("evmPrefixedPath"),
+                            inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("chain"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned(
+                                        "enum IRolldownPrimitives.ChainId",
+                                    ),
+                                ),
+                            },],
+                            outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::String,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("string"),
+                                ),
+                            },],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("evmPrefixedPath"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("chain"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned(
+                                            "enum IRolldownPrimitives.ChainId",
+                                        ),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("path"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::String,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("string"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                                name: ::std::string::String::new(),
+                                kind: ::ethers::core::abi::ethabi::ParamType::String,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("string"),
+                                ),
+                            },],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
                 ),
                 (
                     ::std::borrow::ToOwned::to_owned("excludeArtifacts"),
@@ -1097,6 +1145,14 @@ pub mod gasp_multi_rollup_service_deployer {
                 .method_hash([196, 152, 239, 172], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `dummy_rolldown_address` (0x23df1675) function
+        pub fn dummy_rolldown_address(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
+            self.0
+                .method_hash([35, 223, 22, 117], ())
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `evmPrefixedPath` (0x6f6d4061) function
         pub fn evm_prefixed_path(
             &self,
@@ -1104,6 +1160,16 @@ pub mod gasp_multi_rollup_service_deployer {
         ) -> ::ethers::contract::builders::ContractCall<M, ::std::string::String> {
             self.0
                 .method_hash([111, 109, 64, 97], chain)
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `evmPrefixedPath` (0x9fad787a) function
+        pub fn evm_prefixed_path_with_path(
+            &self,
+            chain: u8,
+            path: ::std::string::String,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::std::string::String> {
+            self.0
+                .method_hash([159, 173, 120, 122], (chain, path))
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `excludeArtifacts` (0xb5508aa9) function
@@ -2185,6 +2251,21 @@ pub mod gasp_multi_rollup_service_deployer {
     )]
     #[ethcall(name = "deployConfigPath", abi = "deployConfigPath()")]
     pub struct DeployConfigPathCall;
+    ///Container type for all input parameters for the `dummy_rolldown_address` function with signature `dummy_rolldown_address()` and selector `0x23df1675`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "dummy_rolldown_address", abi = "dummy_rolldown_address()")]
+    pub struct DummyRolldownAddressCall;
     ///Container type for all input parameters for the `evmPrefixedPath` function with signature `evmPrefixedPath(uint8)` and selector `0x6f6d4061`
     #[derive(
         Clone,
@@ -2201,6 +2282,24 @@ pub mod gasp_multi_rollup_service_deployer {
     #[ethcall(name = "evmPrefixedPath", abi = "evmPrefixedPath(uint8)")]
     pub struct EvmPrefixedPathCall {
         pub chain: u8,
+    }
+    ///Container type for all input parameters for the `evmPrefixedPath` function with signature `evmPrefixedPath(uint8,string)` and selector `0x9fad787a`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "evmPrefixedPath", abi = "evmPrefixedPath(uint8,string)")]
+    pub struct EvmPrefixedPathWithPathCall {
+        pub chain: u8,
+        pub path: ::std::string::String,
     }
     ///Container type for all input parameters for the `excludeArtifacts` function with signature `excludeArtifacts()` and selector `0xb5508aa9`
     #[derive(
@@ -2545,7 +2644,9 @@ pub mod gasp_multi_rollup_service_deployer {
         ConvertBoolToString(ConvertBoolToStringCall),
         ConvertOperatorStatusToString(ConvertOperatorStatusToStringCall),
         DeployConfigPath(DeployConfigPathCall),
+        DummyRolldownAddress(DummyRolldownAddressCall),
         EvmPrefixedPath(EvmPrefixedPathCall),
+        EvmPrefixedPathWithPath(EvmPrefixedPathWithPathCall),
         ExcludeArtifacts(ExcludeArtifactsCall),
         ExcludeContracts(ExcludeContractsCall),
         ExcludeSenders(ExcludeSendersCall),
@@ -2600,9 +2701,19 @@ pub mod gasp_multi_rollup_service_deployer {
                 return Ok(Self::DeployConfigPath(decoded));
             }
             if let Ok(decoded) =
+                <DummyRolldownAddressCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::DummyRolldownAddress(decoded));
+            }
+            if let Ok(decoded) =
                 <EvmPrefixedPathCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::EvmPrefixedPath(decoded));
+            }
+            if let Ok(decoded) =
+                <EvmPrefixedPathWithPathCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::EvmPrefixedPathWithPath(decoded));
             }
             if let Ok(decoded) =
                 <ExcludeArtifactsCall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -2713,7 +2824,13 @@ pub mod gasp_multi_rollup_service_deployer {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::DeployConfigPath(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::DummyRolldownAddress(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::EvmPrefixedPath(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::EvmPrefixedPathWithPath(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::ExcludeArtifacts(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::ExcludeContracts(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::ExcludeSenders(element) => ::ethers::core::abi::AbiEncode::encode(element),
@@ -2753,7 +2870,9 @@ pub mod gasp_multi_rollup_service_deployer {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::DeployConfigPath(element) => ::core::fmt::Display::fmt(element, f),
+                Self::DummyRolldownAddress(element) => ::core::fmt::Display::fmt(element, f),
                 Self::EvmPrefixedPath(element) => ::core::fmt::Display::fmt(element, f),
+                Self::EvmPrefixedPathWithPath(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ExcludeArtifacts(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ExcludeContracts(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ExcludeSenders(element) => ::core::fmt::Display::fmt(element, f),
@@ -2810,9 +2929,19 @@ pub mod gasp_multi_rollup_service_deployer {
             Self::DeployConfigPath(value)
         }
     }
+    impl ::core::convert::From<DummyRolldownAddressCall> for GaspMultiRollupServiceDeployerCalls {
+        fn from(value: DummyRolldownAddressCall) -> Self {
+            Self::DummyRolldownAddress(value)
+        }
+    }
     impl ::core::convert::From<EvmPrefixedPathCall> for GaspMultiRollupServiceDeployerCalls {
         fn from(value: EvmPrefixedPathCall) -> Self {
             Self::EvmPrefixedPath(value)
+        }
+    }
+    impl ::core::convert::From<EvmPrefixedPathWithPathCall> for GaspMultiRollupServiceDeployerCalls {
+        fn from(value: EvmPrefixedPathWithPathCall) -> Self {
+            Self::EvmPrefixedPathWithPath(value)
         }
     }
     impl ::core::convert::From<ExcludeArtifactsCall> for GaspMultiRollupServiceDeployerCalls {
@@ -2990,6 +3119,20 @@ pub mod gasp_multi_rollup_service_deployer {
         Hash,
     )]
     pub struct DeployConfigPathReturn(pub ::std::string::String);
+    ///Container type for all return fields from the `dummy_rolldown_address` function with signature `dummy_rolldown_address()` and selector `0x23df1675`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct DummyRolldownAddressReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `evmPrefixedPath` function with signature `evmPrefixedPath(uint8)` and selector `0x6f6d4061`
     #[derive(
         Clone,
@@ -3004,6 +3147,20 @@ pub mod gasp_multi_rollup_service_deployer {
         Hash,
     )]
     pub struct EvmPrefixedPathReturn(pub ::std::string::String);
+    ///Container type for all return fields from the `evmPrefixedPath` function with signature `evmPrefixedPath(uint8,string)` and selector `0x9fad787a`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct EvmPrefixedPathWithPathReturn(pub ::std::string::String);
     ///Container type for all return fields from the `excludeArtifacts` function with signature `excludeArtifacts()` and selector `0xb5508aa9`
     #[derive(
         Clone,

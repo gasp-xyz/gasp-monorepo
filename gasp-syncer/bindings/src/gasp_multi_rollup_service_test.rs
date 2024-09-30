@@ -329,6 +329,18 @@ pub mod gasp_multi_rollup_service_test {
                     },],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("RolldownTargetUpdated"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("RolldownTargetUpdated",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
+                            name: ::std::borrow::ToOwned::to_owned("rolldownAddress"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            indexed: false,
+                        },],
+                        anonymous: false,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("log"),
                     ::std::vec![::ethers::core::abi::ethabi::Event {
                         name: ::std::borrow::ToOwned::to_owned("log"),
@@ -915,6 +927,13 @@ pub mod gasp_multi_rollup_service_test {
         {
             self.0.event()
         }
+        ///Gets the contract's `RolldownTargetUpdated` event
+        pub fn rolldown_target_updated_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, RolldownTargetUpdatedFilter>
+        {
+            self.0.event()
+        }
         ///Gets the contract's `log` event
         pub fn log_filter(
             &self,
@@ -1136,6 +1155,22 @@ pub mod gasp_multi_rollup_service_test {
     pub struct EigenReinitProcessedFilter {
         pub task_number: u32,
         pub task_created_block: u32,
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethevent(name = "RolldownTargetUpdated", abi = "RolldownTargetUpdated(address)")]
+    pub struct RolldownTargetUpdatedFilter {
+        pub rolldown_address: ::ethers::core::types::Address,
     }
     #[derive(
         Clone,
@@ -1507,6 +1542,7 @@ pub mod gasp_multi_rollup_service_test {
         EigenOpUpdateProcessedFilter(EigenOpUpdateProcessedFilter),
         EigenRdUpdateProcessedFilter(EigenRdUpdateProcessedFilter),
         EigenReinitProcessedFilter(EigenReinitProcessedFilter),
+        RolldownTargetUpdatedFilter(RolldownTargetUpdatedFilter),
         LogFilter(LogFilter),
         LogAddressFilter(LogAddressFilter),
         LogArray1Filter(LogArray1Filter),
@@ -1542,6 +1578,9 @@ pub mod gasp_multi_rollup_service_test {
             }
             if let Ok(decoded) = EigenReinitProcessedFilter::decode_log(log) {
                 return Ok(GaspMultiRollupServiceTestEvents::EigenReinitProcessedFilter(decoded));
+            }
+            if let Ok(decoded) = RolldownTargetUpdatedFilter::decode_log(log) {
+                return Ok(GaspMultiRollupServiceTestEvents::RolldownTargetUpdatedFilter(decoded));
             }
             if let Ok(decoded) = LogFilter::decode_log(log) {
                 return Ok(GaspMultiRollupServiceTestEvents::LogFilter(decoded));
@@ -1642,6 +1681,7 @@ pub mod gasp_multi_rollup_service_test {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::EigenReinitProcessedFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::RolldownTargetUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LogFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LogAddressFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LogArray1Filter(element) => ::core::fmt::Display::fmt(element, f),
@@ -1680,6 +1720,11 @@ pub mod gasp_multi_rollup_service_test {
     impl ::core::convert::From<EigenReinitProcessedFilter> for GaspMultiRollupServiceTestEvents {
         fn from(value: EigenReinitProcessedFilter) -> Self {
             Self::EigenReinitProcessedFilter(value)
+        }
+    }
+    impl ::core::convert::From<RolldownTargetUpdatedFilter> for GaspMultiRollupServiceTestEvents {
+        fn from(value: RolldownTargetUpdatedFilter) -> Self {
+            Self::RolldownTargetUpdatedFilter(value)
         }
     }
     impl ::core::convert::From<LogFilter> for GaspMultiRollupServiceTestEvents {

@@ -1,4 +1,5 @@
 // Code generated - DO NOT EDIT.
+
 // This file is a generated binding and any manual changes will be lost.
 
 package contractGaspMultiRollupService
@@ -80,7 +81,8 @@ type IFinalizerTaskManagerOpTaskResponse struct {
 // IFinalizerTaskManagerRdTask is an auto generated low-level Go binding around an user-defined struct.
 type IFinalizerTaskManagerRdTask struct {
 	TaskNum                                      uint32
-	BlockNumber                                  *big.Int
+	ChainId                                      uint8
+	BatchId                                      uint32
 	TaskCreatedBlock                             uint32
 	LastCompletedOpTaskCreatedBlock              uint32
 	LastCompletedOpTaskQuorumNumbers             []byte
@@ -91,9 +93,12 @@ type IFinalizerTaskManagerRdTask struct {
 type IFinalizerTaskManagerRdTaskResponse struct {
 	ReferenceTaskIndex uint32
 	ReferenceTaskHash  [32]byte
-	BlockHash          [32]byte
-	StorageProofHash   [32]byte
-	PendingStateHash   [32]byte
+	ChainId            uint8
+	BatchId            uint32
+	RdUpdate           [32]byte
+	RangeStart         *big.Int
+	RangeEnd           *big.Int
+	Updater            common.Address
 }
 
 // IGaspMultiRollupServicePrimitivesOperatorStateInfo is an auto generated low-level Go binding around an user-defined struct.
@@ -147,6 +152,12 @@ type IGaspMultiRollupServicePrimitivesQuorumsApkUpdate struct {
 type IGaspMultiRollupServicePrimitivesQuorumsStakeUpdate struct {
 	QuorumNumber uint8
 	QuorumStake  *big.Int
+}
+
+// IRolldownPrimitivesRange is an auto generated low-level Go binding around an user-defined struct.
+type IRolldownPrimitivesRange struct {
+	Start *big.Int
+	End   *big.Int
 }
 
 // ContractGaspMultiRollupServiceMetaData contains all meta data concerning the ContractGaspMultiRollupService contract.
@@ -353,6 +364,68 @@ func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCallerSessi
 	return _ContractGaspMultiRollupService.Contract.AllowNonRootInit(&_ContractGaspMultiRollupService.CallOpts)
 }
 
+// ChainId is a free data retrieval call binding the contract method 0x9a8a0592.
+//
+// Solidity: function chainId() view returns(uint8)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCaller) ChainId(opts *bind.CallOpts) (uint8, error) {
+	var out []interface{}
+	err := _ContractGaspMultiRollupService.contract.Call(opts, &out, "chainId")
+
+	if err != nil {
+		return *new(uint8), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint8)).(*uint8)
+
+	return out0, err
+
+}
+
+// ChainId is a free data retrieval call binding the contract method 0x9a8a0592.
+//
+// Solidity: function chainId() view returns(uint8)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) ChainId() (uint8, error) {
+	return _ContractGaspMultiRollupService.Contract.ChainId(&_ContractGaspMultiRollupService.CallOpts)
+}
+
+// ChainId is a free data retrieval call binding the contract method 0x9a8a0592.
+//
+// Solidity: function chainId() view returns(uint8)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCallerSession) ChainId() (uint8, error) {
+	return _ContractGaspMultiRollupService.Contract.ChainId(&_ContractGaspMultiRollupService.CallOpts)
+}
+
+// ChainRdBatchNonce is a free data retrieval call binding the contract method 0xdeb4037d.
+//
+// Solidity: function chainRdBatchNonce() view returns(uint32)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCaller) ChainRdBatchNonce(opts *bind.CallOpts) (uint32, error) {
+	var out []interface{}
+	err := _ContractGaspMultiRollupService.contract.Call(opts, &out, "chainRdBatchNonce")
+
+	if err != nil {
+		return *new(uint32), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint32)).(*uint32)
+
+	return out0, err
+
+}
+
+// ChainRdBatchNonce is a free data retrieval call binding the contract method 0xdeb4037d.
+//
+// Solidity: function chainRdBatchNonce() view returns(uint32)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) ChainRdBatchNonce() (uint32, error) {
+	return _ContractGaspMultiRollupService.Contract.ChainRdBatchNonce(&_ContractGaspMultiRollupService.CallOpts)
+}
+
+// ChainRdBatchNonce is a free data retrieval call binding the contract method 0xdeb4037d.
+//
+// Solidity: function chainRdBatchNonce() view returns(uint32)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCallerSession) ChainRdBatchNonce() (uint32, error) {
+	return _ContractGaspMultiRollupService.Contract.ChainRdBatchNonce(&_ContractGaspMultiRollupService.CallOpts)
+}
+
 // CheckSignatures is a free data retrieval call binding the contract method 0x7d978897.
 //
 // Solidity: function checkSignatures(bytes32 msgHash, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) params) view returns((uint96[],uint96[]))
@@ -506,37 +579,6 @@ func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) La
 // Solidity: function latestCompletedRdTaskNumber() view returns(uint32)
 func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCallerSession) LatestCompletedRdTaskNumber() (uint32, error) {
 	return _ContractGaspMultiRollupService.Contract.LatestCompletedRdTaskNumber(&_ContractGaspMultiRollupService.CallOpts)
-}
-
-// LatestPendingStateHash is a free data retrieval call binding the contract method 0x4ae6b203.
-//
-// Solidity: function latestPendingStateHash() view returns(bytes32)
-func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCaller) LatestPendingStateHash(opts *bind.CallOpts) ([32]byte, error) {
-	var out []interface{}
-	err := _ContractGaspMultiRollupService.contract.Call(opts, &out, "latestPendingStateHash")
-
-	if err != nil {
-		return *new([32]byte), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
-
-	return out0, err
-
-}
-
-// LatestPendingStateHash is a free data retrieval call binding the contract method 0x4ae6b203.
-//
-// Solidity: function latestPendingStateHash() view returns(bytes32)
-func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) LatestPendingStateHash() ([32]byte, error) {
-	return _ContractGaspMultiRollupService.Contract.LatestPendingStateHash(&_ContractGaspMultiRollupService.CallOpts)
-}
-
-// LatestPendingStateHash is a free data retrieval call binding the contract method 0x4ae6b203.
-//
-// Solidity: function latestPendingStateHash() view returns(bytes32)
-func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCallerSession) LatestPendingStateHash() ([32]byte, error) {
-	return _ContractGaspMultiRollupService.Contract.LatestPendingStateHash(&_ContractGaspMultiRollupService.CallOpts)
 }
 
 // OperatorAndQuorumToStakes is a free data retrieval call binding the contract method 0x499d6fb6.
@@ -863,6 +905,37 @@ func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCallerSessi
 	return _ContractGaspMultiRollupService.Contract.QuorumToStakes(&_ContractGaspMultiRollupService.CallOpts, arg0)
 }
 
+// Rolldown is a free data retrieval call binding the contract method 0x3d9fb00c.
+//
+// Solidity: function rolldown() view returns(address)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCaller) Rolldown(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _ContractGaspMultiRollupService.contract.Call(opts, &out, "rolldown")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// Rolldown is a free data retrieval call binding the contract method 0x3d9fb00c.
+//
+// Solidity: function rolldown() view returns(address)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) Rolldown() (common.Address, error) {
+	return _ContractGaspMultiRollupService.Contract.Rolldown(&_ContractGaspMultiRollupService.CallOpts)
+}
+
+// Rolldown is a free data retrieval call binding the contract method 0x3d9fb00c.
+//
+// Solidity: function rolldown() view returns(address)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCallerSession) Rolldown() (common.Address, error) {
+	return _ContractGaspMultiRollupService.Contract.Rolldown(&_ContractGaspMultiRollupService.CallOpts)
+}
+
 // Stalled is a free data retrieval call binding the contract method 0x526e3e64.
 //
 // Solidity: function stalled() view returns(bool)
@@ -970,25 +1043,25 @@ func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceCallerSessi
 	return _ContractGaspMultiRollupService.Contract.Updater(&_ContractGaspMultiRollupService.CallOpts)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xfecf9734.
+// Initialize is a paid mutator transaction binding the contract method 0x30c47d8e.
 //
-// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _updater, bool _allowNonRootInit) returns()
-func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactor) Initialize(opts *bind.TransactOpts, _pauserRegistry common.Address, initialOwner common.Address, _updater common.Address, _allowNonRootInit bool) (*types.Transaction, error) {
-	return _ContractGaspMultiRollupService.contract.Transact(opts, "initialize", _pauserRegistry, initialOwner, _updater, _allowNonRootInit)
+// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _updater, bool _allowNonRootInit, address _rolldown, uint8 _chainId) returns()
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactor) Initialize(opts *bind.TransactOpts, _pauserRegistry common.Address, initialOwner common.Address, _updater common.Address, _allowNonRootInit bool, _rolldown common.Address, _chainId uint8) (*types.Transaction, error) {
+	return _ContractGaspMultiRollupService.contract.Transact(opts, "initialize", _pauserRegistry, initialOwner, _updater, _allowNonRootInit, _rolldown, _chainId)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xfecf9734.
+// Initialize is a paid mutator transaction binding the contract method 0x30c47d8e.
 //
-// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _updater, bool _allowNonRootInit) returns()
-func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _updater common.Address, _allowNonRootInit bool) (*types.Transaction, error) {
-	return _ContractGaspMultiRollupService.Contract.Initialize(&_ContractGaspMultiRollupService.TransactOpts, _pauserRegistry, initialOwner, _updater, _allowNonRootInit)
+// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _updater, bool _allowNonRootInit, address _rolldown, uint8 _chainId) returns()
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _updater common.Address, _allowNonRootInit bool, _rolldown common.Address, _chainId uint8) (*types.Transaction, error) {
+	return _ContractGaspMultiRollupService.Contract.Initialize(&_ContractGaspMultiRollupService.TransactOpts, _pauserRegistry, initialOwner, _updater, _allowNonRootInit, _rolldown, _chainId)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xfecf9734.
+// Initialize is a paid mutator transaction binding the contract method 0x30c47d8e.
 //
-// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _updater, bool _allowNonRootInit) returns()
-func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactorSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _updater common.Address, _allowNonRootInit bool) (*types.Transaction, error) {
-	return _ContractGaspMultiRollupService.Contract.Initialize(&_ContractGaspMultiRollupService.TransactOpts, _pauserRegistry, initialOwner, _updater, _allowNonRootInit)
+// Solidity: function initialize(address _pauserRegistry, address initialOwner, address _updater, bool _allowNonRootInit, address _rolldown, uint8 _chainId) returns()
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactorSession) Initialize(_pauserRegistry common.Address, initialOwner common.Address, _updater common.Address, _allowNonRootInit bool, _rolldown common.Address, _chainId uint8) (*types.Transaction, error) {
+	return _ContractGaspMultiRollupService.Contract.Initialize(&_ContractGaspMultiRollupService.TransactOpts, _pauserRegistry, initialOwner, _updater, _allowNonRootInit, _rolldown, _chainId)
 }
 
 // Pause is a paid mutator transaction binding the contract method 0x136439dd.
@@ -1033,67 +1106,67 @@ func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactorS
 	return _ContractGaspMultiRollupService.Contract.PauseAll(&_ContractGaspMultiRollupService.TransactOpts)
 }
 
-// ProcessEigenOpUpdate is a paid mutator transaction binding the contract method 0x232b8e98.
+// ProcessEigenOpUpdate is a paid mutator transaction binding the contract method 0x34fadbea.
 //
-// Solidity: function process_eigen_op_update((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo) returns()
+// Solidity: function processEigenOpUpdate((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo) returns()
 func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactor) ProcessEigenOpUpdate(opts *bind.TransactOpts, task IFinalizerTaskManagerOpTask, taskResponse IFinalizerTaskManagerOpTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature, operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo) (*types.Transaction, error) {
-	return _ContractGaspMultiRollupService.contract.Transact(opts, "process_eigen_op_update", task, taskResponse, nonSignerStakesAndSignature, operatorStateInfo)
+	return _ContractGaspMultiRollupService.contract.Transact(opts, "processEigenOpUpdate", task, taskResponse, nonSignerStakesAndSignature, operatorStateInfo)
 }
 
-// ProcessEigenOpUpdate is a paid mutator transaction binding the contract method 0x232b8e98.
+// ProcessEigenOpUpdate is a paid mutator transaction binding the contract method 0x34fadbea.
 //
-// Solidity: function process_eigen_op_update((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo) returns()
+// Solidity: function processEigenOpUpdate((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo) returns()
 func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) ProcessEigenOpUpdate(task IFinalizerTaskManagerOpTask, taskResponse IFinalizerTaskManagerOpTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature, operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo) (*types.Transaction, error) {
 	return _ContractGaspMultiRollupService.Contract.ProcessEigenOpUpdate(&_ContractGaspMultiRollupService.TransactOpts, task, taskResponse, nonSignerStakesAndSignature, operatorStateInfo)
 }
 
-// ProcessEigenOpUpdate is a paid mutator transaction binding the contract method 0x232b8e98.
+// ProcessEigenOpUpdate is a paid mutator transaction binding the contract method 0x34fadbea.
 //
-// Solidity: function process_eigen_op_update((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo) returns()
+// Solidity: function processEigenOpUpdate((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (uint32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo) returns()
 func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactorSession) ProcessEigenOpUpdate(task IFinalizerTaskManagerOpTask, taskResponse IFinalizerTaskManagerOpTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature, operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo) (*types.Transaction, error) {
 	return _ContractGaspMultiRollupService.Contract.ProcessEigenOpUpdate(&_ContractGaspMultiRollupService.TransactOpts, task, taskResponse, nonSignerStakesAndSignature, operatorStateInfo)
 }
 
-// ProcessEigenRdUpdate is a paid mutator transaction binding the contract method 0x79a0a853.
+// ProcessEigenRdUpdate is a paid mutator transaction binding the contract method 0xed39e502.
 //
-// Solidity: function process_eigen_rd_update((uint32,uint256,uint32,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+// Solidity: function processEigenRdUpdate((uint32,uint8,uint32,uint32,uint32,bytes,uint32) task, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
 func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactor) ProcessEigenRdUpdate(opts *bind.TransactOpts, task IFinalizerTaskManagerRdTask, taskResponse IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
-	return _ContractGaspMultiRollupService.contract.Transact(opts, "process_eigen_rd_update", task, taskResponse, nonSignerStakesAndSignature)
+	return _ContractGaspMultiRollupService.contract.Transact(opts, "processEigenRdUpdate", task, taskResponse, nonSignerStakesAndSignature)
 }
 
-// ProcessEigenRdUpdate is a paid mutator transaction binding the contract method 0x79a0a853.
+// ProcessEigenRdUpdate is a paid mutator transaction binding the contract method 0xed39e502.
 //
-// Solidity: function process_eigen_rd_update((uint32,uint256,uint32,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+// Solidity: function processEigenRdUpdate((uint32,uint8,uint32,uint32,uint32,bytes,uint32) task, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
 func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) ProcessEigenRdUpdate(task IFinalizerTaskManagerRdTask, taskResponse IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
 	return _ContractGaspMultiRollupService.Contract.ProcessEigenRdUpdate(&_ContractGaspMultiRollupService.TransactOpts, task, taskResponse, nonSignerStakesAndSignature)
 }
 
-// ProcessEigenRdUpdate is a paid mutator transaction binding the contract method 0x79a0a853.
+// ProcessEigenRdUpdate is a paid mutator transaction binding the contract method 0xed39e502.
 //
-// Solidity: function process_eigen_rd_update((uint32,uint256,uint32,uint32,bytes,uint32) task, (uint32,bytes32,bytes32,bytes32,bytes32) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
+// Solidity: function processEigenRdUpdate((uint32,uint8,uint32,uint32,uint32,bytes,uint32) task, (uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address) taskResponse, (uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]) nonSignerStakesAndSignature) returns()
 func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactorSession) ProcessEigenRdUpdate(task IFinalizerTaskManagerRdTask, taskResponse IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Transaction, error) {
 	return _ContractGaspMultiRollupService.Contract.ProcessEigenRdUpdate(&_ContractGaspMultiRollupService.TransactOpts, task, taskResponse, nonSignerStakesAndSignature)
 }
 
-// ProcessEigenReinit is a paid mutator transaction binding the contract method 0xd093867f.
+// ProcessEigenReinit is a paid mutator transaction binding the contract method 0x2635e74e.
 //
-// Solidity: function process_eigen_reinit((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo, bytes32 pendingStateHash) returns()
-func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactor) ProcessEigenReinit(opts *bind.TransactOpts, task IFinalizerTaskManagerOpTask, operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo, pendingStateHash [32]byte) (*types.Transaction, error) {
-	return _ContractGaspMultiRollupService.contract.Transact(opts, "process_eigen_reinit", task, operatorStateInfo, pendingStateHash)
+// Solidity: function processEigenReinit((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo, bytes32[] merkleRoots, (uint256,uint256)[] ranges, uint32 lastBatchId) returns()
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactor) ProcessEigenReinit(opts *bind.TransactOpts, task IFinalizerTaskManagerOpTask, operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo, merkleRoots [][32]byte, ranges []IRolldownPrimitivesRange, lastBatchId uint32) (*types.Transaction, error) {
+	return _ContractGaspMultiRollupService.contract.Transact(opts, "processEigenReinit", task, operatorStateInfo, merkleRoots, ranges, lastBatchId)
 }
 
-// ProcessEigenReinit is a paid mutator transaction binding the contract method 0xd093867f.
+// ProcessEigenReinit is a paid mutator transaction binding the contract method 0x2635e74e.
 //
-// Solidity: function process_eigen_reinit((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo, bytes32 pendingStateHash) returns()
-func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) ProcessEigenReinit(task IFinalizerTaskManagerOpTask, operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo, pendingStateHash [32]byte) (*types.Transaction, error) {
-	return _ContractGaspMultiRollupService.Contract.ProcessEigenReinit(&_ContractGaspMultiRollupService.TransactOpts, task, operatorStateInfo, pendingStateHash)
+// Solidity: function processEigenReinit((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo, bytes32[] merkleRoots, (uint256,uint256)[] ranges, uint32 lastBatchId) returns()
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) ProcessEigenReinit(task IFinalizerTaskManagerOpTask, operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo, merkleRoots [][32]byte, ranges []IRolldownPrimitivesRange, lastBatchId uint32) (*types.Transaction, error) {
+	return _ContractGaspMultiRollupService.Contract.ProcessEigenReinit(&_ContractGaspMultiRollupService.TransactOpts, task, operatorStateInfo, merkleRoots, ranges, lastBatchId)
 }
 
-// ProcessEigenReinit is a paid mutator transaction binding the contract method 0xd093867f.
+// ProcessEigenReinit is a paid mutator transaction binding the contract method 0x2635e74e.
 //
-// Solidity: function process_eigen_reinit((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo, bytes32 pendingStateHash) returns()
-func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactorSession) ProcessEigenReinit(task IFinalizerTaskManagerOpTask, operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo, pendingStateHash [32]byte) (*types.Transaction, error) {
-	return _ContractGaspMultiRollupService.Contract.ProcessEigenReinit(&_ContractGaspMultiRollupService.TransactOpts, task, operatorStateInfo, pendingStateHash)
+// Solidity: function processEigenReinit((uint32,uint32,uint32,bytes,uint32,bytes,uint32) task, (bool,uint8[],(uint8,uint96,(uint256,uint256))[],(uint8,uint96)[],(uint8,(uint256,uint256))[],bytes32[],(bytes32,uint8[],uint96[],uint8)[],(bytes32,uint8[],uint96[])[],(bytes32,uint8)[]) operatorStateInfo, bytes32[] merkleRoots, (uint256,uint256)[] ranges, uint32 lastBatchId) returns()
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactorSession) ProcessEigenReinit(task IFinalizerTaskManagerOpTask, operatorStateInfo IGaspMultiRollupServicePrimitivesOperatorStateInfo, merkleRoots [][32]byte, ranges []IRolldownPrimitivesRange, lastBatchId uint32) (*types.Transaction, error) {
+	return _ContractGaspMultiRollupService.Contract.ProcessEigenReinit(&_ContractGaspMultiRollupService.TransactOpts, task, operatorStateInfo, merkleRoots, ranges, lastBatchId)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
@@ -1138,23 +1211,44 @@ func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactorS
 	return _ContractGaspMultiRollupService.Contract.SetPauserRegistry(&_ContractGaspMultiRollupService.TransactOpts, newPauserRegistry)
 }
 
-// SetUpdater is a paid mutator transaction binding the contract method 0x124648c9.
+// SetRolldown is a paid mutator transaction binding the contract method 0xfdc15de8.
 //
-// Solidity: function set_updater(address _updater) returns()
-func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactor) SetUpdater(opts *bind.TransactOpts, _updater common.Address) (*types.Transaction, error) {
-	return _ContractGaspMultiRollupService.contract.Transact(opts, "set_updater", _updater)
+// Solidity: function setRolldown(address _rolldown) returns()
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactor) SetRolldown(opts *bind.TransactOpts, _rolldown common.Address) (*types.Transaction, error) {
+	return _ContractGaspMultiRollupService.contract.Transact(opts, "setRolldown", _rolldown)
 }
 
-// SetUpdater is a paid mutator transaction binding the contract method 0x124648c9.
+// SetRolldown is a paid mutator transaction binding the contract method 0xfdc15de8.
 //
-// Solidity: function set_updater(address _updater) returns()
+// Solidity: function setRolldown(address _rolldown) returns()
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) SetRolldown(_rolldown common.Address) (*types.Transaction, error) {
+	return _ContractGaspMultiRollupService.Contract.SetRolldown(&_ContractGaspMultiRollupService.TransactOpts, _rolldown)
+}
+
+// SetRolldown is a paid mutator transaction binding the contract method 0xfdc15de8.
+//
+// Solidity: function setRolldown(address _rolldown) returns()
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactorSession) SetRolldown(_rolldown common.Address) (*types.Transaction, error) {
+	return _ContractGaspMultiRollupService.Contract.SetRolldown(&_ContractGaspMultiRollupService.TransactOpts, _rolldown)
+}
+
+// SetUpdater is a paid mutator transaction binding the contract method 0x9d54f419.
+//
+// Solidity: function setUpdater(address _updater) returns()
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactor) SetUpdater(opts *bind.TransactOpts, _updater common.Address) (*types.Transaction, error) {
+	return _ContractGaspMultiRollupService.contract.Transact(opts, "setUpdater", _updater)
+}
+
+// SetUpdater is a paid mutator transaction binding the contract method 0x9d54f419.
+//
+// Solidity: function setUpdater(address _updater) returns()
 func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceSession) SetUpdater(_updater common.Address) (*types.Transaction, error) {
 	return _ContractGaspMultiRollupService.Contract.SetUpdater(&_ContractGaspMultiRollupService.TransactOpts, _updater)
 }
 
-// SetUpdater is a paid mutator transaction binding the contract method 0x124648c9.
+// SetUpdater is a paid mutator transaction binding the contract method 0x9d54f419.
 //
-// Solidity: function set_updater(address _updater) returns()
+// Solidity: function setUpdater(address _updater) returns()
 func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceTransactorSession) SetUpdater(_updater common.Address) (*types.Transaction, error) {
 	return _ContractGaspMultiRollupService.Contract.SetUpdater(&_ContractGaspMultiRollupService.TransactOpts, _updater)
 }
@@ -2167,6 +2261,140 @@ func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceFilterer) W
 func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceFilterer) ParsePauserRegistrySet(log types.Log) (*ContractGaspMultiRollupServicePauserRegistrySet, error) {
 	event := new(ContractGaspMultiRollupServicePauserRegistrySet)
 	if err := _ContractGaspMultiRollupService.contract.UnpackLog(event, "PauserRegistrySet", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// ContractGaspMultiRollupServiceRolldownTargetUpdatedIterator is returned from FilterRolldownTargetUpdated and is used to iterate over the raw logs and unpacked data for RolldownTargetUpdated events raised by the ContractGaspMultiRollupService contract.
+type ContractGaspMultiRollupServiceRolldownTargetUpdatedIterator struct {
+	Event *ContractGaspMultiRollupServiceRolldownTargetUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ContractGaspMultiRollupServiceRolldownTargetUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ContractGaspMultiRollupServiceRolldownTargetUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ContractGaspMultiRollupServiceRolldownTargetUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ContractGaspMultiRollupServiceRolldownTargetUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ContractGaspMultiRollupServiceRolldownTargetUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ContractGaspMultiRollupServiceRolldownTargetUpdated represents a RolldownTargetUpdated event raised by the ContractGaspMultiRollupService contract.
+type ContractGaspMultiRollupServiceRolldownTargetUpdated struct {
+	RolldownAddress common.Address
+	Raw             types.Log // Blockchain specific contextual infos
+}
+
+// FilterRolldownTargetUpdated is a free log retrieval operation binding the contract event 0x2f20cf1bda67739044c5bf577353970c3dbc183b2c7274d1e8584a1026923267.
+//
+// Solidity: event RolldownTargetUpdated(address rolldownAddress)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceFilterer) FilterRolldownTargetUpdated(opts *bind.FilterOpts) (*ContractGaspMultiRollupServiceRolldownTargetUpdatedIterator, error) {
+
+	logs, sub, err := _ContractGaspMultiRollupService.contract.FilterLogs(opts, "RolldownTargetUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &ContractGaspMultiRollupServiceRolldownTargetUpdatedIterator{contract: _ContractGaspMultiRollupService.contract, event: "RolldownTargetUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchRolldownTargetUpdated is a free log subscription operation binding the contract event 0x2f20cf1bda67739044c5bf577353970c3dbc183b2c7274d1e8584a1026923267.
+//
+// Solidity: event RolldownTargetUpdated(address rolldownAddress)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceFilterer) WatchRolldownTargetUpdated(opts *bind.WatchOpts, sink chan<- *ContractGaspMultiRollupServiceRolldownTargetUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _ContractGaspMultiRollupService.contract.WatchLogs(opts, "RolldownTargetUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ContractGaspMultiRollupServiceRolldownTargetUpdated)
+				if err := _ContractGaspMultiRollupService.contract.UnpackLog(event, "RolldownTargetUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRolldownTargetUpdated is a log parse operation binding the contract event 0x2f20cf1bda67739044c5bf577353970c3dbc183b2c7274d1e8584a1026923267.
+//
+// Solidity: event RolldownTargetUpdated(address rolldownAddress)
+func (_ContractGaspMultiRollupService *ContractGaspMultiRollupServiceFilterer) ParseRolldownTargetUpdated(log types.Log) (*ContractGaspMultiRollupServiceRolldownTargetUpdated, error) {
+	event := new(ContractGaspMultiRollupServiceRolldownTargetUpdated)
+	if err := _ContractGaspMultiRollupService.contract.UnpackLog(event, "RolldownTargetUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

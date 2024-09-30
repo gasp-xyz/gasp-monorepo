@@ -1,5 +1,4 @@
-import { chai, describe, expect, it } from "vitest";
-chai.should()
+import { describe, expect, it } from "vitest";
 import supertest from "supertest";
 import app from "../../src/app";
 import { MAX_DAYS, MAX_INTERVAL, ERROR_MSG_PAIR_ASSET_NOT_FOUND } from "./utils";

@@ -71,7 +71,7 @@ pub mod finalizer_task_manager {
                                     kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
                                     internal_type: ::core::option::Option::Some(
                                         ::std::borrow::ToOwned::to_owned(
-                                            "enum FinalizerTaskManager.TaskType",
+                                            "enum IFinalizerTaskManager.TaskType",
                                         ),
                                     ),
                                 },
@@ -110,7 +110,7 @@ pub mod finalizer_task_manager {
                                     kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
                                     internal_type: ::core::option::Option::Some(
                                         ::std::borrow::ToOwned::to_owned(
-                                            "enum FinalizerTaskManager.TaskType",
+                                            "enum IFinalizerTaskManager.TaskType",
                                         ),
                                     ),
                                 },
@@ -194,6 +194,36 @@ pub mod finalizer_task_manager {
                                         ::std::borrow::ToOwned::to_owned(
                                             "contract BLSSignatureChecker",
                                         ),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("chainRdBatchNonce"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("chainRdBatchNonce"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned(
+                                            "enum IRolldownPrimitives.ChainId",
+                                        ),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint32"),
                                     ),
                                 },
                             ],
@@ -388,12 +418,19 @@ pub mod finalizer_task_manager {
                             name: ::std::borrow::ToOwned::to_owned("createNewRdTask"),
                             inputs: ::std::vec![
                                 ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned("blockNumber"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(
-                                        256usize,
-                                    ),
+                                    name: ::std::borrow::ToOwned::to_owned("chainId"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
                                     internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint256"),
+                                        ::std::borrow::ToOwned::to_owned(
+                                            "enum IRolldownPrimitives.ChainId",
+                                        ),
+                                    ),
+                                },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("batchId"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint32"),
                                     ),
                                 },
                             ],
@@ -591,6 +628,20 @@ pub mod finalizer_task_manager {
                             outputs: ::std::vec![],
                             constant: ::core::option::Option::None,
                             state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("forceCancelPendingTasks"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "forceCancelPendingTasks",
+                            ),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
                         },
                     ],
                 ),
@@ -1079,7 +1130,7 @@ pub mod finalizer_task_manager {
                                     kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
                                     internal_type: ::core::option::Option::Some(
                                         ::std::borrow::ToOwned::to_owned(
-                                            "enum FinalizerTaskManager.TaskType",
+                                            "enum IFinalizerTaskManager.TaskType",
                                         ),
                                     ),
                                 },
@@ -1097,7 +1148,7 @@ pub mod finalizer_task_manager {
                                     kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
                                     internal_type: ::core::option::Option::Some(
                                         ::std::borrow::ToOwned::to_owned(
-                                            "enum FinalizerTaskManager.TaskStatus",
+                                            "enum IFinalizerTaskManager.TaskStatus",
                                         ),
                                     ),
                                 },
@@ -1168,15 +1219,6 @@ pub mod finalizer_task_manager {
                                 },
                                 ::ethers::core::abi::ethabi::Param {
                                     name: ::std::borrow::ToOwned::to_owned(
-                                        "_minOpTaskResponseWindowBlock",
-                                    ),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::borrow::ToOwned::to_owned(
                                         "_operatorStateRetrieverExtended",
                                     ),
                                     kind: ::ethers::core::abi::ethabi::ParamType::Address,
@@ -1184,10 +1226,37 @@ pub mod finalizer_task_manager {
                                         ::std::borrow::ToOwned::to_owned("address"),
                                     ),
                                 },
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("_rolldown"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IRolldown"),
+                                    ),
+                                },
                             ],
                             outputs: ::std::vec![],
                             constant: ::core::option::Option::None,
                             state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("isTaskPending"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("isTaskPending"),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("bool"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
                         },
                     ],
                 ),
@@ -1304,6 +1373,28 @@ pub mod finalizer_task_manager {
                     ],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("lastRdTaskCreatedBlock"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "lastRdTaskCreatedBlock",
+                            ),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("uint32"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("latestOpTaskNum"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
@@ -1324,56 +1415,10 @@ pub mod finalizer_task_manager {
                     ],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("latestPendingStateHash"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "latestPendingStateHash",
-                            ),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("bytes32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("latestRdTaskNum"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
                             name: ::std::borrow::ToOwned::to_owned("latestRdTaskNum"),
-                            inputs: ::std::vec![],
-                            outputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::Param {
-                                    name: ::std::string::String::new(),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    internal_type: ::core::option::Option::Some(
-                                        ::std::borrow::ToOwned::to_owned("uint32"),
-                                    ),
-                                },
-                            ],
-                            constant: ::core::option::Option::None,
-                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                        },
-                    ],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("minOpTaskResponseWindowBlock"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::Function {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "minOpTaskResponseWindowBlock",
-                            ),
                             inputs: ::std::vec![],
                             outputs: ::std::vec![
                                 ::ethers::core::abi::ethabi::Param {
@@ -1742,7 +1787,8 @@ pub mod finalizer_task_manager {
                                     kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
                                         ::std::vec![
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::Bytes,
@@ -1761,9 +1807,12 @@ pub mod finalizer_task_manager {
                                         ::std::vec![
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
                                         ],
                                     ),
                                     internal_type: ::core::option::Option::Some(
@@ -1884,6 +1933,26 @@ pub mod finalizer_task_manager {
                     ],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("rolldown"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("rolldown"),
+                            inputs: ::std::vec![],
+                            outputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::string::String::new(),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IRolldown"),
+                                    ),
+                                },
+                            ],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                        },
+                    ],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("setPauserRegistry"),
                     ::std::vec![
                         ::ethers::core::abi::ethabi::Function {
@@ -1894,6 +1963,26 @@ pub mod finalizer_task_manager {
                                     kind: ::ethers::core::abi::ethabi::ParamType::Address,
                                     internal_type: ::core::option::Option::Some(
                                         ::std::borrow::ToOwned::to_owned("contract IPauserRegistry"),
+                                    ),
+                                },
+                            ],
+                            outputs: ::std::vec![],
+                            constant: ::core::option::Option::None,
+                            state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                        },
+                    ],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("setRolldown"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Function {
+                            name: ::std::borrow::ToOwned::to_owned("setRolldown"),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::Param {
+                                    name: ::std::borrow::ToOwned::to_owned("_rolldown"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                    internal_type: ::core::option::Option::Some(
+                                        ::std::borrow::ToOwned::to_owned("contract IRolldown"),
                                     ),
                                 },
                             ],
@@ -2089,28 +2178,7 @@ pub mod finalizer_task_manager {
                             name: ::std::borrow::ToOwned::to_owned(
                                 "NewOpTaskForceCreated",
                             ),
-                            inputs: ::std::vec![
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("taskIndex"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("task"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
-                                        ::std::vec![
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                        ],
-                                    ),
-                                    indexed: false,
-                                },
-                            ],
+                            inputs: ::std::vec![],
                             anonymous: false,
                         },
                     ],
@@ -2131,7 +2199,8 @@ pub mod finalizer_task_manager {
                                     kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
                                         ::std::vec![
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::Bytes,
@@ -2373,21 +2442,17 @@ pub mod finalizer_task_manager {
                                     indexed: true,
                                 },
                                 ::ethers::core::abi::ethabi::EventParam {
-                                    name: ::std::borrow::ToOwned::to_owned("blockHash"),
-                                    kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(
-                                        32usize,
-                                    ),
-                                    indexed: true,
-                                },
-                                ::ethers::core::abi::ethabi::EventParam {
                                     name: ::std::borrow::ToOwned::to_owned("taskResponse"),
                                     kind: ::ethers::core::abi::ethabi::ParamType::Tuple(
                                         ::std::vec![
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
                                         ],
                                     ),
                                     indexed: false,
@@ -2414,9 +2479,12 @@ pub mod finalizer_task_manager {
                                         ::std::vec![
                                             ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                             ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
+                                            ::ethers::core::abi::ethabi::ParamType::Address,
                                         ],
                                     ),
                                     indexed: false,
@@ -2461,6 +2529,24 @@ pub mod finalizer_task_manager {
                                         "resetTrackedQuorums",
                                     ),
                                     kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                                    indexed: false,
+                                },
+                            ],
+                            anonymous: false,
+                        },
+                    ],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("RolldownTargetUpdated"),
+                    ::std::vec![
+                        ::ethers::core::abi::ethabi::Event {
+                            name: ::std::borrow::ToOwned::to_owned(
+                                "RolldownTargetUpdated",
+                            ),
+                            inputs: ::std::vec![
+                                ::ethers::core::abi::ethabi::EventParam {
+                                    name: ::std::borrow::ToOwned::to_owned("rolldownAddress"),
+                                    kind: ::ethers::core::abi::ethabi::ParamType::Address,
                                     indexed: false,
                                 },
                             ],
@@ -2662,6 +2748,15 @@ pub mod finalizer_task_manager {
                 .method_hash([28, 23, 142, 156], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `chainRdBatchNonce` (0x930390d9) function
+        pub fn chain_rd_batch_nonce(
+            &self,
+            p0: u8,
+        ) -> ::ethers::contract::builders::ContractCall<M, u32> {
+            self.0
+                .method_hash([147, 3, 144, 217], p0)
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `checkSignatures` (0x6efb4636) function
         pub fn check_signatures(
             &self,
@@ -2695,13 +2790,14 @@ pub mod finalizer_task_manager {
                 )
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `createNewRdTask` (0xb3ea184e) function
+        ///Calls the contract's `createNewRdTask` (0x6f254819) function
         pub fn create_new_rd_task(
             &self,
-            block_number: ::ethers::core::types::U256,
+            chain_id: u8,
+            batch_id: u32,
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
-                .method_hash([179, 234, 24, 78], block_number)
+                .method_hash([111, 37, 72, 25], (chain_id, batch_id))
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `delegation` (0xdf5cf723) function
@@ -2728,6 +2824,14 @@ pub mod finalizer_task_manager {
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash([69, 38, 91, 122], (quorum_stake_totals,))
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `forceCancelPendingTasks` (0x60202fc0) function
+        pub fn force_cancel_pending_tasks(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
+            self.0
+                .method_hash([96, 32, 47, 192], ())
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `forceCreateNewOpTask` (0xf5640cf8) function
@@ -2866,7 +2970,7 @@ pub mod finalizer_task_manager {
                 .method_hash([191, 35, 21, 237], (p0, p1))
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `initialize` (0x2d4713db) function
+        ///Calls the contract's `initialize` (0xde434838) function
         pub fn initialize(
             &self,
             pauser_registry: ::ethers::core::types::Address,
@@ -2876,12 +2980,12 @@ pub mod finalizer_task_manager {
             allow_non_root_init: bool,
             bls_signature_checker_address: ::ethers::core::types::Address,
             task_response_window_block: u32,
-            min_op_task_response_window_block: u32,
             operator_state_retriever_extended: ::ethers::core::types::Address,
+            rolldown: ::ethers::core::types::Address,
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash(
-                    [45, 71, 19, 219],
+                    [222, 67, 72, 56],
                     (
                         pauser_registry,
                         initial_owner,
@@ -2890,10 +2994,16 @@ pub mod finalizer_task_manager {
                         allow_non_root_init,
                         bls_signature_checker_address,
                         task_response_window_block,
-                        min_op_task_response_window_block,
                         operator_state_retriever_extended,
+                        rolldown,
                     ),
                 )
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `isTaskPending` (0x36f78ed8) function
+        pub fn is_task_pending(&self) -> ::ethers::contract::builders::ContractCall<M, bool> {
+            self.0
+                .method_hash([54, 247, 142, 216], ())
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `lastCompletedOpTaskCreatedBlock` (0x537a2929) function
@@ -2936,32 +3046,24 @@ pub mod finalizer_task_manager {
                 .method_hash([77, 122, 113, 22], ())
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `lastRdTaskCreatedBlock` (0x8c82af5e) function
+        pub fn last_rd_task_created_block(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, u32> {
+            self.0
+                .method_hash([140, 130, 175, 94], ())
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `latestOpTaskNum` (0x41789d57) function
         pub fn latest_op_task_num(&self) -> ::ethers::contract::builders::ContractCall<M, u32> {
             self.0
                 .method_hash([65, 120, 157, 87], ())
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `latestPendingStateHash` (0x4ae6b203) function
-        pub fn latest_pending_state_hash(
-            &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
-            self.0
-                .method_hash([74, 230, 178, 3], ())
-                .expect("method not found (this should never happen)")
-        }
         ///Calls the contract's `latestRdTaskNum` (0x7afdd54b) function
         pub fn latest_rd_task_num(&self) -> ::ethers::contract::builders::ContractCall<M, u32> {
             self.0
                 .method_hash([122, 253, 213, 75], ())
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `minOpTaskResponseWindowBlock` (0xc987de8e) function
-        pub fn min_op_task_response_window_block(
-            &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, u32> {
-            self.0
-                .method_hash([201, 135, 222, 142], ())
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `operatorStateRetrieverExtended` (0x8380acbd) function
@@ -3062,7 +3164,7 @@ pub mod finalizer_task_manager {
                 )
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `respondToRdTask` (0x05c6b663) function
+        ///Calls the contract's `respondToRdTask` (0xe72ddf10) function
         pub fn respond_to_rd_task(
             &self,
             task: RdTask,
@@ -3071,7 +3173,7 @@ pub mod finalizer_task_manager {
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash(
-                    [5, 198, 182, 99],
+                    [231, 45, 223, 16],
                     (task, task_response, non_signer_stakes_and_signature),
                 )
                 .expect("method not found (this should never happen)")
@@ -3085,6 +3187,14 @@ pub mod finalizer_task_manager {
                 .method_hash([25, 26, 172, 122], reset_tracked_quorums)
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `rolldown` (0x3d9fb00c) function
+        pub fn rolldown(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Address> {
+            self.0
+                .method_hash([61, 159, 176, 12], ())
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `setPauserRegistry` (0x10d67a2f) function
         pub fn set_pauser_registry(
             &self,
@@ -3092,6 +3202,15 @@ pub mod finalizer_task_manager {
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash([16, 214, 122, 47], new_pauser_registry)
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `setRolldown` (0xfdc15de8) function
+        pub fn set_rolldown(
+            &self,
+            rolldown: ::ethers::core::types::Address,
+        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
+            self.0
+                .method_hash([253, 193, 93, 232], rolldown)
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `stakeRegistry` (0x68304835) function
@@ -3258,6 +3377,13 @@ pub mod finalizer_task_manager {
         {
             self.0.event()
         }
+        ///Gets the contract's `RolldownTargetUpdated` event
+        pub fn rolldown_target_updated_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, RolldownTargetUpdatedFilter>
+        {
+            self.0.event()
+        }
         ///Gets the contract's `StaleStakesForbiddenUpdate` event
         pub fn stale_stakes_forbidden_update_filter(
             &self,
@@ -3358,15 +3484,8 @@ pub mod finalizer_task_manager {
         Eq,
         Hash,
     )]
-    #[ethevent(
-        name = "NewOpTaskForceCreated",
-        abi = "NewOpTaskForceCreated(uint32,(uint32,uint32,uint32,bytes,uint32,bytes,uint32))"
-    )]
-    pub struct NewOpTaskForceCreatedFilter {
-        #[ethevent(indexed)]
-        pub task_index: u32,
-        pub task: OpTask,
-    }
+    #[ethevent(name = "NewOpTaskForceCreated", abi = "NewOpTaskForceCreated()")]
+    pub struct NewOpTaskForceCreatedFilter;
     #[derive(
         Clone,
         ::ethers::contract::EthEvent,
@@ -3381,7 +3500,7 @@ pub mod finalizer_task_manager {
     )]
     #[ethevent(
         name = "NewRdTaskCreated",
-        abi = "NewRdTaskCreated(uint32,(uint32,uint256,uint32,uint32,bytes,uint32))"
+        abi = "NewRdTaskCreated(uint32,(uint32,uint8,uint32,uint32,uint32,bytes,uint32))"
     )]
     pub struct NewRdTaskCreatedFilter {
         #[ethevent(indexed)]
@@ -3571,13 +3690,11 @@ pub mod finalizer_task_manager {
     )]
     #[ethevent(
         name = "RdTaskCompleted",
-        abi = "RdTaskCompleted(uint32,bytes32,(uint32,bytes32,bytes32,bytes32,bytes32))"
+        abi = "RdTaskCompleted(uint32,(uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address))"
     )]
     pub struct RdTaskCompletedFilter {
         #[ethevent(indexed)]
         pub task_index: u32,
-        #[ethevent(indexed)]
-        pub block_hash: [u8; 32],
         pub task_response: RdTaskResponse,
     }
     #[derive(
@@ -3594,7 +3711,7 @@ pub mod finalizer_task_manager {
     )]
     #[ethevent(
         name = "RdTaskResponded",
-        abi = "RdTaskResponded(uint32,(uint32,bytes32,bytes32,bytes32,bytes32),(uint32,bytes32,uint96[],uint96[]))"
+        abi = "RdTaskResponded(uint32,(uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address),(uint32,bytes32,uint96[],uint96[]))"
     )]
     pub struct RdTaskRespondedFilter {
         #[ethevent(indexed)]
@@ -3617,6 +3734,22 @@ pub mod finalizer_task_manager {
     #[ethevent(name = "ResumeTrackingOpState", abi = "ResumeTrackingOpState(bool)")]
     pub struct ResumeTrackingOpStateFilter {
         pub reset_tracked_quorums: bool,
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethevent(name = "RolldownTargetUpdated", abi = "RolldownTargetUpdated(address)")]
+    pub struct RolldownTargetUpdatedFilter {
+        pub rolldown_address: ::ethers::core::types::Address,
     }
     #[derive(
         Clone,
@@ -3684,6 +3817,7 @@ pub mod finalizer_task_manager {
         RdTaskCompletedFilter(RdTaskCompletedFilter),
         RdTaskRespondedFilter(RdTaskRespondedFilter),
         ResumeTrackingOpStateFilter(ResumeTrackingOpStateFilter),
+        RolldownTargetUpdatedFilter(RolldownTargetUpdatedFilter),
         StaleStakesForbiddenUpdateFilter(StaleStakesForbiddenUpdateFilter),
         UnpausedFilter(UnpausedFilter),
     }
@@ -3754,6 +3888,11 @@ pub mod finalizer_task_manager {
                     decoded,
                 ));
             }
+            if let Ok(decoded) = RolldownTargetUpdatedFilter::decode_log(log) {
+                return Ok(FinalizerTaskManagerEvents::RolldownTargetUpdatedFilter(
+                    decoded,
+                ));
+            }
             if let Ok(decoded) = StaleStakesForbiddenUpdateFilter::decode_log(log) {
                 return Ok(FinalizerTaskManagerEvents::StaleStakesForbiddenUpdateFilter(decoded));
             }
@@ -3785,6 +3924,7 @@ pub mod finalizer_task_manager {
                 Self::RdTaskCompletedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RdTaskRespondedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ResumeTrackingOpStateFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::RolldownTargetUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StaleStakesForbiddenUpdateFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
@@ -3875,6 +4015,11 @@ pub mod finalizer_task_manager {
     impl ::core::convert::From<ResumeTrackingOpStateFilter> for FinalizerTaskManagerEvents {
         fn from(value: ResumeTrackingOpStateFilter) -> Self {
             Self::ResumeTrackingOpStateFilter(value)
+        }
+    }
+    impl ::core::convert::From<RolldownTargetUpdatedFilter> for FinalizerTaskManagerEvents {
+        fn from(value: RolldownTargetUpdatedFilter) -> Self {
+            Self::RolldownTargetUpdatedFilter(value)
         }
     }
     impl ::core::convert::From<StaleStakesForbiddenUpdateFilter> for FinalizerTaskManagerEvents {
@@ -3992,6 +4137,21 @@ pub mod finalizer_task_manager {
     )]
     #[ethcall(name = "blsSignatureChecker", abi = "blsSignatureChecker()")]
     pub struct BlsSignatureCheckerCall;
+    ///Container type for all input parameters for the `chainRdBatchNonce` function with signature `chainRdBatchNonce(uint8)` and selector `0x930390d9`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "chainRdBatchNonce", abi = "chainRdBatchNonce(uint8)")]
+    pub struct ChainRdBatchNonceCall(pub u8);
     ///Container type for all input parameters for the `checkSignatures` function with signature `checkSignatures(bytes32,bytes,uint32,(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))` and selector `0x6efb4636`
     #[derive(
         Clone,
@@ -4033,7 +4193,7 @@ pub mod finalizer_task_manager {
         pub quorum_threshold_percentage: u32,
         pub quorum_numbers: ::ethers::core::types::Bytes,
     }
-    ///Container type for all input parameters for the `createNewRdTask` function with signature `createNewRdTask(uint256)` and selector `0xb3ea184e`
+    ///Container type for all input parameters for the `createNewRdTask` function with signature `createNewRdTask(uint8,uint32)` and selector `0x6f254819`
     #[derive(
         Clone,
         ::ethers::contract::EthCall,
@@ -4046,9 +4206,10 @@ pub mod finalizer_task_manager {
         Eq,
         Hash,
     )]
-    #[ethcall(name = "createNewRdTask", abi = "createNewRdTask(uint256)")]
+    #[ethcall(name = "createNewRdTask", abi = "createNewRdTask(uint8,uint32)")]
     pub struct CreateNewRdTaskCall {
-        pub block_number: ::ethers::core::types::U256,
+        pub chain_id: u8,
+        pub batch_id: u32,
     }
     ///Container type for all input parameters for the `delegation` function with signature `delegation()` and selector `0xdf5cf723`
     #[derive(
@@ -4105,6 +4266,21 @@ pub mod finalizer_task_manager {
     pub struct DummyForQuorumStakeTotalsTypeCall {
         pub quorum_stake_totals: QuorumStakeTotals,
     }
+    ///Container type for all input parameters for the `forceCancelPendingTasks` function with signature `forceCancelPendingTasks()` and selector `0x60202fc0`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "forceCancelPendingTasks", abi = "forceCancelPendingTasks()")]
+    pub struct ForceCancelPendingTasksCall;
     ///Container type for all input parameters for the `forceCreateNewOpTask` function with signature `forceCreateNewOpTask(uint32,bytes)` and selector `0xf5640cf8`
     #[derive(
         Clone,
@@ -4308,7 +4484,7 @@ pub mod finalizer_task_manager {
     )]
     #[ethcall(name = "idToTaskStatus", abi = "idToTaskStatus(uint8,uint32)")]
     pub struct IdToTaskStatusCall(pub u8, pub u32);
-    ///Container type for all input parameters for the `initialize` function with signature `initialize(address,address,address,address,bool,address,uint32,uint32,address)` and selector `0x2d4713db`
+    ///Container type for all input parameters for the `initialize` function with signature `initialize(address,address,address,address,bool,address,uint32,address,address)` and selector `0xde434838`
     #[derive(
         Clone,
         ::ethers::contract::EthCall,
@@ -4323,7 +4499,7 @@ pub mod finalizer_task_manager {
     )]
     #[ethcall(
         name = "initialize",
-        abi = "initialize(address,address,address,address,bool,address,uint32,uint32,address)"
+        abi = "initialize(address,address,address,address,bool,address,uint32,address,address)"
     )]
     pub struct InitializeCall {
         pub pauser_registry: ::ethers::core::types::Address,
@@ -4333,9 +4509,24 @@ pub mod finalizer_task_manager {
         pub allow_non_root_init: bool,
         pub bls_signature_checker_address: ::ethers::core::types::Address,
         pub task_response_window_block: u32,
-        pub min_op_task_response_window_block: u32,
         pub operator_state_retriever_extended: ::ethers::core::types::Address,
+        pub rolldown: ::ethers::core::types::Address,
     }
+    ///Container type for all input parameters for the `isTaskPending` function with signature `isTaskPending()` and selector `0x36f78ed8`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "isTaskPending", abi = "isTaskPending()")]
+    pub struct IsTaskPendingCall;
     ///Container type for all input parameters for the `lastCompletedOpTaskCreatedBlock` function with signature `lastCompletedOpTaskCreatedBlock()` and selector `0x537a2929`
     #[derive(
         Clone,
@@ -4420,6 +4611,21 @@ pub mod finalizer_task_manager {
     )]
     #[ethcall(name = "lastOpTaskCreatedBlock", abi = "lastOpTaskCreatedBlock()")]
     pub struct LastOpTaskCreatedBlockCall;
+    ///Container type for all input parameters for the `lastRdTaskCreatedBlock` function with signature `lastRdTaskCreatedBlock()` and selector `0x8c82af5e`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "lastRdTaskCreatedBlock", abi = "lastRdTaskCreatedBlock()")]
+    pub struct LastRdTaskCreatedBlockCall;
     ///Container type for all input parameters for the `latestOpTaskNum` function with signature `latestOpTaskNum()` and selector `0x41789d57`
     #[derive(
         Clone,
@@ -4435,21 +4641,6 @@ pub mod finalizer_task_manager {
     )]
     #[ethcall(name = "latestOpTaskNum", abi = "latestOpTaskNum()")]
     pub struct LatestOpTaskNumCall;
-    ///Container type for all input parameters for the `latestPendingStateHash` function with signature `latestPendingStateHash()` and selector `0x4ae6b203`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "latestPendingStateHash", abi = "latestPendingStateHash()")]
-    pub struct LatestPendingStateHashCall;
     ///Container type for all input parameters for the `latestRdTaskNum` function with signature `latestRdTaskNum()` and selector `0x7afdd54b`
     #[derive(
         Clone,
@@ -4465,24 +4656,6 @@ pub mod finalizer_task_manager {
     )]
     #[ethcall(name = "latestRdTaskNum", abi = "latestRdTaskNum()")]
     pub struct LatestRdTaskNumCall;
-    ///Container type for all input parameters for the `minOpTaskResponseWindowBlock` function with signature `minOpTaskResponseWindowBlock()` and selector `0xc987de8e`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "minOpTaskResponseWindowBlock",
-        abi = "minOpTaskResponseWindowBlock()"
-    )]
-    pub struct MinOpTaskResponseWindowBlockCall;
     ///Container type for all input parameters for the `operatorStateRetrieverExtended` function with signature `operatorStateRetrieverExtended()` and selector `0x8380acbd`
     #[derive(
         Clone,
@@ -4677,7 +4850,7 @@ pub mod finalizer_task_manager {
         pub task_response: OpTaskResponse,
         pub non_signer_stakes_and_signature: NonSignerStakesAndSignature,
     }
-    ///Container type for all input parameters for the `respondToRdTask` function with signature `respondToRdTask((uint32,uint256,uint32,uint32,bytes,uint32),(uint32,bytes32,bytes32,bytes32,bytes32),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))` and selector `0x05c6b663`
+    ///Container type for all input parameters for the `respondToRdTask` function with signature `respondToRdTask((uint32,uint8,uint32,uint32,uint32,bytes,uint32),(uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))` and selector `0xe72ddf10`
     #[derive(
         Clone,
         ::ethers::contract::EthCall,
@@ -4692,7 +4865,7 @@ pub mod finalizer_task_manager {
     )]
     #[ethcall(
         name = "respondToRdTask",
-        abi = "respondToRdTask((uint32,uint256,uint32,uint32,bytes,uint32),(uint32,bytes32,bytes32,bytes32,bytes32),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))"
+        abi = "respondToRdTask((uint32,uint8,uint32,uint32,uint32,bytes,uint32),(uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address),(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))"
     )]
     pub struct RespondToRdTaskCall {
         pub task: RdTask,
@@ -4716,6 +4889,21 @@ pub mod finalizer_task_manager {
     pub struct ResumeTrackingQuorumsCall {
         pub reset_tracked_quorums: bool,
     }
+    ///Container type for all input parameters for the `rolldown` function with signature `rolldown()` and selector `0x3d9fb00c`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "rolldown", abi = "rolldown()")]
+    pub struct RolldownCall;
     ///Container type for all input parameters for the `setPauserRegistry` function with signature `setPauserRegistry(address)` and selector `0x10d67a2f`
     #[derive(
         Clone,
@@ -4732,6 +4920,23 @@ pub mod finalizer_task_manager {
     #[ethcall(name = "setPauserRegistry", abi = "setPauserRegistry(address)")]
     pub struct SetPauserRegistryCall {
         pub new_pauser_registry: ::ethers::core::types::Address,
+    }
+    ///Container type for all input parameters for the `setRolldown` function with signature `setRolldown(address)` and selector `0xfdc15de8`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "setRolldown", abi = "setRolldown(address)")]
+    pub struct SetRolldownCall {
+        pub rolldown: ::ethers::core::types::Address,
     }
     ///Container type for all input parameters for the `stakeRegistry` function with signature `stakeRegistry()` and selector `0x68304835`
     #[derive(
@@ -4836,12 +5041,14 @@ pub mod finalizer_task_manager {
         AllowNonRootInit(AllowNonRootInitCall),
         BlsApkRegistry(BlsApkRegistryCall),
         BlsSignatureChecker(BlsSignatureCheckerCall),
+        ChainRdBatchNonce(ChainRdBatchNonceCall),
         CheckSignatures(CheckSignaturesCall),
         CreateNewOpTask(CreateNewOpTaskCall),
         CreateNewRdTask(CreateNewRdTaskCall),
         Delegation(DelegationCall),
         DummyForOperatorStateInfoType(DummyForOperatorStateInfoTypeCall),
         DummyForQuorumStakeTotalsType(DummyForQuorumStakeTotalsTypeCall),
+        ForceCancelPendingTasks(ForceCancelPendingTasksCall),
         ForceCreateNewOpTask(ForceCreateNewOpTaskCall),
         ForceRespondToOpTask(ForceRespondToOpTaskCall),
         Generator(GeneratorCall),
@@ -4855,6 +5062,7 @@ pub mod finalizer_task_manager {
         GetQuorumBitmapsAtBlockNumber(GetQuorumBitmapsAtBlockNumberCall),
         IdToTaskStatus(IdToTaskStatusCall),
         Initialize(InitializeCall),
+        IsTaskPending(IsTaskPendingCall),
         LastCompletedOpTaskCreatedBlock(LastCompletedOpTaskCreatedBlockCall),
         LastCompletedOpTaskNum(LastCompletedOpTaskNumCall),
         LastCompletedOpTaskQuorumNumbers(LastCompletedOpTaskQuorumNumbersCall),
@@ -4862,10 +5070,9 @@ pub mod finalizer_task_manager {
             LastCompletedOpTaskQuorumThresholdPercentageCall,
         ),
         LastOpTaskCreatedBlock(LastOpTaskCreatedBlockCall),
+        LastRdTaskCreatedBlock(LastRdTaskCreatedBlockCall),
         LatestOpTaskNum(LatestOpTaskNumCall),
-        LatestPendingStateHash(LatestPendingStateHashCall),
         LatestRdTaskNum(LatestRdTaskNumCall),
-        MinOpTaskResponseWindowBlock(MinOpTaskResponseWindowBlockCall),
         OperatorStateRetrieverExtended(OperatorStateRetrieverExtendedCall),
         OperatorsStateInfoHash(OperatorsStateInfoHashCall),
         Owner(OwnerCall),
@@ -4880,7 +5087,9 @@ pub mod finalizer_task_manager {
         RespondToOpTask(RespondToOpTaskCall),
         RespondToRdTask(RespondToRdTaskCall),
         ResumeTrackingQuorums(ResumeTrackingQuorumsCall),
+        Rolldown(RolldownCall),
         SetPauserRegistry(SetPauserRegistryCall),
+        SetRolldown(SetRolldownCall),
         StakeRegistry(StakeRegistryCall),
         TaskResponseWindowBlock(TaskResponseWindowBlockCall),
         TransferOwnership(TransferOwnershipCall),
@@ -4925,6 +5134,11 @@ pub mod finalizer_task_manager {
                 return Ok(Self::BlsSignatureChecker(decoded));
             }
             if let Ok(decoded) =
+                <ChainRdBatchNonceCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::ChainRdBatchNonce(decoded));
+            }
+            if let Ok(decoded) =
                 <CheckSignaturesCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::CheckSignatures(decoded));
@@ -4951,6 +5165,11 @@ pub mod finalizer_task_manager {
                 <DummyForQuorumStakeTotalsTypeCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::DummyForQuorumStakeTotalsType(decoded));
+            }
+            if let Ok(decoded) =
+                <ForceCancelPendingTasksCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::ForceCancelPendingTasks(decoded));
             }
             if let Ok(decoded) =
                 <ForceCreateNewOpTaskCall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -5005,6 +5224,10 @@ pub mod finalizer_task_manager {
             if let Ok(decoded) = <InitializeCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Initialize(decoded));
             }
+            if let Ok(decoded) = <IsTaskPendingCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::IsTaskPending(decoded));
+            }
             if let Ok(decoded) =
                 <LastCompletedOpTaskCreatedBlockCall as ::ethers::core::abi::AbiDecode>::decode(
                     data,
@@ -5035,24 +5258,19 @@ pub mod finalizer_task_manager {
                 return Ok(Self::LastOpTaskCreatedBlock(decoded));
             }
             if let Ok(decoded) =
+                <LastRdTaskCreatedBlockCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::LastRdTaskCreatedBlock(decoded));
+            }
+            if let Ok(decoded) =
                 <LatestOpTaskNumCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::LatestOpTaskNum(decoded));
             }
             if let Ok(decoded) =
-                <LatestPendingStateHashCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::LatestPendingStateHash(decoded));
-            }
-            if let Ok(decoded) =
                 <LatestRdTaskNumCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::LatestRdTaskNum(decoded));
-            }
-            if let Ok(decoded) =
-                <MinOpTaskResponseWindowBlockCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::MinOpTaskResponseWindowBlock(decoded));
             }
             if let Ok(decoded) =
                 <OperatorStateRetrieverExtendedCall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -5116,10 +5334,16 @@ pub mod finalizer_task_manager {
             {
                 return Ok(Self::ResumeTrackingQuorums(decoded));
             }
+            if let Ok(decoded) = <RolldownCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+                return Ok(Self::Rolldown(decoded));
+            }
             if let Ok(decoded) =
                 <SetPauserRegistryCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::SetPauserRegistry(decoded));
+            }
+            if let Ok(decoded) = <SetRolldownCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+                return Ok(Self::SetRolldown(decoded));
             }
             if let Ok(decoded) = <StakeRegistryCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
@@ -5162,6 +5386,7 @@ pub mod finalizer_task_manager {
                 Self::BlsSignatureChecker(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
+                Self::ChainRdBatchNonce(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::CheckSignatures(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::CreateNewOpTask(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::CreateNewRdTask(element) => ::ethers::core::abi::AbiEncode::encode(element),
@@ -5170,6 +5395,9 @@ pub mod finalizer_task_manager {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::DummyForQuorumStakeTotalsType(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
+                Self::ForceCancelPendingTasks(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::ForceCreateNewOpTask(element) => {
@@ -5197,6 +5425,7 @@ pub mod finalizer_task_manager {
                 }
                 Self::IdToTaskStatus(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::Initialize(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::IsTaskPending(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::LastCompletedOpTaskCreatedBlock(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -5212,14 +5441,11 @@ pub mod finalizer_task_manager {
                 Self::LastOpTaskCreatedBlock(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
+                Self::LastRdTaskCreatedBlock(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::LatestOpTaskNum(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::LatestPendingStateHash(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
                 Self::LatestRdTaskNum(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::MinOpTaskResponseWindowBlock(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
                 Self::OperatorStateRetrieverExtended(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -5244,7 +5470,9 @@ pub mod finalizer_task_manager {
                 Self::ResumeTrackingQuorums(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
+                Self::Rolldown(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::SetPauserRegistry(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::SetRolldown(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::StakeRegistry(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::TaskResponseWindowBlock(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
@@ -5267,6 +5495,7 @@ pub mod finalizer_task_manager {
                 Self::AllowNonRootInit(element) => ::core::fmt::Display::fmt(element, f),
                 Self::BlsApkRegistry(element) => ::core::fmt::Display::fmt(element, f),
                 Self::BlsSignatureChecker(element) => ::core::fmt::Display::fmt(element, f),
+                Self::ChainRdBatchNonce(element) => ::core::fmt::Display::fmt(element, f),
                 Self::CheckSignatures(element) => ::core::fmt::Display::fmt(element, f),
                 Self::CreateNewOpTask(element) => ::core::fmt::Display::fmt(element, f),
                 Self::CreateNewRdTask(element) => ::core::fmt::Display::fmt(element, f),
@@ -5277,6 +5506,7 @@ pub mod finalizer_task_manager {
                 Self::DummyForQuorumStakeTotalsType(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
+                Self::ForceCancelPendingTasks(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ForceCreateNewOpTask(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ForceRespondToOpTask(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Generator(element) => ::core::fmt::Display::fmt(element, f),
@@ -5292,6 +5522,7 @@ pub mod finalizer_task_manager {
                 }
                 Self::IdToTaskStatus(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Initialize(element) => ::core::fmt::Display::fmt(element, f),
+                Self::IsTaskPending(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LastCompletedOpTaskCreatedBlock(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
@@ -5303,12 +5534,9 @@ pub mod finalizer_task_manager {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::LastOpTaskCreatedBlock(element) => ::core::fmt::Display::fmt(element, f),
+                Self::LastRdTaskCreatedBlock(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LatestOpTaskNum(element) => ::core::fmt::Display::fmt(element, f),
-                Self::LatestPendingStateHash(element) => ::core::fmt::Display::fmt(element, f),
                 Self::LatestRdTaskNum(element) => ::core::fmt::Display::fmt(element, f),
-                Self::MinOpTaskResponseWindowBlock(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
                 Self::OperatorStateRetrieverExtended(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
@@ -5325,7 +5553,9 @@ pub mod finalizer_task_manager {
                 Self::RespondToOpTask(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RespondToRdTask(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ResumeTrackingQuorums(element) => ::core::fmt::Display::fmt(element, f),
+                Self::Rolldown(element) => ::core::fmt::Display::fmt(element, f),
                 Self::SetPauserRegistry(element) => ::core::fmt::Display::fmt(element, f),
+                Self::SetRolldown(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StakeRegistry(element) => ::core::fmt::Display::fmt(element, f),
                 Self::TaskResponseWindowBlock(element) => ::core::fmt::Display::fmt(element, f),
                 Self::TransferOwnership(element) => ::core::fmt::Display::fmt(element, f),
@@ -5371,6 +5601,11 @@ pub mod finalizer_task_manager {
             Self::BlsSignatureChecker(value)
         }
     }
+    impl ::core::convert::From<ChainRdBatchNonceCall> for FinalizerTaskManagerCalls {
+        fn from(value: ChainRdBatchNonceCall) -> Self {
+            Self::ChainRdBatchNonce(value)
+        }
+    }
     impl ::core::convert::From<CheckSignaturesCall> for FinalizerTaskManagerCalls {
         fn from(value: CheckSignaturesCall) -> Self {
             Self::CheckSignatures(value)
@@ -5399,6 +5634,11 @@ pub mod finalizer_task_manager {
     impl ::core::convert::From<DummyForQuorumStakeTotalsTypeCall> for FinalizerTaskManagerCalls {
         fn from(value: DummyForQuorumStakeTotalsTypeCall) -> Self {
             Self::DummyForQuorumStakeTotalsType(value)
+        }
+    }
+    impl ::core::convert::From<ForceCancelPendingTasksCall> for FinalizerTaskManagerCalls {
+        fn from(value: ForceCancelPendingTasksCall) -> Self {
+            Self::ForceCancelPendingTasks(value)
         }
     }
     impl ::core::convert::From<ForceCreateNewOpTaskCall> for FinalizerTaskManagerCalls {
@@ -5458,6 +5698,11 @@ pub mod finalizer_task_manager {
             Self::Initialize(value)
         }
     }
+    impl ::core::convert::From<IsTaskPendingCall> for FinalizerTaskManagerCalls {
+        fn from(value: IsTaskPendingCall) -> Self {
+            Self::IsTaskPending(value)
+        }
+    }
     impl ::core::convert::From<LastCompletedOpTaskCreatedBlockCall> for FinalizerTaskManagerCalls {
         fn from(value: LastCompletedOpTaskCreatedBlockCall) -> Self {
             Self::LastCompletedOpTaskCreatedBlock(value)
@@ -5485,24 +5730,19 @@ pub mod finalizer_task_manager {
             Self::LastOpTaskCreatedBlock(value)
         }
     }
+    impl ::core::convert::From<LastRdTaskCreatedBlockCall> for FinalizerTaskManagerCalls {
+        fn from(value: LastRdTaskCreatedBlockCall) -> Self {
+            Self::LastRdTaskCreatedBlock(value)
+        }
+    }
     impl ::core::convert::From<LatestOpTaskNumCall> for FinalizerTaskManagerCalls {
         fn from(value: LatestOpTaskNumCall) -> Self {
             Self::LatestOpTaskNum(value)
         }
     }
-    impl ::core::convert::From<LatestPendingStateHashCall> for FinalizerTaskManagerCalls {
-        fn from(value: LatestPendingStateHashCall) -> Self {
-            Self::LatestPendingStateHash(value)
-        }
-    }
     impl ::core::convert::From<LatestRdTaskNumCall> for FinalizerTaskManagerCalls {
         fn from(value: LatestRdTaskNumCall) -> Self {
             Self::LatestRdTaskNum(value)
-        }
-    }
-    impl ::core::convert::From<MinOpTaskResponseWindowBlockCall> for FinalizerTaskManagerCalls {
-        fn from(value: MinOpTaskResponseWindowBlockCall) -> Self {
-            Self::MinOpTaskResponseWindowBlock(value)
         }
     }
     impl ::core::convert::From<OperatorStateRetrieverExtendedCall> for FinalizerTaskManagerCalls {
@@ -5575,9 +5815,19 @@ pub mod finalizer_task_manager {
             Self::ResumeTrackingQuorums(value)
         }
     }
+    impl ::core::convert::From<RolldownCall> for FinalizerTaskManagerCalls {
+        fn from(value: RolldownCall) -> Self {
+            Self::Rolldown(value)
+        }
+    }
     impl ::core::convert::From<SetPauserRegistryCall> for FinalizerTaskManagerCalls {
         fn from(value: SetPauserRegistryCall) -> Self {
             Self::SetPauserRegistry(value)
+        }
+    }
+    impl ::core::convert::From<SetRolldownCall> for FinalizerTaskManagerCalls {
+        fn from(value: SetRolldownCall) -> Self {
+            Self::SetRolldown(value)
         }
     }
     impl ::core::convert::From<StakeRegistryCall> for FinalizerTaskManagerCalls {
@@ -5703,6 +5953,20 @@ pub mod finalizer_task_manager {
         Hash,
     )]
     pub struct BlsSignatureCheckerReturn(pub ::ethers::core::types::Address);
+    ///Container type for all return fields from the `chainRdBatchNonce` function with signature `chainRdBatchNonce(uint8)` and selector `0x930390d9`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct ChainRdBatchNonceReturn(pub u32);
     ///Container type for all return fields from the `checkSignatures` function with signature `checkSignatures(bytes32,bytes,uint32,(uint32[],(uint256,uint256)[],(uint256,uint256)[],(uint256[2],uint256[2]),(uint256,uint256),uint32[],uint32[],uint32[][]))` and selector `0x6efb4636`
     #[derive(
         Clone,
@@ -5852,6 +6116,20 @@ pub mod finalizer_task_manager {
         Hash,
     )]
     pub struct IdToTaskStatusReturn(pub u8);
+    ///Container type for all return fields from the `isTaskPending` function with signature `isTaskPending()` and selector `0x36f78ed8`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct IsTaskPendingReturn(pub bool);
     ///Container type for all return fields from the `lastCompletedOpTaskCreatedBlock` function with signature `lastCompletedOpTaskCreatedBlock()` and selector `0x537a2929`
     #[derive(
         Clone,
@@ -5922,6 +6200,20 @@ pub mod finalizer_task_manager {
         Hash,
     )]
     pub struct LastOpTaskCreatedBlockReturn(pub u32);
+    ///Container type for all return fields from the `lastRdTaskCreatedBlock` function with signature `lastRdTaskCreatedBlock()` and selector `0x8c82af5e`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct LastRdTaskCreatedBlockReturn(pub u32);
     ///Container type for all return fields from the `latestOpTaskNum` function with signature `latestOpTaskNum()` and selector `0x41789d57`
     #[derive(
         Clone,
@@ -5936,20 +6228,6 @@ pub mod finalizer_task_manager {
         Hash,
     )]
     pub struct LatestOpTaskNumReturn(pub u32);
-    ///Container type for all return fields from the `latestPendingStateHash` function with signature `latestPendingStateHash()` and selector `0x4ae6b203`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct LatestPendingStateHashReturn(pub [u8; 32]);
     ///Container type for all return fields from the `latestRdTaskNum` function with signature `latestRdTaskNum()` and selector `0x7afdd54b`
     #[derive(
         Clone,
@@ -5964,20 +6242,6 @@ pub mod finalizer_task_manager {
         Hash,
     )]
     pub struct LatestRdTaskNumReturn(pub u32);
-    ///Container type for all return fields from the `minOpTaskResponseWindowBlock` function with signature `minOpTaskResponseWindowBlock()` and selector `0xc987de8e`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct MinOpTaskResponseWindowBlockReturn(pub u32);
     ///Container type for all return fields from the `operatorStateRetrieverExtended` function with signature `operatorStateRetrieverExtended()` and selector `0x8380acbd`
     #[derive(
         Clone,
@@ -6076,6 +6340,20 @@ pub mod finalizer_task_manager {
         Hash,
     )]
     pub struct RegistryCoordinatorReturn(pub ::ethers::core::types::Address);
+    ///Container type for all return fields from the `rolldown` function with signature `rolldown()` and selector `0x3d9fb00c`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct RolldownReturn(pub ::ethers::core::types::Address);
     ///Container type for all return fields from the `stakeRegistry` function with signature `stakeRegistry()` and selector `0x68304835`
     #[derive(
         Clone,
