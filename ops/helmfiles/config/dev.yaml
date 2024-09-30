@@ -31,26 +31,26 @@ collator:
   tolerations:
     - key: production
       operator: Equal
-      value: 'true'
+      value: "true"
       effect: NoSchedule
   collator01:
     # Identity ID: 12D3KooWMSVfmcTo6q4nnb9Pw9WFjPh3hW1sqjNi5dUhWDzuKFdj
-    customNodeKey: '749be7f7de592c01db098afb95cb121961ce025e92d8ffeaabb377057cd01555'
+    customNodeKey: "749be7f7de592c01db098afb95cb121961ce025e92d8ffeaabb377057cd01555"
     bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWLdCNsgrzW8BiFFwSSxWi8nTp8SNZHTTL9x8Ceokq8quV
     extraArgs:
       - --alith
       - --pruning=archive
-    nodeSelector: 
-      production: 'true'
+    nodeSelector:
+      production: "true"
   collator02:
     # Identity ID: 12D3KooWLdCNsgrzW8BiFFwSSxWi8nTp8SNZHTTL9x8Ceokq8quV
-    customNodeKey: '96d1ece760b2038230f1e78449e879e34e2de637b89a7bbedc22ade73f9c2009'
+    customNodeKey: "96d1ece760b2038230f1e78449e879e34e2de637b89a7bbedc22ade73f9c2009"
     bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWMSVfmcTo6q4nnb9Pw9WFjPh3hW1sqjNi5dUhWDzuKFdj
     extraArgs:
       - --baltathar
       - --pruning=archive
-    nodeSelector: 
-      production: 'true'
+    nodeSelector:
+      production: "true"
 
 ######################
 # aggregator configs #
@@ -83,7 +83,7 @@ aggregatorEnv:
 finalizerEnabled: true
 finalizerEnvSecrets: {}
 finalizerEnv:
-    # rpc
+  # rpc
   ETH_RPC_URL: http://evm-node-eth:8545
   ETH_WS_URL: ws://evm-node-eth:8546
   # contracts
@@ -91,7 +91,7 @@ finalizerEnv:
   AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
   AVS_BLOCK_VALIDATION_PERIOD: "5"
   # OP
-  RUST_LOG: info
+  RUST_LOG: info,substrate=warn
   AVS_RPC_URL: http://avs-aggregator:8090
   ECDSA_EPHEMERAL_KEY: "true"
   BLS_EPHEMERAL_KEY: "true"
@@ -124,13 +124,11 @@ updaterEnvArb:
   MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
   FINALIZATION_SOURCE: "relay"
 
-
 ############################
 # rollup-sequencer configs #
 ############################
 sequencerEnabled: true
 secondSequencerEnabled: true
-
 
 firstSequencerMnemonicEth: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
 secondSequencerMnemonicEth: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"

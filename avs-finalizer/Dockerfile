@@ -59,7 +59,7 @@ COPY --chown=appuser:appuser --from=rollup-node-image /app/node /app/rollup-node
 ENV ROLLUP_NODE_CHAIN=/app/holesky-chainspec.json \
 		ROLLUP_NODE_BOOTNODE=/dns/collator-01-p2p-rollup-holesky.gasp.xyz/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK \
 		ROLLUP_NODE_BASE_PATH=/data \
-		ROLLUP_RUST_LOG=info,substrate=warn
+		RUST_LOG=info,substrate=warn
 
 # avs-finalizer default env vars for connecting to rollup-holesky testnet
 ENV SUBSTRATE_RPC_URL='ws://127.0.0.1:9944' \
@@ -105,7 +105,6 @@ COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	# stdout_logfile_maxbytes = 50MB
 	# stdout_logfile_backups = 1
 	# redirect_stderr = true
-	environment = RUST_LOG="%(ENV_ROLLUP_RUST_LOG)s"
 	priority = 10
 EOF
 

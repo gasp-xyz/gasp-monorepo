@@ -27,14 +27,14 @@ collator:
     enabled: false
   collator01:
     # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-    customNodeKey: '5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef'
+    customNodeKey: "5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef"
     bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
     extraArgs:
       - --alith
       - --pruning=archive
   collator02:
     # Identity ID: 12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
-    customNodeKey: 'bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b'
+    customNodeKey: "bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b"
     bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
     extraArgs:
       - --baltathar
@@ -79,7 +79,7 @@ finalizerEnv:
   AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
   AVS_BLOCK_VALIDATION_PERIOD: "5"
   # OP
-  RUST_LOG: info
+  RUST_LOG: info,substrate=warn
   AVS_RPC_URL: http://avs-aggregator:8090
   ECDSA_EPHEMERAL_KEY: "true"
   BLS_EPHEMERAL_KEY: "true"
@@ -112,13 +112,11 @@ updaterEnvArb:
   MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
   FINALIZATION_SOURCE: "relay"
 
-
 ############################
 # rollup-sequencer configs #
 ############################
 sequencerEnabled: true
 secondSequencerEnabled: false
-
 
 firstSequencerMnemonicEth: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
 secondSequencerMnemonicEth: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
