@@ -8,6 +8,7 @@ import "@eigenlayer/contracts/core/AVSDirectory.sol";
 import "@eigenlayer/contracts/core/StrategyManager.sol";
 import "@eigenlayer/contracts/core/Slasher.sol";
 import "@eigenlayer/contracts/core/DelegationManager.sol";
+import "@eigenlayer/contracts/core/RewardsCoordinator.sol";
 import "@eigenlayer/test/mocks/EmptyContract.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -74,6 +75,7 @@ contract Deployer is Script, Utils, Test {
     DelegationManager public delegation;
     AVSDirectory public avsDirectory;
     StrategyManager public strategyManager;
+    RewardsCoordinator public rewardsCoordinator;
 
     function run() external {
 
@@ -83,6 +85,7 @@ contract Deployer is Script, Utils, Test {
             StrategyManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.strategyManager"));
         delegation = DelegationManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.delegationManager"));
         avsDirectory = AVSDirectory(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.avsDirectory"));
+        rewardsCoordinator = RewardsCoordinator(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.rewardsCoordinator"));
 
         // READ JSON CONFIG DATA
         string memory configData = readConfig(_CONFIG_PATH);
@@ -229,6 +232,7 @@ contract Deployer is Script, Utils, Test {
 
             serviceManagerImplementation = new FinalizerServiceManager(
                 avsDirectory,
+                rewardsCoordinator,
                 registryCoordinator,
                 stakeRegistry,
                 IFinalizerTaskManager(address(taskManager)),
@@ -240,7 +244,7 @@ contract Deployer is Script, Utils, Test {
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(serviceManager))),
             address(serviceManagerImplementation),
-            abi.encodeWithSelector(serviceManager.initialize.selector, avsOwner, ejector)
+            abi.encodeWithSelector(serviceManager.initialize.selector, avsOwner, avsOwner, ejector)
         );
 
         blsSignatureChecker = new BLSSignatureChecker(registryCoordinator);

@@ -106,6 +106,22 @@ pub mod registry_coordinator_storage {
                     },],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("ejectionCooldown"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("ejectionCooldown"),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("ejector"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("ejector"),
@@ -438,6 +454,28 @@ pub mod registry_coordinator_storage {
                             kind: ::ethers::core::abi::ethabi::ParamType::Bool,
                             internal_type: ::core::option::Option::Some(
                                 ::std::borrow::ToOwned::to_owned("bool"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("lastEjectionTimestamp"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("lastEjectionTimestamp",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("address"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint256"),
                             ),
                         },],
                         constant: ::core::option::Option::None,
@@ -801,6 +839,14 @@ pub mod registry_coordinator_storage {
                 .method_hash([110, 59, 23, 219], (operator, quorum_numbers))
                 .expect("method not found (this should never happen)")
         }
+        ///Calls the contract's `ejectionCooldown` (0xa96f783e) function
+        pub fn ejection_cooldown(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::U256> {
+            self.0
+                .method_hash([169, 111, 120, 62], ())
+                .expect("method not found (this should never happen)")
+        }
         ///Calls the contract's `ejector` (0x28f61b31) function
         pub fn ejector(
             &self,
@@ -918,6 +964,15 @@ pub mod registry_coordinator_storage {
         ) -> ::ethers::contract::builders::ContractCall<M, bool> {
             self.0
                 .method_hash([20, 120, 133, 31], p0)
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `lastEjectionTimestamp` (0x125e0584) function
+        pub fn last_ejection_timestamp(
+            &self,
+            p0: ::ethers::core::types::Address,
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::U256> {
+            self.0
+                .method_hash([18, 94, 5, 132], p0)
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `numRegistries` (0xd72d8dd6) function
@@ -1357,6 +1412,21 @@ pub mod registry_coordinator_storage {
         pub operator: ::ethers::core::types::Address,
         pub quorum_numbers: ::ethers::core::types::Bytes,
     }
+    ///Container type for all input parameters for the `ejectionCooldown` function with signature `ejectionCooldown()` and selector `0xa96f783e`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "ejectionCooldown", abi = "ejectionCooldown()")]
+    pub struct EjectionCooldownCall;
     ///Container type for all input parameters for the `ejector` function with signature `ejector()` and selector `0x28f61b31`
     #[derive(
         Clone,
@@ -1594,6 +1664,21 @@ pub mod registry_coordinator_storage {
         abi = "isChurnApproverSaltUsed(bytes32)"
     )]
     pub struct IsChurnApproverSaltUsedCall(pub [u8; 32]);
+    ///Container type for all input parameters for the `lastEjectionTimestamp` function with signature `lastEjectionTimestamp(address)` and selector `0x125e0584`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(name = "lastEjectionTimestamp", abi = "lastEjectionTimestamp(address)")]
+    pub struct LastEjectionTimestampCall(pub ::ethers::core::types::Address);
     ///Container type for all input parameters for the `numRegistries` function with signature `numRegistries()` and selector `0xd72d8dd6`
     #[derive(
         Clone,
@@ -1739,6 +1824,7 @@ pub mod registry_coordinator_storage {
         BlsApkRegistry(BlsApkRegistryCall),
         ChurnApprover(ChurnApproverCall),
         EjectOperator(EjectOperatorCall),
+        EjectionCooldown(EjectionCooldownCall),
         Ejector(EjectorCall),
         GetCurrentQuorumBitmap(GetCurrentQuorumBitmapCall),
         GetOperator(GetOperatorCall),
@@ -1752,6 +1838,7 @@ pub mod registry_coordinator_storage {
         GetQuorumBitmapUpdateByIndex(GetQuorumBitmapUpdateByIndexCall),
         IndexRegistry(IndexRegistryCall),
         IsChurnApproverSaltUsed(IsChurnApproverSaltUsedCall),
+        LastEjectionTimestamp(LastEjectionTimestampCall),
         NumRegistries(NumRegistriesCall),
         Owner(OwnerCall),
         PubkeyRegistrationMessageHash(PubkeyRegistrationMessageHashCall),
@@ -1788,6 +1875,11 @@ pub mod registry_coordinator_storage {
             if let Ok(decoded) = <EjectOperatorCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::EjectOperator(decoded));
+            }
+            if let Ok(decoded) =
+                <EjectionCooldownCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::EjectionCooldown(decoded));
             }
             if let Ok(decoded) = <EjectorCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Ejector(decoded));
@@ -1852,6 +1944,11 @@ pub mod registry_coordinator_storage {
             {
                 return Ok(Self::IsChurnApproverSaltUsed(decoded));
             }
+            if let Ok(decoded) =
+                <LastEjectionTimestampCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
+                return Ok(Self::LastEjectionTimestamp(decoded));
+            }
             if let Ok(decoded) = <NumRegistriesCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::NumRegistries(decoded));
@@ -1899,6 +1996,7 @@ pub mod registry_coordinator_storage {
                 Self::BlsApkRegistry(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::ChurnApprover(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::EjectOperator(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::EjectionCooldown(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::Ejector(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::GetCurrentQuorumBitmap(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
@@ -1926,6 +2024,9 @@ pub mod registry_coordinator_storage {
                 Self::IsChurnApproverSaltUsed(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
+                Self::LastEjectionTimestamp(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::NumRegistries(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::Owner(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::PubkeyRegistrationMessageHash(element) => {
@@ -1951,6 +2052,7 @@ pub mod registry_coordinator_storage {
                 Self::BlsApkRegistry(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ChurnApprover(element) => ::core::fmt::Display::fmt(element, f),
                 Self::EjectOperator(element) => ::core::fmt::Display::fmt(element, f),
+                Self::EjectionCooldown(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Ejector(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetCurrentQuorumBitmap(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetOperator(element) => ::core::fmt::Display::fmt(element, f),
@@ -1972,6 +2074,7 @@ pub mod registry_coordinator_storage {
                 }
                 Self::IndexRegistry(element) => ::core::fmt::Display::fmt(element, f),
                 Self::IsChurnApproverSaltUsed(element) => ::core::fmt::Display::fmt(element, f),
+                Self::LastEjectionTimestamp(element) => ::core::fmt::Display::fmt(element, f),
                 Self::NumRegistries(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Owner(element) => ::core::fmt::Display::fmt(element, f),
                 Self::PubkeyRegistrationMessageHash(element) => {
@@ -2008,6 +2111,11 @@ pub mod registry_coordinator_storage {
     impl ::core::convert::From<EjectOperatorCall> for RegistryCoordinatorStorageCalls {
         fn from(value: EjectOperatorCall) -> Self {
             Self::EjectOperator(value)
+        }
+    }
+    impl ::core::convert::From<EjectionCooldownCall> for RegistryCoordinatorStorageCalls {
+        fn from(value: EjectionCooldownCall) -> Self {
+            Self::EjectionCooldown(value)
         }
     }
     impl ::core::convert::From<EjectorCall> for RegistryCoordinatorStorageCalls {
@@ -2077,6 +2185,11 @@ pub mod registry_coordinator_storage {
     impl ::core::convert::From<IsChurnApproverSaltUsedCall> for RegistryCoordinatorStorageCalls {
         fn from(value: IsChurnApproverSaltUsedCall) -> Self {
             Self::IsChurnApproverSaltUsed(value)
+        }
+    }
+    impl ::core::convert::From<LastEjectionTimestampCall> for RegistryCoordinatorStorageCalls {
+        fn from(value: LastEjectionTimestampCall) -> Self {
+            Self::LastEjectionTimestamp(value)
         }
     }
     impl ::core::convert::From<NumRegistriesCall> for RegistryCoordinatorStorageCalls {
@@ -2175,6 +2288,20 @@ pub mod registry_coordinator_storage {
         Hash,
     )]
     pub struct ChurnApproverReturn(pub ::ethers::core::types::Address);
+    ///Container type for all return fields from the `ejectionCooldown` function with signature `ejectionCooldown()` and selector `0xa96f783e`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct EjectionCooldownReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `ejector` function with signature `ejector()` and selector `0x28f61b31`
     #[derive(
         Clone,
@@ -2359,6 +2486,20 @@ pub mod registry_coordinator_storage {
         Hash,
     )]
     pub struct IsChurnApproverSaltUsedReturn(pub bool);
+    ///Container type for all return fields from the `lastEjectionTimestamp` function with signature `lastEjectionTimestamp(address)` and selector `0x125e0584`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct LastEjectionTimestampReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `numRegistries` function with signature `numRegistries()` and selector `0xd72d8dd6`
     #[derive(
         Clone,

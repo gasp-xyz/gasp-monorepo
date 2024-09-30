@@ -6,23 +6,23 @@ import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 
-import "../../../src/contracts/interfaces/IETHPOSDeposit.sol";
+import "@eigenlayer/contracts/interfaces/IETHPOSDeposit.sol";
 
-import "../../../src/contracts/core/StrategyManager.sol";
-import "../../../src/contracts/core/Slasher.sol";
-import "../../../src/contracts/core/DelegationManager.sol";
-import "../../../src/contracts/core/AVSDirectory.sol";
-import "../../../src/contracts/core/RewardsCoordinator.sol";
+import "@eigenlayer/contracts/core/StrategyManager.sol";
+import "@eigenlayer/contracts/core/Slasher.sol";
+import "@eigenlayer/contracts/core/DelegationManager.sol";
+import "@eigenlayer/contracts/core/AVSDirectory.sol";
+import "@eigenlayer/contracts/core/RewardsCoordinator.sol";
 
-import "../../../src/contracts/strategies/StrategyBaseTVLLimits.sol";
+import "@eigenlayer/contracts/strategies/StrategyBaseTVLLimits.sol";
 
-import "../../../src/contracts/pods/EigenPod.sol";
-import "../../../src/contracts/pods/EigenPodManager.sol";
+import "@eigenlayer/contracts/pods/EigenPod.sol";
+import "@eigenlayer/contracts/pods/EigenPodManager.sol";
 
-import "../../../src/contracts/permissions/PauserRegistry.sol";
+import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
 
-import "../../../src/test/mocks/EmptyContract.sol";
-import "../../../src/test/mocks/ETHDepositMock.sol";
+import "@eigenlayer/test/mocks/EmptyContract.sol";
+import "@eigenlayer/test/mocks/ETHDepositMock.sol";
 
 import "forge-std/Script.sol";
 import "forge-std/Test.sol";
@@ -33,6 +33,8 @@ import "forge-std/Test.sol";
 // # To deploy and verify our contract
 // forge script script/deploy/devnet/M2_Deploy_From_Scratch.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --sig "run(string memory configFile)" -- M2_deploy_from_scratch.anvil.config.json
 contract Deployer_M2 is Script, Test {
+    address constant HEVM_ADDRESS =
+        address(bytes20(uint160(uint256(keccak256('hevm cheat code')))));
     Vm cheats = Vm(HEVM_ADDRESS);
 
     // struct used to encode token info in config file
