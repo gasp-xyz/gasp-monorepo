@@ -85,6 +85,7 @@ finalizerEnv:
   # rollup-node configs
   ROLLUP_NODE_CHAIN: /app/fungible-chainspec.json
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+  TESTNET: "true"
 
 ###########################
 # rollup-updater configs #
