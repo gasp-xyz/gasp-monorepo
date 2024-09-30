@@ -389,6 +389,8 @@ contract Rolldown is
                 depositsCounter++;
             } else if (cancelResolutions[requestId].requestId.id != 0) {
                 cancelsCounter++;
+            }else {
+              revert("Invalid range");
             }
         }
 
