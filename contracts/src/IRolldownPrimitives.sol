@@ -7,7 +7,8 @@ interface IRolldownPrimitives {
         uint256 requestId,
         address depositRecipient,
         address tokenAddress,
-        uint256 amount
+        uint256 amount,
+        uint256 ferryTip
     );
 
     event DisputeResolutionAcceptedIntoQueue(
@@ -15,36 +16,6 @@ interface IRolldownPrimitives {
         bool cancelJustified
     );
 
-    // NOTE: PR DESC
-    // event WithdrawalResolutionAcceptedIntoQueue(
-    //     uint256 requestId,
-    //     bool success
-    // );
- 
-    // NOTE: PR DESC
-    // event L2UpdatesToRemovedAcceptedIntoQueue(
-    //     uint256 requestId,
-    //     uint256[] l2UpdatesToRemove
-    // );
-    // NOTE: PR DESC
-    // event FundsWithdrawn(
-    //     address withdrawRecipient,
-    //     address tokenAddress,
-    //     uint256 amount
-    // );
-    // NOTE: PR DESC
-    // event FundsReturned(
-    //     address depositRecipient,
-    //     address tokenAddress,
-    //     uint256 amount
-    // );
-
-    // NOTE: PR DESC
-    // event cancelAndCalculatedHash(bytes32 cancelHash, bytes32 calculatedHash);
-
-    // NOTE: PR DESC
-    // event EthWithdrawPending(address sender, uint amount);
-    
     event NativeTokensWithdrawn(
       address sender,
       uint256 amount
@@ -59,6 +30,30 @@ interface IRolldownPrimitives {
     event WithdrawalClosed(
       uint256 requestId,
       bytes32 withdrawalHash
+    );
+
+    event FerriedWithdrawalClosed(
+      uint256 requestId,
+      bytes32 withdrawalHash
+    );
+
+    event WithdrawalFerried(
+      uint256 requestId,
+      uint256 amount,
+      address recipient,
+      address ferry,
+      bytes32 withdrawalHash
+    );
+
+    event FailedDepositResolutionClosed(
+      uint256 requestId,
+      uint256 originDepositId,
+      bytes32 failedDespotiResolutionHash
+    );
+
+    event L2UpdateAccepted(
+      bytes32 root,
+      Range range
     );
 
     event NewUpdaterSet(address updater);
@@ -84,14 +79,14 @@ interface IRolldownPrimitives {
         address tokenAddress;
         uint256 amount;
         uint256 timeStamp;
+        uint256 ferryTip;
     }
 
-    // NOTE: PR DESC
-    // struct L2UpdatesToRemove {
-    //     RequestId requestId;
-    //     uint256[] l2UpdatesToRemove;
-    //     uint256 timeStamp;
-    // }
+    struct FailedDepositResolution {
+      RequestId requestId;
+      uint256 originRequestId;
+      address ferry;
+    }
 
     struct CancelResolution {
         RequestId requestId;
@@ -100,50 +95,19 @@ interface IRolldownPrimitives {
         uint256 timeStamp;
     }
 
-    // NOTE: PR DESC
-    // struct WithdrawalResolution {
-    //     RequestId requestId;
-    //     uint256 l2RequestId;
-    //     bool status;
-    //     uint256 timeStamp;
-    // }
-
 		enum ChainId{ Ethereum, Arbitrum }
 
     struct L1Update {
         ChainId chain;
         Deposit[] pendingDeposits;
         CancelResolution[] pendingCancelResolutions;
-        // NOTE: PR DESC
-        // WithdrawalResolution[] pendingWithdrawalResolutions;
-        // L2UpdatesToRemove[] pendingL2UpdatesToRemove;
     } 
-
-    // NOTE: PR DESC
-    ////TODO: should be renamed to RequestType
-    //enum UpdateType {
-    //    DEPOSIT,
-    //    WITHDRAWAL,
-    //    WITHDRAWAL_RESOLUTION,
-    //    INDEX_UPDATE,
-    //    CANCEL,
-    //    CANCEL_RESOLUTION
-    //}
 
     struct RequestResult {
         RequestId requestId;
         uint256 originRequestId;
-        // NOTE: PR DESC
-        // UpdateType updateType;
         bool status;
     }
-
-    // NOTE: PR DESC
-    // struct L2Update {
-    //     Cancel[] cancels;
-    //     Withdrawal[] withdrawals;
-    //     RequestResult[] results;
-    // }
 
     struct Cancel {
         RequestId requestId;
@@ -156,6 +120,7 @@ interface IRolldownPrimitives {
         address recipient;
         address tokenAddress;
         uint256 amount;
+        uint256 ferryTip;
     }
 
 }

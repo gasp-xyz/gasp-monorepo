@@ -1,11 +1,12 @@
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import * as crypto from 'crypto'
 
 export const TIMESERIES_HOST_DOCKER_IMAGE_NAME = "mangatasolutions/redis-test-stash_ts:v2";
 export const REDIS_HOST_DOCKER_IMAGE_NAME = "mangatasolutions/redis-test-stash:latest";
 export const MAX_DAYS="max";
 export const MAX_INTERVAL="day";
-export const ERROR_MSG_POOL_NOT_FOUND = "this must be one of the following values: GASPV2-L1Asset, L1Asset-GASPV2, GASPV2-L1Asset-GASPV2, L1Asset-GASPV2-GASPV2, L1Asset-L1Asset-GASPV2, L1Asset-GASPV2-L1Asset, GASPV2-GETH-GASPV2, GASPV2-GASPV2-GETH, L1Asset-L1Asset, ALL";
-export const ERROR_MSG_PAIR_ASSET_NOT_FOUND = "this must be one of the following values: GASPV2, L1Asset, GASPV2-GETH, L1Asset-GASPV2";
+export const ERROR_MSG_POOL_NOT_FOUND = "this must be one of the following values: GASPV2-L1Asset, L1Asset-GASPV2, GASPV2-L1Asset-GASPV2, L1Asset-GASPV2-GASPV2, L1Asset-L1Asset-GASPV2, L1Asset-GASPV2-L1Asset, GASPV2-ETH-GASPV2, GASPV2-GASPV2-ETH, L1Asset-L1Asset, ALL";
+export const ERROR_MSG_PAIR_ASSET_NOT_FOUND = "this must be one of the following values: GASPV2, L1Asset, GASPV2-ETH, L1Asset-GASPV2";
 
 
 let redisContainer: StartedTestContainer;
@@ -46,4 +47,18 @@ export async function initBothContainers() {
         console.error(e);
         throw e;
     }
+}
+
+export function generateRandomHash(): string {
+    const randomBytes = crypto.randomBytes(32);
+    const hash = '0x' + crypto.createHash('sha256').update(randomBytes).digest('hex');
+
+    return hash;
+}
+
+export function generateRandomAddress(): string {
+    const randomBytes = crypto.randomBytes(20);
+    const address = '0x' + randomBytes.toString('hex');
+
+    return address;
 }

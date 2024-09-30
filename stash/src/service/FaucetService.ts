@@ -2,7 +2,12 @@ import axios from 'axios'
 import * as process from 'node:process'
 import { redis } from '../connector/RedisConnector.js'
 import logger from '../util/Logger.js'
-import { createWalletClient, http, publicActions } from 'viem'
+import {
+  createWalletClient,
+  createPublicClient,
+  http,
+  publicActions,
+} from 'viem'
 import { holesky } from 'viem/chains'
 import { privateKeyToAccount } from 'viem/accounts'
 import Gasp from '../Gasp.json' assert { type: 'json' }
@@ -96,6 +101,16 @@ const send = async (
 }
 
 const simulateTransaction = async (transaction: SimulateTransactionRequest) => {
+  const publicClient = createPublicClient({
+    chain: holesky,
+    transport: http(process.env.HOLESKY_ADDRESS),
+  })
+  const baseFeeInWei = await publicClient.getGasPrice()
+  const maxPriorityFeePerGasInWei =
+    await publicClient.estimateMaxPriorityFeePerGas()
+  const maxFeeInWei =
+    BigInt(2) * BigInt(baseFeeInWei) + BigInt(maxPriorityFeePerGasInWei)
+
   const { request } = await transaction.client.simulateContract({
     account: transaction.account,
     chain: holesky,
@@ -103,6 +118,8 @@ const simulateTransaction = async (transaction: SimulateTransactionRequest) => {
     address: transaction.tokenToSendAddress,
     args: [transaction.toAddress, transaction.amount],
     functionName: 'transfer',
+    maxFeePerGas: maxFeeInWei,
+    maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
   })
   logger.info('Transaction simulation successful, executing transaction...')
   return request

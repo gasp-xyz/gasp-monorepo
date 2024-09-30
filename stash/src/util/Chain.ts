@@ -3,9 +3,8 @@ import { Codec } from '@polkadot/types/types'
 import { blake2AsHex } from '@polkadot/util-crypto'
 import _ from 'lodash'
 
-export const GETH = 1
-export const KSM = 1
-export const BASE_TOKEN = GETH
+export const ETH = 1
+export const BASE_TOKEN = ETH
 
 export type CodecOrArray = Codec | Codec[]
 

@@ -24,7 +24,7 @@ contract RolldownDeployerTest is Test {
     address updaterAccount;
 
     MyERC20 internal token;
-    address payable internal ETH_TOKEN_ADDRESS;
+    address payable internal NATIVE_TOKEN_ADDRESS;
 
     ProxyAdmin public rolldownProxyAdmin;
     PauserRegistry public rolldownPauserReg;

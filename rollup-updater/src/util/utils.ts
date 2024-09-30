@@ -5,10 +5,14 @@ import {LIMIT, MANGATA_CONTRACT_ADDRESS, ROLLDOWN_METADATA, ROLLDOWN_ABI, L1_CHA
 import {ethAccount, getChain} from "../viem/client.js";
 import {Cancel, L2Update, RequestResult, Withdrawal} from "../common/types.js";
 import {estimateMaxPriorityFeePerGas} from "viem/actions";
-import type { Option } from '@polkadot/types-codec';
+import type { Option, u128, u32, BTreeMap  } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { PalletRolldownL2Request } from '@polkadot/types/lookup';
 import type { H256 } from '@polkadot/types/interfaces/runtime';
+import type {
+  SpRuntimeAccountAccountId20,
+	PalletRolldownMessagesChain,
+} from "@polkadot/types/lookup";
 
 
 export async function getLatestRequestIdSubmittedToL1(publicClient: PublicClient) {
@@ -20,14 +24,20 @@ export async function getLatestRequestIdSubmittedToL1(publicClient: PublicClient
 }
 
 async function getLastBatchId(api: ApiPromise, blockHash: Uint8Array) {
-    const chain = api.createType('Chain', L1_CHAIN);
+    const chain: PalletRolldownMessagesChain = api.createType('PalletRolldownMessagesChain', L1_CHAIN);
     let apiAt = await api.at(blockHash);
     let last_batch = await apiAt.query.rolldown.l2RequestsBatchLast();
-    let specificL1LastBatch = last_batch.toHuman()[L1_CHAIN];
-    if (specificL1LastBatch == undefined ){
-      return null
-    }else{
-        return (specificL1LastBatch as any)[1];
+
+    // NOTE: looks like === is not implemented for PalletRolldownMessagesChain
+    // therefore its not possible to query valu from map using .get(chain) query ;<
+    let found = Array.from(last_batch.keys()).findIndex( (key) => {
+      return key.toString() === chain.toString();
+    });
+
+    if (found == -1){
+      return null;
+    } else {
+      return Array.from(last_batch.values())[found][1].toBigInt();
     }
 }
 
@@ -42,13 +52,25 @@ async function findBatchWithNewUpdates(api: ApiPromise, publicClient: PublicClie
     const nextRequestId = lastSubmittedId + 1n;
 
     while (batchId > 0) {
-      let batch = await api.query.rolldown.l2RequestsBatch([L1_CHAIN, batchId]);
-      let rangeStart = BigInt((batch.toHuman() as any)[1][0]);
-      let rangeStop = BigInt((batch.toHuman() as any)[1][1]);
+      const chain: PalletRolldownMessagesChain = api.createType('PalletRolldownMessagesChain', L1_CHAIN);
+      let batch: Option<ITuple<[u32, ITuple<[u128, u128]>, SpRuntimeAccountAccountId20]>> = await api.query.rolldown.l2RequestsBatch([chain, batchId]);
+
+      batchId -= 1n;
+      if (batch.isNone){
+        continue;
+      }
+
+      let rangeStart = batch.value[1][0].toBigInt();
+      let rangeStop = batch.value[1][1].toBigInt();
+
+
       if (rangeStart <= nextRequestId && rangeStop >= nextRequestId) {
         return [rangeStart, rangeStop];
       }
-      batchId -= 1;
+
+      if (rangeStart < nextRequestId && rangeStop < nextRequestId){
+        return null;
+      }
     }
 
     console.log(`couldnt find any batch with requestId: ${nextRequestId}`);
@@ -123,24 +145,31 @@ async function findMerkleRange(
 
 async function isL2RequestAlreadyExecuted(
     publicClient: PublicClient,
-    requestId: bigint
+    requestHash: H256
 ) {
-    return (await publicClient.readContract({
+    let status = await publicClient.readContract({
         address: MANGATA_CONTRACT_ADDRESS,
         abi: ROLLDOWN_ABI,
         functionName: "processedL2Requests",
-        args: [requestId],
-    }));
+        args: [requestHash.toString()],
+    })
+
+    const closed = await publicClient.readContract({
+      address: MANGATA_CONTRACT_ADDRESS,
+      abi: ROLLDOWN_ABI,
+      functionName: 'CLOSED',
+    });
+
+    return status === closed;
 }
 
-async function isWithdrawal(
+async function getRequest(
     api: ApiPromise,
     requestId: bigint
 ) {
   let request   = await api.query.rolldown.l2Requests(L1_CHAIN, {origin:'L2', id:requestId})!;
-  return (request as Option<ITuple<[PalletRolldownL2Request, H256]>>).unwrap()[0].isWithdrawal;
+  return (request as Option<ITuple<[PalletRolldownL2Request, H256]>>);
 }
-
 
 export async function closeWithdrawals(
     api: ApiPromise,
@@ -164,15 +193,23 @@ export async function closeWithdrawals(
     }
 
     for (let withdrawalRequestId of indexes){
-      if (!(await isWithdrawal(api, withdrawalRequestId))){
-        console.log(`ignroing non withdrawal ${withdrawalRequestId} request ...`);
+      let req = await getRequest(api, withdrawalRequestId);
+      if (req.isNone){
+        console.log(`ignroing non existing request ${withdrawalRequestId}`);
         continue;
       }
 
-      if (await isL2RequestAlreadyExecuted(publicClient, withdrawalRequestId)){
+      let [r, hash] = req.unwrap();
+      if (!r.isWithdrawal){
+        console.log(`ignroing non withdrawal request ${withdrawalRequestId}`);
+        continue;
+      }
+
+      if (await isL2RequestAlreadyExecuted(publicClient, hash)){
         console.log(`withdrawal ${withdrawalRequestId} already executed - ignoring...`);
         continue;
       };
+
       let range = await findMerkleRange(publicClient, withdrawalRequestId)
       const rangeStart = (range as any).start;
       const rangeEnd = (range as any).end;

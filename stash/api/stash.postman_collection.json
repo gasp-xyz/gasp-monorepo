@@ -1,0 +1,567 @@
+{
+	"info": {
+		"_postman_id": "ff1c3460-44ac-4685-91cd-ceabeeb75e8d",
+		"name": "stash",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3658946"
+	},
+	"item": [
+		{
+			"name": "price history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const res = pm.response.json();",
+							"const vizData = {",
+							"    labels: _.map(res.prices, (p) => p[0]),",
+							"    data: _.map(res.prices, (p) => p[1]),",
+							"};",
+							"",
+							"var template = `",
+							"<canvas id=\"myChart\" height=\"150\"></canvas>",
+							"",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js\"></script>",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script> ",
+							"",
+							"<script>",
+							"    // Get DOM element to render the chart in",
+							"    var ctx = document.getElementById(\"myChart\");",
+							"",
+							"    // Configure Chart JS here.",
+							"    // You can customize the options passed to this constructor to",
+							"    // make the chart look and behave the way you want",
+							"    var myChart = new Chart(ctx, {",
+							"        type: \"line\",",
+							"        data: {",
+							"            labels: [], // We will update this later in pm.getData()",
+							"            datasets: [{",
+							"                label: '',",
+							"                data: [], // We will update this later in pm.getData()",
+							"                ",
+							"                // Change these colours to customize the chart",
+							"                backgroundColor: \"#3e95cd\",",
+							"\t\t\t\t\tborderColor: \"#8e5ea2\",",
+							"\t\t\t\t\tfill: false,         ",
+							"                }]",
+							"        },",
+							"        options: {",
+							"            legend: { display: false },",
+							"            title: {",
+							"                display: true,",
+							"                text: ''",
+							"            },",
+							"            scales: {",
+							"                xAxes: [{",
+							"                    type: 'time',",
+							"\t\t\t\t\t\ttime: {",
+							"\t\t\t\t\t\t\t// round: 'day'",
+							"\t\t\t\t\t\t\ttooltipFormat: 'll HH:mm'",
+							"\t\t\t\t\t\t},",
+							"\t\t\t\t\t\tscaleLabel: {",
+							"\t\t\t\t\t\t\tdisplay: true,",
+							"\t\t\t\t\t\t\tlabelString: 'Time'",
+							"\t\t\t\t\t\t}",
+							"                }],",
+							"                yAxes: [{",
+							"                    display: true,",
+							"                    scaleLabel: {",
+							"                        display: true,",
+							"                        labelString: 'price in USD'",
+							"                    }",
+							"                }]",
+							"            }",
+							"        }",
+							"",
+							"    });",
+							"",
+							"    // Access the data passed to pm.visualizer.set() from the JavaScript",
+							"    // code of the Visualizer template",
+							"    pm.getData(function (err, value) {",
+							"        myChart.data.datasets[0].data = value.data;",
+							"        myChart.data.labels = value.labels;",
+							"        myChart.update();",
+							"    });",
+							"</script>`;",
+							"",
+							"pm.visualizer.set(template, vizData);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/price-history/MGX?interval=day&days=300",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"price-history",
+						"MGX"
+					],
+					"query": [
+						{
+							"key": "interval",
+							"value": "day"
+						},
+						{
+							"key": "days",
+							"value": "300"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "volume history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const res = pm.response.json();",
+							"const vizData = {",
+							"    labels: _.map(res.volumes, (p) => p[0]),",
+							"    data: _.map(res.volumes, (p) => p[1]),",
+							"};",
+							"",
+							"var template = `",
+							"<canvas id=\"myChart\" height=\"150\"></canvas>",
+							"",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js\"></script>",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script> ",
+							"",
+							"<script>",
+							"    // Get DOM element to render the chart in",
+							"    var ctx = document.getElementById(\"myChart\");",
+							"",
+							"    // Configure Chart JS here.",
+							"    // You can customize the options passed to this constructor to",
+							"    // make the chart look and behave the way you want",
+							"    var myChart = new Chart(ctx, {",
+							"        type: \"line\",",
+							"        data: {",
+							"            labels: [], // We will update this later in pm.getData()",
+							"            datasets: [{",
+							"                label: '',",
+							"                data: [], // We will update this later in pm.getData()",
+							"                ",
+							"                // Change these colours to customize the chart",
+							"                backgroundColor: \"#3e95cd\",",
+							"\t\t\t\t\tborderColor: \"#8e5ea2\",",
+							"\t\t\t\t\tfill: false,         ",
+							"                }]",
+							"        },",
+							"        options: {",
+							"            legend: { display: false },",
+							"            title: {",
+							"                display: true,",
+							"                text: ''",
+							"            },",
+							"            scales: {",
+							"                xAxes: [{",
+							"                    type: 'time',",
+							"\t\t\t\t\t\ttime: {",
+							"\t\t\t\t\t\t\t// round: 'day'",
+							"\t\t\t\t\t\t\ttooltipFormat: 'll HH:mm'",
+							"\t\t\t\t\t\t},",
+							"\t\t\t\t\t\tscaleLabel: {",
+							"\t\t\t\t\t\t\tdisplay: true,",
+							"\t\t\t\t\t\t\tlabelString: 'Time'",
+							"\t\t\t\t\t\t}",
+							"                }],",
+							"                yAxes: [{",
+							"                    display: true,",
+							"                    scaleLabel: {",
+							"                        display: true,",
+							"                        labelString: 'price in USD'",
+							"                    }",
+							"                }]",
+							"            }",
+							"        }",
+							"",
+							"    });",
+							"",
+							"    // Access the data passed to pm.visualizer.set() from the JavaScript",
+							"    // code of the Visualizer template",
+							"    pm.getData(function (err, value) {",
+							"        myChart.data.datasets[0].data = value.data;",
+							"        myChart.data.labels = value.labels;",
+							"        myChart.update();",
+							"    });",
+							"</script>`;",
+							"",
+							"pm.visualizer.set(template, vizData);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/volume-history/MGX?interval=day&days=100",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"volume-history",
+						"MGX"
+					],
+					"query": [
+						{
+							"key": "interval",
+							"value": "day"
+						},
+						{
+							"key": "days",
+							"value": "100"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "volume history pool",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const res = pm.response.json();",
+							"const vizData = {",
+							"    labels: _.map(res.volumes, (p) => p[0]),",
+							"    data: _.map(res.volumes, (p) => p[1]),",
+							"};",
+							"",
+							"var template = `",
+							"<canvas id=\"myChart\" height=\"150\"></canvas>",
+							"",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js\"></script>",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script> ",
+							"",
+							"<script>",
+							"    // Get DOM element to render the chart in",
+							"    var ctx = document.getElementById(\"myChart\");",
+							"",
+							"    // Configure Chart JS here.",
+							"    // You can customize the options passed to this constructor to",
+							"    // make the chart look and behave the way you want",
+							"    var myChart = new Chart(ctx, {",
+							"        type: \"line\",",
+							"        data: {",
+							"            labels: [], // We will update this later in pm.getData()",
+							"            datasets: [{",
+							"                label: '',",
+							"                data: [], // We will update this later in pm.getData()",
+							"                ",
+							"                // Change these colours to customize the chart",
+							"                backgroundColor: \"#3e95cd\",",
+							"\t\t\t\t\tborderColor: \"#8e5ea2\",",
+							"\t\t\t\t\tfill: false,         ",
+							"                }]",
+							"        },",
+							"        options: {",
+							"            legend: { display: false },",
+							"            title: {",
+							"                display: true,",
+							"                text: ''",
+							"            },",
+							"            scales: {",
+							"                xAxes: [{",
+							"                    type: 'time',",
+							"\t\t\t\t\t\ttime: {",
+							"\t\t\t\t\t\t\t// round: 'day'",
+							"\t\t\t\t\t\t\ttooltipFormat: 'll HH:mm'",
+							"\t\t\t\t\t\t},",
+							"\t\t\t\t\t\tscaleLabel: {",
+							"\t\t\t\t\t\t\tdisplay: true,",
+							"\t\t\t\t\t\t\tlabelString: 'Time'",
+							"\t\t\t\t\t\t}",
+							"                }],",
+							"                yAxes: [{",
+							"                    display: true,",
+							"                    scaleLabel: {",
+							"                        display: true,",
+							"                        labelString: 'price in USD'",
+							"                    }",
+							"                }]",
+							"            }",
+							"        }",
+							"",
+							"    });",
+							"",
+							"    // Access the data passed to pm.visualizer.set() from the JavaScript",
+							"    // code of the Visualizer template",
+							"    pm.getData(function (err, value) {",
+							"        myChart.data.datasets[0].data = value.data;",
+							"        myChart.data.labels = value.labels;",
+							"        myChart.update();",
+							"    });",
+							"</script>`;",
+							"",
+							"pm.visualizer.set(template, vizData);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/volume-history/pools/ALL?days=100&interval=day",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"volume-history",
+						"pools",
+						"ALL"
+					],
+					"query": [
+						{
+							"key": "days",
+							"value": "100"
+						},
+						{
+							"key": "interval",
+							"value": "day"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TVL history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const res = pm.response.json();",
+							"const vizData = {",
+							"    labels: _.map(res.volumes, (p) => p[0]),",
+							"    data: _.map(res.volumes, (p) => p[1]),",
+							"};",
+							"",
+							"var template = `",
+							"<canvas id=\"myChart\" height=\"150\"></canvas>",
+							"",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js\"></script>",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script> ",
+							"",
+							"<script>",
+							"    // Get DOM element to render the chart in",
+							"    var ctx = document.getElementById(\"myChart\");",
+							"",
+							"    // Configure Chart JS here.",
+							"    // You can customize the options passed to this constructor to",
+							"    // make the chart look and behave the way you want",
+							"    var myChart = new Chart(ctx, {",
+							"        type: \"line\",",
+							"        data: {",
+							"            labels: [], // We will update this later in pm.getData()",
+							"            datasets: [{",
+							"                label: '',",
+							"                data: [], // We will update this later in pm.getData()",
+							"                ",
+							"                // Change these colours to customize the chart",
+							"                backgroundColor: \"#3e95cd\",",
+							"\t\t\t\t\tborderColor: \"#8e5ea2\",",
+							"\t\t\t\t\tfill: false,         ",
+							"                }]",
+							"        },",
+							"        options: {",
+							"            legend: { display: false },",
+							"            title: {",
+							"                display: true,",
+							"                text: ''",
+							"            },",
+							"            scales: {",
+							"                xAxes: [{",
+							"                    type: 'time',",
+							"\t\t\t\t\t\ttime: {",
+							"\t\t\t\t\t\t\t// round: 'day'",
+							"\t\t\t\t\t\t\ttooltipFormat: 'll HH:mm'",
+							"\t\t\t\t\t\t},",
+							"\t\t\t\t\t\tscaleLabel: {",
+							"\t\t\t\t\t\t\tdisplay: true,",
+							"\t\t\t\t\t\t\tlabelString: 'Time'",
+							"\t\t\t\t\t\t}",
+							"                }],",
+							"                yAxes: [{",
+							"                    display: true,",
+							"                    scaleLabel: {",
+							"                        display: true,",
+							"                        labelString: 'price in USD'",
+							"                    }",
+							"                }]",
+							"            }",
+							"        }",
+							"",
+							"    });",
+							"",
+							"    // Access the data passed to pm.visualizer.set() from the JavaScript",
+							"    // code of the Visualizer template",
+							"    pm.getData(function (err, value) {",
+							"        myChart.data.datasets[0].data = value.data;",
+							"        myChart.data.labels = value.labels;",
+							"        myChart.update();",
+							"    });",
+							"</script>`;",
+							"",
+							"pm.visualizer.set(template, vizData);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/tvl-history/MGX?interval=day&days=1000",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"tvl-history",
+						"MGX"
+					],
+					"query": [
+						{
+							"key": "interval",
+							"value": "day"
+						},
+						{
+							"key": "days",
+							"value": "1000"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TVL history pool",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const res = pm.response.json();",
+							"const vizData = {",
+							"    labels: _.map(res.volumes, (p) => p[0]),",
+							"    data: _.map(res.volumes, (p) => p[1]),",
+							"};",
+							"",
+							"var template = `",
+							"<canvas id=\"myChart\" height=\"150\"></canvas>",
+							"",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js\"></script>",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script> ",
+							"",
+							"<script>",
+							"    // Get DOM element to render the chart in",
+							"    var ctx = document.getElementById(\"myChart\");",
+							"",
+							"    // Configure Chart JS here.",
+							"    // You can customize the options passed to this constructor to",
+							"    // make the chart look and behave the way you want",
+							"    var myChart = new Chart(ctx, {",
+							"        type: \"line\",",
+							"        data: {",
+							"            labels: [], // We will update this later in pm.getData()",
+							"            datasets: [{",
+							"                label: '',",
+							"                data: [], // We will update this later in pm.getData()",
+							"                ",
+							"                // Change these colours to customize the chart",
+							"                backgroundColor: \"#3e95cd\",",
+							"\t\t\t\t\tborderColor: \"#8e5ea2\",",
+							"\t\t\t\t\tfill: false,         ",
+							"                }]",
+							"        },",
+							"        options: {",
+							"            legend: { display: false },",
+							"            title: {",
+							"                display: true,",
+							"                text: ''",
+							"            },",
+							"            scales: {",
+							"                xAxes: [{",
+							"                    type: 'time',",
+							"\t\t\t\t\t\ttime: {",
+							"\t\t\t\t\t\t\t// round: 'day'",
+							"\t\t\t\t\t\t\ttooltipFormat: 'll HH:mm'",
+							"\t\t\t\t\t\t},",
+							"\t\t\t\t\t\tscaleLabel: {",
+							"\t\t\t\t\t\t\tdisplay: true,",
+							"\t\t\t\t\t\t\tlabelString: 'Time'",
+							"\t\t\t\t\t\t}",
+							"                }],",
+							"                yAxes: [{",
+							"                    display: true,",
+							"                    scaleLabel: {",
+							"                        display: true,",
+							"                        labelString: 'price in USD'",
+							"                    }",
+							"                }]",
+							"            }",
+							"        }",
+							"",
+							"    });",
+							"",
+							"    // Access the data passed to pm.visualizer.set() from the JavaScript",
+							"    // code of the Visualizer template",
+							"    pm.getData(function (err, value) {",
+							"        myChart.data.datasets[0].data = value.data;",
+							"        myChart.data.labels = value.labels;",
+							"        myChart.update();",
+							"    });",
+							"</script>`;",
+							"",
+							"pm.visualizer.set(template, vizData);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/tvl-history/pools/ALL?interval=15m&days=10",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"tvl-history",
+						"pools",
+						"ALL"
+					],
+					"query": [
+						{
+							"key": "interval",
+							"value": "15m"
+						},
+						{
+							"key": "days",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

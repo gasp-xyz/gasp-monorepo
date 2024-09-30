@@ -1,9 +1,16 @@
-# Mangata AVS
+# Gasp Monorepo
 
 <b> Do not use it in Production, testnet only. </b>
 
+Monorepo consists of:
 
-PoC Mangata AVS implementation
+1. **(RollDown) Gasp ETH Contract:** Smart contract on the Ethereum blockchain that receives ERC20 token deposits and withdrawal requests.
+2. **Gasp Sequencer:** Decentralized service that reads updates from the Gasp ETH Contract and submits transactions with the information to the collator. It also monitors other sequencers for malicious activity and submits cancel requests before the dispute period ends for deposits.
+3. **Gasp Collator (Gasp blockchain node):** Responsible for building blockchain blocks on the Gasp L2 network built in Rust and Substrate framework. Based on information received from the sequencer, can also execute deposits and withdrawal requests.
+4. **Gasp Updater:** Monitors finished tasks on Eigen Layer and submits its results to **(RollDown) Gasp ETH Contract**
+5. **Aggregator & Task Manager:** Gasp runs an off-chain service that generates "tasks" and aggregates tasks processed by Eigen Layer operators. In our case, it will generate a task to finalize every 100th block. The Aggregator will sign the Ethereum TX to the **Eigen ETH Contract.** This service is a centralized off-chain worker.
+6. ** AVS Finalizer - (Eigen Operator - AVS):** Collection of decentralized AVS operators that handle tasks. In our case, the task will be “Merkle root verification” and “operator list change”. Operators will sign the results and provide it to the aggregator. The **operator** will also finalise the block by re-executing it.
+7. **Eigen ETH Contracts:** Smart contracts (approx. 15) that handle the storage Merkle Roots and actual Operator Lists with coresponding BLS aggregated keys and stakes.
 
 ## Dependencies
 
