@@ -179,7 +179,7 @@
         }
       }
     },
-    "/token/{symbol}/stats": {
+    "/token/{id}/stats": {
       "get": {
         "tags": [
           "Token List"
@@ -188,7 +188,7 @@
         "description": "This endpoint retrieves detail information about token listed on Mangata with its stats",
         "parameters": [
           {
-            "name": "symbol",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string"

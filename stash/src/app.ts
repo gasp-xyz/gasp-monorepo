@@ -37,7 +37,7 @@ app.get('/', async (req: Request, res: Response): Promise<void> => {
 app.get('/token/order-buckets', tokenController.listTokenOrderBuckets)
 // Token list
 app.get('/token/list/stats', tokenListController.tokenList)
-app.get('/token/:symbol/stats', tokenListController.tokenDetails)
+app.get('/token/:id/stats', tokenListController.tokenDetails)
 
 // XCM
 app.get('/xcm/channels', xcmController.channels)

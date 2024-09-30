@@ -37,16 +37,12 @@ export const pathPairCurrencySchema = object({
   targetCurrencySymbol: string().required(),
 })
 
-export const tokenSymbolSchema = object({
-  symbol: string()
+export const tokenIdSchema = object({
+  id: number()
     .required()
-    .test('no-hyphen', 'Token symbol cannot contain a hyphen (-)', (value) => {
-      if (typeof value === 'string') {
-        // Check if the string contains a hyphen
-        return !value.includes('-')
-      }
-      // Return true for non-string values (to avoid validation)
-      return true
+    .integer()
+    .test('is-integer', 'Token ID must be an integer', (value) => {
+      return Number.isInteger(value)
     }),
 })
 
