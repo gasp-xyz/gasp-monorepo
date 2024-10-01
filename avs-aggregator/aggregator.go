@@ -83,6 +83,8 @@ type Aggregator struct {
 	opStateUpdater *OpStateUpdater
 }
 
+const waitForReceipt = bool(true)
+
 // NewAggregator creates a new Aggregator with the provided config.
 func NewAggregator(c *Config) (*Aggregator, error) {
 	logger, err := sdklogging.NewZapLogger(c.LogLevel)
@@ -107,7 +109,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	chainId, err := ethRpc.Clients.EthHttpClient.ChainID(context.Background())
+	chainId, err := ethRpc.AvsReader.AvsServiceBindings.EthClient.ChainID(context.Background())
 	if err != nil {
 		logger.Error("Cannot get chainId", "err", err)
 		return nil, err
@@ -123,12 +125,12 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	operatorPubkeysService := operatorpubkeys.NewOperatorPubkeysServiceInMemory(
+	operatorPubkeysService := oprsinfoserv.NewOperatorsInfoServiceInMemory(
 		context.Background(),
 		ethRpc.Clients.AvsRegistryChainSubscriber,
 		ethRpc.Clients.AvsRegistryChainReader,
 		nil,
-		nil,
+		oprsinfoserv.Opts{},
 		logger,
 	)
 	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, operatorPubkeysService, logger)

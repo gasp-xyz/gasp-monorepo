@@ -15,8 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
-	// blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
-	"github.com/Layr-Labs/eigensdk-go/services/avsregistry"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
@@ -126,7 +124,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		}
 		Ids := make(map[sdktypes.OperatorId]bool)
 		for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
-			operatorIds, err := osu.ethRpc.Clients.AvsRegistryChainReader.GetOperatorIdList(&bind.CallOpts{}, quorum, uint32(currentBlock))
+			operatorIds, err := osu.ethRpc.AvsReader.GetOperatorIdList(&bind.CallOpts{}, quorum, uint32(currentBlock))
 			if err != nil {
 				osu.errorC <- fmt.Errorf("OpStateUpdater failed to GetOperatorIdList: err: %v", err)
 				return
@@ -763,7 +761,7 @@ func (osu *OpStateUpdater) getCheckpointedOpState(atBlock sdktypes.BlockNum) err
 func (osu *OpStateUpdater) getCurrentOpState(atBlock sdktypes.BlockNum) error {
 	Ids := make(map[sdktypes.OperatorId]bool)
 	for _, quorum := range types.TRACKED_QUORUM_NUMBERS {
-		operatorIds, err := osu.ethRpc.Clients.AvsRegistryChainReader.GetOperatorIdList(&bind.CallOpts{}, quorum, uint32(atBlock))
+		operatorIds, err := osu.ethRpc.AvsReader.GetOperatorIdList(&bind.CallOpts{}, quorum, uint32(atBlock))
 		if err != nil {
 			ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorIdList: err: %v, atBlock: %v", err, atBlock)
 			osu.logger.Error(ierr.Error())
@@ -1049,7 +1047,7 @@ func (osu *OpStateUpdater) UpdateStateForEntireQuorums(quorumNums sdktypes.Quoru
 
 	var operatorAddresses [][]common.Address
 	for _, qn := range quorumNums {
-		operatorIds, err := osu.ethRpc.Clients.AvsRegistryChainReader.GetOperatorIdList(&bind.CallOpts{}, qn, uint32(currentBlock))
+		operatorIds, err := osu.ethRpc.AvsReader.GetOperatorIdList(&bind.CallOpts{}, qn, uint32(currentBlock))
 		if err != nil {
 			ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorIdList: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, qn)
 			osu.logger.Error(ierr.Error())
@@ -1073,7 +1071,7 @@ func (osu *OpStateUpdater) UpdateStateForEntireQuorums(quorumNums sdktypes.Quoru
 
 	}
 
-	_, err = osu.ethRpc.Clients.AvsRegistryChainWriter.UpdateStakesOfEntireOperatorSetForQuorums(context.Background(), operatorAddresses, quorumNums)
+	_, err = osu.ethRpc.Clients.AvsRegistryChainWriter.UpdateStakesOfEntireOperatorSetForQuorums(context.Background(), operatorAddresses, quorumNums, waitForReceipt)
 	if err != nil {
 		ierr := fmt.Errorf("OpStateUpdater failed to UpdateStakesOfEntireOperatorSetForQuorums: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, quorumNums)
 		osu.logger.Error(ierr.Error())
@@ -1101,7 +1099,7 @@ func (osu *OpStateUpdater) UpdateStateForOperatorIds(operatorIds []sdktypes.Oper
 		return ierr
 	}
 
-	_, err = osu.ethRpc.Clients.AvsRegistryChainWriter.UpdateStakesOfOperatorSubsetForAllQuorums(context.Background(), operatorAdrresses)
+	_, err = osu.ethRpc.Clients.AvsRegistryChainWriter.UpdateStakesOfOperatorSubsetForAllQuorums(context.Background(), operatorAdrresses, waitForReceipt)
 	if err != nil {
 		ierr := fmt.Errorf("OpStateUpdater failed to UpdateStakesOfOperatorSubsetForAllQuorums: err: %v", err)
 		osu.logger.Error(ierr.Error())

@@ -190,7 +190,7 @@ func (r *AvsReader) LastCompletedOpTaskCreatedBlockAtBlock(
 func (r *AvsReader) GetRdTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error) {
 	events := []taskmanager.ContractFinalizerTaskManagerRdTaskResponded{}
 
-	currentBlock, err := r.AvsServiceBindings.ethClient.BlockNumber(ctx)
+	currentBlock, err := r.AvsServiceBindings.EthClient.BlockNumber(ctx)
 	if err != nil {
 		r.logger.Error("Cannot get current block number", "err", err)
 		return nil, err
@@ -217,7 +217,7 @@ func (r *AvsReader) GetNonSigningOperatorPubKeys(event taskmanager.ContractFinal
 	// get the nonSignerStakesAndSignature
 	txHash := event.Raw.TxHash
 	// r.logger.Debug("txHash", "txHash", txHash)
-	tx, _, err := r.AvsServiceBindings.ethClient.TransactionByHash(context.Background(), txHash)
+	tx, _, err := r.AvsServiceBindings.EthClient.TransactionByHash(context.Background(), txHash)
 	_ = tx
 	if err != nil {
 		r.logger.Error("Error getting transaction by hash",
