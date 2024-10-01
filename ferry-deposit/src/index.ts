@@ -1,6 +1,8 @@
+import { profileEnd } from "node:console";
 import { Keyring } from "@polkadot/api";
 import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
+import { hexToU8a } from "@polkadot/util";
 import "dotenv/config";
 import { signTx } from "gasp-sdk";
 import "gasp-types";
@@ -18,6 +20,7 @@ import {
 	L1Api,
 	L2Api,
 	getApi,
+	getL1ChainType,
 	isSuccess,
 	print,
 } from "./utils/index.js";
@@ -26,11 +29,11 @@ async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
 	const l2 = new L2Api(api);
 	const l1 = new L1Api(ETH_CHAIN_URL);
-	if (await l1.isRolldownDeployed()) {
+	if (!(await l1.isRolldownDeployed())) {
 		throw `Rolldown contract ${MANGATA_CONTRACT_ADDRESS} is not deployed on L1`;
 	}
 
-	if (await api.isReady) {
+	if (!(await api.isReady)) {
 		throw `Cannot connect to ${MANGATA_NODE_URL}`;
 	}
 
@@ -48,6 +51,7 @@ async function main() {
 
 	const unwatch = await api.derive.chain.subscribeFinalizedHeads(
 		async (header: HeaderExtended) => {
+      console.info(`New L2 block: #${header.number}`);
 			if (inProgress) {
 				return;
 			}
@@ -55,12 +59,14 @@ async function main() {
 			inProgress = true;
 			const pending = await ferry.getPendingDeposits();
 			const profitable = await ferry.rateDeposits(pending);
+
+			console.info(`Found ${profitable.length} proffitable deposits`);
 			if (profitable.length > 0) {
 				const depositToFerry = profitable[0];
 				const status = await signTx(
 					api,
 					api.tx.rolldown.ferryDeposit(
-						"Ethereum",
+						getL1ChainType(api),
 						{ origin: "L1", id: depositToFerry.requestId },
 						depositToFerry.depositRecipient,
 						depositToFerry.tokenAddress,
@@ -95,6 +101,3 @@ main()
 		console.error("Something went wrong", e);
 		process.exit(1);
 	});
-function hexToU8a(address: string): Uint8Array {
-	throw new Error("Function not implemented.");
-}

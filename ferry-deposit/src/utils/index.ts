@@ -28,7 +28,7 @@ import { anvil } from "viem/chains";
 import "gasp-types";
 
 import type { H256 } from "@polkadot/types/interfaces/runtime";
-import { hexToU8a } from "@polkadot/util";
+import { hexToU8a, u8aToHex } from "@polkadot/util";
 import type { KeypairType } from "@polkadot/util-crypto/types";
 import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
 import {
@@ -97,68 +97,106 @@ class Ferry {
 		this.minProfit = minProfit;
 	}
 
+	logFilteredOut(before: Deposit[], after: Deposit[], message: string) {
+		const diff = before.length - after.length;
+		if (diff > 0) {
+			console.info(`filtered out ${diff} : ${message}`);
+		}
+	}
+
 	async getPendingDeposits(): Promise<Deposit[]> {
-		const start = await this.l1.getLatestRequestId();
-		const end = await this.l2.getLastProcessedRequestId();
-		if (start === null) {
+		const end = await this.l1.getLatestRequestId();
+		let start = await this.l2.getLastProcessedRequestId();
+		if (end === null) {
 			return Promise.resolve([]);
+		}
+		if (start === 0n) {
+			start = 1n;
 		}
 		const deposits = await this.l1.getDeposits(start, end);
 
-		return await asyncFilter(deposits, async (elem: Deposit) => {
-			const hash = await this.l1.getDepostiHash(elem.requestId);
-			const isFerried = await this.l2.isFerried(hash);
-			const isExecuted = await this.l2.isExecuted(elem.requestId);
-			return !isFerried && !isExecuted;
-		});
+		const ferryableDeposits = await asyncFilter(
+			deposits,
+			async (elem: Deposit) => {
+				const hash = await this.l1.getDepostiHash(elem.requestId);
+				const isFerried = await this.l2.isFerried(hash);
+				const isExecuted = await this.l2.isExecuted(elem.requestId);
+				return !isFerried && !isExecuted;
+			},
+		);
+		return ferryableDeposits;
 	}
 
 	async rateDeposits(deposits: Deposit[]): Promise<Deposit[]> {
 		const nativeTokenAddress = await this.l2.getNativeTokenAddress();
 		const balances = await this.l2.getBalances(this.me);
-		const result = deposits
-			.filter((deposit) => {
-				if (deposit.amount < deposit.ferryTip) {
-					return false;
-				}
 
-				const transferAmount = deposit.amount - deposit.ferryTip;
+		const tokenAddressToBalance = new Map<string, bigint>(
+			Array.from(balances, ([k, v]) => [u8aToHex(k), v]),
+		);
 
-				if (balances.has(deposit.tokenAddress)) {
-					if (deposit.tokenAddress === nativeTokenAddress) {
-						return (
-							balances.get(deposit.tokenAddress)! >=
-							transferAmount + this.txCost
-						);
-					} else {
-						return balances.get(deposit.tokenAddress)! >= transferAmount;
-					}
-				} else {
-					return false;
-				}
-			})
-			.sort((a, b) => {
-				if (a.ferryTip > b.ferryTip) {
-					return -1;
-				} else if (a.ferryTip == b.ferryTip) {
-					if (a.amount > b.amount) {
-						return 1;
-					} else if (a.amount > b.amount) {
-						return 0;
-					} else {
-						return -1;
-					}
-				} else {
-					return 1;
-				}
-			});
-
-		return await asyncFilter(result, async (elem: Deposit) => {
-			return (
-				(await this.l2.valutateToken(elem.tokenAddress, elem.ferryTip)) >=
-				this.minProfit
-			);
+		const validDeposits = deposits.filter((deposit) => {
+			return deposit.amount > deposit.ferryTip;
 		});
+		this.logFilteredOut(deposits, validDeposits, "invalid deposit");
+
+		const affordableDeposits = validDeposits.filter((deposit) => {
+			const transferAmount = deposit.amount - deposit.ferryTip;
+			const tokenAddress = u8aToHex(deposit.tokenAddress);
+
+			if (tokenAddressToBalance.has(tokenAddress)) {
+				if (deposit.tokenAddress === nativeTokenAddress) {
+					return (
+						tokenAddressToBalance.get(tokenAddress)! >=
+						transferAmount + this.txCost
+					);
+				} else {
+					return tokenAddressToBalance.get(tokenAddress)! >= transferAmount;
+				}
+			} else {
+				return false;
+			}
+		});
+
+		this.logFilteredOut(
+			validDeposits,
+			affordableDeposits,
+			`not enought tokens to cover Account: ${u8aToHex(this.me)}`,
+		);
+
+		const ratedDeposits = affordableDeposits.sort((a, b) => {
+			if (a.ferryTip > b.ferryTip) {
+				return -1;
+			} else if (a.ferryTip === b.ferryTip) {
+				if (a.amount > b.amount) {
+					return 1;
+				} else if (a.amount > b.amount) {
+					return 0;
+				} else {
+					return -1;
+				}
+			} else {
+				return 1;
+			}
+		});
+
+		const aboveProfitThreshold = await asyncFilter(
+			ratedDeposits,
+			async (elem: Deposit) => {
+				return (
+					(await this.l2.valutateToken(elem.tokenAddress, elem.ferryTip)) >=
+					this.minProfit
+				);
+			},
+		);
+
+		this.logFilteredOut(
+			affordableDeposits,
+			aboveProfitThreshold,
+			"profit below expected threshold",
+		);
+
+		return aboveProfitThreshold;
 	}
 }
 
@@ -259,15 +297,12 @@ class L1Api implements L1Interface {
 			functionName: selector,
 			args: [rangeStart, rangeEnd],
 		});
-		// console.info(util.inspect((contractData as any).pendingDeposits.length));
-		console.info(MANGATA_CONTRACT_ADDRESS);
-		console.info(util.inspect(contractData as any));
 
 		return (contractData as any).pendingDeposits.map((deposit: any) => {
 			return {
 				requestId: deposit.requestId.id,
-				depositRecipient: deposit.depositRecipient,
-				tokenAddress: deposit.tokenAddress,
+				depositRecipient: hexToU8a(deposit.depositRecipient),
+				tokenAddress: hexToU8a(deposit.tokenAddress),
 				amount: deposit.amount,
 				timeStamp: deposit.timeStamp,
 				ferryTip: deposit.ferryTip,
@@ -344,10 +379,10 @@ class L2Api implements L2Interface {
 					return [id, value.unwrap().asArbitrum.toU8a()];
 				} else if (address.isEthereum && chain.isEthereum) {
 					return [id, value.unwrap().asEthereum.toU8a()];
-				} else {
-					throw new Error("Unknown chain id");
 				}
+        throw new Error("Invalid chain type");
 			});
+
 		const idToL1Asset = new Map<bigint, Uint8Array>(mapping);
 
 		const balances = await this.api.query.tokens.accounts.entries(address);
@@ -452,4 +487,5 @@ export {
 	dummyDeposit,
 	Ferry,
 	type Deposit,
+	getL1ChainType,
 };
