@@ -94,6 +94,7 @@ pub(crate) async fn ephemeral_testnet(
         cfg.avs_registry_coordinator_addr,
         stake.unwrap_or(100),
         operator.clone().client.signer().clone(),
+        cfg.chain_id,
     )
     .await?;
 
