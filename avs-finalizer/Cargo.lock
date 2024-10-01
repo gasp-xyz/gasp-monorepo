@@ -754,6 +754,7 @@ dependencies = [
  "ark-bn254",
  "ark-ec",
  "ark-ff 0.4.2",
+ "array-bytes",
  "bindings",
  "clap",
  "color-eyre",
