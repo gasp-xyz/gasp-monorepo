@@ -93,7 +93,6 @@ finalizerEnv:
   # rpc
   ETH_RPC_URL: http://evm-node-eth:8545
   ETH_WS_URL: ws://evm-node-eth:8546
-  SUBSTRATE_RPC_URL: ws://collator-01:9944
   # contracts
   CHAIN_ID: "1337"
   AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
