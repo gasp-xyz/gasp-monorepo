@@ -41,7 +41,6 @@ describe('Ferry Service', () => {
 
     l2Mock = {
         getBalances: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
-        ferryDeposits: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         getLastProcessedRequestId: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         isExecuted: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         isFerried: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),

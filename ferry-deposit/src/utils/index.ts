@@ -33,6 +33,21 @@ import {
   MANGATA_CONTRACT_ADDRESS,
 } from "../common/constants.js";
 
+function getL1ChainType(api: ApiPromise): PalletRolldownMessagesChain {
+  return api.createType("PalletRolldownMessagesChain", L1_CHAIN);
+}
+
+function createL1Asset(api: ApiPromise, tokenAddress: Uint8Array): MangataTypesAssetsL1Asset {
+  let chain: PalletRolldownMessagesChain = getL1ChainType(api);
+  if (chain.isEthereum) {
+    return api.createType("MangataTypesAssetsL1Asset", {"Ethereum": tokenAddress});
+  }else if (chain.isArbitrum) {
+    return api.createType("MangataTypesAssetsL1Asset", {"Arbitrum": tokenAddress});
+  } else{
+    throw new Error(`Unknown chain id ${chain.toHuman()}`);
+  }
+}
+
 async function asyncFilter(arr: Deposit[], predicate: any) {
 	const results = await Promise.all(arr.map(predicate));
 	return arr.filter((v: any, index: any) => { return results[index];});
@@ -157,7 +172,6 @@ interface L1Interface {
 
 interface L2Interface {
   getBalances(address: Uint8Array): Promise<Map<Uint8Array, bigint>>;
-  ferryDeposits(deposit: Deposit): Promise<boolean>;
   getLastProcessedRequestId(): Promise<bigint>;
   getLastProcessedRequestId(): Promise<bigint>;
   isExecuted(depositId: bigint): Promise<boolean>;
@@ -255,10 +269,8 @@ class L2Api implements L2Interface {
   }
 
   async valutateToken(tokenAddress: Uint8Array, amount: bigint): Promise<bigint> {
-    let asset: MangataTypesAssetsL1Asset = this.api.createType("MangataTypesAssetsL1Asset", {"Ethereum": tokenAddress});
-    console.info(asset.toString());
+    let asset: MangataTypesAssetsL1Asset = createL1Asset(this.api, tokenAddress);
     let tokenId = await this.api.query.assetRegistry.l1AssetToId(asset);
-    console.info(tokenId.toString());
     if (tokenId.isNone) {
       return 0n;
     }
@@ -276,9 +288,21 @@ class L2Api implements L2Interface {
 
   async getBalances(address: Uint8Array): Promise<Map<Uint8Array, bigint>> {
     const assetMapping = await this.api.query.assetRegistry.idToL1Asset.entries();
+    let chain = getL1ChainType(this.api);
 
     let mapping: [bigint, Uint8Array][] = assetMapping
-      .map(([key, value]) => [BigInt(key.args[0].toString()), value.unwrap().asEthereum.toU8a()]);
+      .filter( ([_key, value]) => (value.unwrap().isEthereum && chain.isEthereum) || (value.unwrap().isArbitrum && chain.isArbitrum))
+      .map(([key, value]) => {
+      let id = BigInt(key.args[0].toString());
+      let address = value.unwrap();
+      if ( address.isArbitrum && chain.isArbitrum ) {
+        return [id, value.unwrap().asArbitrum.toU8a()]
+      }else if (address.isEthereum && chain.isEthereum) {
+        return [id, value.unwrap().asEthereum.toU8a()]
+      }else{
+        throw new Error("Unknown chain id");
+      }
+    });
     const idToL1Asset = new Map<bigint, Uint8Array>(mapping);
 
     const balances = await this.api.query.tokens.accounts.entries(address);
@@ -290,10 +314,6 @@ class L2Api implements L2Interface {
       });
 
     return new Map<Uint8Array, bigint>(values);
-  }
-
-  ferryDeposits(deposit: object): Promise<boolean> {
-    throw new Error("Method not implemented.");
   }
 
   async getLastProcessedRequestId(): Promise<bigint> {
@@ -318,9 +338,6 @@ class L2Api implements L2Interface {
 }
 
 
-function getL1ChainType(api: ApiPromise): PalletRolldownMessagesChain {
-  return api.createType("PalletRolldownMessagesChain", L1_CHAIN);
-}
 
 function sleep(timeInMilliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, timeInMilliseconds));
