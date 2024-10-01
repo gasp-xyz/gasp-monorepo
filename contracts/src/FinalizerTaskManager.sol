@@ -180,6 +180,30 @@ contract FinalizerTaskManager is
         _createNewOpTask(quorumThresholdPercentage, quorumNumbers);
     }
 
+    function validateTaskResponse(bytes32 taskHash, TaskType taskType, uint32 referenceTaskIndex, uint32 taskCreatedBlock) public view {
+
+        require(
+                isTaskPending == true, "No task pending");
+        // check that the task is valid, hasn't been responsed yet, and is being responsed in time
+        require(
+            taskHash == allTaskHashes[taskType][referenceTaskIndex],
+            "Task mismatch"
+        );
+        // some logical checks
+        require(
+            idToTaskStatus[taskType][referenceTaskIndex] == TaskStatus.INITIALIZED,
+            "Not Init state"
+        );
+        require(
+            allTaskResponses[taskType][referenceTaskIndex] == bytes32(0),
+            "Alrdy Resp"
+        );
+        require(
+            uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
+            "Too late"
+        );
+    }
+
     // NOTE: this function responds to existing tasks.
     function respondToOpTask(
         OpTask calldata task,
@@ -195,26 +219,7 @@ contract FinalizerTaskManager is
         bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
         uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
 
-        require(
-                isTaskPending == true, "No task pending");
-        // check that the task is valid, hasn't been responsed yet, and is being responsed in time
-        require(
-            keccak256(abi.encode(task)) == allTaskHashes[TaskType.OP_TASK][taskResponse.referenceTaskIndex],
-            "Task mismatch"
-        );
-        // some logical checks
-        require(
-            idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Not Init state"
-        );
-        require(
-            allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
-            "Alrdy Resp"
-        );
-        require(
-            uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Too late"
-        );
+        validateTaskResponse(keccak256(abi.encode(task)), TaskType.OP_TASK, taskResponse.referenceTaskIndex, taskCreatedBlock);
 
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
 
@@ -318,27 +323,7 @@ contract FinalizerTaskManager is
         bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
         uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
 
-
-        require(
-                isTaskPending == true, "No task pending");
-        // check that the task is valid, hasn't been responsed yet, and is being responsed in time
-        require(
-            keccak256(abi.encode(task)) == allTaskHashes[TaskType.OP_TASK][taskResponse.referenceTaskIndex],
-            "Task mismatch"
-        );
-        // some logical checks
-        require(
-            idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Not Init state"
-        );
-        require(
-            allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
-            "Alrdy Resp"
-        );
-        require(
-            uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Too late"
-        );
+        validateTaskResponse(keccak256(abi.encode(task)), TaskType.OP_TASK, taskResponse.referenceTaskIndex, taskCreatedBlock);
 
         IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
 
@@ -411,27 +396,9 @@ contract FinalizerTaskManager is
         // TODO
         // Maybe this belongs in createNewRdTask
         require(chainRdBatchNonce[taskResponse.chainId] ==0 || taskResponse.batchId == chainRdBatchNonce[taskResponse.chainId], "chainRdBatchNonce mismatch"); 
-        require(
-                isTaskPending == true, "No task pending");
-        // check that the task is valid, hasn't been responsed yet, and is being responsed in time
-        require(
-            keccak256(abi.encode(task)) == allTaskHashes[TaskType.RD_TASK][taskResponse.referenceTaskIndex],
-            "Task mismatch"
-        );
-        // some logical checks
-        require(
-            idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Not Init state"
-        );
-        require(
-            allTaskResponses[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
-            "Alrdy Resp"
-        );
-        require(
-            uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Too late"
-        );
-
+        
+        validateTaskResponse(keccak256(abi.encode(task)), TaskType.RD_TASK, taskResponse.referenceTaskIndex, taskCreatedBlock);
+        
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
 
         /* CHECKING SIGNATURES & WHETHER THRESHOLD IS MET OR NOT */
