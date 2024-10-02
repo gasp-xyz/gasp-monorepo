@@ -191,6 +191,28 @@ contract Deployer is Script, Utils, Test {
             TransparentUpgradeableProxy(payable(address(indexRegistry))), address(indexRegistryImplementation)
         );
 
+        //deploy serviceManager
+        {
+            uint64 recurrentRegistrationLimit =
+                uint64(stdJson.readUint(configData, ".registryParams.recurrentRegistrationLimit"));
+
+            serviceManagerImplementation = new FinalizerServiceManager(
+                avsDirectory,
+                rewardsCoordinator,
+                registryCoordinator,
+                stakeRegistry,
+                IFinalizerTaskManager(address(taskManager)),
+                recurrentRegistrationLimit
+            );
+        }
+
+        // upgrade service manager proxy to implementation and initialize
+        avsProxyAdmin.upgradeAndCall(
+            TransparentUpgradeableProxy(payable(address(serviceManager))),
+            address(serviceManagerImplementation),
+            abi.encodeWithSelector(serviceManager.initialize.selector, avsOwner, avsOwner, ejector)
+        );
+
         // deploy RegistryCoordinator
         registryCoordinatorImplementation = new RegistryCoordinator(
             IServiceManager(address(serviceManager)), stakeRegistry, blsApkRegistry, indexRegistry
@@ -221,28 +243,6 @@ contract Deployer is Script, Utils, Test {
                 minimumStakeForQuorum,
                 strategyAndWeightingMultipliers
             )
-        );
-
-        //deploy serviceManager
-        {
-            uint64 recurrentRegistrationLimit =
-                uint64(stdJson.readUint(configData, ".registryParams.recurrentRegistrationLimit"));
-
-            serviceManagerImplementation = new FinalizerServiceManager(
-                avsDirectory,
-                rewardsCoordinator,
-                registryCoordinator,
-                stakeRegistry,
-                IFinalizerTaskManager(address(taskManager)),
-                recurrentRegistrationLimit
-            );
-        }
-
-        // upgrade service manager proxy to implementation and initialize
-        avsProxyAdmin.upgradeAndCall(
-            TransparentUpgradeableProxy(payable(address(serviceManager))),
-            address(serviceManagerImplementation),
-            abi.encodeWithSelector(serviceManager.initialize.selector, avsOwner, avsOwner, ejector)
         );
 
         blsSignatureChecker = new BLSSignatureChecker(registryCoordinator);
