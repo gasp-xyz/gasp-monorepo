@@ -136,7 +136,7 @@ class Ferry {
 		);
 
 		const validDeposits = deposits.filter((deposit) => {
-			return deposit.amount > deposit.ferryTip;
+			return deposit.amount >= deposit.ferryTip;
 		});
 		this.logFilteredOut(deposits, validDeposits, "invalid deposit");
 
