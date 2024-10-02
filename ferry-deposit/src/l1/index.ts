@@ -5,17 +5,14 @@ import {
 
 import {
 	ABI,
-	L1_CHAIN,
 	MANGATA_CONTRACT_ADDRESS,
 } from "../common/constants.js";
 
-import { type PublicClientConfig, createPublicClient } from "viem";
+import {  createPublicClient } from "viem";
 import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
-import { hexToU8a, u8aToHex } from "@polkadot/util";
+import { hexToU8a } from "@polkadot/util";
 import {
 	http,
-	type PrivateKeyAccount,
-	createWalletClient,
 	webSocket,
 } from "viem";
 

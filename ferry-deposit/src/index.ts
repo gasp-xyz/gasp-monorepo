@@ -1,37 +1,22 @@
-import { profileEnd } from "node:console";
 import util from "node:util";
 import { Keyring } from "@polkadot/api";
 import type { HeaderExtended } from "@polkadot/api-derive/type/types";
-import type { KeyringPair } from "@polkadot/keyring/types";
 import { hexToU8a } from "@polkadot/util";
 import "dotenv/config";
 import { signTx } from "gasp-sdk";
 import "gasp-types";
-import { BaseError, keccak256 } from "viem";
 import {
 	ETH_CHAIN_URL,
-	MANGATA_CONTRACT_ADDRESS,
 	MANGATA_NODE_URL,
 	MIN_PROFIT,
 	MNEMONIC,
 	TX_COST,
 } from "./common/constants.js";
 
-import {
-	Ferry,
-	getApi,
-	isSuccess,
-	print,
-} from "./utils/index.js";
-
-import {
-	L2Api,
-	getL1ChainType,
-} from "./l2/index.js";
-
-import {
-	L1Api,
-} from "./l1/index.js";
+import { getApi, isSuccess, print, } from "./utils/index.js";
+import { L2Api, getL1ChainType, } from "./l2/index.js";
+import { L1Api, } from "./l1/index.js";
+import { Ferry } from "./ferry/index.js";
 
 
 async function main() {

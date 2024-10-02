@@ -1,10 +1,8 @@
-import { type ApiPromise, Keyring } from "@polkadot/api";
+import { type ApiPromise } from "@polkadot/api";
 import type { KeyringPair } from "@polkadot/keyring/types";
 import type {
-	FrameSystemEventRecord,
 	MangataTypesAssetsL1Asset,
 	PalletRolldownMessagesChain,
-	PalletRolldownMessagesL1Update,
 } from "@polkadot/types/lookup";
 
 import {

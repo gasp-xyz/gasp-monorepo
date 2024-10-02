@@ -1,36 +1,18 @@
-import { describe, test, beforeAll, expect, it , vi} from "vitest";
-import { Ferry, getApi} from "../src/utils/index.js";
-import { L2Interface, L2Api } from "../src/l2";
-import { L1Api } from "../src/l1";
+import { describe, beforeAll, expect, it , vi} from "vitest";
+import { L2Interface } from "../src/l2";
 import { hexToU8a } from "@polkadot/util";
 import { Deposit } from "../src/common/deposit.js";
 import { L1Interface } from "../src/l1/index.js";
-import { TestClient, createPublicClient, createTestClient, decodeFunctionResult, webSocket } from "viem";
-import util from "node:util";
+import { Ferry } from "../src/ferry/index.js";
 
-const timeout = 60000;
 
-const URI = "ws://localhost:9944";
-const WS_URI = "ws://localhost:8545";
-const HTTP_URI = "http://localhost:8545";
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
 const DUMMY_TOKEN = hexToU8a("0x1111111111111111111111111111111111111111");
 const NATIVE_TOKEN = hexToU8a("0x2222222222222222222222222222222222222222");
-const ANVIL_TEST_ACCOUNT = "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba";
-
-const properImpl = (key: any, value: any) => {
-  if (typeof value === 'bigint') {
-    return value.toString();
-  }
-  return value;
-};
-
-
 
 let ferry: Ferry;
 let l1Mock: L1Interface;
 let l2Mock: L2Interface;
-const ME = hexToU8a(ALITH);
 
 describe('Ferry Service', () => {
 
