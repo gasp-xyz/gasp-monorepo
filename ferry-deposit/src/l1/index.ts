@@ -25,8 +25,10 @@ interface L1Interface {
 
 class L1Api implements L1Interface {
 	client!: PublicClient;
+  delay: bigint;
 
-	constructor(uri: string) {
+	constructor(uri: string, delay: bigint) {
+    this.delay = delay;
 		if (uri.startsWith("ws")) {
 			this.client = createPublicClient({
 				transport: webSocket(uri, { retryCount: 5 }),
@@ -45,7 +47,7 @@ class L1Api implements L1Interface {
 			address: MANGATA_CONTRACT_ADDRESS,
 			abi: ABI,
 			functionName: "deposits",
-			blockTag: "finalized",
+			blockTag: "latest",
 			args: [requestId],
 		});
 		const hash = encodeAbiParameters(
@@ -56,11 +58,17 @@ class L1Api implements L1Interface {
 	}
 
 	async getLatestRequestId(): Promise<bigint | null> {
+    const blockNumber = await this.client.getBlockNumber({cacheTime: 0});
+    if (blockNumber < this.delay) {
+      return null;
+    }
+    const blockToReadAt = blockNumber - this.delay;
+
 		const value = await this.client.readContract({
 			address: MANGATA_CONTRACT_ADDRESS,
 			abi: ABI,
 			functionName: "counter",
-			blockTag: "finalized",
+			blockNumber: BigInt(blockToReadAt),
 		});
 		const reqId = BigInt(value as any) - 1n;
 		if (reqId < 1n) {
@@ -70,12 +78,19 @@ class L1Api implements L1Interface {
 	}
 
 	async getDeposits(rangeStart: bigint, rangeEnd: bigint): Promise<Deposit[]> {
+    const blockNumber = await this.client.getBlockNumber();
+    if (blockNumber < this.delay) {
+      return Promise.resolve([]);
+    }
+    const blockToReadAt = blockNumber - this.delay;
+
 		const selector = "getPendingRequests";
 		const contractData = await this.client.readContract({
 			address: MANGATA_CONTRACT_ADDRESS,
 			abi: ABI,
 			functionName: selector,
 			args: [rangeStart, rangeEnd],
+      blockNumber: blockToReadAt
 		});
 
 		return (contractData as any).pendingDeposits.map((deposit: any) => {
@@ -91,9 +106,15 @@ class L1Api implements L1Interface {
 	}
 
 	async isRolldownDeployed(): Promise<boolean> {
+    const blockNumber = await this.client.getBlockNumber();
+    if (blockNumber < this.delay) {
+      return false;
+    }
+    const blockToReadAt = blockNumber - this.delay;
+
 		const code = await this.client.getCode({
 			address: MANGATA_CONTRACT_ADDRESS,
-			blockTag: "finalized",
+			blockNumber: blockToReadAt,
 		});
 		return code !== undefined && code !== "0x";
 	}

@@ -8,6 +8,7 @@ export const appConfigSchema = z.object({
 	L1_CHAIN: z.string(),
 	MIN_PROFIT: z.bigint(),
 	TX_COST: z.bigint(),
+	BLOCK_DELAY: z.bigint(),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;
@@ -25,5 +26,6 @@ export function createConfig() {
 		L1_CHAIN: process.env.L1_CHAIN!,
 		MIN_PROFIT: BigInt(process.env.MIN_PROFIT!),
 		TX_COST: BigInt(process.env.TX_COST!),
+		BLOCK_DELAY: BigInt(process.env.BLOCK_DELAY!),
 	});
 }

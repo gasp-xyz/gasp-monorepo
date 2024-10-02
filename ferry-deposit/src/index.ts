@@ -6,6 +6,7 @@ import "dotenv/config";
 import { signTx } from "gasp-sdk";
 import "gasp-types";
 import {
+	BLOCK_DELAY,
 	ETH_CHAIN_URL,
 	MANGATA_CONTRACT_ADDRESS,
 	MANGATA_NODE_URL,
@@ -22,7 +23,7 @@ import { getApi, isSuccess, print } from "./utils/index.js";
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
 	const l2 = new L2Api(api);
-	const l1 = new L1Api(ETH_CHAIN_URL);
+	const l1 = new L1Api(ETH_CHAIN_URL, BLOCK_DELAY);
 
 	if (!(await api.isReady)) {
 		throw `Cannot connect to ${MANGATA_NODE_URL}`;
