@@ -12,15 +12,15 @@ services:
       eth-contracts-deployment:
         condition: service_completed_successfully
     environment:
-      - CHAIN_ID=${CHAIN_ID:-31337}
-      - RUST_LOG=info
-      - ETH_RPC_URL=${ETH_RPC_URL:-http://eth-stub:8545}
-      - ETH_WS_URL=${ETH_WS_URL:-ws://eth-stub:8545}
-      - AVS_RPC_URL=${AVS_RPC_URL:-http://avs-aggregator:8090}
-      - AVS_REGISTRY_COORDINATOR_ADDR=0x851356ae760d987E095750cCeb3bC6014560891C
-      - TESTNET=true
-      - ECDSA_EPHEMERAL_KEY=true
-      - BLS_EPHEMERAL_KEY=true
-      # rollup-node specific configs
-      - ROLLUP_NODE_BOOTNODE=/dns/node-alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
-      - ROLLUP_NODE_CHAIN=rollup-local-seq
+      CHAIN_ID: ${CHAIN_ID:-31337}
+      RUST_LOG: info
+      ETH_RPC_URL: ${ETH_RPC_URL:-http://eth-stub:8545}
+      ETH_WS_URL: ${ETH_WS_URL:-ws://eth-stub:8545}
+      AVS_RPC_URL: ${AVS_RPC_URL:-http://avs-aggregator:8090}
+      AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
+      ECDSA_EPHEMERAL_KEY: true
+      BLS_EPHEMERAL_KEY: true
+      TESTNET: true
+      # rollup-node configs
+      ROLLUP_NODE_BOOTNODE: /dns/node-alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+      ROLLUP_NODE_CHAIN: rollup-local-seq

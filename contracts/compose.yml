@@ -4,12 +4,13 @@ services:
     platform: linux/amd64
     build: .
     depends_on:
-      - eth-stub
+      eth-stub:
+          condition: service_healthy
     command:
       - script
       - script/MultiStage.s.sol
       - --rpc-url
-      - http://eth-stub:8545
+      - ${ETH_RPC_URL:-http://eth-stub:8545}
       - --private-key
       - "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       - --broadcast
@@ -28,12 +29,13 @@ services:
     platform: linux/amd64
     build: .
     depends_on:
-      - arbitrum-stub
+      arbitrum-stub:
+        condition: service_healthy
     command:
       - script
       - script/MultiStage.s.sol
       - --rpc-url
-      - http://arbitrum-stub:8546
+      - ${ARBITRUM_RPC_URL:-http://arbitrum-stub:8546}
       - --private-key
       - "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       - --broadcast
