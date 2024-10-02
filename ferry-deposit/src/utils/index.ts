@@ -2,18 +2,13 @@ import util from "node:util";
 import { type ApiPromise, Keyring } from "@polkadot/api";
 import type { ApiDecoration } from "@polkadot/api/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
-import type { StorageKey } from "@polkadot/types";
-import type { Option, u32, u128 } from "@polkadot/types-codec";
+import type { Option } from "@polkadot/types-codec";
 import type {
 	FrameSystemEventRecord,
 	MangataTypesAssetsL1Asset,
-	OrmlTokensAccountData,
 	PalletRolldownMessagesChain,
-	PalletRolldownMessagesDeposit,
 	PalletRolldownMessagesL1Update,
-	SpRuntimeAccountAccountId20,
 } from "@polkadot/types/lookup";
-import type { ITuple } from "@polkadot/types/types";
 import { Mangata, type MangataGenericEvent, signTx } from "gasp-sdk";
 import {
 	http,
@@ -27,7 +22,6 @@ import { anvil } from "viem/chains";
 
 import "gasp-types";
 
-import type { H256 } from "@polkadot/types/interfaces/runtime";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import type { KeypairType } from "@polkadot/util-crypto/types";
 import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
@@ -35,7 +29,6 @@ import {
 	ABI,
 	L1_CHAIN,
 	MANGATA_CONTRACT_ADDRESS,
-	MIN_PROFIT,
 } from "../common/constants.js";
 
 function getL1ChainType(api: ApiPromise): PalletRolldownMessagesChain {
