@@ -1,7 +1,8 @@
 import { describe, test, beforeAll, expect, it , vi} from "vitest";
-import { Ferry, dummyDeposit, L1Api, L1Interface, L2Api, getApi, L2Interface } from "../src/utils/index.js";
+import { Ferry, dummyDeposit, L1Api, L2Api, getApi, L2Interface } from "../src/utils/index.js";
 import { hexToU8a } from "@polkadot/util";
 import { Deposit } from "../src/common/deposit.js";
+import { L1Interface } from "../src/l1/index.js";
 import { TestClient, createPublicClient, createTestClient, decodeFunctionResult, webSocket } from "viem";
 import util from "node:util";
 

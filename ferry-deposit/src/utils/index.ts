@@ -20,6 +20,7 @@ import { type PublicClientConfig, createPublicClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { anvil } from "viem/chains";
 import { Deposit } from "../common/deposit.js";
+import { L1Interface } from "../l1";
 
 import "gasp-types";
 
@@ -234,12 +235,12 @@ async function dummyDeposit(uri: string) {
 	return await wc.writeContract(request);
 }
 
-interface L1Interface {
-	isRolldownDeployed(): Promise<boolean>;
-	getLatestRequestId(): Promise<bigint | null>;
-	getDeposits(rangeStart: bigint, rangeEnd: bigint): Promise<Deposit[]>;
-	getDepostiHash(requestId: bigint): Promise<Uint8Array>;
-}
+// interface L1Interface {
+// 	isRolldownDeployed(): Promise<boolean>;
+// 	getLatestRequestId(): Promise<bigint | null>;
+// 	getDeposits(rangeStart: bigint, rangeEnd: bigint): Promise<Deposit[]>;
+// 	getDepostiHash(requestId: bigint): Promise<Uint8Array>;
+// }
 
 interface L2Interface {
 	getBalances(address: Uint8Array): Promise<Map<Uint8Array, bigint>>;
@@ -489,7 +490,6 @@ export {
 	getCollator,
 	getNativeL1Update,
 	L1Api,
-	type L1Interface,
 	L2Api,
 	type L2Interface,
 	dummyDeposit,
