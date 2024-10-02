@@ -11,7 +11,7 @@ services:
       eth-contracts-deployment:
         condition: service_completed_successfully
     environment:
-      - RUST_LOG=debug
+      - RUST_LOG=info
       - ETH_RPC_URL=${ETH_RPC_URL:-http://eth-stub:8545}
       - ETH_WS_URL=${ETH_WS_URL:-ws://eth-stub:8545}
       - CHAIN_ID=31337
