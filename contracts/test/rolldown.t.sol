@@ -367,8 +367,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         assertEq(token.balanceOf(recipient), 123456);        
         assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
-        assertTrue(rolldown.processedL2Requests(1));
-        assertFalse(rolldown.processedL2Requests(2));
+        address status = rolldown.processedL2Requests(merkle_root);
+        assertTrue(status == rolldown.CLOSED());
 
     }
 
@@ -414,7 +414,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
       assertEq(l1UpdateAfter.pendingCancelResolutions.length, 1);
       assertEq(l1UpdateAfter.pendingCancelResolutions[0].l2RequestId, 1);
       assertEq(l1UpdateAfter.pendingCancelResolutions[0].cancelJustified, true);
-      assertTrue(rolldown.processedL2Requests(1));
+      address status = rolldown.processedL2Requests(merkle_root);
+      assertTrue(status == rolldown.CLOSED());
     }
 
     function testCancelResolutionWithMatchingHashResultsWithJustifiedStatus()
@@ -461,7 +462,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(l1UpdateAfter.pendingCancelResolutions.length, 1);
         assertEq(l1UpdateAfter.pendingCancelResolutions[0].l2RequestId, 1);
         assertEq(l1UpdateAfter.pendingCancelResolutions[0].cancelJustified, false);
-        assertTrue(rolldown.processedL2Requests(1));
+        address status = rolldown.processedL2Requests(merkle_root);
+        assertTrue(status == rolldown.CLOSED());
     }
 
     function testUnsuccessfulWithdrawalRequest() public {
@@ -495,8 +497,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(token.balanceOf(recipient), 0);
         
         assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
-        assertFalse(rolldown.processedL2Requests(1));
-        assertFalse(rolldown.processedL2Requests(2));
+        address status = rolldown.processedL2Requests(merkle_root);
+        assertTrue(status != rolldown.CLOSED());
         L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,2);
         assertEq(l1UpdateBefore.pendingDeposits.length, 0);
         assertEq(l1UpdateBefore.pendingCancelResolutions.length, 0);
@@ -523,9 +525,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
       assertEq(start, 2);
       assertEq(end, 13);
       
-      for (uint256 i = 1; i <= lastId; i++) {
-          assertFalse(rolldown.processedL2Requests(i), "L2 must be unprocessed");
-      }
       //New update win over old updates
       Range memory range0 = rolldown.find_l2_batch(3);
       assertEq(range0.start, 2);
