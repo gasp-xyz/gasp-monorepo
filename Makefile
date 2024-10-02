@@ -4,7 +4,7 @@
 help:
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-CONTRACTS_REGEX="FinalizerServiceManager|FinalizerTaskManager|AVSDirectory|BLSApkRegistry|RegistryCoordinator|DelegationManager|ERC20Mock|StrategyManager|IStrategy|StakeRegistry"
+CONTRACTS_REGEX="FinalizerServiceManager|FinalizerTaskManager|AVSDirectory|BLSApkRegistry|RegistryCoordinator|DelegationManager|ERC20Mock|StrategyManager|IStrategy|StakeRegistry|GaspMultiRollupService"
 # CONTRACTS_REGEX=".+"
 
 -----------------------------: ## 
@@ -41,6 +41,9 @@ deploy-all-to-anvil-and-save-state: deploy-eigenlayer-contracts-to-anvil-and-sav
 deploy-alt-l1-contracts-and-save-state:
 	./tests/integration/deploy-alt-l1-contracts-and-save-anvil-state.sh
 
+deploy-all-contracts-via-multistage-and-save-state:
+	./tests/integration/deploy-all-contracts-via-multistage-and-save-anvil-state.sh
+
 deploy-all-contracts-and-save-state:
 	./tests/integration/deploy-all-contracts-and-save-anvil-state.sh
 
@@ -59,6 +62,8 @@ bindings-go: ## generates contract bindings
 bindings-rs: ## generates rust bindings
 	forge bind --bindings-path ./avs-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX}
 	cd ./avs-finalizer && cargo fmt
+	cd ./gasp-syncer && cargo fmt
+	cp -rf ./avs-finalizer/bindings ./gasp-syncer/
 
 bindings-json: ## generate JS bindings
 	cd ./contracts && forge build && cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../rollup-updater/src/FinalizerTaskManager.json && cp out/Rolldown.sol/Rolldown.json ../rollup-updater/src/Rolldown.json && cp out/Rolldown.sol/Rolldown.json ../rollup-sequencer/src/Rolldown.json

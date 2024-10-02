@@ -1,12 +1,8 @@
 
 import { describe, it , expect} from 'vitest'
-import chaiHttp from 'chai-http';
-import chai from 'chai';
 import app from "../../src/app";
 import supertest from "supertest";
 
-chai.use(chaiHttp);
-chai.should();
 const priceHistoryPath = "price-history"
 describe('Prices', () => {
 
@@ -18,9 +14,20 @@ describe('Prices', () => {
         .then((response) => {
           const invalidTokenNameResponse = response.body;
           expect(invalidTokenNameResponse.exceptionName).to.contain("ValidationError")
-          expect(invalidTokenNameResponse.message).to.contain("this must be one of the following values: GASPV2, L1Asset, GASPV2-GETH, L1Asset-GASPV2")
+          expect(invalidTokenNameResponse.message).to.contain("this must be one of the following values: GASPV2, L1Asset, GASPV2-ETH, L1Asset-GASPV2")
+        });
+    });
+
+    it('GET /price-history - Schema validation', async() => {
+      await supertest(app)
+        .get(`/${priceHistoryPath}/GASPV2`)         
+        .expect(200)
+        .then((response) => {
+          expect(response.body).toMatchSnapshot("Prices")
+          expect(response.body.error).toBeUndefined();
+          expect(response.body.prices).toBeDefined();
+          expect(response.body.prices).toBeInstanceOf(Array);
         });
     });
   });
-
 });

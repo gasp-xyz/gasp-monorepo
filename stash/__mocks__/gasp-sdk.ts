@@ -16,8 +16,8 @@ const ASSETS_INFO = {
     id: '0',
     chainId: 0,
     decimals: 18,
-    name: 'Gasp Ethereum',
-    symbol: 'GETH',
+    name: 'Ethereum',
+    symbol: 'ETH',
     address: '',
   },
   '1': {
@@ -36,7 +36,7 @@ const ASSETS_INFO = {
     chainId: 0,
     decimals: 18,
     name: 'Liquidity Pool Token',
-    symbol: 'GASPV2-GETH',
+    symbol: 'GASPV2-ETH',
     address: '',
   },
   '6': {
@@ -44,7 +44,7 @@ const ASSETS_INFO = {
     chainId: 0,
     decimals: 18,
     name: 'Liquidity Pool Token',
-    symbol: 'L1Asset-GETH',
+    symbol: 'L1Asset-ETH',
     address: '',
   },
   '7': {

@@ -63,15 +63,15 @@ describe('[Token list]', () => {
   it('should mock the token details endpoint method for GETH token', async () => {
     const expectedResponse: TokenInfoStats = {
       tokenId: '0',
-      tokenName: 'Gasp Ethereum',
-      symbol: 'GETH',
+      tokenName: 'Ethereum',
+      symbol: 'ETH',
       priceInUSD: '0.0005226090144381267',
       volume24hInUSD: '867.4535759973365',
       liquidity24hInUSD: '508786.95209646935',
       priceChange24hInPerc: '2.33',
       volumeChange24hInPerc: '4.21',
     }
-    const result = await tokenDetails('GETH')
+    const result = await tokenDetails('ETH')
     expect(result).deep.equal(expectedResponse)
     expect(result).toHaveProperty('tokenId')
     expect(result).toHaveProperty('tokenName')
@@ -110,8 +110,8 @@ describe('[Token list]', () => {
     const expectedResponse: TokenInfoStats[] = [
       {
         tokenId: '0',
-        tokenName: 'Gasp Ethereum',
-        symbol: 'GETH',
+        tokenName: 'Ethereum',
+        symbol: 'ETH',
         priceInUSD: '0.0005226090144381267',
         volume24hInUSD: '867.4535759973365',
         liquidity24hInUSD: '508786.95209646935',

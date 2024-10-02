@@ -2,6 +2,8 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/console.sol";
@@ -15,11 +17,15 @@ contract Rolldown is
     Initializable,
     OwnableUpgradeable,
     Pausable,
-    RolldownStorage
+    RolldownStorage,
+    ReentrancyGuard
 {
+    using SafeERC20 for IERC20;
 
-    address public constant ETH_TOKEN_ADDRESS =
+    address public constant NATIVE_TOKEN_ADDRESS =
         0x0000000000000000000000000000000000000001;
+
+    address public constant CLOSED = 0x1111111111111111111111111111111111111111;
 
     // TODO: move to separate modoule/contract
     function calculate_root(bytes32 leave_hash, uint32 leave_idx, bytes32[] calldata proof, uint32 leaves_count) pure public returns (bytes32) {
@@ -63,34 +69,21 @@ contract Rolldown is
         updaterAccount = updater;
     }
 
-    function setUpdater(address updater) external whenNotPaused {
-      require(msg.sender == updaterAccount, "Only active updater can move rights to a new a account");
+    function setUpdater(address updater) external onlyOwner whenNotPaused {
       updaterAccount = updater;
       emit NewUpdaterSet(updaterAccount);
     }
 
-    function withdraw_pending_eth_to_recipient(uint256 amount, address payable recipient) private whenNotPaused {
-        require(amount > 0, "Amount must be greater than zero");
-        require(pendingEthWithdrawals[recipient] >= amount, "not enough pending withdraw amount");
-        require(payable(address(this)).balance >= amount, "not enough eth funds");
-
-        // important to set this here before .sendValue
-        // to prevent reentrancy
-        pendingEthWithdrawals[recipient] -= amount;
-
-        emit PendingEthWithdrawn(recipient, amount);
-
-        // send value uses call (gas unbounded)
-        // and reverts upon failure
-        Address.sendValue(recipient, amount);
+    function deposit_native() external payable nonReentrant whenNotPaused {
+      deposit_native_with_tip(0);
     }
 
-
-    function withdraw_pending_eth(uint256 amount) external whenNotPaused {
-      withdraw_pending_eth_to_recipient(amount, payable(msg.sender));
+    function deposit_native(uint256 ferryTip) external payable nonReentrant whenNotPaused {
+      deposit_native_with_tip(ferryTip);
     }
 
-    function deposit_native() external payable whenNotPaused {
+    function deposit_native_with_tip(uint256 ferryTip) private {
+        require(ferryTip <= msg.value, "Tip exceeds deposited amount");
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
         uint amount = msg.value;
@@ -99,34 +92,46 @@ contract Rolldown is
         Deposit memory depositRequest = Deposit({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
-            tokenAddress: ETH_TOKEN_ADDRESS,
+            tokenAddress: NATIVE_TOKEN_ADDRESS,
             amount: amount,
-            timeStamp: timeStamp
+            timeStamp: timeStamp,
+            ferryTip: ferryTip
         });
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
         emit DepositAcceptedIntoQueue(
             depositRequest.requestId.id,
             depositRecipient,
-            ETH_TOKEN_ADDRESS,
-            amount
+            NATIVE_TOKEN_ADDRESS,
+            amount,
+            ferryTip
         );
     }
 
-    function deposit(address tokenAddress, uint256 amount) public whenNotPaused {
-        deposit_erc20(tokenAddress, amount);
+    function deposit(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant  {
+        deposit_erc20_with_tip(tokenAddress, amount, 0);
     }
 
-    function deposit_erc20(address tokenAddress, uint256 amount) public whenNotPaused {
+    function deposit(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant  {
+        deposit_erc20_with_tip(tokenAddress, amount, ferryTip);
+    }
+
+    function deposit_erc20(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
+        deposit_erc20_with_tip(tokenAddress, amount, 0);
+    }
+
+    function deposit_erc20(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
+        deposit_erc20_with_tip(tokenAddress, amount, ferryTip);
+    }
+
+    function deposit_erc20_with_tip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
+        require(ferryTip <= amount, "Tip exceeds deposited amount");
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
         address depositRecipient = msg.sender;
 
         IERC20 token = IERC20(tokenAddress);
-        require(
-            token.transferFrom(msg.sender, address(this), amount),
-            "Token transfer failed"
-        );
+        token.safeTransferFrom(msg.sender, address(this), amount);
 
         uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
@@ -134,7 +139,8 @@ contract Rolldown is
             depositRecipient: depositRecipient,
             tokenAddress: tokenAddress,
             amount: amount,
-            timeStamp: timeStamp
+            timeStamp: timeStamp,
+            ferryTip: ferryTip
         });
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
@@ -142,7 +148,8 @@ contract Rolldown is
             depositRequest.requestId.id,
             depositRecipient,
             tokenAddress,
-            amount
+            amount,
+            ferryTip
         );
     }
 
@@ -159,21 +166,80 @@ contract Rolldown is
         return a > b ? a : b;
     }
 
-    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public {
-        Range memory r = merkleRootRange[merkle_root];
-        require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
+    function ferry_withdrawal(Withdrawal calldata withdrawal) payable public whenNotPaused nonReentrant {
+      require(withdrawal.ferryTip <= withdrawal.amount, "Tip exceeds deposited amount");
+      uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
+      bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
 
-        bytes32 withdrawal_hash = keccak256(abi.encode(withdrawal));
-        require(processedL2Requests[withdrawal.requestId.id] == false, "Already processed");
+      require(processedL2Requests[withdrawalHash] == address(0), "Already ferried");
+      processedL2Requests[withdrawalHash] = msg.sender;
 
-        uint32 leaves_count = uint32(r.end - r.start + 1);
-        uint32 pos = uint32(withdrawal.requestId.id - r.start);
-        require(
-          calculate_root(withdrawal_hash, pos, proof, leaves_count) == merkle_root,
-          "Invalid proof"
+      if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
+        // console.log(msg.value);
+        // console.log(ferriedAmount);
+        require(msg.value > 0, "Native token not sent");
+        require(msg.value == ferriedAmount, "Sent amount should exactly match withdrawal.amount - withdrawal.ferryTip");
+        payable(withdrawal.recipient).transfer(ferriedAmount);
+        emit WithdrawalFerried(
+          withdrawal.requestId.id,
+          ferriedAmount,
+          withdrawal.recipient,
+          msg.sender,
+          withdrawalHash
         );
-        process_l2_update_withdrawal(withdrawal);
-        processedL2Requests[withdrawal.requestId.id] = true;
+      } else {
+        IERC20 token = IERC20(withdrawal.tokenAddress);
+        require(token.balanceOf(address(msg.sender)) >= ferriedAmount, "Not enough funds");
+        token.transferFrom(msg.sender, withdrawal.recipient, ferriedAmount);
+        emit WithdrawalFerried(
+          withdrawal.requestId.id,
+          ferriedAmount,
+          withdrawal.recipient,
+          msg.sender,
+          withdrawalHash
+        );
+      }
+    }
+
+    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+        verify_request_proof(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)), merkle_root, proof);
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+        address ferryAddress = processedL2Requests[withdrawalHash];
+        bool isFerried = ferryAddress != address(0);
+        processedL2Requests[withdrawalHash] = CLOSED;
+
+        if ( !isFerried ){
+
+          if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
+            send_native_and_emit_event(withdrawal.recipient, withdrawal.amount);
+          }
+          else {
+            send_erc20_and_emit_event(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount);
+          }
+
+          emit WithdrawalClosed(
+            withdrawal.requestId.id,
+            keccak256(abi.encode(withdrawal))
+          );
+
+        }else{
+
+          if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
+            send_native_and_emit_event(ferryAddress, withdrawal.amount);
+          }
+          else {
+            send_erc20_and_emit_event(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
+          }
+
+          emit FerriedWithdrawalClosed(
+            withdrawal.requestId.id,
+            keccak256(abi.encode(withdrawal))
+          );
+
+        }
+
+
     }
 
     function find_l2_batch(uint256 requestId) view public returns (Range memory) {
@@ -189,23 +255,58 @@ contract Rolldown is
         }
 
         return Range({start: 0, end: 0});
+
     }
 
-    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public {
+    function verify_request_proof(uint256 requestId, bytes32 request_hash, bytes32 merkle_root, bytes32[] calldata proof) private view {
         Range memory r = merkleRootRange[merkle_root];
         require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
 
-        bytes32 cancel_hash = keccak256(abi.encode(cancel));
-        require(processedL2Requests[cancel.requestId.id] == false, "Already processed");
+        require(processedL2Requests[request_hash] != CLOSED, "Already processed");
+
         uint32 leaves_count = uint32(r.end - r.start + 1);
-        uint32 pos = uint32(r.start - cancel.requestId.id);
+        uint32 pos = uint32(requestId - r.start);
         require(
-          calculate_root(cancel_hash, pos, proof, leaves_count) == merkle_root,
+          calculate_root(request_hash, pos, proof, leaves_count) == merkle_root,
           "Invalid proof"
         );
-        process_l2_update_cancels(cancel);
-        processedL2Requests[cancel.requestId.id] = true;
     }
+
+    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+        bytes32 hash = keccak256(abi.encode(cancel));
+        verify_request_proof(cancel.requestId.id, hash, merkle_root, proof);
+        process_l2_update_cancels(cancel);
+        processedL2Requests[hash] = CLOSED;
+    }
+
+    function close_deposit_refund(FailedDepositResolution calldata failedDeposit, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+        bytes32 hash = keccak256(abi.encode(failedDeposit));
+        verify_request_proof(failedDeposit.requestId.id, keccak256(abi.encode(failedDeposit)), merkle_root, proof);
+        process_l2_update_failed_deposit(failedDeposit);
+        processedL2Requests[hash] = CLOSED;
+    }
+
+    function process_l2_update_failed_deposit(FailedDepositResolution calldata failedDeposit) private {
+        Deposit storage originDeposit = deposits[failedDeposit.originRequestId];
+        address recipient = originDeposit.depositRecipient;
+
+        if (failedDeposit.ferry != address(0)) {
+          recipient = failedDeposit.ferry;
+        }
+
+        if (originDeposit.tokenAddress == NATIVE_TOKEN_ADDRESS) {
+              send_native_and_emit_event(recipient, originDeposit.amount);
+        } else {
+              send_erc20_and_emit_event(recipient, originDeposit.tokenAddress, originDeposit.amount);
+        }
+
+        emit FailedDepositResolutionClosed(
+          failedDeposit.requestId.id,
+          failedDeposit.originRequestId,
+          keccak256(abi.encode(failedDeposit))
+        );
+    }
+
 
     // TODO:
     // - verify that merkle_root is correct (passing TaskResponse along with the merkle root?)
@@ -213,11 +314,13 @@ contract Rolldown is
     function update_l1_from_l2(bytes32 merkle_root, Range calldata range /*,TaskResponse calldata response ??? */) external whenNotPaused {
         require(msg.sender == updaterAccount, "Not the owner");
         require(range.end > lastProcessedUpdate_origin_l2, "Update brings no new data");
+        require(range.start > 0 , "range id must be greater than 0");
         require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
         require(range.end >= range.start, "Invalid range");
         roots.push(merkle_root);
         merkleRootRange[merkle_root] = range;
         lastProcessedUpdate_origin_l2 = range.end;
+        emit L2UpdateAccepted(merkle_root, range);
     }
 
     function process_l2_update_cancels(Cancel calldata cancel) private {
@@ -242,71 +345,32 @@ contract Rolldown is
         );
     }
 
-    function process_l2_update_withdrawal( Withdrawal calldata withdrawal) private {
-        if (withdrawal.tokenAddress == ETH_TOKEN_ADDRESS){
-            process_eth_withdrawal(withdrawal);
-        }
-        else {
-            process_erc20_withdrawal(withdrawal);
-        }
+    function send_native_and_emit_event(
+        address recipient,
+        uint256 amount
+    ) private {
+        require(payable(address(this)).balance >= amount, "Not enough funds in contract");
+        require(amount > 0, "Amount must be greater than zero");
+        emit NativeTokensWithdrawn(recipient, amount);
+        Address.sendValue(payable(recipient), amount);
     }
 
-    function process_eth_withdrawal( Withdrawal calldata withdrawal) private {
-        bool enought_funds_in_contract = payable(address(this)).balance >= withdrawal.amount;
-        bool is_account = withdrawal.withdrawalRecipient.code.length == 0;
-        bool status = enought_funds_in_contract && is_account;
-        uint256 timeStamp = block.timestamp;
 
-        WithdrawalResolution memory resolution = WithdrawalResolution({
-            requestId: RequestId({origin: Origin.L1, id: counter++}),
-            l2RequestId: withdrawal.requestId.id,
-            status: status,
-            timeStamp: timeStamp
-        });
+    function send_erc20_and_emit_event(
+        address recipient,
+        address tokenAddress,
+        uint256 amount
+    ) private {
+        IERC20 token = IERC20(tokenAddress);
+        require(token.balanceOf(address(this)) >= amount, "Not enough funds in contract");
+        require(amount > 0, "Amount must be greater than zero");
 
-        withdrawalResolutions[resolution.requestId.id] = resolution;
-        emit WithdrawalResolutionAcceptedIntoQueue(
-            resolution.requestId.id,
-            status
+        token.safeTransfer(recipient, amount);
+        emit ERC20TokensWithdrawn(
+          recipient,
+          tokenAddress,
+          amount
         );
-
-        if (status) {
-            pendingEthWithdrawals[withdrawal.withdrawalRecipient] += withdrawal.amount;
-            emit EthWithdrawPending(
-                withdrawal.withdrawalRecipient,
-                pendingEthWithdrawals[withdrawal.withdrawalRecipient]
-            );
-            //TODO:: remove with protocol update
-            withdraw_pending_eth_to_recipient(withdrawal.amount, payable(withdrawal.withdrawalRecipient));
-        }
-    }
-
-    function process_erc20_withdrawal( Withdrawal calldata withdrawal) private {
-        IERC20 token = IERC20(withdrawal.tokenAddress);
-        bool status = token.balanceOf(address(this)) >= withdrawal.amount;
-        uint256 timeStamp = block.timestamp;
-
-        WithdrawalResolution memory resolution = WithdrawalResolution({
-            requestId: RequestId({origin: Origin.L1, id: counter++}),
-            l2RequestId: withdrawal.requestId.id,
-            status: status,
-            timeStamp: timeStamp
-        });
-
-        withdrawalResolutions[resolution.requestId.id] = resolution;
-        emit WithdrawalResolutionAcceptedIntoQueue(
-            resolution.requestId.id,
-            status
-        );
-
-        if (status) {
-            token.transfer(withdrawal.withdrawalRecipient, withdrawal.amount);
-            emit FundsWithdrawn(
-                withdrawal.withdrawalRecipient,
-                withdrawal.tokenAddress,
-                withdrawal.amount
-            );
-        }
     }
 
     function getPendingRequests(
@@ -317,17 +381,11 @@ contract Rolldown is
 
         result.chain = chain;
         uint256 depositsCounter = 0;
-        uint256 withdrawalsCounter = 0;
         uint256 cancelsCounter = 0;
-        uint256 updatesToBeRemovedCounter = 0;
 
         for (uint256 requestId = start; requestId <= end; requestId++) {
             if (deposits[requestId].requestId.id != 0) {
                 depositsCounter++;
-            } else if (l2UpdatesToRemove[requestId].requestId.id != 0) {
-                updatesToBeRemovedCounter++;
-            } else if (withdrawalResolutions[requestId].requestId.id != 0) {
-                withdrawalsCounter++;
             } else if (cancelResolutions[requestId].requestId.id != 0) {
                 cancelsCounter++;
             }
@@ -335,29 +393,13 @@ contract Rolldown is
 
         result.pendingDeposits = new Deposit[](depositsCounter);
         result.pendingCancelResolutions = new CancelResolution[](cancelsCounter);
-        result.pendingWithdrawalResolutions = new WithdrawalResolution[](
-            withdrawalsCounter
-        );
-        result.pendingL2UpdatesToRemove = new L2UpdatesToRemove[](
-            updatesToBeRemovedCounter
-        );
 
-        withdrawalsCounter = 0;
         depositsCounter = 0;
         cancelsCounter = 0;
-        updatesToBeRemovedCounter = 0;
 
         for (uint256 requestId = start; requestId <= end; requestId++) {
             if (deposits[requestId].requestId.id > 0) {
                 result.pendingDeposits[depositsCounter++] = deposits[requestId];
-            } else if (withdrawalResolutions[requestId].requestId.id > 0) {
-                result.pendingWithdrawalResolutions[
-                    withdrawalsCounter++
-                ] = withdrawalResolutions[requestId];
-            } else if (l2UpdatesToRemove[requestId].requestId.id > 0) {
-                result.pendingL2UpdatesToRemove[
-                    updatesToBeRemovedCounter++
-                ] = l2UpdatesToRemove[requestId];
             } else if (cancelResolutions[requestId].l2RequestId > 0) {
                 result.pendingCancelResolutions[
                     cancelsCounter++

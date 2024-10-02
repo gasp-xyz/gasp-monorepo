@@ -21,6 +21,7 @@ type Config struct {
 
 	ServerAddressPort string
 	BlockPeriod       int
+	BlockPeriodOpsTask       int
 	Expiration        int
 	UpdatePeriod      int
 	DebounceRpc       int
@@ -32,6 +33,7 @@ type Config struct {
 	Address  common.Address
 
 	KickPeriod int
+	MinOpUpdateInterval int
 }
 
 // NewConfig parses the Config from the provided flags or environment variables and
@@ -81,8 +83,10 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		LogLevel:                   logLevel,
 		ServerAddressPort:          ctx.GlobalString(config.AvsServerPortAddressFlag.Name),
 		BlockPeriod:                ctx.GlobalInt(config.AvsBlockValidationPeriodFlag.Name),
+		BlockPeriodOpsTask:                ctx.GlobalInt(config.AvsOpTaskPeriodFlag.Name),
 		Expiration:                 ctx.GlobalInt(config.AvsTaskExpirationFlag.Name),
 		KickPeriod:                 ctx.GlobalInt(config.AvsKickPeriodFlag.Name),
+		MinOpUpdateInterval:            ctx.GlobalInt(config.AvsMinOpUpdateInterval.Name),
 		UpdatePeriod:               ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
 		DebounceRpc:                ctx.GlobalInt(config.AvsDebounceRpcFlag.Name),
 		EthRpcUrl:                  ctx.GlobalString(config.EthRpcFlag.Name),
@@ -109,7 +113,9 @@ var Flags = []cli.Flag{
 	config.EcdsaKeyJsonFlag,
 	config.EcdsaKeyPasswordFlag,
 	config.AvsBlockValidationPeriodFlag,
+	config.AvsOpTaskPeriodFlag,
 	config.AvsKickPeriodFlag,
+	config.AvsMinOpUpdateInterval,
 	config.AvsUpdateStakePeriodFlag,
 	config.AvsTaskExpirationFlag,
 	config.AvsDebounceRpcFlag,

@@ -81,10 +81,10 @@ export async function getOperatorId(publicClient: any, operatorAddress: string) 
 }
 
 export async function waitForTaskResponded(publicClient: PublicClient, numTasks = 1) : Promise<any[]> {
-    return waitFor(publicClient, numTasks, "TaskResponded");
+    return waitFor(publicClient, numTasks, "RdTaskResponded");
 }
 
-export async function waitFor(publicClient: PublicClient, numTasks = 1, eventName="TaskResponded") : Promise<any[]> {
+export async function waitFor(publicClient: PublicClient, numTasks = 1, eventName="RdTaskResponded") : Promise<any[]> {
     let tasks : any[] = [];
     console.info("Waiting for :" + numTasks + " tasks to be " + eventName + "..");
     return await  new Promise( (resolve) => {
@@ -93,20 +93,18 @@ export async function waitFor(publicClient: PublicClient, numTasks = 1, eventNam
             address: taskManagerAddress,
             eventName: eventName,
             onLogs: async (logs) => {
-                if(tasks.length < numTasks) {
-                    tasks = tasks.concat(logs);
-                } else {
+                tasks = tasks.concat(logs);
+                if(tasks.length >= numTasks) {
                     unwatch();
                     resolve(tasks);
                 }
-
             },
         });
     } )
 }
 
 
-export async function waitForNo(publicClient: PublicClient, waitingTime = 120 , eventName="TaskResponded") : Promise<boolean> {
+export async function waitForNo(publicClient: PublicClient, waitingTime = 120 , eventName="RdTaskResponded") : Promise<boolean> {
     console.info("Waiting for :" + waitingTime + " secs to be " + eventName + "..");
     return await  new Promise( (resolve) => {
         const unwatch = publicClient.watchContractEvent({

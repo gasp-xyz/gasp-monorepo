@@ -5,14 +5,14 @@ exports[`Snapshots tests: Coingeko > GET /pairs - Schema validation > Pairs 1`] 
   {
     "base": "GASPV2",
     "pool_id": "5",
-    "target": "GETH",
-    "ticker_id": "GASPV2_GETH",
+    "target": "ETH",
+    "ticker_id": "GASPV2_ETH",
   },
   {
     "base": "L1Asset",
     "pool_id": "6",
-    "target": "GETH",
-    "ticker_id": "L1Asset_GETH",
+    "target": "ETH",
+    "ticker_id": "L1Asset_ETH",
   },
   {
     "base": "L1Asset",
@@ -26,6 +26,18 @@ exports[`Snapshots tests: Coingeko > GET /pairs - Schema validation > Pairs 1`] 
     "target": "L1Asset",
     "ticker_id": "GASPV2_L1Asset",
   },
+  {
+    "base": "L1Asset",
+    "pool_id": "18",
+    "target": "L1Asset",
+    "ticker_id": "L1Asset_L1Asset",
+  },
+  {
+    "base": "ETH",
+    "pool_id": "19",
+    "target": "L1Asset",
+    "ticker_id": "ETH_L1Asset",
+  },
 ]
 `;
 
@@ -36,9 +48,9 @@ exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 1`] = `
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
   "pool_id": "5",
-  "target_currency": "GETH",
+  "target_currency": "ETH",
   "target_volume": Any<String>,
-  "ticker_id": "GASPV2_GETH",
+  "ticker_id": "GASPV2_ETH",
 }
 `;
 
@@ -49,9 +61,9 @@ exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 2`] = `
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
   "pool_id": "6",
-  "target_currency": "GETH",
+  "target_currency": "ETH",
   "target_volume": Any<String>,
-  "ticker_id": "L1Asset_GETH",
+  "ticker_id": "L1Asset_ETH",
 }
 `;
 
@@ -78,5 +90,31 @@ exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 4`] = `
   "target_currency": "L1Asset",
   "target_volume": Any<String>,
   "ticker_id": "GASPV2_L1Asset",
+}
+`;
+
+exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 5`] = `
+{
+  "base_currency": "L1Asset",
+  "base_volume": Any<String>,
+  "last_price": Any<String>,
+  "liquidity_in_usd": Any<String>,
+  "pool_id": "18",
+  "target_currency": "L1Asset",
+  "target_volume": Any<String>,
+  "ticker_id": "L1Asset_L1Asset",
+}
+`;
+
+exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 6`] = `
+{
+  "base_currency": "ETH",
+  "base_volume": Any<String>,
+  "last_price": Any<String>,
+  "liquidity_in_usd": Any<String>,
+  "pool_id": "19",
+  "target_currency": "L1Asset",
+  "target_volume": Any<String>,
+  "ticker_id": "ETH_L1Asset",
 }
 `;

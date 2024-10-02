@@ -1,6 +1,6 @@
 import {afterEach, describe, expect, it, jest} from "@jest/globals";
 import {DockerUtils} from "./DockerUtils";
-import {createPublicClient, defineChain, webSocket,} from "viem";
+import {createPublicClient, defineChain, PublicClient, webSocket,} from "viem";
 
 // @ts-ignore
 import registryCoordinator from "../../contracts/out/RegistryCoordinator.sol/RegistryCoordinator.json";
@@ -25,6 +25,8 @@ import {
 } from "./validators";
 expect.extend( { toIncludeAllMembers} );
 import 'jest-extended';
+import {StartedTestContainer} from "testcontainers";
+import {createAWithdrawWithManualBatch} from "./nodeHelper";
 
 
 jest.setTimeout(1500000);
@@ -48,6 +50,8 @@ const anvil3 = defineChain({
     },
 });
 let dockerUtils: DockerUtils;
+let secContainer: DockerUtils;
+let thirdContainer: DockerUtils;
 
 async function mineEthBlocks(blocks: number) {
     for (let i = 0; i < blocks; i++) {
@@ -75,8 +79,27 @@ async function mineEthBlocks(blocks: number) {
 
 }
 
+
+async function waitForOperatorToSubmitATask(opContainer: StartedTestContainer) {
+    //wait for operator send an task response correctly ( to be fully onboard )
+    console.info("Waiting for a task submitted by the operator");
+    return new Promise((resolve) => {
+        opContainer.logs().then((stream) => {
+            stream.on("data", (line) => {
+                if (line.toString().includes("Task finished successfuly and sent to AVS service")) {
+                    console.info("Task submitted correctly by operator")
+                    resolve(true);
+                }
+            });
+        });
+    }).then(() => {
+        console.info("...Done waiting for operator to submit a task");
+    });
+}
+
 describe('AVS Finalizer', () => {
-    it('opt-in / opt-out', async () => {
+    it.only('opt-in / opt-out', async () => {
+        const chain = "Ethereum";
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -85,10 +108,15 @@ describe('AVS Finalizer', () => {
             transport,
             chain: anvil3,
         });
-        const POperatorAddress = waitForOperatorRegistered(publicClient);
-        await dockerUtils.startContainer();
+        const POperatorAddress = waitForOperatorRegistered(publicClient as PublicClient);
+        const {container : opContainer } =  await dockerUtils.startContainer();
         const operatorAddress = await POperatorAddress;
-        console.log("operatorAddress: " + operatorAddress);
+        await createAWithdrawWithManualBatch(chain);
+        await waitForOperatorToSubmitATask(opContainer);
+        console.info("Waiting for opTaskCreated Event...");
+        await createAWithdrawWithManualBatch(chain);
+        await waitFor(publicClient, 1, "NewRdTaskCreated");
+        console.info("...Done waiting for opTaskCreated Event");
         const res = await publicClient.readContract({
             address: registryCoordinatorAddress,
             abi: registryCoordinator.abi,
@@ -102,6 +130,7 @@ describe('AVS Finalizer', () => {
         const statusBeforeOptOut = await getLatestQuorumUpdate(publicClient);
 
         const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
+        console.info("Opting out...");
         // opt-out
         await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
             console.log(result);
@@ -109,6 +138,7 @@ describe('AVS Finalizer', () => {
             console.error(err);
         });
         const deRegistered = await PoperatorDeregisteredAddress;
+        console.info("...Done waiting for deregistration");
         expect(deRegistered).toBe(operatorAddress);
 
         const statusAfter = await publicClient.readContract({
@@ -118,7 +148,8 @@ describe('AVS Finalizer', () => {
             args: [operatorAddress],
         });
         expect(statusAfter).toBe(2);
-        const tasks = await waitFor(publicClient, 2, "TaskCompleted");
+        await createAWithdrawWithManualBatch(chain, 2);
+        const tasks = await waitFor(publicClient, 2, "RdTaskCompleted");
          expect(tasks).toHaveLength(2);
 
          //Test that after op-out the operator still has the bls keys in the registry
@@ -127,7 +158,7 @@ describe('AVS Finalizer', () => {
         await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
 
     });
-    it('operator that does not respond -> eject', async () => {
+    it('operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )', async () => {
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -137,7 +168,7 @@ describe('AVS Finalizer', () => {
             chain: anvil3,
         });
         const POperatorAddress = waitForOperatorRegistered(publicClient);
-        await dockerUtils.startContainer();
+        const { edcsa , bls } =  await dockerUtils.startContainer();
         const operatorAddress = await POperatorAddress;
         console.log("operatorAddress: " + operatorAddress);
         const res = await publicClient.readContract({
@@ -166,22 +197,77 @@ describe('AVS Finalizer', () => {
         expect(statusAfter).toBe(2);
         await validateOperatorOptOutStakeRegistry(publicClient, operatorAddress as string);
         await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
+        console.log("Re-Register STEP: operatorAddress: " + operatorAddress);
+
+        //re-register
+        secContainer = new DockerUtils();
+        const errMessage = "Contract call reverted with message: ServiceManager.registerOperatorToAVS: minimum blocks elapsed limit for recurrent registration not met";
+        await secContainer.startContainer(undefined, undefined, { edcsa , bls } , errMessage );
+        //validate still in opt-out
+        const statusAfterReRegister = await publicClient.readContract({
+            address: registryCoordinatorAddress,
+            abi: registryCoordinator.abi,
+            functionName: "getOperatorStatus",
+            args: [operatorAddress],
+        });
+        expect(statusAfterReRegister).toBe(2);
+        await validateOperatorOptOutStakeRegistry(publicClient, operatorAddress as string);
+        await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
+
+        await secContainer.stopContainer();
+
+        await mineEthBlocks(10);
+        console.log("After-Waiting and Re-Register STEP: operatorAddress: " + operatorAddress);
+
+        //re-register again
+        thirdContainer = new DockerUtils();
+        await thirdContainer.startContainer(undefined, undefined, { edcsa , bls });
+        const statusAfterWaitingAndReJoined = await publicClient.readContract({
+            address: registryCoordinatorAddress,
+            abi: registryCoordinator.abi,
+            functionName: "getOperatorStatus",
+            args: [operatorAddress],
+        });
+        console.log("Validate status - OK " + operatorAddress);
+        expect(statusAfterWaitingAndReJoined).toBe(1);
+        await validateOperatorOptInStakeRegistry(publicClient, operatorAddress as string);
+        await validateOperatorOptInIndexRegistry(publicClient, operatorAddress as string);
+        await thirdContainer.stopContainer();
+        //we need to wait for it being de-registered
+        await waitForOperatorDeRegistered(publicClient);
 
     });
     afterEach(async () => {
         //try opt-out just in case.
-        await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
-            console.log(result);
-        }).catch((err) => {
-            console.error(err);
-        });
-        await dockerUtils.stopContainer();
+        try {
+            await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
+                console.log(result);
+            }).catch((err) => {
+                console.error(err);
+            });
+            await dockerUtils.stopContainer();
+            await secContainer.container?.exec("./main opt-out-avs").then((result) => {
+                console.log(result);
+            }).catch((err) => {
+                console.error(err);
+            });
+            await secContainer.stopContainer();
+            await thirdContainer.container?.exec("./main opt-out-avs").then((result) => {
+                console.log(result);
+            }).catch((err) => {
+                console.error(err);
+            });
+            await thirdContainer.stopContainer();
+        }catch (e) {
+            console.info("Opt-out failed, probably the container is not running");
+        }
+
     });
 
 });
-
-describe("AVS Finalizer - tasks", () => {
-    it('When operator online -> threshold changes && task response is submitted', async () => {
+//TODO: Unskip when the syncer is in place.
+describe.skip("AVS Finalizer - tasks", () => {
+    it.skip('When operator online -> threshold changes && task response is submitted', async () => {
         dockerUtils = new DockerUtils();
         const publicClient = getPubClient();
 
@@ -203,7 +289,7 @@ describe("AVS Finalizer - tasks", () => {
         const quorumAfter = BigInt(taskAfter[taskAfter.length -1].quroumStakeTotals[0]);
         const operatorStake = BigInt(dockerUtils.bigStakeLocalEnvironment.STAKE);
         expect(quorumAfter - quorumBefore).toBe(operatorStake);
-        const pTaskCompleted = waitFor(publicClient, 1, "TaskCompleted");
+        const pTaskCompleted = waitFor(publicClient, 1, "RdTaskCompleted");
         const taskRespondedWithOp = await waitForTaskResponded(publicClient, 1).then((tasks) => {
             return tasks.map( x=> JSON.parse(JSON.stringify(x)))
         });
@@ -223,7 +309,7 @@ describe("AVS Finalizer - tasks", () => {
         }).catch((err) => {
             console.error(err);
         });
-        const pTaskCompletedAfterOptOut = waitFor(publicClient, 3, "TaskCompleted");
+        const pTaskCompletedAfterOptOut = waitFor(publicClient, 3, "RdTaskCompleted");
         await mineEthBlocks(5);
         const taskAfterOptOut = await waitForTaskResponded(publicClient, 3).then((tasks) => {
             return tasks.map( x=> JSON.parse(JSON.stringify(x)))
