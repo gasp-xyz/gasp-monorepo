@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        ROLLUP_NODE_VERSION: ${MANGATA_NODE_VERSION:-eth-rollup-develop}
+        ROLLUP_NODE_VERSION: ${ROLLUP_NODE_VERSION:-eth-rollup-develop}
     image: mangatasolutions/avs-finalizer:${AVS_FINALIZER_VERSION:-local}
     restart: unless-stopped
     depends_on:

@@ -40,7 +40,7 @@ env:
   GASP_SYNCER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_UPDATER_VERSION: ${{ inputs.globalVersion }}
-  MANGATA_NODE_VERSION: ${{ inputs.substrateNodeVersion }}
+  ROLLUP_NODE_VERSION: ${{ inputs.substrateNodeVersion }}
 
 jobs:
   run-e2e-tests:
@@ -118,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test: [ "test-opt-out", "test-corrupted" ]
+        test: ["test-opt-out", "test-corrupted"]
     steps:
       - uses: actions/checkout@v4
         with:
