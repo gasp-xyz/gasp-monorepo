@@ -1,8 +1,22 @@
 import { describe, test, beforeAll, expect, it } from "vitest";
-import { dummyDeposit, L1Api, L2Api, getApi } from "../src/utils/index.js";
-import { L2Interface } from "../src/l2";
+import { getApi } from "../src/utils/index.js";
+import { L2Interface, L2Api } from "../src/l2";
+import { L1Api } from "../src/l1";
 import { L1Interface } from "../src/l1/index.js";
 import { hexToU8a } from "@polkadot/util";
+import { anvil } from "viem/chains";
+import {
+  ABI,
+	MANGATA_CONTRACT_ADDRESS,
+} from "../src/common/constants.js";
+
+
+import {
+	http,
+	type PrivateKeyAccount,
+	createWalletClient,
+} from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { TestClient, createPublicClient, createTestClient, webSocket } from "viem";
 import util from "node:util";
 
@@ -19,6 +33,32 @@ const properImpl = (key: any, value: any) => {
   }
   return value;
 };
+
+async function dummyDeposit(uri: string) {
+	const ANVIL_TEST_ACCOUNT =
+		"0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba";
+	const transport = webSocket(uri, { retryCount: 5 });
+	const publicClient = createPublicClient({
+		transport,
+	});
+
+	const acc: PrivateKeyAccount = privateKeyToAccount(ANVIL_TEST_ACCOUNT);
+
+	const { request } = await publicClient.simulateContract({
+		account: acc,
+		address: MANGATA_CONTRACT_ADDRESS,
+		abi: ABI,
+		functionName: "deposit_native",
+		value: BigInt(123456789),
+	});
+
+	const wc = createWalletClient({
+		account: acc,
+		chain: anvil,
+		transport,
+	});
+	return await wc.writeContract(request);
+}
 
 async function mintBlocks() {
   const tc = createTestClient({

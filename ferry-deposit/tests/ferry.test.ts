@@ -1,6 +1,7 @@
 import { describe, test, beforeAll, expect, it , vi} from "vitest";
-import { Ferry, dummyDeposit, L1Api, L2Api, getApi} from "../src/utils/index.js";
-import { L2Interface } from "../src/l2";
+import { Ferry, getApi} from "../src/utils/index.js";
+import { L2Interface, L2Api } from "../src/l2";
+import { L1Api } from "../src/l1";
 import { hexToU8a } from "@polkadot/util";
 import { Deposit } from "../src/common/deposit.js";
 import { L1Interface } from "../src/l1/index.js";

@@ -16,15 +16,23 @@ import {
 	MNEMONIC,
 	TX_COST,
 } from "./common/constants.js";
+
 import {
 	Ferry,
-	L1Api,
-	L2Api,
 	getApi,
-	getL1ChainType,
 	isSuccess,
 	print,
 } from "./utils/index.js";
+
+import {
+	L2Api,
+	getL1ChainType,
+} from "./l2/index.js";
+
+import {
+	L1Api,
+} from "./l1/index.js";
+
 
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);

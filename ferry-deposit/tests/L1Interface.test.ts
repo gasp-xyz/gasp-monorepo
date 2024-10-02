@@ -1,6 +1,6 @@
 import { describe, test, beforeAll, expect, it } from "vitest";
-import { L2Api, getApi } from "../src/utils/index.js";
-import { L2Interface } from "../src/l2";
+import { getApi } from "../src/utils/index.js";
+import { L2Interface, L2Api } from "../src/l2";
 import { hexToU8a } from "@polkadot/util";
 const timeout = 60000;
 
