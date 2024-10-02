@@ -30,9 +30,6 @@ async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
 	const l2 = new L2Api(api);
 	const l1 = new L1Api(ETH_CHAIN_URL);
-	if (!(await l1.isRolldownDeployed())) {
-		throw `Rolldown contract ${MANGATA_CONTRACT_ADDRESS} is not deployed on L1`;
-	}
 
 	if (!(await api.isReady)) {
 		throw `Cannot connect to ${MANGATA_NODE_URL}`;
@@ -56,6 +53,10 @@ async function main() {
 			if (inProgress) {
 				return;
 			}
+
+      if (!(await l1.isRolldownDeployed())) {
+        return;
+      }
 
 			inProgress = true;
 			const pending = await ferry.getPendingDeposits();

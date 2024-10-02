@@ -19,6 +19,7 @@ import {
 import { type PublicClientConfig, createPublicClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { anvil } from "viem/chains";
+import { Deposit } from "../common/deposit.js";
 
 import "gasp-types";
 
@@ -60,14 +61,14 @@ async function asyncFilter(arr: Deposit[], predicate: any) {
 	});
 }
 
-interface Deposit {
-	readonly requestId: bigint;
-	readonly depositRecipient: Uint8Array;
-	readonly tokenAddress: Uint8Array;
-	readonly amount: bigint;
-	readonly timeStamp: bigint;
-	readonly ferryTip: bigint;
-}
+// interface Deposit {
+// 	readonly requestId: bigint;
+// 	readonly depositRecipient: Uint8Array;
+// 	readonly tokenAddress: Uint8Array;
+// 	readonly amount: bigint;
+// 	readonly timeStamp: bigint;
+// 	readonly ferryTip: bigint;
+// }
 
 class Ferry {
 	l1: L1Interface;
@@ -322,7 +323,7 @@ class L1Api implements L1Interface {
 			address: MANGATA_CONTRACT_ADDRESS,
 			blockTag: "finalized",
 		});
-		return code !== "0x";
+		return code !== undefined && code !== "0x";
 	}
 }
 
@@ -493,6 +494,5 @@ export {
 	type L2Interface,
 	dummyDeposit,
 	Ferry,
-	type Deposit,
 	getL1ChainType,
 };
