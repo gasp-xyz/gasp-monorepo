@@ -77,7 +77,7 @@ COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 
 	# Reference: https://github.com/Supervisor/supervisor/issues/712#issuecomment-396553685 
 	[program:finalizer]
-	command = bash -c "wait-for-it ${SUBSTRATE_RPC_URL#*//} -t 300 -- /app/finalizer || kill -s SIGINT `cat supervisord.pid`"
+	command = bash -c "wait-for-it ${SUBSTRATE_RPC_URL#*//} -t 300 -- /app/finalizer; kill -s SIGINT `cat supervisord.pid`"
 	stopasgroup = true
 	autorestart = false
 	stdout_logfile = /dev/stdout
