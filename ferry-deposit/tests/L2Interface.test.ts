@@ -1,127 +1,65 @@
 import { describe, test, beforeAll, expect, it } from "vitest";
 import { getApi } from "../src/utils/index.js";
 import { L2Interface, L2Api } from "../src/l2";
-import { L1Api } from "../src/l1";
-import { L1Interface } from "../src/l1/index.js";
 import { hexToU8a } from "@polkadot/util";
-import { anvil } from "viem/chains";
-import {
-  ABI,
-	MANGATA_CONTRACT_ADDRESS,
-} from "../src/common/constants.js";
-
-
-import {
-	http,
-	type PrivateKeyAccount,
-	createWalletClient,
-} from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { TestClient, createPublicClient, createTestClient, webSocket } from "viem";
-import util from "node:util";
-
 const timeout = 60000;
 
-const WS_URI = "ws://localhost:8545";
-const HTTP_URI = "http://localhost:8545";
+const URI = "ws://localhost:9944";
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
-const ANVIL_TEST_ACCOUNT = "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba";
-
-const properImpl = (key: any, value: any) => {
-  if (typeof value === 'bigint') {
-    return value.toString();
-  }
-  return value;
-};
-
-async function dummyDeposit(uri: string) {
-	const ANVIL_TEST_ACCOUNT =
-		"0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba";
-	const transport = webSocket(uri, { retryCount: 5 });
-	const publicClient = createPublicClient({
-		transport,
-	});
-
-	const acc: PrivateKeyAccount = privateKeyToAccount(ANVIL_TEST_ACCOUNT);
-
-	const { request } = await publicClient.simulateContract({
-		account: acc,
-		address: MANGATA_CONTRACT_ADDRESS,
-		abi: ABI,
-		functionName: "deposit_native",
-		value: BigInt(123456789),
-	});
-
-	const wc = createWalletClient({
-		account: acc,
-		chain: anvil,
-		transport,
-	});
-	return await wc.writeContract(request);
-}
-
-async function mintBlocks() {
-  const tc = createTestClient({
-    mode: "anvil",
-    transport: webSocket(WS_URI, { retryCount: 5 })
-  });
-  await tc.mine({ blocks: 100 })
-}
 
 describe('L2Interface', () => {
-  beforeAll(async () => {
-    /// Mint blocks(only on anvil) so the the contract deployment is reachable using viem 
-    // 'blockTag' : 'latest'
-    console.info('Minting blocks!!!!!');
-    await mintBlocks();
-    await dummyDeposit(WS_URI);
-  });
+    it('should successfully connect through websocket', async () => {
+      let api = await getApi(URI);
+    });
 
-  it('should successfully connect through websocket', async () => {
-    let l1Api = new L1Api(WS_URI);
-    expect(await l1Api.isRolldownDeployed()).toBeTruthy()
-  });
+    it('should fetch balances from local chain', async () => {
+      let api = await getApi(URI);
+      let l2 = new L2Api(api);
+      let balances = await l2.getBalances(hexToU8a(ALITH));
+      expect(balances.size).toBeGreaterThan(0);
+      for (let [_key, value] of balances) {
+        expect(value).toBeGreaterThan(0);
+      }
+    });
 
-  it('should successfully connect through http', async () => {
-    let l1Api = new L1Api(HTTP_URI);
-    expect(await l1Api.isRolldownDeployed()).toBeTruthy()
-  });
+    it('can query last processed request id', async () => {
+      let api = await getApi(URI);
+      let l2 = new L2Api(api);
+      await l2.getLastProcessedRequestId();
+    });
 
-  it('can fetch latestRequestId', async () => {
-    await mintBlocks();
-    let l1Api = new L1Api(HTTP_URI);
-    let latestRequestId = await l1Api.getLatestRequestId();
-    expect(latestRequestId).toBeGreaterThanOrEqual(0);
-    await dummyDeposit(WS_URI);
-    await mintBlocks();
-    expect(await l1Api.getLatestRequestId()).toBeGreaterThan(latestRequestId!);
-  });
+    it('can check if deposits was executed', async () => {
+      let api = await getApi(URI);
+      let l2 = new L2Api(api);
+      const lastExecuted = await l2.getLastProcessedRequestId();
+      expect(await l2.isExecuted(lastExecuted)).toBeTruthy();
+      expect(await l2.isExecuted(lastExecuted + 1n)).toBeFalsy();
+    });
 
-  it('can fetch deposits', async () => {
-    await mintBlocks();
-    let l1Api = new L1Api(HTTP_URI);
-    await dummyDeposit(WS_URI);
-    await mintBlocks();
-    let latestRequestId = await l1Api.getLatestRequestId();
-    const deposits = await l1Api.getDeposits(1n, latestRequestId!);
-    expect(deposits.length).toBeGreaterThan(0);
-  });
+    it('can check if deposits was ferried', async () => {
+      let api = await getApi(URI);
+      let l2 = new L2Api(api);
+      expect(await l2.isFerried(new Uint8Array(32))).toBeFalsy();
+    });
 
-  it('can fetch deposits hash', async () => {
-    await mintBlocks();
-    let l1Api = new L1Api(HTTP_URI);
+    it('can fetch native asset id', async () => {
+      let api = await getApi(URI);
+      let l2 = new L2Api(api);
+      await l2.getNativeTokenAddress();
+    });
 
-    const firstId = (await l1Api.getLatestRequestId())!;
-    await dummyDeposit(WS_URI);
-    await mintBlocks();
-    const secondId = (await l1Api.getLatestRequestId())!;
-    expect(firstId).not.toEqual(secondId);
+    it('can valuate token', async () => {
+      let api = await getApi(URI);
+      let l2 = new L2Api(api);
+      await l2.valutateToken(hexToU8a("0000000000000000000000000000000000000001"), 10n);
 
-    const firstHash = await l1Api.getDepostiHash(firstId);
-    const secondHash = await l1Api.getDepostiHash(secondId);
-    expect(firstHash).not.toEqual(secondHash);
+      let nativeTokenAddress = await l2.getNativeTokenAddress();
+      expect(await l2.valutateToken(nativeTokenAddress, 10n)).to.be.equal(10n);
+    });
 
-  });
+    // TODO: add in the end
+    it('consecutive ferry will fail', async () => {
+    });
 
 
 });
