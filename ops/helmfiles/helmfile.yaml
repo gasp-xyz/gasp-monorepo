@@ -112,7 +112,7 @@ releases:
     values:
       - image:
           repository: mangatasolutions/gasp-syncer
-          tag: {{ .Values | get gaspSyncerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+          tag: {{ .Values | get "gaspSyncerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
         env: {{ .Values.gaspSyncerEnv | toYaml | nindent 10 }}
         envSecrets: {{ .Values.gaspSyncerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
