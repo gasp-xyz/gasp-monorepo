@@ -1,5 +1,6 @@
 import { profileEnd } from "node:console";
 import { Keyring } from "@polkadot/api";
+import util from "node:util";
 import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
 import { hexToU8a } from "@polkadot/util";
@@ -63,6 +64,10 @@ async function main() {
 			console.info(`Found ${profitable.length} proffitable deposits`);
 			if (profitable.length > 0) {
 				const depositToFerry = profitable[0];
+        console.info(`Ferrying deposit ${util.inspect(depositToFerry)}`);
+        if (!await ferry.hasFundsToCoverTxFee()) {
+          throw new Error(`Not enough funds to cover tx fee`);
+        }
 				const status = await signTx(
 					api,
 					api.tx.rolldown.ferryDeposit(
