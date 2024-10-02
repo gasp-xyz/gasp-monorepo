@@ -2,7 +2,7 @@ services:
   eth-ferry-deposit:
     restart: unless-stopped
     platform: linux/amd64
-    image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}-eth
+    image: mangatasolutions/ferry-deposit:local-eth
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully

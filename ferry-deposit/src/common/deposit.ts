@@ -7,4 +7,4 @@ interface Deposit {
 	readonly ferryTip: bigint;
 }
 
-export { Deposit };
+export type { Deposit };

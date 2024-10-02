@@ -1,4 +1,4 @@
-FROM node:18.19 AS build
+FROM node:18.20.4 AS build
 
 WORKDIR /app
 
@@ -22,4 +22,4 @@ COPY package*.json ./
 COPY --from=build /app/build /app/build
 COPY --from=build /app/node_modules /app/node_modules
 
-CMD ["node", "build/index.js"]
+CMD ["node", "build/src/index.js"]

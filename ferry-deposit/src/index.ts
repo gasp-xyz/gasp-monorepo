@@ -7,17 +7,17 @@ import { signTx } from "gasp-sdk";
 import "gasp-types";
 import {
 	ETH_CHAIN_URL,
+	MANGATA_CONTRACT_ADDRESS,
 	MANGATA_NODE_URL,
 	MIN_PROFIT,
 	MNEMONIC,
 	TX_COST,
 } from "./common/constants.js";
 
-import { getApi, isSuccess, print, } from "./utils/index.js";
-import { L2Api, getL1ChainType, } from "./l2/index.js";
-import { L1Api, } from "./l1/index.js";
 import { Ferry } from "./ferry/index.js";
-
+import { L1Api } from "./l1/index.js";
+import { L2Api, getL1ChainType } from "./l2/index.js";
+import { getApi, isSuccess, print } from "./utils/index.js";
 
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
@@ -47,9 +47,12 @@ async function main() {
 				return;
 			}
 
-      if (!(await l1.isRolldownDeployed())) {
-        return;
-      }
+			if (!(await l1.isRolldownDeployed())) {
+				console.info(
+					`rolldown contract ${MANGATA_CONTRACT_ADDRESS} not found yet`,
+				);
+				return;
+			}
 
 			inProgress = true;
 			const pending = await ferry.getPendingDeposits();

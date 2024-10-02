@@ -23,9 +23,4 @@ function print(data: any) {
 	console.log(util.inspect(data, { depth: null }));
 }
 
-export {
-	print,
-	sleep,
-	getApi,
-	isSuccess,
-};
+export { print, sleep, getApi, isSuccess };
