@@ -97,20 +97,19 @@ class Ferry {
 		this.minProfit = minProfit;
 	}
 
-  async hasFundsToCoverTxFee() {
+	async hasFundsToCoverTxFee() {
 		const balances = await this.l2.getBalances(this.me);
 		const tokenAddressToBalance = new Map<string, bigint>(
 			Array.from(balances, ([k, v]) => [u8aToHex(k), v]),
 		);
 
-
-    const nativeToken = u8aToHex(await this.l2.getNativeTokenAddress());
-    if (!tokenAddressToBalance.has(nativeToken)) {
-      return false;
-    }else{
-      return tokenAddressToBalance.get(nativeToken)! >= this.txCost;
-    }
-  }
+		const nativeToken = u8aToHex(await this.l2.getNativeTokenAddress());
+		if (!tokenAddressToBalance.has(nativeToken)) {
+			return false;
+		} else {
+			return tokenAddressToBalance.get(nativeToken)! >= this.txCost;
+		}
+	}
 
 	logFilteredOut(before: Deposit[], after: Deposit[], message: string) {
 		const diff = before.length - after.length;
@@ -370,7 +369,6 @@ class L2Api implements L2Interface {
 		}
 	}
 
-
 	async getNativeTokenAddress(): Promise<Uint8Array> {
 		return (await this.api.query.assetRegistry.idToL1Asset(0))
 			.unwrap()
@@ -396,7 +394,7 @@ class L2Api implements L2Interface {
 				} else if (address.isEthereum && chain.isEthereum) {
 					return [id, value.unwrap().asEthereum.toU8a()];
 				}
-        throw new Error("Invalid chain type");
+				throw new Error("Invalid chain type");
 			});
 
 		const idToL1Asset = new Map<bigint, Uint8Array>(mapping);
