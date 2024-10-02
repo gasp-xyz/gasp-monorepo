@@ -1,7 +1,8 @@
 import {GenericContainer, StartedTestContainer, Wait} from "testcontainers";
 import {Environment} from "testcontainers/build/types";
 import { randomBytes } from "crypto";
-import Wallet from 'ethereumjs-wallet'
+//@ts-ignore
+import  { Wallet } from '@ethereumjs/wallet'
 import {generateBls12381G2KeyPair} from "@mattrglobal/bbs-signatures";
 
 interface operatorKeys {
@@ -12,8 +13,8 @@ interface operatorKeys {
 async function getNewKeys() {
     const key = randomBytes(32).toString("hex");
     const keyp =  await generateBls12381G2KeyPair();
-    const wbls = Wallet.fromPrivateKey(Buffer.from(keyp.secretKey));
-    const wecdsa = Wallet.fromPrivateKey(Buffer.from(key, 'hex'));
+    const wbls =   Wallet.fromPrivateKey(Buffer.from(keyp.secretKey));
+    const wecdsa =  Wallet.fromPrivateKey(Buffer.from(key, 'hex'));
     return  { edcsa : await  wecdsa.toV3(""), bls:  await wbls.toV3("") };
 }
 
@@ -24,7 +25,7 @@ export class DockerUtils{
     constructor() {
         this.container = undefined;
         this.containerName = "";
-        this.FINALIZER_IMAGE = "mangatasolutions/avs-finalizer:" + ( process.env.AVS_FINALIZER_VERSION || '1c466c93b9f55debaab8af4502737076de0a6729' );
+        this.FINALIZER_IMAGE = "mangatasolutions/avs-finalizer:" + ( process.env.AVS_FINALIZER_VERSION || 'local' );
         console.info("Using image: " + this.FINALIZER_IMAGE);
     }
     async startContainer(image: string = this.FINALIZER_IMAGE, env = this.finalizerLocalEnvironment, opKeys : Partial<operatorKeys>  = {}, logMessage = "Testnet setup sucessfully, starting AVS verification") {

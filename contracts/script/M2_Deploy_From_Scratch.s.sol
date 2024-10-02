@@ -394,6 +394,11 @@ contract Deployer_M2 is Script, Test {
         vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
         vm.serializeString(parent_object, chain_info, chain_info_output);
         string memory finalJson = vm.serializeString(parent_object, parameters, parameters_output);
+
+        console.log("################################################################################");
+        console.log("Deployer_M2 writing output");
+        console.log("################################################################################");
+
         // TODO: should output to different file depending on configFile passed to run()
         //       so that we don't override mainnet output by deploying to goerli for eg.
         vm.writeJson(finalJson, "script/output/M2_from_scratch_deployment_data.json");

@@ -7,10 +7,10 @@ use bindings::{
 };
 use ethers::{
     contract::{ContractError, EthError},
-    middleware::{MiddlewareBuilder, NonceManagerMiddleware, SignerMiddleware},
+    middleware::{Middleware, MiddlewareBuilder, NonceManagerMiddleware, SignerMiddleware},
     providers::{Http, Provider},
     signers::{LocalWallet, Signer},
-    types::Address,
+    types::{Address, TransactionRequest},
     utils::parse_ether,
 };
 use eyre::eyre;
@@ -54,9 +54,10 @@ pub(crate) async fn setup_deposits(
     registry_address: Address,
     stake: u32,
     operator: LocalWallet,
+    chain_id: u64,
 ) -> eyre::Result<()> {
     let op_address = operator.address();
-    anvil_balance(eth_rpc_url.clone(), op_address, 100).await?;
+    set_balance(chain_id, eth_rpc_url.clone(), op_address, 100).await?;
     debug!("set some ether to operator");
 
     let provider: Provider<Http> = MW::try_from(eth_rpc_url)?;
@@ -92,21 +93,19 @@ pub(crate) async fn setup_deposits(
     Ok(())
 }
 
-async fn anvil_balance(
+async fn set_balance(
+    chain_id: u64,
     eth_rpc_url: String,
     address: Address,
     ether: u128,
-) -> Result<(), reqwest::Error> {
-    let client = reqwest::Client::new();
-    client
-        .post(eth_rpc_url)
-        .json(&serde_json::json!({
-            "jsonrpc": "2.0",
-            "method": "anvil_setBalance",
-            "params": [address, parse_ether(ether).unwrap()],
-            "id": 1
-        }))
-        .send()
-        .await?;
+) -> eyre::Result<()> {
+    // 0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f
+    let dev_wallet = "dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+        .parse::<LocalWallet>()?
+        .with_chain_id(chain_id);
+    let provider: Provider<Http> = MW::try_from(eth_rpc_url)?;
+    let client = provider.with_signer(dev_wallet);
+    let tx = TransactionRequest::pay(address, parse_ether(ether).unwrap());
+    let _ = client.send_transaction(tx, None).await?.await?;
     Ok(())
 }

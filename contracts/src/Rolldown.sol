@@ -22,8 +22,10 @@ contract Rolldown is
 {
     using SafeERC20 for IERC20;
 
-    address public constant ETH_TOKEN_ADDRESS =
+    address public constant NATIVE_TOKEN_ADDRESS =
         0x0000000000000000000000000000000000000001;
+
+    address public constant CLOSED = 0x1111111111111111111111111111111111111111;
 
     // TODO: move to separate modoule/contract
     function calculate_root(bytes32 leave_hash, uint32 leave_idx, bytes32[] calldata proof, uint32 leaves_count) pure public returns (bytes32) {
@@ -67,13 +69,21 @@ contract Rolldown is
         updaterAccount = updater;
     }
 
-    function setUpdater(address updater) external whenNotPaused {
-      require(msg.sender == updaterAccount, "Only active updater can move rights to a new a account");
+    function setUpdater(address updater) external onlyOwner whenNotPaused {
       updaterAccount = updater;
       emit NewUpdaterSet(updaterAccount);
     }
 
-    function deposit_native() external payable whenNotPaused {
+    function deposit_native() external payable nonReentrant whenNotPaused {
+      deposit_native_with_tip(0);
+    }
+
+    function deposit_native(uint256 ferryTip) external payable nonReentrant whenNotPaused {
+      deposit_native_with_tip(ferryTip);
+    }
+
+    function deposit_native_with_tip(uint256 ferryTip) private {
+        require(ferryTip <= msg.value, "Tip exceeds deposited amount");
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
         uint amount = msg.value;
@@ -82,25 +92,40 @@ contract Rolldown is
         Deposit memory depositRequest = Deposit({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
-            tokenAddress: ETH_TOKEN_ADDRESS,
+            tokenAddress: NATIVE_TOKEN_ADDRESS,
             amount: amount,
-            timeStamp: timeStamp
+            timeStamp: timeStamp,
+            ferryTip: ferryTip
         });
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
         emit DepositAcceptedIntoQueue(
             depositRequest.requestId.id,
             depositRecipient,
-            ETH_TOKEN_ADDRESS,
-            amount
+            NATIVE_TOKEN_ADDRESS,
+            amount,
+            ferryTip
         );
     }
 
-    function deposit(address tokenAddress, uint256 amount) public whenNotPaused {
-        deposit_erc20(tokenAddress, amount);
+    function deposit(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant  {
+        deposit_erc20_with_tip(tokenAddress, amount, 0);
+    }
+
+    function deposit(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant  {
+        deposit_erc20_with_tip(tokenAddress, amount, ferryTip);
     }
 
     function deposit_erc20(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
+        deposit_erc20_with_tip(tokenAddress, amount, 0);
+    }
+
+    function deposit_erc20(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
+        deposit_erc20_with_tip(tokenAddress, amount, ferryTip);
+    }
+
+    function deposit_erc20_with_tip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
+        require(ferryTip <= amount, "Tip exceeds deposited amount");
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
         address depositRecipient = msg.sender;
@@ -114,7 +139,8 @@ contract Rolldown is
             depositRecipient: depositRecipient,
             tokenAddress: tokenAddress,
             amount: amount,
-            timeStamp: timeStamp
+            timeStamp: timeStamp,
+            ferryTip: ferryTip
         });
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
@@ -122,7 +148,8 @@ contract Rolldown is
             depositRequest.requestId.id,
             depositRecipient,
             tokenAddress,
-            amount
+            amount,
+            ferryTip
         );
     }
 
@@ -139,21 +166,80 @@ contract Rolldown is
         return a > b ? a : b;
     }
 
-    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
-        Range memory r = merkleRootRange[merkle_root];
-        require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
+    function ferry_withdrawal(Withdrawal calldata withdrawal) payable public whenNotPaused nonReentrant {
+      require(withdrawal.ferryTip <= withdrawal.amount, "Tip exceeds deposited amount");
+      uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
+      bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
 
-        bytes32 withdrawal_hash = keccak256(abi.encode(withdrawal));
-        require(processedL2Requests[withdrawal.requestId.id] == false, "Already processed");
+      require(processedL2Requests[withdrawalHash] == address(0), "Already ferried");
+      processedL2Requests[withdrawalHash] = msg.sender;
 
-        uint32 leaves_count = uint32(r.end - r.start + 1);
-        uint32 pos = uint32(withdrawal.requestId.id - r.start);
-        require(
-          calculate_root(withdrawal_hash, pos, proof, leaves_count) == merkle_root,
-          "Invalid proof"
+      if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
+        // console.log(msg.value);
+        // console.log(ferriedAmount);
+        require(msg.value > 0, "Native token not sent");
+        require(msg.value == ferriedAmount, "Sent amount should exactly match withdrawal.amount - withdrawal.ferryTip");
+        payable(withdrawal.recipient).transfer(ferriedAmount);
+        emit WithdrawalFerried(
+          withdrawal.requestId.id,
+          ferriedAmount,
+          withdrawal.recipient,
+          msg.sender,
+          withdrawalHash
         );
-        process_l2_update_withdrawal(withdrawal);
-        processedL2Requests[withdrawal.requestId.id] = true;
+      } else {
+        IERC20 token = IERC20(withdrawal.tokenAddress);
+        require(token.balanceOf(address(msg.sender)) >= ferriedAmount, "Not enough funds");
+        token.transferFrom(msg.sender, withdrawal.recipient, ferriedAmount);
+        emit WithdrawalFerried(
+          withdrawal.requestId.id,
+          ferriedAmount,
+          withdrawal.recipient,
+          msg.sender,
+          withdrawalHash
+        );
+      }
+    }
+
+    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+        verify_request_proof(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)), merkle_root, proof);
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+        address ferryAddress = processedL2Requests[withdrawalHash];
+        bool isFerried = ferryAddress != address(0);
+        processedL2Requests[withdrawalHash] = CLOSED;
+
+        if ( !isFerried ){
+
+          if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
+            send_native_and_emit_event(withdrawal.recipient, withdrawal.amount);
+          }
+          else {
+            send_erc20_and_emit_event(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount);
+          }
+
+          emit WithdrawalClosed(
+            withdrawal.requestId.id,
+            keccak256(abi.encode(withdrawal))
+          );
+
+        }else{
+
+          if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
+            send_native_and_emit_event(ferryAddress, withdrawal.amount);
+          }
+          else {
+            send_erc20_and_emit_event(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
+          }
+
+          emit FerriedWithdrawalClosed(
+            withdrawal.requestId.id,
+            keccak256(abi.encode(withdrawal))
+          );
+
+        }
+
+
     }
 
     function find_l2_batch(uint256 requestId) view public returns (Range memory) {
@@ -169,23 +255,58 @@ contract Rolldown is
         }
 
         return Range({start: 0, end: 0});
+
     }
 
-    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+    function verify_request_proof(uint256 requestId, bytes32 request_hash, bytes32 merkle_root, bytes32[] calldata proof) private view {
         Range memory r = merkleRootRange[merkle_root];
         require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
 
-        bytes32 cancel_hash = keccak256(abi.encode(cancel));
-        require(processedL2Requests[cancel.requestId.id] == false, "Already processed");
+        require(processedL2Requests[request_hash] != CLOSED, "Already processed");
+
         uint32 leaves_count = uint32(r.end - r.start + 1);
-        uint32 pos = uint32(cancel.requestId.id - r.start);
+        uint32 pos = uint32(requestId - r.start);
         require(
-          calculate_root(cancel_hash, pos, proof, leaves_count) == merkle_root,
+          calculate_root(request_hash, pos, proof, leaves_count) == merkle_root,
           "Invalid proof"
         );
-        process_l2_update_cancels(cancel);
-        processedL2Requests[cancel.requestId.id] = true;
     }
+
+    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+        bytes32 hash = keccak256(abi.encode(cancel));
+        verify_request_proof(cancel.requestId.id, hash, merkle_root, proof);
+        process_l2_update_cancels(cancel);
+        processedL2Requests[hash] = CLOSED;
+    }
+
+    function close_deposit_refund(FailedDepositResolution calldata failedDeposit, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+        bytes32 hash = keccak256(abi.encode(failedDeposit));
+        verify_request_proof(failedDeposit.requestId.id, keccak256(abi.encode(failedDeposit)), merkle_root, proof);
+        process_l2_update_failed_deposit(failedDeposit);
+        processedL2Requests[hash] = CLOSED;
+    }
+
+    function process_l2_update_failed_deposit(FailedDepositResolution calldata failedDeposit) private {
+        Deposit storage originDeposit = deposits[failedDeposit.originRequestId];
+        address recipient = originDeposit.depositRecipient;
+
+        if (failedDeposit.ferry != address(0)) {
+          recipient = failedDeposit.ferry;
+        }
+
+        if (originDeposit.tokenAddress == NATIVE_TOKEN_ADDRESS) {
+              send_native_and_emit_event(recipient, originDeposit.amount);
+        } else {
+              send_erc20_and_emit_event(recipient, originDeposit.tokenAddress, originDeposit.amount);
+        }
+
+        emit FailedDepositResolutionClosed(
+          failedDeposit.requestId.id,
+          failedDeposit.originRequestId,
+          keccak256(abi.encode(failedDeposit))
+        );
+    }
+
 
     // TODO:
     // - verify that merkle_root is correct (passing TaskResponse along with the merkle root?)
@@ -224,38 +345,31 @@ contract Rolldown is
         );
     }
 
-    function process_l2_update_withdrawal( Withdrawal calldata withdrawal) private {
-        if (withdrawal.tokenAddress == ETH_TOKEN_ADDRESS){
-            process_eth_withdrawal(withdrawal);
-        }
-        else {
-            process_erc20_withdrawal(withdrawal);
-        }
-
-        emit WithdrawalClosed(
-          withdrawal.requestId.id,
-          keccak256(abi.encode(withdrawal))
-        );
-
+    function send_native_and_emit_event(
+        address recipient,
+        uint256 amount
+    ) private {
+        require(payable(address(this)).balance >= amount, "Not enough funds in contract");
+        require(amount > 0, "Amount must be greater than zero");
+        emit NativeTokensWithdrawn(recipient, amount);
+        Address.sendValue(payable(recipient), amount);
     }
 
-    function process_eth_withdrawal( Withdrawal calldata withdrawal) private {
-        require(payable(address(this)).balance >= withdrawal.amount, "Not enough funds in contract");
-        require(withdrawal.amount > 0, "Amount must be greater than zero");
-        Address.sendValue(payable(withdrawal.recipient), withdrawal.amount);
-        emit NativeTokensWithdrawn(withdrawal.recipient, withdrawal.amount);
-    }
 
-    function process_erc20_withdrawal( Withdrawal calldata withdrawal) private {
-        IERC20 token = IERC20(withdrawal.tokenAddress);
-        require(token.balanceOf(address(this)) >= withdrawal.amount, "Not enough funds in contract");
-        require(withdrawal.amount > 0, "Amount must be greater than zero");
+    function send_erc20_and_emit_event(
+        address recipient,
+        address tokenAddress,
+        uint256 amount
+    ) private {
+        IERC20 token = IERC20(tokenAddress);
+        require(token.balanceOf(address(this)) >= amount, "Not enough funds in contract");
+        require(amount > 0, "Amount must be greater than zero");
 
-        token.safeTransfer(withdrawal.recipient, withdrawal.amount);
+        token.safeTransfer(recipient, amount);
         emit ERC20TokensWithdrawn(
-          withdrawal.recipient,
-          withdrawal.tokenAddress,
-          withdrawal.amount
+          recipient,
+          tokenAddress,
+          amount
         );
     }
 

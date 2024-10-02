@@ -145,24 +145,31 @@ async function findMerkleRange(
 
 async function isL2RequestAlreadyExecuted(
     publicClient: PublicClient,
-    requestId: bigint
+    requestHash: H256
 ) {
-    return (await publicClient.readContract({
+    let status = await publicClient.readContract({
         address: MANGATA_CONTRACT_ADDRESS,
         abi: ROLLDOWN_ABI,
         functionName: "processedL2Requests",
-        args: [requestId],
-    }));
+        args: [requestHash.toString()],
+    })
+
+    const closed = await publicClient.readContract({
+      address: MANGATA_CONTRACT_ADDRESS,
+      abi: ROLLDOWN_ABI,
+      functionName: 'CLOSED',
+    });
+
+    return status === closed;
 }
 
-async function isWithdrawal(
+async function getRequest(
     api: ApiPromise,
     requestId: bigint
 ) {
   let request   = await api.query.rolldown.l2Requests(L1_CHAIN, {origin:'L2', id:requestId})!;
-  return (request as Option<ITuple<[PalletRolldownL2Request, H256]>>).unwrap()[0].isWithdrawal;
+  return (request as Option<ITuple<[PalletRolldownL2Request, H256]>>);
 }
-
 
 export async function closeWithdrawals(
     api: ApiPromise,
@@ -186,15 +193,23 @@ export async function closeWithdrawals(
     }
 
     for (let withdrawalRequestId of indexes){
-      if (!(await isWithdrawal(api, withdrawalRequestId))){
-        console.log(`ignroing non withdrawal ${withdrawalRequestId} request ...`);
+      let req = await getRequest(api, withdrawalRequestId);
+      if (req.isNone){
+        console.log(`ignroing non existing request ${withdrawalRequestId}`);
         continue;
       }
 
-      if (await isL2RequestAlreadyExecuted(publicClient, withdrawalRequestId)){
+      let [r, hash] = req.unwrap();
+      if (!r.isWithdrawal){
+        console.log(`ignroing non withdrawal request ${withdrawalRequestId}`);
+        continue;
+      }
+
+      if (await isL2RequestAlreadyExecuted(publicClient, hash)){
         console.log(`withdrawal ${withdrawalRequestId} already executed - ignoring...`);
         continue;
       };
+
       let range = await findMerkleRange(publicClient, withdrawalRequestId)
       const rangeStart = (range as any).start;
       const rangeEnd = (range as any).end;

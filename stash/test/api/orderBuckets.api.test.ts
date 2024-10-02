@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { beforeAll, chai, describe, expect, it } from "vitest";
-chai.should()
+import { beforeAll, describe, expect, it } from "vitest";
 import supertest from "supertest";
 import Joi from 'joi';
 import mangataNode from "../../src/connector/MangataNode";

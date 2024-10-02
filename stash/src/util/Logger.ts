@@ -6,7 +6,7 @@ const logger = createLogger({
   transports: [
     process.env.GAE_APPLICATION
       ? new LoggingWinston({
-          level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+          level: 'debug',
         })
       : new transports.Console({
           level: 'debug',

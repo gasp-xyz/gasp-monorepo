@@ -24,13 +24,14 @@ use node_executor::ExecutorDispatch;
 use node_primitives::BlockNumber;
 
 use ethers::abi::AbiEncode;
-use eyre::eyre;
-use serde::Serialize;
+use eyre::{eyre, OptionExt};
+use serde::{Deserialize, Serialize};
 use sp_core::H256;
 use sp_runtime::traits::{BlakeTwo256, Hash, Keccak256};
 use sp_runtime::{generic, OpaqueExtrinsic};
 use std::collections::HashMap;
 use std::sync::Arc;
+use substrate_rpc_client::{rpc_params, ws_client, ClientT};
 use tokio::select;
 use tokio::time::{sleep, Duration};
 use tokio::try_join;
@@ -130,19 +131,15 @@ impl Operator {
                                 });
                             },
                             FinalizerTaskManagerEvents::NewRdTaskCreatedFilter(event) => {
-                                let proofs = self.clone().execute_block(event.task.block_number.as_u32()).await?;
-                                debug!("Block executed successfully {:?}", proofs);
-                                rd_payload = Some(RdTaskResponse {
-                                    reference_task_index: event.task_index,
-                                    reference_task_hash: Keccak256::hash(
-                                        vec![0u8;31].into_iter().chain(vec![32u8]).chain(
-                                            event.task.clone().encode().into_iter()
-                                        ).collect::<Vec<_>>()
-                                        .as_ref()).into(),
-                                    block_hash: proofs.0.as_fixed_bytes().to_owned(),
-                                    storage_proof_hash: proofs.1.as_fixed_bytes().to_owned(),
-                                    pending_state_hash: proofs.2.as_fixed_bytes().to_owned(),
-                                });
+                                let mut rd_payload_tmp = self.clone().get_rd_update(event.task.clone()).await?;
+                                rd_payload_tmp.reference_task_index = event.task_index;
+                                rd_payload_tmp.reference_task_hash = Keccak256::hash(
+                                    vec![0u8;31].into_iter().chain(vec![32u8]).chain(
+                                        event.task.clone().encode().into_iter()
+                                    ).collect::<Vec<_>>()
+                                    .as_ref()).into();
+                                debug!("rd_payload_tmp: {:?}", rd_payload_tmp);
+                                rd_payload = Some(rd_payload_tmp);
                             },
                             _ => return Err(eyre!("Got unexpected stream event"))
                         }
@@ -170,6 +167,109 @@ impl Operator {
 
         // ws provider has internal reconnect, but if it fails we are done
         Ok(())
+    }
+
+    pub(crate) async fn get_rd_update(
+        self: Arc<Self>,
+        rd_task: RdTask,
+    ) -> eyre::Result<RdTaskResponse> {
+        use codec::{Decode, Encode};
+        #[derive(Debug, codec::Encode, codec::Decode)]
+        struct StorageItemKeyType(u8, u128);
+        #[derive(Debug, codec::Encode, codec::Decode)]
+        struct StorageItemDataType(u32, (u128, u128), [u8; 20]);
+
+        debug!("get_rd_update - rd_task: {:?}", rd_task);
+
+        let rpc = ws_client(self.substrate_client_uri.clone())
+            .await
+            .map_err(|e| eyre!(e))?;
+        let two_x_hash_pallet = sp_io::hashing::twox_128(b"Rolldown");
+        let two_x_hash_storage_item = sp_io::hashing::twox_128(b"L2RequestsBatch");
+
+        let storage_item_key: StorageItemKeyType =
+            StorageItemKeyType(rd_task.chain_id, rd_task.batch_id.into());
+
+        debug!("get_rd_update - storage_item_key: {:?}", storage_item_key);
+
+        let storage_item_key_encoded = storage_item_key.encode();
+        debug!(
+            "get_rd_update - storage_item_key_encoded: {:?}",
+            array_bytes::bytes2hex("0x", storage_item_key_encoded.clone())
+        );
+
+        let mut storage_item_key_hashed =
+            sp_io::hashing::blake2_128(&storage_item_key_encoded[..]).to_vec();
+        debug!(
+            "get_rd_update - storage_item_key_hashed: {:?}",
+            array_bytes::bytes2hex("0x", storage_item_key_hashed.clone())
+        );
+        storage_item_key_hashed.extend_from_slice(&storage_item_key_encoded[..]);
+        debug!(
+            "get_rd_update - storage_item_key_hashed: {:?}",
+            array_bytes::bytes2hex("0x", storage_item_key_hashed.clone())
+        );
+
+        let mut storage_key = Vec::<u8>::new();
+        storage_key.extend_from_slice(&two_x_hash_pallet[..]);
+        storage_key.extend_from_slice(&two_x_hash_storage_item[..]);
+        storage_key.extend_from_slice(&storage_item_key_hashed[..]);
+
+        debug!(
+            "get_rd_update - storage_key: {:?}",
+            array_bytes::bytes2hex("0x", storage_key.clone())
+        );
+
+        let params = rpc_params!(array_bytes::bytes2hex("0x", storage_key));
+
+        debug!("get_rd_update - params: {:?}", params);
+
+        let maybe_storage_raw_string: Option<String> =
+            rpc.request("state_getStorage", params).await?;
+
+        let storage_raw_string =
+            maybe_storage_raw_string.ok_or_eyre("state_getStorage got None")?;
+
+        debug!(
+            "get_rd_update - storage_raw_string: {:?}",
+            storage_raw_string
+        );
+
+        let storage_raw = array_bytes::hex2bytes(storage_raw_string.as_str())
+            .map_err(|_| eyre!("Failed to decode storage_raw_string"))?;
+
+        let StorageItemDataType(created_block_number, (range_start, range_end), updater) =
+            StorageItemDataType::decode(&mut &storage_raw[..])?;
+
+        debug!(
+            "get_rd_update - (created_block_number, (range_start, range_end), updater): {:?}",
+            (created_block_number, (range_start, range_end), updater)
+        );
+
+        // TODO
+        // Properly solve this hack
+        let chain_as_string = match rd_task.chain_id {
+            0 => String::from("Ethereum"),
+            1 => String::from("Arbitrum"),
+            _ => return Err(eyre!("Unexpected chain in task")),
+        };
+        let params = rpc_params!(chain_as_string, (range_start, range_end));
+        let rd_update: H256 = rpc.request("rolldown_get_merkle_root", params).await?;
+
+        debug!("get_rd_update - rd_update: {:?}", rd_update);
+
+        let partial_rd_task_response = RdTaskResponse {
+            reference_task_index: Default::default(),
+            reference_task_hash: Default::default(),
+            chain_id: rd_task.chain_id,
+            batch_id: rd_task.batch_id,
+            rd_update: rd_update.into(),
+            range_start: range_start.into(),
+            range_end: range_end.into(),
+            updater: updater.into(),
+        };
+
+        Ok(partial_rd_task_response)
     }
 
     pub(crate) async fn execute_block(
