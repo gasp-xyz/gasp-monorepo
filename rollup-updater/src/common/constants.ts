@@ -5,6 +5,7 @@ import {configuration} from "../config/config.js"
 
 
 export const ROLLDOWN_ABI = rolldownAbi.abi;
+export const ROLLDOWN_METADATA = rolldownAbi.metadata;
 export const EIGEN_ABI = eigenContractAbi.abi;
 export const MANGATA_NODE_URL = configuration.MANGATA_NODE_URL
 export const ETH_CHAIN_URL = configuration.ETH_CHAIN_URL
@@ -15,3 +16,4 @@ export const FINALIZATION_SOURCE = configuration.FINALIZATION_SOURCE;
 export const VERBOSE = Boolean(configuration.VERBOSE);
 export const LIMIT = parseInt(configuration.LIMIT);
 export const L1_CHAIN = configuration.L1_CHAIN;
+export const DEV_MODE = configuration.DEV_MODE;

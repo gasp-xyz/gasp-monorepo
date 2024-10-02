@@ -33,7 +33,7 @@
     "strategies": "",
     "strategyManager": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
     "strategyManagerImplementation": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
-    "taksManagerImplementation": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
+    "taksManagerImplementation": "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90",
     "taskManager": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
   },
   "chainInfo": {

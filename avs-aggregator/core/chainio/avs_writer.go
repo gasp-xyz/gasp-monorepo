@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math/big"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
 	gethcommon "github.com/ethereum/go-ethereum/common"
@@ -18,17 +19,16 @@ import (
 )
 
 type AvsWriterer interface {
-	SendNewTaskVerifyBlock(
+	SendNewRdTask(
 		ctx context.Context,
 		blockNumber *big.Int,
+	) (taskmanager.IFinalizerTaskManagerRdTask, uint32, error)
+	SendNewOpTask(ctx context.Context,
 		quorumThresholdPercentage uint32,
 		quorumNumbers sdktypes.QuorumNums,
-	) (taskmanager.IFinalizerTaskManagerTask, uint32, error)
-	SendAggregatedResponse(ctx context.Context,
-		task taskmanager.IFinalizerTaskManagerTask,
-		taskResponse taskmanager.IFinalizerTaskManagerTaskResponse,
-		nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
-	) (*types.Receipt, error)
+	) (taskmanager.IFinalizerTaskManagerOpTask, uint32, error)
+	SendAggregatedOpTaskResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerOpTask, taskResponse taskmanager.IFinalizerTaskManagerOpTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error)
+	SendAggregatedRdTaskResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerRdTask, taskResponse taskmanager.IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error)
 	EjectOperators(
 		ctx context.Context,
 		operators []common.Address,
@@ -57,47 +57,108 @@ func NewAvsWriter(txMgr txmgr.TxManager, registryAddr gethcommon.Address, ethHtt
 }
 
 // returns the tx receipt, as well as the task index (which it gets from parsing the tx receipt logs)
-func (w *AvsWriter) SendNewTaskVerifyBlock(ctx context.Context, blockNumber *big.Int, quorumThresholdPercentage uint32, quorumNumbers sdktypes.QuorumNums) (taskmanager.IFinalizerTaskManagerTask, uint32, error) {
+func (w *AvsWriter) SendNewOpTask(ctx context.Context, quorumThresholdPercentage uint32, quorumNumbers sdktypes.QuorumNums) (taskmanager.IFinalizerTaskManagerOpTask, uint32, error) {
 	w.logger.Info("creating new task with AVS's task manager")
 	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
 	if err != nil {
-		return taskmanager.IFinalizerTaskManagerTask{}, 0, err
+		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, err
 	}
-	tx, err := w.AvsContractBindings.TaskManager.CreateNewTask(noSendTxOpts, blockNumber, quorumThresholdPercentage, quorumNumbers.UnderlyingType())
+	tx, err := w.AvsContractBindings.TaskManager.CreateNewOpTask(noSendTxOpts, quorumThresholdPercentage, quorumNumbers.UnderlyingType())
 	if err != nil {
-		w.logger.Errorf("Error assembling CreateNewTask tx")
-		return taskmanager.IFinalizerTaskManagerTask{}, 0, err
+		w.logger.Errorf("Error assembling CreateNewOpTask tx")
+		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, err
 	}
 
 	receipt, err := w.txMgr.Send(ctx, tx)
 	if err != nil {
-		return taskmanager.IFinalizerTaskManagerTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
+		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
+	}
+	if receipt.Status == 0{
+		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
-	newTaskCreatedEvent, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewTaskCreated(*receipt.Logs[0])
+	newTaskCreatedEvent, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewOpTaskCreated(*receipt.Logs[0])
 	if err != nil {
 		w.logger.Error("Aggregator failed to parse new task created event", "err", err)
-		return taskmanager.IFinalizerTaskManagerTask{}, 0, err
+		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, err
 	}
 	return newTaskCreatedEvent.Task, newTaskCreatedEvent.TaskIndex, nil
 }
 
-func (w *AvsWriter) SendAggregatedResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerTask, taskResponse taskmanager.IFinalizerTaskManagerTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error) {
+// returns the tx receipt, as well as the task index (which it gets from parsing the tx receipt logs)
+func (w *AvsWriter) SendNewRdTask(ctx context.Context, chainToUpdate uint8, chainBatchIdToUpdate uint32) (taskmanager.IFinalizerTaskManagerRdTask, uint32, error) {
+	w.logger.Info("creating new task with AVS's task manager")
+	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
+	if err != nil {
+		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, err
+	}
+	tx, err := w.AvsContractBindings.TaskManager.CreateNewRdTask(noSendTxOpts, chainToUpdate, chainBatchIdToUpdate)
+	if err != nil {
+		w.logger.Errorf("Error assembling CreateNewRdTask tx")
+		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, err
+	}
+
+	receipt, err := w.txMgr.Send(ctx, tx)
+	if err != nil {
+		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
+	}
+	if receipt.Status == 0{
+		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
+	}
+	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
+	w.logger.Info("sent new task with the AVS's task manager")
+	newTaskCreatedEvent, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewRdTaskCreated(*receipt.Logs[0])
+	if err != nil {
+		w.logger.Error("Aggregator failed to parse new task created event", "err", err)
+		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, err
+	}
+	return newTaskCreatedEvent.Task, newTaskCreatedEvent.TaskIndex, nil
+}
+
+func (w *AvsWriter) SendAggregatedOpTaskResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerOpTask, taskResponse taskmanager.IFinalizerTaskManagerOpTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error) {
 	w.logger.Info("sending aggregated task response with the AVS's task manager")
 	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
 	if err != nil {
 		return nil, err
 	}
-	tx, err := w.AvsContractBindings.TaskManager.RespondToTask(noSendTxOpts, task, taskResponse, nonSignerStakesAndSignature)
+	tx, err := w.AvsContractBindings.TaskManager.RespondToOpTask(noSendTxOpts, task, taskResponse, nonSignerStakesAndSignature)
 	if err != nil {
-		w.logger.Errorf("Error assembling RespondToTask tx")
+		w.logger.Errorf("Error assembling RespondToOpTask tx")
 		return nil, err
 	}
 
 	receipt, err := w.txMgr.Send(ctx, tx)
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
+	}
+	if receipt.Status == 0{
+		return nil, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
+	}
+	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
+	w.logger.Info("sent aggregated response with the AVS's task manager")
+	return receipt, nil
+}
+
+
+func (w *AvsWriter) SendAggregatedRdTaskResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerRdTask, taskResponse taskmanager.IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error) {
+	w.logger.Info("sending aggregated task response with the AVS's task manager")
+	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
+	if err != nil {
+		return nil, err
+	}
+	tx, err := w.AvsContractBindings.TaskManager.RespondToRdTask(noSendTxOpts, task, taskResponse, nonSignerStakesAndSignature)
+	if err != nil {
+		w.logger.Errorf("Error assembling RespondToRdTask tx")
+		return nil, err
+	}
+
+	receipt, err := w.txMgr.Send(ctx, tx)
+	if err != nil {
+		return nil, errors.New("failed to send tx with err: " + err.Error())
+	}
+	if receipt.Status == 0{
+		return nil, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent aggregated response with the AVS's task manager")
@@ -119,6 +180,9 @@ func (w *AvsWriter) EjectOperators(ctx context.Context, operators []common.Addre
 	receipt, err := w.txMgr.Send(ctx, tx)
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
+	}
+	if receipt.Status == 0{
+		return nil, fmt.Errorf("Txn failed with status failure (0): %v", receipt)
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent eject operators with AVS's service manager")

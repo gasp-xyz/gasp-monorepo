@@ -1,35 +1,41 @@
 services:
   eth-contracts-deployment:
-    image: mangatasolutions/avs-contract:local
+    image: mangatasolutions/avs-contract:local-eth
+    platform: linux/amd64
     build: .
     depends_on:
-     - eth-stub
+      - eth-stub
     command:
-      - script 
+      - script
       - script/MultiStage.s.sol
       - --rpc-url
       - http://eth-stub:8545
       - --private-key
-      - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+      - "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       - --broadcast
+      #- --verify
+      #- --verifier
+      #- blockscout
+      #- --verifier-url
+      #- http://host.docker.internal/api
       - -v
     environment:
-      EVM_ID: Ethereum
       ENV_SELECTOR: ethereum-stub
-
+    #extra_hosts:
+      #      - "host.docker.internal:host-gateway"
   arbitrum-contracts-deployment:
-    image: mangatasolutions/avs-contract:local
+    image: mangatasolutions/avs-contract:local-arb
+    platform: linux/amd64
     build: .
     depends_on:
-     - arbitrum-stub
+      - arbitrum-stub
     command:
-      - script 
+      - script
       - script/MultiStage.s.sol
       - --rpc-url
       - http://arbitrum-stub:8546
       - --private-key
-      - 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+      - "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       - --broadcast
     environment:
-      EVM_ID: Arbitrum
       ENV_SELECTOR: arbitrum-stub

@@ -1,18 +1,23 @@
 pragma solidity ^0.8.9;
 import {Rolldown} from "../src/Rolldown.sol";
-import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
 import "forge-std/console.sol";
+import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
+import "forge-std/StdJson.sol";
 import {Utilities, MyERC20} from "./utils/Utilities.sol";
 import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract RolldownTest is Test, IRolldownPrimitives {
     using stdStorage for StdStorage;
     Rolldown public rolldown;
     Utilities internal utils;
     address payable[] internal users;
+    address payable ALICE;
+    address payable BOB;
+    address payable CHARLIE;
     MyERC20 internal token;
-    address payable internal ETH_TOKEN_ADDRESS;
+    address payable internal NATIVE_TOKEN_ADDRESS;
 
     function setUp() public {
         address payable[] memory admins;
@@ -33,10 +38,14 @@ contract RolldownTest is Test, IRolldownPrimitives {
             );
         }
 
-        users = utils.createUsers(1);
+        users = utils.createUsers(3);
+        ALICE = users[0];
+        BOB = users[1];
+        CHARLIE = users[2];
         rolldown = new Rolldown();
         rolldown.initialize(avsPauserReg, avsOwner, ChainId.Ethereum, users[0]);
-        ETH_TOKEN_ADDRESS = payable(0x5748395867463837537395739375937493733457);
+        NATIVE_TOKEN_ADDRESS = payable(0x0000000000000000000000000000000000000001);
+        token = new MyERC20();
     }
 
     function beforeEach() public {}
@@ -45,7 +54,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
         // Arrange
         address payable alice = users[0];
         uint256 amount = 10;
-        address payable tokenAddress = payable(ETH_TOKEN_ADDRESS);
+        uint256 fee = 0;
+        address payable tokenAddress = payable(NATIVE_TOKEN_ADDRESS);
         address payable contract_address = payable(address(rolldown));
         deal(alice, 100 ether);
         uint256 aliceBalanceBefore = alice.balance;
@@ -54,8 +64,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
         // Act
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
-        rolldown.deposit_eth{value: amount}();
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount, fee);
+        rolldown.deposit_native{value: amount}();
         vm.stopPrank();
 
         Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
@@ -65,7 +75,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         // Assert
         assertEq(l1Update.pendingDeposits.length, 1);
         assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
         assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
         assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
         assertEq(l1Update.pendingDeposits[0].amount, amount);
@@ -73,1094 +82,1190 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(contractBalanceAfter - contractBalanceBefore, 10);
     }
 
-    function testExecuteWithdrawEth() public {
-        // Arrange
+    function deposit_native_emits_event() public {
         address payable alice = users[0];
         uint256 amount = 1000;
-        address payable tokenAddress = payable(ETH_TOKEN_ADDRESS);
-        address payable contract_address = payable(address(rolldown));
-        deal(alice, 10000 ether);
-        uint256 aliceBalanceBefore = alice.balance;
-        uint256 contractBalanceBefore = contract_address.balance;
+        uint256 fee = 0;
+        address payable tokenAddress = payable(NATIVE_TOKEN_ADDRESS);
 
         // Act
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
-        rolldown.deposit_eth{value: amount}();
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount, fee);
+        rolldown.deposit_native{value: amount}();
         vm.stopPrank();
+    }
 
-        Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
-        uint256 aliceBalanceAfterDeposit = alice.balance;
-        uint256 contractBalanceAfterDeposit = contract_address.balance;
+    function deposit_erc20_emits_event() public {
+        address payable alice = users[0];
+        uint256 amount = 1000;
+        address payable tokenAddress = payable(NATIVE_TOKEN_ADDRESS);
+        uint256 fee = 0;
 
-        // Assert
-        assertEq(l1Update.pendingDeposits.length, 1);
-        assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
-        assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
-        assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
-        assertEq(l1Update.pendingDeposits[0].amount, amount);
-        assertEq(aliceBalanceBefore - aliceBalanceAfterDeposit, amount);
-        assertEq(contractBalanceAfterDeposit - contractBalanceBefore, amount);
-
-        uint withdraw_amount = 500;
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](0);
-        l2Update.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: withdraw_amount
-        });
-
+        // Act
         vm.startPrank(alice);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.WithdrawalResolutionAcceptedIntoQueue(2, true);
-        vm.expectEmit(true, true, false, true);
-        emit IRolldownPrimitives.EthWithdrawPending(alice, 500);
-        rolldown.update_l1_from_l2(l2Update);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount, fee);
+        rolldown.deposit_erc20(tokenAddress, amount);
+        vm.stopPrank();
+    }
+
+    function testUpdateL1FromL2TriggersEvent() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        token.mint(address(rolldown));
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: address(token),
+          amount: amount,
+          ferryTip: 0
+        });
+
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.L2UpdateAccepted(merkle_root, Range({start: 1, end: 1}));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+    }
+
+    function testExecuteWithdrawErc20() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        token.mint(address(rolldown));
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: address(token),
+          amount: amount,
+          ferryTip: 0
+        });
+
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
 
-        Rolldown.L1Update memory l1UpdateAfterWithdraw = rolldown.getUpdateForL2();
-        assertEq(l1UpdateAfterWithdraw.pendingWithdrawalResolutions.length, 1);
-        assertEq(stdstore
-                    .target(address(rolldown))
-                    .sig(rolldown.pendingEthWithdrawals.selector)
-                    .with_key(alice)
-                    .read_uint(),
-                withdraw_amount);
+        bytes32[] memory proofs = new bytes32[](0);
+        assertEq(token.balanceOf(recipient), 0);
 
-        uint withdraw_from_pending = 200;
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.ERC20TokensWithdrawn(recipient, address(token), amount);
+        emit IRolldownPrimitives.WithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
+        assertEq(token.balanceOf(recipient), amount);
+    }
 
-        vm.startPrank(alice);
-        vm.expectEmit(true, true, false, true);
-        emit IRolldownPrimitives.PendingEthWithdrawn(alice, withdraw_from_pending);
-        rolldown.withdraw_pending_eth(withdraw_from_pending);
+    function testExecuteWithdrawErc20WithWrongHash() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        token.mint(address(rolldown));
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: address(token),
+          amount: amount,
+          ferryTip: 0
+        });
+
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
 
-        assertEq(stdstore
-                    .target(address(rolldown))
-                    .sig(rolldown.pendingEthWithdrawals.selector)
-                    .with_key(alice)
-                    .read_uint(),
-                withdraw_amount - withdraw_from_pending);
-        assertEq(alice.balance - aliceBalanceAfterDeposit, withdraw_from_pending);
-        assertEq(contractBalanceAfterDeposit - contract_address.balance, withdraw_from_pending);
+        bytes32[] memory proofs = new bytes32[](0);
+        withdrawal.amount += 1;
+
+        vm.startPrank(ALICE);
+        vm.expectRevert("Invalid proof");
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
     }
 
     function testExecuteDeposit() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 10;
-        deal(tokenAddress, alice, 100 ether);
-        uint256 aliceBalanceBefore = token.balanceOf(alice);
-        uint256 contractBalanceBefore = token.balanceOf(address(rolldown));
+      // Arrange
+      address payable alice = users[0];
+      token = new MyERC20();
+      address tokenAddress = address(token);
+      uint256 amount = 10;
+      uint256 fee = 0;
+      deal(tokenAddress, alice, 100 ether);
+      uint256 aliceBalanceBefore = token.balanceOf(alice);
+      uint256 contractBalanceBefore = token.balanceOf(address(rolldown));
 
-        // Act
-        vm.startPrank(alice);
+      // Act
+      vm.startPrank(alice);
+      token.approve(address(rolldown), amount);
+      vm.expectEmit(true, true, true, true);
+      emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount, fee);
+      rolldown.deposit_erc20(tokenAddress, 10);
+      vm.stopPrank();
+
+      Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
+      uint256 aliceBalanceAfter = token.balanceOf(alice);
+      uint256 contractBalanceAfter = token.balanceOf(address(rolldown));
+
+      // Assert
+      assertEq(l1Update.pendingDeposits.length, 1);
+      assertEq(l1Update.pendingCancelResolutions.length, 0);
+      assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
+      assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
+      assertEq(l1Update.pendingDeposits[0].amount, amount);
+      assertEq(aliceBalanceBefore - aliceBalanceAfter, 10);
+      assertEq(contractBalanceAfter - contractBalanceBefore, 10);
+    }
+
+
+     function testAcceptUpdateWithMultipleWithdrawals() public {
+        uint256 amount = 12345; 
+        token.mint(ALICE);
+
+        token.mint(address(rolldown));
+        vm.startPrank(ALICE);
         token.approve(address(rolldown), amount);
-        vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, alice, tokenAddress, amount);
-        rolldown.deposit_erc20(tokenAddress, 10);
+        rolldown.deposit_erc20(address(token), amount);
         vm.stopPrank();
 
-        Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
-        uint256 aliceBalanceAfter = token.balanceOf(alice);
-        uint256 contractBalanceAfter = token.balanceOf(address(rolldown));
+        L1Update memory l1Update = rolldown.getPendingRequests(1,1);
 
-        // Assert
-        assertEq(l1Update.pendingDeposits.length, 1);
-        assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
-        assertEq(l1Update.pendingDeposits[0].depositRecipient, alice);
-        assertEq(l1Update.pendingDeposits[0].tokenAddress, tokenAddress);
-        assertEq(l1Update.pendingDeposits[0].amount, amount);
-        assertEq(aliceBalanceBefore - aliceBalanceAfter, 10);
-        assertEq(contractBalanceAfter - contractBalanceBefore, 10);
-    }
+       Withdrawal memory withdrawalBob1 = IRolldownPrimitives.Withdrawal({
+         requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+         recipient: BOB,
+         tokenAddress: address(token),
+         amount: amount,
+         ferryTip: 0
+       });
 
-    function testAcceptL2Update() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 10;
-        deal(tokenAddress, alice, 100 ether);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), amount);
-        rolldown.deposit_erc20(tokenAddress, 10);
+       Withdrawal memory withdrawalBob2 = IRolldownPrimitives.Withdrawal({
+         requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
+         recipient: BOB,
+         tokenAddress: address(token),
+         amount: amount,
+         ferryTip: 0
+       });
 
-        Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
-        assertEq(l1Update.pendingDeposits.length, 1);
-        assertEq(l1Update.pendingL2UpdatesToRemove.length, 0);
-        assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingDeposits[0].requestId.id, 1);
+       Withdrawal memory withdrawalCharlie = IRolldownPrimitives.Withdrawal({
+         requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
+         recipient: CHARLIE,
+         tokenAddress: address(token),
+         amount: amount,
+         ferryTip: 0
+       });
 
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](1);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
+       Cancel memory cancel = IRolldownPrimitives.Cancel({
+         requestId: IRolldownPrimitives.RequestId({id: 4, origin: IRolldownPrimitives.Origin.L1}),
+         range: Range({start: 1, end: 1}),
+         hash: keccak256(abi.encode(l1Update))
+       });
+
+      //                             hash(hash(0, 1), hash(2, 3)) // AKA Merkle Root
+      //                     /                                        \
+      //                    /                                          \
+      //                   /                                            \
+      //               hash(0, 1)                                  hash(2, 3)
+      //           /             \                             /               \
+      //          /               \                           /                 \
+      //         /                 \                         /                   \
+      //       (0)                 (1)                      (2)                  (3)
+      // withdrawalBob1     withdrawalBob2            withdrawalCharlie         cancel
+
+
+      // manualy compure merkle root
+      bytes32 node_0 = keccak256(abi.encode(withdrawalBob1));
+      bytes32 node_1 = keccak256(abi.encode(withdrawalBob2));
+      bytes32 node_2 = keccak256(abi.encode(withdrawalCharlie));
+      bytes32 node_3 = keccak256(abi.encode(cancel));
+
+      bytes32 node_01 = keccak256(abi.encodePacked(node_0, node_1));
+      bytes32 node_23 = keccak256(abi.encodePacked(node_2, node_3));
+
+      bytes32 merkle_root = keccak256(abi.encodePacked(node_01, node_23));
+
+      // manualy compure merkle proofs
+      bytes32[] memory proof_withdrawalBob1 = new bytes32[](2);
+      proof_withdrawalBob1[0] = node_1;
+      proof_withdrawalBob1[1] = node_23;
+
+      bytes32[] memory proof_withdrawalBob2 = new bytes32[](2);
+      proof_withdrawalBob2[0] = node_0;
+      proof_withdrawalBob2[1] = node_23;
+
+      bytes32[] memory proof_withdrawalCharlie = new bytes32[](2);
+      proof_withdrawalCharlie[0] = node_3;
+      proof_withdrawalCharlie[1] = node_01;
+
+      vm.startPrank(ALICE);
+      rolldown.update_l1_from_l2(merkle_root, IRolldownPrimitives.Range({start: 1, end: 4}));
+      vm.stopPrank();
+
+      vm.startPrank(CHARLIE);
+      vm.expectRevert("Invalid proof");
+      rolldown.close_withdrawal(withdrawalBob1, merkle_root, proof_withdrawalCharlie);
+      vm.stopPrank();
+
+
+      vm.startPrank(ALICE);
+      vm.expectEmit(true, true, true, true);
+      emit IRolldownPrimitives.ERC20TokensWithdrawn(CHARLIE, address(token), 12345);
+      rolldown.close_withdrawal(withdrawalCharlie, merkle_root, proof_withdrawalCharlie);
+      vm.stopPrank();
+
+      vm.startPrank(CHARLIE);
+      vm.expectEmit(true, true, true, true);
+      emit IRolldownPrimitives.ERC20TokensWithdrawn(BOB, address(token), 12345);
+      rolldown.close_withdrawal(withdrawalBob1, merkle_root, proof_withdrawalBob1);
+      vm.stopPrank();
+
+      vm.startPrank(CHARLIE);
+      vm.expectEmit(true, true, true, true);
+      emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(cancel.requestId.id, false);
+      rolldown.close_cancel(cancel, merkle_root, toBytes32Array([node_2, node_01]));
+      vm.stopPrank();
+
+
+     }
+
+    function testCloseSameWithdrawalTwiceFails() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        token.mint(address(rolldown));
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: address(token),
+          amount: amount,
+          ferryTip: 0
         });
 
-        // Act
-        rolldown.update_l1_from_l2(l2Update);
-        //
-        l1Update = rolldown.getUpdateForL2();
-        assertEq(l1Update.pendingL2UpdatesToRemove.length, 1);
-        assertEq(l1Update.pendingDeposits.length, 0);
-        assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].requestId.id, 2);
-        assertEq(
-            l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
-            1
-        );
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove[0], 1);
-
-        Rolldown.L2Update memory l2Update2;
-        l2Update2.cancels = new Rolldown.Cancel[](0);
-        l2Update2.results = new Rolldown.RequestResult[](1);
-        l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-            status: true
-        });
-        rolldown.update_l1_from_l2(l2Update2);
-
-        l1Update = rolldown.getUpdateForL2();
-        assertEq(l1Update.pendingL2UpdatesToRemove.length, 1);
-        assertEq(l1Update.pendingDeposits.length, 0);
-        assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].requestId.id, 3);
-        assertEq(
-            l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
-            1
-        );
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove[0], 2);
-
-        Rolldown.L2Update memory l2Update3;
-        l2Update3.cancels = new Rolldown.Cancel[](0);
-        l2Update3.results = new Rolldown.RequestResult[](1);
-        l2Update3.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 3,
-            updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-            status: true
-        });
-        rolldown.update_l1_from_l2(l2Update3);
-
-        // Assert
-        l1Update = rolldown.getUpdateForL2();
-        assertEq(l1Update.pendingL2UpdatesToRemove.length, 1);
-        assertEq(l1Update.pendingDeposits.length, 0);
-        assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].requestId.id, 4);
-        assertEq(
-            l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
-            1
-        );
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove[0], 3);
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
-    }
 
-    function testIgnoreDuplicatedUpdates() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 10;
-        deal(tokenAddress, alice, 100 ether);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), amount);
-        rolldown.deposit_erc20(tokenAddress, 10);
+        bytes32[] memory proofs = new bytes32[](0);
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
 
-        Rolldown.L2Update memory l2Update;
-        l2Update.cancels = new Rolldown.Cancel[](0);
-        l2Update.results = new Rolldown.RequestResult[](1);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-
-        // Act
-        // make sure that executing same request does not alter the state
-        rolldown.update_l1_from_l2(l2Update);
-        vm.expectRevert("Invalid L2Update");
-        rolldown.update_l1_from_l2(l2Update);
+        vm.startPrank(ALICE);
+        vm.expectRevert("Already processed");
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
+
+        assertEq(token.balanceOf(recipient), 123456);        
+        assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
+        address status = rolldown.processedL2Requests(merkle_root);
+        assertTrue(status == rolldown.CLOSED());
+
     }
 
-    function testL1UpdateHashCompatibilityWithMangataNode() public {
-        Rolldown.L1Update memory l1Update;
-        l1Update.chain = ChainId.Ethereum;
-        l1Update.pendingDeposits = new Rolldown.Deposit[](1);
-        l1Update.pendingL2UpdatesToRemove = new Rolldown.L2UpdatesToRemove[](1);
-        l1Update.pendingCancelResolutions = new Rolldown.CancelResolution[](1);
-        l1Update
-            .pendingWithdrawalResolutions = new Rolldown.WithdrawalResolution[](
-            1
-        );
-
-        l1Update.pendingDeposits[0] = IRolldownPrimitives.Deposit({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L1}),
-            depositRecipient: 0x0000000000000000000000000000000000000002,
-            tokenAddress: 0x0000000000000000000000000000000000000003,
-            amount: 4,
-            timeStamp: 1
-        });
-
-        l1Update.pendingCancelResolutions[0] = IRolldownPrimitives.CancelResolution({
-            requestId: IRolldownPrimitives.RequestId({id: 6, origin: IRolldownPrimitives.Origin.L1}),
-            l2RequestId: 7,
-            cancelJustified: true,
-            timeStamp: 2
-        });
-
-        l1Update.pendingWithdrawalResolutions[0] = IRolldownPrimitives
-            .WithdrawalResolution({
-                requestId: IRolldownPrimitives.RequestId({
-                    id: 9,
-                    origin: IRolldownPrimitives.Origin.L1
-                }),
-                l2RequestId: 10,
-                status: true,
-                timeStamp: 3
-            });
-
-        uint256[] memory l2UpdatesToRemove = new uint256[](1);
-        l2UpdatesToRemove[0] = 13;
-        l1Update.pendingL2UpdatesToRemove[0] = IRolldownPrimitives.L2UpdatesToRemove({
-            requestId: IRolldownPrimitives.RequestId({id: 12, origin: IRolldownPrimitives.Origin.L1}),
-            l2UpdatesToRemove: l2UpdatesToRemove,
-            timeStamp: 4
-        });
-
-        assertEq(
-            keccak256(abi.encode(l1Update)),
-            0x3c1e43a559da200b6b94ab0efb9f273b653242cb014efe2310807ff26d1db2d1
-        );
-    }
-
-    function testL2UpdateHashCompatibilityWithMangataNode() public {
-        // TODO: add such  a test on substrate side
-        Rolldown.L2Update memory l2Update;
-        l2Update.cancels = new Rolldown.Cancel[](1);
-        l2Update.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update.results = new Rolldown.RequestResult[](1);
-
-        l2Update.cancels[0] = IRolldownPrimitives.Cancel({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            range: IRolldownPrimitives.Range({start: 2, end: 3}),
-            hash: 0x0000000000000000000000000000000000000000000000000000000000000004
-        });
-
-        l2Update.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 5, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: 0x0000000000000000000000000000000000000006,
-            tokenAddress: 0x0000000000000000000000000000000000000007,
-            amount: 8
-        });
-
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 9, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 10,
-            updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-            status: true
-        });
-
-        bytes32 l2Hash = 0x86056ca0e2dd30bb80627000335bd10a2a57699f532e665260ffebb55047544f;
-        assertEq(keccak256(abi.encode(l2Update)), l2Hash);
-    }
-
-    function testCancelResolutionWithNonMatchingHashResultsWithUnjustifiedStatus()
+    function testCancelWithNonMatchingHashResultsWithUnjustifiedStatus()
         public
     {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
+      uint256 amount = 123456;
+      token.mint(ALICE);
 
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](0);
-        l2Update.cancels = new Rolldown.Cancel[](1);
-        l2Update.cancels[0] = IRolldownPrimitives.Cancel({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            range: IRolldownPrimitives.Range({start: 1, end: 1}),
-            hash: bytes32(uint256(0))
-        });
+      Cancel memory cancel = IRolldownPrimitives.Cancel({
+        requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+        range: IRolldownPrimitives.Range({start: 1, end: 1}),
+        hash: 0x0000000000000000000000000000000000000000000000000000000000000000
+      });
 
-        vm.startPrank(alice);
-        vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, false);
-        rolldown.update_l1_from_l2(l2Update);
-        vm.stopPrank();
+      vm.startPrank(ALICE);
+      token.approve(address(rolldown), amount);
+      rolldown.deposit_erc20(address(token), amount);
+      vm.stopPrank();
+
+      vm.startPrank(ALICE);
+      // merkle_root of tree with single element is just that single element
+      bytes32 merkle_root = keccak256(abi.encode(cancel));
+      bytes32[] memory proofs = new bytes32[](0);
+      Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+      rolldown.update_l1_from_l2(merkle_root, range);
+      vm.stopPrank();
+
+      L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,2);
+      assertEq(l1UpdateBefore.pendingDeposits.length, 1);
+      assertEq(l1UpdateBefore.pendingCancelResolutions.length, 0);
+
+      vm.startPrank(ALICE);
+      vm.expectEmit(true, true, true, true);
+      emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, true);
+      rolldown.close_cancel(cancel, merkle_root, proofs);
+      vm.stopPrank();
+
+          
+      //validate pendingL2requests        
+      L1Update memory l1UpdateAfter = rolldown.getPendingRequests(1,2);
+      assertEq(l1UpdateAfter.pendingDeposits.length, 1);
+      assertEq(l1UpdateAfter.pendingCancelResolutions.length, 1);
+      assertEq(l1UpdateAfter.pendingCancelResolutions[0].l2RequestId, 1);
+      assertEq(l1UpdateAfter.pendingCancelResolutions[0].cancelJustified, true);
+      address status = rolldown.processedL2Requests(merkle_root);
+      assertTrue(status == rolldown.CLOSED());
     }
 
     function testCancelResolutionWithMatchingHashResultsWithJustifiedStatus()
         public
     {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, amount);
+        uint256 amount = 123456;
+        token.mint(ALICE);
 
-        // Act
-        vm.startPrank(alice);
+        vm.startPrank(ALICE);
         token.approve(address(rolldown), amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
+        rolldown.deposit_erc20(address(token), amount);
         vm.stopPrank();
 
-        Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
+        L1Update memory l1Update = rolldown.getPendingRequests(1,1);
 
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](0);
-        l2Update.cancels = new Rolldown.Cancel[](1);
-        l2Update.cancels[0] = IRolldownPrimitives.Cancel({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            range: IRolldownPrimitives.Range({start: 1, end: 1}),
-            hash: bytes32(keccak256(abi.encode(l1Update)))
+        Cancel memory cancel = IRolldownPrimitives.Cancel({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          range: IRolldownPrimitives.Range({start: 1, end: 1}),
+          hash: keccak256(abi.encode(l1Update))
         });
 
-        vm.startPrank(alice);
+
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(cancel));
+        bytes32[] memory proofs = new bytes32[](0);
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,2);
+        assertEq(l1UpdateBefore.pendingDeposits.length, 1);
+        assertEq(l1UpdateBefore.pendingCancelResolutions.length, 0);
+
+        vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, true);
-        rolldown.update_l1_from_l2(l2Update);
+        emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, false);
+        rolldown.close_cancel(cancel, merkle_root, proofs);
         vm.stopPrank();
-    }
-
-    function testProcessWithdraw() public {
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 10;
-
-        // Arrange
-        deal(tokenAddress, alice, 100 ether);
-
-        // Act
-        vm.startPrank(alice);
-        token.transfer(address(rolldown), amount);
-        uint256 aliceBalanceBefore = token.balanceOf(alice);
-        uint256 contractBalanceBefore = token.balanceOf(address(rolldown));
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](0);
-        l2Update.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: amount
-        });
-
-        rolldown.update_l1_from_l2(l2Update);
-        vm.stopPrank();
-    }
-
-    function testSuccessfulWithdrawalRequest() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](0);
-        l2Update.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 500
-        });
-
-        vm.startPrank(alice);
-        vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.WithdrawalResolutionAcceptedIntoQueue(2, true);
-        emit IRolldownPrimitives.FundsWithdrawn(alice, tokenAddress, 500);
-        rolldown.update_l1_from_l2(l2Update);
-        vm.stopPrank();
-
-        Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
-        assertEq(l1Update.pendingWithdrawalResolutions.length, 1);
+    
+        //validate pendingL2requests        
+        L1Update memory l1UpdateAfter = rolldown.getPendingRequests(1,2);
+        assertEq(l1UpdateAfter.pendingDeposits.length, 1);
+        assertEq(l1UpdateAfter.pendingCancelResolutions.length, 1);
+        assertEq(l1UpdateAfter.pendingCancelResolutions[0].l2RequestId, 1);
+        assertEq(l1UpdateAfter.pendingCancelResolutions[0].cancelJustified, false);
+        address status = rolldown.processedL2Requests(merkle_root);
+        assertTrue(status == rolldown.CLOSED());
     }
 
     function testUnsuccessfulWithdrawalRequest() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        vm.stopPrank();
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
 
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](0);
-        l2Update.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 1001
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: address(token),
+          amount: amount,
+          ferryTip: 0
         });
 
-        vm.startPrank(alice);
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+        assertEq(token.balanceOf(recipient), 0);
+
+        assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
+
+        vm.startPrank(ALICE);
+        vm.expectRevert("Not enough funds in contract");
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
+        assertEq(token.balanceOf(recipient), 0);
+        
+        assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
+        address status = rolldown.processedL2Requests(merkle_root);
+        assertTrue(status != rolldown.CLOSED());
+        L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,2);
+        assertEq(l1UpdateBefore.pendingDeposits.length, 0);
+        assertEq(l1UpdateBefore.pendingCancelResolutions.length, 0);
+
+    }
+
+    function testAcceptOnlyConsecutiveUpdatesWithoutGaps() public {
+        vm.startPrank(ALICE);
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 1}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 2, end: 2}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 2, end: 10}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 9, end: 11}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 12}));
+
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000001, IRolldownPrimitives.Range({start: 2, end: 13}));
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000002, IRolldownPrimitives.Range({start: 12, end: 14}));
+
+        vm.stopPrank();
+      // validate storage & getters after updates
+      uint256 lastId = 14;
+      assertEq(rolldown.lastProcessedUpdate_origin_l2(), lastId);
+      bytes32 expectedRoot = 0x0000000000000000000000000000000000000000000000000000000000000001;
+      (uint256 start, uint256 end)  = rolldown.merkleRootRange(expectedRoot);
+      assertEq(start, 2);
+      assertEq(end, 13);
+      
+      //New update win over old updates
+      Range memory range0 = rolldown.find_l2_batch(3);
+      assertEq(range0.start, 2);
+      assertEq(range0.end, 13);
+
+      Range memory range1 = rolldown.find_l2_batch(12);
+      assertEq(range1.start, 12);
+      assertEq(range1.end, 14);
+
+      vm.expectRevert("Invalid request id");
+      Range memory range2 = rolldown.find_l2_batch(66);
+      assertEq(range2.start, 0);
+      assertEq(range2.end, 0);
+      
+      
+    }
+
+    function testRejectUpdateWithoutNewRequests() public {
+        vm.startPrank(ALICE);
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 10}));
+        vm.stopPrank();
+
+        vm.startPrank(ALICE);
+        vm.expectRevert("Update brings no new data");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000001, IRolldownPrimitives.Range({start: 9, end: 9}));
+        vm.stopPrank();
+
+        vm.startPrank(ALICE);
+        vm.expectRevert("Update brings no new data");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000002, IRolldownPrimitives.Range({start: 1, end: 9}));
+        vm.stopPrank();
+
+        vm.startPrank(ALICE);
+        vm.expectRevert("Update brings no new data");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000003, IRolldownPrimitives.Range({start: 1, end: 10}));
+        vm.stopPrank();
+
+        vm.startPrank(ALICE);
+        vm.expectRevert("Update brings no new data");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000004, IRolldownPrimitives.Range({start: 10, end: 10}));
+        vm.stopPrank();
+
+        vm.startPrank(ALICE);
+        vm.expectRevert("Update brings no new data");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000005, IRolldownPrimitives.Range({start: 1, end: 1}));
+        vm.stopPrank();
+    }
+
+    function testRejectUpdateWithGaps() public {
+        vm.startPrank(ALICE);
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 1, end: 10}));
+        vm.stopPrank();
+
+        vm.startPrank(ALICE);
+        vm.expectRevert("Previous update missing");
+        rolldown.update_l1_from_l2(0x0000000000000000000000000000000000000000000000000000000000000000, IRolldownPrimitives.Range({start: 12, end: 12}));
+        vm.stopPrank();
+
+    }
+
+    function testVerifyBalancedMerkleRoot() public {
+      //                                   ROOT
+      //                      /                             \
+      //                     /                               \
+      //            /             \                    /              \
+      //           /               \                  /                \
+      //      /      \          /     \           /      \          /     \
+      //     /        \        /       \         /        \        /       \
+      // 0x00..00 0x11..11 0x22..22 0x33..33 0x44..44 0x55..55 0x66..66 0x77.77
+
+        bytes32 root_hash = 0x36e4d0b08be66e3c82af50073c3f2833ac26cb61026c0c16d2d58230d8682998;
+        bytes32[] memory proof = new bytes32[](3);
+
+        proof[0] = 0x1111111111111111111111111111111111111111111111111111111111111111;
+        proof[1] = 0xf3357627f4934d47fe409005b05c900777a6d97ec3788304e2d9c7b4d322cd4d;
+        proof[2] = 0x9aaa5fc7595410234204542d86b85ce74d07a1f98d62d1bbf23f1c2378cc3089;
+        assertEq(root_hash, rolldown.calculate_root(0x0000000000000000000000000000000000000000000000000000000000000000, 0, proof, 8));
+
+        proof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+        proof[1] = 0xf3357627f4934d47fe409005b05c900777a6d97ec3788304e2d9c7b4d322cd4d;
+        proof[2] = 0x9aaa5fc7595410234204542d86b85ce74d07a1f98d62d1bbf23f1c2378cc3089;
+        assertEq(root_hash, rolldown.calculate_root(0x1111111111111111111111111111111111111111111111111111111111111111, 1, proof, 8));
+
+        proof[0] = 0x3333333333333333333333333333333333333333333333333333333333333333;
+        proof[1] = 0x8e4b8e18156a1c7271055ce5b7ef53bb370294ebd631a3b95418a92da46e681f;
+        proof[2] = 0x9aaa5fc7595410234204542d86b85ce74d07a1f98d62d1bbf23f1c2378cc3089;
+        assertEq(root_hash, rolldown.calculate_root(0x2222222222222222222222222222222222222222222222222222222222222222, 2, proof, 8));
+
+        proof[0] = 0x2222222222222222222222222222222222222222222222222222222222222222;
+        proof[1] = 0x8e4b8e18156a1c7271055ce5b7ef53bb370294ebd631a3b95418a92da46e681f;
+        proof[2] = 0x9aaa5fc7595410234204542d86b85ce74d07a1f98d62d1bbf23f1c2378cc3089;
+        assertEq(root_hash, rolldown.calculate_root(0x3333333333333333333333333333333333333333333333333333333333333333, 3, proof, 8));
+
+        proof[0] = 0x5555555555555555555555555555555555555555555555555555555555555555;
+        proof[1] = 0x37df8a86dbd0a06a5a6720079d9a4ce5a5a5c93198607ca71402d78b7db2869e;
+        proof[2] = 0xd287edfff411d3b45e9c7bf7186d7e9d44fa2a0fe36d85154165da0a1d7ce5bd;
+        assertEq(root_hash, rolldown.calculate_root(0x4444444444444444444444444444444444444444444444444444444444444444, 4, proof, 8));
+
+        proof[0] = 0x4444444444444444444444444444444444444444444444444444444444444444;
+        proof[1] = 0x37df8a86dbd0a06a5a6720079d9a4ce5a5a5c93198607ca71402d78b7db2869e;
+        proof[2] = 0xd287edfff411d3b45e9c7bf7186d7e9d44fa2a0fe36d85154165da0a1d7ce5bd;
+        assertEq(root_hash, rolldown.calculate_root(0x5555555555555555555555555555555555555555555555555555555555555555, 5, proof, 8));
+
+        proof[0] = 0x7777777777777777777777777777777777777777777777777777777777777777;
+        proof[1] = 0x60c25b70d66af589f985b3cf4732585b8f7ecea5df88cb12368650edfe7e6f50;
+        proof[2] = 0xd287edfff411d3b45e9c7bf7186d7e9d44fa2a0fe36d85154165da0a1d7ce5bd;
+        assertEq(root_hash, rolldown.calculate_root(0x6666666666666666666666666666666666666666666666666666666666666666, 6, proof, 8));
+
+        proof[0] = 0x6666666666666666666666666666666666666666666666666666666666666666;
+        proof[1] = 0x60c25b70d66af589f985b3cf4732585b8f7ecea5df88cb12368650edfe7e6f50;
+        proof[2] = 0xd287edfff411d3b45e9c7bf7186d7e9d44fa2a0fe36d85154165da0a1d7ce5bd;
+        assertEq(root_hash, rolldown.calculate_root(0x7777777777777777777777777777777777777777777777777777777777777777, 7, proof, 8));
+    }
+
+    function testVerifyUnBalancedMerkleRoot1() public {
+      //                                   ROOT
+      //                      /                             \
+      //                     /                               \
+      //            /             \                    /              \
+      //           /               \                  /                \
+      //      /      \          /     \           /      \          /     \
+      //     /        \        /       \         /        \        /       \
+      // 0x00..00 0x11..11 0x22..22 0x33..33 0x44..44 0x55..55 0x66..66
+      //
+        bytes32 root_hash = 0x018f1011ee4add9a8c0e73b4909158862437ec4aadcc6ca697b357f49425e9ad;
+        bytes32[] memory proof = new bytes32[](3);
+
+        proof[0] = 0x60c25b70d66af589f985b3cf4732585b8f7ecea5df88cb12368650edfe7e6f50;
+        proof[1] = 0xd287edfff411d3b45e9c7bf7186d7e9d44fa2a0fe36d85154165da0a1d7ce5bd;
+        assertEq(root_hash, rolldown.calculate_root(0x6666666666666666666666666666666666666666666666666666666666666666, 6, proof, 7));
+    }
+
+    function testMerkleProofs() public {
+      string memory config_data = vm.readFile("./test/merkle-verificaction-testdata.json");
+      uint256 test_cases_amount = stdJson.readUint(config_data, ".cases_count");
+
+      for (uint256 i = 0; i < test_cases_amount ; ++i) {
+        console.log("TEST case: ", i);
+        uint256 leavePos = stdJson.readUint(config_data, string.concat(".cases.[", Strings.toString(i), "].leave_pos"));
+        bytes32 leaveHash = stdJson.readBytes32(config_data, string.concat(".cases.[", Strings.toString(i),"].leave_hash"));
+        bytes32 expectedRoot = stdJson.readBytes32(config_data, string.concat(".cases.[", Strings.toString(i),"].expected_root"));
+        bytes32[] memory proof = stdJson.readBytes32Array(config_data, string.concat(".cases.[", Strings.toString(i), "].proof"));
+        bytes32[] memory leaves = stdJson.readBytes32Array(config_data, string.concat(".cases.[", Strings.toString(i), "].leaves"));
+
+        assertEq(
+          rolldown.calculate_root(leaveHash, uint32(leavePos), proof, uint32(leaves.length)),
+          expectedRoot
+        );
+      }
+
+    }
+
+
+
+    function toBytes32Array(bytes32[2] memory input) internal pure returns (bytes32[] memory) {
+        bytes32[] memory result = new bytes32[](2);
+        result[0] = input[0];
+        result[1] = input[1];
+    return result;
+    }
+
+    function testRefundFailedERC20DepositWithoutFerryFee() public {
+        uint256 amount = 123456;
+        token.mint(address(rolldown));
+        token.mint(ALICE);
+
+        vm.startPrank(ALICE);
+        token.approve(address(rolldown), amount);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.WithdrawalResolutionAcceptedIntoQueue(2, false);
-        rolldown.update_l1_from_l2(l2Update);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, address(token), amount, 0);
+        rolldown.deposit_erc20(address(token), amount);
         vm.stopPrank();
+
+        FailedDepositResolution memory failedDeposit = IRolldownPrimitives.FailedDepositResolution({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          originRequestId: 1,
+          ferry: address(0)
+        });
+
+        vm.startPrank(ALICE);
+        bytes32 merkle_root = keccak256(abi.encode(failedDeposit));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        uint256 aliceBefore = token.balanceOf(ALICE);
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, keccak256(abi.encode(failedDeposit)));
+        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        vm.stopPrank();
+
+        uint256 aliceAfter = token.balanceOf(ALICE);
+        assertEq(aliceAfter - aliceBefore, amount);
     }
 
-    function testRejectL2UpdateWhenSubmittedSecondTime() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, 2 * amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), 2 * amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
 
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](0);
-        l2Update.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 1000
-        });
+    function testRefundFailedERC20DepositWithFerryFee() public {
+        uint256 amount = 123456;
+        uint256 fee = 10;
+        token.mint(address(rolldown));
+        token.mint(ALICE);
 
-        rolldown.update_l1_from_l2(l2Update);
-
-        vm.expectRevert("Invalid L2Update");
-        rolldown.update_l1_from_l2(l2Update);
-        vm.stopPrank();
-    }
-
-    function testDoNotRejectPartialyKnownL2Update() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, 2 * amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), 2 * amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](0);
-        l2Update.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 1000
-        });
-        rolldown.update_l1_from_l2(l2Update);
-
-        Rolldown.L2Update memory partiallyKnownUpdate;
-        partiallyKnownUpdate.results = new Rolldown.RequestResult[](0);
-        partiallyKnownUpdate.withdrawals = new Rolldown.Withdrawal[](2);
-        partiallyKnownUpdate.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 1000
-        });
-        partiallyKnownUpdate.withdrawals[1] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 1000
-        });
-
-        rolldown.update_l1_from_l2(partiallyKnownUpdate);
-        vm.stopPrank();
-    }
-
-    function testAcceptConsecutiveUpdates() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, 2 * amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), 2 * amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](2);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-
-        rolldown.update_l1_from_l2(l2Update);
-
-        Rolldown.L2Update memory l2Update2;
-        l2Update2.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update2.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 1000
-        });
-
-        l2Update2.results = new Rolldown.RequestResult[](1);
-        l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 4, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 3,
-            updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-            status: true
-        });
-
-        rolldown.update_l1_from_l2(l2Update2);
-        vm.stopPrank();
-    }
-
-    function testOverlapping() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, 2 * amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), 2 * amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](2);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-
-        rolldown.update_l1_from_l2(l2Update);
-
-        Rolldown.L2Update memory l2Update2;
-        l2Update2.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update2.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 1000
-        });
-
-        l2Update2.results = new Rolldown.RequestResult[](2);
-        l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update2.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-
-        rolldown.update_l1_from_l2(l2Update2);
-        vm.stopPrank();
-    }
-
-    function testWithdrawalAlongIndexUpdateWhenWithdrawalProcessedBeforeIndexUpdate()
-        public
-    {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, 2 * amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), 2 * amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](2);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-
-        rolldown.update_l1_from_l2(l2Update);
-
-        Rolldown.L2Update memory l2Update2;
-        l2Update2.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update2.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 1000
-        });
-
-        l2Update2.results = new Rolldown.RequestResult[](1);
-        l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 4, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 3,
-            updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-            status: true
-        });
-
-        rolldown.update_l1_from_l2(l2Update2);
-        Rolldown.L1Update memory update = rolldown.getUpdateForL2();
-        assertEq(update.pendingWithdrawalResolutions.length, 1);
-        assert(
-            update.pendingWithdrawalResolutions[0].requestId.origin ==
-                IRolldownPrimitives.Origin.L1
-        );
-        assertEq(update.pendingWithdrawalResolutions[0].requestId.id, 4);
-        vm.stopPrank();
-    }
-
-    function testWithdrawalAlongIndexUpdateWhenWithdrawalProcessedAfterIndexUpdate()
-        public
-    {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, 2 * amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), 2 * amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](2);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-
-        rolldown.update_l1_from_l2(l2Update);
-
-        Rolldown.L2Update memory l2Update2;
-        l2Update2.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update2.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 4, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 1000
-        });
-
-        l2Update2.results = new Rolldown.RequestResult[](1);
-        l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 3,
-            updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-            status: true
-        });
-
-        rolldown.update_l1_from_l2(l2Update2);
-        Rolldown.L1Update memory update = rolldown.getUpdateForL2();
-        assertEq(update.pendingWithdrawalResolutions.length, 1);
-        assert(
-            update.pendingWithdrawalResolutions[0].requestId.origin ==
-                IRolldownPrimitives.Origin.L1
-        );
-        assertEq(update.pendingWithdrawalResolutions[0].requestId.id, 4);
-        vm.stopPrank();
-    }
-
-    function testReproduceWithdrawalHandling() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, 2 * amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), 2 * amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](2);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-        rolldown.update_l1_from_l2(l2Update);
-
-        Rolldown.L2Update memory l2Update2;
-        l2Update2.results = new Rolldown.RequestResult[](1);
-        l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 3,
-            updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-            status: true
-        });
-        rolldown.update_l1_from_l2(l2Update2);
-
-        Rolldown.L2Update memory l2Update3;
-        l2Update3.results = new Rolldown.RequestResult[](1);
-        l2Update3.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 3,
-            updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-            status: true
-        });
-        l2Update3.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update3.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 4, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 1000
-        });
-        rolldown.update_l1_from_l2(l2Update3);
-
-        Rolldown.L2Update memory l2Update4;
-        l2Update4.results = new Rolldown.RequestResult[](2);
-        l2Update4.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 5, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 4,
-            updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-            status: true
-        });
-        l2Update4.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 6, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 5,
-            updateType: IRolldownPrimitives.UpdateType.WITHDRAWAL_RESOLUTION,
-            status: true
-        });
-        rolldown.update_l1_from_l2(l2Update4);
-        vm.stopPrank();
-    }
-
-    function testReproduceWithdrawalHandling2() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, 2 * amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), 2 * amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](2);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-        rolldown.update_l1_from_l2(l2Update);
-
-        Rolldown.L2Update memory l2Update2;
-        l2Update2.results = new Rolldown.RequestResult[](2);
-        l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update2.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-        l2Update2.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update2.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: alice,
-            tokenAddress: tokenAddress,
-            amount: 1000
-        });
-        rolldown.update_l1_from_l2(l2Update2);
-
-        Rolldown.L2Update memory l2Update3;
-        l2Update3.results = new Rolldown.RequestResult[](2);
-        l2Update3.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 4, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 3,
-            updateType: IRolldownPrimitives.UpdateType.WITHDRAWAL_RESOLUTION,
-            status: true
-        });
-        l2Update3.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 5, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.INDEX_UPDATE,
-            status: false
-        });
-        rolldown.update_l1_from_l2(l2Update3);
-        vm.stopPrank();
-    }
-
-    function testEveryRequestResultIsIncludedInSingleL2UpdatesToRemoveForOverlappingL2Updates()
-        public
-    {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, 2 * amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), 2 * amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](1);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        rolldown.update_l1_from_l2(l2Update);
-        Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
-        assertEq(l1Update.pendingL2UpdatesToRemove.length, 1);
-        assertEq(
-            l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
-            1
-        );
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove[0], 1);
-
-        Rolldown.L2Update memory l2Update2;
-        l2Update2.results = new Rolldown.RequestResult[](2);
-        l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update2.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-        rolldown.update_l1_from_l2(l2Update2);
-        rolldown.getUpdateForL2();
-
-        l1Update = rolldown.getUpdateForL2();
-        assertEq(l1Update.pendingL2UpdatesToRemove.length, 2);
-        assertEq(
-            l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove.length,
-            1
-        );
-        assertEq(l1Update.pendingL2UpdatesToRemove[0].l2UpdatesToRemove[0], 1);
-
-        assertEq(
-            l1Update.pendingL2UpdatesToRemove[1].l2UpdatesToRemove.length,
-            1
-        );
-        assertEq(l1Update.pendingL2UpdatesToRemove[1].l2UpdatesToRemove[0], 2);
-        vm.stopPrank();
-    }
-
-    function testUpdateWithWithdrawalAndRequestResult() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 1000;
-        deal(tokenAddress, alice, 2 * amount);
-        vm.startPrank(alice);
-        token.approve(address(rolldown), 2 * amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-        rolldown.deposit_erc20(tokenAddress, amount);
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](2);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 2, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 2,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-        rolldown.update_l1_from_l2(l2Update);
-
-        Rolldown.L2Update memory l2Update2;
-        l2Update2.results = new Rolldown.RequestResult[](2);
-        l2Update2.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 3, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        l2Update2.results[1] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 5, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-
-        l2Update2.withdrawals = new Rolldown.Withdrawal[](1);
-        l2Update2.withdrawals[0] = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: 4, origin: IRolldownPrimitives.Origin.L2}),
-            withdrawalRecipient: 0x0000000000000000000000000000000000000006,
-            tokenAddress: tokenAddress,
-            amount: 8
-        });
-        rolldown.update_l1_from_l2(l2Update2);
-        vm.stopPrank();
-    }
-
-    function testNonsuccessfullDepositHandling() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 10;
-        deal(tokenAddress, alice, 100 ether);
-        uint256 aliceBalanceBefore = token.balanceOf(alice);
-        uint256 contractBalanceBefore = token.balanceOf(address(rolldown));
-
-        // Act
-        vm.startPrank(alice);
+        vm.startPrank(ALICE);
         token.approve(address(rolldown), amount);
-        rolldown.deposit(tokenAddress, 10);
-        uint256 aliceBalanceAfterDeposit = token.balanceOf(alice);
-        uint256 contractAfterDeposit = token.balanceOf(address(rolldown));
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](1);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: false
-        });
-        rolldown.update_l1_from_l2(l2Update);
-        uint256 aliceBalanceAfterDepositUpdate = token.balanceOf(alice);
-        uint256 contractAfterDepositUpdate = token.balanceOf(address(rolldown));
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, address(token), amount, fee);
+        rolldown.deposit_erc20(address(token), amount, fee);
         vm.stopPrank();
 
-        assertEq(aliceBalanceBefore - aliceBalanceAfterDeposit, 10);
-        assertEq(contractAfterDeposit - contractBalanceBefore, 10);
-        assertEq(aliceBalanceBefore - aliceBalanceAfterDepositUpdate, 0);
-        assertEq(contractBalanceBefore - contractAfterDepositUpdate, 0);
+        FailedDepositResolution memory failedDeposit = IRolldownPrimitives.FailedDepositResolution({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          originRequestId: 1,
+          ferry: address(0)
+        });
+
+        vm.startPrank(ALICE);
+        bytes32 merkle_root = keccak256(abi.encode(failedDeposit));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        uint256 aliceBefore = token.balanceOf(ALICE);
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1,  1, keccak256(abi.encode(failedDeposit)));
+        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        vm.stopPrank();
+
+        uint256 aliceAfter = token.balanceOf(ALICE);
+        assertEq(aliceAfter - aliceBefore, amount);
     }
 
-    function testSuccessfullDepositHandling() public {
-        // Arrange
-        address payable alice = users[0];
-        token = new MyERC20();
-        address tokenAddress = address(token);
-        uint256 amount = 10;
-        deal(tokenAddress, alice, 100 ether);
-        uint256 aliceBalanceBefore = token.balanceOf(alice);
-        uint256 contractBalanceBefore = token.balanceOf(address(rolldown));
+    function testRefundFailedERC20FerriedDepositWithoutFerryFee() public {
+        address ferry = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        token.mint(address(rolldown));
+        token.mint(ALICE);
 
-        // Act
-        vm.startPrank(alice);
+        vm.startPrank(ALICE);
         token.approve(address(rolldown), amount);
-        rolldown.deposit(tokenAddress, 10);
-        uint256 aliceBalanceAfterDeposit = token.balanceOf(alice);
-        uint256 contractAfterDeposit = token.balanceOf(address(rolldown));
-
-        Rolldown.L2Update memory l2Update;
-        l2Update.results = new Rolldown.RequestResult[](1);
-        l2Update.results[0] = IRolldownPrimitives.RequestResult({
-            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
-            originRequestId: 1,
-            updateType: IRolldownPrimitives.UpdateType.DEPOSIT,
-            status: true
-        });
-        rolldown.update_l1_from_l2(l2Update);
-        uint256 aliceBalanceAfterDepositUpdate = token.balanceOf(alice);
-        uint256 contractAfterDepositUpdate = token.balanceOf(address(rolldown));
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, address(token), amount, 0);
+        rolldown.deposit_erc20(address(token), amount);
         vm.stopPrank();
 
-        assertEq(aliceBalanceBefore - aliceBalanceAfterDeposit, 10);
-        assertEq(contractAfterDeposit - contractBalanceBefore, 10);
-        assertEq(aliceBalanceBefore - aliceBalanceAfterDepositUpdate, 10);
-        assertEq(contractAfterDepositUpdate - contractBalanceBefore, 10);
+        FailedDepositResolution memory failedDeposit = IRolldownPrimitives.FailedDepositResolution({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          originRequestId: 1,
+          ferry: ferry
+        });
+
+        vm.startPrank(ALICE);
+        bytes32 merkle_root = keccak256(abi.encode(failedDeposit));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+        assertEq(token.balanceOf(ferry), 0);
+
+        uint256 aliceBefore = token.balanceOf(ALICE);
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.ERC20TokensWithdrawn(ferry, address(token), amount);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, keccak256(abi.encode(failedDeposit)));
+        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(token.balanceOf(ALICE), aliceBefore);
+        assertEq(token.balanceOf(ferry), amount);
     }
+
+    function testRefundFailedERC20FerriedDepositWithFerryFee() public {
+        address ferry = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        uint256 fee = 10;
+        token.mint(address(rolldown));
+        token.mint(ALICE);
+
+        vm.startPrank(ALICE);
+        token.approve(address(rolldown), amount);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, address(token), amount, fee);
+        rolldown.deposit_erc20(address(token), amount, fee);
+        vm.stopPrank();
+
+        FailedDepositResolution memory failedDeposit = IRolldownPrimitives.FailedDepositResolution({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          originRequestId: 1,
+          ferry: ferry
+        });
+
+        vm.startPrank(ALICE);
+        bytes32 merkle_root = keccak256(abi.encode(failedDeposit));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        uint256 aliceBefore = token.balanceOf(ALICE);
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.ERC20TokensWithdrawn(ferry, address(token), amount);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1,  1, keccak256(abi.encode(failedDeposit)));
+        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(token.balanceOf(ALICE), aliceBefore);
+        assertEq(token.balanceOf(ferry), amount);
+    }
+
+    function testRefundFailedNativeDepositWithoutFerryFee() public {
+        uint256 amount = 123456;
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, NATIVE_TOKEN_ADDRESS, amount, 0);
+        rolldown.deposit_native{value: amount}();
+        vm.stopPrank();
+
+        FailedDepositResolution memory failedDeposit = IRolldownPrimitives.FailedDepositResolution({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          originRequestId: 1,
+          ferry: address(0)
+        });
+
+        vm.startPrank(ALICE);
+        bytes32 merkle_root = keccak256(abi.encode(failedDeposit));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+        uint256 aliceBefore = ALICE.balance;
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, keccak256(abi.encode(failedDeposit)));
+        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(ALICE.balance - aliceBefore, amount);
+    }
+
+
+    function testRefundFailedNativeDepositWithFerryFee() public {
+        uint256 amount = 123456;
+        uint256 fee = 10;
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, NATIVE_TOKEN_ADDRESS, amount, fee);
+        rolldown.deposit_native{value: amount}(fee);
+        vm.stopPrank();
+
+        FailedDepositResolution memory failedDeposit = IRolldownPrimitives.FailedDepositResolution({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          originRequestId: 1,
+          ferry: address(0)
+        });
+
+        vm.startPrank(ALICE);
+        bytes32 merkle_root = keccak256(abi.encode(failedDeposit));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        uint256 aliceBefore = ALICE.balance;
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1,  1, keccak256(abi.encode(failedDeposit)));
+        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(ALICE.balance - aliceBefore, amount);
+    }
+
+    function testRefundFailedNativeFerriedDepositWithoutFerryFee() public {
+        address ferry = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, NATIVE_TOKEN_ADDRESS, amount, 0);
+        rolldown.deposit_native{value: amount}();
+        vm.stopPrank();
+
+        FailedDepositResolution memory failedDeposit = IRolldownPrimitives.FailedDepositResolution({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          originRequestId: 1,
+          ferry: ferry
+        });
+
+        vm.startPrank(ALICE);
+        bytes32 merkle_root = keccak256(abi.encode(failedDeposit));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+        assertEq(ferry.balance, 0);
+
+        uint256 aliceBefore = ALICE.balance;
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.NativeTokensWithdrawn(ferry,  amount);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, keccak256(abi.encode(failedDeposit)));
+        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(ALICE.balance, aliceBefore);
+        assertEq(ferry.balance, amount);
+    }
+
+    function testRefundFailedNativeFerriedDepositWithFerryFee() public {
+        address ferry = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        uint256 fee = 10;
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.DepositAcceptedIntoQueue(1, ALICE, NATIVE_TOKEN_ADDRESS, amount, fee);
+        rolldown.deposit_native{value: amount}(fee);
+        vm.stopPrank();
+
+        FailedDepositResolution memory failedDeposit = IRolldownPrimitives.FailedDepositResolution({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          originRequestId: 1,
+          ferry: ferry
+        });
+
+        vm.startPrank(ALICE);
+        bytes32 merkle_root = keccak256(abi.encode(failedDeposit));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        uint256 aliceBefore = ALICE.balance;
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.NativeTokensWithdrawn(ferry,  amount);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1,  1, keccak256(abi.encode(failedDeposit)));
+        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(ALICE.balance, aliceBefore);
+        assertEq(ferry.balance, amount);
+    }
+
+
+    function testFerryWithdrawalErc20WithTip() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        uint256 ferryTip = 10;
+        token.mint(address(rolldown));
+        token.mint(address(ALICE));
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: address(token),
+          amount: amount,
+          ferryTip: ferryTip 
+        });
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+        uint256 ferryBefore = token.balanceOf(ALICE);
+
+        vm.startPrank(ALICE);
+        token.approve(address(rolldown), amount - ferryTip);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.WithdrawalFerried(withdrawal.requestId.id, amount - ferryTip, recipient, ALICE, withdrawalHash);
+        rolldown.ferry_withdrawal(withdrawal);
+        vm.stopPrank();
+
+        assertEq(token.balanceOf(recipient), amount - ferryTip);
+        assertEq(token.balanceOf(ALICE), ferryBefore - amount + ferryTip);
+
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        uint256 aliceBefore = token.balanceOf(ALICE);
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
+        emit IRolldownPrimitives.WithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(token.balanceOf(ALICE), ferryBefore + ferryTip);
+    }
+
+    // NOTE: how to handle ferries without ferry fee, they can they be considered close?
+    function testFerryWithdrawalErc20WithoutTip() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        token.mint(address(rolldown));
+        token.mint(address(ALICE));
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: address(token),
+          amount: amount,
+          ferryTip: 0 
+        });
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+        uint256 ferryBefore = token.balanceOf(ALICE);
+
+        vm.startPrank(ALICE);
+        token.approve(address(rolldown), amount);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.WithdrawalFerried(withdrawal.requestId.id, amount, recipient, ALICE, withdrawalHash);
+        rolldown.ferry_withdrawal(withdrawal);
+        vm.stopPrank();
+
+        assertEq(token.balanceOf(recipient), amount);
+        assertEq(token.balanceOf(ALICE), ferryBefore - amount);
+
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        // uint256 aliceBefore = token.balanceOf(ALICE);
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
+        emit IRolldownPrimitives.WithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(token.balanceOf(ALICE), ferryBefore);
+    }
+
+
+    function testFerryWithdrawalNativeWithTip() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        uint256 ferryTip = 10;
+        deal(address(rolldown), 999999 ether);
+        deal(ALICE, 123466 ether);
+        uint256 aliceBefore = ALICE.balance;
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: NATIVE_TOKEN_ADDRESS,
+          amount: amount,
+          ferryTip: ferryTip 
+        });
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+        uint256 ferryBefore = ALICE.balance;
+
+        vm.startPrank(ALICE);
+        // token.approve(address(rolldown), amount - ferryTip);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.WithdrawalFerried(withdrawal.requestId.id, amount - ferryTip, recipient, ALICE, withdrawalHash);
+        rolldown.ferry_withdrawal{value: amount - ferryTip}(withdrawal);
+        vm.stopPrank();
+
+        assertEq(recipient.balance, amount - ferryTip);
+        assertEq(ALICE.balance, ferryBefore - amount + ferryTip);
+
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
+        emit IRolldownPrimitives.FerriedWithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(ALICE.balance, aliceBefore + ferryTip);
+    }
+
+    function testFerryWithdrawalNativeWithoutTip() public {
+        address recipient = 0x0000000000000000000000000000000000000006;
+        uint256 amount = 123456;
+        deal(address(rolldown), 999999 ether);
+        deal(ALICE, 123466 ether);
+        uint256 aliceBefore = ALICE.balance;
+
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+          requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L2}),
+          recipient: recipient,
+          tokenAddress: NATIVE_TOKEN_ADDRESS,
+          amount: amount,
+          ferryTip: 0 
+        });
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+
+        uint256 ferryBefore = ALICE.balance;
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.WithdrawalFerried(withdrawal.requestId.id, amount, recipient, ALICE, withdrawalHash);
+        rolldown.ferry_withdrawal{value: amount}(withdrawal);
+        vm.stopPrank();
+
+        assertEq(recipient.balance, amount);
+        assertEq(ALICE.balance, ferryBefore - amount);
+
+        vm.startPrank(ALICE);
+        // merkle_root of tree with single element is just that single element
+        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
+        rolldown.update_l1_from_l2(merkle_root, range);
+        vm.stopPrank();
+
+        bytes32[] memory proofs = new bytes32[](0);
+
+        vm.startPrank(ALICE);
+        vm.expectEmit(true, true, true, true);
+        emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
+        emit IRolldownPrimitives.FerriedWithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
+
+        assertEq(ALICE.balance, aliceBefore);
+    }
+
+    /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    /// NOTE: Below hash values should not be ever chaned, there are comaptible test implemented in mangata to node
+    /// to ensure abi compatibility between L1 & L2
+    /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    function testL1UpdateHashCompatibilityWithMangataNode() public {
+        Rolldown.L1Update memory l1Update;
+        l1Update.chain = ChainId.Ethereum;
+        l1Update.pendingDeposits = new Rolldown.Deposit[](1);
+        l1Update.pendingCancelResolutions = new Rolldown.CancelResolution[](1);
+
+        l1Update.pendingDeposits[0] = IRolldownPrimitives.Deposit({
+            requestId: IRolldownPrimitives.RequestId({id: 1, origin: IRolldownPrimitives.Origin.L1}),
+            depositRecipient: 0x1111111111111111111111111111111111111111,
+            tokenAddress: 0x2222222222222222222222222222222222222222,
+            amount: 123456,
+            timeStamp: 987,
+            ferryTip: 321987
+        });
+
+        l1Update.pendingCancelResolutions[0] = IRolldownPrimitives.CancelResolution({
+            requestId: IRolldownPrimitives.RequestId({id: 123, origin: IRolldownPrimitives.Origin.L1}),
+            l2RequestId: 123456,
+            cancelJustified: true,
+            timeStamp: 987
+        });
+
+        uint256[] memory l2UpdatesToRemove = new uint256[](1);
+        l2UpdatesToRemove[0] = 13;
+
+
+        assertEq(
+            keccak256(abi.encode(l1Update)),
+            0x663fa3ddfe64659f67b2728637936fa8d21f18ef96c07dec110cdd8f45be6fee
+        );
+    }
+
+    function testChainWithMangataNode() public {
+
+        assertEq(
+            keccak256(abi.encode(ChainId.Ethereum)),
+            0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563
+        );
+
+        assertEq(
+            keccak256(abi.encode(ChainId.Arbitrum)),
+            0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6
+        );
+    }
+
+    function testWithdrawalHash() public {
+        Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+            requestId: IRolldownPrimitives.RequestId({id: 123, origin: IRolldownPrimitives.Origin.L2}),
+            recipient: address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF),
+            tokenAddress: 0x1f1f1F1f1F1f1f1F1F1F1f1F1f1F1f1F1F1F1F1F,
+            amount: 123456,
+            ferryTip: 465789
+        });
+
+
+        assertEq(
+            keccak256(abi.encode(withdrawal)),
+            0xa931da68c445f23b06a72768d07a3513f85c0118ff80f6e284117a221869ae8b
+        );
+    }
+
+    function testDepositResolutionHashMatches() public {
+
+        FailedDepositResolution memory failedDeposit = FailedDepositResolution({
+            requestId: IRolldownPrimitives.RequestId({id: 123, origin: IRolldownPrimitives.Origin.L1}),
+            originRequestId: 1234,
+            ferry: 0xb5b5B5b5B5b5B5B5B5B5B5b5B5B5B5b5B5B5b5b5
+        });
+
+
+        assertEq(
+            keccak256(abi.encode(failedDeposit)),
+            0xd3def31efb42dd99500c389f59115f0eef5e008db0ee0a81562ef3acbe02eece
+        );
+
+    }
+
 }

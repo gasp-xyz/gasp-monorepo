@@ -7,6 +7,7 @@ import "../../src/ERC20Mock.sol";
 
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";
+import {IRolldownPrimitives} from "../../src/Rolldown.sol";
 
 contract Utils is Script {
     // Note that this fct will only work for the ERC20Mock that has a public mint function
@@ -62,18 +63,52 @@ contract Utils is Script {
             return "UNKNOWN";
         }
     }
+    function calculateInputPath(
+        string memory inputfilename
+    ) internal view returns (string memory) {
+        string memory inputdir = string.concat(
+            vm.projectRoot(),
+            "/script/input/"
+        );
+        string memory chaindir = string.concat(vm.toString(block.chainid), "/");
+        string memory file = string.concat(inputfilename, ".json");
+        return string.concat(inputdir, chaindir, file);
+    }
+
+    function calculateOutputPath(
+        string memory outputfilename
+    ) internal view returns (string memory) {
+        string memory outputdir = string.concat(
+            vm.projectRoot(),
+            "/script/output/"
+        );
+        string memory chaindir = string.concat(vm.toString(block.chainid), "/");
+        string memory file = string.concat(outputfilename, ".json");
+        return string.concat(outputdir, chaindir, file);
+    }
+
+
+    // Forge scripts best practice: https://book.getfoundry.sh/tutorials/best-practices#scripts
+    function inputExists(
+        string memory inputFileName
+    ) internal returns (bool) {
+        string memory input = calculateInputPath(inputFileName);
+        console.log(input);
+        return vm.exists(calculateInputPath(inputFileName));
+    }
+
 
     // Forge scripts best practice: https://book.getfoundry.sh/tutorials/best-practices#scripts
     function readInput(
         string memory inputFileName
     ) internal view returns (string memory) {
-        string memory inputDir = string.concat(
-            vm.projectRoot(),
-            "/script/input/"
-        );
-        string memory chainDir = string.concat(vm.toString(block.chainid), "/");
-        string memory file = string.concat(inputFileName, ".json");
-        return vm.readFile(string.concat(inputDir, chainDir, file));
+        return vm.readFile(calculateInputPath(inputFileName));
+    }
+
+    function readOutput(
+        string memory outputFileName
+    ) internal view returns (string memory) {
+        return vm.readFile(calculateOutputPath(outputFileName));
     }
 
     function readConfig(
@@ -104,5 +139,19 @@ contract Utils is Script {
             ".json"
         );
         vm.writeJson(outputJson, outputFilePath);
+    }
+
+    function evmPrefixedPath(IRolldownPrimitives.ChainId chain, string memory path) public view returns (string memory) {
+      string memory evm;
+
+      if (chain == IRolldownPrimitives.ChainId.Ethereum) {
+        evm = "ethereum_";
+      } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
+        evm = "arbitrum_"; 
+      } else {
+        revert("Unsupported chain");
+      }
+
+      return string.concat(evm, path);
     }
 }

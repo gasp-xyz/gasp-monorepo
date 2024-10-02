@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "contracts-{{ .Values.envSelector }}-{{ .Values.image.tag | trunc 7 }}"
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  # This job will be automatically deleted in 10 mins after it completes
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      initContainers:
+        - name: wait-for-evm
+          image: busybox
+          command: ["sh", "-c", "until nc -zv {{ include "app.name" . }} 8545; do sleep 5; done"]
+      containers:
+        - name: forge
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
+          command: ["/bin/sh"]
+          args:
+            - -c
+            - |
+              set -ex
+              # Deploy all contracts
+              forge script script/MultiStage.s.sol \
+                --rpc-url http://{{ include "app.name" . }}:8545 \
+                --private-key {{ .Values.privateKey }} \
+                {{- if .Values.verifierEnabled }}
+                --verifier {{ .Values.verifierName }} --verifier-url {{ .Values.verifierUrl | quote }} \
+                {{- end }}
+                --broadcast -v
+          env:
+            - name: ENV_SELECTOR
+              value: {{ .Values.envSelector }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      restartPolicy: Never
+  backoffLimit: 1

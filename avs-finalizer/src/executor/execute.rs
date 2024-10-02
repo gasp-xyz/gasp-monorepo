@@ -11,7 +11,7 @@ use sp_runtime::{
     traits::{Block as BlockT, Hash, Header as HeaderT, Keccak256, NumberFor},
 };
 use std::{fmt::Debug, str::FromStr};
-use substrate_rpc_client::{rpc_params, ws_client, ChainApi, ClientT};
+use substrate_rpc_client::{rpc_params, ws_client, ChainApi};
 use tracing::instrument;
 
 #[instrument(skip(uri))]
@@ -68,10 +68,16 @@ where
     )?;
     let hash = Keccak256::hash_of(&proof);
 
-    let params = rpc_params!("Ethereum", block_hash);
-    let update_hash = rpc
-        .request::<H256, _>("rolldown_pending_l2_requests_hash", params)
-        .await?;
+    let _params = rpc_params!("Ethereum", block_hash);
+    // TODO: replace with callculating merkle root once the requests range is included in eigen
+    // layer task (to know what range to calculate)
+    // let update_hash = rpc
+    //     .request::<H256, _>("rolldown_pending_l2_requests_hash", params)
+    //     .await?;
+
+    // tempoarary calculate update_hash as the hash of the proof hash
+    // to always have unique values that operators may aggree on each block
+    let update_hash = Keccak256::hash_of(&proof);
 
     Ok((block_hash.into(), hash, update_hash))
 }

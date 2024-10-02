@@ -1,0 +1,5 @@
+nameOverride: ''
+url: ''
+port: 9944
+serviceSelector:
+  role: rpc

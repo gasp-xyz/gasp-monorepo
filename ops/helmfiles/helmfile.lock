@@ -1,0 +1,10 @@
+version: v0.166.0
+dependencies:
+- name: blockscout-stack
+  repository: https://blockscout.github.io/helm-charts
+  version: 1.6.2
+- name: node
+  repository: git+https://github.com/mangata-finance/helm-charts@charts?ref=node-v2.3.0
+  version: 2.3.0
+digest: sha256:8dcd3595f7b7c6152f4aff52143c60e58871c93e324f8d067baf13633186b170
+generated: "2024-07-03T22:55:59.068479+01:00"

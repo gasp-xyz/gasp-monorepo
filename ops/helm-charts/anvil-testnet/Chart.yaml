@@ -1,5 +1,0 @@
-apiVersion: v2
-name: anvil-testnet
-description: A Helm chart for deploying forge's anvil testnet
-type: application
-version: 0.1.0

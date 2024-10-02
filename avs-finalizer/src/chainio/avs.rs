@@ -1,16 +1,21 @@
 use std::{fmt::Debug, sync::Arc};
 
 use bindings::{
+    bls_apk_registry::BLSApkRegistry,
     finalizer_service_manager::FinalizerServiceManager,
-    finalizer_task_manager::{FinalizerTaskManager, NewTaskCreatedFilter},
+    finalizer_task_manager::{
+        FinalizerTaskManager, FinalizerTaskManagerEvents, NewOpTaskCreatedFilter,
+        NewRdTaskCreatedFilter,
+    },
     registry_coordinator::RegistryCoordinator,
     shared_types::OperatorInfo,
+    stake_registry::StakeRegistry,
     strategy_manager_storage::{PubkeyRegistrationParams, SignatureWithSaltAndExpiry},
 };
 use ethers::{
     contract::{EthEvent, Event},
     providers::{Provider, Ws},
-    types::{Filter, TransactionReceipt, H256, U64},
+    types::{Address, Filter, TransactionReceipt, H256, U64},
 };
 use eyre::{eyre, Ok, OptionExt};
 
@@ -22,11 +27,14 @@ use crate::{
 use super::{map_revert, Client};
 
 pub struct AvsContracts {
-    service_manager: FinalizerServiceManager<Client>,
-    task_manager: FinalizerTaskManager<Client>,
-    task_manager_sub: FinalizerTaskManager<Provider<Ws>>,
-    registry: RegistryCoordinator<Client>,
-    client: Arc<Client>,
+    pub service_manager: FinalizerServiceManager<Client>,
+    pub task_manager: FinalizerTaskManager<Client>,
+    pub task_manager_sub: FinalizerTaskManager<Provider<Ws>>,
+    pub registry_coordinator_address: Address,
+    pub registry: RegistryCoordinator<Client>,
+    pub stake_registry: StakeRegistry<Client>,
+    pub bls_apk_registry: BLSApkRegistry<Client>,
+    pub client: Arc<Client>,
     pub ws_client: Arc<Provider<Ws>>,
 }
 
@@ -57,19 +65,32 @@ impl AvsContracts {
         let task_manager = FinalizerTaskManager::new(task_manager_addr, client.clone());
         let task_manager_sub = FinalizerTaskManager::new(task_manager_addr, ws_client.clone());
 
+        let bls_apk_registry_addr = registry.bls_apk_registry().await?;
+        let bls_apk_registry = BLSApkRegistry::new(bls_apk_registry_addr, client.clone());
+        let stake_registry_addr = registry.stake_registry().await?;
+        let stake_registry = StakeRegistry::new(stake_registry_addr, client.clone());
+
         Ok(Self {
             service_manager,
             task_manager,
             task_manager_sub,
+            registry_coordinator_address: config.avs_registry_coordinator_addr,
             registry,
+            stake_registry,
+            bls_apk_registry,
             client,
             ws_client,
         })
     }
 
-    pub fn new_task_stream(&self) -> Event<Arc<Provider<Ws>>, Provider<Ws>, NewTaskCreatedFilter> {
+    pub fn new_task_stream(
+        &self,
+    ) -> Event<Arc<Provider<Ws>>, Provider<Ws>, FinalizerTaskManagerEvents> {
         self.task_manager_sub
-            .event_with_filter(Filter::new().event(&NewTaskCreatedFilter::abi_signature()))
+            .event_with_filter(Filter::new().events([
+                NewOpTaskCreatedFilter::abi_signature().into_owned(),
+                NewRdTaskCreatedFilter::abi_signature().into_owned(),
+            ]))
     }
 
     pub async fn operator_id(&self) -> eyre::Result<Option<H256>> {

@@ -1,0 +1,27 @@
+{{- if .Values.remoteCluster -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "app.name" . }}
+  labels: {{- include "app.labels" . | nindent 4 }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: "{{ include "app.name" . }}-{{ .Values.environment }}.{{ .Values.domainZone }}"
+    kubernetes.io/tls-acme: 'true'
+spec:
+  ingressClassName: {{ .Values.ingressClassName }}
+  rules:
+    - host: "{{ include "app.name" . }}-{{ .Values.environment }}.{{ .Values.domainZone }}"
+      http:
+        paths:
+        - pathType: Prefix
+          path: /
+          backend:
+            service:
+              name: {{ include "app.name" . }}
+              port:
+                number: 8545
+  tls:
+    - hosts:
+        - "{{ include "app.name" . }}-{{ .Values.environment }}.{{ .Values.domainZone }}"
+      secretName: {{ include "app.name" . }}-tls
+{{- end }}

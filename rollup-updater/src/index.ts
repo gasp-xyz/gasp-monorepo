@@ -1,15 +1,20 @@
-import { Mangata } from "@mangata-finance/sdk";
-import "@mangata-finance/types";
-import "@mangata-finance/types";
 import "dotenv/config";
+import { Mangata } from "gasp-sdk";
+import "gasp-types";
 import {
+	DEV_MODE,
 	EIGEN_ABI,
 	EIGEN_CONTRACT_ADDRESS,
 	FINALIZATION_SOURCE,
 	MANGATA_NODE_URL,
 } from "./common/constants.js";
 import "./util/polyfill.js";
-import { print, sendUpdateToL1 } from "./util/utils.js";
+import {
+	closeWithdrawals,
+	getLatestRequestIdSubmittedToL1,
+	print,
+	sendUpdateToL1,
+} from "./util/utils.js";
 import {
 	ethAccount,
 	getChain,
@@ -31,6 +36,7 @@ async function main() {
 
 	let unwatch: any;
 	let inProgress = false;
+	let latestRequestIdSubmittedToL1 = 0n;
 
 	if (FINALIZATION_SOURCE === "relay") {
 		unwatch = await api.rpc.chain.subscribeFinalizedHeads(async (header) => {
@@ -38,20 +44,19 @@ async function main() {
 				inProgress = true;
 				print(`Chain is at block: #${header.number}`);
 
-				const txHash = await sendUpdateToL1(
-					api,
-					walletClient,
-					publicClient,
-					header.hash,
-				);
-				if (txHash) {
-					const result = await publicClient.waitForTransactionReceipt({
-						hash: txHash,
-					});
-					print(
-						`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
+				if (DEV_MODE !== "false") {
+					console.log(
+						"DEV_MODE is enabled. Withdrawals will be autoamtically executed",
+					);
+					latestRequestIdSubmittedToL1 = await closeWithdrawals(
+						api,
+						walletClient,
+						publicClient,
+						latestRequestIdSubmittedToL1,
 					);
 				}
+
+				await sendUpdateToL1(api, walletClient, publicClient, header.hash);
 				inProgress = false;
 			} else {
 				print(`Chain is at block: #${header.number} - tx pending`);
@@ -62,24 +67,16 @@ async function main() {
 		unwatch = publicClient.watchContractEvent({
 			address: EIGEN_CONTRACT_ADDRESS,
 			abi: EIGEN_ABI,
-			eventName: "TaskCompleted",
+			eventName: "RdTaskCompleted",
 			onLogs: async (logs) => {
 				print("Received task notification from L1");
 				for (const log of logs) {
-					const txHash = await sendUpdateToL1(
+					await sendUpdateToL1(
 						api,
 						walletClient,
 						publicClient,
 						(log as any).args.blockHash,
 					);
-					if (txHash) {
-						const result = await publicClient.waitForTransactionReceipt({
-							hash: txHash,
-						});
-						print(
-							`#${result.blockNumber} ${result.transactionHash} : ${result.status}`,
-						);
-					}
 				}
 			},
 		});
@@ -108,7 +105,6 @@ async function main() {
 main()
 	.then(() => print("Success"))
 	.catch((e) => {
-      console.error("Something went wrong", e)
-      process.exit(1);
-    }
-  );
+		console.error("Something went wrong", e);
+		process.exit(1);
+	});

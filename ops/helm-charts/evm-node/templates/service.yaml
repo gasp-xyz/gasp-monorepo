@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "app.name" . }}
+  {{- if .Values.remoteCluster }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: "{{ include "app.name" . }}-{{ .Values.environment }}.{{ .Values.domainZone }}"
+  {{- end }}
+  labels: {{- include "app.labels" . | nindent 4 }}
+    service: {{ include "app.name" . }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8545
+      name: rpc
+    - port: 8546
+      name: rpc-ws
+  selector:
+    {{- include "app.selectorLabels" . | nindent 4 }}
+    service: {{ include "app.name" . }}
