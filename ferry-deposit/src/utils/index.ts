@@ -21,6 +21,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { anvil } from "viem/chains";
 import { Deposit } from "../common/deposit.js";
 import { L1Interface } from "../l1";
+import { L2Interface } from "../l2";
 
 import "gasp-types";
 
@@ -62,14 +63,6 @@ async function asyncFilter(arr: Deposit[], predicate: any) {
 	});
 }
 
-// interface Deposit {
-// 	readonly requestId: bigint;
-// 	readonly depositRecipient: Uint8Array;
-// 	readonly tokenAddress: Uint8Array;
-// 	readonly amount: bigint;
-// 	readonly timeStamp: bigint;
-// 	readonly ferryTip: bigint;
-// }
 
 class Ferry {
 	l1: L1Interface;
@@ -235,22 +228,7 @@ async function dummyDeposit(uri: string) {
 	return await wc.writeContract(request);
 }
 
-// interface L1Interface {
-// 	isRolldownDeployed(): Promise<boolean>;
-// 	getLatestRequestId(): Promise<bigint | null>;
-// 	getDeposits(rangeStart: bigint, rangeEnd: bigint): Promise<Deposit[]>;
-// 	getDepostiHash(requestId: bigint): Promise<Uint8Array>;
-// }
 
-interface L2Interface {
-	getBalances(address: Uint8Array): Promise<Map<Uint8Array, bigint>>;
-	getLastProcessedRequestId(): Promise<bigint>;
-	getLastProcessedRequestId(): Promise<bigint>;
-	isExecuted(depositId: bigint): Promise<boolean>;
-	isFerried(depositId: Uint8Array): Promise<boolean>;
-	getNativeTokenAddress(): Promise<Uint8Array>;
-	valutateToken(tokenAddress: Uint8Array, amount: bigint): Promise<bigint>;
-}
 
 class L1Api implements L1Interface {
 	client!: PublicClient;
@@ -491,7 +469,6 @@ export {
 	getNativeL1Update,
 	L1Api,
 	L2Api,
-	type L2Interface,
 	dummyDeposit,
 	Ferry,
 	getL1ChainType,

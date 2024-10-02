@@ -1,5 +1,6 @@
 import { describe, test, beforeAll, expect, it } from "vitest";
-import { dummyDeposit, L1Api, L2Api, L2Interface, getApi } from "../src/utils/index.js";
+import { dummyDeposit, L1Api, L2Api, getApi } from "../src/utils/index.js";
+import { L2Interface } from "../src/l2";
 import { L1Interface } from "../src/l1/index.js";
 import { hexToU8a } from "@polkadot/util";
 import { TestClient, createPublicClient, createTestClient, webSocket } from "viem";
