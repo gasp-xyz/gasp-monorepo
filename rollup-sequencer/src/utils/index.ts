@@ -306,12 +306,13 @@ async function getUpdateForL2(
 		blockNumber,
 	})) as bigint;
 
-	const rangeStart = BigInt(lastProcessed.toString()) + 1n;
+	const latestRequestId = counter - 1n;
 
-	let rangeEnd = rangeStart + BigInt(LIMIT);
-	if (rangeEnd > counter - 1n) {
-		rangeEnd = counter - 1n;
-	}
+	const rangeStart = minBigInt(
+		latestRequestId,
+		BigInt(lastProcessed.toString()) + 1n,
+	);
+	const rangeEnd = minBigInt(latestRequestId, rangeStart + BigInt(LIMIT));
 
 	return await publicClient.readContract({
 		address: MANGATA_CONTRACT_ADDRESS,

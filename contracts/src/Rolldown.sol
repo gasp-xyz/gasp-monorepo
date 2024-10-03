@@ -383,6 +383,10 @@ contract Rolldown is
         uint256 depositsCounter = 0;
         uint256 cancelsCounter = 0;
 
+        if (start == 0 && end == 0){
+          return result;
+        }
+
         for (uint256 requestId = start; requestId <= end; requestId++) {
             if (deposits[requestId].requestId.id != 0) {
                 depositsCounter++;
