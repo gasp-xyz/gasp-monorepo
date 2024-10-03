@@ -16,11 +16,9 @@ const FILTER_LIQUIDITY_TOKENS = 'Liquidity'
 
 export const tokenDetails = async (id: number): Promise<TokenInfoStats> => {
   const assetsInfo = await MangataClient.query.getAssetsInfo()
-  const tokenInfo = Object.values(assetsInfo)
-    .filter((asset) => {
-      return asset.name !== 'L1Asset' // we do not want to have L1Asset there
-    })
-    .find((item) => Number(item.id) === id)
+  const tokenInfo = Object.values(assetsInfo).find(
+    (item) => Number(item.id) === id
+  )
   if (!tokenInfo) throw new NotFoundException('Unknown currency id.')
 
   const current = moment.utc()
@@ -71,9 +69,6 @@ export const tokenList = async (): Promise<TokenInfoStats[]> => {
   const listedTokens = Object.entries(assetsInfo)
     .map(([id, info]) => ({ id, ...info }))
     .filter((asset) => !asset.name.includes(FILTER_LIQUIDITY_TOKENS))
-    .filter((asset) => {
-      return asset.name !== 'L1Asset' // we do not want to have L1Asset there
-    })
 
   const tokens: TokenInfoStats[] = []
   await Promise.all(

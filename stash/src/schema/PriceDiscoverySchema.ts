@@ -30,11 +30,11 @@ export const bodyHistorySchema = object({
 })
 
 export const pathCurrencySchema = object({
-  currencySymbol: string().required(),
+  currencyId: string().required(),
 })
 export const pathPairCurrencySchema = object({
-  baseCurrencySymbol: string().required(),
-  targetCurrencySymbol: string().required(),
+  baseCurrencyId: string().required(),
+  targetCurrencyId: string().required(),
 })
 
 export const tokenIdSchema = object({
