@@ -3,7 +3,7 @@ import { BN } from '@polkadot/util'
 import { Decimal } from 'decimal.js'
 import _ from 'lodash'
 import moment from 'moment'
-import { StringSchema } from 'yup'
+import { string, StringSchema } from 'yup'
 import * as coinGecko from '../connector/CoinGecko.js'
 import { CoinGeckoCoinData } from '../connector/CoinGecko.js'
 import MangataClient from '../connector/MangataNode.js'
@@ -20,7 +20,7 @@ import logger from '../util/Logger.js'
 const minInSec = 60
 const secInMs = 1000
 const coinGeckoId = 'ethereum'
-const tokenForPriceSymbol = process.env.TOKEN_FOR_PRICE_SYMBOL
+const tokenForPriceId = process.env.TOKEN_FOR_PRICE_ID
 
 let baseTokenPrice: CoinGeckoCoinData = null
 let assetInfo: Map<string, TokenInfo>
@@ -64,7 +64,7 @@ const refresh = async () => {
     const assets = registeredAssets.filter((a) =>
       assetIds.includes(Number.parseInt(a.id))
     )
-    assetInfo = new Map(assets.map((a) => [a.symbol, a]))
+    assetInfo = new Map(assets.map((a) => [a.id, a]))
 
     // only pools we have stored in DB
     const poolIds = []
@@ -75,8 +75,8 @@ const refresh = async () => {
       const asset_0 = idToAsset.get(pool.pool[0])
       const asset_1 = idToAsset.get(pool.pool[1])
       const keys = [
-        `${asset_0.symbol}-${asset_1.symbol}`,
-        `${asset_1.symbol}-${asset_0.symbol}`,
+        `${asset_0.id}-${asset_1.id}`,
+        `${asset_1.id}-${asset_0.id}`,
       ]
 
       assetInfo.set(keys[0], asset)
@@ -88,28 +88,30 @@ const refresh = async () => {
     assetInfo.set(ASSET_ALL.symbol, ASSET_ALL)
     poolIds.push(ASSET_ALL.id)
 
-    assetSchema = currencyIdSchemaFn(assets.map((a) => a.symbol))
+    assetSchema = currencyIdSchemaFn(assets.map((a) => a.id))
+    console.log('assetScheme', assets)
     poolSchema = currencyIdSchemaFn(poolIds)
+    console.log('poolScheme', poolIds)
 
     nextPriceRefresh = new Date()
   }
 }
 
-const getAsset = (symbol: string, isPool: boolean) => {
-  isPool ? poolSchema.validateSync(symbol) : assetSchema.validateSync(symbol)
-  return assetInfo.get(symbol)
+const getAsset = (id: string, isPool: boolean) => {
+  isPool ? poolSchema.validateSync(id) : assetSchema.validateSync(id)
+  return assetInfo.get(id)
 }
 
 export const priceDiscovery = async (
-  currencySymbol: string
+  currencyId: string
 ): Promise<PriceDiscoveryDto> => {
   await refresh()
 
-  const calculatedAsset = getAsset(currencySymbol, false)
-  const priceTokenAssetInfo = getAsset(tokenForPriceSymbol, false)
+  const calculatedAsset = getAsset(currencyId, false)
+  const priceTokenAssetInfo = getAsset(tokenForPriceId, false)
 
   if (calculatedAsset == null)
-    throw new NotFoundException('Unknown currency symbol.')
+    throw new NotFoundException('Unknown currency id.')
 
   const buyAmount = new BN(1 + '0'.repeat(calculatedAsset.decimals))
   const buyPriceInPriceToken = await MangataClient.rpc.calculateBuyPriceId(
@@ -124,7 +126,7 @@ export const priceDiscovery = async (
 
   for (const currency in baseTokenPrice.market_data.current_price) {
     results[currency] =
-      currencySymbol === 'ETH'
+      currencyId === '1'
         ? new Decimal(1)
             .times(baseTokenPrice.market_data.current_price[currency])
             .toString()
@@ -169,14 +171,14 @@ export const priceHistoryPair = async (
 }
 
 export const priceHistory = async (
-  currencySymbol: string,
+  currencyId: string,
   days: number | 'max' = 'max',
   interval: number | Interval = 0
 ): Promise<PriceHistoryDto> => {
   await refresh()
 
   const intervalAdjusted = interval === 0 ? adjustInterval(days) : interval
-  const asset = getAsset(currencySymbol, false)
+  const asset = getAsset(currencyId, false)
   const exponent = new Decimal(`1e${asset.decimals}`)
   const current = moment.utc()
   const to = current.valueOf()
@@ -189,7 +191,7 @@ export const priceHistory = async (
 }
 
 export const volumeHistory = async (
-  currencySymbol: string,
+  currencyId: string,
   isPool: boolean,
   days: number | 'max' = 'max',
   interval: number | Interval = 0
@@ -197,7 +199,7 @@ export const volumeHistory = async (
   await refresh()
 
   const intervalAdjusted = interval === 0 ? adjustInterval(days) : interval
-  const asset = getAsset(currencySymbol, isPool)
+  const asset = getAsset(currencyId, isPool)
   const current = moment.utc()
   const to = current.valueOf()
   const from = days === 'max' ? 0 : current.subtract(days, 'days').valueOf()
@@ -213,7 +215,7 @@ export const volumeHistory = async (
 }
 
 export const tradesHistory = async (
-  currencySymbol: string,
+  currencyId: string,
   isPool: boolean,
   days: number | 'max' = 'max',
   interval: number | Interval = 0
@@ -221,7 +223,7 @@ export const tradesHistory = async (
   await refresh()
 
   const intervalAdjusted = interval === 0 ? adjustInterval(days) : interval
-  const asset = getAsset(currencySymbol, isPool)
+  const asset = getAsset(currencyId, isPool)
   const current = moment.utc()
   const to = current.valueOf()
   const from = days === 'max' ? 0 : current.subtract(days, 'days').valueOf()

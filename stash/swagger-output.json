@@ -348,7 +348,7 @@
         }
       }
     },
-    "/price-discovery/{currencySymbol}/": {
+    "/price-discovery/{currencyId}/": {
       "get": {
         "tags": [
           "Price Discovery"
@@ -357,7 +357,7 @@
         "description": "The price will be returned in all tokens including USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
             "type": "string",
@@ -388,7 +388,7 @@
         }
       }
     },
-    "/price-history/pair/{baseCurrencySymbol}/{targetCurrencySymbol}": {
+    "/price-history/pair/{baseCurrencyId}/{targetCurrencyId}": {
       "get": {
         "tags": [
           "Price History Pair"
@@ -397,17 +397,17 @@
         "description": "The price of base asset will be returned in in the target asset.",
         "parameters": [
           {
-            "name": "baseCurrencySymbol",
+            "name": "baseCurrencyId",
             "in": "path",
             "required": true,
-            "type": "string",
+            "type": "integer",
             "description": "which token to get as a base"
           },
           {
-            "name": "targetCurrencySymbol",
+            "name": "targetCurrencyId",
             "in": "path",
             "required": true,
-            "type": "string",
+            "type": "integer",
             "description": "which token to get as target"
           },
           {
@@ -445,7 +445,7 @@
         }
       }
     },
-    "/price-history/{currencySymbol}/": {
+    "/price-history/{currencyId}/": {
       "get": {
         "tags": [
           "Price History"
@@ -454,7 +454,7 @@
         "description": "The price will be returned in USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
             "type": "string",
@@ -495,7 +495,7 @@
         }
       }
     },
-    "/volume-history/pools/{currencySymbol}/": {
+    "/volume-history/pools/{currencyId}/": {
       "get": {
         "tags": [
           "Volume History"
@@ -504,7 +504,7 @@
         "description": "The price will be returned in USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
             "type": "string",
@@ -545,7 +545,7 @@
         }
       }
     },
-    "/volume-history/{currencySymbol}/": {
+    "/volume-history/{currencyId}/": {
       "get": {
         "tags": [
           "Volume History"
@@ -554,7 +554,7 @@
         "description": "The price will be returned in USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
             "type": "string",
@@ -595,7 +595,7 @@
         }
       }
     },
-    "/tvl-history/pools/{currencySymbol}/": {
+    "/tvl-history/pools/{currencyId}/": {
       "get": {
         "tags": [
           "TVL History"
@@ -604,7 +604,7 @@
         "description": "The price will be returned in USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
             "type": "string",
@@ -645,7 +645,7 @@
         }
       }
     },
-    "/tvl-history/{currencySymbol}/": {
+    "/tvl-history/{currencyId}/": {
       "get": {
         "tags": [
           "TVL History"
@@ -654,10 +654,10 @@
         "description": "The price will be returned in USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
-            "type": "string",
+            "type": "integer",
             "description": "which token or pool to get"
           },
           {

@@ -13,7 +13,7 @@ export const getPrice = async (req: Request, res: Response): Promise<void> => {
   /*       #swagger.tags = ['Price Discovery']
            #swagger.summary = 'Get the price of the token on Managata DEX.'
            #swagger.description = "The price will be returned in all tokens including USD."
-           #swagger.parameters['currencySymbol'] = {
+           #swagger.parameters['currencyId'] = {
               in: 'path',
               description: 'which token or pool to get',
               type: 'string'
@@ -40,9 +40,7 @@ export const getPrice = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = pathCurrencySchema.validateSync(req.params)
 
-    const response = await priceDiscoveryService.priceDiscovery(
-      id.currencySymbol
-    )
+    const response = await priceDiscoveryService.priceDiscovery(id.currencyId)
 
     res.json(response)
   } catch (e) {
@@ -58,15 +56,15 @@ export const getHistoryPair = async (
    #swagger.tags = ['Price History Pair']
    #swagger.summary = 'Get the price history of the token pair.'
    #swagger.description = "The price of base asset will be returned in in the target asset."
-   #swagger.parameters['baseCurrencySymbol'] = {
+   #swagger.parameters['baseCurrencyId'] = {
       in: 'path',
       description: 'which token to get as a base',
-      type: 'string'
+      type: 'integer'
    }
-   #swagger.parameters['targetCurrencySymbol'] = {
+   #swagger.parameters['targetCurrencyId'] = {
       in: 'path',
       description: 'which token to get as target',
-      type: 'string'
+      type: 'integer'
    }
    #swagger.parameters['days'] = {
       in: 'query',
@@ -102,8 +100,8 @@ export const getHistoryPair = async (
     const args = bodyHistorySchema.validateSync(req.query)
 
     const response = await priceDiscoveryService.priceHistoryPair(
-      ids.baseCurrencySymbol,
-      ids.targetCurrencySymbol,
+      ids.baseCurrencyId,
+      ids.targetCurrencyId,
       args.days,
       args.interval
     )
@@ -121,7 +119,7 @@ export const getHistory = async (
   /* #swagger.tags = ['Price History']
    #swagger.summary = 'Get the price history of the token.'
    #swagger.description = "The price will be returned in USD."
-   #swagger.parameters['currencySymbol'] = {
+   #swagger.parameters['currencyId'] = {
       in: 'path',
       description: 'which token or pool to get',
       type: 'string'
@@ -161,7 +159,7 @@ export const getHistory = async (
     const args = bodyHistorySchema.validateSync(req.query)
 
     const response = await priceDiscoveryService.priceHistory(
-      id.currencySymbol,
+      id.currencyId,
       args.days,
       args.interval
     )
@@ -179,10 +177,10 @@ export const getVolumeAsset = async (
   /*       #swagger.tags = ['TVL History']
          #swagger.summary = 'Get the trade volume history of the token.'
          #swagger.description = "The price will be returned in USD."
-         #swagger.parameters['currencySymbol'] = {
+         #swagger.parameters['currencyId'] = {
             in: 'path',
             description: 'which token or pool to get',
-            type: 'string'
+            type: 'integer'
          }
          #swagger.parameters['days'] = {
             in: 'query',
@@ -222,7 +220,7 @@ export const getVolumePool = async (
   /*       #swagger.tags = ['TVL History']
          #swagger.summary = 'Get the TVL history of the pool.'
          #swagger.description = "The price will be returned in USD."
-         #swagger.parameters['currencySymbol'] = {
+         #swagger.parameters['currencyId'] = {
             in: 'path',
             description: 'which token or pool to get',
             type: 'string'
@@ -268,7 +266,7 @@ const getVolume = async (
     const args = bodyHistorySchema.validateSync(req.query)
 
     const response = await priceDiscoveryService.volumeHistory(
-      id.currencySymbol,
+      id.currencyId,
       isPool,
       args.days,
       args.interval
@@ -287,7 +285,7 @@ export const getTradesAsset = async (
   /*       #swagger.tags = ['Volume History']
           #swagger.summary = 'Get the trade volume history of the token.'
           #swagger.description = "The price will be returned in USD."
-          #swagger.parameters['currencySymbol'] = {
+          #swagger.parameters['currencyId'] = {
              in: 'path',
              description: 'which token or pool to get',
              type: 'string'
@@ -330,7 +328,7 @@ export const getTradesPool = async (
   /*       #swagger.tags = ['Volume History']
           #swagger.summary = 'Get the trade volume history of the pool. '
           #swagger.description = "The price will be returned in USD."
-          #swagger.parameters['currencySymbol'] = {
+          #swagger.parameters['currencyId'] = {
              in: 'path',
              description: 'which token or pool to get',
              type: 'string'
@@ -376,7 +374,7 @@ const getTrades = async (
     const args = bodyHistorySchema.validateSync(req.query)
 
     const response = await priceDiscoveryService.tradesHistory(
-      id.currencySymbol,
+      id.currencyId,
       isPool,
       args.days,
       args.interval
