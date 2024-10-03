@@ -324,17 +324,24 @@ contract Rolldown is
     }
 
     function process_l2_update_cancels(Cancel calldata cancel) private {
-        L1Update memory pending = getPendingRequests(
+        bool cancelJustified = false;
+
+        if (cancel.range.end > counter - 1 ){
+          cancelJustified = true;
+        }else{
+          L1Update memory pending = getPendingRequests(
             cancel.range.start,
             cancel.range.end
-        );
-        bytes32 correct_hash = keccak256(abi.encode(pending));
+          );
+          bytes32 correct_hash = keccak256(abi.encode(pending));
+          cancelJustified = correct_hash != cancel.hash;
+        }
         uint256 timeStamp = block.timestamp;
 
         CancelResolution memory resolution = CancelResolution({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             l2RequestId: cancel.requestId.id,
-            cancelJustified: correct_hash != cancel.hash,
+            cancelJustified: cancelJustified,
             timeStamp: timeStamp
         });
 
