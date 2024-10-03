@@ -66,10 +66,14 @@ export const tokenDetails = async (id: number): Promise<TokenInfoStats> => {
 
 export const tokenList = async (): Promise<TokenInfoStats[]> => {
   const assetsInfo = await MangataClient.query.getAssetsInfo()
+  const api = await MangataClient.api()
+  const liquidityPools = await api.query.xyk.liquidityPools.entries()
+  const liquidityPoolIds = liquidityPools.map(([key, _]) =>
+    key.args[0].toString()
+  )
   const listedTokens = Object.entries(assetsInfo)
     .map(([id, info]) => ({ id, ...info }))
-    .filter((asset) => !asset.name.includes(FILTER_LIQUIDITY_TOKENS))
-
+    .filter((asset) => !liquidityPoolIds.includes(asset.id))
   const tokens: TokenInfoStats[] = []
   await Promise.all(
     listedTokens.map(async (token) => {
