@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest'
 import supertest from 'supertest'
 import app from '../../src/app'
 
-describe('APi tests: volume-history/', () => {
-  const tokens = ['GASPV2', 'L1Asset', 'GASPV2-ETH', 'L1Asset-GASPV2']
-  it.each(tokens)(
+describe('APi tests: volume-history', () => {
+  const tokenIDs = ['0', '2', '4', '5', '7', '11', '14', '15', '16']
+  it.each(tokenIDs)(
     'should return volumes for supported pools: %s',
-    async (token) => {
+    async (tokenID) => {
       const response = await supertest(app)
-        .get('/volume-history/' + token)
+        .get('/volume-history/' + tokenID)
         .expect(200)
       expect(response.body).to.have.property('volumes')
       expect(response.body.error).toBeUndefined()
@@ -21,7 +21,7 @@ describe('APi tests: volume-history/', () => {
 describe('API Errors: volume-history/', () => {
   it('GET pools/foo does not exist -> Expect validation error', async () => {
     const errorMessage =
-      'this must be one of the following values: GASPV2, L1Asset, GASPV2-ETH, L1Asset-GASPV2'
+      'this must be one of the following values: 0, 2, 4, 5, 7, 11, 14, 15, 16'
     await supertest(app)
       .get('/volume-history/foo')
       .expect(500)

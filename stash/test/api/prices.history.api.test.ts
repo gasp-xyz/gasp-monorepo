@@ -7,7 +7,7 @@ const priceHistoryPath = 'price-history'
 describe('/GET prices', () => {
   it('GET /price-history - Schema validation', async () => {
     await supertest(app)
-      .get(`/${priceHistoryPath}/GASPV2`)
+      .get(`/price-history/0`)
       .expect(200)
       .then((response) => {
         expect(response.body).toMatchSnapshot('Prices')

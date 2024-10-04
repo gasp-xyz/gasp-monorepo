@@ -13,7 +13,7 @@ const pricesSchema = Joi.object({
 describe('APi tests: price-history/pair', () => {
   const pair = 'GASPV2/L1Asset'
   const reversedPair = 'L1Asset/GASPV2'
-  it('GET pair GASPV2/L1Asset validate schema', async () => {
+  it.only('GET pair GASPV2/L1Asset validate schema', async () => {
     const ksmMgx = await supertest(app)
       .get('/price-history/pair/' + pair)
       .query({
