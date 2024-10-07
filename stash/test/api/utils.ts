@@ -2,9 +2,9 @@ import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
 import * as crypto from 'crypto'
 
 export const TIMESERIES_HOST_DOCKER_IMAGE_NAME =
-  'mangatasolutions/redis-test-stash_ts:v2'
+  'mangatasolutions/redis-test-stash_ts:4'
 export const REDIS_HOST_DOCKER_IMAGE_NAME =
-  'mangatasolutions/redis-test-stash:latest'
+  'mangatasolutions/redis-test-stash:4'
 export const MAX_DAYS = 'max'
 export const MAX_INTERVAL = 'day'
 
@@ -24,6 +24,7 @@ export async function startContainer(image: string) {
     return await new GenericContainer(image)
       .withWorkingDir('/')
       .withEntrypoint(['redis-server'])
+      .withCommand([' --protected-mode no'])
       .withExposedPorts({ container: 6379, host: 6380 })
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
       .start()
