@@ -180,41 +180,43 @@ contract FinalizerTaskManager is
         _createNewOpTask(quorumThresholdPercentage, quorumNumbers);
     }
 
-    // NOTE: this function responds to existing tasks.
-    function respondToOpTask(
-        OpTask calldata task,
-        OpTaskResponse calldata taskResponse,
-        IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
-    ) external {
-        bool isInit = lastCompletedOpTaskCreatedBlock == 0;
-        uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
-
-        require(!isInit || allowNonRootInit, "use root init");
-
-        uint32 taskCreatedBlock = task.taskCreatedBlock;
-        bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
-        uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
+    function validateTaskResponse(bytes32 taskHash, TaskType taskType, uint32 referenceTaskIndex, uint32 taskCreatedBlock) public view {
 
         require(
                 isTaskPending == true, "No task pending");
         // check that the task is valid, hasn't been responsed yet, and is being responsed in time
         require(
-            keccak256(abi.encode(task)) == allTaskHashes[TaskType.OP_TASK][taskResponse.referenceTaskIndex],
+            taskHash == allTaskHashes[taskType][referenceTaskIndex],
             "Task mismatch"
         );
         // some logical checks
         require(
-            idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
+            idToTaskStatus[taskType][referenceTaskIndex] == TaskStatus.INITIALIZED,
             "Not Init state"
         );
         require(
-            allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
+            allTaskResponses[taskType][referenceTaskIndex] == bytes32(0),
             "Alrdy Resp"
         );
         require(
             uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
             "Too late"
         );
+    }
+
+    // NOTE: this function responds to existing tasks.
+    function respondToOpTask(
+        OpTask calldata task,
+        OpTaskResponse calldata taskResponse,
+        IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
+    ) external {
+
+        require(!(lastCompletedOpTaskCreatedBlock == 0) || allowNonRootInit, "use root init");
+
+        bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
+        uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
+
+        validateTaskResponse(keccak256(abi.encode(task)), TaskType.OP_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
 
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
 
@@ -226,7 +228,7 @@ contract FinalizerTaskManager is
 
         // check the BLS signature
         (quorumStakeTotals, hashOfNonSigners) =
-            blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
+            blsSignatureChecker.checkSignatures(message, quorumNumbers, task.lastCompletedOpTaskCreatedBlock, nonSignerStakesAndSignature);
 
         TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
             uint32(block.number),
@@ -234,14 +236,13 @@ contract FinalizerTaskManager is
             quorumStakeTotals.totalStakeForQuorum,
             quorumStakeTotals.signedStakeForQuorum
         );
+
         // updating the storage with task responsea
         allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
         idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = TaskStatus.RESPONDED;
-
+        isTaskPending = false;
         // emitting event
         emit OpTaskResponded(task.taskNum, taskResponse, taskResponseMetadata);
-
-        isTaskPending = false;
 
         // check that signatories own at least a threshold percentage of each quourm
         for (uint256 i = 0; i < quorumNumbers.length; i++) {
@@ -311,34 +312,8 @@ contract FinalizerTaskManager is
         OpTask calldata task,
         OpTaskResponse calldata taskResponse
     ) external onlyOwner {
-        uint32 referenceTaskIndex = taskResponse.referenceTaskIndex;
-        uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
 
-        uint32 taskCreatedBlock = task.taskCreatedBlock;
-        bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
-        uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
-
-
-        require(
-                isTaskPending == true, "No task pending");
-        // check that the task is valid, hasn't been responsed yet, and is being responsed in time
-        require(
-            keccak256(abi.encode(task)) == allTaskHashes[TaskType.OP_TASK][taskResponse.referenceTaskIndex],
-            "Task mismatch"
-        );
-        // some logical checks
-        require(
-            idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Not Init state"
-        );
-        require(
-            allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
-            "Alrdy Resp"
-        );
-        require(
-            uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Too late"
-        );
+        validateTaskResponse(keccak256(abi.encode(task)), TaskType.OP_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
 
         IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
 
@@ -379,14 +354,15 @@ contract FinalizerTaskManager is
         );
         uint32 latestRdTaskNumMem = latestRdTaskNum;
         // create a new task struct
-        RdTask memory newTask;
-        newTask.taskNum = latestRdTaskNumMem;
-        newTask.chainId = chainId;
-        newTask.batchId = batchId;
-        newTask.taskCreatedBlock = uint32(block.number);
-        newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
-        newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
-        newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
+        RdTask memory newTask = RdTask({
+            taskNum: latestRdTaskNumMem,
+            chainId: chainId,
+            batchId: batchId,
+            taskCreatedBlock: uint32(block.number),
+            lastCompletedOpTaskQuorumThresholdPercentage: lastCompletedOpTaskQuorumThresholdPercentage,
+            lastCompletedOpTaskQuorumNumbers: lastCompletedOpTaskQuorumNumbers,
+            lastCompletedOpTaskCreatedBlock: lastCompletedOpTaskCreatedBlock
+        });
 
         // store hash of task onchain, emit event, and increase taskNum
         allTaskHashes[TaskType.RD_TASK][latestRdTaskNumMem] = keccak256(abi.encode(newTask));
@@ -403,35 +379,15 @@ contract FinalizerTaskManager is
         RdTaskResponse calldata taskResponse,
         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
     ) external onlyAggregator {
-        uint32 taskReferenceBlock = task.lastCompletedOpTaskCreatedBlock;
-        uint32 taskCreatedBlock = task.taskCreatedBlock;
         bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
         uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
 
         // TODO
         // Maybe this belongs in createNewRdTask
         require(chainRdBatchNonce[taskResponse.chainId] ==0 || taskResponse.batchId == chainRdBatchNonce[taskResponse.chainId], "chainRdBatchNonce mismatch"); 
-        require(
-                isTaskPending == true, "No task pending");
-        // check that the task is valid, hasn't been responsed yet, and is being responsed in time
-        require(
-            keccak256(abi.encode(task)) == allTaskHashes[TaskType.RD_TASK][taskResponse.referenceTaskIndex],
-            "Task mismatch"
-        );
-        // some logical checks
-        require(
-            idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Not Init state"
-        );
-        require(
-            allTaskResponses[TaskType.RD_TASK][taskResponse.referenceTaskIndex] == bytes32(0),
-            "Alrdy Resp"
-        );
-        require(
-            uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Too late"
-        );
-
+        
+        validateTaskResponse(keccak256(abi.encode(task)), TaskType.RD_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
+        
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
 
         /* CHECKING SIGNATURES & WHETHER THRESHOLD IS MET OR NOT */
@@ -440,7 +396,7 @@ contract FinalizerTaskManager is
 
         // check the BLS signature
         (IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals, bytes32 hashOfNonSigners) =
-            blsSignatureChecker.checkSignatures(message, quorumNumbers, taskReferenceBlock, nonSignerStakesAndSignature);
+            blsSignatureChecker.checkSignatures(message, quorumNumbers, task.lastCompletedOpTaskCreatedBlock, nonSignerStakesAndSignature);
 
         TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
             uint32(block.number),
@@ -451,14 +407,13 @@ contract FinalizerTaskManager is
         // updating the storage with task responses
         allTaskResponses[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
         idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = TaskStatus.RESPONDED;
+        isTaskPending = false;
 
         // TODO
         // Optimize the following
 
         // emitting event
         emit RdTaskResponded(task.taskNum, taskResponse, taskResponseMetadata);
-
-        isTaskPending = false;
 
         // check that signatories own at least a threshold percentage of each quourm
         for (uint256 i = 0; i < quorumNumbers.length; i++) {

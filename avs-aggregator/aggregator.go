@@ -14,7 +14,7 @@ import (
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/services/avsregistry"
 	blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
-	operatorpubkeys "github.com/Layr-Labs/eigensdk-go/services/operatorpubkeys"
+	oprsinfoserv "github.com/Layr-Labs/eigensdk-go/services/operatorsinfo"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
@@ -83,6 +83,8 @@ type Aggregator struct {
 	opStateUpdater *OpStateUpdater
 }
 
+const waitForReceipt = bool(true)
+
 // NewAggregator creates a new Aggregator with the provided config.
 func NewAggregator(c *Config) (*Aggregator, error) {
 	logger, err := sdklogging.NewZapLogger(c.LogLevel)
@@ -107,7 +109,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	chainId, err := ethRpc.Clients.EthHttpClient.ChainID(context.Background())
+	chainId, err := ethRpc.AvsReader.AvsServiceBindings.EthClient.ChainID(context.Background())
 	if err != nil {
 		logger.Error("Cannot get chainId", "err", err)
 		return nil, err
@@ -123,16 +125,15 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	pubkeyService := operatorpubkeys.NewOperatorPubkeysServiceInMemory(
+	operatorPubkeysService := oprsinfoserv.NewOperatorsInfoServiceInMemory(
 		context.Background(),
 		ethRpc.Clients.AvsRegistryChainSubscriber,
 		ethRpc.Clients.AvsRegistryChainReader,
-		ethRpc.Clients.EthHttpClient,
-		c.AvsDeploymentBlock,
-		50_000,
+		nil,
+		oprsinfoserv.Opts{},
 		logger,
 	)
-	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, pubkeyService, logger)
+	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, operatorPubkeysService, logger)
 	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, c.DebounceRpc, logger)
 
 	substrateRpc, err := gsrpc.NewSubstrateAPI(c.SubstrateWsRpcUrl)
@@ -147,7 +148,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, avsRegistryService, c.MinOpUpdateInterval)
+	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, c.MinOpUpdateInterval)
 	if err != nil {
 		logger.Error("Cannot create operator stakes updateer", "err", err)
 		return nil, err
