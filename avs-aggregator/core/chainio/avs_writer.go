@@ -81,11 +81,10 @@ func (w *AvsWriter) SendNewOpTask(ctx context.Context, quorumThresholdPercentage
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
 
-	var event taskmanager.IFinalizerTaskManagerOpTask
+	var event *taskmanager.ContractFinalizerTaskManagerNewOpTaskCreated
 	var foundEvent bool
-	var err error
 	for _, log := range receipt.Logs{
-		event, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewOpTaskCreated(*log)
+		event, err = w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewOpTaskCreated(*log)
 		if err == nil {
 			foundEvent = true
 		}
@@ -121,11 +120,10 @@ func (w *AvsWriter) SendNewRdTask(ctx context.Context, chainToUpdate uint8, chai
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
 
-	var event taskmanager.IFinalizerTaskManagerRdTask
+	var event *taskmanager.ContractFinalizerTaskManagerNewRdTaskCreated
 	var foundEvent bool
-	var err error
 	for _, log := range receipt.Logs{
-		event, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewRdTaskCreated(*log)
+		event, err = w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewRdTaskCreated(*log)
 		if err == nil {
 			foundEvent = true
 		}
