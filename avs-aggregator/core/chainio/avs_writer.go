@@ -80,12 +80,21 @@ func (w *AvsWriter) SendNewOpTask(ctx context.Context, quorumThresholdPercentage
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
-	newTaskCreatedEvent, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewOpTaskCreated(*receipt.Logs[0])
-	if err != nil {
-		w.logger.Error("Aggregator failed to parse new task created event", "err", err)
+
+	var event *taskmanager.ContractFinalizerTaskManagerNewOpTaskCreated
+	var foundEvent bool
+	for _, log := range receipt.Logs{
+		event, err = w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewOpTaskCreated(*log)
+		if err == nil {
+			foundEvent = true
+		}
+	}
+	
+	if foundEvent == false {
+		w.logger.Error("Aggregator failed to parse new task created op event", "err", err)
 		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, err
 	}
-	return newTaskCreatedEvent.Task, newTaskCreatedEvent.TaskIndex, nil
+	return event.Task, event.TaskIndex, nil
 }
 
 // returns the tx receipt, as well as the task index (which it gets from parsing the tx receipt logs)
@@ -110,12 +119,21 @@ func (w *AvsWriter) SendNewRdTask(ctx context.Context, chainToUpdate uint8, chai
 	}
 	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
 	w.logger.Info("sent new task with the AVS's task manager")
-	newTaskCreatedEvent, err := w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewRdTaskCreated(*receipt.Logs[0])
-	if err != nil {
-		w.logger.Error("Aggregator failed to parse new task created event", "err", err)
+
+	var event *taskmanager.ContractFinalizerTaskManagerNewRdTaskCreated
+	var foundEvent bool
+	for _, log := range receipt.Logs{
+		event, err = w.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseNewRdTaskCreated(*log)
+		if err == nil {
+			foundEvent = true
+		}
+	}
+	
+	if foundEvent == false {
+		w.logger.Error("Aggregator failed to parse new task rd created event", "err", err)
 		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, err
 	}
-	return newTaskCreatedEvent.Task, newTaskCreatedEvent.TaskIndex, nil
+	return event.Task, event.TaskIndex, nil
 }
 
 func (w *AvsWriter) SendAggregatedOpTaskResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerOpTask, taskResponse taskmanager.IFinalizerTaskManagerOpTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error) {

@@ -694,25 +694,26 @@ func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 
 	isOpsInit := lastCompletedOpTaskCreatedBlock != 0
 
-	if isRduTask && isOpsInit{
-
-		isUpdate, chainToUpdate, chainBatchIdToUpdate, err := agg.getL1BatchUpdateInfo(blockNumber)
-		if err != nil {
-			return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to getL1BatchUpdateInfo: err: %v", err)
-		}
-
-		if !isUpdate{
-			agg.logger.Info("Aggregator in maybeSendNewRdTask found no new updates at", "block number", blockNumber)
-			return nil
-		}
-
-		
-		err = agg.createAndProcessRdTask(chainToUpdate, chainBatchIdToUpdate, 3)
-		if err != nil{
-			return fmt.Errorf("Aggregator failed to createAndProcessRdTask: err: %v", err)
-		}
-
+	if !isOpsInit {
+		return nil
 	}
+
+
+	isUpdate, chainToUpdate, chainBatchIdToUpdate, err := agg.getL1BatchUpdateInfo(blockNumber)
+	if err != nil {
+		return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to getL1BatchUpdateInfo: err: %v", err)
+	}
+
+	if !isUpdate{
+		agg.logger.Info("Aggregator in maybeSendNewRdTask found no new updates at", "block number", blockNumber)
+		return nil
+	}
+
+
+	err = agg.createAndProcessRdTask(chainToUpdate, chainBatchIdToUpdate, 3)
+	if err != nil{
+		return fmt.Errorf("Aggregator failed to createAndProcessRdTask: err: %v", err)
+	}	
 
 	return nil
 }
