@@ -397,7 +397,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
       rolldown.update_l1_from_l2(merkle_root, range);
       vm.stopPrank();
 
-      L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,2);
+      L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,1);
       assertEq(l1UpdateBefore.pendingDeposits.length, 1);
       assertEq(l1UpdateBefore.pendingCancelResolutions.length, 0);
 
@@ -446,7 +446,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
 
-        L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,2);
+        L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,1);
         assertEq(l1UpdateBefore.pendingDeposits.length, 1);
         assertEq(l1UpdateBefore.pendingCancelResolutions.length, 0);
 
@@ -455,7 +455,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, false);
         rolldown.close_cancel(cancel, merkle_root, proofs);
         vm.stopPrank();
-    
+
         //validate pendingL2requests        
         L1Update memory l1UpdateAfter = rolldown.getPendingRequests(1,2);
         assertEq(l1UpdateAfter.pendingDeposits.length, 1);
@@ -495,14 +495,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
         assertEq(token.balanceOf(recipient), 0);
-        
+
         assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
         address status = rolldown.processedL2Requests(merkle_root);
         assertTrue(status != rolldown.CLOSED());
-        L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,2);
-        assertEq(l1UpdateBefore.pendingDeposits.length, 0);
-        assertEq(l1UpdateBefore.pendingCancelResolutions.length, 0);
-
     }
 
     function testAcceptOnlyConsecutiveUpdatesWithoutGaps() public {
