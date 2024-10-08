@@ -15,12 +15,21 @@ import {
 	http,
 	webSocket,
 } from "viem";
+import { Withdrawal } from "../common/withdrawal.js";
+
+function minBigInt(lhs: bigint, rhs: bigint): bigint {
+  return [lhs, rhs].reduce((min, current) => current < min ? current : min);
+}
 
 interface L1Interface {
 	isRolldownDeployed(): Promise<boolean>;
-	getLatestRequestId(): Promise<bigint | null>;
-	getDeposits(rangeStart: bigint, rangeEnd: bigint): Promise<Deposit[]>;
-	getDepostiHash(requestId: bigint): Promise<Uint8Array>;
+  getFerriedAndReadyToClose(rangeStart: bigint , rangeEnd: bigint ): Promise<Withdrawal[]>;
+  getLatestRequestId(): Promise<bigint| null>;
+
+  closeWithdrawal(withdrawalId: bigint): Promise<void>;
+  ferryWithdrawal(withdrawalId: bigint): Promise<void>;
+  canBeFerried(withdrawalId: bigint): Promise<boolean>;
+  canBeClosed(withdrawalId: bigint): Promise<boolean>;
 }
 
 class L1Api implements L1Interface {
@@ -42,69 +51,6 @@ class L1Api implements L1Interface {
 		}
 	}
 
-	async getDepostiHash(requestId: bigint): Promise<Uint8Array> {
-		const value = await this.client.readContract({
-			address: MANGATA_CONTRACT_ADDRESS,
-			abi: ABI,
-			functionName: "deposits",
-			blockTag: "latest",
-			args: [requestId],
-		});
-		const hash = encodeAbiParameters(
-			ABI.find((e: any) => e!.name === "deposits")!.outputs!,
-			[...(value as any)],
-		);
-		return hexToU8a(keccak256(hexToU8a(hash)));
-	}
-
-	async getLatestRequestId(): Promise<bigint | null> {
-    const blockNumber = await this.client.getBlockNumber({cacheTime: 0});
-    if (blockNumber < this.delay) {
-      return null;
-    }
-    const blockToReadAt = blockNumber - this.delay;
-
-		const value = await this.client.readContract({
-			address: MANGATA_CONTRACT_ADDRESS,
-			abi: ABI,
-			functionName: "counter",
-			blockNumber: BigInt(blockToReadAt),
-		});
-		const reqId = BigInt(value as any) - 1n;
-		if (reqId < 1n) {
-			return null;
-		}
-		return reqId;
-	}
-
-	async getDeposits(rangeStart: bigint, rangeEnd: bigint): Promise<Deposit[]> {
-    const blockNumber = await this.client.getBlockNumber();
-    if (blockNumber < this.delay) {
-      return Promise.resolve([]);
-    }
-    const blockToReadAt = blockNumber - this.delay;
-
-		const selector = "getPendingRequests";
-		const contractData = await this.client.readContract({
-			address: MANGATA_CONTRACT_ADDRESS,
-			abi: ABI,
-			functionName: selector,
-			args: [rangeStart, rangeEnd],
-      blockNumber: blockToReadAt
-		});
-
-		return (contractData as any).pendingDeposits.map((deposit: any) => {
-			return {
-				requestId: deposit.requestId.id,
-				depositRecipient: hexToU8a(deposit.depositRecipient),
-				tokenAddress: hexToU8a(deposit.tokenAddress),
-				amount: deposit.amount,
-				timeStamp: deposit.timeStamp,
-				ferryTip: deposit.ferryTip,
-			};
-		});
-	}
-
 	async isRolldownDeployed(): Promise<boolean> {
     const blockNumber = await this.client.getBlockNumber();
     if (blockNumber < this.delay) {
@@ -118,6 +64,54 @@ class L1Api implements L1Interface {
 		});
 		return code !== undefined && code !== "0x";
 	}
+
+	async getLatestRequestId(): Promise<bigint | null> {
+		const value = await this.client.readContract({
+			address: MANGATA_CONTRACT_ADDRESS,
+			abi: ABI,
+			functionName: "counter",
+			blockTag: "latest"
+		});
+		const reqId = BigInt(value as any) - 1n;
+		if (reqId < 1n) {
+			return null;
+		}
+		return reqId;
+	}
+
+  async getFerriedAndReadyToClose(rangeStart: bigint, rangeEnd: bigint): Promise<Withdrawal[]> {
+    const latest = await this.getLatestRequestId();
+    if (latest == null ){
+      return [];
+    }
+
+    const end = minBigInt(rangeEnd, latest);
+    const value = await this.client.readContract({
+      address: MANGATA_CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: "counter",
+      blockTag: "latest"
+    });
+
+    return [];
+  }
+
+  async closeWithdrawal(withdrawalId: bigint): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  async ferryWithdrawal(withdrawalId: bigint): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  canBeFerried(withdrawalId: bigint): Promise<boolean> {
+    throw new Error("Method not implemented.");
+  }
+
+  canBeClosed(withdrawalId: bigint): Promise<boolean> {
+    throw new Error("Method not implemented.");
+  }
+
 }
 
 export { L1Interface, L1Api };

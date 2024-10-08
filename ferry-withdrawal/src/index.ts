@@ -56,41 +56,41 @@ async function main() {
 			}
 
 			inProgress = true;
-			const pending = await ferry.getPendingDeposits();
-			const profitable = await ferry.rateDeposits(pending);
+			// const pending = await ferry.getPendingDeposits();
+			// const profitable = await ferry.rateDeposits(pending);
 
-			console.info(`Found ${profitable.length} proffitable deposits`);
-			if (profitable.length > 0) {
-				const depositToFerry = profitable[0];
-				console.info(`Ferrying deposit ${util.inspect(depositToFerry)}`);
-				if (!(await ferry.hasFundsToCoverTxFee())) {
-					throw new Error(`Not enough funds to cover tx fee`);
-				}
-				const status = await signTx(
-					api,
-					api.tx.rolldown.ferryDeposit(
-						getL1ChainType(api),
-						{ origin: "L1", id: depositToFerry.requestId },
-						depositToFerry.depositRecipient,
-						depositToFerry.tokenAddress,
-						depositToFerry.amount,
-						depositToFerry.timeStamp,
-						depositToFerry.ferryTip,
-						await l1.getDepostiHash(depositToFerry.requestId),
-					),
-					keypair,
-				);
-
-				if (isSuccess(status)) {
-					print(
-						`Ferrying deposit ${depositToFerry.requestId} to ${depositToFerry.depositRecipient}`,
-					);
-				} else {
-					print(
-						`Failed to ferry deposit ${depositToFerry.requestId} to ${depositToFerry.depositRecipient}`,
-					);
-				}
-			}
+			// console.info(`Found ${profitable.length} proffitable deposits`);
+			// if (profitable.length > 0) {
+			// 	const depositToFerry = profitable[0];
+			// 	console.info(`Ferrying deposit ${util.inspect(depositToFerry)}`);
+			// 	if (!(await ferry.hasFundsToCoverTxFee())) {
+			// 		throw new Error(`Not enough funds to cover tx fee`);
+			// 	}
+			// 	const status = await signTx(
+			// 		api,
+			// 		api.tx.rolldown.ferryDeposit(
+			// 			getL1ChainType(api),
+			// 			{ origin: "L1", id: depositToFerry.requestId },
+			// 			depositToFerry.depositRecipient,
+			// 			depositToFerry.tokenAddress,
+			// 			depositToFerry.amount,
+			// 			depositToFerry.timeStamp,
+			// 			depositToFerry.ferryTip,
+			// 			await l1.getDepostiHash(depositToFerry.requestId),
+			// 		),
+			// 		keypair,
+			// 	);
+			//
+			// 		print(
+			//      if (isSuccess(status)) {
+			// 			`Ferrying deposit ${depositToFerry.requestId} to ${depositToFerry.depositRecipient}`,
+			// 		);
+			// 	} else {
+			// 		print(
+			// 			`Failed to ferry deposit ${depositToFerry.requestId} to ${depositToFerry.depositRecipient}`,
+			// 		);
+			// 	}
+			// }
 			inProgress = false;
 		},
 	);

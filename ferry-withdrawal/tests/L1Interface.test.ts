@@ -101,55 +101,55 @@ describe('L1Interface', () => {
     expect(await l1Api.getLatestRequestId()).toBeGreaterThan(latestRequestId!);
   });
 
-  it('can fetch deposits', async () => {
-    await dummyDeposit(WS_URI);
-    let latestRequestId = await l1Api.getLatestRequestId();
-    const deposits = await l1Api.getDeposits(1n, latestRequestId!);
-    expect(deposits.length).toBeGreaterThan(0);
-  });
-
-  it('can fetch deposits hash', async () => {
-
-    const firstId = (await l1Api.getLatestRequestId())!;
-    await dummyDeposit(WS_URI);
-
-    const secondId = (await l1Api.getLatestRequestId())!;
-    expect(firstId).not.toEqual(secondId);
-
-    const firstHash = await l1Api.getDepostiHash(firstId);
-    const secondHash = await l1Api.getDepostiHash(secondId);
-    expect(firstHash).not.toEqual(secondHash);
-
-  });
-
-  it('block delay works for getLatestRequestId', async () => {
-    l1Api = new L1Api(WS_URI, 10n);
-    await mintBlocks(10);
-    const firstId = (await l1Api.getLatestRequestId())!;
-
-    await dummyDeposit(WS_URI);
-
-    const secondId = (await l1Api.getLatestRequestId())!;
-    expect(firstId).to.be.equal(secondId);
-
-    await mintBlocks(10);
-    const thirdId = (await l1Api.getLatestRequestId())!;
-    expect(thirdId).to.be.equal(firstId + 1n);
-  });
-
-  it('block delay works for getDeposits', async () => {
-    l1Api = new L1Api(WS_URI, 10n);
-    await mintBlocks(10);
-
-    const from = (await l1Api.getLatestRequestId())!;
-    await dummyDeposit(WS_URI);
-    expect(l1Api.getDeposits(from + 1n , from + 1n)).rejects.toThrow();
-
-    await mintBlocks(10);
-    const after = (await l1Api.getLatestRequestId())!;
-    expect(after).to.be.equal(from + 1n);
-    expect((await l1Api.getDeposits(after, after)).length).to.be.equal(1);
-  });
+  // it('can fetch deposits', async () => {
+  //   await dummyDeposit(WS_URI);
+  //   let latestRequestId = await l1Api.getLatestRequestId();
+  //   const deposits = await l1Api.getDeposits(1n, latestRequestId!);
+  //   expect(deposits.length).toBeGreaterThan(0);
+  // });
+  //
+  // it('can fetch deposits hash', async () => {
+  //
+  //   const firstId = (await l1Api.getLatestRequestId())!;
+  //   await dummyDeposit(WS_URI);
+  //
+  //   const secondId = (await l1Api.getLatestRequestId())!;
+  //   expect(firstId).not.toEqual(secondId);
+  //
+  //   const firstHash = await l1Api.getDepostiHash(firstId);
+  //   const secondHash = await l1Api.getDepostiHash(secondId);
+  //   expect(firstHash).not.toEqual(secondHash);
+  //
+  // });
+  //
+  // it('block delay works for getLatestRequestId', async () => {
+  //   l1Api = new L1Api(WS_URI, 10n);
+  //   await mintBlocks(10);
+  //   const firstId = (await l1Api.getLatestRequestId())!;
+  //
+  //   await dummyDeposit(WS_URI);
+  //
+  //   const secondId = (await l1Api.getLatestRequestId())!;
+  //   expect(firstId).to.be.equal(secondId);
+  //
+  //   await mintBlocks(10);
+  //   const thirdId = (await l1Api.getLatestRequestId())!;
+  //   expect(thirdId).to.be.equal(firstId + 1n);
+  // });
+  //
+  // it('block delay works for getDeposits', async () => {
+  //   l1Api = new L1Api(WS_URI, 10n);
+  //   await mintBlocks(10);
+  //
+  //   const from = (await l1Api.getLatestRequestId())!;
+  //   await dummyDeposit(WS_URI);
+  //   expect(l1Api.getDeposits(from + 1n , from + 1n)).rejects.toThrow();
+  //
+  //   await mintBlocks(10);
+  //   const after = (await l1Api.getLatestRequestId())!;
+  //   expect(after).to.be.equal(from + 1n);
+  //   expect((await l1Api.getDeposits(after, after)).length).to.be.equal(1);
+  // });
 
 
 
