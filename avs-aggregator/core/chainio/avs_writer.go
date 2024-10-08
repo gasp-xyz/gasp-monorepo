@@ -9,14 +9,16 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	logging "github.com/Layr-Labs/eigensdk-go/logging"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 )
+
+const waitForReceipt = bool(true)
 
 type AvsWriterer interface {
 	SendNewRdTask(
@@ -42,7 +44,7 @@ type AvsWriter struct {
 	logger              logging.Logger
 }
 
-func NewAvsWriter(txMgr txmgr.TxManager, registryAddr gethcommon.Address, ethHttpClient eth.Client, logger logging.Logger) (*AvsWriter, error) {
+func NewAvsWriter(txMgr txmgr.TxManager, registryAddr gethcommon.Address, ethHttpClient *ethclient.Client, logger logging.Logger) (*AvsWriter, error) {
 	avsServiceBindings, err := NewAvsServiceBindings(registryAddr, ethHttpClient, logger)
 	if err != nil {
 		logger.Error("Failed to create contract bindings", "err", err)
@@ -69,7 +71,7 @@ func (w *AvsWriter) SendNewOpTask(ctx context.Context, quorumThresholdPercentage
 		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, err
 	}
 
-	receipt, err := w.txMgr.Send(ctx, tx)
+	receipt, err := w.txMgr.Send(ctx, tx, waitForReceipt)
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
 	}
@@ -99,7 +101,7 @@ func (w *AvsWriter) SendNewRdTask(ctx context.Context, chainToUpdate uint8, chai
 		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, err
 	}
 
-	receipt, err := w.txMgr.Send(ctx, tx)
+	receipt, err := w.txMgr.Send(ctx, tx, waitForReceipt)
 	if err != nil {
 		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, errors.New("failed to send tx with err: " + err.Error())
 	}
@@ -128,7 +130,7 @@ func (w *AvsWriter) SendAggregatedOpTaskResponse(ctx context.Context, task taskm
 		return nil, err
 	}
 
-	receipt, err := w.txMgr.Send(ctx, tx)
+	receipt, err := w.txMgr.Send(ctx, tx, waitForReceipt)
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
 	}
@@ -153,7 +155,7 @@ func (w *AvsWriter) SendAggregatedRdTaskResponse(ctx context.Context, task taskm
 		return nil, err
 	}
 
-	receipt, err := w.txMgr.Send(ctx, tx)
+	receipt, err := w.txMgr.Send(ctx, tx, waitForReceipt)
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
 	}
@@ -177,7 +179,7 @@ func (w *AvsWriter) EjectOperators(ctx context.Context, operators []common.Addre
 		return nil, err
 	}
 
-	receipt, err := w.txMgr.Send(ctx, tx)
+	receipt, err := w.txMgr.Send(ctx, tx, waitForReceipt)
 	if err != nil {
 		return nil, errors.New("failed to send tx with err: " + err.Error())
 	}

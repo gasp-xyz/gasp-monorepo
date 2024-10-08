@@ -2,9 +2,9 @@
 // kudos to: https://github.com/FrankieIsLost/forge-template/blob/master/src/test/utils/Utilities.sol
 pragma solidity >=0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {DSTest} from "ds-test/test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import "forge-std/console.sol";
+import {Test} from "forge-std/Test.sol";
 
 contract MyERC20 is ERC20 {
     constructor() ERC20("Name", "SYM") {
@@ -17,8 +17,7 @@ contract MyERC20 is ERC20 {
 }
 
 //common utilities for forge tests
-contract Utilities is DSTest {
-    Vm internal immutable vm = Vm(HEVM_ADDRESS);
+contract Utilities is Test {
     bytes32 internal nextUser = keccak256(abi.encodePacked("user address"));
 
     function getNextUserAddress() external returns (address payable) {
