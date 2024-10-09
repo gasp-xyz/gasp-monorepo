@@ -3,7 +3,7 @@ import supertest from 'supertest'
 import app from '../../src/app'
 
 describe('APi tests: volume-history', () => {
-  const tokenIDs = ['0', '2', '4', '5', '7', '11', '14', '15', '16']
+  const tokenIDs = ['0', '1', '2', '3', '4', '5', '7', '15', '19']
   it.each(tokenIDs)(
     'should return volumes for supported pools: %s',
     async (tokenID) => {
@@ -21,7 +21,7 @@ describe('APi tests: volume-history', () => {
 describe('API Errors: volume-history/', () => {
   it('GET pools/foo does not exist -> Expect validation error', async () => {
     const errorMessage =
-      'this must be one of the following values: 0, 2, 4, 5, 7, 11, 14, 15, 16'
+      'this must be one of the following values: 0, 1, 2, 3, 4, 5, 7, 15, 19'
     await supertest(app)
       .get('/volume-history/foo')
       .expect(500)

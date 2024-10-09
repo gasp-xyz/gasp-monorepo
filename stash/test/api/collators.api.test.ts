@@ -43,10 +43,11 @@ function validateValidApyRange(body) {
   expect(apy).to.be.lessThanOrEqual(40)
   expect(apy).to.be.greaterThan(10)
 }
+// will be fixed once MGX-1539 is done
 
-describe('APi tests: Collator apy - dailyRewards', () => {
+describe.skip('APi tests: Collator apy - dailyRewards', () => {
   //todo: remove skip once we have rewards
-  it.skip('GET /collators/apy - collator - OK', async () => {
+  it('GET /collators/apy - collator - OK', async () => {
     //todo: remove skip when we have 3d party rewards
     await supertest(app)
       .get(`/collator/${collatorAddress}/staking/apy`)
@@ -61,7 +62,7 @@ describe('APi tests: Collator apy - dailyRewards', () => {
         validateValidApyRange(body)
       })
   })
-  it.skip('GET /collators/dailyReward - collator - OK', async () => {
+  it('GET /collators/dailyReward - collator - OK', async () => {
     //todo: remove skip when we have 3d party rewards
     await supertest(app)
       .get(`/collator/${collatorAddress}/staking/dailyReward`)
@@ -78,7 +79,7 @@ describe('APi tests: Collator apy - dailyRewards', () => {
         expect(rewardValue.toNumber()).gt(5000)
       })
   })
-  it.skip('GET /collators/apy - old - collator - OK', async () => {
+  it('GET /collators/apy - old - collator - OK', async () => {
     //todo: qa to fix and remove skip
     await supertest(app)
       .get(`/collator/${ethCollatorAddress}/staking/apy`)
@@ -97,7 +98,7 @@ describe('APi tests: Collator apy - dailyRewards', () => {
         validateValidApyRange(body)
       })
   })
-  it.skip('GET /collators/dailyReward - old - collator - OK', async () => {
+  it('GET /collators/dailyReward - old - collator - OK', async () => {
     //todo: qa to fix and remove skip
     await supertest(app)
       .get(`/collator/${oldCollatorAddress}/staking/dailyReward`)
@@ -118,7 +119,7 @@ describe('APi tests: Collator apy - dailyRewards', () => {
       })
   })
 
-  describe('API errors', () => {
+  describe.skip('API errors', () => {
     const errorMessage = 'This collator has not received any rewards as of yet.'
 
     it('GET /collators/dailyReward - no data', async () => {

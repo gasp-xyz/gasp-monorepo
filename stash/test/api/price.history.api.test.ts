@@ -2,8 +2,6 @@ import { describe, it, expect } from 'vitest'
 import app from '../../src/app'
 import supertest from 'supertest'
 
-const priceHistoryPath = 'price-history'
-
 describe('/GET prices', () => {
   it('GET /price-history - Schema validation', async () => {
     await supertest(app)
@@ -17,13 +15,27 @@ describe('/GET prices', () => {
       })
   })
 
+  const tokenIDs = ['0', '1', '2', '3', '4', '5', '7', '15', '19']
+  it.each(tokenIDs)(
+    'should return prices for supported pools: %s',
+    async (tokenID) => {
+      const response = await supertest(app)
+        .get('/price-history/' + tokenID)
+        .expect(200)
+      expect(response.body).to.have.property('prices')
+      expect(response.body.error).toBeUndefined()
+      expect(response.body.prices).toBeDefined()
+      expect(response.body.prices).toBeInstanceOf(Array)
+    }
+  )
+
   describe('API errors', () => {
     it('[MGX-597] - pools should not be returned on prices', async () => {
       const errorMessage =
-        'this must be one of the following values: GASPV2, L1Asset, GASPV2-ETH, L1Asset-GASPV2'
+        'this must be one of the following values: 0, 1, 2, 3, 4, 5, 7, 15, 19'
 
       await supertest(app)
-        .get(`/${priceHistoryPath}/GASPV2-L1Asset?interval=day&days=300`)
+        .get(`/price-history/0-2?interval=day&days=300`)
         .expect(500)
         .then((response) => {
           const invalidTokenNameResponse = response.body

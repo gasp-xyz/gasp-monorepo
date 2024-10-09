@@ -11,9 +11,9 @@ const pricesSchema = Joi.object({
 })
 
 describe('APi tests: price-history/pair', () => {
-  const pair = 'GASPV2/L1Asset'
-  const reversedPair = 'L1Asset/GASPV2'
-  it.only('GET pair GASPV2/L1Asset validate schema', async () => {
+  const pair = '0/1'
+  const reversedPair = '1/0'
+  it('GET pair 0/2 validate schema', async () => {
     const ksmMgx = await supertest(app)
       .get('/price-history/pair/' + pair)
       .query({
@@ -24,7 +24,8 @@ describe('APi tests: price-history/pair', () => {
     const validationResult = pricesSchema.validate(ksmMgx.body)
     expect(validationResult.error).toBeUndefined()
   })
-  it('GET pair GASPV2/L1Asset returns same as pair L1Asset/GASPV2', async () => {
+
+  it('GET pair 0/2 returns same as pair 2/0', async () => {
     const ksmMgx = await supertest(app)
       .get('/price-history/pair/' + pair)
       .query({
@@ -45,9 +46,9 @@ describe('APi tests: price-history/pair', () => {
     expect(timestamps1).toStrictEqual(timestamps2)
   })
 
-  it('GET pools/GASPV2/GASPV2: pool that does not exist expect empty', async () => {
+  it('GET pools/0/0: pool that does not exist expect empty', async () => {
     await supertest(app)
-      .get('/price-history/pair/GASPV2/GASPV2')
+      .get('/price-history/pair/0/0')
       .query({
         interval: MAX_INTERVAL,
         days: MAX_DAYS,
@@ -55,7 +56,6 @@ describe('APi tests: price-history/pair', () => {
       .expect(200)
       .then((response) => {
         const poolDoesNotExist = response.body
-        console.log('response,', poolDoesNotExist)
         expect(poolDoesNotExist.prices).to.be.empty
       })
   })
@@ -63,7 +63,7 @@ describe('APi tests: price-history/pair', () => {
 
 describe('API Errors: price-history/pair', () => {
   const errorMessage =
-    'this must be one of the following values: GASPV2, L1Asset, GASPV2-ETH, L1Asset-GASPV2'
+    'this must be one of the following values: 0, 1, 2, 3, 4, 5, 7, 15, 19'
 
   it('GET pools/foo: token does not exist Expect validation error', async () => {
     await supertest(app)

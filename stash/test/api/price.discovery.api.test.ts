@@ -2,28 +2,29 @@ import { describe, expect, it } from 'vitest'
 import supertest from 'supertest'
 import app from '../../src/app'
 import { MAX_DAYS, MAX_INTERVAL } from './utils'
-import { compactStripLength } from '@polkadot/util'
 
 describe('APi tests: price-discovery', () => {
-  it.only('should return current prices for given currency ID', async () => {
-    await supertest(app)
-      .get(`/price-discovery/0`)
-      .expect(200)
-      .then((response) => {
-        console.dir(response)
-        // expect(response.body.error).toBeUndefined()
-        // expect(response.body.prices).toBeDefined()
-        // expect(response.body.prices).toBeInstanceOf(Array)
-      })
-  })
+  const tokenIDs = ['0', '1', '2', '3', '4', '5', '7', '15', '19']
+  it.each(tokenIDs)(
+    'should return current prices for supported token IDs: %s',
+    async (tokenID) => {
+      const response = await supertest(app)
+        .get('/price-discovery/' + tokenID)
+        .expect(200)
+      expect(response.body).to.have.property('current_price')
+      expect(response.body.error).toBeUndefined()
+      expect(response.body.current_price).toBeDefined()
+      expect(response.body.current_price).toBeInstanceOf(Object)
+    }
+  )
 })
 
-describe('API Errors: tvl-history/pools', () => {
-  it('GET pools/foo does not exist Expect validation error', async () => {
+describe('API Errors: price-discovery', () => {
+  it('GET price-discovery/foo does not exist Expect validation error', async () => {
     const errorMessage =
-      'this must be one of the following values: 0-2, 2-0, 4-0, 0-4, 0-7, 7-0, 4-7, 7-4, 5-0, 0-5, 0-11, 11-0, 11-4, 4-11, 0-14, 14-0, 16-0, 0-16, 16-4, 4-16, ALL'
+      'this must be one of the following values: 0, 1, 2, 3, 4, 5, 7, 15, 19'
     await supertest(app)
-      .get('/tvl-history/pools/foo')
+      .get('/price-discovery/foo')
       .query({
         interval: MAX_INTERVAL,
         days: MAX_DAYS,
@@ -35,7 +36,4 @@ describe('API Errors: tvl-history/pools', () => {
         expect(fooResponse.message).to.contain(errorMessage)
       })
   })
-})
-describe.todo('System Errors: tvl-history/pools', () => {
-  //more tests will come...
 })
