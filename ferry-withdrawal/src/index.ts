@@ -35,7 +35,7 @@ async function main() {
 		hexToU8a(keypair.address),
 		l1,
 		l2,
-		TX_COST,
+		[],
 		MIN_PROFIT,
 	);
 

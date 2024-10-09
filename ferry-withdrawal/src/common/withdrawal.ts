@@ -4,6 +4,7 @@ interface Withdrawal {
 	readonly tokenAddress: Uint8Array;
 	readonly amount: bigint;
 	readonly ferryTip: bigint;
+	readonly hash: Uint8Array;
 }
 
 export type { Withdrawal };

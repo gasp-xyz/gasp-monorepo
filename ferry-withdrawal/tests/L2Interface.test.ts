@@ -59,45 +59,4 @@ describe('L2Interface', () => {
       expect(withdrawals.length).to.be.greaterThan(0);
     }, {timeout: 30000});
 
-    //
-    // it('can query last processed request id', async () => {
-    //   let api = await getApi(URI);
-    //   let l2 = new L2Api(api);
-    //   await l2.getLastProcessedRequestId();
-    // });
-    //
-    // it('can check if deposits was executed', async () => {
-    //   let api = await getApi(URI);
-    //   let l2 = new L2Api(api);
-    //   const lastExecuted = await l2.getLastProcessedRequestId();
-    //   expect(await l2.isExecuted(lastExecuted)).toBeTruthy();
-    //   expect(await l2.isExecuted(lastExecuted + 1n)).toBeFalsy();
-    // });
-    //
-    // it('can check if deposits was ferried', async () => {
-    //   let api = await getApi(URI);
-    //   let l2 = new L2Api(api);
-    //   expect(await l2.isFerried(new Uint8Array(32))).toBeFalsy();
-    // });
-    //
-    // it('can fetch native asset id', async () => {
-    //   let api = await getApi(URI);
-    //   let l2 = new L2Api(api);
-    //   await l2.getNativeTokenAddress();
-    // });
-    //
-    // it('can valuate token', async () => {
-    //   let api = await getApi(URI);
-    //   let l2 = new L2Api(api);
-    //   await l2.valutateToken(hexToU8a("0000000000000000000000000000000000000001"), 10n);
-    //
-    //   let nativeTokenAddress = await l2.getNativeTokenAddress();
-    //   expect(await l2.valutateToken(nativeTokenAddress, 10n)).to.be.equal(10n);
-    // });
-    //
-    // // TODO: add in the end
-    // it('consecutive ferry will fail', async () => {
-    // });
-
-
 });

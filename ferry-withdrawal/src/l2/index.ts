@@ -22,7 +22,6 @@ function createBigIntArrayFromRange(start:bigint, end:bigint) {
   return result;
 }
 
-
 interface L2Interface {
 	getLatestRequestId(): Promise<bigint|null>;
   getWithdrawals(startRange: bigint, endRange: bigint): Promise<Withdrawal[]>;
@@ -123,7 +122,8 @@ class L2Api implements L2Interface {
         withdrawalRecipient: req.asWithdrawal.withdrawalRecipient,
         tokenAddress: req.asWithdrawal.tokenAddress.toU8a(),
         amount: BigInt(req.asWithdrawal.amount.toString()),
-        ferryTip: BigInt(req.asWithdrawal.ferryTip.toString())
+        ferryTip: BigInt(req.asWithdrawal.ferryTip.toString()),
+        hash: _hash.toU8a(),
       };
     })
     return withdrawals;

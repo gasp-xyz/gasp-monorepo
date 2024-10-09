@@ -7,8 +7,16 @@ import { Ferry } from "../src/ferry/index.js";
 
 
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
-const DUMMY_TOKEN = hexToU8a("0x1111111111111111111111111111111111111111");
-const NATIVE_TOKEN = hexToU8a("0x2222222222222222222222222222222222222222");
+const NATIVE_TOKEN = hexToU8a("0x0000000000000000000000000000000000000001", 160);
+const FERRY_TOKEN1 = hexToU8a("0x1111111111111111111111111111111111111111", 160);
+const FERRY_TOKEN2 = hexToU8a("0x2222222222222222222222222222222222222222", 160);
+const DUMMY_TOKEN = hexToU8a("0x3333333333333333333333333333333333333333", 160);
+const DEFAULT_BALANCE = 1000000n;
+const TOKENS_TO_FERRY: [Uint8Array, bigint, bigint][] = [
+  [NATIVE_TOKEN, 10000n, 1n],
+  [FERRY_TOKEN1, 10000n, 1n],
+  [FERRY_TOKEN2, 20000n, 1n],
+];
 
 let ferry: Ferry;
 let l1Mock: L1Interface;
@@ -18,399 +26,287 @@ describe('Ferry Service', () => {
 
   beforeAll(async () => {
 
-    // l1Mock = {
-    //     isRolldownDeployed: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
-    //     getLatestRequestId: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
-    //     getDeposits: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
-    //     getDepostiHash: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
-    // };
-    //
-    // l2Mock = {
-    //     getBalances: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
-    //     getLastProcessedRequestId: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
-    //     isExecuted: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
-    //     isFerried: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
-    //     getNativeTokenAddress: vi.fn().mockResolvedValue(NATIVE_TOKEN),
-    //     valutateToken: vi.fn().mockImplementation( (_address, amount) => amount),
-    // };
-    // ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, 0n, 0n);
-    //
+    l1Mock = {
+      isRolldownDeployed: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
+      getFerriedAndReadyToClose: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
+      getNativeTokenAddress: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
+      getLatestRequestId: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
+      isClosed: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
+      isFerried: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
+      getBalance: vi.fn().mockImplementation(() => DEFAULT_BALANCE),
+    };
+
+    l2Mock = {
+        getLatestRequestId: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
+        getWithdrawals: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
+        getNativeTokenAddress: vi.fn().mockImplementation(() => NATIVE_TOKEN),
+    };
+
+    ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, TOKENS_TO_FERRY, 0n);
   });
 
-  it('foo', async () => {
-  });
-  // it('works fine when no deposits to ferry', async () => {
-  //
-  //   l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(0n);
-  //   l2Mock.getLastProcessedRequestId = vi.fn().mockResolvedValue(0n);
-  //   l1Mock.getDeposits = vi.fn().mockResolvedValue([]);
-  //
-  //   expect(await ferry.getPendingDeposits()).toHaveLength(0);
-  // });
-  //
-  //
-  // it('ignores ferried deposits', async () => {
-  //
-  //   const deposits: Deposit[] = [
-  //     {
-  //       requestId: 1n,
-  //       depositRecipient: new Uint8Array(20).fill(1),
-  //       tokenAddress: new Uint8Array(20).fill(1),
-  //       amount: 1n, 
-  //       timeStamp: 1n,
-  //       ferryTip: 0n,
-  //     }
-  //   ];
-  //
-  //   l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(0n);
-  //   l2Mock.getLastProcessedRequestId = vi.fn().mockResolvedValue(0n);
-  //   l1Mock.getDeposits = vi.fn().mockResolvedValue(deposits);
-  //   l1Mock.getDepostiHash = vi.fn().mockResolvedValue(new Uint8Array(32));
-  //   l2Mock.isExecuted = vi.fn().mockResolvedValue(false);
-  //   l2Mock.isFerried = vi.fn().mockResolvedValue(true);
-  //
-  //   expect(await ferry.getPendingDeposits()).toHaveLength(0);
-  // });
-  //
-  //
-  // it('ignores executed deposits', async () => {
-  //
-  //   const deposits: Deposit[] = [
-  //     {
-  //       requestId: 1n,
-  //       depositRecipient: new Uint8Array(20).fill(1),
-  //       tokenAddress: new Uint8Array(20).fill(1),
-  //       amount: 1n, 
-  //       timeStamp: 1n,
-  //       ferryTip: 0n,
-  //     }
-  //   ];
-  //
-  //   l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(0n);
-  //   l2Mock.getLastProcessedRequestId = vi.fn().mockResolvedValue(0n);
-  //   l1Mock.getDeposits = vi.fn().mockResolvedValue(deposits);
-  //   l1Mock.getDepostiHash = vi.fn().mockResolvedValue(new Uint8Array(32));
-  //   l2Mock.isExecuted = vi.fn().mockResolvedValue(true);
-  //   l2Mock.isFerried = vi.fn().mockResolvedValue(false);
-  //
-  //   expect(await ferry.getPendingDeposits()).toHaveLength(0);
-  // });
-  //
-  // it('considers only not ferried and not executed deposits', async () => {
-  //
-  //   const deposits: Deposit[] = [
-  //     {
-  //       requestId: 1n,
-  //       depositRecipient: new Uint8Array(20).fill(1),
-  //       tokenAddress: new Uint8Array(20).fill(1),
-  //       amount: 1n, 
-  //       timeStamp: 1n,
-  //       ferryTip: 0n,
-  //     }
-  //   ];
-  //
-  //   l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(0n);
-  //   l2Mock.getLastProcessedRequestId = vi.fn().mockResolvedValue(0n);
-  //   l1Mock.getDeposits = vi.fn().mockResolvedValue(deposits);
-  //   l1Mock.getDepostiHash = vi.fn().mockResolvedValue(new Uint8Array(32));
-  //   l2Mock.isExecuted = vi.fn().mockResolvedValue(false);
-  //   l2Mock.isFerried = vi.fn().mockResolvedValue(false);
-  //
-  //   expect(await ferry.getPendingDeposits()).toHaveLength(1);
-  // });
-  //
-  // it('rates deposits based on fee', async () => {
-  //   l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 1000n]]));
-  //
-  //   const depositWithFee: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 10n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 10n,
-  //   };
-  //
-  //   const depositWithoutFee: Deposit = {
-  //     requestId: 2n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 10n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 0n,
-  //   };
-  //
-  //   expect(await ferry.rateDeposits(
-  //     [depositWithoutFee, depositWithFee],
-  //   )).toStrictEqual([depositWithFee, depositWithoutFee]);
-  //
-  // });
-  //
-  // it('rates deposits based on fee & amount', async () => {
-  //   l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 1000n]]));
-  //
-  //   const depositWithFeeAndLeastTranferValue: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 10n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 10n,
-  //   };
-  //
-  //
-  //   const depositWithFee: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 20n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 10n,
-  //   };
-  //
-  //   const depositWithoutFee: Deposit = {
-  //     requestId: 2n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 1n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 0n,
-  //   };
-  //
-  //   expect(await ferry.rateDeposits(
-  //     [depositWithoutFee, depositWithFeeAndLeastTranferValue, depositWithFee],
-  //   )).toStrictEqual([depositWithFeeAndLeastTranferValue, depositWithFee, depositWithoutFee]);
-  //
-  // });
-  //
-  // it('filters out deposits that can not afford', async () => {
-  //   l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 10n]]));
-  //
-  //
-  //   const depositWithTooMuchAmount: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 11n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 0n,
-  //   };
-  //
-  //   const depositWithTooMuchAmount2: Deposit = {
-  //     requestId: 2n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 25n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 0n,
-  //   };
-  //
-  //   expect(await ferry.rateDeposits(
-  //     [depositWithTooMuchAmount, depositWithTooMuchAmount2]
-  //   )).toStrictEqual([]);
-  //
-  // });
-  //
-  // it('accepts the deposits that can be afforded', async () => {
-  //   l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 10n]]));
-  //
-  //
-  //   const depositWithTooMuchAmount: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 11n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 0n,
-  //   };
-  //
-  //   const depositWihoutFee: Deposit = {
-  //     requestId: 2n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 10n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 0n,
-  //   };
-  //
-  //   const depositWihFee: Deposit = {
-  //     requestId: 2n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 25n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 15n,
-  //   };
-  //
-  //
-  //   expect(await ferry.rateDeposits(
-  //     [depositWithTooMuchAmount, depositWihoutFee, depositWihFee]
-  //   )).toStrictEqual([depositWihFee, depositWihoutFee]);
-  //
-  // });
-  //
-  // it('accepts the deposits that can be afforded', async () => {
-  //   l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 10n]]));
-  //
-  //
-  //   const depositWithTooMuchAmount: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 11n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 0n,
-  //   };
-  //
-  //   const depositWihoutFee: Deposit = {
-  //     requestId: 2n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 10n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 0n,
-  //   };
-  //
-  //   const depositWihFee: Deposit = {
-  //     requestId: 2n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 25n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 15n,
-  //   };
-  //
-  //
-  //   expect(await ferry.rateDeposits(
-  //     [depositWithTooMuchAmount, depositWihoutFee, depositWihFee]
-  //   )).toStrictEqual([depositWihFee, depositWihoutFee]);
-  //
-  // });
-  //
-  // it('ignores invalid deposits', async () => {
-  //   l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 10n]]));
-  //
-  //   const invalidDeposit: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 10n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 100n,
-  //   };
-  //
-  //
-  //   expect(await ferry.rateDeposits(
-  //     [invalidDeposit]
-  //   )).toStrictEqual([]);
-  // });
-  //
-  //
-  // it('tx cost applies only for native deposits', async () => {
-  //   const txCost = 100n;
-  //   ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, txCost, 0n);
-  //
-  //   l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([
-  //     [NATIVE_TOKEN, 109n],
-  //     [DUMMY_TOKEN, 10n]
-  //   ]));
-  //
-  //   const nativeDeposit: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: NATIVE_TOKEN,
-  //     amount: 10n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 0n,
-  //   };
-  //
-  //   const nativeDeposit2: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: NATIVE_TOKEN,
-  //     amount: 9n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 0n,
-  //   };
-  //
-  //
-  //   const dummyDeposit: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 10n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 0n,
-  //   };
-  //
-  //
-  //   expect(await ferry.rateDeposits(
-  //     [nativeDeposit, nativeDeposit2, dummyDeposit]
-  //   )).toStrictEqual([nativeDeposit2, dummyDeposit]);
-  //
-  // });
-  //
-  //
-  // it('highes reward:input ratio deposits are preffered', async () => {
-  //
-  //   l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([
-  //     [DUMMY_TOKEN, 10000n]
-  //   ]));
-  //
-  //   const depositBetter: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 1000n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 100n,
-  //   };
-  //
-  //   const depositWorse: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 1500n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 100n,
-  //   };
-  //
-  //   expect(await ferry.rateDeposits(
-  //     [depositWorse, depositBetter],
-  //   )).toStrictEqual([depositBetter, depositWorse]);
-  //
-  // });
-  //
-  // it('ignores deposits with fee valuation lower than min', async () => {
-  //
-  //   const minProfit = 100n;
-  //   ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, 0n, minProfit);
-  //   l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([
-  //     [DUMMY_TOKEN, 10000n]
-  //   ]));
-  //
-  //   const depositBelowProfitThreshold: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 1000n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 99n,
-  //   };
-  //
-  //   const depositAboveProfitThreshold: Deposit = {
-  //     requestId: 1n,
-  //     depositRecipient: new Uint8Array(20).fill(1),
-  //     tokenAddress: DUMMY_TOKEN,
-  //     amount: 1500n, 
-  //     timeStamp: 1n,
-  //     ferryTip: 100n,
-  //   };
-  //
-  //   expect(await ferry.rateDeposits(
-  //     [depositBelowProfitThreshold, depositAboveProfitThreshold],
-  //   )).toStrictEqual([depositAboveProfitThreshold]);
-  //
-  // });
+  it('should use latests requests ids to fetch pending withdrawals', async () => {
 
+    const latestRequestIdL1 = 123n;
+    const latestRequestIdL2 = 456n;
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(latestRequestIdL1);
+    l2Mock.getLatestRequestId = vi.fn().mockResolvedValue(latestRequestIdL2);
+
+    l2Mock.getWithdrawals = vi.fn()
+      .mockImplementationOnce(async (arg1, arg2) => {
+        if (arg1 === latestRequestIdL1 && arg2 === latestRequestIdL2) {
+          return [];
+        }
+        throw new Error("Unexpected arguments");
+      });
+    const withdrawals = await ferry.getPendingWithdrawals();
+    expect(withdrawals).toHaveLength(0);
+  });
+
+  it('should use return ampty array when one of counter does not exist 1', async () => {
+
+    const latestRequestIdL1 = null;
+    const latestRequestIdL2 = 456n;
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(latestRequestIdL1);
+    l2Mock.getLatestRequestId = vi.fn().mockResolvedValue(latestRequestIdL2);
+
+    const withdrawals = await ferry.getPendingWithdrawals();
+    expect(withdrawals).toHaveLength(0);
+  });
+
+  it('should use return ampty array when one of counter does not exist 2', async () => {
+
+    const latestRequestIdL1 = 456n;
+    const latestRequestIdL2 = null;
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(latestRequestIdL1);
+    l2Mock.getLatestRequestId = vi.fn().mockResolvedValue(latestRequestIdL2);
+
+    const withdrawals = await ferry.getPendingWithdrawals();
+    expect(withdrawals).toHaveLength(0);
+  });
+
+  it('should fetch withdrawals that are not ferried and not closed', async () => {
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(1n);
+    l2Mock.getLatestRequestId = vi.fn().mockResolvedValue(2n);
+    l1Mock.isFerried = vi.fn().mockResolvedValue(false);
+    l1Mock.isClosed = vi.fn().mockResolvedValue(false);
+    l2Mock.getWithdrawals = vi.fn().mockResolvedValue(
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      }]
+    );
+    const withdrawals = await ferry.getPendingWithdrawals();
+    expect(withdrawals).toHaveLength(1);
+  });
+
+  it('getWithdrawals should ignore ferried txs', async () => {
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(1n);
+    l2Mock.getLatestRequestId = vi.fn().mockResolvedValue(2n);
+    l1Mock.isFerried = vi.fn().mockResolvedValue(true);
+    l1Mock.isClosed = vi.fn().mockResolvedValue(false);
+    l2Mock.getWithdrawals = vi.fn().mockResolvedValue(
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      }]
+    );
+    const withdrawals = await ferry.getPendingWithdrawals();
+    expect(withdrawals).toHaveLength(0);
+  });
+
+  it('getWithdrawals should ignore closed txs', async () => {
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(1n);
+    l2Mock.getLatestRequestId = vi.fn().mockResolvedValue(2n);
+    l1Mock.isFerried = vi.fn().mockResolvedValue(false);
+    l1Mock.isClosed = vi.fn().mockResolvedValue(true);
+    l2Mock.getWithdrawals = vi.fn().mockResolvedValue(
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      }]
+    );
+    const withdrawals = await ferry.getPendingWithdrawals();
+    expect(withdrawals).toHaveLength(0);
+  });
+
+  it('rateWithdrawals considers only tokens passed in ctor', async () => {
+
+    const withdrawals = 
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      },
+        {
+        requestId: 2n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: DUMMY_TOKEN,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      }];
+
+    const ferryableWithdrawals = await ferry.rateWithdrawals(withdrawals);
+    expect(ferryableWithdrawals).toHaveLength(1);
+    expect(ferryableWithdrawals[0]).to.be.equal(withdrawals[0]);
+  });
+
+
+  it('rateWithdrawals considers ignores withdrawals that can not afford', async () => {
+    const withdrawals = 
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount: DEFAULT_BALANCE + 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      },
+        {
+        requestId: 2n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount: DEFAULT_BALANCE,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      }];
+
+    const ferryableWithdrawals = await ferry.rateWithdrawals(withdrawals);
+    expect(ferryableWithdrawals).toHaveLength(1);
+    expect(ferryableWithdrawals[0]).to.be.equal(withdrawals[1]);
+  });
+
+  it('rateWithdrawals considers tx cost for erc ferries', async () => {
+    const withdrawals = 
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount: DEFAULT_BALANCE + 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      },
+        {
+        requestId: 2n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount: DEFAULT_BALANCE,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      }];
+
+    const ferryableWithdrawals = await ferry.rateWithdrawals(withdrawals);
+    expect(ferryableWithdrawals).toHaveLength(1);
+    expect(ferryableWithdrawals[0]).to.be.equal(withdrawals[1]);
+  });
+
+  it('rateWithdrawals considers tx cost for native withdrawals', async () => {
+
+    const MIN_ACCOUNT_BALANCE = 1000n;
+    ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, TOKENS_TO_FERRY, MIN_ACCOUNT_BALANCE);
+    const withdrawals = 
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: NATIVE_TOKEN,
+        amount:  DEFAULT_BALANCE,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      },
+      ];
+
+    const ferryableWithdrawals = await ferry.rateWithdrawals(withdrawals);
+    expect(ferryableWithdrawals).toHaveLength(0);
+  });
+
+  it('rateWithdrawals ignores tx cost for erc20 withdrawals', async () => {
+
+    const MIN_ACCOUNT_BALANCE = 1000n;
+    ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, TOKENS_TO_FERRY, MIN_ACCOUNT_BALANCE);
+    const withdrawals = 
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount:  DEFAULT_BALANCE,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      },
+      ];
+
+    const ferryableWithdrawals = await ferry.rateWithdrawals(withdrawals);
+    expect(ferryableWithdrawals).toHaveLength(1);
+    expect(ferryableWithdrawals[0]).to.be.equal(withdrawals[0]);
+  });
+
+  it('rateWithdrawals considers assigned weight', async () => {
+    const tokensToFerry: [Uint8Array, bigint, bigint][] = [
+      [FERRY_TOKEN1, 10000n, 1n],
+      [FERRY_TOKEN2, 20000n, 2n],
+    ];
+    ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, tokensToFerry, 0n);
+    const withdrawals = 
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount:  DEFAULT_BALANCE,
+        ferryTip: 1n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      },
+      {
+        requestId: 2n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN2,
+        amount:  DEFAULT_BALANCE,
+        ferryTip: 1n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      },
+      ];
+
+    const ferryableWithdrawals = await ferry.rateWithdrawals(withdrawals);
+    expect(ferryableWithdrawals).toHaveLength(2);
+    expect(ferryableWithdrawals[0].requestId).to.be.equal(2n);
+  });
+
+  it('rateWithdrawals considers amount when weight is the same assigned weight', async () => {
+    const withdrawals = 
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount:  DEFAULT_BALANCE,
+        ferryTip: 1n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      },
+      {
+        requestId: 2n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount:  30000n,
+        ferryTip: 1n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      },
+      ];
+
+    const ferryableWithdrawals = await ferry.rateWithdrawals(withdrawals);
+    expect(ferryableWithdrawals).toHaveLength(2);
+    expect(ferryableWithdrawals[0].requestId).to.be.equal(1n);
+  });
 })

@@ -24,6 +24,7 @@ const timeout = 60000;
 
 const WS_URI = "ws://localhost:8545";
 const HTTP_URI = "http://localhost:8545";
+const TOKEN_ADDRESS = hexToU8a("0xFD471836031dc5108809D173A067e8486B9047A3", 160);
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
 const ANVIL_TEST_ACCOUNT = "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba";
 
@@ -43,8 +44,6 @@ async function getBlockNumnber() {
 }
 
 async function dummyDeposit(uri: string) {
-	const ANVIL_TEST_ACCOUNT =
-		"0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba";
 	const transport = webSocket(uri, { retryCount: 5 });
 	const publicClient = createPublicClient({
 		transport,
@@ -87,10 +86,12 @@ describe('L1Interface', () => {
   });
 
   it('should successfully connect through websocket', async () => {
+    l1Api = new L1Api(WS_URI, 0n);
     expect(await l1Api.isRolldownDeployed()).toBeTruthy()
   });
 
   it('should successfully connect through http', async () => {
+    l1Api = new L1Api(HTTP_URI, 0n);
     expect(await l1Api.isRolldownDeployed()).toBeTruthy()
   });
 
@@ -101,55 +102,47 @@ describe('L1Interface', () => {
     expect(await l1Api.getLatestRequestId()).toBeGreaterThan(latestRequestId!);
   });
 
-  // it('can fetch deposits', async () => {
-  //   await dummyDeposit(WS_URI);
-  //   let latestRequestId = await l1Api.getLatestRequestId();
-  //   const deposits = await l1Api.getDeposits(1n, latestRequestId!);
-  //   expect(deposits.length).toBeGreaterThan(0);
-  // });
-  //
-  // it('can fetch deposits hash', async () => {
-  //
-  //   const firstId = (await l1Api.getLatestRequestId())!;
-  //   await dummyDeposit(WS_URI);
-  //
-  //   const secondId = (await l1Api.getLatestRequestId())!;
-  //   expect(firstId).not.toEqual(secondId);
-  //
-  //   const firstHash = await l1Api.getDepostiHash(firstId);
-  //   const secondHash = await l1Api.getDepostiHash(secondId);
-  //   expect(firstHash).not.toEqual(secondHash);
-  //
-  // });
-  //
-  // it('block delay works for getLatestRequestId', async () => {
-  //   l1Api = new L1Api(WS_URI, 10n);
-  //   await mintBlocks(10);
-  //   const firstId = (await l1Api.getLatestRequestId())!;
-  //
-  //   await dummyDeposit(WS_URI);
-  //
-  //   const secondId = (await l1Api.getLatestRequestId())!;
-  //   expect(firstId).to.be.equal(secondId);
-  //
-  //   await mintBlocks(10);
-  //   const thirdId = (await l1Api.getLatestRequestId())!;
-  //   expect(thirdId).to.be.equal(firstId + 1n);
-  // });
-  //
-  // it('block delay works for getDeposits', async () => {
-  //   l1Api = new L1Api(WS_URI, 10n);
-  //   await mintBlocks(10);
-  //
-  //   const from = (await l1Api.getLatestRequestId())!;
-  //   await dummyDeposit(WS_URI);
-  //   expect(l1Api.getDeposits(from + 1n , from + 1n)).rejects.toThrow();
-  //
-  //   await mintBlocks(10);
-  //   const after = (await l1Api.getLatestRequestId())!;
-  //   expect(after).to.be.equal(from + 1n);
-  //   expect((await l1Api.getDeposits(after, after)).length).to.be.equal(1);
-  // });
+  it('can fetch erc20 balance of existing token', async () => {
+    const value = await l1Api.getBalance(TOKEN_ADDRESS, hexToU8a(ALITH));
+    expect(value).toBeGreaterThanOrEqual(0);
+  });
+
+  it('can fetch erc20 balance of unexisting token (returns null)', async () => {
+    const value = await l1Api.getBalance(hexToU8a("0x8888888888888888888888888888888888888888"), hexToU8a(ALITH));
+    expect(value).toBeNull();
+  });
+
+  it('can fetch balance of native token (returns null)', async () => {
+    const value = await l1Api.getBalance(hexToU8a("0x8888888888888888888888888888888888888888"), hexToU8a(ALITH));
+    expect(value).toBeNull();
+  });
+
+  it('can fetch balance of native token (returns null)', async () => {
+    const value = await l1Api.getBalance(hexToU8a("0x8888888888888888888888888888888888888888"), hexToU8a(ALITH));
+    expect(value).toBeNull();
+  });
+
+  it('can fetch native token address', async () => {
+    const value = await l1Api.getNativeTokenAddress();
+    expect(value).toEqual(hexToU8a("0x0000000000000000000000000000000000000001"));
+  });
+
+  it('can fetch native token balance', async () => {
+    const nativeTokenAddress = await l1Api.getNativeTokenAddress();
+    const acc: PrivateKeyAccount = privateKeyToAccount(ANVIL_TEST_ACCOUNT);
+    const value = await l1Api.getBalance(nativeTokenAddress, hexToU8a(acc.address));
+    expect(value).toBeGreaterThan(0);
+  });
+
+  it('isFerried works', async () => {
+    const value = await l1Api.isFerried(hexToU8a("0x9191919191919191919191919191919191919191919191919191919191919191"));
+    expect(value).toBeFalsy();
+  });
+
+  it('isClosed works', async () => {
+    const value = await l1Api.isClosed(hexToU8a("0x9191919191919191919191919191919191919191919191919191919191919191"));
+    expect(value).toBeFalsy();
+  });
 
 
 

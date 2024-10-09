@@ -323,6 +323,10 @@ contract Rolldown is
         emit L2UpdateAccepted(merkle_root, range);
     }
 
+    function getMerkleRootsLength() public view returns (uint256){
+      return roots.length;
+    }
+
     function process_l2_update_cancels(Cancel calldata cancel) private {
         bool cancelJustified = false;
 
