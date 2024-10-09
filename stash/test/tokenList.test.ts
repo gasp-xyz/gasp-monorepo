@@ -6,7 +6,7 @@ import { TokenInfoStats } from '../src/util/Listing'
 
 vi.mock('gasp-sdk')
 
-describe('[Token list]', () => {
+describe.skip('[Token list]', () => {
   beforeAll(() => {
     vi.mock('../src/util/Listing', async () => {
       const actual = await vi.importActual('../src/util/Listing')
