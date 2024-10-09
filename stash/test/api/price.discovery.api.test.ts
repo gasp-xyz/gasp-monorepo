@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import supertest from 'supertest'
 import app from '../../src/app'
-import { MAX_DAYS, MAX_INTERVAL } from './utils'
+import { MAX_DAYS, MAX_INTERVAL, tokenIDs } from './utils'
 
 describe('APi tests: price-discovery', () => {
-  const tokenIDs = ['0', '1', '2', '3', '4', '5', '7', '15', '19']
   it.each(tokenIDs)(
     'should return current prices for supported token IDs: %s',
     async (tokenID) => {

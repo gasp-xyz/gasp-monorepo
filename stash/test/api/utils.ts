@@ -6,6 +6,7 @@ export const TIMESERIES_HOST_DOCKER_IMAGE_NAME =
 export const REDIS_HOST_DOCKER_IMAGE_NAME = 'p1k1m4n/redis-test-stash:5'
 export const MAX_DAYS = 'max'
 export const MAX_INTERVAL = 'day'
+export const tokenIDs = ['0', '1', '2', '3', '4', '5', '7', '15', '19']
 
 let redisContainer: StartedTestContainer
 let timeSeriesContainer: StartedTestContainer

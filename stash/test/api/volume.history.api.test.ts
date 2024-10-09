@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import supertest from 'supertest'
 import app from '../../src/app'
+import { tokenIDs } from './utils'
 
 describe('APi tests: volume-history', () => {
-  const tokenIDs = ['0', '1', '2', '3', '4', '5', '7', '15', '19']
   it.each(tokenIDs)(
     'should return volumes for supported pools: %s',
     async (tokenID) => {

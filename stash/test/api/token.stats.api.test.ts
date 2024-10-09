@@ -74,23 +74,14 @@ describe('APi tests: token stats', () => {
     pools.forEach((pool) => {
       const firstTokenId = pool[1].toHuman()[0]
       const secondTokenId = pool[1].toHuman()[1]
-      const excludePool = ['2', '3', '9', '15', '16'] // leave only pool with 0 and 1 token ids (GASPV2 and ETH)
       const firstToken = allstats.filter(
         (token: { tokenId: number }) => token.tokenId === firstTokenId
       )
       const secondToken = allstats.filter(
         (token: { tokenId: number }) => token.tokenId === secondTokenId
       )
-      console.log(`Token ${firstTokenId} , ${secondTokenId} `)
-      if (
-        excludePool.includes(firstTokenId) ||
-        excludePool.includes(secondTokenId)
-      ) {
-        console.log(`Skipped:: ${firstTokenId} , ${secondTokenId} `)
-      } else {
-        expect(firstToken.length).toEqual(1)
-        expect(secondToken.length).toEqual(1)
-      }
+      expect(firstToken.length).toEqual(1)
+      expect(secondToken.length).toEqual(1)
     })
   })
 })

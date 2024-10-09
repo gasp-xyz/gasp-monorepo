@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import app from '../../src/app'
 import supertest from 'supertest'
+import { tokenIDs } from './utils'
 
 describe('/GET tvl-history', () => {
   it('GET /tvl-history - Schema validation', async () => {
@@ -15,7 +16,6 @@ describe('/GET tvl-history', () => {
       })
   })
 
-  const tokenIDs = ['0', '1', '2', '3', '4', '5', '7', '15', '19']
   it.each(tokenIDs)(
     'should return prices for supported pools: %s',
     async (tokenID) => {
