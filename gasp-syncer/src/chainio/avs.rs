@@ -10,7 +10,6 @@ use bindings::{
     registry_coordinator::RegistryCoordinator,
     shared_types::OperatorInfo,
     stake_registry::StakeRegistry,
-    strategy_manager_storage::{PubkeyRegistrationParams, SignatureWithSaltAndExpiry},
 };
 use ethers::{
     contract::{EthEvent, Event},

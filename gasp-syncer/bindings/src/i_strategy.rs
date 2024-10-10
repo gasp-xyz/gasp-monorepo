@@ -281,7 +281,39 @@ pub mod i_strategy {
                     },],
                 ),
             ]),
-            events: ::std::collections::BTreeMap::new(),
+            events: ::core::convert::From::from([
+                (
+                    ::std::borrow::ToOwned::to_owned("ExchangeRateEmitted"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("ExchangeRateEmitted",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
+                            name: ::std::borrow::ToOwned::to_owned("rate"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
+                            indexed: false,
+                        },],
+                        anonymous: false,
+                    },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("StrategyTokenSet"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("StrategyTokenSet"),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("token"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                indexed: false,
+                            },
+                            ::ethers::core::abi::ethabi::EventParam {
+                                name: ::std::borrow::ToOwned::to_owned("decimals"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                indexed: false,
+                            },
+                        ],
+                        anonymous: false,
+                    },],
+                ),
+            ]),
             errors: ::std::collections::BTreeMap::new(),
             receive: false,
             fallback: false,
@@ -435,10 +467,110 @@ pub mod i_strategy {
                 .method_hash([217, 202, 237, 18], (recipient, token, amount_shares))
                 .expect("method not found (this should never happen)")
         }
+        ///Gets the contract's `ExchangeRateEmitted` event
+        pub fn exchange_rate_emitted_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, ExchangeRateEmittedFilter>
+        {
+            self.0.event()
+        }
+        ///Gets the contract's `StrategyTokenSet` event
+        pub fn strategy_token_set_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, StrategyTokenSetFilter>
+        {
+            self.0.event()
+        }
+        /// Returns an `Event` builder for all the events of this contract.
+        pub fn events(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, IStrategyEvents> {
+            self.0
+                .event_with_filter(::core::default::Default::default())
+        }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>> for IStrategy<M> {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
+        }
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethevent(name = "ExchangeRateEmitted", abi = "ExchangeRateEmitted(uint256)")]
+    pub struct ExchangeRateEmittedFilter {
+        pub rate: ::ethers::core::types::U256,
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethevent(name = "StrategyTokenSet", abi = "StrategyTokenSet(address,uint8)")]
+    pub struct StrategyTokenSetFilter {
+        pub token: ::ethers::core::types::Address,
+        pub decimals: u8,
+    }
+    ///Container type for all of the contract's events
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        serde::Serialize,
+        serde::Deserialize,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub enum IStrategyEvents {
+        ExchangeRateEmittedFilter(ExchangeRateEmittedFilter),
+        StrategyTokenSetFilter(StrategyTokenSetFilter),
+    }
+    impl ::ethers::contract::EthLogDecode for IStrategyEvents {
+        fn decode_log(
+            log: &::ethers::core::abi::RawLog,
+        ) -> ::core::result::Result<Self, ::ethers::core::abi::Error> {
+            if let Ok(decoded) = ExchangeRateEmittedFilter::decode_log(log) {
+                return Ok(IStrategyEvents::ExchangeRateEmittedFilter(decoded));
+            }
+            if let Ok(decoded) = StrategyTokenSetFilter::decode_log(log) {
+                return Ok(IStrategyEvents::StrategyTokenSetFilter(decoded));
+            }
+            Err(::ethers::core::abi::Error::InvalidData)
+        }
+    }
+    impl ::core::fmt::Display for IStrategyEvents {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+            match self {
+                Self::ExchangeRateEmittedFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::StrategyTokenSetFilter(element) => ::core::fmt::Display::fmt(element, f),
+            }
+        }
+    }
+    impl ::core::convert::From<ExchangeRateEmittedFilter> for IStrategyEvents {
+        fn from(value: ExchangeRateEmittedFilter) -> Self {
+            Self::ExchangeRateEmittedFilter(value)
+        }
+    }
+    impl ::core::convert::From<StrategyTokenSetFilter> for IStrategyEvents {
+        fn from(value: StrategyTokenSetFilter) -> Self {
+            Self::StrategyTokenSetFilter(value)
         }
     }
     ///Container type for all input parameters for the `deposit` function with signature `deposit(address,uint256)` and selector `0x47e7ef24`
