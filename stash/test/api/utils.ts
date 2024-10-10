@@ -16,7 +16,7 @@ export async function startContainer(image: string) {
   if (image === TIMESERIES_HOST_DOCKER_IMAGE_NAME) {
     return await new GenericContainer(image)
       .withWorkingDir('/')
-      .withEntrypoint(['/entrypoint.sh'])
+      .withEntrypoint(['./entrypoint.sh'])
       .withExposedPorts({ container: 6379, host: 6379 })
       .withLogConsumer(stream => {
         stream.on("data", line => console.debug("redis_ts ->" + line));
