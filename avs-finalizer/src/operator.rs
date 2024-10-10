@@ -35,7 +35,7 @@ use substrate_rpc_client::{rpc_params, ws_client, ClientT};
 use tokio::select;
 use tokio::time::{sleep, Duration};
 use tokio::try_join;
-use tracing::{debug, error, info, instrument};
+use tracing::{debug, error, info, instrument, trace};
 
 pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
@@ -98,6 +98,7 @@ impl Operator {
 
     #[instrument(skip_all)]
     pub async fn watch_new_tasks(self: Arc<Self>) -> eyre::Result<()> {
+        self.clone().wait_for_gasp_to_sync().await?;
         let evs = self.clone().avs_contracts.new_task_stream();
         let mut stream: stream::EventStream<'_, _, (FinalizerTaskManagerEvents, LogMeta), _> =
             evs.subscribe_with_meta().await?;
@@ -254,7 +255,11 @@ impl Operator {
             _ => return Err(eyre!("Unexpected chain in task")),
         };
         let params = rpc_params!(chain_as_string, (range_start, range_end));
-        let rd_update: H256 = rpc.request("rolldown_get_merkle_root", params).await?;
+        let rd_update: H256 = rpc.request("rolldown_get_merkle_root", params.clone()).await?;
+
+        if rd_update.is_zero() {
+            return Err(eyre!("rolldown_get_merkle_root returned zero value, params: {:?}", params));
+        }
 
         debug!("get_rd_update - rd_update: {:?}", rd_update);
 
@@ -270,6 +275,36 @@ impl Operator {
         };
 
         Ok(partial_rd_task_response)
+    }
+
+    pub(crate) async fn wait_for_gasp_to_sync(self: Arc<Self>) -> eyre::Result<()> {
+        let rpc = ws_client(self.substrate_client_uri.clone())
+            .await
+            .map_err(|e| eyre!(e))?;
+        
+        let params = rpc_params!();
+        let health: sc_rpc_api::system::helpers::Health = rpc.request("system_health", params).await?;
+
+        debug!("Gasp node is_syncing - {:?}", health.is_syncing);
+
+        if health.is_syncing {
+            let retry_delay: tokio::time::Duration = tokio::time::Duration::from_secs(600);
+            info!("Waiting for gasp node to finish syncing");
+
+            loop{
+                let params = rpc_params!();
+                let health: sc_rpc_api::system::helpers::Health = rpc.request("system_health", params).await?;
+
+                info!("Gasp node is_syncing - {:?}", health.is_syncing);
+                if !health.is_syncing{
+                    break;
+                }
+                info!("Rechecking sync status after - {:?}", retry_delay);
+                tokio::time::sleep(retry_delay).await;
+            }
+        }
+        debug!("Done waiting for gasp node to sync");
+        Ok(())
     }
 
     pub(crate) async fn execute_block(
