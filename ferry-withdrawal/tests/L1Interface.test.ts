@@ -1,6 +1,7 @@
 import { describe, test, beforeAll, expect, it } from "vitest";
 import { sleep, getApi } from "../src/utils/index.js";
 import { L2Interface, L2Api } from "../src/l2";
+import { isEqual} from "../src/utils/index.js";
 import { L1Api } from "../src/l1";
 import { L1Interface, toViemFormat } from "../src/l1/index.js";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
@@ -56,9 +57,6 @@ function hashWithdrawal(withdrawal: Withdrawal) {
     ABI.find((e: any) => e!.name === "ferry_withdrawal")!.inputs!,
     [toViemFormat(withdrawal)]
   );
-  console.info(`encoded   : ${encoded}`);
-  console.info(`keccak256 : ${keccak256(encoded)}`);
-  console.info(`encoded   : ${hexToU8a(keccak256(encoded).toString()).length}`);
   return hexToU8a(keccak256(encoded).toString());
 }
 
@@ -260,13 +258,38 @@ describe('L1Interface', () => {
     };
     withdrawal.hash = hashWithdrawal(withdrawal);
 
-    injectMerkleRoot(WS_URI, withdrawal.hash, withdrawal.requestId, withdrawal.requestId);
+    await injectMerkleRoot(WS_URI, withdrawal.hash, withdrawal.requestId, withdrawal.requestId);
     const privateKey = hexToU8a("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
     expect(await l1Api.isFerried(hashWithdrawal(withdrawal))).toBeFalsy();
     expect(await l1Api.isClosed(hashWithdrawal(withdrawal))).toBeFalsy();
     await l1Api.close(withdrawal, privateKey);
     expect(await l1Api.isClosed(hashWithdrawal(withdrawal))).toBeTruthy();
-    }, {timeout: 10000});
+    }, {timeout: 30000});
 
+  it('getFerry works', async () => {
+    await updateUpdaterAccount(WS_URI);
+    await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
+    const randomAddress = getRandomUintArray(20);
+    const lastRequestId = await l1Api.getLatestRequestId();
+
+    let withdrawal1 = {
+        requestId: lastRequestId! + 1n,
+        withdrawalRecipient: randomAddress,
+        tokenAddress: TOKEN_ADDRESS,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 256),
+    };
+    withdrawal1.hash = hashWithdrawal(withdrawal1);
+
+    const privateKey = hexToU8a("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
+    const acc: PrivateKeyAccount = privateKeyToAccount(u8aToHex(privateKey));
+    await l1Api.ferry(withdrawal1, privateKey)
+    await l1Api.isFerried(withdrawal1.hash);
+    const ferryAddress = await l1Api.getFerry(withdrawal1.hash);
+    expect(ferryAddress).not.toBeNull();
+    expect(isEqual(ferryAddress!, hexToU8a(acc.address))).toBeTruthy();
+
+    }, {timeout: 10000});
 
 });

@@ -28,11 +28,11 @@ describe('Ferry Service', () => {
 
     l1Mock = {
       isRolldownDeployed: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
-      getFerriedAndReadyToClose: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       getNativeTokenAddress: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       getLatestRequestId: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       isClosed: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       isFerried: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
+      getFerry: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       ferry: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       close: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       getBalance: vi.fn().mockImplementation(() => DEFAULT_BALANCE),

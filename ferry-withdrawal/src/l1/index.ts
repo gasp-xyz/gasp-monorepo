@@ -40,10 +40,10 @@ interface L1Interface {
 
   isClosed(hash: Uint8Array): Promise<boolean>;
   isFerried(hash: Uint8Array): Promise<boolean>;
+  getFerry(hash: Uint8Array): Promise<Uint8Array | null>;
 
   ferry(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>;
   close(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>;
-  getFerriedAndReadyToClose(rangeStart: bigint, rangeEnd: bigint): Promise<Withdrawal[]>;
 }
 
 class L1Api implements L1Interface {
@@ -67,6 +67,22 @@ class L1Api implements L1Interface {
       throw new Error("Invalid uri");
     }
   }
+
+  async getFerry(hash: Uint8Array): Promise<Uint8Array | null> {
+    const closedStatus = u8aToHex( await this.getClosedStatus());
+    const zeros = "0x0000000000000000000000000000000000000000";
+
+    const status = await this.client.readContract({
+      address: MANGATA_CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: "processedL2Requests",
+      args: [u8aToHex(hash)],
+      blockTag: "latest"
+    }) as string;
+
+    return (status !== null && status !== closedStatus && status !== zeros) ? hexToU8a(status) : null;
+  }
+
   async getNativeTokenAddress(): Promise<Uint8Array> {
     let val = await this.client.readContract({
       address: MANGATA_CONTRACT_ADDRESS,
@@ -184,23 +200,6 @@ class L1Api implements L1Interface {
     }
   }
 
-  async getFerriedAndReadyToClose(rangeStart: bigint, rangeEnd: bigint): Promise<Withdrawal[]> {
-    const latest = await this.getLatestRequestId();
-    if (latest == null) {
-      return [];
-    }
-
-    const end = minBigInt(rangeEnd, latest);
-    const value = await this.client.readContract({
-      address: MANGATA_CONTRACT_ADDRESS,
-      abi: ABI,
-      functionName: "counter",
-      blockTag: "latest"
-    });
-
-    return [];
-  }
-
   async ferry(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>{
     const stringPrivateKey = u8aToHex(privateKey) as `0x${string}`;
     const acc: PrivateKeyAccount = privateKeyToAccount("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
@@ -249,16 +248,6 @@ class L1Api implements L1Interface {
       chain: anvil,
       transport: this.transport,
     });
-
-    const yyy = "0x0000000000000000000000000000000000000000000000000000000000000000";
-    const encoded = encodeAbiParameters(
-      ABI.find((e: any) => e!.name === "close_withdrawal")!.inputs!,
-      [toViemFormat(withdrawal), yyy, []]
-    );
-    console.info(withdrawal.hash);
-    const xxx = u8aToHex(withdrawal.hash, 256);
-    console.info(xxx);
-    console.info(yyy);
 
     const ferryRequest = await this.client.simulateContract({
       account: acc,

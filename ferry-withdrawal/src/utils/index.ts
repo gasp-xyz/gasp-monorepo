@@ -19,8 +19,15 @@ function isSuccess(events: MangataGenericEvent[]) {
 	);
 }
 
+function isEqual(first: Uint8Array, second: Uint8Array): boolean {
+  if(first.length !== second.length) {
+    return false;
+  }
+  return first.every((value, index) => value === second[index]);
+}
+
 function print(data: any) {
 	console.log(util.inspect(data, { depth: null }));
 }
 
-export { print, sleep, getApi, isSuccess };
+export { print, sleep, getApi, isSuccess, isEqual };
