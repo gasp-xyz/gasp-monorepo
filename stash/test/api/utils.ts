@@ -18,6 +18,11 @@ export async function startContainer(image: string) {
       .withWorkingDir('/')
       .withEntrypoint(['/entrypoint.sh'])
       .withExposedPorts({ container: 6379, host: 6379 })
+      .withLogConsumer(stream => {
+        stream.on("data", line => console.debug("redis_ts ->" + line));
+        stream.on("err", line => console.debug("redis_ts ->" + line));
+        stream.on('end', () => console.debug("redis_ts ->" + 'Stream closed'))
+      })
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
       .start()
   } else {
@@ -25,6 +30,12 @@ export async function startContainer(image: string) {
       .withWorkingDir('/')
       .withEntrypoint(['redis-server', '--protected-mode no'])
       .withExposedPorts({ container: 6379, host: 6380 })
+      .withName('redis-container')
+      .withLogConsumer(stream => {
+        stream.on("data", line => console.debug("redis_db ->" + line));
+        stream.on("err", line => console.debug("redis_db ->" + line));
+        stream.on('end', () => console.debug("redis_db ->" + 'Stream closed'))
+      })
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
       .start()
   }
