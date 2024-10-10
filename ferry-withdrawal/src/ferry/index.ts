@@ -1,9 +1,12 @@
 import { L1Interface } from "../l1";
 import { L2Interface } from "../l2";
 import { Deposit } from "../common/deposit.js";
+import { isEqual} from "../utils/index.js";
 import util from "node:util";
 import { u8aToHex } from "@polkadot/util";
 import { Withdrawal } from "../common/withdrawal";
+
+const HOURS_TO_BLOCKS = 12*5*60;
 
 async function asyncFilter(arr: Withdrawal[], predicate: any) {
 	const results = await Promise.all(arr.map(predicate));
@@ -77,7 +80,7 @@ class Ferry {
 		);
 		return ferryableDeposits;
 	}
-	
+
 	async rateWithdrawals(withdrawals: Withdrawal[]): Promise<Withdrawal[]> {
     const balances = await Promise.all(this.tokensToFerry.map( ([tokenAddress, _minProfit, _weight]) => Promise.all([Promise.resolve( tokenAddress), this.l1.getBalance(tokenAddress, this.me)])));
     const nativeTokenAddress = await this.l2.getNativeTokenAddress();
@@ -116,6 +119,24 @@ class Ferry {
 
     const result = rankedWithdrawals;
     return result;
+	}
+
+	async getPastFerriesReadyToClose(blockInPast: number, who: Uint8Array): Promise<Withdrawal[]> {
+    const rangeEnd = await this.l1.getLatestRequestId();
+    const rangeStart = await this.l2.getLatestRequestIdInPast(blockInPast);
+    if (rangeStart === null || rangeEnd === null) {
+      return [];
+    }
+
+    const withdrawals = await this.l2.getWithdrawals(rangeStart!, rangeEnd!);
+    const withdrawalsWithStatus: [Withdrawal, Uint8Array | null][] = await Promise.all(
+      withdrawals
+      .map(elem => Promise.all([Promise.resolve(elem), this.l1.getFerry(elem.hash)]))
+    );
+
+    return withdrawalsWithStatus
+      .filter( ([_withdrawal, ferry]) => ferry !== null && isEqual(ferry!, who))
+      .map(([withdrawal, _ferry]) => withdrawal);
 	}
 }
 

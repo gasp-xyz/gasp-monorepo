@@ -40,6 +40,7 @@ describe('Ferry Service', () => {
 
     l2Mock = {
         getLatestRequestId: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
+        getLatestRequestIdInPast: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         getWithdrawals: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         getNativeTokenAddress: vi.fn().mockImplementation(() => NATIVE_TOKEN),
     };
@@ -311,4 +312,74 @@ describe('Ferry Service', () => {
     expect(ferryableWithdrawals).toHaveLength(2);
     expect(ferryableWithdrawals[0].requestId).to.be.equal(1n);
   });
+
+  it('getPastFerriesReadyToClose works when latestRequestIdL1 is not available', async () => {
+
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(null);
+    l2Mock.getLatestRequestIdInPast = vi.fn().mockResolvedValue(9);
+    const result = await ferry.getPastFerriesReadyToClose(1000, hexToU8a(ALITH));
+    expect(result).toHaveLength(0);
+  });
+
+  it('getPastFerriesReadyToClose works when latestRequestIdL1 is not available', async () => {
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(9);
+    l2Mock.getLatestRequestIdInPast = vi.fn().mockResolvedValue(null);
+    const result = await ferry.getPastFerriesReadyToClose(1000, hexToU8a(ALITH));
+    expect(result).toHaveLength(0);
+  });
+
+  it('getPastFerriesReadyToClose ignore non ferried withdrawals', async () => {
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(9);
+    l2Mock.getLatestRequestIdInPast = vi.fn().mockResolvedValue(10);
+    l2Mock.getWithdrawals = vi.fn().mockResolvedValue(
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      }]
+    );
+    l1Mock.getFerry = vi.fn().mockResolvedValue(null);
+    const result = await ferry.getPastFerriesReadyToClose(1000, hexToU8a(ALITH));
+    expect(result).toHaveLength(0);
+  });
+
+  it('getPastFerriesReadyToClose ignores withdrawals ferried by other accounts', async () => {
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(9);
+    l2Mock.getLatestRequestIdInPast = vi.fn().mockResolvedValue(10);
+    l2Mock.getWithdrawals = vi.fn().mockResolvedValue(
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      }]
+    );
+    l1Mock.getFerry = vi.fn().mockResolvedValue(hexToU8a("0x9999999999999999999999999999999999999999"));
+    const result = await ferry.getPastFerriesReadyToClose(1000, hexToU8a(ALITH));
+    expect(result).toHaveLength(0);
+  });
+
+  it('getPastFerriesReadyToClose accept withdrawals ferried by my', async () => {
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(9);
+    l2Mock.getLatestRequestIdInPast = vi.fn().mockResolvedValue(10);
+    l2Mock.getWithdrawals = vi.fn().mockResolvedValue(
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      }]
+    );
+    l1Mock.getFerry = vi.fn().mockResolvedValue(hexToU8a(ALITH));
+    const result = await ferry.getPastFerriesReadyToClose(1000, hexToU8a(ALITH));
+    expect(result).toHaveLength(1);
+  });
+
 })

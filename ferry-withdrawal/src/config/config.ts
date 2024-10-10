@@ -4,11 +4,10 @@ export const appConfigSchema = z.object({
 	MANGATA_CONTRACT_ADDRESS: z.string(),
 	ETH_CHAIN_URL: z.string(),
 	MANGATA_NODE_URL: z.string(),
-	MNEMONIC: z.string(),
+	PRIVATE_KEY: z.string(),
 	L1_CHAIN: z.string(),
-	MIN_PROFIT: z.bigint(),
+	TOKENS_TO_TRACK: z.string(),
 	TX_COST: z.bigint(),
-	BLOCK_DELAY: z.bigint(),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;
@@ -22,10 +21,9 @@ export function createConfig() {
 		MANGATA_CONTRACT_ADDRESS: process.env.MANGATA_CONTRACT_ADDRESS!,
 		ETH_CHAIN_URL: process.env.ETH_CHAIN_URL!,
 		MANGATA_NODE_URL: process.env.MANGATA_NODE_URL!,
-		MNEMONIC: process.env.MNEMONIC!,
+		PRIVATE_KEY: process.env.PRIVATE_KEY!,
 		L1_CHAIN: process.env.L1_CHAIN!,
-		MIN_PROFIT: BigInt(process.env.MIN_PROFIT!),
+		TOKENS_TO_TRACK: process.env.TOKENS_TO_TRACK!,
 		TX_COST: BigInt(process.env.TX_COST!),
-		BLOCK_DELAY: BigInt(process.env.BLOCK_DELAY!),
 	});
 }

@@ -6,12 +6,11 @@ import "dotenv/config";
 import { signTx } from "gasp-sdk";
 import "gasp-types";
 import {
-	BLOCK_DELAY,
+	TOKENS_TO_TRACK,
 	ETH_CHAIN_URL,
 	MANGATA_CONTRACT_ADDRESS,
 	MANGATA_NODE_URL,
-	MIN_PROFIT,
-	MNEMONIC,
+	PRIVATE_KEY,
 	TX_COST,
 } from "./common/constants.js";
 
@@ -19,24 +18,26 @@ import { Ferry } from "./ferry/index.js";
 import { L1Api } from "./l1/index.js";
 import { L2Api, getL1ChainType } from "./l2/index.js";
 import { getApi, isSuccess, print } from "./utils/index.js";
+import { PrivateKeyAccount } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
 	const l2 = new L2Api(api);
-	const l1 = new L1Api(ETH_CHAIN_URL, BLOCK_DELAY);
+	const l1 = new L1Api(ETH_CHAIN_URL);
 
 	if (!(await api.isReady)) {
 		throw `Cannot connect to ${MANGATA_NODE_URL}`;
 	}
 
-	const keyring = new Keyring({ type: "ethereum" });
-	const keypair = keyring.createFromUri(MNEMONIC);
+
+	const acc: PrivateKeyAccount = privateKeyToAccount(PRIVATE_KEY as any);
 	const ferry = new Ferry(
-		hexToU8a(keypair.address),
+		hexToU8a(acc.address),
 		l1,
 		l2,
-		[],
-		MIN_PROFIT,
+		JSON.parse(TOKENS_TO_TRACK),
+		TX_COST,
 	);
 
 	let inProgress = false;
@@ -56,6 +57,20 @@ async function main() {
 			}
 
 			inProgress = true;
+      const pastWithdrawalsToClose = await ferry.getPendingWithdrawals();
+      if (pastWithdrawalsToClose.length > 0) {
+        await l1.close(pastWithdrawalsToClose[0], hexToU8a(acc.address));
+        inProgress = false;
+        return;
+      }else{
+        const pending = await ferry.getPendingWithdrawals();
+        const rated = await ferry.rateWithdrawals(pending);
+        if (rated.length == 0) {
+          inProgress = false;
+          return;
+        }
+        await l1.ferry(rated[0], hexToU8a(PRIVATE_KEY));
+      }
 			// const pending = await ferry.getPendingDeposits();
 			// const profitable = await ferry.rateDeposits(pending);
 

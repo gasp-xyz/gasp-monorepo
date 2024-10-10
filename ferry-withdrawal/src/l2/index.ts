@@ -1,5 +1,6 @@
 import { type ApiPromise } from "@polkadot/api";
 import type { KeyringPair } from "@polkadot/keyring/types";
+import type { BTreeMap, u128 } from '@polkadot/types-codec';
 import type {
 	MangataTypesAssetsL1Asset,
 	PalletRolldownMessagesChain,
@@ -24,6 +25,7 @@ function createBigIntArrayFromRange(start:bigint, end:bigint) {
 
 interface L2Interface {
 	getLatestRequestId(): Promise<bigint|null>;
+	getLatestRequestIdInPast(delay: number): Promise<bigint|null>;
   getWithdrawals(startRange: bigint, endRange: bigint): Promise<Withdrawal[]>;
 	getNativeTokenAddress(): Promise<Uint8Array>;
 }
@@ -84,13 +86,11 @@ class L2Api implements L2Interface {
 			.asEthereum.toU8a();
 	}
 
-  async getLatestRequestId(): Promise<bigint|null> {
-    const chain: PalletRolldownMessagesChain = getL1ChainType(this.api);
-    let nextRequesId = await this.api.query.rolldown.l2OriginRequestId();
-    console.info(nextRequesId.toString());
 
+  parseLatestRequestId(nextRequesId: BTreeMap<PalletRolldownMessagesChain, u128>): bigint|null {
     // NOTE: looks like === is not implemented for PalletRolldownMessagesChain
     // therefore its not possible to query valu from map using .get(chain) query ;<
+    const chain: PalletRolldownMessagesChain = getL1ChainType(this.api);
     let found = Array.from(nextRequesId.keys()).findIndex( (key) => {
       return key.toString() === chain.toString();
     });
@@ -101,6 +101,21 @@ class L2Api implements L2Interface {
       return Array.from(nextRequesId.values())[found].toBigInt();
     }
   }
+
+  async getLatestRequestId(): Promise<bigint|null> {
+    let nextRequesId = await this.api.query.rolldown.l2OriginRequestId();
+    return this.parseLatestRequestId(nextRequesId);
+  }
+
+  async getLatestRequestIdInPast(blockInPast: number): Promise<bigint|null> {
+    const { number } = await this.api.rpc.chain.getHeader();
+    const targetBlock = Math.min(0, number.toNumber() - blockInPast);
+    const targetBlockHash = await this.api.query.system.blockHash(targetBlock);
+    let apiAt = await this.api.at(targetBlockHash);
+    let nextRequesId = await apiAt.query.rolldown.l2OriginRequestId();
+    return this.parseLatestRequestId(nextRequesId);
+  }
+
 
   async getWithdrawals(startRange: bigint, endRange: bigint): Promise<Withdrawal[]> {
     const chain = getL1ChainType(this.api);

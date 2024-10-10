@@ -49,10 +49,8 @@ interface L1Interface {
 class L1Api implements L1Interface {
   client!: PublicClient;
   transport: any;
-  delay: bigint;
 
-  constructor(uri: string, delay: bigint) {
-    this.delay = delay;
+  constructor(uri: string) {
     if (uri.startsWith("ws")) {
       this.transport = webSocket(uri, { retryCount: 5 });
       this.client = createPublicClient({
@@ -157,12 +155,6 @@ class L1Api implements L1Interface {
   }
 
   async isRolldownDeployed(): Promise<boolean> {
-    const blockNumber = await this.client.getBlockNumber();
-    if (blockNumber < this.delay) {
-      return false;
-    }
-    const blockToReadAt = blockNumber - this.delay;
-
     const code = await this.client.getCode({
       address: MANGATA_CONTRACT_ADDRESS,
       blockTag: "latest",
