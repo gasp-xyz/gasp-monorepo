@@ -2,8 +2,8 @@ import { describe, test, beforeAll, expect, it } from "vitest";
 import { sleep, getApi } from "../src/utils/index.js";
 import { L2Interface, L2Api } from "../src/l2";
 import { L1Api } from "../src/l1";
-import { L1Interface } from "../src/l1/index.js";
-import { hexToU8a } from "@polkadot/util";
+import { L1Interface, toViemFormat } from "../src/l1/index.js";
+import { hexToU8a, u8aToHex } from "@polkadot/util";
 import { anvil } from "viem/chains";
 import {
   ABI,
@@ -11,16 +11,32 @@ import {
 } from "../src/common/constants.js";
 
 
+
 import {
 	http,
 	type PrivateKeyAccount,
 	createWalletClient,
+  encodeAbiParameters,
+  keccak256,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { TestClient, createPublicClient, createTestClient, webSocket } from "viem";
 import util from "node:util";
+import { Withdrawal } from "../src/common/withdrawal.js";
 
 const timeout = 60000;
+
+function getRandomInt (min: number, max: number) : number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomUintArray(length: number) {
+    const arr = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+        arr[i] = getRandomInt(0, 255);
+    }
+    return arr;
+}
 
 const WS_URI = "ws://localhost:8545";
 const HTTP_URI = "http://localhost:8545";
@@ -35,28 +51,31 @@ const properImpl = (key: any, value: any) => {
   return value;
 };
 
-async function getBlockNumnber() {
-	const transport = webSocket(WS_URI, { retryCount: 5 });
-	const publicClient = createPublicClient({
-		transport,
-	});
-  return await publicClient.getBlockNumber({cacheTime: 0});
+function hashWithdrawal(withdrawal: Withdrawal) {
+  const encoded = encodeAbiParameters(
+    ABI.find((e: any) => e!.name === "ferry_withdrawal")!.inputs!,
+    [toViemFormat(withdrawal)]
+  );
+  console.info(`encoded   : ${encoded}`);
+  console.info(`keccak256 : ${keccak256(encoded)}`);
+  console.info(`encoded   : ${hexToU8a(keccak256(encoded).toString()).length}`);
+  return hexToU8a(keccak256(encoded).toString());
 }
 
-async function dummyDeposit(uri: string) {
+async function updateUpdaterAccount(uri: string) {
 	const transport = webSocket(uri, { retryCount: 5 });
 	const publicClient = createPublicClient({
 		transport,
 	});
 
-	const acc: PrivateKeyAccount = privateKeyToAccount(ANVIL_TEST_ACCOUNT);
+	const acc: PrivateKeyAccount = privateKeyToAccount("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
 
 	const { request } = await publicClient.simulateContract({
 		account: acc,
 		address: MANGATA_CONTRACT_ADDRESS,
 		abi: ABI,
-		functionName: "deposit_native",
-		value: BigInt(123456789),
+		functionName: "setUpdater",
+		args: [acc.address]
 	});
 
 	const wc = createWalletClient({
@@ -67,6 +86,65 @@ async function dummyDeposit(uri: string) {
 	const txHash = await wc.writeContract(request);
   return await publicClient.waitForTransactionReceipt({ hash: txHash });
 }
+
+async function injectMerkleRoot(uri: string, merkleRoot: Uint8Array, startRange: bigint, endRange: bigint) {
+	const transport = webSocket(uri, { retryCount: 5 });
+	const publicClient = createPublicClient({
+		transport,
+	});
+
+	const acc: PrivateKeyAccount = privateKeyToAccount("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
+
+	const { request } = await publicClient.simulateContract({
+		account: acc,
+		address: MANGATA_CONTRACT_ADDRESS,
+		abi: ABI,
+		functionName: "update_l1_from_l2",
+		args: [u8aToHex(merkleRoot), [startRange, endRange]]
+	});
+
+	const wc = createWalletClient({
+		account: acc,
+		chain: anvil,
+		transport,
+	});
+	const txHash = await wc.writeContract(request);
+  const result = await publicClient.waitForTransactionReceipt({ hash: txHash });
+  return result.status === "success";
+}
+
+async function transfer(uri: string, to: Uint8Array, value: bigint) {
+	const transport = webSocket(uri, { retryCount: 5 });
+	const publicClient = createPublicClient({
+		transport,
+	});
+
+	const acc: PrivateKeyAccount = privateKeyToAccount("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
+
+	const { request } = await publicClient.simulateContract({
+		account: acc,
+		address: u8aToHex(TOKEN_ADDRESS),
+		abi: [{
+          "constant": true,
+          "inputs": [{ "name": "to", "type": "address" }, { "name": "value", "type": "uint256" }],
+          "name": "mint",
+          "outputs": [],
+          "type": "function",
+        }],
+		functionName: "mint",
+		args: [u8aToHex(to), 10000],
+	});
+
+	const wc = createWalletClient({
+		account: acc,
+		chain: anvil,
+		transport,
+	});
+	const txHash = await wc.writeContract(request);
+  return await publicClient.waitForTransactionReceipt({ hash: txHash });
+}
+
+
 
 async function mintBlocks(count: number) {
   const tc = createTestClient({
@@ -80,7 +158,6 @@ let l1Api : L1Interface;
 
 describe('L1Interface', () => {
   beforeAll(async () => {
-    await dummyDeposit(WS_URI);
     await mintBlocks(1);
     l1Api = new L1Api(WS_URI, 0n);
   });
@@ -96,10 +173,17 @@ describe('L1Interface', () => {
   });
 
   it('can fetch latestRequestId', async () => {
+    await updateUpdaterAccount(WS_URI);
+    const rangeStart = 1n;
+    const rangeEnd = 10n;
+    // try catch in case test is run multiple times
+    try {
+      await injectMerkleRoot(WS_URI, hexToU8a("0x8888888888888888888888888888888888888888888888888888888888888888"),rangeStart, rangeEnd);
+    } catch (e) {
+      console.info("update already injected");
+    }
     let latestRequestId = await l1Api.getLatestRequestId();
-    expect(latestRequestId).toBeGreaterThanOrEqual(0);
-    await dummyDeposit(WS_URI);
-    expect(await l1Api.getLatestRequestId()).toBeGreaterThan(latestRequestId!);
+    expect(latestRequestId).toBeGreaterThanOrEqual(rangeEnd);
   });
 
   it('can fetch erc20 balance of existing token', async () => {
@@ -144,6 +228,45 @@ describe('L1Interface', () => {
     expect(value).toBeFalsy();
   });
 
+  it('ferryWithdrawal works', async () => {
+    const randomAddress = getRandomUintArray(20);
+
+    const withdrawal: Withdrawal = {
+        requestId: 1n,
+        withdrawalRecipient: randomAddress,
+        tokenAddress: TOKEN_ADDRESS,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+    };
+
+    const privateKey = hexToU8a("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
+    await l1Api.ferry(withdrawal, privateKey);
+    }, {timeout: 10000});
+
+  it('closeWithdrawal works', async () => {
+    await updateUpdaterAccount(WS_URI);
+    await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
+    const randomAddress = getRandomUintArray(20);
+    const lastRequestId = await l1Api.getLatestRequestId();
+
+    let withdrawal = {
+        requestId: lastRequestId! + 1n,
+        withdrawalRecipient: randomAddress,
+        tokenAddress: TOKEN_ADDRESS,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 256),
+    };
+    withdrawal.hash = hashWithdrawal(withdrawal);
+
+    injectMerkleRoot(WS_URI, withdrawal.hash, withdrawal.requestId, withdrawal.requestId);
+    const privateKey = hexToU8a("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
+    expect(await l1Api.isFerried(hashWithdrawal(withdrawal))).toBeFalsy();
+    expect(await l1Api.isClosed(hashWithdrawal(withdrawal))).toBeFalsy();
+    await l1Api.close(withdrawal, privateKey);
+    expect(await l1Api.isClosed(hashWithdrawal(withdrawal))).toBeTruthy();
+    }, {timeout: 10000});
 
 
 });

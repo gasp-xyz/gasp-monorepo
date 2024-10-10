@@ -8,7 +8,7 @@ import {
   MANGATA_CONTRACT_ADDRESS,
 } from "../common/constants.js";
 
-import { createPublicClient } from "viem";
+import { PrivateKeyAccount, createPublicClient, createWalletClient } from "viem";
 import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import {
@@ -16,6 +16,17 @@ import {
   webSocket,
 } from "viem";
 import { Withdrawal } from "../common/withdrawal.js";
+import { privateKeyToAccount } from "viem/accounts";
+import { anvil } from "viem/chains";
+
+function toViemFormat(withdrawal: Withdrawal): unknown[]  {
+  return [
+    [1, withdrawal.requestId], 
+    u8aToHex(withdrawal.withdrawalRecipient, 160), 
+    u8aToHex(withdrawal.tokenAddress, 160), 
+    withdrawal.amount, 
+    withdrawal.ferryTip];
+}
 
 function minBigInt(lhs: bigint, rhs: bigint): bigint {
   return [lhs, rhs].reduce((min, current) => current < min ? current : min);
@@ -30,22 +41,27 @@ interface L1Interface {
   isClosed(hash: Uint8Array): Promise<boolean>;
   isFerried(hash: Uint8Array): Promise<boolean>;
 
+  ferry(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>;
+  close(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>;
   getFerriedAndReadyToClose(rangeStart: bigint, rangeEnd: bigint): Promise<Withdrawal[]>;
 }
 
 class L1Api implements L1Interface {
   client!: PublicClient;
+  transport: any;
   delay: bigint;
 
   constructor(uri: string, delay: bigint) {
     this.delay = delay;
     if (uri.startsWith("ws")) {
+      this.transport = webSocket(uri, { retryCount: 5 });
       this.client = createPublicClient({
-        transport: webSocket(uri, { retryCount: 5 }),
+        transport: this.transport
       });
     } else if (uri.startsWith("http")) {
+      this.transport = http(uri, { retryCount: 5 });
       this.client = createPublicClient({
-        transport: http(uri, { retryCount: 5 }),
+        transport: this.transport,
       });
     } else {
       throw new Error("Invalid uri");
@@ -164,8 +180,7 @@ class L1Api implements L1Interface {
         args: [lastHash],
         blockTag: "latest"
       });
-      console.info(range);
-      return null;
+      return (range as any)[1];
     }
   }
 
@@ -186,6 +201,78 @@ class L1Api implements L1Interface {
     return [];
   }
 
+  async ferry(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>{
+    const stringPrivateKey = u8aToHex(privateKey) as `0x${string}`;
+    const acc: PrivateKeyAccount = privateKeyToAccount("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
+    const wc = createWalletClient({
+      account: acc,
+      chain: anvil,
+      transport: this.transport,
+    });
+
+    // TODO: submit as a batch
+    const approveRequest = await this.client.simulateContract({
+      account: acc,
+      address: u8aToHex(withdrawal.tokenAddress),
+      abi: [{
+        "constant": true,
+        "inputs": [{ "name": "spender", "type": "address" }, { "name": "amount", "type": "uint256" }],
+        "name": "approve",
+        "outputs": [{ "name": "status", "type": "bool" }],
+        "type": "function",
+      }],
+      functionName: "approve",
+      args: [MANGATA_CONTRACT_ADDRESS, withdrawal.amount]
+    });
+    const approvetxHash = await wc.writeContract(approveRequest.request);
+    await this.client.waitForTransactionReceipt({ hash: approvetxHash });
+
+
+    const ferryRequest = await this.client.simulateContract({
+      account: acc,
+      address: MANGATA_CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: "ferry_withdrawal",
+      args: [toViemFormat(withdrawal)],
+    });
+
+    const ferrytxHash = await wc.writeContract(ferryRequest.request);
+    const status = await this.client.waitForTransactionReceipt({ hash: ferrytxHash });
+    return status.status === "success";
+  }
+
+  async close(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>{
+    const stringPrivateKey = u8aToHex(privateKey) as `0x${string}`;
+    const acc: PrivateKeyAccount = privateKeyToAccount("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
+    const wc = createWalletClient({
+      account: acc,
+      chain: anvil,
+      transport: this.transport,
+    });
+
+    const yyy = "0x0000000000000000000000000000000000000000000000000000000000000000";
+    const encoded = encodeAbiParameters(
+      ABI.find((e: any) => e!.name === "close_withdrawal")!.inputs!,
+      [toViemFormat(withdrawal), yyy, []]
+    );
+    console.info(withdrawal.hash);
+    const xxx = u8aToHex(withdrawal.hash, 256);
+    console.info(xxx);
+    console.info(yyy);
+
+    const ferryRequest = await this.client.simulateContract({
+      account: acc,
+      address: MANGATA_CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: "close_withdrawal",
+      args: [toViemFormat(withdrawal), u8aToHex(withdrawal.hash, 256), [u8aToHex(withdrawal.hash, 256)]],
+    });
+
+    const ferrytxHash = await wc.writeContract(ferryRequest.request);
+    const status = await this.client.waitForTransactionReceipt({ hash: ferrytxHash });
+    return status.status === "success";
+  }
 }
 
-export { L1Interface, L1Api };
+
+export { L1Interface, L1Api, toViemFormat };
