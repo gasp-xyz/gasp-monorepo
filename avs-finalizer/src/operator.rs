@@ -255,10 +255,15 @@ impl Operator {
             _ => return Err(eyre!("Unexpected chain in task")),
         };
         let params = rpc_params!(chain_as_string, (range_start, range_end));
-        let rd_update: H256 = rpc.request("rolldown_get_merkle_root", params.clone()).await?;
+        let rd_update: H256 = rpc
+            .request("rolldown_get_merkle_root", params.clone())
+            .await?;
 
         if rd_update.is_zero() {
-            return Err(eyre!("rolldown_get_merkle_root returned zero value, params: {:?}", params));
+            return Err(eyre!(
+                "rolldown_get_merkle_root returned zero value, params: {:?}",
+                params
+            ));
         }
 
         debug!("get_rd_update - rd_update: {:?}", rd_update);
@@ -281,9 +286,10 @@ impl Operator {
         let rpc = ws_client(self.substrate_client_uri.clone())
             .await
             .map_err(|e| eyre!(e))?;
-        
+
         let params = rpc_params!();
-        let health: sc_rpc_api::system::helpers::Health = rpc.request("system_health", params).await?;
+        let health: sc_rpc_api::system::helpers::Health =
+            rpc.request("system_health", params).await?;
 
         debug!("Gasp node is_syncing - {:?}", health.is_syncing);
 
@@ -291,12 +297,13 @@ impl Operator {
             let retry_delay: tokio::time::Duration = tokio::time::Duration::from_secs(600);
             info!("Waiting for gasp node to finish syncing");
 
-            loop{
+            loop {
                 let params = rpc_params!();
-                let health: sc_rpc_api::system::helpers::Health = rpc.request("system_health", params).await?;
+                let health: sc_rpc_api::system::helpers::Health =
+                    rpc.request("system_health", params).await?;
 
                 info!("Gasp node is_syncing - {:?}", health.is_syncing);
-                if !health.is_syncing{
+                if !health.is_syncing {
                     break;
                 }
                 info!("Rechecking sync status after - {:?}", retry_delay);
