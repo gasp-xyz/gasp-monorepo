@@ -98,7 +98,7 @@ async function waitForOperatorToSubmitATask(opContainer: StartedTestContainer) {
 }
 
 describe('AVS Finalizer', () => {
-    it.only('opt-in / opt-out', async () => {
+    it('opt-in / opt-out', async () => {
         const chain = "Ethereum";
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
@@ -158,7 +158,7 @@ describe('AVS Finalizer', () => {
         await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
 
     });
-    it('operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )', async () => {
+    it.only('operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )', async () => {
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,
@@ -183,8 +183,10 @@ describe('AVS Finalizer', () => {
         const statusBeforeOptOut = await getLatestQuorumUpdate(publicClient);
 
         const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
+        const Ptasks =  createAWithdrawWithManualBatch("Ethereum", 6)
         // 10s * 2 * 5 = 100s ( every two blocks we produce a task, and at 5th task we eject)
-        const deRegistered = await PoperatorDeregisteredAddress;
+
+        const [deRegistered, _ ]  = await Promise.all([PoperatorDeregisteredAddress, Ptasks] );
 
         expect(deRegistered).toBe(operatorAddress);
 
@@ -233,8 +235,14 @@ describe('AVS Finalizer', () => {
         await validateOperatorOptInStakeRegistry(publicClient, operatorAddress as string);
         await validateOperatorOptInIndexRegistry(publicClient, operatorAddress as string);
         await thirdContainer.stopContainer();
+
+
         //we need to wait for it being de-registered
-        await waitForOperatorDeRegistered(publicClient);
+        const PoperatorDeregisteredAddress2 = waitForOperatorDeRegistered(publicClient);
+        const Ptasks2 =  createAWithdrawWithManualBatch("Ethereum", 6)
+        // 10s * 2 * 5 = 100s ( every two blocks we produce a task, and at 5th task we eject)
+        const [deRegistered2, _2 ]  = await Promise.all([PoperatorDeregisteredAddress2, Ptasks2] );
+        expect(deRegistered2).toBe(operatorAddress);
 
     });
     afterEach(async () => {
