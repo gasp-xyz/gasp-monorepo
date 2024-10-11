@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy to"
+        description: 'Environment to deploy to'
         required: true
-        default: "frontend"
+        default: 'frontend'
         type: choice
         options:
           - frontend
@@ -19,8 +19,8 @@ on:
       - ".github/workflows/stash.yml"
 
 permissions:
-  contents: "read"
-  id-token: "write"
+  contents: 'read'
+  id-token: 'write'
 
 jobs:
   build:
@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: '18'
           cache: "yarn"
           cache-dependency-path: "./stash/yarn.lock"
 
