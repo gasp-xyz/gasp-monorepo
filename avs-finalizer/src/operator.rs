@@ -98,7 +98,6 @@ impl Operator {
 
     #[instrument(skip_all)]
     pub async fn watch_new_tasks(self: Arc<Self>) -> eyre::Result<()> {
-        self.clone().wait_for_gasp_to_sync().await?;
         let evs = self.clone().avs_contracts.new_task_stream();
         let mut stream: stream::EventStream<'_, _, (FinalizerTaskManagerEvents, LogMeta), _> =
             evs.subscribe_with_meta().await?;
