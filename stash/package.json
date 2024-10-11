@@ -23,6 +23,8 @@
     "gcp-build": "rimraf dist/ && yarn run build-ts",
     "test": "yarn vitest --run ",
     "test-ci": "yarn vitest --run --coverage --passWithNoTests",
+    "test:api": "yarn vitest --run test/api",
+    "test:unit": "yarn vitest --run test/*.unit.test.ts --passWithNoTests",
     "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"yarn run watch-ts\" \"yarn run serve-debug\"",
     "watch-node": "nodemon dist/server.js",
     "watch-test": "yarn vitest",
