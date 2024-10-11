@@ -157,16 +157,16 @@ let l1Api : L1Interface;
 describe('L1Interface', () => {
   beforeAll(async () => {
     await mintBlocks(1);
-    l1Api = new L1Api(WS_URI, 0n);
+    l1Api = new L1Api(WS_URI);
   });
 
   it('should successfully connect through websocket', async () => {
-    l1Api = new L1Api(WS_URI, 0n);
+    l1Api = new L1Api(WS_URI);
     expect(await l1Api.isRolldownDeployed()).toBeTruthy()
   });
 
   it('should successfully connect through http', async () => {
-    l1Api = new L1Api(HTTP_URI, 0n);
+    l1Api = new L1Api(HTTP_URI);
     expect(await l1Api.isRolldownDeployed()).toBeTruthy()
   });
 

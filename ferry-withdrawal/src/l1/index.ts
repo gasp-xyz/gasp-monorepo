@@ -18,6 +18,7 @@ import {
 import { Withdrawal } from "../common/withdrawal.js";
 import { privateKeyToAccount } from "viem/accounts";
 import { anvil } from "viem/chains";
+import { isEqual } from "../utils/index.js";
 
 function toViemFormat(withdrawal: Withdrawal): unknown[]  {
   return [
@@ -93,7 +94,7 @@ class L1Api implements L1Interface {
 
   async getBalance(tokenAddress: Uint8Array, account: Uint8Array): Promise<bigint | null> {
     const nativeTokenAddress = await this.getNativeTokenAddress();
-    if (u8aToHex(nativeTokenAddress) === u8aToHex(tokenAddress)) {
+    if (isEqual(nativeTokenAddress , tokenAddress)) {
       return this.client.getBalance({address: u8aToHex(account)})
     } else {
     try {
@@ -173,6 +174,7 @@ class L1Api implements L1Interface {
     if (value === 0n) {
       return null;
     }else{
+
       const lastHash = await this.client.readContract({
         address: MANGATA_CONTRACT_ADDRESS,
         abi: ABI,
@@ -180,6 +182,7 @@ class L1Api implements L1Interface {
         args: [value-1n],
         blockTag: "latest"
       });
+
 
       const range = await this.client.readContract({
         address: MANGATA_CONTRACT_ADDRESS,
@@ -193,9 +196,8 @@ class L1Api implements L1Interface {
   }
 
   async ferry(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>{
-    const stringPrivateKey = u8aToHex(privateKey) as `0x${string}`;
-    const acc: PrivateKeyAccount = privateKeyToAccount("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
-    const wc = createWalletClient({
+    const acc: PrivateKeyAccount = privateKeyToAccount(u8aToHex(privateKey) as `0x{string}`);
+  const wc = createWalletClient({
       account: acc,
       chain: anvil,
       transport: this.transport,
@@ -233,8 +235,7 @@ class L1Api implements L1Interface {
   }
 
   async close(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>{
-    const stringPrivateKey = u8aToHex(privateKey) as `0x${string}`;
-    const acc: PrivateKeyAccount = privateKeyToAccount("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
+    const acc: PrivateKeyAccount = privateKeyToAccount(u8aToHex(privateKey) as `0x{string}`);
     const wc = createWalletClient({
       account: acc,
       chain: anvil,

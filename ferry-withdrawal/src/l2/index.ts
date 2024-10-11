@@ -109,7 +109,7 @@ class L2Api implements L2Interface {
 
   async getLatestRequestIdInPast(blockInPast: number): Promise<bigint|null> {
     const { number } = await this.api.rpc.chain.getHeader();
-    const targetBlock = Math.min(0, number.toNumber() - blockInPast);
+    const targetBlock = Math.max(0, number.toNumber() - blockInPast);
     const targetBlockHash = await this.api.query.system.blockHash(targetBlock);
     let apiAt = await this.api.at(targetBlockHash);
     let nextRequesId = await apiAt.query.rolldown.l2OriginRequestId();

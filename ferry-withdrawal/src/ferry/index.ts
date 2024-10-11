@@ -36,21 +36,7 @@ class Ferry {
     this.minBalance = minBalance;
 	}
 
-	// async hasFundsToCoverTxFee() {
-	// 	const balances = await this.l2.getBalances(this.me);
-	// 	const tokenAddressToBalance = new Map<string, bigint>(
-	// 		Array.from(balances, ([k, v]) => [u8aToHex(k), v]),
-	// 	);
-	//
-	// 	const nativeToken = u8aToHex(await this.l2.getNativeTokenAddress());
-	// 	if (!tokenAddressToBalance.has(nativeToken)) {
-	// 		return false;
-	// 	} else {
-	// 		return tokenAddressToBalance.get(nativeToken)! >= this.txCost;
-	// 	}
-	// }
-	//
-	logFilteredOut(before: Deposit[], after: Deposit[], message: string) {
+	logFilteredOut(before: Withdrawal[], after: Withdrawal[], message: string) {
 		const diff = before.length - after.length;
 		if (diff > 0) {
 			console.info(`filtered out ${diff} : ${message}`);
@@ -83,22 +69,37 @@ class Ferry {
 
 	async rateWithdrawals(withdrawals: Withdrawal[]): Promise<Withdrawal[]> {
     const balances = await Promise.all(this.tokensToFerry.map( ([tokenAddress, _minProfit, _weight]) => Promise.all([Promise.resolve( tokenAddress), this.l1.getBalance(tokenAddress, this.me)])));
-    const nativeTokenAddress = await this.l2.getNativeTokenAddress();
+
+    balances.forEach(([tokenAddress, balance]) => {
+      console.info(`Balance ${u8aToHex(tokenAddress)} : ${balance}`);
+    });
+
+    const nativeTokenAddress = await this.l1.getNativeTokenAddress();
+
 
 		const canAffordWirhdrawals = withdrawals.filter((elem) => 
 			balances.find(([tokenAddress, balance]) => 
       {
-          if (tokenAddress === nativeTokenAddress) {
-            return tokenAddress === elem.tokenAddress && balance != null && balance >= (elem.amount + this.minBalance);
+          if (isEqual(tokenAddress , nativeTokenAddress)) {
+            return isEqual(tokenAddress , elem.tokenAddress) && balance != null && balance >= (elem.amount + this.minBalance);
           }else{
-            return tokenAddress === elem.tokenAddress && balance != null && balance >= elem.amount;
+            return isEqual(tokenAddress , elem.tokenAddress) && balance != null && balance >= elem.amount;
           }
       }) !== undefined
 		);
 
-    const rankedWithdrawals = canAffordWirhdrawals.sort((first, second) => {
-      const firstTokenWeight = this.tokensToFerry.find(([tokenAddress, minProfit, weight]) => tokenAddress === first.tokenAddress)![2];
-      const secondTokenWeight = this.tokensToFerry.find(([tokenAddress, minProfit, weight]) => tokenAddress === second.tokenAddress)![2];
+    this.logFilteredOut(withdrawals, canAffordWirhdrawals, "not enought balance");
+ 
+    const aboveMinimalProfit = canAffordWirhdrawals.filter(elem => {
+      const minProfit = this.tokensToFerry.find(([tokenAddress, minProfit, weight]) => isEqual(tokenAddress ,elem.tokenAddress))![1];
+      return elem.amount >= minProfit;
+    });
+
+    this.logFilteredOut(canAffordWirhdrawals, aboveMinimalProfit, "below minimal profit");
+
+    const rankedWithdrawals = aboveMinimalProfit.sort((first, second) => {
+      const firstTokenWeight = this.tokensToFerry.find(([tokenAddress, minProfit, weight]) => isEqual(tokenAddress , first.tokenAddress))![2];
+      const secondTokenWeight = this.tokensToFerry.find(([tokenAddress, minProfit, weight]) => isEqual(tokenAddress , second.tokenAddress))![2];
       const firstWithdrawalProfit = first.ferryTip * firstTokenWeight;
       const secondWithdrawalProfit = second.ferryTip * secondTokenWeight;
 
@@ -121,9 +122,11 @@ class Ferry {
     return result;
 	}
 
-	async getPastFerriesReadyToClose(blockInPast: number, who: Uint8Array): Promise<Withdrawal[]> {
+	async getPastFerriesReadyToClose(blockInPast: number, who: Uint8Array | null = null): Promise<Withdrawal[]> {
+    const account: Uint8Array = who === null ? this.me : who!;
     const rangeEnd = await this.l1.getLatestRequestId();
-    const rangeStart = await this.l2.getLatestRequestIdInPast(blockInPast);
+    const latestRequestIdInPast = await this.l2.getLatestRequestIdInPast(blockInPast);
+    const rangeStart = latestRequestIdInPast ? latestRequestIdInPast : 1n;
     if (rangeStart === null || rangeEnd === null) {
       return [];
     }
@@ -135,7 +138,7 @@ class Ferry {
     );
 
     return withdrawalsWithStatus
-      .filter( ([_withdrawal, ferry]) => ferry !== null && isEqual(ferry!, who))
+      .filter( ([_withdrawal, ferry]) => ferry !== null && isEqual(ferry!, account))
       .map(([withdrawal, _ferry]) => withdrawal);
 	}
 }

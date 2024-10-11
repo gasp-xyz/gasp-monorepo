@@ -13,9 +13,9 @@ const FERRY_TOKEN2 = hexToU8a("0x2222222222222222222222222222222222222222", 160)
 const DUMMY_TOKEN = hexToU8a("0x3333333333333333333333333333333333333333", 160);
 const DEFAULT_BALANCE = 1000000n;
 const TOKENS_TO_FERRY: [Uint8Array, bigint, bigint][] = [
-  [NATIVE_TOKEN, 10000n, 1n],
-  [FERRY_TOKEN1, 10000n, 1n],
-  [FERRY_TOKEN2, 20000n, 1n],
+  [NATIVE_TOKEN, 0n, 1n],
+  [FERRY_TOKEN1, 0n, 1n],
+  [FERRY_TOKEN2, 0n, 1n],
 ];
 
 let ferry: Ferry;
@@ -311,6 +311,37 @@ describe('Ferry Service', () => {
     const ferryableWithdrawals = await ferry.rateWithdrawals(withdrawals);
     expect(ferryableWithdrawals).toHaveLength(2);
     expect(ferryableWithdrawals[0].requestId).to.be.equal(1n);
+  });
+
+  it('rateWithdrawals considers min expected profit', async () => {
+
+    const tokensToFerry: [Uint8Array, bigint, bigint][] = [
+      [FERRY_TOKEN1, 1000n, 1n],
+    ];
+
+    ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, tokensToFerry, 0n);
+    const withdrawals = 
+      [{
+        requestId: 1n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount:  999n,
+        ferryTip: 1n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      },
+      {
+        requestId: 2n,
+        withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+        tokenAddress: FERRY_TOKEN1,
+        amount:  30000n,
+        ferryTip: 1n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+      },
+    ];
+
+    const ferryableWithdrawals = await ferry.rateWithdrawals(withdrawals);
+    expect(ferryableWithdrawals).toHaveLength(1);
+    expect(ferryableWithdrawals[0].requestId).to.be.equal(2n);
   });
 
   it('getPastFerriesReadyToClose works when latestRequestIdL1 is not available', async () => {
