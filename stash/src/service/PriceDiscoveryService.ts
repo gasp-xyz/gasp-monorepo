@@ -89,9 +89,7 @@ const refresh = async () => {
     poolIds.push(ASSET_ALL.id)
 
     assetSchema = currencyIdSchemaFn(assets.map((a) => a.id))
-    console.log('assetScheme', assets)
     poolSchema = currencyIdSchemaFn(poolIds)
-    console.log('poolScheme', poolIds)
 
     nextPriceRefresh = new Date()
   }
