@@ -37,7 +37,7 @@ app.get('/', async (req: Request, res: Response): Promise<void> => {
 app.get('/token/order-buckets', tokenController.listTokenOrderBuckets)
 // Token list
 app.get('/token/list/stats', tokenListController.tokenList)
-app.get('/token/:symbol/stats', tokenListController.tokenDetails)
+app.get('/token/:id/stats', tokenListController.tokenDetails)
 
 // XCM
 app.get('/xcm/channels', xcmController.channels)
@@ -61,28 +61,22 @@ app.get(
 )
 
 // Price Discovery API
-app.get('/price-discovery/:currencySymbol/', priceDiscoveryController.getPrice)
+app.get('/price-discovery/:currencyId/', priceDiscoveryController.getPrice)
 app.get(
-  '/price-history/pair/:baseCurrencySymbol/:targetCurrencySymbol',
+  '/price-history/pair/:baseCurrencyId/:targetCurrencyId',
   priceDiscoveryController.getHistoryPair
 )
-app.get('/price-history/:currencySymbol/', priceDiscoveryController.getHistory)
+app.get('/price-history/:currencyId/', priceDiscoveryController.getHistory)
 app.get(
-  '/volume-history/pools/:currencySymbol/',
+  '/volume-history/pools/:currencyId/',
   priceDiscoveryController.getTradesPool
 )
+app.get('/volume-history/:currencyId/', priceDiscoveryController.getTradesAsset)
 app.get(
-  '/volume-history/:currencySymbol/',
-  priceDiscoveryController.getTradesAsset
-)
-app.get(
-  '/tvl-history/pools/:currencySymbol/',
+  '/tvl-history/pools/:currencyId/',
   priceDiscoveryController.getVolumePool
 )
-app.get(
-  '/tvl-history/:currencySymbol/',
-  priceDiscoveryController.getVolumeAsset
-)
+app.get('/tvl-history/:currencyId/', priceDiscoveryController.getVolumeAsset)
 
 // CoinGecko listing endpoints
 app.get('/coingecko/pairs', coingeckoController.pairs)

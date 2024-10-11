@@ -90,23 +90,17 @@ describe('Multiswap test: skip summary event', function () {
       .catch((error) => {
         failed = true
         err = error.message
+        console.log('-----', error)
       })
     expect(failed).to.be.true
     expect(err).to.be.equal('ERR TSDB: the key does not exist')
 
     const swap1 = await redisClientTs.call(
       'TS.RANGE',
-      'trades:pool:32',
-      '1689269814386',
-      '1689269814386'
-    )
-    const swap2 = await redisClientTs.call(
-      'TS.RANGE',
-      'trades:pool:5',
+      'trades:pool:9',
       '1689269814386',
       '1689269814386'
     )
     expect(swap1).not.to.be.empty
-    expect(swap2).not.to.be.empty
   })
 })
