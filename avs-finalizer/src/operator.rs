@@ -311,6 +311,7 @@ impl Operator {
             }
         }
         debug!("Done waiting for gasp node to sync");
+        info!("Gasp node is synced!");
         Ok(())
     }
 
