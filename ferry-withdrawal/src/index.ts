@@ -42,10 +42,8 @@ function printWithdrawal(withdrawal: Withdrawal): void {
   console.log(`hash: ${u8aToHex(withdrawal.hash)}`);
 }
 
-
 //TODO: improve logging
 //TODO: log level configurable from env
-//TODO: improve gas esitmation
 //TODO: automate ci
 
 async function main() {

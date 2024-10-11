@@ -28,7 +28,7 @@ describe('Ferry Service', () => {
 
     l1Mock = {
       isRolldownDeployed: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
-      getNativeTokenAddress: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
+      getNativeTokenAddress: vi.fn().mockImplementation(() => NATIVE_TOKEN),
       getLatestRequestId: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       isClosed: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       isFerried: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
@@ -42,7 +42,7 @@ describe('Ferry Service', () => {
         getLatestRequestId: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         getLatestRequestIdInPast: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         getWithdrawals: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
-        getNativeTokenAddress: vi.fn().mockImplementation(() => NATIVE_TOKEN),
+        getNativeTokenAddress: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
     };
 
     ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, TOKENS_TO_FERRY, 0n);
@@ -352,9 +352,10 @@ describe('Ferry Service', () => {
     expect(result).toHaveLength(0);
   });
 
-  it('getPastFerriesReadyToClose works when latestRequestIdL1 is not available', async () => {
+  it('getPastFerriesReadyToClose works when latestRequestIdL2 is not available', async () => {
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(9);
     l2Mock.getLatestRequestIdInPast = vi.fn().mockResolvedValue(null);
+    l2Mock.getWithdrawals = vi.fn().mockResolvedValue([]);
     const result = await ferry.getPastFerriesReadyToClose(1000, hexToU8a(ALITH));
     expect(result).toHaveLength(0);
   });

@@ -19,6 +19,25 @@ import { Withdrawal } from "../common/withdrawal.js";
 import { privateKeyToAccount } from "viem/accounts";
 import { anvil } from "viem/chains";
 import { isEqual } from "../utils/index.js";
+import { estimateMaxPriorityFeePerGas } from "viem/actions";
+
+  async function estimateGasInWei(publicClient: PublicClient) {
+    // https://www.blocknative.com/blog/eip-1559-fees
+    // We do not want VIEM estimate we would like to make our own estimate
+    // based on this equation: Max Fee = (2 * Base Fee) + Max Priority Fee
+
+    // Max Fee = maxFeePerGas (viem)
+    // Max Priority Fee = maxPriorityFeePerGas (viem)
+
+    const baseFeeInWei = await publicClient.getGasPrice()
+
+    const maxPriorityFeePerGasInWei =  await estimateMaxPriorityFeePerGas(publicClient)
+
+    const maxFeeInWei = BigInt(2) * BigInt(baseFeeInWei) + BigInt(maxPriorityFeePerGasInWei)
+
+    return {maxFeeInWei, maxPriorityFeePerGasInWei}
+  }
+
 
 function toViemFormat(withdrawal: Withdrawal): unknown[]  {
   return [
@@ -221,18 +240,22 @@ class L1Api implements L1Interface {
     await this.client.waitForTransactionReceipt({ hash: approvetxHash });
 
 
+    const {maxFeeInWei, maxPriorityFeePerGasInWei} = await estimateGasInWei(this.client);
     const ferryRequest = await this.client.simulateContract({
       account: acc,
       address: MANGATA_CONTRACT_ADDRESS,
       abi: ABI,
       functionName: "ferry_withdrawal",
       args: [toViemFormat(withdrawal)],
+      maxFeePerGas: maxFeeInWei,
+      maxPriorityFeePerGas: maxPriorityFeePerGasInWei
     });
 
     const ferrytxHash = await wc.writeContract(ferryRequest.request);
     const status = await this.client.waitForTransactionReceipt({ hash: ferrytxHash });
     return status.status === "success";
   }
+
 
   async close(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>{
     const acc: PrivateKeyAccount = privateKeyToAccount(u8aToHex(privateKey) as `0x{string}`);
@@ -242,12 +265,16 @@ class L1Api implements L1Interface {
       transport: this.transport,
     });
 
+
+    const {maxFeeInWei, maxPriorityFeePerGasInWei} = await estimateGasInWei(this.client);
     const ferryRequest = await this.client.simulateContract({
       account: acc,
       address: MANGATA_CONTRACT_ADDRESS,
       abi: ABI,
       functionName: "close_withdrawal",
       args: [toViemFormat(withdrawal), u8aToHex(withdrawal.hash, 256), [u8aToHex(withdrawal.hash, 256)]],
+      maxFeePerGas: maxFeeInWei,
+      maxPriorityFeePerGas: maxPriorityFeePerGasInWei
     });
 
     const ferrytxHash = await wc.writeContract(ferryRequest.request);

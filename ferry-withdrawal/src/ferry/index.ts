@@ -132,6 +132,7 @@ class Ferry {
     }
 
     const withdrawals = await this.l2.getWithdrawals(rangeStart!, rangeEnd!);
+    console.info(withdrawals.length);
     const withdrawalsWithStatus: [Withdrawal, Uint8Array | null][] = await Promise.all(
       withdrawals
       .map(elem => Promise.all([Promise.resolve(elem), this.l1.getFerry(elem.hash)]))
