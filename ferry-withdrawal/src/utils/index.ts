@@ -1,6 +1,21 @@
 import util from "node:util";
 import { type ApiPromise, Keyring } from "@polkadot/api";
 import { Mangata, type MangataGenericEvent, signTx } from "gasp-sdk";
+import { createLogger, transports, format } from "winston";
+import { LOG } from "../common/constants.js";
+
+const myFormat = format.printf(({ level, message, label, timestamp }) => {
+  return `${timestamp} ${level}: ${message}`;
+});
+
+const logger = createLogger({
+  format: format.combine(
+    format.timestamp(),
+    format.colorize(),
+    myFormat
+  ),
+  transports: [new transports.Console()]
+});
 
 function sleep(timeInMilliseconds: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, timeInMilliseconds));
@@ -30,4 +45,4 @@ function print(data: any) {
 	console.log(util.inspect(data, { depth: null }));
 }
 
-export { print, sleep, getApi, isSuccess, isEqual };
+export { print, sleep, getApi, isSuccess, isEqual, logger };

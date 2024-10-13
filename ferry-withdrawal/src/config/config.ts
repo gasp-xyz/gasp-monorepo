@@ -9,6 +9,7 @@ export const appConfigSchema = z.object({
 	TOKENS_TO_TRACK: z.string(),
 	TX_COST: z.bigint(),
 	LOOK_BACK_HOURS: z.number(),
+	LOG: z.string(),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;
@@ -27,5 +28,6 @@ export function createConfig() {
 		TOKENS_TO_TRACK: process.env.TOKENS_TO_TRACK!,
 		TX_COST: BigInt(process.env.TX_COST!),
 		LOOK_BACK_HOURS: Number(process.env.LOOK_BACK_HOURS!),
+		LOG: process.env.LOG!,
 	});
 }

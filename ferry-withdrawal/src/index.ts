@@ -19,7 +19,7 @@ import {
 import { Ferry } from "./ferry/index.js";
 import { L1Api } from "./l1/index.js";
 import { L2Api, getL1ChainType } from "./l2/index.js";
-import { getApi, isSuccess, print } from "./utils/index.js";
+import { getApi, isSuccess, print, logger } from "./utils/index.js";
 import { PrivateKeyAccount } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { z } from "zod";
@@ -43,8 +43,6 @@ function printWithdrawal(withdrawal: Withdrawal): void {
 }
 
 //TODO: improve logging
-//TODO: log level configurable from env
-//TODO: automate ci
 
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
@@ -70,13 +68,13 @@ async function main() {
 
 	const unwatch = await api.derive.chain.subscribeFinalizedHeads(
 		async (header: HeaderExtended) => {
-			console.info(`New L2 block: #${header.number}`);
+			logger.info(`New L2 block: #${header.number}`);
 			if (inProgress) {
 				return;
 			}
 
 			if (!(await l1.isRolldownDeployed())) {
-				console.info(
+				logger.info(
 					`rolldown contract ${MANGATA_CONTRACT_ADDRESS} not found yet`,
 				);
 				return;
@@ -85,20 +83,20 @@ async function main() {
 			inProgress = true;
       const pastWithdrawalsToClose = await ferry.getPastFerriesReadyToClose(LOOK_BACK_HOURS*5*60);
       if (pastWithdrawalsToClose.length > 0) {
-        console.info(`Closing withdrawal`);
+        logger.info(`Closing withdrawal`);
         printWithdrawal(pastWithdrawalsToClose[0]);
         await l1.close(pastWithdrawalsToClose[0], hexToU8a(PRIVATE_KEY));
         inProgress = false;
         return;
       }else{
         const pending = await ferry.getPendingWithdrawals();
-        console.info(`Found ${pending.length} pending withdrawals`);
+        logger.info(`Found ${pending.length} pending withdrawals`);
         const rated = await ferry.rateWithdrawals(pending);
         if (rated.length == 0) {
           inProgress = false;
           return;
         }
-        console.info(`Ferrying withdrawal`);
+        logger.info(`Ferrying withdrawal`);
         printWithdrawal(rated[0]);
         await l1.ferry(rated[0], hexToU8a(PRIVATE_KEY));
       }
