@@ -9,7 +9,7 @@
     "lint": "npx @biomejs/biome check --apply src/common src/config src/utils src/viem src/index.ts",
     "run": "node build/src/index.js",
     "test": "vitest --dir tests",
-    "test-offline": "vitest --dir tests ferry",
+    "test-ferry": "vitest --dir tests ferry",
     "test-l1": "vitest --dir tests l1",
     "test-l2": "vitest --dir tests l2"
   },
