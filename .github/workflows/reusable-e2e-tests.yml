@@ -157,3 +157,36 @@ jobs:
         run: docker logs rollup-eth-stub-1
 
       - run: docker ps
+
+  ferry-withdrawal-test:
+    name: Ferry withdrawal tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ferry-withdrawal
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Build
+        working-directory: .
+        run: docker compose up --wait
+
+      - name: Test L1 interface
+        run: npm run test-l1
+
+      - name: Test L2 interface
+        run: npm run test-l2
+
+      - name: Test ferry
+        run: npm run test-ferry
