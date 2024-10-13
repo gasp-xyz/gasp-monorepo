@@ -5,6 +5,7 @@ import type { KeyringPair } from "@polkadot/keyring/types";
 import { L2Interface, L2Api , getL1ChainType} from "../src/l2";
 import { hexToU8a } from "@polkadot/util";
 import { Mangata, type MangataGenericEvent, signTx } from "gasp-sdk";
+import 'dotenv/config'
 const timeout = 60000;
 
 const URI = "ws://localhost:9944";

@@ -6,13 +6,11 @@ import { L1Api } from "../src/l1";
 import { L1Interface, toViemFormat } from "../src/l1/index.js";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import { anvil } from "viem/chains";
+import dotenv from 'dotenv/config'
 import {
   ABI,
 	MANGATA_CONTRACT_ADDRESS,
 } from "../src/common/constants.js";
-
-
-
 import {
 	http,
 	type PrivateKeyAccount,

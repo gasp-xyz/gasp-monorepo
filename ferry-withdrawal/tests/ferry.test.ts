@@ -4,6 +4,7 @@ import { hexToU8a } from "@polkadot/util";
 import { Deposit } from "../src/common/deposit.js";
 import { L1Interface } from "../src/l1/index.js";
 import { Ferry } from "../src/ferry/index.js";
+import 'dotenv/config'
 
 
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";

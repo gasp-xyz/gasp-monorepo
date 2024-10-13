@@ -118,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test: [ "test-opt-out", "test-corrupted" ]
+        test: ["test-opt-out", "test-corrupted"]
     steps:
       - uses: actions/checkout@v4
         with:

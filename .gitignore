@@ -13,6 +13,7 @@
 
 # Test binary, built with `go test -c`
 *.test
+!ferry-withdrawal/env.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
