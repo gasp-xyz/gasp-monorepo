@@ -112,11 +112,11 @@ jobs:
       - run: helmfile template -e fungible | kubeconform -kubernetes-version 1.28.0 -skip ServiceMonitor -strict
 
   ferry-withdrawal-test:
-    name: Lint and validate Helmfile configuration
+    name: Ferry withdrawal tests
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ops/helmfiles
+        working-directory: ferry-withdrawal
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
