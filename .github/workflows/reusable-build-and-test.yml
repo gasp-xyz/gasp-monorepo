@@ -126,5 +126,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Test L1 interface
+        run: npm run test-l1
+
+      - name: Test L2 interface
+        run: npm run test-l2
+
       - name: Test ferry
         run: npm run test-ferry
