@@ -16,8 +16,6 @@ import (
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
 
-	// blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
-	"github.com/Layr-Labs/eigensdk-go/services/avsregistry"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
