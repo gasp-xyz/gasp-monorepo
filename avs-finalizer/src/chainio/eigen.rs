@@ -1,10 +1,12 @@
 use std::{fmt::Debug, ops::Add, sync::Arc};
 
 use bindings::{
-    avs_directory::AVSDirectory, delegation_manager::DelegationManager,
-    finalizer_service_manager::FinalizerServiceManager, registry_coordinator::RegistryCoordinator,
-    shared_types::OperatorDetails, stake_registry::StakeRegistry,
-    strategy_manager_storage::SignatureWithSaltAndExpiry,
+    avs_directory::AVSDirectory,
+    delegation_manager::DelegationManager,
+    finalizer_service_manager::FinalizerServiceManager,
+    registry_coordinator::RegistryCoordinator,
+    shared_types::{OperatorDetails, SignatureWithSaltAndExpiry},
+    stake_registry::StakeRegistry,
 };
 use ethers::{
     providers::Middleware,
@@ -63,7 +65,7 @@ impl ElContracts {
         operator_address: Address,
     ) -> eyre::Result<TransactionReceipt> {
         let op_details = OperatorDetails {
-            earnings_receiver: operator_address,
+            deprecated_earnings_receiver: operator_address,
             ..Default::default()
         };
         let tx = self

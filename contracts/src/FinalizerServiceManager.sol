@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+import "@eigenlayer/contracts/interfaces/IRewardsCoordinator.sol";
 import "@eigenlayer/contracts/libraries/BytesLib.sol";
 import "./IFinalizerTaskManager.sol";
 import "./IFinalizerServiceManager.sol";
@@ -33,17 +34,18 @@ contract FinalizerServiceManager is ServiceManagerBase, IFinalizerServiceManager
 
     constructor(
         IAVSDirectory _avsDirectory,
+        IRewardsCoordinator _rewardsCoordinator,
         IRegistryCoordinator _registryCoordinator,
         IStakeRegistry _stakeRegistry,
         IFinalizerTaskManager _taskManager,
         uint64 _recurrentRegistrationBlocksLimit
-    ) ServiceManagerBase(_avsDirectory, _registryCoordinator, _stakeRegistry) {
+    ) ServiceManagerBase(_avsDirectory, _rewardsCoordinator, _registryCoordinator, _stakeRegistry) {
         taskManager = _taskManager;
         recurrentRegistrationBlocksLimit = _recurrentRegistrationBlocksLimit;
     }
 
-    function initialize(address initialOwner, address _ejector) public virtual initializer {
-        __ServiceManagerBase_init(initialOwner);
+    function initialize(address initialOwner, address _rewardsInitiator, address _ejector) public virtual initializer {
+        __ServiceManagerBase_init(initialOwner, _rewardsInitiator);
         ejector = _ejector;
     }
 

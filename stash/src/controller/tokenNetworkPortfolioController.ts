@@ -22,16 +22,11 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
         const frozenTokens = new BN(frozen)
         const freeBalance = freeTokens.sub(frozenTokens)
         const tokenId = storageKey.args[1].toString()
-        const tokenInfo = (
-          await api.query.assetRegistry.metadata(tokenId)
-        ).toHuman() as {
-          symbol: string
-        }
-
         let tokenBalanceInUsd: string
         try {
-          tokenBalanceInUsd = (await priceDiscovery(tokenInfo.symbol))
-            .current_price['usd']
+          tokenBalanceInUsd = (await priceDiscovery(tokenId)).current_price[
+            'usd'
+          ]
         } catch (error) {
           logger.error('Error fetching token balance in USD:', error)
           tokenBalanceInUsd = '0'

@@ -10,7 +10,6 @@ pub use i_strategy_manager::*;
     non_camel_case_types
 )]
 pub mod i_strategy_manager {
-    pub use super::super::shared_types::*;
     #[allow(deprecated)]
     fn __abi() -> ::ethers::core::abi::Abi {
         ::ethers::core::abi::ethabi::Contract {
@@ -88,48 +87,6 @@ pub mod i_strategy_manager {
                         outputs: ::std::vec![],
                         constant: ::core::option::Option::None,
                         state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("calculateWithdrawalRoot"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("calculateWithdrawalRoot",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("queuedWithdrawal"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ),
-                                ),
-                                ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                    ),
-                                ),
-                                ::ethers::core::abi::ethabi::ParamType::Address,
-                                ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                ],),
-                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                ::ethers::core::abi::ethabi::ParamType::Address,
-                            ],),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned(
-                                    "struct IStrategyManager.DeprecatedStruct_QueuedWithdrawal",
-                                ),
-                            ),
-                        },],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::Pure,
                     },],
                 ),
                 (
@@ -301,57 +258,6 @@ pub mod i_strategy_manager {
                     },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("migrateQueuedWithdrawal"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("migrateQueuedWithdrawal",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("queuedWithdrawal"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ),
-                                ),
-                                ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                    ),
-                                ),
-                                ::ethers::core::abi::ethabi::ParamType::Address,
-                                ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(96usize),
-                                ],),
-                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                ::ethers::core::abi::ethabi::ParamType::Address,
-                            ],),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned(
-                                    "struct IStrategyManager.DeprecatedStruct_QueuedWithdrawal",
-                                ),
-                            ),
-                        },],
-                        outputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("bool"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("bytes32"),
-                                ),
-                            },
-                        ],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("removeShares"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("removeShares"),
@@ -402,6 +308,31 @@ pub mod i_strategy_manager {
                                 ::std::borrow::ToOwned::to_owned("contract IStrategy[]"),
                             ),
                         },],
+                        outputs: ::std::vec![],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
+                    },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("setThirdPartyTransfersForbidden"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("setThirdPartyTransfersForbidden",),
+                        inputs: ::std::vec![
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("strategy"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                                ),
+                            },
+                            ::ethers::core::abi::ethabi::Param {
+                                name: ::std::borrow::ToOwned::to_owned("value"),
+                                kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                                internal_type: ::core::option::Option::Some(
+                                    ::std::borrow::ToOwned::to_owned("bool"),
+                                ),
+                            },
+                        ],
                         outputs: ::std::vec![],
                         constant: ::core::option::Option::None,
                         state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
@@ -470,6 +401,28 @@ pub mod i_strategy_manager {
                             kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
                             internal_type: ::core::option::Option::Some(
                                 ::std::borrow::ToOwned::to_owned("uint256"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("strategyIsWhitelistedForDeposit"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("strategyIsWhitelistedForDeposit",),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::borrow::ToOwned::to_owned("strategy"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("contract IStrategy"),
+                            ),
+                        },],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("bool"),
                             ),
                         },],
                         constant: ::core::option::Option::None,
@@ -724,15 +677,6 @@ pub mod i_strategy_manager {
                 )
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `calculateWithdrawalRoot` (0xb43b514b) function
-        pub fn calculate_withdrawal_root(
-            &self,
-            queued_withdrawal: DeprecatedStructQueuedWithdrawal,
-        ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
-            self.0
-                .method_hash([180, 59, 81, 75], (queued_withdrawal,))
-                .expect("method not found (this should never happen)")
-        }
         ///Calls the contract's `delegation` (0xdf5cf723) function
         pub fn delegation(
             &self,
@@ -792,15 +736,6 @@ pub mod i_strategy_manager {
                 .method_hash([148, 246, 73, 221], staker)
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `migrateQueuedWithdrawal` (0xcd293f6f) function
-        pub fn migrate_queued_withdrawal(
-            &self,
-            queued_withdrawal: DeprecatedStructQueuedWithdrawal,
-        ) -> ::ethers::contract::builders::ContractCall<M, (bool, [u8; 32])> {
-            self.0
-                .method_hash([205, 41, 63, 111], (queued_withdrawal,))
-                .expect("method not found (this should never happen)")
-        }
         ///Calls the contract's `removeShares` (0x8c80d4e5) function
         pub fn remove_shares(
             &self,
@@ -819,6 +754,16 @@ pub mod i_strategy_manager {
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash([181, 216, 181, 184], strategies_to_remove_from_whitelist)
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `setThirdPartyTransfersForbidden` (0x4e5a4263) function
+        pub fn set_third_party_transfers_forbidden(
+            &self,
+            strategy: ::ethers::core::types::Address,
+            value: bool,
+        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
+            self.0
+                .method_hash([78, 90, 66, 99], (strategy, value))
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `slasher` (0xb1344271) function
@@ -846,6 +791,15 @@ pub mod i_strategy_manager {
         ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::U256> {
             self.0
                 .method_hash([122, 126, 13, 146], (user, strategy))
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `strategyIsWhitelistedForDeposit` (0x663c1de4) function
+        pub fn strategy_is_whitelisted_for_deposit(
+            &self,
+            strategy: ::ethers::core::types::Address,
+        ) -> ::ethers::contract::builders::ContractCall<M, bool> {
+            self.0
+                .method_hash([102, 60, 29, 228], strategy)
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `strategyWhitelister` (0x967fc0d2) function
@@ -1167,26 +1121,6 @@ pub mod i_strategy_manager {
         pub strategies_to_whitelist: ::std::vec::Vec<::ethers::core::types::Address>,
         pub third_party_transfers_forbidden_values: ::std::vec::Vec<bool>,
     }
-    ///Container type for all input parameters for the `calculateWithdrawalRoot` function with signature `calculateWithdrawalRoot((address[],uint256[],address,(address,uint96),uint32,address))` and selector `0xb43b514b`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "calculateWithdrawalRoot",
-        abi = "calculateWithdrawalRoot((address[],uint256[],address,(address,uint96),uint32,address))"
-    )]
-    pub struct CalculateWithdrawalRootCall {
-        pub queued_withdrawal: DeprecatedStructQueuedWithdrawal,
-    }
     ///Container type for all input parameters for the `delegation` function with signature `delegation()` and selector `0xdf5cf723`
     #[derive(
         Clone,
@@ -1281,26 +1215,6 @@ pub mod i_strategy_manager {
     pub struct GetDepositsCall {
         pub staker: ::ethers::core::types::Address,
     }
-    ///Container type for all input parameters for the `migrateQueuedWithdrawal` function with signature `migrateQueuedWithdrawal((address[],uint256[],address,(address,uint96),uint32,address))` and selector `0xcd293f6f`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "migrateQueuedWithdrawal",
-        abi = "migrateQueuedWithdrawal((address[],uint256[],address,(address,uint96),uint32,address))"
-    )]
-    pub struct MigrateQueuedWithdrawalCall {
-        pub queued_withdrawal: DeprecatedStructQueuedWithdrawal,
-    }
     ///Container type for all input parameters for the `removeShares` function with signature `removeShares(address,address,uint256)` and selector `0x8c80d4e5`
     #[derive(
         Clone,
@@ -1339,6 +1253,27 @@ pub mod i_strategy_manager {
     )]
     pub struct RemoveStrategiesFromDepositWhitelistCall {
         pub strategies_to_remove_from_whitelist: ::std::vec::Vec<::ethers::core::types::Address>,
+    }
+    ///Container type for all input parameters for the `setThirdPartyTransfersForbidden` function with signature `setThirdPartyTransfersForbidden(address,bool)` and selector `0x4e5a4263`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(
+        name = "setThirdPartyTransfersForbidden",
+        abi = "setThirdPartyTransfersForbidden(address,bool)"
+    )]
+    pub struct SetThirdPartyTransfersForbiddenCall {
+        pub strategy: ::ethers::core::types::Address,
+        pub value: bool,
     }
     ///Container type for all input parameters for the `slasher` function with signature `slasher()` and selector `0xb1344271`
     #[derive(
@@ -1394,6 +1329,26 @@ pub mod i_strategy_manager {
     )]
     pub struct StakerStrategySharesCall {
         pub user: ::ethers::core::types::Address,
+        pub strategy: ::ethers::core::types::Address,
+    }
+    ///Container type for all input parameters for the `strategyIsWhitelistedForDeposit` function with signature `strategyIsWhitelistedForDeposit(address)` and selector `0x663c1de4`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(
+        name = "strategyIsWhitelistedForDeposit",
+        abi = "strategyIsWhitelistedForDeposit(address)"
+    )]
+    pub struct StrategyIsWhitelistedForDepositCall {
         pub strategy: ::ethers::core::types::Address,
     }
     ///Container type for all input parameters for the `strategyWhitelister` function with signature `strategyWhitelister()` and selector `0x967fc0d2`
@@ -1468,18 +1423,18 @@ pub mod i_strategy_manager {
     pub enum IStrategyManagerCalls {
         AddShares(AddSharesCall),
         AddStrategiesToDepositWhitelist(AddStrategiesToDepositWhitelistCall),
-        CalculateWithdrawalRoot(CalculateWithdrawalRootCall),
         Delegation(DelegationCall),
         DepositIntoStrategy(DepositIntoStrategyCall),
         DepositIntoStrategyWithSignature(DepositIntoStrategyWithSignatureCall),
         EigenPodManager(EigenPodManagerCall),
         GetDeposits(GetDepositsCall),
-        MigrateQueuedWithdrawal(MigrateQueuedWithdrawalCall),
         RemoveShares(RemoveSharesCall),
         RemoveStrategiesFromDepositWhitelist(RemoveStrategiesFromDepositWhitelistCall),
+        SetThirdPartyTransfersForbidden(SetThirdPartyTransfersForbiddenCall),
         Slasher(SlasherCall),
         StakerStrategyListLength(StakerStrategyListLengthCall),
         StakerStrategyShares(StakerStrategySharesCall),
+        StrategyIsWhitelistedForDeposit(StrategyIsWhitelistedForDepositCall),
         StrategyWhitelister(StrategyWhitelisterCall),
         ThirdPartyTransfersForbidden(ThirdPartyTransfersForbiddenCall),
         WithdrawSharesAsTokens(WithdrawSharesAsTokensCall),
@@ -1498,11 +1453,6 @@ pub mod i_strategy_manager {
                 )
             {
                 return Ok(Self::AddStrategiesToDepositWhitelist(decoded));
-            }
-            if let Ok(decoded) =
-                <CalculateWithdrawalRootCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::CalculateWithdrawalRoot(decoded));
             }
             if let Ok(decoded) = <DelegationCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Delegation(decoded));
@@ -1527,11 +1477,6 @@ pub mod i_strategy_manager {
             if let Ok(decoded) = <GetDepositsCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::GetDeposits(decoded));
             }
-            if let Ok(decoded) =
-                <MigrateQueuedWithdrawalCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::MigrateQueuedWithdrawal(decoded));
-            }
             if let Ok(decoded) = <RemoveSharesCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::RemoveShares(decoded));
@@ -1542,6 +1487,13 @@ pub mod i_strategy_manager {
                 )
             {
                 return Ok(Self::RemoveStrategiesFromDepositWhitelist(decoded));
+            }
+            if let Ok(decoded) =
+                <SetThirdPartyTransfersForbiddenCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
+                return Ok(Self::SetThirdPartyTransfersForbidden(decoded));
             }
             if let Ok(decoded) = <SlasherCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Slasher(decoded));
@@ -1555,6 +1507,13 @@ pub mod i_strategy_manager {
                 <StakerStrategySharesCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::StakerStrategyShares(decoded));
+            }
+            if let Ok(decoded) =
+                <StrategyIsWhitelistedForDepositCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
+                return Ok(Self::StrategyIsWhitelistedForDeposit(decoded));
             }
             if let Ok(decoded) =
                 <StrategyWhitelisterCall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -1581,9 +1540,6 @@ pub mod i_strategy_manager {
                 Self::AddStrategiesToDepositWhitelist(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::CalculateWithdrawalRoot(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
                 Self::Delegation(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::DepositIntoStrategy(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
@@ -1593,11 +1549,11 @@ pub mod i_strategy_manager {
                 }
                 Self::EigenPodManager(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::GetDeposits(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::MigrateQueuedWithdrawal(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
                 Self::RemoveShares(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::RemoveStrategiesFromDepositWhitelist(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
+                Self::SetThirdPartyTransfersForbidden(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::Slasher(element) => ::ethers::core::abi::AbiEncode::encode(element),
@@ -1605,6 +1561,9 @@ pub mod i_strategy_manager {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::StakerStrategyShares(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
+                Self::StrategyIsWhitelistedForDeposit(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::StrategyWhitelister(element) => {
@@ -1626,7 +1585,6 @@ pub mod i_strategy_manager {
                 Self::AddStrategiesToDepositWhitelist(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::CalculateWithdrawalRoot(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Delegation(element) => ::core::fmt::Display::fmt(element, f),
                 Self::DepositIntoStrategy(element) => ::core::fmt::Display::fmt(element, f),
                 Self::DepositIntoStrategyWithSignature(element) => {
@@ -1634,14 +1592,19 @@ pub mod i_strategy_manager {
                 }
                 Self::EigenPodManager(element) => ::core::fmt::Display::fmt(element, f),
                 Self::GetDeposits(element) => ::core::fmt::Display::fmt(element, f),
-                Self::MigrateQueuedWithdrawal(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RemoveShares(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RemoveStrategiesFromDepositWhitelist(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
+                Self::SetThirdPartyTransfersForbidden(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::Slasher(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StakerStrategyListLength(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StakerStrategyShares(element) => ::core::fmt::Display::fmt(element, f),
+                Self::StrategyIsWhitelistedForDeposit(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::StrategyWhitelister(element) => ::core::fmt::Display::fmt(element, f),
                 Self::ThirdPartyTransfersForbidden(element) => {
                     ::core::fmt::Display::fmt(element, f)
@@ -1658,11 +1621,6 @@ pub mod i_strategy_manager {
     impl ::core::convert::From<AddStrategiesToDepositWhitelistCall> for IStrategyManagerCalls {
         fn from(value: AddStrategiesToDepositWhitelistCall) -> Self {
             Self::AddStrategiesToDepositWhitelist(value)
-        }
-    }
-    impl ::core::convert::From<CalculateWithdrawalRootCall> for IStrategyManagerCalls {
-        fn from(value: CalculateWithdrawalRootCall) -> Self {
-            Self::CalculateWithdrawalRoot(value)
         }
     }
     impl ::core::convert::From<DelegationCall> for IStrategyManagerCalls {
@@ -1690,11 +1648,6 @@ pub mod i_strategy_manager {
             Self::GetDeposits(value)
         }
     }
-    impl ::core::convert::From<MigrateQueuedWithdrawalCall> for IStrategyManagerCalls {
-        fn from(value: MigrateQueuedWithdrawalCall) -> Self {
-            Self::MigrateQueuedWithdrawal(value)
-        }
-    }
     impl ::core::convert::From<RemoveSharesCall> for IStrategyManagerCalls {
         fn from(value: RemoveSharesCall) -> Self {
             Self::RemoveShares(value)
@@ -1703,6 +1656,11 @@ pub mod i_strategy_manager {
     impl ::core::convert::From<RemoveStrategiesFromDepositWhitelistCall> for IStrategyManagerCalls {
         fn from(value: RemoveStrategiesFromDepositWhitelistCall) -> Self {
             Self::RemoveStrategiesFromDepositWhitelist(value)
+        }
+    }
+    impl ::core::convert::From<SetThirdPartyTransfersForbiddenCall> for IStrategyManagerCalls {
+        fn from(value: SetThirdPartyTransfersForbiddenCall) -> Self {
+            Self::SetThirdPartyTransfersForbidden(value)
         }
     }
     impl ::core::convert::From<SlasherCall> for IStrategyManagerCalls {
@@ -1720,6 +1678,11 @@ pub mod i_strategy_manager {
             Self::StakerStrategyShares(value)
         }
     }
+    impl ::core::convert::From<StrategyIsWhitelistedForDepositCall> for IStrategyManagerCalls {
+        fn from(value: StrategyIsWhitelistedForDepositCall) -> Self {
+            Self::StrategyIsWhitelistedForDeposit(value)
+        }
+    }
     impl ::core::convert::From<StrategyWhitelisterCall> for IStrategyManagerCalls {
         fn from(value: StrategyWhitelisterCall) -> Self {
             Self::StrategyWhitelister(value)
@@ -1735,20 +1698,6 @@ pub mod i_strategy_manager {
             Self::WithdrawSharesAsTokens(value)
         }
     }
-    ///Container type for all return fields from the `calculateWithdrawalRoot` function with signature `calculateWithdrawalRoot((address[],uint256[],address,(address,uint96),uint32,address))` and selector `0xb43b514b`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct CalculateWithdrawalRootReturn(pub [u8; 32]);
     ///Container type for all return fields from the `delegation` function with signature `delegation()` and selector `0xdf5cf723`
     #[derive(
         Clone,
@@ -1826,20 +1775,6 @@ pub mod i_strategy_manager {
         pub ::std::vec::Vec<::ethers::core::types::Address>,
         pub ::std::vec::Vec<::ethers::core::types::U256>,
     );
-    ///Container type for all return fields from the `migrateQueuedWithdrawal` function with signature `migrateQueuedWithdrawal((address[],uint256[],address,(address,uint96),uint32,address))` and selector `0xcd293f6f`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct MigrateQueuedWithdrawalReturn(pub bool, pub [u8; 32]);
     ///Container type for all return fields from the `slasher` function with signature `slasher()` and selector `0xb1344271`
     #[derive(
         Clone,
@@ -1884,6 +1819,20 @@ pub mod i_strategy_manager {
     pub struct StakerStrategySharesReturn {
         pub shares: ::ethers::core::types::U256,
     }
+    ///Container type for all return fields from the `strategyIsWhitelistedForDeposit` function with signature `strategyIsWhitelistedForDeposit(address)` and selector `0x663c1de4`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct StrategyIsWhitelistedForDepositReturn(pub bool);
     ///Container type for all return fields from the `strategyWhitelister` function with signature `strategyWhitelister()` and selector `0x967fc0d2`
     #[derive(
         Clone,

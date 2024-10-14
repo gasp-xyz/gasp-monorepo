@@ -19,7 +19,7 @@ abstract contract RolldownStorage is IRolldown {
     // NOTE: PR DESC
     // mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
     mapping(uint256 => CancelResolution) public cancelResolutions;
-    mapping(uint256 => Deposit) internal deposits;
+    mapping(uint256 => Deposit) public deposits;
     // NOTE: PR DESC
     // mapping(uint256 => L2UpdatesToRemove) internal l2UpdatesToRemove;
     // NOTE: PR DESC
