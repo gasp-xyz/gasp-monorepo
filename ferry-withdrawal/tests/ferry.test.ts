@@ -58,7 +58,7 @@ describe('Ferry Service', () => {
 
     l2Mock.getWithdrawals = vi.fn()
       .mockImplementationOnce(async (arg1, arg2) => {
-        if (arg1 === latestRequestIdL1 && arg2 === latestRequestIdL2) {
+        if (arg1 === latestRequestIdL1 + 1n && arg2 === latestRequestIdL2) {
           return [];
         }
         throw new Error("Unexpected arguments");
@@ -67,23 +67,32 @@ describe('Ferry Service', () => {
     expect(withdrawals).toHaveLength(0);
   });
 
-  it('should use return ampty array when one of counter does not exist 1', async () => {
+  it('should use default latestRequestIdL1 to 1 returns null', async () => {
 
     const latestRequestIdL1 = null;
     const latestRequestIdL2 = 456n;
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(latestRequestIdL1);
     l2Mock.getLatestRequestId = vi.fn().mockResolvedValue(latestRequestIdL2);
 
+    l2Mock.getWithdrawals = vi.fn()
+      .mockImplementationOnce(async (arg1, arg2) => {
+        if (arg1 === 1n && arg2 === latestRequestIdL2) {
+          return [];
+        }
+        throw new Error("Unexpected arguments");
+      });
+
     const withdrawals = await ferry.getPendingWithdrawals();
     expect(withdrawals).toHaveLength(0);
   });
 
-  it('should use return ampty array when one of counter does not exist 2', async () => {
+  it('should return empty array when latestRequestIdL2 does not exists', async () => {
 
     const latestRequestIdL1 = 456n;
     const latestRequestIdL2 = null;
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(latestRequestIdL1);
     l2Mock.getLatestRequestId = vi.fn().mockResolvedValue(latestRequestIdL2);
+
 
     const withdrawals = await ferry.getPendingWithdrawals();
     expect(withdrawals).toHaveLength(0);
@@ -96,7 +105,7 @@ describe('Ferry Service', () => {
     l1Mock.isClosed = vi.fn().mockResolvedValue(false);
     l2Mock.getWithdrawals = vi.fn().mockResolvedValue(
       [{
-        requestId: 1n,
+        requestId: 2n,
         withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
         tokenAddress: FERRY_TOKEN1,
         amount: 1n,
@@ -271,7 +280,7 @@ describe('Ferry Service', () => {
         withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
         tokenAddress: FERRY_TOKEN1,
         amount:  DEFAULT_BALANCE,
-        ferryTip: 1n,
+        ferryTip: DEFAULT_BALANCE,
         hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
       },
       {
@@ -279,7 +288,7 @@ describe('Ferry Service', () => {
         withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
         tokenAddress: FERRY_TOKEN2,
         amount:  DEFAULT_BALANCE,
-        ferryTip: 1n,
+        ferryTip: DEFAULT_BALANCE,
         hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
       },
       ];
@@ -296,7 +305,7 @@ describe('Ferry Service', () => {
         withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
         tokenAddress: FERRY_TOKEN1,
         amount:  DEFAULT_BALANCE,
-        ferryTip: 1n,
+        ferryTip: DEFAULT_BALANCE,
         hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
       },
       {
@@ -304,7 +313,7 @@ describe('Ferry Service', () => {
         withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
         tokenAddress: FERRY_TOKEN1,
         amount:  30000n,
-        ferryTip: 1n,
+        ferryTip: DEFAULT_BALANCE,
         hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
       },
       ];
@@ -327,7 +336,7 @@ describe('Ferry Service', () => {
         withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
         tokenAddress: FERRY_TOKEN1,
         amount:  999n,
-        ferryTip: 1n,
+        ferryTip: 999n,
         hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
       },
       {
@@ -335,7 +344,7 @@ describe('Ferry Service', () => {
         withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
         tokenAddress: FERRY_TOKEN1,
         amount:  30000n,
-        ferryTip: 1n,
+        ferryTip: 30000n,
         hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
       },
     ];
@@ -346,9 +355,10 @@ describe('Ferry Service', () => {
   });
 
   it('getPastFerriesReadyToClose works when latestRequestIdL1 is not available', async () => {
-
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(null);
     l2Mock.getLatestRequestIdInPast = vi.fn().mockResolvedValue(9);
+
+
     const result = await ferry.getPastFerriesReadyToClose(1000, hexToU8a(ALITH));
     expect(result).toHaveLength(0);
   });

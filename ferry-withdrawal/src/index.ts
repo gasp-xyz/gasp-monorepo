@@ -107,11 +107,11 @@ async function main() {
 				const pending = await ferry.getPendingWithdrawals();
 				logger.info(`Found ${pending.length} pending withdrawals`);
 				const rated = await ferry.rateWithdrawals(pending);
-				if (rated.length == 0) {
+				if (rated.length === 0) {
 					inProgress = false;
 					return;
 				}
-				logger.info(`Ferry withdrawal ${toString(pastWithdrawalsToClose[0])}`);
+				logger.info(`Ferry withdrawal ${toString(rated[0])}`);
 				await l1.ferry(rated[0], hexToU8a(PRIVATE_KEY));
 			}
 			inProgress = false;

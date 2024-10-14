@@ -10,14 +10,7 @@ interface Withdrawal {
 }
 
 function toString(withdrawal: Withdrawal): string {
-	return (
-		`\trequestId: ${withdrawal.requestId}` +
-		`\n\trecipient: ${u8aToHex(withdrawal.withdrawalRecipient)}` +
-		`\n\ttoken: ${u8aToHex(withdrawal.tokenAddress)}` +
-		`\n\tamount: ${withdrawal.amount}` +
-		`\n\tferryTip: ${withdrawal.ferryTip}` +
-		`\n\thash: ${u8aToHex(withdrawal.hash)}`
-	);
+	return `rid:${withdrawal.requestId} recipient:${u8aToHex(withdrawal.withdrawalRecipient)} token:${u8aToHex(withdrawal.tokenAddress)} amount:${withdrawal.amount} tip:${withdrawal.ferryTip} hash:${u8aToHex(withdrawal.hash)}`;
 }
 
 export { type Withdrawal, toString };

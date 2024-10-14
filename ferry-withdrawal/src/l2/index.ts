@@ -59,7 +59,7 @@ class L2Api implements L2Interface {
     if (found == -1){
       return null;
     } else {
-      return Array.from(nextRequesId.values())[found].toBigInt();
+      return Array.from(nextRequesId.values())[found].toBigInt() - 1n;
     }
   }
 
@@ -87,7 +87,6 @@ class L2Api implements L2Interface {
         return false;
       }
 
-      let x :ITuple<[PalletRolldownL2Request, H256]> = elem.unwrap();
       let [req, hash] = elem.unwrap();
       return req.isWithdrawal;
     })
