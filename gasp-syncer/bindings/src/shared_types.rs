@@ -32,6 +32,23 @@ pub struct G2Point {
     pub x: [::ethers::core::types::U256; 2],
     pub y: [::ethers::core::types::U256; 2],
 }
+///`OperatorSet(address,uint32)`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+)]
+pub struct OperatorSet {
+    pub avs: ::ethers::core::types::Address,
+    pub operator_set_id: u32,
+}
 ///`ApkUpdate(bytes24,uint32,uint32)`
 #[derive(
     Clone,
@@ -122,7 +139,7 @@ pub struct QuorumStakeTotals {
     Hash,
 )]
 pub struct OperatorDetails {
-    pub earnings_receiver: ::ethers::core::types::Address,
+    pub deprecated_earnings_receiver: ::ethers::core::types::Address,
     pub delegation_approver: ::ethers::core::types::Address,
     pub staker_opt_out_window_blocks: u32,
 }
@@ -522,44 +539,6 @@ pub struct StakeUpdate {
 pub struct StrategyParams {
     pub strategy: ::ethers::core::types::Address,
     pub multiplier: u128,
-}
-///`DeprecatedStructQueuedWithdrawal(address[],uint256[],address,(address,uint96),uint32,address)`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-)]
-pub struct DeprecatedStructQueuedWithdrawal {
-    pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
-    pub shares: ::std::vec::Vec<::ethers::core::types::U256>,
-    pub staker: ::ethers::core::types::Address,
-    pub withdrawer_and_nonce: DeprecatedStructWithdrawerAndNonce,
-    pub withdrawal_start_block: u32,
-    pub delegated_address: ::ethers::core::types::Address,
-}
-///`DeprecatedStructWithdrawerAndNonce(address,uint96)`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-)]
-pub struct DeprecatedStructWithdrawerAndNonce {
-    pub withdrawer: ::ethers::core::types::Address,
-    pub nonce: u128,
 }
 ///`FuzzInterface(address,string[])`
 #[derive(

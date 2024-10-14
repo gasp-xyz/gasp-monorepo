@@ -1,64 +1,77 @@
-import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
 import * as crypto from 'crypto'
 
-export const TIMESERIES_HOST_DOCKER_IMAGE_NAME = "mangatasolutions/redis-test-stash_ts:v2";
-export const REDIS_HOST_DOCKER_IMAGE_NAME = "mangatasolutions/redis-test-stash:latest";
-export const MAX_DAYS="max";
-export const MAX_INTERVAL="day";
-export const ERROR_MSG_POOL_NOT_FOUND = "this must be one of the following values: GASPV2-L1Asset, L1Asset-GASPV2, GASPV2-L1Asset-GASPV2, L1Asset-GASPV2-GASPV2, L1Asset-L1Asset-GASPV2, L1Asset-GASPV2-L1Asset, GASPV2-ETH-GASPV2, GASPV2-GASPV2-ETH, L1Asset-L1Asset, ALL";
-export const ERROR_MSG_PAIR_ASSET_NOT_FOUND = "this must be one of the following values: GASPV2, L1Asset, GASPV2-ETH, L1Asset-GASPV2";
+export const TIMESERIES_HOST_DOCKER_IMAGE_NAME =
+  'mangatasolutions/redis-test-stash_ts:5'
+export const REDIS_HOST_DOCKER_IMAGE_NAME = 'p1k1m4n/redis-test-stash:5'
+export const MAX_DAYS = 'max'
+export const MAX_INTERVAL = 'day'
+export const tokenIDs = ['0', '1', '2', '3', '4', '5', '7', '15', '19']
 
-
-let redisContainer: StartedTestContainer;
-let timeSeriesContainer: StartedTestContainer;
+let redisContainer: StartedTestContainer
+let timeSeriesContainer: StartedTestContainer
 
 export async function startContainer(image: string) {
-    console.warn("Starting container: " + image);
-    if(image === TIMESERIES_HOST_DOCKER_IMAGE_NAME) {
-        return await new GenericContainer(image)
-            .withWorkingDir("/")
-            .withEntrypoint(["/entrypoint.sh"])
-            .withExposedPorts({container: 6379, host: 6379})
-            .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
-            .start();
-    } else {
-        return await new GenericContainer(image)
-            .withWorkingDir('/')
-            .withEntrypoint(['redis-server'])
-            .withExposedPorts({container: 6379, host: 6380})
-            .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
-            .start()
-    }
+  console.warn('Starting container: ' + image)
+  if (image === TIMESERIES_HOST_DOCKER_IMAGE_NAME) {
+    return await new GenericContainer(image)
+      .withWorkingDir('/')
+      .withEntrypoint(['./entrypoint.sh'])
+      .withExposedPorts({ container: 6379, host: 6379 })
+      .withLogConsumer(stream => {
+        stream.on("data", line => console.debug("redis_ts ->" + line));
+        stream.on("err", line => console.debug("redis_ts ->" + line));
+        stream.on('end', () => console.debug("redis_ts ->" + 'Stream closed'))
+      })
+      .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
+      .start()
+  } else {
+    return await new GenericContainer(image)
+      .withWorkingDir('/')
+      .withEntrypoint(['redis-server', '--protected-mode no'])
+      .withExposedPorts({ container: 6379, host: 6380 })
+      .withName('redis-container')
+      .withLogConsumer(stream => {
+        stream.on("data", line => console.debug("redis_db ->" + line));
+        stream.on("err", line => console.debug("redis_db ->" + line));
+        stream.on('end', () => console.debug("redis_db ->" + 'Stream closed'))
+      })
+      .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
+      .start()
+  }
 }
 export async function tearDownBothContainers() {
-    console.warn("Tearing down containers");
-    if (redisContainer) {
-        await redisContainer.stop();
-    }
-    if (timeSeriesContainer) {
-        await timeSeriesContainer.stop();
-    }
+  console.warn('Tearing down containers')
+  if (redisContainer) {
+    await redisContainer.stop()
+  }
+  if (timeSeriesContainer) {
+    await timeSeriesContainer.stop()
+  }
 }
 export async function initBothContainers() {
-    try {
-        redisContainer = await startContainer(REDIS_HOST_DOCKER_IMAGE_NAME);
-        timeSeriesContainer = await startContainer(TIMESERIES_HOST_DOCKER_IMAGE_NAME);
-    } catch (e) {
-        console.error(e);
-        throw e;
-    }
+  try {
+    redisContainer = await startContainer(REDIS_HOST_DOCKER_IMAGE_NAME)
+    timeSeriesContainer = await startContainer(
+      TIMESERIES_HOST_DOCKER_IMAGE_NAME
+    )
+  } catch (e) {
+    console.error(e)
+    throw e
+  }
 }
 
 export function generateRandomHash(): string {
-    const randomBytes = crypto.randomBytes(32);
-    const hash = '0x' + crypto.createHash('sha256').update(randomBytes).digest('hex');
+  const randomBytes = crypto.randomBytes(32)
+  const hash =
+    '0x' + crypto.createHash('sha256').update(randomBytes).digest('hex')
 
-    return hash;
+  return hash
 }
 
 export function generateRandomAddress(): string {
-    const randomBytes = crypto.randomBytes(20);
-    const address = '0x' + randomBytes.toString('hex');
+  const randomBytes = crypto.randomBytes(20)
+  const address = '0x' + randomBytes.toString('hex')
 
-    return address;
+  return address
 }
