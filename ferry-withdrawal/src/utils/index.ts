@@ -9,6 +9,7 @@ const myFormat = format.printf(({ level, message, label, timestamp }) => {
 });
 
 const logger = createLogger({
+  level: LOG,
   format: format.combine(
     format.timestamp(),
     format.colorize(),

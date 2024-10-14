@@ -1,10 +1,7 @@
-import util from "node:util";
-import { Keyring } from "@polkadot/api";
 import JSONbig  from 'json-bigint';
 import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import "dotenv/config";
-import { signTx } from "gasp-sdk";
 import "gasp-types";
 import {
 	TOKENS_TO_TRACK,
@@ -13,17 +10,18 @@ import {
 	MANGATA_NODE_URL,
 	PRIVATE_KEY,
 	TX_COST,
-  LOOK_BACK_HOURS
+  LOOK_BACK_HOURS,
+  LOG,
 } from "./common/constants.js";
 
 import { Ferry } from "./ferry/index.js";
 import { L1Api } from "./l1/index.js";
-import { L2Api, getL1ChainType } from "./l2/index.js";
-import { getApi, isSuccess, print, logger } from "./utils/index.js";
+import { L2Api } from "./l2/index.js";
+import { getApi, print, logger } from "./utils/index.js";
 import { PrivateKeyAccount } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { z } from "zod";
-import { Withdrawal } from "./common/withdrawal.js";
+import { toString } from "./common/withdrawal.js";
 
 export const TOKENS_TO_TRACK_SCHEMA = z.tuple([
 	z.string().transform((x) => hexToU8a(x,160)),
@@ -32,15 +30,6 @@ export const TOKENS_TO_TRACK_SCHEMA = z.tuple([
 ]).array();
 export type AppConfig = z.infer<typeof TOKENS_TO_TRACK_SCHEMA>;
 
-
-function printWithdrawal(withdrawal: Withdrawal): void {
-  console.log(`requestId: ${withdrawal.requestId}`);
-  console.log(`withdrawalRecipient: ${u8aToHex(withdrawal.withdrawalRecipient)}`);
-  console.log(`tokenAddress: ${u8aToHex(withdrawal.tokenAddress)}`);
-  console.log(`amount: ${withdrawal.amount}`);
-  console.log(`ferryTip: ${withdrawal.ferryTip}`);
-  console.log(`hash: ${u8aToHex(withdrawal.hash)}`);
-}
 
 //TODO: improve logging
 
@@ -55,7 +44,18 @@ async function main() {
 
   const enabled_tokens = TOKENS_TO_TRACK_SCHEMA.parse(JSONbig({ alwaysParseAsBig: true, useNativeBigInt: true}).parse(TOKENS_TO_TRACK));
 	const acc: PrivateKeyAccount = privateKeyToAccount(PRIVATE_KEY as any);
-  console.info(`Using account ${acc.address}`);
+
+  logger.info(`Account      : ${acc.address}`);
+  logger.info(`L1           : ${ETH_CHAIN_URL}`);
+  logger.info(`L2           : ${MANGATA_NODE_URL}`);
+  logger.info(`Rolldown     : ${MANGATA_CONTRACT_ADDRESS}`);
+  logger.info(`Close period : ${LOOK_BACK_HOURS} hours`);
+  logger.info(`Log level    : ${LOG}`);
+
+  enabled_tokens.forEach((token) => {
+    logger.info(`Token to ferry ${u8aToHex(token[0])} minimal profit : ${token[1]} weight : ${token[2]}`);
+  });
+
 	const ferry = new Ferry(
 		hexToU8a(acc.address),
 		l1,
@@ -82,9 +82,9 @@ async function main() {
 
 			inProgress = true;
       const pastWithdrawalsToClose = await ferry.getPastFerriesReadyToClose(LOOK_BACK_HOURS*5*60);
+      logger.debug(`Found ${pastWithdrawalsToClose.length} past withdrawals ready to close `);
       if (pastWithdrawalsToClose.length > 0) {
-        logger.info(`Closing withdrawal`);
-        printWithdrawal(pastWithdrawalsToClose[0]);
+        logger.info(`Closing withdrawal ${toString(pastWithdrawalsToClose[0])}`);
         await l1.close(pastWithdrawalsToClose[0], hexToU8a(PRIVATE_KEY));
         inProgress = false;
         return;
@@ -96,8 +96,7 @@ async function main() {
           inProgress = false;
           return;
         }
-        logger.info(`Ferrying withdrawal`);
-        printWithdrawal(rated[0]);
+        logger.info(`Ferry withdrawal ${toString(pastWithdrawalsToClose[0])}`);
         await l1.ferry(rated[0], hexToU8a(PRIVATE_KEY));
       }
 			inProgress = false;

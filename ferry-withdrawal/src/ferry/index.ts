@@ -1,12 +1,9 @@
 import { L1Interface } from "../l1";
 import { L2Interface } from "../l2";
-import { Deposit } from "../common/deposit.js";
 import { isEqual} from "../utils/index.js";
-import util from "node:util";
 import { u8aToHex } from "@polkadot/util";
-import { Withdrawal } from "../common/withdrawal";
-
-const HOURS_TO_BLOCKS = 12*5*60;
+import { Withdrawal, toString } from "../common/withdrawal.js";
+import { logger } from "../utils/index.js";
 
 async function asyncFilter(arr: Withdrawal[], predicate: any) {
 	const results = await Promise.all(arr.map(predicate));
@@ -38,8 +35,15 @@ class Ferry {
 
 	logFilteredOut(before: Withdrawal[], after: Withdrawal[], message: string) {
 		const diff = before.length - after.length;
+    const mapAfter : Map<bigint, Withdrawal> = new Map(after.map( (elem) => [elem.requestId, elem]));
+
+
 		if (diff > 0) {
-			console.info(`filtered out ${diff} : ${message}`);
+      before
+        .filter( elem => mapAfter.has(elem.requestId) === false)
+        .forEach( elem => logger.silly(`filtered out ${message}: \n${toString(elem)}`));
+
+			logger.debug(`filtered out ${diff} : ${message}`);
 		}
 	}
 
@@ -71,7 +75,7 @@ class Ferry {
     const balances = await Promise.all(this.tokensToFerry.map( ([tokenAddress, _minProfit, _weight]) => Promise.all([Promise.resolve( tokenAddress), this.l1.getBalance(tokenAddress, this.me)])));
 
     balances.forEach(([tokenAddress, balance]) => {
-      console.info(`Balance ${u8aToHex(tokenAddress)} : ${balance}`);
+      logger.debug(`Balance ${u8aToHex(tokenAddress)} : ${balance}`);
     });
 
     const nativeTokenAddress = await this.l1.getNativeTokenAddress();
@@ -88,7 +92,7 @@ class Ferry {
       }) !== undefined
 		);
 
-    this.logFilteredOut(withdrawals, canAffordWirhdrawals, "not enought balance");
+    this.logFilteredOut(withdrawals, canAffordWirhdrawals, "not enough balance");
  
     const aboveMinimalProfit = canAffordWirhdrawals.filter(elem => {
       const minProfit = this.tokensToFerry.find(([tokenAddress, minProfit, weight]) => isEqual(tokenAddress ,elem.tokenAddress))![1];
@@ -132,7 +136,7 @@ class Ferry {
     }
 
     const withdrawals = await this.l2.getWithdrawals(rangeStart!, rangeEnd!);
-    console.info(withdrawals.length);
+    logger.debug(`Found ${withdrawals.length} past ferried withdrawals looked through rid (${rangeStart} ... ${rangeEnd})`);
     const withdrawalsWithStatus: [Withdrawal, Uint8Array | null][] = await Promise.all(
       withdrawals
       .map(elem => Promise.all([Promise.resolve(elem), this.l1.getFerry(elem.hash)]))

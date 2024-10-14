@@ -1,15 +1,11 @@
 
 import {
-  Deposit
-} from "../common/deposit.js";
-
-import {
   ABI,
   MANGATA_CONTRACT_ADDRESS,
 } from "../common/constants.js";
 
 import { PrivateKeyAccount, createPublicClient, createWalletClient } from "viem";
-import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
+import { type PublicClient } from "viem";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import {
   http,

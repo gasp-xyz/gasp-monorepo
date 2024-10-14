@@ -2,7 +2,6 @@ import { type ApiPromise } from "@polkadot/api";
 import type { KeyringPair } from "@polkadot/keyring/types";
 import type { BTreeMap, u128 } from '@polkadot/types-codec';
 import type {
-	MangataTypesAssetsL1Asset,
 	PalletRolldownMessagesChain,
 } from "@polkadot/types/lookup";
 import {  PalletRolldownL2Request } from '@polkadot/types/lookup';
@@ -33,44 +32,6 @@ interface L2Interface {
 function getL1ChainType(api: ApiPromise): PalletRolldownMessagesChain {
 	return api.createType("PalletRolldownMessagesChain", L1_CHAIN);
 }
-
-// function createL1Asset(
-// 	api: ApiPromise,
-// 	tokenAddress: Uint8Array,
-// ): MangataTypesAssetsL1Asset {
-// 	const chain: PalletRolldownMessagesChain = getL1ChainType(api);
-// 	if (chain.isEthereum) {
-// 		return api.createType("MangataTypesAssetsL1Asset", {
-// 			Ethereum: tokenAddress,
-// 		});
-// 	} else if (chain.isArbitrum) {
-// 		return api.createType("MangataTypesAssetsL1Asset", {
-// 			Arbitrum: tokenAddress,
-// 		});
-// 	} else {
-// 		throw new Error(`Unknown chain id ${chain.toHuman()}`);
-// 	}
-// }
-//
-
-// async function getLastBatchId(api: ApiPromise, blockHash: Uint8Array) {
-//     const chain: PalletRolldownMessagesChain = api.createType('PalletRolldownMessagesChain', L1_CHAIN);
-//     let apiAt = await api.at(blockHash);
-//     let last_batch = await apiAt.query.rolldown.l2RequestsBatchLast();
-//
-//     // NOTE: looks like === is not implemented for PalletRolldownMessagesChain
-//     // therefore its not possible to query valu from map using .get(chain) query ;<
-//     let found = Array.from(last_batch.keys()).findIndex( (key) => {
-//       return key.toString() === chain.toString();
-//     });
-//
-//     if (found == -1){
-//       return null;
-//     } else {
-//       return Array.from(last_batch.values())[found][1].toBigInt();
-//     }
-// }
-
 
 class L2Api implements L2Interface {
 	api!: ApiPromise;
