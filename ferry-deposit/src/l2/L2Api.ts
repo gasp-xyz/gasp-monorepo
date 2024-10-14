@@ -7,18 +7,10 @@ import type {
 
 import {
 	L1_CHAIN,
-} from "../common/constants.js";
+} from "../config.js";
+import { L2Interface } from "./L2Interface.js";
 
 
-interface L2Interface {
-	getBalances(address: Uint8Array): Promise<Map<Uint8Array, bigint>>;
-	getLastProcessedRequestId(): Promise<bigint>;
-	getLastProcessedRequestId(): Promise<bigint>;
-	isExecuted(depositId: bigint): Promise<boolean>;
-	isFerried(depositId: Uint8Array): Promise<boolean>;
-	getNativeTokenAddress(): Promise<Uint8Array>;
-	valutateToken(tokenAddress: Uint8Array, amount: bigint): Promise<bigint>;
-}
 
 function getL1ChainType(api: ApiPromise): PalletRolldownMessagesChain {
 	return api.createType("PalletRolldownMessagesChain", L1_CHAIN);
@@ -145,4 +137,4 @@ class L2Api implements L2Interface {
 	}
 
 }
-export { L2Interface, L2Api, getL1ChainType };
+export { L2Api, getL1ChainType };

@@ -13,12 +13,12 @@ import {
 	MIN_PROFIT,
 	MNEMONIC,
 	TX_COST,
-} from "./common/constants.js";
+} from "./config.js";
 
-import { Ferry } from "./ferry/index.js";
-import { L1Api } from "./l1/index.js";
-import { L2Api, getL1ChainType } from "./l2/index.js";
-import { getApi, isSuccess, print } from "./utils/index.js";
+import { Ferry } from "./Ferry.js";
+import { L1Api } from "./l1/L1Api.js";
+import { L2Api, getL1ChainType } from "./l2/L2Api.js";
+import { getApi, isSuccess, print } from "./utils.js";
 
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);

@@ -1,6 +1,7 @@
-import { L1Interface } from "../l1";
-import { L2Interface } from "../l2";
-import { Deposit } from "../common/deposit.js";
+
+import { L1Interface } from "./l1/L1Interface.js";
+import { L2Interface } from "./l2/L2Interface.js";
+import { Deposit } from "./Deposit.js";
 import { u8aToHex } from "@polkadot/util";
 
 async function asyncFilter(arr: Deposit[], predicate: any) {

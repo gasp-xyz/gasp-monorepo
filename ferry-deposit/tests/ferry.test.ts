@@ -1,9 +1,9 @@
 import { describe, beforeAll, expect, it , vi} from "vitest";
-import { L2Interface } from "../src/l2";
 import { hexToU8a } from "@polkadot/util";
-import { Deposit } from "../src/common/deposit.js";
-import { L1Interface } from "../src/l1/index.js";
-import { Ferry } from "../src/ferry/index.js";
+import { Deposit } from "../src/Deposit.js";
+import { L2Interface } from "../src/l2/L2Interface.js";
+import { L1Interface } from "../src/l1/L1Interface.js";
+import { Ferry } from "../src/Ferry.js";
 
 
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
