@@ -16,24 +16,21 @@ import { privateKeyToAccount } from "viem/accounts";
 import { anvil } from "viem/chains";
 import { isEqual } from "../utils/index.js";
 import { estimateMaxPriorityFeePerGas } from "viem/actions";
+import { L1Interface } from "./L1Interface.js";
 
-  async function estimateGasInWei(publicClient: PublicClient) {
-    // https://www.blocknative.com/blog/eip-1559-fees
-    // We do not want VIEM estimate we would like to make our own estimate
-    // based on this equation: Max Fee = (2 * Base Fee) + Max Priority Fee
+async function estimateGasInWei(publicClient: PublicClient) {
+  // https://www.blocknative.com/blog/eip-1559-fees
+  // We do not want VIEM estimate we would like to make our own estimate
+  // based on this equation: Max Fee = (2 * Base Fee) + Max Priority Fee
 
-    // Max Fee = maxFeePerGas (viem)
-    // Max Priority Fee = maxPriorityFeePerGas (viem)
+  // Max Fee = maxFeePerGas (viem)
+  // Max Priority Fee = maxPriorityFeePerGas (viem)
 
-    const baseFeeInWei = await publicClient.getGasPrice()
-
-    const maxPriorityFeePerGasInWei =  await estimateMaxPriorityFeePerGas(publicClient)
-
-    const maxFeeInWei = BigInt(2) * BigInt(baseFeeInWei) + BigInt(maxPriorityFeePerGasInWei)
-
-    return {maxFeeInWei, maxPriorityFeePerGasInWei}
-  }
-
+  const baseFeeInWei = await publicClient.getGasPrice()
+  const maxPriorityFeePerGasInWei =  await estimateMaxPriorityFeePerGas(publicClient)
+  const maxFeeInWei = BigInt(2) * BigInt(baseFeeInWei) + BigInt(maxPriorityFeePerGasInWei)
+  return {maxFeeInWei, maxPriorityFeePerGasInWei}
+}
 
 function toViemFormat(withdrawal: Withdrawal): unknown[]  {
   return [
@@ -42,24 +39,6 @@ function toViemFormat(withdrawal: Withdrawal): unknown[]  {
     u8aToHex(withdrawal.tokenAddress, 160), 
     withdrawal.amount, 
     withdrawal.ferryTip];
-}
-
-function minBigInt(lhs: bigint, rhs: bigint): bigint {
-  return [lhs, rhs].reduce((min, current) => current < min ? current : min);
-}
-
-interface L1Interface {
-  isRolldownDeployed(): Promise<boolean>;
-  getLatestRequestId(): Promise<bigint | null>;
-  getBalance(account: Uint8Array, tokenAddress: Uint8Array): Promise<bigint | null>;
-  getNativeTokenAddress(): Promise<Uint8Array>;
-
-  isClosed(hash: Uint8Array): Promise<boolean>;
-  isFerried(hash: Uint8Array): Promise<boolean>;
-  getFerry(hash: Uint8Array): Promise<Uint8Array | null>;
-
-  ferry(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>;
-  close(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>;
 }
 
 class L1Api implements L1Interface {

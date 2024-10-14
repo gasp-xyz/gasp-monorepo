@@ -19,7 +19,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { z } from "zod";
 import { toString } from "./common/withdrawal.js";
 import { Ferry } from "./ferry/index.js";
-import { L1Api } from "./l1/index.js";
+import { L1Api } from "./l1/L1Api.js";
 import { L2Api } from "./l2/index.js";
 import { getApi, logger, print } from "./utils/index.js";
 

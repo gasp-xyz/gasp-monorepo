@@ -1,29 +1,22 @@
-import { describe, test, beforeAll, expect, it } from "vitest";
-import { sleep, getApi } from "../src/utils/index.js";
-import { L2Interface, L2Api } from "../src/l2";
+import { describe, beforeAll, expect, it } from "vitest";
 import { isEqual} from "../src/utils/index.js";
-import { L1Api } from "../src/l1";
-import { L1Interface, toViemFormat } from "../src/l1/index.js";
+import { L1Api , toViemFormat } from "../src/l1/L1Api.js";
+import { L1Interface } from "../src/l1/L1Interface.js";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import { anvil } from "viem/chains";
-import dotenv from 'dotenv/config'
 import {
   ABI,
 	MANGATA_CONTRACT_ADDRESS,
 } from "../src/common/constants.js";
 import {
-	http,
 	type PrivateKeyAccount,
 	createWalletClient,
   encodeAbiParameters,
   keccak256,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { TestClient, createPublicClient, createTestClient, webSocket } from "viem";
-import util from "node:util";
+import {  createPublicClient, createTestClient, webSocket } from "viem";
 import { Withdrawal } from "../src/common/withdrawal.js";
-
-const timeout = 60000;
 
 function getRandomInt (min: number, max: number) : number {
     return Math.floor(Math.random() * (max - min + 1)) + min;

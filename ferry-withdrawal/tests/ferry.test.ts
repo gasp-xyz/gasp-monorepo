@@ -2,7 +2,7 @@ import { describe, beforeAll, expect, it , vi} from "vitest";
 import { L2Interface } from "../src/l2";
 import { hexToU8a } from "@polkadot/util";
 import { Deposit } from "../src/common/deposit.js";
-import { L1Interface } from "../src/l1/index.js";
+import { L1Interface } from "../src/l1/L1Interface.js";
 import { Ferry } from "../src/ferry/index.js";
 import 'dotenv/config'
 

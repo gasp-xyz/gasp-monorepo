@@ -1,4 +1,4 @@
-import { L1Interface } from "../l1";
+import { L1Interface } from "../l1/L1Interface.js";
 import { L2Interface } from "../l2";
 import { isEqual} from "../utils/index.js";
 import { u8aToHex } from "@polkadot/util";
