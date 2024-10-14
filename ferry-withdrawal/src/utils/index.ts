@@ -1,21 +1,17 @@
 import util from "node:util";
 import { type ApiPromise, Keyring } from "@polkadot/api";
 import { Mangata, type MangataGenericEvent, signTx } from "gasp-sdk";
-import { createLogger, transports, format } from "winston";
+import { createLogger, format, transports } from "winston";
 import { LOG } from "../common/constants.js";
 
 const myFormat = format.printf(({ level, message, label, timestamp }) => {
-  return `${timestamp} ${level}: ${message}`;
+	return `${timestamp} ${level}: ${message}`;
 });
 
 const logger = createLogger({
-  level: LOG,
-  format: format.combine(
-    format.timestamp(),
-    format.colorize(),
-    myFormat
-  ),
-  transports: [new transports.Console()]
+	level: LOG,
+	format: format.combine(format.timestamp(), format.colorize(), myFormat),
+	transports: [new transports.Console()],
 });
 
 function sleep(timeInMilliseconds: number): Promise<void> {
@@ -36,10 +32,10 @@ function isSuccess(events: MangataGenericEvent[]) {
 }
 
 function isEqual(first: Uint8Array, second: Uint8Array): boolean {
-  if(first.length !== second.length) {
-    return false;
-  }
-  return first.every((value, index) => value === second[index]);
+	if (first.length !== second.length) {
+		return false;
+	}
+	return first.every((value, index) => value === second[index]);
 }
 
 function print(data: any) {
