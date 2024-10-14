@@ -1,18 +1,21 @@
-import { type ApiPromise } from "@polkadot/api";
-import type { KeyringPair } from "@polkadot/keyring/types";
 import type { BTreeMap, u128 } from '@polkadot/types-codec';
-import type {
-	PalletRolldownMessagesChain,
-} from "@polkadot/types/lookup";
-import {  PalletRolldownL2Request } from '@polkadot/types/lookup';
 import type { H256 } from '@polkadot/types/interfaces/runtime';
-
-import type { Option} from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
-import {
-	L1_CHAIN,
-} from "../common/constants.js";
-import { Withdrawal } from "../common/withdrawal.js";
+import type { KeyringPair } from "@polkadot/keyring/types";
+import type { L2Interface } from './L2Interface.js';
+import type { Option} from '@polkadot/types-codec';
+import type { PalletRolldownMessagesChain, } from "@polkadot/types/lookup";
+import {  PalletRolldownL2Request } from '@polkadot/types/lookup';
+import { L1_CHAIN, } from "../Config.js";
+import { Mangata } from "gasp-sdk";
+import { Withdrawal } from "../Withdrawal.js";
+import { type ApiPromise } from "@polkadot/api";
+
+async function getApi(nodeUrl: string): Promise<ApiPromise> {
+	const api = await Mangata.instance([nodeUrl]).api();
+	await api.isReady;
+	return api;
+}
 
 function createBigIntArrayFromRange(start:bigint, end:bigint) {
   const result = [];
@@ -22,12 +25,6 @@ function createBigIntArrayFromRange(start:bigint, end:bigint) {
   return result;
 }
 
-interface L2Interface {
-	getLatestRequestId(): Promise<bigint|null>;
-	getLatestRequestIdInPast(delay: number): Promise<bigint|null>;
-  getWithdrawals(startRange: bigint, endRange: bigint): Promise<Withdrawal[]>;
-	getNativeTokenAddress(): Promise<Uint8Array>;
-}
 
 function getL1ChainType(api: ApiPromise): PalletRolldownMessagesChain {
 	return api.createType("PalletRolldownMessagesChain", L1_CHAIN);
@@ -105,4 +102,4 @@ class L2Api implements L2Interface {
   }
 
 }
-export { L2Interface, L2Api, getL1ChainType };
+export { L2Api, getL1ChainType, getApi };

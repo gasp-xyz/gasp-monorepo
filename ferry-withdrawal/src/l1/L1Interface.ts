@@ -1,4 +1,4 @@
-import { Withdrawal } from "../common/withdrawal.js";
+import { Withdrawal } from "../Withdrawal.js";
 
 export interface L1Interface {
   isRolldownDeployed(): Promise<boolean>;

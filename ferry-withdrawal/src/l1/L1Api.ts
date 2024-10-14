@@ -2,7 +2,7 @@
 import {
   ABI,
   MANGATA_CONTRACT_ADDRESS,
-} from "../common/constants.js";
+} from "../Config.js";
 
 import { PrivateKeyAccount, createPublicClient, createWalletClient } from "viem";
 import { type PublicClient } from "viem";
@@ -11,10 +11,10 @@ import {
   http,
   webSocket,
 } from "viem";
-import { Withdrawal } from "../common/withdrawal.js";
+import { Withdrawal } from "../Withdrawal.js";
 import { privateKeyToAccount } from "viem/accounts";
 import { anvil } from "viem/chains";
-import { isEqual } from "../utils/index.js";
+import { isEqual } from "../utils.js";
 import { estimateMaxPriorityFeePerGas } from "viem/actions";
 import { L1Interface } from "./L1Interface.js";
 

@@ -1,8 +1,15 @@
-import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
+import type { PrivateKeyAccount } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import "dotenv/config";
 import "gasp-types";
-import JSONbig from "json-bigint";
+
+import { toString } from "./Withdrawal.js";
+import { Ferry } from "./Ferry.js";
+import { L1Api } from "./l1/L1Api.js";
+import { L2Api, getApi } from "./l2/L2Api.js";
+import { logger } from "./logger.js";
 import {
 	ETH_CHAIN_URL,
 	LOG,
@@ -12,27 +19,7 @@ import {
 	PRIVATE_KEY,
 	TOKENS_TO_TRACK,
 	TX_COST,
-} from "./common/constants.js";
-
-import type { PrivateKeyAccount } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { z } from "zod";
-import { toString } from "./common/withdrawal.js";
-import { Ferry } from "./ferry/index.js";
-import { L1Api } from "./l1/L1Api.js";
-import { L2Api } from "./l2/index.js";
-import { getApi, logger, print } from "./utils/index.js";
-
-export const TOKENS_TO_TRACK_SCHEMA = z
-	.tuple([
-		z.string().transform((x) => hexToU8a(x, 160)),
-		z.bigint(),
-		z.bigint(),
-	])
-	.array();
-export type AppConfig = z.infer<typeof TOKENS_TO_TRACK_SCHEMA>;
-
-//TODO: improve logging
+} from "./Config.js";
 
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
@@ -43,11 +30,6 @@ async function main() {
 		throw `Cannot connect to ${MANGATA_NODE_URL}`;
 	}
 
-	const enabled_tokens = TOKENS_TO_TRACK_SCHEMA.parse(
-		JSONbig({ alwaysParseAsBig: true, useNativeBigInt: true }).parse(
-			TOKENS_TO_TRACK,
-		),
-	);
 	const acc: PrivateKeyAccount = privateKeyToAccount(PRIVATE_KEY as any);
 
 	logger.info(`Account      : ${acc.address}`);
@@ -57,7 +39,7 @@ async function main() {
 	logger.info(`Close period : ${LOOK_BACK_HOURS} hours`);
 	logger.info(`Log level    : ${LOG}`);
 
-	enabled_tokens.forEach((token) => {
+	TOKENS_TO_TRACK.forEach((token) => {
 		logger.info(
 			`Token to ferry ${u8aToHex(token[0])} minimal profit : ${
 				token[1]
@@ -69,7 +51,7 @@ async function main() {
 		hexToU8a(acc.address),
 		l1,
 		l2,
-		enabled_tokens,
+		TOKENS_TO_TRACK,
 		TX_COST,
 	);
 
@@ -121,7 +103,6 @@ async function main() {
 
 main()
 	.then(() => {
-		print("Success");
 	})
 	.catch((e) => {
 		console.error("Something went wrong", e);

@@ -1,5 +1,5 @@
 import { describe, beforeAll, expect, it } from "vitest";
-import { isEqual} from "../src/utils/index.js";
+import { isEqual} from "../src/utils.js";
 import { L1Api , toViemFormat } from "../src/l1/L1Api.js";
 import { L1Interface } from "../src/l1/L1Interface.js";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
@@ -7,7 +7,8 @@ import { anvil } from "viem/chains";
 import {
   ABI,
 	MANGATA_CONTRACT_ADDRESS,
-} from "../src/common/constants.js";
+  MANGATA_NODE_URL,
+} from "../src/Config.js";
 import {
 	type PrivateKeyAccount,
 	createWalletClient,
@@ -16,7 +17,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import {  createPublicClient, createTestClient, webSocket } from "viem";
-import { Withdrawal } from "../src/common/withdrawal.js";
+import { Withdrawal } from "../src/Withdrawal.js";
 
 function getRandomInt (min: number, max: number) : number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -36,12 +37,6 @@ const TOKEN_ADDRESS = hexToU8a("0xFD471836031dc5108809D173A067e8486B9047A3", 160
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
 const ANVIL_TEST_ACCOUNT = "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba";
 
-const properImpl = (key: any, value: any) => {
-  if (typeof value === 'bigint') {
-    return value.toString();
-  }
-  return value;
-};
 
 function hashWithdrawal(withdrawal: Withdrawal) {
   const encoded = encodeAbiParameters(
@@ -238,6 +233,7 @@ describe('L1Interface', () => {
     await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
     const randomAddress = getRandomUintArray(20);
     const lastRequestId = await l1Api.getLatestRequestId();
+    console.info(lastRequestId);
 
     let withdrawal = {
         requestId: lastRequestId! + 1n,

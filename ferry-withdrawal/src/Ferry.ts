@@ -1,9 +1,10 @@
-import { L1Interface } from "../l1/L1Interface.js";
-import { L2Interface } from "../l2";
-import { isEqual} from "../utils/index.js";
 import { u8aToHex } from "@polkadot/util";
-import { Withdrawal, toString } from "../common/withdrawal.js";
-import { logger } from "../utils/index.js";
+
+import { L1Interface } from "./l1/L1Interface.js";
+import { L2Interface } from "./l2/L2Interface.js";
+import { isEqual} from "./utils.js";
+import { logger } from "./logger.js";
+import { Withdrawal, toString } from "./Withdrawal.js";
 
 async function asyncFilter(arr: Withdrawal[], predicate: any) {
 	const results = await Promise.all(arr.map(predicate));

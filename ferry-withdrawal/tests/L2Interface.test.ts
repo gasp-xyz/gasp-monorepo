@@ -1,15 +1,10 @@
-import { describe, test, beforeAll, expect, it } from "vitest";
-import { getApi } from "../src/utils/index.js";
+import { describe, expect, it } from "vitest";
 import { type ApiPromise, Keyring } from "@polkadot/api";
-import type { KeyringPair } from "@polkadot/keyring/types";
-import { L2Interface, L2Api , getL1ChainType} from "../src/l2";
-import { hexToU8a } from "@polkadot/util";
-import { Mangata, type MangataGenericEvent, signTx } from "gasp-sdk";
+import { getApi , L2Api , getL1ChainType} from "../src/l2/L2Api.js";
+import { signTx } from "gasp-sdk";
 import 'dotenv/config'
-const timeout = 60000;
 
 const URI = "ws://localhost:9944";
-const NATIVE_TOKEN = "0x0000000000000000000000000000000000000001";
 const ALITH_PRIVATE_KEY = "0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133";
 
 async function dummyWithdrawal(api: ApiPromise, tokenAddress: Uint8Array, amount: bigint,ferryTip: bigint) :Promise<void> {
