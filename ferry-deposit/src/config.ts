@@ -17,10 +17,10 @@ export const appConfigSchema = z.object({
 	MANGATA_NODE_URL: z.string(),
 	MNEMONIC: z.string(),
 	L1_CHAIN: z.string(),
-	MIN_PROFIT: z.bigint(),
 	TX_COST: z.bigint(),
 	BLOCK_DELAY: z.bigint(),
 	TOKENS_TO_TRACK: z.string().transform(elem => tokensToTrackSchema.parse(JSONbig({ alwaysParseAsBig: true, useNativeBigInt: true }).parse(elem))),
+  LOG: z.string(),
 });
 
 const configuration = appConfigSchema.parse({
@@ -29,10 +29,10 @@ const configuration = appConfigSchema.parse({
 		MANGATA_NODE_URL: process.env.MANGATA_NODE_URL!,
 		MNEMONIC: process.env.MNEMONIC!,
 		L1_CHAIN: process.env.L1_CHAIN!,
-		MIN_PROFIT: BigInt(process.env.MIN_PROFIT!),
 		TX_COST: BigInt(process.env.TX_COST!),
 		BLOCK_DELAY: BigInt(process.env.BLOCK_DELAY!),
     TOKENS_TO_TRACK: process.env.TOKENS_TO_TRACK!,
+    LOG: process.env.LOG!,
 	});
 
 
@@ -41,9 +41,9 @@ export const ETH_CHAIN_URL = configuration.ETH_CHAIN_URL;
 export const MANGATA_NODE_URL = configuration.MANGATA_NODE_URL;
 export const MNEMONIC = configuration.MNEMONIC;
 export const L1_CHAIN = configuration.L1_CHAIN;
-export const MIN_PROFIT = configuration.MIN_PROFIT;
 export const TX_COST = configuration.TX_COST;
 export const BLOCK_DELAY = configuration.BLOCK_DELAY;
 export const TOKENS_TO_TRACK = configuration.TOKENS_TO_TRACK;
+export const LOG = configuration.LOG;
 
 export const ABI = rolldownAbi.abi;

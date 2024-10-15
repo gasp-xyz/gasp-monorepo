@@ -1,8 +1,10 @@
 
 import { L1Interface } from "./l1/L1Interface.js";
 import { L2Interface } from "./l2/L2Interface.js";
-import { Deposit } from "./Deposit.js";
+import { Deposit, toString } from "./Deposit.js";
+import { isEqual  } from "./utils.js";
 import { u8aToHex } from "@polkadot/util";
+import { logger } from "./logger.js";
 
 async function asyncFilter(arr: Deposit[], predicate: any) {
 	const results = await Promise.all(arr.map(predicate));
@@ -16,14 +18,14 @@ class Ferry {
 	l2: L2Interface;
 	me: Uint8Array;
 	txCost: bigint;
-	minProfit: bigint;
+	minProfit: [Uint8Array, bigint, bigint][];
 
 	constructor(
 		me: Uint8Array,
 		l1: L1Interface,
 		l2: L2Interface,
 		txCost: bigint,
-		minProfit: bigint,
+		minProfit: [Uint8Array, bigint, bigint][],
 	) {
 		this.me = me;
 		this.l1 = l1;
@@ -48,10 +50,18 @@ class Ferry {
 
 	logFilteredOut(before: Deposit[], after: Deposit[], message: string) {
 		const diff = before.length - after.length;
+    const mapAfter : Map<bigint, Deposit> = new Map(after.map( (elem) => [elem.requestId, elem]));
+
+
 		if (diff > 0) {
-			console.info(`filtered out ${diff} : ${message}`);
+      before
+        .filter( elem => mapAfter.has(elem.requestId) === false)
+        .forEach( elem => logger.silly(`filtered out ${message}: ${toString(elem)}`));
+
+			logger.debug(`filtered out ${diff} withdrawals, reason "${message}"`);
 		}
 	}
+
 
 	async getPendingDeposits(): Promise<Deposit[]> {
 		const end = await this.l1.getLatestRequestId();
@@ -80,32 +90,31 @@ class Ferry {
 		const nativeTokenAddress = await this.l2.getNativeTokenAddress();
 		const balances = await this.l2.getBalances(this.me);
 
-		const tokenAddressToBalance = new Map<string, bigint>(
-			Array.from(balances, ([k, v]) => [u8aToHex(k), v]),
-		);
+    balances.forEach(([tokenAddress, balance]) => {
+      logger.silly(`\tBalance ${u8aToHex(tokenAddress)} : ${balance}`);
+    });
 
 		const validDeposits = deposits.filter((deposit) => {
 			return deposit.amount >= deposit.ferryTip;
 		});
 		this.logFilteredOut(deposits, validDeposits, "invalid deposit");
 
-		const affordableDeposits = validDeposits.filter((deposit) => {
-			const transferAmount = deposit.amount - deposit.ferryTip;
-			const tokenAddress = u8aToHex(deposit.tokenAddress);
+    const whitelisted = validDeposits.filter((deposit) => this.minProfit.find( ([token, minProfit, _weight]) => {
+      return isEqual(token, deposit.tokenAddress) !== undefined && deposit.ferryTip >= minProfit;
+    }));
 
-			if (tokenAddressToBalance.has(tokenAddress)) {
-				if (deposit.tokenAddress === nativeTokenAddress) {
-					return (
-						tokenAddressToBalance.get(tokenAddress)! >=
-						transferAmount + this.txCost
-					);
-				} else {
-					return tokenAddressToBalance.get(tokenAddress)! >= transferAmount;
-				}
-			} else {
-				return false;
-			}
-		});
+		this.logFilteredOut(validDeposits, whitelisted, "below min expected profit");
+
+    const affordableDeposits = whitelisted.filter((deposit) => balances.find( ([token, balance]) => {
+      if (isEqual(deposit.tokenAddress, token)) {
+        if (isEqual(token, nativeTokenAddress)) {
+          return balance >= this.txCost + deposit.amount - deposit.ferryTip;
+        }else{
+          return balance >= deposit.amount - deposit.ferryTip;
+        }
+      }
+      return false;
+      }) !== undefined);
 
 		this.logFilteredOut(
 			validDeposits,
@@ -114,12 +123,16 @@ class Ferry {
 		);
 
 		const ratedDeposits = affordableDeposits.sort((a, b) => {
-			if (a.ferryTip > b.ferryTip) {
+      const aWeight = this.minProfit.find( ([token, _minProfit, _weight]) => isEqual(token, a.tokenAddress) !== undefined)?.[2] ?? 0n;
+      const bWeight = this.minProfit.find( ([token, _minProfit, _weight]) => isEqual(token, b.tokenAddress) !== undefined)?.[2] ?? 0n;
+      const aProfit =  a.ferryTip * aWeight;
+      const bProfit =  b.ferryTip * bWeight;
+			if (aProfit > bProfit) {
 				return -1;
-			} else if (a.ferryTip === b.ferryTip) {
+			} else if (aProfit === bProfit) {
 				if (a.amount > b.amount) {
 					return 1;
-				} else if (a.amount > b.amount) {
+				} else if (a.amount === b.amount) {
 					return 0;
 				} else {
 					return -1;
@@ -129,23 +142,8 @@ class Ferry {
 			}
 		});
 
-		const aboveProfitThreshold = await asyncFilter(
-			ratedDeposits,
-			async (elem: Deposit) => {
-				return (
-					(await this.l2.valutateToken(elem.tokenAddress, elem.ferryTip)) >=
-					this.minProfit
-				);
-			},
-		);
 
-		this.logFilteredOut(
-			affordableDeposits,
-			aboveProfitThreshold,
-			"profit below expected threshold",
-		);
-
-		return aboveProfitThreshold;
+		return ratedDeposits;
 	}
 }
 

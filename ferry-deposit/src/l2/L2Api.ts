@@ -77,7 +77,7 @@ class L2Api implements L2Interface {
 			.asEthereum.toU8a();
 	}
 
-	async getBalances(address: Uint8Array): Promise<Map<Uint8Array, bigint>> {
+	async getBalances(address: Uint8Array): Promise<[Uint8Array, bigint][]> {
 		const assetMapping =
 			await this.api.query.assetRegistry.idToL1Asset.entries();
 		const chain = getL1ChainType(this.api);
@@ -111,7 +111,7 @@ class L2Api implements L2Interface {
 				return [tokenAddress, BigInt(value.free.toString())];
 			});
 
-		return new Map<Uint8Array, bigint>(values);
+		return values;
 	}
 
 	async getLastProcessedRequestId(): Promise<bigint> {

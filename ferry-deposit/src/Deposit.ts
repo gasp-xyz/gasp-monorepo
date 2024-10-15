@@ -1,3 +1,5 @@
+import { u8aToHex } from "@polkadot/util";
+
 interface Deposit {
 	readonly requestId: bigint;
 	readonly depositRecipient: Uint8Array;
@@ -7,4 +9,7 @@ interface Deposit {
 	readonly ferryTip: bigint;
 }
 
-export type { Deposit };
+function toString(withdrawal: Deposit): string {
+	return `rid:${withdrawal.requestId} recipient:${u8aToHex(withdrawal.depositRecipient)} token:${u8aToHex(withdrawal.tokenAddress)} amount:${withdrawal.amount} tip:${withdrawal.ferryTip}`;
+}
+export { type Deposit, toString };
