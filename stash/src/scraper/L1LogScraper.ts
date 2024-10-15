@@ -1,6 +1,10 @@
 import { type PublicClientConfig, createPublicClient, http } from 'viem'
 import RolldownContract from '../Rolldown.json' assert { type: 'json' }
-import { transactionRepository } from '../repository/TransactionRepository.js'
+import IRolldownPrimitivesContract from '../IRolldownPrimitives.json' assert { type: 'json' }
+import {
+  transactionRepository,
+  withdrawalRepository,
+} from '../repository/TransactionRepository.js'
 import process from 'node:process'
 import { ApiPromise } from '@polkadot/api'
 import { timeseries } from '../connector/RedisConnector.js'
@@ -9,6 +13,8 @@ import logger from '../util/Logger.js'
 
 export const L1_CONFIRMED_STATUS = 'L1_CONFIRMED'
 export const L1_INITIATED_STATUS = 'L1_INITIATED'
+export const L2_CONFIRMED_STATUS = 'L2_CONFIRMED'
+export const L1_PROCESSED_STATUS = 'L1_Processed'
 
 const keepProcessing = true
 
@@ -31,7 +37,7 @@ export const watchDepositAcceptedIntoQueue = async (
         fromBlock = toBlock
       }
       logger.info({
-        message: `chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
+        message: `Deposit: chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
       })
       const logs = await publicClient.getContractEvents({
         address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
@@ -59,7 +65,7 @@ export const watchDepositAcceptedIntoQueue = async (
           existingTransaction.updated = Date.parse(timestamp)
           await transactionRepository.save(existingTransaction)
           logger.info({
-            message: 'Transaction status updated:',
+            message: 'Deposit status updated:',
             transaction: existingTransaction,
           })
         }
@@ -69,6 +75,71 @@ export const watchDepositAcceptedIntoQueue = async (
     } catch (error) {
       logger.error({
         message: 'Error in watchDepositAcceptedIntoQueue loop:',
+        error: error,
+      })
+    }
+    await setTimeout(5000)
+  }
+}
+
+export const watchWithdrawalClosed = async (
+  api: any,
+  chainUrl: string,
+  chain: any,
+  chainName: string
+) => {
+  const publicClient = getPublicClient({
+    transport: http(chainUrl),
+    chain: chain,
+  })
+
+  while (keepProcessing) {
+    try {
+      const toBlock = await publicClient.getBlockNumber()
+      let fromBlock = await getLastProcessedBlock(chainName, 'withdrawal')
+      if (fromBlock === 0n) {
+        fromBlock = toBlock
+      }
+      logger.info({
+        message: ` Withdrawal: chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
+      })
+      const logs = await publicClient.getContractEvents({
+        address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
+        abi: IRolldownPrimitivesContract.abi,
+        eventName: 'WithdrawalClosed',
+        fromBlock,
+        toBlock,
+      })
+      for (const log of logs) {
+        const { blockNumber } = log
+        const existingTransaction = await withdrawalRepository
+          .search()
+          .where('requestId')
+          .equals(0)
+          .and('txHash')
+          .equals(0)
+          .and('type')
+          .equals('withdrawal')
+          .and('status')
+          .equals(L2_CONFIRMED_STATUS)
+          .returnFirst()
+
+        if (existingTransaction) {
+          existingTransaction.status = L1_PROCESSED_STATUS
+          const timestamp = new Date().toISOString()
+          existingTransaction.updated = Date.parse(timestamp)
+          await withdrawalRepository.save(existingTransaction)
+          logger.info({
+            message: 'Withdrawal status updated:',
+            transaction: existingTransaction,
+          })
+        }
+        await saveLastProcessedBlock(chainName, blockNumber, 'withdrawal') //saving the last processed block
+      }
+      await saveLastProcessedBlock(chainName, toBlock, 'withdrawal') //even if in the range of fromBlock and toBlock we didn't find any event, we save the last block
+    } catch (error) {
+      logger.error({
+        message: 'Error in withdrawalClosed loop:',
         error: error,
       })
     }
@@ -132,7 +203,7 @@ const saveLastProcessedRequestId = async (
     lastProcessedRequestId.toString()
   )
   logger.info(
-    `Last processed requestId ${lastProcessedRequestId} for chain ${l1Chain} saved`
+    `${type} : Last processed requestId ${lastProcessedRequestId} chain ${l1Chain} saved`
   )
 }
 
@@ -158,7 +229,7 @@ const saveLastProcessedBlock = async (
     lastProcessedBlock.toString()
   )
   logger.info(
-    `Last processed block ${lastProcessedBlock} saved for chain ${l1Chain}`
+    `${type} : Last processed block ${lastProcessedBlock} saved for chain ${l1Chain}`
   )
 }
 

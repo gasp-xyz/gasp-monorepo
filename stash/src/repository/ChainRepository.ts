@@ -13,7 +13,7 @@ const KEY_LATEST = PREFIX + 'latest'
 const keyPool = (id: number) => PREFIX_POOL + id
 
 const ROLLUP_STARTER_BLOCK = 0 //8 July 2024
-const BATCH = 300 * 12 * 1000 // ~= 1 hour of blocks
+const BATCH = 300 * 6 * 1000 // ~= 1 hour of blocks
 
 export const LIMIT = 10_000
 
