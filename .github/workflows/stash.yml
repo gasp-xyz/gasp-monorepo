@@ -47,7 +47,7 @@ jobs:
 
       - run: yarn install --immutable
       - run: sops exec-env frontend.enc.env 'yarn run build'
-      - run: sops exec-env frontend.enc.env 'yarn run test-ci'
+      - run: sops exec-env frontend.enc.env 'yarn run test:unit'
 
   deploy-frontend:
     name: Deploy `stash` to `frontend` environment

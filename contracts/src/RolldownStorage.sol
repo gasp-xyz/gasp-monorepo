@@ -30,7 +30,7 @@ abstract contract RolldownStorage is IRolldown {
     mapping(bytes32 => address) public processedL2Requests;   
     // stores all merkle roots in order, seems like binary search on this array
     // is the most efficient way to find merkle root that contains particular tx id
-    bytes32[] roots;
+    bytes32[] public roots;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

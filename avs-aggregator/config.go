@@ -25,6 +25,7 @@ type Config struct {
 	Expiration        int
 	UpdatePeriod      int
 	DebounceRpc       int
+	EnableKicker      bool
 
 	AvsRegistryCoordinatorAddr common.Address
 	AvsDeploymentBlock         uint64
@@ -89,6 +90,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		MinOpUpdateInterval:            ctx.GlobalInt(config.AvsMinOpUpdateInterval.Name),
 		UpdatePeriod:               ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
 		DebounceRpc:                ctx.GlobalInt(config.AvsDebounceRpcFlag.Name),
+		EnableKicker:                ctx.GlobalBool(config.AvsEnableKickerFlag.Name),
 		EthRpcUrl:                  ctx.GlobalString(config.EthRpcFlag.Name),
 		EthWsUrl:                   ctx.GlobalString(config.EthWsFlag.Name),
 		ChainId:                    chainId,
@@ -119,4 +121,5 @@ var Flags = []cli.Flag{
 	config.AvsUpdateStakePeriodFlag,
 	config.AvsTaskExpirationFlag,
 	config.AvsDebounceRpcFlag,
+	config.AvsEnableKickerFlag,
 }

@@ -142,10 +142,14 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	kicker, err := NewKicker(logger, *ethRpc, uint32(c.KickPeriod), uint32(c.BlockPeriod))
-	if err != nil {
-		logger.Error("Cannot create operator active list filter", "err", err)
-		return nil, err
+	var kicker *Kicker
+
+	if c.EnableKicker {
+		kicker, err = NewKicker(logger, *ethRpc, uint32(c.KickPeriod), uint32(c.BlockPeriod))
+		if err != nil {
+			logger.Error("Cannot create operator active list filter", "err", err)
+			return nil, err
+		}
 	}
 
 	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, c.MinOpUpdateInterval)
@@ -627,7 +631,9 @@ func (agg *Aggregator) processCreatedRdTask(newTask taskmanager.IFinalizerTaskMa
 	agg.tasks[taskId] = newTask
 	agg.tasksMu.Unlock()
 
-	agg.kicker.TriggerNewTask(taskId.TaskIndex)
+	if agg.kicker != nil {
+		agg.kicker.TriggerNewTask(taskId.TaskIndex)
+	}
 
 	quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.LastCompletedOpTaskQuorumNumbers))
 	for i, _ := range newTask.LastCompletedOpTaskQuorumNumbers {

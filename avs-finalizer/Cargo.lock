@@ -775,6 +775,7 @@ dependencies = [
  "reqwest-retry",
  "sc-cli",
  "sc-executor",
+ "sc-rpc-api",
  "scrypt",
  "serde",
  "serde_json",
