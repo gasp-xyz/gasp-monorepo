@@ -141,41 +141,6 @@ contract FinalizerTaskManager is
     }
     
     /* FUNCTIONS */
-    function _createNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
-        internal
-    {
-        require(
-            lastCompletedOpTaskCreatedBlock != block.number && block.number != 0,
-            "Can't in lastCompletedOpTaskCreatedBlock"
-        );
-
-        uint32 latestOpTaskNumMem = latestOpTaskNum;
-
-        // create a new task struct
-        OpTask memory newTask;
-        newTask.taskNum = latestOpTaskNum;
-        newTask.taskCreatedBlock = uint32(block.number);
-        newTask.quorumThresholdPercentage = quorumThresholdPercentage;
-        newTask.quorumNumbers = quorumNumbers;
-        // This is to help the aggregator function as it currently is while 
-        // being compatible with past op state verficiation
-        if (lastCompletedOpTaskCreatedBlock == 0) {
-            newTask.lastCompletedOpTaskCreatedBlock = uint32(block.number);
-            newTask.lastCompletedOpTaskQuorumNumbers = quorumNumbers;
-            newTask.lastCompletedOpTaskQuorumThresholdPercentage = quorumThresholdPercentage;
-        } else {
-            newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
-            newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
-            newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
-        }
-
-        // store hash of task onchain, emit event, and increase taskNum
-        _processTaskMetadata(TaskType.OP_TASK, latestOpTaskNumMem, keccak256(abi.encode(newTask)), TaskStatus.INITIALIZED);
-        lastOpTaskCreatedBlock = uint32(block.number);
-        emit NewOpTaskCreated(latestOpTaskNumMem, newTask);
-        latestOpTaskNum = latestOpTaskNumMem + 1;
-    }
-
     function createNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
         external
         onlyTaskGenerator
@@ -185,30 +150,6 @@ contract FinalizerTaskManager is
             "Task already pending"
         );
         _createNewOpTask(quorumThresholdPercentage, quorumNumbers);
-    }
-
-    function validateTaskResponse(bytes32 taskHash, TaskType taskType, uint32 referenceTaskIndex, uint32 taskCreatedBlock) public view {
-
-        require(
-                isTaskPending == true, "No task pending");
-        // check that the task is valid, hasn't been responsed yet, and is being responsed in time
-        require(
-            taskHash == allTaskHashes[taskType][referenceTaskIndex],
-            "Task mismatch"
-        );
-        // some logical checks
-        require(
-            idToTaskStatus[taskType][referenceTaskIndex] == TaskStatus.INITIALIZED,
-            "Not Init state"
-        );
-        require(
-            allTaskResponses[taskType][referenceTaskIndex] == bytes32(0),
-            "Alrdy Resp"
-        );
-        require(
-            uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
-            "Too late"
-        );
     }
 
     // NOTE: this function responds to existing tasks.
@@ -223,7 +164,7 @@ contract FinalizerTaskManager is
         bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
         uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
 
-        validateTaskResponse(keccak256(abi.encode(task)), TaskType.OP_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
+        _validateTaskResponse(keccak256(abi.encode(task)), TaskType.OP_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
 
         // TODO
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
@@ -241,69 +182,6 @@ contract FinalizerTaskManager is
         _processOpTaskResponse(taskResponse.operatorsStateInfoHash, task);
 
         emit OpTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
-    }
-
-    function _checkTaskResponse(bytes32 message, uint32 referenceBlock, IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature, bytes calldata quorumNumbers, uint32 quorumThresholdPercentage) internal view returns (bool, TaskResponseMetadata memory){
-
-        // check the BLS signature
-        (IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals, bytes32 hashOfNonSigners) =
-            blsSignatureChecker.checkSignatures(message, quorumNumbers, referenceBlock, nonSignerStakesAndSignature);
-
-        TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
-            uint32(block.number),
-            hashOfNonSigners,
-            quorumStakeTotals.totalStakeForQuorum,
-            quorumStakeTotals.signedStakeForQuorum
-        );
-
-        bool quorumsThresholdReached = true;
-        // check that signatories own at least a threshold percentage of each quourm
-        for (uint256 i = 0; i < quorumNumbers.length; i++) {
-            // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
-            // signed stake > total stake
-            if (
-                quorumStakeTotals.signedStakeForQuorum[i] * THRESHOLD_DENOMINATOR
-                    < quorumStakeTotals.totalStakeForQuorum[i] * uint8(quorumThresholdPercentage)
-            ) {
-                // "Signatories do not own at least threshold percentage of a quorum"
-                quorumsThresholdReached = false;
-            }
-        }
-        return (quorumsThresholdReached, taskResponseMetadata);
-    }
-
-    function _processOpTaskResponse(bytes32 _operatorsStateInfoHash, OpTask calldata task) internal {
-        operatorsStateInfoHash = _operatorsStateInfoHash;
-        lastCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
-        lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
-        lastCompletedOpTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
-        lastCompletedOpTaskNum = task.taskNum;
-    }
-
-    function _processTaskResponseMetadata( TaskType taskType, uint32 taskIndex, bytes32 responseHash, TaskStatus taskStatus) internal {
-        allTaskResponses[taskType][taskIndex] = responseHash;
-        idToTaskStatus[taskType][taskIndex] = taskStatus;
-        isTaskPending = false;
-    }
-
-    function _cancelPendingTasks()
-    internal {
-        if (latestOpTaskNum > 0) {
-            uint32 lastTaskNum = latestOpTaskNum - 1;
-            if (idToTaskStatus[TaskType.OP_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
-                idToTaskStatus[TaskType.OP_TASK][lastTaskNum] = TaskStatus.CANCELLED;
-                emit OpTaskCancelled(lastTaskNum);
-            }
-        }
-
-        if (latestRdTaskNum > 0) {
-            uint32 lastTaskNum = latestRdTaskNum - 1;
-            if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
-                idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
-                emit RdTaskCancelled(lastTaskNum);
-            }
-        }
-        isTaskPending = false;
     }
 
     function forceCancelPendingTasks()
@@ -332,7 +210,7 @@ contract FinalizerTaskManager is
         OpTaskResponse calldata taskResponse
     ) external onlyOwner {
 
-        validateTaskResponse(keccak256(abi.encode(task)), TaskType.OP_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
+        _validateTaskResponse(keccak256(abi.encode(task)), TaskType.OP_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
 
         IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
 
@@ -384,12 +262,6 @@ contract FinalizerTaskManager is
         latestRdTaskNum = latestRdTaskNumMem + 1;
     }
 
-    function _processTaskMetadata(TaskType taskType, uint32 taskIndex, bytes32 taskHash, TaskStatus taskStatus) internal{
-        allTaskHashes[taskType][taskIndex] = taskHash;
-        idToTaskStatus[taskType][taskIndex] = taskStatus;
-        isTaskPending = true;
-    }
-
     // NOTE: this function responds to existing tasks.
     function respondToRdTask(
         RdTask calldata task,
@@ -403,7 +275,7 @@ contract FinalizerTaskManager is
         // Maybe this belongs in createNewRdTask
         require(chainRdBatchNonce[taskResponse.chainId] ==0 || taskResponse.batchId == chainRdBatchNonce[taskResponse.chainId], "chainRdBatchNonce mismatch"); 
         
-        validateTaskResponse(keccak256(abi.encode(task)), TaskType.RD_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
+        _validateTaskResponse(keccak256(abi.encode(task)), TaskType.RD_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
         
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
        
@@ -462,5 +334,132 @@ contract FinalizerTaskManager is
         )
     {
         return blsSignatureChecker.checkSignatures(msgHash, quorumNumbers, referenceBlockNumber, nonSignerStakesAndSignature);
+    }
+
+    function _createNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
+        internal
+    {
+        require(
+            lastCompletedOpTaskCreatedBlock != block.number && block.number != 0,
+            "Can't in lastCompletedOpTaskCreatedBlock"
+        );
+
+        uint32 latestOpTaskNumMem = latestOpTaskNum;
+
+        // create a new task struct
+        OpTask memory newTask;
+        newTask.taskNum = latestOpTaskNum;
+        newTask.taskCreatedBlock = uint32(block.number);
+        newTask.quorumThresholdPercentage = quorumThresholdPercentage;
+        newTask.quorumNumbers = quorumNumbers;
+        // This is to help the aggregator function as it currently is while 
+        // being compatible with past op state verficiation
+        if (lastCompletedOpTaskCreatedBlock == 0) {
+            newTask.lastCompletedOpTaskCreatedBlock = uint32(block.number);
+            newTask.lastCompletedOpTaskQuorumNumbers = quorumNumbers;
+            newTask.lastCompletedOpTaskQuorumThresholdPercentage = quorumThresholdPercentage;
+        } else {
+            newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
+            newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
+            newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
+        }
+
+        // store hash of task onchain, emit event, and increase taskNum
+        _processTaskMetadata(TaskType.OP_TASK, latestOpTaskNumMem, keccak256(abi.encode(newTask)), TaskStatus.INITIALIZED);
+        lastOpTaskCreatedBlock = uint32(block.number);
+        emit NewOpTaskCreated(latestOpTaskNumMem, newTask);
+        latestOpTaskNum = latestOpTaskNumMem + 1;
+    }
+
+    function _validateTaskResponse(bytes32 taskHash, TaskType taskType, uint32 referenceTaskIndex, uint32 taskCreatedBlock) public view {
+        require(
+                isTaskPending == true, "No task pending");
+        // check that the task is valid, hasn't been responsed yet, and is being responsed in time
+        require(
+            taskHash == allTaskHashes[taskType][referenceTaskIndex],
+            "Task mismatch"
+        );
+        // some logical checks
+        require(
+            idToTaskStatus[taskType][referenceTaskIndex] == TaskStatus.INITIALIZED,
+            "Not Init state"
+        );
+        require(
+            allTaskResponses[taskType][referenceTaskIndex] == bytes32(0),
+            "Alrdy Resp"
+        );
+        require(
+            uint32(block.number) <= taskCreatedBlock + taskResponseWindowBlock,
+            "Too late"
+        );
+    }
+
+    function _checkTaskResponse(bytes32 message, uint32 referenceBlock, IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature, bytes calldata quorumNumbers, uint32 quorumThresholdPercentage) internal view returns (bool, TaskResponseMetadata memory){
+
+        // check the BLS signature
+        (IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals, bytes32 hashOfNonSigners) =
+            blsSignatureChecker.checkSignatures(message, quorumNumbers, referenceBlock, nonSignerStakesAndSignature);
+
+        TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
+            uint32(block.number),
+            hashOfNonSigners,
+            quorumStakeTotals.totalStakeForQuorum,
+            quorumStakeTotals.signedStakeForQuorum
+        );
+
+        bool quorumsThresholdReached = true;
+        // check that signatories own at least a threshold percentage of each quourm
+        for (uint256 i = 0; i < quorumNumbers.length; i++) {
+            // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
+            // signed stake > total stake
+            if (
+                quorumStakeTotals.signedStakeForQuorum[i] * THRESHOLD_DENOMINATOR
+                    < quorumStakeTotals.totalStakeForQuorum[i] * uint8(quorumThresholdPercentage)
+            ) {
+                // "Signatories do not own at least threshold percentage of a quorum"
+                quorumsThresholdReached = false;
+            }
+        }
+        return (quorumsThresholdReached, taskResponseMetadata);
+    }
+
+    function _processOpTaskResponse(bytes32 _operatorsStateInfoHash, OpTask calldata task) internal {
+        operatorsStateInfoHash = _operatorsStateInfoHash;
+        lastCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
+        lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
+        lastCompletedOpTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
+        lastCompletedOpTaskNum = task.taskNum;
+    }
+
+    function _processTaskMetadata(TaskType taskType, uint32 taskIndex, bytes32 taskHash, TaskStatus taskStatus) internal{
+        allTaskHashes[taskType][taskIndex] = taskHash;
+        idToTaskStatus[taskType][taskIndex] = taskStatus;
+        isTaskPending = true;
+    }
+    
+    function _processTaskResponseMetadata( TaskType taskType, uint32 taskIndex, bytes32 responseHash, TaskStatus taskStatus) internal {
+        allTaskResponses[taskType][taskIndex] = responseHash;
+        idToTaskStatus[taskType][taskIndex] = taskStatus;
+        isTaskPending = false;
+    }
+
+    function _cancelPendingTasks()
+    internal {
+        if (latestOpTaskNum > 0) {
+            uint32 lastTaskNum = latestOpTaskNum - 1;
+            if (idToTaskStatus[TaskType.OP_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
+                idToTaskStatus[TaskType.OP_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+                emit OpTaskCancelled(lastTaskNum);
+            }
+        }
+
+        if (latestRdTaskNum > 0) {
+            uint32 lastTaskNum = latestRdTaskNum - 1;
+            if (idToTaskStatus[TaskType.RD_TASK][lastTaskNum] == TaskStatus.INITIALIZED){
+                idToTaskStatus[TaskType.RD_TASK][lastTaskNum] = TaskStatus.CANCELLED;
+                emit RdTaskCancelled(lastTaskNum);
+            }
+        }
+        isTaskPending = false;
     }
 }
