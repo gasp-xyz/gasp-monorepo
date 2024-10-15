@@ -86,6 +86,12 @@ var (
 		Value:    5,
 		EnvVar:   "AVS_DEBOUNCE_RPC",
 	}
+	AvsEnableKickerFlag = cli.BoolTFlag{
+		Name:     "avs-enable-kicker",
+		Usage:    "Enable kicker",
+		Required: false,
+		EnvVar:   "AVS_ENABLE_KICKER",
+	}
 
 	// Aggregator OpStateUpdaterFlags
 	AvsMinOpUpdateInterval = cli.IntFlag{
