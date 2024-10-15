@@ -1,4 +1,4 @@
-# Withdrawal ferry service
+# Ferry deposit service
 Service responsible for ferrying deposits from `L1` to `Gasp`.  
 
 ## Configuration
