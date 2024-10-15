@@ -87,6 +87,28 @@ jobs:
           # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
           docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
 
+  build-ferry-withdrawal-image:
+    name: Build ferry-withdrawal Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+          docker buildx create --use
+          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
+          docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./ferry-withdrawal
+
+  build-ferry-deposit-image:
+    name: Build ferry-deposit Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+          docker buildx create --use
+          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
+          docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./ferry-deposit
+
   helmfile-lint:
     name: Lint and validate Helmfile configuration
     runs-on: ubuntu-latest
