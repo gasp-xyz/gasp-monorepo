@@ -106,6 +106,16 @@ contract FinalizerTaskManager is
         rolldown = _rolldown;
     }
 
+    function setAggregator(address _aggregator) external whenNotPaused onlyOwner {
+      aggregator = _aggregator;
+      emit AggregatorUpdated(_aggregator);
+    }
+
+    function setGenerator(address _generator) external whenNotPaused onlyOwner {
+      generator = _generator;
+      emit GeneratorUpdated(_generator);
+    }
+
     function setRolldown(IRolldown _rolldown) external whenNotPaused onlyOwner {
       rolldown = _rolldown;
       emit RolldownTargetUpdated(address(_rolldown));
@@ -129,9 +139,6 @@ contract FinalizerTaskManager is
         blsSignatureChecker = BLSSignatureChecker(_blsSignatureCheckerAddress);
         emit BLSSignatureCheckerAddressUpdated(_blsSignatureCheckerAddress);
     }
-
-    // TODO!!!
-    // DEDUP ALL THIS!
     
     /* FUNCTIONS */
     function _createNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
@@ -141,6 +148,8 @@ contract FinalizerTaskManager is
             lastCompletedOpTaskCreatedBlock != block.number && block.number != 0,
             "Can't in lastCompletedOpTaskCreatedBlock"
         );
+
+        uint32 latestOpTaskNumMem = latestOpTaskNum;
 
         // create a new task struct
         OpTask memory newTask;
@@ -161,12 +170,10 @@ contract FinalizerTaskManager is
         }
 
         // store hash of task onchain, emit event, and increase taskNum
-        allTaskHashes[TaskType.OP_TASK][latestOpTaskNum] = keccak256(abi.encode(newTask));
-        idToTaskStatus[TaskType.OP_TASK][latestOpTaskNum] = TaskStatus.INITIALIZED;
+        _processTaskMetadata(TaskType.OP_TASK, latestOpTaskNumMem, keccak256(abi.encode(newTask)), TaskStatus.INITIALIZED);
         lastOpTaskCreatedBlock = uint32(block.number);
-        isTaskPending = true;
-        emit NewOpTaskCreated(latestOpTaskNum, newTask);
-        latestOpTaskNum = latestOpTaskNum + 1;
+        emit NewOpTaskCreated(latestOpTaskNumMem, newTask);
+        latestOpTaskNum = latestOpTaskNumMem + 1;
     }
 
     function createNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
@@ -218,17 +225,29 @@ contract FinalizerTaskManager is
 
         validateTaskResponse(keccak256(abi.encode(task)), TaskType.OP_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
 
+        // TODO
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
 
-        /* CHECKING SIGNATURES & WHETHER THRESHOLD IS MET OR NOT */
-        // calculate message which operators signed
-        bytes32 message = keccak256(abi.encode(taskResponse));
+        (bool quorumsThresholdReached, TaskResponseMetadata memory taskResponseMetadata) = _checkTaskResponse(keccak256(abi.encode(taskResponse)), task.lastCompletedOpTaskCreatedBlock, nonSignerStakesAndSignature, quorumNumbers, quorumThresholdPercentage);
 
-        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals; bytes32 hashOfNonSigners;
+        emit OpTaskResponded(task.taskNum, taskResponse, taskResponseMetadata);
+        if (quorumsThresholdReached) {
+            _processTaskResponseMetadata(TaskType.OP_TASK, taskResponse.referenceTaskIndex, keccak256(abi.encode(taskResponse, taskResponseMetadata)), TaskStatus.COMPLETED);
+        } else {
+            _processTaskResponseMetadata(TaskType.OP_TASK, taskResponse.referenceTaskIndex, keccak256(abi.encode(taskResponse, taskResponseMetadata)), TaskStatus.RESPONDED);
+            return;
+        }
+
+        _processOpTaskResponse(taskResponse.operatorsStateInfoHash, task);
+
+        emit OpTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
+    }
+
+    function _checkTaskResponse(bytes32 message, uint32 referenceBlock, IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature, bytes calldata quorumNumbers, uint32 quorumThresholdPercentage) internal view returns (bool, TaskResponseMetadata memory){
 
         // check the BLS signature
-        (quorumStakeTotals, hashOfNonSigners) =
-            blsSignatureChecker.checkSignatures(message, quorumNumbers, task.lastCompletedOpTaskCreatedBlock, nonSignerStakesAndSignature);
+        (IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals, bytes32 hashOfNonSigners) =
+            blsSignatureChecker.checkSignatures(message, quorumNumbers, referenceBlock, nonSignerStakesAndSignature);
 
         TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
             uint32(block.number),
@@ -237,13 +256,7 @@ contract FinalizerTaskManager is
             quorumStakeTotals.signedStakeForQuorum
         );
 
-        // updating the storage with task responsea
-        allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
-        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = TaskStatus.RESPONDED;
-        isTaskPending = false;
-        // emitting event
-        emit OpTaskResponded(task.taskNum, taskResponse, taskResponseMetadata);
-
+        bool quorumsThresholdReached = true;
         // check that signatories own at least a threshold percentage of each quourm
         for (uint256 i = 0; i < quorumNumbers.length; i++) {
             // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
@@ -253,18 +266,24 @@ contract FinalizerTaskManager is
                     < quorumStakeTotals.totalStakeForQuorum[i] * uint8(quorumThresholdPercentage)
             ) {
                 // "Signatories do not own at least threshold percentage of a quorum"
-                return;
+                quorumsThresholdReached = false;
             }
         }
+        return (quorumsThresholdReached, taskResponseMetadata);
+    }
 
-        operatorsStateInfoHash = taskResponse.operatorsStateInfoHash;
-        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = TaskStatus.COMPLETED;
+    function _processOpTaskResponse(bytes32 _operatorsStateInfoHash, OpTask calldata task) internal {
+        operatorsStateInfoHash = _operatorsStateInfoHash;
         lastCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
         lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
         lastCompletedOpTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
         lastCompletedOpTaskNum = task.taskNum;
-        // emitting completed event
-        emit OpTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
+    }
+
+    function _processTaskResponseMetadata( TaskType taskType, uint32 taskIndex, bytes32 responseHash, TaskStatus taskStatus) internal {
+        allTaskResponses[taskType][taskIndex] = responseHash;
+        idToTaskStatus[taskType][taskIndex] = taskStatus;
+        isTaskPending = false;
     }
 
     function _cancelPendingTasks()
@@ -324,15 +343,9 @@ contract FinalizerTaskManager is
             quorumStakeTotals.signedStakeForQuorum
         );
         // updating the storage with task responsea
-        allTaskResponses[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
-
-        operatorsStateInfoHash = taskResponse.operatorsStateInfoHash;
-        idToTaskStatus[TaskType.OP_TASK][taskResponse.referenceTaskIndex] = TaskStatus.COMPLETED;
-        lastCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
-        lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
-        lastCompletedOpTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
-        lastCompletedOpTaskNum = task.taskNum;
-        isTaskPending = false;
+        _processTaskResponseMetadata(TaskType.OP_TASK, taskResponse.referenceTaskIndex, keccak256(abi.encode(taskResponse, taskResponseMetadata)), TaskStatus.COMPLETED);
+        
+        _processOpTaskResponse(taskResponse.operatorsStateInfoHash, task);
         // emitting completed event
         emit OpTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
         emit OpTaskForceCompleted(taskResponse.referenceTaskIndex, taskResponse);
@@ -365,12 +378,16 @@ contract FinalizerTaskManager is
         });
 
         // store hash of task onchain, emit event, and increase taskNum
-        allTaskHashes[TaskType.RD_TASK][latestRdTaskNumMem] = keccak256(abi.encode(newTask));
-        idToTaskStatus[TaskType.RD_TASK][latestRdTaskNumMem] = TaskStatus.INITIALIZED;
+        _processTaskMetadata(TaskType.RD_TASK, latestRdTaskNumMem, keccak256(abi.encode(newTask)), TaskStatus.INITIALIZED);
         lastRdTaskCreatedBlock = uint32(block.number);
-        isTaskPending = true;
         emit NewRdTaskCreated(latestRdTaskNumMem, newTask);
         latestRdTaskNum = latestRdTaskNumMem + 1;
+    }
+
+    function _processTaskMetadata(TaskType taskType, uint32 taskIndex, bytes32 taskHash, TaskStatus taskStatus) internal{
+        allTaskHashes[taskType][taskIndex] = taskHash;
+        idToTaskStatus[taskType][taskIndex] = taskStatus;
+        isTaskPending = true;
     }
 
     // NOTE: this function responds to existing tasks.
@@ -389,46 +406,16 @@ contract FinalizerTaskManager is
         validateTaskResponse(keccak256(abi.encode(task)), TaskType.RD_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
         
         // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
+       
+        (bool quorumsThresholdReached, TaskResponseMetadata memory taskResponseMetadata) = _checkTaskResponse(keccak256(abi.encode(taskResponse)), task.lastCompletedOpTaskCreatedBlock, nonSignerStakesAndSignature, quorumNumbers, quorumThresholdPercentage);
 
-        /* CHECKING SIGNATURES & WHETHER THRESHOLD IS MET OR NOT */
-        // calculate message which operators signed
-        bytes32 message = keccak256(abi.encode(taskResponse));
-
-        // check the BLS signature
-        (IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals, bytes32 hashOfNonSigners) =
-            blsSignatureChecker.checkSignatures(message, quorumNumbers, task.lastCompletedOpTaskCreatedBlock, nonSignerStakesAndSignature);
-
-        TaskResponseMetadata memory taskResponseMetadata = TaskResponseMetadata(
-            uint32(block.number),
-            hashOfNonSigners,
-            quorumStakeTotals.totalStakeForQuorum,
-            quorumStakeTotals.signedStakeForQuorum
-        );
-        // updating the storage with task responses
-        allTaskResponses[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = keccak256(abi.encode(taskResponse, taskResponseMetadata));
-        idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = TaskStatus.RESPONDED;
-        isTaskPending = false;
-
-        // TODO
-        // Optimize the following
-
-        // emitting event
         emit RdTaskResponded(task.taskNum, taskResponse, taskResponseMetadata);
-
-        // check that signatories own at least a threshold percentage of each quourm
-        for (uint256 i = 0; i < quorumNumbers.length; i++) {
-            // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
-            // signed stake > total stake
-            if (
-                quorumStakeTotals.signedStakeForQuorum[i] * THRESHOLD_DENOMINATOR
-                    < quorumStakeTotals.totalStakeForQuorum[i] * uint8(quorumThresholdPercentage)
-            ) {
-                // "Signatories do not own at least threshold percentage of a quorum"
-                return;
-            }
+        if (quorumsThresholdReached) {
+            _processTaskResponseMetadata(TaskType.RD_TASK, taskResponse.referenceTaskIndex, keccak256(abi.encode(taskResponse, taskResponseMetadata)), TaskStatus.COMPLETED);
+        } else {
+            _processTaskResponseMetadata(TaskType.RD_TASK, taskResponse.referenceTaskIndex, keccak256(abi.encode(taskResponse, taskResponseMetadata)), TaskStatus.RESPONDED);
+            return;
         }
-
-        idToTaskStatus[TaskType.RD_TASK][taskResponse.referenceTaskIndex] = TaskStatus.COMPLETED;
 
         IRolldown.ChainId ethChainId = IRolldownPrimitives.ChainId.Ethereum;
         if (taskResponse.chainId == ethChainId){
