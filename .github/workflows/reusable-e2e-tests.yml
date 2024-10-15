@@ -211,16 +211,15 @@ jobs:
       - name: Build
         run: npm run build
 
-      # TODO: uncomment on ferry-deposit cleanup
-      # - name: Build
-      #   working-directory: .
-      #   run: docker compose up --wait
-      #
-      # - name: Test L1 interface
-      #   run: npm run test-l1
-      #
-      # - name: Test L2 interface
-      #   run: npm run test-l2
-      #
-      # - name: Test ferry
-      #   run: npm run test-ferry
+      - name: Build
+        working-directory: .
+        run: docker compose up --wait
+
+      - name: Test L1 interface
+        run: npm run test-l1
+
+      - name: Test L2 interface
+        run: npm run test-l2
+
+      - name: Test ferry
+        run: npm run test-ferry
