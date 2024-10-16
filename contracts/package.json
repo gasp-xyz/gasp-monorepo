@@ -1,0 +1,21 @@
+{
+    "name": "gasp-contracts",
+    "version": "1.0.0",
+    "description": "Gasp smart contracts for an EVM compatible virtual machine",
+    "scripts": {
+        "format": "prettier --write \"**/*.{json,md,yml}\""
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gasp-xyz/gasp-monorepo/contracts"
+    },
+    "license": "BUSL-1.1",
+    "private": true,
+    "maintainers": [
+        "mateuszaaa <mateusz.cz.nowakowski@gmail.com>",
+        "Serge <2901744+evercoinx@users.noreply.github.com>"
+    ],
+    "devDependencies": {
+        "prettier": "^3.3.3"
+    }
+}

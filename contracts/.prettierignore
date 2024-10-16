@@ -1,0 +1,17 @@
+broadcast/
+cache/
+coverage/
+node_modules/
+out/
+
+*.env
+*.log
+.DS_Store
+.pnp.*
+.solcx-lock-*
+bun.lockb
+coverage.json
+lcov.info
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
