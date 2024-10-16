@@ -39,6 +39,9 @@ export class DockerUtils{
         if(opKeys.bls){
             env.BLS_KEY_JSON = opKeys.bls!;
         }
+        if(opKeys.bls && opKeys.edcsa){
+            env.STAKE = "1";
+        }
         const name = "rollup-avs-finalizer-TEST-" + randomBytes(4).toString("hex")
         console.info("name" + name + "keys: " + env.ECDSA_KEY_JSON  + env.BLS_KEY_JSON );
         console.info("Starting container: " + image);
