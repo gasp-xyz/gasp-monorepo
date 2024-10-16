@@ -244,6 +244,10 @@ describe('AVS Finalizer', () => {
         const [deRegistered2, _2 ]  = await Promise.all([PoperatorDeregisteredAddress2, Ptasks2] );
         expect(deRegistered2).toBe(operatorAddress);
 
+        await createAWithdrawWithManualBatch("Ethereum", 2);
+        const tasks = await waitFor(publicClient, 2, "RdTaskCompleted");
+        expect(tasks).toHaveLength(2);
+
     });
     afterEach(async () => {
         //try opt-out just in case.
