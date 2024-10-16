@@ -18,6 +18,7 @@ export default defineConfig({
       COINGECKO_API_KEY: process.env.COINGECKO_API_KEY,
       CAPTCHA_SITEKEY: '10000000-ffff-ffff-ffff-000000000001',
       CAPTCHA_SECRET: '0x0000000000000000000000000000000000000000',
+      TOKEN_FOR_PRICE_ID: '1',
     },
     coverage: {
       include: ['src/**/*'],

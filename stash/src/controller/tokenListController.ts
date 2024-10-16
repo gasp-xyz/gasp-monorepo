@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import * as tokenListService from '../service/TokenListService.js'
 import * as errorHandler from '../error/Handler.js'
-import { tokenSymbolSchema } from '../schema/PriceDiscoverySchema.js'
+import { tokenIdSchema } from '../schema/PriceDiscoverySchema.js'
 
 export const tokenList = async (_: Request, res: Response) => {
   /* #swagger.tags = ['Token List']
@@ -87,8 +87,8 @@ export const tokenDetails = async (req: Request, res: Response) => {
            }
         */
   try {
-    const { symbol } = tokenSymbolSchema.validateSync(req.params)
-    const tokenDetails = await tokenListService.tokenDetails(symbol)
+    const { id } = tokenIdSchema.validateSync(req.params)
+    const tokenDetails = await tokenListService.tokenDetails(id)
     res.json(tokenDetails)
   } catch (e) {
     await errorHandler.handle(res, e)

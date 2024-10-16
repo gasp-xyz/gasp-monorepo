@@ -23,7 +23,7 @@ rm -rf bindings/*
 forge clean
 forge build
 
-avs_service_contracts="FinalizerServiceManager FinalizerTaskManager GaspMultiRollupService BLSSignatureChecker DelegationManager StakeRegistry OperatorStateRetrieverExtended"
+avs_service_contracts="FinalizerServiceManager FinalizerTaskManager GaspMultiRollupService BLSSignatureChecker DelegationManager StakeRegistry IndexRegistry OperatorStateRetrieverExtended"
 for contract in $avs_service_contracts; do
     create_binding . $contract ../avs-aggregator/bindings
 done
