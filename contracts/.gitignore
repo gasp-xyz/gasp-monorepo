@@ -1,12 +1,18 @@
-# Compiler files
+!broadcast
+broadcast/*
+broadcast/*/31337/
 cache/
+coverage/
+node_modules/
 out/
 
-# Ignores development broadcast logs
-/broadcast/**
-
-# Dotenv file
-.env
-
-# Not sure what this folder is for.. so removing for now
-data/
+*.env
+*.log
+.DS_Store
+.pnp.*
+.solcx-lock-*
+coverage.json
+lcov.info
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
