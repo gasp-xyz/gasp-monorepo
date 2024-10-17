@@ -7,14 +7,18 @@
   "scripts": {
     "build": "rimraf ./build && npx tsc",
     "lint": "npx @biomejs/biome check --apply src/common src/config src/utils src/viem src/index.ts",
-    "run": "node build/src/index.js",
-    "test": "vitest --dir tests"
+    "run": "node build/src/main.js",
+    "test": "vitest --dir tests",
+    "test-ferry": "vitest --dir tests ferry",
+    "test-l1": "vitest --dir tests l1",
+    "test-l2": "vitest --dir tests l2"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@biomejs/biome": "1.6.4",
+    "@types/json-bigint": "^1.0.4",
     "@types/node": "20.10.3",
     "rimraf": "5.0.5",
     "typescript": "5.3.2",
@@ -29,6 +33,7 @@
     "immutable": "^4.3.7",
     "json-bigint": "^1.0.0",
     "viem": "^2.17.4",
+    "winston": "^3.15.0",
     "zod": "^3.22.5"
   }
 }

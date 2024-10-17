@@ -102,14 +102,18 @@ pub struct RootEcdsaKey {
 impl CliArgs {
     pub fn build() -> Self {
         let args = CliArgs::parse();
-        if args.source_chain_id != Chain::AnvilHardhat as u64
-            && args.target_chain_id != Chain::AnvilHardhat as u64
+        // Only if both source and target are testnet then it is testnet
+        if !(
+            [Chain::AnvilHardhat as u64, Chain::Dev as u64].contains(&args.source_chain_id)
+            &&
+            [Chain::AnvilHardhat as u64, Chain::Dev as u64].contains(&args.target_chain_id)
+            )
         {
             let mut cmd = CliArgs::command();
             if args.testnet {
                 cmd.error(
                     ErrorKind::ArgumentConflict,
-                    "testnet is only available with anvil testnet `--chain-id=31337`",
+                    "testnet is only available with anvil testnet `--chain-id=31337` and reth testnet `--chain-id=1337`",
                 )
                 .exit();
             }

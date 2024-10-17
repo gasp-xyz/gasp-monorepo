@@ -13,6 +13,8 @@
 
 # Test binary, built with `go test -c`
 *.test
+!ferry-withdrawal/env.test
+!ferry-deposit/env.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
@@ -99,4 +101,3 @@ out
 .continueignore
 
 .decrypted*
-

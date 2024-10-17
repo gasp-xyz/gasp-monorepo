@@ -10,6 +10,7 @@ include:
   - path: ./contracts/compose.yml
   - path: ./gasp-syncer/compose.yml
   - path: ./ferry-deposit/compose.yml
+  - path: ./ferry-withdrawal/compose.yml
 
 services:
   node-alice:
