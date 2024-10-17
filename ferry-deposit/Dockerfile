@@ -22,4 +22,4 @@ COPY package*.json ./
 COPY --from=build /app/build /app/build
 COPY --from=build /app/node_modules /app/node_modules
 
-CMD ["node", "build/src/index.js"]
+CMD ["node", "build/src/main.js"]
