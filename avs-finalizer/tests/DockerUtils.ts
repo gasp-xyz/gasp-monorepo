@@ -39,9 +39,6 @@ export class DockerUtils{
         if(opKeys.bls){
             env.BLS_KEY_JSON = opKeys.bls!;
         }
-        if(opKeys.bls && opKeys.edcsa){
-            env.STAKE = "1";
-        }
         const name = "rollup-avs-finalizer-TEST-" + randomBytes(4).toString("hex")
         console.info("name" + name + "keys: " + env.ECDSA_KEY_JSON  + env.BLS_KEY_JSON );
         console.info("Starting container: " + image);
@@ -68,6 +65,21 @@ export class DockerUtils{
         console.info(".... Done! ");
     }
 
+    /** 
+    docker run -it --network=host \
+    -e RUST_LOG=info \
+    -e ETH_RPC_URL=http://0.0.0.0:8545 \
+    -e ETH_WS_URL=ws://0.0.0.0:8545 \
+    -e CHAIN_ID=31337 \
+    -e SUBSTRATE_RPC_URL=ws://0.0.0.0:9946 \
+    -e AVS_RPC_URL=http://0.0.0.0:8090 \
+    -e AVS_REGISTRY_COORDINATOR_ADDR=0xf5059a5D33d5853360D16C683c16e67980206f36 \
+    -e TESTNET=true \
+    -e STAKE=60 \
+    --entrypoint /bin/bash \
+    mangatasolutions/avs-finalizer:local 
+    cc: ./main --bls-ephemeral-key --ecdsa-ephemeral-key
+    */
     finalizerLocalEnvironment : Environment = {
         RUST_LOG: "info",
         ETH_RPC_URL:"http://0.0.0.0:8545" ,
@@ -77,7 +89,7 @@ export class DockerUtils{
         AVS_RPC_URL:"http://0.0.0.0:8090" ,
         AVS_REGISTRY_COORDINATOR_ADDR:"0xf5059a5D33d5853360D16C683c16e67980206f36" ,
         TESTNET:"true",
-        STAKE:"22",
+        STAKE:"60",
     }
     bigStakeLocalEnvironment : Environment = {
         RUST_LOG: "info",
