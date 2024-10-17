@@ -26,6 +26,8 @@ async function main() {
 	const l2 = new L2Api(api);
 	const l1 = new L1Api(ETH_CHAIN_URL);
 
+  logger.info(`Ferry Withdrawal`);
+
 	if (!(await api.isReady)) {
 		throw `Cannot connect to ${MANGATA_NODE_URL}`;
 	}

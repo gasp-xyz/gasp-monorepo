@@ -1,27 +1,20 @@
 
-import {
-  Deposit
-} from "../common/deposit.js";
+import { Deposit } from "../Deposit.js";
 
 import {
 	ABI,
 	MANGATA_CONTRACT_ADDRESS,
-} from "../common/constants.js";
+} from "../config.js";
 
 import {  createPublicClient } from "viem";
 import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
 import { hexToU8a } from "@polkadot/util";
+import { L1Interface } from "./L1Interface.js";
 import {
 	http,
 	webSocket,
 } from "viem";
 
-interface L1Interface {
-	isRolldownDeployed(): Promise<boolean>;
-	getLatestRequestId(): Promise<bigint | null>;
-	getDeposits(rangeStart: bigint, rangeEnd: bigint): Promise<Deposit[]>;
-	getDepostiHash(requestId: bigint): Promise<Uint8Array>;
-}
 
 class L1Api implements L1Interface {
 	client!: PublicClient;

@@ -1,14 +1,15 @@
 import { describe, beforeAll, expect, it , vi} from "vitest";
-import { L2Interface } from "../src/l2";
 import { hexToU8a } from "@polkadot/util";
-import { Deposit } from "../src/common/deposit.js";
-import { L1Interface } from "../src/l1/index.js";
-import { Ferry } from "../src/ferry/index.js";
+import { Deposit } from "../src/Deposit.js";
+import { L2Interface } from "../src/l2/L2Interface.js";
+import { L1Interface } from "../src/l1/L1Interface.js";
+import { Ferry } from "../src/Ferry.js";
 
 
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
 const DUMMY_TOKEN = hexToU8a("0x1111111111111111111111111111111111111111");
 const NATIVE_TOKEN = hexToU8a("0x2222222222222222222222222222222222222222");
+const TOKENS_TO_TRACK: [Uint8Array, bigint, bigint][] = [[DUMMY_TOKEN, 0n, 1n]];
 
 let ferry: Ferry;
 let l1Mock: L1Interface;
@@ -33,7 +34,7 @@ describe('Ferry Service', () => {
         getNativeTokenAddress: vi.fn().mockResolvedValue(NATIVE_TOKEN),
         valutateToken: vi.fn().mockImplementation( (_address, amount) => amount),
     };
-    ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, 0n, 0n);
+    ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, 0n, TOKENS_TO_TRACK);
 
   });
 
@@ -118,7 +119,7 @@ describe('Ferry Service', () => {
   });
 
   it('rates deposits based on fee', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 1000n]]));
+    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 1000n]]);
 
     const depositWithFee: Deposit = {
       requestId: 1n,
@@ -145,7 +146,7 @@ describe('Ferry Service', () => {
   });
 
   it('rates deposits based on fee & amount', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 1000n]]));
+    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 1000n]]);
 
     const depositWithFeeAndLeastTranferValue: Deposit = {
       requestId: 1n,
@@ -182,7 +183,7 @@ describe('Ferry Service', () => {
   });
 
   it('filters out deposits that can not afford', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 10n]]));
+    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
 
 
     const depositWithTooMuchAmount: Deposit = {
@@ -209,8 +210,8 @@ describe('Ferry Service', () => {
 
   });
 
-  it('accepts the deposits that can be afforded', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 10n]]));
+  it('accepts the deposits that can be afforded XXX', async () => {
+    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
 
 
     const depositWithTooMuchAmount: Deposit = {
@@ -248,7 +249,7 @@ describe('Ferry Service', () => {
   });
 
   it('accepts the deposits that can be afforded', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 10n]]));
+    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
 
 
     const depositWithTooMuchAmount: Deposit = {
@@ -286,7 +287,7 @@ describe('Ferry Service', () => {
   });
 
   it('ignores invalid deposits', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([[DUMMY_TOKEN, 10n]]));
+    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
 
     const invalidDeposit: Deposit = {
       requestId: 1n,
@@ -306,31 +307,30 @@ describe('Ferry Service', () => {
 
   it('tx cost applies only for native deposits', async () => {
     const txCost = 100n;
-    ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, txCost, 0n);
+    ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, txCost, [[DUMMY_TOKEN, 0n, 1n], [NATIVE_TOKEN, 0n, 1n]]);
 
-    l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([
-      [NATIVE_TOKEN, 109n],
+    l2Mock.getBalances = vi.fn().mockResolvedValue([
+      [NATIVE_TOKEN, 200n],
       [DUMMY_TOKEN, 10n]
-    ]));
+    ]);
 
     const nativeDeposit: Deposit = {
       requestId: 1n,
       depositRecipient: new Uint8Array(20).fill(1),
       tokenAddress: NATIVE_TOKEN,
-      amount: 10n, 
+      amount: 200n, 
       timeStamp: 1n,
-      ferryTip: 0n,
+      ferryTip: 99n,
     };
 
     const nativeDeposit2: Deposit = {
       requestId: 1n,
       depositRecipient: new Uint8Array(20).fill(1),
       tokenAddress: NATIVE_TOKEN,
-      amount: 9n, 
+      amount: 200n, 
       timeStamp: 1n,
-      ferryTip: 0n,
+      ferryTip: 100n,
     };
-
 
     const dummyDeposit: Deposit = {
       requestId: 1n,
@@ -338,22 +338,22 @@ describe('Ferry Service', () => {
       tokenAddress: DUMMY_TOKEN,
       amount: 10n, 
       timeStamp: 1n,
-      ferryTip: 0n,
+      ferryTip: 1n,
     };
 
-
-    expect(await ferry.rateDeposits(
+    const result = await ferry.rateDeposits(
       [nativeDeposit, nativeDeposit2, dummyDeposit]
-    )).toStrictEqual([nativeDeposit2, dummyDeposit]);
+    );
+
+    expect(result).toHaveLength(2);
+    expect(result).toStrictEqual([nativeDeposit2, dummyDeposit]);
 
   });
 
 
-  it('highes reward:input ratio deposits are preffered', async () => {
+  it('highest reward:input ratio deposits are preffered', async () => {
 
-    l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([
-      [DUMMY_TOKEN, 10000n]
-    ]));
+    l2Mock.getBalances = vi.fn().mockResolvedValue( [[DUMMY_TOKEN, 10000n]]);
 
     const depositBetter: Deposit = {
       requestId: 1n,
@@ -381,11 +381,9 @@ describe('Ferry Service', () => {
 
   it('ignores deposits with fee valuation lower than min', async () => {
 
-    const minProfit = 100n;
-    ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, 0n, minProfit);
-    l2Mock.getBalances = vi.fn().mockResolvedValue(new Map([
-      [DUMMY_TOKEN, 10000n]
-    ]));
+    const tokensToTrack:[Uint8Array, bigint, bigint][] = [[DUMMY_TOKEN, 100n, 1n]];
+    ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, 0n, tokensToTrack);
+    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10000n]]);
 
     const depositBelowProfitThreshold: Deposit = {
       requestId: 1n,
