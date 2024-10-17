@@ -180,7 +180,7 @@ jobs:
 
       - name: Build
         working-directory: .
-        run: docker compose up --wait
+        run: docker compose up --wait eth-ferry-withdrawal
 
       - name: Test L1 interface
         run: npm run test-l1
@@ -213,7 +213,7 @@ jobs:
 
       - name: Build
         working-directory: .
-        run: docker compose up --wait
+        run: docker compose up --wait eth-ferry-deposit
 
       - name: Test L1 interface
         run: npm run test-l1
