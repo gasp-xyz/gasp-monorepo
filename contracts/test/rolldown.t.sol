@@ -1277,7 +1277,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
           ferryTip: 23456
         });
 
-        uint256 aliceBefore = token.balanceOf(ALICE);
         vm.startPrank(ALICE);
         // merkle_root of tree with single element is just that single element
         bytes32 merkle_root = keccak256(abi.encode(withdrawal));
@@ -1286,7 +1285,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
+        uint256 aliceBefore = token.balanceOf(ALICE);
+        vm.startPrank(ALICE);
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        vm.stopPrank();
 
         assertEq(token.balanceOf(recipient), withdrawal.amount - withdrawal.ferryTip);
         assertEq(token.balanceOf(ALICE) - aliceBefore, withdrawal.ferryTip);        
