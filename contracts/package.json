@@ -3,7 +3,10 @@
     "version": "1.0.0",
     "description": "Gasp smart contracts for an EVM compatible virtual machine",
     "scripts": {
-        "format": "prettier --write \"**/*.{json,md,yml}\""
+        "format:check": "bun prettier --check '**/*.{json,md,yml}' && forge fmt --check",
+        "format": "bun prettier --write '**/*.{json,md,yml}' && forge fmt",
+        "lint:check": "bun solhint '{script,src,test}/**/*.sol'",
+        "lint": "bun solhint --fix '{script,src,test}/**/*.sol'"
     },
     "repository": {
         "type": "git",
@@ -16,6 +19,7 @@
         "Serge <2901744+evercoinx@users.noreply.github.com>"
     ],
     "devDependencies": {
-        "prettier": "^3.3.3"
+        "prettier": "^3.3.3",
+        "solhint": "^5.0.3"
     }
 }
