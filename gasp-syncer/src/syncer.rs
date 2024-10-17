@@ -96,7 +96,7 @@ impl Syncer {
         }))
     }
 
-    #[instrument(skip_all)]
+    #[instrument(skip_all, err)]
     pub async fn sync(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
         let latest_completed_op_task_number = self
             .gasp_service_contract
@@ -113,7 +113,6 @@ impl Syncer {
         // let mut task_number_expected = latest_completed_task_number + 1;
 
         if latest_completed_op_task_created_block.is_zero() && !cfg.push_first_init {
-            tracing::error!("target uninit and push_first_init set to false");
             return Err(eyre!("target uninit and push_first_init set to false"));
         }
 
@@ -137,52 +136,46 @@ impl Syncer {
                                 let txn_hash = log.transaction_hash;
                                 let txn = self.clone().avs_contracts.ws_client.get_transaction(txn_hash).await?
                                 .ok_or_else(
-                                    || {tracing::error!("missing expected txn {:?}", txn_hash);
-                                    eyre!("missing expected txn {:?}", txn_hash)}
+                                    || {eyre!("missing expected txn {:?}", txn_hash)}
                                 )?
                                 ;
-                                println!("{:?}", txn);
+                                debug!("{:?}", txn);
                                 let call = match FinalizerTaskManagerCalls::decode(txn.input)?{
                                     FinalizerTaskManagerCalls::RespondToOpTask(c) => c,
                                     FinalizerTaskManagerCalls::ForceRespondToOpTask(_) => {
-                                        tracing::error!("The call that resulted in the OpTaskCompleted event was a ForceRespondToOpTask call. This cannot be synced without a admin reinit");
                                         return Err(eyre!("The call that resulted in the OpTaskCompleted event was a ForceRespondToOpTask call. This cannot be synced without a admin reinit"))
                                     }
                                     _ => {
-                                        tracing::error!("wrong call decoded");
                                         return Err(eyre!("wrong call decoded"))
                                     }
                                 };
-                                println!("{:?}", call);
-                                println!("{:?}", call.task.clone());
-                                println!("encoded - {:?}", call.task.clone().encode());
-                                println!("encoded - {:?}", array_bytes::bytes2hex("0x",call.task.clone().encode()));
+                                debug!("{:?}", call);
+                                debug!("{:?}", call.task.clone());
+                                debug!("encoded - {:?}", call.task.clone().encode());
+                                debug!("encoded - {:?}", array_bytes::bytes2hex("0x",call.task.clone().encode()));
                                 let task_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
                                     call.task.clone().encode().into_iter()
                                 ).collect::<Vec<_>>().as_ref());
-                                println!("{:?}", task_hash);
-                                println!("{:?}", task_hash == call.task_response.reference_task_hash.into());
+                                debug!("{:?}", task_hash);
+                                debug!("{:?}", task_hash == call.task_response.reference_task_hash.into());
 
                                 if task_hash != call.task_response.reference_task_hash.into() {
-                                    tracing::error!("task_hash mismatch {:?}", task_hash);
                                     return Err(eyre!("task_hash mismatch {:?}", task_hash))
                                 }
 
                                 let operators_state_info = self.clone().get_operators_state_info(call.task.clone()).await?;
-                                println!("{:?}", operators_state_info);
+                                debug!("{:?}", operators_state_info);
                                 let operators_state_info_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
                                     operators_state_info.clone().encode().into_iter()
                                 ).collect::<Vec<_>>().as_ref());
-                                println!("{:?}", operators_state_info_hash);
-                                println!("{:?}", operators_state_info_hash == call.task_response.operators_state_info_hash.into());
+                                debug!("{:?}", operators_state_info_hash);
+                                debug!("{:?}", operators_state_info_hash == call.task_response.operators_state_info_hash.into());
 
                                 if operators_state_info_hash != call.task_response.operators_state_info_hash.into() {
-                                    tracing::error!("operators_state_info_hash mismatch {:?}", operators_state_info_hash);
                                     return Err(eyre!("operators_state_info_hash mismatch {:?}", operators_state_info_hash))
                                 }
 
                                 if latest_completed_op_task_created_block !=0 && latest_completed_op_task_created_block < call.task.last_completed_op_task_created_block {
-                                    tracing::error!("missing expected task response {:?}", latest_completed_op_task_created_block);
                                     return Err(eyre!("missing expected task response {:?}", latest_completed_op_task_created_block))
                                 }
 
@@ -194,11 +187,11 @@ impl Syncer {
                                 }
 
                                 let update_txn = self.clone().gasp_service_contract.process_eigen_op_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature, operators_state_info);
-                                println!("{:?}", update_txn);
+                                debug!("{:?}", update_txn);
                                 let update_txn_pending = update_txn.send().await;
-                                println!("{:?}", update_txn_pending);
+                                debug!("{:?}", update_txn_pending);
                                 let update_txn_receipt = update_txn_pending?.await?;
-                                println!("{:?}", update_txn_receipt);
+                                debug!("{:?}", update_txn_receipt);
                                 match update_txn_receipt.clone().ok_or_eyre("failed to unwrap update_txn_receipt")?.status{
                                     Some(status) if status.is_zero()=>{
                                         return Err(eyre!("update_txn failed {:?}", update_txn_receipt))
@@ -206,40 +199,38 @@ impl Syncer {
                                     _=>{}
                                 }
 
+                                info!("sucessfully synced op task - {:?}", call.task.clone());
                                 latest_completed_op_task_created_block = call.task.task_created_block;
                             },
                             FinalizerTaskManagerEvents::RdTaskCompletedFilter(event) => {
                                 let txn_hash = log.transaction_hash;
                                 let txn = self.clone().avs_contracts.ws_client.get_transaction(txn_hash).await?
                                 .ok_or_else(
-                                    || {tracing::error!("missing expected txn {:?}", txn_hash);
-                                    eyre!("missing expected txn {:?}", txn_hash)}
+                                    || {eyre!("missing expected txn {:?}", txn_hash)}
                                 )?
                                 ;
-                                println!("{:?}", txn);
+                                debug!("{:?}", txn);
                                 let call = match FinalizerTaskManagerCalls::decode(txn.input)?{
                                     FinalizerTaskManagerCalls::RespondToRdTask(c) => c,
                                     _ => {
-                                        tracing::error!("wrong call decoded");
                                         return Err(eyre!("wrong call decoded"))
                                     }
                                 };
-                                println!("{:?}", call);
-                                println!("{:?}", call.task.clone());
-                                println!("encoded - {:?}", call.task.clone().encode());
-                                println!("encoded - {:?}", array_bytes::bytes2hex("0x",call.task.clone().encode()));
+                                debug!("{:?}", call);
+                                debug!("{:?}", call.task.clone());
+                                debug!("encoded - {:?}", call.task.clone().encode());
+                                debug!("encoded - {:?}", array_bytes::bytes2hex("0x",call.task.clone().encode()));
                                 let task_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
                                     call.task.clone().encode().into_iter()
                                 ).collect::<Vec<_>>().as_ref());
-                                println!("{:?}", task_hash);
-                                println!("{:?}", task_hash == call.task_response.reference_task_hash.into());
+                                debug!("{:?}", task_hash);
+                                debug!("{:?}", task_hash == call.task_response.reference_task_hash.into());
 
                                 if call.task.chain_id != self.target_chain_index{
                                     continue;
                                 }
 
                                 if task_hash != call.task_response.reference_task_hash.into() {
-                                    tracing::error!("task_hash mismatch {:?}", task_hash);
                                     return Err(eyre!("task_hash mismatch {:?}", task_hash))
                                 }
 
@@ -248,16 +239,15 @@ impl Syncer {
                                 }
 
                                 if latest_completed_op_task_created_block != call.task.last_completed_op_task_created_block {
-                                    tracing::error!("latest_completed_op_task_created_block mismatch {:?}", latest_completed_op_task_created_block);
                                     return Err(eyre!("latest_completed_op_task_created_block mismatch {:?}", latest_completed_op_task_created_block))
                                 }
 
                                 let update_txn = self.clone().gasp_service_contract.process_eigen_rd_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature);
-                                println!("{:?}", update_txn);
+                                debug!("{:?}", update_txn);
                                 let update_txn_pending = update_txn.send().await;
-                                println!("{:?}", update_txn_pending);
+                                debug!("{:?}", update_txn_pending);
                                 let update_txn_receipt = update_txn_pending?.await?;
-                                println!("{:?}", update_txn_receipt);
+                                debug!("{:?}", update_txn_receipt);
                                 match update_txn_receipt.clone().ok_or_eyre("failed to unwrap update_txn_receipt")?.status{
                                     Some(status) if status.is_zero()=>{
                                         return Err(eyre!("update_txn failed {:?}", update_txn_receipt))
@@ -265,13 +255,14 @@ impl Syncer {
                                     _=>{}
                                 }
 
+                                info!("sucessfully synced rd task - {:?}", call.task.clone());
                                 latest_completed_rd_task_number = call.task.task_num;
 
                             },
                             _ => return Err(eyre!("Got unexpected stream event"))
                         }
                     }
-                    Err(e) => tracing::error!("EthWs subscription error {:?}", e),
+                    Err(e) => error!("EthWs subscription error {:?}", e),
                 },
                 block = blocks.next() => {
                     if block.is_none() {
@@ -343,10 +334,6 @@ impl Syncer {
             // TODO
             // Use a constant for the enum variant index
             if task_status != 4 {
-                tracing::error!(
-                    "no completed tasks for reinit {:?}",
-                    latest_completed_op_task_created_block
-                );
                 return Err(eyre!(
                     "no completed tasks for reinit {:?}",
                     latest_completed_op_task_created_block
@@ -369,7 +356,6 @@ impl Syncer {
         let mut last_task = match block_events.pop() {
             Some(e) if e.task_index == task_num => e.task,
             _ => {
-                tracing::error!("task not in events for reinit {:?}", task_num);
                 return Err(eyre!("task not in events for reinit {:?}", task_num));
             }
         };
@@ -400,17 +386,25 @@ impl Syncer {
             .clone()
             .expect("should work in reinit")
             .process_eigen_reinit(
-                last_task,
-                operators_state_info,
-                merkle_roots,
-                ranges,
-                last_batch_id,
+                last_task.clone(),
+                operators_state_info.clone(),
+                merkle_roots.clone(),
+                ranges.clone(),
+                last_batch_id.clone(),
             );
-        println!("{:?}", reinit_txn);
+        debug!("{:?}", reinit_txn);
         let reinit_txn_pending = reinit_txn.send().await;
-        println!("{:?}", reinit_txn_pending);
+        debug!("{:?}", reinit_txn_pending);
         let reinit_txn_receipt = reinit_txn_pending?.await?;
-        println!("{:?}", reinit_txn_receipt);
+        debug!("{:?}", reinit_txn_receipt);
+
+        info!("Sucessfully completed reinit - {:?}", (
+            last_task,
+            operators_state_info,
+            merkle_roots,
+            ranges,
+            last_batch_id,
+        ));
 
         Ok(())
     }
@@ -433,11 +427,11 @@ impl Syncer {
         // Put the quorum_threshold_percentage and quorum_numbers into constants properly somewhere
         // Maybe put default values in the TaskManager contract itself
         let force_task_txn = task_manager.force_create_new_op_task(66u32, vec![0u8].into());
-        println!("{:?}", force_task_txn);
+        debug!("{:?}", force_task_txn);
         let force_task_txn_pending = force_task_txn.send().await;
-        println!("{:?}", force_task_txn_pending);
+        debug!("{:?}", force_task_txn_pending);
         let force_task_txn_receipt = force_task_txn_pending?.await?;
-        println!("{:?}", force_task_txn_receipt);
+        debug!("{:?}", force_task_txn_receipt);
         let force_task_txn_receipt =
             force_task_txn_receipt.ok_or_eyre("force_task_txn_receipt is None")?;
         let new_op_task_created_event = force_task_txn_receipt.logs.into_iter().find_map(|r| {
@@ -456,7 +450,7 @@ impl Syncer {
         let task = new_op_task_created_event.task;
 
         let operators_state_info = self.clone().get_operators_state_info(task.clone()).await?;
-        println!("{:?}", operators_state_info);
+        debug!("{:?}", operators_state_info);
         let operators_state_info_hash = Keccak256::hash(
             vec![0u8; 31]
                 .into_iter()
@@ -465,7 +459,7 @@ impl Syncer {
                 .collect::<Vec<_>>()
                 .as_ref(),
         );
-        println!("{:?}", operators_state_info_hash);
+        debug!("{:?}", operators_state_info_hash);
 
         let task_hash = Keccak256::hash(
             vec![0u8; 31]
@@ -479,18 +473,27 @@ impl Syncer {
         // Respond to the opTask via forceRespondToOpTask
 
         let force_respond_txn = task_manager.force_respond_to_op_task(
+            task.clone(),
+            OpTaskResponse {
+                reference_task_index: new_op_task_created_event.task_index.clone(),
+                reference_task_hash: task_hash.clone().into(),
+                operators_state_info_hash: operators_state_info_hash.clone().into(),
+            },
+        );
+        debug!("{:?}", force_respond_txn);
+        let force_respond_txn_pending = force_respond_txn.send().await;
+        debug!("{:?}", force_respond_txn_pending);
+        let force_respond_txn_receipt = force_respond_txn_pending?.await?;
+        debug!("{:?}", force_respond_txn_receipt);
+
+        info!("Successfully completed reinit-eth - {:?}", (
             task,
             OpTaskResponse {
                 reference_task_index: new_op_task_created_event.task_index,
                 reference_task_hash: task_hash.into(),
                 operators_state_info_hash: operators_state_info_hash.into(),
             },
-        );
-        println!("{:?}", force_respond_txn);
-        let force_respond_txn_pending = force_respond_txn.send().await;
-        println!("{:?}", force_respond_txn_pending);
-        let force_respond_txn_receipt = force_respond_txn_pending?.await?;
-        println!("{:?}", force_respond_txn_receipt);
+        ));
 
         Ok(())
     }
@@ -525,10 +528,6 @@ impl Syncer {
                 continue;
             }
             if event.task_response.reference_task_index > expected_rd_task_number {
-                tracing::error!(
-                    "missing expected_rd_task_number {:?}",
-                    expected_rd_task_number
-                );
                 return Err(eyre!(
                     "missing expected_rd_task_number {:?}",
                     expected_rd_task_number
@@ -538,7 +537,6 @@ impl Syncer {
             // Here expected_rd_task_number == event.task_response.reference_task_index
             if event.task_response.chain_id == self.target_chain_index {
                 if expected_batch_id != event.task_response.batch_id {
-                    tracing::error!("missing expected_batch_id {:?}", expected_batch_id);
                     return Err(eyre!("missing expected_batch_id {:?}", expected_batch_id));
                 }
                 merkle_roots.push(event.task_response.rd_update);

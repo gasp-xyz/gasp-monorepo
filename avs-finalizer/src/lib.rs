@@ -8,7 +8,6 @@ use tracing::{info, instrument, warn};
 mod chainio;
 mod cli;
 mod crypto;
-mod executor;
 mod operator;
 mod rpc;
 

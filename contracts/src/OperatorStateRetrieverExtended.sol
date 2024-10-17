@@ -46,7 +46,6 @@ contract OperatorStateRetrieverExtended is OperatorStateRetriever {
 
     function getOperatorsStakesForQuorum(IRegistryCoordinator registryCoordinator, bytes calldata quorumNumbers, address[] calldata operatorsAddr) public virtual view returns (Operator[][] memory){
         IBLSApkRegistry blsApkRegistry = registryCoordinator.blsApkRegistry();
-        IStakeRegistry stakeRegistry = registryCoordinator.stakeRegistry();
 
         Operator[][] memory operators = new Operator[][](quorumNumbers.length);
         for (uint256 i = 0; i < quorumNumbers.length; i++) {

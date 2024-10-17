@@ -48,6 +48,8 @@ interface IFinalizerTaskManager {
         RdTaskResponse taskResponse);
 
     event RolldownTargetUpdated(address rolldownAddress);
+    event AggregatorUpdated(address aggregatorAddress);
+    event GeneratorUpdated(address generatorAddress);
 
     // DATA STRUCTURES
     enum TaskStatus
