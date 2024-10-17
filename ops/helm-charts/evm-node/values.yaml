@@ -16,7 +16,7 @@ verifierUrl: 'http://blockscout-eth-blockscout-stack-blockscout-svc:80/api'
 
 dataMountPath: /data
 
-evmNodeImage: 'ghcr.io/paradigmxyz/reth:v1.0.0'
+evmNodeImage: 'ghcr.io/paradigmxyz/reth:v1.0.7'
 command: []
 args:
   - node
@@ -38,7 +38,7 @@ storageClass: standard
 storageSize: 5Gi
 
 image: 
-  repository: mangatasolutions/anvil
+  repository: mangatasolutions/gasp-contracts
   tag: be439052d9ed89109c4dd02b387cdf7cbbcc6870
 
 resources:
