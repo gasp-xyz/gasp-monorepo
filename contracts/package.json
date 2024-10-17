@@ -3,10 +3,12 @@
     "version": "1.0.0",
     "description": "Gasp smart contracts for an EVM compatible virtual machine",
     "scripts": {
-        "format:check": "bun prettier --check '**/*.{json,md,yml}' && forge fmt --check",
-        "format": "bun prettier --write '**/*.{json,md,yml}' && forge fmt",
-        "lint:check": "bun solhint '{script,src,test}/**/*.sol'",
-        "lint": "bun solhint --fix '{script,src,test}/**/*.sol'"
+        "format": "bun prettier --check '**/*.{json,md,yml}' && forge fmt --check",
+        "format:fix": "bun prettier --write '**/*.{json,md,yml}' && forge fmt",
+        "lint": "bun solhint '{script,src,test}/**/*.sol'",
+        "lint:fix": "bun solhint --fix '{script,src,test}/**/*.sol'",
+        "analyze": "slitherin . --separated",
+        "analyze:ci": "slitherin --separated . --skip-clean --ignore-compile"
     },
     "repository": {
         "type": "git",
