@@ -1,0 +1,5 @@
+{
+    "compile_force_framework": "foundry",
+    "detectors_to_exclude": "timestamp",
+    "filter_paths": "(eigenlayer|forge-std|openzeppelin)"
+}
