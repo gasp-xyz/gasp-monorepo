@@ -1,8 +1,7 @@
-import { describe, test, beforeAll, expect, it } from "vitest";
-import { getApi } from "../src/utils/index.js";
-import { L2Interface, L2Api } from "../src/l2";
+import { describe,  expect, it } from "vitest";
+import { getApi } from "../src/utils.js";
+import { L2Api } from "../src/l2/L2Api.js";
 import { hexToU8a } from "@polkadot/util";
-const timeout = 60000;
 
 const URI = "ws://localhost:9944";
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
@@ -16,7 +15,7 @@ describe('L2Interface', () => {
       let api = await getApi(URI);
       let l2 = new L2Api(api);
       let balances = await l2.getBalances(hexToU8a(ALITH));
-      expect(balances.size).toBeGreaterThan(0);
+      expect(balances.length).toBeGreaterThan(0);
       for (let [_key, value] of balances) {
         expect(value).toBeGreaterThan(0);
       }

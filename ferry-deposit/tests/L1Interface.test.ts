@@ -1,46 +1,21 @@
-import { describe, test, beforeAll, expect, it } from "vitest";
-import { sleep, getApi } from "../src/utils/index.js";
-import { L2Interface, L2Api } from "../src/l2";
-import { L1Api } from "../src/l1";
-import { L1Interface } from "../src/l1/index.js";
-import { hexToU8a } from "@polkadot/util";
+import { describe, beforeAll, expect, it } from "vitest";
+import { L1Api } from "../src/l1/L1Api.js";
+import { L1Interface } from "../src/l1/L1Interface.js";
 import { anvil } from "viem/chains";
 import {
   ABI,
 	MANGATA_CONTRACT_ADDRESS,
-} from "../src/common/constants.js";
+} from "../src/config.js";
 
 
 import {
-	http,
 	type PrivateKeyAccount,
 	createWalletClient,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { TestClient, createPublicClient, createTestClient, webSocket } from "viem";
-import util from "node:util";
-
-const timeout = 60000;
+import { createPublicClient, createTestClient, webSocket } from "viem";
 
 const WS_URI = "ws://localhost:8545";
-const HTTP_URI = "http://localhost:8545";
-const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
-const ANVIL_TEST_ACCOUNT = "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba";
-
-const properImpl = (key: any, value: any) => {
-  if (typeof value === 'bigint') {
-    return value.toString();
-  }
-  return value;
-};
-
-async function getBlockNumnber() {
-	const transport = webSocket(WS_URI, { retryCount: 5 });
-	const publicClient = createPublicClient({
-		transport,
-	});
-  return await publicClient.getBlockNumber({cacheTime: 0});
-}
 
 async function dummyDeposit(uri: string) {
 	const ANVIL_TEST_ACCOUNT =

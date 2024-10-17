@@ -1,3 +1,4 @@
+
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import type { PrivateKeyAccount } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -26,7 +27,7 @@ async function main() {
 	const l2 = new L2Api(api);
 	const l1 = new L1Api(ETH_CHAIN_URL);
 
-  logger.info(`Ferry Withdrawal`);
+  logger.info(`Closer Service`);
 
 	if (!(await api.isReady)) {
 		throw `Cannot connect to ${MANGATA_NODE_URL}`;
