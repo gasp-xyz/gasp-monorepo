@@ -117,9 +117,7 @@ export const watchWithdrawalClosed = async (
         toBlock,
       })
       const combinedLogs = [...logsFerried, ...logsNotFerried]
-      console.log('combined withdrawal logs:', combinedLogs)
       for (const log of combinedLogs) {
-        console.log('withdrawal log:', log)
         const {
           blockNumber,
           args: { requestId, withdrawalHash },
@@ -137,7 +135,7 @@ export const watchWithdrawalClosed = async (
           .and('chain')
           .equals(chainName)
           .returnFirst()
-        console.log('existingTransaction found:', existingTransaction)
+        logger.info('Existing withdrawal found to be updated:', existingTransaction)
         if (existingTransaction) {
           existingTransaction.status = L1_PROCESSED_STATUS
           const timestamp = new Date().toISOString()
@@ -148,12 +146,12 @@ export const watchWithdrawalClosed = async (
             transaction: existingTransaction,
           })
         }
-        await saveLastProcessedBlock(chainName, blockNumber, 'withdrawal') //saving the last processed block
+        await saveLastProcessedBlock(chainName, blockNumber, 'withdrawal')
       }
       await saveLastProcessedBlock(chainName, toBlock, 'withdrawal') //even if in the range of fromBlock and toBlock we didn't find any event, we save the last block
     } catch (error) {
       logger.error({
-        message: 'Error in withdrawalClosed loop:',
+        message: 'Error in withdrawal closure loop:',
         error: error,
       })
     }

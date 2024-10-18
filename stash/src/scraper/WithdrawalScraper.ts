@@ -4,6 +4,8 @@ import { withdrawalRepository } from '../repository/TransactionRepository.js'
 import { ApiPromise } from '@polkadot/api'
 import { keccak256 } from 'viem'
 import { redis } from '../connector/RedisConnector.js'
+import logger from '../util/Logger.js'
+
 
 const NETWORK_LIST_KEY = 'affirmed_networks_list'
 const L2_INITIATED = 'L2_INITIATED'
@@ -27,14 +29,10 @@ export const processWithdrawalEvents = async (
   if (events.length > 0) {
     for (const eventGroup of events) {
       for (const event of eventGroup) {
-        console.log('Method:', event.method)
-        console.log('Section:', event.section)
-        console.log('Index:', event.index)
-        console.log('Data:', event.data)
         if (event.method === 'WithdrawalRequestCreated') {
-          console.log('Event accepted at:', new Date().toISOString())
+          logger.info('Event accepted at:', new Date().toISOString())
           const withdrawalData = await startTracingWithdrawal(api, event.data)
-          console.log('Tracing started for withdrawal', withdrawalData)
+          logger.info('Tracing started for withdrawal', withdrawalData)
         } else if (event.method === 'TxBatchCreated') {
           await updateWithdrawalsWhenBatchCreated(api, event.data)
         }
@@ -52,7 +50,7 @@ const startTracingWithdrawal = async (
     eventData.chain,
     eventData.requestId.id
   )
-  console.log(
+  logger.info(
     'Withdrawal hash and keccak256 match:',
     keccak256(calldata.toHex()) === eventData.hash_,
     'Calculated keccak:',
@@ -60,15 +58,11 @@ const startTracingWithdrawal = async (
     'Event hash:',
     eventData.hash_
   )
-  // Fetch affirmed networks from Redis
   const affirmedNetworks = await redis.client.get(NETWORK_LIST_KEY)
   const networks = affirmedNetworks ? JSON.parse(affirmedNetworks) : []
-
-  // Find the network with the matching key
   const network = networks.find((net: Network) => net.key === eventData.chain)
-
-  // Check the chainId of the found network
   const chainId = network ? network.chainId : 'unknown'
+
   const withdrawalData = {
     requestId: Number(eventData.requestId.id),
     txHash: eventData.hash_,
@@ -113,17 +107,16 @@ const updateWithdrawalsWhenBatchCreated = async (
         [firstElement, lastElement],
         withdrawal.requestId
       )
-      console.log('Proof:', proof.toHuman())
       let root = await api.rpc.rolldown.get_merkle_root(chain, [
         firstElement,
         lastElement,
       ])
-      console.log('Root:', root.toHuman())
+      logger.info('Root:', root.toHuman())
       withdrawal.updated = Date.parse(updateTimestamp)
       withdrawal.status = L2_CONFIRMED
       withdrawal.proof = proof.toHex()
       await withdrawalRepository.save(withdrawal)
-      console.log('Withdrawal batch created and status updated', withdrawal)
+      logger.info('Withdrawal batch created and status updated', withdrawal)
     }
   }
 }
