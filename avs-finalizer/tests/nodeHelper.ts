@@ -12,12 +12,19 @@ export async function createAWithdrawWithManualBatch(chain = "Ethereum", num = 1
     const keyring = new Keyring({type: "ethereum"});
     const alice = keyring.addFromUri("0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133");
     keyring.addPair(alice);
+    let token;
+    if(chain === "Ethereum"){
+        const gaspToken = await api.query.assetRegistry.idToL1Asset(0);
+        token = JSON.parse(JSON.stringify(gaspToken));
+    }
+    //@ts-ignore
+    const gaspAddr = token.ethereum;
     const tx = api.tx.utility.batchAll(
         [
             api.tx.rolldown.withdraw(
                 api.createType("PalletRolldownMessagesChain", chain),
                 alice.address,
-                "0xfd471836031dc5108809d173a067e8486b9047a3",
+                gaspAddr,
                 11,
                 null),
             api.tx.rolldown.createBatch(
