@@ -6,7 +6,7 @@ export function isEqual(first: Uint8Array, second: Uint8Array): boolean {
 }
 
 export function minBigInt(...args: bigint[]) {
-	return args.reduce((min, current) => (current < min ? current : min));
+	return BigInt(args.reduce((min, current) => (current < min ? current : min)));
 }
 
 export async function asyncFilter<T>(arr: T[], predicate: any) {

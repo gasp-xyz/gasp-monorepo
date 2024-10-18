@@ -17,44 +17,28 @@ async function asyncFilter(arr: Withdrawal[], predicate: any) {
 class CloserService {
 	l1: L1Interface;
 	l2: L2Interface;
-	me: Uint8Array;
 	tokensToClose: [Uint8Array, bigint, bigint][];
   minBalance: bigint;
   lastCheckedWithrdawal : bigint;
   withdrawalsToClose : Withdrawal[];
+  batchSize: bigint;
 
 	constructor(
-		me: Uint8Array,
 		l1: L1Interface,
 		l2: L2Interface,
 		tokensToClose: [Uint8Array, bigint, bigint][],
     minBalance: bigint,
+    batchSize: bigint = 1000n,
 	) {
-		this.me = me;
 		this.l1 = l1;
 		this.l2 = l2;
 		this.tokensToClose = tokensToClose;
     this.minBalance = minBalance;
     this.lastCheckedWithrdawal = 1n;
     this.withdrawalsToClose = [];
-
-    // this.lastCheckedWithrdawal = 0;
-    // this.withdrawalsToClose = [];
+    this.batchSize = batchSize;
 	}
 
-	logFilteredOut(before: Withdrawal[], after: Withdrawal[], message: string) {
-		const diff = before.length - after.length;
-    const mapAfter : Map<bigint, Withdrawal> = new Map(after.map( (elem) => [elem.requestId, elem]));
-
-
-		if (diff > 0) {
-      before
-        .filter( elem => mapAfter.has(elem.requestId) === false)
-        .forEach( elem => logger.silly(`filtered out ${message}: ${toString(elem)}`));
-
-			logger.debug(`filtered out ${diff} withdrawals, reason "${message}"`);
-		}
-	}
 
   async findWithdrawalsToClose() : Promise<void> {
     const latestClosableReqeustIdOnL1 = await this.l1.getLatestRequestId();
@@ -63,9 +47,9 @@ class CloserService {
       return;
     }
 
-    while (this.withdrawalsToClose.length === 0 || this.lastCheckedWithrdawal >= latestClosableReqeustIdOnL1) {
+    while (this.withdrawalsToClose.length === 0 && this.lastCheckedWithrdawal < latestClosableReqeustIdOnL1) {
       const rangeStart: bigint = this.lastCheckedWithrdawal;
-      const rangeEnd = minBigInt(rangeStart + 100n, latestClosableReqeustIdOnL1);
+      const rangeEnd: bigint = minBigInt(rangeStart + this.batchSize, latestClosableReqeustIdOnL1);
 
       const withdrawals = await this.l2.getWithdrawals(rangeStart, rangeEnd);
       logger.silly(`Fetching withdrawals in range ${rangeStart} .. ${rangeEnd} - found ${withdrawals.length} withdrawals`);
@@ -83,7 +67,6 @@ class CloserService {
       this.withdrawalsToClose = closableWithdrawals;
     }
   }
-
 
   async getNextWithdrawalToClose() : Promise<Withdrawal | null> {
     return this.withdrawalsToClose.shift() ?? null;

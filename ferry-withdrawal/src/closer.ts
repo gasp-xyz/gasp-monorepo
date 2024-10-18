@@ -52,7 +52,6 @@ async function main() {
 	});
 
 	const closerService = new CloserService(
-		hexToU8a(acc.address),
 		l1,
 		l2,
 		TOKENS_TO_TRACK,
