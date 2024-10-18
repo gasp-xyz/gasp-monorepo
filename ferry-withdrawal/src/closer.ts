@@ -13,7 +13,6 @@ import { logger } from "./logger.js";
 import {
 	ETH_CHAIN_URL,
 	LOG,
-	LOOK_BACK_HOURS,
 	MANGATA_CONTRACT_ADDRESS,
 	MANGATA_NODE_URL,
 	PRIVATE_KEY,
@@ -22,7 +21,7 @@ import {
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
 
-const BATCH_SIZE = 100n;
+const BATCH_SIZE = 1000n;
 
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
@@ -45,9 +44,7 @@ async function main() {
 
 	TOKENS_TO_TRACK.forEach((token) => {
 		logger.info(
-			`Token to ferry ${u8aToHex(token[0])} minimal profit : ${
-				token[1]
-			} weight : ${token[2]}`,
+			`Withdrawals to close ${u8aToHex(token[0])} minimal profit : ${token[1]}`,
 		);
 	});
 
@@ -56,6 +53,7 @@ async function main() {
 		l2,
 		TOKENS_TO_TRACK,
 		TX_COST,
+    BATCH_SIZE,
 	);
 
 	let inProgress = false;
@@ -70,7 +68,7 @@ async function main() {
         logger.info(`#${header.number} Closing withdrawal ${toString(withdrawal)}`);
         await closerService.closeWithdrawal(withdrawal, hexToU8a(PRIVATE_KEY));
       }else{
-        logger.info(`#${header.number} no withdrawals left`);
+        logger.debug(`#${header.number} nothing to close`);
       }
 			inProgress = false;
 		},

@@ -103,6 +103,24 @@ describe('Closer Service', () => {
     expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(2001n, 2002n);
   });
 
+  it('fetches withdrawals properly when they come one by one', async () => {
+
+    l2Mock.getWithdrawals = vi.fn().mockResolvedValue([])
+    l1Mock.getLatestRequestId = vi.fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(1n);
+
+    l2Mock.getWithdrawals = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
+    closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, 1000n);
+    await closer.findWithdrawalsToClose();
+    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(0);
+
+    await closer.findWithdrawalsToClose();
+    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(1);
+    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(1n, 1n);
+  });
+
+
   it('should not fetch new batch until there are some withdrawals to consume', async () => {
 
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(2001n);
@@ -225,7 +243,6 @@ describe('Closer Service', () => {
   });
 
   it('only considers enabled tokens above the threshold', async () => {
-
     const TOKENS_TO_CLOSE: [Uint8Array, bigint, bigint][] = [
       [ENABLED_TOKEN, 100n, 1n],
     ];
@@ -257,8 +274,5 @@ describe('Closer Service', () => {
 
     expect(await closer.getNextWithdrawalToClose()).toStrictEqual(closeableWithdrawal);
     expect(await closer.getNextWithdrawalToClose()).toBeNull();
-
-
   });
-
 })

@@ -3,7 +3,7 @@ import { u8aToHex } from "@polkadot/util";
 
 import { L1Interface } from "./l1/L1Interface.js";
 import { L2Interface } from "./l2/L2Interface.js";
-import { isEqual, minBigInt} from "./utils.js";
+import { isEqual, maxBigInt, minBigInt} from "./utils.js";
 import { logger } from "./logger.js";
 import { Withdrawal, toString } from "./Withdrawal.js";
 
@@ -34,7 +34,7 @@ class CloserService {
 		this.l2 = l2;
 		this.tokensToClose = tokensToClose;
     this.minBalance = minBalance;
-    this.lastCheckedWithrdawal = 1n;
+    this.lastCheckedWithrdawal = 0n;
     this.withdrawalsToClose = [];
     this.batchSize = batchSize;
 	}
@@ -44,11 +44,12 @@ class CloserService {
     const latestClosableReqeustIdOnL1 = await this.l1.getLatestRequestId();
 
     if (latestClosableReqeustIdOnL1 === null) {
+      logger.debug(`No withdrawals has been brought yet to L1 contract`);
       return;
     }
 
     while (this.withdrawalsToClose.length === 0 && this.lastCheckedWithrdawal < latestClosableReqeustIdOnL1) {
-      const rangeStart: bigint = this.lastCheckedWithrdawal;
+      const rangeStart: bigint = maxBigInt(1n, this.lastCheckedWithrdawal);
       const rangeEnd: bigint = minBigInt(rangeStart + this.batchSize, latestClosableReqeustIdOnL1);
 
       const withdrawals = await this.l2.getWithdrawals(rangeStart, rangeEnd);
