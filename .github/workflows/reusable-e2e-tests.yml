@@ -191,6 +191,9 @@ jobs:
       - name: Test ferry
         run: npm run test-ferry
 
+      - name: Test closer service
+        run: npm run test-closer
+
   ferry-deposit-test:
     name: Ferry deposit tests
     runs-on: ubuntu-latest
