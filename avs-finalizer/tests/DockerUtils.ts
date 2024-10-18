@@ -92,7 +92,7 @@ export class DockerUtils{
         AVS_RPC_URL:"http://0.0.0.0:8090" ,
         AVS_REGISTRY_COORDINATOR_ADDR:"0xf5059a5D33d5853360D16C683c16e67980206f36" ,
         TESTNET:"true",
-        STAKE:"60",
+        STAKE:"45",
     }
     bigStakeLocalEnvironment : Environment = {
         RUST_LOG: "info",
