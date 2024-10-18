@@ -1,9 +1,9 @@
-import {Block, Event} from './BlockScraper'
+import { Block, Event } from './BlockScraper'
 import _ from 'lodash'
-import {withdrawalRepository} from '../repository/TransactionRepository.js'
-import {ApiPromise} from '@polkadot/api'
-import {keccak256} from 'viem'
-import {redis} from '../connector/RedisConnector.js'
+import { withdrawalRepository } from '../repository/TransactionRepository.js'
+import { ApiPromise } from '@polkadot/api'
+import { keccak256 } from 'viem'
+import { redis } from '../connector/RedisConnector.js'
 
 const NETWORK_LIST_KEY = 'affirmed_networks_list'
 const L2_INITIATED = 'L2_INITIATED'
@@ -113,6 +113,12 @@ const updateWithdrawalsWhenBatchCreated = async (
         [firstElement, lastElement],
         withdrawal.requestId
       )
+      console.log('Proof:', proof.toHuman())
+      let root = await api.rpc.rolldown.get_merkle_root(chain, [
+        firstElement,
+        lastElement,
+      ])
+      console.log('Root:', root.toHuman())
       withdrawal.updated = Date.parse(updateTimestamp)
       withdrawal.status = L2_CONFIRMED
       withdrawal.proof = proof.toHex()

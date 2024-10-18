@@ -1,6 +1,5 @@
 import { type PublicClientConfig, createPublicClient, http } from 'viem'
 import RolldownContract from '../Rolldown.json' assert { type: 'json' }
-import IRolldownPrimitivesContract from '../IRolldownPrimitives.json' assert { type: 'json' }
 import {
   transactionRepository,
   withdrawalRepository,
@@ -14,7 +13,7 @@ import logger from '../util/Logger.js'
 export const L1_CONFIRMED_STATUS = 'L1_CONFIRMED'
 export const L1_INITIATED_STATUS = 'L1_INITIATED'
 export const L2_CONFIRMED_STATUS = 'L2_CONFIRMED'
-export const L1_PROCESSED_STATUS = 'L1_Processed'
+export const L1_PROCESSED_STATUS = 'L1_PROCESSED'
 
 const keepProcessing = true
 
@@ -103,27 +102,42 @@ export const watchWithdrawalClosed = async (
       logger.info({
         message: ` Withdrawal: chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
       })
-      const logs = await publicClient.getContractEvents({
+      const logsFerried = await publicClient.getContractEvents({
         address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
-        abi: IRolldownPrimitivesContract.abi,
+        abi: RolldownContract.abi,
+        eventName: 'FerriedWithdrawalClosed',
+        fromBlock,
+        toBlock,
+      })
+      const logsNotFerried = await publicClient.getContractEvents({
+        address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
+        abi: RolldownContract.abi,
         eventName: 'WithdrawalClosed',
         fromBlock,
         toBlock,
       })
-      for (const log of logs) {
-        const { blockNumber } = log
+      const combinedLogs = [...logsFerried, ...logsNotFerried]
+      console.log('combined withdrawal logs:', combinedLogs)
+      for (const log of combinedLogs) {
+        console.log('withdrawal log:', log)
+        const {
+          blockNumber,
+          args: { requestId, withdrawalHash },
+        } = log as any
         const existingTransaction = await withdrawalRepository
           .search()
           .where('requestId')
-          .equals(0)
+          .equals(requestId)
           .and('txHash')
-          .equals(0)
+          .equals(withdrawalHash)
           .and('type')
           .equals('withdrawal')
           .and('status')
           .equals(L2_CONFIRMED_STATUS)
+          .and('chain')
+          .equals(chainName)
           .returnFirst()
-
+        console.log('existingTransaction found:', existingTransaction)
         if (existingTransaction) {
           existingTransaction.status = L1_PROCESSED_STATUS
           const timestamp = new Date().toISOString()
