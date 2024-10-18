@@ -2,16 +2,10 @@ import { u8aToHex } from "@polkadot/util";
 
 import { L1Interface } from "./l1/L1Interface.js";
 import { L2Interface } from "./l2/L2Interface.js";
-import { isEqual} from "./utils.js";
+import { isEqual, asyncFilter} from "./utils.js";
 import { logger } from "./logger.js";
 import { Withdrawal, toString } from "./Withdrawal.js";
 
-async function asyncFilter(arr: Withdrawal[], predicate: any) {
-	const results = await Promise.all(arr.map(predicate));
-	return arr.filter((v: any, index: any) => {
-		return results[index];
-	});
-}
 
 class Ferry {
 	l1: L1Interface;

@@ -212,10 +212,16 @@ contract Rolldown is
         if ( !isFerried ){
 
           if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
-            send_native_and_emit_event(withdrawal.recipient, withdrawal.amount);
+            send_native_and_emit_event(withdrawal.recipient, withdrawal.amount - withdrawal.ferryTip);
+            if (withdrawal.ferryTip > 0){
+              send_native_and_emit_event(msg.sender, withdrawal.ferryTip);
+            }
           }
           else {
-            send_erc20_and_emit_event(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount);
+            send_erc20_and_emit_event(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount - withdrawal.ferryTip);
+            if (withdrawal.ferryTip > 0){
+              send_erc20_and_emit_event(msg.sender, withdrawal.tokenAddress, withdrawal.ferryTip);
+            }
           }
 
           emit WithdrawalClosed(

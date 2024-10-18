@@ -10,6 +10,8 @@ import {
   MANGATA_NODE_URL,
 } from "../src/Config.js";
 import {
+  ContractFunctionExecutionError,
+  ContractFunctionRevertedError,
 	type PrivateKeyAccount,
 	createWalletClient,
   encodeAbiParameters,
