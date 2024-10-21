@@ -17,7 +17,6 @@ import { anvil } from "viem/chains";
 import { isEqual } from "../utils.js";
 import { estimateMaxPriorityFeePerGas } from "viem/actions";
 import { L1Interface } from "./L1Interface.js";
-import { logger } from "../logger.js";
 
 async function estimateGasInWei(publicClient: PublicClient) {
   // https://www.blocknative.com/blog/eip-1559-fees
@@ -62,15 +61,27 @@ class L1Api implements L1Interface {
     }
   }
 
-  async getMerkleRange(requestId: bigint): Promise<[bigint, bigint] | null> {
-    const status = await this.client.readContract({
+  async getMerkleRange(requestId: bigint): Promise<{ root: Uint8Array, range: [bigint, bigint] }> {
+    const root = await this.client.readContract({
       address: MANGATA_CONTRACT_ADDRESS,
       abi: ABI,
       functionName: "find_l2_batch",
       args: [requestId],
       blockTag: "latest"
     }) as any;
-    return status.start === 0n && status.end === 0n ? null : [status.start, status.end];
+
+    const range = await this.client.readContract({
+      address: MANGATA_CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: "merkleRootRange",
+      args: [root],
+      blockTag: "latest"
+    });
+
+    return {
+      root: root,
+      range: range as [bigint, bigint],
+    };
   }
 
   async getFerry(hash: Uint8Array): Promise<Uint8Array | null> {
@@ -157,7 +168,7 @@ class L1Api implements L1Interface {
       args: [u8aToHex(hash)],
       blockTag: "latest"
     });
-    logger.silly(`isFerried ${u8aToHex(hash)} status: ${status}`);
+
     return status !== closedStatus && status !== zeros;
   }
 
@@ -240,15 +251,11 @@ class L1Api implements L1Interface {
 
     const ferrytxHash = await wc.writeContract(ferryRequest.request);
     const status = await this.client.waitForTransactionReceipt({ hash: ferrytxHash });
-    logger.info(`Ferryed ${withdrawal.requestId} status: ${status.status}`);
-    status.logs.forEach((log) => {
-      logger.debug(log.data);
-    });
     return status.status === "success";
   }
 
 
-  async close(withdrawal: Withdrawal, privateKey: Uint8Array, proof: Uint8Array[] = []): Promise<boolean>{
+  async close(withdrawal: Withdrawal, merkleRoot: Uint8Array, proof: Uint8Array[], privateKey: Uint8Array): Promise<boolean>{
     const acc: PrivateKeyAccount = privateKeyToAccount(u8aToHex(privateKey) as `0x{string}`);
     const wc = createWalletClient({
       account: acc,
@@ -263,7 +270,7 @@ class L1Api implements L1Interface {
       address: MANGATA_CONTRACT_ADDRESS,
       abi: ABI,
       functionName: "close_withdrawal",
-      args: [toViemFormat(withdrawal), u8aToHex(withdrawal.hash, 256), proof.map((p) => u8aToHex(p, 256))],
+      args: [toViemFormat(withdrawal), u8aToHex(merkleRoot), proof.map((p) => u8aToHex(p))],
       maxFeePerGas: maxFeeInWei,
       maxPriorityFeePerGas: maxPriorityFeePerGasInWei
     });

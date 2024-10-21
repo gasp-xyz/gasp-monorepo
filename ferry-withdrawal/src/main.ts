@@ -82,12 +82,13 @@ async function main() {
             `Found ${pastWithdrawalsToClose.length} past withdrawals ready to close `,
           );
           if (pastWithdrawalsToClose.length > 0) {
+            const withdrawal = pastWithdrawalsToClose[0];
             logger.info(
-              `Closing withdrawal ${toString(pastWithdrawalsToClose[0])}`,
+              `Closing withdrawal ${toString(withdrawal)}`,
             );
-            const range = await l1.getMerkleRange(pastWithdrawalsToClose[0].requestId);
-            const proof = await l2.getMerkleProof(range![0], range![1], pastWithdrawalsToClose[0].requestId);
-            await l1.close(pastWithdrawalsToClose[0], hexToU8a(PRIVATE_KEY), proof);
+            const {range, root} = await l1.getMerkleRange(withdrawal.requestId);
+            const proof = await l2.getMerkleProof(range[0], range[1], withdrawal.requestId);
+            await l1.close(pastWithdrawalsToClose[0], root, proof, hexToU8a(PRIVATE_KEY));
           } else {
             const pending = await ferry.getPendingWithdrawals();
             logger.info(`Found ${pending.length} pending withdrawals`);
@@ -96,7 +97,6 @@ async function main() {
               inProgress = false;
               return;
             }
-            const status = await l1.isFerried(rated[0].hash);
             await l1.ferry(rated[0], hexToU8a(PRIVATE_KEY));
           }
           inProgress = false;
@@ -114,7 +114,7 @@ main()
     if (e instanceof ContractFunctionExecutionError) {
       logger.error("ContractFunctionExecutionError", e);
     } else {
-      logger.error("Something went wrong", e.toString());
+      logger.error("Something went wrong", e);
     }
     process.exit(1);
   });

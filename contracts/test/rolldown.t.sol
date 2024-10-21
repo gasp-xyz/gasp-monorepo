@@ -522,20 +522,18 @@ contract RolldownTest is Test, IRolldownPrimitives {
       assertEq(end, 13);
       
       //New update win over old updates
-      Range memory range0 = rolldown.find_l2_batch(3);
-      assertEq(range0.start, 2);
-      assertEq(range0.end, 13);
+      bytes32 batch = rolldown.find_l2_batch(3);
+      (start, end)  = rolldown.merkleRootRange(batch);
+      assertEq(start, 2);
+      assertEq(end, 13);
 
-      Range memory range1 = rolldown.find_l2_batch(12);
-      assertEq(range1.start, 12);
-      assertEq(range1.end, 14);
+      batch = rolldown.find_l2_batch(12);
+      (start, end)  = rolldown.merkleRootRange(batch);
+      assertEq(start, 12);
+      assertEq(end, 14);
 
       vm.expectRevert("Invalid request id");
-      Range memory range2 = rolldown.find_l2_batch(66);
-      assertEq(range2.start, 0);
-      assertEq(range2.end, 0);
-      
-      
+      rolldown.find_l2_batch(66);
     }
 
     function testRejectUpdateWithoutNewRequests() public {

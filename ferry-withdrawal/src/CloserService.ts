@@ -77,9 +77,9 @@ class CloserService {
     const isClosed = await this.l1.isClosed(withdrawal.hash);
     const isFerried = await this.l1.isFerried(withdrawal.hash) 
     if ( !isClosed && !isFerried) {
-      const range = await this.l1.getMerkleRange(withdrawal.requestId);
-      const proof = await this.l2.getMerkleProof(range![0], range![1], withdrawal.requestId);
-      await this.l1.close(withdrawal, privateKey, proof);
+      const {range, root} = await this.l1.getMerkleRange(withdrawal.requestId);
+      const proof = await this.l2.getMerkleProof(range[0], range[1], withdrawal.requestId);
+      await this.l1.close(withdrawal, root, proof, privateKey);
     }
 	}
 

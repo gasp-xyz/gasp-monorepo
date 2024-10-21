@@ -246,20 +246,19 @@ contract Rolldown is
 
     }
 
-    function find_l2_batch(uint256 requestId) view public returns (Range memory) {
+    function find_l2_batch(uint256 requestId) view public returns (bytes32) {
         require(requestId <= lastProcessedUpdate_origin_l2, "Invalid request id");
         if (roots.length == 0) {
-            return Range({start: 0, end: 0});
+            return bytes32(0);
         }
 
         for (uint256 i = roots.length - 1; i >= 0; i--) {
           if ( requestId >= merkleRootRange[roots[i]].start && requestId <= merkleRootRange[roots[i]].end) {
-            return merkleRootRange[roots[i]];
+            return roots[i];
           }
         }
 
-        return Range({start: 0, end: 0});
-
+        return bytes32(0);
     }
 
     function verify_request_proof(uint256 requestId, bytes32 request_hash, bytes32 merkle_root, bytes32[] calldata proof) private view {
@@ -277,10 +276,6 @@ contract Rolldown is
     }
 
     function hashWithdrawal(Withdrawal calldata withdrawal) public pure returns (bytes32) {
-      console.logBytes(abi.encode(L2RequestType.Withdrawal));
-      console.logBytes(abi.encode(withdrawal));
-      console.logBytes(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
-
       return keccak256(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
     }
 
