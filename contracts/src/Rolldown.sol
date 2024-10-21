@@ -169,14 +169,12 @@ contract Rolldown is
     function ferry_withdrawal(Withdrawal calldata withdrawal) payable public whenNotPaused nonReentrant {
       require(withdrawal.ferryTip <= withdrawal.amount, "Tip exceeds deposited amount");
       uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
-      bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+      bytes32 withdrawalHash = hashWithdrawal(withdrawal);
 
       require(processedL2Requests[withdrawalHash] == address(0), "Already ferried");
       processedL2Requests[withdrawalHash] = msg.sender;
 
       if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
-        // console.log(msg.value);
-        // console.log(ferriedAmount);
         require(msg.value > 0, "Native token not sent");
         require(msg.value == ferriedAmount, "Sent amount should exactly match withdrawal.amount - withdrawal.ferryTip");
         payable(withdrawal.recipient).transfer(ferriedAmount);
@@ -202,8 +200,8 @@ contract Rolldown is
     }
 
     function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
-        verify_request_proof(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)), merkle_root, proof);
-        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+        bytes32 withdrawalHash = hashWithdrawal(withdrawal);
+        verify_request_proof(withdrawal.requestId.id, withdrawalHash, merkle_root, proof);
 
         address ferryAddress = processedL2Requests[withdrawalHash];
         bool isFerried = ferryAddress != address(0);
@@ -278,15 +276,27 @@ contract Rolldown is
         );
     }
 
+    function hashWithdrawal(Withdrawal calldata withdrawal) public pure returns (bytes32) {
+      return keccak256(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
+    }
+
+    function hashCancel(Cancel calldata withdrawal) public pure returns (bytes32) {
+      return keccak256(bytes.concat(abi.encode(L2RequestType.Cancel), abi.encode(withdrawal)));
+    }
+    
+    function hashFailedDepositResolution(FailedDepositResolution calldata withdrawal) public pure returns (bytes32) {
+      return keccak256(bytes.concat(abi.encode(L2RequestType.FailedDepositResolution), abi.encode(withdrawal)));
+    }
+
     function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
-        bytes32 hash = keccak256(abi.encode(cancel));
+        bytes32 hash = hashCancel(cancel);
         verify_request_proof(cancel.requestId.id, hash, merkle_root, proof);
         process_l2_update_cancels(cancel);
         processedL2Requests[hash] = CLOSED;
     }
 
     function close_deposit_refund(FailedDepositResolution calldata failedDeposit, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
-        bytes32 hash = keccak256(abi.encode(failedDeposit));
+        bytes32 hash = hashFailedDepositResolution(failedDeposit);
         verify_request_proof(failedDeposit.requestId.id, keccak256(abi.encode(failedDeposit)), merkle_root, proof);
         process_l2_update_failed_deposit(failedDeposit);
         processedL2Requests[hash] = CLOSED;
