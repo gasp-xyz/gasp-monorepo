@@ -11,5 +11,5 @@ export interface L1Interface {
   getFerry(hash: Uint8Array): Promise<Uint8Array | null>;
 
   ferry(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>;
-  close(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>;
-}
+  close(withdrawal: Withdrawal, privateKey: Uint8Array, proof: Uint8Array[]): Promise<boolean>;
+  getMerkleRange(requestId: bigint): Promise<[bigint, bigint] | null>; }

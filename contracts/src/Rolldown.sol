@@ -277,15 +277,19 @@ contract Rolldown is
     }
 
     function hashWithdrawal(Withdrawal calldata withdrawal) public pure returns (bytes32) {
+      console.logBytes(abi.encode(L2RequestType.Withdrawal));
+      console.logBytes(abi.encode(withdrawal));
+      console.logBytes(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
+
       return keccak256(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
     }
 
-    function hashCancel(Cancel calldata withdrawal) public pure returns (bytes32) {
-      return keccak256(bytes.concat(abi.encode(L2RequestType.Cancel), abi.encode(withdrawal)));
+    function hashCancel(Cancel calldata cancel) public pure returns (bytes32) {
+      return keccak256(bytes.concat(abi.encode(L2RequestType.Cancel), abi.encode(cancel)));
     }
     
-    function hashFailedDepositResolution(FailedDepositResolution calldata withdrawal) public pure returns (bytes32) {
-      return keccak256(bytes.concat(abi.encode(L2RequestType.FailedDepositResolution), abi.encode(withdrawal)));
+    function hashFailedDepositResolution(FailedDepositResolution calldata failedDeposit) public pure returns (bytes32) {
+      return keccak256(bytes.concat(abi.encode(L2RequestType.FailedDepositResolution), abi.encode(failedDeposit)));
     }
 
     function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {

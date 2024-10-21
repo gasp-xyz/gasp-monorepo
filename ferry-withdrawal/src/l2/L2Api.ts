@@ -38,6 +38,12 @@ class L2Api implements L2Interface {
 		this.api = api;
 	}
 
+  async getMerkleProof(startRange: bigint, endRange: bigint, txId: bigint): Promise<Uint8Array[]> {
+    const chain: PalletRolldownMessagesChain = getL1ChainType(this.api);
+    const result = await this.api.rpc.rolldown.get_merkle_proof(chain, [startRange, endRange], txId);
+    return result.map((elem: Uint8Array) => elem);
+  }
+
 	async getNativeTokenAddress(): Promise<Uint8Array> {
 		return (await this.api.query.assetRegistry.idToL1Asset(0))
 			.unwrap()

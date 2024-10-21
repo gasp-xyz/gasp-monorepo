@@ -7,11 +7,8 @@ import { anvil } from "viem/chains";
 import {
   ABI,
 	MANGATA_CONTRACT_ADDRESS,
-  MANGATA_NODE_URL,
 } from "../src/Config.js";
 import {
-  ContractFunctionExecutionError,
-  ContractFunctionRevertedError,
 	type PrivateKeyAccount,
 	createWalletClient,
   encodeAbiParameters,
@@ -45,7 +42,8 @@ function hashWithdrawal(withdrawal: Withdrawal) {
     ABI.find((e: any) => e!.name === "ferry_withdrawal")!.inputs!,
     [toViemFormat(withdrawal)]
   );
-  return hexToU8a(keccak256(encoded).toString());
+  const input = new Uint8Array([...hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000"), ...hexToU8a(encoded.toString())])
+  return hexToU8a(keccak256(input));
 }
 
 async function updateUpdaterAccount(uri: string) {
@@ -227,15 +225,37 @@ describe('L1Interface', () => {
     };
 
     const privateKey = hexToU8a("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
+    expect(await l1Api.isFerried(hashWithdrawal(withdrawal))).toBeFalsy();
     await l1Api.ferry(withdrawal, privateKey);
+    expect(await l1Api.isFerried(hashWithdrawal(withdrawal))).toBeTruthy();
     }, {timeout: 10000});
+
+  it('getMerkleRange works', async () => {
+    await updateUpdaterAccount(WS_URI);
+    await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
+    const randomAddress = getRandomUintArray(20);
+    const lastRequestId = await l1Api.getLatestRequestId();
+
+    let withdrawal = {
+        requestId: lastRequestId! + 1n,
+        withdrawalRecipient: randomAddress,
+        tokenAddress: TOKEN_ADDRESS,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 256),
+    };
+    withdrawal.hash = hashWithdrawal(withdrawal);
+
+    await injectMerkleRoot(WS_URI, withdrawal.hash, withdrawal.requestId, withdrawal.requestId);
+    const result = await l1Api.getMerkleRange(withdrawal.requestId);
+    expect(result).not.toBeNull();
+    }, {timeout: 30000});
 
   it('closeWithdrawal works', async () => {
     await updateUpdaterAccount(WS_URI);
     await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
     const randomAddress = getRandomUintArray(20);
     const lastRequestId = await l1Api.getLatestRequestId();
-    console.info(lastRequestId);
 
     let withdrawal = {
         requestId: lastRequestId! + 1n,
@@ -251,7 +271,7 @@ describe('L1Interface', () => {
     const privateKey = hexToU8a("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
     expect(await l1Api.isFerried(hashWithdrawal(withdrawal))).toBeFalsy();
     expect(await l1Api.isClosed(hashWithdrawal(withdrawal))).toBeFalsy();
-    await l1Api.close(withdrawal, privateKey);
+    await l1Api.close(withdrawal, privateKey, []);
     expect(await l1Api.isClosed(hashWithdrawal(withdrawal))).toBeTruthy();
     }, {timeout: 30000});
 
