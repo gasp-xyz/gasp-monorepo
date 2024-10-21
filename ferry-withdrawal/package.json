@@ -10,6 +10,7 @@
     "run": "node build/src/main.js",
     "test": "vitest --dir tests",
     "test-ferry": "vitest --dir tests ferry",
+    "test-closer": "vitest --dir tests closer",
     "test-l1": "vitest --dir tests l1",
     "test-l2": "vitest --dir tests l2"
   },
