@@ -294,7 +294,7 @@ contract FinalizerTaskManager is
             IRolldown.Range memory range;
             range.start = taskResponse.rangeStart;
             range.end = taskResponse.rangeEnd;
-            rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
+            rolldown.updateL1FromL2(taskResponse.rdUpdate, range);
         }
         chainRdBatchNonce[taskResponse.chainId] = taskResponse.batchId + 1;
 

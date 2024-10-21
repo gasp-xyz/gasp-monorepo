@@ -68,7 +68,7 @@ contract GaspMultiRollupService is
         quorumThresholdPercentage = task.quorumThresholdPercentage;
 
         for (uint256 i = 0; i < merkleRoots.length; i++) {
-            rolldown.update_l1_from_l2(merkleRoots[i], ranges[i]);
+            rolldown.updateL1FromL2(merkleRoots[i], ranges[i]);
         }
         if (merkleRoots.length != 0){
             chainRdBatchNonce = lastBatchId + 1;
@@ -156,7 +156,7 @@ contract GaspMultiRollupService is
         IRolldown.Range memory range;
         range.start = taskResponse.rangeStart;
         range.end = taskResponse.rangeEnd;
-        rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
+        rolldown.updateL1FromL2(taskResponse.rdUpdate, range);
         chainRdBatchNonce = taskResponse.batchId + 1;
         latestCompletedRdTaskNumber = task.taskNum;
 

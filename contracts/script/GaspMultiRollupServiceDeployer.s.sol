@@ -15,7 +15,7 @@ import "forge-std/StdJson.sol";
 import "forge-std/console.sol";
 import {GaspMultiRollupService} from "../src/GaspMultiRollupService.sol";
 import {IGaspMultiRollupServicePrimitives} from "../src/IGaspMultiRollupServicePrimitives.sol";
-import {IRolldownPrimitives} from "../src/Rolldown.sol";
+import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
 
 contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
