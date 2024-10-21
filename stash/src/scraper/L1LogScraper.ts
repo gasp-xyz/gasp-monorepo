@@ -1,7 +1,7 @@
 import { type PublicClientConfig, createPublicClient, http } from 'viem'
 import RolldownContract from '../Rolldown.json' assert { type: 'json' }
 import {
-  transactionRepository,
+  depositRepository,
   withdrawalRepository,
 } from '../repository/TransactionRepository.js'
 import process from 'node:process'
@@ -47,7 +47,7 @@ export const watchDepositAcceptedIntoQueue = async (
       })
       for (const log of logs) {
         const { transactionHash, blockNumber } = log
-        const existingTransaction = await transactionRepository
+        const existingTransaction = await depositRepository
           .search()
           .where('txHash')
           .equals(transactionHash)
@@ -62,7 +62,7 @@ export const watchDepositAcceptedIntoQueue = async (
           existingTransaction.requestId = Number((log as any).args.requestId)
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
-          await transactionRepository.save(existingTransaction)
+          await depositRepository.save(existingTransaction)
           logger.info({
             message: 'Deposit status updated:',
             transaction: existingTransaction,
@@ -135,7 +135,10 @@ export const watchWithdrawalClosed = async (
           .and('chain')
           .equals(chainName)
           .returnFirst()
-        logger.info('Existing withdrawal found to be updated:', existingTransaction)
+        logger.info(
+          'Existing withdrawal found to be updated:',
+          existingTransaction
+        )
         if (existingTransaction) {
           existingTransaction.status = L1_PROCESSED_STATUS
           const timestamp = new Date().toISOString()
@@ -169,7 +172,7 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
         l1Chain,
         'deposit'
       )
-      const transactionsToProcess = await transactionRepository
+      const transactionsToProcess = await depositRepository
         .search()
         .where('chain')
         .equals(l1Chain)
@@ -185,7 +188,7 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
         transaction.status = 'PROCESSED'
         const timestamp = new Date().toISOString()
         transaction.updated = Date.parse(timestamp)
-        await transactionRepository.save(transaction)
+        await depositRepository.save(transaction)
       }
       await saveLastProcessedRequestId(
         //even if we don't have any transaction to process, we save the last processed request id
@@ -210,7 +213,7 @@ const saveLastProcessedRequestId = async (
   type: string
 ) => {
   await timeseries.client.hset(
-    `tx:${type}:${l1Chain}`,
+    `transactions_scanned:${type}:${l1Chain}`,
     'lastRequestId',
     lastProcessedRequestId.toString()
   )
@@ -224,7 +227,7 @@ const getLastProcessedRequestId = async (
   type: string
 ): Promise<number | null> => {
   const result = await timeseries.client.hget(
-    `tx:${type}:${l1Chain}`,
+    `transactions_scanned:${type}:${l1Chain}`,
     'lastRequestId'
   )
   return result ? Number(result) : 0
@@ -236,7 +239,7 @@ const saveLastProcessedBlock = async (
   type: string
 ) => {
   await timeseries.client.hset(
-    `tx:${type}:${l1Chain}`,
+    `transactions_scanned:${type}:${l1Chain}`,
     'lastBlock',
     lastProcessedBlock.toString()
   )
@@ -250,7 +253,7 @@ const getLastProcessedBlock = async (
   type: string
 ): Promise<bigint | null> => {
   const result = await timeseries.client.hget(
-    `tx:${type}:${l1Chain}`,
+    `transactions_scanned:${type}:${l1Chain}`,
     'lastBlock'
   )
   return result ? BigInt(result) : 0n

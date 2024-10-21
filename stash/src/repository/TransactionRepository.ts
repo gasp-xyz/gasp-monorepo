@@ -1,5 +1,5 @@
 import { Client } from 'redis-om'
-import { transactionSchema } from '../model/Transaction.js'
+import { depositSchema } from '../model/Deposit.js'
 import { withdrawalSchema } from '../model/Withdrawal.js'
 import { getTimeseriesUrl } from '../connector/RedisConnector.js'
 import logger from '../util/Logger.js'
@@ -7,11 +7,11 @@ import logger from '../util/Logger.js'
 const client = new Client()
 await client.open(getTimeseriesUrl())
 
-const transactionRepository = client.fetchRepository(transactionSchema)
+const depositRepository = client.fetchRepository(depositSchema)
 const withdrawalRepository = client.fetchRepository(withdrawalSchema)
 
 try {
-  await transactionRepository.createIndex()
+  await depositRepository.createIndex()
 } catch (error) {
   if (error.message.includes('Deposit index already exists')) {
     logger.log({
@@ -35,4 +35,4 @@ try {
   }
 }
 
-export { transactionRepository, withdrawalRepository }
+export { depositRepository, withdrawalRepository }
