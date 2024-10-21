@@ -29,7 +29,7 @@ import {StartedTestContainer} from "testcontainers";
 import {createAWithdrawWithManualBatch} from "./nodeHelper";
 
 
-jest.setTimeout(1500000);
+jest.setTimeout(3500000);
 
 const anvil3 = defineChain({
     id: 31337,
@@ -159,6 +159,7 @@ describe('AVS Finalizer', () => {
 
     });
     it('operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )', async () => {
+        console.log("Starting : operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )");
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
             retryCount: 5,

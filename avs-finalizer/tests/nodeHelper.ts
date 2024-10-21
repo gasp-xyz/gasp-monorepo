@@ -33,7 +33,9 @@ export async function createAWithdrawWithManualBatch(chain = "Ethereum", num = 1
         ]
     );
     for (let i = 0; i < num; i++) {
-        await signTx(api, tx, alice);
+        console.log("Batching updates!... ")
+        const events = await signTx(api, tx, alice);
+        console.log(JSON.stringify(events));
     }
 
 }
