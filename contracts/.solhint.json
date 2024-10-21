@@ -53,7 +53,7 @@
     "not-rely-on-block-hash": "error",
     "not-rely-on-time": "off",
     "one-contract-per-file": "error",
-    "ordering": "off",
+    "ordering": "error",
     "payable-fallback": "error",
     "private-vars-leading-underscore": "error",
     "quotes": ["error", "double"],

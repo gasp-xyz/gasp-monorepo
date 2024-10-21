@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Gasp smart contracts for an EVM compatible virtual machine",
   "scripts": {
-    "format": "bun prettier --check '**/*.{json,md,yml}' && forge fmt --check src/Rolldown.sol",
-    "format:fix": "bun prettier --write '**/*.{json,md,yml}' && forge fmt src/Rolldown.sol",
+    "format": "bun prettier --check '**/*.{json,md,yml}' && forge fmt --check src/{Rolldown|IRolldown}.sol",
+    "format:fix": "bun prettier --write '**/*.{json,md,yml}' && forge fmt src/{Rolldown|IRolldown}.sol",
     "lint": "bun solhint '{script,src,test}/**/Rolldown.sol'",
-    "lint:fix": "bun solhint --fix '{script,src,test}/**/Rolldown.sol'",
+    "lint:fix": "bun solhint --fix '{script,src,test}/**/{Rolldown|IRolldown}.sol'",
     "analyze": "slitherin . --separated",
     "analyze:ci": "slitherin --separated . --skip-clean --ignore-compile"
   },
