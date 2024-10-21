@@ -14,48 +14,7 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
     using SafeERC20 for IERC20;
 
     address public constant NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
-
     address public constant CLOSED = 0x1111111111111111111111111111111111111111;
-
-    // TODO: move to separate modoule/contract
-    function calculateRoot(bytes32 leave_hash, uint32 leave_idx, bytes32[] calldata proof, uint32 leaves_count)
-        public
-        pure
-        returns (bytes32)
-    {
-        uint32 levels = 0;
-        uint32 tmp = leaves_count;
-        while (tmp > 0) {
-            tmp = tmp / 2;
-            levels += 1;
-        }
-        return calculateRootImpl(levels, leave_idx, leave_hash, proof, 0, leaves_count - 1);
-    }
-
-    function calculateRootImpl(
-        uint32 level,
-        uint32 pos,
-        bytes32 hash,
-        bytes32[] calldata proofs,
-        uint32 proof_idx,
-        uint32 max_index
-    ) public pure returns (bytes32) {
-        if (pos % 2 == 0) {
-            if (pos == max_index) {
-                // promoted node
-            } else {
-                hash = keccak256(abi.encodePacked(hash, proofs[proof_idx++]));
-            }
-        } else {
-            hash = keccak256(abi.encodePacked(proofs[proof_idx++], hash));
-        }
-
-        if (level == 1) {
-            return hash;
-        } else {
-            return calculateRootImpl(level - 1, pos / 2, hash, proofs, proof_idx, max_index / 2);
-        }
-    }
 
     function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
         public
@@ -70,20 +29,60 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         updaterAccount = updater;
     }
 
+    // TODO: move to separate modoule/contract
+    function calculateRoot(bytes32 leaveHash, uint32 leaveIdx, bytes32[] calldata proof, uint32 leaveCount)
+        public
+        pure
+        returns (bytes32)
+    {
+        uint32 levels = 0;
+        uint32 tmp = leaveCount;
+        while (tmp > 0) {
+            tmp = tmp / 2;
+            levels += 1;
+        }
+        return calculateRootImpl(levels, leaveIdx, leaveHash, proof, 0, leaveCount - 1);
+    }
+
+    function calculateRootImpl(
+        uint32 level,
+        uint32 pos,
+        bytes32 hash,
+        bytes32[] calldata proofs,
+        uint32 proofIdx,
+        uint32 maxIdx
+    ) public pure returns (bytes32) {
+        if (pos % 2 == 0) {
+            if (pos == maxIdx) {
+                // promoted node
+            } else {
+                hash = keccak256(abi.encodePacked(hash, proofs[proofIdx++]));
+            }
+        } else {
+            hash = keccak256(abi.encodePacked(proofs[proofIdx++], hash));
+        }
+
+        if (level == 1) {
+            return hash;
+        } else {
+            return calculateRootImpl(level - 1, pos / 2, hash, proofs, proofIdx, maxIdx / 2);
+        }
+    }
+
     function setUpdater(address updater) external onlyOwner whenNotPaused {
         updaterAccount = updater;
         emit NewUpdaterSet(updaterAccount);
     }
 
     function depositNative() external payable nonReentrant whenNotPaused {
-        depositNativeWithTip(0);
+        _depositNativeWithTip(0);
     }
 
     function depositNative(uint256 ferryTip) external payable nonReentrant whenNotPaused {
-        depositNativeWithTip(ferryTip);
+        _depositNativeWithTip(ferryTip);
     }
 
-    function depositNativeWithTip(uint256 ferryTip) private {
+    function _depositNativeWithTip(uint256 ferryTip) private {
         require(ferryTip <= msg.value, "Tip exceeds deposited amount");
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
@@ -107,22 +106,22 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
     }
 
     function deposit(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
-        depositERC20WithTip(tokenAddress, amount, 0);
+        _depositERC20WithTip(tokenAddress, amount, 0);
     }
 
     function deposit(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
-        depositERC20WithTip(tokenAddress, amount, ferryTip);
+        _depositERC20WithTip(tokenAddress, amount, ferryTip);
     }
 
     function depositERC20(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
-        depositERC20WithTip(tokenAddress, amount, 0);
+        _depositERC20WithTip(tokenAddress, amount, 0);
     }
 
     function depositERC20(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
-        depositERC20WithTip(tokenAddress, amount, ferryTip);
+        _depositERC20WithTip(tokenAddress, amount, ferryTip);
     }
 
-    function depositERC20WithTip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
+    function _depositERC20WithTip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
         require(ferryTip <= amount, "Tip exceeds deposited amount");
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
@@ -149,11 +148,11 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
     }
 
-    function min(uint256 a, uint256 b) private pure returns (uint256) {
+    function _min(uint256 a, uint256 b) private pure returns (uint256) {
         return a < b ? a : b;
     }
 
-    function max(uint256 a, uint256 b) private pure returns (uint256) {
+    function _max(uint256 a, uint256 b) private pure returns (uint256) {
         return a > b ? a : b;
     }
 
@@ -170,7 +169,7 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
             // console.log(ferriedAmount);
             require(msg.value > 0, "Native token not sent");
             require(
-                msg.value == ferriedAmount, "Sent amount should exactly match withdrawal.amount - withdrawal.ferryTip"
+                msg.value == ferriedAmount, "Sent amount must exactly match amount without ferryTip"
             );
             payable(withdrawal.recipient).transfer(ferriedAmount);
             emit WithdrawalFerried(
@@ -186,12 +185,12 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         }
     }
 
-    function closeWithdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof)
+    function closeWithdrawal(Withdrawal calldata withdrawal, bytes32 merkleRoot, bytes32[] calldata proof)
         public
         whenNotPaused
         nonReentrant
     {
-        verifyRequestProof(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)), merkle_root, proof);
+        _verifyRequestProof(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)), merkleRoot, proof);
         bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
 
         address ferryAddress = processedL2Requests[withdrawalHash];
@@ -200,25 +199,25 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
 
         if (!isFerried) {
             if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
-                sendNativeAndEmitEvent(withdrawal.recipient, withdrawal.amount - withdrawal.ferryTip);
+                _sendNativeAndEmitEvent(withdrawal.recipient, withdrawal.amount - withdrawal.ferryTip);
                 if (withdrawal.ferryTip > 0) {
-                    sendNativeAndEmitEvent(msg.sender, withdrawal.ferryTip);
+                    _sendNativeAndEmitEvent(msg.sender, withdrawal.ferryTip);
                 }
             } else {
-                sendERC20AndEmitEvent(
+                _sendERC20AndEmitEvent(
                     withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount - withdrawal.ferryTip
                 );
                 if (withdrawal.ferryTip > 0) {
-                    sendERC20AndEmitEvent(msg.sender, withdrawal.tokenAddress, withdrawal.ferryTip);
+                    _sendERC20AndEmitEvent(msg.sender, withdrawal.tokenAddress, withdrawal.ferryTip);
                 }
             }
 
             emit WithdrawalClosed(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)));
         } else {
             if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
-                sendNativeAndEmitEvent(ferryAddress, withdrawal.amount);
+                _sendNativeAndEmitEvent(ferryAddress, withdrawal.amount);
             } else {
-                sendERC20AndEmitEvent(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
+                _sendERC20AndEmitEvent(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
             }
 
             emit FerriedWithdrawalClosed(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)));
@@ -231,52 +230,57 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
             return Range({start: 0, end: 0});
         }
 
-        for (uint256 i = roots.length - 1; i >= 0; i--) {
+        uint256 rootCount = roots.length;
+        for (uint256 i = rootCount - 1; i >= 0;) {
             if (requestId >= merkleRootRange[roots[i]].start && requestId <= merkleRootRange[roots[i]].end) {
                 return merkleRootRange[roots[i]];
+            }
+            
+            unchecked {
+              --i;
             }
         }
 
         return Range({start: 0, end: 0});
     }
 
-    function verifyRequestProof(uint256 requestId, bytes32 request_hash, bytes32 merkle_root, bytes32[] calldata proof)
+    function _verifyRequestProof(uint256 requestId, bytes32 requestHash, bytes32 merkleRoot, bytes32[] calldata proof)
         private
         view
     {
-        Range memory r = merkleRootRange[merkle_root];
+        Range memory r = merkleRootRange[merkleRoot];
         require(r.start != 0 && r.end != 0, "Unknown merkle root");
 
-        require(processedL2Requests[request_hash] != CLOSED, "Already processed");
+        require(processedL2Requests[requestHash] != CLOSED, "Already processed");
 
-        uint32 leaves_count = uint32(r.end - r.start + 1);
+        uint32 leaveCount = uint32(r.end - r.start + 1);
         uint32 pos = uint32(requestId - r.start);
-        require(calculateRoot(request_hash, pos, proof, leaves_count) == merkle_root, "Invalid proof");
+        require(calculateRoot(requestHash, pos, proof, leaveCount) == merkleRoot, "Invalid proof");
     }
 
-    function closeCancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof)
+    function closeCancel(Cancel calldata cancel, bytes32 merkleRoot, bytes32[] calldata proof)
         public
         whenNotPaused
         nonReentrant
     {
         bytes32 hash = keccak256(abi.encode(cancel));
-        verifyRequestProof(cancel.requestId.id, hash, merkle_root, proof);
-        processL2UpdateCancels(cancel);
+        _verifyRequestProof(cancel.requestId.id, hash, merkleRoot, proof);
+        _processL2UpdateCancels(cancel);
         processedL2Requests[hash] = CLOSED;
     }
 
     function closeDepositRefund(
         FailedDepositResolution calldata failedDeposit,
-        bytes32 merkle_root,
+        bytes32 merkleRoot,
         bytes32[] calldata proof
     ) public whenNotPaused nonReentrant {
         bytes32 hash = keccak256(abi.encode(failedDeposit));
-        verifyRequestProof(failedDeposit.requestId.id, keccak256(abi.encode(failedDeposit)), merkle_root, proof);
-        processL2UpdateFailedDeposit(failedDeposit);
+        _verifyRequestProof(failedDeposit.requestId.id, keccak256(abi.encode(failedDeposit)), merkleRoot, proof);
+        _processL2UpdateFailedDeposit(failedDeposit);
         processedL2Requests[hash] = CLOSED;
     }
 
-    function processL2UpdateFailedDeposit(FailedDepositResolution calldata failedDeposit) private {
+    function _processL2UpdateFailedDeposit(FailedDepositResolution calldata failedDeposit) private {
         Deposit storage originDeposit = deposits[failedDeposit.originRequestId];
         address recipient = originDeposit.depositRecipient;
 
@@ -285,9 +289,9 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         }
 
         if (originDeposit.tokenAddress == NATIVE_TOKEN_ADDRESS) {
-            sendNativeAndEmitEvent(recipient, originDeposit.amount);
+            _sendNativeAndEmitEvent(recipient, originDeposit.amount);
         } else {
-            sendERC20AndEmitEvent(recipient, originDeposit.tokenAddress, originDeposit.amount);
+            _sendERC20AndEmitEvent(recipient, originDeposit.tokenAddress, originDeposit.amount);
         }
 
         emit FailedDepositResolutionClosed(
@@ -296,9 +300,9 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
     }
 
     // TODO:
-    // - verify that merkle_root is correct (passing TaskResponse along with the merkle root?)
-    // - verify that range is correct and belongs to particular merkle_root
-    function updateL1FromL2(bytes32 merkle_root, Range calldata range /*,TaskResponse calldata response ??? */ )
+    // - verify that merkleRoot is correct (passing TaskResponse along with the merkle root?)
+    // - verify that range is correct and belongs to particular merkleRoot
+    function updateL1FromL2(bytes32 merkleRoot, Range calldata range /*,TaskResponse calldata response ??? */ )
         external
         whenNotPaused
     {
@@ -307,25 +311,25 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         require(range.start > 0, "range id must be greater than 0");
         require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
         require(range.end >= range.start, "Invalid range");
-        roots.push(merkle_root);
-        merkleRootRange[merkle_root] = range;
+        roots.push(merkleRoot);
+        merkleRootRange[merkleRoot] = range;
         lastProcessedUpdate_origin_l2 = range.end;
-        emit L2UpdateAccepted(merkle_root, range);
+        emit L2UpdateAccepted(merkleRoot, range);
     }
 
     function getMerkleRootsLength() public view returns (uint256) {
         return roots.length;
     }
 
-    function processL2UpdateCancels(Cancel calldata cancel) private {
+    function _processL2UpdateCancels(Cancel calldata cancel) private {
         bool cancelJustified = false;
 
         if (cancel.range.end > counter - 1) {
             cancelJustified = true;
         } else {
             L1Update memory pending = getPendingRequests(cancel.range.start, cancel.range.end);
-            bytes32 correct_hash = keccak256(abi.encode(pending));
-            cancelJustified = correct_hash != cancel.hash;
+            bytes32 correctHash = keccak256(abi.encode(pending));
+            cancelJustified = correctHash != cancel.hash;
         }
         uint256 timeStamp = block.timestamp;
 
@@ -340,14 +344,14 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         emit DisputeResolutionAcceptedIntoQueue(resolution.l2RequestId, resolution.cancelJustified);
     }
 
-    function sendNativeAndEmitEvent(address recipient, uint256 amount) private {
+    function _sendNativeAndEmitEvent(address recipient, uint256 amount) private {
         require(payable(address(this)).balance >= amount, "Not enough funds in contract");
         require(amount > 0, "Amount must be greater than zero");
         emit NativeTokensWithdrawn(recipient, amount);
         Address.sendValue(payable(recipient), amount);
     }
 
-    function sendERC20AndEmitEvent(address recipient, address tokenAddress, uint256 amount) private {
+    function _sendERC20AndEmitEvent(address recipient, address tokenAddress, uint256 amount) private {
         IERC20 token = IERC20(tokenAddress);
         require(token.balanceOf(address(this)) >= amount, "Not enough funds in contract");
         require(amount > 0, "Amount must be greater than zero");
@@ -360,36 +364,44 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         L1Update memory result;
 
         result.chain = chain;
-        uint256 depositsCounter = 0;
-        uint256 cancelsCounter = 0;
+        uint256 depositCounter = 0;
+        uint256 cancelCounter = 0;
 
         if (start == 0 && end == 0) {
             return result;
         }
 
-        for (uint256 requestId = start; requestId <= end; requestId++) {
-            if (deposits[requestId].requestId.id != 0) {
-                depositsCounter++;
-            } else if (cancelResolutions[requestId].requestId.id != 0) {
-                cancelsCounter++;
+        for (uint256 i = start; i <= end;) {
+            if (deposits[i].requestId.id != 0) {
+                ++depositCounter;
+            } else if (cancelResolutions[i].requestId.id != 0) {
+                ++cancelCounter;
             } else {
                 revert("Invalid range");
             }
+
+            unchecked {
+              ++i;
+            }
         }
 
-        result.pendingDeposits = new Deposit[](depositsCounter);
-        result.pendingCancelResolutions = new CancelResolution[](cancelsCounter);
+        result.pendingDeposits = new Deposit[](depositCounter);
+        result.pendingCancelResolutions = new CancelResolution[](cancelCounter);
 
-        depositsCounter = 0;
-        cancelsCounter = 0;
+        depositCounter = 0;
+        cancelCounter = 0;
 
-        for (uint256 requestId = start; requestId <= end; requestId++) {
-            if (deposits[requestId].requestId.id > 0) {
-                result.pendingDeposits[depositsCounter++] = deposits[requestId];
-            } else if (cancelResolutions[requestId].l2RequestId > 0) {
-                result.pendingCancelResolutions[cancelsCounter++] = cancelResolutions[requestId];
+        for (uint256 i = start; i <= end; ) {
+            if (deposits[i].requestId.id > 0) {
+                result.pendingDeposits[depositCounter++] = deposits[i];
+            } else if (cancelResolutions[i].l2RequestId > 0) {
+                result.pendingCancelResolutions[cancelCounter++] = cancelResolutions[i];
             } else {
                 break;
+            }
+
+            unchecked {
+               ++i;
             }
         }
 
