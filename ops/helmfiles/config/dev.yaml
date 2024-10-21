@@ -135,7 +135,7 @@ sequencerEnvEth:
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
-  TX_COST: 1000000000000000000000
+  TX_COST: '1000000000000000000000'
 
 firstSequencerMnemonicArb: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
 secondSequencerMnemonicArb: "bottom drive obey lake curtain smoke basket hold race lonely fit walk//Bob"
@@ -145,4 +145,4 @@ sequencerEnvArb:
   L1_CHAIN: "Arbitrum"
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
-  TX_COST: 1000000000000000000000
+  TX_COST: '1000000000000000000000'
