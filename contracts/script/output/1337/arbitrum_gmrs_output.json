@@ -1,6 +1,10 @@
 {
   "addresses": {
     "gaspErc20Mock": "0x04C89607413713Ec9775E14b954286519d836FEf",
+    "gmrs": "0x8198f5d8F8CfFE8f9C413d98a0A55aEB8ab9FbB7",
+    "gmrsImplementation": "0x0355B7B8cb128fA5692729Ab3AAa199C1753f726",
+    "gmrsPauseReg": "0x51A1ceB83B83F1985a81C295d1fF28Afef186E02",
+    "gmrsProxyAdmin": "0xDC11f7E700A4c898AE5CAddB1082cFfa76512aDD",
     "rolldown": "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823",
     "rolldownImplementation": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
     "rolldownPauseReg": "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6",
@@ -11,6 +15,9 @@
     "deploymentBlock": 69
   },
   "permissions": {
+    "gmrsOwner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "gmrsUpdater": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
+    "gmrsUpgrader": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "rolldownOwner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "rolldownUpdater": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "rolldownUpgrader": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
