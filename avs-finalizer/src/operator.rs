@@ -2,7 +2,6 @@ use crate::chainio::{avs::AvsContracts, build_eth_client, eigen::ElContracts, Cl
 use crate::cli::CliArgs;
 use crate::crypto::bn254::{BlsKeypair, OperatorId};
 use crate::crypto::EthConvert;
-use crate::executor::execute::execute_block;
 use crate::rpc::Rpc;
 
 use bindings::{
@@ -20,15 +19,12 @@ use ethers::{
     providers::StreamExt,
     types::{Address, Bytes, U256},
 };
-use node_executor::ExecutorDispatch;
-use node_primitives::BlockNumber;
 
 use ethers::abi::AbiEncode;
 use eyre::{eyre, OptionExt};
 use serde::{Deserialize, Serialize};
 use sp_core::H256;
-use sp_runtime::traits::{BlakeTwo256, Hash, Keccak256};
-use sp_runtime::{generic, OpaqueExtrinsic};
+use sp_runtime::traits::{Hash, Keccak256};
 use std::collections::HashMap;
 use std::sync::Arc;
 use substrate_rpc_client::{rpc_params, ws_client, ClientT};
@@ -36,9 +32,6 @@ use tokio::select;
 use tokio::time::{sleep, Duration};
 use tokio::try_join;
 use tracing::{debug, error, info, instrument, trace};
-
-pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
-pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 
 type QuorumNum = u8;
 
@@ -312,23 +305,6 @@ impl Operator {
         debug!("Done waiting for gasp node to sync");
         info!("Gasp node is synced!");
         Ok(())
-    }
-
-    pub(crate) async fn execute_block(
-        self: Arc<Self>,
-        block_number: BlockNumber,
-    ) -> eyre::Result<(H256, H256, H256)> {
-        use sc_executor::{sp_wasm_interface::ExtendedHostFunctions, NativeExecutionDispatch};
-        let res = execute_block::<
-            Block,
-            ExtendedHostFunctions<
-                sp_io::SubstrateHostFunctions,
-                <ExecutorDispatch as NativeExecutionDispatch>::ExtendHostFunctions,
-            >,
-        >(&self.substrate_client_uri, block_number)
-        .await?;
-
-        Ok(res)
     }
 
     pub(crate) async fn get_operators_state_info_hash(

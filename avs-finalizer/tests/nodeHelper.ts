@@ -17,7 +17,7 @@ export async function createAWithdrawWithManualBatch(chain = "Ethereum", num = 1
             api.tx.rolldown.withdraw(
                 api.createType("PalletRolldownMessagesChain", chain),
                 alice.address,
-                "0xc351628eb244ec633d5f21fbd6621e1a683b1181",
+                "0xfd471836031dc5108809d173a067e8486b9047a3",
                 11,
                 null),
             api.tx.rolldown.createBatch(
