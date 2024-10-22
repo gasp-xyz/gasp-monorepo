@@ -6,7 +6,7 @@ import "@eigenlayer/contracts/strategies/StrategyBase.sol";
 import "../../src/ERC20Mock.sol";
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";
-import {IRolldownPrimitives} from "../../src/IRolldownPrimitives.sol";
+import {IRolldown} from "../../src/interfaces/IRolldown.sol";
 
 contract Utils is Script {
     // Note that this fct will only work for the ERC20Mock that has a public mint function
@@ -140,12 +140,12 @@ contract Utils is Script {
         vm.writeJson(outputJson, outputFilePath);
     }
 
-    function evmPrefixedPath(IRolldownPrimitives.ChainId chain, string memory path) public view returns (string memory) {
+    function evmPrefixedPath(IRolldown.ChainId chain, string memory path) public pure returns (string memory) {
       string memory evm;
 
-      if (chain == IRolldownPrimitives.ChainId.Ethereum) {
+      if (chain == IRolldown.ChainId.Ethereum) {
         evm = "ethereum_";
-      } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
+      } else if (chain == IRolldown.ChainId.Arbitrum) {
         evm = "arbitrum_"; 
       } else {
         revert("Unsupported chain");

@@ -13,7 +13,7 @@ import "@eigenlayer/contracts/permissions/Pausable.sol";
 import "./GaspMultiRollupServiceStorage.sol";
 import "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
 import "./IFinalizerTaskManager.sol";
-import {IRolldown} from "./IRolldown.sol";
+import {IRolldown} from "./interfaces/IRolldown.sol";
  
 contract GaspMultiRollupService is
     Initializable,

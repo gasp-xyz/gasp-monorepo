@@ -6,7 +6,7 @@ import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "forge-std/StdJson.sol";
 import {Utilities, MyERC20} from "./utils/Utilities.sol";
-import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
+import {IRolldown} from "../src/interfaces/IRolldown.sol";
 import {Rolldown} from "../src/Rolldown.sol";
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -69,7 +69,7 @@ contract RolldownDeployerTest is Test {
                 rolldown.initialize.selector,
                 rolldownPauserReg,
                 owner,
-                IRolldownPrimitives.ChainId.Ethereum,
+                IRolldown.ChainId.Ethereum,
                 updaterAccount
             )
         );
@@ -90,7 +90,7 @@ contract RolldownDeployerTest is Test {
                 rolldown.initialize.selector,
                 rolldownPauserReg,
                 owner,
-                IRolldownPrimitives.ChainId.Ethereum,
+                IRolldown.ChainId.Ethereum,
                 updaterAccount
             )
         );
@@ -106,7 +106,7 @@ contract RolldownDeployerTest is Test {
                 rolldown.initialize.selector,
                 rolldownPauserReg,
                 owner,
-                IRolldownPrimitives.ChainId.Ethereum,
+                IRolldown.ChainId.Ethereum,
                 updaterAccount
             )
         );
@@ -131,7 +131,7 @@ contract RolldownDeployerTest is Test {
                 rolldown.initialize.selector,
                 rolldownPauserReg,
                 owner,
-                IRolldownPrimitives.ChainId.Ethereum,
+                IRolldown.ChainId.Ethereum,
                 updaterAccount
             )
         );
@@ -168,7 +168,7 @@ contract RolldownDeployerTest is Test {
                 rolldown.initialize.selector,
                 rolldownPauserReg,
                 owner,
-                IRolldownPrimitives.ChainId.Ethereum,
+                IRolldown.ChainId.Ethereum,
                 updaterAccount
             )
         );

@@ -5,8 +5,7 @@ import "../script/1_FinalizerAvsDeployer.s.sol";
 import "../script/M2_Deploy_From_Scratch.s.sol";
 import "../script/RolldownDeployer.s.sol";
 import "../script/GaspMultiRollupServiceDeployer.s.sol";
-import "../src/IRolldown.sol";
-import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
+import {IRolldown} from "../src/interfaces/IRolldown.sol";
 import {Utils} from "./utils/Utils.sol";
 
 import "forge-std/StdJson.sol";
@@ -24,7 +23,7 @@ contract MultiStage is Script, Utils, Test {
         Deployer finalizerDeployer = new Deployer();
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
 
-        if (!rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Ethereum)) {
+        if (!rolldownDeployer.isProxyDeployed(IRolldown.ChainId.Ethereum)) {
           console.log("################################################################################");
           console.log("Deploying eigen layer infra");
           console.log("################################################################################");
@@ -43,7 +42,7 @@ contract MultiStage is Script, Utils, Test {
           console.log("################################################################################");
           console.log("Deploying rolldown contracts");
           console.log("################################################################################");
-          rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+          rolldownDeployer.run(IRolldown.ChainId.Ethereum);
         } else {
           //TODO: 
           //redeploy finalizer contracts as well
@@ -51,7 +50,7 @@ contract MultiStage is Script, Utils, Test {
           console.log("################################################################################");
           console.log("Deploying rolldown contracts");
           console.log("################################################################################");
-          rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+          rolldownDeployer.run(IRolldown.ChainId.Ethereum);
         }
 
 
@@ -64,7 +63,7 @@ contract MultiStage is Script, Utils, Test {
         taskManager = FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
 
         string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
-        string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Ethereum, _ROLLDOWN_OUTPUT_PATH));
+        string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldown.ChainId.Ethereum, _ROLLDOWN_OUTPUT_PATH));
         rolldown = Rolldown(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown"));
 
         string memory _CONFIG_PATH = "deploy.config";
@@ -85,13 +84,13 @@ contract MultiStage is Script, Utils, Test {
         console.log("Deploying rolldown contracts");
         console.log("################################################################################");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
-        rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
+        rolldownDeployer.run(IRolldown.ChainId.Arbitrum);
 
         console.log("################################################################################");
         console.log("Deploying gaspMultiRollupService contracts");
         console.log("################################################################################");
         GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
-        gaspMultiRollupServiceDeployer.run(IRolldownPrimitives.ChainId.Arbitrum, true);
+        gaspMultiRollupServiceDeployer.run(IRolldown.ChainId.Arbitrum, true);
 
 
         Rolldown rolldown;
@@ -99,11 +98,11 @@ contract MultiStage is Script, Utils, Test {
         address avsOwner;
 
         string memory _GMRS_OUTPUT_PATH = "gmrs_output";
-        string memory gmrsDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Arbitrum, _GMRS_OUTPUT_PATH));
+        string memory gmrsDeployedContracts = readOutput(evmPrefixedPath(IRolldown.ChainId.Arbitrum, _GMRS_OUTPUT_PATH));
         gmrs = GaspMultiRollupService(stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs"));
 
         string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
-        string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Arbitrum, _ROLLDOWN_OUTPUT_PATH));
+        string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldown.ChainId.Arbitrum, _ROLLDOWN_OUTPUT_PATH));
         rolldown = Rolldown(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown"));
 
         string memory _CONFIG_PATH = "deploy.config";
@@ -123,7 +122,7 @@ contract MultiStage is Script, Utils, Test {
         console.log("Deploying rolldown contracts");
         console.log("################################################################################");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
-        rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
+        rolldownDeployer.run(IRolldown.ChainId.Arbitrum);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("ethereum-holesky"))){
 
@@ -131,7 +130,7 @@ contract MultiStage is Script, Utils, Test {
         console.log("Deploying rolldown contracts");
         console.log("################################################################################");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
-        rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+        rolldownDeployer.run(IRolldown.ChainId.Ethereum);
 
       }else{
  

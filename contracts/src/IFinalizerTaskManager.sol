@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 import "@eigenlayer-middleware/src/libraries/BN254.sol";
 import "./IGaspMultiRollupServicePrimitives.sol";
-import {IRolldown} from "./IRolldown.sol";
+import {IRolldown} from "./interfaces/IRolldown.sol";
 
 interface IFinalizerTaskManager {
     // EVENTS

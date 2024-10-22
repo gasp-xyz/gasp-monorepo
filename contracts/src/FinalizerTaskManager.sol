@@ -16,8 +16,7 @@ import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRe
 
 import "./IGaspMultiRollupServicePrimitives.sol";
 import "./IFinalizerTaskManager.sol";
-import {IRolldown} from "./IRolldown.sol";
-import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
+import {IRolldown} from "./interfaces/IRolldown.sol";
 
 contract FinalizerTaskManager is
     Initializable,
@@ -289,7 +288,7 @@ contract FinalizerTaskManager is
             return;
         }
 
-        IRolldown.ChainId ethChainId = IRolldownPrimitives.ChainId.Ethereum;
+        IRolldown.ChainId ethChainId = IRolldown.ChainId.Ethereum;
         if (taskResponse.chainId == ethChainId){
             IRolldown.Range memory range;
             range.start = taskResponse.rangeStart;

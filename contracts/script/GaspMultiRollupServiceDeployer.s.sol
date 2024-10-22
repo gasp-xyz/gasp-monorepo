@@ -15,7 +15,7 @@ import "forge-std/StdJson.sol";
 import "forge-std/console.sol";
 import {GaspMultiRollupService} from "../src/GaspMultiRollupService.sol";
 import {IGaspMultiRollupServicePrimitives} from "../src/IGaspMultiRollupServicePrimitives.sol";
-import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
+import {IRolldown} from "../src/interfaces/IRolldown.sol";
 
 contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
@@ -34,12 +34,12 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
     address public upgrader;
     address public updaterAccount;
 
-    function evmPrefixedPath(IRolldownPrimitives.ChainId chain) public view returns (string memory) {
+    function evmPrefixedPath(IRolldown.ChainId chain) public pure returns (string memory) {
       string memory evm;
 
-      if (chain == IRolldownPrimitives.ChainId.Ethereum) {
+      if (chain == IRolldown.ChainId.Ethereum) {
         evm = "ethereum_";
-      } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
+      } else if (chain == IRolldown.ChainId.Arbitrum) {
         evm = "arbitrum_"; 
       } else {
         revert("Unsupported chain");
@@ -48,7 +48,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
       return string.concat(evm, _OUTPUT_PATH);
     }
 
-    function upgrade(IRolldownPrimitives.ChainId chain) public {
+    function upgrade(IRolldown.ChainId chain) public {
       string memory configData = readInput(evmPrefixedPath(chain));
       upgrader = stdJson.readAddress(configData, ".permissions.gmrsUpgrader");
       address proxyAdmin = stdJson.readAddress(configData, ".addresses.gmrsProxyAdmin");
@@ -72,7 +72,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
 
     }
 
-    function isProxyDeployed(IRolldownPrimitives.ChainId chain) public returns (bool){
+    function isProxyDeployed(IRolldown.ChainId chain) public returns (bool){
       if (!inputExists(evmPrefixedPath(chain))){
         return false;
       }
@@ -81,7 +81,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
       return proxyAdmin.code.length > 0;
     }
 
-    function initialDeployment(IRolldownPrimitives.ChainId chain, bool allowNonRootInit) public {
+    function initialDeployment(IRolldown.ChainId chain, bool allowNonRootInit) public {
       string memory configData = readConfig(_CONFIG_PATH);
       owner = stdJson.readAddress(configData, ".permissions.owner");
       upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
@@ -126,7 +126,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
         _writeOutput(chain);
     }
 
-    function run(IRolldownPrimitives.ChainId chain, bool allowNonRootInit) external {
+    function run(IRolldown.ChainId chain, bool allowNonRootInit) external {
       if (isProxyDeployed(chain)){
         console.log("Upgrading proxy");
         upgrade(chain);
@@ -136,7 +136,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
       }
     }
 
-    function _writeOutput(IRolldownPrimitives.ChainId chain) internal {
+    function _writeOutput(IRolldown.ChainId chain) internal {
         string memory parent_object = "parent object";
 
         string memory deployed_addresses = "addresses";
