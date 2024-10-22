@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
-import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin-upgrades/contracts/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
 import {ContextUpgradeable} from "@openzeppelin-upgrades/contracts/utils/ContextUpgradeable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -11,7 +11,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IRolldown} from "./interfaces/IRolldown.sol";
 
-contract Rolldown is Initializable, ContextUpgradeable, OwnableUpgradeable, ReentrancyGuard, Pausable, IRolldown {
+contract Rolldown is Initializable, ContextUpgradeable, AccessControlUpgradeable, ReentrancyGuard, Pausable, IRolldown {
     using SafeERC20 for IERC20;
     using Address for address payable;
 
@@ -44,19 +44,19 @@ contract Rolldown is Initializable, ContextUpgradeable, OwnableUpgradeable, Reen
     // is the most efficient way to find merkle root that contains particular tx id
     bytes32[] public roots;
 
-    function initialize(IPauserRegistry pauserRegistry, address owner, ChainId chainId_, address updater_)
+    function initialize(IPauserRegistry pauserRegistry, address admin, ChainId chainId_, address updater_)
         external
         initializer
     {
         _initializePauser(pauserRegistry, UNPAUSE_ALL);
-        _transferOwnership(owner);
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
 
         counter = 1;
         chainId = chainId_;
         updater = updater_;
     }
 
-    function setUpdater(address updater_) external override onlyOwner whenNotPaused {
+    function setUpdater(address updater_) external override onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
         updater = updater_;
         emit UpdaterSet(updater);
     }
@@ -97,12 +97,13 @@ contract Rolldown is Initializable, ContextUpgradeable, OwnableUpgradeable, Reen
 
     function ferryWithdrawal(Withdrawal calldata withdrawal) external payable override nonReentrant whenNotPaused {
         require(withdrawal.ferryTip <= withdrawal.amount, "Tip exceeds deposited amount");
-        uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
-        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
 
+        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
         require(processedL2Requests[withdrawalHash] == address(0), "Already ferried");
+
         processedL2Requests[withdrawalHash] = _msgSender();
 
+        uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
         if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
             require(msg.value > 0, "Native token not sent");
             require(msg.value == ferriedAmount, "Sent amount must exactly match amount without ferryTip");
@@ -284,14 +285,14 @@ contract Rolldown is Initializable, ContextUpgradeable, OwnableUpgradeable, Reen
     }
 
     // TODO: move to separate modoule/contract
-    function calculateRoot(bytes32 leaveHash, uint32 leaveIdx, bytes32[] calldata proof, uint32 leaveCount)
+    function calculateRoot(bytes32 leaveHash, uint256 leaveIdx, bytes32[] calldata proof, uint256 leaveCount)
         public
         pure
         override
         returns (bytes32)
     {
-        uint32 levels;
-        uint32 tmp = leaveCount;
+        uint256 levels;
+        uint256 tmp = leaveCount;
         while (tmp > 0) {
             tmp = tmp / 2;
             levels += 1;
@@ -301,12 +302,12 @@ contract Rolldown is Initializable, ContextUpgradeable, OwnableUpgradeable, Reen
     }
 
     function calculateRootImpl(
-        uint32 level,
-        uint32 pos,
+        uint256 level,
+        uint256 pos,
         bytes32 hash,
         bytes32[] calldata proofs,
-        uint32 proofIdx,
-        uint32 maxIdx
+        uint256 proofIdx,
+        uint256 maxIdx
     ) public pure override returns (bytes32) {
         if (pos % 2 == 0) {
             if (pos == maxIdx) {

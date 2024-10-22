@@ -20,9 +20,10 @@ import {Rolldown} from "../src/Rolldown.sol";
 import {IRolldown} from "../src/interfaces/IRolldown.sol";
 
 contract RolldownDeployer is Script, Utils, Test {
-    string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
-    string constant _CONFIG_PATH = "deploy.config";
-    string constant _OUTPUT_PATH = "rolldown_output";
+    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    string private constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
+    string private constant _CONFIG_PATH = "deploy.config";
+    string private constant _OUTPUT_PATH = "rolldown_output";
 
     string public deployConfigPath;
 
@@ -165,10 +166,10 @@ contract RolldownDeployer is Script, Utils, Test {
     }
 
     function _verifyInitalizations() internal view {
-        require(rolldown.owner() == owner, "rolldown.owner() != owner");
+        require(rolldown.hasRole(DEFAULT_ADMIN_ROLE, owner), "rolldown.hasRole(DEFAULT_ADMIN_ROLE) != owner");
         require(rolldown.lastProcessedUpdateOriginL1() == 0, "rolldown.lastProcessedUpdate_origin_l1 != 0");
-        require(rolldown.counter() == 1, "rolldown.counter != 1");
         require(rolldown.lastProcessedUpdateOriginL2() == 0, "rolldown.lastProcessedUpdate_origin_l2 != 0");
+        require(rolldown.counter() == 1, "rolldown.counter != 1");
         require(rolldown.pauserRegistry() == rolldownPauserReg, "rolldown: pauser registry not set correctly");
         require(rolldown.paused() == 0, "rolldown: init paused status set incorrectly");
     }

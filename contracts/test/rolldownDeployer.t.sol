@@ -17,10 +17,11 @@ import {Gasp} from "../src/GaspToken.sol";
 import {RollDownUpg} from "./utils/RollDownUpg.sol";
 
 contract RolldownDeployerTest is Test {
-    RolldownDeployer rolldownDeployer;
-
     using stdStorage for StdStorage;
 
+    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x0000000000000000000000000000000000000000000000000000000000000000;
+
+    RolldownDeployer rolldownDeployer;
     Utilities internal utils;
     address payable[] internal users;
     address owner;
@@ -74,8 +75,7 @@ contract RolldownDeployerTest is Test {
         vm.stopBroadcast();
 
         Rolldown rolldown2 = Rolldown(address(rolldown));
-        address ownerFromCt = rolldown2.owner();
-        assertEq(owner, ownerFromCt);
+        assertTrue(rolldown2.hasRole(DEFAULT_ADMIN_ROLE, owner));
     }
 
     function testRolldownFromInitializeReInitialize() public {
@@ -111,8 +111,7 @@ contract RolldownDeployerTest is Test {
         vm.stopBroadcast();
 
         Rolldown rolldown2 = Rolldown(address(rolldown));
-        address ownerFromCt = rolldown2.owner();
-        assertEq(owner, ownerFromCt);
+        assertTrue(rolldown2.hasRole(DEFAULT_ADMIN_ROLE, owner));
     }
 
     function testRolldownFromInitializedtoUpdated() public {

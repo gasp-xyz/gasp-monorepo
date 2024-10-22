@@ -132,17 +132,17 @@ interface IRolldown {
 
     function getPendingRequests(uint256 start, uint256 end) external view returns (L1Update memory);
 
-    function calculateRoot(bytes32 leaveHash, uint32 leaveIdx, bytes32[] calldata proof, uint32 leaveCount)
+    function calculateRoot(bytes32 leaveHash, uint256 leaveIdx, bytes32[] calldata proof, uint256 leaveCount)
         external
         pure
         returns (bytes32);
 
     function calculateRootImpl(
-        uint32 level,
-        uint32 pos,
+        uint256 level,
+        uint256 pos,
         bytes32 hash,
         bytes32[] calldata proofs,
-        uint32 proofIdx,
-        uint32 maxIdx
+        uint256 proofIdx,
+        uint256 maxIdx
     ) external pure returns (bytes32);
 }
