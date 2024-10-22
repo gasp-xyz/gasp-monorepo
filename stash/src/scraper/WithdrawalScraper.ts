@@ -6,7 +6,6 @@ import { keccak256 } from 'viem'
 import { redis } from '../connector/RedisConnector.js'
 import logger from '../util/Logger.js'
 
-
 const NETWORK_LIST_KEY = 'affirmed_networks_list'
 const L2_INITIATED = 'L2_INITIATED'
 const L2_CONFIRMED = 'L2_CONFIRMED'
@@ -41,15 +40,17 @@ export const processWithdrawalEvents = async (
   }
 }
 
-const startTracingWithdrawal = async (
+export const startTracingWithdrawal = async (
   api: ApiPromise,
   eventData: any
 ): Promise<object> => {
   const timestamp = new Date().toISOString()
+  console.log('Event data:', eventData)
   const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
     eventData.chain,
     eventData.requestId.id
   )
+  console.log('Calldata:', calldata)
   logger.info(
     'Withdrawal hash and keccak256 match:',
     keccak256(calldata.toHex()) === eventData.hash_,
@@ -81,7 +82,7 @@ const startTracingWithdrawal = async (
   return withdrawalRepository.save(withdrawalData)
 }
 
-const updateWithdrawalsWhenBatchCreated = async (
+export const updateWithdrawalsWhenBatchCreated = async (
   api: ApiPromise,
   eventData: any
 ): Promise<void> => {
@@ -122,6 +123,8 @@ const updateWithdrawalsWhenBatchCreated = async (
 }
 
 const filterEvents = (ev: Event) => {
-  return ev.section === 'rolldown' &&
-      (ev.method === 'WithdrawalRequestCreated' || ev.method === 'TxBatchCreated')
+  return (
+    ev.section === 'rolldown' &&
+    (ev.method === 'WithdrawalRequestCreated' || ev.method === 'TxBatchCreated')
+  )
 }
