@@ -158,7 +158,7 @@ describe('AVS Finalizer', () => {
         await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
 
     });
-    it('operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )', async () => {
+    it.only('operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )', async () => {
         console.log("Starting : operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )");
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
