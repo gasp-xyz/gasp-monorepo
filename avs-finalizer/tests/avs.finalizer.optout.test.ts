@@ -188,7 +188,7 @@ describe('AVS Finalizer', () => {
         //At least 5 * 4 = 20 task are checked loop back by AOL.
         const Ptasks =  createAWithdrawWithManualBatch("Ethereum", 30)
         console.log(new Date().toString() + "Generating 30 tasks and waiting for ejection to happen! <3");
-        const [deRegistered, _ i] = await Promise.all([PoperatorDeregisteredAddress, Ptasks]);
+        const [deRegistered, _ ] = await Promise.all([PoperatorDeregisteredAddress, Ptasks]);
         expect(deRegistered).toBe(operatorAddress);
 
         const statusAfter = await publicClient.readContract({
