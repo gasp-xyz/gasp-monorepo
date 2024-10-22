@@ -148,7 +148,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        bytes32 merkle_root = rolldown.hashWithdrawal(withdrawal);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
         rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
@@ -283,10 +283,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
 
       // manualy compure merkle root
-      bytes32 node_0 = keccak256(abi.encode(withdrawalBob1));
-      bytes32 node_1 = keccak256(abi.encode(withdrawalBob2));
-      bytes32 node_2 = keccak256(abi.encode(withdrawalCharlie));
-      bytes32 node_3 = keccak256(abi.encode(cancel));
+      bytes32 node_0 = rolldown.hashWithdrawal(withdrawalBob1);
+      bytes32 node_1 = rolldown.hashWithdrawal(withdrawalBob2);
+      bytes32 node_2 = rolldown.hashWithdrawal(withdrawalCharlie);
+      bytes32 node_3 = rolldown.hashCancel(cancel);
 
       bytes32 node_01 = keccak256(abi.encodePacked(node_0, node_1));
       bytes32 node_23 = keccak256(abi.encodePacked(node_2, node_3));
@@ -352,7 +352,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        bytes32 merkle_root = rolldown.hashWithdrawal(withdrawal);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
         rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
@@ -391,7 +391,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
       vm.startPrank(ALICE);
       // merkle_root of tree with single element is just that single element
-      bytes32 merkle_root = keccak256(abi.encode(cancel));
+      bytes32 merkle_root = rolldown.hashCancel(cancel);
       bytes32[] memory proofs = new bytes32[](0);
       Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
       rolldown.update_l1_from_l2(merkle_root, range);
@@ -440,7 +440,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = keccak256(abi.encode(cancel));
+        bytes32 merkle_root = rolldown.hashCancel(cancel);
         bytes32[] memory proofs = new bytes32[](0);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
         rolldown.update_l1_from_l2(merkle_root, range);
@@ -480,7 +480,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        bytes32 merkle_root = rolldown.hashWithdrawal(withdrawal);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
         rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
@@ -522,20 +522,18 @@ contract RolldownTest is Test, IRolldownPrimitives {
       assertEq(end, 13);
       
       //New update win over old updates
-      Range memory range0 = rolldown.find_l2_batch(3);
-      assertEq(range0.start, 2);
-      assertEq(range0.end, 13);
+      bytes32 batch = rolldown.find_l2_batch(3);
+      (start, end)  = rolldown.merkleRootRange(batch);
+      assertEq(start, 2);
+      assertEq(end, 13);
 
-      Range memory range1 = rolldown.find_l2_batch(12);
-      assertEq(range1.start, 12);
-      assertEq(range1.end, 14);
+      batch = rolldown.find_l2_batch(12);
+      (start, end)  = rolldown.merkleRootRange(batch);
+      assertEq(start, 12);
+      assertEq(end, 14);
 
       vm.expectRevert("Invalid request id");
-      Range memory range2 = rolldown.find_l2_batch(66);
-      assertEq(range2.start, 0);
-      assertEq(range2.end, 0);
-      
-      
+      rolldown.find_l2_batch(66);
     }
 
     function testRejectUpdateWithoutNewRequests() public {
@@ -1006,7 +1004,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
           amount: amount,
           ferryTip: ferryTip 
         });
-        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+        bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
 
         uint256 ferryBefore = token.balanceOf(ALICE);
 
@@ -1022,7 +1020,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        bytes32 merkle_root = withdrawalHash;
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
         rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
@@ -1033,14 +1031,13 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
-        emit IRolldownPrimitives.WithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        emit IRolldownPrimitives.WithdrawalClosed(1, withdrawalHash);
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
 
         assertEq(token.balanceOf(ALICE), ferryBefore + ferryTip);
     }
 
-    // NOTE: how to handle ferries without ferry fee, they can they be considered close?
     function testFerryWithdrawalErc20WithoutTip() public {
         address recipient = 0x0000000000000000000000000000000000000006;
         uint256 amount = 123456;
@@ -1054,7 +1051,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
           amount: amount,
           ferryTip: 0 
         });
-        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+        bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
 
         uint256 ferryBefore = token.balanceOf(ALICE);
 
@@ -1070,7 +1067,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        bytes32 merkle_root = withdrawalHash;
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
         rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
@@ -1081,7 +1078,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
-        emit IRolldownPrimitives.WithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        emit IRolldownPrimitives.WithdrawalClosed(1, withdrawalHash);
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
 
@@ -1104,7 +1101,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
           amount: amount,
           ferryTip: ferryTip 
         });
-        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+        bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
 
         uint256 ferryBefore = ALICE.balance;
 
@@ -1120,7 +1117,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        bytes32 merkle_root = withdrawalHash;
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
         rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
@@ -1130,7 +1127,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
-        emit IRolldownPrimitives.FerriedWithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        emit IRolldownPrimitives.FerriedWithdrawalClosed(1, withdrawalHash);
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
 
@@ -1151,7 +1148,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
           amount: amount,
           ferryTip: 0 
         });
-        bytes32 withdrawalHash = keccak256(abi.encode(withdrawal));
+        bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
 
         uint256 ferryBefore = ALICE.balance;
 
@@ -1166,7 +1163,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        bytes32 merkle_root = withdrawalHash;
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
         rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();
@@ -1176,7 +1173,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
-        emit IRolldownPrimitives.FerriedWithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
+        emit IRolldownPrimitives.FerriedWithdrawalClosed(1, withdrawalHash);
         rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
         vm.stopPrank();
 
@@ -1279,7 +1276,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        bytes32 merkle_root = rolldown.hashWithdrawal(withdrawal);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
         rolldown.update_l1_from_l2(merkle_root, range);
         vm.stopPrank();

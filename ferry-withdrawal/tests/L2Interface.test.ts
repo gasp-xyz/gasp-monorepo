@@ -55,4 +55,15 @@ describe('L2Interface', () => {
       expect(withdrawals.length).to.be.greaterThan(0);
     }, {timeout: 30000});
 
+
+    it('should fetch merkle proof', async () => {
+      let api = await getApi(URI);
+      let l2 = new L2Api(api);
+      const nativeTokenAddress = await l2.getNativeTokenAddress();
+      await dummyWithdrawal(api, nativeTokenAddress, 1n, 0n);
+      await dummyWithdrawal(api, nativeTokenAddress, 1n, 0n);
+      const result = await l2.getMerkleProof(1n, 2n, 2n);
+      expect(result.length).to.be.greaterThan(0);
+    }, {timeout: 1200000});
+
 });
