@@ -182,11 +182,10 @@ describe('AVS Finalizer', () => {
         await dockerUtils.stopContainer();
         await mineEthBlocks(1);
         const statusBeforeOptOut = await getLatestQuorumUpdate(publicClient);
-
+        console.log(new Date().toString() + "Op docker has been stopped, and now creating 6 tasks: " + operatorAddress);
         const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
         const Ptasks =  createAWithdrawWithManualBatch("Ethereum", 6)
         // 10s * 2 * 5 = 100s ( every two blocks we produce a task, and at 5th task we eject)
-
         const [deRegistered, _ ]  = await Promise.all([PoperatorDeregisteredAddress, Ptasks] );
 
         expect(deRegistered).toBe(operatorAddress);
@@ -200,7 +199,7 @@ describe('AVS Finalizer', () => {
         expect(statusAfter).toBe(2);
         await validateOperatorOptOutStakeRegistry(publicClient, operatorAddress as string);
         await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
-        console.log("Re-Register STEP: operatorAddress: " + operatorAddress);
+        console.log(new Date().toString() + "Re-Register STEP: operatorAddress: " + operatorAddress);
 
         //re-register
         secContainer = new DockerUtils();
@@ -220,7 +219,7 @@ describe('AVS Finalizer', () => {
         await secContainer.stopContainer();
 
         await mineEthBlocks(10);
-        console.log("After-Waiting and Re-Register STEP: operatorAddress: " + operatorAddress);
+        console.log(new Date().toString() + "After-Waiting and Re-Register STEP: operatorAddress: " + operatorAddress);
 
         //re-register again
         thirdContainer = new DockerUtils();
@@ -231,7 +230,7 @@ describe('AVS Finalizer', () => {
             functionName: "getOperatorStatus",
             args: [operatorAddress],
         });
-        console.log("Validate status - OK " + operatorAddress);
+        console.log(new Date().toString() + "Validate status - OK " + operatorAddress);
         expect(statusAfterWaitingAndReJoined).toBe(1);
         await validateOperatorOptInStakeRegistry(publicClient, operatorAddress as string);
         await validateOperatorOptInIndexRegistry(publicClient, operatorAddress as string);
@@ -254,19 +253,19 @@ describe('AVS Finalizer', () => {
         //try opt-out just in case.
         try {
             await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
-                console.log(result);
+                console.log(new Date().toString() + result);
             }).catch((err) => {
                 console.error(err);
             });
             await dockerUtils.stopContainer();
             await secContainer.container?.exec("./main opt-out-avs").then((result) => {
-                console.log(result);
+                console.log(new Date().toString() + result);
             }).catch((err) => {
                 console.error(err);
             });
             await secContainer.stopContainer();
             await thirdContainer.container?.exec("./main opt-out-avs").then((result) => {
-                console.log(result);
+                console.log(new Date().toString() + result);
             }).catch((err) => {
                 console.error(err);
             });
@@ -291,7 +290,7 @@ describe.skip("AVS Finalizer - tasks", () => {
         const POperatorAddress = waitForOperatorRegistered(publicClient);
         await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE, dockerUtils.bigStakeLocalEnvironment);
         const operatorAddress = await POperatorAddress;
-        console.log("operatorAddress: " + operatorAddress);
+        console.log(new Date().toString() + "operatorAddress: " + operatorAddress);
         const taskAfter = await waitForTaskResponded(publicClient, 4).then((tasks) => {
             expect(tasks).toHaveLength(4);
             return tasks.map( x=> x.args.taskResponseMetadata)
@@ -309,7 +308,7 @@ describe.skip("AVS Finalizer - tasks", () => {
         const taskCompleted = await pTaskCompleted;
         expect(taskCompleted).toHaveLength(1);
         expect(taskCompleted[0].args.taskIndex).toBe(taskRespondedWithOp[0].args.taskResponse.referenceTaskIndex);
-        console.log(taskRespondedWithOp)
+        console.log(new Date().toString() + taskRespondedWithOp)
         await validateTaskDataFromEvent(
             publicClient,
             taskRespondedWithOp[0].args.taskResponse.referenceTaskIndex,
@@ -318,7 +317,7 @@ describe.skip("AVS Finalizer - tasks", () => {
             taskRespondedWithOp[0].transactionHash );
         //opt-out
         await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
-            console.log(result);
+            console.log(new Date().toString() + result);
         }).catch((err) => {
             console.error(err);
         });
@@ -339,7 +338,7 @@ describe.skip("AVS Finalizer - tasks", () => {
     afterEach(async () => {
         // opt-out
         await dockerUtils.container?.exec("./main opt-out-avs").then((result) => {
-            console.log(result);
+            console.log(new Date().toString() + result);
         }).catch((err) => {
             console.error(err);
         });
