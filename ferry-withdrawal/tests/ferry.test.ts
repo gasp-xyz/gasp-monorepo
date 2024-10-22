@@ -34,10 +34,12 @@ describe('Ferry Service', () => {
       getFerry: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       ferry: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       close: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
+      getMerkleRange: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called")}),
       getBalance: vi.fn().mockImplementation(() => DEFAULT_BALANCE),
     };
 
     l2Mock = {
+        getMerkleProof: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         getLatestRequestId: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         getLatestRequestIdInPast: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         getWithdrawals: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
