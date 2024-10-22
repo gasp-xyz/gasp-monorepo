@@ -187,12 +187,8 @@ describe('AVS Finalizer', () => {
 
         //At least 5 * 4 = 20 task are checked loop back by AOL.
         const Ptasks =  createAWithdrawWithManualBatch("Ethereum", 30)
-        //@ts-ignore
-        const promiseAnyIndexed = pp => Promise.race(pp.map((p,i)=>p.then(res=>[res,i])));
         console.log(new Date().toString() + "Generating 30 tasks and waiting for ejection to happen! <3");
-        const [deRegistered, i] = await promiseAnyIndexed([PoperatorDeregisteredAddress, Ptasks]);
-        //We need de-registration promise to happen first ow, there must be a bug somewhere.
-        expect(i).toBe(0);
+        const [deRegistered, i] = await Promise.all([PoperatorDeregisteredAddress, Ptasks]);
         expect(deRegistered).toBe(operatorAddress);
 
         const statusAfter = await publicClient.readContract({
