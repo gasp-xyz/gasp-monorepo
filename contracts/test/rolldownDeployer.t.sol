@@ -36,8 +36,6 @@ contract RolldownDeployerTest is Test {
     Rolldown public rolldownImplementation;
 
     function setUp() public {
-        address payable[] memory admins;
-
         utils = new Utilities();
         users = utils.createUsers(3);
         owner = users[0];
@@ -176,7 +174,7 @@ contract RolldownDeployerTest is Test {
 
         RollDownUpg rolldown2 = RollDownUpg(address(rolldown));
         vm.expectRevert();
-        bool res = rolldown2.imUpgraded();
+        rolldown2.imUpgraded();
 
         Rolldown rd2 = new RollDownUpg();
         vm.startBroadcast(notOwner);

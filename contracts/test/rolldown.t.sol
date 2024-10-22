@@ -359,7 +359,7 @@ contract RolldownTest is Test,Rolldown{
         vm.stopPrank();
 
         assertEq(token.balanceOf(recipient), 123456);
-        assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1);
+        assertEq(rolldown.lastProcessedUpdateOriginL2(), 1);
         address status = rolldown.processedL2Requests(merkle_root);
         assertTrue(status == rolldown.CLOSED());
     }
@@ -474,7 +474,7 @@ contract RolldownTest is Test,Rolldown{
         bytes32[] memory proofs = new bytes32[](0);
         assertEq(token.balanceOf(recipient), 0);
 
-        assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1);
+        assertEq(rolldown.lastProcessedUpdateOriginL2(), 1);
 
         vm.startPrank(ALICE);
         vm.expectRevert("Not enough funds in contract");
@@ -482,7 +482,7 @@ contract RolldownTest is Test,Rolldown{
         vm.stopPrank();
         assertEq(token.balanceOf(recipient), 0);
 
-        assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1);
+        assertEq(rolldown.lastProcessedUpdateOriginL2(), 1);
         address status = rolldown.processedL2Requests(merkle_root);
         assertTrue(status != rolldown.CLOSED());
     }
@@ -522,7 +522,7 @@ contract RolldownTest is Test,Rolldown{
         vm.stopPrank();
         // validate storage & getters after updates
         uint256 lastId = 14;
-        assertEq(rolldown.lastProcessedUpdate_origin_l2(), lastId);
+        assertEq(rolldown.lastProcessedUpdateOriginL2(), lastId);
         bytes32 expectedRoot = 0x0000000000000000000000000000000000000000000000000000000000000001;
         (uint256 start, uint256 end) = rolldown.merkleRootRange(expectedRoot);
         assertEq(start, 2);

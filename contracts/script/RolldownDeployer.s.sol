@@ -166,9 +166,9 @@ contract RolldownDeployer is Script, Utils, Test {
 
     function _verifyInitalizations() internal view {
         require(rolldown.owner() == owner, "rolldown.owner() != owner");
-        require(rolldown.lastProcessedUpdate_origin_l1() == 0, "rolldown.lastProcessedUpdate_origin_l1 != 0");
+        require(rolldown.lastProcessedUpdateOriginL1() == 0, "rolldown.lastProcessedUpdate_origin_l1 != 0");
         require(rolldown.counter() == 1, "rolldown.counter != 1");
-        require(rolldown.lastProcessedUpdate_origin_l2() == 0, "rolldown.lastProcessedUpdate_origin_l2 != 0");
+        require(rolldown.lastProcessedUpdateOriginL2() == 0, "rolldown.lastProcessedUpdate_origin_l2 != 0");
         require(rolldown.pauserRegistry() == rolldownPauserReg, "rolldown: pauser registry not set correctly");
         require(rolldown.paused() == 0, "rolldown: init paused status set incorrectly");
     }

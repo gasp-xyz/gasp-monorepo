@@ -71,30 +71,30 @@ interface IRolldown {
     }
 
     event DepositAcceptedIntoQueue(
-        uint256 requestId, address depositRecipient, address tokenAddress, uint256 amount, uint256 ferryTip
+        uint256 indexed requestId, address indexed depositRecipient, address indexed tokenAddress, uint256 amount, uint256 ferryTip
     );
 
-    event DisputeResolutionAcceptedIntoQueue(uint256 requestId, bool cancelJustified);
+    event DisputeResolutionAcceptedIntoQueue(uint256 indexed requestId, bool cancelJustified);
 
-    event NativeTokensWithdrawn(address sender, uint256 amount);
+    event NativeTokensWithdrawn(address indexed sender, uint256 amount);
 
-    event ERC20TokensWithdrawn(address sender, address token_address, uint256 amount);
+    event ERC20TokensWithdrawn(address indexed sender, address indexed tokenAddress, uint256 amount);
 
-    event WithdrawalClosed(uint256 requestId, bytes32 withdrawalHash);
+    event WithdrawalClosed(uint256 indexed requestId, bytes32 withdrawalHash);
 
-    event FerriedWithdrawalClosed(uint256 requestId, bytes32 withdrawalHash);
+    event FerriedWithdrawalClosed(uint256 indexed requestId, bytes32 withdrawalHash);
 
     event WithdrawalFerried(
-        uint256 requestId, uint256 amount, address recipient, address ferry, bytes32 withdrawalHash
+        uint256 indexed requestId, uint256 amount, address indexed recipient, address indexed ferry, bytes32 withdrawalHash
     );
 
     event FailedDepositResolutionClosed(
-        uint256 requestId, uint256 originDepositId, bytes32 failedDespotiResolutionHash
+        uint256 indexed requestId, uint256 indexed originDepositId, bytes32 failedDespotiResolutionHash
     );
 
     event L2UpdateAccepted(bytes32 root, Range range);
 
-    event NewUpdaterSet(address updater);
+    event UpdaterSet(address indexed updater);
 
     function setUpdater(address updater) external;
 

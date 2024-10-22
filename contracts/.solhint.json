@@ -42,7 +42,7 @@
     "max-states-count": ["error", 15],
     "modifier-name-mixedcase": "error",
     "multiple-sends": "error",
-    "named-parameters-mapping": "error",
+    "named-parameters-mapping": "off",
     "no-complex-fallback": "error",
     "no-console": "error",
     "no-empty-blocks": "off",

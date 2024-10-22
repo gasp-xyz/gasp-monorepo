@@ -41,7 +41,7 @@ contract ERC20Mock is Context, IERC20 {
 
     uint256 private _totalSupply;
 
-    function decimals() public view returns (uint8) {
+    function decimals() public pure returns (uint8) {
         return 18;
     }
 
