@@ -7,8 +7,6 @@ import {
 import { withdrawalRepository } from '../src/repository/TransactionRepository.js'
 import { redis } from '../src/connector/RedisConnector.js'
 import { ApiPromise } from '@polkadot/api'
-import { keccak256 } from 'viem'
-import logger from '../src/util/Logger.js'
 
 // Mock dependencies
 vi.mock('../repository/TransactionRepository')
@@ -175,7 +173,8 @@ describe('startTracingWithdrawal', () => {
     }
 
     vi.spyOn(redis.client, 'get').mockResolvedValue(
-      JSON.stringify([{ key: 'testchain', chainId: 'testchain' }]))
+      JSON.stringify([{ key: 'testchain', chainId: 'testchain' }])
+    )
 
     vi.spyOn(withdrawalRepository, 'save').mockResolvedValue({
       status: 'L2_INITIATED',
@@ -192,7 +191,6 @@ describe('startTracingWithdrawal', () => {
       type: 'withdrawal',
       updated: 1729517393690,
     })
-    vi.mocked(keccak256).mockReturnValue('0x123')
 
     const result = await startTracingWithdrawal(mockApi, mockEventData)
 

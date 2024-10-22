@@ -2,7 +2,6 @@ import { Block, Event } from './BlockScraper'
 import _ from 'lodash'
 import { withdrawalRepository } from '../repository/TransactionRepository.js'
 import { ApiPromise } from '@polkadot/api'
-import { keccak256 } from 'viem'
 import { redis } from '../connector/RedisConnector.js'
 import logger from '../util/Logger.js'
 
@@ -49,15 +48,6 @@ export const startTracingWithdrawal = async (
   const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
     eventData.chain,
     eventData.requestId.id
-  )
-  console.log('Calldata:', calldata)
-  logger.info(
-    'Withdrawal hash and keccak256 match:',
-    keccak256(calldata.toHex()) === eventData.hash_,
-    'Calculated keccak:',
-    keccak256(calldata.toHex()),
-    'Event hash:',
-    eventData.hash_
   )
   const affirmedNetworks = await redis.client.get(NETWORK_LIST_KEY)
   const networks = affirmedNetworks ? JSON.parse(affirmedNetworks) : []
