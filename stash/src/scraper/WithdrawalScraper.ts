@@ -43,7 +43,6 @@ export const startTracingWithdrawal = async (
   eventData: any
 ): Promise<object> => {
   const timestamp = new Date().toISOString()
-  console.log('Event data:', eventData)
   const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
     eventData.chain,
     eventData.requestId.id

@@ -12,6 +12,6 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
   rules: {
-    // Add your custom rules here
+    // Custom rules here
   },
 }

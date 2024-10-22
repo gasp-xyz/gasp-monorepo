@@ -7,7 +7,6 @@ import * as withdrawals from '../scraper/WithdrawalScraper.js'
 import logger from '../util/Logger.js'
 
 export const initService = async () => {
-  console.log('init service called')
   const api = await MangataClient.api()
 
   const latestBlock = (await store.getLatest()).block
