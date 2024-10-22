@@ -158,7 +158,7 @@ describe('AVS Finalizer', () => {
         await validateOperatorOptOutIndexRegistry(publicClient, operatorAddress as string, statusBeforeOptOut);
 
     });
-    it.only('operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )', async () => {
+    it('operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )', async () => {
         console.log("Starting : operator that does not respond -> eject -> rejoin ( <10b ) -> rejoin ( > 10b )");
         dockerUtils = new DockerUtils();
         const transport = webSocket("ws://0.0.0.0:8545" , {
@@ -184,10 +184,14 @@ describe('AVS Finalizer', () => {
         const statusBeforeOptOut = await getLatestQuorumUpdate(publicClient);
         console.log(new Date().toString() + "Op docker has been stopped, and now creating 6 tasks: " + operatorAddress);
         const PoperatorDeregisteredAddress = waitForOperatorDeRegistered(publicClient);
-        const Ptasks =  createAWithdrawWithManualBatch("Ethereum", 6)
-        // 10s * 2 * 5 = 100s ( every two blocks we produce a task, and at 5th task we eject)
-        const [deRegistered, _ ]  = await Promise.all([PoperatorDeregisteredAddress, Ptasks] );
 
+        //At least 5 * 4 = 20 task are checked loop back by AOL.
+        const Ptasks =  createAWithdrawWithManualBatch("Ethereum", 30)
+        const promiseAnyIndexed = pp => Promise.any(pp.map((p,i)=>p.then(res=>[res,i])));
+        console.log(new Date().toString() + "Generating 30 tasks and waiting for ejection to happen! <3");
+        const [deRegistered, i] = await promiseAnyIndexed([PoperatorDeregisteredAddress, Ptasks]);
+        //We need de-registration promise to happen first ow, there must be a bug somewhere.
+        expect(i).toBe(0);
         expect(deRegistered).toBe(operatorAddress);
 
         const statusAfter = await publicClient.readContract({
