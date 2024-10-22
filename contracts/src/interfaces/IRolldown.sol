@@ -71,7 +71,11 @@ interface IRolldown {
     }
 
     event DepositAcceptedIntoQueue(
-        uint256 indexed requestId, address indexed depositRecipient, address indexed tokenAddress, uint256 amount, uint256 ferryTip
+        uint256 indexed requestId,
+        address indexed depositRecipient,
+        address indexed tokenAddress,
+        uint256 amount,
+        uint256 ferryTip
     );
 
     event DisputeResolutionAcceptedIntoQueue(uint256 indexed requestId, bool cancelJustified);
@@ -85,7 +89,11 @@ interface IRolldown {
     event FerriedWithdrawalClosed(uint256 indexed requestId, bytes32 withdrawalHash);
 
     event WithdrawalFerried(
-        uint256 indexed requestId, uint256 amount, address indexed recipient, address indexed ferry, bytes32 withdrawalHash
+        uint256 indexed requestId,
+        uint256 amount,
+        address indexed recipient,
+        address indexed ferry,
+        bytes32 withdrawalHash
     );
 
     event FailedDepositResolutionClosed(

@@ -11,7 +11,14 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IRolldown} from "./interfaces/IRolldown.sol";
 
-contract Rolldown is Initializable, ContextUpgradeable, AccessControlUpgradeable, ReentrancyGuard, Pausable, IRolldown {
+contract Rolldown is
+    Initializable,
+    ContextUpgradeable,
+    AccessControlUpgradeable,
+    ReentrancyGuard,
+    Pausable,
+    IRolldown
+{
     using SafeERC20 for IERC20;
     using Address for address payable;
 
@@ -116,9 +123,6 @@ contract Rolldown is Initializable, ContextUpgradeable, AccessControlUpgradeable
             return;
         }
 
-        uint256 balance = IERC20(withdrawal.tokenAddress).balanceOf(_msgSender());
-        require(balance >= ferriedAmount, "Not enough funds");
-
         emit WithdrawalFerried(
             withdrawal.requestId.id, ferriedAmount, withdrawal.recipient, _msgSender(), withdrawalHash
         );
@@ -138,30 +142,30 @@ contract Rolldown is Initializable, ContextUpgradeable, AccessControlUpgradeable
         address ferryAddress = processedL2Requests[withdrawalHash];
         processedL2Requests[withdrawalHash] = CLOSED;
 
-        if (ferryAddress == address(0)) {
-            if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
-                _sendNative(withdrawal.recipient, withdrawal.amount - withdrawal.ferryTip);
+        if (ferryAddress != address(0)) {
+            withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS
+                ? _sendNative(ferryAddress, withdrawal.amount)
+                : _sendERC20(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
 
-                if (withdrawal.ferryTip > 0) {
-                    _sendNative(_msgSender(), withdrawal.ferryTip);
-                }
-            } else {
-                _sendERC20(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount - withdrawal.ferryTip);
-
-                if (withdrawal.ferryTip > 0) {
-                    _sendERC20(_msgSender(), withdrawal.tokenAddress, withdrawal.ferryTip);
-                }
-            }
-
-            emit WithdrawalClosed(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)));
-            return;
+            emit FerriedWithdrawalClosed(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)));
         }
 
-        withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS
-            ? _sendNative(ferryAddress, withdrawal.amount)
-            : _sendERC20(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
+        uint256 finalWithdrawalAmount = withdrawal.amount - withdrawal.ferryTip;
+        if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
+            _sendNative(withdrawal.recipient, finalWithdrawalAmount);
 
-        emit FerriedWithdrawalClosed(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)));
+            if (withdrawal.ferryTip > 0) {
+                _sendNative(_msgSender(), withdrawal.ferryTip);
+            }
+        } else {
+            _sendERC20(withdrawal.recipient, withdrawal.tokenAddress, finalWithdrawalAmount);
+
+            if (withdrawal.ferryTip > 0) {
+                _sendERC20(_msgSender(), withdrawal.tokenAddress, withdrawal.ferryTip);
+            }
+        }
+
+        emit WithdrawalClosed(withdrawal.requestId.id, keccak256(abi.encode(withdrawal)));
     }
 
     function closeCancel(Cancel calldata cancel, bytes32 merkleRoot, bytes32[] calldata proof)
@@ -196,10 +200,10 @@ contract Rolldown is Initializable, ContextUpgradeable, AccessControlUpgradeable
         whenNotPaused
     {
         require(_msgSender() == updater, "Not the owner");
-        require(range.end > lastProcessedUpdateOriginL2, "Update brings no new data");
         require(range.start > 0, "range id must be greater than 0");
         require(range.start - 1 <= lastProcessedUpdateOriginL2, "Previous update missing");
         require(range.end >= range.start, "Invalid range");
+        require(range.end > lastProcessedUpdateOriginL2, "Update brings no new data");
 
         roots.push(merkleRoot);
         merkleRootRange[merkleRoot] = range;
@@ -210,18 +214,18 @@ contract Rolldown is Initializable, ContextUpgradeable, AccessControlUpgradeable
 
     function findL2Batch(uint256 requestId) external view override returns (Range memory) {
         require(requestId <= lastProcessedUpdateOriginL2, "Invalid request id");
-        if (roots.length == 0) {
-            return Range({start: 0, end: 0});
-        }
 
         uint256 rootCount = roots.length;
-        for (uint256 i = rootCount - 1; i >= 0;) {
-            if (requestId >= merkleRootRange[roots[i]].start && requestId <= merkleRootRange[roots[i]].end) {
-                return merkleRootRange[roots[i]];
-            }
+        if (rootCount > 0) {
+            for (uint256 i = rootCount - 1; i >= 0;) {
+                Range memory range = merkleRootRange[roots[i]];
+                if (requestId >= range.start && requestId <= range.end) {
+                    return range;
+                }
 
-            unchecked {
-                --i;
+                unchecked {
+                    --i;
+                }
             }
         }
 
@@ -323,49 +327,49 @@ contract Rolldown is Initializable, ContextUpgradeable, AccessControlUpgradeable
     }
 
     function _depositNativeWithTip(uint256 ferryTip) private {
-        require(ferryTip <= msg.value, "Tip exceeds deposited amount");
-        require(msg.value > 0, "msg value must be greater that 0");
+        uint256 amount = msg.value;
+        require(amount > 0, "msg value must be greater that 0");
+        require(ferryTip <= amount, "Tip exceeds deposited amount");
 
         address depositRecipient = _msgSender();
-        uint256 amount = msg.value;
 
-        uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
             tokenAddress: NATIVE_TOKEN_ADDRESS,
             amount: amount,
-            timeStamp: timeStamp,
+            timeStamp: block.timestamp,
             ferryTip: ferryTip
         });
 
-        // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
+
         emit DepositAcceptedIntoQueue(
             depositRequest.requestId.id, depositRecipient, NATIVE_TOKEN_ADDRESS, amount, ferryTip
         );
     }
 
     function _depositERC20WithTip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
-        require(ferryTip <= amount, "Tip exceeds deposited amount");
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
+        require(ferryTip <= amount, "Tip exceeds deposited amount");
 
         address depositRecipient = _msgSender();
-        IERC20(tokenAddress).safeTransferFrom(depositRecipient, address(this), amount);
 
-        uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
             tokenAddress: tokenAddress,
             amount: amount,
-            timeStamp: timeStamp,
+            timeStamp: block.timestamp,
             ferryTip: ferryTip
         });
-        // Add the new request to the mapping
+
         deposits[depositRequest.requestId.id] = depositRequest;
+
         emit DepositAcceptedIntoQueue(depositRequest.requestId.id, depositRecipient, tokenAddress, amount, ferryTip);
+
+        IERC20(tokenAddress).safeTransferFrom(depositRecipient, address(this), amount);
     }
 
     function _processL2UpdateFailedDeposit(FailedDepositResolution calldata failedDeposit) private {
@@ -409,7 +413,6 @@ contract Rolldown is Initializable, ContextUpgradeable, AccessControlUpgradeable
 
     function _sendNative(address recipient, uint256 amount) private {
         require(amount > 0, "Amount must be greater than zero");
-        require(address(this).balance >= amount, "Not enough funds in contract");
 
         emit NativeTokensWithdrawn(recipient, amount);
         payable(recipient).sendValue(amount);
@@ -417,9 +420,6 @@ contract Rolldown is Initializable, ContextUpgradeable, AccessControlUpgradeable
 
     function _sendERC20(address recipient, address tokenAddress, uint256 amount) private {
         require(amount > 0, "Amount must be greater than zero");
-
-        uint256 balance = IERC20(tokenAddress).balanceOf(address(this));
-        require(balance >= amount, "Not enough funds in contract");
 
         IERC20(tokenAddress).safeTransfer(recipient, amount);
         emit ERC20TokensWithdrawn(recipient, tokenAddress, amount);
@@ -429,12 +429,13 @@ contract Rolldown is Initializable, ContextUpgradeable, AccessControlUpgradeable
         private
         view
     {
-        Range memory r = merkleRootRange[merkleRoot];
-        require(r.start != 0 && r.end != 0, "Unknown merkle root");
         require(processedL2Requests[requestHash] != CLOSED, "Already processed");
 
-        uint32 pos = uint32(requestId - r.start);
-        uint32 leaveCount = uint32(r.end - r.start + 1);
+        Range memory range = merkleRootRange[merkleRoot];
+        require(range.start != 0 && range.end != 0, "Unknown merkle root");
+
+        uint256 pos = requestId - range.start;
+        uint256 leaveCount = range.end - range.start + 1;
 
         bytes32 root = calculateRoot(requestHash, pos, proof, leaveCount);
         require(root == merkleRoot, "Invalid proof");
