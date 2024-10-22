@@ -8,6 +8,8 @@ services:
         condition: service_completed_successfully
       node-alice:
         condition: service_started
+      node-bob:
+        condition: service_started
     build: .
     environment:
       MANGATA_NODE_URL: ${ETH_FERRY_DEPOSIT_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}

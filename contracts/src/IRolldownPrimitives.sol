@@ -96,6 +96,7 @@ interface IRolldownPrimitives {
     }
 
 		enum ChainId{ Ethereum, Arbitrum }
+    enum L2RequestType{ Withdrawal, Cancel, FailedDepositResolution }
 
     struct L1Update {
         ChainId chain;
