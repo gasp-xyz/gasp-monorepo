@@ -28,7 +28,6 @@ export const processWithdrawalEvents = async (
     for (const eventGroup of events) {
       for (const event of eventGroup) {
         if (event.method === 'WithdrawalRequestCreated') {
-          logger.info('Event accepted at:', new Date().toISOString())
           const withdrawalData = await startTracingWithdrawal(api, event.data)
           logger.info('Tracing started for withdrawal', withdrawalData)
         } else if (event.method === 'TxBatchCreated') {
