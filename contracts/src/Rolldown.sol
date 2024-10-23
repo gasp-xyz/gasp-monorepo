@@ -10,13 +10,40 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IRolldown} from "./IRolldown.sol";
 import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
-import {RolldownStorage} from "./RolldownStorage.sol";
 
-contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorage, ReentrancyGuard {
+contract Rolldown is Initializable, OwnableUpgradeable, ReentrancyGuard, Pausable, IRolldown {
     using SafeERC20 for IERC20;
 
     address public constant NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
     address public constant CLOSED = 0x1111111111111111111111111111111111111111;
+
+    // Counter for mapping key
+    uint256 public counter;
+    // Counter for last processed request to ensure not reading and processing already processed
+    uint256 public lastProcessedUpdate_origin_l1;
+    // Counter for last processed updates comming from l2 to ensure not reading and processing already processed
+    uint256 public lastProcessedUpdate_origin_l2;
+    // Chain identificator
+    ChainId public chain;
+    // Chain identificator
+    address public updaterAccount;
+
+    // NOTE: PR DESC
+    // mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
+    mapping(uint256 => CancelResolution) public cancelResolutions;
+
+    mapping(uint256 => Deposit) public deposits;
+    // NOTE: PR DESC
+    // mapping(uint256 => L2UpdatesToRemove) internal l2UpdatesToRemove;
+    // NOTE: PR DESC
+    // mapping(address => uint) public pendingEthWithdrawals;
+
+    mapping(bytes32 => Range) public merkleRootRange;
+
+    mapping(bytes32 => address) public processedL2Requests;
+    // stores all merkle roots in order, seems like binary search on this array
+    // is the most efficient way to find merkle root that contains particular tx id
+    bytes32[] public roots;
 
     function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
         external
