@@ -10,6 +10,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IRolldown} from "./IRolldown.sol";
 import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
+import {LMerkleTree} from "./LMerkleTree.sol";
 
 contract Rolldown is Initializable, OwnableUpgradeable, ReentrancyGuard, Pausable, IRolldown {
     using SafeERC20 for IERC20;
@@ -45,61 +46,25 @@ contract Rolldown is Initializable, OwnableUpgradeable, ReentrancyGuard, Pausabl
     // is the most efficient way to find merkle root that contains particular tx id
     bytes32[] public roots;
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
+    function initialize(IPauserRegistry _pauserRegistry, address owner, ChainId chainId, address updater)
         external
         initializer
     {
-        _initializePauser(_pauserRegistry, UNPAUSE_ALL);
-        _transferOwnership(initialOwner);
-        lastProcessedUpdate_origin_l1 = 0;
-        counter = 1;
-        lastProcessedUpdate_origin_l2 = 0;
-        chain = chainId;
+        require(owner != address(0), "Zero owner address");
+        _transferOwnership(owner);
+
+        require(updater != address(0), "Zero updater address");
         updaterAccount = updater;
-    }
 
-    // TODO: move to separate modoule/contract
-    function calculateRoot(bytes32 leaveHash, uint32 leaveIdx, bytes32[] calldata proof, uint32 leaveCount)
-        public
-        pure
-        override
-        returns (bytes32)
-    {
-        uint32 levels = 0;
-        uint32 tmp = leaveCount;
-        while (tmp > 0) {
-            tmp = tmp / 2;
-            levels += 1;
-        }
-        return calculateRootImpl(levels, leaveIdx, leaveHash, proof, 0, leaveCount - 1);
-    }
+        _initializePauser(_pauserRegistry, UNPAUSE_ALL);
 
-    function calculateRootImpl(
-        uint32 level,
-        uint32 pos,
-        bytes32 hash,
-        bytes32[] calldata proofs,
-        uint32 proofIdx,
-        uint32 maxIdx
-    ) public pure override returns (bytes32) {
-        if (pos % 2 == 0) {
-            if (pos == maxIdx) {
-                // promoted node
-            } else {
-                hash = keccak256(abi.encodePacked(hash, proofs[proofIdx++]));
-            }
-        } else {
-            hash = keccak256(abi.encodePacked(proofs[proofIdx++], hash));
-        }
-
-        if (level == 1) {
-            return hash;
-        } else {
-            return calculateRootImpl(level - 1, pos / 2, hash, proofs, proofIdx, maxIdx / 2);
-        }
+        counter = 1;
+        chain = chainId;
     }
 
     function setUpdater(address updater) external override onlyOwner whenNotPaused {
+        require(updater != address(0), "Zero updater address");
+
         updaterAccount = updater;
         emit NewUpdaterSet(updaterAccount);
     }
@@ -338,7 +303,7 @@ contract Rolldown is Initializable, OwnableUpgradeable, ReentrancyGuard, Pausabl
 
         uint32 leaveCount = uint32(r.end - r.start + 1);
         uint32 pos = uint32(requestId - r.start);
-        require(calculateRoot(requestHash, pos, proof, leaveCount) == merkleRoot, "Invalid proof");
+        require(LMerkleTree.calculateRoot(requestHash, pos, proof, leaveCount) == merkleRoot, "Invalid proof");
     }
 
     function hashWithdrawal(Withdrawal calldata withdrawal) public pure override returns (bytes32) {
