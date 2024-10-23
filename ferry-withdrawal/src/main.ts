@@ -5,7 +5,7 @@ import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import "dotenv/config";
 import "gasp-types";
 
-import { toString } from "./Withdrawal.js";
+import { Withdrawal, toString } from "./Withdrawal.js";
 import { Ferry } from "./Ferry.js";
 import { L1Api } from "./l1/L1Api.js";
 import { L2Api, getApi } from "./l2/L2Api.js";
@@ -97,6 +97,10 @@ async function main() {
               inProgress = false;
               return;
             }
+            const withdrawal: Withdrawal = rated[0];
+            logger.info(
+              `Ferrying withdrawal ${toString(withdrawal)}`,
+            );
             await l1.ferry(rated[0], hexToU8a(PRIVATE_KEY));
           }
           inProgress = false;
@@ -115,6 +119,7 @@ main()
       logger.error("ContractFunctionExecutionError", e);
     } else {
       logger.error("Something went wrong", e);
+      logger.error(e.stack);
     }
     process.exit(1);
   });
