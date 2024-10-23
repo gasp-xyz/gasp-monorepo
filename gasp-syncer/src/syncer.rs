@@ -39,9 +39,6 @@ use tracing::{debug, error, info, instrument};
 // sync or we can provide the block number (taskCreatedBlock) to sync to...
 // But rdTasks and opTasks make this fairly annoying to do...
 
-// TODO!!
-// Check the receipt status!
-
 // TODO!
 // Maybe also check logs.removed?
 
@@ -397,6 +394,12 @@ impl Syncer {
         debug!("{:?}", reinit_txn_pending);
         let reinit_txn_receipt = reinit_txn_pending?.await?;
         debug!("{:?}", reinit_txn_receipt);
+        match reinit_txn_receipt.clone().ok_or_eyre("failed to unwrap reinit_txn_receipt")?.status{
+            Some(status) if status.is_zero()=>{
+                return Err(eyre!("reinit_txn failed {:?}", reinit_txn_receipt))
+            }
+            _=>{}
+        }
 
         info!("Sucessfully completed reinit - {:?}", (
             last_task,
@@ -432,6 +435,13 @@ impl Syncer {
         debug!("{:?}", force_task_txn_pending);
         let force_task_txn_receipt = force_task_txn_pending?.await?;
         debug!("{:?}", force_task_txn_receipt);
+        match force_task_txn_receipt.clone().ok_or_eyre("failed to unwrap force_task_txn_receipt")?.status{
+            Some(status) if status.is_zero()=>{
+                return Err(eyre!("force_task_txn failed {:?}", force_task_txn_receipt))
+            }
+            _=>{}
+        }
+
         let force_task_txn_receipt =
             force_task_txn_receipt.ok_or_eyre("force_task_txn_receipt is None")?;
         let new_op_task_created_event = force_task_txn_receipt.logs.into_iter().find_map(|r| {
@@ -485,6 +495,12 @@ impl Syncer {
         debug!("{:?}", force_respond_txn_pending);
         let force_respond_txn_receipt = force_respond_txn_pending?.await?;
         debug!("{:?}", force_respond_txn_receipt);
+        match force_respond_txn_receipt.clone().ok_or_eyre("failed to unwrap force_respond_txn_receipt")?.status{
+            Some(status) if status.is_zero()=>{
+                return Err(eyre!("force_respond_txn failed {:?}", force_respond_txn_receipt))
+            }
+            _=>{}
+        }
 
         info!("Successfully completed reinit-eth - {:?}", (
             task,
