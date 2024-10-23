@@ -1,12 +1,14 @@
-pragma solidity ^0.8.9;
-import {Rolldown} from "../src/Rolldown.sol";
-import "forge-std/console.sol";
-import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
-import "forge-std/StdJson.sol";
-import {Utilities, MyERC20} from "./utils/Utilities.sol";
-import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.13;
+
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "forge-std/console.sol";
+import "forge-std/StdJson.sol";
+import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
+import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
+import {Rolldown} from "../src/Rolldown.sol";
+import {Utilities, MyERC20} from "./utils/Utilities.sol";
 
 contract RolldownTest is Test, IRolldownPrimitives {
     using stdStorage for StdStorage;
@@ -579,7 +581,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
     }
 
-    function testVerifyBalancedMerkleRoot() public {
+    function testVerifyBalancedMerkleRoot() public view {
       //                                   ROOT
       //                      /                             \
       //                     /                               \
@@ -633,7 +635,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(root_hash, rolldown.calculateRoot(0x7777777777777777777777777777777777777777777777777777777777777777, 7, proof, 8));
     }
 
-    function testVerifyUnBalancedMerkleRoot1() public {
+    function testVerifyUnBalancedMerkleRoot1() public view {
       //                                   ROOT
       //                      /                             \
       //                     /                               \
@@ -651,7 +653,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(root_hash, rolldown.calculateRoot(0x6666666666666666666666666666666666666666666666666666666666666666, 6, proof, 7));
     }
 
-    function testMerkleProofs() public {
+    function testMerkleProofs() public view {
       string memory config_data = vm.readFile("./test/merkle-verificaction-testdata.json");
       uint256 test_cases_amount = stdJson.readUint(config_data, ".cases_count");
 
@@ -1026,7 +1028,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         bytes32[] memory proofs = new bytes32[](0);
 
-        uint256 aliceBefore = token.balanceOf(ALICE);
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
@@ -1183,7 +1184,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
     /// NOTE: Below hash values should not be ever chaned, there are comaptible test implemented in mangata to node
     /// to ensure abi compatibility between L1 & L2
     /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    function testL1UpdateHashCompatibilityWithMangataNode() public {
+    function testL1UpdateHashCompatibilityWithMangataNode() public pure {
         Rolldown.L1Update memory l1Update;
         l1Update.chain = ChainId.Ethereum;
         l1Update.pendingDeposits = new Rolldown.Deposit[](1);
@@ -1215,7 +1216,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         );
     }
 
-    function testChainWithMangataNode() public {
+    function testChainWithMangataNode() public pure {
 
         assertEq(
             keccak256(abi.encode(ChainId.Ethereum)),
@@ -1228,7 +1229,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         );
     }
 
-    function testWithdrawalHash() public {
+    function testWithdrawalHash() public pure {
         Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: 123, origin: IRolldownPrimitives.Origin.L2}),
             recipient: address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF),

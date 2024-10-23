@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.13;
+pragma solidity 0.8.13;
 
 import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
 import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
@@ -208,14 +208,6 @@ contract Rolldown is Initializable, OwnableUpgradeable, ReentrancyGuard, Pausabl
         return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
     }
 
-    function min(uint256 a, uint256 b) private pure returns (uint256) {
-        return a < b ? a : b;
-    }
-
-    function max(uint256 a, uint256 b) private pure returns (uint256) {
-        return a > b ? a : b;
-    }
-
     function ferry_withdrawal(Withdrawal calldata withdrawal) external payable override nonReentrant whenNotPaused {
         _ferryWithdrawal(withdrawal);
     }
@@ -234,9 +226,7 @@ contract Rolldown is Initializable, OwnableUpgradeable, ReentrancyGuard, Pausabl
 
         if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
             require(msg.value > 0, "Native token not sent");
-            require(
-                msg.value == ferriedAmount, "Sent amount should exactly match withdrawal.amount - withdrawal.ferryTip"
-            );
+            require(msg.value == ferriedAmount, "Sent amount must exactly match amount without ferryTip");
             payable(withdrawal.recipient).transfer(ferriedAmount);
             emit WithdrawalFerried(
                 withdrawal.requestId.id, ferriedAmount, withdrawal.recipient, msg.sender, withdrawalHash
