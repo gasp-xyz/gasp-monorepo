@@ -467,7 +467,7 @@ impl Operator {
                 old_operators_stake,
                 old_quorum_numbers.clone().into(),
             )
-            .await
+            .await?
             .values()
             .cloned()
             .collect::<Vec<_>>();
@@ -476,7 +476,7 @@ impl Operator {
                 new_operators_stake,
                 new_quorum_numbers.clone().into(),
             )
-            .await
+            .await?
             .values()
             .cloned()
             .collect::<Vec<_>>();
@@ -664,11 +664,11 @@ impl Operator {
         &self,
         operators_stakes_in_quorums: Vec<Vec<TMOperator>>,
         quorum_nums: Bytes,
-    ) -> HashMap<H256, CustomOperatorAvsState> {
+    ) -> eyre::Result<HashMap<H256, CustomOperatorAvsState>> {
         let mut operators_avs_state: HashMap<H256, CustomOperatorAvsState> = HashMap::new();
 
         if operators_stakes_in_quorums.len() != quorum_nums.len() {
-            // throw error
+            return Err(eyre!("operators_stakes_in_quorums.len() != quorum_nums.len()"))
         }
 
         for (quorum_id, quorum_num) in quorum_nums.iter().enumerate() {
@@ -686,7 +686,7 @@ impl Operator {
             }
         }
 
-        operators_avs_state
+        Ok(operators_avs_state)
     }
 
     pub(crate) fn operator_id(&self) -> OperatorId {
