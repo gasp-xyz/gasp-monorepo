@@ -272,15 +272,7 @@ describe('L1Interface', () => {
     expect(await l1Api.isFerried(hashWithdrawal(withdrawal))).toBeFalsy();
     expect(await l1Api.isClosed(hashWithdrawal(withdrawal))).toBeFalsy();
     const proof: Uint8Array[] = [];
-    try {
     await l1Api.close(withdrawal, withdrawal.hash, proof, privateKey);
-    } catch (e) {
-      console.info(e);
-      // console.info(e as any.toString());
-      // console.info(e as any.stack);
-      
-    }
-    // expect(await l1Api.isClosed(hashWithdrawal(withdrawal))).toBeTruthy();
     }, {timeout: 30000});
 
   it('getFerry works', async () => {

@@ -188,7 +188,7 @@ contract Rolldown is
       } else {
         IERC20 token = IERC20(withdrawal.tokenAddress);
         require(token.balanceOf(address(msg.sender)) >= ferriedAmount, "Not enough funds");
-        token.transferFrom(msg.sender, withdrawal.recipient, ferriedAmount);
+        token.safeTransferFrom(msg.sender, withdrawal.recipient, ferriedAmount);
         emit WithdrawalFerried(
           withdrawal.requestId.id,
           ferriedAmount,
