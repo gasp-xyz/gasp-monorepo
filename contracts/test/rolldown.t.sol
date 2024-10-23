@@ -123,13 +123,13 @@ contract RolldownTest is Test, IRolldownPrimitives {
           ferryTip: 0
         });
 
-        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        bytes32 merkleRoot = keccak256(abi.encode(withdrawal));
 
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.L2UpdateAccepted(merkle_root, Range({start: 1, end: 1}));
+        emit IRolldownPrimitives.L2UpdateAccepted(merkleRoot, Range({start: 1, end: 1}));
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
     }
 
@@ -147,10 +147,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = rolldown.hashWithdrawal(withdrawal);
+        // merkleRoot of tree with single element is just that single element
+        bytes32 merkleRoot = rolldown.hashWithdrawal(withdrawal);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -160,7 +160,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.ERC20TokensWithdrawn(recipient, address(token), amount);
         emit IRolldownPrimitives.WithdrawalClosed(1, keccak256(abi.encode(withdrawal)));
-        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        rolldown.close_withdrawal(withdrawal, merkleRoot, proofs);
         vm.stopPrank();
         assertEq(token.balanceOf(recipient), amount);
     }
@@ -179,10 +179,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = keccak256(abi.encode(withdrawal));
+        // merkleRoot of tree with single element is just that single element
+        bytes32 merkleRoot = keccak256(abi.encode(withdrawal));
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -190,7 +190,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         vm.expectRevert("Invalid proof");
-        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        rolldown.close_withdrawal(withdrawal, merkleRoot, proofs);
         vm.stopPrank();
     }
 
@@ -291,7 +291,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
       bytes32 node_01 = keccak256(abi.encodePacked(node_0, node_1));
       bytes32 node_23 = keccak256(abi.encodePacked(node_2, node_3));
 
-      bytes32 merkle_root = keccak256(abi.encodePacked(node_01, node_23));
+      bytes32 merkleRoot = keccak256(abi.encodePacked(node_01, node_23));
 
       // manualy compure merkle proofs
       bytes32[] memory proof_withdrawalBob1 = new bytes32[](2);
@@ -307,31 +307,31 @@ contract RolldownTest is Test, IRolldownPrimitives {
       proof_withdrawalCharlie[1] = node_01;
 
       vm.startPrank(ALICE);
-      rolldown.update_l1_from_l2(merkle_root, IRolldownPrimitives.Range({start: 1, end: 4}));
+      rolldown.update_l1_from_l2(merkleRoot, IRolldownPrimitives.Range({start: 1, end: 4}));
       vm.stopPrank();
 
       vm.startPrank(CHARLIE);
       vm.expectRevert("Invalid proof");
-      rolldown.close_withdrawal(withdrawalBob1, merkle_root, proof_withdrawalCharlie);
+      rolldown.close_withdrawal(withdrawalBob1, merkleRoot, proof_withdrawalCharlie);
       vm.stopPrank();
 
 
       vm.startPrank(ALICE);
       vm.expectEmit(true, true, true, true);
       emit IRolldownPrimitives.ERC20TokensWithdrawn(CHARLIE, address(token), 12345);
-      rolldown.close_withdrawal(withdrawalCharlie, merkle_root, proof_withdrawalCharlie);
+      rolldown.close_withdrawal(withdrawalCharlie, merkleRoot, proof_withdrawalCharlie);
       vm.stopPrank();
 
       vm.startPrank(CHARLIE);
       vm.expectEmit(true, true, true, true);
       emit IRolldownPrimitives.ERC20TokensWithdrawn(BOB, address(token), 12345);
-      rolldown.close_withdrawal(withdrawalBob1, merkle_root, proof_withdrawalBob1);
+      rolldown.close_withdrawal(withdrawalBob1, merkleRoot, proof_withdrawalBob1);
       vm.stopPrank();
 
       vm.startPrank(CHARLIE);
       vm.expectEmit(true, true, true, true);
       emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(cancel.requestId.id, false, rolldown.hashCancel(cancel));
-      rolldown.close_cancel(cancel, merkle_root, toBytes32Array([node_2, node_01]));
+      rolldown.close_cancel(cancel, merkleRoot, toBytes32Array([node_2, node_01]));
       vm.stopPrank();
 
 
@@ -351,23 +351,23 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = rolldown.hashWithdrawal(withdrawal);
+        // merkleRoot of tree with single element is just that single element
+        bytes32 merkleRoot = rolldown.hashWithdrawal(withdrawal);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
-        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        rolldown.close_withdrawal(withdrawal, merkleRoot, proofs);
 
         vm.startPrank(ALICE);
         vm.expectRevert("Already processed");
-        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        rolldown.close_withdrawal(withdrawal, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(token.balanceOf(recipient), 123456);        
         assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
-        address status = rolldown.processedL2Requests(merkle_root);
+        address status = rolldown.processedL2Requests(merkleRoot);
         assertTrue(status == rolldown.CLOSED());
 
     }
@@ -390,11 +390,11 @@ contract RolldownTest is Test, IRolldownPrimitives {
       vm.stopPrank();
 
       vm.startPrank(ALICE);
-      // merkle_root of tree with single element is just that single element
-      bytes32 merkle_root = rolldown.hashCancel(cancel);
+      // merkleRoot of tree with single element is just that single element
+      bytes32 merkleRoot = rolldown.hashCancel(cancel);
       bytes32[] memory proofs = new bytes32[](0);
       Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-      rolldown.update_l1_from_l2(merkle_root, range);
+      rolldown.update_l1_from_l2(merkleRoot, range);
       vm.stopPrank();
 
       L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,1);
@@ -404,7 +404,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
       vm.startPrank(ALICE);
       vm.expectEmit(true, true, true, true);
       emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, true, rolldown.hashCancel(cancel));
-      rolldown.close_cancel(cancel, merkle_root, proofs);
+      rolldown.close_cancel(cancel, merkleRoot, proofs);
       vm.stopPrank();
 
           
@@ -414,7 +414,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
       assertEq(l1UpdateAfter.pendingCancelResolutions.length, 1);
       assertEq(l1UpdateAfter.pendingCancelResolutions[0].l2RequestId, 1);
       assertEq(l1UpdateAfter.pendingCancelResolutions[0].cancelJustified, true);
-      address status = rolldown.processedL2Requests(merkle_root);
+      address status = rolldown.processedL2Requests(merkleRoot);
       assertTrue(status == rolldown.CLOSED());
     }
 
@@ -439,11 +439,11 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
 
         vm.startPrank(ALICE);
-        // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = rolldown.hashCancel(cancel);
+        // merkleRoot of tree with single element is just that single element
+        bytes32 merkleRoot = rolldown.hashCancel(cancel);
         bytes32[] memory proofs = new bytes32[](0);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         L1Update memory l1UpdateBefore = rolldown.getPendingRequests(1,1);
@@ -453,7 +453,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.DisputeResolutionAcceptedIntoQueue(1, false, rolldown.hashCancel(cancel));
-        rolldown.close_cancel(cancel, merkle_root, proofs);
+        rolldown.close_cancel(cancel, merkleRoot, proofs);
         vm.stopPrank();
 
         //validate pendingL2requests        
@@ -462,7 +462,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(l1UpdateAfter.pendingCancelResolutions.length, 1);
         assertEq(l1UpdateAfter.pendingCancelResolutions[0].l2RequestId, 1);
         assertEq(l1UpdateAfter.pendingCancelResolutions[0].cancelJustified, false);
-        address status = rolldown.processedL2Requests(merkle_root);
+        address status = rolldown.processedL2Requests(merkleRoot);
         assertTrue(status == rolldown.CLOSED());
     }
 
@@ -479,10 +479,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = rolldown.hashWithdrawal(withdrawal);
+        // merkleRoot of tree with single element is just that single element
+        bytes32 merkleRoot = rolldown.hashWithdrawal(withdrawal);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -492,12 +492,12 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         vm.expectRevert("Not enough funds in contract");
-        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        rolldown.close_withdrawal(withdrawal, merkleRoot, proofs);
         vm.stopPrank();
         assertEq(token.balanceOf(recipient), 0);
 
         assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
-        address status = rolldown.processedL2Requests(merkle_root);
+        address status = rolldown.processedL2Requests(merkleRoot);
         assertTrue(status != rolldown.CLOSED());
     }
 
@@ -699,9 +699,9 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        bytes32 merkle_root = rolldown.hashFailedDepositResolution(failedDeposit);
+        bytes32 merkleRoot = rolldown.hashFailedDepositResolution(failedDeposit);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -711,8 +711,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
-        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, merkle_root);
-        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, merkleRoot);
+        rolldown.close_deposit_refund(failedDeposit, merkleRoot, proofs);
         vm.stopPrank();
 
         uint256 aliceAfter = token.balanceOf(ALICE);
@@ -740,9 +740,9 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        bytes32 merkle_root = rolldown.hashFailedDepositResolution(failedDeposit);
+        bytes32 merkleRoot = rolldown.hashFailedDepositResolution(failedDeposit);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -752,8 +752,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
-        emit IRolldownPrimitives.FailedDepositResolutionClosed(1,  1, merkle_root);
-        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1,  1, merkleRoot);
+        rolldown.close_deposit_refund(failedDeposit, merkleRoot, proofs);
         vm.stopPrank();
 
         uint256 aliceAfter = token.balanceOf(ALICE);
@@ -780,9 +780,9 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        bytes32 merkle_root = rolldown.hashFailedDepositResolution(failedDeposit);
+        bytes32 merkleRoot = rolldown.hashFailedDepositResolution(failedDeposit);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -792,9 +792,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
-        emit IRolldownPrimitives.ERC20TokensWithdrawn(ferry, address(token), amount);
-        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, merkle_root);
-        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, merkleRoot);
+        rolldown.close_deposit_refund(failedDeposit, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(token.balanceOf(ALICE), aliceBefore);
@@ -822,9 +821,9 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        bytes32 merkle_root = rolldown.hashFailedDepositResolution(failedDeposit);
+        bytes32 merkleRoot = rolldown.hashFailedDepositResolution(failedDeposit);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -834,8 +833,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.ERC20TokensWithdrawn(ferry, address(token), amount);
-        emit IRolldownPrimitives.FailedDepositResolutionClosed(1,  1, merkle_root);
-        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1,  1, merkleRoot);
+        rolldown.close_deposit_refund(failedDeposit, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(token.balanceOf(ALICE), aliceBefore);
@@ -858,9 +857,9 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        bytes32 merkle_root = rolldown.hashFailedDepositResolution(failedDeposit);
+        bytes32 merkleRoot = rolldown.hashFailedDepositResolution(failedDeposit);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -869,8 +868,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
-        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, merkle_root);
-        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, merkleRoot);
+        rolldown.close_deposit_refund(failedDeposit, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(ALICE.balance - aliceBefore, amount);
@@ -894,9 +893,9 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        bytes32 merkle_root = rolldown.hashFailedDepositResolution(failedDeposit);
+        bytes32 merkleRoot = rolldown.hashFailedDepositResolution(failedDeposit);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -906,8 +905,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
-        emit IRolldownPrimitives.FailedDepositResolutionClosed(1,  1, merkle_root);
-        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, merkleRoot);
+        rolldown.close_deposit_refund(failedDeposit, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(ALICE.balance - aliceBefore, amount);
@@ -930,9 +929,9 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        bytes32 merkle_root = rolldown.hashFailedDepositResolution(failedDeposit);
+        bytes32 merkleRoot = rolldown.hashFailedDepositResolution(failedDeposit);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -943,8 +942,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.NativeTokensWithdrawn(ferry,  amount);
-        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, merkle_root);
-        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, merkleRoot);
+        rolldown.close_deposit_refund(failedDeposit, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(ALICE.balance, aliceBefore);
@@ -969,9 +968,9 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        bytes32 merkle_root = rolldown.hashFailedDepositResolution(failedDeposit);
+        bytes32 merkleRoot = rolldown.hashFailedDepositResolution(failedDeposit);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -981,8 +980,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.startPrank(ALICE);
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.NativeTokensWithdrawn(ferry,  amount);
-        emit IRolldownPrimitives.FailedDepositResolutionClosed(1,  1, merkle_root);
-        rolldown.close_deposit_refund(failedDeposit, merkle_root, proofs);
+        emit IRolldownPrimitives.FailedDepositResolutionClosed(1, 1, merkleRoot);
+        rolldown.close_deposit_refund(failedDeposit, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(ALICE.balance, aliceBefore);
@@ -1019,10 +1018,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(token.balanceOf(ALICE), ferryBefore - amount + ferryTip);
 
         vm.startPrank(ALICE);
-        // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = withdrawalHash;
+        // merkleRoot of tree with single element is just that single element
+        bytes32 merkleRoot = withdrawalHash;
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -1032,7 +1031,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
         emit IRolldownPrimitives.WithdrawalClosed(1, withdrawalHash);
-        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        rolldown.close_withdrawal(withdrawal, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(token.balanceOf(ALICE), ferryBefore + ferryTip);
@@ -1066,10 +1065,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(token.balanceOf(ALICE), ferryBefore - amount);
 
         vm.startPrank(ALICE);
-        // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = withdrawalHash;
+        // merkleRoot of tree with single element is just that single element
+        bytes32 merkleRoot = withdrawalHash;
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -1079,7 +1078,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.ERC20TokensWithdrawn(ALICE, address(token), amount);
         emit IRolldownPrimitives.WithdrawalClosed(1, withdrawalHash);
-        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        rolldown.close_withdrawal(withdrawal, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(token.balanceOf(ALICE), ferryBefore);
@@ -1116,10 +1115,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(ALICE.balance, ferryBefore - amount + ferryTip);
 
         vm.startPrank(ALICE);
-        // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = withdrawalHash;
+        // merkleRoot of tree with single element is just that single element
+        bytes32 merkleRoot = withdrawalHash;
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -1128,7 +1127,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
         emit IRolldownPrimitives.FerriedWithdrawalClosed(1, withdrawalHash);
-        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        rolldown.close_withdrawal(withdrawal, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(ALICE.balance, aliceBefore + ferryTip);
@@ -1162,10 +1161,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(ALICE.balance, ferryBefore - amount);
 
         vm.startPrank(ALICE);
-        // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = withdrawalHash;
+        // merkleRoot of tree with single element is just that single element
+        bytes32 merkleRoot = withdrawalHash;
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
@@ -1174,7 +1173,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         vm.expectEmit(true, true, true, true);
         emit IRolldownPrimitives.NativeTokensWithdrawn(ALICE, amount);
         emit IRolldownPrimitives.FerriedWithdrawalClosed(1, withdrawalHash);
-        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        rolldown.close_withdrawal(withdrawal, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(ALICE.balance, aliceBefore);
@@ -1275,16 +1274,16 @@ contract RolldownTest is Test, IRolldownPrimitives {
         });
 
         vm.startPrank(ALICE);
-        // merkle_root of tree with single element is just that single element
-        bytes32 merkle_root = rolldown.hashWithdrawal(withdrawal);
+        // merkleRoot of tree with single element is just that single element
+        bytes32 merkleRoot = rolldown.hashWithdrawal(withdrawal);
         Range memory range = IRolldownPrimitives.Range({start: 1, end: 1});
-        rolldown.update_l1_from_l2(merkle_root, range);
+        rolldown.update_l1_from_l2(merkleRoot, range);
         vm.stopPrank();
 
         bytes32[] memory proofs = new bytes32[](0);
         uint256 aliceBefore = token.balanceOf(ALICE);
         vm.startPrank(ALICE);
-        rolldown.close_withdrawal(withdrawal, merkle_root, proofs);
+        rolldown.close_withdrawal(withdrawal, merkleRoot, proofs);
         vm.stopPrank();
 
         assertEq(token.balanceOf(recipient), withdrawal.amount - withdrawal.ferryTip);
