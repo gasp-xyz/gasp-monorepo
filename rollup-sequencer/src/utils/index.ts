@@ -94,7 +94,7 @@ async function initReadContractWithRetry(
 ) {
 	while (true) {
 		const latestBlockNumber = await publicClient.getBlockNumber();
-		const delayedBlockNumber = latestBlockNumber - BigInt(BLOCK_NUMBER_DELAY);
+		const delayedBlockNumber = latestBlockNumber - minBigInt(latestBlockNumber, BigInt(BLOCK_NUMBER_DELAY));
 		const code = await publicClient.getCode({
 			address: MANGATA_CONTRACT_ADDRESS,
 			blockNumber: delayedBlockNumber,
@@ -338,6 +338,7 @@ async function getUpdateForL2(
 		abi: ABI,
 		functionName: "getPendingRequests",
 		args: [rangeStart, rangeEnd],
+    blockNumber
 	});
 }
 
