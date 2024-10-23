@@ -79,7 +79,7 @@ class L1Api implements L1Interface {
     });
 
     return {
-      root: root,
+      root: hexToU8a(root),
       range: range as [bigint, bigint],
     };
   }
