@@ -13,26 +13,24 @@ const withdrawalRepository = client.fetchRepository(withdrawalSchema)
 try {
   await depositRepository.createIndex()
 } catch (error) {
-  if (error.message.includes('Deposit index already exists')) {
-    logger.log({
-      level: 'info',
-      message: 'Deposit index already exists, skipping creation.',
-    })
-  } else {
+  if (!error.message.includes('Deposit index already exists')) {
     throw error
   }
+  logger.log({
+    level: 'info',
+    message: 'Deposit index already exists, skipping creation.',
+  })
 }
 try {
   await withdrawalRepository.createIndex()
 } catch (error) {
-  if (error.message.includes('Withdrawal index already exists')) {
-    logger.log({
-      level: 'info',
-      message: 'Withdrawal index already exists, skipping creation.',
-    })
-  } else {
+  if (!error.message.includes('Withdrawal index already exists')) {
     throw error
   }
+  logger.log({
+    level: 'info',
+    message: 'Withdrawal index already exists, skipping creation.',
+  })
 }
 
 export { depositRepository, withdrawalRepository }

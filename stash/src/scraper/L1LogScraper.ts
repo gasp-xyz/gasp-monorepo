@@ -102,26 +102,26 @@ export const watchWithdrawalClosed = async (
       logger.info({
         message: ` Withdrawal: chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
       })
-      const logsFerried = await publicClient.getContractEvents({
+      const eventsFerried = await publicClient.getContractEvents({
         address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
         abi: RolldownContract.abi,
         eventName: 'FerriedWithdrawalClosed',
         fromBlock,
         toBlock,
       })
-      const logsNotFerried = await publicClient.getContractEvents({
+      const eventsNotFerried = await publicClient.getContractEvents({
         address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
         abi: RolldownContract.abi,
         eventName: 'WithdrawalClosed',
         fromBlock,
         toBlock,
       })
-      const combinedLogs = [...logsFerried, ...logsNotFerried]
-      for (const log of combinedLogs) {
+      const combinedEvents = [...eventsFerried, ...eventsNotFerried]
+      for (const event of combinedEvents) {
         const {
           blockNumber,
           args: { requestId, withdrawalHash },
-        } = log as any
+        } = event as any
         const existingTransaction = await withdrawalRepository
           .search()
           .where('requestId')
