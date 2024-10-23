@@ -13,7 +13,8 @@ interface IRolldownPrimitives {
 
     event DisputeResolutionAcceptedIntoQueue(
         uint256 requestId,
-        bool cancelJustified
+        bool cancelJustified,
+        bytes32 cancelResolutionHash
     );
 
     event NativeTokensWithdrawn(

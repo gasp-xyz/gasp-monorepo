@@ -224,7 +224,7 @@ contract Rolldown is
 
           emit WithdrawalClosed(
             withdrawal.requestId.id,
-            keccak256(abi.encode(withdrawal))
+            withdrawalHash
           );
 
         }else{
@@ -238,7 +238,7 @@ contract Rolldown is
 
           emit FerriedWithdrawalClosed(
             withdrawal.requestId.id,
-            keccak256(abi.encode(withdrawal))
+            withdrawalHash
           );
 
         }
@@ -290,18 +290,18 @@ contract Rolldown is
     function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
         bytes32 hash = hashCancel(cancel);
         verify_request_proof(cancel.requestId.id, hash, merkle_root, proof);
-        process_l2_update_cancels(cancel);
+        process_l2_update_cancels(cancel, hash);
         processedL2Requests[hash] = CLOSED;
     }
 
     function close_deposit_refund(FailedDepositResolution calldata failedDeposit, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
         bytes32 hash = hashFailedDepositResolution(failedDeposit);
-        verify_request_proof(failedDeposit.requestId.id, keccak256(abi.encode(failedDeposit)), merkle_root, proof);
-        process_l2_update_failed_deposit(failedDeposit);
+        verify_request_proof(failedDeposit.requestId.id, hash, merkle_root, proof);
+        process_l2_update_failed_deposit(failedDeposit, hash);
         processedL2Requests[hash] = CLOSED;
     }
 
-    function process_l2_update_failed_deposit(FailedDepositResolution calldata failedDeposit) private {
+    function process_l2_update_failed_deposit(FailedDepositResolution calldata failedDeposit, bytes32 failedDepositHash) private {
         Deposit storage originDeposit = deposits[failedDeposit.originRequestId];
         address recipient = originDeposit.depositRecipient;
 
@@ -318,7 +318,7 @@ contract Rolldown is
         emit FailedDepositResolutionClosed(
           failedDeposit.requestId.id,
           failedDeposit.originRequestId,
-          keccak256(abi.encode(failedDeposit))
+          failedDepositHash
         );
     }
 
@@ -342,7 +342,7 @@ contract Rolldown is
       return roots.length;
     }
 
-    function process_l2_update_cancels(Cancel calldata cancel) private {
+    function process_l2_update_cancels(Cancel calldata cancel, bytes32 cancelHash) private {
         bool cancelJustified = false;
 
         if (cancel.range.end > counter - 1 ){
@@ -367,7 +367,8 @@ contract Rolldown is
         cancelResolutions[resolution.requestId.id] = resolution;
         emit DisputeResolutionAcceptedIntoQueue(
             resolution.l2RequestId,
-            resolution.cancelJustified
+            resolution.cancelJustified,
+            cancelHash
         );
     }
 
