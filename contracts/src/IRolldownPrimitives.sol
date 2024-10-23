@@ -1,38 +1,7 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity ^0.8.13;
 
 interface IRolldownPrimitives {
-    event DepositAcceptedIntoQueue(
-        uint256 requestId, address depositRecipient, address tokenAddress, uint256 amount, uint256 ferryTip
-    );
-
-    event DisputeResolutionAcceptedIntoQueue(uint256 requestId, bool cancelJustified, bytes32 cancelResolutionHash);
-
-    event NativeTokensWithdrawn(address sender, uint256 amount);
-
-    event ERC20TokensWithdrawn(address sender, address token_address, uint256 amount);
-
-    event WithdrawalClosed(uint256 requestId, bytes32 withdrawalHash);
-
-    event FerriedWithdrawalClosed(uint256 requestId, bytes32 withdrawalHash);
-
-    event WithdrawalFerried(
-        uint256 requestId, uint256 amount, address recipient, address ferry, bytes32 withdrawalHash
-    );
-
-    event FailedDepositResolutionClosed(
-        uint256 requestId, uint256 originDepositId, bytes32 failedDespotiResolutionHash
-    );
-
-    event L2UpdateAccepted(bytes32 root, Range range);
-
-    event NewUpdaterSet(address updater);
-
-    enum Origin {
-        L1,
-        L2
-    }
-
     struct RequestId {
         Origin origin;
         uint256 id;
@@ -65,16 +34,6 @@ interface IRolldownPrimitives {
         uint256 timeStamp;
     }
 
-    enum ChainId {
-        Ethereum,
-        Arbitrum
-    }
-    enum L2RequestType {
-        Withdrawal,
-        Cancel,
-        FailedDepositResolution
-    }
-
     struct L1Update {
         ChainId chain;
         Deposit[] pendingDeposits;
@@ -100,4 +59,56 @@ interface IRolldownPrimitives {
         uint256 amount;
         uint256 ferryTip;
     }
+
+    enum Origin {
+        L1,
+        L2
+    }
+
+    enum ChainId {
+        Ethereum,
+        Arbitrum
+    }
+
+    enum L2RequestType {
+        Withdrawal,
+        Cancel,
+        FailedDepositResolution
+    }
+
+    event DepositAcceptedIntoQueue(
+        uint256 indexed requestId,
+        address indexed depositRecipient,
+        address indexed tokenAddress,
+        uint256 amount,
+        uint256 ferryTip
+    );
+
+    event DisputeResolutionAcceptedIntoQueue(
+        uint256 indexed requestId, bool cancelJustified, bytes32 cancelResolutionHash
+    );
+
+    event NativeTokensWithdrawn(address indexed sender, uint256 amount);
+
+    event ERC20TokensWithdrawn(address indexed sender, address indexed tokenAddress, uint256 amount);
+
+    event WithdrawalClosed(uint256 indexed requestId, bytes32 withdrawalHash);
+
+    event FerriedWithdrawalClosed(uint256 indexed requestId, bytes32 withdrawalHash);
+
+    event WithdrawalFerried(
+        uint256 indexedrequestId,
+        uint256 amount,
+        address indexed recipient,
+        address indexed ferry,
+        bytes32 withdrawalHash
+    );
+
+    event FailedDepositResolutionClosed(
+        uint256 indexedrequestId, uint256 originDepositId, bytes32 failedDespotiResolutionHash
+    );
+
+    event L2UpdateAccepted(bytes32 root, Range range);
+
+    event NewUpdaterSet(address indexed updater);
 }

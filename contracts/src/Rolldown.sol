@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.13;
 
 import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
 import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
@@ -464,7 +464,7 @@ contract Rolldown is Initializable, OwnableUpgradeable, ReentrancyGuard, Pausabl
         emit L2UpdateAccepted(merkleRoot, range);
     }
 
-    function getMerkleRootsLength() external override view returns (uint256) {
+    function getMerkleRootsLength() external view override returns (uint256) {
         return roots.length;
     }
 
