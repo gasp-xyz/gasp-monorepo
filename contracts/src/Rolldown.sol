@@ -1,59 +1,62 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "forge-std/console.sol";
+import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
+import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
+import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {IRolldown} from "./IRolldown.sol";
+import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
+import {RolldownStorage} from "./RolldownStorage.sol";
 
-import "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
-import "@eigenlayer/contracts/permissions/Pausable.sol";
-import "./RolldownStorage.sol";
-
-contract Rolldown is
-    Initializable,
-    OwnableUpgradeable,
-    Pausable,
-    RolldownStorage,
-    ReentrancyGuard
-{
+contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorage, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    address public constant NATIVE_TOKEN_ADDRESS =
-        0x0000000000000000000000000000000000000001;
+    address public constant NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
 
     address public constant CLOSED = 0x1111111111111111111111111111111111111111;
 
     // TODO: move to separate modoule/contract
-    function calculate_root(bytes32 leave_hash, uint32 leave_idx, bytes32[] calldata proof, uint32 leaves_count) pure public returns (bytes32) {
-      uint32 levels = 0;
-      uint32 tmp = leaves_count;
-      while (tmp > 0) {
-        tmp = tmp / 2;
-        levels += 1;
-      }
-      return calculate_root_impl(levels, leave_idx, leave_hash, proof, 0, leaves_count - 1);
+    function calculate_root(bytes32 leave_hash, uint32 leave_idx, bytes32[] calldata proof, uint32 leaves_count)
+        public
+        pure
+        returns (bytes32)
+    {
+        uint32 levels = 0;
+        uint32 tmp = leaves_count;
+        while (tmp > 0) {
+            tmp = tmp / 2;
+            levels += 1;
+        }
+        return calculate_root_impl(levels, leave_idx, leave_hash, proof, 0, leaves_count - 1);
     }
 
-    function calculate_root_impl(uint32 level, uint32 pos, bytes32 hash, bytes32[] calldata proofs, uint32 proof_idx, uint32 max_index) pure public returns (bytes32) {
-      if (pos % 2 == 0) {
-        if (pos == max_index) {
-          // promoted node
-        }else{
-          hash = keccak256(abi.encodePacked(hash, proofs[proof_idx++]));
+    function calculate_root_impl(
+        uint32 level,
+        uint32 pos,
+        bytes32 hash,
+        bytes32[] calldata proofs,
+        uint32 proof_idx,
+        uint32 max_index
+    ) public pure returns (bytes32) {
+        if (pos % 2 == 0) {
+            if (pos == max_index) {
+                // promoted node
+            } else {
+                hash = keccak256(abi.encodePacked(hash, proofs[proof_idx++]));
+            }
+        } else {
+            hash = keccak256(abi.encodePacked(proofs[proof_idx++], hash));
         }
-      } else {
-        hash = keccak256(abi.encodePacked(proofs[proof_idx++], hash));
-      }
 
-      if (level == 1) {
-        return hash;
-      }else{
-        return calculate_root_impl(level-1, pos/2, hash, proofs, proof_idx, max_index/2);
-      }
+        if (level == 1) {
+            return hash;
+        } else {
+            return calculate_root_impl(level - 1, pos / 2, hash, proofs, proof_idx, max_index / 2);
+        }
     }
 
     function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
@@ -70,23 +73,31 @@ contract Rolldown is
     }
 
     function setUpdater(address updater) external onlyOwner whenNotPaused {
-      updaterAccount = updater;
-      emit NewUpdaterSet(updaterAccount);
+        updaterAccount = updater;
+        emit NewUpdaterSet(updaterAccount);
     }
 
     function deposit_native() external payable nonReentrant whenNotPaused {
-      deposit_native_with_tip(0);
+        _depositNativeWithTip(0);
+    }
+
+    function depositNative() external payable nonReentrant whenNotPaused {
+        _depositNativeWithTip(0);
     }
 
     function deposit_native(uint256 ferryTip) external payable nonReentrant whenNotPaused {
-      deposit_native_with_tip(ferryTip);
+        _depositNativeWithTip(ferryTip);
     }
 
-    function deposit_native_with_tip(uint256 ferryTip) private {
+    function depositNative(uint256 ferryTip) external payable nonReentrant whenNotPaused {
+        _depositNativeWithTip(ferryTip);
+    }
+
+    function _depositNativeWithTip(uint256 ferryTip) private {
         require(ferryTip <= msg.value, "Tip exceeds deposited amount");
         require(msg.value > 0, "msg value must be greater that 0");
         address depositRecipient = msg.sender;
-        uint amount = msg.value;
+        uint256 amount = msg.value;
 
         uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
@@ -100,31 +111,35 @@ contract Rolldown is
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
         emit DepositAcceptedIntoQueue(
-            depositRequest.requestId.id,
-            depositRecipient,
-            NATIVE_TOKEN_ADDRESS,
-            amount,
-            ferryTip
+            depositRequest.requestId.id, depositRecipient, NATIVE_TOKEN_ADDRESS, amount, ferryTip
         );
     }
 
-    function deposit(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant  {
-        deposit_erc20_with_tip(tokenAddress, amount, 0);
+    function deposit(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
+        _depositERC20WithTip(tokenAddress, amount, 0);
     }
 
-    function deposit(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant  {
-        deposit_erc20_with_tip(tokenAddress, amount, ferryTip);
+    function deposit(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
+        _depositERC20WithTip(tokenAddress, amount, ferryTip);
     }
 
     function deposit_erc20(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
-        deposit_erc20_with_tip(tokenAddress, amount, 0);
+        _depositERC20WithTip(tokenAddress, amount, 0);
+    }
+
+    function depositERC20(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
+        _depositERC20WithTip(tokenAddress, amount, 0);
     }
 
     function deposit_erc20(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
-        deposit_erc20_with_tip(tokenAddress, amount, ferryTip);
+        _depositERC20WithTip(tokenAddress, amount, ferryTip);
     }
 
-    function deposit_erc20_with_tip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
+    function depositERC20(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
+        _depositERC20WithTip(tokenAddress, amount, ferryTip);
+    }
+
+    function _depositERC20WithTip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
         require(ferryTip <= amount, "Tip exceeds deposited amount");
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
@@ -144,18 +159,11 @@ contract Rolldown is
         });
         // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
-        emit DepositAcceptedIntoQueue(
-            depositRequest.requestId.id,
-            depositRecipient,
-            tokenAddress,
-            amount,
-            ferryTip
-        );
+        emit DepositAcceptedIntoQueue(depositRequest.requestId.id, depositRecipient, tokenAddress, amount, ferryTip);
     }
 
     function getUpdateForL2() public view returns (L1Update memory) {
-        return
-            getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
+        return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
     }
 
     function min(uint256 a, uint256 b) private pure returns (uint256) {
@@ -166,182 +174,225 @@ contract Rolldown is
         return a > b ? a : b;
     }
 
-    function ferry_withdrawal(Withdrawal calldata withdrawal) payable public whenNotPaused nonReentrant {
-      require(withdrawal.ferryTip <= withdrawal.amount, "Tip exceeds deposited amount");
-      uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
-      bytes32 withdrawalHash = hashWithdrawal(withdrawal);
-
-      require(processedL2Requests[withdrawalHash] == address(0), "Already ferried");
-      processedL2Requests[withdrawalHash] = msg.sender;
-
-      if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
-        require(msg.value > 0, "Native token not sent");
-        require(msg.value == ferriedAmount, "Sent amount should exactly match withdrawal.amount - withdrawal.ferryTip");
-        payable(withdrawal.recipient).transfer(ferriedAmount);
-        emit WithdrawalFerried(
-          withdrawal.requestId.id,
-          ferriedAmount,
-          withdrawal.recipient,
-          msg.sender,
-          withdrawalHash
-        );
-      } else {
-        IERC20 token = IERC20(withdrawal.tokenAddress);
-        require(token.balanceOf(address(msg.sender)) >= ferriedAmount, "Not enough funds");
-        token.safeTransferFrom(msg.sender, withdrawal.recipient, ferriedAmount);
-        emit WithdrawalFerried(
-          withdrawal.requestId.id,
-          ferriedAmount,
-          withdrawal.recipient,
-          msg.sender,
-          withdrawalHash
-        );
-      }
+    function ferry_withdrawal(Withdrawal calldata withdrawal) external payable whenNotPaused nonReentrant {
+        _ferryWithdrawal(withdrawal);
     }
 
-    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+    function ferryWithdrawal(Withdrawal calldata withdrawal) external payable whenNotPaused nonReentrant {
+        _ferryWithdrawal(withdrawal);
+    }
+
+    function _ferryWithdrawal(Withdrawal calldata withdrawal) private {
+        require(withdrawal.ferryTip <= withdrawal.amount, "Tip exceeds deposited amount");
+        uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
         bytes32 withdrawalHash = hashWithdrawal(withdrawal);
-        verify_request_proof(withdrawal.requestId.id, withdrawalHash, merkle_root, proof);
+
+        require(processedL2Requests[withdrawalHash] == address(0), "Already ferried");
+        processedL2Requests[withdrawalHash] = msg.sender;
+
+        if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
+            require(msg.value > 0, "Native token not sent");
+            require(
+                msg.value == ferriedAmount, "Sent amount should exactly match withdrawal.amount - withdrawal.ferryTip"
+            );
+            payable(withdrawal.recipient).transfer(ferriedAmount);
+            emit WithdrawalFerried(
+                withdrawal.requestId.id, ferriedAmount, withdrawal.recipient, msg.sender, withdrawalHash
+            );
+        } else {
+            IERC20 token = IERC20(withdrawal.tokenAddress);
+            require(token.balanceOf(address(msg.sender)) >= ferriedAmount, "Not enough funds");
+            token.safeTransferFrom(msg.sender, withdrawal.recipient, ferriedAmount);
+            emit WithdrawalFerried(
+                withdrawal.requestId.id, ferriedAmount, withdrawal.recipient, msg.sender, withdrawalHash
+            );
+        }
+    }
+
+    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof)
+        external
+        whenNotPaused
+        nonReentrant
+    {
+        _closeWithdrawal(withdrawal, merkle_root, proof);
+    }
+
+    function closeWithdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof)
+        external
+        whenNotPaused
+        nonReentrant
+    {
+        _closeWithdrawal(withdrawal, merkle_root, proof);
+    }
+
+    function _closeWithdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) private {
+        bytes32 withdrawalHash = hashWithdrawal(withdrawal);
+        verifyRequestProof(withdrawal.requestId.id, withdrawalHash, merkle_root, proof);
 
         address ferryAddress = processedL2Requests[withdrawalHash];
         bool isFerried = ferryAddress != address(0);
         processedL2Requests[withdrawalHash] = CLOSED;
 
-        if ( !isFerried ){
-
-          if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
-            send_native_and_emit_event(withdrawal.recipient, withdrawal.amount - withdrawal.ferryTip);
-            if (withdrawal.ferryTip > 0){
-              send_native_and_emit_event(msg.sender, withdrawal.ferryTip);
+        if (!isFerried) {
+            if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
+                _sendNative(withdrawal.recipient, withdrawal.amount - withdrawal.ferryTip);
+                if (withdrawal.ferryTip > 0) {
+                    _sendNative(msg.sender, withdrawal.ferryTip);
+                }
+            } else {
+                _sendERC20(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount - withdrawal.ferryTip);
+                if (withdrawal.ferryTip > 0) {
+                    _sendERC20(msg.sender, withdrawal.tokenAddress, withdrawal.ferryTip);
+                }
             }
-          }
-          else {
-            send_erc20_and_emit_event(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount - withdrawal.ferryTip);
-            if (withdrawal.ferryTip > 0){
-              send_erc20_and_emit_event(msg.sender, withdrawal.tokenAddress, withdrawal.ferryTip);
+
+            emit WithdrawalClosed(withdrawal.requestId.id, withdrawalHash);
+        } else {
+            if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
+                _sendNative(ferryAddress, withdrawal.amount);
+            } else {
+                _sendERC20(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
             }
-          }
 
-          emit WithdrawalClosed(
-            withdrawal.requestId.id,
-            withdrawalHash
-          );
-
-        }else{
-
-          if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
-            send_native_and_emit_event(ferryAddress, withdrawal.amount);
-          }
-          else {
-            send_erc20_and_emit_event(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
-          }
-
-          emit FerriedWithdrawalClosed(
-            withdrawal.requestId.id,
-            withdrawalHash
-          );
-
+            emit FerriedWithdrawalClosed(withdrawal.requestId.id, withdrawalHash);
         }
-
-
     }
 
-    function find_l2_batch(uint256 requestId) view public returns (bytes32) {
+    function find_l2_batch(uint256 requestId) external view returns (bytes32) {
+        return _findL2Batch(requestId);
+    }
+
+    function findL2Batch(uint256 requestId) external view returns (bytes32) {
+        return _findL2Batch(requestId);
+    }
+
+    function _findL2Batch(uint256 requestId) private view returns (bytes32) {
         require(requestId <= lastProcessedUpdate_origin_l2, "Invalid request id");
         if (roots.length == 0) {
             revert("there are no roots yet on the contract");
         }
 
         for (uint256 i = roots.length - 1; i >= 0; i--) {
-          if ( requestId >= merkleRootRange[roots[i]].start && requestId <= merkleRootRange[roots[i]].end) {
-            return roots[i];
-          }
+            if (requestId >= merkleRootRange[roots[i]].start && requestId <= merkleRootRange[roots[i]].end) {
+                return roots[i];
+            }
         }
 
         revert("couldnt find the batch containing the request");
     }
 
-    function verify_request_proof(uint256 requestId, bytes32 request_hash, bytes32 merkle_root, bytes32[] calldata proof) private view {
+    function verifyRequestProof(uint256 requestId, bytes32 request_hash, bytes32 merkle_root, bytes32[] calldata proof)
+        private
+        view
+    {
         Range memory r = merkleRootRange[merkle_root];
-        require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
+        require(r.start != 0 && r.end != 0, "Unknown merkle root");
 
         require(processedL2Requests[request_hash] != CLOSED, "Already processed");
 
         if (r.end < r.start) {
-          revert("Invalid request range, end < start");
+            revert("Invalid request range, end < start");
         }
 
         if (requestId < r.start || requestId > r.end) {
-          revert("Request id outside of range");
+            revert("Request id outside of range");
         }
 
-        if (r.end - r.start + 1 > type(uint32).max ){
-          revert("Range too big");
+        if (r.end - r.start + 1 > type(uint32).max) {
+            revert("Range too big");
         }
 
         uint32 leaves_count = uint32(r.end - r.start + 1);
         uint32 pos = uint32(requestId - r.start);
-        require(
-          calculate_root(request_hash, pos, proof, leaves_count) == merkle_root,
-          "Invalid proof"
-        );
+        require(calculate_root(request_hash, pos, proof, leaves_count) == merkle_root, "Invalid proof");
     }
 
     function hashWithdrawal(Withdrawal calldata withdrawal) public pure returns (bytes32) {
-      return keccak256(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
+        return keccak256(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
     }
 
     function hashCancel(Cancel calldata cancel) public pure returns (bytes32) {
-      return keccak256(bytes.concat(abi.encode(L2RequestType.Cancel), abi.encode(cancel)));
-    }
-    
-    function hashFailedDepositResolution(FailedDepositResolution calldata failedDeposit) public pure returns (bytes32) {
-      return keccak256(bytes.concat(abi.encode(L2RequestType.FailedDepositResolution), abi.encode(failedDeposit)));
+        return keccak256(bytes.concat(abi.encode(L2RequestType.Cancel), abi.encode(cancel)));
     }
 
-    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+    function hashFailedDepositResolution(FailedDepositResolution calldata failedDeposit)
+        public
+        pure
+        returns (bytes32)
+    {
+        return keccak256(bytes.concat(abi.encode(L2RequestType.FailedDepositResolution), abi.encode(failedDeposit)));
+    }
+
+    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof)
+        public
+        whenNotPaused
+        nonReentrant
+    {
+        _closeCancel(cancel, merkle_root, proof);
+    }
+
+    function closeCancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof)
+        public
+        whenNotPaused
+        nonReentrant
+    {
+        _closeCancel(cancel, merkle_root, proof);
+    }
+
+    function _closeCancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) private {
         bytes32 hash = hashCancel(cancel);
-        verify_request_proof(cancel.requestId.id, hash, merkle_root, proof);
-        process_l2_update_cancels(cancel, hash);
+        verifyRequestProof(cancel.requestId.id, hash, merkle_root, proof);
+        _processL2UpdateCancels(cancel, hash);
         processedL2Requests[hash] = CLOSED;
     }
 
-    function close_deposit_refund(FailedDepositResolution calldata failedDeposit, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+    function close_deposit_refund(
+        FailedDepositResolution calldata failedDeposit,
+        bytes32 merkle_root,
+        bytes32[] calldata proof
+    ) public whenNotPaused nonReentrant {
         bytes32 hash = hashFailedDepositResolution(failedDeposit);
-        verify_request_proof(failedDeposit.requestId.id, hash, merkle_root, proof);
-        process_l2_update_failed_deposit(failedDeposit, hash);
+        verifyRequestProof(failedDeposit.requestId.id, hash, merkle_root, proof);
+        _processL2UpdateFailedDeposit(failedDeposit, hash);
         processedL2Requests[hash] = CLOSED;
     }
 
-    function process_l2_update_failed_deposit(FailedDepositResolution calldata failedDeposit, bytes32 failedDepositHash) private {
+    function _processL2UpdateFailedDeposit(FailedDepositResolution calldata failedDeposit, bytes32 failedDepositHash)
+        private
+    {
         Deposit storage originDeposit = deposits[failedDeposit.originRequestId];
         address recipient = originDeposit.depositRecipient;
 
         if (failedDeposit.ferry != address(0)) {
-          recipient = failedDeposit.ferry;
+            recipient = failedDeposit.ferry;
         }
 
         if (originDeposit.tokenAddress == NATIVE_TOKEN_ADDRESS) {
-              send_native_and_emit_event(recipient, originDeposit.amount);
+            _sendNative(recipient, originDeposit.amount);
         } else {
-              send_erc20_and_emit_event(recipient, originDeposit.tokenAddress, originDeposit.amount);
+            _sendERC20(recipient, originDeposit.tokenAddress, originDeposit.amount);
         }
 
-        emit FailedDepositResolutionClosed(
-          failedDeposit.requestId.id,
-          failedDeposit.originRequestId,
-          failedDepositHash
-        );
+        emit FailedDepositResolutionClosed(failedDeposit.requestId.id, failedDeposit.originRequestId, failedDepositHash);
     }
 
+    function update_l1_from_l2(bytes32 merkle_root, Range calldata range) external whenNotPaused {
+        _updateL1FromL2(merkle_root, range);
+    }
+
+    function updateL1FromL2(bytes32 merkle_root, Range calldata range) external whenNotPaused {
+        _updateL1FromL2(merkle_root, range);
+    }
 
     // TODO:
     // - verify that merkle_root is correct (passing TaskResponse along with the merkle root?)
     // - verify that range is correct and belongs to particular merkle_root
-    function update_l1_from_l2(bytes32 merkle_root, Range calldata range /*,TaskResponse calldata response ??? */) external whenNotPaused {
+    function _updateL1FromL2(bytes32 merkle_root, Range calldata range /*,TaskResponse calldata response ??? */ )
+        private
+    {
         require(msg.sender == updaterAccount, "Not the owner");
         require(range.end > lastProcessedUpdate_origin_l2, "Update brings no new data");
-        require(range.start > 0 , "range id must be greater than 0");
+        require(range.start > 0, "range id must be greater than 0");
         require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
         require(range.end >= range.start, "Invalid range");
         roots.push(merkle_root);
@@ -350,22 +401,19 @@ contract Rolldown is
         emit L2UpdateAccepted(merkle_root, range);
     }
 
-    function getMerkleRootsLength() public view returns (uint256){
-      return roots.length;
+    function getMerkleRootsLength() public view returns (uint256) {
+        return roots.length;
     }
 
-    function process_l2_update_cancels(Cancel calldata cancel, bytes32 cancelHash) private {
+    function _processL2UpdateCancels(Cancel calldata cancel, bytes32 cancelHash) private {
         bool cancelJustified = false;
 
-        if (cancel.range.end > counter - 1 ){
-          cancelJustified = true;
-        }else{
-          L1Update memory pending = getPendingRequests(
-            cancel.range.start,
-            cancel.range.end
-          );
-          bytes32 correct_hash = keccak256(abi.encode(pending));
-          cancelJustified = correct_hash != cancel.hash;
+        if (cancel.range.end > counter - 1) {
+            cancelJustified = true;
+        } else {
+            L1Update memory pending = getPendingRequests(cancel.range.start, cancel.range.end);
+            bytes32 correct_hash = keccak256(abi.encode(pending));
+            cancelJustified = correct_hash != cancel.hash;
         }
         uint256 timeStamp = block.timestamp;
 
@@ -377,53 +425,34 @@ contract Rolldown is
         });
 
         cancelResolutions[resolution.requestId.id] = resolution;
-        emit DisputeResolutionAcceptedIntoQueue(
-            resolution.l2RequestId,
-            resolution.cancelJustified,
-            cancelHash
-        );
+        emit DisputeResolutionAcceptedIntoQueue(resolution.l2RequestId, resolution.cancelJustified, cancelHash);
     }
 
-    function send_native_and_emit_event(
-        address recipient,
-        uint256 amount
-    ) private {
+    function _sendNative(address recipient, uint256 amount) private {
         require(payable(address(this)).balance >= amount, "Not enough funds in contract");
         require(amount > 0, "Amount must be greater than zero");
         emit NativeTokensWithdrawn(recipient, amount);
         Address.sendValue(payable(recipient), amount);
     }
 
-
-    function send_erc20_and_emit_event(
-        address recipient,
-        address tokenAddress,
-        uint256 amount
-    ) private {
+    function _sendERC20(address recipient, address tokenAddress, uint256 amount) private {
         IERC20 token = IERC20(tokenAddress);
         require(token.balanceOf(address(this)) >= amount, "Not enough funds in contract");
         require(amount > 0, "Amount must be greater than zero");
 
         token.safeTransfer(recipient, amount);
-        emit ERC20TokensWithdrawn(
-          recipient,
-          tokenAddress,
-          amount
-        );
+        emit ERC20TokensWithdrawn(recipient, tokenAddress, amount);
     }
 
-    function getPendingRequests(
-        uint256 start,
-        uint256 end
-    ) public view returns (L1Update memory) {
+    function getPendingRequests(uint256 start, uint256 end) public view returns (L1Update memory) {
         L1Update memory result;
 
         result.chain = chain;
         uint256 depositsCounter = 0;
         uint256 cancelsCounter = 0;
 
-        if (start == 0 && end == 0){
-          return result;
+        if (start == 0 && end == 0) {
+            return result;
         }
 
         for (uint256 requestId = start; requestId <= end; requestId++) {
@@ -431,8 +460,8 @@ contract Rolldown is
                 depositsCounter++;
             } else if (cancelResolutions[requestId].requestId.id != 0) {
                 cancelsCounter++;
-            }else {
-              revert("Invalid range");
+            } else {
+                revert("Invalid range");
             }
         }
 
@@ -446,9 +475,7 @@ contract Rolldown is
             if (deposits[requestId].requestId.id > 0) {
                 result.pendingDeposits[depositsCounter++] = deposits[requestId];
             } else if (cancelResolutions[requestId].l2RequestId > 0) {
-                result.pendingCancelResolutions[
-                    cancelsCounter++
-                ] = cancelResolutions[requestId];
+                result.pendingCancelResolutions[cancelsCounter++] = cancelResolutions[requestId];
             } else {
                 break;
             }

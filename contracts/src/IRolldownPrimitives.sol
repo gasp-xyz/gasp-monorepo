@@ -2,60 +2,29 @@
 pragma solidity ^0.8.9;
 
 interface IRolldownPrimitives {
-
     event DepositAcceptedIntoQueue(
-        uint256 requestId,
-        address depositRecipient,
-        address tokenAddress,
-        uint256 amount,
-        uint256 ferryTip
+        uint256 requestId, address depositRecipient, address tokenAddress, uint256 amount, uint256 ferryTip
     );
 
-    event DisputeResolutionAcceptedIntoQueue(
-        uint256 requestId,
-        bool cancelJustified,
-        bytes32 cancelResolutionHash
-    );
+    event DisputeResolutionAcceptedIntoQueue(uint256 requestId, bool cancelJustified, bytes32 cancelResolutionHash);
 
-    event NativeTokensWithdrawn(
-      address sender,
-      uint256 amount
-    );
+    event NativeTokensWithdrawn(address sender, uint256 amount);
 
-    event ERC20TokensWithdrawn(
-      address sender, 
-      address token_address, 
-      uint256 amount
-    );
+    event ERC20TokensWithdrawn(address sender, address token_address, uint256 amount);
 
-    event WithdrawalClosed(
-      uint256 requestId,
-      bytes32 withdrawalHash
-    );
+    event WithdrawalClosed(uint256 requestId, bytes32 withdrawalHash);
 
-    event FerriedWithdrawalClosed(
-      uint256 requestId,
-      bytes32 withdrawalHash
-    );
+    event FerriedWithdrawalClosed(uint256 requestId, bytes32 withdrawalHash);
 
     event WithdrawalFerried(
-      uint256 requestId,
-      uint256 amount,
-      address recipient,
-      address ferry,
-      bytes32 withdrawalHash
+        uint256 requestId, uint256 amount, address recipient, address ferry, bytes32 withdrawalHash
     );
 
     event FailedDepositResolutionClosed(
-      uint256 requestId,
-      uint256 originDepositId,
-      bytes32 failedDespotiResolutionHash
+        uint256 requestId, uint256 originDepositId, bytes32 failedDespotiResolutionHash
     );
 
-    event L2UpdateAccepted(
-      bytes32 root,
-      Range range
-    );
+    event L2UpdateAccepted(bytes32 root, Range range);
 
     event NewUpdaterSet(address updater);
 
@@ -84,9 +53,9 @@ interface IRolldownPrimitives {
     }
 
     struct FailedDepositResolution {
-      RequestId requestId;
-      uint256 originRequestId;
-      address ferry;
+        RequestId requestId;
+        uint256 originRequestId;
+        address ferry;
     }
 
     struct CancelResolution {
@@ -96,14 +65,21 @@ interface IRolldownPrimitives {
         uint256 timeStamp;
     }
 
-		enum ChainId{ Ethereum, Arbitrum }
-    enum L2RequestType{ Withdrawal, Cancel, FailedDepositResolution }
+    enum ChainId {
+        Ethereum,
+        Arbitrum
+    }
+    enum L2RequestType {
+        Withdrawal,
+        Cancel,
+        FailedDepositResolution
+    }
 
     struct L1Update {
         ChainId chain;
         Deposit[] pendingDeposits;
         CancelResolution[] pendingCancelResolutions;
-    } 
+    }
 
     struct RequestResult {
         RequestId requestId;
@@ -124,5 +100,4 @@ interface IRolldownPrimitives {
         uint256 amount;
         uint256 ferryTip;
     }
-
 }

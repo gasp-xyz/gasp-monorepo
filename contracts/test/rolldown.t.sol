@@ -1244,7 +1244,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         );
     }
 
-    function testDepositResolutionHashMatches() public {
+    function testDepositResolutionHashMatches() public pure {
 
         FailedDepositResolution memory failedDeposit = FailedDepositResolution({
             requestId: IRolldownPrimitives.RequestId({id: 123, origin: IRolldownPrimitives.Origin.L1}),
