@@ -16,51 +16,10 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
     using SafeERC20 for IERC20;
 
     address public constant NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
-
     address public constant CLOSED = 0x1111111111111111111111111111111111111111;
 
-    // TODO: move to separate modoule/contract
-    function calculate_root(bytes32 leave_hash, uint32 leave_idx, bytes32[] calldata proof, uint32 leaves_count)
-        public
-        pure
-        returns (bytes32)
-    {
-        uint32 levels = 0;
-        uint32 tmp = leaves_count;
-        while (tmp > 0) {
-            tmp = tmp / 2;
-            levels += 1;
-        }
-        return calculate_root_impl(levels, leave_idx, leave_hash, proof, 0, leaves_count - 1);
-    }
-
-    function calculate_root_impl(
-        uint32 level,
-        uint32 pos,
-        bytes32 hash,
-        bytes32[] calldata proofs,
-        uint32 proof_idx,
-        uint32 max_index
-    ) public pure returns (bytes32) {
-        if (pos % 2 == 0) {
-            if (pos == max_index) {
-                // promoted node
-            } else {
-                hash = keccak256(abi.encodePacked(hash, proofs[proof_idx++]));
-            }
-        } else {
-            hash = keccak256(abi.encodePacked(proofs[proof_idx++], hash));
-        }
-
-        if (level == 1) {
-            return hash;
-        } else {
-            return calculate_root_impl(level - 1, pos / 2, hash, proofs, proof_idx, max_index / 2);
-        }
-    }
-
     function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
-        public
+        external
         initializer
     {
         _initializePauser(_pauserRegistry, UNPAUSE_ALL);
@@ -72,24 +31,65 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         updaterAccount = updater;
     }
 
-    function setUpdater(address updater) external onlyOwner whenNotPaused {
+    // TODO: move to separate modoule/contract
+    function calculateRoot(bytes32 leaveHash, uint32 leaveIdx, bytes32[] calldata proof, uint32 leaveCount)
+        public
+        pure
+        override
+        returns (bytes32)
+    {
+        uint32 levels = 0;
+        uint32 tmp = leaveCount;
+        while (tmp > 0) {
+            tmp = tmp / 2;
+            levels += 1;
+        }
+        return calculateRootImpl(levels, leaveIdx, leaveHash, proof, 0, leaveCount - 1);
+    }
+
+    function calculateRootImpl(
+        uint32 level,
+        uint32 pos,
+        bytes32 hash,
+        bytes32[] calldata proofs,
+        uint32 proofIdx,
+        uint32 maxIdx
+    ) public pure override returns (bytes32) {
+        if (pos % 2 == 0) {
+            if (pos == maxIdx) {
+                // promoted node
+            } else {
+                hash = keccak256(abi.encodePacked(hash, proofs[proofIdx++]));
+            }
+        } else {
+            hash = keccak256(abi.encodePacked(proofs[proofIdx++], hash));
+        }
+
+        if (level == 1) {
+            return hash;
+        } else {
+            return calculateRootImpl(level - 1, pos / 2, hash, proofs, proofIdx, maxIdx / 2);
+        }
+    }
+
+    function setUpdater(address updater) external override onlyOwner whenNotPaused {
         updaterAccount = updater;
         emit NewUpdaterSet(updaterAccount);
     }
 
-    function deposit_native() external payable nonReentrant whenNotPaused {
+    function deposit_native() external payable override nonReentrant whenNotPaused {
         _depositNativeWithTip(0);
     }
 
-    function depositNative() external payable nonReentrant whenNotPaused {
+    function depositNative() external payable override nonReentrant whenNotPaused {
         _depositNativeWithTip(0);
     }
 
-    function deposit_native(uint256 ferryTip) external payable nonReentrant whenNotPaused {
+    function deposit_native(uint256 ferryTip) external payable override nonReentrant whenNotPaused {
         _depositNativeWithTip(ferryTip);
     }
 
-    function depositNative(uint256 ferryTip) external payable nonReentrant whenNotPaused {
+    function depositNative(uint256 ferryTip) external payable override nonReentrant whenNotPaused {
         _depositNativeWithTip(ferryTip);
     }
 
@@ -115,27 +115,42 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         );
     }
 
-    function deposit(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
+    function deposit(address tokenAddress, uint256 amount) external override nonReentrant whenNotPaused {
         _depositERC20WithTip(tokenAddress, amount, 0);
     }
 
-    function deposit(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
+    function deposit(address tokenAddress, uint256 amount, uint256 ferryTip)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
         _depositERC20WithTip(tokenAddress, amount, ferryTip);
     }
 
-    function deposit_erc20(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
+    function deposit_erc20(address tokenAddress, uint256 amount) external override nonReentrant whenNotPaused {
         _depositERC20WithTip(tokenAddress, amount, 0);
     }
 
-    function depositERC20(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
+    function depositERC20(address tokenAddress, uint256 amount) external override nonReentrant whenNotPaused {
         _depositERC20WithTip(tokenAddress, amount, 0);
     }
 
-    function deposit_erc20(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
+    function deposit_erc20(address tokenAddress, uint256 amount, uint256 ferryTip)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
         _depositERC20WithTip(tokenAddress, amount, ferryTip);
     }
 
-    function depositERC20(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
+    function depositERC20(address tokenAddress, uint256 amount, uint256 ferryTip)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
         _depositERC20WithTip(tokenAddress, amount, ferryTip);
     }
 
@@ -162,7 +177,7 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         emit DepositAcceptedIntoQueue(depositRequest.requestId.id, depositRecipient, tokenAddress, amount, ferryTip);
     }
 
-    function getUpdateForL2() public view returns (L1Update memory) {
+    function getUpdateForL2() external view override returns (L1Update memory) {
         return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
     }
 
@@ -174,11 +189,11 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         return a > b ? a : b;
     }
 
-    function ferry_withdrawal(Withdrawal calldata withdrawal) external payable whenNotPaused nonReentrant {
+    function ferry_withdrawal(Withdrawal calldata withdrawal) external payable override nonReentrant whenNotPaused {
         _ferryWithdrawal(withdrawal);
     }
 
-    function ferryWithdrawal(Withdrawal calldata withdrawal) external payable whenNotPaused nonReentrant {
+    function ferryWithdrawal(Withdrawal calldata withdrawal) external payable override nonReentrant whenNotPaused {
         _ferryWithdrawal(withdrawal);
     }
 
@@ -209,25 +224,27 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         }
     }
 
-    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof)
+    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkleRoot, bytes32[] calldata proof)
         external
-        whenNotPaused
+        override
         nonReentrant
+        whenNotPaused
     {
-        _closeWithdrawal(withdrawal, merkle_root, proof);
+        _closeWithdrawal(withdrawal, merkleRoot, proof);
     }
 
-    function closeWithdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof)
+    function closeWithdrawal(Withdrawal calldata withdrawal, bytes32 merkleRoot, bytes32[] calldata proof)
         external
-        whenNotPaused
+        override
         nonReentrant
+        whenNotPaused
     {
-        _closeWithdrawal(withdrawal, merkle_root, proof);
+        _closeWithdrawal(withdrawal, merkleRoot, proof);
     }
 
-    function _closeWithdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) private {
+    function _closeWithdrawal(Withdrawal calldata withdrawal, bytes32 merkleRoot, bytes32[] calldata proof) private {
         bytes32 withdrawalHash = hashWithdrawal(withdrawal);
-        verifyRequestProof(withdrawal.requestId.id, withdrawalHash, merkle_root, proof);
+        _verifyRequestProof(withdrawal.requestId.id, withdrawalHash, merkleRoot, proof);
 
         address ferryAddress = processedL2Requests[withdrawalHash];
         bool isFerried = ferryAddress != address(0);
@@ -258,11 +275,11 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         }
     }
 
-    function find_l2_batch(uint256 requestId) external view returns (bytes32) {
+    function find_l2_batch(uint256 requestId) external view override returns (bytes32) {
         return _findL2Batch(requestId);
     }
 
-    function findL2Batch(uint256 requestId) external view returns (bytes32) {
+    function findL2Batch(uint256 requestId) external view override returns (bytes32) {
         return _findL2Batch(requestId);
     }
 
@@ -281,14 +298,14 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         revert("couldnt find the batch containing the request");
     }
 
-    function verifyRequestProof(uint256 requestId, bytes32 request_hash, bytes32 merkle_root, bytes32[] calldata proof)
+    function _verifyRequestProof(uint256 requestId, bytes32 requestHash, bytes32 merkleRoot, bytes32[] calldata proof)
         private
         view
     {
-        Range memory r = merkleRootRange[merkle_root];
+        Range memory r = merkleRootRange[merkleRoot];
         require(r.start != 0 && r.end != 0, "Unknown merkle root");
 
-        require(processedL2Requests[request_hash] != CLOSED, "Already processed");
+        require(processedL2Requests[requestHash] != CLOSED, "Already processed");
 
         if (r.end < r.start) {
             revert("Invalid request range, end < start");
@@ -302,57 +319,76 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
             revert("Range too big");
         }
 
-        uint32 leaves_count = uint32(r.end - r.start + 1);
+        uint32 leaveCount = uint32(r.end - r.start + 1);
         uint32 pos = uint32(requestId - r.start);
-        require(calculate_root(request_hash, pos, proof, leaves_count) == merkle_root, "Invalid proof");
+        require(calculateRoot(requestHash, pos, proof, leaveCount) == merkleRoot, "Invalid proof");
     }
 
-    function hashWithdrawal(Withdrawal calldata withdrawal) public pure returns (bytes32) {
+    function hashWithdrawal(Withdrawal calldata withdrawal) public pure override returns (bytes32) {
         return keccak256(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
     }
 
-    function hashCancel(Cancel calldata cancel) public pure returns (bytes32) {
+    function hashCancel(Cancel calldata cancel) public pure override returns (bytes32) {
         return keccak256(bytes.concat(abi.encode(L2RequestType.Cancel), abi.encode(cancel)));
     }
 
     function hashFailedDepositResolution(FailedDepositResolution calldata failedDeposit)
         public
         pure
+        override
         returns (bytes32)
     {
         return keccak256(bytes.concat(abi.encode(L2RequestType.FailedDepositResolution), abi.encode(failedDeposit)));
     }
 
-    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof)
-        public
+    function close_cancel(Cancel calldata cancel, bytes32 merkleRoot, bytes32[] calldata proof)
+        external
+        override
         whenNotPaused
         nonReentrant
     {
-        _closeCancel(cancel, merkle_root, proof);
+        _closeCancel(cancel, merkleRoot, proof);
     }
 
-    function closeCancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof)
-        public
+    function closeCancel(Cancel calldata cancel, bytes32 merkleRoot, bytes32[] calldata proof)
+        external
+        override
         whenNotPaused
         nonReentrant
     {
-        _closeCancel(cancel, merkle_root, proof);
+        _closeCancel(cancel, merkleRoot, proof);
     }
 
-    function _closeCancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) private {
+    function _closeCancel(Cancel calldata cancel, bytes32 merkleRoot, bytes32[] calldata proof) private {
         bytes32 hash = hashCancel(cancel);
-        verifyRequestProof(cancel.requestId.id, hash, merkle_root, proof);
+        _verifyRequestProof(cancel.requestId.id, hash, merkleRoot, proof);
         _processL2UpdateCancels(cancel, hash);
         processedL2Requests[hash] = CLOSED;
     }
 
     function close_deposit_refund(
         FailedDepositResolution calldata failedDeposit,
-        bytes32 merkle_root,
+        bytes32 merkleRoot,
         bytes32[] calldata proof
-    ) public whenNotPaused nonReentrant {
+    ) external override nonReentrant whenNotPaused {
+        _closeDepositRefund(failedDeposit, merkleRoot, proof);
+    }
+
+    function closeDepositRefund(
+        FailedDepositResolution calldata failedDeposit,
+        bytes32 merkleRoot,
+        bytes32[] calldata proof
+    ) external override nonReentrant whenNotPaused {
+        _closeDepositRefund(failedDeposit, merkleRoot, proof);
+    }
+
+    function _closeDepositRefund(
+        FailedDepositResolution calldata failedDeposit,
+        bytes32 merkleRoot,
+        bytes32[] calldata proof
+    ) private {
         bytes32 hash = hashFailedDepositResolution(failedDeposit);
-        verifyRequestProof(failedDeposit.requestId.id, hash, merkle_root, proof);
+        _verifyRequestProof(failedDeposit.requestId.id, hash, merkleRoot, proof);
         _processL2UpdateFailedDeposit(failedDeposit, hash);
         processedL2Requests[hash] = CLOSED;
     }
@@ -376,18 +412,18 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         emit FailedDepositResolutionClosed(failedDeposit.requestId.id, failedDeposit.originRequestId, failedDepositHash);
     }
 
-    function update_l1_from_l2(bytes32 merkle_root, Range calldata range) external whenNotPaused {
-        _updateL1FromL2(merkle_root, range);
+    function update_l1_from_l2(bytes32 merkleRoot, Range calldata range) external override whenNotPaused {
+        _updateL1FromL2(merkleRoot, range);
     }
 
-    function updateL1FromL2(bytes32 merkle_root, Range calldata range) external whenNotPaused {
-        _updateL1FromL2(merkle_root, range);
+    function updateL1FromL2(bytes32 merkleRoot, Range calldata range) external override whenNotPaused {
+        _updateL1FromL2(merkleRoot, range);
     }
 
     // TODO:
-    // - verify that merkle_root is correct (passing TaskResponse along with the merkle root?)
-    // - verify that range is correct and belongs to particular merkle_root
-    function _updateL1FromL2(bytes32 merkle_root, Range calldata range /*,TaskResponse calldata response ??? */ )
+    // - verify that merkleRoot is correct (passing TaskResponse along with the merkle root?)
+    // - verify that range is correct and belongs to particular merkleRoot
+    function _updateL1FromL2(bytes32 merkleRoot, Range calldata range /*,TaskResponse calldata response ??? */ )
         private
     {
         require(msg.sender == updaterAccount, "Not the owner");
@@ -395,13 +431,13 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         require(range.start > 0, "range id must be greater than 0");
         require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
         require(range.end >= range.start, "Invalid range");
-        roots.push(merkle_root);
-        merkleRootRange[merkle_root] = range;
+        roots.push(merkleRoot);
+        merkleRootRange[merkleRoot] = range;
         lastProcessedUpdate_origin_l2 = range.end;
-        emit L2UpdateAccepted(merkle_root, range);
+        emit L2UpdateAccepted(merkleRoot, range);
     }
 
-    function getMerkleRootsLength() public view returns (uint256) {
+    function getMerkleRootsLength() external override view returns (uint256) {
         return roots.length;
     }
 
@@ -444,7 +480,7 @@ contract Rolldown is Initializable, OwnableUpgradeable, Pausable, RolldownStorag
         emit ERC20TokensWithdrawn(recipient, tokenAddress, amount);
     }
 
-    function getPendingRequests(uint256 start, uint256 end) public view returns (L1Update memory) {
+    function getPendingRequests(uint256 start, uint256 end) public view override returns (L1Update memory) {
         L1Update memory result;
 
         result.chain = chain;
