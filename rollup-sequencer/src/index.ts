@@ -1,6 +1,7 @@
 import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import "dotenv/config";
 import { signTx } from "gasp-sdk";
+import { Mutex, tryAcquire, E_ALREADY_LOCKED } from "async-mutex";
 import "gasp-types";
 import { BaseError, keccak256 } from "viem";
 import {
@@ -29,7 +30,6 @@ async function main() {
 	const SECONDS_1 = 1 * 1000;
 	const watchdogL1 = new WatchDog("L1", WATCHDOG_PERIOD);
 	const watchdogL2 = new WatchDog("L1", WATCHDOG_PERIOD);
-	let inProgress = false;
 
 	const publicClient = getPublicClient({ transport: webSocketTransport });
 	const api = await getApi(MANGATA_NODE_URL);
@@ -53,6 +53,7 @@ async function main() {
 			.then((block) => watchdogL2.feed(block.toString()));
 	}, SECONDS_30);
 
+  let mutex = new Mutex();
 	await api.derive.chain.subscribeNewHeads(async (header: HeaderExtended) => {
 		const collator = getCollator("ethereum", MNEMONIC);
 		print(`collator address: ${collator.address}`);
@@ -67,53 +68,53 @@ async function main() {
 			collator.address,
 			header.hash,
 		);
-		print(`me ${collator.address}`);
-		print(`selected : ${selectedSequencer}`);
-		print(`is selected ${isSequencerSelected}`);
-		print(`has read rights : ${hasReadRights}`);
-		print(`has cancel rights : ${hasCancelRights}`);
-		if (isSequencerSelected && hasReadRights) {
-			if (inProgress) {
-				return;
-			} else {
-				print("In progress, skipping...");
-				inProgress = true;
-			}
-			const nativeL1Update = await processDataForL2Update(api, publicClient);
 
-			if (nativeL1Update === null) {
-				inProgress = false;
-				return;
-			}
+    try {
+      await tryAcquire(mutex).runExclusive(async () => {
+        print(`me ${collator.address}`);
+        print(`selected : ${selectedSequencer}`);
+        print(`is selected ${isSequencerSelected}`);
+        print(`has read rights : ${hasReadRights}`);
+        print(`has cancel rights : ${hasCancelRights}`);
 
-			const maxRequestId = getMaxRequestId(nativeL1Update.update);
+        if (isSequencerSelected && hasReadRights) {
+          const nativeL1Update = await processDataForL2Update(api, publicClient);
 
-			console.log(`maxRequestId: ${maxRequestId}`);
-			if (maxRequestId > lastRequestId) {
-				const result = await signTx(
-					api,
-					api.tx.rolldown.updateL2FromL1Unsafe(nativeL1Update.update),
-					collator,
-				);
+          if (nativeL1Update === null) {
+            return;
+          }
 
-				if (isSuccess(result)) {
-					print("L1update was submitted successfully");
-					lastRequestId = maxRequestId;
-				} else {
-					print("L1update was submitted unsuccessfully");
-				}
-			} else {
-				print(`L1Update with max id == ${lastRequestId} was already submitted`);
-			}
+          const maxRequestId = getMaxRequestId(nativeL1Update.update);
+          console.log(`maxRequestId: ${maxRequestId}`);
+          if (maxRequestId > lastRequestId) {
+            const result = await signTx(
+              api,
+              api.tx.rolldown.updateL2FromL1Unsafe(nativeL1Update.update),
+              collator,
+            );
 
-			inProgress = false;
-		}
+            if (isSuccess(result)) {
+              print("L1update was submitted successfully");
+              lastRequestId = maxRequestId;
+            } else {
+              print("L1update was submitted unsuccessfully");
+            }
+          } else {
+            print(`L1Update with max id == ${lastRequestId} was already submitted`);
+          }
+        }
 
-		if (hasCancelRights && !inProgress) {
-			inProgress = true;
-			await processPendingRequestsEvents(api, publicClient, collator);
-			inProgress = false;
-		}
+        if (hasCancelRights) {
+          await processPendingRequestsEvents(api, publicClient, collator);
+        }
+
+      });
+    } catch (e) {
+      if (e === E_ALREADY_LOCKED) {
+        console.info("#${header.number} ignored");
+      }
+    }
+
 	});
 }
 
