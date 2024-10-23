@@ -76,9 +76,7 @@ impl ElContracts {
         let receipt = pending.await?;
 
         if Some(U64::zero()) == receipt.as_ref().and_then(|r| r.status) {
-            return Err(eyre!(
-                "register_as_operator_with_el tx failed"
-            ));
+            return Err(eyre!("register_as_operator_with_el tx failed"));
         }
 
         receipt.ok_or_eyre("register_as_operator_with_el trx failed")

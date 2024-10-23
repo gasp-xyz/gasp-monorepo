@@ -668,7 +668,9 @@ impl Operator {
         let mut operators_avs_state: HashMap<H256, CustomOperatorAvsState> = HashMap::new();
 
         if operators_stakes_in_quorums.len() != quorum_nums.len() {
-            return Err(eyre!("operators_stakes_in_quorums.len() != quorum_nums.len()"))
+            return Err(eyre!(
+                "operators_stakes_in_quorums.len() != quorum_nums.len()"
+            ));
         }
 
         for (quorum_id, quorum_num) in quorum_nums.iter().enumerate() {

@@ -394,20 +394,27 @@ impl Syncer {
         debug!("{:?}", reinit_txn_pending);
         let reinit_txn_receipt = reinit_txn_pending?.await?;
         debug!("{:?}", reinit_txn_receipt);
-        match reinit_txn_receipt.clone().ok_or_eyre("failed to unwrap reinit_txn_receipt")?.status{
-            Some(status) if status.is_zero()=>{
+        match reinit_txn_receipt
+            .clone()
+            .ok_or_eyre("failed to unwrap reinit_txn_receipt")?
+            .status
+        {
+            Some(status) if status.is_zero() => {
                 return Err(eyre!("reinit_txn failed {:?}", reinit_txn_receipt))
             }
-            _=>{}
+            _ => {}
         }
 
-        info!("Sucessfully completed reinit - {:?}", (
-            last_task,
-            operators_state_info,
-            merkle_roots,
-            ranges,
-            last_batch_id,
-        ));
+        info!(
+            "Sucessfully completed reinit - {:?}",
+            (
+                last_task,
+                operators_state_info,
+                merkle_roots,
+                ranges,
+                last_batch_id,
+            )
+        );
 
         Ok(())
     }
@@ -435,11 +442,15 @@ impl Syncer {
         debug!("{:?}", force_task_txn_pending);
         let force_task_txn_receipt = force_task_txn_pending?.await?;
         debug!("{:?}", force_task_txn_receipt);
-        match force_task_txn_receipt.clone().ok_or_eyre("failed to unwrap force_task_txn_receipt")?.status{
-            Some(status) if status.is_zero()=>{
+        match force_task_txn_receipt
+            .clone()
+            .ok_or_eyre("failed to unwrap force_task_txn_receipt")?
+            .status
+        {
+            Some(status) if status.is_zero() => {
                 return Err(eyre!("force_task_txn failed {:?}", force_task_txn_receipt))
             }
-            _=>{}
+            _ => {}
         }
 
         let force_task_txn_receipt =
@@ -495,21 +506,31 @@ impl Syncer {
         debug!("{:?}", force_respond_txn_pending);
         let force_respond_txn_receipt = force_respond_txn_pending?.await?;
         debug!("{:?}", force_respond_txn_receipt);
-        match force_respond_txn_receipt.clone().ok_or_eyre("failed to unwrap force_respond_txn_receipt")?.status{
-            Some(status) if status.is_zero()=>{
-                return Err(eyre!("force_respond_txn failed {:?}", force_respond_txn_receipt))
+        match force_respond_txn_receipt
+            .clone()
+            .ok_or_eyre("failed to unwrap force_respond_txn_receipt")?
+            .status
+        {
+            Some(status) if status.is_zero() => {
+                return Err(eyre!(
+                    "force_respond_txn failed {:?}",
+                    force_respond_txn_receipt
+                ))
             }
-            _=>{}
+            _ => {}
         }
 
-        info!("Successfully completed reinit-eth - {:?}", (
-            task,
-            OpTaskResponse {
-                reference_task_index: new_op_task_created_event.task_index,
-                reference_task_hash: task_hash.into(),
-                operators_state_info_hash: operators_state_info_hash.into(),
-            },
-        ));
+        info!(
+            "Successfully completed reinit-eth - {:?}",
+            (
+                task,
+                OpTaskResponse {
+                    reference_task_index: new_op_task_created_event.task_index,
+                    reference_task_hash: task_hash.into(),
+                    operators_state_info_hash: operators_state_info_hash.into(),
+                },
+            )
+        );
 
         Ok(())
     }
