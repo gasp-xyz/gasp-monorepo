@@ -249,7 +249,7 @@ contract Rolldown is
     function find_l2_batch(uint256 requestId) view public returns (bytes32) {
         require(requestId <= lastProcessedUpdate_origin_l2, "Invalid request id");
         if (roots.length == 0) {
-            return bytes32(0);
+            revert("there are no roots yet on the contract");
         }
 
         for (uint256 i = roots.length - 1; i >= 0; i--) {
@@ -258,7 +258,7 @@ contract Rolldown is
           }
         }
 
-        return bytes32(0);
+        revert("couldnt find the batch containing the request");
     }
 
     function verify_request_proof(uint256 requestId, bytes32 request_hash, bytes32 merkle_root, bytes32[] calldata proof) private view {
@@ -266,6 +266,18 @@ contract Rolldown is
         require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
 
         require(processedL2Requests[request_hash] != CLOSED, "Already processed");
+
+        if (r.end < r.start) {
+          revert("Invalid request range, end < start");
+        }
+
+        if (requestId < r.start || requestId > r.end) {
+          revert("Request id outside of range");
+        }
+
+        if (r.end - r.start + 1 > type(uint32).max ){
+          revert("Range too big");
+        }
 
         uint32 leaves_count = uint32(r.end - r.start + 1);
         uint32 pos = uint32(requestId - r.start);
