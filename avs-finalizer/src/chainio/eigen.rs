@@ -10,9 +10,9 @@ use bindings::{
 };
 use ethers::{
     providers::Middleware,
-    types::{Address, TransactionReceipt},
+    types::{Address, TransactionReceipt, U64},
 };
-use eyre::{Ok, OptionExt};
+use eyre::{eyre, Ok, OptionExt};
 use rand::RngCore;
 use sp_core::U256;
 
