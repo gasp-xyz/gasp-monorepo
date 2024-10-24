@@ -468,7 +468,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						}
 						if osu.triggerOpStateUpdate && osu.checkTriggerOpStateUpdate{
 							osu.paused = true
-							osu.pauseReasonV = fmt.Sprintf("triggerOpStateUpdate true in updateOpStates. Please restart aggregator to continue.")
+							osu.pauseReasonV = fmt.Sprintf("triggerOpStateUpdate true just after OpTaskCompleted. Please restart aggregator to continue.")
 						}
 					}
 
@@ -660,7 +660,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						}
 						if osu.triggerOpStateUpdate && osu.checkTriggerOpStateUpdate{
 							osu.paused = true
-							osu.pauseReasonV = fmt.Sprintf("triggerOpStateUpdate true in updateOpStates. Please restart aggregator to continue.")
+							osu.pauseReasonV = fmt.Sprintf("triggerOpStateUpdate true just after OpTaskCompleted. Please restart aggregator to continue.")
 						}
 						break watchForTriggersLoop
 					}
