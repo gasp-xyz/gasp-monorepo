@@ -7,8 +7,8 @@ import {ContextUpgradeable} from "@openzeppelin-upgrades/contracts/utils/Context
 import {ReentrancyGuardUpgradeable} from "@openzeppelin-upgrades/contracts/security/ReentrancyGuardUpgradeable.sol";
 import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRolldown} from "./IRolldown.sol";
 import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
 import {LMerkleTree} from "./LMerkleTree.sol";
@@ -21,6 +21,7 @@ contract Rolldown is
     Pausable,
     IRolldown
 {
+    using Address for address payable;
     using SafeERC20 for IERC20;
 
     address public constant NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
@@ -180,10 +181,6 @@ contract Rolldown is
         IERC20(tokenAddress).safeTransferFrom(depositRecipient, address(this), amount);
     }
 
-    function getUpdateForL2() external view override returns (L1Update memory) {
-        return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
-    }
-
     function ferry_withdrawal(Withdrawal calldata withdrawal) external payable override nonReentrant whenNotPaused {
         _ferryWithdrawal(withdrawal);
     }
@@ -194,27 +191,30 @@ contract Rolldown is
 
     function _ferryWithdrawal(Withdrawal calldata withdrawal) private {
         require(withdrawal.ferryTip <= withdrawal.amount, "Tip exceeds deposited amount");
-        uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
-        bytes32 withdrawalHash = hashWithdrawal(withdrawal);
 
+        bytes32 withdrawalHash = hashWithdrawal(withdrawal);
         require(processedL2Requests[withdrawalHash] == address(0), "Already ferried");
-        processedL2Requests[withdrawalHash] = msg.sender;
+
+        processedL2Requests[withdrawalHash] = _msgSender();
+        uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
 
         if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
             require(msg.value > 0, "Native token not sent");
             require(msg.value == ferriedAmount, "Sent amount must exactly match amount without ferryTip");
-            payable(withdrawal.recipient).transfer(ferriedAmount);
+
             emit WithdrawalFerried(
-                withdrawal.requestId.id, ferriedAmount, withdrawal.recipient, msg.sender, withdrawalHash
+                withdrawal.requestId.id, ferriedAmount, withdrawal.recipient, _msgSender(), withdrawalHash
             );
-        } else {
-            IERC20 token = IERC20(withdrawal.tokenAddress);
-            require(token.balanceOf(address(msg.sender)) >= ferriedAmount, "Not enough funds");
-            token.safeTransferFrom(msg.sender, withdrawal.recipient, ferriedAmount);
-            emit WithdrawalFerried(
-                withdrawal.requestId.id, ferriedAmount, withdrawal.recipient, msg.sender, withdrawalHash
-            );
+
+            payable(withdrawal.recipient).sendValue(ferriedAmount);
+            return;
         }
+
+        emit WithdrawalFerried(
+            withdrawal.requestId.id, ferriedAmount, withdrawal.recipient, _msgSender(), withdrawalHash
+        );
+
+        IERC20(withdrawal.tokenAddress).safeTransferFrom(_msgSender(), withdrawal.recipient, ferriedAmount);
     }
 
     function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkleRoot, bytes32[] calldata proof)
@@ -240,32 +240,33 @@ contract Rolldown is
         _verifyRequestProof(withdrawal.requestId.id, withdrawalHash, merkleRoot, proof);
 
         address ferryAddress = processedL2Requests[withdrawalHash];
-        bool isFerried = ferryAddress != address(0);
         processedL2Requests[withdrawalHash] = CLOSED;
 
-        if (!isFerried) {
-            if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
-                _sendNative(withdrawal.recipient, withdrawal.amount - withdrawal.ferryTip);
-                if (withdrawal.ferryTip > 0) {
-                    _sendNative(msg.sender, withdrawal.ferryTip);
-                }
-            } else {
-                _sendERC20(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount - withdrawal.ferryTip);
-                if (withdrawal.ferryTip > 0) {
-                    _sendERC20(msg.sender, withdrawal.tokenAddress, withdrawal.ferryTip);
-                }
-            }
-
-            emit WithdrawalClosed(withdrawal.requestId.id, withdrawalHash);
-        } else {
-            if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
-                _sendNative(ferryAddress, withdrawal.amount);
-            } else {
-                _sendERC20(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
-            }
+        if (ferryAddress != address(0)) {
+            withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS
+                ? _sendNative(ferryAddress, withdrawal.amount)
+                : _sendERC20(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
 
             emit FerriedWithdrawalClosed(withdrawal.requestId.id, withdrawalHash);
+            return;
         }
+
+        uint256 finalWithdrawalAmount = withdrawal.amount - withdrawal.ferryTip;
+        if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
+            _sendNative(withdrawal.recipient, finalWithdrawalAmount);
+
+            if (withdrawal.ferryTip > 0) {
+                _sendNative(_msgSender(), withdrawal.ferryTip);
+            }
+        } else {
+            _sendERC20(withdrawal.recipient, withdrawal.tokenAddress, finalWithdrawalAmount);
+
+            if (withdrawal.ferryTip > 0) {
+                _sendERC20(_msgSender(), withdrawal.tokenAddress, withdrawal.ferryTip);
+            }
+        }
+
+        emit WithdrawalClosed(withdrawal.requestId.id, withdrawalHash);
     }
 
     function find_l2_batch(uint256 requestId) external view override returns (bytes32) {
@@ -315,23 +316,6 @@ contract Rolldown is
         uint32 leaveCount = uint32(r.end - r.start + 1);
         uint32 pos = uint32(requestId - r.start);
         require(LMerkleTree.calculateRoot(requestHash, pos, proof, leaveCount) == merkleRoot, "Invalid proof");
-    }
-
-    function hashWithdrawal(Withdrawal calldata withdrawal) public pure override returns (bytes32) {
-        return keccak256(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
-    }
-
-    function hashCancel(Cancel calldata cancel) public pure override returns (bytes32) {
-        return keccak256(bytes.concat(abi.encode(L2RequestType.Cancel), abi.encode(cancel)));
-    }
-
-    function hashFailedDepositResolution(FailedDepositResolution calldata failedDeposit)
-        public
-        pure
-        override
-        returns (bytes32)
-    {
-        return keccak256(bytes.concat(abi.encode(L2RequestType.FailedDepositResolution), abi.encode(failedDeposit)));
     }
 
     function close_cancel(Cancel calldata cancel, bytes32 merkleRoot, bytes32[] calldata proof)
@@ -419,7 +403,7 @@ contract Rolldown is
     function _updateL1FromL2(bytes32 merkleRoot, Range calldata range /*,TaskResponse calldata response ??? */ )
         private
     {
-        require(msg.sender == updaterAccount, "Not the owner");
+        require(_msgSender() == updaterAccount, "Not the owner");
         require(range.end > lastProcessedUpdate_origin_l2, "Update brings no new data");
         require(range.start > 0, "range id must be greater than 0");
         require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
@@ -428,10 +412,6 @@ contract Rolldown is
         merkleRootRange[merkleRoot] = range;
         lastProcessedUpdate_origin_l2 = range.end;
         emit L2UpdateAccepted(merkleRoot, range);
-    }
-
-    function getMerkleRootsLength() external view override returns (uint256) {
-        return roots.length;
     }
 
     function _processL2UpdateCancels(Cancel calldata cancel, bytes32 cancelHash) private {
@@ -471,6 +451,31 @@ contract Rolldown is
 
         token.safeTransfer(recipient, amount);
         emit ERC20TokensWithdrawn(recipient, tokenAddress, amount);
+    }
+
+    function getUpdateForL2() external view override returns (L1Update memory) {
+        return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
+    }
+
+    function getMerkleRootsLength() external view override returns (uint256) {
+        return roots.length;
+    }
+
+    function hashWithdrawal(Withdrawal calldata withdrawal) public pure override returns (bytes32) {
+        return keccak256(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
+    }
+
+    function hashCancel(Cancel calldata cancel) public pure override returns (bytes32) {
+        return keccak256(bytes.concat(abi.encode(L2RequestType.Cancel), abi.encode(cancel)));
+    }
+
+    function hashFailedDepositResolution(FailedDepositResolution calldata failedDeposit)
+        public
+        pure
+        override
+        returns (bytes32)
+    {
+        return keccak256(bytes.concat(abi.encode(L2RequestType.FailedDepositResolution), abi.encode(failedDeposit)));
     }
 
     function getPendingRequests(uint256 start, uint256 end) public view override returns (L1Update memory) {

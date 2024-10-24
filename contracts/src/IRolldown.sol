@@ -26,8 +26,6 @@ interface IRolldown is IRolldownPrimitives {
 
     function depositERC20(address tokenAddress, uint256 amount, uint256 ferryTip) external;
 
-    function getUpdateForL2() external view returns (L1Update memory);
-
     function ferry_withdrawal(Withdrawal calldata withdrawal) external payable;
 
     function ferryWithdrawal(Withdrawal calldata withdrawal) external payable;
@@ -60,9 +58,11 @@ interface IRolldown is IRolldownPrimitives {
         bytes32[] calldata proof
     ) external;
 
-    function getPendingRequests(uint256 start, uint256 end) external view returns (L1Update memory);
+    function getUpdateForL2() external view returns (L1Update memory);
 
     function getMerkleRootsLength() external view returns (uint256);
+
+    function getPendingRequests(uint256 start, uint256 end) external view returns (L1Update memory);
 
     function hashWithdrawal(Withdrawal calldata withdrawal) external pure returns (bytes32);
 
