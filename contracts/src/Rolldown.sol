@@ -24,6 +24,7 @@ contract Rolldown is
     using Address for address payable;
     using SafeERC20 for IERC20;
 
+    bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
     address public constant NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
     address public constant CLOSED = 0x1111111111111111111111111111111111111111;
 
@@ -67,6 +68,7 @@ contract Rolldown is
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
 
         require(updater != address(0), "Zero updater address");
+        _grantRole(UPDATER_ROLE, updater);
         updaterAccount = updater;
 
         _initializePauser(pauserRegistry_, UNPAUSE_ALL);
@@ -390,11 +392,11 @@ contract Rolldown is
         emit FailedDepositResolutionClosed(failedDeposit.requestId.id, failedDeposit.originRequestId, failedDepositHash);
     }
 
-    function update_l1_from_l2(bytes32 merkleRoot, Range calldata range) external override whenNotPaused {
+    function update_l1_from_l2(bytes32 merkleRoot, Range calldata range) external override whenNotPaused onlyRole(UPDATER_ROLE) {
         _updateL1FromL2(merkleRoot, range);
     }
 
-    function updateL1FromL2(bytes32 merkleRoot, Range calldata range) external override whenNotPaused {
+    function updateL1FromL2(bytes32 merkleRoot, Range calldata range) external override whenNotPaused onlyRole(UPDATER_ROLE) {
         _updateL1FromL2(merkleRoot, range);
     }
 
@@ -404,7 +406,6 @@ contract Rolldown is
     function _updateL1FromL2(bytes32 merkleRoot, Range calldata range /*,TaskResponse calldata response ??? */ )
         private
     {
-        require(_msgSender() == updaterAccount, "Not the owner");
         require(range.start > 0, "Range id must be greater than zero");
         require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
         require(range.end >= range.start, "Invalid range");

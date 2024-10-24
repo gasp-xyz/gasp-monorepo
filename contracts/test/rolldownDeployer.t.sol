@@ -1,4 +1,6 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
+
 import {RolldownDeployer} from "../script/RolldownDeployer.s.sol";
 import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
 import "forge-std/console.sol";
@@ -16,6 +18,7 @@ import {RollDownUpg} from "./utils/RollDownUpg.sol" ;
 
 contract RolldownDeployerTest is Test {
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
 
     RolldownDeployer rolldownDeployer;
     using stdStorage for StdStorage;
@@ -78,6 +81,7 @@ contract RolldownDeployerTest is Test {
 
         Rolldown rolldown2 = Rolldown(address(rolldown));
         assertTrue(rolldown2.hasRole(DEFAULT_ADMIN_ROLE, owner));
+        assertTrue(rolldown2.hasRole(UPDATER_ROLE, updaterAccount));
 
     }
     function testRolldownFromInitializeReInitialize() public {
@@ -103,6 +107,7 @@ contract RolldownDeployerTest is Test {
 
         Rolldown rolldown2 = Rolldown(address(rolldown));
         assertTrue(rolldown2.hasRole(DEFAULT_ADMIN_ROLE, owner));
+        assertTrue(rolldown2.hasRole(UPDATER_ROLE, updaterAccount));
 
     }
     function testRolldownFromInitializedtoUpdated() public {
