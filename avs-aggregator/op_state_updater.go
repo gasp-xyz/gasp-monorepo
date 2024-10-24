@@ -261,7 +261,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					for {
 						select {
 						case <-ticker.C:
-							osu.logger.Info("The OpStateUpdater is paused due to: %v", osu.pauseReasonV)
+							osu.logger.Infof("The OpStateUpdater is paused due to: %v", osu.pauseReasonV)
 						case <-ctx.Done():
 							osu.errorC <- ctx.Err()
 							return
@@ -274,7 +274,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 								osu.errorC <- fmt.Errorf("Failed to ParseResumeTrackingOpState: err: %v, atBlock: %v", err, vLog.BlockNumber)
 								return
 							}
-							osu.logger.Info("Received resume event: %v", event)
+							osu.logger.Infof("Received resume event: %v", event)
 							if event.ResetTrackedQuorums {
 								osu.logger.Debug("OpStateUpdater received resume event with resetTrackedQuorums = true")
 								osu.resetTrackedQuorums = true
