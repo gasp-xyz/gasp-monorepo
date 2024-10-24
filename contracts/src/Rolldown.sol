@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
-import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
 import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
+import {ContextUpgradeable} from "@openzeppelin-upgrades/contracts/utils/ContextUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin-upgrades/contracts/security/ReentrancyGuardUpgradeable.sol";
+import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
@@ -12,7 +13,14 @@ import {IRolldown} from "./IRolldown.sol";
 import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
 import {LMerkleTree} from "./LMerkleTree.sol";
 
-contract Rolldown is Initializable, OwnableUpgradeable, ReentrancyGuard, Pausable, IRolldown {
+contract Rolldown is
+    Initializable,
+    ContextUpgradeable,
+    OwnableUpgradeable,
+    ReentrancyGuardUpgradeable,
+    Pausable,
+    IRolldown
+{
     using SafeERC20 for IERC20;
 
     address public constant NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
@@ -50,6 +58,10 @@ contract Rolldown is Initializable, OwnableUpgradeable, ReentrancyGuard, Pausabl
         external
         initializer
     {
+        ContextUpgradeable.__Context_init();
+        OwnableUpgradeable.__Ownable_init();
+        ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
+
         require(owner != address(0), "Zero owner address");
         _transferOwnership(owner);
 
@@ -69,39 +81,39 @@ contract Rolldown is Initializable, OwnableUpgradeable, ReentrancyGuard, Pausabl
         emit NewUpdaterSet(updaterAccount);
     }
 
-    function deposit_native() external payable override nonReentrant whenNotPaused {
+    function deposit_native() external payable override whenNotPaused {
         _depositNativeWithTip(0);
     }
 
-    function depositNative() external payable override nonReentrant whenNotPaused {
+    function depositNative() external payable override whenNotPaused {
         _depositNativeWithTip(0);
     }
 
-    function deposit_native(uint256 ferryTip) external payable override nonReentrant whenNotPaused {
+    function deposit_native(uint256 ferryTip) external payable override whenNotPaused {
         _depositNativeWithTip(ferryTip);
     }
 
-    function depositNative(uint256 ferryTip) external payable override nonReentrant whenNotPaused {
+    function depositNative(uint256 ferryTip) external payable override whenNotPaused {
         _depositNativeWithTip(ferryTip);
     }
 
     function _depositNativeWithTip(uint256 ferryTip) private {
-        require(ferryTip <= msg.value, "Tip exceeds deposited amount");
-        require(msg.value > 0, "msg value must be greater that 0");
-        address depositRecipient = msg.sender;
         uint256 amount = msg.value;
+        require(amount > 0, "Value must be greater than zero");
+        require(ferryTip <= amount, "Tip exceeds deposited amount");
 
-        uint256 timeStamp = block.timestamp;
+        address depositRecipient = _msgSender();
+
         Deposit memory depositRequest = Deposit({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
             tokenAddress: NATIVE_TOKEN_ADDRESS,
             amount: amount,
-            timeStamp: timeStamp,
+            timeStamp: block.timestamp,
             ferryTip: ferryTip
         });
-        // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
+
         emit DepositAcceptedIntoQueue(
             depositRequest.requestId.id, depositRecipient, NATIVE_TOKEN_ADDRESS, amount, ferryTip
         );
@@ -147,26 +159,25 @@ contract Rolldown is Initializable, OwnableUpgradeable, ReentrancyGuard, Pausabl
     }
 
     function _depositERC20WithTip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
-        require(ferryTip <= amount, "Tip exceeds deposited amount");
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than zero");
-        address depositRecipient = msg.sender;
+        require(ferryTip <= amount, "Tip exceeds deposited amount");
 
-        IERC20 token = IERC20(tokenAddress);
-        token.safeTransferFrom(msg.sender, address(this), amount);
+        address depositRecipient = _msgSender();
 
-        uint256 timeStamp = block.timestamp;
         Deposit memory depositRequest = Deposit({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             depositRecipient: depositRecipient,
             tokenAddress: tokenAddress,
             amount: amount,
-            timeStamp: timeStamp,
+            timeStamp: block.timestamp,
             ferryTip: ferryTip
         });
-        // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
+
         emit DepositAcceptedIntoQueue(depositRequest.requestId.id, depositRecipient, tokenAddress, amount, ferryTip);
+
+        IERC20(tokenAddress).safeTransferFrom(depositRecipient, address(this), amount);
     }
 
     function getUpdateForL2() external view override returns (L1Update memory) {
