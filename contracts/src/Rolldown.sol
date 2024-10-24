@@ -35,7 +35,7 @@ contract Rolldown is
     uint256 public lastProcessedUpdate_origin_l2;
     // Chain identificator
     ChainId public chain;
-    // Chain identificator
+    // Updater account address
     address public updaterAccount;
 
     // NOTE: PR DESC
@@ -55,7 +55,7 @@ contract Rolldown is
     // is the most efficient way to find merkle root that contains particular tx id
     bytes32[] public roots;
 
-    function initialize(IPauserRegistry pauserRegistry, address admin, ChainId chainId, address updater)
+    function initialize(IPauserRegistry pauserRegistry_, address admin, ChainId chainId, address updater)
         external
         initializer
     {
@@ -69,9 +69,11 @@ contract Rolldown is
         require(updater != address(0), "Zero updater address");
         updaterAccount = updater;
 
-        _initializePauser(pauserRegistry, UNPAUSE_ALL);
+        _initializePauser(pauserRegistry_, UNPAUSE_ALL);
 
         counter = 1;
+        lastProcessedUpdate_origin_l1 = 0;
+        lastProcessedUpdate_origin_l2 = 0;
         chain = chainId;
     }
 
@@ -283,10 +285,12 @@ contract Rolldown is
         uint256 rootCount = roots.length;
         require(rootCount > 0, "No roots found yet");
 
-        for (uint256 i = rootCount - 1; i >= 0;) {
-            Range memory range = merkleRootRange[roots[i]];
+        for (uint256 i = rootCount; i > 0;) {
+            bytes32 root = roots[i - 1];
+            Range memory range = merkleRootRange[root];
+
             if (requestId >= range.start && requestId <= range.end) {
-                return roots[i];
+                return root;
             }
 
             unchecked {
@@ -357,6 +361,7 @@ contract Rolldown is
         _closeDepositRefund(failedDeposit, merkleRoot, proof);
     }
 
+    // slither-disable-next-line reentrancy-eth
     function _closeDepositRefund(
         FailedDepositResolution calldata failedDeposit,
         bytes32 merkleRoot,
@@ -483,8 +488,8 @@ contract Rolldown is
             return result;
         }
 
-        uint256 depositCounter;
-        uint256 cancelCounter;
+        uint256 depositCounter = 0;
+        uint256 cancelCounter = 0;
 
         for (uint256 id = start; id <= end;) {
             if (deposits[id].requestId.id != 0) {
