@@ -2,7 +2,7 @@
 pragma solidity 0.8.13;
 
 import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
-import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin-upgrades/contracts/access/AccessControlUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin-upgrades/contracts/utils/ContextUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin-upgrades/contracts/security/ReentrancyGuardUpgradeable.sol";
 import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
@@ -16,7 +16,7 @@ import {LMerkleTree} from "./LMerkleTree.sol";
 contract Rolldown is
     Initializable,
     ContextUpgradeable,
-    OwnableUpgradeable,
+    AccessControlUpgradeable,
     ReentrancyGuardUpgradeable,
     Pausable,
     IRolldown
@@ -55,16 +55,16 @@ contract Rolldown is
     // is the most efficient way to find merkle root that contains particular tx id
     bytes32[] public roots;
 
-    function initialize(IPauserRegistry pauserRegistry, address owner, ChainId chainId, address updater)
+    function initialize(IPauserRegistry pauserRegistry, address admin, ChainId chainId, address updater)
         external
         initializer
     {
         ContextUpgradeable.__Context_init();
-        OwnableUpgradeable.__Ownable_init();
+        AccessControlUpgradeable.__AccessControl_init();
         ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
 
-        require(owner != address(0), "Zero owner address");
-        _transferOwnership(owner);
+        require(admin != address(0), "Zero admin address");
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
 
         require(updater != address(0), "Zero updater address");
         updaterAccount = updater;
@@ -75,7 +75,7 @@ contract Rolldown is
         chain = chainId;
     }
 
-    function setUpdater(address updater) external override onlyOwner whenNotPaused {
+    function setUpdater(address updater) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         require(updater != address(0), "Zero updater address");
 
         updaterAccount = updater;
