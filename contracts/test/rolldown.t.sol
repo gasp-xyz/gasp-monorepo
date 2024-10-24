@@ -494,7 +494,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         assertEq(rolldown.lastProcessedUpdate_origin_l2(), 1 );
 
         vm.startPrank(ALICE);
-        vm.expectRevert("Not enough funds in contract");
+        vm.expectRevert("ERC20: transfer amount exceeds balance");
         rolldown.close_withdrawal(withdrawal, merkleRoot, proofs);
         vm.stopPrank();
         assertEq(token.balanceOf(recipient), 0);
