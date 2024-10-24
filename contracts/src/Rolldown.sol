@@ -481,8 +481,11 @@ contract Rolldown is
     }
 
     function getPendingRequests(uint256 start, uint256 end) public view override returns (L1Update memory) {
-        L1Update memory result;
-        result.chain = chain;
+        L1Update memory result = L1Update({
+            chain: chain,
+            pendingDeposits: new Deposit[](0),
+            pendingCancelResolutions: new CancelResolution[](0)
+        });
 
         if (start == 0 && end == 0) {
             return result;
@@ -492,9 +495,9 @@ contract Rolldown is
         uint256 cancelCounter = 0;
 
         for (uint256 id = start; id <= end;) {
-            if (deposits[id].requestId.id != 0) {
+            if (deposits[id].requestId.id > 0) {
                 ++depositCounter;
-            } else if (cancelResolutions[id].requestId.id != 0) {
+            } else if (cancelResolutions[id].requestId.id > 0) {
                 ++cancelCounter;
             } else {
                 revert("Invalid range");
