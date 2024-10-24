@@ -55,7 +55,7 @@ contract Rolldown is
     // is the most efficient way to find merkle root that contains particular tx id
     bytes32[] public roots;
 
-    function initialize(IPauserRegistry _pauserRegistry, address owner, ChainId chainId, address updater)
+    function initialize(IPauserRegistry pauserRegistry, address owner, ChainId chainId, address updater)
         external
         initializer
     {
@@ -69,7 +69,7 @@ contract Rolldown is
         require(updater != address(0), "Zero updater address");
         updaterAccount = updater;
 
-        _initializePauser(_pauserRegistry, UNPAUSE_ALL);
+        _initializePauser(pauserRegistry, UNPAUSE_ALL);
 
         counter = 1;
         chain = chainId;
@@ -279,43 +279,41 @@ contract Rolldown is
 
     function _findL2Batch(uint256 requestId) private view returns (bytes32) {
         require(requestId <= lastProcessedUpdate_origin_l2, "Invalid request id");
-        if (roots.length == 0) {
-            revert("there are no roots yet on the contract");
-        }
 
-        for (uint256 i = roots.length - 1; i >= 0; i--) {
-            if (requestId >= merkleRootRange[roots[i]].start && requestId <= merkleRootRange[roots[i]].end) {
+        uint256 rootCount = roots.length;
+        require(rootCount > 0, "No roots found yet");
+
+        for (uint256 i = rootCount - 1; i >= 0;) {
+            Range memory range = merkleRootRange[roots[i]];
+            if (requestId >= range.start && requestId <= range.end) {
                 return roots[i];
+            }
+
+            unchecked {
+                --i;
             }
         }
 
-        revert("couldnt find the batch containing the request");
+        revert("Couldn't find batch with request");
     }
 
     function _verifyRequestProof(uint256 requestId, bytes32 requestHash, bytes32 merkleRoot, bytes32[] calldata proof)
         private
         view
     {
-        Range memory r = merkleRootRange[merkleRoot];
-        require(r.start != 0 && r.end != 0, "Unknown merkle root");
-
         require(processedL2Requests[requestHash] != CLOSED, "Already processed");
 
-        if (r.end < r.start) {
-            revert("Invalid request range, end < start");
-        }
+        Range memory range = merkleRootRange[merkleRoot];
+        require(range.start > 0 && range.end > 0, "Unknown merkle root");
+        require(range.end >= range.start, "Invalid request range");
+        require(requestId >= range.start && requestId <= range.end, "Request id out of range");
 
-        if (requestId < r.start || requestId > r.end) {
-            revert("Request id outside of range");
-        }
+        uint256 leaveCount = range.end - range.start + 1;
+        require(leaveCount <= type(uint32).max, "Range too big");
 
-        if (r.end - r.start + 1 > type(uint32).max) {
-            revert("Range too big");
-        }
-
-        uint32 leaveCount = uint32(r.end - r.start + 1);
-        uint32 pos = uint32(requestId - r.start);
-        require(LMerkleTree.calculateRoot(requestHash, pos, proof, leaveCount) == merkleRoot, "Invalid proof");
+        uint256 pos = requestId - range.start;
+        bytes32 root = LMerkleTree.calculateRoot(requestHash, pos, proof, leaveCount);
+        require(root == merkleRoot, "Invalid proof");
     }
 
     function close_cancel(Cancel calldata cancel, bytes32 merkleRoot, bytes32[] calldata proof)
@@ -374,17 +372,15 @@ contract Rolldown is
         private
     {
         Deposit storage originDeposit = deposits[failedDeposit.originRequestId];
-        address recipient = originDeposit.depositRecipient;
+        address depositRecipient = originDeposit.depositRecipient;
 
         if (failedDeposit.ferry != address(0)) {
-            recipient = failedDeposit.ferry;
+            depositRecipient = failedDeposit.ferry;
         }
 
-        if (originDeposit.tokenAddress == NATIVE_TOKEN_ADDRESS) {
-            _sendNative(recipient, originDeposit.amount);
-        } else {
-            _sendERC20(recipient, originDeposit.tokenAddress, originDeposit.amount);
-        }
+        originDeposit.tokenAddress == NATIVE_TOKEN_ADDRESS
+            ? _sendNative(depositRecipient, originDeposit.amount)
+            : _sendERC20(depositRecipient, originDeposit.tokenAddress, originDeposit.amount);
 
         emit FailedDepositResolutionClosed(failedDeposit.requestId.id, failedDeposit.originRequestId, failedDepositHash);
     }
@@ -404,53 +400,54 @@ contract Rolldown is
         private
     {
         require(_msgSender() == updaterAccount, "Not the owner");
-        require(range.end > lastProcessedUpdate_origin_l2, "Update brings no new data");
-        require(range.start > 0, "range id must be greater than 0");
+        require(range.start > 0, "Range id must be greater than zero");
         require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
         require(range.end >= range.start, "Invalid range");
+        require(range.end > lastProcessedUpdate_origin_l2, "Update brings no new data");
+
         roots.push(merkleRoot);
         merkleRootRange[merkleRoot] = range;
         lastProcessedUpdate_origin_l2 = range.end;
+
         emit L2UpdateAccepted(merkleRoot, range);
     }
 
     function _processL2UpdateCancels(Cancel calldata cancel, bytes32 cancelHash) private {
-        bool cancelJustified = false;
+        bool cancelJustified;
 
         if (cancel.range.end > counter - 1) {
             cancelJustified = true;
         } else {
             L1Update memory pending = getPendingRequests(cancel.range.start, cancel.range.end);
-            bytes32 correct_hash = keccak256(abi.encode(pending));
-            cancelJustified = correct_hash != cancel.hash;
+            cancelJustified = cancel.hash != keccak256(abi.encode(pending));
         }
-        uint256 timeStamp = block.timestamp;
 
         CancelResolution memory resolution = CancelResolution({
             requestId: RequestId({origin: Origin.L1, id: counter++}),
             l2RequestId: cancel.requestId.id,
             cancelJustified: cancelJustified,
-            timeStamp: timeStamp
+            timeStamp: block.timestamp
         });
 
         cancelResolutions[resolution.requestId.id] = resolution;
+
         emit DisputeResolutionAcceptedIntoQueue(resolution.l2RequestId, resolution.cancelJustified, cancelHash);
     }
 
     function _sendNative(address recipient, uint256 amount) private {
-        require(payable(address(this)).balance >= amount, "Not enough funds in contract");
         require(amount > 0, "Amount must be greater than zero");
+
         emit NativeTokensWithdrawn(recipient, amount);
+
         Address.sendValue(payable(recipient), amount);
     }
 
     function _sendERC20(address recipient, address tokenAddress, uint256 amount) private {
-        IERC20 token = IERC20(tokenAddress);
-        require(token.balanceOf(address(this)) >= amount, "Not enough funds in contract");
         require(amount > 0, "Amount must be greater than zero");
 
-        token.safeTransfer(recipient, amount);
         emit ERC20TokensWithdrawn(recipient, tokenAddress, amount);
+
+        IERC20(tokenAddress).safeTransfer(recipient, amount);
     }
 
     function getUpdateForL2() external view override returns (L1Update memory) {
@@ -480,38 +477,46 @@ contract Rolldown is
 
     function getPendingRequests(uint256 start, uint256 end) public view override returns (L1Update memory) {
         L1Update memory result;
-
         result.chain = chain;
-        uint256 depositsCounter = 0;
-        uint256 cancelsCounter = 0;
 
         if (start == 0 && end == 0) {
             return result;
         }
 
-        for (uint256 requestId = start; requestId <= end; requestId++) {
-            if (deposits[requestId].requestId.id != 0) {
-                depositsCounter++;
-            } else if (cancelResolutions[requestId].requestId.id != 0) {
-                cancelsCounter++;
+        uint256 depositCounter;
+        uint256 cancelCounter;
+
+        for (uint256 id = start; id <= end;) {
+            if (deposits[id].requestId.id != 0) {
+                ++depositCounter;
+            } else if (cancelResolutions[id].requestId.id != 0) {
+                ++cancelCounter;
             } else {
                 revert("Invalid range");
             }
+
+            unchecked {
+                ++id;
+            }
         }
 
-        result.pendingDeposits = new Deposit[](depositsCounter);
-        result.pendingCancelResolutions = new CancelResolution[](cancelsCounter);
+        result.pendingDeposits = new Deposit[](depositCounter);
+        result.pendingCancelResolutions = new CancelResolution[](cancelCounter);
 
-        depositsCounter = 0;
-        cancelsCounter = 0;
+        depositCounter = 0;
+        cancelCounter = 0;
 
-        for (uint256 requestId = start; requestId <= end; requestId++) {
-            if (deposits[requestId].requestId.id > 0) {
-                result.pendingDeposits[depositsCounter++] = deposits[requestId];
-            } else if (cancelResolutions[requestId].l2RequestId > 0) {
-                result.pendingCancelResolutions[cancelsCounter++] = cancelResolutions[requestId];
+        for (uint256 id = start; id <= end;) {
+            if (deposits[id].requestId.id > 0) {
+                result.pendingDeposits[depositCounter++] = deposits[id];
+            } else if (cancelResolutions[id].l2RequestId > 0) {
+                result.pendingCancelResolutions[cancelCounter++] = cancelResolutions[id];
             } else {
                 break;
+            }
+
+            unchecked {
+                ++id;
             }
         }
 
