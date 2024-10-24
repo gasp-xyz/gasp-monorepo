@@ -365,10 +365,11 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						osu.logger.Debug("OpStateUpdater waiting for opTask to complete")
 
 						query := ethereum.FilterQuery{
-							Addresses: []common.Address{taskManagerContractAddress},
+							Addresses: []common.Address{taskManagerContractAddress, stakeRegistryContractAddress},
 							Topics: [][]common.Hash{
 								[]common.Hash{
-									getEventID(taskmanagerAbi, "OpTaskCompleted"),
+									getEventID(taskmanagerAbi, "OpTaskCompleted"), getEventID(stakeRegistryAbi, "StrategyMultiplierUpdated"), getEventID(stakeRegistryAbi, "MinimumStakeForQuorumUpdated"),
+									getEventID(taskmanagerAbi, "PauseTrackingOpState"),
 								},
 							},
 							FromBlock: big.NewInt(int64(sendNewOpTaskReturn.OpTask.TaskCreatedBlock)),
@@ -397,52 +398,98 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 								osu.errorC <- fmt.Errorf("OpStateUpdater timed out in watchForOpTaskCompletedLoop")
 								return
 							case vLog := <-rawLogsC:
-								{
-									event, err := osu.ethRpc.AvsReader.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseOpTaskCompleted(vLog)
-									if err != nil {
-										osu.errorC <- fmt.Errorf("Failed to ParseOpTaskCompleted: err: %v, atBlock: %v", err, vLog.BlockNumber)
-										return
-									}
-									osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event: %v", event)
-
-									// TODO
-									// If get an OpTaskCompleted event with taskIndex higher than
-									// what we expect then perhaps our expected task didn't complete
-									// And another one was init and then completed so, we shouldn't
-									// error out here instead set the osu.checkpointedBlock and osu.atBlock
-									// then break out of the loop and let updateOpStates update accordingly
-									// Similar to how we do it when we see an OpTaskCompleted event when watching
-									// triggers
-									if sendNewOpTaskReturn.OpTask.TaskNum < event.TaskIndex {
-										osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event has task with higher than expted taskIndex: %v", event)
-										lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), event.Raw.BlockNumber)
+							osu.logger.Debugf("Received log: %+v\n", vLog)
+							switch {
+								case vLog.Address == taskManagerContractAddress && vLog.Topics[0] == getEventID(taskmanagerAbi, "OpTaskCompleted"):
+									{
+										event, err := osu.ethRpc.AvsReader.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseOpTaskCompleted(vLog)
 										if err != nil {
-											osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", event.Raw.BlockNumber)
+											osu.errorC <- fmt.Errorf("Failed to ParseOpTaskCompleted: err: %v, atBlock: %v", err, vLog.BlockNumber)
 											return
 										}
-										osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
+										osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event: %v", event)
+
+										// TODO
+										// If get an OpTaskCompleted event with taskIndex higher than
+										// what we expect then perhaps our expected task didn't complete
+										// And another one was init and then completed so, we shouldn't
+										// error out here instead set the osu.checkpointedBlock and osu.atBlock
+										// then break out of the loop and let updateOpStates update accordingly
+										// Similar to how we do it when we see an OpTaskCompleted event when watching
+										// triggers
+										if sendNewOpTaskReturn.OpTask.TaskNum < event.TaskIndex {
+											osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event has task with higher than expted taskIndex: %v", event)
+											lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), event.Raw.BlockNumber)
+											if err != nil {
+												osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", event.Raw.BlockNumber)
+												return
+											}
+											osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
+											osu.atBlock = uint32(event.Raw.BlockNumber)
+										} else if sendNewOpTaskReturn.OpTask.TaskNum > event.TaskIndex {
+
+										// This branch is to account for the case where
+										// a task is completed in a block and another task is created
+										// in the same block and then that one is also completed in the same block
+											continue
+										} else {
+
+										osu.logger.Info("OpStateUpdater - Got the expected OpTaskCompleted event", "TaskIndex", sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
+
+										// TODO
+										// Since we are here upon observing an OpTaskCompleted event
+										// probably should set atBlock to the current block (at which we
+										// found the OpTaskCompleted event) rather than the OpTask.TaskCreatedBlock
+										// Similar to how we do it when we see an OpTaskCompleted event when watching
+										// triggers
+										// In any case when we come to the OpTaskCompleted event it will do the above anyway
+										osu.checkpointedBlock = sendNewOpTaskReturn.OpTask.TaskCreatedBlock
 										osu.atBlock = uint32(event.Raw.BlockNumber)
-									} else if sendNewOpTaskReturn.OpTask.TaskNum > event.TaskIndex {
-
-									// This branch is to account for the case where
-									// a task is completed in a block and another task is created
-									// in the same block and then that one is also completed in the same block
-										continue
-									} else {
-
-									osu.logger.Info("OpStateUpdater - Got the expected OpTaskCompleted event", "TaskIndex", sendNewOpTaskReturn.OpTask.TaskCreatedBlock)
-
-									// TODO
-									// Since we are here upon observing an OpTaskCompleted event
-									// probably should set atBlock to the current block (at which we
-									// found the OpTaskCompleted event) rather than the OpTask.TaskCreatedBlock
-									// Similar to how we do it when we see an OpTaskCompleted event when watching
-									// triggers
-									// In any case when we come to the OpTaskCompleted event it will do the above anyway
-									osu.checkpointedBlock = sendNewOpTaskReturn.OpTask.TaskCreatedBlock
-									osu.atBlock = uint32(event.Raw.BlockNumber)
+										}
+										break watchForOpTaskCompletedLoop
 									}
-									break watchForOpTaskCompletedLoop
+								case vLog.Address == stakeRegistryContractAddress && vLog.Topics[0] == getEventID(stakeRegistryAbi, "StrategyMultiplierUpdated"):
+									{
+										osu.logger.Debugf("Event %s from contract %s\n", "StrategyMultiplierUpdated", vLog.Address.Hex())
+										osu.atBlock = uint32(vLog.BlockNumber)
+										// Process the log here based on event signature and ABI
+										ContractStakeRegistryStrategyMultiplierUpdated, err := osu.ethRpc.AvsReader.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseStrategyMultiplierUpdated(vLog)
+										if err != nil {
+											osu.errorC <- fmt.Errorf("Failed to ParseStrategyMultiplierUpdated: err: %v, atBlock: %v", err, vLog.BlockNumber)
+											return
+										}
+										osu.logger.Info("Pausing trackingOpState upon event trigger", "trigger", ContractStakeRegistryStrategyMultiplierUpdated)
+										osu.paused = true
+										osu.pauseReasonV = fmt.Sprintf("Pausing trackingOpState upon event trigger: %v", ContractStakeRegistryStrategyMultiplierUpdated)
+									}
+								case vLog.Address == stakeRegistryContractAddress && vLog.Topics[0] == getEventID(stakeRegistryAbi, "MinimumStakeForQuorumUpdated"):
+									{
+										osu.logger.Debugf("Event %s from contract %s\n", "MinimumStakeForQuorumUpdated", vLog.Address.Hex())
+										osu.atBlock = uint32(vLog.BlockNumber)
+										// Process the log here based on event signature and ABI
+										ContractStakeRegistryMinimumStakeForQuorumUpdated, err := osu.ethRpc.AvsReader.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseMinimumStakeForQuorumUpdated(vLog)
+										if err != nil {
+											osu.errorC <- fmt.Errorf("Failed to ParseMinimumStakeForQuorumUpdated: err: %v, atBlock: %v", err, vLog.BlockNumber)
+											return
+										}
+										osu.logger.Info("Pausing trackingOpState upon event trigger", "trigger", ContractStakeRegistryMinimumStakeForQuorumUpdated)
+										osu.paused = true
+										osu.pauseReasonV = fmt.Sprintf("Pausing trackingOpState upon event trigger: %v", ContractStakeRegistryMinimumStakeForQuorumUpdated)
+									}
+								case vLog.Address == taskManagerContractAddress && vLog.Topics[0] == getEventID(taskmanagerAbi, "PauseTrackingOpState"):
+									{
+										osu.logger.Debugf("Event %s from contract %s\n", "PauseTrackingOpState", vLog.Address.Hex())
+										osu.atBlock = uint32(vLog.BlockNumber)
+										// Process the log here based on event signature and ABI
+										ContractFinalizerTaskManagerPauseTrackingOpState, err := osu.ethRpc.AvsReader.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParsePauseTrackingOpState(vLog)
+										if err != nil {
+											osu.errorC <- fmt.Errorf("Failed to ParsePauseTrackingOpState: err: %v, atBlock: %v", err, vLog.BlockNumber)
+											return
+										}
+										osu.logger.Info("Pausing trackingOpState upon event trigger", "trigger", ContractFinalizerTaskManagerPauseTrackingOpState)
+										osu.paused = true
+										osu.pauseReasonV = fmt.Sprintf("Pausing trackingOpState upon event trigger: %v", ContractFinalizerTaskManagerPauseTrackingOpState)
+									}
 								}
 							}
 						}
