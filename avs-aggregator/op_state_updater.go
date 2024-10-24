@@ -251,7 +251,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					for {
 						select {
 						case <-ticker.C:
-							osu.logger.Info("The OpStateUpdater is paused due to: %v", osu.pauseReasonV)
+							osu.logger.Infof("The OpStateUpdater is paused due to: %v", osu.pauseReasonV)
 						case <-ctx.Done():
 							osu.errorC <- ctx.Err()
 							return
@@ -264,7 +264,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 								osu.errorC <- fmt.Errorf("Failed to ParseResumeTrackingOpState: err: %v, atBlock: %v", err, vLog.BlockNumber)
 								return
 							}
-							osu.logger.Info("Received resume event: %v", event)
+							osu.logger.Infof("Received resume event: %v", event)
 							if event.ResetTrackedQuorums {
 								osu.logger.Debug("OpStateUpdater received resume event with resetTrackedQuorums = true")
 								osu.resetTrackedQuorums = true
@@ -301,7 +301,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					// to cost us a lot of eth
 					if time.Since(osu.lastOpStateUpdateTime) < osu.triggerOpStateUpdateWindow {
 						osu.paused = true
-						osu.pauseReasonV = fmt.Sprintf("OpStateUpdater osu.triggerOpStateUpdate called again too soon: since: %v, now: %v", osu.lastOpStateUpdateTime, time.Now())
+						osu.pauseReasonV = fmt.Sprintf("OpStateUpdater osu.triggerOpStateUpdate called again too soon: since: %v, now: %v. Please restart agg", osu.lastOpStateUpdateTime, time.Now())
 						continue
 					}
 
@@ -718,7 +718,7 @@ func (osu *OpStateUpdater) updateOpStates() error {
 	osu.checkQuorumThresholds()
 	if osu.triggerOpStateUpdate {
 		osu.paused = true
-		osu.pauseReasonV = fmt.Sprintf("triggerOpStateUpdate true in updateOpStates")
+		osu.pauseReasonV = fmt.Sprintf("triggerOpStateUpdate true in updateOpStates. Please resume with resetTrackedQuorums as true")
 	}
 	osu.logger.Debug("OpStateUpdater - isAnyQuorumInCheckpointedAvsStateEmpty")
 	if osu.isAnyQuorumInCheckpointedAvsStateEmpty() {

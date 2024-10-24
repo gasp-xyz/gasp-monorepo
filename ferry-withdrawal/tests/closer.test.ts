@@ -24,6 +24,7 @@ describe('Closer Service', () => {
   beforeEach(async () => {
 
     l1Mock = {
+      getMerkleRange: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
       isRolldownDeployed: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
       getNativeTokenAddress: vi.fn().mockImplementation(() => NATIVE_TOKEN),
       getLatestRequestId: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
@@ -36,6 +37,7 @@ describe('Closer Service', () => {
     };
 
     l2Mock = {
+      getMerkleProof: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
       getLatestRequestId: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
       getLatestRequestIdInPast: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
       getWithdrawals: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),

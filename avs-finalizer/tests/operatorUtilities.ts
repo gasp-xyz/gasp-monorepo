@@ -24,6 +24,7 @@ export const indexRegistryAddress : `0x${string}` = deploymentJson.addresses.ind
 export const DEFAULT_QUORUM = 0;
 
 export async function waitForOperatorRegistered(publicClient: PublicClient) {
+    console.log(new Date().toString() + "Waiting for operator Registered");
     return new Promise((resolve, _) => {
         const unwatch = publicClient.watchEvent({
             address: registryCoordinatorAddress,
@@ -48,6 +49,7 @@ export async function waitForOperatorRegistered(publicClient: PublicClient) {
 }
 export async function waitForOperatorDeRegistered(publicClient: PublicClient) {
     return new Promise((resolve, _) => {
+        console.log(new Date().toString() +  "Waiting for operator de-registered.-....")
         const unwatch = publicClient.watchEvent({
             address: registryCoordinatorAddress,
             event: {

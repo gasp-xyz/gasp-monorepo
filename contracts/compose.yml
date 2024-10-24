@@ -23,7 +23,7 @@ services:
     environment:
       ENV_SELECTOR: ethereum-stub
     #extra_hosts:
-      #      - "host.docker.internal:host-gateway"
+    #      - "host.docker.internal:host-gateway"
   arbitrum-contracts-deployment:
     image: mangatasolutions/gasp-contracts:local-arb
     platform: linux/amd64

@@ -61,6 +61,29 @@ class L1Api implements L1Interface {
     }
   }
 
+  async getMerkleRange(requestId: bigint): Promise<{ root: Uint8Array, range: [bigint, bigint] }> {
+    const root = await this.client.readContract({
+      address: MANGATA_CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: "find_l2_batch",
+      args: [requestId],
+      blockTag: "latest"
+    }) as any;
+
+    const range = await this.client.readContract({
+      address: MANGATA_CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: "merkleRootRange",
+      args: [root],
+      blockTag: "latest"
+    });
+
+    return {
+      root: hexToU8a(root),
+      range: range as [bigint, bigint],
+    };
+  }
+
   async getFerry(hash: Uint8Array): Promise<Uint8Array | null> {
     const closedStatus = u8aToHex( await this.getClosedStatus());
     const zeros = "0x0000000000000000000000000000000000000000";
@@ -232,7 +255,7 @@ class L1Api implements L1Interface {
   }
 
 
-  async close(withdrawal: Withdrawal, privateKey: Uint8Array): Promise<boolean>{
+  async close(withdrawal: Withdrawal, merkleRoot: Uint8Array, proof: Uint8Array[], privateKey: Uint8Array): Promise<boolean>{
     const acc: PrivateKeyAccount = privateKeyToAccount(u8aToHex(privateKey) as `0x{string}`);
     const wc = createWalletClient({
       account: acc,
@@ -247,7 +270,7 @@ class L1Api implements L1Interface {
       address: MANGATA_CONTRACT_ADDRESS,
       abi: ABI,
       functionName: "close_withdrawal",
-      args: [toViemFormat(withdrawal), u8aToHex(withdrawal.hash, 256), [u8aToHex(withdrawal.hash, 256)]],
+      args: [toViemFormat(withdrawal), u8aToHex(merkleRoot), proof.map((p) => u8aToHex(p))],
       maxFeePerGas: maxFeeInWei,
       maxPriorityFeePerGas: maxPriorityFeePerGasInWei
     });

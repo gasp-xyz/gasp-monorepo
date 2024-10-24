@@ -115,6 +115,14 @@ const mockMangata = (urls: string[]) => ({
 
       return new BN(0)
     },
+    rolldown: {
+      get_merkle_proof: vi.fn().mockResolvedValue({
+        toHex: () => 'mock-proof',
+      }),
+      get_merkle_root: vi.fn().mockResolvedValue({
+        toHuman: () => 'mock-root',
+      }),
+    },
   },
 })
 
