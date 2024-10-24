@@ -1,7 +1,7 @@
 import { Schema } from 'redis-om'
 
-const transactionSchema = new Schema(
-  'transactions',
+const withdrawalSchema = new Schema(
+  'withdrawals',
   {
     address: { type: 'string' },
     txHash: { type: 'string' },
@@ -14,10 +14,12 @@ const transactionSchema = new Schema(
     amount: { type: 'string' },
     asset_chainId: { type: 'string' },
     asset_address: { type: 'string' },
+    proof: { type: 'string' },
+    calldata: { type: 'string' },
   },
   {
     dataStructure: 'JSON',
   }
 )
 
-export { transactionSchema }
+export { withdrawalSchema }

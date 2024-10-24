@@ -33,7 +33,6 @@ export const verifyCaptcha = async (captchaToken: string): Promise<void> => {
     sitekey: process.env.CAPTCHA_SITEKEY,
     response: captchaToken,
   }
-  console.log('token: ' + captchaToken)
   const response = await axios.post(VERIFY_URL, payload, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

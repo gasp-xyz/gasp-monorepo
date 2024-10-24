@@ -7,7 +7,7 @@ import { CodecOrArray, parseNumber, toHuman } from '../util/Chain.js'
 import logger from '../util/Logger.js'
 import { Metrics } from '../util/Metrics.js'
 
-export const BLOCK_TIME = 12000
+export const BLOCK_TIME = 6000
 
 export interface Block {
   number: number

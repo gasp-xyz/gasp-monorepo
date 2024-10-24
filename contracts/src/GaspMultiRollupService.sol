@@ -58,49 +58,7 @@ contract GaspMultiRollupService is
 
         require(merkleRoots.length == ranges.length, "rdUpdate info length mismatch");
 
-        for (uint256 i = 0; i < operatorStateInfo.quorumsRemoved.length; i++) {
-            delete quorumToStakes[operatorStateInfo.quorumsRemoved[i]];
-            delete qourumApk[operatorStateInfo.quorumsRemoved[i]];
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.quorumsAdded.length; i++) {
-            quorumToStakes[operatorStateInfo.quorumsAdded[i].quorumNumber] = operatorStateInfo.quorumsAdded[i].quorumStake;
-            qourumApk[operatorStateInfo.quorumsAdded[i].quorumNumber] = operatorStateInfo.quorumsAdded[i].quorumApk;
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.quorumsStakeUpdate.length; i++) {
-            quorumToStakes[operatorStateInfo.quorumsStakeUpdate[i].quorumNumber] = operatorStateInfo.quorumsStakeUpdate[i].quorumStake;
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.quorumsApkUpdate.length; i++) {
-            qourumApk[operatorStateInfo.quorumsApkUpdate[i].quorumNumber] = operatorStateInfo.quorumsApkUpdate[i].quorumApk;
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.operatorsRemoved.length; i++) {
-            for (uint256 j = 0; j < quorumNumbers.length; i++) {
-               delete operatorAndQuorumToStakes[operatorStateInfo.operatorsRemoved[i]][uint8(quorumNumbers[j])];
-            }
-            delete operatorIdQuorumCount[operatorStateInfo.operatorsRemoved[i]];
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.operatorsAdded.length; i++) {
-            operatorIdQuorumCount[operatorStateInfo.operatorsAdded[i].operatorId] = operatorStateInfo.operatorsAdded[i].quorumCount;
-
-            for (uint256 j = 0; j < operatorStateInfo.operatorsAdded[i].quorumForStakes.length; j++) {
-                operatorAndQuorumToStakes[operatorStateInfo.operatorsAdded[i].operatorId][operatorStateInfo.operatorsAdded[i].quorumForStakes[j]] = operatorStateInfo.operatorsAdded[i].quorumStakes[j];
-            }
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.operatorsStakeUpdate.length; i++) {
-
-            for (uint256 j = 0; j < operatorStateInfo.operatorsStakeUpdate[i].quorumForStakes.length; j++) {
-                operatorAndQuorumToStakes[operatorStateInfo.operatorsStakeUpdate[i].operatorId][operatorStateInfo.operatorsStakeUpdate[i].quorumForStakes[j]] = operatorStateInfo.operatorsStakeUpdate[i].quorumStakes[j];
-            }
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.operatorsQuorumCountUpdate.length; i++) {
-            operatorIdQuorumCount[operatorStateInfo.operatorsQuorumCountUpdate[i].operatorId] = operatorStateInfo.operatorsQuorumCountUpdate[i].quorumCount;
-        }
+        updateOpState(operatorStateInfo);
 
         latestCompletedOpTaskNumber = task.taskNum;
         latestCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
@@ -120,88 +78,41 @@ contract GaspMultiRollupService is
         
     }
 
-    function processEigenOpUpdate(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public onlyUpdater  {
+    function processEigenOpUpdate(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public {
 
-
-        bool isInit = latestCompletedOpTaskCreatedBlock == 0;
-
-        if (isInit) {
-            if (allowNonRootInit) {
-                require(msg.sender == updater, "Auth0");
-            } else {
-                require(msg.sender == owner(), "Auth2");
-            }
-        } else {
+        uint32 latestCompletedOpTaskCreatedBlockCached = latestCompletedOpTaskCreatedBlock;
+        if (!(latestCompletedOpTaskCreatedBlockCached == 0) || allowNonRootInit) {
             require(msg.sender == updater, "Auth0");
+        } else {
+            require(msg.sender == owner(), "Auth1");
         }
 
         require(taskResponse.referenceTaskHash == keccak256(abi.encode(task)), "referenceTaskHash hash mismatch");
         require(taskResponse.operatorsStateInfoHash == keccak256(abi.encode(operatorStateInfo)), "operatorStateInfo hash mismatch");
 
-        if (!isInit) {
-        require(latestCompletedOpTaskCreatedBlock == task.lastCompletedOpTaskCreatedBlock, "reference block mismatch");
-        
-        // if the this is the first task then don't check sigs
-        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals = checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignature);
+        // Process signatures iff the op state has been init
+        if (!(latestCompletedOpTaskCreatedBlockCached == 0)) {
+            require(latestCompletedOpTaskCreatedBlockCached == task.lastCompletedOpTaskCreatedBlock, "reference block mismatch");
+            
+            // if the this is the first task then don't check sigs
+            IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals = checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignature);
 
-        uint32 QuorumThresholdPercentage = quorumThresholdPercentage;
-        // check that signatories own at least a threshold percentage of each quourm
-        for (uint256 i = 0; i < quorumNumbers.length; i++) {
-            // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
-            // signed stake > total stake
-            if (
-                quorumStakeTotals.signedStakeForQuorum[i] * _THRESHOLD_DENOMINATOR
-                    < quorumStakeTotals.totalStakeForQuorum[i] * uint8(QuorumThresholdPercentage)
-            ) {
-                // "Signatories do not own at least threshold percentage of a quorum"
-                revert("Failed to meet quorum");
-            }
-        }
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.quorumsRemoved.length; i++) {
-            delete quorumToStakes[operatorStateInfo.quorumsRemoved[i]];
-            delete qourumApk[operatorStateInfo.quorumsRemoved[i]];
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.quorumsAdded.length; i++) {
-            quorumToStakes[operatorStateInfo.quorumsAdded[i].quorumNumber] = operatorStateInfo.quorumsAdded[i].quorumStake;
-            qourumApk[operatorStateInfo.quorumsAdded[i].quorumNumber] = operatorStateInfo.quorumsAdded[i].quorumApk;
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.quorumsStakeUpdate.length; i++) {
-            quorumToStakes[operatorStateInfo.quorumsStakeUpdate[i].quorumNumber] = operatorStateInfo.quorumsStakeUpdate[i].quorumStake;
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.quorumsApkUpdate.length; i++) {
-            qourumApk[operatorStateInfo.quorumsApkUpdate[i].quorumNumber] = operatorStateInfo.quorumsApkUpdate[i].quorumApk;
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.operatorsRemoved.length; i++) {
-            for (uint256 j = 0; j < quorumNumbers.length; i++) {
-               delete operatorAndQuorumToStakes[operatorStateInfo.operatorsRemoved[i]][uint8(quorumNumbers[j])];
-            }
-            delete operatorIdQuorumCount[operatorStateInfo.operatorsRemoved[i]];
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.operatorsAdded.length; i++) {
-            operatorIdQuorumCount[operatorStateInfo.operatorsAdded[i].operatorId] = operatorStateInfo.operatorsAdded[i].quorumCount;
-
-            for (uint256 j = 0; j < operatorStateInfo.operatorsAdded[i].quorumForStakes.length; j++) {
-                operatorAndQuorumToStakes[operatorStateInfo.operatorsAdded[i].operatorId][operatorStateInfo.operatorsAdded[i].quorumForStakes[j]] = operatorStateInfo.operatorsAdded[i].quorumStakes[j];
+            uint32 QuorumThresholdPercentage = quorumThresholdPercentage;
+            // check that signatories own at least a threshold percentage of each quourm
+            for (uint256 i = 0; i < quorumNumbers.length; i++) {
+                // we don't check that the quorumThresholdPercentages are not >100 because a greater value would trivially fail the check, implying
+                // signed stake > total stake
+                if (
+                    quorumStakeTotals.signedStakeForQuorum[i] * _THRESHOLD_DENOMINATOR
+                        < quorumStakeTotals.totalStakeForQuorum[i] * uint8(QuorumThresholdPercentage)
+                ) {
+                    // "Signatories do not own at least threshold percentage of a quorum"
+                    revert("Failed to meet quorum");
+                }
             }
         }
 
-        for (uint256 i = 0; i < operatorStateInfo.operatorsStakeUpdate.length; i++) {
-
-            for (uint256 j = 0; j < operatorStateInfo.operatorsStakeUpdate[i].quorumForStakes.length; j++) {
-                operatorAndQuorumToStakes[operatorStateInfo.operatorsStakeUpdate[i].operatorId][operatorStateInfo.operatorsStakeUpdate[i].quorumForStakes[j]] = operatorStateInfo.operatorsStakeUpdate[i].quorumStakes[j];
-            }
-        }
-
-        for (uint256 i = 0; i < operatorStateInfo.operatorsQuorumCountUpdate.length; i++) {
-            operatorIdQuorumCount[operatorStateInfo.operatorsQuorumCountUpdate[i].operatorId] = operatorStateInfo.operatorsQuorumCountUpdate[i].quorumCount;
-        }
+        updateOpState(operatorStateInfo);
 
         latestCompletedOpTaskNumber = task.taskNum;
         latestCompletedOpTaskCreatedBlock = task.taskCreatedBlock;
@@ -380,5 +291,53 @@ contract GaspMultiRollupService is
                 apkG2,
                 PAIRING_EQUALITY_CHECK_GAS
             );
+    }
+
+    function updateOpState(
+        OperatorStateInfo calldata operatorStateInfo
+    ) internal {
+        for (uint256 i = 0; i < operatorStateInfo.quorumsRemoved.length; i++) {
+            delete quorumToStakes[operatorStateInfo.quorumsRemoved[i]];
+            delete qourumApk[operatorStateInfo.quorumsRemoved[i]];
+        }
+
+        for (uint256 i = 0; i < operatorStateInfo.quorumsAdded.length; i++) {
+            quorumToStakes[operatorStateInfo.quorumsAdded[i].quorumNumber] = operatorStateInfo.quorumsAdded[i].quorumStake;
+            qourumApk[operatorStateInfo.quorumsAdded[i].quorumNumber] = operatorStateInfo.quorumsAdded[i].quorumApk;
+        }
+
+        for (uint256 i = 0; i < operatorStateInfo.quorumsStakeUpdate.length; i++) {
+            quorumToStakes[operatorStateInfo.quorumsStakeUpdate[i].quorumNumber] = operatorStateInfo.quorumsStakeUpdate[i].quorumStake;
+        }
+
+        for (uint256 i = 0; i < operatorStateInfo.quorumsApkUpdate.length; i++) {
+            qourumApk[operatorStateInfo.quorumsApkUpdate[i].quorumNumber] = operatorStateInfo.quorumsApkUpdate[i].quorumApk;
+        }
+
+        for (uint256 i = 0; i < operatorStateInfo.operatorsRemoved.length; i++) {
+            for (uint256 j = 0; j < quorumNumbers.length; i++) {
+               delete operatorAndQuorumToStakes[operatorStateInfo.operatorsRemoved[i]][uint8(quorumNumbers[j])];
+            }
+            delete operatorIdQuorumCount[operatorStateInfo.operatorsRemoved[i]];
+        }
+
+        for (uint256 i = 0; i < operatorStateInfo.operatorsAdded.length; i++) {
+            operatorIdQuorumCount[operatorStateInfo.operatorsAdded[i].operatorId] = operatorStateInfo.operatorsAdded[i].quorumCount;
+
+            for (uint256 j = 0; j < operatorStateInfo.operatorsAdded[i].quorumForStakes.length; j++) {
+                operatorAndQuorumToStakes[operatorStateInfo.operatorsAdded[i].operatorId][operatorStateInfo.operatorsAdded[i].quorumForStakes[j]] = operatorStateInfo.operatorsAdded[i].quorumStakes[j];
+            }
+        }
+
+        for (uint256 i = 0; i < operatorStateInfo.operatorsStakeUpdate.length; i++) {
+
+            for (uint256 j = 0; j < operatorStateInfo.operatorsStakeUpdate[i].quorumForStakes.length; j++) {
+                operatorAndQuorumToStakes[operatorStateInfo.operatorsStakeUpdate[i].operatorId][operatorStateInfo.operatorsStakeUpdate[i].quorumForStakes[j]] = operatorStateInfo.operatorsStakeUpdate[i].quorumStakes[j];
+            }
+        }
+
+        for (uint256 i = 0; i < operatorStateInfo.operatorsQuorumCountUpdate.length; i++) {
+            operatorIdQuorumCount[operatorStateInfo.operatorsQuorumCountUpdate[i].operatorId] = operatorStateInfo.operatorsQuorumCountUpdate[i].quorumCount;
+        }
     }
 }

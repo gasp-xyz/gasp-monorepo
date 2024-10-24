@@ -2,6 +2,7 @@ import MangataClient from '../connector/MangataNode.js'
 import {
   watchDepositAcceptedIntoQueue,
   processRequests,
+  watchWithdrawalClosed,
 } from '../scraper/L1LogScraper.js'
 import logger from '../util/Logger.js'
 import { holesky, arbitrumSepolia } from 'viem/chains'
@@ -23,6 +24,8 @@ export const initService = async () => {
       arbitrumSepolia,
       ARB_CHAIN
     ),
+    watchWithdrawalClosed(api, process.env.ETH_CHAIN_URL, holesky, ETH_CHAIN),
+    watchWithdrawalClosed(api, process.env.ARBITRUM_SEPOLIA_CHAIN_URL, arbitrumSepolia, ARB_CHAIN),
     processRequests(api, 'Arbitrum'),
     processRequests(api, 'Ethereum'),
   ]).then((results) => {
