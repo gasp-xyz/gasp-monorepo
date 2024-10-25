@@ -25,6 +25,7 @@ type Config struct {
 	Expiration        int
 	UpdatePeriod      int
 	DebounceRpc       int
+	EnableKicker      bool
 
 	AvsRegistryCoordinatorAddr common.Address
 	AvsDeploymentBlock         uint64
@@ -34,6 +35,10 @@ type Config struct {
 
 	KickPeriod int
 	MinOpUpdateInterval int
+
+	ReinitOpStateAtInit bool
+	CheckTriggerOpStateUpdate bool
+	CheckTriggerOpStateUpdateWindow bool
 }
 
 // NewConfig parses the Config from the provided flags or environment variables and
@@ -89,6 +94,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		MinOpUpdateInterval:            ctx.GlobalInt(config.AvsMinOpUpdateInterval.Name),
 		UpdatePeriod:               ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
 		DebounceRpc:                ctx.GlobalInt(config.AvsDebounceRpcFlag.Name),
+		EnableKicker:                ctx.GlobalBool(config.AvsEnableKickerFlag.Name),
 		EthRpcUrl:                  ctx.GlobalString(config.EthRpcFlag.Name),
 		EthWsUrl:                   ctx.GlobalString(config.EthWsFlag.Name),
 		ChainId:                    chainId,
@@ -97,6 +103,9 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		AvsDeploymentBlock:         uint64(ctx.GlobalInt(config.AvsDeploymentBlockFlag.Name)),
 		SignerFn:                   signer,
 		Address:                    address,
+		ReinitOpStateAtInit:  ctx.GlobalBool(config.AggOsuReinitOpStateAtInit.Name),
+		CheckTriggerOpStateUpdate:  ctx.GlobalBool(config.AggOsuCheckTriggerOpStateUpdate.Name),
+		CheckTriggerOpStateUpdateWindow:  ctx.GlobalBool(config.AggOsuCheckTriggerOpStateUpdateWindow.Name),
 	}, nil
 }
 
@@ -119,4 +128,8 @@ var Flags = []cli.Flag{
 	config.AvsUpdateStakePeriodFlag,
 	config.AvsTaskExpirationFlag,
 	config.AvsDebounceRpcFlag,
+	config.AvsEnableKickerFlag,
+	config.AggOsuReinitOpStateAtInit,
+	config.AggOsuCheckTriggerOpStateUpdate,
+	config.AggOsuCheckTriggerOpStateUpdateWindow,
 }

@@ -13,22 +13,59 @@ jobs:
     name: Foundry project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           submodules: recursive
+        
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12.x
+          check-latest: true
+          cache: pip
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
+          cache: true
 
-      - name: Run Forge build
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      
+      - name: Install Python dependencies
+        run: |
+          pip install -U setuptools
+          pip install -r requirements.txt
+
+      - name: Build code
         run: |
           forge --version
           forge build --sizes
         id: build
+      
+      - name: Check file and code format
+        if: false
+        run: bun run format
+        id: format
+      
+      - name: Lint code
+        if: false
+        run: bun run lint
+        id: lint
 
-      - name: Run Forge tests
-        run: |
-          forge test -vvv
+      - name: Test code
+        run: forge test -vvv
         id: test
+      
+      - name: Analyze code with static analyzer
+        if: false
+        run: bun run analyze:ci
+        id: analyze
+      
+      - name: Create gas usage snapshot
+        run: forge snapshot
+        id: snapshot

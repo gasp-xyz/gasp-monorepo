@@ -1,16 +1,18 @@
 use std::{fmt::Debug, ops::Add, sync::Arc};
 
 use bindings::{
-    avs_directory::AVSDirectory, delegation_manager::DelegationManager,
-    finalizer_service_manager::FinalizerServiceManager, registry_coordinator::RegistryCoordinator,
-    shared_types::OperatorDetails, stake_registry::StakeRegistry,
-    strategy_manager_storage::SignatureWithSaltAndExpiry,
+    avs_directory::AVSDirectory,
+    delegation_manager::DelegationManager,
+    finalizer_service_manager::FinalizerServiceManager,
+    registry_coordinator::RegistryCoordinator,
+    shared_types::{OperatorDetails, SignatureWithSaltAndExpiry},
+    stake_registry::StakeRegistry,
 };
 use ethers::{
     providers::Middleware,
-    types::{Address, TransactionReceipt},
+    types::{Address, TransactionReceipt, U64},
 };
-use eyre::{Ok, OptionExt};
+use eyre::{eyre, Ok, OptionExt};
 use rand::RngCore;
 use sp_core::U256;
 
@@ -63,7 +65,7 @@ impl ElContracts {
         operator_address: Address,
     ) -> eyre::Result<TransactionReceipt> {
         let op_details = OperatorDetails {
-            earnings_receiver: operator_address,
+            deprecated_earnings_receiver: operator_address,
             ..Default::default()
         };
         let tx = self
@@ -72,6 +74,10 @@ impl ElContracts {
 
         let pending = tx.send().await.map_err(map_revert)?;
         let receipt = pending.await?;
+
+        if Some(U64::zero()) == receipt.as_ref().and_then(|r| r.status) {
+            return Err(eyre!("register_as_operator_with_el tx failed"));
+        }
 
         receipt.ok_or_eyre("register_as_operator_with_el trx failed")
     }

@@ -86,6 +86,12 @@ var (
 		Value:    5,
 		EnvVar:   "AVS_DEBOUNCE_RPC",
 	}
+	AvsEnableKickerFlag = cli.BoolTFlag{
+		Name:     "avs-enable-kicker",
+		Usage:    "Enable kicker",
+		Required: false,
+		EnvVar:   "AVS_ENABLE_KICKER",
+	}
 
 	// Aggregator OpStateUpdaterFlags
 	AvsMinOpUpdateInterval = cli.IntFlag{
@@ -94,6 +100,24 @@ var (
 		Required: false,
 		Value:    60,
 		EnvVar:   "AVS_MIN_OP_UPDATE_INTERVAL",
+	}
+	AggOsuReinitOpStateAtInit = cli.BoolFlag{
+		Name:     "agg-osu-reinit-op-state-at-init",
+		Usage:    "flag to perform reinit of op state at startup",
+		Required: false,
+		EnvVar:   "AGG_OSU_REINIT_OP",
+	}
+	AggOsuCheckTriggerOpStateUpdate = cli.BoolTFlag{
+		Name:     "agg-osu-check-trigger-op-state-update",
+		Usage:    "Enable the check that op state trigger doesn't happen twice right after an opTask was completed",
+		Required: false,
+		EnvVar:   "AGG_OSU_CHECK_UPDATE_TRIGGER",
+	}
+	AggOsuCheckTriggerOpStateUpdateWindow = cli.BoolTFlag{
+		Name:     "agg-osu-check-trigger-op-state-update-window",
+		Usage:    "Enable the check that op state trigger doesn't happen twice in the AvsMinOpUpdateInterval",
+		Required: false,
+		EnvVar:   "AGG_OSU_CHECK_UPDATE_TRIGGER_WINDOW",
 	}
 
 	// Deployment

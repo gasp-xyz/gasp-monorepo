@@ -14,7 +14,7 @@ import (
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/services/avsregistry"
 	blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
-	operatorpubkeys "github.com/Layr-Labs/eigensdk-go/services/operatorpubkeys"
+	oprsinfoserv "github.com/Layr-Labs/eigensdk-go/services/operatorsinfo"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
@@ -27,7 +27,7 @@ import (
 	gsrpctypes "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
-// Aggregator sends tasks (numbers to square) onchain, then listens for operator signed TaskResponses.
+// Aggregator sends tasks onchain, then listens for operator signed TaskResponses.
 // It aggregates responses signatures, and if any of the TaskResponses reaches the QuorumThresholdPercentage for each quorum
 // (currently we only use a single quorum of the ERC20Mock token), it sends the aggregated TaskResponse and signature onchain.
 //
@@ -83,6 +83,8 @@ type Aggregator struct {
 	opStateUpdater *OpStateUpdater
 }
 
+const waitForReceipt = bool(true)
+
 // NewAggregator creates a new Aggregator with the provided config.
 func NewAggregator(c *Config) (*Aggregator, error) {
 	logger, err := sdklogging.NewZapLogger(c.LogLevel)
@@ -107,7 +109,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	chainId, err := ethRpc.Clients.EthHttpClient.ChainID(context.Background())
+	chainId, err := ethRpc.AvsReader.AvsServiceBindings.EthClient.ChainID(context.Background())
 	if err != nil {
 		logger.Error("Cannot get chainId", "err", err)
 		return nil, err
@@ -123,16 +125,15 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	pubkeyService := operatorpubkeys.NewOperatorPubkeysServiceInMemory(
+	operatorPubkeysService := oprsinfoserv.NewOperatorsInfoServiceInMemory(
 		context.Background(),
 		ethRpc.Clients.AvsRegistryChainSubscriber,
 		ethRpc.Clients.AvsRegistryChainReader,
-		ethRpc.Clients.EthHttpClient,
-		c.AvsDeploymentBlock,
-		50_000,
+		nil,
+		oprsinfoserv.Opts{},
 		logger,
 	)
-	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, pubkeyService, logger)
+	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, operatorPubkeysService, logger)
 	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, c.DebounceRpc, logger)
 
 	substrateRpc, err := gsrpc.NewSubstrateAPI(c.SubstrateWsRpcUrl)
@@ -141,13 +142,17 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	kicker, err := NewKicker(logger, *ethRpc, uint32(c.KickPeriod), uint32(c.BlockPeriod))
-	if err != nil {
-		logger.Error("Cannot create operator active list filter", "err", err)
-		return nil, err
+	var kicker *Kicker
+
+	if c.EnableKicker {
+		kicker, err = NewKicker(logger, *ethRpc, uint32(c.KickPeriod), uint32(c.BlockPeriod))
+		if err != nil {
+			logger.Error("Cannot create operator active list filter", "err", err)
+			return nil, err
+		}
 	}
 
-	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, avsRegistryService, c.MinOpUpdateInterval)
+	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, c.MinOpUpdateInterval, c.ReinitOpStateAtInit, c.CheckTriggerOpStateUpdate, c.CheckTriggerOpStateUpdateWindow)
 	if err != nil {
 		logger.Error("Cannot create operator stakes updateer", "err", err)
 		return nil, err
@@ -545,7 +550,7 @@ func (agg *Aggregator) createOpTask()(taskmanager.IFinalizerTaskManagerOpTask, s
 	}
 
 	agg.logger.Info("Aggregator sending new OpTask")
-	// Send number to square to the task manager contract
+	// Send new opTask to the task manager contract
 	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewOpTask(context.Background(), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
@@ -606,7 +611,7 @@ func (agg *Aggregator) createRdTask(chainToUpdate uint8, chainBatchIdToUpdate ui
 	}
 
 	agg.logger.Info("Aggregator sending new RdTask", "chainToUpdate", chainToUpdate, "chainBatchIdToUpdate", chainBatchIdToUpdate)
-	// Send number to square to the task manager contract
+	// Send new rdTask to the task manager contract
 	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewRdTask(context.Background(), chainToUpdate, chainBatchIdToUpdate)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to SendNewRdTask", "err", err)
@@ -626,7 +631,9 @@ func (agg *Aggregator) processCreatedRdTask(newTask taskmanager.IFinalizerTaskMa
 	agg.tasks[taskId] = newTask
 	agg.tasksMu.Unlock()
 
-	agg.kicker.TriggerNewTask(taskId.TaskIndex)
+	if agg.kicker != nil {
+		agg.kicker.TriggerNewTask(taskId.TaskIndex)
+	}
 
 	quorumThresholdPercentages := make(sdktypes.QuorumThresholdPercentages, len(newTask.LastCompletedOpTaskQuorumNumbers))
 	for i, _ := range newTask.LastCompletedOpTaskQuorumNumbers {
@@ -693,25 +700,26 @@ func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 
 	isOpsInit := lastCompletedOpTaskCreatedBlock != 0
 
-	if isRduTask && isOpsInit{
-
-		isUpdate, chainToUpdate, chainBatchIdToUpdate, err := agg.getL1BatchUpdateInfo(blockNumber)
-		if err != nil {
-			return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to getL1BatchUpdateInfo: err: %v", err)
-		}
-
-		if !isUpdate{
-			agg.logger.Info("Aggregator in maybeSendNewRdTask found no new updates at", "block number", blockNumber)
-			return nil
-		}
-
-		
-		err = agg.createAndProcessRdTask(chainToUpdate, chainBatchIdToUpdate, 3)
-		if err != nil{
-			return fmt.Errorf("Aggregator failed to createAndProcessRdTask: err: %v", err)
-		}
-
+	if !isOpsInit {
+		return nil
 	}
+
+
+	isUpdate, chainToUpdate, chainBatchIdToUpdate, err := agg.getL1BatchUpdateInfo(blockNumber)
+	if err != nil {
+		return fmt.Errorf("Aggregator in maybeSendNewRdTask failed to getL1BatchUpdateInfo: err: %v", err)
+	}
+
+	if !isUpdate{
+		agg.logger.Info("Aggregator in maybeSendNewRdTask found no new updates at", "block number", blockNumber)
+		return nil
+	}
+
+
+	err = agg.createAndProcessRdTask(chainToUpdate, chainBatchIdToUpdate, 3)
+	if err != nil{
+		return fmt.Errorf("Aggregator failed to createAndProcessRdTask: err: %v", err)
+	}	
 
 	return nil
 }

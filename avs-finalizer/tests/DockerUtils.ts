@@ -39,6 +39,9 @@ export class DockerUtils{
         if(opKeys.bls){
             env.BLS_KEY_JSON = opKeys.bls!;
         }
+        if(opKeys.edcsa && opKeys.bls){
+            env.STAKE = "1";
+        }
         const name = "rollup-avs-finalizer-TEST-" + randomBytes(4).toString("hex")
         console.info("name" + name + "keys: " + env.ECDSA_KEY_JSON  + env.BLS_KEY_JSON );
         console.info("Starting container: " + image);
@@ -65,6 +68,21 @@ export class DockerUtils{
         console.info(".... Done! ");
     }
 
+    /** 
+    docker run -it --network=host \
+    -e RUST_LOG=info \
+    -e ETH_RPC_URL=http://0.0.0.0:8545 \
+    -e ETH_WS_URL=ws://0.0.0.0:8545 \
+    -e CHAIN_ID=31337 \
+    -e SUBSTRATE_RPC_URL=ws://0.0.0.0:9946 \
+    -e AVS_RPC_URL=http://0.0.0.0:8090 \
+    -e AVS_REGISTRY_COORDINATOR_ADDR=0xf5059a5D33d5853360D16C683c16e67980206f36 \
+    -e TESTNET=true \
+    -e STAKE=60 \
+    --entrypoint /bin/bash \
+    mangatasolutions/avs-finalizer:local 
+    cc: ./main --bls-ephemeral-key --ecdsa-ephemeral-key
+    */
     finalizerLocalEnvironment : Environment = {
         RUST_LOG: "info",
         ETH_RPC_URL:"http://0.0.0.0:8545" ,
@@ -72,9 +90,9 @@ export class DockerUtils{
         CHAIN_ID:"31337" ,
         SUBSTRATE_RPC_URL:"ws://0.0.0.0:9946" ,
         AVS_RPC_URL:"http://0.0.0.0:8090" ,
-        AVS_REGISTRY_COORDINATOR_ADDR:"0x851356ae760d987E095750cCeb3bC6014560891C" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0xf5059a5D33d5853360D16C683c16e67980206f36" ,
         TESTNET:"true",
-        STAKE:"60",
+        STAKE:"45",
     }
     bigStakeLocalEnvironment : Environment = {
         RUST_LOG: "info",
@@ -83,7 +101,7 @@ export class DockerUtils{
         CHAIN_ID:"31337" ,
         SUBSTRATE_RPC_URL:"ws://0.0.0.0:9946" ,
         AVS_RPC_URL:"http://0.0.0.0:8090" ,
-        AVS_REGISTRY_COORDINATOR_ADDR:"0x851356ae760d987E095750cCeb3bC6014560891C" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0xf5059a5D33d5853360D16C683c16e67980206f36" ,
         TESTNET:"true",
         STAKE:"100",
     }
@@ -105,7 +123,7 @@ export class DockerUtils{
         CHAIN_ID:"31337" ,
         SUBSTRATE_RPC_URL:"wss://kusama-archive.mangata.online:443" ,
         AVS_RPC_URL:"http://0.0.0.0:8090" ,
-        AVS_REGISTRY_COORDINATOR_ADDR:"0x851356ae760d987E095750cCeb3bC6014560891C" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0xf5059a5D33d5853360D16C683c16e67980206f36" ,
         TESTNET:"true",
         STAKE:"90",
     }

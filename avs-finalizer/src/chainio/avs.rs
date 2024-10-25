@@ -8,9 +8,8 @@ use bindings::{
         NewRdTaskCreatedFilter,
     },
     registry_coordinator::RegistryCoordinator,
-    shared_types::OperatorInfo,
+    shared_types::{OperatorInfo, PubkeyRegistrationParams, SignatureWithSaltAndExpiry},
     stake_registry::StakeRegistry,
-    strategy_manager_storage::{PubkeyRegistrationParams, SignatureWithSaltAndExpiry},
 };
 use ethers::{
     contract::{EthEvent, Event},

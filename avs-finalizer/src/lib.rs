@@ -8,7 +8,6 @@ use tracing::{info, instrument, warn};
 mod chainio;
 mod cli;
 mod crypto;
-mod executor;
 mod operator;
 mod rpc;
 
@@ -39,6 +38,7 @@ pub async fn start() -> eyre::Result<()> {
 }
 
 pub async fn run_node(operator: Arc<Operator>, opt_in: bool) -> eyre::Result<()> {
+    operator.clone().wait_for_gasp_to_sync().await?;
     check_registration(operator.clone(), opt_in).await?;
     operator.watch_new_tasks().await?;
 
@@ -89,6 +89,7 @@ pub(crate) async fn ephemeral_testnet(
     stake: Option<u32>,
     cfg: &CliArgs,
 ) -> eyre::Result<()> {
+    operator.clone().wait_for_gasp_to_sync().await?;
     setup_deposits(
         cfg.eth_rpc_url.clone(),
         cfg.avs_registry_coordinator_addr,

@@ -2,7 +2,6 @@ use crate::chainio::{avs::AvsContracts, build_eth_client, eigen::ElContracts, Cl
 use crate::cli::CliArgs;
 use crate::crypto::bn254::{BlsKeypair, OperatorId};
 use crate::crypto::EthConvert;
-use crate::executor::execute::execute_block;
 use crate::rpc::Rpc;
 
 use bindings::{
@@ -20,25 +19,19 @@ use ethers::{
     providers::StreamExt,
     types::{Address, Bytes, U256},
 };
-use node_executor::ExecutorDispatch;
-use node_primitives::BlockNumber;
 
 use ethers::abi::AbiEncode;
 use eyre::{eyre, OptionExt};
 use serde::{Deserialize, Serialize};
 use sp_core::H256;
-use sp_runtime::traits::{BlakeTwo256, Hash, Keccak256};
-use sp_runtime::{generic, OpaqueExtrinsic};
+use sp_runtime::traits::{Hash, Keccak256};
 use std::collections::HashMap;
 use std::sync::Arc;
 use substrate_rpc_client::{rpc_params, ws_client, ClientT};
 use tokio::select;
 use tokio::time::{sleep, Duration};
 use tokio::try_join;
-use tracing::{debug, error, info, instrument};
-
-pub type Header = generic::HeaderVer<node_primitives::BlockNumber, BlakeTwo256>;
-pub type Block = generic::Block<Header, OpaqueExtrinsic>;
+use tracing::{debug, error, info, instrument, trace};
 
 type QuorumNum = u8;
 
@@ -254,7 +247,16 @@ impl Operator {
             _ => return Err(eyre!("Unexpected chain in task")),
         };
         let params = rpc_params!(chain_as_string, (range_start, range_end));
-        let rd_update: H256 = rpc.request("rolldown_get_merkle_root", params).await?;
+        let rd_update: H256 = rpc
+            .request("rolldown_get_merkle_root", params.clone())
+            .await?;
+
+        if rd_update.is_zero() {
+            return Err(eyre!(
+                "rolldown_get_merkle_root returned zero value, params: {:?}",
+                params
+            ));
+        }
 
         debug!("get_rd_update - rd_update: {:?}", rd_update);
 
@@ -272,21 +274,37 @@ impl Operator {
         Ok(partial_rd_task_response)
     }
 
-    pub(crate) async fn execute_block(
-        self: Arc<Self>,
-        block_number: BlockNumber,
-    ) -> eyre::Result<(H256, H256, H256)> {
-        use sc_executor::{sp_wasm_interface::ExtendedHostFunctions, NativeExecutionDispatch};
-        let res = execute_block::<
-            Block,
-            ExtendedHostFunctions<
-                sp_io::SubstrateHostFunctions,
-                <ExecutorDispatch as NativeExecutionDispatch>::ExtendHostFunctions,
-            >,
-        >(&self.substrate_client_uri, block_number)
-        .await?;
+    pub(crate) async fn wait_for_gasp_to_sync(self: Arc<Self>) -> eyre::Result<()> {
+        let rpc = ws_client(self.substrate_client_uri.clone())
+            .await
+            .map_err(|e| eyre!(e))?;
 
-        Ok(res)
+        let params = rpc_params!();
+        let health: sc_rpc_api::system::helpers::Health =
+            rpc.request("system_health", params).await?;
+
+        debug!("Gasp node is_syncing - {:?}", health.is_syncing);
+
+        if health.is_syncing {
+            let retry_delay: tokio::time::Duration = tokio::time::Duration::from_secs(600);
+            info!("Waiting for gasp node to finish syncing");
+
+            loop {
+                let params = rpc_params!();
+                let health: sc_rpc_api::system::helpers::Health =
+                    rpc.request("system_health", params).await?;
+
+                info!("Gasp node is_syncing - {:?}", health.is_syncing);
+                if !health.is_syncing {
+                    break;
+                }
+                info!("Rechecking sync status after - {:?}", retry_delay);
+                tokio::time::sleep(retry_delay).await;
+            }
+        }
+        debug!("Done waiting for gasp node to sync");
+        info!("Gasp node is synced!");
+        Ok(())
     }
 
     pub(crate) async fn get_operators_state_info_hash(
@@ -449,7 +467,7 @@ impl Operator {
                 old_operators_stake,
                 old_quorum_numbers.clone().into(),
             )
-            .await
+            .await?
             .values()
             .cloned()
             .collect::<Vec<_>>();
@@ -458,7 +476,7 @@ impl Operator {
                 new_operators_stake,
                 new_quorum_numbers.clone().into(),
             )
-            .await
+            .await?
             .values()
             .cloned()
             .collect::<Vec<_>>();
@@ -646,11 +664,13 @@ impl Operator {
         &self,
         operators_stakes_in_quorums: Vec<Vec<TMOperator>>,
         quorum_nums: Bytes,
-    ) -> HashMap<H256, CustomOperatorAvsState> {
+    ) -> eyre::Result<HashMap<H256, CustomOperatorAvsState>> {
         let mut operators_avs_state: HashMap<H256, CustomOperatorAvsState> = HashMap::new();
 
         if operators_stakes_in_quorums.len() != quorum_nums.len() {
-            // throw error
+            return Err(eyre!(
+                "operators_stakes_in_quorums.len() != quorum_nums.len()"
+            ));
         }
 
         for (quorum_id, quorum_num) in quorum_nums.iter().enumerate() {
@@ -668,7 +688,7 @@ impl Operator {
             }
         }
 
-        operators_avs_state
+        Ok(operators_avs_state)
     }
 
     pub(crate) fn operator_id(&self) -> OperatorId {
