@@ -24,8 +24,26 @@ export const initService = async () => {
       arbitrumSepolia,
       ARB_CHAIN
     ),
-    watchWithdrawalClosed(api, process.env.ETH_CHAIN_URL, holesky, ETH_CHAIN),
-    watchWithdrawalClosed(api, process.env.ARBITRUM_SEPOLIA_CHAIN_URL, arbitrumSepolia, ARB_CHAIN),
+    new Promise((resolve) => {
+      setTimeout(() => {
+        watchWithdrawalClosed(
+          api,
+          process.env.ETH_CHAIN_URL,
+          holesky,
+          ETH_CHAIN
+        ).then(resolve)
+      }, 10000) // Delay of 10000 milliseconds (10 seconds) to allow past withdrawals to be started and confirmed first
+    }),
+    new Promise((resolve) => {
+      setTimeout(() => {
+        watchWithdrawalClosed(
+          api,
+          process.env.ARBITRUM_SEPOLIA_CHAIN_URL,
+          arbitrumSepolia,
+          ARB_CHAIN
+        ).then(resolve)
+      }, 10000)
+    }),
     processRequests(api, 'Arbitrum'),
     processRequests(api, 'Ethereum'),
   ]).then((results) => {
