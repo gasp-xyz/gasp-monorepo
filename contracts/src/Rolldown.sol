@@ -103,24 +103,23 @@ contract Rolldown is
     }
 
     function _depositNativeWithTip(uint256 ferryTip) private {
-        uint256 amount = msg.value;
-        require(amount > 0, "Value must be greater than zero");
-        require(ferryTip <= amount, "Tip exceeds deposited amount");
+        require(msg.value > 0, "Amount must be greater than zero");
+        require(ferryTip <= msg.value, "Tip exceeds deposited amount");
 
         address depositRecipient = _msgSender();
 
         Deposit memory depositRequest = Deposit({
-            requestId: RequestId({origin: Origin.L1, id: counter++}),
+            requestId: _createRequestId(Origin.L1),
             depositRecipient: depositRecipient,
             tokenAddress: NATIVE_TOKEN_ADDRESS,
-            amount: amount,
+            amount: msg.value,
             timeStamp: block.timestamp,
             ferryTip: ferryTip
         });
         deposits[depositRequest.requestId.id] = depositRequest;
 
         emit DepositAcceptedIntoQueue(
-            depositRequest.requestId.id, depositRecipient, NATIVE_TOKEN_ADDRESS, amount, ferryTip
+            depositRequest.requestId.id, depositRecipient, NATIVE_TOKEN_ADDRESS, msg.value, ferryTip
         );
     }
 
@@ -168,11 +167,9 @@ contract Rolldown is
         require(amount > 0, "Amount must be greater than zero");
         require(ferryTip <= amount, "Tip exceeds deposited amount");
 
-        address depositRecipient = _msgSender();
-
         Deposit memory depositRequest = Deposit({
-            requestId: RequestId({origin: Origin.L1, id: counter++}),
-            depositRecipient: depositRecipient,
+            requestId: _createRequestId(Origin.L1),
+            depositRecipient: _msgSender(),
             tokenAddress: tokenAddress,
             amount: amount,
             timeStamp: block.timestamp,
@@ -180,9 +177,9 @@ contract Rolldown is
         });
         deposits[depositRequest.requestId.id] = depositRequest;
 
-        emit DepositAcceptedIntoQueue(depositRequest.requestId.id, depositRecipient, tokenAddress, amount, ferryTip);
+        emit DepositAcceptedIntoQueue(depositRequest.requestId.id, _msgSender(), tokenAddress, amount, ferryTip);
 
-        IERC20(tokenAddress).safeTransferFrom(depositRecipient, address(this), amount);
+        IERC20(tokenAddress).safeTransferFrom(_msgSender(), address(this), amount);
     }
 
     function ferry_withdrawal(Withdrawal calldata withdrawal) external payable override nonReentrant whenNotPaused {
@@ -392,11 +389,21 @@ contract Rolldown is
         emit FailedDepositResolutionClosed(failedDeposit.requestId.id, failedDeposit.originRequestId, failedDepositHash);
     }
 
-    function update_l1_from_l2(bytes32 merkleRoot, Range calldata range) external override whenNotPaused onlyRole(UPDATER_ROLE) {
+    function update_l1_from_l2(bytes32 merkleRoot, Range calldata range)
+        external
+        override
+        whenNotPaused
+        onlyRole(UPDATER_ROLE)
+    {
         _updateL1FromL2(merkleRoot, range);
     }
 
-    function updateL1FromL2(bytes32 merkleRoot, Range calldata range) external override whenNotPaused onlyRole(UPDATER_ROLE) {
+    function updateL1FromL2(bytes32 merkleRoot, Range calldata range)
+        external
+        override
+        whenNotPaused
+        onlyRole(UPDATER_ROLE)
+    {
         _updateL1FromL2(merkleRoot, range);
     }
 
@@ -429,7 +436,7 @@ contract Rolldown is
         }
 
         CancelResolution memory resolution = CancelResolution({
-            requestId: RequestId({origin: Origin.L1, id: counter++}),
+            requestId: _createRequestId(Origin.L1),
             l2RequestId: cancel.requestId.id,
             cancelJustified: cancelJustified,
             timeStamp: block.timestamp
@@ -438,6 +445,10 @@ contract Rolldown is
         cancelResolutions[resolution.requestId.id] = resolution;
 
         emit DisputeResolutionAcceptedIntoQueue(resolution.l2RequestId, resolution.cancelJustified, cancelHash);
+    }
+
+    function _createRequestId(Origin origin) private returns (RequestId memory) {
+        return RequestId({origin: origin, id: counter++});
     }
 
     function _sendNative(address recipient, uint256 amount) private {

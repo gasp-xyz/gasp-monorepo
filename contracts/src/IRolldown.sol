@@ -72,7 +72,7 @@ interface IRolldown is IRolldownPrimitives {
         external
         pure
         returns (bytes32);
-    
+
     function counter() external view returns (uint256);
 
     function lastProcessedUpdate_origin_l1() external view returns (uint256);
