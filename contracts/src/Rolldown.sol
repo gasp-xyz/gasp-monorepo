@@ -52,6 +52,12 @@ contract Rolldown is
     // is the most efficient way to find merkle root that contains particular tx id
     bytes32[] public roots;
 
+    modifier checkAmountWithFerryTip(uint256 amount, uint256 ferryTip) {
+        require(amount > 0, "Amount must be greater than zero");
+        require(amount >= ferryTip, "Ferry tip exceeds amount");
+        _;
+    }
+
     function initialize(IPauserRegistry pauserRegistry, address admin, ChainId chainId, address updater)
         external
         initializer
@@ -102,15 +108,10 @@ contract Rolldown is
         _depositNativeWithTip(ferryTip);
     }
 
-    function _depositNativeWithTip(uint256 ferryTip) private {
-        require(msg.value > 0, "Amount must be greater than zero");
-        require(ferryTip <= msg.value, "Tip exceeds deposited amount");
-
-        address depositRecipient = _msgSender();
-
+    function _depositNativeWithTip(uint256 ferryTip) private checkAmountWithFerryTip(msg.value, ferryTip) {
         Deposit memory depositRequest = Deposit({
             requestId: _createRequestId(Origin.L1),
-            depositRecipient: depositRecipient,
+            depositRecipient: _msgSender(),
             tokenAddress: NATIVE_TOKEN_ADDRESS,
             amount: msg.value,
             timeStamp: block.timestamp,
@@ -119,7 +120,7 @@ contract Rolldown is
         deposits[depositRequest.requestId.id] = depositRequest;
 
         emit DepositAcceptedIntoQueue(
-            depositRequest.requestId.id, depositRecipient, NATIVE_TOKEN_ADDRESS, msg.value, ferryTip
+            depositRequest.requestId.id, _msgSender(), NATIVE_TOKEN_ADDRESS, msg.value, ferryTip
         );
     }
 
@@ -162,10 +163,11 @@ contract Rolldown is
         _depositERC20WithTip(tokenAddress, amount, ferryTip);
     }
 
-    function _depositERC20WithTip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
-        require(tokenAddress != address(0), "Invalid token address");
-        require(amount > 0, "Amount must be greater than zero");
-        require(ferryTip <= amount, "Tip exceeds deposited amount");
+    function _depositERC20WithTip(address tokenAddress, uint256 amount, uint256 ferryTip)
+        private
+        checkAmountWithFerryTip(amount, ferryTip)
+    {
+        require(tokenAddress != address(0), "Zero token address");
 
         Deposit memory depositRequest = Deposit({
             requestId: _createRequestId(Origin.L1),
@@ -190,11 +192,12 @@ contract Rolldown is
         _ferryWithdrawal(withdrawal);
     }
 
-    function _ferryWithdrawal(Withdrawal calldata withdrawal) private {
-        require(withdrawal.ferryTip <= withdrawal.amount, "Tip exceeds deposited amount");
-
+    function _ferryWithdrawal(Withdrawal calldata withdrawal)
+        private
+        checkAmountWithFerryTip(withdrawal.amount, withdrawal.ferryTip)
+    {
         bytes32 withdrawalHash = hashWithdrawal(withdrawal);
-        require(processedL2Requests[withdrawalHash] == address(0), "Already ferried");
+        require(processedL2Requests[withdrawalHash] == address(0), "Withdrawal already ferried");
 
         processedL2Requests[withdrawalHash] = _msgSender();
         uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
@@ -282,7 +285,7 @@ contract Rolldown is
         require(requestId <= lastProcessedUpdate_origin_l2, "Invalid request id");
 
         uint256 rootCount = roots.length;
-        require(rootCount > 0, "No roots found yet");
+        require(rootCount > 0, "No roots found");
 
         for (uint256 i = rootCount; i > 0;) {
             bytes32 root = roots[i - 1];
@@ -297,17 +300,17 @@ contract Rolldown is
             }
         }
 
-        revert("Couldn't find batch with request");
+        revert("Batch with request not found");
     }
 
     function _verifyRequestProof(uint256 requestId, bytes32 requestHash, bytes32 merkleRoot, bytes32[] calldata proof)
         private
         view
     {
-        require(processedL2Requests[requestHash] != CLOSED, "Already processed");
+        require(processedL2Requests[requestHash] != CLOSED, "L2 request already processed");
 
         Range memory range = merkleRootRange[merkleRoot];
-        require(range.start > 0 && range.end > 0, "Unknown merkle root");
+        require(range.start > 0 && range.end > 0, "Unknown Merkle root");
         require(range.end >= range.start, "Invalid request range");
         require(requestId >= range.start && requestId <= range.end, "Request id out of range");
 
