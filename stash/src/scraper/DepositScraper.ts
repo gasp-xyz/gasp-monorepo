@@ -36,7 +36,6 @@ export const processFerriedDeposit = async (
     .and('requestId')
     .equals(Number(eventData.deposit.requestId.id))
     .returnFirst()
-  console.log('transactionsToProcess', transactionsToProcess)
   if (transactionsToProcess) {
     transactionsToProcess.status = 'Processed'
     const timestamp = new Date().toISOString()
