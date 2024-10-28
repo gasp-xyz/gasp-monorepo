@@ -14,6 +14,7 @@ const depositSchema = new Schema(
     amount: { type: 'string' },
     asset_chainId: { type: 'string' },
     asset_address: { type: 'string' },
+    closedBy: { type: 'string' },
   },
   {
     dataStructure: 'JSON',
