@@ -72,4 +72,16 @@ interface IRolldown is IRolldownPrimitives {
         external
         pure
         returns (bytes32);
+    
+    function counter() external view returns (uint256);
+
+    function lastProcessedUpdate_origin_l1() external view returns (uint256);
+
+    function lastProcessedUpdate_origin_l2() external view returns (uint256);
+
+    function chain() external view returns (ChainId);
+
+    function updaterAccount() external view returns (address);
+
+    function processedL2Requests(bytes32 requestId) external view returns (address);
 }

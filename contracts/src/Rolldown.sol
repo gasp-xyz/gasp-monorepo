@@ -29,15 +29,15 @@ contract Rolldown is
     address public constant CLOSED = 0x1111111111111111111111111111111111111111;
 
     // Counter for mapping key
-    uint256 public counter;
+    uint256 public override counter;
     // Counter for last processed request to ensure not reading and processing already processed
-    uint256 public lastProcessedUpdate_origin_l1;
+    uint256 public override lastProcessedUpdate_origin_l1;
     // Counter for last processed updates comming from l2 to ensure not reading and processing already processed
-    uint256 public lastProcessedUpdate_origin_l2;
+    uint256 public override lastProcessedUpdate_origin_l2;
     // Chain identificator
-    ChainId public chain;
+    ChainId public override chain;
     // Updater account address
-    address public updaterAccount;
+    address public override updaterAccount;
 
     // NOTE: PR DESC
     // mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
@@ -51,7 +51,7 @@ contract Rolldown is
 
     mapping(bytes32 => Range) public merkleRootRange;
 
-    mapping(bytes32 => address) public processedL2Requests;
+    mapping(bytes32 => address) public override processedL2Requests;
     // stores all merkle roots in order, seems like binary search on this array
     // is the most efficient way to find merkle root that contains particular tx id
     bytes32[] public roots;
