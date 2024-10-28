@@ -38,25 +38,21 @@ contract Rolldown is
     ChainId public override chain;
     // Updater account address
     address public override updaterAccount;
-
     // NOTE: PR DESC
     // mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
     mapping(uint256 => CancelResolution) public cancelResolutions;
-
     mapping(uint256 => Deposit) public deposits;
     // NOTE: PR DESC
     // mapping(uint256 => L2UpdatesToRemove) internal l2UpdatesToRemove;
     // NOTE: PR DESC
     // mapping(address => uint) public pendingEthWithdrawals;
-
     mapping(bytes32 => Range) public merkleRootRange;
-
     mapping(bytes32 => address) public override processedL2Requests;
     // stores all merkle roots in order, seems like binary search on this array
     // is the most efficient way to find merkle root that contains particular tx id
     bytes32[] public roots;
 
-    function initialize(IPauserRegistry pauserRegistry_, address admin, ChainId chainId, address updater)
+    function initialize(IPauserRegistry pauserRegistry, address admin, ChainId chainId, address updater)
         external
         initializer
     {
@@ -71,7 +67,7 @@ contract Rolldown is
         _grantRole(UPDATER_ROLE, updater);
         updaterAccount = updater;
 
-        _initializePauser(pauserRegistry_, UNPAUSE_ALL);
+        _initializePauser(pauserRegistry, UNPAUSE_ALL);
 
         counter = 1;
         lastProcessedUpdate_origin_l1 = 0;
@@ -81,9 +77,13 @@ contract Rolldown is
 
     function setUpdater(address updater) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         require(updater != address(0), "Zero updater address");
+        require(updater != updaterAccount, "Same updater address");
+
+        _revokeRole(UPDATER_ROLE, updaterAccount);
+        _grantRole(UPDATER_ROLE, updater);
 
         updaterAccount = updater;
-        emit NewUpdaterSet(updaterAccount);
+        emit NewUpdaterSet(updater);
     }
 
     function deposit_native() external payable override whenNotPaused {
