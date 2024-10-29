@@ -21,7 +21,7 @@ export const startTracingTransaction = async (
   if (type === 'deposit') {
     status = 'PendingOnL1'
   } else if (type === 'withdrawal') {
-    status = 'L2_INITIATED'
+    status = 'PendingOnL2'
   } else {
     status = 'UNKNOWN'
   }

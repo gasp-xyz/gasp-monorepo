@@ -6,8 +6,8 @@ import { redis } from '../connector/RedisConnector.js'
 import logger from '../util/Logger.js'
 
 const NETWORK_LIST_KEY = 'affirmed_networks_list'
-const L2_INITIATED = 'L2_INITIATED'
-const L2_CONFIRMED = 'L2_CONFIRMED'
+const WITHDRAWAL_PENDING_ON_L2 = 'PendingOnL2'
+const WITHDRAWAL_BATCHED_FOR_L1 = 'BatchedForL1'
 const type = 'withdrawal'
 
 interface Network {
@@ -58,7 +58,7 @@ export const startTracingWithdrawal = async (
     address: eventData.recipient,
     created: Date.parse(timestamp),
     updated: Date.parse(timestamp),
-    status: L2_INITIATED,
+    status: WITHDRAWAL_PENDING_ON_L2,
     type: type,
     chain: eventData.chain,
     amount: eventData.amount,
@@ -66,6 +66,7 @@ export const startTracingWithdrawal = async (
     asset_address: eventData.tokenAddress,
     proof: '',
     calldata: calldata.toHex(),
+    closedBy: null,
   }
   return withdrawalRepository.save(withdrawalData)
 }
@@ -86,7 +87,7 @@ export const updateWithdrawalsWhenBatchCreated = async (
     .and('chain')
     .equals(eventData.chain)
     .and('status')
-    .equals(L2_INITIATED)
+    .equals(WITHDRAWAL_PENDING_ON_L2)
     .returnAll()
   if (existingWithdrawal.length > 0) {
     for (const withdrawal of existingWithdrawal) {
@@ -102,7 +103,7 @@ export const updateWithdrawalsWhenBatchCreated = async (
       ])
       logger.info('Root:', root.toHuman())
       withdrawal.updated = Date.parse(updateTimestamp)
-      withdrawal.status = L2_CONFIRMED
+      withdrawal.status = WITHDRAWAL_BATCHED_FOR_L1
       withdrawal.proof = proof.toHex()
       await withdrawalRepository.save(withdrawal)
       logger.info('Withdrawal batch created and status updated', withdrawal)
