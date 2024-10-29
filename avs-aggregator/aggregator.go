@@ -864,14 +864,14 @@ func (agg *Aggregator) verifyTaskResponseExistsOnL2(rdTaskResponse taskmanager.I
 		    return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 CreateStorageKey failed : err: %v", err)
 		}
 
-    agg.logger.Debug("Aggregator::verifyTaskResponseExistsOnL2 CreateStorageKey", "key", hex.EncodeToString(key))
+		agg.logger.Debug("Aggregator::verifyTaskResponseExistsOnL2", "l2batch_raw_storage_key", hex.EncodeToString(key))
 
 		raw, err := agg.substrateClient.RPC.State.GetStorageRawLatest(key)
 		if err != nil {
 			return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 GetStorage failed err: %v", err)
 		}
 
-		agg.logger.Debug("Aggregator::verifyTaskResponseExistsOnL2 GetStorageRaw", "raw", raw)
+		agg.logger.Debug("Aggregator::verifyTaskResponseExistsOnL2", "l2batch_raw_storage_value", raw.Hex())
 		var substrateL2RequestsBatch types.SubstrateL2RequestsBatch;
 
 		ok, err := agg.substrateClient.RPC.State.GetStorageLatest(key, &substrateL2RequestsBatch)
@@ -903,18 +903,19 @@ func (agg *Aggregator) verifyTaskResponseExistsOnL2(rdTaskResponse taskmanager.I
       return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 get merkle root failed: err %v", err)
     }
 
-		agg.logger.Info("Aggregator::verifyTaskResponseExistsOnL2 ", "root %s", merkleRoot)
+		agg.logger.Debug("Aggregator::verifyTaskResponseExistsOnL2 ", "merkle_root", merkleRoot)
 
 
-    decoded, err := hex.DecodeString(merkleRoot)
+    decoded, err := hex.DecodeString(merkleRoot[2:])
 
     if err != nil {
       return fmt.Errorf("Aggregator::rolldown_get_merkle_root cannot decode root as bytes %s", merkleRoot)
     }
 
-    if bytes.Equal(decoded ,rdTaskResponse.RdUpdate[:]) {
+    if !bytes.Equal(decoded ,rdTaskResponse.RdUpdate[:]) {
       return fmt.Errorf("Aggregator %v does not match %v", rdTaskResponse.RdUpdate, decoded)
     }
+		agg.logger.Info("Aggregator::verifyTaskResponseExistsOnL2 rdTaskResponse verified successfully", "batch_id", rdTaskResponse.BatchId, "chain", chain)
 
     return nil;
 }
