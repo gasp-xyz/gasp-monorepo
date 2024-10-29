@@ -14,7 +14,8 @@ include:
 
 services:
   node-alice:
-    image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION:-eth-rollup-develop}
+    image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION}
+    pull_policy: always
     command:
       - --alith
       - --chain=rollup-local-seq
@@ -28,7 +29,8 @@ services:
       - 30333:30333
 
   node-bob:
-    image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION:-eth-rollup-develop}
+    image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION}
+    pull_policy: always
     command:
       - --baltathar
       - --chain=rollup-local-seq

@@ -19,30 +19,16 @@ on:
         description: Enable caching
         required: false
         type: boolean
-      service-name:
-        default: avs-finalizer
-        description: Service name to build
-        required: false
-        type: string
-      service-folder:
-        default: avs-finalizer
-        description: Folder inside the repository where service's code is stored
-        required: false
-        type: string
-      service-docker-hub-repository:
-        default: mangatasolutions/avs-finalizer
-        description: Docker repository of the build service
-        required: false
-        type: string
 
 env:
   SKIP_WASM_BUILD: 1
-  DOCKER_IMAGE_REPOSITORY: ${{ inputs.service-docker-hub-repository }}
 
 jobs:
-  rust-fmt-check:
-    name: Formatting check
+  finalizer-rust-fmt-check:
+    name: Formatting check for avs-finalizer
     runs-on: ubuntu-latest
+    env:
+      SERVICE_FOLDER: avs-finalizer
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
@@ -53,15 +39,16 @@ jobs:
           components: rustfmt, clippy
       - uses: arduino/setup-protoc@v3
       - name: Check formatting
-        working-directory: ${{ inputs.service-folder }}
+        working-directory: ${{ env.SERVICE_FOLDER }}
         run: cargo fmt --all -- --check
 
-  clippy-check:
-    name: Clippy check
+  finalizer-clippy-check:
+    name: Clippy check for avs-finalizer
     runs-on: compile-gke
     env:
-      JOB_CACHE_PREFIX: cargo-rollup-clippy-job-build-cache-${{ inputs.cache-version }}
+      JOB_CACHE_PREFIX: cargo-finalizer-clippy-job-build-cache-${{ inputs.cache-version }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
+      SERVICE_FOLDER: avs-finalizer
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
@@ -108,7 +95,7 @@ jobs:
           echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
 
       - name: Run clippy check
-        working-directory: ${{ inputs.service-folder }}
+        working-directory: ${{ env.SERVICE_FOLDER }}
         run: cargo clippy
 
       - name: Upload cargo build cache
@@ -118,7 +105,7 @@ jobs:
           CACHE_KEY="${{ steps.cache.outputs.cache_key }}"
           ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
           CACHE_PATHS=(
-            "${{ github.workspace }}/${{ inputs.service-folder }}/target"
+            "${{ github.workspace }}/${{ env.SERVICE_FOLDER }}/target"
             "$HOME/.cargo/bin/"
             "$HOME/.cargo/registry/index/"
             "$HOME/.cargo/registry/cache/"
@@ -137,6 +124,7 @@ jobs:
     env:
       JOB_CACHE_PREFIX: cargo-rollup-tests-job-cache-${{ inputs.cache-version }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
+      SERVICE_FOLDER: avs-finalizer
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
@@ -183,7 +171,7 @@ jobs:
           echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
 
       - name: Run tests
-        working-directory: ${{ inputs.service-folder }}
+        working-directory: ${{ env.SERVICE_FOLDER }}
         run: cargo test
 
       - name: Upload cargo build cache
@@ -193,7 +181,7 @@ jobs:
           CACHE_KEY="${{ steps.cache.outputs.cache_key }}"
           ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
           CACHE_PATHS=(
-            "${{ github.workspace }}/${{ inputs.service-folder }}/target"
+            "${{ github.workspace }}/${{ env.SERVICE_FOLDER }}/target"
             "$HOME/.cargo/bin/"
             "$HOME/.cargo/registry/index/"
             "$HOME/.cargo/registry/cache/"
@@ -206,7 +194,7 @@ jobs:
             SECONDS=0; gcloud storage cp "$ARCHIVE_NAME" "gs://mangata-node-ci-cache/$CACHE_KEY/$ARCHIVE_NAME"
             echo "Upload completed in $SECONDS seconds"
 
-  build-docker-image:
+  build-finalizer-docker-image:
     name: Build Docker image
     strategy:
       matrix:
@@ -217,8 +205,10 @@ jobs:
             runner: compile-gke-arm
     runs-on: ${{ matrix.platform.runner }}
     env:
-      JOB_CACHE_PREFIX: docker-cache-${{ inputs.service-name }}-${{ matrix.platform.name }}-${{ inputs.cache-version }}
+      JOB_CACHE_PREFIX: docker-cache-finalizer-${{ matrix.platform.name }}-${{ inputs.cache-version }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
+      SERVICE_FOLDER: avs-finalizer
+      DOCKER_IMAGE_REPOSITORY: mangatasolutions/avs-finalizer
     steps:
       - uses: actions/checkout@v4
     
@@ -265,7 +255,7 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          context: ${{ inputs.service-folder }}
+          context: ${{ env.SERVICE_FOLDER }}
           platforms: linux/${{ matrix.platform.name }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
@@ -307,10 +297,13 @@ jobs:
             SECONDS=0; gcloud storage cp "$ARCHIVE_NAME" "gs://mangata-node-ci-cache/$CACHE_KEY/$ARCHIVE_NAME"
             echo "Upload completed in $SECONDS seconds"
 
-  create-docker-image-manifest-and-export-wasms:
+  create-finalizer-docker-image-manifest-and-export-wasms:
     name: Generate multiplatform Docker image manifest
-    needs: [build-docker-image]
+    needs: [build-finalizer-docker-image]
     runs-on: ubuntu-latest
+    env:
+      DOCKER_IMAGE_REPOSITORY: mangatasolutions/avs-finalizer
+      IMAGE_TAG: ${{ inputs.version }}
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
@@ -327,7 +320,144 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.DOCKER_IMAGE_REPOSITORY }}
-          tags: type=raw,value=${{ inputs.version }}
+          tags: type=raw,value=${{ env.IMAGE_TAG }}
+      
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.DOCKER_IMAGE_REPOSITORY }}@sha256:%s ' *)          
+      
+      - name: Inspect image
+        run: docker buildx imagetools inspect ${{ env.DOCKER_IMAGE_REPOSITORY }}:${{ steps.meta.outputs.version }}
+
+  build-finalizer-fast-docker-image:
+    name: Build finalizer Docker image with fast runtime for rollup-node 
+    strategy:
+      matrix:
+        platform:
+          - name: amd64
+            runner: compile-gke
+          - name: arm64
+            runner: compile-gke-arm
+    runs-on: ${{ matrix.platform.runner }}
+    env:
+      JOB_CACHE_PREFIX: docker-cache-finalizer-fast-${{ matrix.platform.name }}-${{ inputs.cache-version }}
+      CACHE_ARCHIVE_NAME: cache_archive.tar.zst
+      SERVICE_FOLDER: avs-finalizer
+      DOCKER_IMAGE_REPOSITORY: mangatasolutions/avs-finalizer
+    steps:
+      - uses: actions/checkout@v4
+    
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_IMAGE_REPOSITORY }}
+          tags: ${{ env.DOCKER_IMAGE_REPOSITORY }}:${{ inputs.version }}
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+              
+      - run: curl -LJO https://github.com/reproducible-containers/buildkit-cache-dance/archive/refs/tags/v3.1.2.tar.gz && tar xvf buildkit-cache-dance-3.1.2.tar.gz
+      - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Download cargo build cache
+        if: inputs.cache-enabled
+        id: cache
+        run: |
+          set -x
+          CACHE_KEY="${{ env.JOB_CACHE_PREFIX }}-${{ hashFiles('**/Cargo.lock') }}"
+          ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
+          CACHE_FOUND=false
+      
+          if gcloud storage cp "gs://mangata-node-ci-cache/$CACHE_KEY/$ARCHIVE_NAME" - | zstd -d | tar -xf - ; then
+            echo "Injecting buildkit mount cache into Docker system"
+            node ./buildkit-cache-dance-3.1.2/dist/index.js --cache-map '{"usr-local-cargo-registry": "/usr/local/cargo/registry", "usr-local-cargo-git": "/usr/local/cargo/git", "app-target": "/app/target"}'
+            
+            CACHE_FOUND=true
+          fi
+      
+          echo "cache_found=$CACHE_FOUND" >> $GITHUB_OUTPUT
+          echo "cache_key=$CACHE_KEY" >> $GITHUB_OUTPUT
+      
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.SERVICE_FOLDER }}
+          platforms: linux/${{ matrix.platform.name }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
+      
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+      
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-linux-${{ matrix.platform.name }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+      
+      - name: Upload cargo build cache
+        if: inputs.cache-enabled && steps.cache.outputs.cache_found == 'false'
+        shell: bash
+        run: |
+          set -x
+        
+          echo "Extracting buildkit cache from Docker system"
+          node ./buildkit-cache-dance-3.1.2/dist/index.js --extract --cache-map '{"usr-local-cargo-registry": "/usr/local/cargo/registry", "usr-local-cargo-git": "/usr/local/cargo/git", "app-target": "/app/target"}'
+          
+          CACHE_KEY="${{ steps.cache.outputs.cache_key }}"
+          ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
+          CACHE_PATHS=(
+            "usr-local-cargo-registry"
+            "usr-local-cargo-git"
+            "app-target"
+          )
+      
+            SECONDS=0; tar -cf - "${CACHE_PATHS[@]}" | zstd -T0 -5 > "$ARCHIVE_NAME"
+            echo "Compression completed in $SECONDS seconds" && echo "Archive size: $(du -h "$ARCHIVE_NAME" | cut -f1)"
+      
+            SECONDS=0; gcloud storage cp "$ARCHIVE_NAME" "gs://mangata-node-ci-cache/$CACHE_KEY/$ARCHIVE_NAME"
+            echo "Upload completed in $SECONDS seconds"
+
+  create-finalizer-fast-docker-image-manifest-and-export-wasms:
+    name: Generate multiplatform Docker image for finalizer with fast rollup-node runtime
+    needs: [build-finalizer-fast-docker-image]
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_IMAGE_REPOSITORY: mangatasolutions/avs-finalizer
+      IMAGE_TAG: ${{ inputs.version }}-fast
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+      
+      - uses: docker/setup-buildx-action@v3
+      - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+      
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_IMAGE_REPOSITORY }}
+          tags: type=raw,value=${{ env.IMAGE_TAG }}
       
       - name: Create manifest list and push
         working-directory: /tmp/digests

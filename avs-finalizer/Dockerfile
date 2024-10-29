@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG ROLLUP_NODE_VERSION=26de25adc6ecbfba763eb4ac12489e8cd50ee496
+ARG ROLLUP_NODE_VERSION
 FROM mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION} AS rollup-node-image
 
 FROM rust:1.78 AS builder
