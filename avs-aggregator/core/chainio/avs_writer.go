@@ -92,7 +92,7 @@ func (w *AvsWriter) SendNewOpTask(ctx context.Context, quorumThresholdPercentage
 	
 	if foundEvent == false {
 		w.logger.Error("Aggregator failed to parse new task created op event", "err", err)
-		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, err
+		return taskmanager.IFinalizerTaskManagerOpTask{}, 0, fmt.Errorf("Aggregator failed to parse new task op created event - err: %v", err)
 	}
 	return event.Task, event.TaskIndex, nil
 }
@@ -131,9 +131,34 @@ func (w *AvsWriter) SendNewRdTask(ctx context.Context, chainToUpdate uint8, chai
 	
 	if foundEvent == false {
 		w.logger.Error("Aggregator failed to parse new task rd created event", "err", err)
-		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, err
+		return taskmanager.IFinalizerTaskManagerRdTask{}, 0, fmt.Errorf("Aggregator failed to parse new task rd created event - err: %v", err)
 	}
 	return event.Task, event.TaskIndex, nil
+}
+
+func (w *AvsWriter) CancelPendingTask(ctx context.Context) (error) {
+	w.logger.Info("Cancelling pending task with AVS's task manager")
+	noSendTxOpts, err := w.txMgr.GetNoSendTxOpts()
+	if err != nil {
+		return err
+	}
+	tx, err := w.AvsContractBindings.TaskManager.CancelPendingTasks(noSendTxOpts)
+	if err != nil {
+		w.logger.Errorf("Error assembling cancelPendingTasks tx")
+		return err
+	}
+
+	receipt, err := w.txMgr.Send(ctx, tx, waitForReceipt)
+	if err != nil {
+		return errors.New("failed to send tx with err: " + err.Error())
+	}
+	if receipt.Status == 0{
+		return fmt.Errorf("Txn failed with status failure (0): %v", receipt)
+	}
+	w.logger.Infof("tx hash: %s", receipt.TxHash.String())
+	w.logger.Info("Pending task cancelled with the AVS's task manager")
+
+	return nil
 }
 
 func (w *AvsWriter) SendAggregatedOpTaskResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerOpTask, taskResponse taskmanager.IFinalizerTaskManagerOpTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error) {

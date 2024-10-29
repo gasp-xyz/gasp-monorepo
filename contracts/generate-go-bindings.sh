@@ -16,7 +16,7 @@ function create_binding {
 
     rm -f $binding_dir/${contract}/binding.go
     abigen --bin=data/tmp.bin --abi=data/tmp.abi --pkg=contract${contract} --out=$binding_dir/${contract}/binding.go
-    rm -rf ../data/tmp.abi ../data/tmp.bin
+    rm -rf data/tmp.abi data/tmp.bin
 }
 
 rm -rf bindings/*
