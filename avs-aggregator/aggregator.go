@@ -378,12 +378,20 @@ func (agg *Aggregator) getAndProcessPendingOpTask(latestOpTaskNum uint32, lastOp
 
 func (agg *Aggregator) processPendingOpTask(newTask taskmanager.IFinalizerTaskManagerOpTask, taskId sdktypes.TaskId) (error) {
 
-	success, err := agg.processCreatedOpTask(newTask, taskId)
+	responded, success, err := agg.processCreatedOpTask(newTask, taskId)
 	if err != nil{
 		return fmt.Errorf("Aggregator failed to processCreatedOpTask: err: %v", err)
 	}
 	if success{
 		return nil
+	}
+	// if no response cancel the task and try fresh
+	if !responded{
+		agg.logger.Info("Aggregator received no responses - cancelling task and retrying", "newTask", newTask, "taskId", taskId)
+		err := agg.ethRpc.AvsWriter.CancelPendingTask(context.Background())
+		if err != nil{
+			return fmt.Errorf("Aggregator failed to CancelPendingTask: err: %v", err)
+		}
 	}
 
 	newTask, err = agg.createAndProcessOpTask(2)
@@ -425,12 +433,20 @@ func (agg *Aggregator) processPendingRdTask(newTask taskmanager.IFinalizerTaskMa
 	chainToUpdate := newTask.ChainId
 	chainBatchIdToUpdate := newTask.BatchId
 
-	success, err := agg.processCreatedRdTask(newTask, taskId)
+	responded, success, err := agg.processCreatedRdTask(newTask, taskId)
 	if err != nil{
 		return fmt.Errorf("Aggregator failed to processCreatedRdTask: err: %v", err)
 	}
 	if success{
 		return nil
+	}
+	// if no response cancel the task and try fresh
+	if !responded{
+		agg.logger.Info("Aggregator received no responses - cancelling task and retrying", "newTask", newTask, "taskId", taskId)
+		err := agg.ethRpc.AvsWriter.CancelPendingTask(context.Background())
+		if err != nil{
+			return fmt.Errorf("Aggregator failed to CancelPendingTask: err: %v", err)
+		}
 	}
 
 	err = agg.createAndProcessRdTask(chainToUpdate, chainBatchIdToUpdate, 2)
@@ -440,9 +456,13 @@ func (agg *Aggregator) processPendingRdTask(newTask taskmanager.IFinalizerTaskMa
 	return nil
 }
 
-func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg.BlsAggregationServiceResponse, expectedTaskId sdktypes.TaskId) (bool, error) {
+func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg.BlsAggregationServiceResponse, expectedTaskId sdktypes.TaskId) (bool, bool, error) {
+	if blsAggServiceResp.Err != nil && blsAggServiceResp.Err == blsagg.TaskNotRespondedError {
+		agg.logger.Errorf("bls aggregation error, err: %v", blsAggServiceResp.Err)
+		return false, false, nil
+	}
 	if blsAggServiceResp.Err != nil && blsAggServiceResp.Err != blsagg.TaskExpiredError {
-		return false, fmt.Errorf("bls aggregation error, err: %v", blsAggServiceResp.Err)
+		return false, false, fmt.Errorf("bls aggregation error, err: %v", blsAggServiceResp.Err)
 	}
 	nonSignerPubkeys := []taskmanager.BN254G1Point{}
 	log := []string{}
@@ -471,7 +491,7 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 	// since the signedTaskResponseC is deleted before another response can be accepted via select
 	if blsAggServiceResp.TaskId != expectedTaskId{
 		// This is not the task we were expecting so don't even send it
-		return false, fmt.Errorf("FATAL: blsAggServiceResp.TaskId != expectedTaskId,blsAggServiceResp.TaskId: %v, expectedTaskId: %v", blsAggServiceResp.TaskId, expectedTaskId)
+		return false, false, fmt.Errorf("FATAL: blsAggServiceResp.TaskId != expectedTaskId,blsAggServiceResp.TaskId: %v, expectedTaskId: %v", blsAggServiceResp.TaskId, expectedTaskId)
 	}
 
 	agg.logger.Info("sending aggregated response onchain.", "TaskId", blsAggServiceResp.TaskId)
@@ -486,15 +506,15 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 
 		opTask, ok := task.(taskmanager.IFinalizerTaskManagerOpTask)
 		if !ok {
-			return false, fmt.Errorf("FATAL: Aggregator failed to decode opTask, task: %v", task)
+			return false, false, fmt.Errorf("FATAL: Aggregator failed to decode opTask, task: %v", task)
 		}
 		opTaskResponse, ok := taskResponse.(taskmanager.IFinalizerTaskManagerOpTaskResponse)
 		if !ok {
-			return false, fmt.Errorf("FATAL: Aggregator failed to decode opTaskResponse, taskResponse: %v", taskResponse)
+			return false, false, fmt.Errorf("FATAL: Aggregator failed to decode opTaskResponse, taskResponse: %v", taskResponse)
 		}
 		r, err := agg.ethRpc.AvsWriter.SendAggregatedOpTaskResponse(context.Background(), opTask, opTaskResponse, nonSignerStakesAndSignature)
 		if err != nil {
-			return false, fmt.Errorf("Aggregator failed to SendAggregatedOpTaskResponse, task: %v, err: %v", task, err)
+			return false, false, fmt.Errorf("Aggregator failed to SendAggregatedOpTaskResponse, task: %v, err: %v", task, err)
 		}
 		var success bool
 		for _, log := range r.Logs{
@@ -504,21 +524,21 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 			}
 		}
 		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r, "success", success)
-		return success, nil
+		return true, success, nil
 
 	} else if blsAggServiceResp.TaskId.TaskType == 1 {
 
 		rdTask, ok := task.(taskmanager.IFinalizerTaskManagerRdTask)
 		if !ok {
-			return false, fmt.Errorf("FATAL: Aggregator failed to decode rdTask, task: %v", task)
+			return false, false, fmt.Errorf("FATAL: Aggregator failed to decode rdTask, task: %v", task)
 		}
 		rdTaskResponse, ok := taskResponse.(taskmanager.IFinalizerTaskManagerRdTaskResponse)
 		if !ok {
-			return false, fmt.Errorf("FATAL: Aggregator failed to decode rdTaskResponse, taskResponse: %v", taskResponse)
+			return false, false, fmt.Errorf("FATAL: Aggregator failed to decode rdTaskResponse, taskResponse: %v", taskResponse)
 		}
 		r, err := agg.ethRpc.AvsWriter.SendAggregatedRdTaskResponse(context.Background(), rdTask, rdTaskResponse, nonSignerStakesAndSignature)
 		if err != nil {
-			return false, fmt.Errorf("Aggregator failed to respond to task, task: %v, err: %v", task, err)
+			return false, false, fmt.Errorf("Aggregator failed to respond to task, task: %v, err: %v", task, err)
 		}
 		var success bool
 		for _, log := range r.Logs{
@@ -528,13 +548,13 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 			}
 		}
 		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r, "success", success)
-		return success, nil
+		return true, success, nil
 
 	} else {
-		return false, fmt.Errorf("FATAL: Aggregator failed to recognize TaskType, blsAggServiceResp.TaskId: %v", blsAggServiceResp.TaskId)
+		return false, false, fmt.Errorf("FATAL: Aggregator failed to recognize TaskType, blsAggServiceResp.TaskId: %v", blsAggServiceResp.TaskId)
 	}
 
-	return true, nil
+	return true, true, nil
 
 }
 
@@ -565,7 +585,7 @@ func (agg *Aggregator) createOpTask()(taskmanager.IFinalizerTaskManagerOpTask, s
 }
 
 
-func (agg *Aggregator) processCreatedOpTask(newTask taskmanager.IFinalizerTaskManagerOpTask, taskId sdktypes.TaskId ) (bool, error) {
+func (agg *Aggregator) processCreatedOpTask(newTask taskmanager.IFinalizerTaskManagerOpTask, taskId sdktypes.TaskId ) (bool, bool, error) {
 
 	agg.tasksMu.Lock()
 	agg.tasks[taskId] = newTask
@@ -582,7 +602,7 @@ func (agg *Aggregator) processCreatedOpTask(newTask taskmanager.IFinalizerTaskMa
 	taskTimeToExpiry := time.Second * time.Duration(agg.expiration) * 2
 	err := agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
 	if err != nil{
-		return false, fmt.Errorf("Aggregator failed to InitializeNewTask, err: %v", err)
+		return false, false, fmt.Errorf("Aggregator failed to InitializeNewTask, err: %v", err)
 	}
 	agg.logger.Info("Aggregator initialized new operator state task", "taskId", taskId, "expiry", taskTimeToExpiry)
 
@@ -591,12 +611,12 @@ func (agg *Aggregator) processCreatedOpTask(newTask taskmanager.IFinalizerTaskMa
 	agg.logger.Info("Aggregator in processCreatedOpTask waiting for response from blsagg", "taskId", taskId)
 	blsAggServiceResp := <-agg.blsAggregationService.GetResponseChannel()
 	agg.logger.Info("Received response from blsAggregationService", "blsAggServiceResp", blsAggServiceResp)
-	success, err := agg.sendAggregatedResponseToContract(blsAggServiceResp, taskId)
+	responded, success, err := agg.sendAggregatedResponseToContract(blsAggServiceResp, taskId)
 	if err != nil{
-		return false, fmt.Errorf("sendAggregatedResponseToContract err: %v", err)
+		return false, false, fmt.Errorf("sendAggregatedResponseToContract err: %v", err)
 	}
 
-	return success, nil
+	return responded, success, nil
 }
 
 
@@ -626,7 +646,7 @@ func (agg *Aggregator) createRdTask(chainToUpdate uint8, chainBatchIdToUpdate ui
 	return newTask, taskId, nil
 }
 
-func (agg *Aggregator) processCreatedRdTask(newTask taskmanager.IFinalizerTaskManagerRdTask, taskId sdktypes.TaskId ) (bool, error) {
+func (agg *Aggregator) processCreatedRdTask(newTask taskmanager.IFinalizerTaskManagerRdTask, taskId sdktypes.TaskId ) (bool, bool, error) {
 	agg.tasksMu.Lock()
 	agg.tasks[taskId] = newTask
 	agg.tasksMu.Unlock()
@@ -646,7 +666,7 @@ func (agg *Aggregator) processCreatedRdTask(newTask taskmanager.IFinalizerTaskMa
 	taskTimeToExpiry := time.Second * time.Duration(agg.expiration)
 	err := agg.blsAggregationService.InitializeNewTask(taskId, newTask.LastCompletedOpTaskCreatedBlock, quorumNums, quorumThresholdPercentages, taskTimeToExpiry)
 	if err != nil{
-		return false, fmt.Errorf("Aggregator failed to InitializeNewTask, err: %v", err)
+		return false, false, fmt.Errorf("Aggregator failed to InitializeNewTask, err: %v", err)
 	}
 	agg.logger.Info("Aggregator initialized new rolldown update task", "newTask", newTask, "taskId", taskId, "expiry", taskTimeToExpiry)
 
@@ -655,12 +675,12 @@ func (agg *Aggregator) processCreatedRdTask(newTask taskmanager.IFinalizerTaskMa
 	agg.logger.Info("Aggregator in processCreatedRdTask waiting for response from blsagg", "taskId", taskId)
 	blsAggServiceResp := <-agg.blsAggregationService.GetResponseChannel()
 	agg.logger.Info("Received response from blsAggregationService", "blsAggServiceResp", blsAggServiceResp)
-	success, err := agg.sendAggregatedResponseToContract(blsAggServiceResp, taskId)
+	responded, success, err := agg.sendAggregatedResponseToContract(blsAggServiceResp, taskId)
 	if err != nil{
-		return false, fmt.Errorf("sendAggregatedResponseToContract err: %v", err)
+		return false, false, fmt.Errorf("sendAggregatedResponseToContract err: %v", err)
 	}
 
-	return success, nil
+	return responded, success, nil
 }
 
 
@@ -726,23 +746,33 @@ func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 
 func (agg *Aggregator) createAndProcessOpTask(maxAttempts uint8) (taskmanager.IFinalizerTaskManagerOpTask, error) {
 
+	var responded bool
 	var success bool
 	var newTask taskmanager.IFinalizerTaskManagerOpTask
 	var taskId sdktypes.TaskId
 	var err error
 	for attempt := 0; attempt < int(maxAttempts); attempt++ {
-	
+		agg.logger.Info("Aggregator new OpTask", "attempt", attempt)
 		newTask, taskId, err = agg.createOpTask()
 		if err != nil {
 			return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to createOpTask, err: %v", err)
 		}
 
-		success, err = agg.processCreatedOpTask(newTask, taskId)
+		responded, success, err = agg.processCreatedOpTask(newTask, taskId)
 		if err != nil {
 			return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to processCreatedOpTask, err: %v", err)
 		}
+
 		if success {
 			break;
+		}
+		// if no response cancel the task and try fresh
+		if !responded {
+			agg.logger.Info("Aggregator received no responses - cancelling task", "newTask", newTask, "taskId", taskId)
+			err := agg.ethRpc.AvsWriter.CancelPendingTask(context.Background())
+			if err != nil{
+				return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to CancelPendingTask: err: %v", err)
+			}
 		}
 	}
 	if success!=true{
@@ -753,25 +783,35 @@ func (agg *Aggregator) createAndProcessOpTask(maxAttempts uint8) (taskmanager.IF
 }
 
 func (agg *Aggregator) createAndProcessRdTask(chainToUpdate uint8, chainBatchIdToUpdate uint32, maxAttempts uint8) (error) {
+	var responded bool
 	var success bool
 	var newTask taskmanager.IFinalizerTaskManagerRdTask
 	var taskId sdktypes.TaskId
 	var err error
 	for attempt := 0; attempt < int(maxAttempts); attempt++ {
-	agg.logger.Info("Aggregator new RdTask", "chainToUpdate", chainToUpdate, "chainBatchIdToUpdate", chainBatchIdToUpdate, "attempt", attempt)
+		agg.logger.Info("Aggregator new RdTask", "chainToUpdate", chainToUpdate, "chainBatchIdToUpdate", chainBatchIdToUpdate, "attempt", attempt)
 
-	newTask, taskId, err = agg.createRdTask(chainToUpdate, chainBatchIdToUpdate)
-	if err != nil{
-		return fmt.Errorf("Aggregator failed to createRdTask: err: %v", err)
-	}
+		newTask, taskId, err = agg.createRdTask(chainToUpdate, chainBatchIdToUpdate)
+		if err != nil{
+			return fmt.Errorf("Aggregator failed to createRdTask: err: %v", err)
+		}
 
-	success, err = agg.processCreatedRdTask(newTask, taskId)
-	if err != nil{
-		return fmt.Errorf("Aggregator failed to processCreatedRdTask: err: %v", err)
-	}
-	if success {
-		break;
-	}
+		responded, success, err = agg.processCreatedRdTask(newTask, taskId)
+		if err != nil{
+			return fmt.Errorf("Aggregator failed to processCreatedRdTask: err: %v", err)
+		}
+		if success {
+			break;
+		}
+		// if no response cancel the task and try fresh (but only if it is NOT the last attempt)
+		if !responded {
+			agg.logger.Info("Aggregator received no responses - cancelling task", "newTask", newTask, "taskId", taskId)
+			err := agg.ethRpc.AvsWriter.CancelPendingTask(context.Background())
+			if err != nil{
+				return fmt.Errorf("Aggregator failed to CancelPendingTask: err: %v", err)
+			}
+		}
+
 	}
 	if success!=true{
 		return fmt.Errorf("Aggregator failed to succesfully complete rdTask after 3 attempts, chainToUpdate: %v, chainBatchIdToUpdate: %v", chainToUpdate, chainBatchIdToUpdate)
