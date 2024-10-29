@@ -53,8 +53,12 @@ contract Rolldown is
     bytes32[] public roots;
 
     modifier checkAmountWithFerryTip(uint256 amount, uint256 ferryTip) {
-        require(amount > 0, "Amount must be greater than zero");
-        require(amount >= ferryTip, "Ferry tip exceeds amount");
+        if (amount == 0) {
+            revert ZeroAmount();
+        }
+        if (ferryTip > amount) {
+            revert FerryTipExceedsAmount(ferryTip, amount);
+        }
         _;
     }
 
@@ -66,10 +70,14 @@ contract Rolldown is
         AccessControlUpgradeable.__AccessControl_init();
         ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
 
-        require(admin != address(0), "Zero admin address");
+        if (admin == address(0)) {
+            revert ZeroAdmin();
+        }
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
 
-        require(updater != address(0), "Zero updater address");
+        if (updater == address(0)) {
+            revert ZeroUpdater();
+        }
         _grantRole(UPDATER_ROLE, updater);
         updaterAccount = updater;
 
@@ -82,8 +90,12 @@ contract Rolldown is
     }
 
     function setUpdater(address updater) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(updater != address(0), "Zero updater address");
-        require(updater != updaterAccount, "Same updater address");
+        if (updater == address(0)) {
+            revert ZeroUpdater();
+        }
+        if (updater == updaterAccount) {
+            revert SameUpdater(updater);
+        }
 
         _revokeRole(UPDATER_ROLE, updaterAccount);
         _grantRole(UPDATER_ROLE, updater);
@@ -167,7 +179,9 @@ contract Rolldown is
         private
         checkAmountWithFerryTip(amount, ferryTip)
     {
-        require(tokenAddress != address(0), "Zero token address");
+        if (tokenAddress == address(0)) {
+            revert ZeroToken();
+        }
 
         Deposit memory depositRequest = Deposit({
             requestId: _createRequestId(Origin.L1),
@@ -197,14 +211,17 @@ contract Rolldown is
         checkAmountWithFerryTip(withdrawal.amount, withdrawal.ferryTip)
     {
         bytes32 withdrawalHash = hashWithdrawal(withdrawal);
-        require(processedL2Requests[withdrawalHash] == address(0), "Withdrawal already ferried");
+        if (processedL2Requests[withdrawalHash] != address(0)) {
+            revert WithdrawalAlreadyFerried(withdrawalHash);
+        }
 
         processedL2Requests[withdrawalHash] = _msgSender();
         uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
 
         if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
-            require(msg.value > 0, "Native token not sent");
-            require(msg.value == ferriedAmount, "Sent amount must exactly match amount without ferryTip");
+            if (msg.value != ferriedAmount) {
+                revert InvalidFerriedAmount(msg.value, ferriedAmount);
+            }
 
             emit WithdrawalFerried(
                 withdrawal.requestId.id, ferriedAmount, withdrawal.recipient, _msgSender(), withdrawalHash
@@ -282,10 +299,14 @@ contract Rolldown is
     }
 
     function _findL2Batch(uint256 requestId) private view returns (bytes32) {
-        require(requestId <= lastProcessedUpdate_origin_l2, "Invalid request id");
+        if (requestId > lastProcessedUpdate_origin_l2) {
+            revert InvalidRequestId(requestId);
+        }
 
         uint256 rootCount = roots.length;
-        require(rootCount > 0, "No roots found");
+        if (rootCount == 0) {
+            revert ZeroRootCount();
+        }
 
         for (uint256 i = rootCount; i > 0;) {
             bytes32 root = roots[i - 1];
@@ -307,19 +328,31 @@ contract Rolldown is
         private
         view
     {
-        require(processedL2Requests[requestHash] != CLOSED, "L2 request already processed");
+        if (processedL2Requests[requestHash] == CLOSED) {
+            revert L2RequestAlreadyProcessed(requestHash);
+        }
 
         Range memory range = merkleRootRange[merkleRoot];
-        require(range.start > 0 && range.end > 0, "Unknown Merkle root");
-        require(range.end >= range.start, "Invalid request range");
-        require(requestId >= range.start && requestId <= range.end, "Request id out of range");
+        if (range.start == 0 || range.end == 0) {
+            revert UnexpectedMerkleRoot();
+        }
+        if (range.end < range.start) {
+            revert InvalidRequestRange(range.start, range.end);
+        }
+        if (requestId < range.start || requestId > range.end) {
+            revert RequestOutOfRange(requestId, range.start, range.end);
+        }
 
         uint256 leaveCount = range.end - range.start + 1;
-        require(leaveCount <= type(uint32).max, "Range too big");
+        if (leaveCount > type(uint32).max) {
+            revert RequestRangeTooLarge(leaveCount);
+        }
 
         uint256 pos = requestId - range.start;
-        bytes32 root = LMerkleTree.calculateRoot(requestHash, pos, proof, leaveCount);
-        require(root == merkleRoot, "Invalid proof");
+        bytes32 expectedMerkleRoot = LMerkleTree.calculateRoot(requestHash, pos, proof, leaveCount);
+        if (merkleRoot != expectedMerkleRoot) {
+            revert InvalidRequestProof(merkleRoot);
+        }
     }
 
     function close_cancel(Cancel calldata cancel, bytes32 merkleRoot, bytes32[] calldata proof)
@@ -416,10 +449,18 @@ contract Rolldown is
     function _updateL1FromL2(bytes32 merkleRoot, Range calldata range /*,TaskResponse calldata response ??? */ )
         private
     {
-        require(range.start > 0, "Range id must be greater than zero");
-        require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
-        require(range.end >= range.start, "Invalid range");
-        require(range.end > lastProcessedUpdate_origin_l2, "Update brings no new data");
+        if (range.start == 0) {
+            revert ZeroUpdateRange();
+        }
+        if (range.start > range.end) {
+            revert InvalidUpdateRange(range.start, range.end);
+        }
+        if (range.start - 1 > lastProcessedUpdate_origin_l2) {
+            revert PreviousUpdateMissed(range.start, lastProcessedUpdate_origin_l2);
+        }
+        if (range.end <= lastProcessedUpdate_origin_l2) {
+            revert UpdateAlreadyApplied(range.end, lastProcessedUpdate_origin_l2);
+        }
 
         roots.push(merkleRoot);
         merkleRootRange[merkleRoot] = range;
@@ -455,7 +496,9 @@ contract Rolldown is
     }
 
     function _sendNative(address recipient, uint256 amount) private {
-        require(amount > 0, "Amount must be greater than zero");
+        if (amount == 0) {
+            revert ZeroTransferAmount();
+        }
 
         emit NativeTokensWithdrawn(recipient, amount);
 
@@ -463,7 +506,9 @@ contract Rolldown is
     }
 
     function _sendERC20(address recipient, address tokenAddress, uint256 amount) private {
-        require(amount > 0, "Amount must be greater than zero");
+        if (amount == 0) {
+            revert ZeroTransferAmount();
+        }
 
         emit ERC20TokensWithdrawn(recipient, tokenAddress, amount);
 

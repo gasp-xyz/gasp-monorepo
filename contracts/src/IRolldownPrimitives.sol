@@ -111,4 +111,46 @@ interface IRolldownPrimitives {
     event L2UpdateAccepted(bytes32 root, Range range);
 
     event NewUpdaterSet(address indexed updater);
+
+    error ZeroAmount();
+
+    error FerryTipExceedsAmount(uint256 ferryTip, uint256 amount);
+
+    error ZeroAdmin();
+
+    error ZeroUpdater();
+
+    error SameUpdater(address updater);
+
+    error ZeroToken();
+
+    error WithdrawalAlreadyFerried(bytes32 withdrawalHash);
+
+    error L2RequestAlreadyProcessed(bytes32 requestHash);
+
+    error InvalidFerriedAmount(uint256 actualAmount, uint256 expectedAmount);
+
+    error InvalidRequestId(uint256 requestId);
+
+    error ZeroRootCount();
+
+    error UnexpectedMerkleRoot();
+
+    error InvalidRequestRange(uint256 start, uint256 end);
+
+    error RequestOutOfRange(uint256 requestId, uint256 start, uint256 end);
+
+    error RequestRangeTooLarge(uint256 count);
+
+    error InvalidRequestProof(bytes32 merkleRoot);
+
+    error ZeroUpdateRange();
+
+    error InvalidUpdateRange(uint256 start, uint256 end);
+
+    error PreviousUpdateMissed(uint256 currentStartRange, uint256 lastProcessedUpdate);
+
+    error UpdateAlreadyApplied(uint256 currentEndRange, uint256 lastProcessedUpdate);
+
+    error ZeroTransferAmount();
 }
