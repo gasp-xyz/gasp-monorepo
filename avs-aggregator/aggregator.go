@@ -1,13 +1,14 @@
 package aggregator
 
 import (
+	"bytes"
 	"context"
+	"encoding/binary"
 	"encoding/hex"
 	"errors"
-	// "math/big"
+	"fmt"
 	"sync"
 	"time"
-	"fmt"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
@@ -20,11 +21,10 @@ import (
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
-
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	gsrpcrpcchain "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/chain"
 	gsrpctypes "github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 )
 
 // Aggregator sends tasks (numbers to square) onchain, then listens for operator signed TaskResponses.
@@ -516,6 +516,12 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		if !ok {
 			return false, fmt.Errorf("FATAL: Aggregator failed to decode rdTaskResponse, taskResponse: %v", taskResponse)
 		}
+
+    err := agg.verifyTaskResponseExistsOnL2(rdTaskResponse);
+    if err != nil {
+			return false, fmt.Errorf("FATAL: Aggregator rdTaskResponse verification error %v", err)
+    }
+
 		r, err := agg.ethRpc.AvsWriter.SendAggregatedRdTaskResponse(context.Background(), rdTask, rdTaskResponse, nonSignerStakesAndSignature)
 		if err != nil {
 			return false, fmt.Errorf("Aggregator failed to respond to task, task: %v, err: %v", task, err)
@@ -533,8 +539,6 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 	} else {
 		return false, fmt.Errorf("FATAL: Aggregator failed to recognize TaskType, blsAggServiceResp.TaskId: %v", blsAggServiceResp.TaskId)
 	}
-
-	return true, nil
 
 }
 
@@ -822,11 +826,6 @@ func (agg *Aggregator) getL1BatchUpdateInfo(blockNumber uint32) (bool, uint8, ui
 			return false, 0, 0, nil
 		}
 
-		// if substrateL2RequestsBatchLast == nil {
-		// 	agg.logger.Debug("Aggregator in maybeSendNewRdTask after GetStorage", "substrateL2RequestsBatchLast", substrateL2RequestsBatchLast)
-		// 	return false, 0, 0, nil
-		// }
-
 		for _, lastBatchByL1 := range substrateL2RequestsBatchLast{
 			
 			chainRdBatchNonce, err := agg.ethRpc.AvsReader.ChainRdBatchNonce(context.Background(), uint8(lastBatchByL1.Key))
@@ -847,4 +846,75 @@ func (agg *Aggregator) getL1BatchUpdateInfo(blockNumber uint32) (bool, uint8, ui
 		}
 
 		return isUpdate, chainToUpdate, chainBatchIdToUpdate, nil
+}
+
+func (agg *Aggregator) verifyTaskResponseExistsOnL2(rdTaskResponse taskmanager.IFinalizerTaskManagerRdTaskResponse) error {
+
+		meta, err := agg.substrateClient.RPC.State.GetMetadataLatest()
+		if err != nil {
+      return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 GetMetadata failed err: %v", err)
+		}
+
+    batchIdBytes := make([]byte, 17)
+    batchIdBytes[0] = byte(0)
+    binary.LittleEndian.PutUint32(batchIdBytes[1:], rdTaskResponse.BatchId)
+		key, err := gsrpctypes.CreateStorageKey(meta, "Rolldown", "L2RequestsBatch", batchIdBytes, nil);
+
+		if err != nil {
+		    return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 CreateStorageKey failed : err: %v", err)
+		}
+
+    agg.logger.Debug("Aggregator::verifyTaskResponseExistsOnL2 CreateStorageKey", "key", hex.EncodeToString(key))
+
+		raw, err := agg.substrateClient.RPC.State.GetStorageRawLatest(key)
+		if err != nil {
+			return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 GetStorage failed err: %v", err)
+		}
+
+		agg.logger.Debug("Aggregator::verifyTaskResponseExistsOnL2 GetStorageRaw", "raw", raw)
+		var substrateL2RequestsBatch types.SubstrateL2RequestsBatch;
+
+		ok, err := agg.substrateClient.RPC.State.GetStorageLatest(key, &substrateL2RequestsBatch)
+		if err != nil {
+			return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 L2RequestsBatch read failed: err: %v", err)
+		}
+
+    agg.logger.Debug("Aggregator::verifyTaskResponseExistsOnL2 ", "substrateL2RequestsBatch", substrateL2RequestsBatch)
+
+		if !ok {
+			return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 GetStorage staus is NOK")
+		}
+  
+    merkleRoot  := "";
+    chain := ""
+    if rdTaskResponse.ChainId == 0 {
+      chain = "Ethereum"
+    }else if rdTaskResponse.ChainId == 1 {
+      chain = "Arbitrum"
+    }else{
+      return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 unknown chain id %v", rdTaskResponse.ChainId)
+    }
+
+    rangeStart := gsrpctypes.NewU128(*rdTaskResponse.RangeStart);
+    rangeEnd := gsrpctypes.NewU128(*rdTaskResponse.RangeEnd);
+    err = agg.substrateClient.Client.Call(&merkleRoot, "rolldown_get_merkle_root",chain, [...]gsrpctypes.U128{rangeStart, rangeEnd})
+
+    if err != nil {
+      return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 get merkle root failed: err %v", err)
+    }
+
+		agg.logger.Info("Aggregator::verifyTaskResponseExistsOnL2 ", "root %s", merkleRoot)
+
+
+    decoded, err := hex.DecodeString(merkleRoot)
+
+    if err != nil {
+      return fmt.Errorf("Aggregator::rolldown_get_merkle_root cannot decode root as bytes %s", merkleRoot)
+    }
+
+    if bytes.Equal(decoded ,rdTaskResponse.RdUpdate[:]) {
+      return fmt.Errorf("Aggregator %v does not match %v", rdTaskResponse.RdUpdate, decoded)
+    }
+
+    return nil;
 }
