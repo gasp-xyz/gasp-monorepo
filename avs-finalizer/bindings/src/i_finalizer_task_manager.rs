@@ -18,11 +18,35 @@ pub mod i_finalizer_task_manager {
             functions: ::std::collections::BTreeMap::new(),
             events: ::core::convert::From::from([
                 (
+                    ::std::borrow::ToOwned::to_owned("AggregatorUpdated"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("AggregatorUpdated"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
+                            name: ::std::borrow::ToOwned::to_owned("aggregatorAddress"),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            indexed: false,
+                        },],
+                        anonymous: false,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("BLSSignatureCheckerAddressUpdated"),
                     ::std::vec![::ethers::core::abi::ethabi::Event {
                         name: ::std::borrow::ToOwned::to_owned("BLSSignatureCheckerAddressUpdated",),
                         inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
                             name: ::std::borrow::ToOwned::to_owned("blsSignatureCheckerAddress",),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
+                            indexed: false,
+                        },],
+                        anonymous: false,
+                    },],
+                ),
+                (
+                    ::std::borrow::ToOwned::to_owned("GeneratorUpdated"),
+                    ::std::vec![::ethers::core::abi::ethabi::Event {
+                        name: ::std::borrow::ToOwned::to_owned("GeneratorUpdated"),
+                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
+                            name: ::std::borrow::ToOwned::to_owned("generatorAddress"),
                             kind: ::ethers::core::abi::ethabi::ParamType::Address,
                             indexed: false,
                         },],
@@ -354,6 +378,13 @@ pub mod i_finalizer_task_manager {
                 client,
             ))
         }
+        ///Gets the contract's `AggregatorUpdated` event
+        pub fn aggregator_updated_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, AggregatorUpdatedFilter>
+        {
+            self.0.event()
+        }
         ///Gets the contract's `BLSSignatureCheckerAddressUpdated` event
         pub fn bls_signature_checker_address_updated_filter(
             &self,
@@ -362,6 +393,13 @@ pub mod i_finalizer_task_manager {
             M,
             BlssignatureCheckerAddressUpdatedFilter,
         > {
+            self.0.event()
+        }
+        ///Gets the contract's `GeneratorUpdated` event
+        pub fn generator_updated_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, GeneratorUpdatedFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `NewOpTaskCreated` event
@@ -483,12 +521,44 @@ pub mod i_finalizer_task_manager {
         Eq,
         Hash,
     )]
+    #[ethevent(name = "AggregatorUpdated", abi = "AggregatorUpdated(address)")]
+    pub struct AggregatorUpdatedFilter {
+        pub aggregator_address: ::ethers::core::types::Address,
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
     #[ethevent(
         name = "BLSSignatureCheckerAddressUpdated",
         abi = "BLSSignatureCheckerAddressUpdated(address)"
     )]
     pub struct BlssignatureCheckerAddressUpdatedFilter {
         pub bls_signature_checker_address: ::ethers::core::types::Address,
+    }
+    #[derive(
+        Clone,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethevent(name = "GeneratorUpdated", abi = "GeneratorUpdated(address)")]
+    pub struct GeneratorUpdatedFilter {
+        pub generator_address: ::ethers::core::types::Address,
     }
     #[derive(
         Clone,
@@ -745,7 +815,9 @@ pub mod i_finalizer_task_manager {
         Hash,
     )]
     pub enum IFinalizerTaskManagerEvents {
+        AggregatorUpdatedFilter(AggregatorUpdatedFilter),
         BlssignatureCheckerAddressUpdatedFilter(BlssignatureCheckerAddressUpdatedFilter),
+        GeneratorUpdatedFilter(GeneratorUpdatedFilter),
         NewOpTaskCreatedFilter(NewOpTaskCreatedFilter),
         NewOpTaskForceCreatedFilter(NewOpTaskForceCreatedFilter),
         NewRdTaskCreatedFilter(NewRdTaskCreatedFilter),
@@ -764,10 +836,18 @@ pub mod i_finalizer_task_manager {
         fn decode_log(
             log: &::ethers::core::abi::RawLog,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::Error> {
+            if let Ok(decoded) = AggregatorUpdatedFilter::decode_log(log) {
+                return Ok(IFinalizerTaskManagerEvents::AggregatorUpdatedFilter(
+                    decoded,
+                ));
+            }
             if let Ok(decoded) = BlssignatureCheckerAddressUpdatedFilter::decode_log(log) {
                 return Ok(
                     IFinalizerTaskManagerEvents::BlssignatureCheckerAddressUpdatedFilter(decoded),
                 );
+            }
+            if let Ok(decoded) = GeneratorUpdatedFilter::decode_log(log) {
+                return Ok(IFinalizerTaskManagerEvents::GeneratorUpdatedFilter(decoded));
             }
             if let Ok(decoded) = NewOpTaskCreatedFilter::decode_log(log) {
                 return Ok(IFinalizerTaskManagerEvents::NewOpTaskCreatedFilter(decoded));
@@ -824,9 +904,11 @@ pub mod i_finalizer_task_manager {
     impl ::core::fmt::Display for IFinalizerTaskManagerEvents {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
+                Self::AggregatorUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::BlssignatureCheckerAddressUpdatedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
+                Self::GeneratorUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::NewOpTaskCreatedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::NewOpTaskForceCreatedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::NewRdTaskCreatedFilter(element) => ::core::fmt::Display::fmt(element, f),
@@ -843,11 +925,21 @@ pub mod i_finalizer_task_manager {
             }
         }
     }
+    impl ::core::convert::From<AggregatorUpdatedFilter> for IFinalizerTaskManagerEvents {
+        fn from(value: AggregatorUpdatedFilter) -> Self {
+            Self::AggregatorUpdatedFilter(value)
+        }
+    }
     impl ::core::convert::From<BlssignatureCheckerAddressUpdatedFilter>
         for IFinalizerTaskManagerEvents
     {
         fn from(value: BlssignatureCheckerAddressUpdatedFilter) -> Self {
             Self::BlssignatureCheckerAddressUpdatedFilter(value)
+        }
+    }
+    impl ::core::convert::From<GeneratorUpdatedFilter> for IFinalizerTaskManagerEvents {
+        fn from(value: GeneratorUpdatedFilter) -> Self {
+            Self::GeneratorUpdatedFilter(value)
         }
     }
     impl ::core::convert::From<NewOpTaskCreatedFilter> for IFinalizerTaskManagerEvents {
