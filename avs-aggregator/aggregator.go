@@ -846,7 +846,7 @@ func (agg *Aggregator) verifyTaskResponseExistsOnL2(rdTaskResponse taskmanager.I
 	}
 
 	batchIdBytes := make([]byte, 17)
-	batchIdBytes[0] = byte(0)
+	batchIdBytes[0] = byte(rdTaskResponse.ChainId)
 	binary.LittleEndian.PutUint32(batchIdBytes[1:], rdTaskResponse.BatchId)
 	key, err := gsrpctypes.CreateStorageKey(meta, "Rolldown", "L2RequestsBatch", batchIdBytes, nil)
 
