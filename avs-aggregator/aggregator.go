@@ -546,8 +546,6 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		return false, fmt.Errorf("FATAL: Aggregator failed to recognize TaskType, blsAggServiceResp.TaskId: %v", blsAggServiceResp.TaskId)
 	}
 
-	return true, nil
-
 }
 
 func (agg *Aggregator) createOpTask() (taskmanager.IFinalizerTaskManagerOpTask, sdktypes.TaskId, error) {
