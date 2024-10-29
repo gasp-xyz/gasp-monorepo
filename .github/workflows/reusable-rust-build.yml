@@ -195,7 +195,7 @@ jobs:
             echo "Upload completed in $SECONDS seconds"
 
   build-finalizer-docker-image:
-    name: Build Docker image
+    name: ${{ matrix.platform.name }} avs-finalizer image${{ matrix.platform.fast-runtime && ' with fast runtime' || '' }}
     strategy:
       matrix:
         platform:
