@@ -110,7 +110,7 @@ describe('L1LogScraper', () => {
       returnFirst: vi.fn().mockResolvedValue({
         requestId: 1,
         txHash: '0x456',
-        status: 'L2_CONFIRMED',
+        status: 'BatchedForL1',
         type: 'withdrawal',
         chain: 'Ethereum',
         updated: 0,
