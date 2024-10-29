@@ -66,6 +66,7 @@ export const startTracingWithdrawal = async (
     asset_address: eventData.tokenAddress,
     proof: '',
     calldata: calldata.toHex(),
+    closedBy: null,
   }
   return withdrawalRepository.save(withdrawalData)
 }

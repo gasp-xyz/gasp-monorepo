@@ -120,6 +120,7 @@ export const watchWithdrawalClosed = async (
       for (const event of combinedEvents) {
         const {
           blockNumber,
+          eventName,
           args: { requestId, withdrawalHash },
         } = event as any
         const existingTransaction = await withdrawalRepository
@@ -141,6 +142,8 @@ export const watchWithdrawalClosed = async (
         )
         if (existingTransaction) {
           existingTransaction.status = PROCESSED_STATUS
+          existingTransaction.closedBy =
+            eventName === 'FerriedWithdrawalClosed' ? 'ferry' : 'regular'
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
           await withdrawalRepository.save(existingTransaction)
