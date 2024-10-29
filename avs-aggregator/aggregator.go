@@ -27,7 +27,7 @@ import (
 	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 )
 
-// Aggregator sends tasks (numbers to square) onchain, then listens for operator signed TaskResponses.
+// Aggregator sends tasks onchain, then listens for operator signed TaskResponses.
 // It aggregates responses signatures, and if any of the TaskResponses reaches the QuorumThresholdPercentage for each quorum
 // (currently we only use a single quorum of the ERC20Mock token), it sends the aggregated TaskResponse and signature onchain.
 //
@@ -152,7 +152,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		}
 	}
 
-	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, c.MinOpUpdateInterval)
+	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, c.MinOpUpdateInterval, c.ReinitOpStateAtInit, c.CheckTriggerOpStateUpdate, c.CheckTriggerOpStateUpdateWindow)
 	if err != nil {
 		logger.Error("Cannot create operator stakes updateer", "err", err)
 		return nil, err
@@ -554,7 +554,7 @@ func (agg *Aggregator) createOpTask()(taskmanager.IFinalizerTaskManagerOpTask, s
 	}
 
 	agg.logger.Info("Aggregator sending new OpTask")
-	// Send number to square to the task manager contract
+	// Send new opTask to the task manager contract
 	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewOpTask(context.Background(), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to send block number to verify", "err", err)
@@ -615,7 +615,7 @@ func (agg *Aggregator) createRdTask(chainToUpdate uint8, chainBatchIdToUpdate ui
 	}
 
 	agg.logger.Info("Aggregator sending new RdTask", "chainToUpdate", chainToUpdate, "chainBatchIdToUpdate", chainBatchIdToUpdate)
-	// Send number to square to the task manager contract
+	// Send new rdTask to the task manager contract
 	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewRdTask(context.Background(), chainToUpdate, chainBatchIdToUpdate)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to SendNewRdTask", "err", err)

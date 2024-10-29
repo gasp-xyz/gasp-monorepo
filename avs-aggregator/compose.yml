@@ -25,6 +25,9 @@ services:
       - AVS_KICK_PERIOD=5
       - AVS_MIN_OP_UPDATE_INTERVAL=${AVS_MIN_OP_UPDATE_INTERVAL:-1}
       - AVS_ENABLE_KICKER=true
+      - AGG_OSU_REINIT_OP=false
+      - AGG_OSU_CHECK_UPDATE_TRIGGER=true
+      - AGG_OSU_CHECK_UPDATE_TRIGGER_WINDOW=true
     ports:
       - "8090:8090"
   
