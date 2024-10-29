@@ -50,7 +50,7 @@ describe('TracingController', () => {
           .get(`/tracing/tx/${transactionData.transaction.txHash}`)
           .expect(200)
         expect(response.body).toEqual(
-          expect.objectContaining({ status: 'L1_INITIATED' })
+          expect.objectContaining({ status: 'PendingOnL1' })
         )
       } catch (error) {
         logger.error(
@@ -98,7 +98,7 @@ describe('TracingController', () => {
       try {
         const response = await supertest(app)
           .get(
-            `/tracing/tx/listByAddress/${transactionData.transaction.address}/L1_INITIATED`
+            `/tracing/tx/listByAddress/${transactionData.transaction.address}/PendingOnL1`
           )
           .expect(200)
         expect(response.body).toHaveProperty('transactions')
@@ -109,7 +109,7 @@ describe('TracingController', () => {
         )
         expect(response.body.transactions[0]).toHaveProperty(
           'status',
-          'L1_INITIATED'
+          'PendingOnL1'
         )
       } catch (error) {
         logger.error(
@@ -164,7 +164,7 @@ describe('TracingController', () => {
       const errorMessage = 'No transactions found for this address'
       const wrongAddress = generateRandomAddress()
       const response = await supertest(app)
-        .get(`/tracing/tx/listByAddress/${wrongAddress}/L1_INITIATED`)
+        .get(`/tracing/tx/listByAddress/${wrongAddress}/PendingOnL1`)
         .expect(404)
       expect(response.body).toEqual(
         expect.objectContaining({

@@ -10,10 +10,10 @@ import { timeseries } from '../connector/RedisConnector.js'
 import { setTimeout } from 'timers/promises'
 import logger from '../util/Logger.js'
 
-export const L1_CONFIRMED_STATUS = 'L1_CONFIRMED'
-export const L1_INITIATED_STATUS = 'L1_INITIATED'
+export const DEPOSIT_SUBMITTED_TO_L2 = 'SubmittedToL2'
+export const DEPOSIT_PENDING_ON_L1 = 'PendingOnL1'
 export const L2_CONFIRMED_STATUS = 'L2_CONFIRMED'
-export const L1_PROCESSED_STATUS = 'L1_PROCESSED'
+export const PROCESSED_STATUS = 'Processed'
 
 const keepProcessing = true
 
@@ -54,11 +54,11 @@ export const watchDepositAcceptedIntoQueue = async (
           .and('type')
           .equals('deposit')
           .and('status')
-          .equals(L1_INITIATED_STATUS)
+          .equals(DEPOSIT_PENDING_ON_L1)
           .returnFirst()
 
         if (existingTransaction) {
-          existingTransaction.status = L1_CONFIRMED_STATUS
+          existingTransaction.status = DEPOSIT_SUBMITTED_TO_L2
           existingTransaction.requestId = Number((log as any).args.requestId)
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
@@ -140,7 +140,7 @@ export const watchWithdrawalClosed = async (
           existingTransaction
         )
         if (existingTransaction) {
-          existingTransaction.status = L1_PROCESSED_STATUS
+          existingTransaction.status = PROCESSED_STATUS
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
           await withdrawalRepository.save(existingTransaction)
@@ -182,12 +182,15 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
         .gte(lastSavedProcessedRequestId)
         .and('requestId')
         .lte(lastProcessedRequestId)
+        .and('status')
+        .not.equals('Processed') //we want to skip ferried, already processed
         .return.all()
 
       for (const transaction of transactionsToProcess) {
-        transaction.status = 'PROCESSED'
+        transaction.status = 'Processed'
         const timestamp = new Date().toISOString()
         transaction.updated = Date.parse(timestamp)
+        transaction.closedBy = 'regular'
         await depositRepository.save(transaction)
       }
       await saveLastProcessedRequestId(
