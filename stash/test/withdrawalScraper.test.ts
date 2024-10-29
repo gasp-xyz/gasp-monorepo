@@ -55,7 +55,7 @@ describe('processWithdrawalEvents', () => {
               address: '0xabc',
               created: expect.any(Number),
               updated: expect.any(Number),
-              status: 'L2_INITIATED',
+              status: 'PendingOnL2',
               type: 'withdrawal',
               chain: 'testchain',
               amount: '100',
@@ -75,7 +75,7 @@ describe('processWithdrawalEvents', () => {
       address: '0xabc',
       created: expect.any(Number),
       updated: expect.any(Number),
-      status: 'L2_INITIATED',
+      status: 'PendingOnL2',
       type: 'withdrawal',
       chain: 'testchain',
       amount: '100',
@@ -94,7 +94,7 @@ describe('processWithdrawalEvents', () => {
 
     expect(withdrawalRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
-        status: 'L2_INITIATED',
+        status: 'PendingOnL2',
         type: 'withdrawal',
       })
     )
@@ -115,8 +115,8 @@ describe('processWithdrawalEvents', () => {
     }
 
     const mockExistingWithdrawals = [
-      { requestId: 2, chain: 'testchain', status: 'L2_INITIATED' },
-      { requestId: 4, chain: 'testchain', status: 'L2_INITIATED' },
+      { requestId: 2, chain: 'testchain', status: 'PendingOnL2' },
+      { requestId: 4, chain: 'testchain', status: 'PendingOnL2' },
     ]
 
     vi.spyOn(withdrawalRepository, 'search').mockReturnValue({
@@ -133,7 +133,7 @@ describe('processWithdrawalEvents', () => {
     expect(withdrawalRepository.save).toHaveBeenCalledTimes(2)
     expect(withdrawalRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
-        status: 'L2_CONFIRMED',
+        status: 'BatchedForL1',
         proof: expect.any(String),
       })
     )
@@ -177,7 +177,7 @@ describe('startTracingWithdrawal', () => {
     )
 
     vi.spyOn(withdrawalRepository, 'save').mockResolvedValue({
-      status: 'L2_INITIATED',
+      status: 'PendingOnL2',
       proof: '0xproof',
       address: '0xabc',
       amount: '100',
@@ -201,7 +201,7 @@ describe('startTracingWithdrawal', () => {
         address: '0xabc',
         created: 1729517393690,
         updated: 1729517393690,
-        status: 'L2_INITIATED',
+        status: 'PendingOnL2',
         type: 'withdrawal',
         chain: 'testchain',
         amount: '100',
@@ -213,7 +213,7 @@ describe('startTracingWithdrawal', () => {
     )
     expect(withdrawalRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
-        status: 'L2_INITIATED',
+        status: 'PendingOnL2',
         type: 'withdrawal',
       })
     )
@@ -232,7 +232,7 @@ describe('startTracingWithdrawal', () => {
     vi.spyOn(redis.client, 'get').mockResolvedValue(null)
     vi.spyOn(withdrawalRepository, 'save').mockResolvedValue({
       ...mockEventData,
-      status: 'L2_INITIATED',
+      status: 'PendingOnL2',
       asset_chainId: 'unknown',
     })
 
@@ -274,8 +274,8 @@ describe('updateWithdrawalsWhenBatchCreated', () => {
     }
 
     const mockExistingWithdrawals = [
-      { requestId: 2, chain: 'testchain', status: 'L2_INITIATED' },
-      { requestId: 4, chain: 'testchain', status: 'L2_INITIATED' },
+      { requestId: 2, chain: 'testchain', status: 'PendingOnL2' },
+      { requestId: 4, chain: 'testchain', status: 'PendingOnL2' },
     ]
 
     vi.spyOn(withdrawalRepository, 'search').mockReturnValue({
@@ -288,7 +288,7 @@ describe('updateWithdrawalsWhenBatchCreated', () => {
     } as any)
 
     vi.spyOn(withdrawalRepository, 'save').mockResolvedValue({
-      status: 'L2_CONFIRMED',
+      status: 'BatchedForL1',
       proof: '0xproof',
     })
 
@@ -297,7 +297,7 @@ describe('updateWithdrawalsWhenBatchCreated', () => {
     expect(withdrawalRepository.save).toHaveBeenCalledTimes(2)
     expect(withdrawalRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
-        status: 'L2_CONFIRMED',
+        status: 'BatchedForL1',
         proof: '0xproof',
       })
     )

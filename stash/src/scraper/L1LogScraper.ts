@@ -12,7 +12,7 @@ import logger from '../util/Logger.js'
 
 export const DEPOSIT_SUBMITTED_TO_L2 = 'SubmittedToL2'
 export const DEPOSIT_PENDING_ON_L1 = 'PendingOnL1'
-export const L2_CONFIRMED_STATUS = 'L2_CONFIRMED'
+export const WITHDRAWAL_BATCHED_FOR_L1 = 'BatchedForL1'
 export const PROCESSED_STATUS = 'Processed'
 
 const keepProcessing = true
@@ -120,6 +120,7 @@ export const watchWithdrawalClosed = async (
       for (const event of combinedEvents) {
         const {
           blockNumber,
+          eventName,
           args: { requestId, withdrawalHash },
         } = event as any
         const existingTransaction = await withdrawalRepository
@@ -131,7 +132,7 @@ export const watchWithdrawalClosed = async (
           .and('type')
           .equals('withdrawal')
           .and('status')
-          .equals(L2_CONFIRMED_STATUS)
+          .equals(WITHDRAWAL_BATCHED_FOR_L1)
           .and('chain')
           .equals(chainName)
           .returnFirst()
@@ -141,6 +142,8 @@ export const watchWithdrawalClosed = async (
         )
         if (existingTransaction) {
           existingTransaction.status = PROCESSED_STATUS
+          existingTransaction.closedBy =
+            eventName === 'FerriedWithdrawalClosed' ? 'ferry' : 'regular'
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
           await withdrawalRepository.save(existingTransaction)
