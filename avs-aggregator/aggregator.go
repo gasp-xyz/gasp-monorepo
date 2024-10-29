@@ -763,6 +763,7 @@ func (agg *Aggregator) createAndProcessOpTask(maxAttempts uint8) (taskmanager.IF
 		if success {
 			break
 		}
+		// This could/should be in the sendAggregatedResponseToContract, but it is far more flexible here
 		// if no response cancel the task and try fresh
 		if !responded {
 			agg.logger.Info("Aggregator received no responses - cancelling task", "newTask", newTask, "taskId", taskId)
@@ -800,6 +801,7 @@ func (agg *Aggregator) createAndProcessRdTask(chainToUpdate uint8, chainBatchIdT
 		if success {
 			break;
 		}
+		// This could/should be in the sendAggregatedResponseToContract, but it is far more flexible here
 		// if no response cancel the task and try fresh (but only if it is NOT the last attempt)
 		if !responded {
 			agg.logger.Info("Aggregator received no responses - cancelling task", "newTask", newTask, "taskId", taskId)
