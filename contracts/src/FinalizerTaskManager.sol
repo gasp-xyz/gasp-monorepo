@@ -184,6 +184,14 @@ contract FinalizerTaskManager is
         emit OpTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
     }
 
+    function cancelPendingTasks()
+        external
+        onlyTaskGenerator()
+    {
+        require(isTaskPending == true, "No task pending");
+        _cancelPendingTasks();
+    }
+
     function forceCancelPendingTasks()
         external
         onlyOwner
