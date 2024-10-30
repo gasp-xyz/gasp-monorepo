@@ -38,14 +38,8 @@ contract Rolldown is
     ChainId public override chain;
     // Updater account address
     address public override updaterAccount;
-    // NOTE: PR DESC
-    // mapping(uint256 => WithdrawalResolution) public withdrawalResolutions;
     mapping(uint256 => CancelResolution) public cancelResolutions;
     mapping(uint256 => Deposit) public deposits;
-    // NOTE: PR DESC
-    // mapping(uint256 => L2UpdatesToRemove) internal l2UpdatesToRemove;
-    // NOTE: PR DESC
-    // mapping(address => uint) public pendingEthWithdrawals;
     mapping(bytes32 => Range) public merkleRootRange;
     mapping(bytes32 => address) public override processedL2Requests;
     // stores all merkle roots in order, seems like binary search on this array
@@ -443,12 +437,7 @@ contract Rolldown is
         _updateL1FromL2(merkleRoot, range);
     }
 
-    // TODO:
-    // - verify that merkleRoot is correct (passing TaskResponse along with the merkle root?)
-    // - verify that range is correct and belongs to particular merkleRoot
-    function _updateL1FromL2(bytes32 merkleRoot, Range calldata range /*,TaskResponse calldata response ??? */ )
-        private
-    {
+    function _updateL1FromL2(bytes32 merkleRoot, Range calldata range) private {
         if (range.start == 0) {
             revert ZeroUpdateRange();
         }
