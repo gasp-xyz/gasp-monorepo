@@ -6,7 +6,7 @@ use crate::rpc::Rpc;
 
 use bindings::{
     finalizer_task_manager::{
-        FinalizerTaskManagerEvents, NewOpTaskCreatedFilter, NewRdTaskCreatedFilter,
+        FinalizerTaskManagerEvents,
         Operator as TMOperator, OperatorStateInfo, OperatorsAdded, OperatorsQuorumCountUpdate,
         OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate, QuorumsStakeUpdate,
     },
@@ -14,24 +14,21 @@ use bindings::{
 };
 use ethers::providers::{Middleware, PendingTransaction, SubscriptionStream};
 use ethers::{
-    abi::AbiDecode,
     contract::{stream, LogMeta},
     providers::StreamExt,
-    types::{Address, Bytes, U256},
+    types::{Address, Bytes},
 };
 
 use ethers::abi::AbiEncode;
 use eyre::{eyre, OptionExt};
-use serde::{Deserialize, Serialize};
+use serde::{Serialize};
 use sp_core::H256;
 use sp_runtime::traits::{Hash, Keccak256};
 use std::collections::HashMap;
 use std::sync::Arc;
 use substrate_rpc_client::{rpc_params, ws_client, ClientT};
 use tokio::select;
-use tokio::time::{sleep, Duration};
-use tokio::try_join;
-use tracing::{debug, error, info, instrument, trace};
+use tracing::{debug, error, info, instrument};
 
 type QuorumNum = u8;
 
@@ -120,7 +117,7 @@ impl Operator {
                                             event.task.clone().encode().into_iter()
                                         ).collect::<Vec<_>>()
                                         .as_ref()).into(),
-                                    operators_state_info_hash: operators_state_info_hash,
+                                    operators_state_info_hash,
                                 });
                             },
                             FinalizerTaskManagerEvents::NewRdTaskCreatedFilter(event) => {
@@ -345,7 +342,6 @@ impl Operator {
         info!("new_task_block: {:?}", new_task_block);
 
         let registry_coordinator_address = &self.avs_contracts.registry_coordinator_address;
-        let registry_coordinator = &self.avs_contracts.registry;
         let stake_registry = &self.avs_contracts.stake_registry;
         let bls_apk_registry = &self.avs_contracts.bls_apk_registry;
         let task_manager = &self.avs_contracts.task_manager;
@@ -527,7 +523,7 @@ impl Operator {
                     for qn in quorums_common.iter() {
                         let stake_old = i
                             .stake_per_quorum
-                            .get(&qn)
+                            .get(qn)
                             .map(u128::to_owned)
                             .unwrap_or_else(|| {
                                 error!("Failed to get operator quorum stake");
@@ -535,7 +531,7 @@ impl Operator {
                             });
                         let stake_new = j
                             .stake_per_quorum
-                            .get(&qn)
+                            .get(qn)
                             .map(u128::to_owned)
                             .unwrap_or_else(|| {
                                 error!("Failed to get operator quorum stake");
@@ -636,15 +632,15 @@ impl Operator {
             || (old_quorum_numbers != new_quorum_numbers);
 
         let operator_state_info = OperatorStateInfo {
-            operators_state_changed: operators_state_changed,
-            quorums_removed: quorums_removed,
-            quorums_added: quorums_added,
-            quorums_stake_update: quorums_stake_update,
-            quorums_apk_update: quorums_apk_update,
-            operators_removed: operators_removed,
-            operators_added: operators_added,
-            operators_stake_update: operators_stake_update,
-            operators_quorum_count_update: operators_quorum_count_update,
+            operators_state_changed,
+            quorums_removed,
+            quorums_added,
+            quorums_stake_update,
+            quorums_apk_update,
+            operators_removed,
+            operators_added,
+            operators_stake_update,
+            operators_quorum_count_update,
         };
 
         info!("operator_state_info: {:?}", operator_state_info);
@@ -680,11 +676,11 @@ impl Operator {
                     .entry(H256::from(operator.operator_id))
                     .or_insert_with(|| CustomOperatorAvsState {
                         operator_id: operator.operator_id,
-                        stake_per_quorum: stake_per_quorum,
+                        stake_per_quorum,
                     });
                 avs_state
                     .stake_per_quorum
-                    .insert(*quorum_num, u128::from(operator.stake));
+                    .insert(*quorum_num, operator.stake);
             }
         }
 
