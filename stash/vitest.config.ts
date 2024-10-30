@@ -19,6 +19,7 @@ export default defineConfig({
       CAPTCHA_SITEKEY: '10000000-ffff-ffff-ffff-000000000001',
       CAPTCHA_SECRET: '0x0000000000000000000000000000000000000000',
       TOKEN_FOR_PRICE_ID: '1',
+      MGX_TOKEN_ID: '0',
     },
     coverage: {
       include: ['src/**/*'],
