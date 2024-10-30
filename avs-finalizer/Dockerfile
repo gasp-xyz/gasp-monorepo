@@ -40,7 +40,7 @@ FROM debian:stable-slim
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y supervisor wait-for-it && \
+    apt-get install -y supervisor wait-for-it ca-certificates && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /var/log/rollup-node /data && \
     useradd -m -s /bin/bash appuser && \
