@@ -4,19 +4,18 @@ use bindings::{
     bls_apk_registry::BLSApkRegistry,
     finalizer_service_manager::FinalizerServiceManager,
     finalizer_task_manager::{
-        FinalizerTaskManager, FinalizerTaskManagerEvents, NewOpTaskCreatedFilter,
-        NewRdTaskCreatedFilter, OpTaskCompletedFilter, RdTaskCompletedFilter,
+        FinalizerTaskManager, FinalizerTaskManagerEvents, OpTaskCompletedFilter,
+        RdTaskCompletedFilter,
     },
     registry_coordinator::RegistryCoordinator,
-    shared_types::OperatorInfo,
     stake_registry::StakeRegistry,
 };
 use ethers::{
     contract::{EthEvent, Event},
     providers::{Provider, Ws},
-    types::{Address, Filter, TransactionReceipt, H256, U64},
+    types::{Address, Filter},
 };
-use eyre::{eyre, Ok, OptionExt};
+use eyre::Ok;
 
 use crate::cli::CliArgs;
 
@@ -68,7 +67,7 @@ impl AvsContracts {
             service_manager,
             task_manager,
             task_manager_sub,
-            registry_coordinator_address: config.avs_registry_coordinator_addr.into(),
+            registry_coordinator_address: config.avs_registry_coordinator_addr,
             registry,
             stake_registry,
             bls_apk_registry,
