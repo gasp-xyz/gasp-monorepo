@@ -4,9 +4,7 @@ use crate::{
 };
 use ark_ec::AffineRepr;
 use ark_ff::PrimeField;
-use bindings::{
-    shared_types::{OpTaskResponse, RdTaskResponse},
-};
+use bindings::shared_types::{OpTaskResponse, RdTaskResponse};
 use ethers::abi::AbiEncode;
 use eyre::eyre;
 use reqwest::Response;
@@ -145,11 +143,7 @@ fn create_response(
                 operator_id: keypair.operator_id().to_fixed_bytes(),
             })
         }
-        (None, None) => {
-            Err(eyre!("Neither of op and rd task response populated"))
-        }
-        (Some(_), Some(_)) => {
-            Err(eyre!("Both of op and rd task response populated"))
-        }
+        (None, None) => Err(eyre!("Neither of op and rd task response populated")),
+        (Some(_), Some(_)) => Err(eyre!("Both of op and rd task response populated")),
     }
 }

@@ -6,9 +6,9 @@ use crate::rpc::Rpc;
 
 use bindings::{
     finalizer_task_manager::{
-        FinalizerTaskManagerEvents,
-        Operator as TMOperator, OperatorStateInfo, OperatorsAdded, OperatorsQuorumCountUpdate,
-        OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate, QuorumsStakeUpdate,
+        FinalizerTaskManagerEvents, Operator as TMOperator, OperatorStateInfo, OperatorsAdded,
+        OperatorsQuorumCountUpdate, OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate,
+        QuorumsStakeUpdate,
     },
     shared_types::{G1Point, G2Point, OpTask, OpTaskResponse, RdTask, RdTaskResponse},
 };
@@ -21,7 +21,7 @@ use ethers::{
 
 use ethers::abi::AbiEncode;
 use eyre::{eyre, OptionExt};
-use serde::{Serialize};
+use serde::Serialize;
 use sp_core::H256;
 use sp_runtime::traits::{Hash, Keccak256};
 use std::collections::HashMap;
