@@ -18,8 +18,8 @@ services:
       - RUST_LOG=info
       - SOURCE_RPC_URL=${ETH_RPC_URL:-http://eth-stub:8545}
       - SOURCE_WS_URL=${ETH_WS_URL:-ws://eth-stub:8545}
-      - TARGET_RPC_URL=${ETH_RPC_URL:-http://arbitrum-stub:8546}
-      - TARGET_WS_URL=${ETH_WS_URL:-ws://arbitrum-stub:8546}
+      - TARGET_RPC_URL=${ARB_RPC_URL:-http://arbitrum-stub:8546}
+      - TARGET_WS_URL=${ARB_WS_URL:-ws://arbitrum-stub:8546}
       - SOURCE_CHAIN_ID=${CHAIN_ID:-31337}
       - TARGET_CHAIN_ID=${CHAIN_ID:-31337}
       - AVS_REGISTRY_COORDINATOR_ADDR=0xf5059a5D33d5853360D16C683c16e67980206f36
