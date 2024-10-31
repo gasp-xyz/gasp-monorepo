@@ -1,8 +1,7 @@
 use cli::CliArgs;
-use eyre::{eyre, Ok};
-use std::sync::Arc;
+use eyre::Ok;
 use syncer::Syncer;
-use tracing::{info, instrument, warn};
+use tracing::{info, warn};
 
 mod chainio;
 mod cli;

@@ -127,7 +127,7 @@ export async function waitForNo(publicClient: PublicClient, waitingTime = 120 , 
 
 
 export async function optOut(dockerUtilsInstance: DockerUtils){
-    await dockerUtilsInstance.container?.exec("./main opt-out-avs").then((result) => {
+    await dockerUtilsInstance.container?.exec("/app/finalizer opt-out-avs").then((result) => {
         console.log(result);
     }).catch((err) => {
         console.error(err);

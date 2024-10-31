@@ -1,4 +1,4 @@
-use clap::{error::ErrorKind, Args, CommandFactory, Parser, Subcommand};
+use clap::{error::ErrorKind, Args, CommandFactory, Parser};
 use ethers::types::{Address, Chain};
 use eyre::Ok;
 use serde::Serialize;

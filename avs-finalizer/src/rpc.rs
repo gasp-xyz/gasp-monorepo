@@ -4,10 +4,7 @@ use crate::{
 };
 use ark_ec::AffineRepr;
 use ark_ff::PrimeField;
-use bindings::{
-    finalizer_task_manager::OperatorStateInfo,
-    shared_types::{OpTask, OpTaskResponse, RdTask, RdTaskResponse, *},
-};
+use bindings::shared_types::{OpTaskResponse, RdTaskResponse};
 use ethers::abi::AbiEncode;
 use eyre::eyre;
 use reqwest::Response;
@@ -126,12 +123,12 @@ fn create_response(
             let hash = Keccak256::hash(encoded.as_ref());
             let sig = keypair.sign(hash.as_bytes())?;
 
-            return Ok(SignedTaskResponse {
+            Ok(SignedTaskResponse {
                 bls_signature: sig.into(),
                 op_task_response: encoded.into(),
                 rd_task_response: vec![].into(),
                 operator_id: keypair.operator_id().to_fixed_bytes(),
-            });
+            })
         }
         (None, Some(task)) => {
             let encoded = task.clone().encode();
@@ -146,11 +143,7 @@ fn create_response(
                 operator_id: keypair.operator_id().to_fixed_bytes(),
             })
         }
-        (None, None) => {
-            return Err(eyre!("Neither of op and rd task response populated"));
-        }
-        (Some(_), Some(_)) => {
-            return Err(eyre!("Both of op and rd task response populated"));
-        }
+        (None, None) => Err(eyre!("Neither of op and rd task response populated")),
+        (Some(_), Some(_)) => Err(eyre!("Both of op and rd task response populated")),
     }
 }

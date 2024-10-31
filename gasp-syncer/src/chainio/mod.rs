@@ -1,20 +1,9 @@
-use std::sync::Arc;
-
-use bindings::{
-    delegation_manager::DelegationManager, erc20_mock::ERC20Mock, i_strategy::IStrategy,
-    registry_coordinator::RegistryCoordinator, stake_registry::StakeRegistry,
-    strategy_manager::StrategyManager,
-};
 use ethers::{
-    contract::{ContractError, EthError},
-    middleware::{MiddlewareBuilder, NonceManagerMiddleware, SignerMiddleware},
+    middleware::{NonceManagerMiddleware, SignerMiddleware},
     providers::{Http, Provider},
     signers::{LocalWallet, Signer},
-    types::Address,
-    utils::parse_ether,
 };
-use eyre::eyre;
-use tracing::{debug, info, instrument};
+use tracing::{info, instrument};
 
 use crate::cli::CliArgs;
 

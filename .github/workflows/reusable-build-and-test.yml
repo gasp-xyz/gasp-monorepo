@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   foundry-tests:
-    name: Build foundry deployer Docker image with smart contracts code
+    name: Run Foundry tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,7 +47,7 @@ jobs:
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/anvil:${{ inputs.version }} -f contracts/Dockerfile contracts
+          docker buildx build --push --platform linux/amd64 -t mangatasolutions/gasp-contracts:${{ inputs.version }} -f contracts/Dockerfile contracts
 
   build-avs-aggregator-image:
     name: Build avs-aggregator Docker image
@@ -111,7 +111,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup helmfile
-        uses: mamezou-tech/setup-helmfile@v1.3.0
+        uses: mamezou-tech/setup-helmfile@v2.0.0
         with:
           helmfile-version: v0.166.0
           helm-version: v3.15.2
