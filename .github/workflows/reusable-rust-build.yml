@@ -93,7 +93,7 @@ jobs:
             fast-runtime: true
     runs-on: ${{ matrix.platform.runner }}
     env:
-      JOB_CACHE_PREFIX: finalizer-${{ matrix.platform.name }}${{ matrix.platform.fast-runtime && '-fast' || '' }}-${{ inputs.cache-version }}
+      JOB_CACHE_PREFIX: finalizer-${{ matrix.platform.name }}${{ matrix.platform.fast-runtime && 'fast' || 'regular' }}-${{ inputs.cache-version }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
       SERVICE_FOLDER: avs-finalizer
       DOCKER_IMAGE_REPOSITORY: mangatasolutions/avs-finalizer
