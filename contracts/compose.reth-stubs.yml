@@ -22,6 +22,9 @@ services:
         - '--ws.api=all'
         - '--ws.origins=*'
         - '--auto-mine'
+        # In case the problem may reappear again
+        # Ref: https://mangatafinance.slack.com/archives/G01FB4YHGMT/p1727947361912019?thread_ts=1727862030.716929&cid=G01FB4YHGMT
+        # - '--dev.block-time=1s'
     healthcheck:
       test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
       interval: 10s
@@ -51,6 +54,9 @@ services:
         - '--ws.api=all'
         - '--ws.origins=*'
         - '--auto-mine'
+        # In case the problem may reappear again
+        # Ref: https://mangatafinance.slack.com/archives/G01FB4YHGMT/p1727947361912019?thread_ts=1727862030.716929&cid=G01FB4YHGMT
+        # - '--dev.block-time=1s'
     healthcheck:
       test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]      
       interval: 10s
