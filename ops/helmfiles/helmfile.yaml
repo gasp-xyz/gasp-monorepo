@@ -45,7 +45,7 @@ releases:
     chart: ../helm-charts/evm-node
     values:
       - image:
-          repository: mangatasolutions/anvil
+          repository: mangatasolutions/gasp-contracts
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
@@ -63,7 +63,7 @@ releases:
     chart: ../helm-charts/evm-node
     values:
       - image:
-          repository: mangatasolutions/anvil
+          repository: mangatasolutions/gasp-contracts
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
@@ -91,17 +91,12 @@ releases:
   - name: avs-finalizer
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.finalizerEnabled }}
-    chart: ../helm-charts/rollup-node
+    chart: ../helm-charts/avs-finalizer
     values:
       - image:
           repository: mangatasolutions/avs-finalizer
           tag: {{ .Values | get "finalizerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
-        remoteCluster: {{ .Values.remoteCluster }}
-        rpcPort: 9010
-        enableServiceMonitorCollectors: {{ .Values.finalizerEnableServiceMonitorCollectors }}
-        prometheus:
-          enabled: true
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.finalizerEnv | toYaml | nindent 10 }}
 
@@ -187,6 +182,7 @@ releases:
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.blockscoutEnabled }}
     chart: blockscout/blockscout-stack
+    version: 1.6.8
     dependencies:
       - chart: oci://registry-1.docker.io/bitnamicharts/postgresql
         version: '12.x.x'
@@ -210,6 +206,7 @@ releases:
           primary:
             extendedConfiguration: |
               max_connections = 1024
+              log_min_messages = ERROR
           persistence:
             enabled: true
             size: 8Gi
@@ -225,8 +222,9 @@ releases:
             enabled: false
         blockscout:
           image:
-            tag: 6.7.1.commit.1015bfd0
+            tag: 6.8.1.commit.dd6b1c9d
           env:
+            RUST_LOG: warn
             DATABASE_URL: 'postgresql://postgres:postgres@blockscout-eth-postgresql:5432/blockscout?ssl=false'
             SECRET_KEY_BASE: RMgI4C1HSkxsEjdhtGMfwAHfyT6CKWXOgzCboJflfSm4jeAlic52io05KB6mqzc5
             ETHEREUM_JSONRPC_VARIANT: 'geth'
@@ -249,7 +247,7 @@ releases:
           enabled: true
           replicaCount: 1
           image:
-            tag: v1.32.0-alpha.2
+            tag: v1.34.1
           ingress:
             enabled: true
             hostname: blockscout.rollup-{{ .Values.environmentName }}-eth.gasp.xyz
@@ -269,29 +267,12 @@ releases:
             NEXT_PUBLIC_API_SPEC_URL: https://raw.githubusercontent.com/blockscout/blockscout-api-v2-swagger/main/swagger.yaml
             NEXT_PUBLIC_AD_TEXT_PROVIDER: 'none'
             NEXT_PUBLIC_AD_BANNER_PROVIDER: 'none'
-        stats:
-          enabled: true
-          env:
-            STATS__SERVER__HTTP__ENABLED: true
-            STATS__SERVER__HTTP__ADDR: '0.0.0.0:8050'
-            STATS__DB_URL: 'postgresql://postgres:postgres@blockscout-eth-postgresql:5432/blockscout-stats?ssl=false'
-            STATS__BLOCKSCOUT_DB_URL: 'postgresql://postgres:postgres@blockscout-eth-postgresql:5432/blockscout?ssl=false'
-            STATS__CREATE_DATABASE: true
-            STATS__RUN_MIGRATIONS: true
-          ingress:
-            enabled: true
-            hostname: stats.blockscout.rollup-{{ .Values.environmentName }}-eth.gasp.xyz
-            annotations:
-              kubernetes.io/ingress.class: nginx
-              kubernetes.io/tls-acme: 'true'
-            className: nginx
-            tls:
-              enabled: true
   
   - name: blockscout-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.blockscoutEnabled .Values.enableArbitrumServices }}
     chart: blockscout/blockscout-stack
+    version: 1.6.8
     dependencies:
       - chart: oci://registry-1.docker.io/bitnamicharts/postgresql
         version: '12.x.x'
@@ -315,6 +296,7 @@ releases:
           primary:
             extendedConfiguration: |
               max_connections = 1024
+              log_min_messages = ERROR
           persistence:
             enabled: true
             size: 8Gi
@@ -330,8 +312,9 @@ releases:
             enabled: false
         blockscout:
           image:
-            tag: 6.7.1.commit.1015bfd0
+            tag: 6.8.1.commit.dd6b1c9d
           env:
+            RUST_LOG: warn
             DATABASE_URL: 'postgresql://postgres:postgres@blockscout-arb-postgresql:5432/blockscout?ssl=false'
             SECRET_KEY_BASE: RMgI4C1HSkxsEjdhtGMfwAHfyT6CKWXOgzCboJflfSm4jeAlic52io05KB6mqzc5
             ETHEREUM_JSONRPC_VARIANT: 'geth'
@@ -354,7 +337,7 @@ releases:
           enabled: true
           replicaCount: 1
           image:
-            tag: v1.32.0-alpha.2
+            tag: v1.34.1
           ingress:
             enabled: true
             hostname: blockscout.rollup-{{ .Values.environmentName }}-arb.gasp.xyz
@@ -374,28 +357,9 @@ releases:
             NEXT_PUBLIC_API_SPEC_URL: https://raw.githubusercontent.com/blockscout/blockscout-api-v2-swagger/main/swagger.yaml
             NEXT_PUBLIC_AD_TEXT_PROVIDER: 'none'
             NEXT_PUBLIC_AD_BANNER_PROVIDER: 'none'
-        stats:
-          enabled: true
-          env:
-            STATS__SERVER__HTTP__ENABLED: true
-            STATS__SERVER__HTTP__ADDR: '0.0.0.0:8050'
-            STATS__DB_URL: 'postgresql://postgres:postgres@blockscout-arb-postgresql:5432/blockscout-stats?ssl=false'
-            STATS__BLOCKSCOUT_DB_URL: 'postgresql://postgres:postgres@blockscout-arb-postgresql:5432/blockscout?ssl=false'
-            STATS__CREATE_DATABASE: true
-            STATS__RUN_MIGRATIONS: true
-          ingress:
-            enabled: true
-            hostname: stats.blockscout.rollup-{{ .Values.environmentName }}-arb.gasp.xyz
-            annotations:
-              kubernetes.io/ingress.class: nginx
-              kubernetes.io/tls-acme: 'true'
-            className: nginx
-            tls:
-              enabled: true
 
   - name: collator-01
     installed: {{ .Values.collatorsEnabled }}
-    needs: [collator-02]
     chart: mangata-node/node
     namespace: 'rollup-{{ .Values.environmentName }}'
     values:

@@ -19,7 +19,7 @@ collator:
     repository: mangatasolutions/rollup-node
     tag: frontend-fix
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/mangata-finance/chainspec/e6dbb96641a79a8d77c2ce79c20c1ed598958f00/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 50Gi
@@ -36,7 +36,7 @@ collator:
   # Node specific collator configs
   collator01:
     # Identity ID: 12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
-    customNodeKey: '5f982f7cd04dde558ae7800d4cf2facd0a4e0c64f627db666456ad903077e6da'
+    customNodeKey: "5f982f7cd04dde558ae7800d4cf2facd0a4e0c64f627db666456ad903077e6da"
     bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWNVGLHURQs8NqYGrLnpoSePh5QPjBqUJDJL8CmNgr4qWN
     extraArgs:
       - --alith
@@ -47,7 +47,7 @@ collator:
       topology.kubernetes.io/zone: europe-west1-b
   collator02:
     # Identity ID: 12D3KooWNVGLHURQs8NqYGrLnpoSePh5QPjBqUJDJL8CmNgr4qWN
-    customNodeKey: '2747e7dadbc3a7cc50e678a9f264cb385852a8883cac4d4d016afc0b8513a6f9'
+    customNodeKey: "2747e7dadbc3a7cc50e678a9f264cb385852a8883cac4d4d016afc0b8513a6f9"
     bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
     extraArgs:
       - --baltathar
@@ -56,45 +56,6 @@ collator:
     nodeSelector:
       production: "true"
       topology.kubernetes.io/zone: europe-west1-c
-
-####################
-# evm-node configs #
-####################
-envEth:
-  # rpc
-  ETH_RPC_URL: http://evm-node-eth:8545
-  ETH_WS_URL: ws://evm-node-eth:8546
-  SUBSTRATE_RPC_URL: ws://collator-01:9944
-  # contracts
-  CHAIN_ID: "1337"
-  AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
-  # AVS
-  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  AVS_BLOCK_VALIDATION_PERIOD: "5"
-  # OP
-  RUST_LOG: info
-  AVS_RPC_URL: http://avs-aggregator:8090
-  TESTNET: "true"
-  ECDSA_EPHEMERAL_KEY: "true"
-  BLS_EPHEMERAL_KEY: "true"
-
-envArb:
-  # rpc
-  ETH_RPC_URL: http://evm-node-arb:8545
-  ETH_WS_URL: ws://evm-node-arb:8546
-  SUBSTRATE_RPC_URL: ws://collator-01:9944
-  # contracts
-  CHAIN_ID: "1337"
-  AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
-  # AVS
-  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  AVS_BLOCK_VALIDATION_PERIOD: "5"
-  # OP
-  RUST_LOG: info
-  AVS_RPC_URL: http://avs-aggregator:8090
-  TESTNET: "true"
-  ECDSA_EPHEMERAL_KEY: "true"
-  BLS_EPHEMERAL_KEY: "true"
 
 ######################
 # aggregator configs #
@@ -111,17 +72,17 @@ aggregatorEnvSecrets:
 aggregatorEnv:
   SUBSTRATE_RPC_URL: ws://rpc-shared-dns-record:9944
   CHAIN_ID: "17000"
-  AVS_BLOCK_VALIDATION_PERIOD: '100'
-  AVS_DEBOUNCE_RPC: '20'
-  AVS_DEPLOYMENT_BLOCK: '1233400'
-  AVS_KICK_PERIOD: '25'
-  AVS_REGISTRY_COORDINATOR_ADDR: '0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1'
+  AVS_BLOCK_VALIDATION_PERIOD: "100"
+  AVS_DEBOUNCE_RPC: "20"
+  AVS_DEPLOYMENT_BLOCK: "1233400"
+  AVS_KICK_PERIOD: "25"
+  AVS_REGISTRY_COORDINATOR_ADDR: "0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1"
   AVS_RPC_URL: http://avs-aggregator:8090
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  AVS_TASK_EXPIRATION: '300'
-  AVS_UPDATE_STAKE_PERIOD: '150'
-  OPT_IN_AT_STARTUP: 'true'
-  LOG_LEVEL: 'info'
+  AVS_TASK_EXPIRATION: "300"
+  AVS_UPDATE_STAKE_PERIOD: "150"
+  OPT_IN_AT_STARTUP: "true"
+  LOG_LEVEL: "info"
   RUST_LOG: avs=debug
 
 #####################
@@ -131,7 +92,6 @@ finalizerEnabled: true
 # Override the image tag provided on deployment from IMAGE_TAG env variable
 finalizerImageTag: ba3aaf237234092ad21bf0a4c5ff0f08523ba6f0
 
-finalizerEnableServiceMonitorCollectors: true
 finalizerEnvSecrets:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetFinalizerEcdsaKeyJson
   ECDSA_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetFinalizerEcdsaKeyPassword
@@ -140,20 +100,22 @@ finalizerEnvSecrets:
   ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
 finalizerEnv:
-  SUBSTRATE_RPC_URL: ws://rpc-shared-dns-record:9944
   CHAIN_ID: "17000"
-  AVS_BLOCK_VALIDATION_PERIOD: '100'
-  AVS_DEBOUNCE_RPC: '20'
-  AVS_DEPLOYMENT_BLOCK: '1233400'
-  AVS_KICK_PERIOD: '25'
-  AVS_REGISTRY_COORDINATOR_ADDR: '0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1'
+  AVS_BLOCK_VALIDATION_PERIOD: "100"
+  AVS_DEBOUNCE_RPC: "20"
+  AVS_DEPLOYMENT_BLOCK: "1233400"
+  AVS_KICK_PERIOD: "25"
+  AVS_REGISTRY_COORDINATOR_ADDR: "0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1"
   AVS_RPC_URL: http://avs-aggregator:8090
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  AVS_TASK_EXPIRATION: '300'
-  AVS_UPDATE_STAKE_PERIOD: '150'
-  OPT_IN_AT_STARTUP: 'true'
-  LOG_LEVEL: 'info'
+  AVS_TASK_EXPIRATION: "300"
+  AVS_UPDATE_STAKE_PERIOD: "150"
+  OPT_IN_AT_STARTUP: "true"
+  LOG_LEVEL: "info"
   RUST_LOG: avs=debug,ether=trace
+  # rollup-node configs
+  ROLLUP_NODE_CHAIN: /app/holesky-chainspec.json
+  ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
 
 ###########################
 # rollup-updater configs #
@@ -209,4 +171,3 @@ sequencerEnvArb:
   MANGATA_NODE_URL: ws://rpc-shared-dns-record:9944
   MANGATA_CONTRACT_ADDRESS: "0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   LIMIT: "100"
-  
