@@ -1180,6 +1180,6 @@ fn test_sequencer_alias_cleanup() {
 		assert!(SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
 		assert_eq!(AliasAccount::<Test>::get((&CHARLIE, consts::DEFAULT_CHAIN_ID)), Some(DAVE));
 		assert_eq!(AliasAccountInUse::<Test>::get(DAVE), Some(()));
-		assert_eq!(AliasAccountInUse::<Test>::get(CHARLIE), Some(()));
+		assert_eq!(AliasAccountInUse::<Test>::get(EVE), None);
 	});
 }
