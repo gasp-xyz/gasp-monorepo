@@ -16,6 +16,7 @@ describe('TracingController', () => {
       amount: '400000000000000000',
       asset_chainId: '0x106',
       asset_address: '0x107',
+      closedBy: null,
     })
     transactionData = response.body
   })
@@ -41,6 +42,7 @@ describe('TracingController', () => {
     expect(transactionData.transaction.created).toBeTruthy()
     expect(transactionData.transaction).toHaveProperty('updated')
     expect(transactionData.transaction.updated).toBeTruthy()
+    expect(transactionData.transaction).toHaveProperty('closedBy')
   })
 
   describe('Query transactions', () => {
@@ -80,6 +82,7 @@ describe('TracingController', () => {
           status: transactionData.transaction.status,
           txHash: transactionData.transaction.txHash,
           type: transactionData.transaction.type,
+          closedBy: transactionData.transaction.closedBy,
         }
         expect(response.body).toHaveProperty('transactions')
         expect(response.body.transactions).toBeInstanceOf(Array)
@@ -111,6 +114,7 @@ describe('TracingController', () => {
           'status',
           'PendingOnL1'
         )
+        expect(response.body.transactions[0]).toHaveProperty('closedBy')
       } catch (error) {
         logger.error(
           'Error in get all transactions by address and status:',
