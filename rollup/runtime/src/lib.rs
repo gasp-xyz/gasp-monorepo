@@ -797,7 +797,10 @@ impl pallet_rolldown::Config for Runtime {
 	type NativeCurrencyId = tokens::RxTokenId;
 	type SequencerStakingRewards = SequencerStaking;
 	type WithdrawFee = cfg::pallet_rolldown::WithdrawFee;
+	type WeightInfo = weights::pallet_rolldown::ModuleWeight<Runtime>;
 }
+
+impl pallet_rolldown::RolldownBenchmarkingConfig for Runtime {}
 
 impl pallet_sequencer_staking::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
@@ -904,6 +907,7 @@ mod benches {
 		[pallet_multipurpose_liquidity, MultiPurposeLiquidity]
 		[pallet_fee_lock, FeeLock]
 		[pallet_proof_of_stake, ProofOfStake]
+		[pallet_rolldown, Rolldown]
 	);
 }
 use codec::alloc::string::ToString;

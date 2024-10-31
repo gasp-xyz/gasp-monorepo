@@ -214,7 +214,7 @@ impl NativeToEthMapping for Deposit {
 	type EthType = eth_abi::Deposit;
 }
 
-#[derive(Eq, PartialEq, RuntimeDebug, Clone, Encode, Decode, TypeInfo, Serialize)]
+#[derive(Eq, PartialEq, RuntimeDebug, Clone, Encode, Decode, TypeInfo, Serialize, Default)]
 pub struct CancelResolution {
 	pub requestId: RequestId,
 	pub l2RequestId: u128,

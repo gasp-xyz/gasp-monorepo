@@ -1279,6 +1279,10 @@ pub mod config {
 
 				orml_asset_registry::Pallet::<T>::do_register_l1_asset(metadata, None, l1_asset)
 			}
+
+			fn get_asset_l1_id(asset_id: T::AssetId) -> Option<L1Asset> {
+				orml_asset_registry::IdToL1Asset::<T>::get(asset_id)
+			}
 		}
 	}
 
