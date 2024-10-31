@@ -4,33 +4,28 @@ use crate::cli::CliArgs;
 use bindings::{
     finalizer_task_manager::{
         FinalizerTaskManager, FinalizerTaskManagerCalls, FinalizerTaskManagerEvents,
-        NewOpTaskCreatedFilter, NewRdTaskCreatedFilter, OpTaskCompletedFilter,
-        Operator as TMOperator, OperatorStateInfo, OperatorsAdded, OperatorsQuorumCountUpdate,
-        OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate, QuorumsStakeUpdate,
-        RdTaskCompletedFilter,
+        NewOpTaskCreatedFilter, Operator as TMOperator, OperatorStateInfo, OperatorsAdded,
+        OperatorsQuorumCountUpdate, OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate,
+        QuorumsStakeUpdate, RdTaskCompletedFilter,
     },
     gasp_multi_rollup_service::{GaspMultiRollupService, Range},
-    shared_types::{G1Point, G2Point, OpTask, OpTaskResponse, RdTask, RdTaskResponse},
+    shared_types::{OpTask, OpTaskResponse},
 };
-use ethers::providers::{Middleware, PendingTransaction, SubscriptionStream};
+use ethers::providers::{Middleware, SubscriptionStream};
 use ethers::{
     abi::AbiDecode,
     contract::{stream, EthEvent, EthLogDecode, LogMeta},
     providers::StreamExt,
-    types::{Address, Bytes, Filter, U256},
+    types::{Bytes, Filter},
 };
 
 use ethers::abi::AbiEncode;
 use eyre::{eyre, OptionExt};
-use serde::Serialize;
 use sp_core::H256;
-use sp_runtime::traits::{BlakeTwo256, Hash, Keccak256, Zero};
-use sp_runtime::{generic, OpaqueExtrinsic};
+use sp_runtime::traits::{Hash, Keccak256, Zero};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::select;
-use tokio::time::{sleep, Duration};
-use tokio::try_join;
 use tracing::{debug, error, info, instrument};
 
 // TODO
@@ -68,7 +63,7 @@ impl Syncer {
         let avs_contracts = AvsContracts::build(cfg, source_client.clone()).await?;
         let gasp_service_contract =
             GaspMultiRollupService::new(cfg.gasp_service_addr, target_client.clone());
-        let maybe_arc_root_target_client = maybe_root_target_client.map(|x| Arc::new(x));
+        let maybe_arc_root_target_client = maybe_root_target_client.map(Arc::new);
         let root_gasp_service_contract = if cfg.reinit || cfg.only_reinit {
             let root_target_client = maybe_arc_root_target_client
                 .clone()
@@ -95,10 +90,10 @@ impl Syncer {
 
     #[instrument(skip_all, err)]
     pub async fn sync(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
-        let latest_completed_op_task_number = self
-            .gasp_service_contract
-            .latest_completed_op_task_number()
-            .await?;
+        // let latest_completed_op_task_number = self
+        //     .gasp_service_contract
+        //     .latest_completed_op_task_number()
+        //     .await?;
         let mut latest_completed_op_task_created_block = self
             .gasp_service_contract
             .latest_completed_op_task_created_block()
@@ -129,7 +124,7 @@ impl Syncer {
                 Some(stream_event) = stream.next() => match stream_event {
                     Ok((stream_event, log)) => {
                         match stream_event {
-                            FinalizerTaskManagerEvents::OpTaskCompletedFilter(event) => {
+                            FinalizerTaskManagerEvents::OpTaskCompletedFilter(_event) => {
                                 let txn_hash = log.transaction_hash;
                                 let txn = self.clone().avs_contracts.ws_client.get_transaction(txn_hash).await?
                                 .ok_or_else(
@@ -199,7 +194,7 @@ impl Syncer {
                                 info!("sucessfully synced op task - {:?}", call.task.clone());
                                 latest_completed_op_task_created_block = call.task.task_created_block;
                             },
-                            FinalizerTaskManagerEvents::RdTaskCompletedFilter(event) => {
+                            FinalizerTaskManagerEvents::RdTaskCompletedFilter(_event) => {
                                 let txn_hash = log.transaction_hash;
                                 let txn = self.clone().avs_contracts.ws_client.get_transaction(txn_hash).await?
                                 .ok_or_else(
@@ -273,7 +268,7 @@ impl Syncer {
     }
 
     #[instrument(skip_all)]
-    pub async fn reinit(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
+    pub async fn reinit(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
         let alt_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
         let latest_completed_op_task_created_block = self
             .gasp_service_contract
@@ -387,7 +382,7 @@ impl Syncer {
                 operators_state_info.clone(),
                 merkle_roots.clone(),
                 ranges.clone(),
-                last_batch_id.clone(),
+                last_batch_id,
             );
         debug!("{:?}", reinit_txn);
         let reinit_txn_pending = reinit_txn.send().await;
@@ -420,7 +415,7 @@ impl Syncer {
     }
 
     #[instrument(skip_all)]
-    pub async fn reinit_eth(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
+    pub async fn reinit_eth(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
         // Get the root_target_client here, this should exist at this point
         let root_target_client = self
             .root_target_client
@@ -496,9 +491,9 @@ impl Syncer {
         let force_respond_txn = task_manager.force_respond_to_op_task(
             task.clone(),
             OpTaskResponse {
-                reference_task_index: new_op_task_created_event.task_index.clone(),
-                reference_task_hash: task_hash.clone().into(),
-                operators_state_info_hash: operators_state_info_hash.clone().into(),
+                reference_task_index: new_op_task_created_event.task_index,
+                reference_task_hash: task_hash.into(),
+                operators_state_info_hash: operators_state_info_hash.into(),
             },
         );
         debug!("{:?}", force_respond_txn);
@@ -547,7 +542,7 @@ impl Syncer {
         let mut expected_rd_task_number = latest_completed_rd_task_number + 1;
         let mut expected_batch_id = chain_rd_batch_nonce;
 
-        let mut events: Vec<RdTaskCompletedFilter> = self
+        let events: Vec<RdTaskCompletedFilter> = self
             .clone()
             .avs_contracts
             .task_manager
@@ -555,7 +550,7 @@ impl Syncer {
                 Filter::new()
                     .event(&RdTaskCompletedFilter::abi_signature())
                     .from_block(u64::from(latest_completed_op_task_created_block))
-                    .to_block(u64::from(eth_block_number)),
+                    .to_block(eth_block_number),
             )
             .query()
             .await?;
@@ -581,10 +576,10 @@ impl Syncer {
                     start: event.task_response.range_start,
                     end: event.task_response.range_end,
                 });
-                expected_batch_id = expected_batch_id + 1;
+                expected_batch_id += 1;
             }
 
-            expected_rd_task_number = expected_rd_task_number + 1;
+            expected_rd_task_number += 1;
         }
 
         let last_batch_id = expected_batch_id.saturating_sub(1);
@@ -630,7 +625,6 @@ impl Syncer {
         info!("new_task_block: {:?}", new_task_block);
 
         let registry_coordinator_address = &self.avs_contracts.registry_coordinator_address;
-        let registry_coordinator = &self.avs_contracts.registry;
         let stake_registry = &self.avs_contracts.stake_registry;
         let bls_apk_registry = &self.avs_contracts.bls_apk_registry;
         let task_manager = &self.avs_contracts.task_manager;
@@ -812,7 +806,7 @@ impl Syncer {
                     for qn in quorums_common.iter() {
                         let stake_old = i
                             .stake_per_quorum
-                            .get(&qn)
+                            .get(qn)
                             .map(u128::to_owned)
                             .unwrap_or_else(|| {
                                 error!("Failed to get operator quorum stake");
@@ -820,7 +814,7 @@ impl Syncer {
                             });
                         let stake_new = j
                             .stake_per_quorum
-                            .get(&qn)
+                            .get(qn)
                             .map(u128::to_owned)
                             .unwrap_or_else(|| {
                                 error!("Failed to get operator quorum stake");
@@ -921,15 +915,15 @@ impl Syncer {
             || (old_quorum_numbers != new_quorum_numbers);
 
         let operator_state_info = OperatorStateInfo {
-            operators_state_changed: operators_state_changed,
-            quorums_removed: quorums_removed,
-            quorums_added: quorums_added,
-            quorums_stake_update: quorums_stake_update,
-            quorums_apk_update: quorums_apk_update,
-            operators_removed: operators_removed,
-            operators_added: operators_added,
-            operators_stake_update: operators_stake_update,
-            operators_quorum_count_update: operators_quorum_count_update,
+            operators_state_changed,
+            quorums_removed,
+            quorums_added,
+            quorums_stake_update,
+            quorums_apk_update,
+            operators_removed,
+            operators_added,
+            operators_stake_update,
+            operators_quorum_count_update,
         };
 
         info!("operator_state_info: {:?}", operator_state_info);
@@ -954,11 +948,11 @@ impl Syncer {
                     .entry(H256::from(operator.operator_id))
                     .or_insert_with(|| CustomOperatorAvsState {
                         operator_id: operator.operator_id,
-                        stake_per_quorum: stake_per_quorum,
+                        stake_per_quorum,
                     });
                 avs_state
                     .stake_per_quorum
-                    .insert(*quorum_num, u128::from(operator.stake));
+                    .insert(*quorum_num, operator.stake);
             }
         }
 

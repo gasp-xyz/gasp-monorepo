@@ -540,6 +540,23 @@ pub struct StrategyParams {
     pub strategy: ::ethers::core::types::Address,
     pub multiplier: u128,
 }
+///`FuzzArtifactSelector(string,bytes4[])`
+#[derive(
+    Clone,
+    ::ethers::contract::EthAbiType,
+    ::ethers::contract::EthAbiCodec,
+    serde::Serialize,
+    serde::Deserialize,
+    Default,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+)]
+pub struct FuzzArtifactSelector {
+    pub artifact: ::std::string::String,
+    pub selectors: ::std::vec::Vec<[u8; 4]>,
+}
 ///`FuzzInterface(address,string[])`
 #[derive(
     Clone,

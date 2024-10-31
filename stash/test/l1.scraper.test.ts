@@ -2,9 +2,12 @@ import { describe, expect, vi, beforeEach, it } from 'vitest'
 import {
   watchDepositAcceptedIntoQueue,
   processRequests,
-  watchWithdrawalClosed
+  watchWithdrawalClosed,
 } from '../src/scraper/L1LogScraper'
-import { depositRepository, withdrawalRepository } from '../src/repository/TransactionRepository'
+import {
+  depositRepository,
+  withdrawalRepository,
+} from '../src/repository/TransactionRepository'
 import { timeseries } from '../src/connector/RedisConnector'
 import logger from '../src/util/Logger'
 import { holesky } from 'viem/chains'
@@ -15,7 +18,7 @@ vi.mock('../src/util/Logger')
 vi.mock('../src/scraper/L1LogScraper', () => ({
   watchDepositAcceptedIntoQueue: vi.fn(),
   processRequests: vi.fn(),
-  watchWithdrawalClosed: vi.fn()
+  watchWithdrawalClosed: vi.fn(),
 }))
 let keepProcessing = true
 
@@ -25,7 +28,7 @@ describe('L1LogScraper', () => {
     keepProcessing = true
   })
 
-  it('should update transaction status to L1_CONFIRMED on DepositAcceptedIntoQueue event', async () => {
+  it('should update transaction status to SubmittedToL2 on DepositAcceptedIntoQueue event', async () => {
     const mockApi = {}
     const mockPublicClient = {
       getBlockNumber: vi.fn().mockResolvedValue(100n),
@@ -43,7 +46,7 @@ describe('L1LogScraper', () => {
       and: vi.fn().mockReturnThis(),
       returnFirst: vi.fn().mockResolvedValue({
         txHash: '0x123',
-        status: 'L1_INITIATED',
+        status: 'PendingOnL1',
         type: 'deposit',
         requestId: null,
         updated: 0,
@@ -63,7 +66,7 @@ describe('L1LogScraper', () => {
       await depositRepository.search()
       await depositRepository.save({
         txHash: '0x123',
-        status: 'L1_CONFIRMED',
+        status: 'SubmittedToL2',
         requestId: 1,
       })
       await timeseries.client.hset()
@@ -82,14 +85,14 @@ describe('L1LogScraper', () => {
     expect(depositRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
         txHash: '0x123',
-        status: 'L1_CONFIRMED',
+        status: 'SubmittedToL2',
         requestId: 1,
       })
     )
     expect(timeseries.client.hset).toHaveBeenCalled()
   }, 10000)
 
-  it('should update transaction status to L1_PROCESSED on WithdrawalClosed event', async () => {
+  it('should update transaction status to Processed on WithdrawalClosed event', async () => {
     const mockApi = {}
     const mockPublicClient = {
       getBlockNumber: vi.fn().mockResolvedValue(100),
@@ -107,7 +110,7 @@ describe('L1LogScraper', () => {
       returnFirst: vi.fn().mockResolvedValue({
         requestId: 1,
         txHash: '0x456',
-        status: 'L2_CONFIRMED',
+        status: 'BatchedForL1',
         type: 'withdrawal',
         chain: 'Ethereum',
         updated: 0,
@@ -126,31 +129,31 @@ describe('L1LogScraper', () => {
       await withdrawalRepository.save({
         requestId: 1,
         txHash: '0x456',
-        status: 'L1_PROCESSED',
+        status: 'Processed',
       })
       await timeseries.client.hset(
-          `transactions_scanned:withdrawal:Ethereum`,
-          'lastBlock',
-          100
+        `transactions_scanned:withdrawal:Ethereum`,
+        'lastBlock',
+        100
       )
     })
 
     await watchWithdrawalClosed(
-        mockApi,
-        'http://chain.url',
-        holesky,
-        'Ethereum'
+      mockApi,
+      'http://chain.url',
+      holesky,
+      'Ethereum'
     )
 
     expect(mockPublicClient.getBlockNumber).toHaveBeenCalled()
     expect(mockPublicClient.getContractEvents).toHaveBeenCalled()
     expect(withdrawalRepository.search).toHaveBeenCalled()
     expect(withdrawalRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          requestId: 1,
-          txHash: '0x456',
-          status: 'L1_PROCESSED',
-        })
+      expect.objectContaining({
+        requestId: 1,
+        txHash: '0x456',
+        status: 'Processed',
+      })
     )
     expect(timeseries.client.hset).toHaveBeenCalled()
   }, 10000)
@@ -170,7 +173,7 @@ describe('L1LogScraper', () => {
       address: '0x102',
       created: 1725613967329,
       updated: 1725613967329,
-      status: 'L1_CONFIRMED',
+      status: 'SubmittedToL2',
       type: 'deposit',
       chain: 'Ethereum',
       amount: '400000000000000000',
@@ -232,5 +235,4 @@ describe('L1LogScraper', () => {
       expect(timeseries.client.hset).toHaveBeenCalled()
     })
   })
-
 })

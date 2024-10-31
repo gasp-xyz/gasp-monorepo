@@ -10,7 +10,7 @@ interface operatorKeys {
     bls: string
 }
 
-async function getNewKeys() {
+export async function getNewKeys() {
     const key = randomBytes(32).toString("hex");
     const keyp =  await generateBls12381G2KeyPair();
     const wbls =   Wallet.fromPrivateKey(Buffer.from(keyp.secretKey));
@@ -79,6 +79,8 @@ export class DockerUtils{
     -e AVS_REGISTRY_COORDINATOR_ADDR=0xf5059a5D33d5853360D16C683c16e67980206f36 \
     -e TESTNET=true \
     -e STAKE=60 \
+    -e ROLLUP_NODE_CHAIN:"rollup-local-seq",
+    -e ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
     --entrypoint /bin/bash \
     mangatasolutions/avs-finalizer:local 
     cc: ./main --bls-ephemeral-key --ecdsa-ephemeral-key
@@ -93,6 +95,8 @@ export class DockerUtils{
         AVS_REGISTRY_COORDINATOR_ADDR:"0xf5059a5D33d5853360D16C683c16e67980206f36" ,
         TESTNET:"true",
         STAKE:"45",
+        ROLLUP_NODE_CHAIN:"rollup-local-seq",
+        ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
     }
     bigStakeLocalEnvironment : Environment = {
         RUST_LOG: "info",
@@ -104,6 +108,21 @@ export class DockerUtils{
         AVS_REGISTRY_COORDINATOR_ADDR:"0xf5059a5D33d5853360D16C683c16e67980206f36" ,
         TESTNET:"true",
         STAKE:"100",
+        ROLLUP_NODE_CHAIN:"rollup-local-seq",
+        ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+    }
+    bigStakeWithWrongAvsPort : Environment = {
+        RUST_LOG: "info",
+        ETH_RPC_URL:"http://0.0.0.0:8545" ,
+        ETH_WS_URL:"ws://0.0.0.0:8545" ,
+        CHAIN_ID:"31337" ,
+        SUBSTRATE_RPC_URL:"ws://0.0.0.0:9946" ,
+        AVS_RPC_URL:"http://0.0.0.0:6666" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0x851356ae760d987E095750cCeb3bC6014560891C" ,
+        TESTNET:"true",
+        STAKE:"100",
+        ROLLUP_NODE_CHAIN:"rollup-local-seq",
+        ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
     }
     corruptedFinalizerLocalEnvironment : Environment = {
         RUST_LOG: "info",
@@ -115,5 +134,7 @@ export class DockerUtils{
         AVS_REGISTRY_COORDINATOR_ADDR:"0xf5059a5D33d5853360D16C683c16e67980206f36" ,
         TESTNET:"true",
         STAKE:"90",
+        ROLLUP_NODE_CHAIN:"rollup-local-seq",
+        ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
     }
 }

@@ -19,9 +19,9 @@ export const startTracingTransaction = async (
   const timestamp = new Date().toISOString()
   let status: string
   if (type === 'deposit') {
-    status = 'L1_INITIATED'
+    status = 'PendingOnL1'
   } else if (type === 'withdrawal') {
-    status = 'L2_INITIATED'
+    status = 'PendingOnL2'
   } else {
     status = 'UNKNOWN'
   }
@@ -38,6 +38,7 @@ export const startTracingTransaction = async (
     amount,
     asset_chainId,
     asset_address,
+    closedBy: null,
   }
 
   try {

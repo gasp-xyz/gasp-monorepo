@@ -76,3 +76,10 @@ type SubstrateL2RequestsBatchLastRange struct {
 }
 
 type SubstrateL2RequestsBatchLast = []SubstrateL2RequestsBatchLastItem
+
+type SubstrateL2RequestsBatch struct {
+	BlockNumber gsrpctypes.U32
+	BatchRange SubstrateL2RequestsBatchLastRange
+	OperatorAddr common.Address
+}
+

@@ -44,7 +44,7 @@ class CloserService {
     const latestClosableReqeustIdOnL1 = await this.l1.getLatestRequestId();
 
     if (latestClosableReqeustIdOnL1 === null) {
-      logger.debug(`No withdrawals has been brought yet to L1 contract`);
+      logger.debug(`No withdrawals have been brought yet to L1 contract`);
       return;
     }
 
