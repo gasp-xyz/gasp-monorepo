@@ -8,15 +8,11 @@ on:
       substrateNodeVersion:
         type: string
         required: false
-        default: "eth-rollup-develop"
+        default: "eth-rollup-develop-fast"
       globalVersion:
         type: string
         required: false
         default: "8dd0c81aa88b967334d001d8cae031f8799a189f"
-      enableRollupNodeFastRuntime:
-        type: boolean
-        required: false
-        default: true
   workflow_dispatch:
     inputs:
       e2eBranch:
@@ -25,15 +21,11 @@ on:
       substrateNodeVersion:
         type: string
         required: false
-        default: "eth-rollup-develop"
+        default: "eth-rollup-develop-fast"
       globalVersion:
         type: string
         required: false
         default: "8dd0c81aa88b967334d001d8cae031f8799a189f"
-      enableRollupNodeFastRuntime:
-        type: boolean
-        required: false
-        default: true
 
 permissions:
   contents: read
@@ -47,8 +39,8 @@ env:
   GASP_SYNCER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_UPDATER_VERSION: ${{ inputs.globalVersion }}
-  AVS_FINALIZER_VERSION: ${{ inputs.globalVersion }}${{ inputs.enableRollupNodeFastRuntime && '-fast' || '' }}
-  ROLLUP_NODE_VERSION: ${{ inputs.substrateNodeVersion }}${{ inputs.enableRollupNodeFastRuntime && '-fast' || '' }}
+  AVS_FINALIZER_VERSION: ${{ inputs.globalVersion }}-fast
+  ROLLUP_NODE_VERSION: ${{ inputs.substrateNodeVersion }}
 
 jobs:
   run-e2e-tests:
