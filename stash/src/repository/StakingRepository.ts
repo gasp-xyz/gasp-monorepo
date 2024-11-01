@@ -6,7 +6,7 @@ import { Vec } from '@polkadot/types'
 import BigNumber from 'bignumber.js'
 import moment from 'moment'
 import _ from 'lodash'
-import { CodecOrArray, toHuman } from '../util/Chain.js'
+import { CodecOrArray } from '../util/Chain.js'
 
 import { timeseries } from '../connector/RedisConnector.js'
 import {
@@ -316,12 +316,13 @@ export async function valuateLiquidityToken(
   liquidityTokenAmount: BigNumber
 ) {
   const liquidityPool = await apiAt.query.xyk.liquidityPools(liquidityTokenId)
-  const humanReadableLiquidityPool = toHuman(liquidityPool)
-  const [firstTokenId, secondTokenId] = humanReadableLiquidityPool.map((num) =>
-    num.toString()
-  )
-  const tokens = await apiAt.query.xyk.pools([firstTokenId, secondTokenId])
-  const [_, mgxTokenReserve] = toHuman(tokens)
+  const [firstTokenId, secondTokenId] = liquidityPool
+    .unwrap()
+    .map((num) => num.toString())
+  const [_, mgxTokenReserve] = await apiAt.query.xyk.pools([
+    firstTokenId,
+    secondTokenId,
+  ])
   const liquidityTokenReserve = await apiAt.query.tokens.totalIssuance(
     liquidityTokenId
   )
@@ -345,9 +346,9 @@ export async function getCandidate(
 ): Promise<ParachainStakingBond> {
   // We need to retrieve the pool of collator candidates,
   // each with their respective total backing stake at the current block hash
-  const candidatePool = await apiAt.query.parachainStaking.candidatePool()
-  const humanReadableCandidatePool = toHuman(candidatePool)
-  return humanReadableCandidatePool.find((candidate) => {
+  const candidatePool =
+    (await apiAt.query.parachainStaking.candidatePool()) as unknown as ParachainStakingBond['candidatePool']
+  return (candidatePool as any).find((candidate) => {
     const collatorAccount = getCollatorAccount(event.event.data)
     return candidate.owner.toPrimitive() === collatorAccount
   })
