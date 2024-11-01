@@ -11,10 +11,10 @@ services:
       eth-contracts-deployment:
         condition: service_completed_successfully
     environment:
+      - CHAIN_ID=${CHAIN_ID:-31337}
       - ETH_RPC_URL=${ETH_RPC_URL:-http://eth-stub:8545}
       - ETH_WS_URL=${ETH_WS_URL:-ws://eth-stub:8545}
       - SUBSTRATE_RPC_URL=${SUBSTRATE_RPC_URL:-ws://collator-01:9944}
-      - CHAIN_ID=31337
       - AVS_SERVER_IP_PORT_ADDRESS=0.0.0.0:8090
       - AVS_BLOCK_VALIDATION_PERIOD=${AVS_BLOCK_VALIDATION_PERIOD:-5}
       - AVS_REGISTRY_COORDINATOR_ADDR=0xf5059a5D33d5853360D16C683c16e67980206f36

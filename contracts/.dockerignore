@@ -1,0 +1,29 @@
+# Ignore all Dockerfiles
+Dockerfile
+Dockerfile.*
+
+# Ignore all docker-compose files
+docker-compose.yml
+compose.yml
+
+# Ignore git and GitHub directories
+.git
+.github
+
+# Ignore VSCode settings
+.vscode
+
+# Ignore environment files
+.env
+
+# Ignore build directories
+target
+**/target
+!**/target/release/main
+
+# Ignore output directories
+out
+**/out
+
+# Ignore temporary files
+tmp

@@ -15,6 +15,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
 	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
+
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
@@ -211,7 +212,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 	osu.logger.Debug("Sleeping to let the operators subscribe")
 	// We need this here to let the finalizer subscribe
 	// or the first opTask goes unanswered and the agg stalls
-	time.Sleep(1 * time.Minute)
+	time.Sleep(2 * time.Minute)
 
 	// Prepare the subscription
 	baseQuery := ethereum.FilterQuery{

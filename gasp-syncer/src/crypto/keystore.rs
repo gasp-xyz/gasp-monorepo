@@ -5,7 +5,7 @@ use aes::{
 use eth_keystore::{CryptoJson, KdfparamsType};
 use ethers::signers::LocalWallet;
 use eyre::{eyre, Ok, Report};
-use rand::{thread_rng, RngCore};
+use rand::thread_rng;
 use scrypt::{scrypt, Params as ScryptParams};
 use serde::{Deserialize, Serialize};
 use sp_runtime::traits::{Hash, Keccak256};

@@ -315,7 +315,7 @@ contract GaspMultiRollupService is
         }
 
         for (uint256 i = 0; i < operatorStateInfo.operatorsRemoved.length; i++) {
-            for (uint256 j = 0; j < quorumNumbers.length; i++) {
+            for (uint256 j = 0; j < quorumNumbers.length; j++) {
                delete operatorAndQuorumToStakes[operatorStateInfo.operatorsRemoved[i]][uint8(quorumNumbers[j])];
             }
             delete operatorIdQuorumCount[operatorStateInfo.operatorsRemoved[i]];
