@@ -1,6 +1,5 @@
 import { ApiPromise } from '@polkadot/api'
 import BigNumber from 'bignumber.js'
-import { toHuman } from '../util/Chain.js'
 import { calculateAnnualPercentageYieldPerSession } from '../util/Staking.js'
 import { timeseries } from '../connector/RedisConnector.js'
 import {
@@ -15,6 +14,7 @@ import {
 } from '../repository/StakingRepository.js'
 import { Block } from './BlockScraper.js'
 import { Codec, IEvent } from '@polkadot/types/types'
+import logger from '../util/Logger.js'
 
 export const processStaking = async (api: ApiPromise, block: Block) => {
   // This assigns the API to a specific block hash,
@@ -25,11 +25,10 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
   const eventsRecord = await apiAt.query.system.events()
   const sessionIndex = await apiAt.query.parachainStaking.round()
 
-  const collatorEvents = getCollatorEvents(toHuman(eventsRecord))
-
+  const collatorEvents = getCollatorEvents(eventsRecord)
   if (collatorEvents.length > 0) {
     const toCollatorEvents = collatorEvents.map(async (event) => {
-      const currentSessionIndex = toHuman(sessionIndex).current.toNumber()
+      const currentSessionIndex = sessionIndex.current.toNumber()
       const eventSessionIndex =
         event.event.data.length > 2
           ? Number(event.event.data.toPrimitive()[0])
@@ -37,6 +36,10 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
       const jumpInSession = currentSessionIndex - eventSessionIndex
       const numberOfBlocksToSubtract = jumpInSession * 1200
       const jumpToBlockForCandidate = block.number - numberOfBlocksToSubtract
+      if (jumpToBlockForCandidate < 0) {
+        logger.error('Calculated block number is negative, skipping event')
+        return null
+      }
       const blockHashForCandidate = await api.rpc.chain.getBlockHash(
         jumpToBlockForCandidate
       )
@@ -83,9 +86,7 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
         block: block.number,
         section: event.event.section,
         method: event.event.method,
-        sessionIndex: JSON.parse(
-          JSON.stringify(sessionIndex)
-        ).current.toNumber(),
+        sessionIndex: sessionIndex.current.toNumber(),
         collatorAccount,
         amountRewarded: rewardsCollatorAmount.multipliedBy(0.8).toFixed(0),
         liquidityTokenId,
@@ -112,7 +113,7 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
 export const processLiquidStaking = async (api: ApiPromise, block: Block) => {
   const apiAt = await api.at(block.hash)
   const eventsRecord = await apiAt.query.system.events()
-  const liquidStakingEvents = getLiquidStakingEvents(toHuman(eventsRecord))
+  const liquidStakingEvents = getLiquidStakingEvents(eventsRecord)
   if (liquidStakingEvents.length > 0) {
     const toLiquidStakingEvents = liquidStakingEvents.map(async (event) => {
       const data: IEvent<Codec[]>['data'] = event.event.data
