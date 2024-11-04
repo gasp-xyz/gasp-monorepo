@@ -1145,3 +1145,41 @@ fn pallet_max_sequencers_limit_is_considered_separately_for_each_set() {
 		}
 	});
 }
+
+#[test]
+#[serial]
+fn test_sequencer_alias_cleanup() {
+	set_default_mocks!();
+	ExtBuilder::new().build().execute_with(|| {
+		forward_to_block::<Test>(10);
+
+		let new_sequencer_active_mock = MockRolldownProviderApi::new_sequencer_active_context();
+		new_sequencer_active_mock.expect().times(1).return_const(());
+
+		assert!(!SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
+		assert_ok!(SequencerStaking::provide_sequencer_stake(
+			RuntimeOrigin::signed(CHARLIE),
+			consts::DEFAULT_CHAIN_ID,
+			MINIMUM_STAKE,
+			Some(EVE),
+			StakeAction::StakeAndJoinActiveSet
+		));
+
+		assert!(SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
+		assert_eq!(AliasAccount::<Test>::get((&CHARLIE, consts::DEFAULT_CHAIN_ID)), Some(EVE));
+		assert_eq!(AliasAccountInUse::<Test>::get(EVE), Some(()));
+
+		assert_ok!(SequencerStaking::provide_sequencer_stake(
+			RuntimeOrigin::signed(CHARLIE),
+			consts::DEFAULT_CHAIN_ID,
+			MINIMUM_STAKE,
+			Some(DAVE),
+			StakeAction::StakeOnly
+		));
+
+		assert!(SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
+		assert_eq!(AliasAccount::<Test>::get((&CHARLIE, consts::DEFAULT_CHAIN_ID)), Some(DAVE));
+		assert_eq!(AliasAccountInUse::<Test>::get(DAVE), Some(()));
+		assert_eq!(AliasAccountInUse::<Test>::get(EVE), None);
+	});
+}

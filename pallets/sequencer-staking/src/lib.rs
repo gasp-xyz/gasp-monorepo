@@ -424,6 +424,11 @@ pub mod pallet {
 					!Self::is_active_sequencer(chain, &alias_account),
 					Error::<T>::AliasAccountIsActiveSequencer
 				);
+
+				if let Some(prev_alias) = AliasAccount::<T>::take((sender.clone(), chain)) {
+					AliasAccountInUse::<T>::remove(prev_alias);
+				}
+
 				AliasAccount::<T>::insert((sender.clone(), chain), alias_account.clone());
 				AliasAccountInUse::<T>::insert(alias_account.clone(), ());
 			}
