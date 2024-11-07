@@ -35,7 +35,7 @@ export const getStatusByTxHashOrEntityIdSchema = yup.object().shape({
     .required('type is required')
     .oneOf(
       ['deposit', 'withdrawal'],
-      'type must be either "deposit" or "withdrawal"'
+      "type must be either 'deposit' or 'withdrawal'"
     ),
 })
 
@@ -46,7 +46,7 @@ export const getAllTransactionsByAddressSchema = yup.object().shape({
     .required('type is required')
     .oneOf(
       ['deposit', 'withdrawal'],
-      'type must be either "deposit" or "withdrawal"'
+      "type must be either 'deposit' or 'withdrawal'"
     ),
 })
 
@@ -58,7 +58,7 @@ export const getAllTransactionsByAddressAndStatusSchema = yup.object().shape({
     .required('type is required')
     .oneOf(
       ['deposit', 'withdrawal'],
-      'type must be either "deposit" or "withdrawal"'
+      "type must be either 'deposit' or 'withdrawal'"
     ),
 })
 
@@ -69,6 +69,6 @@ export const getTransactionByEntityIdSchema = yup.object().shape({
     .required('type is required')
     .oneOf(
       ['deposit', 'withdrawal'],
-      'type must be either "deposit" or "withdrawal"'
+      "type must be either 'deposit' or 'withdrawal'"
     ),
 })

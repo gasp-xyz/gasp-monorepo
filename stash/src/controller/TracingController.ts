@@ -104,7 +104,10 @@ export const getTransactionStatusByTxHashOrEntityId = async (
   */
   try {
     const { txHashOrEntityId, type } = req.params
-    await getStatusByTxHashOrEntityIdSchema.validate({ txHashOrEntityId, type })
+    await getStatusByTxHashOrEntityIdSchema.validateSync({
+      txHashOrEntityId,
+      type,
+    })
     const status = await getStatusByTxHashOrEntityId(txHashOrEntityId, type)
     if (status) {
       res.status(200).send({ status })
@@ -149,7 +152,7 @@ export const getAllTransactionsByAddress = async (
   */
   try {
     const { address, type } = req.params
-    getAllTransactionsByAddressSchema.validate({ address, type })
+    getAllTransactionsByAddressSchema.validateSync({ address, type })
     const transactions = await getTransactionsByAddress(address, type)
     if (transactions.length > 0) {
       res.status(200).send({ transactions })
@@ -197,7 +200,7 @@ export const getAllTransactionsByAddressAndStatus = async (
   */
   try {
     const { address, status, type } = req.params
-    getAllTransactionsByAddressAndStatusSchema.validate({
+    getAllTransactionsByAddressAndStatusSchema.validateSync({
       address,
       status,
       type,
