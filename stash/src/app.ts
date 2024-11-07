@@ -99,22 +99,22 @@ app.get(
 app.post('/tracing/tx/start', tracingController.startTracing)
 
 app.get(
-  '/tracing/tx/:txHashOrEntityId',
+  '/tracing/type/:type/tx/:txHashOrEntityId',
   tracingController.getTransactionStatusByTxHashOrEntityId
 )
 
 app.get(
-  '/tracing/tx/listByAddress/:address',
+  '/tracing/type/:type/tx/listByAddress/:address',
   tracingController.getAllTransactionsByAddress
 )
 
 app.get(
-  '/tracing/tx/listByAddress/:address/:status',
+  '/tracing/type/:type/tx/listByAddress/:address/:status',
   tracingController.getAllTransactionsByAddressAndStatus
 )
 
 app.get(
-  '/tracing/tx/findByEntityId/:entityId',
+  '/tracing/type/:type/tx/findByEntityId/:entityId',
 
   tracingController.getATransactionByEntityId
 )

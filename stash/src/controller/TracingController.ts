@@ -78,13 +78,20 @@ export const getTransactionStatusByTxHashOrEntityId = async (
   /*
    #swagger.tags = ['Tracing']
    #swagger.summary = 'Get transaction status by txHash or entityId.'
-   #swagger.description = "Get the status of a transaction by providing the transaction hash or entity ID."
+   #swagger.description = "Get the status of a transaction by providing the transaction hash or entity ID and type of the transaction."
    #swagger.parameters['txHashOrEntityId'] = {
      in: 'path',
      description: 'Transaction hash or entity ID',
      required: true,
      type: 'string'
    }
+   #swagger.parameters['type'] = {
+    in: 'path',
+    description: 'Type of the transaction',
+    required: true,
+    type: 'string',
+    enum: ['deposit', 'withdrawal']
+}
    #swagger.responses[200] = {
       description: 'Successful response with transaction status'
    }
@@ -96,9 +103,9 @@ export const getTransactionStatusByTxHashOrEntityId = async (
    }
   */
   try {
-    const { txHashOrEntityId } = req.params
-    getStatusByTxHashOrEntityIdSchema.validate({ txHashOrEntityId })
-    const status = await getStatusByTxHashOrEntityId(txHashOrEntityId)
+    const { txHashOrEntityId, type } = req.params
+    await getStatusByTxHashOrEntityIdSchema.validate({ txHashOrEntityId, type })
+    const status = await getStatusByTxHashOrEntityId(txHashOrEntityId, type)
     if (status) {
       res.status(200).send({ status })
     } else {
@@ -116,13 +123,20 @@ export const getAllTransactionsByAddress = async (
   /*
    #swagger.tags = ['Tracing']
    #swagger.summary = 'Get all transactions by address.'
-   #swagger.description = "Get all transactions associated with a specific address."
+   #swagger.description = "Get all transactions by providing a specific address and type of a transaction."
    #swagger.parameters['address'] = {
      in: 'path',
      description: 'Address to get transactions for',
      required: true,
      type: 'string'
    }
+   #swagger.parameters['type'] = {
+    in: 'path',
+    description: 'Type of the transaction',
+    required: true,
+    type: 'string',
+    enum: ['deposit', 'withdrawal']
+}
    #swagger.responses[200] = {
       description: 'Successful response with transactions'
    }
@@ -133,10 +147,10 @@ export const getAllTransactionsByAddress = async (
       description: 'Internal Server Error'
    }
   */
-  const { address } = req.params
-  getAllTransactionsByAddressSchema.validate({ address })
   try {
-    const transactions = await getTransactionsByAddress(address)
+    const { address, type } = req.params
+    getAllTransactionsByAddressSchema.validate({ address, type })
+    const transactions = await getTransactionsByAddress(address, type)
     if (transactions.length > 0) {
       res.status(200).send({ transactions })
     } else {
@@ -154,7 +168,7 @@ export const getAllTransactionsByAddressAndStatus = async (
   /*
    #swagger.tags = ['Tracing']
    #swagger.summary = 'Get all transactions by address and status.'
-   #swagger.description = "Get all transactions associated with a specific address and status."
+#swagger.description = "Retrieve all transactions for a specific address and status by providing the address, status, and transaction type."
    #swagger.parameters['address'] = {
      in: 'path',
      description: 'Address to get transactions for',
@@ -167,6 +181,13 @@ export const getAllTransactionsByAddressAndStatus = async (
      required: true,
      type: 'string'
    }
+   #swagger.parameters['type'] = {
+    in: 'path',
+    description: 'Type of the transaction',
+    required: true,
+    type: 'string',
+    enum: ['deposit', 'withdrawal']
+}
    #swagger.responses[200] = {
       description: 'Successful response with transactions'
    }
@@ -174,15 +195,17 @@ export const getAllTransactionsByAddressAndStatus = async (
       description: 'Internal Server Error'
    }
   */
-  const { address, status } = req.params
   try {
+    const { address, status, type } = req.params
     getAllTransactionsByAddressAndStatusSchema.validate({
       address,
       status,
+      type,
     })
     const transactions = await findTransactionsByAddressAndStatus(
       address,
-      status
+      status,
+      type
     )
     if (transactions.length > 0) {
       res.status(200).send({ transactions })
@@ -201,13 +224,20 @@ export const getATransactionByEntityId = async (
   /*
    #swagger.tags = ['Tracing']
    #swagger.summary = 'Get a transaction by entityId.'
-   #swagger.description = "Get a specific transaction by providing the entity ID."
+   #swagger.description = "Get a specific transaction by providing the entity ID and type of a transaction."
    #swagger.parameters['entityId'] = {
      in: 'path',
      description: 'Entity ID of the transaction',
      required: true,
      type: 'string'
    }
+   #swagger.parameters['type'] = {
+    in: 'path',
+    description: 'Type of the transaction',
+    required: true,
+    type: 'string',
+    enum: ['deposit', 'withdrawal']
+}
    #swagger.responses[200] = {
       description: 'Successful response with transaction details'
    }
@@ -218,10 +248,10 @@ export const getATransactionByEntityId = async (
       description: 'Internal Server Error'
    }
   */
-  const { entityId } = req.params
-  getTransactionByEntityIdSchema.validate({ entityId })
   try {
-    const transaction = await getTransactionByEntityId(entityId)
+    const { entityId, type } = req.params
+    getTransactionByEntityIdSchema.validateSync({ entityId, type })
+    const transaction = await getTransactionByEntityId(entityId, type)
     if (transaction) {
       res.status(200).send({ transaction })
     } else {

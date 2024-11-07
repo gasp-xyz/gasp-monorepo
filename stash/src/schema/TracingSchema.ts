@@ -30,17 +30,45 @@ export const startTracingSchema = yup.object().shape({
 
 export const getStatusByTxHashOrEntityIdSchema = yup.object().shape({
   txHashOrEntityId: yup.string().required('txHash or entityId is required'),
+  type: yup
+    .string()
+    .required('type is required')
+    .oneOf(
+      ['deposit', 'withdrawal'],
+      'type must be either "deposit" or "withdrawal"'
+    ),
 })
 
 export const getAllTransactionsByAddressSchema = yup.object().shape({
   address: yup.string().required('address is required'),
+  type: yup
+    .string()
+    .required('type is required')
+    .oneOf(
+      ['deposit', 'withdrawal'],
+      'type must be either "deposit" or "withdrawal"'
+    ),
 })
 
 export const getAllTransactionsByAddressAndStatusSchema = yup.object().shape({
   address: yup.string().required('address is required'),
   status: yup.string().required('status is required'),
+  type: yup
+    .string()
+    .required('type is required')
+    .oneOf(
+      ['deposit', 'withdrawal'],
+      'type must be either "deposit" or "withdrawal"'
+    ),
 })
 
 export const getTransactionByEntityIdSchema = yup.object().shape({
   entityId: yup.string().required('entityId is required'),
+  type: yup
+    .string()
+    .required('type is required')
+    .oneOf(
+      ['deposit', 'withdrawal'],
+      'type must be either "deposit" or "withdrawal"'
+    ),
 })
