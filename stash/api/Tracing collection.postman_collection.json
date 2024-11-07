@@ -8,7 +8,7 @@
 	},
 	"item": [
 		{
-			"name": "Start tracing",
+			"name": "Start tracing deposit",
 			"event": [
 				{
 					"listen": "test",
@@ -29,7 +29,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"txHash\": \"0x101\",\n  \"address\": \"0x102\",\n  \"type\": \"deposit\", //deposit or withdrawal\n  \"chain\": \"Arbitrum\", //send Ethereum or Arbitrum\n  \"amount\": \"400000000000000000\",\n  \"asset_chainId\": \"0x106\",\n  \"asset_address\": \"0x107\"\n\n}",
+					"raw": "{\n  \"txHash\": \"0x101\",\n  \"address\": \"0x102\",\n  \"type\": \"deposit\", //deposit or withdrawal\n  \"chain\": \"Arbitrum\", //send Ethereum or Arbitrum\n  \"amount\": \"400000000000000000\",\n  \"asset_chainId\": \"0x106\",\n  \"asset_address\": \"0x107\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -50,7 +50,75 @@
 				},
 				"description": "Tracing collection"
 			},
-			"response": []
+			"response": [
+				{
+					"name": "Start tracing",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"txHash\": \"0xb96a81aa2075956821c482a22da830af9fabba620f83ca8b42a94eb1396f4f9b\",\n    \"address\": \"0x928f1040ADb982d3AB32A62Dc8EdA57e9B81b4dd\",\n    \"amount\": \"1\",\n    \"asset_address\": \"0x1317106dd45ff0eb911e9f0af78d63fbf9076f69\",\n    \"asset_chainId\": \"0x4268\",\n    \"chain\": \"Ethereum\",\n    \"type\": \"deposit\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:9946/tracing/tx/start",
+							"host": [
+								"localhost"
+							],
+							"port": "9946",
+							"path": [
+								"tracing",
+								"tx",
+								"start"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "access-control-allow-origin",
+							"value": "*"
+						},
+						{
+							"key": "vary",
+							"value": "origin"
+						},
+						{
+							"key": "vary",
+							"value": "access-control-request-method"
+						},
+						{
+							"key": "vary",
+							"value": "access-control-request-headers"
+						},
+						{
+							"key": "access-control-expose-headers",
+							"value": "*"
+						},
+						{
+							"key": "content-length",
+							"value": "75"
+						},
+						{
+							"key": "date",
+							"value": "Fri, 01 Nov 2024 06:05:57 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"jsonrpc\": \"2.0\",\n    \"error\": {\n        \"code\": -32700,\n        \"message\": \"Parse error\"\n    },\n    \"id\": null\n}"
+				}
+			]
 		},
 		{
 			"name": "Get status by hash or entityId",
@@ -58,13 +126,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:8080/tracing/tx/{{entityId}}",
+					"raw": "localhost:8080/tracing/type/{{type}}/tx/{{entityId}}",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
 						"tracing",
+						"type",
+						"{{type}}",
 						"tx",
 						"{{entityId}}"
 					]
@@ -78,13 +148,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:8080/tracing/tx/listByAddress/{{address}}",
+					"raw": "localhost:8080/tracing/type/{{type}}/tx/listByAddress/{{address}}",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
 						"tracing",
+						"type",
+						"{{type}}",
 						"tx",
 						"listByAddress",
 						"{{address}}"
@@ -99,13 +171,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:8080/tracing/tx/listByAddress/{{address}}/{{status}}",
+					"raw": "localhost:8080/tracing/type/{{type}}/tx/listByAddress/{{address}}/{{status}}",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
 						"tracing",
+						"type",
+						"{{type}}",
 						"tx",
 						"listByAddress",
 						"{{address}}",
@@ -121,13 +195,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:8080/tracing/tx/findByEntityId/{{entityId}}",
+					"raw": "localhost:8080/tracing/type/{{type}}/tx/findByEntityId/{{entityId}}",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
 						"tracing",
+						"type",
+						"{{type}}",
 						"tx",
 						"findByEntityId",
 						"{{entityId}}"
