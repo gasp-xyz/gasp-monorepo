@@ -47,7 +47,7 @@ export const startTracing = async (req: Request, res: Response) => {
   const { txHash, address, type, chain, amount, asset_chainId, asset_address } =
     req.body
   try {
-    startTracingSchema.validate({
+    startTracingSchema.validateSync({
       txHash,
       address,
       type,
