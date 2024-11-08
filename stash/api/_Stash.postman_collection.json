@@ -1,0 +1,658 @@
+{
+	"info": {
+		"_postman_id": "41657584-d4ef-4795-8db7-6580d08dcd95",
+		"name": "_Stash",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38428731",
+		"_collection_link": "https://gasp-qa-postman.postman.co/workspace/GASP-QA-Workspace~9a5f0b07-2f04-4cb3-ad07-ae8942647dc9/collection/37441268-41657584-d4ef-4795-8db7-6580d08dcd95?action=share&source=collection_link&creator=38428731"
+	},
+	"item": [
+		{
+			"name": "Affirmed Network List",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/affirmed-network/list",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"affirmed-network",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Affirmed token list",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/affirmed-token/list",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"affirmed-token",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Coingecko Pairs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/coingecko/pairs",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"coingecko",
+						"pairs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Coingecko Tickers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/coingecko/tickers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"coingecko",
+						"tickers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Coingecko market chart",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "x-cg-demo-api-key",
+						"value": "CG-Ak1583q45Q4MULRZRU29Jkmd"
+					}
+				],
+				"url": {
+					"raw": "https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=5&interval=daily",
+					"protocol": "https",
+					"host": [
+						"api",
+						"coingecko",
+						"com"
+					],
+					"path": [
+						"api",
+						"v3",
+						"coins",
+						"ethereum",
+						"market_chart"
+					],
+					"query": [
+						{
+							"key": "vs_currency",
+							"value": "usd"
+						},
+						{
+							"key": "days",
+							"value": "5"
+						},
+						{
+							"key": "interval",
+							"value": "daily"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Collator APY",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/collator/0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac/staking/apy",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"collator",
+						"0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac",
+						"staking",
+						"apy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Collator Daily Reward",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/collator/0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac/staking/dailyReward",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"collator",
+						"0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac",
+						"staking",
+						"dailyReward"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Liquid Staking Rewards 24h",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/account/5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty/liquid-staking/rewards-history/24h/sum",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"account",
+						"5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+						"liquid-staking",
+						"rewards-history",
+						"24h",
+						"sum"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Liquid Staking Rewards Month",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/account/0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac/liquid-staking/rewards-history/month/sum",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"account",
+						"0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac",
+						"liquid-staking",
+						"rewards-history",
+						"month",
+						"sum"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Price Discovery - currency symbol",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/price-discovery/GASPV2",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"price-discovery",
+						"GASPV2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Price History - currency symbol",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/price-history/ETH",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"price-history",
+						"ETH"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Price History Pair",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/price-history/pair/ETH/GASPV2",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"price-history",
+						"pair",
+						"ETH",
+						"GASPV2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TVL History - currency symbol",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/tvl-history/GASPV2",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"tvl-history",
+						"GASPV2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TVL History Pools",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/tvl-history/pools/ETH-GASPV2/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"tvl-history",
+						"pools",
+						"ETH-GASPV2",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Token List Stats",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/token/list/stats",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"token",
+						"list",
+						"stats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Token Order Buckets",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/token/order-buckets",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"token",
+						"order-buckets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Token Portfolio",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/account/0x7509FAD323D0591C1B6Af7b5EF04D3E7775e35bF/token-portfolio",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"account",
+						"0x7509FAD323D0591C1B6Af7b5EF04D3E7775e35bF",
+						"token-portfolio"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Token Symbol Stats",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/token/GASPV2/stats",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"token",
+						"GASPV2",
+						"stats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Volume History - currency symbol",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/volume-history/GASPV2",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"volume-history",
+						"GASPV2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Volume History Pool - currency symbol",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/volume-history/pools/ETH-GASPV2/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"volume-history",
+						"pools",
+						"ETH-GASPV2",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "XCM Channels",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/xcm/channels",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"xcm",
+						"channels"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "XCM Network",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/xcm/network",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"xcm",
+						"network"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "XCM Tokens",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/xcm/tokens",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"xcm",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Collators APY",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/collators/staking/apy",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"collators",
+						"staking",
+						"apy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Coinmarketcap Summary",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/coinmarketcap/v1/summary",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"coinmarketcap",
+						"v1",
+						"summary"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start tracing tx",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"entityId\", jsonData.transaction.entityId);",
+							"pm.environment.set(\"address\", jsonData.transaction.address);",
+							"pm.environment.set(\"txHash\", jsonData.transaction.txHash);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"txHash\": \"0xa8fcfccaa092ab6b3a23761dd2b5817a70b35be342f202d068ed8329d03b71a1\",\n  \"address\": \"0xf525b86742d20ca26069d39c0c5cbc7fcd6148ed\",\n  \"type\": \"deposit\",\n  \"chain\": \"Ethereum\",\n  \"amount\": \"0.3\",\n  \"asset_chainId\": \"0x539\",\n  \"asset_address\": \"0x2bdcc0de6be1f7d2ee689a0342d76f52e8efaba3\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/tracing/tx/start",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"tracing",
+						"tx",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Tx Status by txHash or Entity ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/tracing/type/{{type}}/tx/01J826JEJD3T2QB3DBV27XQ59C",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"tracing",
+						"type",
+						"{{type}}",
+						"tx",
+						"01J826JEJD3T2QB3DBV27XQ59C"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "All Txs by Address",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/tracing/type/{{type}}/tx/listByAddress/0xf525b86742d20ca26069d39c0c5cbc7fcd6148ed",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"tracing",
+						"type",
+						"{{type}}",
+						"tx",
+						"listByAddress",
+						"0xf525b86742d20ca26069d39c0c5cbc7fcd6148ed"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "All Txs by Address and Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/tracing/type/{{type}}/tx/listByAddress/0xf525b86742d20ca26069d39c0c5cbc7fcd6148ed/PROCESSED",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"tracing",
+						"type",
+						"{{type}}",
+						"tx",
+						"listByAddress",
+						"0xf525b86742d20ca26069d39c0c5cbc7fcd6148ed",
+						"PROCESSED"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Tx by Entity ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/tracing/type/{{type}}/tx/findByEntityId/01J826JEJD3T2QB3DBV27XQ59C",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"tracing",
+						"type",
+						"{{type}}",
+						"tx",
+						"findByEntityId",
+						"01J826JEJD3T2QB3DBV27XQ59C"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
