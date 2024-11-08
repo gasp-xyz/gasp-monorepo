@@ -45,7 +45,7 @@ function validateValidApyRange(body) {
 }
 // will be fixed once MGX-1539 is done
 
-describe.skip('APi tests: Collator apy - dailyRewards', () => {
+describe('APi tests: Collator apy - dailyRewards', () => {
   //todo: remove skip once we have rewards
   it('GET /collators/apy - collator - OK', async () => {
     //todo: remove skip when we have 3d party rewards
@@ -79,7 +79,7 @@ describe.skip('APi tests: Collator apy - dailyRewards', () => {
         expect(rewardValue.toNumber()).gt(5000)
       })
   })
-  it('GET /collators/apy - old - collator - OK', async () => {
+  it.skip('GET /collators/apy - old - collator - OK', async () => {
     //todo: qa to fix and remove skip
     await supertest(app)
       .get(`/collator/${ethCollatorAddress}/staking/apy`)
@@ -98,7 +98,7 @@ describe.skip('APi tests: Collator apy - dailyRewards', () => {
         validateValidApyRange(body)
       })
   })
-  it('GET /collators/dailyReward - old - collator - OK', async () => {
+  it.skip('GET /collators/dailyReward - old - collator - OK', async () => {
     //todo: qa to fix and remove skip
     await supertest(app)
       .get(`/collator/${oldCollatorAddress}/staking/dailyReward`)
@@ -119,7 +119,7 @@ describe.skip('APi tests: Collator apy - dailyRewards', () => {
       })
   })
 
-  describe.skip('API errors', () => {
+  describe('API errors', () => {
     const errorMessage = 'This collator has not received any rewards as of yet.'
 
     it('GET /collators/dailyReward - no data', async () => {
