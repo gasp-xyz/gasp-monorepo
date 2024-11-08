@@ -120,8 +120,6 @@ interface IRolldownPrimitives {
 
     error ZeroUpdater();
 
-    error SameUpdater(address updater);
-
     error ZeroToken();
 
     error WithdrawalAlreadyFerried(bytes32 withdrawalHash);

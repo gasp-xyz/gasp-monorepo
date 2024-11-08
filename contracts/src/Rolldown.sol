@@ -87,9 +87,6 @@ contract Rolldown is
         if (updater == address(0)) {
             revert ZeroUpdater();
         }
-        if (updater == updaterAccount) {
-            revert SameUpdater(updater);
-        }
 
         _revokeRole(UPDATER_ROLE, updaterAccount);
         _grantRole(UPDATER_ROLE, updater);

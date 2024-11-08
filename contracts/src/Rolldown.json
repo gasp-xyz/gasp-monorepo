@@ -2197,17 +2197,6 @@
   },
   {
     "type": "error",
-    "name": "SameUpdater",
-    "inputs": [
-      {
-        "name": "updater",
-        "type": "address",
-        "internalType": "address"
-      }
-    ]
-  },
-  {
-    "type": "error",
     "name": "UnexpectedMerkleRoot",
     "inputs": []
   },
