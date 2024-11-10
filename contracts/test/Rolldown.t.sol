@@ -14,6 +14,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
     struct Users {
         address admin;
         address executor;
+        address grantee;
         address recipient;
         address updater;
         address feePayeeA;
@@ -21,14 +22,13 @@ contract RolldownTest is Test, IRolldownPrimitives {
         address feePayeeC;
     }
 
-    address public constant NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
-
     Users public users;
     PauserRegistry public pauserRegistry;
     MyERC20 public token;
     IRolldown public rolldown;
     bytes32 public defaultAdminRole = 0x00;
     bytes32 public updaterRole;
+    address public nativeTokenAddress;
 
     event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
     event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
@@ -38,6 +38,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         users = Users({
             admin: makeAddr("admin"),
             executor: makeAddr("executor"),
+            grantee: makeAddr("grantee"),
             updater: makeAddr("updater"),
             recipient: makeAddr("recipient"),
             feePayeeA: makeAddr("feePayeeA"),
@@ -47,6 +48,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
         deal(payable(users.admin), 100 ether);
         deal(payable(users.executor), 100 ether);
+        deal(payable(users.grantee), 100 ether);
         deal(payable(users.updater), 100 ether);
         deal(payable(users.recipient), 100 ether);
         deal(payable(users.feePayeeA), 100 ether);
@@ -75,6 +77,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         rolldown = IRolldown(address(proxy));
 
         updaterRole = rolldown.UPDATER_ROLE();
+        nativeTokenAddress = rolldown.NATIVE_TOKEN_ADDRESS();
     }
 }
 
@@ -89,22 +92,37 @@ contract Deploy is RolldownTest {
         assertTrue(hasRole);
     }
 
-    function test_HasChainId() external view {
-        IRolldownPrimitives.ChainId chainId = rolldown.chain();
-        assertEq(uint256(chainId), uint256(IRolldownPrimitives.ChainId.Ethereum));
+    function test_HasRightPausedStatus() external view {
+        uint256 paused = rolldown.paused();
+        assertEq(paused, 0);
     }
 
-    function test_HasUpdater() external view {
+    function test_UpdaterAccountSet() external view {
         address updaterAccount = rolldown.updaterAccount();
         assertEq(updaterAccount, users.updater);
     }
 
-    function test_HasRightPausedStatus() external view {
-        uint256 pausedStatus = rolldown.paused();
-        assertEq(pausedStatus, 0);
+    function test_CounterSet() external view {
+        uint256 counter = rolldown.counter();
+        assertEq(counter, 1);
     }
 
-    function tes_RevertIf_InvalidInitialization() external {
+    function test_LastProcessedUpdateOriginL1Unset() external view {
+        uint256 lastProcessedUpdate_origin_l1 = rolldown.lastProcessedUpdate_origin_l1();
+        assertEq(lastProcessedUpdate_origin_l1, 0);
+    }
+
+    function test_LastProcessedUpdateOriginL2Unset() external view {
+        uint256 lastProcessedUpdate_origin_l2 = rolldown.lastProcessedUpdate_origin_l2();
+        assertEq(lastProcessedUpdate_origin_l2, 0);
+    }
+
+    function test_ChainIdSet() external view {
+        IRolldownPrimitives.ChainId chainId = rolldown.chain();
+        assertEq(uint256(chainId), uint256(IRolldownPrimitives.ChainId.Ethereum));
+    }
+
+    function test_RevertIf_InvalidInitialization() external {
         vm.expectRevert("Initializable: contract is already initialized");
         rolldown.initialize(pauserRegistry, users.admin, IRolldownPrimitives.ChainId.Ethereum, users.updater);
     }
@@ -156,18 +174,18 @@ contract GrantRole is RolldownTest {
 
     function test_HasDefaultAdminRole() external {
         vm.prank(users.admin);
-        rolldown.grantRole(defaultAdminRole, users.updater);
+        rolldown.grantRole(defaultAdminRole, users.grantee);
 
-        bool hasRole = rolldown.hasRole(defaultAdminRole, users.updater);
+        bool hasRole = rolldown.hasRole(defaultAdminRole, users.grantee);
         assertTrue(hasRole);
     }
 
     function test_RevertIf_UnauthorizedAccount() external {
-        vm.prank(users.executor);
+        vm.prank(users.grantee);
         vm.expectRevert(
-            "AccessControl: account 0x4aff9da56bee9417ae4be3933b24f77b3e29ca30 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+            "AccessControl: account 0x6e03f5de2c52648bedc16f2ad3d5cfe890017a90 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
         );
-        rolldown.grantRole(defaultAdminRole, users.updater);
+        rolldown.grantRole(defaultAdminRole, users.grantee);
     }
 }
 
@@ -175,11 +193,11 @@ contract RevokeRole is RolldownTest {
     function test_EmitRoleRevoked() external {
         vm.startPrank(users.admin);
 
-        rolldown.grantRole(defaultAdminRole, users.updater);
+        rolldown.grantRole(defaultAdminRole, users.grantee);
 
         vm.expectEmit();
-        emit RoleRevoked(defaultAdminRole, users.updater, users.admin);
-        rolldown.revokeRole(defaultAdminRole, users.updater);
+        emit RoleRevoked(defaultAdminRole, users.grantee, users.admin);
+        rolldown.revokeRole(defaultAdminRole, users.grantee);
 
         vm.stopPrank();
     }
@@ -187,93 +205,89 @@ contract RevokeRole is RolldownTest {
     function test_HasNotDefaultAdminRole() external {
         vm.startPrank(users.admin);
 
-        rolldown.grantRole(defaultAdminRole, users.updater);
-        rolldown.revokeRole(defaultAdminRole, users.updater);
+        rolldown.grantRole(defaultAdminRole, users.grantee);
+        rolldown.revokeRole(defaultAdminRole, users.grantee);
 
         vm.stopPrank();
 
-        bool hasRole = rolldown.hasRole(defaultAdminRole, users.updater);
+        bool hasRole = rolldown.hasRole(defaultAdminRole, users.grantee);
         assertFalse(hasRole);
     }
 
     function test_RevertIf_UnathorizedAccount() external {
         vm.prank(users.admin);
-        rolldown.grantRole(defaultAdminRole, users.updater);
+        rolldown.grantRole(defaultAdminRole, users.grantee);
 
         vm.prank(users.executor);
         vm.expectRevert(
             "AccessControl: account 0x4aff9da56bee9417ae4be3933b24f77b3e29ca30 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
         );
-        rolldown.revokeRole(defaultAdminRole, users.updater);
+        rolldown.revokeRole(defaultAdminRole, users.grantee);
     }
 }
 
 contract RenounceRole is RolldownTest {
     function test_EmitRoleRevoked() external {
         vm.prank(users.admin);
-        rolldown.grantRole(defaultAdminRole, users.updater);
+        rolldown.grantRole(defaultAdminRole, users.grantee);
 
-        vm.prank(users.updater);
+        vm.prank(users.grantee);
         vm.expectEmit();
-        emit RoleRevoked(defaultAdminRole, users.updater, users.updater);
-        rolldown.renounceRole(defaultAdminRole, users.updater);
+        emit RoleRevoked(defaultAdminRole, users.grantee, users.grantee);
+        rolldown.renounceRole(defaultAdminRole, users.grantee);
     }
 
     function test_HasNotDefaultAdminRole() external {
         vm.prank(users.admin);
-        rolldown.grantRole(defaultAdminRole, users.updater);
+        rolldown.grantRole(defaultAdminRole, users.grantee);
 
-        vm.prank(users.updater);
-        rolldown.renounceRole(defaultAdminRole, users.updater);
+        vm.prank(users.grantee);
+        rolldown.renounceRole(defaultAdminRole, users.grantee);
 
-        bool hasRole = rolldown.hasRole(defaultAdminRole, users.updater);
+        bool hasRole = rolldown.hasRole(defaultAdminRole, users.grantee);
         assertFalse(hasRole);
     }
 
     function test_RevertIf_BadConfirmation() external {
         vm.startPrank(users.admin);
 
-        rolldown.grantRole(defaultAdminRole, users.updater);
+        rolldown.grantRole(defaultAdminRole, users.grantee);
 
         vm.expectRevert("AccessControl: can only renounce roles for self");
-        rolldown.renounceRole(defaultAdminRole, users.updater);
+        rolldown.renounceRole(defaultAdminRole, users.grantee);
 
         vm.stopPrank();
     }
 }
 
 contract SetUpdater is RolldownTest {
-    function test_EmitNewUpdaterSet() external {
-        address newUpdaterAddress = makeAddr("newUpdater");
+    address newUpdater = makeAddr("newUpdater");
 
+    function test_EmitNewUpdaterSet() external {
         vm.prank(users.admin);
         vm.expectEmit(true, true, true, true);
-        emit NewUpdaterSet(newUpdaterAddress);
-        rolldown.setUpdater(newUpdaterAddress);
+        emit NewUpdaterSet(newUpdater);
+        rolldown.setUpdater(newUpdater);
     }
 
     function test_SetNewUpdaterAddress() external {
-        address newUpdaterAddress = makeAddr("newUpdater");
-
         vm.prank(users.admin);
-        rolldown.setUpdater(newUpdaterAddress);
+        rolldown.setUpdater(newUpdater);
 
         bool initialUpdater = rolldown.hasRole(updaterRole, users.updater);
-        bool currentUpdater = rolldown.hasRole(updaterRole, newUpdaterAddress);
-
         assertFalse(initialUpdater);
+
+        bool currentUpdater = rolldown.hasRole(updaterRole, newUpdater);
         assertTrue(currentUpdater);
-        assertEq(rolldown.updaterAccount(), newUpdaterAddress);
+        assertEq(rolldown.updaterAccount(), newUpdater);
     }
 
     function test_RevertIf_UnauthorizedAccount() external {
-        address newUpdaterAddress = makeAddr("newUpdater");
-
         vm.prank(users.executor);
         vm.expectRevert(
             "AccessControl: account 0x4aff9da56bee9417ae4be3933b24f77b3e29ca30 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
         );
-        rolldown.setUpdater(newUpdaterAddress);
+        rolldown.setUpdater(newUpdater);
     }
 
     function test_RevertIf_ZeroUpdater() external {
@@ -291,7 +305,7 @@ contract DepositNative is RolldownTest {
     function test_EmitDepositAcceptedIntoQueue() external {
         vm.prank(users.executor);
         vm.expectEmit(true, true, true, true);
-        emit DepositAcceptedIntoQueue(requestId, users.executor, NATIVE_TOKEN_ADDRESS, amount, fee);
+        emit DepositAcceptedIntoQueue(requestId, users.executor, nativeTokenAddress, amount, fee);
         rolldown.depositNative{value: amount}();
     }
 
@@ -310,7 +324,7 @@ contract DepositNative is RolldownTest {
         assertEq(l1Update.pendingCancelResolutions.length, 0);
         assertEq(l1Update.pendingDeposits[0].requestId.id, requestId);
         assertEq(l1Update.pendingDeposits[0].depositRecipient, users.executor);
-        assertEq(l1Update.pendingDeposits[0].tokenAddress, NATIVE_TOKEN_ADDRESS);
+        assertEq(l1Update.pendingDeposits[0].tokenAddress, nativeTokenAddress);
         assertEq(l1Update.pendingDeposits[0].amount, amount);
         assertEq(l1Update.pendingDeposits[0].ferryTip, fee);
         assertEq(initialBalanceExecutor - currentBalanceExecutor, amount);
@@ -341,7 +355,7 @@ contract DepositNativeWithFerryTip is RolldownTest {
     function test_EmitDepositAcceptedIntoQueue() external {
         vm.prank(users.executor);
         vm.expectEmit(true, true, true, true);
-        emit DepositAcceptedIntoQueue(requestId, users.executor, NATIVE_TOKEN_ADDRESS, amount, fee);
+        emit DepositAcceptedIntoQueue(requestId, users.executor, nativeTokenAddress, amount, fee);
         rolldown.depositNative{value: amount}(fee);
     }
 
@@ -360,7 +374,7 @@ contract DepositNativeWithFerryTip is RolldownTest {
         assertEq(l1Update.pendingCancelResolutions.length, 0);
         assertEq(l1Update.pendingDeposits[0].requestId.id, requestId);
         assertEq(l1Update.pendingDeposits[0].depositRecipient, users.executor);
-        assertEq(l1Update.pendingDeposits[0].tokenAddress, NATIVE_TOKEN_ADDRESS);
+        assertEq(l1Update.pendingDeposits[0].tokenAddress, nativeTokenAddress);
         assertEq(l1Update.pendingDeposits[0].amount, amount);
         assertEq(l1Update.pendingDeposits[0].ferryTip, fee);
         assertEq(initialBalanceExecutor - currentBalanceExecutor, amount);
@@ -539,7 +553,7 @@ contract FerryWithdrawal is RolldownTest {
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
-            tokenAddress: NATIVE_TOKEN_ADDRESS,
+            tokenAddress: nativeTokenAddress,
             amount: amount,
             ferryTip: ferryTip
         });
@@ -582,7 +596,7 @@ contract FerryWithdrawal is RolldownTest {
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
-            tokenAddress: NATIVE_TOKEN_ADDRESS,
+            tokenAddress: nativeTokenAddress,
             amount: amount,
             ferryTip: ferryTip
         });
@@ -648,7 +662,7 @@ contract FerryWithdrawal is RolldownTest {
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
-            tokenAddress: NATIVE_TOKEN_ADDRESS,
+            tokenAddress: nativeTokenAddress,
             amount: amount,
             ferryTip: ferryTip
         });
@@ -662,7 +676,7 @@ contract FerryWithdrawal is RolldownTest {
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
-            tokenAddress: NATIVE_TOKEN_ADDRESS,
+            tokenAddress: nativeTokenAddress,
             amount: 0,
             ferryTip: ferryTip
         });
@@ -676,7 +690,7 @@ contract FerryWithdrawal is RolldownTest {
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
-            tokenAddress: NATIVE_TOKEN_ADDRESS,
+            tokenAddress: nativeTokenAddress,
             amount: amount,
             ferryTip: ferryTip + 1
         });
@@ -690,7 +704,7 @@ contract FerryWithdrawal is RolldownTest {
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
-            tokenAddress: NATIVE_TOKEN_ADDRESS,
+            tokenAddress: nativeTokenAddress,
             amount: amount,
             ferryTip: ferryTip
         });
@@ -729,9 +743,9 @@ contract CloseWithdrawal is RolldownTest {
         vm.stopPrank();
 
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA =
-            _createWithdrawal(1, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(1, users.feePayeeA, amount, nativeTokenAddress, 0);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeB =
-            _createWithdrawal(2, users.feePayeeB, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(2, users.feePayeeB, amount, nativeTokenAddress, 0);
 
         bytes32 nodeA = rolldown.hashWithdrawal(withdrawalPayeeA);
         bytes32 nodeB = rolldown.hashWithdrawal(withdrawalPayeeB);
@@ -794,9 +808,9 @@ contract CloseWithdrawal is RolldownTest {
         vm.stopPrank();
 
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA =
-            _createWithdrawal(1, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, ferryTip);
+            _createWithdrawal(1, users.feePayeeA, amount, nativeTokenAddress, ferryTip);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeB =
-            _createWithdrawal(2, users.feePayeeB, amount, NATIVE_TOKEN_ADDRESS, ferryTip);
+            _createWithdrawal(2, users.feePayeeB, amount, nativeTokenAddress, ferryTip);
 
         bytes32 nodeA = rolldown.hashWithdrawal(withdrawalPayeeA);
         bytes32 nodeB = rolldown.hashWithdrawal(withdrawalPayeeB);
@@ -869,13 +883,13 @@ contract CloseWithdrawal is RolldownTest {
         uint256 initialFeePayeeCBalance = users.feePayeeC.balance;
 
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA =
-            _createWithdrawal(1, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(1, users.feePayeeA, amount, nativeTokenAddress, 0);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA2 =
-            _createWithdrawal(2, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(2, users.feePayeeA, amount, nativeTokenAddress, 0);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeB =
-            _createWithdrawal(3, users.feePayeeB, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(3, users.feePayeeB, amount, nativeTokenAddress, 0);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeC =
-            _createWithdrawal(4, users.feePayeeC, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(4, users.feePayeeC, amount, nativeTokenAddress, 0);
 
         bytes32[] memory nodes = new bytes32[](6);
         nodes[0] = rolldown.hashWithdrawal(withdrawalPayeeA);
@@ -1016,13 +1030,13 @@ contract CloseWithdrawal is RolldownTest {
         uint256 initialFeePayeeCBalance = users.feePayeeC.balance;
 
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA =
-            _createWithdrawal(1, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, ferryTip);
+            _createWithdrawal(1, users.feePayeeA, amount, nativeTokenAddress, ferryTip);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA2 =
-            _createWithdrawal(2, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, ferryTip);
+            _createWithdrawal(2, users.feePayeeA, amount, nativeTokenAddress, ferryTip);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeB =
-            _createWithdrawal(3, users.feePayeeB, amount, NATIVE_TOKEN_ADDRESS, ferryTip);
+            _createWithdrawal(3, users.feePayeeB, amount, nativeTokenAddress, ferryTip);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeC =
-            _createWithdrawal(4, users.feePayeeC, amount, NATIVE_TOKEN_ADDRESS, ferryTip);
+            _createWithdrawal(4, users.feePayeeC, amount, nativeTokenAddress, ferryTip);
 
         bytes32[] memory nodes = new bytes32[](6);
         nodes[0] = rolldown.hashWithdrawal(withdrawalPayeeA);
@@ -1176,9 +1190,9 @@ contract CloseWithdrawal is RolldownTest {
         rolldown.pause(1);
 
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA =
-            _createWithdrawal(1, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(1, users.feePayeeA, amount, nativeTokenAddress, 0);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeB =
-            _createWithdrawal(2, users.feePayeeB, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(2, users.feePayeeB, amount, nativeTokenAddress, 0);
 
         bytes32 nodeA = rolldown.hashWithdrawal(withdrawalPayeeA);
         bytes32 nodeB = rolldown.hashWithdrawal(withdrawalPayeeB);
@@ -1199,9 +1213,9 @@ contract CloseWithdrawal is RolldownTest {
         vm.stopPrank();
 
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA =
-            _createWithdrawal(1, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(1, users.feePayeeA, amount, nativeTokenAddress, 0);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeB =
-            _createWithdrawal(2, users.feePayeeB, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(2, users.feePayeeB, amount, nativeTokenAddress, 0);
 
         bytes32 nodeA = rolldown.hashWithdrawal(withdrawalPayeeA);
         bytes32 nodeB = rolldown.hashWithdrawal(withdrawalPayeeB);
@@ -1226,9 +1240,9 @@ contract CloseWithdrawal is RolldownTest {
         vm.stopPrank();
 
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA =
-            _createWithdrawal(1, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(1, users.feePayeeA, amount, nativeTokenAddress, 0);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeB =
-            _createWithdrawal(2, users.feePayeeB, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(2, users.feePayeeB, amount, nativeTokenAddress, 0);
 
         bytes32 nodeA = rolldown.hashWithdrawal(withdrawalPayeeA);
         bytes32 nodeB = rolldown.hashWithdrawal(withdrawalPayeeB);
@@ -1249,9 +1263,9 @@ contract CloseWithdrawal is RolldownTest {
         vm.stopPrank();
 
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA =
-            _createWithdrawal(2, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(2, users.feePayeeA, amount, nativeTokenAddress, 0);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeB =
-            _createWithdrawal(3, users.feePayeeB, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(3, users.feePayeeB, amount, nativeTokenAddress, 0);
 
         bytes32 nodeA = rolldown.hashWithdrawal(withdrawalPayeeA);
         bytes32 nodeB = rolldown.hashWithdrawal(withdrawalPayeeB);
@@ -1275,9 +1289,9 @@ contract CloseWithdrawal is RolldownTest {
         vm.stopPrank();
 
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA =
-            _createWithdrawal(1, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(1, users.feePayeeA, amount, nativeTokenAddress, 0);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeB =
-            _createWithdrawal(2, users.feePayeeB, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(2, users.feePayeeB, amount, nativeTokenAddress, 0);
 
         bytes32 nodeA = rolldown.hashWithdrawal(withdrawalPayeeA);
         bytes32 nodeB = rolldown.hashWithdrawal(withdrawalPayeeB);
@@ -1301,9 +1315,9 @@ contract CloseWithdrawal is RolldownTest {
         vm.stopPrank();
 
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA =
-            _createWithdrawal(1, users.feePayeeA, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(1, users.feePayeeA, amount, nativeTokenAddress, 0);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeB =
-            _createWithdrawal(2, users.feePayeeB, amount, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(2, users.feePayeeB, amount, nativeTokenAddress, 0);
 
         bytes32 nodeA = rolldown.hashWithdrawal(withdrawalPayeeA);
         bytes32 nodeB = rolldown.hashWithdrawal(withdrawalPayeeB);
@@ -1327,9 +1341,9 @@ contract CloseWithdrawal is RolldownTest {
         vm.stopPrank();
 
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeA =
-            _createWithdrawal(1, users.feePayeeA, 0, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(1, users.feePayeeA, 0, nativeTokenAddress, 0);
         IRolldownPrimitives.Withdrawal memory withdrawalPayeeB =
-            _createWithdrawal(2, users.feePayeeB, 0, NATIVE_TOKEN_ADDRESS, 0);
+            _createWithdrawal(2, users.feePayeeB, 0, nativeTokenAddress, 0);
 
         bytes32 nodeA = rolldown.hashWithdrawal(withdrawalPayeeA);
         bytes32 nodeB = rolldown.hashWithdrawal(withdrawalPayeeB);
