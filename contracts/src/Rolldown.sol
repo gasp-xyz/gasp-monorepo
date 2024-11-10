@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
-import {AccessControlUpgradeable} from "@openzeppelin-upgrades/contracts/access/AccessControlUpgradeable.sol";
-import {ContextUpgradeable} from "@openzeppelin-upgrades/contracts/utils/ContextUpgradeable.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin-upgrades/contracts/security/ReentrancyGuardUpgradeable.sol";
 import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin-upgrades/contracts/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin-upgrades/contracts/security/ReentrancyGuardUpgradeable.sol";
+import {ContextUpgradeable} from "@openzeppelin-upgrades/contracts/utils/ContextUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IRolldown} from "./IRolldown.sol";
-import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
 import {LMerkleTree} from "./LMerkleTree.sol";
 
 contract Rolldown is
@@ -201,6 +200,10 @@ contract Rolldown is
         private
         checkAmountWithFerryTip(withdrawal.amount, withdrawal.ferryTip)
     {
+        if (withdrawal.recipient == address(0)) {
+            revert ZeroRecipient();
+        }
+
         bytes32 withdrawalHash = hashWithdrawal(withdrawal);
         if (processedL2Requests[withdrawalHash] != address(0)) {
             revert WithdrawalAlreadyFerried(withdrawalHash);

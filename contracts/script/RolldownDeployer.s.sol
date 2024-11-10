@@ -1,27 +1,20 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.9;
-
-import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
 import "@eigenlayer/test/mocks/EmptyContract.sol";
-
-
-import {Rolldown} from "../src/Rolldown.sol";
-
-import {Utils} from "./utils/Utils.sol";
-
-import {Gasp} from "../src/GaspToken.sol";
-
+import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "forge-std/Test.sol";
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";
 import "forge-std/console.sol";
+import {Gasp} from "../src/GaspToken.sol";
 import {Rolldown} from "../src/Rolldown.sol";
-import {IRolldownPrimitives} from "../src/Rolldown.sol";
+import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
+import {Utils} from "./utils/Utils.sol";
 
 contract RolldownDeployer is Script, Utils, Test {
-    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
 
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";

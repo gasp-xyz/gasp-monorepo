@@ -8,7 +8,7 @@ import {Test} from "forge-std/Test.sol";
 import {IRolldown} from "../src/IRolldown.sol";
 import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
-import {MyERC20} from "./utils/Utilities.sol";
+import {Empty, MyERC20} from "./utils/Utilities.sol";
 
 contract RolldownTest is Test, IRolldownPrimitives {
     struct Users {
@@ -601,9 +601,8 @@ contract FerryWithdrawal is RolldownTest {
     uint256 public ferriedAmount = amount - ferryTip;
 
     function test_EmitWithdrawalFerriedNative() external {
-        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            requestId: _createRequestId(),
             recipient: users.recipient,
             tokenAddress: nativeTokenAddress,
             amount: amount,
@@ -612,24 +611,18 @@ contract FerryWithdrawal is RolldownTest {
 
         bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
 
-        vm.startPrank(users.executor);
-
+        vm.prank(users.executor);
         vm.expectEmit();
-        emit WithdrawalFerried(
-            withdrawal.requestId.id, ferriedAmount, users.recipient, users.executor, withdrawalHash
-        );
+        emit WithdrawalFerried(withdrawal.requestId.id, ferriedAmount, users.recipient, users.executor, withdrawalHash);
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
-
-        vm.stopPrank();
     }
 
     function test_EmitWithdrawalFerriedERC20() external {
         token.mint(users.executor);
         token.mint(address(rolldown));
 
-        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            requestId: _createRequestId(),
             recipient: users.recipient,
             tokenAddress: address(token),
             amount: amount,
@@ -643,18 +636,15 @@ contract FerryWithdrawal is RolldownTest {
         token.approve(address(rolldown), ferriedAmount);
 
         vm.expectEmit();
-        emit WithdrawalFerried(
-            withdrawal.requestId.id, ferriedAmount, users.recipient, users.executor, withdrawalHash
-        );
+        emit WithdrawalFerried(withdrawal.requestId.id, ferriedAmount, users.recipient, users.executor, withdrawalHash);
         rolldown.ferryWithdrawal(withdrawal);
 
         vm.stopPrank();
     }
 
     function test_ChangeBalancesNative() external {
-        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            requestId: _createRequestId(),
             recipient: users.recipient,
             tokenAddress: nativeTokenAddress,
             amount: amount,
@@ -663,12 +653,8 @@ contract FerryWithdrawal is RolldownTest {
 
         uint256 intitalExecutorBalance = users.executor.balance;
 
-        vm.startPrank(users.executor);
-
-        token.approve(address(rolldown), ferriedAmount);
+        vm.prank(users.executor);
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
-
-        vm.stopPrank();
 
         uint256 currentRecipientBalance = users.recipient.balance;
         assertEq(currentRecipientBalance, intitalExecutorBalance + ferriedAmount);
@@ -681,9 +667,8 @@ contract FerryWithdrawal is RolldownTest {
         token.mint(users.executor);
         token.mint(address(rolldown));
 
-        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            requestId: _createRequestId(),
             recipient: users.recipient,
             tokenAddress: address(token),
             amount: amount,
@@ -710,9 +695,8 @@ contract FerryWithdrawal is RolldownTest {
         vm.prank(users.admin);
         rolldown.pause(1);
 
-        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            requestId: _createRequestId(),
             recipient: users.recipient,
             tokenAddress: address(token),
             amount: amount,
@@ -725,9 +709,8 @@ contract FerryWithdrawal is RolldownTest {
     }
 
     function test_RevertIf_ZeroAmount() external {
-        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            requestId: _createRequestId(),
             recipient: users.recipient,
             tokenAddress: nativeTokenAddress,
             amount: 0,
@@ -742,9 +725,8 @@ contract FerryWithdrawal is RolldownTest {
     function test_RevertIf_FerryTipExceedsAmount() external {
         ferryTip = amount + 1;
 
-        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            requestId: _createRequestId(),
             recipient: users.recipient,
             tokenAddress: nativeTokenAddress,
             amount: amount,
@@ -756,12 +738,25 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
     }
 
+    function test_RevertIf_ZeroRecipient() external {
+        IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+            requestId: _createRequestId(),
+            recipient: address(0),
+            tokenAddress: nativeTokenAddress,
+            amount: amount,
+            ferryTip: ferryTip
+        });
+
+        vm.prank(users.executor);
+        vm.expectRevert(IRolldownPrimitives.ZeroRecipient.selector);
+        rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
+    }
+
     function test_RevertIf_InvalidFerriedAmount() external {
         ferriedAmount -= 1;
 
-        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            requestId: _createRequestId(),
             recipient: users.recipient,
             tokenAddress: nativeTokenAddress,
             amount: amount,
@@ -774,9 +769,8 @@ contract FerryWithdrawal is RolldownTest {
     }
 
     function test_RevertIf_InvalidFerriedAmount2() external {
-        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            requestId: _createRequestId(),
             recipient: users.recipient,
             tokenAddress: nativeTokenAddress,
             amount: amount,
@@ -789,9 +783,8 @@ contract FerryWithdrawal is RolldownTest {
     }
 
     function test_RevertIf_WithdrawalAlreadyFerried() external {
-        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            requestId: _createRequestId(),
             recipient: users.recipient,
             tokenAddress: nativeTokenAddress,
             amount: amount,
@@ -808,6 +801,41 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
 
         vm.stopPrank();
+    }
+
+    function test_RevertIf_NonContractCall() external {
+        IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+            requestId: _createRequestId(),
+            recipient: users.recipient,
+            tokenAddress: address(0),
+            amount: amount,
+            ferryTip: ferryTip
+        });
+
+        vm.prank(users.executor);
+        vm.expectRevert("Address: call to non-contract");
+        rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
+    }
+
+    function test_RevertIf_TransferOperationFailed() external {
+        Empty empty = new Empty();
+
+        IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+            requestId: _createRequestId(),
+            recipient: users.recipient,
+            tokenAddress: address(empty),
+            amount: amount,
+            ferryTip: ferryTip
+        });
+
+        vm.prank(users.executor);
+        vm.expectRevert("SafeERC20: low-level call failed");
+        rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
+    }
+
+    function _createRequestId() private view returns (IRolldownPrimitives.RequestId memory) {
+        uint256 requestId = rolldown.counter();
+        return IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2});
     }
 }
 
