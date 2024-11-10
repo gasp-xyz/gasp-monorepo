@@ -265,7 +265,7 @@ contract SetUpdater is RolldownTest {
 
     function test_EmitNewUpdaterSet() external {
         vm.prank(users.admin);
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit();
         emit NewUpdaterSet(newUpdater);
         rolldown.setUpdater(newUpdater);
     }
@@ -298,37 +298,47 @@ contract SetUpdater is RolldownTest {
 }
 
 contract DepositNative is RolldownTest {
-    uint256 public fee = 0;
-    uint256 public amount = 10;
-    uint256 public requestId = 1;
+    uint256 public amount = 1 ether;
+    uint256 public ferryTip = 0;
 
     function test_EmitDepositAcceptedIntoQueue() external {
+        uint256 requestId = rolldown.counter();
+
         vm.prank(users.executor);
-        vm.expectEmit(true, true, true, true);
-        emit DepositAcceptedIntoQueue(requestId, users.executor, nativeTokenAddress, amount, fee);
+        vm.expectEmit();
+        emit DepositAcceptedIntoQueue(requestId, users.executor, nativeTokenAddress, amount, ferryTip);
         rolldown.depositNative{value: amount}();
     }
 
-    function test_ExecuteDepositEth() external {
-        uint256 initialBalanceExecutor = users.executor.balance;
-        uint256 initialBalanceContract = address(rolldown).balance;
+    function test_ChangeBalances() external {
+        uint256 initialExecutorBalance = users.executor.balance;
+        uint256 initialRolldownBalance = address(rolldown).balance;
 
         vm.prank(users.executor);
         rolldown.depositNative{value: amount}();
+
+        uint256 currentExecutorBalance = users.executor.balance;
+        assertEq(initialExecutorBalance - currentExecutorBalance, amount);
+
+        uint256 currentRolldownBalance = address(rolldown).balance;
+        assertEq(currentRolldownBalance - initialRolldownBalance, amount);
+    }
+
+    function test_GetUpdateForL2() external {
+        uint256 requestId = rolldown.counter();
+
+        vm.prank(users.executor);
+        rolldown.depositNative{value: amount}();
+
         Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
-
-        uint256 currentBalanceExecutor = users.executor.balance;
-        uint256 currentBalanceContract = address(rolldown).balance;
-
         assertEq(l1Update.pendingDeposits.length, 1);
-        assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingDeposits[0].requestId.id, requestId);
-        assertEq(l1Update.pendingDeposits[0].depositRecipient, users.executor);
-        assertEq(l1Update.pendingDeposits[0].tokenAddress, nativeTokenAddress);
-        assertEq(l1Update.pendingDeposits[0].amount, amount);
-        assertEq(l1Update.pendingDeposits[0].ferryTip, fee);
-        assertEq(initialBalanceExecutor - currentBalanceExecutor, amount);
-        assertEq(currentBalanceContract - initialBalanceContract, amount);
+
+        Rolldown.Deposit memory pendingDeposit = l1Update.pendingDeposits[0];
+        assertEq(pendingDeposit.requestId.id, requestId);
+        assertEq(pendingDeposit.depositRecipient, users.executor);
+        assertEq(pendingDeposit.tokenAddress, nativeTokenAddress);
+        assertEq(pendingDeposit.amount, amount);
+        assertEq(pendingDeposit.ferryTip, ferryTip);
     }
 
     function test_RevertIf_Paused() external {
@@ -348,37 +358,47 @@ contract DepositNative is RolldownTest {
 }
 
 contract DepositNativeWithFerryTip is RolldownTest {
-    uint256 public fee = 10;
-    uint256 public amount = 10;
-    uint256 public requestId = 1;
+    uint256 public amount = 1 ether;
+    uint256 public ferryTip = amount / 100;
 
     function test_EmitDepositAcceptedIntoQueue() external {
+        uint256 requestId = rolldown.counter();
+
         vm.prank(users.executor);
-        vm.expectEmit(true, true, true, true);
-        emit DepositAcceptedIntoQueue(requestId, users.executor, nativeTokenAddress, amount, fee);
-        rolldown.depositNative{value: amount}(fee);
+        vm.expectEmit();
+        emit DepositAcceptedIntoQueue(requestId, users.executor, nativeTokenAddress, amount, ferryTip);
+        rolldown.depositNative{value: amount}(ferryTip);
     }
 
-    function test_ExecuteDepositEth() external {
-        uint256 initialBalanceExecutor = users.executor.balance;
-        uint256 initialBalanceContract = address(rolldown).balance;
+    function test_ChangeBalances() external {
+        uint256 initialExecutorBalance = users.executor.balance;
+        uint256 initialRolldownBalance = address(rolldown).balance;
 
         vm.prank(users.executor);
-        rolldown.depositNative{value: amount}(fee);
+        rolldown.depositNative{value: amount}(ferryTip);
+
+        uint256 currentExecutorBalance = users.executor.balance;
+        assertEq(initialExecutorBalance - currentExecutorBalance, amount);
+
+        uint256 currentRolldownBalance = address(rolldown).balance;
+        assertEq(currentRolldownBalance - initialRolldownBalance, amount);
+    }
+
+    function test_GetUpdateForL2() external {
+        uint256 requestId = rolldown.counter();
+
+        vm.prank(users.executor);
+        rolldown.depositNative{value: amount}(ferryTip);
+
         Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
-
-        uint256 currentBalanceExecutor = users.executor.balance;
-        uint256 currentBalanceContract = address(rolldown).balance;
-
         assertEq(l1Update.pendingDeposits.length, 1);
-        assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingDeposits[0].requestId.id, requestId);
-        assertEq(l1Update.pendingDeposits[0].depositRecipient, users.executor);
-        assertEq(l1Update.pendingDeposits[0].tokenAddress, nativeTokenAddress);
-        assertEq(l1Update.pendingDeposits[0].amount, amount);
-        assertEq(l1Update.pendingDeposits[0].ferryTip, fee);
-        assertEq(initialBalanceExecutor - currentBalanceExecutor, amount);
-        assertEq(currentBalanceContract - initialBalanceContract, amount);
+
+        Rolldown.Deposit memory pendingDeposit = l1Update.pendingDeposits[0];
+        assertEq(pendingDeposit.requestId.id, requestId);
+        assertEq(pendingDeposit.depositRecipient, users.executor);
+        assertEq(pendingDeposit.tokenAddress, nativeTokenAddress);
+        assertEq(pendingDeposit.amount, amount);
+        assertEq(pendingDeposit.ferryTip, ferryTip);
     }
 
     function test_RevertIf_Paused() external {
@@ -387,64 +407,81 @@ contract DepositNativeWithFerryTip is RolldownTest {
 
         vm.prank(users.executor);
         vm.expectRevert("Pausable: contract is paused");
-        rolldown.depositNative{value: amount}(fee);
+        rolldown.depositNative{value: amount}(ferryTip);
     }
 
     function test_RevertIf_ZeroAmount() external {
         vm.prank(users.executor);
         vm.expectRevert(abi.encodeWithSelector(ZeroAmount.selector));
-        rolldown.depositNative{value: 0}(fee);
+        rolldown.depositNative{value: 0}(ferryTip);
     }
 
     function test_RevertIf_FerryTipExceedsAmount() external {
+        ferryTip = amount + 1;
+
         vm.prank(users.executor);
-        vm.expectRevert(abi.encodeWithSelector(FerryTipExceedsAmount.selector, fee + 1, amount));
-        rolldown.depositNative{value: amount}(fee + 1);
+        vm.expectRevert(abi.encodeWithSelector(FerryTipExceedsAmount.selector, ferryTip, amount));
+        rolldown.depositNative{value: amount}(ferryTip);
     }
 }
 
 contract DepositERC20 is RolldownTest {
-    uint256 public fee = 0;
-    uint256 public amount = 1;
-    uint256 public requestId = 1;
+    uint256 public amount = 1 ether;
+    uint256 public ferryTip = 0;
 
     function test_EmitDepositAcceptedIntoQueue() external {
         vm.startPrank(users.executor);
 
+        uint256 requestId = rolldown.counter();
         token.mint(users.executor);
         token.approve(address(rolldown), amount);
-        vm.expectEmit(true, true, true, true);
-        emit DepositAcceptedIntoQueue(requestId, users.executor, address(token), amount, fee);
+
+        vm.expectEmit();
+        emit DepositAcceptedIntoQueue(requestId, users.executor, address(token), amount, ferryTip);
         rolldown.depositERC20(address(token), amount);
 
         vm.stopPrank();
     }
 
-    function test_ExecuteDepositERC20() external {
+    function test_ChangeBalances() external {
         token.mint(users.executor);
-
-        uint256 initialBalanceExecutor = token.balanceOf(users.executor);
-        uint256 initialBalanceContract = token.balanceOf(address(rolldown));
+        uint256 initialExecutorBalance = token.balanceOf(users.executor);
+        uint256 initialRolldownBalance = token.balanceOf(address(rolldown));
 
         vm.startPrank(users.executor);
+
         token.approve(address(rolldown), amount);
         rolldown.depositERC20(address(token), amount);
+
+        vm.stopPrank();
+
+        uint256 currentExecutorBalance = token.balanceOf(users.executor);
+        assertEq(initialExecutorBalance - currentExecutorBalance, amount);
+
+        uint256 currentRolldownBalance = token.balanceOf(address(rolldown));
+        assertEq(currentRolldownBalance - initialRolldownBalance, amount);
+    }
+
+    function test_GetUpdateForL2() external {
+        token.mint(users.executor);
+        uint256 requestId = rolldown.counter();
+
+        vm.startPrank(users.executor);
+
+        token.approve(address(rolldown), amount);
+        rolldown.depositERC20(address(token), amount);
+
         vm.stopPrank();
 
         Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
-
-        uint256 currentBalanceExecutor = token.balanceOf(users.executor);
-        uint256 currentBalanceContract = token.balanceOf(address(rolldown));
-
         assertEq(l1Update.pendingDeposits.length, 1);
-        assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingDeposits[0].requestId.id, requestId);
-        assertEq(l1Update.pendingDeposits[0].depositRecipient, users.executor);
-        assertEq(l1Update.pendingDeposits[0].tokenAddress, address(token));
-        assertEq(l1Update.pendingDeposits[0].amount, amount);
-        assertEq(l1Update.pendingDeposits[0].ferryTip, fee);
-        assertEq(initialBalanceExecutor - currentBalanceExecutor, amount);
-        assertEq(currentBalanceContract - initialBalanceContract, amount);
+
+        Rolldown.Deposit memory pendingDeposit = l1Update.pendingDeposits[0];
+        assertEq(pendingDeposit.requestId.id, requestId);
+        assertEq(pendingDeposit.depositRecipient, users.executor);
+        assertEq(pendingDeposit.tokenAddress, address(token));
+        assertEq(pendingDeposit.amount, amount);
+        assertEq(pendingDeposit.ferryTip, ferryTip);
     }
 
     function test_RevertIf_Paused() external {
@@ -470,47 +507,62 @@ contract DepositERC20 is RolldownTest {
 }
 
 contract DepositERC20WithFerryTip is RolldownTest {
-    uint256 public fee = 1;
-    uint256 public amount = 1;
-    uint256 public requestId = 1;
+    uint256 public amount = 1 ether;
+    uint256 public ferryTip = amount / 100;
 
     function test_EmitDepositAcceptedIntoQueue() external {
         vm.startPrank(users.executor);
 
+        uint256 requestId = rolldown.counter();
         token.mint(users.executor);
         token.approve(address(rolldown), amount);
-        vm.expectEmit(true, true, true, true);
-        emit DepositAcceptedIntoQueue(requestId, users.executor, address(token), amount, fee);
-        rolldown.depositERC20(address(token), amount, fee);
+
+        vm.expectEmit();
+        emit DepositAcceptedIntoQueue(requestId, users.executor, address(token), amount, ferryTip);
+        rolldown.depositERC20(address(token), amount, ferryTip);
 
         vm.stopPrank();
     }
 
-    function test_ExecuteDepositERC20() external {
+    function test_ChangeBalances() external {
         token.mint(users.executor);
-
-        uint256 initialBalanceExecutor = token.balanceOf(users.executor);
-        uint256 initialBalanceContract = token.balanceOf(address(rolldown));
+        uint256 initialExecutorBalance = token.balanceOf(users.executor);
+        uint256 initialRolldownBalance = token.balanceOf(address(rolldown));
 
         vm.startPrank(users.executor);
+
         token.approve(address(rolldown), amount);
-        rolldown.depositERC20(address(token), amount, fee);
+        rolldown.depositERC20(address(token), amount, ferryTip);
+
+        vm.stopPrank();
+
+        uint256 currentExecutorBalance = token.balanceOf(users.executor);
+        assertEq(initialExecutorBalance - currentExecutorBalance, amount);
+
+        uint256 currentRolldownBalance = token.balanceOf(address(rolldown));
+        assertEq(currentRolldownBalance - initialRolldownBalance, amount);
+    }
+
+    function test_GetUpdateForL2() external {
+        token.mint(users.executor);
+        uint256 requestId = rolldown.counter();
+
+        vm.startPrank(users.executor);
+
+        token.approve(address(rolldown), amount);
+        rolldown.depositERC20(address(token), amount, ferryTip);
+
         vm.stopPrank();
 
         Rolldown.L1Update memory l1Update = rolldown.getUpdateForL2();
-
-        uint256 currentBalanceExecutor = token.balanceOf(users.executor);
-        uint256 currentBalanceContract = token.balanceOf(address(rolldown));
-
         assertEq(l1Update.pendingDeposits.length, 1);
-        assertEq(l1Update.pendingCancelResolutions.length, 0);
-        assertEq(l1Update.pendingDeposits[0].requestId.id, requestId);
-        assertEq(l1Update.pendingDeposits[0].depositRecipient, users.executor);
-        assertEq(l1Update.pendingDeposits[0].tokenAddress, address(token));
-        assertEq(l1Update.pendingDeposits[0].amount, amount);
-        assertEq(l1Update.pendingDeposits[0].ferryTip, fee);
-        assertEq(initialBalanceExecutor - currentBalanceExecutor, amount);
-        assertEq(currentBalanceContract - initialBalanceContract, amount);
+
+        Rolldown.Deposit memory pendingDeposit = l1Update.pendingDeposits[0];
+        assertEq(pendingDeposit.requestId.id, requestId);
+        assertEq(pendingDeposit.depositRecipient, users.executor);
+        assertEq(pendingDeposit.tokenAddress, address(token));
+        assertEq(pendingDeposit.amount, amount);
+        assertEq(pendingDeposit.ferryTip, ferryTip);
     }
 
     function test_RevertIf_Paused() external {
@@ -519,37 +571,37 @@ contract DepositERC20WithFerryTip is RolldownTest {
 
         vm.prank(users.executor);
         vm.expectRevert("Pausable: contract is paused");
-        rolldown.depositERC20(address(token), amount, fee);
+        rolldown.depositERC20(address(token), amount, ferryTip);
     }
 
     function test_RevertIf_ZeroAmount() external {
         vm.prank(users.executor);
         vm.expectRevert(abi.encodeWithSelector(ZeroAmount.selector));
-        rolldown.depositERC20(address(token), 0, fee);
+        rolldown.depositERC20(address(token), 0, ferryTip);
     }
 
     function test_RevertIf_ZeroToken() external {
         vm.prank(users.executor);
         vm.expectRevert(abi.encodeWithSelector(ZeroToken.selector));
-        rolldown.depositERC20(address(0), amount, fee);
+        rolldown.depositERC20(address(0), amount, ferryTip);
     }
 
     function test_RevertIf_FerryTipExceedsAmount() external {
+        ferryTip = amount + 1;
+
         vm.prank(users.executor);
-        vm.expectRevert(abi.encodeWithSelector(FerryTipExceedsAmount.selector, fee + 1, amount));
-        rolldown.depositERC20(address(token), amount, fee + 1);
+        vm.expectRevert(abi.encodeWithSelector(FerryTipExceedsAmount.selector, ferryTip, amount));
+        rolldown.depositERC20(address(token), amount, ferryTip);
     }
 }
 
 contract FerryWithdrawal is RolldownTest {
-    uint256 public ferryTip = 10;
-    uint256 public amount = 10;
-    uint256 public requestId = 1;
+    uint256 public amount = 1 ether;
+    uint256 public ferryTip = amount / 100;
+    uint256 public ferriedAmount = amount - ferryTip;
 
     function test_EmitWithdrawalFerriedNative() external {
-        token.mint(address(rolldown));
-        token.mint(users.executor);
-
+        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
@@ -557,22 +609,25 @@ contract FerryWithdrawal is RolldownTest {
             amount: amount,
             ferryTip: ferryTip
         });
+
         bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
 
         vm.startPrank(users.executor);
-        token.approve(address(rolldown), amount - ferryTip);
-        vm.expectEmit(true, true, true, true);
+
+        vm.expectEmit();
         emit WithdrawalFerried(
-            withdrawal.requestId.id, amount - ferryTip, users.recipient, users.executor, withdrawalHash
+            withdrawal.requestId.id, ferriedAmount, users.recipient, users.executor, withdrawalHash
         );
-        rolldown.ferryWithdrawal(withdrawal);
+        rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
+
         vm.stopPrank();
     }
 
     function test_EmitWithdrawalFerriedERC20() external {
-        token.mint(address(rolldown));
         token.mint(users.executor);
+        token.mint(address(rolldown));
 
+        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
@@ -580,19 +635,24 @@ contract FerryWithdrawal is RolldownTest {
             amount: amount,
             ferryTip: ferryTip
         });
+
         bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
 
         vm.startPrank(users.executor);
-        token.approve(address(rolldown), amount - ferryTip);
-        vm.expectEmit(true, true, true, true);
+
+        token.approve(address(rolldown), ferriedAmount);
+
+        vm.expectEmit();
         emit WithdrawalFerried(
-            withdrawal.requestId.id, amount - ferryTip, users.recipient, users.executor, withdrawalHash
+            withdrawal.requestId.id, ferriedAmount, users.recipient, users.executor, withdrawalHash
         );
         rolldown.ferryWithdrawal(withdrawal);
+
         vm.stopPrank();
     }
 
-    function test_ExecuteWithdrawalFerriedNative() external {
+    function test_ChangeBalancesNative() external {
+        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
@@ -604,21 +664,24 @@ contract FerryWithdrawal is RolldownTest {
         uint256 intitalExecutorBalance = users.executor.balance;
 
         vm.startPrank(users.executor);
-        token.approve(address(rolldown), amount - ferryTip);
-        rolldown.ferryWithdrawal(withdrawal);
+
+        token.approve(address(rolldown), ferriedAmount);
+        rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
+
         vm.stopPrank();
 
-        uint256 currentRecipienBalance = users.recipient.balance;
-        uint256 currentExecutorBalance = users.executor.balance;
+        uint256 currentRecipientBalance = users.recipient.balance;
+        assertEq(currentRecipientBalance, intitalExecutorBalance + ferriedAmount);
 
-        assertEq(currentRecipienBalance, intitalExecutorBalance + (amount - ferryTip));
+        uint256 currentExecutorBalance = users.executor.balance;
         assertEq(currentExecutorBalance, intitalExecutorBalance - amount + ferryTip);
     }
 
-    function test_ExecuteWithdrawalFerriedERC20() external {
-        token.mint(address(rolldown));
+    function test_ChangeBalancesERC20() external {
         token.mint(users.executor);
+        token.mint(address(rolldown));
 
+        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
@@ -630,14 +693,16 @@ contract FerryWithdrawal is RolldownTest {
         uint256 intitalExecutorBalance = token.balanceOf(users.executor);
 
         vm.startPrank(users.executor);
-        token.approve(address(rolldown), amount - ferryTip);
+
+        token.approve(address(rolldown), ferriedAmount);
         rolldown.ferryWithdrawal(withdrawal);
+
         vm.stopPrank();
 
-        uint256 currentRecipienBalance = token.balanceOf(users.recipient);
-        uint256 currentExecutorBalance = token.balanceOf(users.executor);
+        uint256 currentRecipientBalance = token.balanceOf(users.recipient);
+        assertEq(currentRecipientBalance, ferriedAmount);
 
-        assertEq(currentRecipienBalance, amount - ferryTip);
+        uint256 currentExecutorBalance = token.balanceOf(users.executor);
         assertEq(currentExecutorBalance, intitalExecutorBalance - amount + ferryTip);
     }
 
@@ -645,6 +710,7 @@ contract FerryWithdrawal is RolldownTest {
         vm.prank(users.admin);
         rolldown.pause(1);
 
+        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
@@ -655,24 +721,11 @@ contract FerryWithdrawal is RolldownTest {
 
         vm.prank(users.executor);
         vm.expectRevert("Pausable: contract is paused");
-        rolldown.ferryWithdrawal(withdrawal);
-    }
-
-    function test_RevertIf_InvalidFerriedAmount() external {
-        IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
-            recipient: users.recipient,
-            tokenAddress: nativeTokenAddress,
-            amount: amount,
-            ferryTip: ferryTip
-        });
-
-        vm.prank(users.executor);
-        vm.expectRevert(abi.encodeWithSelector(InvalidFerriedAmount.selector, amount, amount - ferryTip));
-        rolldown.ferryWithdrawal{value: amount}(withdrawal);
+        rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
     }
 
     function test_RevertIf_ZeroAmount() external {
+        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
@@ -683,24 +736,13 @@ contract FerryWithdrawal is RolldownTest {
 
         vm.prank(users.executor);
         vm.expectRevert(abi.encodeWithSelector(ZeroAmount.selector));
-        rolldown.ferryWithdrawal(withdrawal);
+        rolldown.ferryWithdrawal{value: 0}(withdrawal);
     }
 
     function test_RevertIf_FerryTipExceedsAmount() external {
-        IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
-            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
-            recipient: users.recipient,
-            tokenAddress: nativeTokenAddress,
-            amount: amount,
-            ferryTip: ferryTip + 1
-        });
+        ferryTip = amount + 1;
 
-        vm.prank(users.executor);
-        vm.expectRevert(abi.encodeWithSelector(FerryTipExceedsAmount.selector, ferryTip + 1, amount));
-        rolldown.ferryWithdrawal(withdrawal);
-    }
-
-    function test_RevertIf_WithdrawalAlreadyFerried() external {
+        uint256 requestId = rolldown.counter();
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
             recipient: users.recipient,
@@ -708,13 +750,64 @@ contract FerryWithdrawal is RolldownTest {
             amount: amount,
             ferryTip: ferryTip
         });
-        bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
-
-        rolldown.ferryWithdrawal(withdrawal);
 
         vm.prank(users.executor);
+        vm.expectRevert(abi.encodeWithSelector(FerryTipExceedsAmount.selector, ferryTip, amount));
+        rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
+    }
+
+    function test_RevertIf_InvalidFerriedAmount() external {
+        ferriedAmount -= 1;
+
+        uint256 requestId = rolldown.counter();
+        IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            recipient: users.recipient,
+            tokenAddress: nativeTokenAddress,
+            amount: amount,
+            ferryTip: ferryTip
+        });
+
+        vm.prank(users.executor);
+        vm.expectRevert(abi.encodeWithSelector(InvalidFerriedAmount.selector, ferriedAmount, amount - ferryTip));
+        rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
+    }
+
+    function test_RevertIf_InvalidFerriedAmount2() external {
+        uint256 requestId = rolldown.counter();
+        IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            recipient: users.recipient,
+            tokenAddress: nativeTokenAddress,
+            amount: amount,
+            ferryTip: ferryTip
+        });
+
+        vm.prank(users.executor);
+        vm.expectRevert(abi.encodeWithSelector(InvalidFerriedAmount.selector, 0, ferriedAmount));
+        rolldown.ferryWithdrawal{value: 0}(withdrawal);
+    }
+
+    function test_RevertIf_WithdrawalAlreadyFerried() external {
+        uint256 requestId = rolldown.counter();
+        IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
+            requestId: IRolldownPrimitives.RequestId({id: requestId, origin: IRolldownPrimitives.Origin.L2}),
+            recipient: users.recipient,
+            tokenAddress: nativeTokenAddress,
+            amount: amount,
+            ferryTip: ferryTip
+        });
+
+        bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
+
+        vm.startPrank(users.executor);
+
+        rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
+
         vm.expectRevert(abi.encodeWithSelector(WithdrawalAlreadyFerried.selector, withdrawalHash));
-        rolldown.ferryWithdrawal(withdrawal);
+        rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
+
+        vm.stopPrank();
     }
 }
 
@@ -757,9 +850,9 @@ contract CloseWithdrawal is RolldownTest {
         rolldown.update_l1_from_l2(merkleRoot, IRolldownPrimitives.Range({start: 1, end: 2}));
 
         vm.startPrank(users.feePayeeB);
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit();
         emit NativeTokensWithdrawn(users.feePayeeB, amount);
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit();
         emit WithdrawalClosed(2, nodeB);
 
         rolldown.closeWithdrawal(withdrawalPayeeB, merkleRoot, proof_withdrawalPayeeB);
@@ -790,11 +883,11 @@ contract CloseWithdrawal is RolldownTest {
         rolldown.update_l1_from_l2(merkleRoot, IRolldownPrimitives.Range({start: 1, end: 2}));
 
         vm.startPrank(users.feePayeeB);
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit();
         emit ERC20TokensWithdrawn(users.feePayeeB, address(token), amount);
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit();
         emit Transfer(address(rolldown), users.feePayeeB, amount);
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit();
         emit WithdrawalClosed(2, nodeB);
 
         rolldown.closeWithdrawal(withdrawalPayeeB, merkleRoot, proof_withdrawalPayeeB);
@@ -825,9 +918,9 @@ contract CloseWithdrawal is RolldownTest {
         token.approve(address(rolldown), amount - ferryTip);
         rolldown.ferryWithdrawal(withdrawalPayeeB);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit();
         emit NativeTokensWithdrawn(users.feePayeeB, amount);
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit();
         emit FerriedWithdrawalClosed(2, nodeB);
 
         rolldown.closeWithdrawal(withdrawalPayeeB, merkleRoot, proof_withdrawalPayeeB);
@@ -861,11 +954,11 @@ contract CloseWithdrawal is RolldownTest {
         token.approve(address(rolldown), amount - ferryTip);
         rolldown.ferryWithdrawal(withdrawalPayeeB);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit();
         emit ERC20TokensWithdrawn(users.feePayeeB, address(token), amount);
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit();
         emit Transfer(address(rolldown), users.feePayeeB, amount);
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit();
         emit FerriedWithdrawalClosed(2, nodeB);
 
         rolldown.closeWithdrawal(withdrawalPayeeB, merkleRoot, proof_withdrawalPayeeB);
