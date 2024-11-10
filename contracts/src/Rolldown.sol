@@ -24,9 +24,9 @@ contract Rolldown is
     using Address for address payable;
     using SafeERC20 for IERC20;
 
-    bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
-    address public constant NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
-    address public constant CLOSED = 0x1111111111111111111111111111111111111111;
+    bytes32 public constant override UPDATER_ROLE = keccak256("UPDATER_ROLE");
+    address public constant override NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
+    address public constant override CLOSED = 0x1111111111111111111111111111111111111111;
 
     // Counter for mapping key
     uint256 public override counter;

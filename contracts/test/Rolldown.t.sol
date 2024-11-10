@@ -2,7 +2,10 @@
 pragma solidity 0.8.13;
 
 import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {Test} from "forge-std/Test.sol";
+import {IRolldown} from "../src/IRolldown.sol";
 import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
 import {MyERC20} from "./utils/Utilities.sol";
@@ -22,9 +25,9 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
     Users public users;
     PauserRegistry public pauserRegistry;
-    Rolldown public rolldown;
     MyERC20 public token;
-    bytes32 public defaultAdminRole;
+    IRolldown public rolldown;
+    bytes32 public defaultAdminRole = 0x00;
     bytes32 public updaterRole;
 
     event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
@@ -54,17 +57,28 @@ contract RolldownTest is Test, IRolldownPrimitives {
         admins[0] = users.admin;
         pauserRegistry = new PauserRegistry(admins, users.admin);
 
-        rolldown = new Rolldown();
-        rolldown.initialize(pauserRegistry, users.admin, IRolldownPrimitives.ChainId.Ethereum, users.updater);
-
         token = new MyERC20();
 
-        defaultAdminRole = rolldown.DEFAULT_ADMIN_ROLE();
+        Rolldown implementation = new Rolldown();
+        ProxyAdmin proxyAdmin = new ProxyAdmin();
+        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+            address(implementation),
+            address(proxyAdmin),
+            abi.encodeWithSelector(
+                Rolldown.initialize.selector,
+                pauserRegistry,
+                users.admin,
+                IRolldownPrimitives.ChainId.Ethereum,
+                users.updater
+            )
+        );
+        rolldown = IRolldown(address(proxy));
+
         updaterRole = rolldown.UPDATER_ROLE();
     }
 }
 
-contract Initialize is RolldownTest {
+contract Deploy is RolldownTest {
     function test_HasDefaultAdminRole() external view {
         bool hasRole = rolldown.hasRole(defaultAdminRole, users.admin);
         assertTrue(hasRole);
@@ -76,8 +90,8 @@ contract Initialize is RolldownTest {
     }
 
     function test_HasChainId() external view {
-        uint256 chainId = uint256(rolldown.chain());
-        assertEq(chainId, uint256(IRolldownPrimitives.ChainId.Ethereum));
+        IRolldownPrimitives.ChainId chainId = rolldown.chain();
+        assertEq(uint256(chainId), uint256(IRolldownPrimitives.ChainId.Ethereum));
     }
 
     function test_HasUpdater() external view {
@@ -96,17 +110,39 @@ contract Initialize is RolldownTest {
     }
 
     function test_RevertIf_ZeroAdmin() external {
-        rolldown = new Rolldown();
+        Rolldown implementation = new Rolldown();
+        ProxyAdmin proxyAdmin = new ProxyAdmin();
 
         vm.expectRevert(abi.encodeWithSelector(ZeroAdmin.selector));
-        rolldown.initialize(pauserRegistry, address(0), IRolldownPrimitives.ChainId.Ethereum, users.updater);
+        new TransparentUpgradeableProxy(
+            address(implementation),
+            address(proxyAdmin),
+            abi.encodeWithSelector(
+                Rolldown.initialize.selector,
+                pauserRegistry,
+                address(0),
+                IRolldownPrimitives.ChainId.Ethereum,
+                users.updater
+            )
+        );
     }
 
     function test_RevertIf_ZeroUpdater() external {
-        rolldown = new Rolldown();
+        Rolldown implementation = new Rolldown();
+        ProxyAdmin proxyAdmin = new ProxyAdmin();
 
         vm.expectRevert(abi.encodeWithSelector(ZeroUpdater.selector));
-        rolldown.initialize(pauserRegistry, users.admin, IRolldownPrimitives.ChainId.Ethereum, address(0));
+        new TransparentUpgradeableProxy(
+            address(implementation),
+            address(proxyAdmin),
+            abi.encodeWithSelector(
+                Rolldown.initialize.selector,
+                pauserRegistry,
+                users.admin,
+                IRolldownPrimitives.ChainId.Ethereum,
+                address(0)
+            )
+        );
     }
 }
 
