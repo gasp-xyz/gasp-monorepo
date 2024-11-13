@@ -179,10 +179,6 @@ contract RolldownDeployer is Script, Utils, Test {
         require(rolldown.lastProcessedUpdate_origin_l1() == 0, "rolldown.lastProcessedUpdate_origin_l1 != 0");
         require(rolldown.counter() == 1, "rolldown.counter != 1");
         require(rolldown.lastProcessedUpdate_origin_l2() == 0, "rolldown.lastProcessedUpdate_origin_l2 != 0");
-        require(
-            rolldown.pauserRegistry() == rolldownPauserReg,
-            "rolldown: pauser registry not set correctly"
-        );
-        require(rolldown.paused() == 0, "rolldown: init paused status set incorrectly");
+        require(!rolldown.paused(), "rolldown: paused status set incorrectly");
     }
 }

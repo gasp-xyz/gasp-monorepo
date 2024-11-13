@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {Test} from "forge-std/Test.sol";
 import {IRolldown} from "../src/IRolldown.sol";
 import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
-import {Empty, MyERC20} from "./utils/Utilities.sol";
+import {MyERC20} from "./utils/Utilities.sol";
 
 contract RolldownTest is Test, IRolldownPrimitives {
     struct Users {
@@ -23,7 +23,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
     }
 
     Users public users;
-    PauserRegistry public pauserRegistry;
     MyERC20 public token;
     IRolldown public rolldown;
     bytes32 public defaultAdminRole = 0x00;
@@ -55,10 +54,6 @@ contract RolldownTest is Test, IRolldownPrimitives {
         deal(payable(users.withdrawerB), 100 ether);
         deal(payable(users.withdrawerC), 100 ether);
 
-        address[] memory admins = new address[](1);
-        admins[0] = users.admin;
-        pauserRegistry = new PauserRegistry(admins, users.admin);
-
         token = new MyERC20();
 
         Rolldown implementation = new Rolldown();
@@ -67,14 +62,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
             address(implementation),
             address(proxyAdmin),
             abi.encodeWithSelector(
-                Rolldown.initialize.selector,
-                pauserRegistry,
-                users.admin,
-                IRolldownPrimitives.ChainId.Ethereum,
-                users.updater
+                Rolldown.initialize.selector, users.admin, IRolldownPrimitives.ChainId.Ethereum, users.updater
             )
         );
-        rolldown = IRolldown(address(proxy));
+        rolldown = Rolldown(address(proxy));
 
         updaterRole = rolldown.UPDATER_ROLE();
         nativeTokenAddress = rolldown.NATIVE_TOKEN_ADDRESS();
@@ -106,11 +97,6 @@ contract Deploy is RolldownTest {
         assertTrue(hasRole);
     }
 
-    function test_HasRightPausedStatus() external view {
-        uint256 paused = rolldown.paused();
-        assertEq(paused, 0);
-    }
-
     function test_UpdaterAccountSet() external view {
         address updaterAccount = rolldown.updaterAccount();
         assertEq(updaterAccount, users.updater);
@@ -138,7 +124,7 @@ contract Deploy is RolldownTest {
 
     function test_RevertIf_InvalidInitialization() external {
         vm.expectRevert("Initializable: contract is already initialized");
-        rolldown.initialize(pauserRegistry, users.admin, IRolldownPrimitives.ChainId.Ethereum, users.updater);
+        rolldown.initialize(users.admin, IRolldownPrimitives.ChainId.Ethereum, users.updater);
     }
 
     function test_RevertIf_ZeroAdmin() external {
@@ -150,11 +136,7 @@ contract Deploy is RolldownTest {
             address(implementation),
             address(proxyAdmin),
             abi.encodeWithSelector(
-                Rolldown.initialize.selector,
-                pauserRegistry,
-                address(0),
-                IRolldownPrimitives.ChainId.Ethereum,
-                users.updater
+                Rolldown.initialize.selector, address(0), IRolldownPrimitives.ChainId.Ethereum, users.updater
             )
         );
     }
@@ -168,11 +150,7 @@ contract Deploy is RolldownTest {
             address(implementation),
             address(proxyAdmin),
             abi.encodeWithSelector(
-                Rolldown.initialize.selector,
-                pauserRegistry,
-                users.admin,
-                IRolldownPrimitives.ChainId.Ethereum,
-                address(0)
+                Rolldown.initialize.selector, users.admin, IRolldownPrimitives.ChainId.Ethereum, address(0)
             )
         );
     }
@@ -357,10 +335,10 @@ contract DepositNative is RolldownTest {
 
     function test_RevertIf_Paused() external {
         vm.prank(users.admin);
-        rolldown.pause(1);
+        rolldown.pause();
 
         vm.prank(users.depositor);
-        vm.expectRevert("Pausable: contract is paused");
+        vm.expectRevert("Pausable: paused");
         rolldown.depositNative{value: amount}();
     }
 
@@ -417,10 +395,10 @@ contract DepositNativeWithFerryTip is RolldownTest {
 
     function test_RevertIf_Paused() external {
         vm.prank(users.admin);
-        rolldown.pause(1);
+        rolldown.pause();
 
         vm.prank(users.depositor);
-        vm.expectRevert("Pausable: contract is paused");
+        vm.expectRevert("Pausable: paused");
         rolldown.depositNative{value: amount}(ferryTip);
     }
 
@@ -500,10 +478,10 @@ contract DepositERC20 is RolldownTest {
 
     function test_RevertIf_Paused() external {
         vm.prank(users.admin);
-        rolldown.pause(1);
+        rolldown.pause();
 
         vm.prank(users.depositor);
-        vm.expectRevert("Pausable: contract is paused");
+        vm.expectRevert("Pausable: paused");
         rolldown.depositERC20(address(token), amount);
     }
 
@@ -581,10 +559,10 @@ contract DepositERC20WithFerryTip is RolldownTest {
 
     function test_RevertIf_Paused() external {
         vm.prank(users.admin);
-        rolldown.pause(1);
+        rolldown.pause();
 
         vm.prank(users.depositor);
-        vm.expectRevert("Pausable: contract is paused");
+        vm.expectRevert("Pausable: paused");
         rolldown.depositERC20(address(token), amount, ferryTip);
     }
 
@@ -707,7 +685,7 @@ contract FerryWithdrawal is RolldownTest {
 
     function test_RevertIf_Paused() external {
         vm.prank(users.admin);
-        rolldown.pause(1);
+        rolldown.pause();
 
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: _createRequestId(),
@@ -718,7 +696,7 @@ contract FerryWithdrawal is RolldownTest {
         });
 
         vm.prank(users.depositor);
-        vm.expectRevert("Pausable: contract is paused");
+        vm.expectRevert("Pausable: paused");
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
     }
 
@@ -832,12 +810,10 @@ contract FerryWithdrawal is RolldownTest {
     }
 
     function test_RevertIf_TransferOperationFailed() external {
-        Empty empty = new Empty();
-
         IRolldownPrimitives.Withdrawal memory withdrawal = IRolldownPrimitives.Withdrawal({
             requestId: _createRequestId(),
             recipient: users.recipient,
-            tokenAddress: address(empty),
+            tokenAddress: address(new EmptyContract()),
             amount: amount,
             ferryTip: ferryTip
         });
@@ -1323,7 +1299,7 @@ contract CloseWithdrawal is RolldownTest {
 
     function test_RevertIf_Paused() external {
         vm.prank(users.admin);
-        rolldown.pause(1);
+        rolldown.pause();
 
         IRolldownPrimitives.Withdrawal memory withdrawalA =
             _createWithdrawal(1, users.withdrawerA, nativeTokenAddress, amount, 0);
@@ -1337,7 +1313,7 @@ contract CloseWithdrawal is RolldownTest {
         merkleProof[0] = nodeA;
 
         vm.prank(users.withdrawerB);
-        vm.expectRevert("Pausable: contract is paused");
+        vm.expectRevert("Pausable: paused");
         rolldown.closeWithdrawal(withdrawalB, merkleRoot, merkleProof);
     }
 

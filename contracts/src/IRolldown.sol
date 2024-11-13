@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {IPausable} from "@eigenlayer/contracts/interfaces/IPausable.sol";
-import {IPauserRegistry} from "@eigenlayer/contracts/permissions/Pausable.sol";
 import {IAccessControlUpgradeable} from "@openzeppelin-upgrades/contracts/access/IAccessControlUpgradeable.sol";
 import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
 
-interface IRolldown is IAccessControlUpgradeable, IPausable, IRolldownPrimitives {
-    function initialize(IPauserRegistry pauserRegistry, address admin, ChainId chainId, address updater) external;
+interface IRolldown is IAccessControlUpgradeable, IRolldownPrimitives {
+    function initialize(address admin, ChainId chainId, address updater) external;
+
+    function pause() external;
+
+    function unpause() external;
 
     function setUpdater(address updater) external;
 

@@ -5,8 +5,6 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {Test} from "forge-std/Test.sol";
 
-contract Empty {}
-
 contract MyERC20 is ERC20 {
     constructor() ERC20("Name", "SYM") {}
 

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin-upgrades/contracts/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin-upgrades/contracts/security/ReentrancyGuardUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin-upgrades/contracts/security/PausableUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin-upgrades/contracts/utils/ContextUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -17,7 +17,7 @@ contract Rolldown is
     ContextUpgradeable,
     AccessControlUpgradeable,
     ReentrancyGuardUpgradeable,
-    Pausable,
+    PausableUpgradeable,
     IRolldown
 {
     using Address for address payable;
@@ -55,12 +55,14 @@ contract Rolldown is
         _;
     }
 
-    function initialize(IPauserRegistry pauserRegistry, address admin, ChainId chainId, address updater)
+    function initialize(address admin, ChainId chainId, address updater)
         external
+        override
         initializer
     {
         ContextUpgradeable.__Context_init();
         AccessControlUpgradeable.__AccessControl_init();
+        PausableUpgradeable.__Pausable_init();
         ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
 
         if (admin == address(0)) {
@@ -74,12 +76,18 @@ contract Rolldown is
         _grantRole(UPDATER_ROLE, updater);
         updaterAccount = updater;
 
-        _initializePauser(pauserRegistry, UNPAUSE_ALL);
-
         counter = 1;
         lastProcessedUpdate_origin_l1 = 0;
         lastProcessedUpdate_origin_l2 = 0;
         chain = chainId;
+    }
+
+    function pause() external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _pause();
+    }
+
+    function unpause() external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _unpause();
     }
 
     function setUpdater(address updater) external override onlyRole(DEFAULT_ADMIN_ROLE) {
