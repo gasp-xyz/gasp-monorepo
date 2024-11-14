@@ -65,11 +65,11 @@ export const processSwapEvents = async (api: ApiPromise, block: Block) => {
   }
 }
 
-const filterEvents = (ev: Event) => {
+export const filterEvents = (ev: Event) => {
   return ev.section === 'xyk' && ev.method === 'AssetsSwapped'
 }
 
-async function decimalsFromTokenId(api: ApiPromise, tokenId: any) {
+export async function decimalsFromTokenId(api: ApiPromise, tokenId: any) {
   const tokens = await api.query.assetRegistry.metadata.entries()
   const assets = tokens.reduce((obj, [key, value]) => {
     const [tokenId] = key.args
@@ -83,7 +83,7 @@ async function decimalsFromTokenId(api: ApiPromise, tokenId: any) {
   return assets[tokenId.toString()] || null
 }
 
-async function calculateVolume(
+export async function calculateVolume(
   tokenId: string,
   decimals: number,
   volume: string
