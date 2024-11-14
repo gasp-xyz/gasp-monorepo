@@ -15,6 +15,7 @@ import * as networkController from './controller/networkController.js'
 import * as tokenNetworkPortfolioController from './controller/tokenNetworkPortfolioController.js'
 import * as faucetController from './controller/FaucetController.js'
 import * as tracingController from './controller/TracingController.js'
+import * as tradingController from './controller/TradingController.js'
 
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
@@ -118,6 +119,11 @@ app.get(
 
   tracingController.getATransactionByEntityId
 )
+
+// Dashboard endpoint
+app.get('/account/:wallet/dashboard', (req: Request, res: Response) => {
+  tradingController.getData(req, res)
+})
 
 // Coinmarketcap listing endpoints
 app.get('/coinmarketcap/v1/summary', coinmarketcapController.summary)
