@@ -35,19 +35,18 @@ export const processSwapEvents = async (api: ApiPromise, block: Block) => {
             existingRecord.lastTradeTimestamp = currentDate
             existingRecord.totalTrades += 1
             const { decimals } = await decimalsFromTokenId(api, tokenId)
-            const newTotalVolume = await calculateVolume(
-              tokenId,
-              decimals,
-              eventVolume
-            )
-            if (newTotalVolume !== null) {
-              existingRecord.totalVolume = newTotalVolume
-            }
+            existingRecord.totalVolume =
+              decimals !== null
+                ? await calculateVolume(tokenId, decimals, eventVolume)
+                : 0
             await swapRepository.save(existingRecord)
           } else {
             //we got the trade for new account
             const { decimals } = await decimalsFromTokenId(api, tokenId)
-            const volume = await calculateVolume(tokenId, decimals, eventVolume)
+            const volume =
+              decimals !== null
+                ? await calculateVolume(tokenId, decimals, eventVolume)
+                : 0
             const newRecord = {
               account: account,
               lastTradeTimestamp: new Date(),
@@ -89,23 +88,18 @@ export async function calculateVolume(
   volume: string
 ): Promise<number | string> {
   try {
-    // const response = await getCoinInfo(tokenSymbol)
     const response = await priceDiscoveryService.priceDiscovery(tokenId)
     const currentPrice = response.current_price['usd']
     const volumeString = volume.toString().replace(/,/g, '')
     const volumeBigInt = BigInt(volumeString)
-    const finalValue =
+    return (
       parseFloat(currentPrice) * (Number(volumeBigInt) / Math.pow(10, decimals))
-    console.log('current price: ', currentPrice)
-    console.log('decimals: ', decimals)
-    console.log('final value in dolars: ', finalValue)
-
-    return finalValue
+    )
   } catch (error) {
     logger.error(
       `Error: Unable to retrieve token price data for token id ${tokenId}`,
       error
     )
-    return null
+    return 0
   }
 }
