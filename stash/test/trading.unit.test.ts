@@ -11,19 +11,19 @@ describe('TradingService', () => {
     })
 
     it('should return data for a valid wallet', async () => {
-      const mockData = [{ id: '1', account: 'wallet1' }]
+      const mockData = [{ id: '1', account: '0xaccount' }]
       ;(swapRepository.search as vi.Mock).mockReturnValue({
         where: vi.fn().mockReturnThis(),
         equals: vi.fn().mockReturnThis(),
         return: { all: vi.fn().mockResolvedValue(mockData) },
       })
 
-      const result = await getDataByWallet('wallet1')
+      const result = await getDataByWallet('0xaccount')
 
       expect(result).toEqual(mockData)
       expect(swapRepository.search().where).toHaveBeenCalledWith('account')
-      expect(swapRepository.search().where('account').equals).toHaveBeenCalledWith('wallet1')
-      expect(swapRepository.search().where('account').equals('wallet1').return.all).toHaveBeenCalled()
+      expect(swapRepository.search().where('account').equals).toHaveBeenCalledWith('0xaccount')
+      expect(swapRepository.search().where('account').equals('0xaccount').return.all).toHaveBeenCalled()
     })
 
     it('should return an empty array for a wallet with no data', async () => {
@@ -33,12 +33,12 @@ describe('TradingService', () => {
         return: { all: vi.fn().mockResolvedValue([]) },
       })
 
-      const result = await getDataByWallet('wallet2')
+      const result = await getDataByWallet('0xaccount2')
 
       expect(result).toEqual([])
       expect(swapRepository.search().where).toHaveBeenCalledWith('account')
-      expect(swapRepository.search().where('account').equals).toHaveBeenCalledWith('wallet2')
-      expect(swapRepository.search().where('account').equals('wallet2').return.all).toHaveBeenCalled()
+      expect(swapRepository.search().where('account').equals).toHaveBeenCalledWith('0xaccount2')
+      expect(swapRepository.search().where('account').equals('0xaccount2').return.all).toHaveBeenCalled()
     })
   })
 })
