@@ -5,6 +5,8 @@ import logger from '../../src/util/Logger'
 import { generateRandomAddress, generateRandomHash } from './utils'
 
 let transactionData: any
+const wrongType = 'deposittt'
+const type = 'deposit'
 
 describe('TracingController', () => {
   beforeAll(async () => {
@@ -49,7 +51,7 @@ describe('TracingController', () => {
     it('should get transaction status by txHash or entityId', async () => {
       try {
         const response = await supertest(app)
-          .get(`/tracing/tx/${transactionData.transaction.txHash}`)
+          .get(`/tracing/type/${type}/tx/${transactionData.transaction.txHash}`)
           .expect(200)
         expect(response.body).toEqual(
           expect.objectContaining({ status: 'PendingOnL1' })
@@ -67,7 +69,7 @@ describe('TracingController', () => {
       try {
         const response = await supertest(app)
           .get(
-            `/tracing/tx/listByAddress/${transactionData.transaction.address}`
+            `/tracing/type/${type}/tx/listByAddress/${transactionData.transaction.address}`
           )
           .expect(200)
 
@@ -101,7 +103,7 @@ describe('TracingController', () => {
       try {
         const response = await supertest(app)
           .get(
-            `/tracing/tx/listByAddress/${transactionData.transaction.address}/PendingOnL1`
+            `/tracing/type/${type}/tx/listByAddress/${transactionData.transaction.address}/PendingOnL1`
           )
           .expect(200)
         expect(response.body).toHaveProperty('transactions')
@@ -128,7 +130,7 @@ describe('TracingController', () => {
       try {
         const response = await supertest(app)
           .get(
-            `/tracing/tx/findByEntityId/${transactionData.transaction.entityId}`
+            `/tracing/type/${type}/tx/findByEntityId/${transactionData.transaction.entityId}`
           )
           .expect(200)
         expect(response.body).toHaveProperty('transaction')
@@ -144,7 +146,7 @@ describe('TracingController', () => {
       const errorMessage = 'Transaction not found'
       const wrongTxHash = generateRandomHash()
       const response = await supertest(app)
-        .get(`/tracing/tx/${wrongTxHash}`)
+        .get(`/tracing/type/${type}/tx/${wrongTxHash}`)
         .expect(404)
       expect(response.body).toEqual(
         expect.objectContaining({ error: errorMessage })
@@ -155,7 +157,7 @@ describe('TracingController', () => {
       const errorMessage = 'No transactions found for this address'
       const wrongAddress = generateRandomAddress()
       const response = await supertest(app)
-        .get(`/tracing/tx/listByAddress/${wrongAddress}`)
+        .get(`/tracing/type/${type}/tx/listByAddress/${wrongAddress}`)
         .expect(404)
       expect(response.body).toEqual(
         expect.objectContaining({
@@ -168,7 +170,9 @@ describe('TracingController', () => {
       const errorMessage = 'No transactions found for this address'
       const wrongAddress = generateRandomAddress()
       const response = await supertest(app)
-        .get(`/tracing/tx/listByAddress/${wrongAddress}/PendingOnL1`)
+        .get(
+          `/tracing/type/${type}/tx/listByAddress/${wrongAddress}/PendingOnL1`
+        )
         .expect(404)
       expect(response.body).toEqual(
         expect.objectContaining({
@@ -181,11 +185,70 @@ describe('TracingController', () => {
       const errorMessage = 'Transaction not found for this entityId'
       const wrongEntityId = '00000000001111111111WWWWWW'
       const response = await supertest(app)
-        .get(`/tracing/tx/findByEntityId/${wrongEntityId}`)
+        .get(`/tracing/type/${type}/tx/findByEntityId/${wrongEntityId}`)
         .expect(404)
       expect(response.body).toEqual(
         expect.objectContaining({
           error: errorMessage,
+        })
+      )
+    })
+    it('should get transaction status by txHash or entityId', async () => {
+      const errorMessage = "type must be either 'deposit' or 'withdrawal'"
+      const response = await supertest(app)
+        .get(
+          `/tracing/type/${wrongType}/tx/${transactionData.transaction.txHash}`
+        )
+        .expect(500)
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          exceptionName: 'ValidationError',
+          message: errorMessage,
+        })
+      )
+    })
+
+    it('should get all transactions by address', async () => {
+      const errorMessage = "type must be either 'deposit' or 'withdrawal'"
+      const response = await supertest(app)
+        .get(
+          `/tracing/type/${wrongType}/tx/listByAddress/${transactionData.transaction.address}`
+        )
+        .expect(500)
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          exceptionName: 'ValidationError',
+          message: errorMessage,
+        })
+      )
+    })
+
+    it('should get all transactions by address and status', async () => {
+      const errorMessage = "type must be either 'deposit' or 'withdrawal'"
+      const response = await supertest(app)
+        .get(
+          `/tracing/type/${wrongType}/tx/listByAddress/${transactionData.transaction.address}/PendingOnL1`
+        )
+        .expect(500)
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          exceptionName: 'ValidationError',
+          message: errorMessage,
+        })
+      )
+    })
+
+    it('should find a transaction by entityId', async () => {
+      const errorMessage = "type must be either 'deposit' or 'withdrawal'"
+      const response = await supertest(app)
+        .get(
+          `/tracing/type/${wrongType}/tx/findByEntityId/${transactionData.transaction.entityId}`
+        )
+        .expect(500)
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          exceptionName: 'ValidationError',
+          message: errorMessage,
         })
       )
     })
