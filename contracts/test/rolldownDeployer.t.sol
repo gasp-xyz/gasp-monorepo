@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
+import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
-import {stdJson} from "forge-std/StdJson.sol";
 import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
-import {RolldownDeployer} from "../script/RolldownDeployer.s.sol";
-import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
-import {Gasp} from "../src/GaspToken.sol";
-import {Rolldown} from "../src/Rolldown.sol";
+import {RolldownDeployer} from "./../script/RolldownDeployer.s.sol";
+import {IRolldownPrimitives} from "./../src/IRolldownPrimitives.sol";
+import {Rolldown} from "./../src/Rolldown.sol";
 import {RollDownUpg} from "./utils/RollDownUpg.sol";
 import {Utilities, MyERC20} from "./utils/Utilities.sol";
 
@@ -19,14 +17,14 @@ contract RolldownDeployerTest is Test {
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
 
-    RolldownDeployer rolldownDeployer;
-    Utilities internal utils;
-    address payable[] internal users;
-    address owner;
-    address upgrader;
-    address updaterAccount;
-    MyERC20 internal token;
-    address payable internal NATIVE_TOKEN_ADDRESS;
+    RolldownDeployer public rolldownDeployer;
+    Utilities public utils;
+    address payable[] public users;
+    address public owner;
+    address public upgrader;
+    address public updaterAccount;
+    MyERC20 public token;
+    address payable public NATIVE_TOKEN_ADDRESS;
     ProxyAdmin public rolldownProxyAdmin;
     Rolldown public rolldown;
     Rolldown public rolldownImplementation;

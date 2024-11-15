@@ -11,6 +11,7 @@ import {Rolldown} from "../src/Rolldown.sol";
 import {MyERC20} from "./utils/Utilities.sol";
 
 contract RolldownTest is Test, IRolldownPrimitives {
+    // solhint-disable-next-line gas-struct-packing
     struct Users {
         address admin;
         address depositor;
@@ -253,7 +254,7 @@ contract RenounceRole is RolldownTest {
 }
 
 contract SetUpdater is RolldownTest {
-    address newUpdater = makeAddr("newUpdater");
+    address public newUpdater = makeAddr("newUpdater");
 
     function test_EmitNewUpdaterSet() external {
         vm.prank(users.admin);
