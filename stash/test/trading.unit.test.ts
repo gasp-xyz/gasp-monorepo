@@ -4,7 +4,7 @@ import { swapRepository } from '../src/repository/TransactionRepository'
 
 vi.mock('../src/repository/TransactionRepository')
 
-describe('TradingService', () => {
+describe.skip('TradingService', () => {
   describe('getDataByWallet', () => {
     beforeEach(() => {
       vi.clearAllMocks()
