@@ -121,9 +121,7 @@ app.get(
 )
 
 // Dashboard endpoint
-app.get('/account/:wallet/dashboard', (req: Request, res: Response) => {
-  tradingController.getData(req, res)
-})
+app.get('/account/:wallet/dashboard', tradingController.getData)
 
 // Coinmarketcap listing endpoints
 app.get('/coinmarketcap/v1/summary', coinmarketcapController.summary)
