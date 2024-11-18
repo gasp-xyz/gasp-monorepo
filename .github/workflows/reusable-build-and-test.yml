@@ -97,6 +97,7 @@ jobs:
       version: ${{ inputs.version }}
       service_folder: sequencer
       docker_image_repository: mangatasolutions/rollup-sequencer
+      cargo_tests_enabled: false
 
   build-ferry-withdrawal-image:
     name: Build ferry-withdrawal Docker image

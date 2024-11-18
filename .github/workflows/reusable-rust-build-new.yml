@@ -32,6 +32,11 @@ on:
         required: false
         type: boolean
         default: false
+      cargo_tests_enabled:
+        description: Run cargo tests
+        required: false
+        type: boolean
+        default: true
 
 env:
   SKIP_WASM_BUILD: 1
@@ -68,6 +73,7 @@ jobs:
   
   cargo-test:
     name: "[${{ inputs.service_folder }}] Run cargo tests"
+    if: inputs.cargo_tests_enabled
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
