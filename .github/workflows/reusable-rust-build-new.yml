@@ -38,7 +38,7 @@ env:
 
 jobs:
   rustfmt-check:
-    name: Formatting check for ${{ inputs.service_folder }}
+    name: "[${{ inputs.service_folder }}] Formatting check"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
         run: cargo fmt --all -- --check
 
   clippy-check:
-    name: Clippy check for ${{ inputs.service_folder }}
+    name: "[${{ inputs.service_folder }}]Clippy check"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
         run: cargo clippy
   
   cargo-test:
-    name: Run ${{ inputs.service_folder }} tests
+    name: "[${{ inputs.service_folder }}] Run cargo tests"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -82,7 +82,7 @@ jobs:
         run: cargo test
 
   docker-image-build:
-    name: ${{ matrix.platform.name }} ${{ inputs.service_folder }} image${{ inputs.finalizer_fast_runtime && ' with fast runtime' || '' }}
+    name: "[${{ inputs.service_folder }}] [${{ matrix.platform.name }}] image${{ inputs.finalizer_fast_runtime && ' with fast runtime' || '' }}"
     strategy:
       matrix:
         platform:
@@ -187,7 +187,7 @@ jobs:
             echo "Upload completed in $SECONDS seconds"
 
   multiplatform-docker-image-compiation-and-push:
-    name: Generate ${{ inputs.service_folder }} multiplatform Docker image manifest
+    name: "[${{ inputs.service_folder }}] Generate multiplatform Docker image manifest"
     needs: [docker-image-build]
     runs-on: ubuntu-latest
     env:
