@@ -111,8 +111,7 @@ where
             .l2
             .get_abi_encoded_request(request_id, self.chain.clone(), at)
             .await?;
-        let cancel = l1types::Cancel::abi_decode(cancel_bytes.as_ref(), true)
-            .or_else(|_| Err(Error::CancelDeserializationFailure))?;
+        let cancel = l1types::Cancel::abi_decode(cancel_bytes.as_ref(), true).map_err(|_| Error::CancelDeserializationFailure)?;
         self.l1
             .close_cancel(cancel, merkle_root.into(), proof)
             .await?;
@@ -335,7 +334,7 @@ pub(crate) mod test {
     use crate::l1::types as l1types;
     use crate::l2::{types as l2types, HeaderStream, PendingUpdateWithKeys};
     use hex_literal::hex;
-    use mockall;
+    
     use mockall::predicate::eq;
     use parity_scale_codec::Decode;
     use primitive_types::H256;
@@ -452,7 +451,7 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_find_malicious_update_ignores_valid_updates() {
         let update_hash = H256::zero();
-        let correct_hash = update_hash.clone();
+        let correct_hash = update_hash;
 
         let update = UpdateBuilder::new()
             .with_dummy_deposit(1u128)
@@ -613,15 +612,15 @@ pub(crate) mod test {
             .return_once(|| Ok(Some(10u128)));
         l1mock
             .expect_is_closed()
-            .with(eq(first_request_hash.clone()))
+            .with(eq(first_request_hash))
             .returning(|_| Ok(true));
         l1mock
             .expect_is_closed()
-            .with(eq(second_request_hash.clone()))
+            .with(eq(second_request_hash))
             .returning(|_| Ok(false));
         l1mock
             .expect_is_closed()
-            .with(eq(third_request_hash.clone()))
+            .with(eq(third_request_hash))
             .returning(|_| Ok(true));
 
         let pending_cancels = vec![1u128, 2u128, 10u128];

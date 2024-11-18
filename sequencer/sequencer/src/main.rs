@@ -78,7 +78,7 @@ fn strip_prefix(str: &String) -> &str {
     if let Some(without_prefix) = str.strip_prefix("0x") {
         without_prefix
     } else {
-        &str
+        str
     }
 }
 

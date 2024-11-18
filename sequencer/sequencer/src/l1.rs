@@ -110,12 +110,10 @@ impl L1Interface for RolldownContract {
 
         let range_start = range
             .start
-            .try_into()
-            .or_else(|_| Err(L1Error::OverflowError))?;
+            .try_into().map_err(|_| L1Error::OverflowError)?;
         let range_end = range
             .end
-            .try_into()
-            .or_else(|_| Err(L1Error::OverflowError))?;
+            .try_into().map_err(|_| L1Error::OverflowError)?;
         Ok((merkle_root.0, (range_start, range_end)))
     }
 
@@ -125,8 +123,7 @@ impl L1Interface for RolldownContract {
         let result = call.call().await?;
         let next_request_id: u128 = result
             ._0
-            .try_into()
-            .or_else(|_| Err(L1Error::OverflowError))?;
+            .try_into().map_err(|_| L1Error::OverflowError)?;
         if next_request_id == 1 {
             Ok(None)
         } else {
@@ -141,7 +138,7 @@ impl L1Interface for RolldownContract {
         let length = call.call().await?._0;
         tracing::trace!("there are {} merkle roots on the contract", length);
         if let Some(id) = length.checked_sub(alloy::primitives::U256::from(1)) {
-            let latest_root = self.contract_handle.roots(id.clone()).call().await?._0;
+            let latest_root = self.contract_handle.roots(id).call().await?._0;
             tracing::trace!("latest merkle root {}", hex_encode(latest_root));
             let range = self
                 .contract_handle
@@ -150,8 +147,7 @@ impl L1Interface for RolldownContract {
                 .await?;
             let latest: u128 = range
                 .end
-                .try_into()
-                .or_else(|_| Err(L1Error::OverflowError))?;
+                .try_into().map_err(|_| L1Error::OverflowError)?;
             tracing::trace!(
                 "latest request in root {}: {}",
                 hex_encode(latest_root),
@@ -254,7 +250,7 @@ mod test {
     use hex_literal::hex;
     use serial_test::serial;
 
-    const URI: &'static str = "http://localhost:8545";
+    const URI: &str = "http://localhost:8545";
     const ROLLDOWN_ADDRESS: [u8; 20] = hex!("1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f");
     const ALICE_PKEY: [u8; 32] =
         hex!("dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97");

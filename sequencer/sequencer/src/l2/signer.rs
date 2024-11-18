@@ -50,7 +50,7 @@ impl SignerT<GaspConfig> for Keypair {
 
     fn sign(&self, signer_payload: &[u8]) -> GaspSignature {
         let hashed = Keccak256::digest(signer_payload);
-        let signature = self.sign_prehashed(&hashed.into());
-        signature
+        
+        self.sign_prehashed(&hashed.into())
     }
 }

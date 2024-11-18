@@ -179,7 +179,7 @@ impl Gasp {
 
             tracing::debug!("checking block #{} {}", number, hex_encode(tx_hash),);
 
-            let block = self.client.blocks().at(hash.clone()).await?;
+            let block = self.client.blocks().at(hash).await?;
             let extrinsics = block.extrinsics().await?;
 
             if let Some((id, _)) = extrinsics
@@ -187,7 +187,7 @@ impl Gasp {
                 .enumerate()
                 .find(|(_, extrinsic)| extrinsic.hash() == tx_hash)
             {
-                let events = self.get_events(hash.into()).await?;
+                let events = self.get_events(hash).await?;
                 let events = events
                     .iter()
                     .filter(|elem| {
@@ -231,7 +231,7 @@ impl Gasp {
         let tx = self.client.tx();
 
         let partial_signed = tx
-            .create_partial_signed(&call, &self.keypair.address().into(), Default::default())
+            .create_partial_signed(&call, &self.keypair.address(), Default::default())
             .await?;
 
         tracing::trace!("tx: {}", hex_encode(partial_signed.signer_payload()));
@@ -241,7 +241,7 @@ impl Gasp {
         tracing::trace!("signed tx: {}", hex_encode(signed.encoded()));
 
         let tx_hash = signed.submit().await?;
-        Ok(self.wait_for_tx_execution(tx_hash).await?)
+        self.wait_for_tx_execution(tx_hash).await
     }
 
     #[cfg(test)]
@@ -604,7 +604,7 @@ impl L2Interface for Gasp {
             .await?
             .map(|elem| {
                 elem.map(|(header, hash)| (header.number, hash.hash()))
-                    .map_err(|err| L2Error::from(err))
+                    .map_err(L2Error::from)
             })
             .boxed())
     }
@@ -617,7 +617,7 @@ impl L2Interface for Gasp {
             .await?
             .map(|elem| {
                 elem.map(|(header, hash)| (header.number, hash.hash()))
-                    .map_err(|err| L2Error::from(err))
+                    .map_err(L2Error::from)
             })
             .boxed())
     }
@@ -632,7 +632,7 @@ mod test {
 
     //TODO: adcd test for L2Interace::deserialize_sequencer_update
 
-    const URI: &'static str = "ws://localhost:9944";
+    const URI: &str = "ws://localhost:9944";
     const DUMMY_PKEY: [u8; 32] =
         hex!("b9d2ea9a615f3165812e8d44de0d24da9bbd164b65c4f0573e1ce2c8dbd9c8df");
     const DUMMY_ADDR: [u8; 20] = hex!("0000000000000000000000000000000000000000");
@@ -728,22 +728,20 @@ mod test {
             .expect("can connect to gasp");
         gasp.wait_for_next_block().await.unwrap();
 
-        assert_eq!(
+        assert!(
             gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
                 .await
-                .expect("can submit withdrawal"),
-            true
+                .expect("can submit withdrawal")
         );
 
         gasp.wait_for_next_block().await.unwrap();
         gasp.wait_for_next_block().await.unwrap();
         gasp.wait_for_next_block().await.unwrap();
 
-        assert_eq!(
+        assert!(
             gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
                 .await
-                .expect("can submit withdrawal"),
-            true
+                .expect("can submit withdrawal")
         );
 
         let at = gasp.latest_block().await.unwrap().1;
@@ -768,7 +766,7 @@ mod test {
             .await
             .expect("can fetch l2 request hash");
 
-        assert_eq!(proofs.len(), 1 as usize);
+        assert_eq!(proofs.len(), 1_usize);
     }
 
     #[serial]
@@ -794,7 +792,7 @@ mod test {
             .cancel_pending_request(u128::MAX, ETHEREUM)
             .await
             .expect("can fetch pending cancels");
-        assert_eq!(false, result);
+        assert!(!result);
     }
 
     #[serial]
@@ -828,6 +826,6 @@ mod test {
             .await
             .expect("can submit update");
 
-        assert_eq!(status, false);
+        assert!(!status);
     }
 }
