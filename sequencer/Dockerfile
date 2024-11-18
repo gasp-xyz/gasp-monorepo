@@ -1,14 +1,13 @@
 FROM debian:stable-slim
 
-RUN apt-get update 
-RUN apt-get install -y ca-certificates
+RUN apt-get update -y && apt-get install -y ca-certificates libssl-dev
 
 WORKDIR /app
 
 ENV RUST_LOG=info
 
-ARG BINARY_PATH=target/release/main
+ARG BINARY_PATH=target/release/sequencer
 
 COPY ./${BINARY_PATH} ./
 
-ENTRYPOINT [ "./main" ]
+ENTRYPOINT [ "./sequencer" ]

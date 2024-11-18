@@ -151,7 +151,7 @@ pub type HashOf<T> = <T as Config>::Hash;
 
 impl Gasp {
     pub async fn new(uri: &str, secret_key: [u8; 32]) -> Result<Self, L2Error> {
-        let client = OnlineClient::<GaspConfig>::from_url(uri).await?;
+        let client = OnlineClient::<GaspConfig>::from_insecure_url(uri).await?;
 
         Ok(Self {
             client,
