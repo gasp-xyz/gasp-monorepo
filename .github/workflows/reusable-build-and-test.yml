@@ -63,7 +63,7 @@ jobs:
   
   build-avs-finalizer-image:
     name: Build avs-finalizer Docker image
-    uses: ./.github/workflows/reusable-rust-build-new.yml
+    uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
       version: ${{ inputs.version }}
@@ -72,7 +72,7 @@ jobs:
 
   build-avs-finalizer-image-with-fast-runtime:
     name: Build avs-finalizer Docker image with fast runtime
-    uses: ./.github/workflows/reusable-rust-build-new.yml
+    uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
       version: ${{ inputs.version }}
@@ -82,7 +82,7 @@ jobs:
 
   build-gasp-syncer-image:
     name: Build gasp-syncer Docker image
-    uses: ./.github/workflows/reusable-rust-build-new.yml
+    uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
       version: ${{ inputs.version }}
@@ -91,7 +91,7 @@ jobs:
 
   build-sequencer-image:
     name: Build sequencer Docker image
-    uses: ./.github/workflows/reusable-rust-build-new.yml
+    uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
       version: ${{ inputs.version }}

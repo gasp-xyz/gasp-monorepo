@@ -19,86 +19,90 @@ on:
         description: Enable caching
         required: false
         type: boolean
+      service_folder:
+        description: service folder to be built
+        required: true
+        type: string
+      docker_image_repository:
+        description: Docker image repository
+        required: true
+        type: string
+      finalizer_fast_runtime:
+        description: Use `rollup-node` with fast runtime when building `avs-finalizer` image
+        required: false
+        type: boolean
+        default: false
+      cargo_tests_enabled:
+        description: Run cargo tests
+        required: false
+        type: boolean
+        default: true
 
 env:
   SKIP_WASM_BUILD: 1
 
 jobs:
-  avs-finalizer-rustfmt-check:
-    name: Formatting check for avs-finalizer
+  rustfmt-check:
+    name: "[${{ inputs.service_folder }}] Formatting check"
     runs-on: ubuntu-latest
-    env:
-      SERVICE_FOLDER: avs-finalizer
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
         with:
           toolchain: ${{ inputs.rust-version }}
-          cache-workspaces: ${{ env.SERVICE_FOLDER }}
+          cache-workspaces: ${{ inputs.service_folder }}
       - uses: arduino/setup-protoc@v3
       - name: Check formatting
-        working-directory: ${{ env.SERVICE_FOLDER }}
+        working-directory: ${{ inputs.service_folder }}
         run: cargo fmt --all -- --check
 
-  avs-finalizer-clippy-check:
-    name: Clippy check for avs-finalizer
+  clippy-check:
+    name: "[${{ inputs.service_folder }}] Clippy check"
     runs-on: ubuntu-latest
-    env:
-      SERVICE_FOLDER: avs-finalizer
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
         with:
           toolchain: ${{ inputs.rust-version }}
-          cache-workspaces: ${{ env.SERVICE_FOLDER }}
+          cache-workspaces: ${{ inputs.service_folder }}
       - uses: arduino/setup-protoc@v3
 
       - name: Run clippy check
-        working-directory: ${{ env.SERVICE_FOLDER }}
+        working-directory: ${{ inputs.service_folder }}
         run: cargo clippy
   
-  avs-finalizer-tests:
-    name: Run avs-finalizer tests
+  cargo-test:
+    name: "[${{ inputs.service_folder }}] Run cargo tests"
+    if: inputs.cargo_tests_enabled
     runs-on: ubuntu-latest
-    env:
-      SERVICE_FOLDER: avs-finalizer
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
         with:
           toolchain: ${{ inputs.rust-version }}
-          cache-workspaces: ${{ env.SERVICE_FOLDER }}
+          cache-workspaces: ${{ inputs.service_folder }}
       - uses: arduino/setup-protoc@v3
 
-      - name: Run tests
-        working-directory: ${{ env.SERVICE_FOLDER }}
+      - name: Run cargo test
+        working-directory: ${{ inputs.service_folder }}
         run: cargo test
 
-  avs-finalizer-docker-image-build:
-    name: ${{ matrix.platform.name }} avs-finalizer image${{ matrix.platform.fast-runtime && ' with fast runtime' || '' }}
+  docker-image-build:
+    name: "[${{ inputs.service_folder }}] [${{ matrix.platform.name }}] image${{ inputs.finalizer_fast_runtime && ' with fast runtime' || '' }}"
     strategy:
       matrix:
         platform:
           - name: amd64
             runner: compile-gke
-            fast-runtime: false
           - name: arm64
             runner: compile-gke-arm
-            fast-runtime: false
-          - name: amd64
-            runner: compile-gke
-            fast-runtime: true
-          - name: arm64
-            runner: compile-gke-arm
-            fast-runtime: true
     runs-on: ${{ matrix.platform.runner }}
     env:
-      JOB_CACHE_PREFIX: finalizer-${{ matrix.platform.name }}${{ matrix.platform.fast-runtime && 'fast' || 'regular' }}-${{ inputs.cache-version }}
+      JOB_CACHE_PREFIX: ${{ inputs.service_folder }}-${{ matrix.platform.name }}${{ inputs.finalizer_fast_runtime && 'fast' || 'regular' }}-${{ inputs.cache-version }}
+      SERVICE_FOLDER: ${{ inputs.service_folder }}
+      DOCKER_IMAGE_REPOSITORY: ${{ inputs.docker_image_repository }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
-      SERVICE_FOLDER: avs-finalizer
-      DOCKER_IMAGE_REPOSITORY: mangatasolutions/avs-finalizer
-      ROLLUP_NODE_VERSION: eth-rollup-develop${{ matrix.platform.fast-runtime && '-fast' || '' }}
-      IMAGE_TAG: ${{ inputs.version }}${{ matrix.platform.fast-runtime && '-fast' || '' }}
+      IMAGE_TAG: ${{ inputs.version }}${{ inputs.finalizer_fast_runtime && '-fast' || '' }}
     steps:
       - uses: actions/checkout@v4
     
@@ -149,7 +153,7 @@ jobs:
           platforms: linux/${{ matrix.platform.name }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
-          build-args: ROLLUP_NODE_VERSION=${{ env.ROLLUP_NODE_VERSION }}
+          build-args: ROLLUP_NODE_VERSION=eth-rollup-develop${{ inputs.finalizer_fast_runtime && '-fast' || '' }}
       
       - name: Export digest
         run: |
@@ -160,7 +164,7 @@ jobs:
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: digests-${{ matrix.platform.fast-runtime && 'fast' || 'regular' }}-linux-${{ matrix.platform.name }}
+          name: ${{ inputs.service_folder }}-${{ inputs.finalizer_fast_runtime && 'fast' || 'regular' }}-linux-${{ matrix.platform.name }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -188,22 +192,19 @@ jobs:
             SECONDS=0; gcloud storage cp "$ARCHIVE_NAME" "gs://mangata-node-ci-cache/$CACHE_KEY/$ARCHIVE_NAME"
             echo "Upload completed in $SECONDS seconds"
 
-  avs-finalizer-multiplatform-docker-image-compiation-and-push:
-    name: Generate avs-finalizer multiplatform Docker image manifest
-    needs: [avs-finalizer-docker-image-build]
+  multiplatform-docker-image-compiation-and-push:
+    name: "[${{ inputs.service_folder }}] Generate multiplatform Docker image manifest"
+    needs: [docker-image-build]
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        fast-runtime: [true, false]
     env:
-      DOCKER_IMAGE_REPOSITORY: mangatasolutions/avs-finalizer
-      IMAGE_TAG: ${{ inputs.version }}${{ matrix.fast-runtime && '-fast' || '' }}
+      DOCKER_IMAGE_REPOSITORY: ${{ inputs.docker_image_repository }}
+      IMAGE_TAG: ${{ inputs.version }}${{ inputs.finalizer_fast_runtime && '-fast' || '' }}
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
           path: /tmp/digests
-          pattern: digests-${{ matrix.fast-runtime && 'fast' || 'regular' }}-*
+          pattern: ${{ inputs.service_folder }}-${{ inputs.finalizer_fast_runtime && 'fast' || 'regular' }}-*
           merge-multiple: true
       
       - uses: docker/setup-buildx-action@v3
@@ -224,116 +225,3 @@ jobs:
       
       - name: Inspect image
         run: docker buildx imagetools inspect ${{ env.DOCKER_IMAGE_REPOSITORY }}:${{ steps.meta.outputs.version }}
-
-  gasp-syncer-rustfmt-check:
-    name: Formatting check for gasp-syncer
-    runs-on: ubuntu-latest
-    env:
-      SERVICE_FOLDER: gasp-syncer
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
-        with:
-          toolchain: ${{ inputs.rust-version }}
-          cache-workspaces: ${{ env.SERVICE_FOLDER }}
-      - uses: arduino/setup-protoc@v3
-      - name: Check formatting
-        working-directory: ${{ env.SERVICE_FOLDER }}
-        run: cargo fmt --all -- --check
-  
-  gasp-syncer-clippy-check:
-    name: Clippy check for gasp-syncer
-    runs-on: ubuntu-latest
-    env:
-      SERVICE_FOLDER: gasp-syncer
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
-        with:
-          toolchain: ${{ inputs.rust-version }}
-          cache-workspaces: ${{ env.SERVICE_FOLDER }}
-      - uses: arduino/setup-protoc@v3
-  
-      - name: Run clippy check
-        working-directory: ${{ env.SERVICE_FOLDER }}
-        run: cargo clippy
-
-  gasp-syncer-docker-image-build-and-push:
-    name: Build gasp-syncer Docker image
-    runs-on: compile-eigen-gke
-    env:
-      JOB_CACHE_PREFIX: gasp-syncer-image-build-job-cache-${{ inputs.cache-version }}
-      CACHE_ARCHIVE_NAME: cache_archive.tar.zst
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
-        with:
-          toolchain: ${{ inputs.rust-version }}
-          cache: false
-      - uses: arduino/setup-protoc@v3
-  
-      - uses: google-github-actions/auth@v2
-        id: auth
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
-  
-      - name: Download cargo build cache
-        if: inputs.cache-enabled
-        id: cache
-        run: |
-          set -x
-          CACHE_KEY="${{ env.JOB_CACHE_PREFIX }}-${{ hashFiles('**/Cargo.lock') }}"
-          ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
-          CACHE_FOUND=false
-      
-          if gcloud storage cp "gs://mangata-node-ci-cache/$CACHE_KEY/$ARCHIVE_NAME" - | zstd -d | tar -xf - -C / ; then 
-            CACHE_FOUND=true
-          fi
-      
-          echo "cache_found=$CACHE_FOUND" >> $GITHUB_OUTPUT
-          echo "cache_key=$CACHE_KEY" >> $GITHUB_OUTPUT
-  
-      - name: Install sccache-cache only on non-release runs
-        if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
-        uses: mozilla-actions/sccache-action@v0.0.5
-      - name: Set Rust caching env vars only on non-release run
-        if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
-        run: |
-          echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
-          echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
-          echo "SCCACHE_GCS_KEY_PREFIX=${{ env.JOB_CACHE_PREFIX }}" >> $GITHUB_ENV
-          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-          echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
-  
-      - name: Run cargo build
-        working-directory: gasp-syncer
-        run: cargo build --release
-      
-      - name: Create Docker image
-        working-directory: gasp-syncer
-        run: |
-          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
-          docker buildx create --use
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/gasp-syncer:${{ inputs.version }} .
-              
-      - name: Upload cargo build cache
-        if: inputs.cache-enabled && steps.cache.outputs.cache_found == 'false'
-        run: |
-          set -x
-          CACHE_KEY="${{ steps.cache.outputs.cache_key }}"
-          ARCHIVE_NAME="${{ env.CACHE_ARCHIVE_NAME }}"
-          CACHE_PATHS=(
-            "${{ github.workspace }}/gasp-syncer/target"
-            "$HOME/.cargo/bin/"
-            "$HOME/.cargo/registry/index/"
-            "$HOME/.cargo/registry/cache/"
-            "$HOME/.cargo/git/db/"
-          )
-  
-            SECONDS=0; tar -cf - "${CACHE_PATHS[@]}" | zstd -T0 -5 > "$ARCHIVE_NAME"
-            echo "Compression completed in $SECONDS seconds" && echo "Archive size: $(du -h "$ARCHIVE_NAME" | cut -f1)"
-  
-            SECONDS=0; gcloud storage cp "$ARCHIVE_NAME" "gs://mangata-node-ci-cache/$CACHE_KEY/$ARCHIVE_NAME"
-            echo "Upload completed in $SECONDS seconds"
