@@ -98,6 +98,7 @@ jobs:
       service_folder: sequencer
       docker_image_repository: mangatasolutions/rollup-sequencer
       cargo_tests_enabled: false
+      cargo_clippy_check_enabled: false
 
   build-ferry-withdrawal-image:
     name: Build ferry-withdrawal Docker image

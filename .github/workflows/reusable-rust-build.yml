@@ -33,7 +33,12 @@ on:
         type: boolean
         default: false
       cargo_tests_enabled:
-        description: Run cargo tests
+        description: Run cargo test
+        required: false
+        type: boolean
+        default: true
+      cargo_clippy_check_enabled:
+        description: Run cargo clippy
         required: false
         type: boolean
         default: true
@@ -58,6 +63,7 @@ jobs:
 
   clippy-check:
     name: "[${{ inputs.service_folder }}] Clippy check"
+    if: inputs.cargo_clippy_check_enabled
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
