@@ -89,6 +89,15 @@ jobs:
       service_folder: gasp-syncer
       docker_image_repository: mangatasolutions/gasp-syncer
 
+  build-sequencer-image:
+    name: Build gasp-syncer Docker image
+    uses: ./.github/workflows/reusable-rust-build-new.yml
+    secrets: inherit
+    with:
+      version: ${{ inputs.version }}
+      service_folder: sequencer
+      docker_image_repository: mangatasolutions/rollup-sequencer
+
   build-ferry-withdrawal-image:
     name: Build ferry-withdrawal Docker image
     runs-on: ubuntu-latest
@@ -97,7 +106,6 @@ jobs:
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
           docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-ferry-withdrawal:${{ inputs.version }} ./ferry-withdrawal
 
   build-ferry-deposit-image:
@@ -108,7 +116,6 @@ jobs:
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
           docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-ferry-deposit:${{ inputs.version }} ./ferry-deposit
 
   helmfile-lint:
