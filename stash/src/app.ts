@@ -15,6 +15,7 @@ import * as networkController from './controller/networkController.js'
 import * as tokenNetworkPortfolioController from './controller/tokenNetworkPortfolioController.js'
 import * as faucetController from './controller/FaucetController.js'
 import * as tracingController from './controller/TracingController.js'
+import * as tradingController from './controller/TradingController.js'
 
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
@@ -99,25 +100,28 @@ app.get(
 app.post('/tracing/tx/start', tracingController.startTracing)
 
 app.get(
-  '/tracing/tx/:txHashOrEntityId',
+  '/tracing/type/:type/tx/:txHashOrEntityId',
   tracingController.getTransactionStatusByTxHashOrEntityId
 )
 
 app.get(
-  '/tracing/tx/listByAddress/:address',
+  '/tracing/type/:type/tx/listByAddress/:address',
   tracingController.getAllTransactionsByAddress
 )
 
 app.get(
-  '/tracing/tx/listByAddress/:address/:status',
+  '/tracing/type/:type/tx/listByAddress/:address/:status',
   tracingController.getAllTransactionsByAddressAndStatus
 )
 
 app.get(
-  '/tracing/tx/findByEntityId/:entityId',
+  '/tracing/type/:type/tx/findByEntityId/:entityId',
 
   tracingController.getATransactionByEntityId
 )
+
+// Dashboard endpoint
+app.get('/account/:wallet/dashboard', tradingController.getData)
 
 // Coinmarketcap listing endpoints
 app.get('/coinmarketcap/v1/summary', coinmarketcapController.summary)

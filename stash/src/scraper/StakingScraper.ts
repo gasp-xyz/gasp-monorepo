@@ -34,12 +34,9 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
           ? Number(event.event.data.toPrimitive()[0])
           : 0
       const jumpInSession = currentSessionIndex - eventSessionIndex
-      const numberOfBlocksToSubtract = jumpInSession * 1200
+      const numberOfBlocksToSubtract =
+        jumpInSession * api.consts.issuance.blocksPerRound.toNumber()
       const jumpToBlockForCandidate = block.number - numberOfBlocksToSubtract
-      if (jumpToBlockForCandidate < 0) {
-        logger.error('Calculated block number is negative, skipping event')
-        return null
-      }
       const blockHashForCandidate = await api.rpc.chain.getBlockHash(
         jumpToBlockForCandidate
       )

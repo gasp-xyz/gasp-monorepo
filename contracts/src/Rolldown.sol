@@ -1,456 +1,576 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.9;
+pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "forge-std/console.sol";
-
-import "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
-import "@eigenlayer/contracts/permissions/Pausable.sol";
-import "./RolldownStorage.sol";
+import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin-upgrades/contracts/access/AccessControlUpgradeable.sol";
+import {ContextUpgradeable} from "@openzeppelin-upgrades/contracts/utils/ContextUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin-upgrades/contracts/security/ReentrancyGuardUpgradeable.sol";
+import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IRolldown} from "./IRolldown.sol";
+import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
+import {LMerkleTree} from "./LMerkleTree.sol";
 
 contract Rolldown is
     Initializable,
-    OwnableUpgradeable,
+    ContextUpgradeable,
+    AccessControlUpgradeable,
+    ReentrancyGuardUpgradeable,
     Pausable,
-    RolldownStorage,
-    ReentrancyGuard
+    IRolldown
 {
+    using Address for address payable;
     using SafeERC20 for IERC20;
 
-    address public constant NATIVE_TOKEN_ADDRESS =
-        0x0000000000000000000000000000000000000001;
-
+    bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
+    address public constant NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
     address public constant CLOSED = 0x1111111111111111111111111111111111111111;
 
-    // TODO: move to separate modoule/contract
-    function calculate_root(bytes32 leave_hash, uint32 leave_idx, bytes32[] calldata proof, uint32 leaves_count) pure public returns (bytes32) {
-      uint32 levels = 0;
-      uint32 tmp = leaves_count;
-      while (tmp > 0) {
-        tmp = tmp / 2;
-        levels += 1;
-      }
-      return calculate_root_impl(levels, leave_idx, leave_hash, proof, 0, leaves_count - 1);
-    }
+    // Counter for mapping key
+    uint256 public override counter;
+    // Counter for last processed request to ensure not reading and processing already processed
+    uint256 public override lastProcessedUpdate_origin_l1;
+    // Counter for last processed updates comming from l2 to ensure not reading and processing already processed
+    uint256 public override lastProcessedUpdate_origin_l2;
+    // Chain identificator
+    ChainId public override chain;
+    // Updater account address
+    address public override updaterAccount;
+    mapping(uint256 => CancelResolution) public cancelResolutions;
+    mapping(uint256 => Deposit) public deposits;
+    mapping(bytes32 => Range) public merkleRootRange;
+    mapping(bytes32 => address) public override processedL2Requests;
+    // stores all merkle roots in order, seems like binary search on this array
+    // is the most efficient way to find merkle root that contains particular tx id
+    bytes32[] public roots;
 
-    function calculate_root_impl(uint32 level, uint32 pos, bytes32 hash, bytes32[] calldata proofs, uint32 proof_idx, uint32 max_index) pure public returns (bytes32) {
-      if (pos % 2 == 0) {
-        if (pos == max_index) {
-          // promoted node
-        }else{
-          hash = keccak256(abi.encodePacked(hash, proofs[proof_idx++]));
+    modifier checkAmountWithFerryTip(uint256 amount, uint256 ferryTip) {
+        if (amount == 0) {
+            revert ZeroAmount();
         }
-      } else {
-        hash = keccak256(abi.encodePacked(proofs[proof_idx++], hash));
-      }
-
-      if (level == 1) {
-        return hash;
-      }else{
-        return calculate_root_impl(level-1, pos/2, hash, proofs, proof_idx, max_index/2);
-      }
+        if (ferryTip > amount) {
+            revert FerryTipExceedsAmount(ferryTip, amount);
+        }
+        _;
     }
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
-        public
+    function initialize(IPauserRegistry pauserRegistry, address admin, ChainId chainId, address updater)
+        external
         initializer
     {
-        _initializePauser(_pauserRegistry, UNPAUSE_ALL);
-        _transferOwnership(initialOwner);
-        lastProcessedUpdate_origin_l1 = 0;
+        ContextUpgradeable.__Context_init();
+        AccessControlUpgradeable.__AccessControl_init();
+        ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
+
+        if (admin == address(0)) {
+            revert ZeroAdmin();
+        }
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+
+        if (updater == address(0)) {
+            revert ZeroUpdater();
+        }
+        _grantRole(UPDATER_ROLE, updater);
+        updaterAccount = updater;
+
+        _initializePauser(pauserRegistry, UNPAUSE_ALL);
+
         counter = 1;
+        lastProcessedUpdate_origin_l1 = 0;
         lastProcessedUpdate_origin_l2 = 0;
         chain = chainId;
+    }
+
+    function setUpdater(address updater) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (updater == address(0)) {
+            revert ZeroUpdater();
+        }
+
+        _revokeRole(UPDATER_ROLE, updaterAccount);
+        _grantRole(UPDATER_ROLE, updater);
+
         updaterAccount = updater;
+        emit NewUpdaterSet(updater);
     }
 
-    function setUpdater(address updater) external onlyOwner whenNotPaused {
-      updaterAccount = updater;
-      emit NewUpdaterSet(updaterAccount);
+    function deposit_native() external payable override whenNotPaused {
+        _depositNativeWithTip(0);
     }
 
-    function deposit_native() external payable nonReentrant whenNotPaused {
-      deposit_native_with_tip(0);
+    function depositNative() external payable override whenNotPaused {
+        _depositNativeWithTip(0);
     }
 
-    function deposit_native(uint256 ferryTip) external payable nonReentrant whenNotPaused {
-      deposit_native_with_tip(ferryTip);
+    function deposit_native(uint256 ferryTip) external payable override whenNotPaused {
+        _depositNativeWithTip(ferryTip);
     }
 
-    function deposit_native_with_tip(uint256 ferryTip) private {
-        require(ferryTip <= msg.value, "Tip exceeds deposited amount");
-        require(msg.value > 0, "msg value must be greater that 0");
-        address depositRecipient = msg.sender;
-        uint amount = msg.value;
+    function depositNative(uint256 ferryTip) external payable override whenNotPaused {
+        _depositNativeWithTip(ferryTip);
+    }
 
-        uint256 timeStamp = block.timestamp;
+    function _depositNativeWithTip(uint256 ferryTip) private checkAmountWithFerryTip(msg.value, ferryTip) {
         Deposit memory depositRequest = Deposit({
-            requestId: RequestId({origin: Origin.L1, id: counter++}),
-            depositRecipient: depositRecipient,
+            requestId: _createRequestId(Origin.L1),
+            depositRecipient: _msgSender(),
             tokenAddress: NATIVE_TOKEN_ADDRESS,
-            amount: amount,
-            timeStamp: timeStamp,
+            amount: msg.value,
+            timeStamp: block.timestamp,
             ferryTip: ferryTip
         });
-        // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
+
         emit DepositAcceptedIntoQueue(
-            depositRequest.requestId.id,
-            depositRecipient,
-            NATIVE_TOKEN_ADDRESS,
-            amount,
-            ferryTip
+            depositRequest.requestId.id, _msgSender(), NATIVE_TOKEN_ADDRESS, msg.value, ferryTip
         );
     }
 
-    function deposit(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant  {
-        deposit_erc20_with_tip(tokenAddress, amount, 0);
+    function deposit(address tokenAddress, uint256 amount) external override nonReentrant whenNotPaused {
+        _depositERC20WithTip(tokenAddress, amount, 0);
     }
 
-    function deposit(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant  {
-        deposit_erc20_with_tip(tokenAddress, amount, ferryTip);
+    function deposit(address tokenAddress, uint256 amount, uint256 ferryTip)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
+        _depositERC20WithTip(tokenAddress, amount, ferryTip);
     }
 
-    function deposit_erc20(address tokenAddress, uint256 amount) public whenNotPaused nonReentrant {
-        deposit_erc20_with_tip(tokenAddress, amount, 0);
+    function deposit_erc20(address tokenAddress, uint256 amount) external override nonReentrant whenNotPaused {
+        _depositERC20WithTip(tokenAddress, amount, 0);
     }
 
-    function deposit_erc20(address tokenAddress, uint256 amount, uint256 ferryTip) public whenNotPaused nonReentrant {
-        deposit_erc20_with_tip(tokenAddress, amount, ferryTip);
+    function depositERC20(address tokenAddress, uint256 amount) external override nonReentrant whenNotPaused {
+        _depositERC20WithTip(tokenAddress, amount, 0);
     }
 
-    function deposit_erc20_with_tip(address tokenAddress, uint256 amount, uint256 ferryTip) private {
-        require(ferryTip <= amount, "Tip exceeds deposited amount");
-        require(tokenAddress != address(0), "Invalid token address");
-        require(amount > 0, "Amount must be greater than zero");
-        address depositRecipient = msg.sender;
+    function deposit_erc20(address tokenAddress, uint256 amount, uint256 ferryTip)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
+        _depositERC20WithTip(tokenAddress, amount, ferryTip);
+    }
 
-        IERC20 token = IERC20(tokenAddress);
-        token.safeTransferFrom(msg.sender, address(this), amount);
+    function depositERC20(address tokenAddress, uint256 amount, uint256 ferryTip)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
+        _depositERC20WithTip(tokenAddress, amount, ferryTip);
+    }
 
-        uint256 timeStamp = block.timestamp;
+    function _depositERC20WithTip(address tokenAddress, uint256 amount, uint256 ferryTip)
+        private
+        checkAmountWithFerryTip(amount, ferryTip)
+    {
+        if (tokenAddress == address(0)) {
+            revert ZeroToken();
+        }
+
         Deposit memory depositRequest = Deposit({
-            requestId: RequestId({origin: Origin.L1, id: counter++}),
-            depositRecipient: depositRecipient,
+            requestId: _createRequestId(Origin.L1),
+            depositRecipient: _msgSender(),
             tokenAddress: tokenAddress,
             amount: amount,
-            timeStamp: timeStamp,
+            timeStamp: block.timestamp,
             ferryTip: ferryTip
         });
-        // Add the new request to the mapping
         deposits[depositRequest.requestId.id] = depositRequest;
-        emit DepositAcceptedIntoQueue(
-            depositRequest.requestId.id,
-            depositRecipient,
-            tokenAddress,
-            amount,
-            ferryTip
-        );
+
+        emit DepositAcceptedIntoQueue(depositRequest.requestId.id, _msgSender(), tokenAddress, amount, ferryTip);
+
+        IERC20(tokenAddress).safeTransferFrom(_msgSender(), address(this), amount);
     }
 
-    function getUpdateForL2() public view returns (L1Update memory) {
-        return
-            getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
+    function ferry_withdrawal(Withdrawal calldata withdrawal) external payable override nonReentrant whenNotPaused {
+        _ferryWithdrawal(withdrawal);
     }
 
-    function min(uint256 a, uint256 b) private pure returns (uint256) {
-        return a < b ? a : b;
+    function ferryWithdrawal(Withdrawal calldata withdrawal) external payable override nonReentrant whenNotPaused {
+        _ferryWithdrawal(withdrawal);
     }
 
-    function max(uint256 a, uint256 b) private pure returns (uint256) {
-        return a > b ? a : b;
-    }
-
-    function ferry_withdrawal(Withdrawal calldata withdrawal) payable public whenNotPaused nonReentrant {
-      require(withdrawal.ferryTip <= withdrawal.amount, "Tip exceeds deposited amount");
-      uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
-      bytes32 withdrawalHash = hashWithdrawal(withdrawal);
-
-      require(processedL2Requests[withdrawalHash] == address(0), "Already ferried");
-      processedL2Requests[withdrawalHash] = msg.sender;
-
-      if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
-        require(msg.value > 0, "Native token not sent");
-        require(msg.value == ferriedAmount, "Sent amount should exactly match withdrawal.amount - withdrawal.ferryTip");
-        payable(withdrawal.recipient).transfer(ferriedAmount);
-        emit WithdrawalFerried(
-          withdrawal.requestId.id,
-          ferriedAmount,
-          withdrawal.recipient,
-          msg.sender,
-          withdrawalHash
-        );
-      } else {
-        IERC20 token = IERC20(withdrawal.tokenAddress);
-        require(token.balanceOf(address(msg.sender)) >= ferriedAmount, "Not enough funds");
-        token.safeTransferFrom(msg.sender, withdrawal.recipient, ferriedAmount);
-        emit WithdrawalFerried(
-          withdrawal.requestId.id,
-          ferriedAmount,
-          withdrawal.recipient,
-          msg.sender,
-          withdrawalHash
-        );
-      }
-    }
-
-    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+    function _ferryWithdrawal(Withdrawal calldata withdrawal)
+        private
+        checkAmountWithFerryTip(withdrawal.amount, withdrawal.ferryTip)
+    {
         bytes32 withdrawalHash = hashWithdrawal(withdrawal);
-        verify_request_proof(withdrawal.requestId.id, withdrawalHash, merkle_root, proof);
+        if (processedL2Requests[withdrawalHash] != address(0)) {
+            revert WithdrawalAlreadyFerried(withdrawalHash);
+        }
+
+        processedL2Requests[withdrawalHash] = _msgSender();
+        uint256 ferriedAmount = withdrawal.amount - withdrawal.ferryTip;
+
+        if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
+            if (msg.value != ferriedAmount) {
+                revert InvalidFerriedAmount(msg.value, ferriedAmount);
+            }
+
+            emit WithdrawalFerried(
+                withdrawal.requestId.id, ferriedAmount, withdrawal.recipient, _msgSender(), withdrawalHash
+            );
+
+            payable(withdrawal.recipient).sendValue(ferriedAmount);
+            return;
+        }
+
+        emit WithdrawalFerried(
+            withdrawal.requestId.id, ferriedAmount, withdrawal.recipient, _msgSender(), withdrawalHash
+        );
+
+        IERC20(withdrawal.tokenAddress).safeTransferFrom(_msgSender(), withdrawal.recipient, ferriedAmount);
+    }
+
+    function close_withdrawal(Withdrawal calldata withdrawal, bytes32 merkleRoot, bytes32[] calldata proof)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
+        _closeWithdrawal(withdrawal, merkleRoot, proof);
+    }
+
+    function closeWithdrawal(Withdrawal calldata withdrawal, bytes32 merkleRoot, bytes32[] calldata proof)
+        external
+        override
+        nonReentrant
+        whenNotPaused
+    {
+        _closeWithdrawal(withdrawal, merkleRoot, proof);
+    }
+
+    function _closeWithdrawal(Withdrawal calldata withdrawal, bytes32 merkleRoot, bytes32[] calldata proof) private {
+        bytes32 withdrawalHash = hashWithdrawal(withdrawal);
+        _verifyRequestProof(withdrawal.requestId.id, withdrawalHash, merkleRoot, proof);
 
         address ferryAddress = processedL2Requests[withdrawalHash];
-        bool isFerried = ferryAddress != address(0);
         processedL2Requests[withdrawalHash] = CLOSED;
 
-        if ( !isFerried ){
+        if (ferryAddress != address(0)) {
+            withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS
+                ? _sendNative(ferryAddress, withdrawal.amount)
+                : _sendERC20(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
 
-          if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
-            send_native_and_emit_event(withdrawal.recipient, withdrawal.amount - withdrawal.ferryTip);
-            if (withdrawal.ferryTip > 0){
-              send_native_and_emit_event(msg.sender, withdrawal.ferryTip);
+            emit FerriedWithdrawalClosed(withdrawal.requestId.id, withdrawalHash);
+            return;
+        }
+
+        uint256 finalWithdrawalAmount = withdrawal.amount - withdrawal.ferryTip;
+        if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS) {
+            _sendNative(withdrawal.recipient, finalWithdrawalAmount);
+
+            if (withdrawal.ferryTip > 0) {
+                _sendNative(_msgSender(), withdrawal.ferryTip);
             }
-          }
-          else {
-            send_erc20_and_emit_event(withdrawal.recipient, withdrawal.tokenAddress, withdrawal.amount - withdrawal.ferryTip);
-            if (withdrawal.ferryTip > 0){
-              send_erc20_and_emit_event(msg.sender, withdrawal.tokenAddress, withdrawal.ferryTip);
+        } else {
+            _sendERC20(withdrawal.recipient, withdrawal.tokenAddress, finalWithdrawalAmount);
+
+            if (withdrawal.ferryTip > 0) {
+                _sendERC20(_msgSender(), withdrawal.tokenAddress, withdrawal.ferryTip);
             }
-          }
-
-          emit WithdrawalClosed(
-            withdrawal.requestId.id,
-            withdrawalHash
-          );
-
-        }else{
-
-          if (withdrawal.tokenAddress == NATIVE_TOKEN_ADDRESS){
-            send_native_and_emit_event(ferryAddress, withdrawal.amount);
-          }
-          else {
-            send_erc20_and_emit_event(ferryAddress, withdrawal.tokenAddress, withdrawal.amount);
-          }
-
-          emit FerriedWithdrawalClosed(
-            withdrawal.requestId.id,
-            withdrawalHash
-          );
-
         }
 
-
+        emit WithdrawalClosed(withdrawal.requestId.id, withdrawalHash);
     }
 
-    function find_l2_batch(uint256 requestId) view public returns (bytes32) {
-        require(requestId <= lastProcessedUpdate_origin_l2, "Invalid request id");
-        if (roots.length == 0) {
-            revert("there are no roots yet on the contract");
+    function find_l2_batch(uint256 requestId) external view override returns (bytes32) {
+        return _findL2Batch(requestId);
+    }
+
+    function findL2Batch(uint256 requestId) external view override returns (bytes32) {
+        return _findL2Batch(requestId);
+    }
+
+    function _findL2Batch(uint256 requestId) private view returns (bytes32) {
+        if (requestId > lastProcessedUpdate_origin_l2) {
+            revert InvalidRequestId(requestId);
         }
 
-        for (uint256 i = roots.length - 1; i >= 0; i--) {
-          if ( requestId >= merkleRootRange[roots[i]].start && requestId <= merkleRootRange[roots[i]].end) {
-            return roots[i];
-          }
+        uint256 rootCount = roots.length;
+        if (rootCount == 0) {
+            revert ZeroRootCount();
         }
 
-        revert("couldnt find the batch containing the request");
-    }
+        for (uint256 i = rootCount; i > 0;) {
+            bytes32 root = roots[i - 1];
+            Range memory range = merkleRootRange[root];
 
-    function verify_request_proof(uint256 requestId, bytes32 request_hash, bytes32 merkle_root, bytes32[] calldata proof) private view {
-        Range memory r = merkleRootRange[merkle_root];
-        require(r.start != 0 && r.end != 0, "Unknown merkle root"); 
+            if (requestId >= range.start && requestId <= range.end) {
+                return root;
+            }
 
-        require(processedL2Requests[request_hash] != CLOSED, "Already processed");
-
-        if (r.end < r.start) {
-          revert("Invalid request range, end < start");
+            unchecked {
+                --i;
+            }
         }
 
-        if (requestId < r.start || requestId > r.end) {
-          revert("Request id outside of range");
+        revert("Batch with request not found");
+    }
+
+    function _verifyRequestProof(uint256 requestId, bytes32 requestHash, bytes32 merkleRoot, bytes32[] calldata proof)
+        private
+        view
+    {
+        if (processedL2Requests[requestHash] == CLOSED) {
+            revert L2RequestAlreadyProcessed(requestHash);
         }
 
-        if (r.end - r.start + 1 > type(uint32).max ){
-          revert("Range too big");
+        Range memory range = merkleRootRange[merkleRoot];
+        if (range.start == 0 || range.end == 0) {
+            revert UnexpectedMerkleRoot();
+        }
+        if (range.end < range.start) {
+            revert InvalidRequestRange(range.start, range.end);
+        }
+        if (requestId < range.start || requestId > range.end) {
+            revert RequestOutOfRange(requestId, range.start, range.end);
         }
 
-        uint32 leaves_count = uint32(r.end - r.start + 1);
-        uint32 pos = uint32(requestId - r.start);
-        require(
-          calculate_root(request_hash, pos, proof, leaves_count) == merkle_root,
-          "Invalid proof"
-        );
+        uint256 leaveCount = range.end - range.start + 1;
+        if (leaveCount > type(uint32).max) {
+            revert RequestRangeTooLarge(leaveCount);
+        }
+
+        uint256 pos = requestId - range.start;
+        bytes32 expectedMerkleRoot = LMerkleTree.calculateRoot(requestHash, pos, proof, leaveCount);
+        if (merkleRoot != expectedMerkleRoot) {
+            revert InvalidRequestProof(merkleRoot);
+        }
     }
 
-    function hashWithdrawal(Withdrawal calldata withdrawal) public pure returns (bytes32) {
-      return keccak256(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
+    function close_cancel(Cancel calldata cancel, bytes32 merkleRoot, bytes32[] calldata proof)
+        external
+        override
+        whenNotPaused
+        nonReentrant
+    {
+        _closeCancel(cancel, merkleRoot, proof);
     }
 
-    function hashCancel(Cancel calldata cancel) public pure returns (bytes32) {
-      return keccak256(bytes.concat(abi.encode(L2RequestType.Cancel), abi.encode(cancel)));
-    }
-    
-    function hashFailedDepositResolution(FailedDepositResolution calldata failedDeposit) public pure returns (bytes32) {
-      return keccak256(bytes.concat(abi.encode(L2RequestType.FailedDepositResolution), abi.encode(failedDeposit)));
+    function closeCancel(Cancel calldata cancel, bytes32 merkleRoot, bytes32[] calldata proof)
+        external
+        override
+        whenNotPaused
+        nonReentrant
+    {
+        _closeCancel(cancel, merkleRoot, proof);
     }
 
-    function close_cancel(Cancel calldata cancel, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+    function _closeCancel(Cancel calldata cancel, bytes32 merkleRoot, bytes32[] calldata proof) private {
         bytes32 hash = hashCancel(cancel);
-        verify_request_proof(cancel.requestId.id, hash, merkle_root, proof);
-        process_l2_update_cancels(cancel, hash);
+        _verifyRequestProof(cancel.requestId.id, hash, merkleRoot, proof);
+        _processL2UpdateCancels(cancel, hash);
         processedL2Requests[hash] = CLOSED;
     }
 
-    function close_deposit_refund(FailedDepositResolution calldata failedDeposit, bytes32 merkle_root, bytes32[] calldata proof) public whenNotPaused nonReentrant {
+    function close_deposit_refund(
+        FailedDepositResolution calldata failedDeposit,
+        bytes32 merkleRoot,
+        bytes32[] calldata proof
+    ) external override nonReentrant whenNotPaused {
+        _closeDepositRefund(failedDeposit, merkleRoot, proof);
+    }
+
+    function closeDepositRefund(
+        FailedDepositResolution calldata failedDeposit,
+        bytes32 merkleRoot,
+        bytes32[] calldata proof
+    ) external override nonReentrant whenNotPaused {
+        _closeDepositRefund(failedDeposit, merkleRoot, proof);
+    }
+
+    // slither-disable-next-line reentrancy-eth
+    function _closeDepositRefund(
+        FailedDepositResolution calldata failedDeposit,
+        bytes32 merkleRoot,
+        bytes32[] calldata proof
+    ) private {
         bytes32 hash = hashFailedDepositResolution(failedDeposit);
-        verify_request_proof(failedDeposit.requestId.id, hash, merkle_root, proof);
-        process_l2_update_failed_deposit(failedDeposit, hash);
+        _verifyRequestProof(failedDeposit.requestId.id, hash, merkleRoot, proof);
+        _processL2UpdateFailedDeposit(failedDeposit, hash);
         processedL2Requests[hash] = CLOSED;
     }
 
-    function process_l2_update_failed_deposit(FailedDepositResolution calldata failedDeposit, bytes32 failedDepositHash) private {
+    function _processL2UpdateFailedDeposit(FailedDepositResolution calldata failedDeposit, bytes32 failedDepositHash)
+        private
+    {
         Deposit storage originDeposit = deposits[failedDeposit.originRequestId];
-        address recipient = originDeposit.depositRecipient;
+        address depositRecipient = originDeposit.depositRecipient;
 
         if (failedDeposit.ferry != address(0)) {
-          recipient = failedDeposit.ferry;
+            depositRecipient = failedDeposit.ferry;
         }
 
-        if (originDeposit.tokenAddress == NATIVE_TOKEN_ADDRESS) {
-              send_native_and_emit_event(recipient, originDeposit.amount);
-        } else {
-              send_erc20_and_emit_event(recipient, originDeposit.tokenAddress, originDeposit.amount);
-        }
+        originDeposit.tokenAddress == NATIVE_TOKEN_ADDRESS
+            ? _sendNative(depositRecipient, originDeposit.amount)
+            : _sendERC20(depositRecipient, originDeposit.tokenAddress, originDeposit.amount);
 
-        emit FailedDepositResolutionClosed(
-          failedDeposit.requestId.id,
-          failedDeposit.originRequestId,
-          failedDepositHash
-        );
+        emit FailedDepositResolutionClosed(failedDeposit.requestId.id, failedDeposit.originRequestId, failedDepositHash);
     }
 
+    function update_l1_from_l2(bytes32 merkleRoot, Range calldata range)
+        external
+        override
+        whenNotPaused
+        onlyRole(UPDATER_ROLE)
+    {
+        _updateL1FromL2(merkleRoot, range);
+    }
 
-    // TODO:
-    // - verify that merkle_root is correct (passing TaskResponse along with the merkle root?)
-    // - verify that range is correct and belongs to particular merkle_root
-    function update_l1_from_l2(bytes32 merkle_root, Range calldata range /*,TaskResponse calldata response ??? */) external whenNotPaused {
-        require(msg.sender == updaterAccount, "Not the owner");
-        require(range.end > lastProcessedUpdate_origin_l2, "Update brings no new data");
-        require(range.start > 0 , "range id must be greater than 0");
-        require(range.start - 1 <= lastProcessedUpdate_origin_l2, "Previous update missing");
-        require(range.end >= range.start, "Invalid range");
-        roots.push(merkle_root);
-        merkleRootRange[merkle_root] = range;
+    function updateL1FromL2(bytes32 merkleRoot, Range calldata range)
+        external
+        override
+        whenNotPaused
+        onlyRole(UPDATER_ROLE)
+    {
+        _updateL1FromL2(merkleRoot, range);
+    }
+
+    function _updateL1FromL2(bytes32 merkleRoot, Range calldata range) private {
+        if (range.start == 0) {
+            revert ZeroUpdateRange();
+        }
+        if (range.start > range.end) {
+            revert InvalidUpdateRange(range.start, range.end);
+        }
+        if (range.start - 1 > lastProcessedUpdate_origin_l2) {
+            revert PreviousUpdateMissed(range.start, lastProcessedUpdate_origin_l2);
+        }
+        if (range.end <= lastProcessedUpdate_origin_l2) {
+            revert UpdateAlreadyApplied(range.end, lastProcessedUpdate_origin_l2);
+        }
+
+        roots.push(merkleRoot);
+        merkleRootRange[merkleRoot] = range;
         lastProcessedUpdate_origin_l2 = range.end;
-        emit L2UpdateAccepted(merkle_root, range);
+
+        emit L2UpdateAccepted(merkleRoot, range);
     }
 
-    function getMerkleRootsLength() public view returns (uint256){
-      return roots.length;
-    }
+    function _processL2UpdateCancels(Cancel calldata cancel, bytes32 cancelHash) private {
+        bool cancelJustified;
 
-    function process_l2_update_cancels(Cancel calldata cancel, bytes32 cancelHash) private {
-        bool cancelJustified = false;
-
-        if (cancel.range.end > counter - 1 ){
-          cancelJustified = true;
-        }else{
-          L1Update memory pending = getPendingRequests(
-            cancel.range.start,
-            cancel.range.end
-          );
-          bytes32 correct_hash = keccak256(abi.encode(pending));
-          cancelJustified = correct_hash != cancel.hash;
+        if (cancel.range.end > counter - 1) {
+            cancelJustified = true;
+        } else {
+            L1Update memory pending = getPendingRequests(cancel.range.start, cancel.range.end);
+            cancelJustified = cancel.hash != keccak256(abi.encode(pending));
         }
-        uint256 timeStamp = block.timestamp;
 
         CancelResolution memory resolution = CancelResolution({
-            requestId: RequestId({origin: Origin.L1, id: counter++}),
+            requestId: _createRequestId(Origin.L1),
             l2RequestId: cancel.requestId.id,
             cancelJustified: cancelJustified,
-            timeStamp: timeStamp
+            timeStamp: block.timestamp
         });
 
         cancelResolutions[resolution.requestId.id] = resolution;
-        emit DisputeResolutionAcceptedIntoQueue(
-            resolution.l2RequestId,
-            resolution.cancelJustified,
-            cancelHash
-        );
+
+        emit DisputeResolutionAcceptedIntoQueue(resolution.l2RequestId, resolution.cancelJustified, cancelHash);
     }
 
-    function send_native_and_emit_event(
-        address recipient,
-        uint256 amount
-    ) private {
-        require(payable(address(this)).balance >= amount, "Not enough funds in contract");
-        require(amount > 0, "Amount must be greater than zero");
+    function _createRequestId(Origin origin) private returns (RequestId memory) {
+        return RequestId({origin: origin, id: counter++});
+    }
+
+    function _sendNative(address recipient, uint256 amount) private {
+        if (amount == 0) {
+            revert ZeroTransferAmount();
+        }
+
         emit NativeTokensWithdrawn(recipient, amount);
+
         Address.sendValue(payable(recipient), amount);
     }
 
-
-    function send_erc20_and_emit_event(
-        address recipient,
-        address tokenAddress,
-        uint256 amount
-    ) private {
-        IERC20 token = IERC20(tokenAddress);
-        require(token.balanceOf(address(this)) >= amount, "Not enough funds in contract");
-        require(amount > 0, "Amount must be greater than zero");
-
-        token.safeTransfer(recipient, amount);
-        emit ERC20TokensWithdrawn(
-          recipient,
-          tokenAddress,
-          amount
-        );
-    }
-
-    function getPendingRequests(
-        uint256 start,
-        uint256 end
-    ) public view returns (L1Update memory) {
-        L1Update memory result;
-
-        result.chain = chain;
-        uint256 depositsCounter = 0;
-        uint256 cancelsCounter = 0;
-
-        if (start == 0 && end == 0){
-          return result;
+    function _sendERC20(address recipient, address tokenAddress, uint256 amount) private {
+        if (amount == 0) {
+            revert ZeroTransferAmount();
         }
 
-        for (uint256 requestId = start; requestId <= end; requestId++) {
-            if (deposits[requestId].requestId.id != 0) {
-                depositsCounter++;
-            } else if (cancelResolutions[requestId].requestId.id != 0) {
-                cancelsCounter++;
-            }else {
-              revert("Invalid range");
+        emit ERC20TokensWithdrawn(recipient, tokenAddress, amount);
+
+        IERC20(tokenAddress).safeTransfer(recipient, amount);
+    }
+
+    function getUpdateForL2() external view override returns (L1Update memory) {
+        return getPendingRequests(lastProcessedUpdate_origin_l1 + 1, counter - 1);
+    }
+
+    function getMerkleRootsLength() external view override returns (uint256) {
+        return roots.length;
+    }
+
+    function hashWithdrawal(Withdrawal calldata withdrawal) public pure override returns (bytes32) {
+        return keccak256(bytes.concat(abi.encode(L2RequestType.Withdrawal), abi.encode(withdrawal)));
+    }
+
+    function hashCancel(Cancel calldata cancel) public pure override returns (bytes32) {
+        return keccak256(bytes.concat(abi.encode(L2RequestType.Cancel), abi.encode(cancel)));
+    }
+
+    function hashFailedDepositResolution(FailedDepositResolution calldata failedDeposit)
+        public
+        pure
+        override
+        returns (bytes32)
+    {
+        return keccak256(bytes.concat(abi.encode(L2RequestType.FailedDepositResolution), abi.encode(failedDeposit)));
+    }
+
+    function getPendingRequests(uint256 start, uint256 end) public view override returns (L1Update memory) {
+        L1Update memory result = L1Update({
+            chain: chain,
+            pendingDeposits: new Deposit[](0),
+            pendingCancelResolutions: new CancelResolution[](0)
+        });
+
+        if (start == 0 && end == 0) {
+            return result;
+        }
+
+        uint256 depositCounter = 0;
+        uint256 cancelCounter = 0;
+
+        for (uint256 id = start; id <= end;) {
+            if (deposits[id].requestId.id > 0) {
+                ++depositCounter;
+            } else if (cancelResolutions[id].requestId.id > 0) {
+                ++cancelCounter;
+            } else {
+                revert("Invalid range");
+            }
+
+            unchecked {
+                ++id;
             }
         }
 
-        result.pendingDeposits = new Deposit[](depositsCounter);
-        result.pendingCancelResolutions = new CancelResolution[](cancelsCounter);
+        result.pendingDeposits = new Deposit[](depositCounter);
+        result.pendingCancelResolutions = new CancelResolution[](cancelCounter);
 
-        depositsCounter = 0;
-        cancelsCounter = 0;
+        depositCounter = 0;
+        cancelCounter = 0;
 
-        for (uint256 requestId = start; requestId <= end; requestId++) {
-            if (deposits[requestId].requestId.id > 0) {
-                result.pendingDeposits[depositsCounter++] = deposits[requestId];
-            } else if (cancelResolutions[requestId].l2RequestId > 0) {
-                result.pendingCancelResolutions[
-                    cancelsCounter++
-                ] = cancelResolutions[requestId];
+        for (uint256 id = start; id <= end;) {
+            if (deposits[id].requestId.id > 0) {
+                result.pendingDeposits[depositCounter++] = deposits[id];
+            } else if (cancelResolutions[id].l2RequestId > 0) {
+                result.pendingCancelResolutions[cancelCounter++] = cancelResolutions[id];
             } else {
                 break;
+            }
+
+            unchecked {
+                ++id;
             }
         }
 

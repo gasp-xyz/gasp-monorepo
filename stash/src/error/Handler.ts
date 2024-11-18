@@ -6,6 +6,7 @@ import {
   NotEnoughException,
   NotFoundException,
   ForbiddenException,
+  ValidationException,
 } from './Exception.js'
 import logger from '../util/Logger.js'
 
@@ -45,6 +46,10 @@ export const handle = async (res: Response, error: Error): Promise<void> => {
     case error instanceof ForbiddenException:
       logger.debug(error.message, error)
       res.status(HttpStatusConstants.FORBIDDEN).json(errorToPayload(error))
+      break
+    case error instanceof ValidationException:
+      logger.debug(error.message, error)
+      res.status(HttpStatusConstants.BAD_REQUEST).json(errorToPayload(error))
       break
     default:
       logger.error(error.message, error)
