@@ -1,11 +1,11 @@
 use alloy::network::{Ethereum, EthereumWallet};
-use alloy::signers::local::PrivateKeySigner;
 use alloy::providers::fillers::{
     BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller, WalletFiller,
 };
-use hex::encode as hex_encode;
+use alloy::signers::local::PrivateKeySigner;
 use alloy::sol_types::SolValue;
 use alloy::transports::BoxTransport;
+use hex::encode as hex_encode;
 use primitive_types::H256;
 use sha3::{Digest, Keccak256};
 
@@ -49,12 +49,9 @@ pub type RolldownInstanceType = bindings::rolldown::Rolldown::RolldownInstance<
     BoxTransport,
     FillProvider<
         JoinFill<
-            JoinFill<Identity,
-                JoinFill<GasFiller, 
-                    JoinFill<BlobGasFiller, 
-                        JoinFill<NonceFiller, ChainIdFiller>
-                    >
-                >,
+            JoinFill<
+                Identity,
+                JoinFill<GasFiller, JoinFill<BlobGasFiller, JoinFill<NonceFiller, ChainIdFiller>>>,
             >,
             WalletFiller<EthereumWallet>,
         >,
@@ -64,14 +61,12 @@ pub type RolldownInstanceType = bindings::rolldown::Rolldown::RolldownInstance<
     >,
 >;
 
-
 pub struct RolldownContract {
     contract_handle: RolldownInstanceType,
 }
 
 impl RolldownContract {
     pub async fn new(uri: &str, address: [u8; 20], private_key: [u8; 32]) -> Result<Self, L1Error> {
-
         let signer: PrivateKeySigner = hex::encode(private_key).parse().expect("valid private key");
         let wallet = EthereumWallet::new(signer);
         let provider = ProviderBuilder::new()
@@ -84,30 +79,28 @@ impl RolldownContract {
             contract_handle: bindings::rolldown::Rolldown::RolldownInstance::new(
                 address.into(),
                 provider.clone(),
-            )
+            ),
         })
     }
 
     #[cfg(test)]
     #[tracing::instrument(skip(self))]
     pub async fn deposit(&self, amount: u128, ferry_tip: u128) -> Result<(), L1Error> {
-        let call = self.contract_handle.deposit_native_1(
-                alloy::primitives::U256::from(ferry_tip)
-        ).value(alloy::primitives::U256::from(amount));
+        let call = self
+            .contract_handle
+            .deposit_native_1(alloy::primitives::U256::from(ferry_tip))
+            .value(alloy::primitives::U256::from(amount));
 
-        let hash = call.send().await?
-            .watch().await?;
+        let hash = call.send().await?.watch().await?;
         tracing::debug!("deposit hash: {}", hex_encode(hash));
 
         Ok(())
     }
-
 }
 
 impl L1Interface for RolldownContract {
     #[tracing::instrument(skip(self))]
-    async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error>{
-
+    async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error> {
         let request_id = alloy::primitives::U256::from(request_id);
         let call = self.contract_handle.find_l2_batch(request_id);
         let merkle_root = call.call().await?._0;
@@ -115,8 +108,14 @@ impl L1Interface for RolldownContract {
         let call = self.contract_handle.merkleRootRange(merkle_root);
         let range = call.call().await?;
 
-        let range_start = range.start.try_into().or_else(|_| Err(L1Error::OverflowError))?;
-        let range_end = range.end.try_into().or_else(|_| Err(L1Error::OverflowError))?;
+        let range_start = range
+            .start
+            .try_into()
+            .or_else(|_| Err(L1Error::OverflowError))?;
+        let range_end = range
+            .end
+            .try_into()
+            .or_else(|_| Err(L1Error::OverflowError))?;
         Ok((merkle_root.0, (range_start, range_end)))
     }
 
@@ -130,7 +129,7 @@ impl L1Interface for RolldownContract {
             .or_else(|_| Err(L1Error::OverflowError))?;
         if next_request_id == 1 {
             Ok(None)
-        }else{
+        } else {
             Ok(next_request_id.checked_sub(1u128))
         }
     }
@@ -149,12 +148,15 @@ impl L1Interface for RolldownContract {
                 .merkleRootRange(latest_root)
                 .call()
                 .await?;
-            let latest: u128 =
-                range
-                    .end
-                    .try_into()
-                    .or_else(|_| Err(L1Error::OverflowError))?;
-            tracing::trace!("latest request in root {}: {}", hex_encode(latest_root), latest);
+            let latest: u128 = range
+                .end
+                .try_into()
+                .or_else(|_| Err(L1Error::OverflowError))?;
+            tracing::trace!(
+                "latest request in root {}: {}",
+                hex_encode(latest_root),
+                latest
+            );
 
             Ok(Some(latest))
         } else {
@@ -229,12 +231,13 @@ impl L1Interface for RolldownContract {
     }
 
     #[tracing::instrument(skip(self))]
-    async fn is_closed(&self, request_hash: H256) -> Result<bool, L1Error>{
-
+    async fn is_closed(&self, request_hash: H256) -> Result<bool, L1Error> {
         let request_hash = request_hash.0.into();
         let request_status = self
             .contract_handle
-            .processedL2Requests(request_hash).call().await
+            .processedL2Requests(request_hash)
+            .call()
+            .await
             .map(|elem| elem._0)?;
 
         let closed = self.contract_handle.CLOSED().call().await?._0;
@@ -242,19 +245,19 @@ impl L1Interface for RolldownContract {
 
         tracing::trace!("is_closed: {} ({})", is_closed, hex_encode(request_status));
         return Ok(is_closed);
-
     }
 }
 
 #[cfg(test)]
-mod test{
+mod test {
     use super::*;
     use hex_literal::hex;
     use serial_test::serial;
 
     const URI: &'static str = "http://localhost:8545";
     const ROLLDOWN_ADDRESS: [u8; 20] = hex!("1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f");
-    const ALICE_PKEY: [u8; 32] = hex!("dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97");
+    const ALICE_PKEY: [u8; 32] =
+        hex!("dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97");
     // const ETHEREUM: l2types::Chain = l2types::Chain::Ethereum;
     // const ARBITRUM: l2types::Chain = l2types::Chain::Arbitrum;
 
@@ -267,15 +270,21 @@ mod test{
     #[serial]
     #[tokio::test]
     async fn test_can_connect() {
-        RolldownContract::new(URI, ROLLDOWN_ADDRESS, ALICE_PKEY).await.unwrap();
+        RolldownContract::new(URI, ROLLDOWN_ADDRESS, ALICE_PKEY)
+            .await
+            .unwrap();
     }
 
     #[serial]
     #[tokio::test]
     async fn test_can_latest_request_id() {
-        let rolldown = RolldownContract::new(URI, ROLLDOWN_ADDRESS, ALICE_PKEY).await.unwrap();
+        let rolldown = RolldownContract::new(URI, ROLLDOWN_ADDRESS, ALICE_PKEY)
+            .await
+            .unwrap();
         rolldown.deposit(1000, 10).await.unwrap();
-        assert!(matches!(rolldown.get_latest_reqeust_id().await.expect("can fetch request"), Some(latest) if latest > 0));
+        assert!(
+            matches!(rolldown.get_latest_reqeust_id().await.expect("can fetch request"), Some(latest) if latest > 0)
+        );
     }
 
     #[serial]
@@ -283,22 +292,43 @@ mod test{
     async fn test_can_fetch_update_and_update_hash() {
         use alloy::sol_types::SolValue;
 
-        let rolldown = RolldownContract::new(URI, ROLLDOWN_ADDRESS, ALICE_PKEY).await.unwrap();
+        let rolldown = RolldownContract::new(URI, ROLLDOWN_ADDRESS, ALICE_PKEY)
+            .await
+            .unwrap();
         rolldown.deposit(1000, 10).await.unwrap();
-        let latest_update_first= rolldown.get_latest_reqeust_id().await.expect("can fetch request").unwrap();
+        let latest_update_first = rolldown
+            .get_latest_reqeust_id()
+            .await
+            .expect("can fetch request")
+            .unwrap();
 
         rolldown.deposit(1000, 10).await.unwrap();
-        let latest_update_second= rolldown.get_latest_reqeust_id().await.expect("can fetch request").unwrap();
+        let latest_update_second = rolldown
+            .get_latest_reqeust_id()
+            .await
+            .expect("can fetch request")
+            .unwrap();
 
         assert!(latest_update_first < latest_update_second);
 
-        let update1 = rolldown.get_update(1u128, latest_update_first).await.unwrap();
-        let update2 = rolldown.get_update(1u128, latest_update_second).await.unwrap();
-        let hash1 = rolldown.get_update_hash(1u128, latest_update_first).await.unwrap();
-        let hash2 = rolldown.get_update_hash(1u128, latest_update_second).await.unwrap();
+        let update1 = rolldown
+            .get_update(1u128, latest_update_first)
+            .await
+            .unwrap();
+        let update2 = rolldown
+            .get_update(1u128, latest_update_second)
+            .await
+            .unwrap();
+        let hash1 = rolldown
+            .get_update_hash(1u128, latest_update_first)
+            .await
+            .unwrap();
+        let hash2 = rolldown
+            .get_update_hash(1u128, latest_update_second)
+            .await
+            .unwrap();
 
         assert!(hash1 != hash2);
         assert!(update1.abi_encode() != update2.abi_encode());
     }
-
 }

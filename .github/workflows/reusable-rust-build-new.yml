@@ -52,7 +52,7 @@ jobs:
         run: cargo fmt --all -- --check
 
   clippy-check:
-    name: "[${{ inputs.service_folder }}]Clippy check"
+    name: "[${{ inputs.service_folder }}] Clippy check"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

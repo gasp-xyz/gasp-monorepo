@@ -90,7 +90,7 @@ jobs:
       docker_image_repository: mangatasolutions/gasp-syncer
 
   build-sequencer-image:
-    name: Build gasp-syncer Docker image
+    name: Build sequencer Docker image
     uses: ./.github/workflows/reusable-rust-build-new.yml
     secrets: inherit
     with:

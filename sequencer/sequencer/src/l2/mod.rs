@@ -28,7 +28,7 @@ pub mod types {
     pub use gasp::api::runtime_types::pallet_rolldown::messages::L1Update;
     #[allow(unused_imports)]
     pub use gasp::api::runtime_types::pallet_rolldown::messages::{
-        Chain, Origin, RequestId, Deposit, CancelResolution
+        CancelResolution, Chain, Deposit, Origin, RequestId,
     };
 }
 
@@ -104,7 +104,7 @@ pub trait L2Interface {
         at: HashOf<GaspConfig>,
     ) -> Result<Option<H256>, L2Error>;
 
-    async fn header_stream( &self,) -> Result<HeaderStream, L2Error>;
+    async fn header_stream(&self) -> Result<HeaderStream, L2Error>;
 
     async fn finalized_header_stream(&self) -> Result<HeaderStream, L2Error>;
 
@@ -177,11 +177,7 @@ impl Gasp {
         while let Some(header) = stream.next().await {
             let (number, hash) = header?;
 
-            tracing::debug!(
-                "checking block #{} {}",
-                number,
-                hex_encode(tx_hash),
-            );
+            tracing::debug!("checking block #{} {}", number, hex_encode(tx_hash),);
 
             let block = self.client.blocks().at(hash.clone()).await?;
             let extrinsics = block.extrinsics().await?;
@@ -350,8 +346,10 @@ impl L2Interface for Gasp {
         &self,
         chain: types::Chain,
         at: HashOf<GaspConfig>,
-    ) -> Result<Option<[u8; 20]>, L2Error>{
-        let storage = gasp::api::storage().sequencer_staking().selected_sequencer();
+    ) -> Result<Option<[u8; 20]>, L2Error> {
+        let storage = gasp::api::storage()
+            .sequencer_staking()
+            .selected_sequencer();
         let selected = self
             .client
             .storage()
@@ -360,7 +358,8 @@ impl L2Interface for Gasp {
             .await?
             .unwrap_or_default();
 
-        let selected = selected.iter()
+        let selected = selected
+            .iter()
             .find(|(c, _)| c == &chain)
             .map(|(_, account)| account.0);
 
@@ -457,7 +456,9 @@ impl L2Interface for Gasp {
             .await?
             .unwrap_or_default()
             .into_iter()
-            .filter(|(account, _request_id, _role)| account.0 == self.keypair.address().into_inner())
+            .filter(|(account, _request_id, _role)| {
+                account.0 == self.keypair.address().into_inner()
+            })
             .map(|(_account, request_id, _role)| request_id)
             .collect::<Vec<_>>();
 
@@ -562,7 +563,6 @@ impl L2Interface for Gasp {
             .call(call)
             .await?;
 
-
         Ok(abi_encoded_request)
     }
 
@@ -596,10 +596,7 @@ impl L2Interface for Gasp {
         Ok(reqeust_hash)
     }
 
-    async fn header_stream(
-        &self,
-    ) -> Result<HeaderStream, L2Error>
-    {
+    async fn header_stream(&self) -> Result<HeaderStream, L2Error> {
         Ok(self
             .client
             .backend()
@@ -612,10 +609,7 @@ impl L2Interface for Gasp {
             .boxed())
     }
 
-    async fn finalized_header_stream(
-        &self,
-    ) -> Result<HeaderStream, L2Error>
-    {
+    async fn finalized_header_stream(&self) -> Result<HeaderStream, L2Error> {
         Ok(self
             .client
             .backend()
@@ -627,7 +621,6 @@ impl L2Interface for Gasp {
             })
             .boxed())
     }
-
 }
 
 #[cfg(test)]
@@ -667,7 +660,6 @@ mod test {
             .from_env_lossy()
             .add_directive("sequencer=trace".parse().expect("proper directive"));
         tracing_subscriber::fmt().with_env_filter(filter).init();
-
 
         let gasp = Gasp::new(URI, BALTATHAR_PKEY)
             .await
@@ -779,7 +771,6 @@ mod test {
         assert_eq!(proofs.len(), 1 as usize);
     }
 
-
     #[serial]
     #[tokio::test]
     async fn test_can_fetch_pending_cancels() {
@@ -787,7 +778,9 @@ mod test {
             .await
             .expect("can connect to gasp");
         let at = gasp.latest_block().await.unwrap().1;
-        gasp.get_pending_cancels(ETHEREUM, at).await.expect("can fetch pending cancels");
+        gasp.get_pending_cancels(ETHEREUM, at)
+            .await
+            .expect("can fetch pending cancels");
     }
 
     #[serial]
@@ -797,7 +790,10 @@ mod test {
             .await
             .expect("can connect to gasp");
 
-        let result = gasp.cancel_pending_request(u128::MAX, ETHEREUM).await.expect("can fetch pending cancels");
+        let result = gasp
+            .cancel_pending_request(u128::MAX, ETHEREUM)
+            .await
+            .expect("can fetch pending cancels");
         assert_eq!(false, result);
     }
 
@@ -808,7 +804,10 @@ mod test {
             .await
             .expect("can connect to gasp");
         let at = gasp.latest_block().await.unwrap().1;
-        let latest_req_id = gasp.get_latest_processed_request_id(ETHEREUM, at).await.unwrap();
+        let latest_req_id = gasp
+            .get_latest_processed_request_id(ETHEREUM, at)
+            .await
+            .unwrap();
         let next_req_id = latest_req_id.saturating_add(1u128);
         let update = UpdateBuilder::new()
             .with_request(Request::Deposit(types::Deposit {
@@ -824,11 +823,11 @@ mod test {
             }))
             .build(ETHEREUM);
 
-        let status = gasp.update_l1_from_l2_unsafe(update)
+        let status = gasp
+            .update_l1_from_l2_unsafe(update)
             .await
             .expect("can submit update");
 
         assert_eq!(status, false);
-
     }
 }

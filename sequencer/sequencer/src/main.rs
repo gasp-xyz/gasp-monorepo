@@ -1,6 +1,6 @@
-use tracing::level_filters::LevelFilter;
 use envconfig::Envconfig;
 use hex::FromHex;
+use tracing::level_filters::LevelFilter;
 
 mod sequencer;
 
@@ -54,7 +54,6 @@ pub enum Error {
     UnsupportedChain(String),
 }
 
-
 #[tokio::main]
 pub async fn main() {
     let filter = tracing_subscriber::EnvFilter::builder()
@@ -66,7 +65,7 @@ pub async fn main() {
     let config = Config::init_from_env().unwrap();
 
     tracing::info!("Config {:#?}", config);
- 
+
     run(config).await.unwrap();
 
     // if let Err(err) = run(config).await {
@@ -78,38 +77,36 @@ pub async fn main() {
 fn strip_prefix(str: &String) -> &str {
     if let Some(without_prefix) = str.strip_prefix("0x") {
         without_prefix
-    }else{
+    } else {
         &str
     }
 }
 
 async fn run(config: Config) -> Result<(), Error> {
-
     let update_size_limit = config.update_size_limit.parse::<u128>().unwrap();
-    assert!(update_size_limit > 0, "Update size limit must be greater than 0");
+    assert!(
+        update_size_limit > 0,
+        "Update size limit must be greater than 0"
+    );
     let eth_secret_key = <[u8; 32]>::from_hex(strip_prefix(&config.l1_private_key))?;
     let gasp_secret_key = <[u8; 32]>::from_hex(strip_prefix(&config.l2_mnemonic))?;
-    let rolldown_contract_address = <[u8; 20]>::from_hex(strip_prefix(&config.rolldown_contract_address))?;
+    let rolldown_contract_address =
+        <[u8; 20]>::from_hex(strip_prefix(&config.rolldown_contract_address))?;
     let chain = match config.chain.to_lowercase().as_ref() {
         "ethereum" => Ok(l2::types::Chain::Ethereum),
         "arbitrum" => Ok(l2::types::Chain::Arbitrum),
-        _ => Err(Error::UnsupportedChain(config.chain.clone()))
+        _ => Err(Error::UnsupportedChain(config.chain.clone())),
     }?;
 
     tracing::trace!("Initiating connection to {}", config.l1_uri);
-    let gasp = Gasp::new(
-        &config.l2_uri,
-        gasp_secret_key,
-    )
-    .await.map_err(Into::<sequencer::Error>::into)?;
+    let gasp = Gasp::new(&config.l2_uri, gasp_secret_key)
+        .await
+        .map_err(Into::<sequencer::Error>::into)?;
     tracing::info!("Connected to {}", config.l2_uri);
 
-    let rolldown = RolldownContract::new(
-        &config.l1_uri,
-        rolldown_contract_address,
-        eth_secret_key
-    )
-    .await.map_err(Into::<sequencer::Error>::into)?;
+    let rolldown = RolldownContract::new(&config.l1_uri, rolldown_contract_address, eth_secret_key)
+        .await
+        .map_err(Into::<sequencer::Error>::into)?;
     tracing::info!("Connected to {}", config.l1_uri);
 
     let seq = Sequencer::new(rolldown, gasp, chain, update_size_limit);
