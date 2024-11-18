@@ -711,7 +711,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         uint256 test_cases_amount = stdJson.readUint(config_data, ".cases_count");
 
         for (uint256 i = 0; i < test_cases_amount; ++i) {
-            console.log("TEST case: ", i);
+            // console.log("TEST case: ", i);
             uint256 leavePos =
                 stdJson.readUint(config_data, string.concat(".cases.[", Strings.toString(i), "].leave_pos"));
             bytes32 leaveHash =
