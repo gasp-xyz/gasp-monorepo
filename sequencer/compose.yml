@@ -1,6 +1,6 @@
 services:
   sequencer-eth:
-    image: mangatasolutions/sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
+    image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
     build:
       context: .
       dockerfile: Dockerfile.local
@@ -21,7 +21,7 @@ services:
       MNEMONIC: ${ETH_SEQUENCER_MNEMONIC}
 
   sequencer-arb:
-    image: mangatasolutions/sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
+    image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
     build:
       context: .
       dockerfile: Dockerfile.local
