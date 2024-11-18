@@ -60,12 +60,26 @@ jobs:
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
           docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/avs-aggregator:${{ inputs.version }} -f avs-aggregator/Dockerfile .
+  
   build-avs-finalizer-image:
     name: Build avs-finalizer Docker image
-    uses: ./.github/workflows/reusable-rust-build.yml
+    uses: ./.github/workflows/reusable-rust-build-new.yml
     secrets: inherit
     with:
       version: ${{ inputs.version }}
+      service_folder: avs-finalizer
+      docker_image_repository: mangatasolutions/avs-finalizer
+
+  build-avs-finalizer-image-with-fast-runtime:
+    name: Build avs-finalizer Docker image with fast runtime
+    uses: ./.github/workflows/reusable-rust-build-new.yml
+    secrets: inherit
+    with:
+      version: ${{ inputs.version }}
+      service_folder: avs-finalizer
+      docker_image_repository: mangatasolutions/avs-finalizer
+      finalizer_fast_runtime: true
+
   build-rollup-sequencer-image:
     name: Build rollup-sequencer Docker image
     runs-on: ubuntu-latest
