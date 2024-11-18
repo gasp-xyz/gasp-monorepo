@@ -1,9 +1,9 @@
 services:
   gasp-syncer:
-    image: mangatasolutions/gasp-syncer:${GASP_SYNCER_VERSION:-local}
+    image: gaspxyz/gasp-syncer:${GASP_SYNCER_VERSION:-local}
     build:
       context: .
-      dockerfile: Dockerfile.local
+    restart: unless-stopped
     depends_on:
       eth-stub:
         condition: service_healthy
@@ -13,7 +13,6 @@ services:
         condition: service_completed_successfully
       arbitrum-contracts-deployment:
         condition: service_completed_successfully
-    platform: linux/amd64
     environment:
       SOURCE_RPC_URL: ${ETH_RPC_URL:-http://eth-stub:8545}
       SOURCE_WS_URL: ${ETH_WS_URL:-ws://eth-stub:8545}
