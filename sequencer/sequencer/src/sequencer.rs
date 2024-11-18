@@ -111,7 +111,8 @@ where
             .l2
             .get_abi_encoded_request(request_id, self.chain.clone(), at)
             .await?;
-        let cancel = l1types::Cancel::abi_decode(cancel_bytes.as_ref(), true).map_err(|_| Error::CancelDeserializationFailure)?;
+        let cancel = l1types::Cancel::abi_decode(cancel_bytes.as_ref(), true)
+            .map_err(|_| Error::CancelDeserializationFailure)?;
         self.l1
             .close_cancel(cancel, merkle_root.into(), proof)
             .await?;
@@ -334,7 +335,7 @@ pub(crate) mod test {
     use crate::l1::types as l1types;
     use crate::l2::{types as l2types, HeaderStream, PendingUpdateWithKeys};
     use hex_literal::hex;
-    
+
     use mockall::predicate::eq;
     use parity_scale_codec::Decode;
     use primitive_types::H256;

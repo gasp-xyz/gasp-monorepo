@@ -108,12 +108,8 @@ impl L1Interface for RolldownContract {
         let call = self.contract_handle.merkleRootRange(merkle_root);
         let range = call.call().await?;
 
-        let range_start = range
-            .start
-            .try_into().map_err(|_| L1Error::OverflowError)?;
-        let range_end = range
-            .end
-            .try_into().map_err(|_| L1Error::OverflowError)?;
+        let range_start = range.start.try_into().map_err(|_| L1Error::OverflowError)?;
+        let range_end = range.end.try_into().map_err(|_| L1Error::OverflowError)?;
         Ok((merkle_root.0, (range_start, range_end)))
     }
 
@@ -121,9 +117,7 @@ impl L1Interface for RolldownContract {
     async fn get_latest_reqeust_id(&self) -> Result<Option<u128>, L1Error> {
         let call = self.contract_handle.counter();
         let result = call.call().await?;
-        let next_request_id: u128 = result
-            ._0
-            .try_into().map_err(|_| L1Error::OverflowError)?;
+        let next_request_id: u128 = result._0.try_into().map_err(|_| L1Error::OverflowError)?;
         if next_request_id == 1 {
             Ok(None)
         } else {
@@ -145,9 +139,7 @@ impl L1Interface for RolldownContract {
                 .merkleRootRange(latest_root)
                 .call()
                 .await?;
-            let latest: u128 = range
-                .end
-                .try_into().map_err(|_| L1Error::OverflowError)?;
+            let latest: u128 = range.end.try_into().map_err(|_| L1Error::OverflowError)?;
             tracing::trace!(
                 "latest request in root {}: {}",
                 hex_encode(latest_root),

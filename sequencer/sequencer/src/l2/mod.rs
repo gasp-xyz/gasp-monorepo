@@ -728,21 +728,19 @@ mod test {
             .expect("can connect to gasp");
         gasp.wait_for_next_block().await.unwrap();
 
-        assert!(
-            gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
-                .await
-                .expect("can submit withdrawal")
-        );
+        assert!(gasp
+            .withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
+            .await
+            .expect("can submit withdrawal"));
 
         gasp.wait_for_next_block().await.unwrap();
         gasp.wait_for_next_block().await.unwrap();
         gasp.wait_for_next_block().await.unwrap();
 
-        assert!(
-            gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
-                .await
-                .expect("can submit withdrawal")
-        );
+        assert!(gasp
+            .withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
+            .await
+            .expect("can submit withdrawal"));
 
         let at = gasp.latest_block().await.unwrap().1;
         let hash1 = gasp
