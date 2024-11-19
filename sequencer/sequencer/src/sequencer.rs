@@ -20,9 +20,9 @@ pub struct Sequencer<L1, L2> {
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("L1 error")]
-    L1Error(#[from] L1Error),
+    L1(#[from] L1Error),
     #[error("L2 error")]
-    L2Error(#[from] L2Error),
+    L2(#[from] L2Error),
     #[error("Cannot deserialize the Cancel prtocol message")]
     CancelDeserializationFailure,
     #[error("Update submission failed")]

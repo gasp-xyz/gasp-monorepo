@@ -1,4 +1,10 @@
-#[allow(dead_code, unused_imports, non_camel_case_types, unreachable_patterns)]
+#[allow(
+    dead_code,
+    unused_imports,
+    non_camel_case_types,
+    unreachable_patterns,
+    non_snake_case
+)]
 #[allow(clippy::all)]
 #[allow(rustdoc::broken_intra_doc_links)]
 pub mod api {

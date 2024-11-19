@@ -74,7 +74,7 @@ impl From<[u8; 20]> for GaspAddress {
 }
 
 impl GaspAddress {
-    pub fn into_inner(&self) -> [u8; 20] {
+    pub fn into_inner(self) -> [u8; 20] {
         self.0
     }
 }
