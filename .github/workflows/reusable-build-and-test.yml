@@ -120,5 +120,6 @@ jobs:
       - name: Install kubeconform
         run: curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.6/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
 
+      - uses: mxschmitt/action-tmate@v3
       - run: helmfile lint -e fungible
       - run: helmfile template -e fungible | kubeconform -kubernetes-version 1.28.0 -skip ServiceMonitor -strict
