@@ -60,7 +60,7 @@ jobs:
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
           docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/avs-aggregator:${{ inputs.version }} -f avs-aggregator/Dockerfile .
-  
+
   build-avs-finalizer-image:
     name: Build avs-finalizer Docker image
     uses: ./.github/workflows/reusable-rust-build.yml
@@ -97,8 +97,8 @@ jobs:
       version: ${{ inputs.version }}
       service_folder: sequencer
       docker_image_repository: mangatasolutions/rollup-sequencer
-      cargo_tests_enabled: false
-      cargo_clippy_check_enabled: false
+      cargo_tests_enabled: true
+      cargo_clippy_check_enabled: true
 
   build-ferry-withdrawal-image:
     name: Build ferry-withdrawal Docker image
