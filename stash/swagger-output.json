@@ -1136,6 +1136,32 @@
         }
       }
     },
+    "/account/{wallet}/dashboard": {
+      "get": {
+        "tags": [
+          "Trading"
+        ],
+        "summary": "Get dashboard data.",
+        "description": "Retrieve the dashboard data.",
+        "parameters": [
+          {
+            "name": "wallet",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Wallet to get dashboard data for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with dashboard data"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/coinmarketcap/v1/summary": {
       "get": {
         "tags": [

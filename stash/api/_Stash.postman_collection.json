@@ -646,6 +646,25 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Dashboard for wallet",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/account/{{wallet}}/dashboard",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"account",
+						"{{wallet}}",
+						"dashboard"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"variable": [

@@ -5,6 +5,7 @@ import * as pools from '../scraper/PoolsScraper.js'
 import * as staking from '../scraper/StakingScraper.js'
 import * as withdrawals from '../scraper/WithdrawalScraper.js'
 import * as deposits from '../scraper/DepositScraper.js'
+import * as swaps from '../scraper/SwapScraper.js'
 import logger from '../util/Logger.js'
 
 export const initService = async () => {
@@ -20,6 +21,7 @@ export const initService = async () => {
       await pools.fetchPools(block)
       await staking.processStaking(api, block)
       await staking.processLiquidStaking(api, block)
+      await swaps.processSwapEvents(api, block)
       await store.saveLatest({
         timestamp: block.timestamp,
         block: block.number,
