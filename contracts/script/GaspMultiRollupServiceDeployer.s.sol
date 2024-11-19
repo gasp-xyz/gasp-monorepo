@@ -40,7 +40,9 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
       if (chain == IRolldownPrimitives.ChainId.Ethereum) {
         evm = "ethereum_";
       } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
-        evm = "arbitrum_"; 
+        evm = "arbitrum_";
+      } else if (chain == IRolldownPrimitives.ChainId.Base) {
+        evm = "base_"; 
       } else {
         revert("Unsupported chain");
       }

@@ -36,3 +36,22 @@ services:
       MNEMONIC: ${ROLLUP_SEQUENCER_MNEMONIC_ARB:-'//Bob'}
       BLOCK_NUMBER_DELAY: ${ROLLUP_SEQUENCER_BLOCK_NUMBER_DELAY}
       L1_CHAIN: ${ROLLUP_SEQUENCER_L1_CHAIN_ARB:-Arbitrum}
+
+  sequencer-base:
+    restart: unless-stopped
+    platform: linux/amd64
+    image: mangatasolutions/rollup-sequencer:${ROLLUP_SEQUENCER_VERSION:-local}-base
+    depends_on:
+      base-contracts-deployment:
+        condition: service_completed_successfully
+      node-alice:
+        condition: service_started
+    build: .
+    environment:
+      WATCHDOG: 3600
+      MANGATA_NODE_URL: ${ROLLUP_SEQUENCER_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}
+      ETH_CHAIN_URL: ${ROLLUP_SEQUENCER_ETH_CHAIN_URL_BASE:-wss://base-rpc.publicnode.com}
+      MANGATA_CONTRACT_ADDRESS: ${MANGATA_CONTRACT_ADDRESS:-0x5FC8d32690cc91D4c39d9d3abcBD16989F875707}
+      MNEMONIC: ${ROLLUP_SEQUENCER_MNEMONIC_BASE:-'//Bob'}
+      BLOCK_NUMBER_DELAY: ${ROLLUP_SEQUENCER_BLOCK_NUMBER_DELAY}
+      L1_CHAIN: ${ROLLUP_SEQUENCER_L1_CHAIN_BASE:-Base}

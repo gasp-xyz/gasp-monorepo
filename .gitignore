@@ -91,6 +91,7 @@ out
 
 !contracts/script/input/1337/ethereum_rolldown_output.json
 !contracts/script/input/1337/arbitrum_rolldown_output.json
+!contracts/script/input/1337/base_rolldown_output.json
 
 /ops/blockscout-docker-compose/services/blockscout-db-data
 /ops/blockscout-docker-compose/services/stats-db-data

@@ -241,6 +241,7 @@ impl Operator {
         let chain_as_string = match rd_task.chain_id {
             0 => String::from("Ethereum"),
             1 => String::from("Arbitrum"),
+            2 => String::from("Base"),
             _ => return Err(eyre!("Unexpected chain in task")),
         };
         let params = rpc_params!(chain_as_string, (range_start, range_end));
