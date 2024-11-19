@@ -103,66 +103,35 @@ releases:
   - name: gasp-syncer
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.gaspSyncerEnabled }}
-    chart: ../helm-charts/gasp-syncer
+    chart: ../helm-charts/common-deployment
     values:
       - image:
           repository: mangatasolutions/gasp-syncer
           tag: {{ .Values | get "gaspSyncerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
         env: {{ .Values.gaspSyncerEnv | toYaml | nindent 10 }}
         envSecrets: {{ .Values.gaspSyncerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
   
   - name: rollup-sequencer-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.sequencerEnabled }}
-    chart: ../helm-charts/rollup-sequencer
+    chart: ../helm-charts/common-deployment
     values:
       - image:
           repository: mangatasolutions/rollup-sequencer
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
-        mnemonic: {{ .Values.firstSequencerMnemonicEth | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerChainUrlEth | fetchSecretValue | quote }}
         env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.sequencerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
 
   - name: rollup-sequencer-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.sequencerEnabled .Values.enableArbitrumServices }}
-    chart: ../helm-charts/rollup-sequencer
+    chart: ../helm-charts/common-deployment
     values:
       - image:
           repository: mangatasolutions/rollup-sequencer
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
-        mnemonic: {{ .Values.firstSequencerMnemonicArb | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerChainUrlArb | fetchSecretValue | quote }}
         env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
-  
-  - name: rollup-sequencer-eth-2
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.secondSequencerEnabled }}
-    chart: ../helm-charts/rollup-sequencer
-    values:
-      - image:
-          repository: mangatasolutions/rollup-sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
-        mnemonic: {{ .Values.secondSequencerMnemonicEth | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerChainUrlEth | fetchSecretValue | quote }}
-        env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
-  
-  - name: rollup-sequencer-arb-2
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.secondSequencerEnabled .Values.enableArbitrumServices }}
-    chart: ../helm-charts/rollup-sequencer
-    values:
-      - image:
-          repository: mangatasolutions/rollup-sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
-        mnemonic: {{ .Values.secondSequencerMnemonicArb | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerChainUrlArb | fetchSecretValue | quote }}
-        env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.sequencerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
 
   - name: blockscout-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
