@@ -50,12 +50,11 @@ spec:
   # This is the podTemplate, the bread and butter
   template:
     metadata:
-{{- include "labels" . | indent 6 -}}
-{{- if .Values.podAnnotations }}
+{{- include "labels" . | indent 6 }}
       annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
 {{- range $k, $v := .Values.podAnnotations }}
         {{ $k }}:  {{ with $v }}{{ tpl . $ | quote }}{{- end }}
-{{- end }}
 {{- end }}
     spec:
 
