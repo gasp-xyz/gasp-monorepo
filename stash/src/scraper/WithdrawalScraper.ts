@@ -61,7 +61,7 @@ export const startTracingWithdrawal = async (
     status: WITHDRAWAL_PENDING_ON_L2,
     type: type,
     chain: eventData.chain,
-    amount: eventData.amount,
+    amount: eventData.amount.replace(/,/g, ''),
     asset_chainId: chainId,
     asset_address: eventData.tokenAddress,
     proof: '',
