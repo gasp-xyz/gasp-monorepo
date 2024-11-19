@@ -46,7 +46,7 @@ services:
         condition: service_completed_successfully
     platform: linux/amd64
     environment:
-      RUST_LOG: "debug"
+      # RUST_LOG: "debug"
       SOURCE_RPC_URL: ${ETH_RPC_URL:-http://eth-stub:8545}
       SOURCE_WS_URL: ${ETH_WS_URL:-ws://eth-stub:8545}
       TARGET_RPC_URL: ${BASE_RPC_URL:-http://base-stub:8546}
