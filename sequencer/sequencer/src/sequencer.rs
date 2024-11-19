@@ -4,6 +4,7 @@ use alloy::sol_types::SolValue;
 use futures::StreamExt;
 use hex::encode as hex_encode;
 use primitive_types::H256;
+use tokio::sync::mpsc::Sender;
 use tokio::time::timeout;
 
 use crate::l1::{types as l1types, L1Error, L1Interface};
@@ -63,9 +64,10 @@ where
         }
     }
 
-    pub async fn run(&self) -> Result<(), Error> {
+    pub async fn run(&self, sender: Sender<()>) -> Result<(), Error> {
         let mut stream = self.l2.finalized_header_stream().await?;
         loop {
+            sender.send(()).await.expect("send error");
             let (number, block_hash) = stream.next().await.expect("infinite stream")?;
             let at = block_hash;
 

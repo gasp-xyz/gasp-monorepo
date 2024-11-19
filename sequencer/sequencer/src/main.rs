@@ -3,6 +3,9 @@ use hex::FromHex;
 use tracing::level_filters::LevelFilter;
 
 mod sequencer;
+mod watchdog;
+use tokio::time::Duration;
+use watchdog::Watchdog;
 
 use sequencer::Sequencer;
 mod l1;
@@ -10,15 +13,6 @@ use l1::RolldownContract;
 
 mod l2;
 use l2::Gasp;
-
-// ROLLUP_SEQUENCER_MANGATA_NODE_URL=ws://node-alice:9944
-// ROLLUP_SEQUENCER_ETH_CHAIN_URL_ETH=ws://eth-stub:8545
-// ROLLUP_SEQUENCER_MNEMONIC_ETH="0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
-// ROLLUP_SEQUENCER_L1_CHAIN_ETH="Ethereum"
-// ROLLUP_SEQUENCER_ETH_CHAIN_URL_ARB=ws://arbitrum-stub:8546
-// ROLLUP_SEQUENCER_L1_CHAIN_ARB="Arbitrum"
-// ROLLUP_SEQUENCER_MNEMONIC_ARB="0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
-// ROLLUP_SEQUENCER_BLOCK_NUMBER_DELAY=0
 
 #[derive(Envconfig, Debug)]
 struct Config {
@@ -42,6 +36,9 @@ struct Config {
 
     #[envconfig(from = "LIMIT")]
     pub update_size_limit: String,
+
+    #[envconfig(from = "WATCHDOG")]
+    pub timeout: String,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -67,11 +64,6 @@ pub async fn main() {
     tracing::info!("Config {:#?}", config);
 
     run(config).await.unwrap();
-
-    // if let Err(err) = run(config).await {
-    //     tracing::error!("{err:?}");
-    //     // tracing::stacktrace::stacktrace().unwrap();
-    // }
 }
 
 fn strip_prefix(str: &String) -> &str {
@@ -83,6 +75,14 @@ fn strip_prefix(str: &String) -> &str {
 }
 
 async fn run(config: Config) -> Result<(), Error> {
+    let timeout = config.timeout.parse::<u64>().expect("timeout is set");
+    let (tx, mut watchdog) = Watchdog::new(Duration::from_secs(timeout));
+
+    let watchdog = tokio::spawn(async move {
+        tracing::info!("Starting watchdog");
+        watchdog.run().await;
+    });
+
     let update_size_limit = config.update_size_limit.parse::<u128>().unwrap();
     assert!(
         update_size_limit > 0,
@@ -110,6 +110,16 @@ async fn run(config: Config) -> Result<(), Error> {
     tracing::info!("Connected to {}", config.l1_uri);
 
     let seq = Sequencer::new(rolldown, gasp, chain, update_size_limit);
-    seq.run().await?;
+    let sequencer_service = tokio::spawn(async move { seq.run(tx).await });
+
+    tokio::select! {
+        seq = sequencer_service => {
+            seq.expect("joined").expect("sequencer failed");
+        },
+        watch = watchdog => {
+            watch.expect("watchdog failed");
+        }
+    };
+
     Ok(())
 }
