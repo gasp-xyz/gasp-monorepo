@@ -27,7 +27,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
     Users public users;
     MyERC20 public token;
-    IRolldown public rolldown;
+    Rolldown public rolldown;
     bytes32 public defaultAdminRole = 0x00;
     bytes32 public updaterRole;
     address public nativeTokenAddress;
@@ -777,6 +777,29 @@ contract FerryWithdrawal is RolldownTest {
         assertEq(currentRecipientBalance, initialRecipientBalance + ferriedAmount);
     }
 
+    function test_ChangeBalances_ERC20_WithoutFerryTip() external {
+        token.mint(users.withdrawerA);
+
+        Withdrawal memory withdrawal =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, address(token), amount, 0);
+
+        uint256 initialWithdrawerBalance = token.balanceOf(users.withdrawerA);
+        uint256 initialRecipientBalance = token.balanceOf(users.recipient);
+
+        vm.startPrank(users.withdrawerA);
+
+        token.approve(address(rolldown), amount);
+        rolldown.ferryWithdrawal(withdrawal);
+
+        vm.stopPrank();
+
+        uint256 currentWithdrawerBalance = token.balanceOf(users.withdrawerA);
+        assertEq(currentWithdrawerBalance, initialWithdrawerBalance - amount);
+
+        uint256 currentRecipientBalance = token.balanceOf(users.recipient);
+        assertEq(currentRecipientBalance, initialRecipientBalance + amount);
+    }
+
     function test_ChangeBalances_ERC20_WithFerryTip() external {
         token.mint(users.withdrawerA);
 
@@ -958,6 +981,218 @@ contract FerryWithdrawal is RolldownTest {
     }
 }
 
+contract UpdateL1FromL2 is RolldownTest {
+    uint256 public amount = 1 ether;
+    uint256 public ferryTip = amount / 100;
+    uint256 public ferriedAmount = amount - ferryTip;
+
+    function test_EmitL2UpdateAccepted() external {
+        token.mint(users.withdrawerB);
+
+        Withdrawal memory withdrawalA =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, 0);
+        bytes32 withdrawalHashA = rolldown.hashWithdrawal(withdrawalA);
+        Withdrawal memory withdrawalB =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, address(token), amount, 0);
+        bytes32 withdrawalHashB = rolldown.hashWithdrawal(withdrawalB);
+
+        vm.prank(users.withdrawerA);
+        rolldown.ferryWithdrawal{value: amount}(withdrawalA);
+
+        vm.startPrank(users.withdrawerB);
+
+        token.approve(address(rolldown), amount);
+        rolldown.ferryWithdrawal(withdrawalB);
+
+        vm.stopPrank();
+
+        bytes32 merkleRoot = keccak256(abi.encodePacked(withdrawalHashA, withdrawalHashB));
+        Range memory range = Range(1, 2);
+
+        vm.prank(users.updater);
+        vm.expectEmit();
+        emit L2UpdateAccepted(merkleRoot, range);
+        rolldown.updateL1FromL2(merkleRoot, range);
+    }
+
+    function test_ReturnRoots() external {
+        token.mint(users.withdrawerB);
+
+        Withdrawal memory withdrawalA =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, 0);
+        bytes32 withdrawalHashA = rolldown.hashWithdrawal(withdrawalA);
+        Withdrawal memory withdrawalB =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, address(token), amount, 0);
+        bytes32 withdrawalHashB = rolldown.hashWithdrawal(withdrawalB);
+
+        vm.prank(users.withdrawerA);
+        rolldown.ferryWithdrawal{value: amount}(withdrawalA);
+
+        vm.startPrank(users.withdrawerB);
+
+        token.approve(address(rolldown), amount);
+        rolldown.ferryWithdrawal(withdrawalB);
+
+        vm.stopPrank();
+
+        bytes32 merkleRoot = keccak256(abi.encodePacked(withdrawalHashA, withdrawalHashB));
+        Range memory range = Range(1, 2);
+
+        vm.prank(users.updater);
+        rolldown.updateL1FromL2(merkleRoot, range);
+        assertEq(rolldown.roots(0), merkleRoot);
+    }
+
+    function test_ReturnMerkeRootRange() external {
+        token.mint(users.withdrawerB);
+
+        Withdrawal memory withdrawalA =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, 0);
+        bytes32 withdrawalHashA = rolldown.hashWithdrawal(withdrawalA);
+        Withdrawal memory withdrawalB =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, address(token), amount, 0);
+        bytes32 withdrawalHashB = rolldown.hashWithdrawal(withdrawalB);
+
+        vm.prank(users.withdrawerA);
+        rolldown.ferryWithdrawal{value: amount}(withdrawalA);
+
+        vm.startPrank(users.withdrawerB);
+
+        token.approve(address(rolldown), amount);
+        rolldown.ferryWithdrawal(withdrawalB);
+
+        vm.stopPrank();
+
+        bytes32 merkleRoot = keccak256(abi.encodePacked(withdrawalHashA, withdrawalHashB));
+        Range memory range = Range(1, 2);
+
+        vm.prank(users.updater);
+        rolldown.updateL1FromL2(merkleRoot, range);
+
+        (uint256 startRange, uint256 endRange) = rolldown.merkleRootRange(merkleRoot);
+        assertEq(startRange, range.start);
+        assertEq(endRange, range.end);
+    }
+
+    function test_ReturnLastProcessedUpdateOriginL2() external {
+        token.mint(users.withdrawerB);
+
+        Withdrawal memory withdrawalA =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, 0);
+        bytes32 withdrawalHashA = rolldown.hashWithdrawal(withdrawalA);
+        Withdrawal memory withdrawalB =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, address(token), amount, 0);
+        bytes32 withdrawalHashB = rolldown.hashWithdrawal(withdrawalB);
+
+        vm.prank(users.withdrawerA);
+        rolldown.ferryWithdrawal{value: amount}(withdrawalA);
+
+        vm.startPrank(users.withdrawerB);
+
+        token.approve(address(rolldown), amount);
+        rolldown.ferryWithdrawal(withdrawalB);
+
+        vm.stopPrank();
+
+        bytes32 merkleRoot = keccak256(abi.encodePacked(withdrawalHashA, withdrawalHashB));
+        Range memory range = Range(1, 2);
+
+        vm.prank(users.updater);
+        rolldown.updateL1FromL2(merkleRoot, range);
+        assertEq(rolldown.lastProcessedUpdate_origin_l2(), range.end);
+    }
+
+    function test_RevertIf_Paused() external {
+        vm.prank(users.admin);
+        rolldown.pause();
+
+        Range memory range = Range(1, 1);
+
+        vm.prank(users.updater);
+        vm.expectRevert("Pausable: paused");
+        rolldown.updateL1FromL2(bytes32(""), range);
+    }
+
+    function test_RevertIf_ZeroUpdateRange() external {
+        Range memory range = Range(0, 1);
+
+        vm.prank(users.updater);
+        vm.expectRevert(ZeroUpdateRange.selector);
+        rolldown.updateL1FromL2(bytes32(""), range);
+    }
+
+    function test_RevertIf_InvalidRangeStart() external {
+        Range memory range = Range(1, 0);
+
+        vm.prank(users.updater);
+        vm.expectRevert(abi.encodeWithSelector(InvalidUpdateRange.selector, range.start, range.end));
+        rolldown.updateL1FromL2(bytes32(""), range);
+    }
+
+    function test_RevertIf_PreviousUpdateMissed() external {
+        token.mint(users.withdrawerB);
+
+        Withdrawal memory withdrawalA =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, 0);
+        bytes32 withdrawalHashA = rolldown.hashWithdrawal(withdrawalA);
+        Withdrawal memory withdrawalB =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, address(token), amount, 0);
+        bytes32 withdrawalHashB = rolldown.hashWithdrawal(withdrawalB);
+
+        vm.prank(users.withdrawerA);
+        rolldown.ferryWithdrawal{value: amount}(withdrawalA);
+
+        vm.startPrank(users.withdrawerB);
+
+        token.approve(address(rolldown), amount);
+        rolldown.ferryWithdrawal(withdrawalB);
+
+        vm.stopPrank();
+
+        bytes32 merkleRoot = keccak256(abi.encodePacked(withdrawalHashA, withdrawalHashB));
+        Range memory range = Range(2, 3);
+        uint256 lastProcessedUpdate = rolldown.lastProcessedUpdate_origin_l2();
+
+        vm.prank(users.updater);
+        vm.expectRevert(abi.encodeWithSelector(PreviousUpdateMissed.selector, range.start, lastProcessedUpdate));
+        rolldown.updateL1FromL2(merkleRoot, range);
+    }
+
+    function test_RevertIf_UpdateAlreadyApplied() external {
+        token.mint(users.withdrawerB);
+
+        Withdrawal memory withdrawalA =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, 0);
+        bytes32 withdrawalHashA = rolldown.hashWithdrawal(withdrawalA);
+        Withdrawal memory withdrawalB =
+            Withdrawal(createRequestId(Origin.L2), users.recipient, address(token), amount, 0);
+        bytes32 withdrawalHashB = rolldown.hashWithdrawal(withdrawalB);
+
+        vm.prank(users.withdrawerA);
+        rolldown.ferryWithdrawal{value: amount}(withdrawalA);
+
+        vm.startPrank(users.withdrawerB);
+
+        token.approve(address(rolldown), amount);
+        rolldown.ferryWithdrawal(withdrawalB);
+
+        vm.stopPrank();
+
+        bytes32 merkleRoot = keccak256(abi.encodePacked(withdrawalHashA, withdrawalHashB));
+        Range memory range = Range(1, 2);
+
+        vm.startPrank(users.updater);
+
+        rolldown.updateL1FromL2(merkleRoot, range);
+        uint256 lastProcessedUpdate = rolldown.lastProcessedUpdate_origin_l2();
+
+        vm.expectRevert(abi.encodeWithSelector(UpdateAlreadyApplied.selector, range.end, lastProcessedUpdate));
+        rolldown.updateL1FromL2(merkleRoot, range);
+
+        vm.stopPrank();
+    }
+}
+
 contract CloseWithdrawal is RolldownTest {
     uint256 public amount = 10;
     uint256 public ferryTip = 10;
@@ -982,7 +1217,7 @@ contract CloseWithdrawal is RolldownTest {
         proof[0] = hashA;
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 2}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 2));
 
         vm.prank(users.withdrawerB);
         vm.expectEmit();
@@ -1013,7 +1248,7 @@ contract CloseWithdrawal is RolldownTest {
         proof[0] = hashA;
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 2}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 2));
 
         vm.prank(users.withdrawerB);
         vm.expectEmit();
@@ -1039,7 +1274,7 @@ contract CloseWithdrawal is RolldownTest {
         proof[0] = hashA;
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 2}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 2));
 
         vm.startPrank(users.withdrawerB);
 
@@ -1075,7 +1310,7 @@ contract CloseWithdrawal is RolldownTest {
         proof[0] = hashA;
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 2}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 2));
 
         vm.startPrank(users.withdrawerB);
 
@@ -1137,7 +1372,7 @@ contract CloseWithdrawal is RolldownTest {
         proofs[3][1] = hashes[4];
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 4}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 4));
 
         vm.startPrank(users.withdrawerA);
 
@@ -1217,7 +1452,7 @@ contract CloseWithdrawal is RolldownTest {
         proofs[3][1] = hashes[4];
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 4}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 4));
 
         vm.startPrank(users.withdrawerA);
 
@@ -1290,7 +1525,7 @@ contract CloseWithdrawal is RolldownTest {
         proofs[3][1] = hashes[4];
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 4}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 4));
 
         vm.startPrank(users.withdrawerA);
 
@@ -1382,7 +1617,7 @@ contract CloseWithdrawal is RolldownTest {
         proofs[3][1] = hashes[4];
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 4}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 4));
 
         vm.startPrank(users.withdrawerA);
 
@@ -1462,7 +1697,7 @@ contract CloseWithdrawal is RolldownTest {
         proof[0] = hashA;
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 2}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 2));
 
         vm.startPrank(users.withdrawerB);
 
@@ -1510,7 +1745,7 @@ contract CloseWithdrawal is RolldownTest {
         proof[0] = hashA;
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 2}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 2));
 
         vm.prank(users.withdrawerB);
         vm.expectRevert(abi.encodeWithSelector(RequestOutOfRange.selector, 3, 1, 2));
@@ -1533,7 +1768,7 @@ contract CloseWithdrawal is RolldownTest {
         proof[0] = hashA;
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: type(uint64).max}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, type(uint64).max));
 
         vm.prank(users.withdrawerB);
         vm.expectRevert(abi.encodeWithSelector(RequestRangeTooLarge.selector, type(uint64).max));
@@ -1556,7 +1791,7 @@ contract CloseWithdrawal is RolldownTest {
         proof[0] = hashB;
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 2}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 2));
 
         vm.prank(users.withdrawerB);
         vm.expectRevert(abi.encodeWithSelector(InvalidRequestProof.selector, merkleRoot));
@@ -1577,7 +1812,7 @@ contract CloseWithdrawal is RolldownTest {
         proof[0] = hashA;
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 2}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 2));
 
         vm.prank(users.withdrawerB);
         vm.expectRevert(ZeroTransferAmount.selector);
@@ -1604,7 +1839,7 @@ contract CloseWithdrawal is RolldownTest {
         proof[0] = hashA;
 
         vm.prank(users.updater);
-        rolldown.updateL1FromL2(merkleRoot, Range({start: 1, end: 2}));
+        rolldown.updateL1FromL2(merkleRoot, Range(1, 2));
 
         vm.prank(users.withdrawerB);
         vm.expectRevert(ZeroTransferAmount.selector);
