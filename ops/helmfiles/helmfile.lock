@@ -1,4 +1,4 @@
-version: v0.168.0
+version: v0.169.1
 dependencies:
 - name: blockscout-stack
   repository: https://blockscout.github.io/helm-charts
@@ -7,16 +7,16 @@ dependencies:
   repository: https://blockscout.github.io/helm-charts
   version: 1.6.8
 - name: node
-  repository: git+https://github.com/mangata-finance/helm-charts@charts?ref=node-v2.3.0
+  repository: git+https://github.com/gasp-xyz/helm-charts@charts?ref=node-v2.3.0
   version: 2.3.0
 - name: node
-  repository: git+https://github.com/mangata-finance/helm-charts@charts?ref=node-v2.3.0
+  repository: git+https://github.com/gasp-xyz/helm-charts@charts?ref=node-v2.3.0
   version: 2.3.0
 - name: node
-  repository: git+https://github.com/mangata-finance/helm-charts@charts?ref=node-v2.3.0
+  repository: git+https://github.com/gasp-xyz/helm-charts@charts?ref=node-v2.3.0
   version: 2.3.0
 - name: node
-  repository: git+https://github.com/mangata-finance/helm-charts@charts?ref=node-v2.3.0
+  repository: git+https://github.com/gasp-xyz/helm-charts@charts?ref=node-v2.3.0
   version: 2.3.0
-digest: sha256:29ca864190891e5e095b31408be0eed219e9edcc98819a33a667d92ab48628f6
-generated: "2024-11-19T17:31:01.305133Z"
+digest: sha256:23d130f21277af8842a7bec61c3db4a817b32f4d3f329f4080d05c6dc91192e8
+generated: "2024-11-19T18:05:57.715261Z"
