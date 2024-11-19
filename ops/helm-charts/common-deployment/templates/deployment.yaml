@@ -194,18 +194,17 @@ spec:
                   divisor: 1Mi
 
             {{- if or .Values.env .Values.envSecrets }}
-            env:
-              {{- range $key, $val := .Values.env }}
-              - name: {{ $key }}
-                value: {{ $val | quote }}
-              {{- end }}
-              {{- range $key, $val := .Values.envSecrets }}
-              - name: {{ $key }}
-                valueFrom:
-                  secretKeyRef:
-                    name: {{ template "name" . }}
-                    key: {{ $key }}
-              {{- end }}
+            {{- range $key, $val := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+            {{- range $key, $val := .Values.envSecrets }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "name" $ }}
+                  key: {{ $key }}
+            {{- end }}
             {{- end }}
 
 # If we want to pull env variables from other confimgaps or secrets

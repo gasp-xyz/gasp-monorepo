@@ -1,7 +1,10 @@
 # Default values for a "deployment"
 
 # REQUIRED for you to set a value here, name of your service
-name: ""
+name: ''
+# OPTIONAL By default the name of the deployment is derived from .Release.Name
+# But you can override it with nameOverride value
+# nameOverride: ''
 
 # Number of pods in deployment, default of not highly available (override on HA environments)
 replicaCount: 1

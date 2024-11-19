@@ -2,7 +2,7 @@
 Define the standardized name of this helm chart and its objects
 */}}
 {{- define "name" -}}
-{{- required "A valid Values.name is required!" .Values.name | trunc 63 | trimSuffix "-" -}}
+{{- default .Release.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
 {{/*
@@ -33,8 +33,8 @@ Sample Usage: {{- include "labels" . | indent 2 }}
 labels:
 # see: https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 {{- if .Values.labelsEnableDefault }}
-  app.kubernetes.io/name: {{ .Values.name | trunc 63 | trimSuffix "-" | quote }}
-  app.kubernetes.io/instance: {{ .Values.name | trunc 63 | trimSuffix "-" | quote }}
+  app.kubernetes.io/name: {{ include "name" . }}
+  app.kubernetes.io/instance: {{ include "name" . }}
 {{- end }}
 {{ include "labels_without_key_or_name" . | indent 2 }}
 {{- end }}
