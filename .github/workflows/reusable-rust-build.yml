@@ -37,6 +37,10 @@ on:
         required: false
         type: boolean
         default: true
+      cargo_tests_filters:
+        description: Cargo test filters to be used when running cargo test
+        required: false
+        type: string
       cargo_clippy_check_enabled:
         description: Run cargo clippy
         required: false
@@ -91,7 +95,12 @@ jobs:
 
       - name: Run cargo test
         working-directory: ${{ inputs.service_folder }}
-        run: cargo test
+        run: |
+          if [ -n "${{ inputs.cargo_tests_filters }}" ]; then
+            cargo test -- ${{ inputs.cargo_tests_filters }}
+          else
+            cargo test
+          fi
 
   docker-image-build:
     name: "[${{ inputs.service_folder }}] [${{ matrix.platform.name }}] image${{ inputs.finalizer_fast_runtime && ' with fast runtime' || '' }}"
