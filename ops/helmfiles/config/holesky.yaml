@@ -15,6 +15,13 @@ evmNode:
 collatorsEnabled: true
 collatorRpcNodesEnabled: true
 collator:
+  resources:
+    requests:
+      cpu: 6
+      memory: 12Gi
+    limits:
+      cpu: 6
+      memory: 12Gi
   image:
     repository: mangatasolutions/rollup-node
     tag: frontend-fix
