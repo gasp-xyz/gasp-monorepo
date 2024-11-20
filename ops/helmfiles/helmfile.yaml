@@ -401,7 +401,7 @@ releases:
         bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
         extraArgs:
           - --pruning=archive
-          - --rpc-max-connections=5000
+          - --rpc-max-connections=20000
         nodeSelector:
           production: "true"
           topology.kubernetes.io/zone: europe-west1-b
@@ -434,7 +434,7 @@ releases:
         bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
         extraArgs:
           - --pruning=archive
-          - --rpc-max-connections=10000
+          - --rpc-max-connections=20000
         nodeSelector:
           production: "true"
           topology.kubernetes.io/zone: europe-west1-c
@@ -467,7 +467,7 @@ releases:
         bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
         extraArgs:
           - --pruning=archive
-          - --rpc-max-connections=10000
+          - --rpc-max-connections=20000
         nodeSelector:
           production: "true"
           topology.kubernetes.io/zone: europe-west1-b
@@ -500,7 +500,7 @@ releases:
         bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
         extraArgs:
           - --pruning=archive
-          - --rpc-max-connections=10000
+          - --rpc-max-connections=20000
         nodeSelector:
           production: "true"
           topology.kubernetes.io/zone: europe-west1-c
