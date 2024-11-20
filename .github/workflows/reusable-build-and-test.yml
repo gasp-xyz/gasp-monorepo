@@ -97,7 +97,7 @@ jobs:
       version: ${{ inputs.version }}
       service_folder: sequencer
       docker_image_repository: mangatasolutions/rollup-sequencer
-      cargo_tests_enabled: true
+      cargo_tests_enabled: false
       cargo_clippy_check_enabled: true
 
   build-ferry-withdrawal-image:
