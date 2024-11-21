@@ -7,4 +7,4 @@
 	branch = m2-mainnet
 [submodule "avs-eigensdk-go"]
 	path = avs-eigensdk-go
-	url = https://github.com/mangata-finance/eigensdk-go
+	url = https://github.com/gasp-xyz/eigensdk-go
