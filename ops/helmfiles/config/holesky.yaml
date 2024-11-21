@@ -158,7 +158,7 @@ sequencerEnvEth:
   LIMIT: "100"
 sequencerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
-  MNEMONIC: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
+  ETH_PRIV_KEY: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
 
 sequencerEnvArb:
   L1_CHAIN: "Arbitrum"
@@ -167,7 +167,7 @@ sequencerEnvArb:
   LIMIT: "100"
 sequencerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sepoliaArbitrumHttpsUrl
-  MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+  ETH_PRIV_KEY: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
 
 #########################
 # ferry-deposit configs #
@@ -181,6 +181,7 @@ ferryDepositEnvEth:
   TOKENS_TO_TRACK: "[]"
   TX_COST: '1000000000000000000000'
   BLOCK_DELAY: 0
+  LOG: silly
 ferryDepositEnvSecretsEth:
   MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
 
@@ -192,6 +193,7 @@ ferryDepositEnvArb:
   TOKENS_TO_TRACK: "[]"
   TX_COST: '1000000000000000000000'
   BLOCK_DELAY: 0
+  LOG: silly
 ferryDepositEnvSecretsArb:
   MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
 
@@ -207,6 +209,7 @@ ferryWithdrawalEnvEth:
   TOKENS_TO_TRACK: "[]"
   TX_COST: '1000000000000000000000'
   LOOK_BACK_HOURS: 1
+  LOG: silly
 ferryWithdrawalEnvSecretsEth:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
 
@@ -218,6 +221,7 @@ ferryWithdrawalEnvArb:
   TOKENS_TO_TRACK: "[]"
   TX_COST: '1000000000000000000000'
   LOOK_BACK_HOURS: 1
+  LOG: silly
 ferryWithdrawalEnvSecretsArb:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
 
@@ -233,6 +237,7 @@ closerEnvEth:
   TOKENS_TO_TRACK: "[]"
   TX_COST: '1000000000000000000000'
   LOOK_BACK_HOURS: 1
+  LOG: silly
 closerEnvSecretsEth:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
 closerEnvArb:
@@ -243,5 +248,6 @@ closerEnvArb:
   TOKENS_TO_TRACK: "[]"
   TX_COST: '1000000000000000000000'
   LOOK_BACK_HOURS: 1
+  LOG: silly
 closerEnvSecretsArb:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"

@@ -128,7 +128,7 @@ releases:
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: gaspxyz/closer
+          repository: gaspxyz/ferry-withdrawal
           tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         # `args` param is used to override the default command in the Dockerfile
         args: ["node", "build/src/closer.js"]
@@ -140,7 +140,7 @@ releases:
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: gaspxyz/closer
+          repository: gaspxyz/ferry-withdrawal
           tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         # `args` param is used to override the default command in the Dockerfile
         args: ["node", "build/src/closer.js"]
