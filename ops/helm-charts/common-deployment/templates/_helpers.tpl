@@ -45,7 +45,7 @@ labels:
 app.kubernetes.io/version: {{ .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" | quote }}
 app.kubernetes.io/component: {{ .Chart.Name | replace "+" "_" | trunc 63 | trimSuffix "-" | quote }}
 app.kubernetes.io/created-by: "gasp-xyz"
-app.kubernetes.io/managed-by: "helm"
+app.kubernetes.io/managed-by: "Helm"
 {{ if .Values.labels -}}
 {{ toYaml .Values.labels }}
 {{- end }}
