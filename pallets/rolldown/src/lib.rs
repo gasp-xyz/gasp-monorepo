@@ -202,14 +202,12 @@ pub mod pallet {
 		fn on_idle(now: BlockNumberFor<T>, mut remaining_weight: Weight) -> Weight {
 			let mut used_weight = Weight::default();
 
-        println!("here1");
 			if T::MaintenanceStatusProvider::is_maintenance() {
 				return used_weight;
 			}
 
     let load_next_update_from_execution_queue_weight = T::DbWeight::get().reads_writes(3, 1);
     if remaining_weight.ref_time() > load_next_update_from_execution_queue_weight.ref_time() {
-        println!("here2");
         used_weight += load_next_update_from_execution_queue_weight;
         remaining_weight -= load_next_update_from_execution_queue_weight;
         if Self::load_next_update_from_execution_queue(){
@@ -1153,8 +1151,6 @@ impl<T: Config> Pallet<T> {
 		}
 
 		// FIXME: remove update from storage somwhere else
-        println!("HELLLLO WORLDDD!!!!!!!!!!!!!!!!");
-        println!("{}", block_number);
 		let _ = PendingSequencerUpdates::<T>::clear_prefix(
 			block_number,
 			u32::MAX,
@@ -1212,7 +1208,6 @@ impl<T: Config> Pallet<T> {
 		// weight for deposit_event
 		total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(2, 3));
 
-        println!("8888888888888888888888888888888888888888");
 		LastProcessedRequestOnL2::<T>::insert(l1, request.id());
 		// weight for LastProcessedRequestOnL2
 		total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
@@ -1249,7 +1244,6 @@ impl<T: Config> Pallet<T> {
 					break;
 				},
 				(Some((scheduled_at, l1, hash, _)), _, _) => {
-                    println!("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 					if let Some(update) = PendingSequencerUpdateContent::<T>::get(hash){
 						for req in update
 							.into_requests()
@@ -1260,7 +1254,6 @@ impl<T: Config> Pallet<T> {
 							.take(limit.saturated_into())
 						{
 							if let Some(request) = req {
-                    println!("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
 								let weight = Self::process_single_request(l1, request);
 								limit -= 1;
 							} else {
@@ -1300,7 +1293,6 @@ impl<T: Config> Pallet<T> {
 			id.saturating_inc();
 			*id
 		});
-    println!("scheduled at {}", id);
 		let size = metadata.max_id.saturating_sub(metadata.min_id).saturating_add(1);
 		UpdatesExecutionQueue::<T>::insert(id, (now, chain, metadata.update_hash, size));
 	}

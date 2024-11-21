@@ -981,7 +981,7 @@ mod benchmarks {
       max_id: 1u128,
       update_size: 1u128,
       sequencer: sequencer_account.clone(),
-      update_hash: H256::zero(),
+      update_hash,
     };
 
 		PendingSequencerUpdates::<T>::insert(1u128, chain, metadata);
