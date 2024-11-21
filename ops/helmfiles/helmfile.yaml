@@ -79,3 +79,70 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+  
+  - name: ferry-deposit-eth
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.ferryDepositEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-deposit
+          tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryDepositEnvEth | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryDepositEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+  - name: ferry-deposit-arb
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.ferryDepositEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-deposit
+          tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryDepositEnvArb | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryDepositEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+
+  - name: ferry-withdrawal-eth
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.ferryWithdrawalEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-withdrawal
+          tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryWithdrawalEnvEth | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryWithdrawalEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+  - name: ferry-withdrawal-arb
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.ferryWithdrawalEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-withdrawal
+          tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryWithdrawalEnvArb | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryWithdrawalEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+
+  - name: closer-eth
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.closerEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/closer
+          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        # `args` param is used to override the default command in the Dockerfile
+        args: ["node", "build/src/closer.js"]
+        env: {{ .Values.closerEnvEth | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.closerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+  - name: closer-arb
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.closerEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/closer
+          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        # `args` param is used to override the default command in the Dockerfile
+        args: ["node", "build/src/closer.js"]
+        env: {{ .Values.closerEnvArb | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.closerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}

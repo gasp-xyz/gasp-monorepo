@@ -147,3 +147,80 @@ sequencerEnvArb:
   ETH_CHAIN_URL: ws://evm-node-arb:8546
 sequencerEnvSecretsArb:
   MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+
+#########################
+# ferry-deposit configs #
+#########################
+ferryDepositEnabled: true
+ferryDepositEnvEth:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-eth:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Ethereum"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  BLOCK_DELAY: 0
+ferryDepositEnvSecretsEth:
+  MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+
+ferryDepositEnvArb:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-arb:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Arbitrum"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  BLOCK_DELAY: 0
+ferryDepositEnvSecretsArb:
+  MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+
+############################
+# ferry-withdrawal configs #
+############################
+ferryWithdrawalEnabled: true
+ferryWithdrawalEnvEth:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-eth:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Ethereum"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  LOOK_BACK_HOURS: 1
+ferryWithdrawalEnvSecretsEth:
+  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+
+ferryWithdrawalEnvArb:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-arb:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Arbitrum"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  LOOK_BACK_HOURS: 1
+ferryWithdrawalEnvSecretsArb:
+  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+
+########################
+# ferry-closer configs #
+########################
+closerEnabled: true
+closerEnvEth:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-eth:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Ethereum"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  LOOK_BACK_HOURS: 1
+closerEnvSecretsEth:
+  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+closerEnvArb:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-arb:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Arbitrum"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  LOOK_BACK_HOURS: 1
+closerEnvSecretsArb:
+  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
