@@ -142,7 +142,7 @@ use crate::messages::L1Update;
 pub use pallet::*;
 
 fn get_read_scalling_factor(size: usize) -> u128 {
-	const base_read_cost: u128 = 25;
+	const BASE_READ_COST: u128 = 25;
 	let approximated_cost = match size{
 		0..=50 => 25u128,
 		51..=100 => 45u128,
@@ -151,12 +151,12 @@ fn get_read_scalling_factor(size: usize) -> u128 {
 		1001..=5000 => 1800u128,
 		_ => 2800u128,
 	};
-	approximated_cost.saturating_div(base_read_cost).saturating_add(1u128)
+	approximated_cost.saturating_div(BASE_READ_COST).saturating_add(1u128)
 }
 
 
 fn get_write_scalling_factor(size: usize) -> u128 {
-	const base_write_cost: u128 = 100;
+	const BASE_WRITE_COST: u128 = 100;
 
 	let approximated_cost = match size{
 		0..=50 => 25u128,
@@ -166,7 +166,7 @@ fn get_write_scalling_factor(size: usize) -> u128 {
 		1001..=5000 => 5000u128,
 		_ => 9000u128,
 	};
-	approximated_cost.saturating_div(base_write_cost).saturating_add(1u128)
+	approximated_cost.saturating_div(BASE_WRITE_COST).saturating_add(1u128)
 }
 
 #[frame_support::pallet]
