@@ -231,11 +231,11 @@ pub mod pallet {
 	#[derive(
 		Eq, PartialEq, RuntimeDebug, Clone, Encode, Decode, MaxEncodedLen, TypeInfo
 	)]
-	pub struct UpdateMetadata<T: Config>{
+	pub struct UpdateMetadata<AccountId>{
 		pub max_id: u128,
 		pub min_id: u128,
 		pub update_size: u128,
-		pub sequencer: T::AccountId,
+		pub sequencer: AccountId,
 		pub update_hash: H256,
 	}
 
@@ -300,7 +300,7 @@ pub mod pallet {
 		u128,
 		Blake2_128Concat,
 		<T as Config>::ChainId,
-		UpdateMetadata<T>,
+		UpdateMetadata<T::AccountId>,
 		OptionQuery,
 	>;
 
@@ -612,10 +612,10 @@ pub mod pallet {
 
 			let metadata = Self::validate_l1_update(chain, &update, T::AddressConverter::convert([0u8;20]))?;
 
-			PendingSequencerUpdateContent::<T>::insert(metadata.update_hash, update);
-
 			let now = <frame_system::Pallet<T>>::block_number();
 			let update_size = update.get_requests_count();
+			PendingSequencerUpdateContent::<T>::insert(metadata.update_hash, update);
+
 			Self::schedule_requests(now, chain, metadata);
 			Ok(().into())
 		}
@@ -1093,9 +1093,9 @@ impl<T: Config> Pallet<T> {
 		for (l1, metadata) in
 			PendingSequencerUpdates::<T>::iter_prefix(block_number)
 		{
-			let sequencer = metadata.sequencer;
-			let l1_read_hash = metadata.update_hash;
-			let update_size = metadata.update_size;
+			let sequencer = metadata.sequencer.clone();
+			let l1_read_hash = metadata.update_hash.clone();
+			let update_size = metadata.update_size.clone();
 
 			if T::SequencerStakingProvider::is_active_sequencer(l1, &sequencer) {
 				SequencersRights::<T>::mutate(l1, |sequencers| {
@@ -1247,7 +1247,7 @@ impl<T: Config> Pallet<T> {
 	fn schedule_requests(
 		now: BlockNumberFor<T>,
 		chain: <T as Config>::ChainId,
-		metadata: UpdateMetadata<T>,
+		metadata: UpdateMetadata<T::AccountId>,
 	) {
 		MaxAcceptedRequestIdOnl2::<T>::mutate(chain, |cnt| *cnt = sp_std::cmp::max(*cnt, metadata.max_id));
 
@@ -1384,7 +1384,7 @@ impl<T: Config> Pallet<T> {
 		l1: <T as Config>::ChainId,
 		update: &messages::L1Update,
 		sequencer: T::AccountId
-	) -> Result<UpdateMetadata<T>, Error<T>> {
+	) -> Result<UpdateMetadata<T::AccountId>, Error<T>> {
 		ensure!(
 			!update.pendingDeposits.is_empty() || !update.pendingCancelResolutions.is_empty(),
 			Error::<T>::EmptyUpdate
@@ -1492,7 +1492,7 @@ impl<T: Config> Pallet<T> {
 			T::SequencerStakingProvider::is_selected_sequencer(l1, &sequencer),
 			Error::<T>::OnlySelectedSequencerisAllowedToUpdate
 		);
-		let metadata = Self::validate_l1_update(l1, &read, sequencer)?;
+		let metadata = Self::validate_l1_update(l1, &read, sequencer.clone())?;
 
 		// check json length to prevent big data spam, maybe not necessary as it will be checked later and slashed
 		let current_block_number =
@@ -1527,7 +1527,7 @@ impl<T: Config> Pallet<T> {
 		PendingSequencerUpdates::<T>::insert(
 			dispute_period_end,
 			l1,
-			metadata
+			metadata.clone()
 		);
 
 		PendingSequencerUpdateContent::<T>::insert(metadata.update_hash, read.clone());
