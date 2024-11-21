@@ -190,31 +190,60 @@ pub mod pallet {
 				total_weight += T::DbWeight::get().writes(1);
 			}else{
 				Self::maybe_create_batch(now);
-				Self::schedule_request_for_execution_if_dispute_period_has_passsed(now);
-				// total_weight =
+      }
+
+            Self::schedule_request_for_execution_if_dispute_period_has_passsed(now);
+            // total_weight =
 				// 	total_weight.saturating_add(<T as Config>::WeightInfo::maybe_create_batch());
 				// total_weight = total_weight.saturating_add(<T as Config>::WeightInfo::schedule_request_for_execution_if_dispute_period_has_passsed());
-			}
 			total_weight
 		}
 
 		fn on_idle(now: BlockNumberFor<T>, mut remaining_weight: Weight) -> Weight {
 			let mut used_weight = Weight::default();
 
+        println!("here1");
 			if T::MaintenanceStatusProvider::is_maintenance() {
 				return used_weight;
 			}
 
+    let load_next_update_from_execution_queue_weight = T::DbWeight::get().reads_writes(3, 1);
+    if remaining_weight.ref_time() > load_next_update_from_execution_queue_weight.ref_time() {
+        println!("here2");
+        used_weight += load_next_update_from_execution_queue_weight;
+        remaining_weight -= load_next_update_from_execution_queue_weight;
+        if Self::load_next_update_from_execution_queue(){
+            return used_weight;
+        }else{
+            Self::execute_requests_from_execute_queue(now);
+            // Self::get_current_update_size_from_execution_queue();
+        }
+    }
 
-			let get_update_size_weight = T::DbWeight::get().reads(2);
-			if remaining_weight.ref_time() > get_update_size_weight.ref_time() {
-				used_weight += get_update_size_weight;
-				if let Some(size) = Self::get_current_update_size_from_execution_queue() {
-					return used_weight;
-				}else{
-					return used_weight;
-				}
-			}
+		// let get_update_size_weight = T::DbWeight::get().reads(2);
+		// if remaining_weight.ref_time() > get_update_size_weight.ref_time() {
+		//       used_weight += get_update_size_weight;
+		//       remaining_weight -= get_update_size_weight;
+		//       println!("here3");
+		// 	if let Some(size) = Self::get_current_update_size_from_execution_queue() {
+		//
+		//       println!("here4");
+		//       // if remaining_weight >= T::DbWeight::get().reads(1) {
+		//           Self::execute_requests_from_execute_queue(now);
+		//           // used_weight += T::DbWeight::get().reads(1);
+		//       // }
+		//     }
+		//   }
+			// 	used_weight += get_update_size_weight;
+			// 	if let Some(size) = Self::get_current_update_size_from_execution_queue() {
+			//                  println!("here2222222222222222222222222222222222222222");
+			//          Self::execute_requests_from_execute_queue(now);
+			// 		return used_weight;
+			// 	}else{
+			//                  println!("here1111111111111111111111111111111111111111");
+			// 		return used_weight;
+			// 	}
+			// }
 
 			return used_weight;
 		}
@@ -1124,8 +1153,10 @@ impl<T: Config> Pallet<T> {
 		}
 
 		// FIXME: remove update from storage somwhere else
+        println!("HELLLLO WORLDDD!!!!!!!!!!!!!!!!");
+        println!("{}", block_number);
 		let _ = PendingSequencerUpdates::<T>::clear_prefix(
-			<frame_system::Pallet<T>>::block_number().saturated_into::<u128>(),
+			block_number,
 			u32::MAX,
 			None,
 		);
@@ -1181,6 +1212,7 @@ impl<T: Config> Pallet<T> {
 		// weight for deposit_event
 		total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(2, 3));
 
+        println!("8888888888888888888888888888888888888888");
 		LastProcessedRequestOnL2::<T>::insert(l1, request.id());
 		// weight for LastProcessedRequestOnL2
 		total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
@@ -1189,11 +1221,23 @@ impl<T: Config> Pallet<T> {
 
 	fn has_next_update_to_execute() -> bool {
         UpdatesExecutionQueue::<T>::contains_key(UpdatesExecutionQueueNextId::<T>::get().saturating_add(1))
-    }
+  }
 
 	fn get_current_update_size_from_execution_queue() -> Option<u128> {
 		UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get()).map(|(_, _, _, size)| size)
+  }
+
+	fn load_next_update_from_execution_queue() -> bool {
+    let current_execution_id = UpdatesExecutionQueueNextId::<T>::get();
+    let next_execution_id = current_execution_id.saturating_add(1u128);
+    match (UpdatesExecutionQueue::<T>::get(current_execution_id), UpdatesExecutionQueue::<T>::get(next_execution_id)) {
+            (None, Some(_)) => {
+								UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
+                true
+            },
+            _ => false,
     }
+  }
 
 	fn execute_requests_from_execute_queue(now: BlockNumberFor<T>) -> Weight {
 		let mut limit = Self::get_max_requests_per_block();
@@ -1205,6 +1249,7 @@ impl<T: Config> Pallet<T> {
 					break;
 				},
 				(Some((scheduled_at, l1, hash, _)), _, _) => {
+                    println!("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 					if let Some(update) = PendingSequencerUpdateContent::<T>::get(hash){
 						for req in update
 							.into_requests()
@@ -1215,11 +1260,11 @@ impl<T: Config> Pallet<T> {
 							.take(limit.saturated_into())
 						{
 							if let Some(request) = req {
+                    println!("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
 								let weight = Self::process_single_request(l1, request);
 								limit -= 1;
 							} else {
 								UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
-								UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
 								break;
 							}
 						}
@@ -1228,15 +1273,15 @@ impl<T: Config> Pallet<T> {
 						UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
 					}
 				},
-				(None, _, true) => {
-					if UpdatesExecutionQueue::<T>::contains_key(
-						UpdatesExecutionQueueNextId::<T>::get().saturating_add(1),
-					) {
-						UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
-					}
-					break;
-				}
-				(None, _, false) => {
+				// (None, _, true) => {
+				// 	if UpdatesExecutionQueue::<T>::contains_key(
+				// 		UpdatesExecutionQueueNextId::<T>::get().saturating_add(1),
+				// 	) {
+				// 		UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
+				// 	}
+				// 	break;
+				// }
+				_ => {
 					break;
 				}
 			}
@@ -1255,6 +1300,7 @@ impl<T: Config> Pallet<T> {
 			id.saturating_inc();
 			*id
 		});
+    println!("scheduled at {}", id);
 		let size = metadata.max_id.saturating_sub(metadata.min_id).saturating_add(1);
 		UpdatesExecutionQueue::<T>::insert(id, (now, chain, metadata.update_hash, size));
 	}

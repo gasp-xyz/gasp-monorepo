@@ -317,6 +317,7 @@ where
 
 		frame_system::Pallet::<T>::on_initialize(new_block_number);
 		rolldown::Pallet::<T>::on_initialize(new_block_number);
+		rolldown::Pallet::<T>::on_idle(new_block_number, Weight::from_parts(u64::MAX, 0u64));
 	}
 }
 

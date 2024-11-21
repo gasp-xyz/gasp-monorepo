@@ -153,6 +153,7 @@ fn l2_counter_updates_when_requests_are_processed() {
 		assert_eq!(Rolldown::get_last_processed_request_on_l2(Chain::Ethereum), 1u128.into());
 
 		forward_to_next_block::<Test>();
+		forward_to_next_block::<Test>();
 		assert_eq!(Rolldown::get_last_processed_request_on_l2(Chain::Ethereum), 2u128.into());
 	});
 }
@@ -333,7 +334,7 @@ fn test_withdrawal_can_be_refunded_only_by_account_deposit_recipient() {
 
 #[test]
 #[serial]
-fn l1_upate_executed_immaidately_if_force_submitted() {
+fn l1_upate_executed_immediately_if_force_submitted() {
 	ExtBuilder::new()
 		.issue(ALICE, ETH_TOKEN_ADDRESS_MGX, 0u128)
 		.execute_with_default_mocks(|| {
@@ -358,7 +359,8 @@ fn l1_upate_executed_immaidately_if_force_submitted() {
 			Rolldown::force_update_l2_from_l1(RuntimeOrigin::root(), update).unwrap();
 			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 
-			forward_to_block::<Test>(11);
+			forward_to_next_block::<Test>();
+			forward_to_next_block::<Test>();
 			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 1u128.into());
 			assert_eq!(TokensOf::<Test>::free_balance(ETH_TOKEN_ADDRESS_MGX, &CHARLIE), MILLION);
 		});
@@ -883,6 +885,7 @@ fn ignore_duplicated_requests_when_already_executed() {
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 5u128.into());
 
 		forward_to_next_block::<Test>();
+		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 6u128.into());
 	});
 }
@@ -911,6 +914,10 @@ fn process_l1_reads_in_order() {
 		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10u128.into());
 
+		forward_to_next_block::<Test>();
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 11u128.into());
+
+		forward_to_next_block::<Test>();
 		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 20u128.into());
 	});
@@ -1074,6 +1081,7 @@ fn execute_two_consecutive_incremental_reqeusts() {
 			forward_to_next_block::<Test>();
 			assert_eq!(TokensOf::<Test>::free_balance(ETH_TOKEN_ADDRESS_MGX, &CHARLIE), MILLION);
 
+			forward_to_next_block::<Test>();
 			forward_to_next_block::<Test>();
 			assert_eq!(
 				TokensOf::<Test>::free_balance(ETH_TOKEN_ADDRESS_MGX, &CHARLIE),
@@ -1687,7 +1695,8 @@ fn consider_awaiting_cancel_resolutions_and_cancel_disputes_when_assigning_initi
 			)
 			.unwrap();
 
-			forward_to_block::<Test>(12);
+			forward_to_next_block::<Test>();
+			forward_to_next_block::<Test>();
 			assert_eq!(
 				*SequencersRights::<Test>::get(consts::CHAIN).get(&ALICE).unwrap(),
 				SequencerRights { read_rights: 1u128, cancel_rights: 2u128 }
@@ -2622,6 +2631,12 @@ fn test_sequencer_updates_are_ignored_and_removed_in_maintanance_mode() {
 			assert!(PendingSequencerUpdates::<Test>::contains_key(15u128, Chain::Ethereum));
 
 			forward_to_block::<Test>(15);
+
+			is_maintenance_mock.checkpoint();
+			let is_maintenance_mock = MockMaintenanceStatusProviderApi::is_maintenance_context();
+			is_maintenance_mock.expect().return_const(true);
+			forward_to_next_block::<Test>();
+			forward_to_next_block::<Test>();
 			assert!(!PendingSequencerUpdates::<Test>::contains_key(15u128, Chain::Ethereum));
 			assert_event_emitted!(Event::L1ReadIgnoredBecauseOfMaintenanceMode {
 				chain: consts::CHAIN,
