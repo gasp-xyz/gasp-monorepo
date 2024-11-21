@@ -494,7 +494,6 @@ contract Rolldown is
         }
 
         emit NativeTokensWithdrawn(recipient, amount);
-
         Address.sendValue(payable(recipient), amount);
     }
 
@@ -504,7 +503,6 @@ contract Rolldown is
         }
 
         emit ERC20TokensWithdrawn(recipient, tokenAddress, amount);
-
         IERC20(tokenAddress).safeTransfer(recipient, amount);
     }
 
@@ -553,7 +551,7 @@ contract Rolldown is
             } else if (cancelResolutions[id].requestId.id > 0) {
                 ++cancelCounter;
             } else {
-                revert("Invalid range");
+                revert InvalidRequestRange(start, end);
             }
 
             unchecked {
