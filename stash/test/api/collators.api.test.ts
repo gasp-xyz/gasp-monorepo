@@ -7,15 +7,17 @@ import moment from 'moment'
 import { BN } from '@polkadot/util'
 import { BN_TEN } from 'gasp-sdk'
 
-const apySchema = Joi.object({
-  5: Joi.object({
+const apySchema = Joi.array().items(
+  Joi.object({
     date: Joi.string().required(),
     apy: Joi.number().precision(18).unsafe().required(),
+    token: Joi.string().required(),
     collatorAddress: Joi.string().required(),
     dateFormat: Joi.string().required(),
     timestamp: Joi.date().timestamp().required(),
-  }),
-})
+  })
+)
+
 const dailyRewardSchema = Joi.array().items(
   Joi.object({
     tokenId: Joi.string().required(),
@@ -36,49 +38,67 @@ function validateReturnedDate(date: string, format: string) {
 
 //perhaps those addresses may change when data is upgraded!
 
-const collatorAddress = '0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac'
+const collatorAddress = '0x3cd0a705a2dc65e5b1e1205896baa2be8a07c6e0'
+const accountAddress = '0x928f1040adb982d3ab32a62dc8eda57e9b81b4dd'
 
 function validateValidApyRange(body) {
   const apy = parseFloat(body.apy)
-  expect(apy).to.be.lessThanOrEqual(40)
-  expect(apy).to.be.greaterThan(10)
+  expect(apy).to.be.lessThanOrEqual(300)
+  expect(apy).to.be.greaterThan(100)
 }
-// will be fixed once MGX-1539 is done
 
 describe('APi tests: Collator apy - dailyRewards', () => {
-  //todo: remove skip once we have rewards
   it('GET /collators/apy - collator - OK', async () => {
-    //todo: remove skip when we have 3d party rewards
     await supertest(app)
       .get(`/collator/${collatorAddress}/staking/apy`)
       .expect(200)
       .then((response) => {
         const validationResult = apySchema.validate(response.body)
-        const body = JSON.parse(JSON.stringify(response.body))[5]
-        const date = body.date //body.5.date;
-        const format = body.dateFormat //response.body.5.dateFormat;
+        const body = JSON.parse(JSON.stringify(response.body[0]))
+        const date = body.date
+        const format = body.dateFormat
         expect(validationResult.error).toBeUndefined()
+        expect(body.token).to.equal('0')
         validateReturnedDate(date, format)
         validateValidApyRange(body)
       })
   })
   it('GET /collators/dailyReward - collator - OK', async () => {
-    //todo: remove skip when we have 3d party rewards
     await supertest(app)
       .get(`/collator/${collatorAddress}/staking/dailyReward`)
       .expect(200)
       .then((response) => {
         const validationResult = dailyRewardSchema.validate(response.body)
         expect(validationResult.error).toBeUndefined()
-        const date = response.body[0].date
-        const format = response.body[0].dateFormat
-        expect(response.body[0].tokenId).to.equal('5')
+        const body = JSON.parse(JSON.stringify(response.body[0]))
+        const date = body.date
+        const format = body.dateFormat
+        expect(body.tokenId).to.equal('0')
         validateReturnedDate(date, format)
-        const reward = response.body[0].dailyRewards
-        const rewardValue = new BN(reward).div(BN_TEN.pow(new BN(18)))
+        const dailyRewards = body.dailyRewards
+        const rewardValue = new BN(dailyRewards).div(BN_TEN.pow(new BN(18)))
         expect(rewardValue.toNumber()).gt(5000)
       })
   })
+
+  it.only('GET account/liquid-staking/rewards-history/month/sum - OK', async () => {
+    await supertest(app)
+      .get(
+        `/account/${accountAddress}/liquid-staking/rewards-history/month/sum`
+      )
+      .expect(200)
+      .then((response) => {
+        const body = response.body[0]
+        expect(body.liquidityTokenId).to.equal('5')
+        const amountClaimed = new BN(body.amountClaimed).div(
+          BN_TEN.pow(new BN(18))
+        )
+        console.log('amount claimed: ', body.amountClaimed)
+        console.log('amount claimed to BN: ', amountClaimed)
+        expect(amountClaimed.toNumber()).gt(50000)
+      })
+  })
+
   it.skip('GET /collators/apy - old - collator - OK', async () => {
     //todo: qa to fix and remove skip
     await supertest(app)
