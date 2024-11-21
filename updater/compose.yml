@@ -1,6 +1,6 @@
 services:
-  gasp-syncer:
-    image: gaspxyz/gasp-syncer:${GASP_SYNCER_VERSION:-local}
+  updater:
+    image: gaspxyz/updater:${UPDATER_VERSION:-local}
     build:
       context: .
     restart: unless-stopped

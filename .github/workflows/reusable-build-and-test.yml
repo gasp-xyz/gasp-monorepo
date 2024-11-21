@@ -80,14 +80,14 @@ jobs:
       docker_image_repository: gaspxyz/avs-finalizer
       finalizer_fast_runtime: true
 
-  build-gasp-syncer-image:
-    name: Build gasp-syncer Docker image
+  build-updater-image:
+    name: Build updater Docker image
     uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
       version: ${{ inputs.version }}
-      service_folder: gasp-syncer
-      docker_image_repository: gaspxyz/gasp-syncer
+      service_folder: updater
+      docker_image_repository: gaspxyz/updater
 
   build-sequencer-image:
     name: Build sequencer Docker image

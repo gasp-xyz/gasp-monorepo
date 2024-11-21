@@ -9,7 +9,7 @@ include:
   # - path: ./rollup-sequencer/compose.yml
   - path: ./sequencer/compose.yml
   - path: ./contracts/compose.yml
-  - path: ./gasp-syncer/compose.yml
+  - path: ./updater/compose.yml
   - path: ./ferry-deposit/compose.yml
   - path: ./ferry-withdrawal/compose.yml
 

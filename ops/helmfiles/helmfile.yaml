@@ -47,16 +47,16 @@ releases:
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.finalizerEnv | toYaml | nindent 10 }}
 
-  - name: gasp-syncer
+  - name: updater
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.gaspSyncerEnabled }}
+    installed: {{ .Values.updaterEnabled }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: gaspxyz/gasp-syncer
-          tag: {{ .Values | get "gaspSyncerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        env: {{ .Values.gaspSyncerEnv | toYaml | nindent 10 }}
-        envSecrets: {{ .Values.gaspSyncerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+          repository: gaspxyz/updater
+          tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.updaterEnv | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.updaterEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
   
   - name: sequencer-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
