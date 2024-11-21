@@ -150,7 +150,7 @@ releases:
   - name: evm-node-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.evmNode.enabled }}
-    chart: ../../../helm-charts/evm-node
+    chart: ../helm-charts/evm-node
     values:
       - image:
           repository: gaspxyz/gasp-contracts
@@ -168,7 +168,7 @@ releases:
   - name: evm-node-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.evmNode.enabled .Values.enableArbitrumServices | toYaml }}
-    chart: ../../../helm-charts/evm-node
+    chart: ../helm-charts/evm-node
     values:
       - image:
           repository: gaspxyz/gasp-contracts
