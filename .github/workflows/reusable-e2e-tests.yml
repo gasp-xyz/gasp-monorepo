@@ -95,7 +95,7 @@ jobs:
 
       - name: Get sequencer logs
         if: success() || failure()
-        run: docker logs sequencer-eth-1
+        run: docker logs rollup-sequencer-eth-1
       - name: Get aggregator logs
         if: success() || failure()
         run: docker logs rollup-avs-aggregator-1
