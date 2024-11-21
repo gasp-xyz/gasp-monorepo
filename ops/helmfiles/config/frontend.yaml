@@ -17,6 +17,13 @@ evmNode:
 collatorsEnabled: true
 collatorRpcNodesEnabled: false
 collator:
+  resources:
+    requests:
+      cpu: 6
+      memory: 12Gi
+    limits:
+      cpu: 6
+      memory: 12Gi
   image:
     repository: mangatasolutions/rollup-node
     tag: 3a07824d8b8a6ad027424629b814a5edb61654cf
@@ -30,13 +37,6 @@ collator:
     image: paritytech/ws-health-exporter:bc071a44-20230830
     env:
       WSHE_NODE_MIN_PEERS: 2
-  resources:
-    limits:
-      cpu: "4"
-      memory: 12Gi
-    requests:
-      cpu: "4"
-      memory: 12Gi
   tolerations:
     - key: production
       operator: Equal

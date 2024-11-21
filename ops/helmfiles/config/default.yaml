@@ -16,6 +16,13 @@ evmNode:
 collatorsEnabled: false
 collatorRpcNodesEnabled: false
 collator:
+  resources:
+    requests:
+      cpu: 1
+      memory: 2Gi
+    limits:
+      cpu: 2
+      memory: 6Gi
   image:
     repository: mangatasolutions/rollup-node
     tag: eth-rollup-develop
