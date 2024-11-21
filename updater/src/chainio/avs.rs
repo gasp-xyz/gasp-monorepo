@@ -29,6 +29,7 @@ pub struct AvsContracts {
     pub registry: RegistryCoordinator<Client>,
     pub stake_registry: StakeRegistry<Client>,
     pub bls_apk_registry: BLSApkRegistry<Client>,
+    #[allow(dead_code)]
     pub client: Arc<Client>,
     pub ws_client: Arc<Provider<Ws>>,
 }

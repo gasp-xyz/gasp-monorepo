@@ -48,6 +48,7 @@ pub struct CustomOperatorAvsState {
 #[derive(Debug)]
 pub struct Syncer {
     pub source_client: Arc<SourceClient>,
+    #[allow(dead_code)]
     pub target_client: Arc<TargetClient>,
     pub target_chain_index: u8,
     pub root_target_client: Option<Arc<TargetClient>>,
