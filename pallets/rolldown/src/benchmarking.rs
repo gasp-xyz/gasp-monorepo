@@ -466,6 +466,7 @@ mod benchmarks {
 		Ok(())
 	}
 
+	//FIX: check and possibly allign this benchmark
 	#[benchmark]
 	fn cancel_requests_from_l1() -> Result<(), BenchmarkError> {
 		setup_sequencer::<T>(SEQUENCER_ACCOUNT.into(), None, true, false)?;
@@ -474,16 +475,20 @@ mod benchmarks {
 			get_chain_and_address_for_asset_id::<T>(TOKEN_ID.into())?;
 		let l1_chain: <T as Config>::ChainId = l1_aset_chain.into();
 
+		let requests = vec![L1UpdateRequest::Deposit(Default::default())];
 		let update = L1UpdateBuilder::default()
 			.with_requests(vec![L1UpdateRequest::Deposit(Default::default())])
 			.build();
 
+		let update_hash = H256::default();
 		let sequencer_account: T::AccountId = SEQUENCER_ACCOUNT.into();
 		PendingSequencerUpdates::<T>::insert(
 			DUMMY_REQUEST_ID,
 			l1_chain,
-			(sequencer_account, update, H256::default()),
+			(sequencer_account, H256::default(), requests.len() as u128),
 		);
+
+		PendingSequencerUpdateContent::<T>::insert(update_hash, update);
 
 		assert!(
 			L2Requests::<T>::get(l1_chain, RequestId::from((Origin::L2, FIRST_REQUEST_ID)))
@@ -508,6 +513,7 @@ mod benchmarks {
 		Ok(())
 	}
 
+	//FIX: check and possibly allign this benchmark
 	#[benchmark]
 	fn force_cancel_requests_from_l1() -> Result<(), BenchmarkError> {
 		setup_sequencer::<T>(SEQUENCER_ACCOUNT.into(), None, true, true)?;
@@ -519,7 +525,7 @@ mod benchmarks {
 		PendingSequencerUpdates::<T>::insert(
 			DUMMY_REQUEST_ID,
 			l1_chain,
-			(sequencer_account, messages::L1Update::default(), H256::default()),
+			(sequencer_account, H256::default(), 0u128),
 		);
 
 		assert!(
@@ -882,53 +888,171 @@ mod benchmarks {
 		Ok(())
 	}
 
+	// #[benchmark]
+	// fn schedule_requests(x: Linear<2, 200>) -> Result<(), BenchmarkError> {
+	// 	let (l1_aset_chain, l1_asset_address) =
+	// 		get_chain_and_address_for_asset_id::<T>(TOKEN_ID.into())?;
+	// 	let l1_chain: <T as Config>::ChainId = l1_aset_chain.into();
+	//
+	// 	let x_deposits: usize = (x as usize) / 2;
+	// 	let x_cancel_resolution: usize = (x as usize) - x_deposits;
+	// 	let mut update = L1UpdateBuilder::default()
+	// 		.with_requests(
+	// 			[
+	// 				vec![L1UpdateRequest::Deposit(Default::default()); x_deposits],
+	// 				vec![
+	// 					L1UpdateRequest::CancelResolution(Default::default());
+	// 					x_cancel_resolution
+	// 				],
+	// 			]
+	// 			.concat(),
+	// 		)
+	// 		.build();
+	//
+	// 	assert!(
+	// 		MaxAcceptedRequestIdOnl2::<T>::get(l1_chain).is_zero(),
+	// 		"BEFORE MaxAcceptedRequestIdOnl2 {:?} chain should be zero",
+	// 		l1_chain
+	// 	);
+	// 	assert!(
+	// 		UpdatesExecutionQueue::<T>::get(FIRST_SCHEDULED_UPDATE_ID).is_none(),
+	// 		"BEFORE UpdatesExecutionQueue {:?} scheduled update id should be none",
+	// 		FIRST_SCHEDULED_UPDATE_ID
+	// 	);
+	//
+	// 	#[block]
+	// 	{
+	// 		Rolldown::<T>::schedule_requests(BlockNumberFor::<T>::default(), l1_chain, update);
+	// 	}
+	//
+	// 	assert!(
+	// 		!MaxAcceptedRequestIdOnl2::<T>::get(l1_chain).is_zero(),
+	// 		"AFTER MaxAcceptedRequestIdOnl2 {:?} chain should NOT be zero",
+	// 		l1_chain
+	// 	);
+	// 	assert!(
+	// 		UpdatesExecutionQueue::<T>::get(FIRST_SCHEDULED_UPDATE_ID).is_some(),
+	// 		"AFTER UpdatesExecutionQueue {:?} scheduled update id should be some",
+	// 		FIRST_SCHEDULED_UPDATE_ID
+	// 	);
+	// 	Ok(())
+	// }
+
 	#[benchmark]
-	fn schedule_requests(x: Linear<2, 200>) -> Result<(), BenchmarkError> {
+	fn schedule_request_for_execution_if_dispute_period_has_passsed() -> Result<(), BenchmarkError>
+	{
+		setup_account::<T>(USER_ACCOUNT.into())?;
+		setup_and_do_withdrawal::<T>(USER_ACCOUNT.into())?;
+
+		let block_for_automatic_batch =
+			(<T as Config>::MerkleRootAutomaticBatchSize::get() + 1u128).saturated_into::<u32>();
+		let chain: <T as Config>::ChainId = crate::messages::Chain::Ethereum.into();
+		let update_hash =
+			H256::from(hex!("1111111111111111111111111111111111111111111111111111111111111111"));
+
+		let sequencer_account: T::AccountId = SEQUENCER_ACCOUNT.into();
+		PendingSequencerUpdates::<T>::insert(1u128, chain, (sequencer_account, update_hash, 0u128));
+		assert_eq!(LastScheduledUpdateIdInExecutionQueue::<T>::get(), 0u128);
+		assert_eq!(UpdatesExecutionQueue::<T>::get(FIRST_SCHEDULED_UPDATE_ID), None);
+
+		#[block]
+		{
+			Rolldown::<T>::schedule_request_for_execution_if_dispute_period_has_passsed(
+				block_for_automatic_batch.into(),
+			);
+		}
+
+		assert_eq!(LastScheduledUpdateIdInExecutionQueue::<T>::get(), 1u128);
+		assert_eq!(
+			UpdatesExecutionQueue::<T>::get(FIRST_SCHEDULED_UPDATE_ID),
+			Some((block_for_automatic_batch.into(), chain, update_hash))
+		);
+
+		Ok(())
+	}
+
+	#[benchmark]
+	fn maybe_create_batch() -> Result<(), BenchmarkError> {
+		// trigger batch creating because of automatic batch size
+		setup_sequencer::<T>(SEQUENCER_ACCOUNT.into(), None, true, true)?;
+
+		let (l1_aset_chain, l1_asset_address) =
+			get_chain_and_address_for_asset_id::<T>(TOKEN_ID.into())?;
+		let l1_chain: <T as Config>::ChainId = l1_aset_chain.into();
+		let automatic_batch_size = Pallet::<T>::automatic_batch_size();
+
+		let last_batch_id = 1u128;
+		let latest_element_in_previous_batch = 123u128;
+		let last_batch_range = (1u128, latest_element_in_previous_batch);
+		let latest_element_now = latest_element_in_previous_batch + automatic_batch_size;
+
+		assert!(T::SequencerStakingProvider::is_selected_sequencer(
+			l1_chain,
+			&SEQUENCER_ACCOUNT.into()
+		));
+
+		L2OriginRequestId::<T>::mutate(|map| {
+			map.insert(l1_chain, latest_element_now.saturating_add(1u128));
+		});
+
+		L2RequestsBatchLast::<T>::mutate(|map| {
+			map.insert(l1_chain, (20u32.into(), 1u128, (1u128, latest_element_in_previous_batch)));
+		});
+
+		assert_eq!(L2RequestsBatch::<T>::get((l1_chain, 2u128)), None);
+
+		<frame_system::Pallet<T>>::set_block_number(20u32.into());
+
+		#[block]
+		{
+			Rolldown::<T>::maybe_create_batch(21u32.into());
+		}
+
+		assert_eq!(
+			L2RequestsBatch::<T>::get((l1_chain, 2u128)),
+			Some((
+				21u32.into(),
+				(latest_element_in_previous_batch + 1, latest_element_now),
+				SEQUENCER_ACCOUNT.into()
+			))
+		);
+
+		Ok(())
+	}
+
+	#[benchmark]
+	fn execute_requests_from_execute_queue() -> Result<(), BenchmarkError> {
 		let (l1_aset_chain, l1_asset_address) =
 			get_chain_and_address_for_asset_id::<T>(TOKEN_ID.into())?;
 		let l1_chain: <T as Config>::ChainId = l1_aset_chain.into();
 
-		let x_deposits: usize = (x as usize) / 2;
-		let x_cancel_resolution: usize = (x as usize) - x_deposits;
-		let mut update = L1UpdateBuilder::default()
-			.with_requests(
-				[
-					vec![L1UpdateRequest::Deposit(Default::default()); x_deposits],
-					vec![
-						L1UpdateRequest::CancelResolution(Default::default());
-						x_cancel_resolution
-					],
-				]
-				.concat(),
-			)
-			.build();
+		<frame_system::Pallet<T>>::set_block_number(20u32.into());
+		let execution_id = 123u128;
+		let scheduled_at: BlockNumberFor<T> = 19u32.into();
+		let l1_chain: <T as Config>::ChainId = l1_aset_chain.into();
+		let update_hash =
+			H256::from(hex!("1111111111111111111111111111111111111111111111111111111111111111"));
 
-		assert!(
-			MaxAcceptedRequestIdOnl2::<T>::get(l1_chain).is_zero(),
-			"BEFORE MaxAcceptedRequestIdOnl2 {:?} chain should be zero",
-			l1_chain
-		);
-		assert!(
-			UpdatesExecutionQueue::<T>::get(FIRST_SCHEDULED_UPDATE_ID).is_none(),
-			"BEFORE UpdatesExecutionQueue {:?} scheduled update id should be none",
-			FIRST_SCHEDULED_UPDATE_ID
-		);
+		UpdatesExecutionQueueNextId::<T>::put(execution_id);
+		UpdatesExecutionQueue::<T>::insert(execution_id, (scheduled_at, l1_chain, update_hash));
+		LastProcessedRequestOnL2::<T>::insert(l1_chain, 0u128);
+
+		let update = L1UpdateBuilder::default()
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 10_000])
+			.build();
+		PendingSequencerUpdateContent::<T>::insert(update_hash, update);
 
 		#[block]
 		{
-			Rolldown::<T>::schedule_requests(BlockNumberFor::<T>::default(), l1_chain, update);
+			Rolldown::<T>::execute_requests_from_execute_queue(21u32.into());
 		}
 
-		assert!(
-			!MaxAcceptedRequestIdOnl2::<T>::get(l1_chain).is_zero(),
-			"AFTER MaxAcceptedRequestIdOnl2 {:?} chain should NOT be zero",
-			l1_chain
+		UpdatesExecutionQueue::<T>::get(execution_id).expect("update partially executed");
+		assert_eq!(
+			LastProcessedRequestOnL2::<T>::get(l1_chain),
+			<T as Config>::RequestsPerBlock::get()
 		);
-		assert!(
-			UpdatesExecutionQueue::<T>::get(FIRST_SCHEDULED_UPDATE_ID).is_some(),
-			"AFTER UpdatesExecutionQueue {:?} scheduled update id should be some",
-			FIRST_SCHEDULED_UPDATE_ID
-		);
+
 		Ok(())
 	}
 }

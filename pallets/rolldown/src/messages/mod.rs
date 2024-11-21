@@ -104,6 +104,19 @@ pub enum Chain {
 	Arbitrum,
 }
 
+pub trait NextEnum {
+	fn next(self) -> Self;
+}
+
+impl NextEnum for Chain {
+	fn next(self) -> Self {
+		match self {
+			Chain::Ethereum => Chain::Arbitrum,
+			Chain::Arbitrum => Chain::Ethereum,
+		}
+	}
+}
+
 #[repr(u8)]
 #[derive(
 	Default, Eq, PartialEq, RuntimeDebug, Clone, Encode, Decode, TypeInfo, Serialize, Copy,
@@ -231,6 +244,12 @@ pub struct L1Update {
 	pub chain: Chain,
 	pub pendingDeposits: Vec<Deposit>,
 	pub pendingCancelResolutions: Vec<CancelResolution>,
+}
+
+impl L1Update{
+	pub fn get_requests_count(&self) -> u128 {
+		self.pendingDeposits.len() as u128 + self.pendingCancelResolutions.len() as u128
+	}
 }
 
 impl NativeToEthMapping for L1Update
