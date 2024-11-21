@@ -1,7 +1,6 @@
 services:
   ferry-deposit-eth:
     restart: unless-stopped
-    platform: linux/amd64
     image: gaspxyz/ferry-deposit:local-eth
     depends_on:
       eth-contracts-deployment:
