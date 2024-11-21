@@ -14,9 +14,6 @@ helmfiles:
   - path: sub-helmfiles/blockscout/helmfile.yaml
     values:
       - {{ toYaml .Values | nindent 8 }}
-  # - path: sub-helmfiles/evm-nodes/helmfile.yaml
-  #   values:
-  #     - {{ toYaml .Values | nindent 8 }}
   - path: sub-helmfiles/rollup-nodes/helmfile.yaml
     values:
       - {{ toYaml .Values | nindent 8 }}
