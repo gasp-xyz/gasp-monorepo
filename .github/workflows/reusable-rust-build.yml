@@ -60,7 +60,6 @@ jobs:
         with:
           toolchain: ${{ inputs.rust-version }}
           cache-workspaces: ${{ inputs.service_folder }}
-      - uses: arduino/setup-protoc@v3
       - name: Check formatting
         working-directory: ${{ inputs.service_folder }}
         run: cargo fmt --all -- --check
@@ -75,7 +74,6 @@ jobs:
         with:
           toolchain: ${{ inputs.rust-version }}
           cache-workspaces: ${{ inputs.service_folder }}
-      - uses: arduino/setup-protoc@v3
 
       - name: Run clippy check
         working-directory: ${{ inputs.service_folder }}
@@ -91,7 +89,6 @@ jobs:
         with:
           toolchain: ${{ inputs.rust-version }}
           cache-workspaces: ${{ inputs.service_folder }}
-      - uses: arduino/setup-protoc@v3
 
       - name: Run cargo test
         working-directory: ${{ inputs.service_folder }}
