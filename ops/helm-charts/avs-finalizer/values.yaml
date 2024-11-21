@@ -21,7 +21,7 @@ envSecrets: {}
 nameOverride: ''
 
 image:
-  repository: mangatasolutions/avs-finalizer
+  repository: gaspxyz/avs-finalizer
   pullPolicy: Always
   ## Overrides the image tag whose default is the chart appVersion.
   tag: latest

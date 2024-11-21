@@ -1,6 +1,6 @@
 services:
   gasp-syncer:
-    image: mangatasolutions/gasp-syncer:${GASP_SYNCER_VERSION:-local}
+    image: gaspxyz/gasp-syncer:${GASP_SYNCER_VERSION:-local}
     build:
       context: .
     restart: unless-stopped

@@ -4,7 +4,7 @@ services:
       context: .
       args:
         ROLLUP_NODE_VERSION: ${ROLLUP_NODE_VERSION}
-    image: mangatasolutions/avs-finalizer:${AVS_FINALIZER_VERSION:-local}
+    image: gaspxyz/avs-finalizer:${AVS_FINALIZER_VERSION:-local}
     restart: unless-stopped
     depends_on:
       eth-stub:

@@ -47,7 +47,7 @@ jobs:
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/gasp-contracts:${{ inputs.version }} -f contracts/Dockerfile contracts
+          docker buildx build --push --platform linux/amd64 -t gaspxyz/gasp-contracts:${{ inputs.version }} -f contracts/Dockerfile contracts
 
   build-avs-aggregator-image:
     name: Build avs-aggregator Docker image
@@ -59,7 +59,7 @@ jobs:
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/avs-aggregator:${{ inputs.version }} -f avs-aggregator/Dockerfile .
+          docker buildx build --push --platform linux/amd64,linux/arm64 -t gaspxyz/avs-aggregator:${{ inputs.version }} -f avs-aggregator/Dockerfile .
 
   build-avs-finalizer-image:
     name: Build avs-finalizer Docker image
@@ -68,7 +68,7 @@ jobs:
     with:
       version: ${{ inputs.version }}
       service_folder: avs-finalizer
-      docker_image_repository: mangatasolutions/avs-finalizer
+      docker_image_repository: gaspxyz/avs-finalizer
 
   build-avs-finalizer-image-with-fast-runtime:
     name: Build avs-finalizer Docker image with fast runtime
@@ -77,7 +77,7 @@ jobs:
     with:
       version: ${{ inputs.version }}
       service_folder: avs-finalizer
-      docker_image_repository: mangatasolutions/avs-finalizer
+      docker_image_repository: gaspxyz/avs-finalizer
       finalizer_fast_runtime: true
 
   build-gasp-syncer-image:
@@ -87,7 +87,7 @@ jobs:
     with:
       version: ${{ inputs.version }}
       service_folder: gasp-syncer
-      docker_image_repository: mangatasolutions/gasp-syncer
+      docker_image_repository: gaspxyz/gasp-syncer
 
   build-sequencer-image:
     name: Build sequencer Docker image
@@ -96,7 +96,7 @@ jobs:
     with:
       version: ${{ inputs.version }}
       service_folder: sequencer
-      docker_image_repository: mangatasolutions/rollup-sequencer
+      docker_image_repository: gaspxyz/rollup-sequencer
       cargo_tests_filters: "l1::test::test_can_connect sequencer::test::test_find_malicious_update_ignores_updates_from_other_chains sequencer::test::test_find_malicious_update_ignores_valid_updates sequencer::test::test_find_malicious_update_with_invalid_range_works sequencer::test::test_find_malicious_update_works sequencer::test::test_find_pending_cancels_ignores_closed_cancels sequencer::test::test_find_pending_cancels_to_close sequencer::test::test_find_pending_cancels_to_close2 sequencer::test::test_find_pending_cancels_to_close_when_there_is_no_merkle_root_provided_to_l1 sequencer::test::test_get_pending_update_when_there_are_no_requests sequencer::test::test_get_pending_update_when_there_are_requests sequencer::test::test_get_pending_update_when_there_are_too_many_requests_for_single_update"
 
   build-ferry-withdrawal-image:

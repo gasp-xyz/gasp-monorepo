@@ -1,6 +1,6 @@
 services:
   sequencer-eth:
-    image: mangatasolutions/sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
+    image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
     build:
       context: .
     depends_on:

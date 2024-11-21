@@ -28,7 +28,7 @@ releases:
     chart: ../helm-charts/rollup-node
     values:
       - image:
-          repository: mangatasolutions/avs-aggregator
+          repository: gaspxyz/avs-aggregator
           tag: {{ .Values | get "aggregatorImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
         remoteCluster: {{ .Values.remoteCluster }}
@@ -41,7 +41,7 @@ releases:
     chart: ../helm-charts/avs-finalizer
     values:
       - image:
-          repository: mangatasolutions/avs-finalizer
+          repository: gaspxyz/avs-finalizer
           tag: {{ .Values | get "finalizerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
         envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
@@ -53,7 +53,7 @@ releases:
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: mangatasolutions/gasp-syncer
+          repository: gaspxyz/gasp-syncer
           tag: {{ .Values | get "gaspSyncerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.gaspSyncerEnv | toYaml | nindent 10 }}
         envSecrets: {{ .Values.gaspSyncerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
@@ -64,7 +64,7 @@ releases:
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: mangatasolutions/rollup-sequencer
+          repository: gaspxyz/rollup-sequencer
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
@@ -75,7 +75,7 @@ releases:
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: mangatasolutions/rollup-sequencer
+          repository: gaspxyz/rollup-sequencer
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
