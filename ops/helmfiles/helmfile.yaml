@@ -58,24 +58,24 @@ releases:
         env: {{ .Values.gaspSyncerEnv | toYaml | nindent 10 }}
         envSecrets: {{ .Values.gaspSyncerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
   
-  - name: rollup-sequencer-eth
+  - name: sequencer-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.sequencerEnabled }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: gaspxyz/rollup-sequencer
+          repository: gaspxyz/sequencer
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
 
-  - name: rollup-sequencer-arb
+  - name: sequencer-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.sequencerEnabled .Values.enableArbitrumServices }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: gaspxyz/rollup-sequencer
+          repository: gaspxyz/sequencer
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}

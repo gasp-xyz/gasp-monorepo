@@ -126,7 +126,7 @@ gaspSyncerEnv:
   PUSH_FIRST_INIT: "true"
 
 ############################
-# rollup-sequencer configs #
+# sequencer configs #
 ############################
 sequencerEnabled: true
 

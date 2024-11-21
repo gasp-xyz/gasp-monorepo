@@ -145,7 +145,7 @@ gaspSyncerEnv:
   PUSH_FIRST_INIT: "true"
 
 ############################
-# rollup-sequencer configs #
+# sequencer configs #
 ############################
 sequencerEnabled: true
 # Override the image tag provided on deployment from IMAGE_TAG env variable
