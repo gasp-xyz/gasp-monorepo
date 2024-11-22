@@ -1020,9 +1020,6 @@ mod benchmarks {
 	}
 
 	#[benchmark]
-	//NOTE: accounts only for the cost of processing the update
-	//assumes the update is emtpy, so cost of processing individual deposits/cancel resultions
-	//needs to be taken into account manually
 	fn execute_requests_from_execute_queue() -> Result<(), BenchmarkError> {
 		let (l1_aset_chain, l1_asset_address) =
 			get_chain_and_address_for_asset_id::<T>(TOKEN_ID.into())?;
