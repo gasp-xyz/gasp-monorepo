@@ -69,7 +69,22 @@ pub trait WeightInfo {
 	fn ferry_deposit_unsafe() -> Weight;
 	fn process_deposit() -> Weight;
 	fn process_cancel_resolution() -> Weight;
-	fn schedule_requests(x: u32, ) -> Weight;
+	fn load_next_update_from_execution_queue() -> Weight{
+		(Weight::from_parts(22_558_000, 0))
+			.saturating_add(RocksDbWeight::get().writes(1 as u64))
+	}
+	fn schedule_request_for_execution_if_dispute_period_has_passsed() -> Weight{
+		(Weight::from_parts(22_558_000, 0))
+			.saturating_add(RocksDbWeight::get().writes(1 as u64))
+	}
+	fn maybe_create_batch() -> Weight{
+		(Weight::from_parts(22_558_000, 0))
+			.saturating_add(RocksDbWeight::get().writes(1 as u64))
+	}
+	fn execute_requests_from_execute_queue() -> Weight{
+		(Weight::from_parts(22_558_000, 0))
+			.saturating_add(RocksDbWeight::get().writes(1 as u64))
+	}
 }
 
 /// Weights for pallet_rolldown using the Mangata node and recommended hardware.
@@ -320,19 +335,6 @@ impl<T: frame_system::Config> pallet_rolldown::WeightInfo for ModuleWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(12 as u64))
 			.saturating_add(T::DbWeight::get().writes(9 as u64))
 	}
-	// Storage: `Rolldown::MaxAcceptedRequestIdOnl2` (r:1 w:1)
-	// Proof: `Rolldown::MaxAcceptedRequestIdOnl2` (`max_values`: None, `max_size`: Some(33), added: 2508, mode: `MaxEncodedLen`)
-	// Storage: `Rolldown::LastScheduledUpdateIdInExecutionQueue` (r:1 w:1)
-	// Proof: `Rolldown::LastScheduledUpdateIdInExecutionQueue` (`max_values`: Some(1), `max_size`: Some(16), added: 511, mode: `MaxEncodedLen`)
-	// Storage: `Rolldown::UpdatesExecutionQueue` (r:0 w:1)
-	// Proof: `Rolldown::UpdatesExecutionQueue` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	fn schedule_requests(x: u32, ) -> Weight {
-		(Weight::from_parts(8_898_848, 0))
-			// Standard Error: 8_479
-			.saturating_add((Weight::from_parts(299_825, 0)).saturating_mul(x as u64))
-			.saturating_add(T::DbWeight::get().reads(2 as u64))
-			.saturating_add(T::DbWeight::get().writes(3 as u64))
-	}
 }
 
 // For backwards compatibility and tests
@@ -581,18 +583,5 @@ impl WeightInfo for () {
 		(Weight::from_parts(97_360_000, 0))
 			.saturating_add(RocksDbWeight::get().reads(12 as u64))
 			.saturating_add(RocksDbWeight::get().writes(9 as u64))
-	}
-	// Storage: `Rolldown::MaxAcceptedRequestIdOnl2` (r:1 w:1)
-	// Proof: `Rolldown::MaxAcceptedRequestIdOnl2` (`max_values`: None, `max_size`: Some(33), added: 2508, mode: `MaxEncodedLen`)
-	// Storage: `Rolldown::LastScheduledUpdateIdInExecutionQueue` (r:1 w:1)
-	// Proof: `Rolldown::LastScheduledUpdateIdInExecutionQueue` (`max_values`: Some(1), `max_size`: Some(16), added: 511, mode: `MaxEncodedLen`)
-	// Storage: `Rolldown::UpdatesExecutionQueue` (r:0 w:1)
-	// Proof: `Rolldown::UpdatesExecutionQueue` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	fn schedule_requests(x: u32, ) -> Weight {
-		(Weight::from_parts(8_898_848, 0))
-			// Standard Error: 8_479
-			.saturating_add((Weight::from_parts(299_825, 0)).saturating_mul(x as u64))
-			.saturating_add(RocksDbWeight::get().reads(2 as u64))
-			.saturating_add(RocksDbWeight::get().writes(3 as u64))
 	}
 }

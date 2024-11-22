@@ -182,6 +182,7 @@ pub mod pallet {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn on_initialize(now: BlockNumberFor<T>) -> Weight {
 			let mut total_weight: Weight = T::DbWeight::get().reads(1);
+
 			if T::MaintenanceStatusProvider::is_maintenance() {
 				LastMaintananceMode::<T>::put(now.saturated_into::<u128>());
 				total_weight += T::DbWeight::get().writes(1);
@@ -190,11 +191,7 @@ pub mod pallet {
 			}
 
 			Self::schedule_request_for_execution_if_dispute_period_has_passsed(now);
-
 			Self::load_next_update_from_execution_queue();
-			// total_weight =
-			// 	total_weight.saturating_add(<T as Config>::WeightInfo::maybe_create_batch());
-			// total_weight = total_weight.saturating_add(<T as Config>::WeightInfo::schedule_request_for_execution_if_dispute_period_has_passsed());
 			total_weight
 		}
 
@@ -214,35 +211,10 @@ pub mod pallet {
 				// if Self::load_next_update_from_execution_queue(){
 				//     return used_weight;
 				// }else{
-				Self::execute_requests_from_execute_queue(now);
+				Self::execute_requests_from_execute_queue();
 				// Self::get_current_update_size_from_execution_queue();
 				// }
 			}
-
-			// let get_update_size_weight = T::DbWeight::get().reads(2);
-			// if remaining_weight.ref_time() > get_update_size_weight.ref_time() {
-			//       used_weight += get_update_size_weight;
-			//       remaining_weight -= get_update_size_weight;
-			//       println!("here3");
-			// 	if let Some(size) = Self::get_current_update_size_from_execution_queue() {
-			//
-			//       println!("here4");
-			//       // if remaining_weight >= T::DbWeight::get().reads(1) {
-			//           Self::execute_requests_from_execute_queue(now);
-			//           // used_weight += T::DbWeight::get().reads(1);
-			//       // }
-			//     }
-			//   }
-			// 	used_weight += get_update_size_weight;
-			// 	if let Some(size) = Self::get_current_update_size_from_execution_queue() {
-			//                  println!("here2222222222222222222222222222222222222222");
-			//          Self::execute_requests_from_execute_queue(now);
-			// 		return used_weight;
-			// 	}else{
-			//                  println!("here1111111111111111111111111111111111111111");
-			// 		return used_weight;
-			// 	}
-			// }
 
 			return used_weight;
 		}
@@ -1128,8 +1100,6 @@ impl<T: Config> Pallet<T> {
 			}
 
 			let update_creation_block = block_number.saturating_sub(Self::get_dispute_period());
-			println!("hello world");
-			println!("{}", update_creation_block);
 
 			match LastMaintananceMode::<T>::get() {
 				Some(last_maintanance_mode) if update_creation_block <= last_maintanance_mode => {
@@ -1154,13 +1124,14 @@ impl<T: Config> Pallet<T> {
 
 	fn process_single_request(
 		l1: <T as Config>::ChainId,
-		request: messages::L1UpdateRequest,
+		request: &messages::L1UpdateRequest,
 	) -> Weight {
 		let mut total_weight: Weight = Weight::default();
 
 		// weight for LastProcessedRequestOnL2
 		total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
-		if request.id() <= LastProcessedRequestOnL2::<T>::get(l1) {
+		let request_id = request.id();
+		if request_id <= LastProcessedRequestOnL2::<T>::get(l1) {
 			return total_weight
 		}
 
@@ -1193,11 +1164,7 @@ impl<T: Config> Pallet<T> {
 			},
 		};
 
-		Pallet::<T>::deposit_event(Event::RequestProcessedOnL2 {
-			chain: l1,
-			request_id: request.id(),
-			status,
-		});
+		Pallet::<T>::deposit_event(Event::RequestProcessedOnL2 { chain: l1, request_id, status });
 		// Not sure about this - not sure exactly what is cached and how across extrinsics (/hooks)
 		// weight for deposit_event
 		total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(2, 3));
@@ -1206,12 +1173,6 @@ impl<T: Config> Pallet<T> {
 		// weight for LastProcessedRequestOnL2
 		total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
 		total_weight
-	}
-
-	fn has_next_update_to_execute() -> bool {
-		UpdatesExecutionQueue::<T>::contains_key(
-			UpdatesExecutionQueueNextId::<T>::get().saturating_add(1),
-		)
 	}
 
 	fn get_current_update_size_from_execution_queue() -> Option<u128> {
@@ -1234,29 +1195,28 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
-	fn execute_requests_from_execute_queue(now: BlockNumberFor<T>) -> Weight {
+	fn execute_requests_from_execute_queue() -> Weight {
 		let mut limit = Self::get_max_requests_per_block();
 		while limit > 0 {
 			match (
 				UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get()),
 				LastMaintananceMode::<T>::get(),
-				Self::has_next_update_to_execute(),
 			) {
-				(Some((scheduled_at, l1, hash, _)), Some(last_maintanance_mode), _)
+				(Some((scheduled_at, _, _, _)), Some(last_maintanance_mode))
 					if scheduled_at.saturated_into::<u128>() <= last_maintanance_mode =>
 				{
 					UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
 					UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
 					break;
 				},
-				(Some((scheduled_at, l1, hash, _)), _, _) => {
+				(Some((_, l1, hash, _)), _) => {
 					if let Some(update) = PendingSequencerUpdateContent::<T>::get(hash) {
 						for req in update
 							.into_requests()
-							.into_iter()
+							.iter()
 							.filter(|request| request.id() > LastProcessedRequestOnL2::<T>::get(l1))
-							.map(|val| Some(val))
-							.chain(sp_std::iter::repeat(None))
+							.map(Some)
+							.chain(sp_std::iter::once(None))
 							.take(limit.saturated_into())
 						{
 							if let Some(request) = req {
@@ -1274,14 +1234,6 @@ impl<T: Config> Pallet<T> {
 						UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
 					}
 				},
-				// (None, _, true) => {
-				// 	if UpdatesExecutionQueue::<T>::contains_key(
-				// 		UpdatesExecutionQueueNextId::<T>::get().saturating_add(1),
-				// 	) {
-				// 		UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
-				// 	}
-				// 	break;
-				// }
 				_ => {
 					break;
 				},

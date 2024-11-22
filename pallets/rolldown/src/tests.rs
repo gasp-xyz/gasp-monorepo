@@ -2753,10 +2753,8 @@ fn test_sequencer_can_submit_update_with_remaining_elements() {
 			is_maintenance_mock.expect().return_const(false);
 			forward_to_block::<Test>(10);
 
-      let requests = vec![L1UpdateRequest::Deposit(messages::Deposit::default()); 11];
-			let deposit_update = L1UpdateBuilder::default()
-				.with_requests(requests.clone())
-				.build();
+			let requests = vec![L1UpdateRequest::Deposit(messages::Deposit::default()); 11];
+			let deposit_update = L1UpdateBuilder::default().with_requests(requests.clone()).build();
 			Rolldown::update_l2_from_l1_unsafe(
 				RuntimeOrigin::signed(ALICE),
 				deposit_update.clone(),

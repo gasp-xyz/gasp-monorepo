@@ -904,55 +904,30 @@ mod benchmarks {
 		Ok(())
 	}
 
-	// #[benchmark]
-	// fn schedule_requests(x: Linear<2, 200>) -> Result<(), BenchmarkError> {
-	// 	let (l1_aset_chain, l1_asset_address) =
-	// 		get_chain_and_address_for_asset_id::<T>(TOKEN_ID.into())?;
-	// 	let l1_chain: <T as Config>::ChainId = l1_aset_chain.into();
-	//
-	// 	let x_deposits: usize = (x as usize) / 2;
-	// 	let x_cancel_resolution: usize = (x as usize) - x_deposits;
-	// 	let mut update = L1UpdateBuilder::default()
-	// 		.with_requests(
-	// 			[
-	// 				vec![L1UpdateRequest::Deposit(Default::default()); x_deposits],
-	// 				vec![
-	// 					L1UpdateRequest::CancelResolution(Default::default());
-	// 					x_cancel_resolution
-	// 				],
-	// 			]
-	// 			.concat(),
-	// 		)
-	// 		.build();
-	//
-	// 	assert!(
-	// 		MaxAcceptedRequestIdOnl2::<T>::get(l1_chain).is_zero(),
-	// 		"BEFORE MaxAcceptedRequestIdOnl2 {:?} chain should be zero",
-	// 		l1_chain
-	// 	);
-	// 	assert!(
-	// 		UpdatesExecutionQueue::<T>::get(FIRST_SCHEDULED_UPDATE_ID).is_none(),
-	// 		"BEFORE UpdatesExecutionQueue {:?} scheduled update id should be none",
-	// 		FIRST_SCHEDULED_UPDATE_ID
-	// 	);
-	//
-	// 	#[block]
-	// 	{
-	// 		Rolldown::<T>::schedule_requests(BlockNumberFor::<T>::default(), l1_chain, update);
-	// 	}
-	//
-	// 	assert!(
-	// 		!MaxAcceptedRequestIdOnl2::<T>::get(l1_chain).is_zero(),
-	// 		"AFTER MaxAcceptedRequestIdOnl2 {:?} chain should NOT be zero",
-	// 		l1_chain
-	// 	);
-	// 	assert!(
-	// 		UpdatesExecutionQueue::<T>::get(FIRST_SCHEDULED_UPDATE_ID).is_some(),
-	// 		"AFTER UpdatesExecutionQueue {:?} scheduled update id should be some",
-	// 		FIRST_SCHEDULED_UPDATE_ID
-	// 	);
-	// 	Ok(())
-	// }
+	#[benchmark]
+	fn load_next_update_from_execution_queue() -> Result<(), BenchmarkError> {
+		let current_execution_id = 1u128;
+		let next_execution_id = 2u128;
+		let scheduled_at: BlockNumberFor<T> = 19u32.into();
+		let (l1_aset_chain, _) = get_chain_and_address_for_asset_id::<T>(TOKEN_ID.into())?;
+		let l1_chain: <T as Config>::ChainId = l1_aset_chain.into();
+
+		UpdatesExecutionQueue::<T>::remove(current_execution_id);
+		UpdatesExecutionQueue::<T>::insert(
+			next_execution_id,
+			(scheduled_at, l1_chain, H256::zero(), 10u128),
+		);
+		UpdatesExecutionQueueNextId::<T>::put(current_execution_id);
+
+		#[block]
+		{
+			Rolldown::<T>::load_next_update_from_execution_queue();
+		}
+
+		assert_eq!(UpdatesExecutionQueueNextId::<T>::get(), next_execution_id);
+
+		Ok(())
+	}
 
 	#[benchmark]
 	fn schedule_request_for_execution_if_dispute_period_has_passsed() -> Result<(), BenchmarkError>
@@ -1071,7 +1046,7 @@ mod benchmarks {
 
 		#[block]
 		{
-			Rolldown::<T>::execute_requests_from_execute_queue(21u32.into());
+			Rolldown::<T>::execute_requests_from_execute_queue();
 		}
 
 		UpdatesExecutionQueue::<T>::get(execution_id).expect("update partially executed");
@@ -1079,7 +1054,6 @@ mod benchmarks {
 			LastProcessedRequestOnL2::<T>::get(l1_chain),
 			<T as Config>::RequestsPerBlock::get()
 		);
-
 		Ok(())
 	}
 }
