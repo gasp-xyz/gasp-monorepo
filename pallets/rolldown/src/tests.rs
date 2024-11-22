@@ -152,6 +152,7 @@ fn l2_counter_updates_when_requests_are_processed() {
 		assert_eq!(Rolldown::get_last_processed_request_on_l2(Chain::Ethereum), 1u128.into());
 
 		forward_to_next_block::<Test>();
+		forward_to_next_block::<Test>();
 		assert_eq!(Rolldown::get_last_processed_request_on_l2(Chain::Ethereum), 2u128.into());
 	});
 }
@@ -881,6 +882,7 @@ fn ignore_duplicated_requests_when_already_executed() {
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 5u128.into());
 
 		forward_to_next_block::<Test>();
+		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 6u128.into());
 	});
 }
@@ -911,6 +913,7 @@ fn process_l1_reads_in_order() {
 		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 11u128.into());
 
+		forward_to_next_block::<Test>();
 		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 20u128.into());
 	});
@@ -1066,6 +1069,7 @@ fn execute_two_consecutive_incremental_requests() {
 			forward_to_block::<Test>(15);
 			assert_eq!(TokensOf::<Test>::free_balance(ETH_TOKEN_ADDRESS_MGX, &CHARLIE), MILLION);
 
+			forward_to_next_block::<Test>();
 			forward_to_next_block::<Test>();
 			assert_eq!(
 				TokensOf::<Test>::free_balance(ETH_TOKEN_ADDRESS_MGX, &CHARLIE),
