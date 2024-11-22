@@ -1020,7 +1020,7 @@ mod benchmarks {
 	}
 
 	#[benchmark]
-	fn execute_requests_from_execute_queue() -> Result<(), BenchmarkError> {
+	fn execute_empty_request_from_execute_queue() -> Result<(), BenchmarkError> {
 		let (l1_aset_chain, l1_asset_address) =
 			get_chain_and_address_for_asset_id::<T>(TOKEN_ID.into())?;
 		let l1_chain: <T as Config>::ChainId = l1_aset_chain.into();
@@ -1039,9 +1039,7 @@ mod benchmarks {
 		);
 		LastProcessedRequestOnL2::<T>::insert(l1_chain, 0u128);
 
-		let update = L1UpdateBuilder::default()
-			.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 10_000])
-			.build();
+		let update = L1UpdateBuilder::default().build();
 		PendingSequencerUpdateContent::<T>::insert(update_hash, update);
 
 		#[block]

@@ -6,6 +6,7 @@ pub mod messages;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+mod weight_utils;
 pub mod weights;
 pub use weights::WeightInfo;
 
@@ -140,33 +141,6 @@ mod mock;
 use crate::messages::L1Update;
 pub use pallet::*;
 
-fn get_read_scalling_factor(size: usize) -> u128 {
-	const BASE_READ_COST: u128 = 25;
-	let approximated_cost = match size {
-		0..=50 => 25u128,
-		51..=100 => 45u128,
-		101..=500 => 210u128,
-		501..=1000 => 400u128,
-		1001..=5000 => 1800u128,
-		_ => 2800u128,
-	};
-	approximated_cost.saturating_div(BASE_READ_COST).saturating_add(1u128)
-}
-
-fn get_write_scalling_factor(size: usize) -> u128 {
-	const BASE_WRITE_COST: u128 = 100;
-
-	let approximated_cost = match size {
-		0..=50 => 25u128,
-		51..=100 => 150u128,
-		101..=500 => 700u128,
-		501..=1000 => 1050u128,
-		1001..=5000 => 5000u128,
-		_ => 9000u128,
-	};
-	approximated_cost.saturating_div(BASE_WRITE_COST).saturating_add(1u128)
-}
-
 #[frame_support::pallet]
 pub mod pallet {
 
@@ -188,35 +162,53 @@ pub mod pallet {
 				total_weight += T::DbWeight::get().writes(1);
 			} else {
 				Self::maybe_create_batch(now);
+				total_weight += <T as Config>::WeightInfo::maybe_create_batch();
 			}
 
 			Self::schedule_request_for_execution_if_dispute_period_has_passsed(now);
+			total_weight += <T as Config>::WeightInfo::schedule_request_for_execution_if_dispute_period_has_passsed();
+
 			Self::load_next_update_from_execution_queue();
+			total_weight += <T as Config>::WeightInfo::load_next_update_from_execution_queue();
 			total_weight
 		}
 
 		fn on_idle(now: BlockNumberFor<T>, mut remaining_weight: Weight) -> Weight {
 			let mut used_weight = Weight::default();
 
-			if T::MaintenanceStatusProvider::is_maintenance() {
-				return used_weight;
-			}
+			// already cached by using in on_initialize hook
+			if !T::MaintenanceStatusProvider::is_maintenance() {
+				let get_update_size_cost = T::DbWeight::get().reads(2);
 
-			let load_next_update_from_execution_queue_weight =
-				T::DbWeight::get().reads_writes(3, 1);
-			if remaining_weight.ref_time() > load_next_update_from_execution_queue_weight.ref_time()
-			{
-				used_weight += load_next_update_from_execution_queue_weight;
-				remaining_weight -= load_next_update_from_execution_queue_weight;
-				// if Self::load_next_update_from_execution_queue(){
-				//     return used_weight;
-				// }else{
+				if remaining_weight.ref_time() < get_update_size_cost.ref_time() {
+					return used_weight;
+				}
+
+				remaining_weight -= get_update_size_cost;
+				used_weight += get_update_size_cost;
+
+				let update_size =
+					Self::get_current_update_size_from_execution_queue().unwrap_or(1u128);
+
+				let mut cost_of_processing_requests =
+					<T as Config>::WeightInfo::execute_requests_from_execute_queue();
+				cost_of_processing_requests +=
+					<T as Config>::WeightInfo::process_cancel_resolution()
+						.saturating_mul(Self::get_max_requests_per_block().saturated_into());
+				cost_of_processing_requests += T::DbWeight::get().reads(1).saturating_mul(
+					weight_utils::get_read_scalling_factor(update_size.saturated_into())
+						.saturated_into(),
+				);
+
+				if remaining_weight.ref_time() < cost_of_processing_requests.ref_time() {
+					return used_weight;
+				}
+
 				Self::execute_requests_from_execute_queue();
-				// Self::get_current_update_size_from_execution_queue();
-				// }
+				used_weight += cost_of_processing_requests;
+				remaining_weight -= cost_of_processing_requests;
 			}
-
-			return used_weight;
+			used_weight
 		}
 	}
 
@@ -458,6 +450,10 @@ pub mod pallet {
 			chain: <T as Config>::ChainId,
 			deposit: messages::Deposit,
 			deposit_hash: H256,
+		},
+		L1ReadExecuted {
+			chain: <T as Config>::ChainId,
+			hash: H256,
 		},
 	}
 
@@ -1118,7 +1114,6 @@ impl<T: Config> Pallet<T> {
 			}
 		}
 
-		// FIXME: remove update from storage somwhere else
 		let _ = PendingSequencerUpdates::<T>::clear_prefix(block_number, u32::MAX, None);
 	}
 
@@ -1196,49 +1191,41 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn execute_requests_from_execute_queue() -> Weight {
-		let mut limit = Self::get_max_requests_per_block();
-		while limit > 0 {
-			match (
-				UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get()),
-				LastMaintananceMode::<T>::get(),
-			) {
-				(Some((scheduled_at, _, _, _)), Some(last_maintanance_mode))
-					if scheduled_at.saturated_into::<u128>() <= last_maintanance_mode =>
-				{
-					UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
-					UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
-					break;
-				},
-				(Some((_, l1, hash, _)), _) => {
-					if let Some(update) = PendingSequencerUpdateContent::<T>::get(hash) {
-						for req in update
-							.into_requests()
-							.iter()
-							.filter(|request| request.id() > LastProcessedRequestOnL2::<T>::get(l1))
-							.map(Some)
-							.chain(sp_std::iter::once(None))
-							.take(limit.saturated_into())
-						{
-							if let Some(request) = req {
-								let weight = Self::process_single_request(l1, request);
-								limit -= 1;
-							} else {
-								UpdatesExecutionQueue::<T>::remove(
-									UpdatesExecutionQueueNextId::<T>::get(),
-								);
-								break;
-							}
-						}
-					} else {
+		let limit = Self::get_max_requests_per_block();
+		match (
+			UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get()),
+			LastMaintananceMode::<T>::get(),
+		) {
+			(Some((scheduled_at, _, _, _)), Some(last_maintanance_mode))
+				if scheduled_at.saturated_into::<u128>() <= last_maintanance_mode =>
+			{
+				UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
+				UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
+			},
+			(Some((_, l1, hash, _)), _) => {
+				if let Some(update) = PendingSequencerUpdateContent::<T>::get(hash) {
+					let requests = update
+						.into_requests()
+						.into_iter()
+						.filter(|request| request.id() > LastProcessedRequestOnL2::<T>::get(l1))
+						.take(limit.saturated_into())
+						.collect::<Vec<_>>();
+
+					if requests.is_empty() {
 						UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
-						UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
+						PendingSequencerUpdateContent::<T>::remove(hash);
+						Self::deposit_event(Event::L1ReadExecuted { chain: l1, hash });
+					} else {
+						for r in requests {
+							let weight = Self::process_single_request(l1, &r);
+						}
 					}
-				},
-				_ => {
-					break;
-				},
-			}
-		}
+				} else {
+					PendingSequencerUpdateContent::<T>::remove(hash);
+				}
+			},
+			_ => {},
+		};
 		Default::default()
 	}
 
