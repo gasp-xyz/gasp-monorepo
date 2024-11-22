@@ -5562,27 +5562,27 @@ futoin-hkdf@^1.5.3:
   resolved "https://registry.npmjs.org/futoin-hkdf/-/futoin-hkdf-1.5.3.tgz"
   integrity sha512-SewY5KdMpaoCeh7jachEWFsh1nNlaDjNHZXWqL5IGwtpEYHTgkr2+AMCgNwKWkcc0wpSYrZfR7he4WdmHFtDxQ==
 
-gasp-sdk@0.0.2-feature-base-integration.4:
-  version "0.0.2-feature-base-integration.4"
-  resolved "https://registry.npmjs.org/gasp-sdk/-/gasp-sdk-0.0.2-feature-base-integration.4.tgz"
-  integrity sha512-x2eyRUQUw1VNKKmCZ++VCeePgJEtsYXaXPcAcP2WSvPEDF1zWB7qZ1SdCShBQAdPaD4KxmZHPaH+2kg2WqQqog==
+gasp-sdk@0.0.2-eth-rollup-develop.63:
+  version "0.0.2-eth-rollup-develop.63"
+  resolved "https://registry.npmjs.org/gasp-sdk/-/gasp-sdk-0.0.2-eth-rollup-develop.63.tgz"
+  integrity sha512-N7YFhw5b2u/PxJJlgTjJ7OI4lpm51Emha9e/XVlVlL16NtGQgHiSSMVFRfzD6nr7Aw3ydSNQTboPUSjIL92neA==
   dependencies:
     big.js "6.2.1"
-    gasp-type-definitions "0.0.2-feature-base-integration.4"
+    gasp-type-definitions "0.0.2-eth-rollup-develop.65"
     tslib "^2.3.0"
     tslog "4.8.2"
     viem "^2.17.4"
     wagmi "^2.10.10"
 
-gasp-type-definitions@0.0.2-feature-base-integration.4:
-  version "0.0.2-feature-base-integration.4"
-  resolved "https://registry.npmjs.org/gasp-type-definitions/-/gasp-type-definitions-0.0.2-feature-base-integration.4.tgz"
-  integrity sha512-ei8x2lOZXhxHSB5JdC+w3iMusiLvvbbZ6vjRN4rSsuhkzHQ0/ShcCT7OAdr5FEuIyiWFHt1QYXid1n3Lb05GuQ==
+gasp-type-definitions@0.0.2-eth-rollup-develop.65:
+  version "0.0.2-eth-rollup-develop.65"
+  resolved "https://registry.npmjs.org/gasp-type-definitions/-/gasp-type-definitions-0.0.2-eth-rollup-develop.65.tgz"
+  integrity sha512-NOy1nu3TQ6zlMpe8FYf22no7rIdshfrKLKnLtn0HbKAHwJUxikk0ExUw6o9gG/GIpMPEq75nsYfMo+voLF7ROA==
 
-gasp-types@0.0.2-feature-base-integration.4:
-  version "0.0.2-feature-base-integration.4"
-  resolved "https://registry.npmjs.org/gasp-types/-/gasp-types-0.0.2-feature-base-integration.4.tgz"
-  integrity sha512-OkJ2uSQTrDVthFPUt5sYrXyzBZzy4nP8a2pD9fKw+/+fwPqykzZz8SExcXfZtNOiX14EjrSsPJuXkB+v8rZPjw==
+gasp-types@0.0.2-eth-rollup-develop.63:
+  version "0.0.2-eth-rollup-develop.63"
+  resolved "https://registry.npmjs.org/gasp-types/-/gasp-types-0.0.2-eth-rollup-develop.63.tgz"
+  integrity sha512-x/zLO/LfMnZp1E4uZlAAG6pFAQoJFX/OCbWZvDhb8asLA6uOXdARkxIGyzIrnfgjOmfe4LVo3dsKU/c0lKyVxg==
 
 gauge@^3.0.0:
   version "3.0.2"
