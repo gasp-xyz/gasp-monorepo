@@ -585,7 +585,9 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::call_index(0)]
-		#[pallet::weight(<T as Config>::WeightInfo::update_l2_from_l1(requests.pendingDeposits.len().saturating_add(requests.pendingCancelResolutions.len()).saturating_mul(2) as u32))]
+		#[pallet::weight(<T as Config>::WeightInfo::update_l2_from_l1(
+            requests.get_requests_count().saturated_into()
+        ).saturating_add(T::DbWeight::get().reads(weight_utils::get_read_scalling_factor(requests.get_requests_count().saturated_into()).saturated_into())))]
 		pub fn update_l2_from_l1(
 			origin: OriginFor<T>,
 			requests: messages::L1Update,
@@ -625,8 +627,9 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(3)]
-		#[pallet::weight(<T as Config>::WeightInfo::cancel_requests_from_l1().saturating_mul(2))]
-		//EXTRINSIC2 (who canceled, dispute_period_end(u32-blocknum)))
+		// NOTE: account for worst case scenario, in the future we should introduce the mandatory
+		// parameter 'update_size' so we can parametrize weight with it
+		#[pallet::weight(<T as Config>::WeightInfo::cancel_requests_from_l1().saturating_mul(weight_utils::get_read_scalling_factor(10_000).saturated_into()))]
 		pub fn cancel_requests_from_l1(
 			origin: OriginFor<T>,
 			chain: <T as Config>::ChainId,
