@@ -173,7 +173,7 @@ pub mod pallet {
 			total_weight
 		}
 
-		fn on_idle(now: BlockNumberFor<T>, mut remaining_weight: Weight) -> Weight {
+		fn on_idle(_now: BlockNumberFor<T>, mut remaining_weight: Weight) -> Weight {
 			let mut used_weight = Weight::default();
 
 			// already cached by using in on_initialize hook
