@@ -81,7 +81,7 @@ describe('APi tests: Collator apy - dailyRewards', () => {
       })
   })
 
-  it.only('GET account/liquid-staking/rewards-history/month/sum - OK', async () => {
+  it('GET account/liquid-staking/rewards-history/month/sum - OK', async () => {
     await supertest(app)
       .get(
         `/account/${accountAddress}/liquid-staking/rewards-history/month/sum`
@@ -151,6 +151,7 @@ describe('APi tests: Collator apy - dailyRewards', () => {
           expect(response.body.exceptionName).to.equal('NotFoundException')
         })
     })
+
     it('GET /collators/apy - no data', async () => {
       await supertest(app)
         .get('/collator/foo/staking/apy')
