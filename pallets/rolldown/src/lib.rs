@@ -190,11 +190,20 @@ pub mod pallet {
 				let update_size =
 					Self::get_current_update_size_from_execution_queue().unwrap_or(1u128);
 
+				// NOTE: execute_requests_from_execute_queue accounts for overal cost of processing
+				// biggest expected update (with 10k requests) assuming that all of them are deposits
+				// to accounts for most expensive case now need to substract cost of processing deposits
+				// and add cost of processing cancels instead
 				let mut cost_of_processing_requests =
 					<T as Config>::WeightInfo::execute_requests_from_execute_queue();
+
 				cost_of_processing_requests +=
 					<T as Config>::WeightInfo::process_cancel_resolution()
 						.saturating_mul(Self::get_max_requests_per_block().saturated_into());
+				cost_of_processing_requests -= <T as Config>::WeightInfo::process_deposit()
+					.saturating_mul(Self::get_max_requests_per_block().saturated_into());
+
+				// account for huge read cost when reading huge update
 				cost_of_processing_requests += T::DbWeight::get().reads(1).saturating_mul(
 					weight_utils::get_read_scalling_factor(update_size.saturated_into())
 						.saturated_into(),
@@ -1190,7 +1199,7 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
-	fn execute_requests_from_execute_queue() -> Weight {
+	fn execute_requests_from_execute_queue() {
 		let limit = Self::get_max_requests_per_block();
 		match (
 			UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get()),
@@ -1217,7 +1226,7 @@ impl<T: Config> Pallet<T> {
 						Self::deposit_event(Event::L1ReadExecuted { chain: l1, hash });
 					} else {
 						for r in requests {
-							let weight = Self::process_single_request(l1, &r);
+							let _ = Self::process_single_request(l1, &r);
 						}
 					}
 				} else {

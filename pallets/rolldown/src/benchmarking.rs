@@ -1042,7 +1042,9 @@ mod benchmarks {
 		);
 		LastProcessedRequestOnL2::<T>::insert(l1_chain, 0u128);
 
-		let update = L1UpdateBuilder::default().build();
+		let update = L1UpdateBuilder::default()
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 10_000])
+			.build();
 		PendingSequencerUpdateContent::<T>::insert(update_hash, update);
 
 		#[block]
