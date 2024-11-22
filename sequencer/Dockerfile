@@ -29,13 +29,14 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     --mount=type=cache,target=/app/target,sharing=locked \
 		cargo build --locked --release && \
 		# copy build artifacts to the root directory to avoid issues with accessing cache mount from 2nd stage
-		cp target/release/main /app/updater
+		cp target/release/sequencer /app/sequencer-bin
 
 
 FROM debian:stable-slim
+RUN apt update -y && apt install -y libssl-dev
 
 WORKDIR /app
 
-COPY --from=builder /app/updater /app/updater
+COPY --from=builder /app/sequencer-bin /app/sequencer
 
-CMD ["/app/updater"]
+CMD ["/app/sequencer"]

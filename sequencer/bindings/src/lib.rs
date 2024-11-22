@@ -5,11 +5,11 @@
 //! These files may be overwritten by the codegen system at any time.
 pub mod ierc20;
 pub mod ierc20metadata;
+pub mod ierc20permit;
 pub mod irolldown;
 pub mod irolldownprimitives;
 pub mod rolldown;
 pub mod rolldowndeployer;
-pub mod rolldownstorage;
-pub mod ierc20permit;
-pub mod rolldowntest;
 pub mod rolldowndeployertest;
+pub mod rolldownstorage;
+pub mod rolldowntest;
