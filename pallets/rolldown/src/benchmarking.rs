@@ -353,13 +353,13 @@ mod benchmarks {
 			.build();
 		let update_hash = update.abi_encode_hash();
 
-    let metadata = UpdateMetadata {
-      min_id: 0u128,
-      max_id: 0u128,
-      update_size: 0u128,
-      sequencer: SEQUENCER_ACCOUNT,
-      update_hash,
-    };
+		let metadata = UpdateMetadata {
+			min_id: 0u128,
+			max_id: 0u128,
+			update_size: 0u128,
+			sequencer: SEQUENCER_ACCOUNT,
+			update_hash,
+		};
 
 		<frame_system::Pallet<T>>::set_block_number(1u32.into());
 		let dispute_period_end = <frame_system::Pallet<T>>::block_number().saturated_into::<u128>() +
@@ -490,19 +490,15 @@ mod benchmarks {
 
 		let update_hash = H256::default();
 		let sequencer_account: T::AccountId = SEQUENCER_ACCOUNT.into();
-    let metadata = UpdateMetadata {
-      min_id: 1u128,
-      max_id: 1u128,
-      update_size: 1u128,
-      sequencer: sequencer_account.clone(),
-      update_hash: H256::zero(),
-    };
+		let metadata = UpdateMetadata {
+			min_id: 1u128,
+			max_id: 1u128,
+			update_size: 1u128,
+			sequencer: sequencer_account.clone(),
+			update_hash: H256::zero(),
+		};
 
-		PendingSequencerUpdates::<T>::insert(
-			DUMMY_REQUEST_ID,
-			l1_chain,
-			metadata,
-		);
+		PendingSequencerUpdates::<T>::insert(DUMMY_REQUEST_ID, l1_chain, metadata);
 
 		PendingSequencerUpdateContent::<T>::insert(update_hash, update);
 
@@ -537,21 +533,16 @@ mod benchmarks {
 			get_chain_and_address_for_asset_id::<T>(TOKEN_ID.into())?;
 		let l1_chain: <T as Config>::ChainId = l1_aset_chain.into();
 
-    let metadata = UpdateMetadata::<T::AccountId> {
-      min_id: 1u128,
-      max_id: 1u128,
-      update_size: 1u128,
-      sequencer: T::AddressConverter::convert(SEQUENCER_ACCOUNT),
-      update_hash: H256::zero(),
-    };
-
+		let metadata = UpdateMetadata::<T::AccountId> {
+			min_id: 1u128,
+			max_id: 1u128,
+			update_size: 1u128,
+			sequencer: T::AddressConverter::convert(SEQUENCER_ACCOUNT),
+			update_hash: H256::zero(),
+		};
 
 		let sequencer_account: T::AccountId = SEQUENCER_ACCOUNT.into();
-		PendingSequencerUpdates::<T>::insert(
-			DUMMY_REQUEST_ID,
-			l1_chain,
-			metadata,
-		);
+		PendingSequencerUpdates::<T>::insert(DUMMY_REQUEST_ID, l1_chain, metadata);
 
 		assert!(
 			T::SequencerStakingProvider::is_selected_sequencer(l1_chain, &SEQUENCER_ACCOUNT.into()),
@@ -976,13 +967,13 @@ mod benchmarks {
 			H256::from(hex!("1111111111111111111111111111111111111111111111111111111111111111"));
 
 		let sequencer_account: T::AccountId = SEQUENCER_ACCOUNT.into();
-    let metadata = UpdateMetadata {
-      min_id: 1u128,
-      max_id: 1u128,
-      update_size: 1u128,
-      sequencer: sequencer_account.clone(),
-      update_hash,
-    };
+		let metadata = UpdateMetadata {
+			min_id: 1u128,
+			max_id: 1u128,
+			update_size: 1u128,
+			sequencer: sequencer_account.clone(),
+			update_hash,
+		};
 
 		PendingSequencerUpdates::<T>::insert(1u128, chain, metadata);
 		assert_eq!(LastScheduledUpdateIdInExecutionQueue::<T>::get(), 0u128);
@@ -1067,7 +1058,10 @@ mod benchmarks {
 			H256::from(hex!("1111111111111111111111111111111111111111111111111111111111111111"));
 
 		UpdatesExecutionQueueNextId::<T>::put(execution_id);
-		UpdatesExecutionQueue::<T>::insert(execution_id, (scheduled_at, l1_chain, update_hash, 10u128));
+		UpdatesExecutionQueue::<T>::insert(
+			execution_id,
+			(scheduled_at, l1_chain, update_hash, 10u128),
+		);
 		LastProcessedRequestOnL2::<T>::insert(l1_chain, 0u128);
 
 		let update = L1UpdateBuilder::default()

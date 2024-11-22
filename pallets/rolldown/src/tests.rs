@@ -149,10 +149,8 @@ fn l2_counter_updates_when_requests_are_processed() {
 		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(BOB), update2).unwrap();
 
 		forward_to_block::<Test>(15);
-		forward_to_next_block::<Test>();
 		assert_eq!(Rolldown::get_last_processed_request_on_l2(Chain::Ethereum), 1u128.into());
 
-		forward_to_next_block::<Test>();
 		forward_to_next_block::<Test>();
 		assert_eq!(Rolldown::get_last_processed_request_on_l2(Chain::Ethereum), 2u128.into());
 	});
@@ -840,7 +838,6 @@ fn execute_a_lot_of_requests_in_following_blocks() {
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 		assert_eq!(UpdatesExecutionQueueNextId::<Test>::get(), 0u128);
 
-		forward_to_block::<Test>(15);
 		forward_to_next_block::<Test>();
 		assert_eq!(
 			LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum),
@@ -881,10 +878,8 @@ fn ignore_duplicated_requests_when_already_executed() {
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 
 		forward_to_block::<Test>(15);
-		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 5u128.into());
 
-		forward_to_next_block::<Test>();
 		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 6u128.into());
 	});
@@ -911,13 +906,11 @@ fn process_l1_reads_in_order() {
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 
 		forward_to_block::<Test>(15);
-		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10u128.into());
 
 		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 11u128.into());
 
-		forward_to_next_block::<Test>();
 		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 20u128.into());
 	});
@@ -1029,13 +1022,6 @@ fn accept_consecutive_update_split_into_two() {
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0);
 
 		forward_to_block::<Test>(15);
-		let mut expected_updates = L2Requests::<Test>::iter_prefix(Chain::Ethereum)
-			.map(|(k, _)| k.id)
-			.collect::<Vec<_>>();
-		expected_updates.sort();
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0);
-
-		forward_to_next_block::<Test>();
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10);
 
 		forward_to_next_block::<Test>();
@@ -1045,7 +1031,7 @@ fn accept_consecutive_update_split_into_two() {
 
 #[test]
 #[serial]
-fn execute_two_consecutive_incremental_reqeusts() {
+fn execute_two_consecutive_incremental_requests() {
 	ExtBuilder::new()
 		.issue(ALICE, ETH_TOKEN_ADDRESS_MGX, 0u128)
 		.execute_with_default_mocks(|| {
@@ -1078,10 +1064,8 @@ fn execute_two_consecutive_incremental_reqeusts() {
 			assert_eq!(TokensOf::<Test>::free_balance(ETH_TOKEN_ADDRESS_MGX, &CHARLIE), 0_u128);
 
 			forward_to_block::<Test>(15);
-			forward_to_next_block::<Test>();
 			assert_eq!(TokensOf::<Test>::free_balance(ETH_TOKEN_ADDRESS_MGX, &CHARLIE), MILLION);
 
-			forward_to_next_block::<Test>();
 			forward_to_next_block::<Test>();
 			assert_eq!(
 				TokensOf::<Test>::free_balance(ETH_TOKEN_ADDRESS_MGX, &CHARLIE),
@@ -2664,7 +2648,6 @@ fn test_reqeust_scheduled_for_execution_are_not_execute_in_the_same_block() {
 			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 
 			forward_to_block::<Test>(15);
-			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 			assert_event_emitted!(Event::L1ReadScheduledForExecution {
 				chain: consts::CHAIN,
 				hash: H256::from(hex!(
@@ -2672,7 +2655,7 @@ fn test_reqeust_scheduled_for_execution_are_not_execute_in_the_same_block() {
 				)),
 			});
 
-			forward_to_block::<Test>(16);
+			forward_to_next_block::<Test>();
 			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 1u128.into());
 			assert_event_emitted!(Event::RequestProcessedOnL2 {
 				chain: consts::CHAIN,
@@ -2694,32 +2677,31 @@ fn test_sequencer_updates_that_went_though_dispute_period_are_not_executed_in_ma
 			forward_to_block::<Test>(10);
 
 			let deposit_update = L1UpdateBuilder::default()
-				.with_requests(vec![L1UpdateRequest::Deposit(messages::Deposit::default())])
+				.with_requests(vec![L1UpdateRequest::Deposit(messages::Deposit::default()); 11])
 				.build();
+			let update_hash = deposit_update.abi_encode_hash();
 			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
 				.unwrap();
 			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 
 			forward_to_block::<Test>(15);
-			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10u128.into());
 			assert_event_emitted!(Event::L1ReadScheduledForExecution {
 				chain: consts::CHAIN,
-				hash: H256::from(hex!(
-					"75207958ce929568193284a176e012a8cf5058dc19d73dafee61a419eb667398"
-				)),
+				hash: update_hash,
 			});
-			is_maintenance_mock.checkpoint();
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10u128.into());
 
+			is_maintenance_mock.checkpoint();
 			let is_maintenance_mock = MockMaintenanceStatusProviderApi::is_maintenance_context();
 			is_maintenance_mock.expect().return_const(true);
+			forward_to_block::<Test>(20);
 
-			forward_to_block::<Test>(50);
-			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 			is_maintenance_mock.checkpoint();
-
 			let is_maintenance_mock = MockMaintenanceStatusProviderApi::is_maintenance_context();
 			is_maintenance_mock.expect().return_const(false);
-			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
+			forward_to_block::<Test>(100);
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10u128.into());
 		})
 }
 
@@ -2762,7 +2744,7 @@ fn test_sequencer_updates_that_went_though_dispute_period_are_not_scheduled_for_
 
 #[test]
 #[serial]
-fn test_sequencer_can_submit_same_update_again_after_maintenance_mode() {
+fn test_sequencer_can_submit_update_with_remaining_elements() {
 	ExtBuilder::new()
 		.issue(ALICE, ETH_TOKEN_ADDRESS_MGX, MILLION)
 		.issue(BOB, ETH_TOKEN_ADDRESS_MGX, MILLION)
@@ -2771,22 +2753,25 @@ fn test_sequencer_can_submit_same_update_again_after_maintenance_mode() {
 			is_maintenance_mock.expect().return_const(false);
 			forward_to_block::<Test>(10);
 
+      let requests = vec![L1UpdateRequest::Deposit(messages::Deposit::default()); 11];
 			let deposit_update = L1UpdateBuilder::default()
-				.with_requests(vec![L1UpdateRequest::Deposit(messages::Deposit::default())])
+				.with_requests(requests.clone())
 				.build();
-			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
-				.unwrap();
+			Rolldown::update_l2_from_l1_unsafe(
+				RuntimeOrigin::signed(ALICE),
+				deposit_update.clone(),
+			)
+			.unwrap();
 			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 
 			forward_to_block::<Test>(15);
 			assert_event_emitted!(Event::L1ReadScheduledForExecution {
 				chain: consts::CHAIN,
-				hash: H256::from(hex!(
-					"75207958ce929568193284a176e012a8cf5058dc19d73dafee61a419eb667398"
-				)),
+				hash: deposit_update.abi_encode_hash()
 			});
-			is_maintenance_mock.checkpoint();
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10u128.into());
 
+			is_maintenance_mock.checkpoint();
 			let is_maintenance_mock = MockMaintenanceStatusProviderApi::is_maintenance_context();
 			is_maintenance_mock.expect().return_const(true);
 
@@ -2798,13 +2783,14 @@ fn test_sequencer_can_submit_same_update_again_after_maintenance_mode() {
 
 			forward_to_block::<Test>(20);
 			let deposit_update = L1UpdateBuilder::default()
-				.with_requests(vec![L1UpdateRequest::Deposit(messages::Deposit::default())])
+				.with_requests(requests.into_iter().skip(10).collect())
+				.with_offset(11)
 				.build();
 			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
 				.unwrap();
-			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
-			forward_to_block::<Test>(26);
-			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 1u128.into());
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10u128.into());
+			forward_to_block::<Test>(25);
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 11u128.into());
 		})
 }
 

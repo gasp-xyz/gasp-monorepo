@@ -61,7 +61,6 @@ macro_rules! log {
 	};
 }
 
-
 #[derive(Debug, PartialEq)]
 pub struct EthereumAddressConverter<AccountId>(sp_std::marker::PhantomData<AccountId>);
 
@@ -143,7 +142,7 @@ pub use pallet::*;
 
 fn get_read_scalling_factor(size: usize) -> u128 {
 	const BASE_READ_COST: u128 = 25;
-	let approximated_cost = match size{
+	let approximated_cost = match size {
 		0..=50 => 25u128,
 		51..=100 => 45u128,
 		101..=500 => 210u128,
@@ -154,11 +153,10 @@ fn get_read_scalling_factor(size: usize) -> u128 {
 	approximated_cost.saturating_div(BASE_READ_COST).saturating_add(1u128)
 }
 
-
 fn get_write_scalling_factor(size: usize) -> u128 {
 	const BASE_WRITE_COST: u128 = 100;
 
-	let approximated_cost = match size{
+	let approximated_cost = match size {
 		0..=50 => 25u128,
 		51..=100 => 150u128,
 		101..=500 => 700u128,
@@ -180,7 +178,6 @@ pub mod pallet {
 	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T>(PhantomData<T>);
 
-
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn on_initialize(now: BlockNumberFor<T>) -> Weight {
@@ -188,14 +185,16 @@ pub mod pallet {
 			if T::MaintenanceStatusProvider::is_maintenance() {
 				LastMaintananceMode::<T>::put(now.saturated_into::<u128>());
 				total_weight += T::DbWeight::get().writes(1);
-			}else{
+			} else {
 				Self::maybe_create_batch(now);
-      }
+			}
 
-            Self::schedule_request_for_execution_if_dispute_period_has_passsed(now);
-            // total_weight =
-				// 	total_weight.saturating_add(<T as Config>::WeightInfo::maybe_create_batch());
-				// total_weight = total_weight.saturating_add(<T as Config>::WeightInfo::schedule_request_for_execution_if_dispute_period_has_passsed());
+			Self::schedule_request_for_execution_if_dispute_period_has_passsed(now);
+
+			Self::load_next_update_from_execution_queue();
+			// total_weight =
+			// 	total_weight.saturating_add(<T as Config>::WeightInfo::maybe_create_batch());
+			// total_weight = total_weight.saturating_add(<T as Config>::WeightInfo::schedule_request_for_execution_if_dispute_period_has_passsed());
 			total_weight
 		}
 
@@ -206,32 +205,34 @@ pub mod pallet {
 				return used_weight;
 			}
 
-    let load_next_update_from_execution_queue_weight = T::DbWeight::get().reads_writes(3, 1);
-    if remaining_weight.ref_time() > load_next_update_from_execution_queue_weight.ref_time() {
-        used_weight += load_next_update_from_execution_queue_weight;
-        remaining_weight -= load_next_update_from_execution_queue_weight;
-        if Self::load_next_update_from_execution_queue(){
-            return used_weight;
-        }else{
-            Self::execute_requests_from_execute_queue(now);
-            // Self::get_current_update_size_from_execution_queue();
-        }
-    }
+			let load_next_update_from_execution_queue_weight =
+				T::DbWeight::get().reads_writes(3, 1);
+			if remaining_weight.ref_time() > load_next_update_from_execution_queue_weight.ref_time()
+			{
+				used_weight += load_next_update_from_execution_queue_weight;
+				remaining_weight -= load_next_update_from_execution_queue_weight;
+				// if Self::load_next_update_from_execution_queue(){
+				//     return used_weight;
+				// }else{
+				Self::execute_requests_from_execute_queue(now);
+				// Self::get_current_update_size_from_execution_queue();
+				// }
+			}
 
-		// let get_update_size_weight = T::DbWeight::get().reads(2);
-		// if remaining_weight.ref_time() > get_update_size_weight.ref_time() {
-		//       used_weight += get_update_size_weight;
-		//       remaining_weight -= get_update_size_weight;
-		//       println!("here3");
-		// 	if let Some(size) = Self::get_current_update_size_from_execution_queue() {
-		//
-		//       println!("here4");
-		//       // if remaining_weight >= T::DbWeight::get().reads(1) {
-		//           Self::execute_requests_from_execute_queue(now);
-		//           // used_weight += T::DbWeight::get().reads(1);
-		//       // }
-		//     }
-		//   }
+			// let get_update_size_weight = T::DbWeight::get().reads(2);
+			// if remaining_weight.ref_time() > get_update_size_weight.ref_time() {
+			//       used_weight += get_update_size_weight;
+			//       remaining_weight -= get_update_size_weight;
+			//       println!("here3");
+			// 	if let Some(size) = Self::get_current_update_size_from_execution_queue() {
+			//
+			//       println!("here4");
+			//       // if remaining_weight >= T::DbWeight::get().reads(1) {
+			//           Self::execute_requests_from_execute_queue(now);
+			//           // used_weight += T::DbWeight::get().reads(1);
+			//       // }
+			//     }
+			//   }
 			// 	used_weight += get_update_size_weight;
 			// 	if let Some(size) = Self::get_current_update_size_from_execution_queue() {
 			//                  println!("here2222222222222222222222222222222222222222");
@@ -255,10 +256,8 @@ pub mod pallet {
 		pub cancel_rights: u128,
 	}
 
-	#[derive(
-		Eq, PartialEq, RuntimeDebug, Clone, Encode, Decode, MaxEncodedLen, TypeInfo
-	)]
-	pub struct UpdateMetadata<AccountId>{
+	#[derive(Eq, PartialEq, RuntimeDebug, Clone, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub struct UpdateMetadata<AccountId> {
 		pub max_id: u128,
 		pub min_id: u128,
 		pub update_size: u128,
@@ -637,7 +636,8 @@ pub mod pallet {
 				Error::<T>::BlockedByMaintenanceMode
 			);
 
-			let metadata = Self::validate_l1_update(chain, &update, T::AddressConverter::convert([0u8;20]))?;
+			let metadata =
+				Self::validate_l1_update(chain, &update, T::AddressConverter::convert([0u8; 20]))?;
 
 			let now = <frame_system::Pallet<T>>::block_number();
 			let update_size = update.get_requests_count();
@@ -670,9 +670,8 @@ pub mod pallet {
 				Ok::<_, Error<T>>(())
 			})?;
 
-			let metadata =
-				PendingSequencerUpdates::<T>::take(requests_to_cancel, chain)
-					.ok_or(Error::<T>::RequestDoesNotExist)?;
+			let metadata = PendingSequencerUpdates::<T>::take(requests_to_cancel, chain)
+				.ok_or(Error::<T>::RequestDoesNotExist)?;
 
 			let submitter = metadata.sequencer;
 			let request_hash = metadata.update_hash;
@@ -820,9 +819,8 @@ pub mod pallet {
 				Error::<T>::BlockedByMaintenanceMode
 			);
 
-			let metadata =
-				PendingSequencerUpdates::<T>::take(requests_to_cancel, chain)
-					.ok_or(Error::<T>::RequestDoesNotExist)?;
+			let metadata = PendingSequencerUpdates::<T>::take(requests_to_cancel, chain)
+				.ok_or(Error::<T>::RequestDoesNotExist)?;
 
 			let submitter = metadata.sequencer;
 			let hash = metadata.update_hash;
@@ -1042,9 +1040,8 @@ impl<T: Config> Pallet<T> {
 	) -> Option<bool> {
 		let pending_requests_to_process = PendingSequencerUpdates::<T>::get(request_id, chain);
 		if let Some(metadata) = pending_requests_to_process {
-
 			if let Some(l1_update) = PendingSequencerUpdateContent::<T>::get(metadata.update_hash) {
-				let calculated_hash = Self::calculate_hash_of_sequencer_update(&l1_update);
+				let calculated_hash = l1_update.abi_encode_hash();
 				Some(hash == calculated_hash)
 			} else {
 				None
@@ -1117,9 +1114,7 @@ impl<T: Config> Pallet<T> {
 	fn schedule_request_for_execution_if_dispute_period_has_passsed(now: BlockNumberFor<T>) {
 		let block_number = <frame_system::Pallet<T>>::block_number().saturated_into::<u128>();
 
-		for (l1, metadata) in
-			PendingSequencerUpdates::<T>::iter_prefix(block_number)
-		{
+		for (l1, metadata) in PendingSequencerUpdates::<T>::iter_prefix(block_number) {
 			let sequencer = metadata.sequencer.clone();
 			let l1_read_hash = metadata.update_hash.clone();
 			let update_size = metadata.update_size.clone();
@@ -1133,8 +1128,11 @@ impl<T: Config> Pallet<T> {
 			}
 
 			let update_creation_block = block_number.saturating_sub(Self::get_dispute_period());
+			println!("hello world");
+			println!("{}", update_creation_block);
+
 			match LastMaintananceMode::<T>::get() {
-				Some(last_maintanance_mode) if update_creation_block < last_maintanance_mode => {
+				Some(last_maintanance_mode) if update_creation_block <= last_maintanance_mode => {
 					Self::deposit_event(Event::L1ReadIgnoredBecauseOfMaintenanceMode {
 						chain: l1,
 						hash: l1_read_hash,
@@ -1151,11 +1149,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		// FIXME: remove update from storage somwhere else
-		let _ = PendingSequencerUpdates::<T>::clear_prefix(
-			block_number,
-			u32::MAX,
-			None,
-		);
+		let _ = PendingSequencerUpdates::<T>::clear_prefix(block_number, u32::MAX, None);
 	}
 
 	fn process_single_request(
@@ -1215,36 +1209,48 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn has_next_update_to_execute() -> bool {
-        UpdatesExecutionQueue::<T>::contains_key(UpdatesExecutionQueueNextId::<T>::get().saturating_add(1))
-  }
+		UpdatesExecutionQueue::<T>::contains_key(
+			UpdatesExecutionQueueNextId::<T>::get().saturating_add(1),
+		)
+	}
 
 	fn get_current_update_size_from_execution_queue() -> Option<u128> {
-		UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get()).map(|(_, _, _, size)| size)
-  }
+		UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get())
+			.map(|(_, _, _, size)| size)
+	}
 
 	fn load_next_update_from_execution_queue() -> bool {
-    let current_execution_id = UpdatesExecutionQueueNextId::<T>::get();
-    let next_execution_id = current_execution_id.saturating_add(1u128);
-    match (UpdatesExecutionQueue::<T>::get(current_execution_id), UpdatesExecutionQueue::<T>::get(next_execution_id)) {
-            (None, Some(_)) => {
-								UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
-                true
-            },
-            _ => false,
-    }
-  }
+		let current_execution_id = UpdatesExecutionQueueNextId::<T>::get();
+		let next_execution_id = current_execution_id.saturating_add(1u128);
+		match (
+			UpdatesExecutionQueue::<T>::get(current_execution_id),
+			UpdatesExecutionQueue::<T>::get(next_execution_id),
+		) {
+			(None, Some(_)) => {
+				UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
+				true
+			},
+			_ => false,
+		}
+	}
 
 	fn execute_requests_from_execute_queue(now: BlockNumberFor<T>) -> Weight {
 		let mut limit = Self::get_max_requests_per_block();
 		while limit > 0 {
-			match (UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get()), LastMaintananceMode::<T>::get(), Self::has_next_update_to_execute()) {
-				(Some((scheduled_at, l1, hash, _)), Some(last_maintanance_mode), _) if scheduled_at.saturated_into::<u128>() <= last_maintanance_mode => {
+			match (
+				UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get()),
+				LastMaintananceMode::<T>::get(),
+				Self::has_next_update_to_execute(),
+			) {
+				(Some((scheduled_at, l1, hash, _)), Some(last_maintanance_mode), _)
+					if scheduled_at.saturated_into::<u128>() <= last_maintanance_mode =>
+				{
 					UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
 					UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
 					break;
 				},
 				(Some((scheduled_at, l1, hash, _)), _, _) => {
-					if let Some(update) = PendingSequencerUpdateContent::<T>::get(hash){
+					if let Some(update) = PendingSequencerUpdateContent::<T>::get(hash) {
 						for req in update
 							.into_requests()
 							.into_iter()
@@ -1257,11 +1263,13 @@ impl<T: Config> Pallet<T> {
 								let weight = Self::process_single_request(l1, request);
 								limit -= 1;
 							} else {
-								UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
+								UpdatesExecutionQueue::<T>::remove(
+									UpdatesExecutionQueueNextId::<T>::get(),
+								);
 								break;
 							}
 						}
-					}else {
+					} else {
 						UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
 						UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
 					}
@@ -1276,7 +1284,7 @@ impl<T: Config> Pallet<T> {
 				// }
 				_ => {
 					break;
-				}
+				},
 			}
 		}
 		Default::default()
@@ -1287,7 +1295,9 @@ impl<T: Config> Pallet<T> {
 		chain: <T as Config>::ChainId,
 		metadata: UpdateMetadata<T::AccountId>,
 	) {
-		MaxAcceptedRequestIdOnl2::<T>::mutate(chain, |cnt| *cnt = sp_std::cmp::max(*cnt, metadata.max_id));
+		MaxAcceptedRequestIdOnl2::<T>::mutate(chain, |cnt| {
+			*cnt = sp_std::cmp::max(*cnt, metadata.max_id)
+		});
 
 		let id = LastScheduledUpdateIdInExecutionQueue::<T>::mutate(|id| {
 			id.saturating_inc();
@@ -1382,12 +1392,6 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	fn calculate_hash_of_sequencer_update(update: &messages::L1Update) -> H256 {
-		let update: messages::eth_abi::L1Update = update.clone().into();
-		let hash: [u8; 32] = keccak_256(&update.abi_encode()[..]).into();
-		H256::from(hash)
-	}
-
 	fn handle_sequencer_deactivation(
 		chain: <T as Config>::ChainId,
 		deactivated_sequencers: BTreeSet<T::AccountId>,
@@ -1421,7 +1425,7 @@ impl<T: Config> Pallet<T> {
 	pub fn validate_l1_update(
 		l1: <T as Config>::ChainId,
 		update: &messages::L1Update,
-		sequencer: T::AccountId
+		sequencer: T::AccountId,
 	) -> Result<UpdateMetadata<T::AccountId>, Error<T>> {
 		ensure!(
 			!update.pendingDeposits.is_empty() || !update.pendingCancelResolutions.is_empty(),
@@ -1511,8 +1515,9 @@ impl<T: Config> Pallet<T> {
 
 		Ok(UpdateMetadata {
 			sequencer,
-			update_hash: Self::calculate_hash_of_sequencer_update(&update),
-			update_size: update.pendingDeposits.len() as u128 + update.pendingCancelResolutions.len() as u128,
+			update_hash: update.abi_encode_hash(),
+			update_size: update.pendingDeposits.len() as u128 +
+				update.pendingCancelResolutions.len() as u128,
 			max_id: lowest_id,
 			min_id: last_id,
 		})
@@ -1561,12 +1566,7 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::MultipleUpdatesInSingleBlock
 		);
 
-
-		PendingSequencerUpdates::<T>::insert(
-			dispute_period_end,
-			l1,
-			metadata.clone()
-		);
+		PendingSequencerUpdates::<T>::insert(dispute_period_end, l1, metadata.clone());
 
 		PendingSequencerUpdateContent::<T>::insert(metadata.update_hash, read.clone());
 
