@@ -16,6 +16,7 @@ pub struct Sequencer<L1, L2> {
     chain: l2types::Chain,
     limit: u128,
     address: [u8; 20],
+    tx_cost: Option<u128>,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -30,6 +31,10 @@ pub enum Error {
     UpdateSubmissionFailure,
     #[error("L2Request does not exists")]
     L2RequestDoesNotExists(u128),
+    #[error("This account is not a sequener")]
+    NotASequencer,
+    #[error("Account balance dropped below required minimum")]
+    NotEnoughtBalance,
 }
 
 impl<L1, L2> Sequencer<L1, L2>
@@ -37,7 +42,7 @@ where
     L1: L1Interface,
     L2: L2Interface,
 {
-    pub fn new(l1: L1, l2: L2, chain: l2types::Chain, limit: u128) -> Self {
+    pub fn new(l1: L1, l2: L2, chain: l2types::Chain, limit: u128, tx_cost: Option<u128>) -> Self {
         let address = l2.address();
         Self {
             l1,
@@ -45,6 +50,7 @@ where
             chain,
             limit,
             address,
+            tx_cost,
         }
     }
 
@@ -73,6 +79,12 @@ where
 
             tracing::info!("#{} : block hash {}", number, hex_encode(block_hash));
 
+            if !self.is_active_sequencer().await? {
+                tracing::error!("{} is not a sequencer for {:?}", hex_encode(self.address), self.chain);
+                return Err(Error::NotASequencer);
+
+            }
+
             if self.has_cancel_rights_available().await? {
                 if let Some(update) = self.find_malicious_update(at).await? {
                     tracing::info!("Found malicious update: {}", update);
@@ -95,10 +107,24 @@ where
                 }
             }
 
-            if let Some(closable) = self.find_closable_cancel_resolutions(at).await?.first() {
-                tracing::info!("Found pending cancel ready to close : {}", closable);
-                self.close_cancel(*closable, at).await?;
-                continue;
+            let balance = self.get_my_balance().await?;
+            match (self.tx_cost, self.find_closable_cancel_resolutions(at).await?.first()){
+                (Some(tx_cost), Some(closable)) if balance  > tx_cost => {
+                    tracing::info!("Found pending cancel ready to close : {}", closable);
+                    self.close_cancel(*closable, at).await?;
+                    stream = Self::consume_stream_with_timeout(stream).await;
+                    continue;
+                },
+                (Some(tx_cost), Some(closable)) => {
+                    tracing::error!("Found pending cancel ready to close : {}, but not enought funds available({}) vs required({})", closable, balance, tx_cost);
+                    return Err(Error::NotEnoughtBalance);
+                },
+                (None, Some(closable)) => {
+                    tracing::warn!("Found pending cancel ready to close : {}, but tx closing is disabled", closable);
+                    continue;
+                },
+                _ => {
+                }
             }
         }
     }
@@ -241,6 +267,15 @@ where
         Ok(cancel_rights > 0)
     }
 
+    #[tracing::instrument(skip(self))]
+    pub async fn is_active_sequencer(&self) -> Result<bool, Error> {
+        let at = self.get_latest_block_hash().await?;
+        let active = self.l2.get_active_sequencers(self.chain.clone(), at).await?;
+
+        Ok(active.iter().any(|e| e == &(self.address)))
+    }
+
+
     pub async fn get_latest_block_hash(&self) -> Result<H256, Error> {
         Ok(self
             .l2
@@ -329,6 +364,10 @@ where
             Ok(vec![])
         }
     }
+
+    pub async fn get_my_balance(&self) -> Result<u128, Error> {
+        Ok(self.l1.get_native_balance(self.address).await?)
+    }
 }
 
 #[cfg(test)]
@@ -376,6 +415,7 @@ pub(crate) mod test {
             async fn finalized_header_stream( &self) -> Result<HeaderStream, L2Error>;
             async fn get_selected_sequencer( &self, chain: l2types::Chain, at: H256) -> Result<Option<[u8; 20]>, L2Error>;
             async fn get_abi_encoded_request( &self, request_id : u128, chain: l2types::Chain, at: H256) -> Result<Vec<u8>, L2Error>;
+            async fn get_active_sequencers(&self, chain: l2types::Chain, at: H256) -> Result<Vec<[u8; 20]>, L2Error>;
         }
     }
 
@@ -476,7 +516,7 @@ pub(crate) mod test {
             .times(1)
             .return_once(move |_| Ok(vec![pending]));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128);
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
 
         assert_eq!(
             sequencer.find_malicious_update(H256::zero()).await.unwrap(),
@@ -502,7 +542,7 @@ pub(crate) mod test {
             .times(1)
             .return_once(move |_| Ok(vec![pending]));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128);
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
 
         assert_eq!(
             sequencer.find_malicious_update(H256::zero()).await.unwrap(),
@@ -536,7 +576,7 @@ pub(crate) mod test {
             .times(1)
             .return_once(move |_| Ok(vec![pending]));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128);
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
 
         assert_eq!(
             sequencer.find_malicious_update(H256::zero()).await.unwrap(),
@@ -561,7 +601,7 @@ pub(crate) mod test {
             .expect_get_l2_request_hash()
             .returning(|_, _, _| Ok(Some(H256::zero())));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128);
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
         let result = sequencer
             .find_closable_cancel_resolutions(H256::zero())
             .await;
@@ -589,7 +629,7 @@ pub(crate) mod test {
             .expect_get_pending_cancels()
             .return_once(|_, _| Ok(cancels));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128);
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
         let result = sequencer
             .find_closable_cancel_resolutions(H256::zero())
             .await;
@@ -649,7 +689,7 @@ pub(crate) mod test {
             .expect_get_pending_cancels()
             .return_once(|_, _| Ok(cancels));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128);
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
         let result = sequencer.find_closable_cancel_resolutions(at).await;
 
         assert_eq!(result.unwrap(), vec![2u128]);
@@ -666,7 +706,7 @@ pub(crate) mod test {
         l2mock.expect_address().return_const(DUMMY_ADDRESS);
         l2mock.expect_get_pending_cancels().times(0);
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128);
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
         let result = sequencer
             .find_closable_cancel_resolutions(H256::zero())
             .await;
@@ -689,7 +729,7 @@ pub(crate) mod test {
 
         l1mock.expect_get_update().times(0);
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128);
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
 
         let update = sequencer.get_pending_update(H256::zero()).await;
         assert!(matches!(update, Ok(None)));
@@ -731,7 +771,7 @@ pub(crate) mod test {
             .times(1)
             .return_once(|_| Ok(UpdateBuilder::new().build(ETHEREUM)));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128);
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
 
         sequencer.get_pending_update(H256::zero()).await.unwrap();
     }
@@ -772,7 +812,7 @@ pub(crate) mod test {
             .times(1)
             .return_once(|_| Ok(UpdateBuilder::new().build(ETHEREUM)));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128);
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
 
         sequencer.get_pending_update(H256::zero()).await.unwrap();
     }
@@ -801,7 +841,7 @@ pub(crate) mod test {
             .times(1)
             .return_once(move |_| Ok(vec![pending]));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128);
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
 
         assert_eq!(
             sequencer.find_malicious_update(H256::zero()).await.unwrap(),

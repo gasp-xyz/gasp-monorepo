@@ -5,7 +5,6 @@ use alloy::providers::fillers::{
 };
 
 use alloy::signers::local::PrivateKeySigner;
-use alloy::signers::Signer;
 use alloy::sol_types::SolValue;
 use alloy::transports::BoxTransport;
 use hex::encode as hex_encode;
@@ -69,13 +68,11 @@ pub type RolldownInstanceType = bindings::rolldown::Rolldown::RolldownInstance<
 
 pub struct RolldownContract {
     contract_handle: RolldownInstanceType,
-    address: [u8; 20],
 }
 
 impl RolldownContract {
     pub async fn new(uri: &str, address: [u8; 20], private_key: [u8; 32]) -> Result<Self, L1Error> {
         let signer: PrivateKeySigner = hex::encode(private_key).parse().expect("valid private key");
-        let me = signer.address();
 
         let wallet = EthereumWallet::new(signer);
         let provider = ProviderBuilder::new()
@@ -89,12 +86,7 @@ impl RolldownContract {
                 address.into(),
                 provider.clone(),
             ),
-            address: me.into(),
         })
-    }
-
-    fn address(&self) -> [u8; 20] {
-        self.address
     }
 
     #[cfg(test)]
@@ -300,14 +292,12 @@ mod test {
     #[serial]
     #[tokio::test]
     async fn test_can_fetch_balance() {
-        use alloy::sol_types::SolValue;
-
         let rolldown = RolldownContract::new(URI, ROLLDOWN_ADDRESS, ALICE_PKEY)
             .await
             .unwrap();
 
         let balance = rolldown
-            .get_native_balance(rolldown.address())
+            .get_native_balance(hex!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266"))
             .await
             .unwrap();
         assert!(balance > 0u128);

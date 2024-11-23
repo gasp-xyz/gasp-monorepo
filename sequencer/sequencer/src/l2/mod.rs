@@ -114,6 +114,8 @@ pub trait L2Interface {
         chain: types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Vec<u8>, L2Error>;
+
+    async fn get_active_sequencers(&self, chain: types::Chain, at: H256) -> Result<Vec<[u8; 20]>, L2Error>;
 }
 
 pub struct Gasp {
@@ -621,6 +623,29 @@ impl L2Interface for Gasp {
             })
             .boxed())
     }
+
+    async fn get_active_sequencers(&self, chain: types::Chain, at: H256) -> Result<Vec<[u8; 20]>, L2Error>{
+        let storage = gasp::api::storage()
+            .sequencer_staking()
+            .active_sequencers();
+
+        let active = self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&storage)
+            .await?
+            .unwrap_or_default();
+
+        let active = active
+            .into_iter()
+            .find(|(c, _)| c == &chain)
+            .map(|(_, account)| account.0)
+            .unwrap_or_default();
+
+
+        Ok(active.into_iter().map(|elem| elem.0).collect())
+    }
 }
 
 #[cfg(test)]
@@ -825,5 +850,21 @@ mod test {
             .expect("can submit update");
 
         assert!(!status);
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_can_fetch_active_sequencers() {
+        let gasp = Gasp::new(URI, ALITH_PKEY)
+            .await
+            .expect("can connect to gasp");
+        let at = gasp.latest_block().await.unwrap().1;
+
+        let active_sequencers = gasp
+            .get_active_sequencers(ETHEREUM, at)
+            .await
+            .unwrap();
+
+        assert!(!active_sequencers.is_empty());
     }
 }

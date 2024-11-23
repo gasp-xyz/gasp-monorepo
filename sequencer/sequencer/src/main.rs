@@ -35,16 +35,13 @@ struct Config {
     pub rolldown_contract_address: String,
 
     #[envconfig(from = "LIMIT")]
-    pub update_size_limit: String,
+    pub update_size_limit: u128,
 
     #[envconfig(from = "WATCHDOG")]
-    pub timeout: String,
+    pub timeout: u128,
 
     #[envconfig(from = "TX_COST")]
-    pub tx_cost: String,
-
-    #[envconfig(from = "ENABLE_CLOSING")]
-    pub should_close_txs: String,
+    pub tx_cost: Option<u128>,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -81,15 +78,15 @@ fn strip_prefix(str: &String) -> &str {
 }
 
 async fn run(config: Config) -> Result<(), Error> {
-    let timeout = config.timeout.parse::<u64>().expect("timeout is set");
-    let (tx, mut watchdog) = Watchdog::new(Duration::from_secs(timeout));
+    let timeout = config.timeout;
+    let (tx, mut watchdog) = Watchdog::new(Duration::from_secs(timeout.try_into().expect("overflow")));
 
     let watchdog = tokio::spawn(async move {
         tracing::info!("Starting watchdog");
         watchdog.run().await;
     });
 
-    let update_size_limit = config.update_size_limit.parse::<u128>().unwrap();
+    let update_size_limit = config.update_size_limit;
     assert!(
         update_size_limit > 0,
         "Update size limit must be greater than 0"
@@ -117,7 +114,7 @@ async fn run(config: Config) -> Result<(), Error> {
         .map_err(Into::<sequencer::Error>::into)?;
     tracing::info!("Connected to {}", config.l1_uri);
 
-    let seq = Sequencer::new(rolldown, gasp, chain, update_size_limit);
+    let seq = Sequencer::new(rolldown, gasp, chain, update_size_limit, config.tx_cost);
     let sequencer_service = tokio::spawn(async move { seq.run(tx).await });
 
     tokio::select! {
