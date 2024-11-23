@@ -82,12 +82,6 @@ where
                 }
             }
 
-            if let Some(closable) = self.find_closable_cancel_resolutions(at).await?.first() {
-                tracing::info!("Found pending cancel ready to close : {}", closable);
-                self.close_cancel(*closable, at).await?;
-                continue;
-            }
-
             if self.has_read_rights_available().await? && self.is_selected_sequencer().await? {
                 if let Some((update_hash, update)) = self.get_pending_update(block_hash).await? {
                     tracing::info!("Found update to submit: {:?}", update);
@@ -99,6 +93,12 @@ where
                         stream = Self::consume_stream_with_timeout(stream).await;
                     }
                 }
+            }
+
+            if let Some(closable) = self.find_closable_cancel_resolutions(at).await?.first() {
+                tracing::info!("Found pending cancel ready to close : {}", closable);
+                self.close_cancel(*closable, at).await?;
+                continue;
             }
         }
     }
