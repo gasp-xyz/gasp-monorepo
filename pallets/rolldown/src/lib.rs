@@ -405,6 +405,16 @@ pub mod pallet {
 		ValueQuery,
 	>;
 
+	#[pallet::storage]
+	pub type DisputePeriod<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		ChainIdOf<T>,
+		u128,
+		OptionQuery,
+	>;
+
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -455,6 +465,10 @@ pub mod pallet {
 			chain: <T as Config>::ChainId,
 			hash: H256,
 		},
+		L1ReadIgnoredBecauseOfUnknownDisputePeriod {
+			chain: <T as Config>::ChainId,
+			hash: H256,
+		},
 		DepositFerried {
 			chain: <T as Config>::ChainId,
 			deposit: messages::Deposit,
@@ -463,6 +477,10 @@ pub mod pallet {
 		L1ReadExecuted {
 			chain: <T as Config>::ChainId,
 			hash: H256,
+		},
+		DisputePeriodSet {
+			chain: <T as Config>::ChainId,
+			dispute_period_length: u128,
 		},
 	}
 
@@ -502,6 +520,7 @@ pub mod pallet {
 		AssetRegistrationProblem,
 		UpdateHashMishmatch,
 		AlreadyExecuted,
+		UninitializedChainId,
 	}
 
 	#[cfg(feature = "runtime-benchmarks")]
@@ -525,8 +544,6 @@ pub mod pallet {
 			+ MultiTokenReservableCurrency<Self::AccountId>
 			+ MultiTokenCurrencyExtended<Self::AccountId>;
 		type AssetRegistryProvider: AssetRegistryProviderTrait<CurrencyIdOf<Self>>;
-		#[pallet::constant]
-		type DisputePeriodLength: Get<u128>;
 		#[pallet::constant]
 		type RightsMultiplier: Get<u128>;
 		#[pallet::constant]
@@ -564,17 +581,25 @@ pub mod pallet {
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
 		pub _phantom: PhantomData<T>,
+		pub dispute_periods: BTreeMap<ChainIdOf<T>, u128>,
 	}
 
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
-			GenesisConfig { _phantom: Default::default() }
+			GenesisConfig {
+				_phantom: Default::default(),
+				dispute_periods : Default::default()
+			}
 		}
 	}
 
 	#[pallet::genesis_build]
 	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
-		fn build(&self) {}
+		fn build(&self) {
+			for (chain, period) in &self.dispute_periods {
+				DisputePeriod::<T>::insert(chain, *period);
+			}
+		}
 	}
 
 	// Many calls that deal with large storage items have their weight mutiplied by 2
@@ -1001,12 +1026,28 @@ pub mod pallet {
 			let sequencer = ensure_signed(origin)?;
 			Self::update_impl(sequencer, requests)
 		}
+
+		#[pallet::call_index(13)]
+		#[pallet::weight(T::DbWeight::get().reads_writes(0, 2))]
+		pub fn set_dispute_period(
+			origin: OriginFor<T>,
+			chain: <T as Config>::ChainId,
+			dispute_period_length: u128,
+		) -> DispatchResult {
+			let _ = ensure_root(origin)?;
+			DisputePeriod::<T>::insert(chain, dispute_period_length);
+			Self::deposit_event(Event::DisputePeriodSet {
+				chain,
+				dispute_period_length,
+			});
+			Ok(())
+		}
 	}
 }
 
 impl<T: Config> Pallet<T> {
-	fn get_dispute_period() -> u128 {
-		T::DisputePeriodLength::get()
+	fn get_dispute_period(chain: ChainIdOf<T>) -> Option<u128> {
+		DisputePeriod::<T>::get(chain)
 	}
 
 	fn get_max_requests_per_block() -> u128 {
@@ -1098,31 +1139,38 @@ impl<T: Config> Pallet<T> {
 			let sequencer = metadata.sequencer.clone();
 			let l1_read_hash = metadata.update_hash.clone();
 			let update_size = metadata.update_size.clone();
+			if let Some(dispute_period) =  Self::get_dispute_period(l1){
 
-			if T::SequencerStakingProvider::is_active_sequencer(l1, &sequencer) {
-				SequencersRights::<T>::mutate(l1, |sequencers| {
-					if let Some(rights) = sequencers.get_mut(&sequencer) {
-						rights.read_rights.saturating_accrue(T::RightsMultiplier::get());
-					}
+				if T::SequencerStakingProvider::is_active_sequencer(l1, &sequencer) {
+					SequencersRights::<T>::mutate(l1, |sequencers| {
+						if let Some(rights) = sequencers.get_mut(&sequencer) {
+							rights.read_rights.saturating_accrue(T::RightsMultiplier::get());
+						}
+					});
+				}
+
+				let update_creation_block = block_number.saturating_sub(dispute_period);
+
+				match LastMaintananceMode::<T>::get() {
+					Some(last_maintanance_mode) if update_creation_block <= last_maintanance_mode => {
+						Self::deposit_event(Event::L1ReadIgnoredBecauseOfMaintenanceMode {
+							chain: l1,
+							hash: l1_read_hash,
+						});
+					},
+					_ => {
+						Self::schedule_requests(now, l1, metadata);
+						Self::deposit_event(Event::L1ReadScheduledForExecution {
+							chain: l1,
+							hash: l1_read_hash,
+						});
+					},
+				}
+			}else{
+				Self::deposit_event(Event::L1ReadIgnoredBecauseOfUnknownDisputePeriod {
+					chain: l1,
+					hash: l1_read_hash,
 				});
-			}
-
-			let update_creation_block = block_number.saturating_sub(Self::get_dispute_period());
-
-			match LastMaintananceMode::<T>::get() {
-				Some(last_maintanance_mode) if update_creation_block <= last_maintanance_mode => {
-					Self::deposit_event(Event::L1ReadIgnoredBecauseOfMaintenanceMode {
-						chain: l1,
-						hash: l1_read_hash,
-					});
-				},
-				_ => {
-					Self::schedule_requests(now, l1, metadata);
-					Self::deposit_event(Event::L1ReadScheduledForExecution {
-						chain: l1,
-						hash: l1_read_hash,
-					});
-				},
 			}
 		}
 
@@ -1491,7 +1539,8 @@ impl<T: Config> Pallet<T> {
 		// check json length to prevent big data spam, maybe not necessary as it will be checked later and slashed
 		let current_block_number =
 			<frame_system::Pallet<T>>::block_number().saturated_into::<u128>();
-		let dispute_period_length = Self::get_dispute_period();
+		let dispute_period_length = Self::get_dispute_period(l1).ok_or(Error::<T>::UninitializedChainId)?;
+
 		let dispute_period_end: u128 = current_block_number + dispute_period_length;
 
 		// ensure sequencer has rights to update
@@ -1542,9 +1591,10 @@ impl<T: Config> Pallet<T> {
 	fn count_of_read_rights_under_dispute(chain: ChainIdOf<T>, sequencer: &AccountIdOf<T>) -> u128 {
 		let mut read_rights = 0u128;
 		let last_update = LastUpdateBySequencer::<T>::get((chain, sequencer));
+		let dispute_period = Self::get_dispute_period(chain).unwrap_or(u128::MAX);
 
 		if last_update != 0 &&
-			last_update.saturating_add(T::DisputePeriodLength::get()) >=
+			last_update.saturating_add(dispute_period) >=
 				<frame_system::Pallet<T>>::block_number().saturated_into::<u128>()
 		{
 			read_rights += 1;

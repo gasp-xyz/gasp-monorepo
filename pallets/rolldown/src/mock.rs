@@ -141,7 +141,6 @@ impl rolldown::Config for Test {
 	type Tokens = orml_tokens::MultiTokenCurrencyAdapter<Test>;
 	type AssetRegistryProvider = MockAssetRegistryProviderApi;
 	type AddressConverter = DummyAddressConverter;
-	type DisputePeriodLength = ConstU128<5>;
 	type RequestsPerBlock = ConstU128<10>;
 	type MaintenanceStatusProvider = MockMaintenanceStatusProviderApi;
 	type ChainId = messages::Chain;
@@ -166,7 +165,10 @@ impl ExtBuilder {
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");
 
-		rolldown::GenesisConfig::<Test> { _phantom: Default::default() }
+		rolldown::GenesisConfig::<Test> {
+			_phantom: Default::default(),
+			dispute_periods: [(crate::messages::Chain::Ethereum, 5u128), (crate::messages::Chain::Arbitrum, 10u128)].into_iter().cloned().collect()
+		}
 			.assimilate_storage(&mut t)
 			.expect("Tokens storage can be assimilated");
 
@@ -186,21 +188,15 @@ impl ExtBuilder {
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");
 
-		rolldown::GenesisConfig::<Test> { _phantom: Default::default() }
+		rolldown::GenesisConfig::<Test> {
+			_phantom: Default::default(),
+			dispute_periods: [(crate::messages::Chain::Ethereum, 5u128), (crate::messages::Chain::Arbitrum, 10u128)].into_iter().cloned().collect()
+		}
 			.assimilate_storage(&mut t)
 			.expect("Tokens storage can be assimilated");
 
 		let ext = sp_io::TestExternalities::new(t);
 
-		Self { ext }
-	}
-
-	pub fn single_sequencer(_seq: AccountId) -> Self {
-		let t = frame_system::GenesisConfig::<Test>::default()
-			.build_storage()
-			.expect("Frame system builds valid default genesis config");
-
-		let ext = sp_io::TestExternalities::new(t);
 		Self { ext }
 	}
 

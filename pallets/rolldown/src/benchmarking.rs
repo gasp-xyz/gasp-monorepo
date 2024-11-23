@@ -363,7 +363,7 @@ mod benchmarks {
 
 		<frame_system::Pallet<T>>::set_block_number(1u32.into());
 		let dispute_period_end = <frame_system::Pallet<T>>::block_number().saturated_into::<u128>() +
-			Rolldown::<T>::get_dispute_period();
+			Rolldown::<T>::get_dispute_period(l1_chain).unwrap();
 		assert!(
 			PendingSequencerUpdates::<T>::get(dispute_period_end, l1_chain).is_none(),
 			"BEFORE PendingSequencerUpdates {:?} dispute_period_end {:?} l1_chain should be uninit",
@@ -414,7 +414,7 @@ mod benchmarks {
 
 		<frame_system::Pallet<T>>::set_block_number(1u32.into());
 		let dispute_period_end = <frame_system::Pallet<T>>::block_number().saturated_into::<u128>() +
-			Rolldown::<T>::get_dispute_period();
+			Rolldown::<T>::get_dispute_period(l1_chain).unwrap();
 		assert!(
 			PendingSequencerUpdates::<T>::get(dispute_period_end, l1_chain).is_none(),
 			"BEFORE PendingSequencerUpdates {:?} dispute_period_end {:?} l1_chain should be uninit",

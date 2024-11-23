@@ -1435,14 +1435,12 @@ pub mod config {
 
 		#[cfg(feature = "fast-runtime")]
 		parameter_types! {
-			pub const DisputePeriodLength: u32 = 10;
 			pub const MerkleRootAutomaticBatchPeriod: u128 = 25;
 			pub const MerkleRootAutomaticBatchSize: u128 = 32;
 		}
 
 		#[cfg(not(feature = "fast-runtime"))]
 		parameter_types! {
-			pub const DisputePeriodLength: u32 = 300;
 			pub const MerkleRootAutomaticBatchPeriod: u128 = 1200;
 			pub const MerkleRootAutomaticBatchSize: u128 = 1024;
 		}

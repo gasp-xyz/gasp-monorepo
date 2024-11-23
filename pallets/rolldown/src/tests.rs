@@ -39,6 +39,7 @@ impl L1UpdateBuilder {
 
 	pub fn build(self) -> messages::L1Update {
 		let mut update = messages::L1Update::default();
+		update.chain = Chain::Ethereum;
 
 		for (id, r) in self.1.into_iter().enumerate() {
 			let rid = if let Some(offset) = self.0 { (id as u128) + offset } else { r.id() };
@@ -94,7 +95,7 @@ fn process_single_deposit() {
 		forward_to_block::<Test>(36);
 		let current_block_number =
 			<frame_system::Pallet<Test>>::block_number().saturated_into::<u128>();
-		let dispute_period: u128 = Rolldown::get_dispute_period();
+		let dispute_period: u128 = Rolldown::get_dispute_period(consts::CHAIN).unwrap();
 		let update = L1UpdateBuilder::default()
 			.with_requests(vec![L1UpdateRequest::Deposit(Default::default())])
 			.build();
@@ -1289,7 +1290,7 @@ fn test_sequencer_unstaking() {
 		let is_maintenance_mock = MockMaintenanceStatusProviderApi::is_maintenance_context();
 		is_maintenance_mock.expect().return_const(false);
 		forward_to_block::<Test>(1);
-		let dispute_period_length = Rolldown::get_dispute_period();
+		let dispute_period_length = Rolldown::get_dispute_period(consts::CHAIN).unwrap();
 		let now = frame_system::Pallet::<Test>::block_number().saturated_into::<u128>();
 
 		LastUpdateBySequencer::<Test>::insert((consts::CHAIN, ALICE), now);
@@ -1533,7 +1534,7 @@ fn test_maintenance_mode_blocks_extrinsics() {
 #[test]
 #[serial]
 fn test_single_sequencer_cannot_cancel_request_without_cancel_rights_in_same_block() {
-	ExtBuilder::single_sequencer(BOB)
+	ExtBuilder::new_without_default_sequencers()
 		.issue(ETH_RECIPIENT_ACCOUNT_MGX, ETH_TOKEN_ADDRESS_MGX, MILLION)
 		.execute_with_default_mocks(|| {
 			forward_to_block::<Test>(10);
@@ -1577,7 +1578,7 @@ fn test_single_sequencer_cannot_cancel_request_without_cancel_rights_in_same_blo
 #[test]
 #[serial]
 fn test_single_sequencer_cannot_cancel_request_without_cancel_rights_in_next_block() {
-	ExtBuilder::single_sequencer(BOB)
+	ExtBuilder::new_without_default_sequencers()
 		.issue(ETH_RECIPIENT_ACCOUNT_MGX, ETH_TOKEN_ADDRESS_MGX, MILLION)
 		.execute_with_default_mocks(|| {
 			forward_to_block::<Test>(10);
