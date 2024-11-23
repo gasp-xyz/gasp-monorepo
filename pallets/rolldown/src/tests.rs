@@ -831,97 +831,136 @@ fn cancel_request_as_council_executed_immadiately() {
 #[test]
 #[serial]
 fn execute_a_lot_of_requests_in_following_blocks() {
-	ExtBuilder::new().execute_with_default_mocks(|| {
-		forward_to_block::<Test>(10);
+	ExtBuilder::new()
+		.issue(ALICE, ETH_TOKEN_ADDRESS_MGX, 0u128)
+		.execute_with_default_mocks(|| {
+			forward_to_block::<Test>(10);
 
-		let requests_count = 25;
-		let requests = vec![L1UpdateRequest::Deposit(messages::Deposit::default()); requests_count];
+			let requests_count = 25;
 
-		let deposit_update = L1UpdateBuilder::default().with_requests(requests).build();
-		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update).unwrap();
+			let dummy_update = L1UpdateRequest::Deposit(messages::Deposit {
+				requestId: Default::default(),
+				depositRecipient: DummyAddressConverter::convert_back(CHARLIE),
+				tokenAddress: ETH_TOKEN_ADDRESS,
+				amount: sp_core::U256::from(MILLION),
+				timeStamp: sp_core::U256::from(1),
+				ferryTip: sp_core::U256::from(0),
+			});
 
-		forward_to_block::<Test>(14);
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
-		assert_eq!(UpdatesExecutionQueueNextId::<Test>::get(), 0u128);
+			let requests = vec![dummy_update; requests_count];
 
-		forward_to_next_block::<Test>();
-		assert_eq!(
-			LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum),
-			Rolldown::get_max_requests_per_block().into()
-		);
+			let deposit_update = L1UpdateBuilder::default().with_requests(requests).build();
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
+				.unwrap();
 
-		forward_to_next_block::<Test>();
-		assert_eq!(
-			LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum),
-			(2u128 * Rolldown::get_max_requests_per_block()).into()
-		);
+			forward_to_block::<Test>(14);
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
+			assert_eq!(UpdatesExecutionQueueNextId::<Test>::get(), 0u128);
 
-		forward_to_next_block::<Test>();
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), requests_count as u128);
+			forward_to_next_block::<Test>();
+			assert_eq!(
+				LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum),
+				Rolldown::get_max_requests_per_block().into()
+			);
 
-		forward_to_next_block::<Test>();
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), requests_count as u128);
-	});
+			forward_to_next_block::<Test>();
+			assert_eq!(
+				LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum),
+				(2u128 * Rolldown::get_max_requests_per_block()).into()
+			);
+
+			forward_to_next_block::<Test>();
+			assert_eq!(
+				LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum),
+				requests_count as u128
+			);
+
+			forward_to_next_block::<Test>();
+			assert_eq!(
+				LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum),
+				requests_count as u128
+			);
+		});
 }
 
 #[test]
 #[serial]
 fn ignore_duplicated_requests_when_already_executed() {
-	ExtBuilder::new().execute_with_default_mocks(|| {
-		let dummy_request = L1UpdateRequest::Deposit(Default::default());
-		let first_update =
-			L1UpdateBuilder::default().with_requests(vec![dummy_request.clone(); 5]).build();
-		let second_update =
-			L1UpdateBuilder::default().with_requests(vec![dummy_request; 6]).build();
+	ExtBuilder::new()
+		.issue(ALICE, ETH_TOKEN_ADDRESS_MGX, 0u128)
+		.execute_with_default_mocks(|| {
+			let dummy_request = L1UpdateRequest::Deposit(messages::Deposit {
+				requestId: Default::default(),
+				depositRecipient: DummyAddressConverter::convert_back(CHARLIE),
+				tokenAddress: ETH_TOKEN_ADDRESS,
+				amount: sp_core::U256::from(MILLION),
+				timeStamp: sp_core::U256::from(1),
+				ferryTip: sp_core::U256::from(0),
+			});
 
-		forward_to_block::<Test>(10);
-		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), first_update).unwrap();
+			let first_update =
+				L1UpdateBuilder::default().with_requests(vec![dummy_request.clone(); 5]).build();
+			let second_update =
+				L1UpdateBuilder::default().with_requests(vec![dummy_request; 6]).build();
 
-		forward_to_block::<Test>(11);
-		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(BOB), second_update).unwrap();
+			forward_to_block::<Test>(10);
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), first_update).unwrap();
 
-		forward_to_block::<Test>(14);
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
+			forward_to_block::<Test>(11);
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(BOB), second_update).unwrap();
 
-		forward_to_block::<Test>(15);
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 5u128.into());
+			forward_to_block::<Test>(14);
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 
-		forward_to_next_block::<Test>();
-		forward_to_next_block::<Test>();
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 6u128.into());
-	});
+			forward_to_block::<Test>(15);
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 5u128.into());
+
+			forward_to_next_block::<Test>();
+			forward_to_next_block::<Test>();
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 6u128.into());
+		});
 }
 
 #[test]
 #[serial]
 fn process_l1_reads_in_order() {
-	ExtBuilder::new().execute_with_default_mocks(|| {
-		let dummy_request = L1UpdateRequest::Deposit(Default::default());
-		let first_update = L1UpdateBuilder::default()
-			.with_requests(vec![dummy_request.clone(); 11])
-			.build();
-		let second_update =
-			L1UpdateBuilder::default().with_requests(vec![dummy_request; 20]).build();
+	ExtBuilder::new()
+		.issue(ALICE, ETH_TOKEN_ADDRESS_MGX, 0u128)
+		.execute_with_default_mocks(|| {
+			let dummy_request = L1UpdateRequest::Deposit(messages::Deposit {
+				requestId: Default::default(),
+				depositRecipient: DummyAddressConverter::convert_back(CHARLIE),
+				tokenAddress: ETH_TOKEN_ADDRESS,
+				amount: sp_core::U256::from(MILLION),
+				timeStamp: sp_core::U256::from(1),
+				ferryTip: sp_core::U256::from(0),
+			});
 
-		forward_to_block::<Test>(10);
-		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), first_update).unwrap();
+			let first_update = L1UpdateBuilder::default()
+				.with_requests(vec![dummy_request.clone(); 11])
+				.build();
+			let second_update =
+				L1UpdateBuilder::default().with_requests(vec![dummy_request; 20]).build();
 
-		forward_to_block::<Test>(11);
-		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(BOB), second_update).unwrap();
+			forward_to_block::<Test>(10);
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), first_update).unwrap();
 
-		forward_to_block::<Test>(14);
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
+			forward_to_block::<Test>(11);
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(BOB), second_update).unwrap();
 
-		forward_to_block::<Test>(15);
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10u128.into());
+			forward_to_block::<Test>(14);
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 
-		forward_to_next_block::<Test>();
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 11u128.into());
+			forward_to_block::<Test>(15);
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10u128.into());
 
-		forward_to_next_block::<Test>();
-		forward_to_next_block::<Test>();
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 20u128.into());
-	});
+			forward_to_next_block::<Test>();
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 11u128.into());
+
+			forward_to_next_block::<Test>();
+			forward_to_next_block::<Test>();
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 20u128.into());
+		});
 }
 
 #[test]
@@ -1008,33 +1047,42 @@ fn reject_second_update_in_the_same_block() {
 #[test]
 #[serial]
 fn accept_consecutive_update_split_into_two() {
-	ExtBuilder::new().execute_with_default_mocks(|| {
-		forward_to_block::<Test>(10);
+	ExtBuilder::new()
+		.issue(ALICE, ETH_TOKEN_ADDRESS_MGX, 0u128)
+		.execute_with_default_mocks(|| {
+			forward_to_block::<Test>(10);
 
-		// imagine that there are 20 request on L1 waiting to be processed
-		// they need to be split into 2 update_l2_from_l1_unsafe calls
+			// imagine that there are 20 request on L1 waiting to be processed
+			// they need to be split into 2 update_l2_from_l1_unsafe calls
 
-		let dummy_update = L1UpdateRequest::Deposit(Default::default());
+			let dummy_update = L1UpdateRequest::Deposit(messages::Deposit {
+				requestId: Default::default(),
+				depositRecipient: DummyAddressConverter::convert_back(CHARLIE),
+				tokenAddress: ETH_TOKEN_ADDRESS,
+				amount: sp_core::U256::from(MILLION),
+				timeStamp: sp_core::U256::from(1),
+				ferryTip: sp_core::U256::from(0),
+			});
 
-		let first_update = L1UpdateBuilder::default()
-			.with_requests(vec![
-				dummy_update.clone();
-				(2 * Rolldown::get_max_requests_per_block()) as usize
-			])
-			.with_offset(1u128)
-			.build();
+			let first_update = L1UpdateBuilder::default()
+				.with_requests(vec![
+					dummy_update.clone();
+					(2 * Rolldown::get_max_requests_per_block()) as usize
+				])
+				.with_offset(1u128)
+				.build();
 
-		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), first_update).unwrap();
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), first_update).unwrap();
 
-		forward_to_next_block::<Test>();
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0);
+			forward_to_next_block::<Test>();
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0);
 
-		forward_to_block::<Test>(15);
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10);
+			forward_to_block::<Test>(15);
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10);
 
-		forward_to_next_block::<Test>();
-		assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 20);
-	});
+			forward_to_next_block::<Test>();
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 20);
+		});
 }
 
 #[test]

@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use messages::{EthAbi, EthAbiHash};
+use messages::{EthAbi, EthAbiHash, L1UpdateRequest};
 pub mod messages;
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -213,7 +213,11 @@ pub mod pallet {
 					return used_weight;
 				}
 
-				Self::execute_requests_from_execute_queue();
+				// NOTE: here we could adjust the used weight based on the actual executed requests
+				// as the benchmarks accounts for the worst case scenario which is cancel_resultion
+				// processing
+				let _executed: Vec<L1UpdateRequest> = Self::execute_requests_from_execute_queue();
+
 				used_weight += cost_of_processing_requests;
 				remaining_weight -= cost_of_processing_requests;
 			}
@@ -1169,54 +1173,39 @@ impl<T: Config> Pallet<T> {
 	fn process_single_request(
 		l1: <T as Config>::ChainId,
 		request: &messages::L1UpdateRequest,
-	) -> Weight {
-		let mut total_weight: Weight = Weight::default();
-
-		// weight for LastProcessedRequestOnL2
-		total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
+	) -> bool {
 		let request_id = request.id();
 		if request_id <= LastProcessedRequestOnL2::<T>::get(l1) {
-			return total_weight
+			return true;
 		}
 
 		let status = match request.clone() {
 			messages::L1UpdateRequest::Deposit(deposit) => {
 				let deposit_status = Self::process_deposit(l1, &deposit);
-				total_weight =
-					total_weight.saturating_add(<T as Config>::WeightInfo::process_deposit());
 				TotalNumberOfDeposits::<T>::mutate(|v| *v = v.saturating_add(One::one()));
-				// weight for TotalNumberOfDeposits
-				total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
 				deposit_status.or_else(|err| {
 					let who: T::AccountId = T::AddressConverter::convert(deposit.depositRecipient);
 					FailedL1Deposits::<T>::insert(
 						(l1, deposit.requestId.id),
 						(who, deposit.abi_encode_hash()),
 					);
-					// weight for FailedL1Deposits
-					total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
 					Err(err.into())
 				})
 			},
-			messages::L1UpdateRequest::CancelResolution(cancel) => {
-				total_weight = total_weight
-					.saturating_add(<T as Config>::WeightInfo::process_cancel_resolution());
+			messages::L1UpdateRequest::CancelResolution(cancel) =>
 				Self::process_cancel_resolution(l1, &cancel).or_else(|err| {
 					T::MaintenanceStatusProvider::trigger_maintanance_mode();
 					Err(err)
-				})
-			},
+				}),
 		};
 
-		Pallet::<T>::deposit_event(Event::RequestProcessedOnL2 { chain: l1, request_id, status });
-		// Not sure about this - not sure exactly what is cached and how across extrinsics (/hooks)
-		// weight for deposit_event
-		total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(2, 3));
-
+		Pallet::<T>::deposit_event(Event::RequestProcessedOnL2 {
+			chain: l1,
+			request_id,
+			status: status.clone(),
+		});
 		LastProcessedRequestOnL2::<T>::insert(l1, request.id());
-		// weight for LastProcessedRequestOnL2
-		total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
-		total_weight
+		status.is_ok()
 	}
 
 	fn get_current_update_size_from_execution_queue() -> Option<u128> {
@@ -1239,7 +1228,7 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
-	fn execute_requests_from_execute_queue() {
+	fn execute_requests_from_execute_queue() -> Vec<L1UpdateRequest> {
 		let limit = Self::get_max_requests_per_block();
 		match (
 			UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get()),
@@ -1250,6 +1239,7 @@ impl<T: Config> Pallet<T> {
 			{
 				UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
 				UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
+				Default::default()
 			},
 			(Some((_, l1, hash, _)), _) => {
 				if let Some(update) = PendingSequencerUpdateContent::<T>::get(hash) {
@@ -1264,18 +1254,23 @@ impl<T: Config> Pallet<T> {
 						UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
 						PendingSequencerUpdateContent::<T>::remove(hash);
 						Self::deposit_event(Event::L1ReadExecuted { chain: l1, hash });
+						Default::default()
 					} else {
-						for r in requests {
-							let _ = Self::process_single_request(l1, &r);
+						for r in requests.iter() {
+							if !Self::process_single_request(l1, &r) {
+								// maintanance mode triggered
+								break;
+							}
 						}
+						requests
 					}
 				} else {
 					PendingSequencerUpdateContent::<T>::remove(hash);
+					Default::default()
 				}
 			},
-			_ => {},
-		};
-		Default::default()
+			_ => Default::default(),
+		}
 	}
 
 	fn schedule_requests(
