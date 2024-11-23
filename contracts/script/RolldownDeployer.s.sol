@@ -92,7 +92,7 @@ contract RolldownDeployer is Script, Utils, Test {
         rolldownProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeWithSelector(rolldown.initialize.selector, owner, chain, updaterAccount)
+            abi.encodeCall(rolldown.initialize, (owner, chain, updaterAccount))
         );
 
         vm.stopBroadcast();
