@@ -39,6 +39,12 @@ struct Config {
 
     #[envconfig(from = "WATCHDOG")]
     pub timeout: String,
+
+    #[envconfig(from = "TX_COST")]
+    pub tx_cost: String,
+
+    #[envconfig(from = "ENABLE_CLOSING")]
+    pub should_close_txs: String,
 }
 
 #[derive(Debug, thiserror::Error)]
