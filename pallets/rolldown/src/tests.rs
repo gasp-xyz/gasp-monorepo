@@ -38,8 +38,12 @@ impl L1UpdateBuilder {
 	}
 
 	pub fn build(self) -> messages::L1Update {
+		Self::build_for_chain(self, Chain::Ethereum)
+	}
+
+	pub fn build_for_chain(self, chain: Chain) -> messages::L1Update {
 		let mut update = messages::L1Update::default();
-		update.chain = Chain::Ethereum;
+		update.chain = chain;
 
 		for (id, r) in self.1.into_iter().enumerate() {
 			let rid = if let Some(offset) = self.0 { (id as u128) + offset } else { r.id() };
@@ -3319,5 +3323,58 @@ fn ferry_already_executed_deposit_fails() {
 				),
 				Error::<Test>::AlreadyExecuted
 			);
+		});
+}
+
+#[test]
+#[serial]
+fn reject_update_for_unknown_chain_id() {
+	ExtBuilder::new()
+		.issue(ALICE, ETH_TOKEN_ADDRESS_MGX, 0u128)
+		.execute_with_default_mocks(|| {
+			forward_to_block::<Test>(10);
+			let update = L1UpdateBuilder::default()
+				.with_requests(vec![L1UpdateRequest::Deposit(messages::Deposit {
+					requestId: Default::default(),
+					depositRecipient: DummyAddressConverter::convert_back(CHARLIE),
+					tokenAddress: ETH_TOKEN_ADDRESS,
+					amount: sp_core::U256::from(MILLION),
+					timeStamp: sp_core::U256::from(1),
+					ferryTip: sp_core::U256::from(0),
+				})])
+				.build_for_chain(Chain::Arbitrum);
+			assert_err!(
+				Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), update.clone()),
+				Error::<Test>::UninitializedChainId
+			);
+		});
+}
+
+#[test]
+#[serial]
+fn set_dispute_period() {
+	ExtBuilder::new()
+		.issue(ALICE, ETH_TOKEN_ADDRESS_MGX, 0u128)
+		.execute_with_default_mocks(|| {
+			forward_to_block::<Test>(10);
+
+			let dispute_period = Rolldown::get_dispute_period(Chain::Ethereum).unwrap();
+			Rolldown::set_dispute_period(
+				RuntimeOrigin::root(),
+				Chain::Ethereum,
+				dispute_period + 1u128,
+			)
+			.unwrap();
+
+			assert_event_emitted!(Event::DisputePeriodSet {
+				chain: messages::Chain::Ethereum,
+				dispute_period_length: dispute_period + 1u128
+			});
+
+			Rolldown::set_dispute_period(RuntimeOrigin::root(), Chain::Arbitrum, 1234).unwrap();
+			assert_event_emitted!(Event::DisputePeriodSet {
+				chain: messages::Chain::Arbitrum,
+				dispute_period_length: 1234
+			});
 		});
 }
