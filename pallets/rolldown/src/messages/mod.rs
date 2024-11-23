@@ -105,19 +105,6 @@ pub enum Chain {
 	Base,
 }
 
-pub trait NextEnum {
-	fn next(self) -> Self;
-}
-
-impl NextEnum for Chain {
-	fn next(self) -> Self {
-		match self {
-			Chain::Ethereum => Chain::Arbitrum,
-			Chain::Arbitrum => Chain::Ethereum,
-		}
-	}
-}
-
 #[repr(u8)]
 #[derive(
 	Default, Eq, PartialEq, RuntimeDebug, Clone, Encode, Decode, TypeInfo, Serialize, Copy,
