@@ -406,14 +406,8 @@ pub mod pallet {
 	>;
 
 	#[pallet::storage]
-	pub type DisputePeriod<T: Config> = StorageMap<
-		_,
-		Blake2_128Concat,
-		ChainIdOf<T>,
-		u128,
-		OptionQuery,
-	>;
-
+	pub type DisputePeriod<T: Config> =
+		StorageMap<_, Blake2_128Concat, ChainIdOf<T>, u128, OptionQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -586,10 +580,7 @@ pub mod pallet {
 
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
-			GenesisConfig {
-				_phantom: Default::default(),
-				dispute_periods : Default::default()
-			}
+			GenesisConfig { _phantom: Default::default(), dispute_periods: Default::default() }
 		}
 	}
 
@@ -1036,10 +1027,7 @@ pub mod pallet {
 		) -> DispatchResult {
 			let _ = ensure_root(origin)?;
 			DisputePeriod::<T>::insert(chain, dispute_period_length);
-			Self::deposit_event(Event::DisputePeriodSet {
-				chain,
-				dispute_period_length,
-			});
+			Self::deposit_event(Event::DisputePeriodSet { chain, dispute_period_length });
 			Ok(())
 		}
 	}
@@ -1139,8 +1127,7 @@ impl<T: Config> Pallet<T> {
 			let sequencer = metadata.sequencer.clone();
 			let l1_read_hash = metadata.update_hash.clone();
 			let update_size = metadata.update_size.clone();
-			if let Some(dispute_period) =  Self::get_dispute_period(l1){
-
+			if let Some(dispute_period) = Self::get_dispute_period(l1) {
 				if T::SequencerStakingProvider::is_active_sequencer(l1, &sequencer) {
 					SequencersRights::<T>::mutate(l1, |sequencers| {
 						if let Some(rights) = sequencers.get_mut(&sequencer) {
@@ -1152,7 +1139,9 @@ impl<T: Config> Pallet<T> {
 				let update_creation_block = block_number.saturating_sub(dispute_period);
 
 				match LastMaintananceMode::<T>::get() {
-					Some(last_maintanance_mode) if update_creation_block <= last_maintanance_mode => {
+					Some(last_maintanance_mode)
+						if update_creation_block <= last_maintanance_mode =>
+					{
 						Self::deposit_event(Event::L1ReadIgnoredBecauseOfMaintenanceMode {
 							chain: l1,
 							hash: l1_read_hash,
@@ -1166,7 +1155,7 @@ impl<T: Config> Pallet<T> {
 						});
 					},
 				}
-			}else{
+			} else {
 				Self::deposit_event(Event::L1ReadIgnoredBecauseOfUnknownDisputePeriod {
 					chain: l1,
 					hash: l1_read_hash,
@@ -1539,7 +1528,8 @@ impl<T: Config> Pallet<T> {
 		// check json length to prevent big data spam, maybe not necessary as it will be checked later and slashed
 		let current_block_number =
 			<frame_system::Pallet<T>>::block_number().saturated_into::<u128>();
-		let dispute_period_length = Self::get_dispute_period(l1).ok_or(Error::<T>::UninitializedChainId)?;
+		let dispute_period_length =
+			Self::get_dispute_period(l1).ok_or(Error::<T>::UninitializedChainId)?;
 
 		let dispute_period_end: u128 = current_block_number + dispute_period_length;
 

@@ -167,10 +167,16 @@ impl ExtBuilder {
 
 		rolldown::GenesisConfig::<Test> {
 			_phantom: Default::default(),
-			dispute_periods: [(crate::messages::Chain::Ethereum, 5u128), (crate::messages::Chain::Arbitrum, 10u128)].into_iter().cloned().collect()
+			dispute_periods: [
+				(crate::messages::Chain::Ethereum, 5u128),
+				(crate::messages::Chain::Arbitrum, 10u128),
+			]
+			.into_iter()
+			.cloned()
+			.collect(),
 		}
-			.assimilate_storage(&mut t)
-			.expect("Tokens storage can be assimilated");
+		.assimilate_storage(&mut t)
+		.expect("Tokens storage can be assimilated");
 
 		let mut ext = sp_io::TestExternalities::new(t);
 
@@ -190,10 +196,16 @@ impl ExtBuilder {
 
 		rolldown::GenesisConfig::<Test> {
 			_phantom: Default::default(),
-			dispute_periods: [(crate::messages::Chain::Ethereum, 5u128), (crate::messages::Chain::Arbitrum, 10u128)].into_iter().cloned().collect()
+			dispute_periods: [
+				(crate::messages::Chain::Ethereum, 5u128),
+				(crate::messages::Chain::Arbitrum, 10u128),
+			]
+			.into_iter()
+			.cloned()
+			.collect(),
 		}
-			.assimilate_storage(&mut t)
-			.expect("Tokens storage can be assimilated");
+		.assimilate_storage(&mut t)
+		.expect("Tokens storage can be assimilated");
 
 		let ext = sp_io::TestExternalities::new(t);
 

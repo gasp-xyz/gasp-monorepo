@@ -398,12 +398,24 @@ fn rollup_genesis(
 		#[cfg(not(feature = "fast-runtime"))]
 		rolldown: rollup_runtime::RolldownConfig {
 			_phantom: Default::default(),
-			dispute_periods: [(pallet_rolldown::messages::Chain::Ethereum, 300u128), (pallet_rolldown::messages::Chain::Arbitrum, 600u128)].iter().cloned().collect(),
+			dispute_periods: [
+				(pallet_rolldown::messages::Chain::Ethereum, 300u128),
+				(pallet_rolldown::messages::Chain::Arbitrum, 600u128),
+			]
+			.iter()
+			.cloned()
+			.collect(),
 		},
 		#[cfg(feature = "fast-runtime")]
 		rolldown: rollup_runtime::RolldownConfig {
 			_phantom: Default::default(),
-			dispute_periods: [(pallet_rolldown::messages::Chain::Ethereum, 10u128), (pallet_rolldown::messages::Chain::Arbitrum, 600u128)].iter().cloned().collect(),
+			dispute_periods: [
+				(pallet_rolldown::messages::Chain::Ethereum, 10u128),
+				(pallet_rolldown::messages::Chain::Arbitrum, 600u128),
+			]
+			.iter()
+			.cloned()
+			.collect(),
 		},
 		metamask: rollup_runtime::MetamaskConfig {
 			name: "Gasp".to_string(),
