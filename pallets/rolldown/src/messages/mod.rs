@@ -102,6 +102,7 @@ pub enum Chain {
 	#[default]
 	Ethereum,
 	Arbitrum,
+	Base,
 }
 
 pub trait NextEnum {
@@ -440,6 +441,7 @@ impl TryFrom<eth_abi::Chain> for Chain {
 		match origin {
 			eth_abi::Chain::Ethereum => Ok(Chain::Ethereum),
 			eth_abi::Chain::Arbitrum => Ok(Chain::Arbitrum),
+			eth_abi::Chain::Base => Ok(Chain::Base),
 			_ => Err(String::from("Invalid origin type")),
 		}
 	}
