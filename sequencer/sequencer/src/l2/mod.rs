@@ -6,7 +6,6 @@ use hex::encode as hex_encode;
 
 use futures::StreamExt;
 use primitive_types::H256;
-// use subxt::config::Header;
 use subxt::ext::subxt_core;
 use subxt::ext::subxt_core::storage::address::StorageHashers;
 use subxt::storage::StorageKey;
@@ -116,6 +115,8 @@ pub trait L2Interface {
     ) -> Result<Vec<u8>, L2Error>;
 
     async fn get_active_sequencers(&self, chain: types::Chain, at: H256) -> Result<Vec<[u8; 20]>, L2Error>;
+
+    async fn get_dispute_period(&self, chain: types::Chain, at: H256) -> Result<u128, L2Error>;
 }
 
 pub struct Gasp {
@@ -147,6 +148,8 @@ pub enum L2Error {
     HeaderSubscriptionFailed,
     #[error("awaiting cancel resolution fetch error")]
     PendingCancelFetchError,
+    #[error("unknown dispute period length")]
+    UnknownDisputePeriodLength,
 }
 
 pub type HashOf<T> = <T as Config>::Hash;
@@ -645,6 +648,22 @@ impl L2Interface for Gasp {
 
 
         Ok(active.into_iter().map(|elem| elem.0).collect())
+    }
+
+    async fn get_dispute_period(&self, _chain: types::Chain, _at: H256) -> Result<u128, L2Error>{
+        let storage = gasp::api::rolldown::constants::ConstantsApi.dispute_period_length();
+
+        let dispute_period_length = self
+            .client
+            .constants()
+            .at(&storage)?;
+
+        if dispute_period_length > 0u128 {
+            Ok(dispute_period_length)
+        } else {
+            tracing::warn!("dispute period length is zero");
+            Err(L2Error::UnknownDisputePeriodLength)
+        }
     }
 }
 

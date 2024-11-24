@@ -94,16 +94,42 @@ where
                 }
             }
 
+
+
             if self.has_read_rights_available().await? && self.is_selected_sequencer().await? {
-                if let Some((update_hash, update)) = self.get_pending_update(block_hash).await? {
-                    tracing::info!("Found update to submit: {:?}", update);
-                    let result = self.l2.update_l1_from_l2(update, update_hash).await?;
-                    if !result {
-                        tracing::error!("update submission failed");
-                        return Err(Error::UpdateSubmissionFailure);
-                    } else {
-                        stream = Self::consume_stream_with_timeout(stream).await;
-                    }
+
+                let dispute_period = self.l2.get_dispute_period(self.chain.clone(), at).await?;
+                let sequencers_count = self.l2.get_active_sequencers(self.chain.clone(), at).await?.len() as u128;
+                let should_send_update = match (self.find_latest_correct_update_block_submission(at).await?, sequencers_count){
+                    (None, _) => {
+                        tracing::info!("there are no pending updates, proceeding...");
+                        true
+                    },
+                    (Some(_), ..=1) => {
+                        tracing::info!("there is just one sequencer, proceeding...");
+                        true
+                    },
+                    (Some(latest), _) if (number as u128).saturating_sub(latest) > (dispute_period / sequencers_count) => {
+                        tracing::info!("previous update was long enough ago, proceeding...");
+                        true
+                    },
+                    _ => {
+                        tracing::info!("previous pending update found, no need to provide update yet");
+                        false
+                    },
+                };
+
+                if should_send_update {
+                    if let Some((update_hash, update)) = self.get_pending_update(block_hash).await? {
+                        tracing::info!("Found update to submit: {:?}", update);
+                        let result = self.l2.update_l1_from_l2(update, update_hash).await?;
+                        if !result {
+                            tracing::error!("update submission failed");
+                            return Err(Error::UpdateSubmissionFailure);
+                        } else {
+                            stream = Self::consume_stream_with_timeout(stream).await;
+                        }
+                }
                 }
             }
 
@@ -147,7 +173,7 @@ where
         Ok(())
     }
 
-    pub async fn find_malicious_update(&self, at: H256) -> Result<Option<u128>, Error> {
+    async fn get_pending_updates(&self, at: H256) -> Result<Vec<PendingUpdate>, Error> {
         let updates = self.l2.get_pending_updates(at).await?;
         let mut updates = updates
             .into_iter()
@@ -193,7 +219,11 @@ where
             .filter(|update| update.chain == self.chain)
             .collect::<Vec<_>>();
         updates.sort_by_key(|update| update.update_id);
+        Ok(updates)
+    }
 
+    pub async fn find_malicious_update(&self, at: H256) -> Result<Option<u128>, Error> {
+        let updates = self.get_pending_updates(at).await?;
         let l1handle = &self.l1;
 
         let mut verified = futures::stream::iter(updates).map(|update| async {
@@ -214,6 +244,31 @@ where
             }
         }
 
+        Ok(None)
+    }
+
+    pub async fn find_latest_correct_update_block_submission(&self, at: H256) -> Result<Option<u128>, Error> {
+        let updates = self.get_pending_updates(at).await?;
+        let dispute_period_length = self.l2.get_dispute_period(self.chain.clone(), at).await?;
+        let l1handle = &self.l1;
+
+        let mut verified = futures::stream::iter(updates.into_iter().rev())
+            .map(|update| async {
+            match l1handle
+                .get_update_hash(update.range.0, update.range.1)
+                .await
+            {
+                Ok(correct_hash) => Ok((correct_hash, update)),
+                Err(e) => Err(Error::from(e)),
+            }
+        });
+
+        while let Some(result) = verified.next().await {
+            let (correct_hash, update) = result.await?;
+            if correct_hash == update.hash {
+                return Ok(Some(update.update_id.saturating_sub(dispute_period_length)));
+            }
+        }
         Ok(None)
     }
 
@@ -416,6 +471,7 @@ pub(crate) mod test {
             async fn get_selected_sequencer( &self, chain: l2types::Chain, at: H256) -> Result<Option<[u8; 20]>, L2Error>;
             async fn get_abi_encoded_request( &self, request_id : u128, chain: l2types::Chain, at: H256) -> Result<Vec<u8>, L2Error>;
             async fn get_active_sequencers(&self, chain: l2types::Chain, at: H256) -> Result<Vec<[u8; 20]>, L2Error>;
+            async fn get_dispute_period(&self, chain: l2types::Chain, at: H256) -> Result<u128, L2Error>;
         }
     }
 
@@ -846,6 +902,142 @@ pub(crate) mod test {
         assert_eq!(
             sequencer.find_malicious_update(H256::zero()).await.unwrap(),
             Some(33u128)
+        );
+    }
+
+    #[tokio::test]
+    async fn test_find_latest_correct_update() {
+        let dispute_period = 10u128;
+        let update_executed_at = 33u128;
+        let update_hash = H256::zero();
+        let update = UpdateBuilder::new()
+            .with_dummy_deposit(1u128)
+            .build(ETHEREUM);
+        let pending: PendingUpdateWithKeys = (update_executed_at, update, update_hash.clone());
+
+        let mut l1mock = MockL1::new();
+        l1mock
+            .expect_get_update_hash()
+            .times(1)
+            .with(eq(1u128), eq(1u128))
+            .return_once(move |_, _| Ok(update_hash));
+
+
+        let mut l2mock = MockL2::new();
+        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock
+            .expect_get_pending_updates()
+            .times(1)
+            .return_once(move |_| Ok(vec![pending]));
+
+        l2mock
+            .expect_get_dispute_period()
+            .times(1)
+            .with(eq(l2types::Chain::Ethereum), eq(H256::zero()))
+            .return_once(move |_,_| Ok(dispute_period));
+
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+
+        assert_eq!(
+            sequencer.find_latest_correct_update_block_submission(H256::zero()).await.unwrap(),
+            Some(update_executed_at - dispute_period)
+        );
+    }
+
+    #[tokio::test]
+    async fn test_find_latest_correct_update_prefers_latest() {
+        let dispute_period = 10u128;
+        let latest_update_executed_at = 33u128;
+        let old_update_executed_at = 23u128;
+        let update_hash = H256::zero();
+        let update = UpdateBuilder::new()
+            .with_dummy_deposit(1u128)
+            .build(ETHEREUM);
+        let latest_pending: PendingUpdateWithKeys = (latest_update_executed_at, update.clone(), update_hash.clone());
+        let old_pending: PendingUpdateWithKeys = (old_update_executed_at, update, update_hash.clone());
+
+        let mut l1mock = MockL1::new();
+        l1mock
+            .expect_get_update_hash()
+            .times(1)
+            .with(eq(1u128), eq(1u128))
+            .return_once(move |_, _| Ok(update_hash));
+
+
+        let mut l2mock = MockL2::new();
+        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock
+            .expect_get_pending_updates()
+            .times(1)
+            .return_once(move |_| Ok(vec![old_pending, latest_pending]));
+
+        l2mock
+            .expect_get_dispute_period()
+            .times(1)
+            .with(eq(l2types::Chain::Ethereum), eq(H256::zero()))
+            .return_once(move |_,_| Ok(dispute_period));
+
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+
+        assert_eq!(
+            sequencer.find_latest_correct_update_block_submission(H256::zero()).await.unwrap(),
+            Some(latest_update_executed_at - dispute_period)
+        );
+    }
+
+    #[tokio::test]
+    async fn test_find_latest_correct_update_ignores_invalid_updates() {
+        let dispute_period = 10u128;
+        let valid_update_executed_at = 33u128;
+        let invalid_update_executed_at = 43u128;
+        let update_hash = H256::from(hex!("1111111111111111111111111111111111111111111111111111111111111111"));
+        let invalid_hash = H256::from(hex!("2222222222222222222222222222222222222222222222222222222222222222"));
+
+        let valid_update = UpdateBuilder::new()
+            .with_dummy_deposit(1u128)
+            .build(ETHEREUM);
+        let valid_pending: PendingUpdateWithKeys = (valid_update_executed_at, valid_update, update_hash.clone());
+
+        let invalid_update = UpdateBuilder::new()
+            .with_dummy_deposit(1u128)
+            .with_dummy_deposit(2u128)
+            .with_dummy_deposit(3u128)
+            .build(ETHEREUM);
+        let invalid_pending: PendingUpdateWithKeys = (invalid_update_executed_at, invalid_update, update_hash.clone());
+
+
+        let mut l1mock = MockL1::new();
+        l1mock
+            .expect_get_update_hash()
+            .times(1)
+            .with(eq(1u128), eq(1u128))
+            .return_once(move |_, _| Ok(update_hash));
+        l1mock
+            .expect_get_update_hash()
+            .times(1)
+            .with(eq(1u128), eq(3u128))
+            .return_once(move |_, _| Ok(invalid_hash));
+
+
+
+        let mut l2mock = MockL2::new();
+        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock
+            .expect_get_pending_updates()
+            .times(1)
+            .return_once(move |_| Ok(vec![invalid_pending, valid_pending]));
+
+        l2mock
+            .expect_get_dispute_period()
+            .times(1)
+            .with(eq(l2types::Chain::Ethereum), eq(H256::zero()))
+            .return_once(move |_,_| Ok(dispute_period));
+
+        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+
+        assert_eq!(
+            sequencer.find_latest_correct_update_block_submission(H256::zero()).await.unwrap(),
+            Some(valid_update_executed_at - dispute_period)
         );
     }
 }
