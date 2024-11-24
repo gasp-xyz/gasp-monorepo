@@ -32,7 +32,8 @@ describe('Closer Service', () => {
       isFerried: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
       getFerry: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
       ferry: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
-      close: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
+      closeWithdrawal: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
+      closeCancel: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
       getBalance: vi.fn().mockImplementation(() => DEFAULT_BALANCE),
     };
 
@@ -41,7 +42,7 @@ describe('Closer Service', () => {
       getLatestRequestId: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
       getLatestRequestIdInPast: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
       getWithdrawals: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
-      getCancels: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
+      getRequests: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
       getNativeTokenAddress: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
     };
 
@@ -51,8 +52,8 @@ describe('Closer Service', () => {
   it('should fetch all withdrawalas at once from small range', async () => {
 
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(123n);
-    l2Mock.getWithdrawals = vi.fn().mockImplementationOnce(async (arg1, arg2) => { return []; })
-    closer.findWithdrawalsToClose();
+    l2Mock.getRequests = vi.fn().mockImplementationOnce(async (arg1, arg2) => { return []; })
+    closer.findRequestToClose();
 
 
   });
@@ -60,74 +61,74 @@ describe('Closer Service', () => {
   it('should fetch withdrawals in batches', async () => {
 
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(123n);
-    l2Mock.getWithdrawals = vi.fn().mockResolvedValue([])
-    l2Mock.getWithdrawals = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
+    l2Mock.getRequests = vi.fn().mockResolvedValue([])
+    l2Mock.getRequests = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
 
     const batchSize = 1000n;
     closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
 
-    await closer.findWithdrawalsToClose();
+    await closer.findRequestToClose();
 
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(1);
-    expect(l2Mock.getWithdrawals).toHaveBeenNthCalledWith(1, 1n, 123n);
+    expect(l2Mock.getRequests).toHaveBeenCalledTimes(1);
+    expect(l2Mock.getRequests).toHaveBeenNthCalledWith(1, 1n, 123n);
 
   });
 
   it('should fetch withdrawals in batches 2', async () => {
 
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(2000n);
-    l2Mock.getWithdrawals = vi.fn().mockResolvedValue([])
-    l2Mock.getWithdrawals = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
+    l2Mock.getRequests = vi.fn().mockResolvedValue([])
+    l2Mock.getRequests = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
 
     const batchSize = 1000n;
     closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
 
-    await closer.findWithdrawalsToClose();
+    await closer.findRequestToClose();
 
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(2);
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(1n, 1001n);
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(1001n, 2000n);
+    expect(l2Mock.getRequests).toHaveBeenCalledTimes(2);
+    expect(l2Mock.getRequests).toHaveBeenCalledWith(1n, 1001n);
+    expect(l2Mock.getRequests).toHaveBeenCalledWith(1001n, 2000n);
 
   });
 
   it('should fetch withdrawals in batches 3', async () => {
 
-    l2Mock.getWithdrawals = vi.fn().mockResolvedValue([])
+    l2Mock.getRequests = vi.fn().mockResolvedValue([])
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(2002);
-    l2Mock.getWithdrawals = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
+    l2Mock.getRequests = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
 
     const batchSize = 1000n;
     closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
-    await closer.findWithdrawalsToClose();
+    await closer.findRequestToClose();
 
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(3);
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(1n, 1001n);
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(1001n, 2001n);
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(2001n, 2002n);
+    expect(l2Mock.getRequests).toHaveBeenCalledTimes(3);
+    expect(l2Mock.getRequests).toHaveBeenCalledWith(1n, 1001n);
+    expect(l2Mock.getRequests).toHaveBeenCalledWith(1001n, 2001n);
+    expect(l2Mock.getRequests).toHaveBeenCalledWith(2001n, 2002n);
   });
 
   it('fetches withdrawals properly when they come one by one', async () => {
 
-    l2Mock.getWithdrawals = vi.fn().mockResolvedValue([])
+    l2Mock.getRequests = vi.fn().mockResolvedValue([])
     l1Mock.getLatestRequestId = vi.fn()
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(1n);
 
-    l2Mock.getWithdrawals = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
+    l2Mock.getRequests = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
     closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, 1000n);
-    await closer.findWithdrawalsToClose();
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(0);
+    await closer.findRequestToClose();
+    expect(l2Mock.getRequests).toHaveBeenCalledTimes(0);
 
-    await closer.findWithdrawalsToClose();
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(1);
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(1n, 1n);
+    await closer.findRequestToClose();
+    expect(l2Mock.getRequests).toHaveBeenCalledTimes(1);
+    expect(l2Mock.getRequests).toHaveBeenCalledWith(1n, 1n);
   });
 
 
   it('should not fetch new batch until there are some withdrawals to consume', async () => {
 
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(2001n);
-    l2Mock.getWithdrawals = vi.fn().mockResolvedValue([{
+    l2Mock.getRequests = vi.fn().mockResolvedValue([{
       requestId: 1n,
       withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
       tokenAddress: ENABLED_TOKEN,
@@ -140,19 +141,19 @@ describe('Closer Service', () => {
 
     const batchSize = 1000n;
     closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
-    await closer.findWithdrawalsToClose();
-    await closer.findWithdrawalsToClose();
-    await closer.findWithdrawalsToClose();
-    await closer.findWithdrawalsToClose();
-    await closer.findWithdrawalsToClose();
+    await closer.findRequestToClose();
+    await closer.findRequestToClose();
+    await closer.findRequestToClose();
+    await closer.findRequestToClose();
+    await closer.findRequestToClose();
 
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(1);
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(1n, 1001n);
+    expect(l2Mock.getRequests).toHaveBeenCalledTimes(1);
+    expect(l2Mock.getRequests).toHaveBeenCalledWith(1n, 1001n);
   });
 
   it('should fetch new batch once all the txs from the previous one are consumed', async () => {
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(2001n);
-    l2Mock.getWithdrawals = vi.fn().mockResolvedValue([{
+    l2Mock.getRequests = vi.fn().mockResolvedValue([{
       requestId: 1n,
       withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
       tokenAddress: ENABLED_TOKEN,
@@ -165,46 +166,46 @@ describe('Closer Service', () => {
 
     const batchSize = 1000n;
     closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
-    await closer.findWithdrawalsToClose();
-    await closer.findWithdrawalsToClose();
-    await closer.findWithdrawalsToClose();
-    await closer.findWithdrawalsToClose();
-    await closer.findWithdrawalsToClose();
+    await closer.findRequestToClose();
+    await closer.findRequestToClose();
+    await closer.findRequestToClose();
+    await closer.findRequestToClose();
+    await closer.findRequestToClose();
 
 
-    expect(await closer.getNextWithdrawalToClose()).not.toBeNull();
-    expect(await closer.getNextWithdrawalToClose()).toBeNull();
+    expect(await closer.getNextRequestToClose()).not.toBeNull();
+    expect(await closer.getNextRequestToClose()).toBeNull();
 
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(1);
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(1n, 1001n);
+    expect(l2Mock.getRequests).toHaveBeenCalledTimes(1);
+    expect(l2Mock.getRequests).toHaveBeenCalledWith(1n, 1001n);
 
-    await closer.findWithdrawalsToClose();
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(2);
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(1001n, 2001n);
+    await closer.findRequestToClose();
+    expect(l2Mock.getRequests).toHaveBeenCalledTimes(2);
+    expect(l2Mock.getRequests).toHaveBeenCalledWith(1001n, 2001n);
   });
 
   it('do not fetch previous withdrawals once everything is processed', async () => {
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(500n);
-    l2Mock.getWithdrawals = vi.fn().mockResolvedValue([])
+    l2Mock.getRequests = vi.fn().mockResolvedValue([])
     l1Mock.isClosed = vi.fn().mockResolvedValue(false);
     l1Mock.isFerried = vi.fn().mockResolvedValue(false);
 
     const batchSize = 1000n;
     closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
-    await closer.findWithdrawalsToClose();
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(1);
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(1n, 500n);
+    await closer.findRequestToClose();
+    expect(l2Mock.getRequests).toHaveBeenCalledTimes(1);
+    expect(l2Mock.getRequests).toHaveBeenCalledWith(1n, 500n);
 
-    await closer.findWithdrawalsToClose();
-    await closer.findWithdrawalsToClose();
-    await closer.findWithdrawalsToClose();
-    await closer.findWithdrawalsToClose();
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(1);
+    await closer.findRequestToClose();
+    await closer.findRequestToClose();
+    await closer.findRequestToClose();
+    await closer.findRequestToClose();
+    expect(l2Mock.getRequests).toHaveBeenCalledTimes(1);
 
     l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(1200n);
-    await closer.findWithdrawalsToClose();
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledTimes(2);
-    expect(l2Mock.getWithdrawals).toHaveBeenCalledWith(500n, 1200n);
+    await closer.findRequestToClose();
+    expect(l2Mock.getRequests).toHaveBeenCalledTimes(2);
+    expect(l2Mock.getRequests).toHaveBeenCalledWith(500n, 1200n);
   });
 
 
@@ -234,13 +235,13 @@ describe('Closer Service', () => {
           hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
         };
 
-    l2Mock.getWithdrawals = vi.fn().mockResolvedValue([closeableWithdrawal, ignoredWithdrawal]), 
+    l2Mock.getRequests = vi.fn().mockResolvedValue([closeableWithdrawal, ignoredWithdrawal]), 
     closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, 1000n);
 
-    await closer.findWithdrawalsToClose();
+    await closer.findRequestToClose();
 
-    expect(await closer.getNextWithdrawalToClose()).toStrictEqual(closeableWithdrawal);
-    expect(await closer.getNextWithdrawalToClose()).toBeNull();
+    expect(await closer.getNextRequestToClose()).toStrictEqual(closeableWithdrawal);
+    expect(await closer.getNextRequestToClose()).toBeNull();
 
 
   });
@@ -270,12 +271,12 @@ describe('Closer Service', () => {
           hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
         };
 
-    l2Mock.getWithdrawals = vi.fn().mockResolvedValue([closeableWithdrawal, ignoredWithdrawal]), 
+    l2Mock.getRequests = vi.fn().mockResolvedValue([closeableWithdrawal, ignoredWithdrawal]), 
     closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, 1000n);
 
-    await closer.findWithdrawalsToClose();
+    await closer.findRequestToClose();
 
-    expect(await closer.getNextWithdrawalToClose()).toStrictEqual(closeableWithdrawal);
-    expect(await closer.getNextWithdrawalToClose()).toBeNull();
+    expect(await closer.getNextRequestToClose()).toStrictEqual(closeableWithdrawal);
+    expect(await closer.getNextRequestToClose()).toBeNull();
   });
 })

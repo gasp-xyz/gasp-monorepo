@@ -1,6 +1,6 @@
 import { describe, beforeAll, expect, it } from "vitest";
 import { isEqual} from "../src/utils.js";
-import { L1Api , toViemFormat } from "../src/l1/L1Api.js";
+import { L1Api , withdrawalToViemFormat } from "../src/l1/L1Api.js";
 import { L1Interface } from "../src/l1/L1Interface.js";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import { anvil } from "viem/chains";
@@ -40,7 +40,7 @@ const ANVIL_TEST_ACCOUNT = "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d334
 function hashWithdrawal(withdrawal: Withdrawal) {
   const encoded = encodeAbiParameters(
     ABI.find((e: any) => e!.name === "ferry_withdrawal")!.inputs!,
-    [toViemFormat(withdrawal)]
+    [withdrawalToViemFormat(withdrawal)]
   );
   const input = new Uint8Array([...hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000"), ...hexToU8a(encoded.toString())])
   return hexToU8a(keccak256(input));
@@ -272,7 +272,7 @@ describe('L1Interface', () => {
     expect(await l1Api.isFerried(hashWithdrawal(withdrawal))).toBeFalsy();
     expect(await l1Api.isClosed(hashWithdrawal(withdrawal))).toBeFalsy();
     const proof: Uint8Array[] = [];
-    await l1Api.close(withdrawal, withdrawal.hash, proof, privateKey);
+    await l1Api.closeWithdrawal(withdrawal, withdrawal.hash, proof, privateKey);
     }, {timeout: 30000});
 
   it('getFerry works', async () => {
