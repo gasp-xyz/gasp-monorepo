@@ -41,6 +41,7 @@ describe('Closer Service', () => {
       getLatestRequestId: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
       getLatestRequestIdInPast: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
       getWithdrawals: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
+      getCancels: vi.fn().mockImplementation(() => { throw new Error("Unexpcted mock called") }),
       getNativeTokenAddress: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
     };
 

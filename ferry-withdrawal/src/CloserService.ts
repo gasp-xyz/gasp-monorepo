@@ -6,8 +6,9 @@ import { L2Interface } from "./l2/L2Interface.js";
 import { isEqual, maxBigInt, minBigInt} from "./utils.js";
 import { logger } from "./logger.js";
 import { Withdrawal, toString } from "./Withdrawal.js";
+import { Cancel } from "./Cancel.js";
 
-async function asyncFilter(arr: Withdrawal[], predicate: any) {
+async function asyncFilter(arr: (Withdrawal| Cancel)[], predicate: any) {
 	const results = await Promise.all(arr.map(predicate));
 	return arr.filter((v: any, index: any) => {
 		return results[index];
@@ -52,10 +53,10 @@ class CloserService {
       const rangeStart: bigint = maxBigInt(1n, this.lastCheckedWithrdawal);
       const rangeEnd: bigint = minBigInt(rangeStart + this.batchSize, latestClosableReqeustIdOnL1);
 
-      const withdrawals = await this.l2.getWithdrawals(rangeStart, rangeEnd);
+      const withdrawals = await this.l2.getRequests(rangeStart, rangeEnd);
       logger.silly(`Fetching withdrawals in range ${rangeStart} .. ${rangeEnd} - found ${withdrawals.length} withdrawals`);
 
-      const closableWithdrawals = await asyncFilter(withdrawals, async (withdrawal: Withdrawal) => {
+      const closableWithdrawals = await asyncFilter(withdrawals, async (withdrawal: Withdrawal|Cancel) => {
         const shouldBeClosed = this.tokensToClose.find( (elem) => {
           return isEqual(elem[0], withdrawal.tokenAddress) && withdrawal.ferryTip >= elem[1];
         }) !== undefined;
