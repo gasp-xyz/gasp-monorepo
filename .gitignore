@@ -8,6 +8,7 @@
 *.so
 *.dylib
 *.idea
+metadata.scale
 
 .DS_Store
 
