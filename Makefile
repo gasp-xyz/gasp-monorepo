@@ -72,6 +72,12 @@ bindings-rs-alloy: ## generates rust alloy bindings
 bindings-json: ## generate JS bindings
 	cd ./contracts && forge build && cp out/Rolldown.sol/Rolldown.json ../rollup-sequencer/src/Rolldown.json
 
+bindings-gasp:
+	subxt metadata -f bytes -o metadata.scale --url http://127.0.0.1:9944
+	subxt codegen --attribute "#[allow(non_snake_case)]" --derive Clone --derive PartialEq --file metadata.scale | rustfmt --edition=2018 --emit=stdout > sequencer/sequencer/src/l2/gasp/gasp_bindings.rs
+	rm -rf metadata.scale
+
+
 bindings: bindings-go bindings-rs bindings-json bindings-rs-alloy## generate all bindings
 
 -----------------------------: ## 
