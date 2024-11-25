@@ -166,7 +166,7 @@ describe('L1Interface', () => {
     } catch (e) {
       console.info("update already injected");
     }
-    let latestRequestId = await l1Api.getLatestRequestId();
+    let latestRequestId = await l1Api.getLatestRequestId(0n);
     expect(latestRequestId).toBeGreaterThanOrEqual(rangeEnd);
   });
 
@@ -234,7 +234,7 @@ describe('L1Interface', () => {
     await updateUpdaterAccount(WS_URI);
     await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
     const randomAddress = getRandomUintArray(20);
-    const lastRequestId = await l1Api.getLatestRequestId();
+    const lastRequestId = await l1Api.getLatestRequestId(0n);
 
     let withdrawal = {
         requestId: lastRequestId! + 1n,
@@ -255,7 +255,7 @@ describe('L1Interface', () => {
     await updateUpdaterAccount(WS_URI);
     await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
     const randomAddress = getRandomUintArray(20);
-    const lastRequestId = await l1Api.getLatestRequestId();
+    const lastRequestId = await l1Api.getLatestRequestId(0n);
 
     let withdrawal = {
         requestId: lastRequestId! + 1n,
@@ -279,7 +279,7 @@ describe('L1Interface', () => {
     await updateUpdaterAccount(WS_URI);
     await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
     const randomAddress = getRandomUintArray(20);
-    const lastRequestId = await l1Api.getLatestRequestId();
+    const lastRequestId = await l1Api.getLatestRequestId(0n);
 
     let withdrawal1 = {
         requestId: lastRequestId! + 1n,

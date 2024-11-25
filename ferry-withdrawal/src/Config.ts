@@ -21,6 +21,7 @@ const cliConfigSchemat = z.object({
 	TX_COST: z.bigint(),
 	LOOK_BACK_HOURS: z.number().default(24),
 	LOG: z.string(),
+	DELAY: z.bigint().default(0n),
 });
 
 
@@ -35,6 +36,7 @@ function createCliConfig() {
 		TX_COST: BigInt(process.env.TX_COST!),
 		LOOK_BACK_HOURS: Number(process.env.LOOK_BACK_HOURS),
 		LOG: process.env.LOG!,
+		DELAY: process.env.DELAY ? BigInt(process.env.DELAY) : undefined,
 	});
 }
 
@@ -50,3 +52,4 @@ export const TX_COST = configuration.TX_COST;
 export const LOOK_BACK_HOURS = configuration.LOOK_BACK_HOURS;
 export const LOG = configuration.LOG;
 export const ABI = rolldownAbi.abi;
+export const DELAY = configuration.DELAY;

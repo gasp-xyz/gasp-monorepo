@@ -19,6 +19,7 @@ import {
 	PRIVATE_KEY,
 	TOKENS_TO_TRACK,
 	TX_COST,
+  DELAY
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
 
@@ -63,7 +64,7 @@ async function main() {
 		async (header: HeaderExtended) => {
 			inProgress = true;
       logger.info(`#${header.number} updating withdrawals to close`);
-      await closerService.findRequestToClose();
+      await closerService.findRequestToClose(DELAY);
       const req = await closerService.getNextRequestToClose();
       if (req) { 
         if (isWithdrawal(req)) {

@@ -41,8 +41,8 @@ class CloserService {
 	}
 
 
-  async findRequestToClose() : Promise<void> {
-    const latestClosableReqeustIdOnL1 = await this.l1.getLatestRequestId();
+  async findRequestToClose(delay: bigint = 0n) : Promise<void> {
+    const latestClosableReqeustIdOnL1 = await this.l1.getLatestRequestId(delay);
 
     if (latestClosableReqeustIdOnL1 === null) {
       logger.debug(`No withdrawals have been brought yet to L1 contract`);

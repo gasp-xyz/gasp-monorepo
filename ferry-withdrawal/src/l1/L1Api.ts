@@ -4,7 +4,7 @@ import {
   MANGATA_CONTRACT_ADDRESS,
 } from "../Config.js";
 
-import { PrivateKeyAccount, createPublicClient, createWalletClient } from "viem";
+import { BlockTag, PrivateKeyAccount, UnauthorizedProviderError, createPublicClient, createWalletClient } from "viem";
 import { type PublicClient } from "viem";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import {
@@ -189,12 +189,27 @@ class L1Api implements L1Interface {
     return code !== undefined && code !== "0x";
   }
 
-  async getLatestRequestId(): Promise<bigint | null> {
+  async getLatestRequestId(delay: bigint = 0n): Promise<bigint | null> {
+    let blockTag: BlockTag | undefined = 'latest';
+    let blockNumber: bigint | undefined = undefined;
+
+    if (delay > 0n ) {
+      let currentBlock = await this.client.getBlockNumber();
+      if (currentBlock < delay) {
+        return null;
+      }else{
+        blockTag = undefined;
+        blockNumber = currentBlock - delay;
+      }
+    }
+
+
     const value = BigInt(await this.client.readContract({
       address: MANGATA_CONTRACT_ADDRESS,
       abi: ABI,
       functionName: "getMerkleRootsLength",
-      blockTag: "latest"
+      blockTag,
+      blockNumber
     }) as any);
 
     if (value === 0n) {
@@ -206,7 +221,8 @@ class L1Api implements L1Interface {
         abi: ABI,
         functionName: "roots",
         args: [value-1n],
-        blockTag: "latest"
+        blockTag,
+        blockNumber
       });
 
 
@@ -215,7 +231,8 @@ class L1Api implements L1Interface {
         abi: ABI,
         functionName: "merkleRootRange",
         args: [lastHash],
-        blockTag: "latest"
+        blockTag,
+        blockNumber
       });
       return (range as any)[1];
     }

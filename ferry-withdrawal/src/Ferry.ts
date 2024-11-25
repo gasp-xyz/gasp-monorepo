@@ -6,6 +6,7 @@ import { isEqual, asyncFilter} from "./utils.js";
 import { logger } from "./logger.js";
 import { Withdrawal, toString } from "./Withdrawal.js";
 
+const LATEST = 0n;
 
 class Ferry {
 	l1: L1Interface;
@@ -43,7 +44,7 @@ class Ferry {
 	}
 
 	async getPendingWithdrawals(): Promise<Withdrawal[]> {
-    const lastL1 = await this.l1.getLatestRequestId();
+    const lastL1 = await this.l1.getLatestRequestId(LATEST);
 		const start = lastL1 ? lastL1 + 1n : 1n;
 		const end = await this.l2.getLatestRequestId();
 
@@ -130,7 +131,7 @@ class Ferry {
 
 	async getPastFerriesReadyToClose(blockInPast: number, who: Uint8Array | null = null): Promise<Withdrawal[]> {
     const account: Uint8Array = who === null ? this.me : who!;
-    const rangeEnd = await this.l1.getLatestRequestId();
+    const rangeEnd = await this.l1.getLatestRequestId(LATEST);
     const latestRequestIdInPast = await this.l2.getLatestRequestIdInPast(blockInPast);
     const rangeStart = latestRequestIdInPast ? latestRequestIdInPast : 1n;
     if (rangeStart === null || rangeEnd === null) {
