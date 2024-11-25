@@ -39,7 +39,7 @@ const ANVIL_TEST_ACCOUNT = "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d334
 
 function hashWithdrawal(withdrawal: Withdrawal) {
   const encoded = encodeAbiParameters(
-    ABI.find((e: any) => e!.name === "ferry_withdrawal")!.inputs!,
+    ABI.find((e: any) => e!.name === "ferryWithdrawal")!.inputs!,
     [toViemFormat(withdrawal)]
   );
   const input = new Uint8Array([...hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000"), ...hexToU8a(encoded.toString())])
@@ -83,7 +83,7 @@ async function injectMerkleRoot(uri: string, merkleRoot: Uint8Array, startRange:
 		account: acc,
 		address: MANGATA_CONTRACT_ADDRESS,
 		abi: ABI,
-		functionName: "update_l1_from_l2",
+		functionName: "updateL1FromL2",
 		args: [u8aToHex(merkleRoot), [startRange, endRange]]
 	});
 
@@ -236,7 +236,7 @@ describe('L1Interface', () => {
     const randomAddress = getRandomUintArray(20);
     const lastRequestId = await l1Api.getLatestRequestId();
 
-    let withdrawal = {
+    const withdrawal = {
         requestId: lastRequestId! + 1n,
         withdrawalRecipient: randomAddress,
         tokenAddress: TOKEN_ADDRESS,
@@ -281,7 +281,7 @@ describe('L1Interface', () => {
     const randomAddress = getRandomUintArray(20);
     const lastRequestId = await l1Api.getLatestRequestId();
 
-    let withdrawal1 = {
+    const withdrawal1 = {
         requestId: lastRequestId! + 1n,
         withdrawalRecipient: randomAddress,
         tokenAddress: TOKEN_ADDRESS,
