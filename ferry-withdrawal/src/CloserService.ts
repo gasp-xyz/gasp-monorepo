@@ -43,7 +43,6 @@ class CloserService {
 
 
   async findRequestToClose(delay: bigint = 0n) : Promise<void> {
-    const delayedLatestClosableReqeustIdOnL1 = await this.l1.getLatestRequestId(delay);
 
     const latestClosableReqeustIdOnL1 = await this.l1.getLatestRequestId(0n);
 
@@ -51,6 +50,8 @@ class CloserService {
       logger.debug(`No withdrawals have been brought yet to L1 contract`);
       return;
     }
+    const maybeDelayedLatestClosableReqeustIdOnL1 = await this.l1.getLatestRequestId(delay);
+    const delayedLatestClosableReqeustIdOnL1: bigint = maybeDelayedLatestClosableReqeustIdOnL1 ? maybeDelayedLatestClosableReqeustIdOnL1 : 0n;
 
     while (this.closableRequests.length === 0 && this.lastCheckedWithrdawal < latestClosableReqeustIdOnL1) {
       const rangeStart: bigint = maxBigInt(1n, this.lastCheckedWithrdawal);
@@ -78,7 +79,7 @@ class CloserService {
       logger.debug(`There are ${closableRequests.length} ready to be closed`);
 
       const requestsToClose =  closableRequests.filter( (request) => {
-        return delayedLatestClosableReqeustIdOnL1 ? request.requestId <= delayedLatestClosableReqeustIdOnL1 : false;
+        return request.requestId <= delayedLatestClosableReqeustIdOnL1;
       });
 
       let ignoredCount = closableRequests.length - requestsToClose.length;
@@ -87,6 +88,8 @@ class CloserService {
       this.lastCheckedWithrdawal = rangeEnd;
       this.closableRequests = requestsToClose;
     }
+
+    this.lastCheckedWithrdawal = minBigInt(this.lastCheckedWithrdawal, delayedLatestClosableReqeustIdOnL1);
   }
 
   async getNextRequestToClose() : Promise<Cancel | Withdrawal | null> {

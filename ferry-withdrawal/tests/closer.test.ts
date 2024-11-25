@@ -112,7 +112,6 @@ describe('Closer Service', () => {
     l2Mock.getRequests = vi.fn().mockResolvedValue([])
     l1Mock.getLatestRequestId = vi.fn()
       .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(1n)
       .mockResolvedValueOnce(1n);
 
