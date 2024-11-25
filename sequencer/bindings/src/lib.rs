@@ -11,5 +11,4 @@ pub mod irolldownprimitives;
 pub mod rolldown;
 pub mod rolldowndeployer;
 pub mod rolldowndeployertest;
-pub mod rolldownstorage;
 pub mod rolldowntest;

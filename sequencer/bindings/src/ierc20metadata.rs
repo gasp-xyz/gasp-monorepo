@@ -245,12 +245,7 @@ interface IERC20Metadata {
   }
 ]
 ```*/
-#[allow(
-    non_camel_case_types,
-    non_snake_case,
-    clippy::pub_underscore_fields,
-    clippy::style
-)]
+#[allow(non_camel_case_types, non_snake_case, clippy::style)]
 pub mod IERC20Metadata {
     use super::*;
     use alloy::sol_types as alloy_sol_types;
@@ -278,12 +273,7 @@ pub mod IERC20Metadata {
     ```solidity
     event Approval(address indexed owner, address indexed spender, uint256 value);
     ```*/
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     #[derive(Clone)]
     pub struct Approval {
         #[allow(missing_docs)]
@@ -291,14 +281,9 @@ pub mod IERC20Metadata {
         #[allow(missing_docs)]
         pub spender: alloy::sol_types::private::Address,
         #[allow(missing_docs)]
-        pub value: alloy::sol_types::private::primitives::aliases::U256,
+        pub value: alloy::sol_types::private::U256,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -329,19 +314,6 @@ pub mod IERC20Metadata {
                     spender: topics.2,
                     value: data.0,
                 }
-            }
-            #[inline]
-            fn check_signature(
-                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
-            ) -> alloy_sol_types::Result<()> {
-                if topics.0 != Self::SIGNATURE_HASH {
-                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
-                        Self::SIGNATURE,
-                        topics.0,
-                        Self::SIGNATURE_HASH,
-                    ));
-                }
-                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
@@ -398,12 +370,7 @@ pub mod IERC20Metadata {
     ```solidity
     event Transfer(address indexed from, address indexed to, uint256 value);
     ```*/
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     #[derive(Clone)]
     pub struct Transfer {
         #[allow(missing_docs)]
@@ -411,14 +378,9 @@ pub mod IERC20Metadata {
         #[allow(missing_docs)]
         pub to: alloy::sol_types::private::Address,
         #[allow(missing_docs)]
-        pub value: alloy::sol_types::private::primitives::aliases::U256,
+        pub value: alloy::sol_types::private::U256,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -449,19 +411,6 @@ pub mod IERC20Metadata {
                     to: topics.2,
                     value: data.0,
                 }
-            }
-            #[inline]
-            fn check_signature(
-                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
-            ) -> alloy_sol_types::Result<()> {
-                if topics.0 != Self::SIGNATURE_HASH {
-                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
-                        Self::SIGNATURE,
-                        topics.0,
-                        Self::SIGNATURE_HASH,
-                    ));
-                }
-                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
@@ -518,24 +467,19 @@ pub mod IERC20Metadata {
     ```solidity
     function allowance(address owner, address spender) external view returns (uint256);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct allowanceCall {
         pub owner: alloy::sol_types::private::Address,
         pub spender: alloy::sol_types::private::Address,
     }
     ///Container type for the return parameters of the [`allowance(address,address)`](allowanceCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct allowanceReturn {
-        pub _0: alloy::sol_types::private::primitives::aliases::U256,
+        pub _0: alloy::sol_types::private::U256,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -580,7 +524,7 @@ pub mod IERC20Metadata {
             #[doc(hidden)]
             type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
             #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::U256,);
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
             fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -650,24 +594,19 @@ pub mod IERC20Metadata {
     ```solidity
     function approve(address spender, uint256 amount) external returns (bool);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct approveCall {
         pub spender: alloy::sol_types::private::Address,
-        pub amount: alloy::sol_types::private::primitives::aliases::U256,
+        pub amount: alloy::sol_types::private::U256,
     }
     ///Container type for the return parameters of the [`approve(address,uint256)`](approveCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct approveReturn {
         pub _0: bool,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -679,7 +618,7 @@ pub mod IERC20Metadata {
             #[doc(hidden)]
             type UnderlyingRustTuple<'a> = (
                 alloy::sol_types::private::Address,
-                alloy::sol_types::private::primitives::aliases::U256,
+                alloy::sol_types::private::U256,
             );
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
@@ -782,23 +721,18 @@ pub mod IERC20Metadata {
     ```solidity
     function balanceOf(address account) external view returns (uint256);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct balanceOfCall {
         pub account: alloy::sol_types::private::Address,
     }
     ///Container type for the return parameters of the [`balanceOf(address)`](balanceOfCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct balanceOfReturn {
-        pub _0: alloy::sol_types::private::primitives::aliases::U256,
+        pub _0: alloy::sol_types::private::U256,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -834,7 +768,7 @@ pub mod IERC20Metadata {
             #[doc(hidden)]
             type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
             #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::U256,);
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
             fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -898,21 +832,16 @@ pub mod IERC20Metadata {
     ```solidity
     function decimals() external view returns (uint8);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct decimalsCall {}
     ///Container type for the return parameters of the [`decimals()`](decimalsCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct decimalsReturn {
         pub _0: u8,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -1008,21 +937,16 @@ pub mod IERC20Metadata {
     ```solidity
     function name() external view returns (string memory);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct nameCall {}
     ///Container type for the return parameters of the [`name()`](nameCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct nameReturn {
         pub _0: alloy::sol_types::private::String,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -1118,21 +1042,16 @@ pub mod IERC20Metadata {
     ```solidity
     function symbol() external view returns (string memory);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct symbolCall {}
     ///Container type for the return parameters of the [`symbol()`](symbolCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct symbolReturn {
         pub _0: alloy::sol_types::private::String,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -1228,21 +1147,16 @@ pub mod IERC20Metadata {
     ```solidity
     function totalSupply() external view returns (uint256);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct totalSupplyCall {}
     ///Container type for the return parameters of the [`totalSupply()`](totalSupplyCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct totalSupplyReturn {
-        pub _0: alloy::sol_types::private::primitives::aliases::U256,
+        pub _0: alloy::sol_types::private::U256,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -1278,7 +1192,7 @@ pub mod IERC20Metadata {
             #[doc(hidden)]
             type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
             #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::U256,);
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
             fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -1338,24 +1252,19 @@ pub mod IERC20Metadata {
     ```solidity
     function transfer(address to, uint256 amount) external returns (bool);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct transferCall {
         pub to: alloy::sol_types::private::Address,
-        pub amount: alloy::sol_types::private::primitives::aliases::U256,
+        pub amount: alloy::sol_types::private::U256,
     }
     ///Container type for the return parameters of the [`transfer(address,uint256)`](transferCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct transferReturn {
         pub _0: bool,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -1367,7 +1276,7 @@ pub mod IERC20Metadata {
             #[doc(hidden)]
             type UnderlyingRustTuple<'a> = (
                 alloy::sol_types::private::Address,
-                alloy::sol_types::private::primitives::aliases::U256,
+                alloy::sol_types::private::U256,
             );
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
@@ -1470,25 +1379,20 @@ pub mod IERC20Metadata {
     ```solidity
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct transferFromCall {
         pub from: alloy::sol_types::private::Address,
         pub to: alloy::sol_types::private::Address,
-        pub amount: alloy::sol_types::private::primitives::aliases::U256,
+        pub amount: alloy::sol_types::private::U256,
     }
     ///Container type for the return parameters of the [`transferFrom(address,address,uint256)`](transferFromCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct transferFromReturn {
         pub _0: bool,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -1502,7 +1406,7 @@ pub mod IERC20Metadata {
             type UnderlyingRustTuple<'a> = (
                 alloy::sol_types::private::Address,
                 alloy::sol_types::private::Address,
-                alloy::sol_types::private::primitives::aliases::U256,
+                alloy::sol_types::private::U256,
             );
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
@@ -2098,7 +2002,7 @@ pub mod IERC20Metadata {
         pub fn approve(
             &self,
             spender: alloy::sol_types::private::Address,
-            amount: alloy::sol_types::private::primitives::aliases::U256,
+            amount: alloy::sol_types::private::U256,
         ) -> alloy_contract::SolCallBuilder<T, &P, approveCall, N> {
             self.call_builder(&approveCall { spender, amount })
         }
@@ -2129,7 +2033,7 @@ pub mod IERC20Metadata {
         pub fn transfer(
             &self,
             to: alloy::sol_types::private::Address,
-            amount: alloy::sol_types::private::primitives::aliases::U256,
+            amount: alloy::sol_types::private::U256,
         ) -> alloy_contract::SolCallBuilder<T, &P, transferCall, N> {
             self.call_builder(&transferCall { to, amount })
         }
@@ -2138,7 +2042,7 @@ pub mod IERC20Metadata {
             &self,
             from: alloy::sol_types::private::Address,
             to: alloy::sol_types::private::Address,
-            amount: alloy::sol_types::private::primitives::aliases::U256,
+            amount: alloy::sol_types::private::U256,
         ) -> alloy_contract::SolCallBuilder<T, &P, transferFromCall, N> {
             self.call_builder(&transferFromCall { from, to, amount })
         }

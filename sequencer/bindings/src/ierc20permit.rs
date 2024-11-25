@@ -89,12 +89,7 @@ interface IERC20Permit {
   }
 ]
 ```*/
-#[allow(
-    non_camel_case_types,
-    non_snake_case,
-    clippy::pub_underscore_fields,
-    clippy::style
-)]
+#[allow(non_camel_case_types, non_snake_case, clippy::style)]
 pub mod IERC20Permit {
     use super::*;
     use alloy::sol_types as alloy_sol_types;
@@ -122,21 +117,16 @@ pub mod IERC20Permit {
     ```solidity
     function DOMAIN_SEPARATOR() external view returns (bytes32);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct DOMAIN_SEPARATORCall {}
     ///Container type for the return parameters of the [`DOMAIN_SEPARATOR()`](DOMAIN_SEPARATORCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct DOMAIN_SEPARATORReturn {
         pub _0: alloy::sol_types::private::FixedBytes<32>,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -232,23 +222,18 @@ pub mod IERC20Permit {
     ```solidity
     function nonces(address owner) external view returns (uint256);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct noncesCall {
         pub owner: alloy::sol_types::private::Address,
     }
     ///Container type for the return parameters of the [`nonces(address)`](noncesCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct noncesReturn {
-        pub _0: alloy::sol_types::private::primitives::aliases::U256,
+        pub _0: alloy::sol_types::private::U256,
     }
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -284,7 +269,7 @@ pub mod IERC20Permit {
             #[doc(hidden)]
             type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
             #[doc(hidden)]
-            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
+            type UnderlyingRustTuple<'a> = (alloy::sol_types::private::U256,);
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
             fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -348,27 +333,22 @@ pub mod IERC20Permit {
     ```solidity
     function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external;
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct permitCall {
         pub owner: alloy::sol_types::private::Address,
         pub spender: alloy::sol_types::private::Address,
-        pub value: alloy::sol_types::private::primitives::aliases::U256,
-        pub deadline: alloy::sol_types::private::primitives::aliases::U256,
+        pub value: alloy::sol_types::private::U256,
+        pub deadline: alloy::sol_types::private::U256,
         pub v: u8,
         pub r: alloy::sol_types::private::FixedBytes<32>,
         pub s: alloy::sol_types::private::FixedBytes<32>,
     }
     ///Container type for the return parameters of the [`permit(address,address,uint256,uint256,uint8,bytes32,bytes32)`](permitCall) function.
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[allow(non_camel_case_types, non_snake_case)]
     #[derive(Clone)]
     pub struct permitReturn {}
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
+    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         {
@@ -386,8 +366,8 @@ pub mod IERC20Permit {
             type UnderlyingRustTuple<'a> = (
                 alloy::sol_types::private::Address,
                 alloy::sol_types::private::Address,
-                alloy::sol_types::private::primitives::aliases::U256,
-                alloy::sol_types::private::primitives::aliases::U256,
+                alloy::sol_types::private::U256,
+                alloy::sol_types::private::U256,
                 u8,
                 alloy::sol_types::private::FixedBytes<32>,
                 alloy::sol_types::private::FixedBytes<32>,
@@ -830,8 +810,8 @@ pub mod IERC20Permit {
             &self,
             owner: alloy::sol_types::private::Address,
             spender: alloy::sol_types::private::Address,
-            value: alloy::sol_types::private::primitives::aliases::U256,
-            deadline: alloy::sol_types::private::primitives::aliases::U256,
+            value: alloy::sol_types::private::U256,
+            deadline: alloy::sol_types::private::U256,
             v: u8,
             r: alloy::sol_types::private::FixedBytes<32>,
             s: alloy::sol_types::private::FixedBytes<32>,
