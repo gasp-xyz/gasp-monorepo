@@ -14,9 +14,7 @@ function isCancel(obj:any): obj is Cancel {
 }
 
 function toString(cancel: Cancel): string {
-  // TODO: fix
-  return "sdfsdf"
-	// return `rid:${cancel.requestId} range: ${cancel.range[0]} .. ${cancel.range[1]}`;
+	return `rid:${cancel.requestId} range: ${cancel.startRange} .. ${cancel.endRange} properUpdateHash: ${u8aToHex(cancel.properHash)} tx hash: ${u8aToHex(cancel.hash)}`;
 }
 
 export { type Cancel, toString, isCancel };

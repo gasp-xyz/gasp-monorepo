@@ -62,7 +62,13 @@ pub async fn main() {
         .add_directive("sequencer=trace".parse().expect("proper directive"));
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
-    let config = Config::init_from_env().unwrap();
+    let mut config = Config::init_from_env().unwrap();
+
+    config.tx_cost = match config.tx_cost{
+        Some(0u128) => None,
+        Some(amount) => Some(amount),
+        None => None,
+    };
 
     tracing::info!("Config {:#?}", config);
 

@@ -8,6 +8,7 @@
     "build": "rimraf ./build && npx tsc",
     "lint": "npx @biomejs/biome check --apply src/common src/config src/utils src/viem src/index.ts",
     "run": "node build/src/main.js",
+    "closer-service": "node build/src/closer.js",
     "test": "vitest --dir tests",
     "test-ferry": "vitest --dir tests ferry",
     "test-closer": "vitest --dir tests closer",
