@@ -1,17 +1,18 @@
-import MangataClient from '../connector/MangataNode.js'
 import { BN } from '@polkadot/util'
 import { ApiDecoration } from '@polkadot/api/types/index.js'
 import { BN_ZERO } from 'gasp-sdk'
 import { u128, u32 } from '@polkadot/types-codec'
 import { signatureVerify } from '@polkadot/util-crypto'
+import { ApiPromise } from '@polkadot/api'
 
 const AIRDROP_WEIGHT = 0.5
 
 export const getEligibilityAtBlockN = async (
+  _api: ApiPromise,
   block: string,
   address: string
 ) => {
-  const api = await (await MangataClient.api()).at(block)
+  const api = await _api.at(block)
 
   const balances = await getBalances(api, address)
   const issuance = await getTokenIssuance(api)

@@ -3,12 +3,10 @@ import {
   getEligibilityAtBlockN,
   verifySignature,
 } from '../src/service/MgxAirdropService.js'
-import MangataClient from '../src/connector/MangataNode'
 import { ApiPromise, Keyring } from '@polkadot/api'
 import { toBN } from 'gasp-sdk'
 import { BN, u8aToHex } from '@polkadot/util'
 
-vi.mock('../src/connector/MangataNode')
 vi.mock('../src/repository/MgxAirdropRepository')
 
 describe('MGX Airdrop', () => {
@@ -21,15 +19,11 @@ describe('MGX Airdrop', () => {
   })
 
   it('calculate correct weight for MGX balance', async () => {
-    vi.mocked(MangataClient.api).mockResolvedValue({
-      at: vi.fn().mockResolvedValue(
-        provideApiMock({
-          tokens: [['0', ['1', '2']]],
-        })
-      ),
-    } as unknown as ApiPromise)
+    const api = (await provideApiMock({
+      tokens: [['0', ['1', '2']]],
+    })) as unknown as ApiPromise
     const { weight, blockMgxLpHoldings, blockMgxHoldings } =
-      await getEligibilityAtBlockN('123', 'address')
+      await getEligibilityAtBlockN(api, '123', 'address')
 
     expect(weight.toString()).toEqual(toBN('1.5').toString())
     expect(blockMgxHoldings.toString()).toEqual(toBN('3').toString())
@@ -37,31 +31,27 @@ describe('MGX Airdrop', () => {
   })
 
   it('calculate correct weight for LP tokens', async () => {
-    vi.mocked(MangataClient.api).mockResolvedValue({
-      at: vi.fn().mockResolvedValue(
-        await provideApiMock({
-          totalIssuance: [
-            ['0', '200'],
-            ['1', '100'],
-          ],
-          tokens: [
-            ['0', ['0', '0']],
-            ['1', ['0', '10']],
-          ],
-          liquidityAssets: [[['0', '2'], '1']],
-          liquidityPools: [['1', ['0', '2']]],
-          pools: [
-            [
-              ['0', '2'],
-              [toBN('10'), toBN('8')],
-            ],
-          ],
-        })
-      ),
-    } as unknown as ApiPromise)
+    const api = (await provideApiMock({
+      totalIssuance: [
+        ['0', '200'],
+        ['1', '100'],
+      ],
+      tokens: [
+        ['0', ['0', '0']],
+        ['1', ['0', '10']],
+      ],
+      liquidityAssets: [[['0', '2'], '1']],
+      liquidityPools: [['1', ['0', '2']]],
+      pools: [
+        [
+          ['0', '2'],
+          [toBN('10'), toBN('8')],
+        ],
+      ],
+    })) as unknown as ApiPromise
 
     const { weight, blockMgxHoldings, blockMgxLpHoldings } =
-      await getEligibilityAtBlockN('123', 'address')
+      await getEligibilityAtBlockN(api, '123', 'address')
 
     expect(weight.toString()).toEqual(toBN('1').toString())
     expect(blockMgxHoldings.toString()).toEqual(toBN('0').toString())
@@ -69,43 +59,39 @@ describe('MGX Airdrop', () => {
   })
 
   it('calculate correct weight for both MGX and multiple LP tokens', async () => {
-    vi.mocked(MangataClient.api).mockResolvedValue({
-      at: vi.fn().mockResolvedValue(
-        await provideApiMock({
-          totalIssuance: [
-            ['0', '200'],
-            ['1', '100'],
-            ['3', '100'],
-          ],
-          tokens: [
-            ['0', ['3', '0']],
-            ['1', ['0', '10']],
-            ['3', ['0', '10']],
-          ],
-          liquidityAssets: [
-            [['0', '2'], '1'],
-            [['4', '0'], '3'],
-          ],
-          liquidityPools: [
-            ['1', ['0', '2']],
-            ['3', ['4', '0']],
-          ],
-          pools: [
-            [
-              ['0', '2'],
-              [toBN('10'), toBN('8')],
-            ],
-            [
-              ['4', '0'],
-              [toBN('8'), toBN('10')],
-            ],
-          ],
-        })
-      ),
-    } as unknown as ApiPromise)
+    const api = (await provideApiMock({
+      totalIssuance: [
+        ['0', '200'],
+        ['1', '100'],
+        ['3', '100'],
+      ],
+      tokens: [
+        ['0', ['3', '0']],
+        ['1', ['0', '10']],
+        ['3', ['0', '10']],
+      ],
+      liquidityAssets: [
+        [['0', '2'], '1'],
+        [['4', '0'], '3'],
+      ],
+      liquidityPools: [
+        ['1', ['0', '2']],
+        ['3', ['4', '0']],
+      ],
+      pools: [
+        [
+          ['0', '2'],
+          [toBN('10'), toBN('8')],
+        ],
+        [
+          ['4', '0'],
+          [toBN('8'), toBN('10')],
+        ],
+      ],
+    })) as unknown as ApiPromise
 
     const { weight, blockMgxHoldings, blockMgxLpHoldings } =
-      await getEligibilityAtBlockN('123', 'address')
+      await getEligibilityAtBlockN(api, '123', 'address')
 
     expect(weight.toString()).toEqual(toBN('3.5').toString())
     expect(blockMgxHoldings.toString()).toEqual(toBN('3').toString())
@@ -231,7 +217,7 @@ async function provideApiMock({
   liquidityAssets?: Array<[[string, string], string]>
   pools?: Array<[[string, string], [BN, BN]]>
 }) {
-  return {
+  const api = {
     query: {
       tokens: {
         accounts: {
@@ -249,5 +235,9 @@ async function provideApiMock({
         },
       },
     },
+  }
+
+  return {
+    at: vi.fn().mockResolvedValue(api),
   }
 }

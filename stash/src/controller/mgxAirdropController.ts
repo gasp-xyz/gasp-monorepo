@@ -5,7 +5,7 @@ import {
 } from '../service/MgxAirdropService.js'
 import { mgxAirdropRepository } from '../repository/MgxAirdropRepository.js'
 import * as errorHandler from '../error/Handler.js'
-import { BN_ZERO } from 'gasp-sdk'
+import { BN_ZERO, Mangata } from 'gasp-sdk'
 import { BadRequestException } from '../error/Exception.js'
 import {
   mgxAirdropEligibilitySchema,
@@ -45,8 +45,12 @@ export async function checkEligibility(req: Request, res: Response) {
 
     mgxAirdropEligibilitySchema.validateSync({ address })
 
+    const MANGATA_API = await Mangata.instance([
+      process.env.OLD_MANGATA_NODE_URL,
+    ]).api()
+
     const snapshotPromises = SNAPSHOTS.map((snapshot) =>
-      getEligibilityAtBlockN(snapshot, address)
+      getEligibilityAtBlockN(MANGATA_API, snapshot, address)
     )
 
     const snapshots = await Promise.all(snapshotPromises)
@@ -129,8 +133,12 @@ export async function linkAddress(req: Request, res: Response) {
       })
     }
 
+    const MANGATA_API = await Mangata.instance([
+      process.env.OLD_MANGATA_NODE_URL,
+    ]).api()
+
     const snapshotPromises = SNAPSHOTS.map((snapshot) =>
-      getEligibilityAtBlockN(snapshot, mangataXAddress)
+      getEligibilityAtBlockN(MANGATA_API, snapshot, mangataXAddress)
     )
     const snapshots = await Promise.all(snapshotPromises)
 
