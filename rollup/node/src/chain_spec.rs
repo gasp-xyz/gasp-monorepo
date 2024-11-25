@@ -421,8 +421,8 @@ fn rollup_genesis(
 			_phantom: Default::default(),
 			dispute_periods: [
 				(pallet_rolldown::messages::Chain::Ethereum, 10u128),
-				(pallet_rolldown::messages::Chain::Arbitrum, 20u128),
-				(pallet_rolldown::messages::Chain::Base, 20u128),
+				(pallet_rolldown::messages::Chain::Arbitrum, 15u128),
+				(pallet_rolldown::messages::Chain::Base, 15u128),
 			]
 			.iter()
 			.cloned()
