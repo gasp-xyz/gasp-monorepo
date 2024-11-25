@@ -1312,6 +1312,11 @@
     "name": "initialize",
     "inputs": [
       {
+        "name": "pauserRegistry",
+        "type": "address",
+        "internalType": "contract IPauserRegistry"
+      },
+      {
         "name": "admin",
         "type": "address",
         "internalType": "address"
@@ -1383,9 +1388,41 @@
   {
     "type": "function",
     "name": "pause",
+    "inputs": [
+      {
+        "name": "newPausedStatus",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "pauseAll",
     "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "paused",
+    "inputs": [
+      {
+        "name": "index",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -1394,8 +1431,21 @@
     "outputs": [
       {
         "name": "",
-        "type": "bool",
-        "internalType": "bool"
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "pauserRegistry",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract IPauserRegistry"
       }
     ],
     "stateMutability": "view"
@@ -1476,6 +1526,19 @@
   },
   {
     "type": "function",
+    "name": "setPauserRegistry",
+    "inputs": [
+      {
+        "name": "newPauserRegistry",
+        "type": "address",
+        "internalType": "contract IPauserRegistry"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "setUpdater",
     "inputs": [
       {
@@ -1509,7 +1572,13 @@
   {
     "type": "function",
     "name": "unpause",
-    "inputs": [],
+    "inputs": [
+      {
+        "name": "newPausedStatus",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -1800,8 +1869,33 @@
       {
         "name": "account",
         "type": "address",
-        "indexed": false,
+        "indexed": true,
         "internalType": "address"
+      },
+      {
+        "name": "newPausedStatus",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PauserRegistrySet",
+    "inputs": [
+      {
+        "name": "pauserRegistry",
+        "type": "address",
+        "indexed": false,
+        "internalType": "contract IPauserRegistry"
+      },
+      {
+        "name": "newPauserRegistry",
+        "type": "address",
+        "indexed": false,
+        "internalType": "contract IPauserRegistry"
       }
     ],
     "anonymous": false
@@ -1888,8 +1982,14 @@
       {
         "name": "account",
         "type": "address",
-        "indexed": false,
+        "indexed": true,
         "internalType": "address"
+      },
+      {
+        "name": "newPausedStatus",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
       }
     ],
     "anonymous": false
@@ -2135,11 +2235,6 @@
   {
     "type": "error",
     "name": "ZeroAmount",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "ZeroRecipient",
     "inputs": []
   },
   {

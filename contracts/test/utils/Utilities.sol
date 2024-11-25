@@ -1,13 +1,15 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: Unlicense
+// kudos to: https://github.com/FrankieIsLost/forge-template/blob/master/src/test/utils/Utilities.sol
 pragma solidity >=0.8.0;
-
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Vm} from "forge-std/Vm.sol";
+import "forge-std/console.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract MyERC20 is ERC20 {
-    constructor() ERC20("Name", "SYM") {}
-
+    constructor() ERC20("Name", "SYM") {
+        this;
+    }
     function mint(address recipient) public {
         _mint(recipient, 1 * 10 ** 18 );
     }

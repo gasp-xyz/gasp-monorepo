@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {AccessControlUpgradeable} from "@openzeppelin-upgrades/contracts/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
-import {PausableUpgradeable} from "@openzeppelin-upgrades/contracts/security/PausableUpgradeable.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin-upgrades/contracts/security/ReentrancyGuardUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin-upgrades/contracts/access/AccessControlUpgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin-upgrades/contracts/utils/ContextUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin-upgrades/contracts/security/ReentrancyGuardUpgradeable.sol";
+import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRolldown} from "./IRolldown.sol";
+import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
 import {LMerkleTree} from "./LMerkleTree.sol";
 
 contract Rolldown is
@@ -17,15 +18,15 @@ contract Rolldown is
     ContextUpgradeable,
     AccessControlUpgradeable,
     ReentrancyGuardUpgradeable,
-    PausableUpgradeable,
+    Pausable,
     IRolldown
 {
     using Address for address payable;
     using SafeERC20 for IERC20;
 
-    bytes32 public constant override UPDATER_ROLE = keccak256("UPDATER_ROLE");
-    address public constant override NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
-    address public constant override CLOSED = 0x1111111111111111111111111111111111111111;
+    bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
+    address public constant NATIVE_TOKEN_ADDRESS = 0x0000000000000000000000000000000000000001;
+    address public constant CLOSED = 0x1111111111111111111111111111111111111111;
 
     // Counter for mapping key
     uint256 public override counter;
@@ -55,10 +56,12 @@ contract Rolldown is
         _;
     }
 
-    function initialize(address admin, ChainId chainId, address updater) external override initializer {
+    function initialize(IPauserRegistry pauserRegistry, address admin, ChainId chainId, address updater)
+        external
+        initializer
+    {
         ContextUpgradeable.__Context_init();
         AccessControlUpgradeable.__AccessControl_init();
-        PausableUpgradeable.__Pausable_init();
         ReentrancyGuardUpgradeable.__ReentrancyGuard_init();
 
         if (admin == address(0)) {
@@ -72,18 +75,12 @@ contract Rolldown is
         _grantRole(UPDATER_ROLE, updater);
         updaterAccount = updater;
 
+        _initializePauser(pauserRegistry, UNPAUSE_ALL);
+
         counter = 1;
         lastProcessedUpdate_origin_l1 = 0;
         lastProcessedUpdate_origin_l2 = 0;
         chain = chainId;
-    }
-
-    function pause() external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        _pause();
-    }
-
-    function unpause() external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        _unpause();
     }
 
     function setUpdater(address updater) external override onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -204,10 +201,6 @@ contract Rolldown is
         private
         checkAmountWithFerryTip(withdrawal.amount, withdrawal.ferryTip)
     {
-        if (withdrawal.recipient == address(0)) {
-            revert ZeroRecipient();
-        }
-
         bytes32 withdrawalHash = hashWithdrawal(withdrawal);
         if (processedL2Requests[withdrawalHash] != address(0)) {
             revert WithdrawalAlreadyFerried(withdrawalHash);
@@ -494,6 +487,7 @@ contract Rolldown is
         }
 
         emit NativeTokensWithdrawn(recipient, amount);
+
         Address.sendValue(payable(recipient), amount);
     }
 
@@ -503,6 +497,7 @@ contract Rolldown is
         }
 
         emit ERC20TokensWithdrawn(recipient, tokenAddress, amount);
+
         IERC20(tokenAddress).safeTransfer(recipient, amount);
     }
 
@@ -551,7 +546,7 @@ contract Rolldown is
             } else if (cancelResolutions[id].requestId.id > 0) {
                 ++cancelCounter;
             } else {
-                revert InvalidRequestRange(start, end);
+                revert("Invalid range");
             }
 
             unchecked {
