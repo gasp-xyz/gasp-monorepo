@@ -47,6 +47,8 @@ contract RolldownDeployer is Script, Utils, Test {
         evm = "ethereum_";
       } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
         evm = "arbitrum_"; 
+      } else if (chain == IRolldownPrimitives.ChainId.Base) {
+        evm = "base_"; 
       } else {
         revert("Unsupported chain");
       }

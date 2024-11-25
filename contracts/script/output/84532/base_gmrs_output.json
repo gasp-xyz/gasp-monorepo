@@ -1,0 +1,25 @@
+{
+  "addresses": {
+    "gaspErc20Mock": "0xF5C9b2ee7bb091E245c92feCb9218Bf952BEA637",
+    "gmrs": "0x2a1B7d69017D14dAf08D24911596e8C244c9E2a8",
+    "gmrsImplementation": "0x109e8d2637449F651666f2F528EC9a699693cF47",
+    "gmrsPauseReg": "0xD2333E11ea617E30fb97900f6ac9782A85f233e7",
+    "gmrsProxyAdmin": "0x96A14F6eb10a67167249Adb64149F33f5D6e8f2b",
+    "rolldown": "0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1",
+    "rolldownImplementation": "0xdFC848742eceB4B5e245D316d909B842466988a3",
+    "rolldownPauseReg": "0xB1F013a1e24aaA62b75eF6ca2BEAF0eeAE8A939a",
+    "rolldownProxyAdmin": "0x74CD30e6E572b242b75e5a5e882E2Ca4974f438A"
+  },
+  "chainInfo": {
+    "chainId": 84532,
+    "deploymentBlock": 18128959
+  },
+  "permissions": {
+    "gmrsOwner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "gmrsUpdater": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "gmrsUpgrader": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "rolldownOwner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "rolldownUpdater": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "rolldownUpgrader": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337"
+  }
+}
