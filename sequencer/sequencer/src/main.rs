@@ -105,8 +105,7 @@ async fn run(config: Config) -> Result<(), Error> {
     let chain = match config.chain.to_lowercase().as_ref() {
         "ethereum" => Ok(l2::types::Chain::Ethereum),
         "arbitrum" => Ok(l2::types::Chain::Arbitrum),
-        //NOTE: regenerate bindings
-        // "arbitrum" => Ok(l2::types::Chain::Base),
+        "base" => Ok(l2::types::Chain::Base),
         _ => Err(Error::UnsupportedChain(config.chain.clone())),
     }?;
 

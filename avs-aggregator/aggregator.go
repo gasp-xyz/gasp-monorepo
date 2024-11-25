@@ -891,6 +891,8 @@ func (agg *Aggregator) verifyTaskResponseExistsOnL2(rdTaskResponse taskmanager.I
 		chain = "Ethereum"
 	} else if rdTaskResponse.ChainId == 1 {
 		chain = "Arbitrum"
+	} else if rdTaskResponse.ChainId == 2 {
+		chain = "Base"
 	} else {
 		return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 unknown chain id %v", rdTaskResponse.ChainId)
 	}

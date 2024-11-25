@@ -270,6 +270,7 @@ mod test {
         hex!("dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97");
     // const ETHEREUM: l2types::Chain = l2types::Chain::Ethereum;
     // const ARBITRUM: l2types::Chain = l2types::Chain::Arbitrum;
+    // const BASE: l2types::Chain = l2types::Chain::Base;
 
     // async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error>;
     // async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error>;

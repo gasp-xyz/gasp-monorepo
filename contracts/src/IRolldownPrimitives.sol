@@ -67,7 +67,8 @@ interface IRolldownPrimitives {
 
     enum ChainId {
         Ethereum,
-        Arbitrum
+        Arbitrum,
+        Base
     }
 
     enum L2RequestType {

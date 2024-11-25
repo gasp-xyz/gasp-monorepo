@@ -504,6 +504,8 @@ pub(crate) mod test {
     const DUMMY_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000000");
     const ETHEREUM: l2types::Chain = l2types::Chain::Ethereum;
     const ARBITRUM: l2types::Chain = l2types::Chain::Arbitrum;
+    #[allow(dead_code)]
+    const BASE: l2types::Chain = l2types::Chain::Base;
 
     #[allow(dead_code)]
     pub enum Request {
