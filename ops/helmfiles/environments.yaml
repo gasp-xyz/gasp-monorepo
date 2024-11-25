@@ -1,0 +1,21 @@
+environments: 
+  default:
+    values:
+     - environmentName: local
+     - config/default.yaml
+  fungible:
+    values:
+     - environmentName: {{ env "ENVIRONMENT" }}
+     - config/fungible.yaml
+  dev:
+    values:
+      - environmentName: dev
+      - config/dev.yaml
+  frontend:
+    values:
+      - environmentName: frontend
+      - config/frontend.yaml
+  holesky:
+    values:
+    - environmentName: holesky
+    - config/holesky.yaml
