@@ -587,6 +587,7 @@ pub(crate) mod test {
         let pending: PendingUpdateWithKeys = (1u128, update, update_hash);
 
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_update_hash()
             .with(eq(1u128), eq(1u128))
@@ -594,7 +595,7 @@ pub(crate) mod test {
             .returning(move |_, _| Ok(correct_hash));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
@@ -617,10 +618,11 @@ pub(crate) mod test {
         let pending: PendingUpdateWithKeys = (1u128, update, update_hash);
 
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock.expect_get_update_hash().times(0);
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
@@ -647,6 +649,7 @@ pub(crate) mod test {
         let pending: PendingUpdateWithKeys = (1u128, update, update_hash);
 
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_update_hash()
             .with(eq(1u128), eq(1u128))
@@ -654,7 +657,7 @@ pub(crate) mod test {
             .returning(move |_, _| Ok(correct_hash));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
@@ -671,13 +674,14 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_find_pending_cancels_to_close() {
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_finalized_request_id()
             .return_once(|| Ok(Some(1u128)));
         l1mock.expect_is_closed().returning(|_| Ok(false));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_cancels()
             .return_once(|_, _| Ok(vec![1u128, 2u128]));
@@ -696,6 +700,7 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_find_pending_cancels_to_close2() {
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_finalized_request_id()
             .return_once(|| Ok(Some(10u128)));
@@ -705,7 +710,7 @@ pub(crate) mod test {
         let cancels = pending_cancels.clone();
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_l2_request_hash()
             .returning(|_, _, _| Ok(Some(H256::zero())));
@@ -735,6 +740,7 @@ pub(crate) mod test {
         ));
 
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_finalized_request_id()
             .return_once(|| Ok(Some(10u128)));
@@ -755,7 +761,7 @@ pub(crate) mod test {
         let cancels = pending_cancels.clone();
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_l2_request_hash()
             .with(eq(pending_cancels[0]), eq(ETHEREUM), eq(at))
@@ -782,12 +788,13 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_find_pending_cancels_to_close_when_there_is_no_merkle_root_provided_to_l1() {
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_finalized_request_id()
             .return_once(|| Ok(None));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock.expect_get_pending_cancels().times(0);
 
         let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
@@ -801,12 +808,13 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_get_pending_update_when_there_are_no_requests() {
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_reqeust_id()
             .return_once(|| Ok(None));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_latest_processed_request_id()
             .return_once(|_, _| Ok(0u128));
@@ -822,12 +830,13 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_get_pending_update_when_there_are_requests() {
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_reqeust_id()
             .return_once(|| Ok(Some(10u128)));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_latest_processed_request_id()
             .return_once(|_, _| Ok(0u128));
@@ -863,12 +872,13 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_get_pending_update_when_there_are_too_many_requests_for_single_update() {
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_reqeust_id()
             .return_once(|| Ok(Some(1000u128)));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_latest_processed_request_id()
             .return_once(|_, _| Ok(0u128));
@@ -912,6 +922,7 @@ pub(crate) mod test {
         let pending: PendingUpdateWithKeys = (33u128, update, update_hash);
 
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_update_hash()
             .with(eq(1u128), eq(1u128))
@@ -919,7 +930,7 @@ pub(crate) mod test {
             .returning(move |_, _| Err(L1Error::InvalidRange));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
@@ -944,6 +955,7 @@ pub(crate) mod test {
         let pending: PendingUpdateWithKeys = (update_executed_at, update, update_hash.clone());
 
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_update_hash()
             .times(1)
@@ -951,7 +963,7 @@ pub(crate) mod test {
             .return_once(move |_, _| Ok(update_hash));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
@@ -992,6 +1004,7 @@ pub(crate) mod test {
             (old_update_executed_at, update, update_hash.clone());
 
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_update_hash()
             .times(1)
@@ -999,7 +1012,7 @@ pub(crate) mod test {
             .return_once(move |_, _| Ok(update_hash));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
@@ -1052,6 +1065,7 @@ pub(crate) mod test {
         );
 
         let mut l1mock = MockL1::new();
+        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_update_hash()
             .times(1)
@@ -1064,7 +1078,7 @@ pub(crate) mod test {
             .return_once(move |_, _| Ok(invalid_hash));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_address().return_const(DUMMY_ADDRESS);
+        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
