@@ -9,7 +9,9 @@ use hex::encode as hex_encode;
 use primitive_types::H256;
 use sha3::{Digest, Keccak256};
 
-use alloy::providers::{Identity, PendingTransactionError, ProviderBuilder, RootProvider, Provider};
+use alloy::providers::{
+    Identity, PendingTransactionError, Provider, ProviderBuilder, RootProvider,
+};
 
 pub mod types {
     pub use bindings::rolldown::IRolldownPrimitives::Cancel;
@@ -190,19 +192,25 @@ impl L1Interface for RolldownContract {
     }
 
     #[tracing::instrument(skip(self))]
-    async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error>  {
+    async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error> {
         // https://www.blocknative.com/blog/eip-1559-fees
         // We do not want client to estimate we would like to make our own estimate
         // based on this equation: Max Fee = (2 * Base Fee) + Max Priority Fee
-      
+
         // Max Fee = maxFeePerGas (client)
         // Max Priority Fee = maxPriorityFeePerGas (client)
-      
+
         let base_fee_in_wei = self.contract_handle.provider().get_gas_price().await?;
-        let max_priority_fee_per_gas_in_wei = self.contract_handle.provider().get_max_priority_fee_per_gas().await?;
-        let max_fee_in_wei = base_fee_in_wei.saturating_mul(2).saturating_add(max_priority_fee_per_gas_in_wei);
+        let max_priority_fee_per_gas_in_wei = self
+            .contract_handle
+            .provider()
+            .get_max_priority_fee_per_gas()
+            .await?;
+        let max_fee_in_wei = base_fee_in_wei
+            .saturating_mul(2)
+            .saturating_add(max_priority_fee_per_gas_in_wei);
         Ok((max_fee_in_wei, max_priority_fee_per_gas_in_wei))
-      }
+    }
 
     #[tracing::instrument(skip(self, cancel))]
     async fn close_cancel(
@@ -212,7 +220,8 @@ impl L1Interface for RolldownContract {
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
         let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
-        let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) = self.estimate_gas_in_wei().await?;
+        let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) =
+            self.estimate_gas_in_wei().await?;
         let call = self
             .contract_handle
             .close_cancel(cancel, merkle_root.0.into(), proof)
