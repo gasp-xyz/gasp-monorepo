@@ -1,8 +1,7 @@
 services:
-  eth-ferry-deposit:
+  ferry-deposit-eth:
     restart: unless-stopped
-    platform: linux/amd64
-    image: mangatasolutions/ferry-deposit:local-eth
+    image: gaspxyz/ferry-deposit:local-eth
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully

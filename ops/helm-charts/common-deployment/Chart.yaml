@@ -1,0 +1,7 @@
+apiVersion: v1
+name: deployment
+version: 1.0.0
+description: The Universal Deployment Helm Chart
+keywords:
+  - deployment
+  - helm

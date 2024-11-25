@@ -7,7 +7,4 @@
 	branch = m2-mainnet
 [submodule "avs-eigensdk-go"]
 	path = avs-eigensdk-go
-	url = https://github.com/mangata-finance/eigensdk-go
-[submodule "lib/forge-std"]
-	path = lib/forge-std
-	url = https://github.com/foundry-rs/forge-std
+	url = https://github.com/gasp-xyz/eigensdk-go

@@ -1,6 +1,6 @@
 services:
   avs-aggregator:
-    image: mangatasolutions/avs-aggregator:${AVS_AGGREGATOR_VERSION:-local}
+    image: gaspxyz/avs-aggregator:${AVS_AGGREGATOR_VERSION:-local}
     restart: unless-stopped
     build:
       context: ../
