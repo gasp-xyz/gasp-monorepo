@@ -509,7 +509,12 @@ interface IRolldownPrimitives {
   }
 ]
 ```*/
-#[allow(non_camel_case_types, non_snake_case, clippy::style)]
+#[allow(
+    non_camel_case_types,
+    non_snake_case,
+    clippy::pub_underscore_fields,
+    clippy::style
+)]
 pub mod IRolldownPrimitives {
     use super::*;
     use alloy::sol_types as alloy_sol_types;
@@ -536,13 +541,18 @@ pub mod IRolldownPrimitives {
     /**```solidity
     struct Range { uint256 start; uint256 end; }
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct Range {
-        pub start: alloy::sol_types::private::U256,
-        pub end: alloy::sol_types::private::U256,
+        pub start: alloy::sol_types::private::primitives::aliases::U256,
+        pub end: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -552,8 +562,8 @@ pub mod IRolldownPrimitives {
         );
         #[doc(hidden)]
         type UnderlyingRustTuple<'a> = (
-            alloy::sol_types::private::U256,
-            alloy::sol_types::private::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
         );
         #[cfg(test)]
         #[allow(dead_code, unreachable_patterns)]
@@ -722,13 +732,18 @@ pub mod IRolldownPrimitives {
     ```solidity
     error FerryTipExceedsAmount(uint256 ferryTip, uint256 amount);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct FerryTipExceedsAmount {
-        pub ferryTip: alloy::sol_types::private::U256,
-        pub amount: alloy::sol_types::private::U256,
+        pub ferryTip: alloy::sol_types::private::primitives::aliases::U256,
+        pub amount: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -738,8 +753,8 @@ pub mod IRolldownPrimitives {
         );
         #[doc(hidden)]
         type UnderlyingRustTuple<'a> = (
-            alloy::sol_types::private::U256,
-            alloy::sol_types::private::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
         );
         #[cfg(test)]
         #[allow(dead_code, unreachable_patterns)]
@@ -796,13 +811,18 @@ pub mod IRolldownPrimitives {
     ```solidity
     error InvalidFerriedAmount(uint256 actualAmount, uint256 expectedAmount);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct InvalidFerriedAmount {
-        pub actualAmount: alloy::sol_types::private::U256,
-        pub expectedAmount: alloy::sol_types::private::U256,
+        pub actualAmount: alloy::sol_types::private::primitives::aliases::U256,
+        pub expectedAmount: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -812,8 +832,8 @@ pub mod IRolldownPrimitives {
         );
         #[doc(hidden)]
         type UnderlyingRustTuple<'a> = (
-            alloy::sol_types::private::U256,
-            alloy::sol_types::private::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
         );
         #[cfg(test)]
         #[allow(dead_code, unreachable_patterns)]
@@ -870,18 +890,23 @@ pub mod IRolldownPrimitives {
     ```solidity
     error InvalidRequestId(uint256 requestId);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct InvalidRequestId {
-        pub requestId: alloy::sol_types::private::U256,
+        pub requestId: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
         type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
         #[doc(hidden)]
-        type UnderlyingRustTuple<'a> = (alloy::sol_types::private::U256,);
+        type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
         #[cfg(test)]
         #[allow(dead_code, unreachable_patterns)]
         fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -931,12 +956,17 @@ pub mod IRolldownPrimitives {
     ```solidity
     error InvalidRequestProof(bytes32 merkleRoot);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct InvalidRequestProof {
         pub merkleRoot: alloy::sol_types::private::FixedBytes<32>,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -994,13 +1024,18 @@ pub mod IRolldownPrimitives {
     ```solidity
     error InvalidRequestRange(uint256 start, uint256 end);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct InvalidRequestRange {
-        pub start: alloy::sol_types::private::U256,
-        pub end: alloy::sol_types::private::U256,
+        pub start: alloy::sol_types::private::primitives::aliases::U256,
+        pub end: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1010,8 +1045,8 @@ pub mod IRolldownPrimitives {
         );
         #[doc(hidden)]
         type UnderlyingRustTuple<'a> = (
-            alloy::sol_types::private::U256,
-            alloy::sol_types::private::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
         );
         #[cfg(test)]
         #[allow(dead_code, unreachable_patterns)]
@@ -1068,13 +1103,18 @@ pub mod IRolldownPrimitives {
     ```solidity
     error InvalidUpdateRange(uint256 start, uint256 end);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct InvalidUpdateRange {
-        pub start: alloy::sol_types::private::U256,
-        pub end: alloy::sol_types::private::U256,
+        pub start: alloy::sol_types::private::primitives::aliases::U256,
+        pub end: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1084,8 +1124,8 @@ pub mod IRolldownPrimitives {
         );
         #[doc(hidden)]
         type UnderlyingRustTuple<'a> = (
-            alloy::sol_types::private::U256,
-            alloy::sol_types::private::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
         );
         #[cfg(test)]
         #[allow(dead_code, unreachable_patterns)]
@@ -1142,12 +1182,17 @@ pub mod IRolldownPrimitives {
     ```solidity
     error L2RequestAlreadyProcessed(bytes32 requestHash);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct L2RequestAlreadyProcessed {
         pub requestHash: alloy::sol_types::private::FixedBytes<32>,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1205,13 +1250,18 @@ pub mod IRolldownPrimitives {
     ```solidity
     error PreviousUpdateMissed(uint256 currentStartRange, uint256 lastProcessedUpdate);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct PreviousUpdateMissed {
-        pub currentStartRange: alloy::sol_types::private::U256,
-        pub lastProcessedUpdate: alloy::sol_types::private::U256,
+        pub currentStartRange: alloy::sol_types::private::primitives::aliases::U256,
+        pub lastProcessedUpdate: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1221,8 +1271,8 @@ pub mod IRolldownPrimitives {
         );
         #[doc(hidden)]
         type UnderlyingRustTuple<'a> = (
-            alloy::sol_types::private::U256,
-            alloy::sol_types::private::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
         );
         #[cfg(test)]
         #[allow(dead_code, unreachable_patterns)]
@@ -1279,14 +1329,19 @@ pub mod IRolldownPrimitives {
     ```solidity
     error RequestOutOfRange(uint256 requestId, uint256 start, uint256 end);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct RequestOutOfRange {
-        pub requestId: alloy::sol_types::private::U256,
-        pub start: alloy::sol_types::private::U256,
-        pub end: alloy::sol_types::private::U256,
+        pub requestId: alloy::sol_types::private::primitives::aliases::U256,
+        pub start: alloy::sol_types::private::primitives::aliases::U256,
+        pub end: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1297,9 +1352,9 @@ pub mod IRolldownPrimitives {
         );
         #[doc(hidden)]
         type UnderlyingRustTuple<'a> = (
-            alloy::sol_types::private::U256,
-            alloy::sol_types::private::U256,
-            alloy::sol_types::private::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
         );
         #[cfg(test)]
         #[allow(dead_code, unreachable_patterns)]
@@ -1360,18 +1415,23 @@ pub mod IRolldownPrimitives {
     ```solidity
     error RequestRangeTooLarge(uint256 count);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct RequestRangeTooLarge {
-        pub count: alloy::sol_types::private::U256,
+        pub count: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
         type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<256>,);
         #[doc(hidden)]
-        type UnderlyingRustTuple<'a> = (alloy::sol_types::private::U256,);
+        type UnderlyingRustTuple<'a> = (alloy::sol_types::private::primitives::aliases::U256,);
         #[cfg(test)]
         #[allow(dead_code, unreachable_patterns)]
         fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -1421,10 +1481,15 @@ pub mod IRolldownPrimitives {
     ```solidity
     error UnexpectedMerkleRoot();
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct UnexpectedMerkleRoot {}
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1476,13 +1541,18 @@ pub mod IRolldownPrimitives {
     ```solidity
     error UpdateAlreadyApplied(uint256 currentEndRange, uint256 lastProcessedUpdate);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct UpdateAlreadyApplied {
-        pub currentEndRange: alloy::sol_types::private::U256,
-        pub lastProcessedUpdate: alloy::sol_types::private::U256,
+        pub currentEndRange: alloy::sol_types::private::primitives::aliases::U256,
+        pub lastProcessedUpdate: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1492,8 +1562,8 @@ pub mod IRolldownPrimitives {
         );
         #[doc(hidden)]
         type UnderlyingRustTuple<'a> = (
-            alloy::sol_types::private::U256,
-            alloy::sol_types::private::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
+            alloy::sol_types::private::primitives::aliases::U256,
         );
         #[cfg(test)]
         #[allow(dead_code, unreachable_patterns)]
@@ -1550,12 +1620,17 @@ pub mod IRolldownPrimitives {
     ```solidity
     error WithdrawalAlreadyFerried(bytes32 withdrawalHash);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct WithdrawalAlreadyFerried {
         pub withdrawalHash: alloy::sol_types::private::FixedBytes<32>,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1613,10 +1688,15 @@ pub mod IRolldownPrimitives {
     ```solidity
     error ZeroAdmin();
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct ZeroAdmin {}
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1668,10 +1748,15 @@ pub mod IRolldownPrimitives {
     ```solidity
     error ZeroAmount();
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct ZeroAmount {}
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1723,10 +1808,15 @@ pub mod IRolldownPrimitives {
     ```solidity
     error ZeroRootCount();
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct ZeroRootCount {}
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1778,10 +1868,15 @@ pub mod IRolldownPrimitives {
     ```solidity
     error ZeroToken();
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct ZeroToken {}
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1833,10 +1928,15 @@ pub mod IRolldownPrimitives {
     ```solidity
     error ZeroTransferAmount();
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct ZeroTransferAmount {}
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1888,10 +1988,15 @@ pub mod IRolldownPrimitives {
     ```solidity
     error ZeroUpdateRange();
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct ZeroUpdateRange {}
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1943,10 +2048,15 @@ pub mod IRolldownPrimitives {
     ```solidity
     error ZeroUpdater();
     ```*/
-    #[allow(non_camel_case_types, non_snake_case)]
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct ZeroUpdater {}
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
@@ -1998,21 +2108,31 @@ pub mod IRolldownPrimitives {
     ```solidity
     event DepositAcceptedIntoQueue(uint256 indexed requestId, address indexed depositRecipient, address indexed tokenAddress, uint256 amount, uint256 ferryTip);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     #[derive(Clone)]
     pub struct DepositAcceptedIntoQueue {
         #[allow(missing_docs)]
-        pub requestId: alloy::sol_types::private::U256,
+        pub requestId: alloy::sol_types::private::primitives::aliases::U256,
         #[allow(missing_docs)]
         pub depositRecipient: alloy::sol_types::private::Address,
         #[allow(missing_docs)]
         pub tokenAddress: alloy::sol_types::private::Address,
         #[allow(missing_docs)]
-        pub amount: alloy::sol_types::private::U256,
+        pub amount: alloy::sol_types::private::primitives::aliases::U256,
         #[allow(missing_docs)]
-        pub ferryTip: alloy::sol_types::private::U256,
+        pub ferryTip: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -2050,6 +2170,19 @@ pub mod IRolldownPrimitives {
                     amount: data.0,
                     ferryTip: data.1,
                 }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
@@ -2113,17 +2246,27 @@ pub mod IRolldownPrimitives {
     ```solidity
     event DisputeResolutionAcceptedIntoQueue(uint256 indexed requestId, bool cancelJustified, bytes32 cancelResolutionHash);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     #[derive(Clone)]
     pub struct DisputeResolutionAcceptedIntoQueue {
         #[allow(missing_docs)]
-        pub requestId: alloy::sol_types::private::U256,
+        pub requestId: alloy::sol_types::private::primitives::aliases::U256,
         #[allow(missing_docs)]
         pub cancelJustified: bool,
         #[allow(missing_docs)]
         pub cancelResolutionHash: alloy::sol_types::private::FixedBytes<32>,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -2157,6 +2300,19 @@ pub mod IRolldownPrimitives {
                     cancelJustified: data.0,
                     cancelResolutionHash: data.1,
                 }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
@@ -2211,7 +2367,12 @@ pub mod IRolldownPrimitives {
     ```solidity
     event ERC20TokensWithdrawn(address indexed sender, address indexed tokenAddress, uint256 amount);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     #[derive(Clone)]
     pub struct ERC20TokensWithdrawn {
         #[allow(missing_docs)]
@@ -2219,9 +2380,14 @@ pub mod IRolldownPrimitives {
         #[allow(missing_docs)]
         pub tokenAddress: alloy::sol_types::private::Address,
         #[allow(missing_docs)]
-        pub amount: alloy::sol_types::private::U256,
+        pub amount: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -2252,6 +2418,19 @@ pub mod IRolldownPrimitives {
                     tokenAddress: topics.2,
                     amount: data.0,
                 }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
@@ -2308,17 +2487,27 @@ pub mod IRolldownPrimitives {
     ```solidity
     event FailedDepositResolutionClosed(uint256 indexedrequestId, uint256 originDepositId, bytes32 failedDespotiResolutionHash);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     #[derive(Clone)]
     pub struct FailedDepositResolutionClosed {
         #[allow(missing_docs)]
-        pub indexedrequestId: alloy::sol_types::private::U256,
+        pub indexedrequestId: alloy::sol_types::private::primitives::aliases::U256,
         #[allow(missing_docs)]
-        pub originDepositId: alloy::sol_types::private::U256,
+        pub originDepositId: alloy::sol_types::private::primitives::aliases::U256,
         #[allow(missing_docs)]
         pub failedDespotiResolutionHash: alloy::sol_types::private::FixedBytes<32>,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -2350,6 +2539,19 @@ pub mod IRolldownPrimitives {
                     originDepositId: data.1,
                     failedDespotiResolutionHash: data.2,
                 }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
@@ -2404,15 +2606,25 @@ pub mod IRolldownPrimitives {
     ```solidity
     event FerriedWithdrawalClosed(uint256 indexed requestId, bytes32 withdrawalHash);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     #[derive(Clone)]
     pub struct FerriedWithdrawalClosed {
         #[allow(missing_docs)]
-        pub requestId: alloy::sol_types::private::U256,
+        pub requestId: alloy::sol_types::private::primitives::aliases::U256,
         #[allow(missing_docs)]
         pub withdrawalHash: alloy::sol_types::private::FixedBytes<32>,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -2441,6 +2653,19 @@ pub mod IRolldownPrimitives {
                     requestId: topics.1,
                     withdrawalHash: data.0,
                 }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
@@ -2490,7 +2715,12 @@ pub mod IRolldownPrimitives {
     ```solidity
     event L2UpdateAccepted(bytes32 root, Range range);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     #[derive(Clone)]
     pub struct L2UpdateAccepted {
         #[allow(missing_docs)]
@@ -2498,7 +2728,12 @@ pub mod IRolldownPrimitives {
         #[allow(missing_docs)]
         pub range: <Range as alloy::sol_types::SolType>::RustType,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -2524,6 +2759,19 @@ pub mod IRolldownPrimitives {
                     root: data.0,
                     range: data.1,
                 }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
@@ -2571,15 +2819,25 @@ pub mod IRolldownPrimitives {
     ```solidity
     event NativeTokensWithdrawn(address indexed sender, uint256 amount);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     #[derive(Clone)]
     pub struct NativeTokensWithdrawn {
         #[allow(missing_docs)]
         pub sender: alloy::sol_types::private::Address,
         #[allow(missing_docs)]
-        pub amount: alloy::sol_types::private::U256,
+        pub amount: alloy::sol_types::private::primitives::aliases::U256,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -2608,6 +2866,19 @@ pub mod IRolldownPrimitives {
                     sender: topics.1,
                     amount: data.0,
                 }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
@@ -2657,13 +2928,23 @@ pub mod IRolldownPrimitives {
     ```solidity
     event NewUpdaterSet(address indexed updater);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     #[derive(Clone)]
     pub struct NewUpdaterSet {
         #[allow(missing_docs)]
         pub updater: alloy::sol_types::private::Address,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -2689,6 +2970,19 @@ pub mod IRolldownPrimitives {
                 data: <Self::DataTuple<'_> as alloy_sol_types::SolType>::RustType,
             ) -> Self {
                 Self { updater: topics.1 }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
@@ -2734,15 +3028,25 @@ pub mod IRolldownPrimitives {
     ```solidity
     event WithdrawalClosed(uint256 indexed requestId, bytes32 withdrawalHash);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     #[derive(Clone)]
     pub struct WithdrawalClosed {
         #[allow(missing_docs)]
-        pub requestId: alloy::sol_types::private::U256,
+        pub requestId: alloy::sol_types::private::primitives::aliases::U256,
         #[allow(missing_docs)]
         pub withdrawalHash: alloy::sol_types::private::FixedBytes<32>,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -2771,6 +3075,19 @@ pub mod IRolldownPrimitives {
                     requestId: topics.1,
                     withdrawalHash: data.0,
                 }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
@@ -2820,13 +3137,18 @@ pub mod IRolldownPrimitives {
     ```solidity
     event WithdrawalFerried(uint256 indexedrequestId, uint256 amount, address indexed recipient, address indexed ferry, bytes32 withdrawalHash);
     ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     #[derive(Clone)]
     pub struct WithdrawalFerried {
         #[allow(missing_docs)]
-        pub indexedrequestId: alloy::sol_types::private::U256,
+        pub indexedrequestId: alloy::sol_types::private::primitives::aliases::U256,
         #[allow(missing_docs)]
-        pub amount: alloy::sol_types::private::U256,
+        pub amount: alloy::sol_types::private::primitives::aliases::U256,
         #[allow(missing_docs)]
         pub recipient: alloy::sol_types::private::Address,
         #[allow(missing_docs)]
@@ -2834,7 +3156,12 @@ pub mod IRolldownPrimitives {
         #[allow(missing_docs)]
         pub withdrawalHash: alloy::sol_types::private::FixedBytes<32>,
     }
-    #[allow(non_camel_case_types, non_snake_case, clippy::style)]
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
     const _: () = {
         use alloy::sol_types as alloy_sol_types;
         #[automatically_derived]
@@ -2872,6 +3199,19 @@ pub mod IRolldownPrimitives {
                     ferry: topics.2,
                     withdrawalHash: data.2,
                 }
+            }
+            #[inline]
+            fn check_signature(
+                topics: &<Self::TopicList as alloy_sol_types::SolType>::RustType,
+            ) -> alloy_sol_types::Result<()> {
+                if topics.0 != Self::SIGNATURE_HASH {
+                    return Err(alloy_sol_types::Error::invalid_event_signature_hash(
+                        Self::SIGNATURE,
+                        topics.0,
+                        Self::SIGNATURE_HASH,
+                    ));
+                }
+                Ok(())
             }
             #[inline]
             fn tokenize_body(&self) -> Self::DataToken<'_> {
