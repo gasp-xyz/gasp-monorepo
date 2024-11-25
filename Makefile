@@ -65,10 +65,20 @@ bindings-rs: ## generates rust bindings
 	cd ./updater && cargo fmt
 	cp -rf ./avs-finalizer/bindings ./updater/
 
+bindings-rs-alloy: ## generates rust alloy bindings
+	forge bind --alloy --bindings-path ./sequencer/bindings --root ./contracts --crate-name bindings --overwrite  --select IERC20 --select Rolldown
+	cd ./sequencer/bindings && cargo fmt
+
 bindings-json: ## generate JS bindings
 	cd ./contracts && forge build && cp out/Rolldown.sol/Rolldown.json ../rollup-sequencer/src/Rolldown.json
 
-bindings: bindings-go bindings-rs bindings-json ## generate all bindings
+bindings-gasp:
+	subxt metadata -f bytes -o metadata.scale --url http://127.0.0.1:9944
+	subxt codegen --attribute "#[allow(non_snake_case)]" --derive Clone --derive PartialEq --file metadata.scale | rustfmt --edition=2018 --emit=stdout > sequencer/sequencer/src/l2/gasp/gasp_bindings.rs
+	rm -rf metadata.scale
+
+
+bindings: bindings-go bindings-rs bindings-json bindings-rs-alloy## generate all bindings
 
 -----------------------------: ## 
 # We pipe all zapper logs through https://github.com/maoueh/zap-pretty so make sure to install it
