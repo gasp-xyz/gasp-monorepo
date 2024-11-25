@@ -35,6 +35,7 @@ pub enum L1Error {
 }
 
 pub trait L1Interface {
+    fn account_address(&self) -> [u8; 20];
     async fn get_native_balance(&self, address: [u8; 20]) -> Result<u128, L1Error>;
     async fn is_closed(&self, request_hash: H256) -> Result<bool, L1Error>;
     async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error>;
@@ -68,11 +69,14 @@ pub type RolldownInstanceType = bindings::rolldown::Rolldown::RolldownInstance<
 
 pub struct RolldownContract {
     contract_handle: RolldownInstanceType,
+    account_address: [u8; 20],
 }
 
 impl RolldownContract {
     pub async fn new(uri: &str, address: [u8; 20], private_key: [u8; 32]) -> Result<Self, L1Error> {
         let signer: PrivateKeySigner = hex::encode(private_key).parse().expect("valid private key");
+        let account_address: [u8; 20] = signer.address().0.into();
+        tracing::debug!("L1 account : {}", hex_encode(account_address));
 
         let wallet = EthereumWallet::new(signer);
         let provider = ProviderBuilder::new()
@@ -86,6 +90,7 @@ impl RolldownContract {
                 address.into(),
                 provider.clone(),
             ),
+            account_address,
         })
     }
 
@@ -105,6 +110,9 @@ impl RolldownContract {
 }
 
 impl L1Interface for RolldownContract {
+    fn account_address(&self) -> [u8; 20]{
+        self.account_address
+    }
     #[tracing::instrument(skip(self))]
     async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error> {
         let request_id = alloy::primitives::U256::from(request_id);

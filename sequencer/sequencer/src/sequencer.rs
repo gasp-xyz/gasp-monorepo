@@ -15,7 +15,8 @@ pub struct Sequencer<L1, L2> {
     l2: L2,
     chain: l2types::Chain,
     limit: u128,
-    address: [u8; 20],
+    l1_account_address: [u8; 20],
+    l2_account_address: [u8; 20],
     tx_cost: Option<u128>,
 }
 
@@ -43,13 +44,15 @@ where
     L2: L2Interface,
 {
     pub fn new(l1: L1, l2: L2, chain: l2types::Chain, limit: u128, tx_cost: Option<u128>) -> Self {
-        let address = l2.address();
+        let l1_account_address = l1.account_address();
+        let l2_account_address = l2.account_address();
         Self {
             l1,
             l2,
             chain,
             limit,
-            address,
+            l1_account_address,
+            l2_account_address,
             tx_cost,
         }
     }
@@ -80,7 +83,7 @@ where
             tracing::info!("#{} : block hash {}", number, hex_encode(block_hash));
 
             if !self.is_active_sequencer().await? {
-                tracing::error!("{} is not a sequencer for {:?}", hex_encode(self.address), self.chain);
+                tracing::error!("{} is not a sequencer for {:?}", hex_encode(self.l2_account_address), self.chain);
                 return Err(Error::NotASequencer);
 
             }
@@ -295,7 +298,7 @@ where
             .get_selected_sequencer(self.chain.clone(), at)
             .await?
         {
-            Some(selected) if selected == self.address => {
+            Some(selected) if selected == self.l2_account_address => {
                 tracing::debug!("i am selected");
                 Ok(true)
             }
@@ -303,7 +306,7 @@ where
                 tracing::debug!(
                     "im not the selected sequencer selected({}) vs me({})",
                     hex_encode(selected),
-                    hex_encode(self.address)
+                    hex_encode(self.l2_account_address)
                 );
                 Ok(false)
             }
@@ -327,7 +330,7 @@ where
         let at = self.get_latest_block_hash().await?;
         let active = self.l2.get_active_sequencers(self.chain.clone(), at).await?;
 
-        Ok(active.iter().any(|e| e == &(self.address)))
+        Ok(active.iter().any(|e| e == &(self.l2_account_address)))
     }
 
 
@@ -421,7 +424,7 @@ where
     }
 
     pub async fn get_my_balance(&self) -> Result<u128, Error> {
-        Ok(self.l1.get_native_balance(self.address).await?)
+        Ok(self.l1.get_native_balance(self.l1_account_address).await?)
     }
 }
 
@@ -440,6 +443,7 @@ pub(crate) mod test {
         pub L1 {}
 
         impl L1Interface for L1{
+            fn account_address(&self) -> [u8; 20];
             async fn get_latest_reqeust_id(&self) -> Result<Option<u128>, L1Error>;
             async fn get_update(&self, start: u128, end: u128) ->  Result<l1types::L1Update, L1Error>;
             async fn get_update_hash(&self, start: u128, end: u128) ->  Result<H256, L1Error>;
@@ -455,7 +459,7 @@ pub(crate) mod test {
         pub L2 {}
 
         impl L2Interface for L2{
-            fn address(&self) -> [u8; 20];
+            fn account_address(&self) -> [u8; 20];
             async fn get_latest_processed_request_id(&self, chain: l2types::Chain, at: H256) -> Result<u128, L2Error>;
             async fn get_read_rights(&self, chain: l2types::Chain, at: H256) -> Result<u128, L2Error>;
             async fn get_cancel_rights(&self, chain: l2types::Chain, at: H256) -> Result<u128, L2Error>;

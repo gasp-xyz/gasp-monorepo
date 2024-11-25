@@ -47,7 +47,7 @@ use gasp::api::runtime_types::rollup_runtime::RuntimeEvent;
 pub type L2Event = EventRecord<RuntimeEvent, H256>;
 
 pub trait L2Interface {
-    fn address(&self) -> [u8; 20];
+    fn account_address(&self) -> [u8; 20];
     async fn get_latest_processed_request_id(
         &self,
         chain: types::Chain,
@@ -298,7 +298,7 @@ impl Gasp {
 }
 
 impl L2Interface for Gasp {
-    fn address(&self) -> [u8; 20] {
+    fn account_address(&self) -> [u8; 20] {
         self.keypair.address().into_inner()
     }
 
