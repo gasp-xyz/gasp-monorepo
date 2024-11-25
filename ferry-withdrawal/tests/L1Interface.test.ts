@@ -148,12 +148,12 @@ describe('L1Interface', () => {
 
   it('should successfully connect through websocket', async () => {
     l1Api = new L1Api(WS_URI);
-    expect(await l1Api.isRolldownDeployed()).toBeTruthy()
+    expect(await l1Api.isRolldownDeployed(0n)).toBeTruthy()
   });
 
   it('should successfully connect through http', async () => {
     l1Api = new L1Api(HTTP_URI);
-    expect(await l1Api.isRolldownDeployed()).toBeTruthy()
+    expect(await l1Api.isRolldownDeployed(0n)).toBeTruthy()
   });
 
   it('can fetch latestRequestId', async () => {

@@ -18,6 +18,7 @@ import { anvil } from "viem/chains";
 import { isEqual } from "../utils.js";
 import { estimateMaxPriorityFeePerGas } from "viem/actions";
 import { L1Interface } from "./L1Interface.js";
+import { logger } from "../logger.js";
 
 async function estimateGasInWei(publicClient: PublicClient) {
   // https://www.blocknative.com/blog/eip-1559-fees
@@ -181,12 +182,31 @@ class L1Api implements L1Interface {
     return status !== closedStatus && status !== zeros;
   }
 
-  async isRolldownDeployed(): Promise<boolean> {
-    const code = await this.client.getCode({
+  async isRolldownDeployed(delay: bigint): Promise<boolean> {
+
+    let currentBlock = await this.client.getBlockNumber();
+    let atBlock: bigint;
+
+    if (delay > currentBlock) {
+      atBlock = 1n;
+    }else{
+      atBlock = currentBlock - delay;
+    }
+
+    if (delay > 0n) {
+      logger.info(`Checking if rolldown is deployed at past block #${atBlock}`);
+    }else{
+      logger.info(`Checking if rolldown is deployed at current block #${currentBlock}`);
+    }
+
+
+    let val = await this.client.readContract({
       address: MANGATA_CONTRACT_ADDRESS,
-      blockTag: "latest",
+      abi: ABI,
+      functionName: "NATIVE_TOKEN_ADDRESS",
+      blockNumber: atBlock
     });
-    return code !== undefined && code !== "0x";
+    return val as string != "0x00000000000000000000000000000000000000000";
   }
 
   async getLatestRequestId(delay: bigint = 0n): Promise<bigint | null> {
@@ -196,13 +216,13 @@ class L1Api implements L1Interface {
     if (delay > 0n ) {
       let currentBlock = await this.client.getBlockNumber();
       if (currentBlock < delay) {
-        return null;
+        blockTag = undefined;
+        blockNumber = 0n;
       }else{
         blockTag = undefined;
         blockNumber = currentBlock - delay;
       }
     }
-
 
     const value = BigInt(await this.client.readContract({
       address: MANGATA_CONTRACT_ADDRESS,

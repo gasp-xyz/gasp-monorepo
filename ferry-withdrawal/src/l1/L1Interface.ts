@@ -2,7 +2,7 @@ import { Withdrawal } from "../Withdrawal.js";
 import { Cancel } from "../Cancel.js";
 
 export interface L1Interface {
-  isRolldownDeployed(): Promise<boolean>;
+  isRolldownDeployed(delay: bigint): Promise<boolean>;
   getLatestRequestId(delay: bigint): Promise<bigint | null>;
   getBalance(account: Uint8Array, tokenAddress: Uint8Array): Promise<bigint | null>;
   getNativeTokenAddress(): Promise<Uint8Array>;

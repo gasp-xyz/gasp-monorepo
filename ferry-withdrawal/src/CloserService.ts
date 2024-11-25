@@ -82,7 +82,7 @@ class CloserService {
       });
 
       let ignoredCount = closableRequests.length - requestsToClose.length;
-      logger.debug(`There are ${requestsToClose.length} that are waiting long enough to be closed (and ${ignoredCount} ignored because of block delay == ${delay})`);
+      logger.debug(`There are ${requestsToClose.length} that are old enough to be closed (and ${ignoredCount} ignored because of block delay == ${delay})`);
 
       this.lastCheckedWithrdawal = rangeEnd;
       this.closableRequests = requestsToClose;

@@ -1,6 +1,6 @@
 
 import { hexToU8a, u8aToHex } from "@polkadot/util";
-import type { PrivateKeyAccount } from "viem";
+import type { PrivateKeyAccount, ReadContractErrorType } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import "dotenv/config";
@@ -50,6 +50,9 @@ async function main() {
 		);
 	});
 
+  await l1.isRolldownDeployed(0n)
+  await l1.isRolldownDeployed(DELAY)
+
 	const closerService = new CloserService(
 		l1,
 		l2,
@@ -83,9 +86,7 @@ async function main() {
 }
 
 main()
-	.then(() => {
-	})
 	.catch((e) => {
-		console.error("Something went wrong", e);
+		console.error("Something went wrong", e.metaMessages || e);
 		process.exit(1);
 	});

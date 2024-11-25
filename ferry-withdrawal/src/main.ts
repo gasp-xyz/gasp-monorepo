@@ -67,7 +67,7 @@ async function main() {
             return;
           }
 
-          if (!(await l1.isRolldownDeployed())) {
+          if (!(await l1.isRolldownDeployed(0n))) {
             logger.info(
               `rolldown contract ${MANGATA_CONTRACT_ADDRESS} not found yet`,
             );
