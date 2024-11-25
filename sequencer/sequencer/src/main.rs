@@ -64,7 +64,7 @@ pub async fn main() {
 
     let mut config = Config::init_from_env().unwrap();
 
-    config.tx_cost = match config.tx_cost{
+    config.tx_cost = match config.tx_cost {
         Some(0u128) => None,
         Some(amount) => Some(amount),
         None => None,
