@@ -25,7 +25,7 @@ export class DockerUtils{
     constructor() {
         this.container = undefined;
         this.containerName = "";
-        this.FINALIZER_IMAGE = "mangatasolutions/avs-finalizer:" + ( process.env.AVS_FINALIZER_VERSION || 'local' );
+        this.FINALIZER_IMAGE = "gaspxyz/avs-finalizer:" + ( process.env.AVS_FINALIZER_VERSION || 'local' );
         console.info("Using image: " + this.FINALIZER_IMAGE);
     }
     async startContainer(image: string = this.FINALIZER_IMAGE, env = this.finalizerLocalEnvironment, opKeys : Partial<operatorKeys>  = {}, logMessage = "Testnet setup sucessfully, starting AVS verification") {
@@ -82,7 +82,7 @@ export class DockerUtils{
     -e ROLLUP_NODE_CHAIN:"rollup-local-seq",
     -e ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
     --entrypoint /bin/bash \
-    mangatasolutions/avs-finalizer:local 
+    gaspxyz/avs-finalizer:local 
     cc: ./main --bls-ephemeral-key --ecdsa-ephemeral-key
     */
     finalizerLocalEnvironment : Environment = {
