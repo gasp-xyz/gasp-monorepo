@@ -118,6 +118,82 @@ contract MultiStage is Script, Utils, Test {
 
         vm.stopBroadcast();
 
+      }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("base-stub"))){
+
+        console.log("################################################################################");
+        console.log("Deploying rolldown contracts");
+        console.log("################################################################################");
+        RolldownDeployer rolldownDeployer = new RolldownDeployer();
+        rolldownDeployer.run(IRolldownPrimitives.ChainId.Base);
+
+        console.log("################################################################################");
+        console.log("Deploying gaspMultiRollupService contracts");
+        console.log("################################################################################");
+        GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
+        gaspMultiRollupServiceDeployer.run(IRolldownPrimitives.ChainId.Base, true);
+
+
+        Rolldown rolldown;
+        GaspMultiRollupService gmrs;
+        address avsOwner;
+
+        string memory _GMRS_OUTPUT_PATH = "gmrs_output";
+        string memory gmrsDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Base, _GMRS_OUTPUT_PATH));
+        gmrs = GaspMultiRollupService(stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs"));
+
+        string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
+        string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Base, _ROLLDOWN_OUTPUT_PATH));
+        rolldown = Rolldown(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown"));
+
+        string memory _CONFIG_PATH = "deploy.config";
+        string memory configData = readConfig(_CONFIG_PATH);
+        avsOwner = stdJson.readAddress(configData, ".permissions.owner");
+
+        vm.startBroadcast(avsOwner);
+
+        gmrs.setRolldown(IRolldown(address(rolldown)));
+        rolldown.setUpdater(address(gmrs));
+
+        vm.stopBroadcast();
+
+      }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("base-sepolia"))){
+
+        console.log("################################################################################");
+        console.log("Deploying rolldown contracts");
+        console.log("################################################################################");
+        RolldownDeployer rolldownDeployer = new RolldownDeployer();
+        rolldownDeployer.run(IRolldownPrimitives.ChainId.Base);
+
+        console.log("################################################################################");
+        console.log("Deploying gaspMultiRollupService contracts");
+        console.log("################################################################################");
+        GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
+        gaspMultiRollupServiceDeployer.run(IRolldownPrimitives.ChainId.Base, true);
+
+
+        Rolldown rolldown;
+        GaspMultiRollupService gmrs;
+        address avsOwner;
+
+        string memory _GMRS_OUTPUT_PATH = "gmrs_output";
+        string memory gmrsDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Base, _GMRS_OUTPUT_PATH));
+        gmrs = GaspMultiRollupService(stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs"));
+
+        string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
+        string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Base, _ROLLDOWN_OUTPUT_PATH));
+        rolldown = Rolldown(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown"));
+
+        string memory _CONFIG_PATH = "deploy.config";
+        string memory configData = readConfig(_CONFIG_PATH);
+        avsOwner = stdJson.readAddress(configData, ".permissions.owner");
+
+        vm.startBroadcast(avsOwner);
+
+        gmrs.setRolldown(IRolldown(address(rolldown)));
+        rolldown.setUpdater(address(gmrs));
+
+        vm.stopBroadcast();
+
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("arbitrum-sepolia"))){
 
         console.log("################################################################################");

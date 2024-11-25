@@ -29,6 +29,10 @@ function createL1Asset(
 		return api.createType("MangataTypesAssetsL1Asset", {
 			Arbitrum: tokenAddress,
 		});
+	} else if (chain.isBase) {
+		return api.createType("MangataTypesAssetsL1Asset", {
+			Base: tokenAddress,
+		});
 	} else {
 		throw new Error(`Unknown chain id ${chain.toHuman()}`);
 	}
@@ -86,7 +90,8 @@ class L2Api implements L2Interface {
 			.filter(
 				([_key, value]) =>
 					(value.unwrap().isEthereum && chain.isEthereum) ||
-					(value.unwrap().isArbitrum && chain.isArbitrum),
+					(value.unwrap().isArbitrum && chain.isArbitrum) ||
+					(value.unwrap().isBase && chain.isBase),
 			)
 			.map(([key, value]) => {
 				const id = BigInt(key.args[0].toString());
@@ -95,6 +100,8 @@ class L2Api implements L2Interface {
 					return [id, value.unwrap().asArbitrum.toU8a()];
 				} else if (address.isEthereum && chain.isEthereum) {
 					return [id, value.unwrap().asEthereum.toU8a()];
+				} else if (address.isBase && chain.isBase) {
+					return [id, value.unwrap().asBase.toU8a()];
 				}
 				throw new Error("Invalid chain type");
 			});

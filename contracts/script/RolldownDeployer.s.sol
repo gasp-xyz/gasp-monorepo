@@ -40,6 +40,22 @@ contract RolldownDeployer is Script, Utils, Test {
         }
     }
 
+    function evmPrefixedPath(IRolldownPrimitives.ChainId chain) public pure returns (string memory) {
+        string memory evm;
+
+        if (chain == IRolldownPrimitives.ChainId.Ethereum) {
+            evm = "ethereum_";
+        } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
+            evm = "arbitrum_";
+        } else if (chain == IRolldownPrimitives.ChainId.Base) {
+            evm = "base_"; 
+        } else {
+            revert("Unsupported chain");
+        }
+
+        return string.concat(evm, _OUTPUT_PATH);
+    }
+
     function isProxyDeployed(IRolldownPrimitives.ChainId chain) public returns (bool) {
         if (!inputExists(evmPrefixedPath(chain))) {
             return false;
@@ -100,20 +116,6 @@ contract RolldownDeployer is Script, Utils, Test {
         _verifyImplementations();
         _verifyInitalizations();
         _writeOutput(chain);
-    }
-
-    function evmPrefixedPath(IRolldownPrimitives.ChainId chain) public pure returns (string memory) {
-        string memory evm;
-
-        if (chain == IRolldownPrimitives.ChainId.Ethereum) {
-            evm = "ethereum_";
-        } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
-            evm = "arbitrum_";
-        } else {
-            revert("Unsupported chain");
-        }
-
-        return string.concat(evm, _OUTPUT_PATH);
     }
 
     function _writeOutput(IRolldownPrimitives.ChainId chain) internal {
