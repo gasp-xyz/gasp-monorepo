@@ -34,7 +34,7 @@ function createCliConfig() {
 		L1_CHAIN: process.env.L1_CHAIN!,
 		TOKENS_TO_TRACK: process.env.TOKENS_TO_TRACK!,
 		TX_COST: BigInt(process.env.TX_COST!),
-		LOOK_BACK_HOURS: Number(process.env.LOOK_BACK_HOURS),
+		LOOK_BACK_HOURS: process.env.LOOK_BACK_HOURS ? Number(process.env.LOOK_BACK_HOURS) : undefined,
 		LOG: process.env.LOG!,
 		DELAY: process.env.DELAY ? BigInt(process.env.DELAY) : undefined,
 	});

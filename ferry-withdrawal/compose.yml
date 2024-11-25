@@ -22,26 +22,26 @@ services:
       LOOK_BACK_HOURS: ${ETH_FERRY_WITHDRAWAL_LOOK_BACK_HOURS}
       LOG: ${ETH_FERRY_WITHDRAWAL_LOG}
 
-  # eth-closer:
-  #   restart: unless-stopped
-  #   platform: linux/amd64
-  #   image: mangatasolutions/closer:local-eth
-  #   command: ["node", "build/src/closer.js"]
-  #   depends_on:
-  #     eth-contracts-deployment:
-  #       condition: service_completed_successfully
-  #     node-alice:
-  #       condition: service_started
-  #     node-bob:
-  #       condition: service_started
-  #   build: .
-  #   environment:
-  #     MANGATA_NODE_URL: ${ETH_CLOSER_MANGATA_NODE_URL}
-  #     ETH_CHAIN_URL: ${ETH_CLOSER_ETH_CHAIN_URL}
-  #     MANGATA_CONTRACT_ADDRESS: ${ETH_CLOSER_MANGATA_CONTRACT_ADDRESS}
-  #     PRIVATE_KEY: ${ETH_CLOSER_PRIVATE_KEY}
-  #     TOKENS_TO_TRACK: ${ETH_CLOSER_TOKENS_TO_TRACK}
-  #     L1_CHAIN: ${ETH_CLOSER_L1_CHAIN}
-  #     TX_COST: ${ETH_CLOSER_TX_COST}
-  #     LOG: ${ETH_CLOSER_LOG}
-  #     LOOK_BACK_HOURS: 0
+  eth-closer:
+    restart: unless-stopped
+    platform: linux/amd64
+    image: mangatasolutions/closer:local-eth
+    command: ["node", "build/src/closer.js"]
+    depends_on:
+      eth-contracts-deployment:
+        condition: service_completed_successfully
+      node-alice:
+        condition: service_started
+      node-bob:
+        condition: service_started
+    build: .
+    environment:
+      MANGATA_NODE_URL: ${ETH_CLOSER_MANGATA_NODE_URL}
+      ETH_CHAIN_URL: ${ETH_CLOSER_ETH_CHAIN_URL}
+      MANGATA_CONTRACT_ADDRESS: ${ETH_CLOSER_MANGATA_CONTRACT_ADDRESS}
+      PRIVATE_KEY: ${ETH_CLOSER_PRIVATE_KEY}
+      TOKENS_TO_TRACK: ${ETH_CLOSER_TOKENS_TO_TRACK}
+      L1_CHAIN: ${ETH_CLOSER_L1_CHAIN}
+      TX_COST: ${ETH_CLOSER_TX_COST}
+      LOG: ${ETH_CLOSER_LOG}
+      LOOK_BACK_HOURS: 0
