@@ -110,7 +110,7 @@ impl RolldownContract {
 }
 
 impl L1Interface for RolldownContract {
-    fn account_address(&self) -> [u8; 20]{
+    fn account_address(&self) -> [u8; 20] {
         self.account_address
     }
     #[tracing::instrument(skip(self))]

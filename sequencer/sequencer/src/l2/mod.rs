@@ -114,7 +114,11 @@ pub trait L2Interface {
         at: HashOf<GaspConfig>,
     ) -> Result<Vec<u8>, L2Error>;
 
-    async fn get_active_sequencers(&self, chain: types::Chain, at: H256) -> Result<Vec<[u8; 20]>, L2Error>;
+    async fn get_active_sequencers(
+        &self,
+        chain: types::Chain,
+        at: H256,
+    ) -> Result<Vec<[u8; 20]>, L2Error>;
 
     async fn get_dispute_period(&self, chain: types::Chain, at: H256) -> Result<u128, L2Error>;
 }
@@ -627,10 +631,12 @@ impl L2Interface for Gasp {
             .boxed())
     }
 
-    async fn get_active_sequencers(&self, chain: types::Chain, at: H256) -> Result<Vec<[u8; 20]>, L2Error>{
-        let storage = gasp::api::storage()
-            .sequencer_staking()
-            .active_sequencers();
+    async fn get_active_sequencers(
+        &self,
+        chain: types::Chain,
+        at: H256,
+    ) -> Result<Vec<[u8; 20]>, L2Error> {
+        let storage = gasp::api::storage().sequencer_staking().active_sequencers();
 
         let active = self
             .client
@@ -646,17 +652,13 @@ impl L2Interface for Gasp {
             .map(|(_, account)| account.0)
             .unwrap_or_default();
 
-
         Ok(active.into_iter().map(|elem| elem.0).collect())
     }
 
-    async fn get_dispute_period(&self, _chain: types::Chain, _at: H256) -> Result<u128, L2Error>{
+    async fn get_dispute_period(&self, _chain: types::Chain, _at: H256) -> Result<u128, L2Error> {
         let storage = gasp::api::rolldown::constants::ConstantsApi.dispute_period_length();
 
-        let dispute_period_length = self
-            .client
-            .constants()
-            .at(&storage)?;
+        let dispute_period_length = self.client.constants().at(&storage)?;
 
         if dispute_period_length > 0u128 {
             Ok(dispute_period_length)
@@ -879,10 +881,7 @@ mod test {
             .expect("can connect to gasp");
         let at = gasp.latest_block().await.unwrap().1;
 
-        let active_sequencers = gasp
-            .get_active_sequencers(ETHEREUM, at)
-            .await
-            .unwrap();
+        let active_sequencers = gasp.get_active_sequencers(ETHEREUM, at).await.unwrap();
 
         assert!(!active_sequencers.is_empty());
     }

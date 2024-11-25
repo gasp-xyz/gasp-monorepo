@@ -79,7 +79,8 @@ fn strip_prefix(str: &String) -> &str {
 
 async fn run(config: Config) -> Result<(), Error> {
     let timeout = config.timeout;
-    let (tx, mut watchdog) = Watchdog::new(Duration::from_secs(timeout.try_into().expect("overflow")));
+    let (tx, mut watchdog) =
+        Watchdog::new(Duration::from_secs(timeout.try_into().expect("overflow")));
 
     let watchdog = tokio::spawn(async move {
         tracing::info!("Starting watchdog");
