@@ -32,7 +32,7 @@ function getRandomUintArray(length: number) {
 
 const WS_URI = "ws://localhost:8545";
 const HTTP_URI = "http://localhost:8545";
-const TOKEN_ADDRESS = hexToU8a("0xFD471836031dc5108809D173A067e8486B9047A3", 160);
+const TOKEN_ADDRESS = hexToU8a("0x09635F643e140090A9A8Dcd712eD6285858ceBef", 160);
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
 const ANVIL_TEST_ACCOUNT = "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba";
 
