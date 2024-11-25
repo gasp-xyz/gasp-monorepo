@@ -77,7 +77,7 @@ describe('APi tests: Collator apy - dailyRewards', () => {
         validateReturnedDate(date, format)
         const dailyRewards = body.dailyRewards
         const rewardValue = new BN(dailyRewards).div(BN_TEN.pow(new BN(18)))
-        expect(rewardValue.toNumber()).gt(5000)
+        expect(rewardValue.toNumber()).gt(500000)
       })
   })
 
@@ -93,9 +93,7 @@ describe('APi tests: Collator apy - dailyRewards', () => {
         const amountClaimed = new BN(body.amountClaimed).div(
           BN_TEN.pow(new BN(18))
         )
-        console.log('amount claimed: ', body.amountClaimed)
-        console.log('amount claimed to BN: ', amountClaimed)
-        expect(amountClaimed.toNumber()).gt(50000)
+        expect(amountClaimed.toNumber()).gt(500000)
       })
   })
 
