@@ -353,6 +353,7 @@ pub(crate) mod test {
             async fn get_latest_finalized_request_id(&self) -> Result<Option<u128>, L1Error>;
             async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error>;
             async fn is_closed(&self, request_hash: H256) -> Result<bool, L1Error>;
+            async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error>;
         }
     }
 
