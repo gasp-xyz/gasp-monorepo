@@ -222,7 +222,7 @@ impl L1Interface for RolldownContract {
         let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
         let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) =
             self.estimate_gas_in_wei().await?;
-        let mut call = self
+        let call = self
             .contract_handle
             .close_cancel(cancel, merkle_root.0.into(), proof);
         match call.call().await {
