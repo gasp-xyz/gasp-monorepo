@@ -52,6 +52,8 @@ pub enum Error {
     DeserializationError(#[from] hex::FromHexError),
     #[error("Unsupported chain `{0}`")]
     UnsupportedChain(String),
+    #[error("Watchdog expired `{0:?}`")]
+    WatchdogExpired(Duration),
 }
 
 #[tokio::main]
@@ -72,7 +74,9 @@ pub async fn main() {
 
     tracing::info!("Config {:#?}", config);
 
-    run(config).await.unwrap();
+    if let Err(err) = run(config).await {
+        tracing::error!("Error: {:?}", err);
+    }
 }
 
 fn strip_prefix(str: &String) -> &str {
@@ -85,8 +89,8 @@ fn strip_prefix(str: &String) -> &str {
 
 async fn run(config: Config) -> Result<(), Error> {
     let timeout = config.timeout;
-    let (tx, mut watchdog) =
-        Watchdog::new(Duration::from_secs(timeout.try_into().expect("overflow")));
+    let duration = Duration::from_secs(timeout.try_into().expect("overflow"));
+    let (tx, mut watchdog) = Watchdog::new(duration);
 
     let watchdog = tokio::spawn(async move {
         tracing::info!("Starting watchdog");
@@ -123,11 +127,8 @@ async fn run(config: Config) -> Result<(), Error> {
     let seq = Sequencer::new(rolldown, gasp, chain, update_size_limit, config.tx_cost);
     let sequencer_service = tokio::spawn(async move { seq.run(tx).await });
 
-    watchdog.await.expect("watchdog failed");
-    sequencer_service
+    watchdog
         .await
-        .expect("joined")
-        .expect("sequencer failed");
-
-    Ok(())
+        .map_err(|_| Error::WatchdogExpired(duration))?;
+    Ok(sequencer_service.await.expect("joined")?)
 }

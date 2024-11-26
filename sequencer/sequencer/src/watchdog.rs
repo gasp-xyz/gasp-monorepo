@@ -1,7 +1,6 @@
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::time::timeout;
 use tokio::time::Duration;
-use tracing;
 
 pub struct Watchdog {
     rx: Receiver<()>,
@@ -16,12 +15,17 @@ impl Watchdog {
 
     pub async fn run(&mut self) {
         loop {
-            if let None = timeout(self.duration, self.rx.recv())
+            match timeout(self.duration, self.rx.recv())
                 .await
                 .expect("watchdog timeout")
             {
-                tracing::error!("Watchdog closed");
-                break;
+                Some(_) => {
+                    tracing::debug!("restarted");
+                }
+                None => {
+                    tracing::error!("timeout");
+                    break;
+                }
             }
         }
     }
