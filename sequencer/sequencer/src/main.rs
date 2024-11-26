@@ -113,14 +113,11 @@ async fn run(config: Config) -> Result<(), Error> {
     let seq = Sequencer::new(rolldown, gasp, chain, update_size_limit);
     let sequencer_service = tokio::spawn(async move { seq.run(tx).await });
 
-    tokio::select! {
-        seq = sequencer_service => {
-            seq.expect("joined").expect("sequencer failed");
-        },
-        watch = watchdog => {
-            watch.expect("watchdog failed");
-        }
-    };
+    watchdog.await.expect("watchdog failed");
+    sequencer_service
+        .await
+        .expect("joined")
+        .expect("sequencer failed");
 
     Ok(())
 }

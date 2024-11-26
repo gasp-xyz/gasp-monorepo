@@ -233,7 +233,7 @@ impl L1Interface for RolldownContract {
                 Ok(call.send().await?.watch().await?.0.into())
             }
             Err(err) => {
-                tracing::warn!("status nok");
+                tracing::error!("status nok {:?}", err);
                 Err(err.into())
             }
         }
