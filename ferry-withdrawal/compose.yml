@@ -43,4 +43,4 @@ services:
       L1_CHAIN: ${ETH_CLOSER_L1_CHAIN}
       TX_COST: ${ETH_CLOSER_TX_COST}
       LOG: ${ETH_CLOSER_LOG}
-      LOOK_BACK_HOURS: 0
+      DELAY: ${ETH_CLOSER_DELAY}

@@ -5,7 +5,8 @@ export ETH_CHAIN_URL=http://127.0.0.1:8545
 export ETH_PRIV_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 export L1_CHAIN=ETHEREUM
 export LIMIT=10000
-export WATCHDOG=30
+export WATCHDOG=300
+export TX_COST=10000000000000000
 
 
 

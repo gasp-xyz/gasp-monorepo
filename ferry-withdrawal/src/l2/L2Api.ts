@@ -9,6 +9,7 @@ import {  PalletRolldownL2Request } from '@polkadot/types/lookup';
 import { L1_CHAIN, } from "../Config.js";
 import { Mangata } from "gasp-sdk";
 import { Withdrawal } from "../Withdrawal.js";
+import { Cancel } from "../Cancel.js";
 import { type ApiPromise } from "@polkadot/api";
 
 async function getApi(nodeUrl: string): Promise<ApiPromise> {
@@ -80,32 +81,48 @@ class L2Api implements L2Interface {
     return this.parseLatestRequestId(nextRequesId);
   }
 
-
   async getWithdrawals(startRange: bigint, endRange: bigint): Promise<Withdrawal[]> {
+    const requests: (Withdrawal | Cancel)[] = await this.getRequests(startRange, endRange);
+    return requests.filter((item): item is Withdrawal => {
+      return (item as Withdrawal).withdrawalRecipient !== undefined;
+    })
+  }
+
+  //TODO: rename
+  async getRequests(startRange: bigint, endRange: bigint): Promise<(Withdrawal | Cancel)[]> {
     const chain = getL1ChainType(this.api);
     let range = createBigIntArrayFromRange(startRange, endRange);
     const requests = await Promise.all(range.map( (idx: bigint) => this.api.query.rolldown.l2Requests(chain,{ origin: "L2", id: idx.toString()})));
-    const withdrawals = requests.filter( (elem: Option<ITuple<[PalletRolldownL2Request, H256]>>) => {
+    const withdrawalsOrCancels = requests.filter( (elem: Option<ITuple<[PalletRolldownL2Request, H256]>>) => {
       if (elem.isNone) {
         return false;
       }
 
-      let [req, hash] = elem.unwrap();
-      return req.isWithdrawal;
+      let [req, _] = elem.unwrap();
+      return req.isWithdrawal || req.isCancel;
     })
     .map( (elem: Option<ITuple<[PalletRolldownL2Request, H256]>> ) => {
-      const [req, _hash] = elem.unwrap();
-      return {
-        requestId: BigInt(req.asWithdrawal.requestId.id.toString()),
-        withdrawalRecipient: req.asWithdrawal.withdrawalRecipient,
-        tokenAddress: req.asWithdrawal.tokenAddress.toU8a(),
-        amount: BigInt(req.asWithdrawal.amount.toString()),
-        ferryTip: BigInt(req.asWithdrawal.ferryTip.toString()),
-        hash: _hash.toU8a(),
-      };
+      const [req, requestHash] = elem.unwrap();
+      if (req.isWithdrawal) {
+        return {
+          requestId: BigInt(req.asWithdrawal.requestId.id.toString()),
+          withdrawalRecipient: req.asWithdrawal.withdrawalRecipient,
+          tokenAddress: req.asWithdrawal.tokenAddress.toU8a(),
+          amount: BigInt(req.asWithdrawal.amount.toString()),
+          ferryTip: BigInt(req.asWithdrawal.ferryTip.toString()),
+          hash: requestHash.toU8a(),
+        };
+      }else{
+        return {
+          requestId: BigInt(req.asCancel.requestId.id.toString()),
+          startRange: BigInt(req.asCancel.range.start.toString()),
+          endRange: BigInt(req.asCancel.range.end.toString()),
+          properHash: req.asCancel.hash_.toU8a(),
+          hash: requestHash,
+        };
+      }
     })
-    return withdrawals;
+    return withdrawalsOrCancels;
   }
-
 }
 export { L2Api, getL1ChainType, getApi };

@@ -6,7 +6,6 @@ use hex::encode as hex_encode;
 
 use futures::StreamExt;
 use primitive_types::H256;
-// use subxt::config::Header;
 use subxt::ext::subxt_core;
 use subxt::ext::subxt_core::storage::address::StorageHashers;
 use subxt::storage::StorageKey;
@@ -48,7 +47,7 @@ use gasp::api::runtime_types::rollup_runtime::RuntimeEvent;
 pub type L2Event = EventRecord<RuntimeEvent, H256>;
 
 pub trait L2Interface {
-    fn address(&self) -> [u8; 20];
+    fn account_address(&self) -> [u8; 20];
     async fn get_latest_processed_request_id(
         &self,
         chain: types::Chain,
@@ -114,6 +113,14 @@ pub trait L2Interface {
         chain: types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Vec<u8>, L2Error>;
+
+    async fn get_active_sequencers(
+        &self,
+        chain: types::Chain,
+        at: H256,
+    ) -> Result<Vec<[u8; 20]>, L2Error>;
+
+    async fn get_dispute_period(&self, chain: types::Chain, at: H256) -> Result<u128, L2Error>;
 }
 
 pub struct Gasp {
@@ -145,6 +152,8 @@ pub enum L2Error {
     HeaderSubscriptionFailed,
     #[error("awaiting cancel resolution fetch error")]
     PendingCancelFetchError,
+    #[error("unknown dispute period length")]
+    UnknownDisputePeriodLength,
 }
 
 pub type HashOf<T> = <T as Config>::Hash;
@@ -293,7 +302,7 @@ impl Gasp {
 }
 
 impl L2Interface for Gasp {
-    fn address(&self) -> [u8; 20] {
+    fn account_address(&self) -> [u8; 20] {
         self.keypair.address().into_inner()
     }
 
@@ -621,6 +630,43 @@ impl L2Interface for Gasp {
             })
             .boxed())
     }
+
+    async fn get_active_sequencers(
+        &self,
+        chain: types::Chain,
+        at: H256,
+    ) -> Result<Vec<[u8; 20]>, L2Error> {
+        let storage = gasp::api::storage().sequencer_staking().active_sequencers();
+
+        let active = self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&storage)
+            .await?
+            .unwrap_or_default();
+
+        let active = active
+            .into_iter()
+            .find(|(c, _)| c == &chain)
+            .map(|(_, account)| account.0)
+            .unwrap_or_default();
+
+        Ok(active.into_iter().map(|elem| elem.0).collect())
+    }
+
+    async fn get_dispute_period(&self, _chain: types::Chain, _at: H256) -> Result<u128, L2Error> {
+        let storage = gasp::api::rolldown::constants::ConstantsApi.dispute_period_length();
+
+        let dispute_period_length = self.client.constants().at(&storage)?;
+
+        if dispute_period_length > 0u128 {
+            Ok(dispute_period_length)
+        } else {
+            tracing::warn!("dispute period length is zero");
+            Err(L2Error::UnknownDisputePeriodLength)
+        }
+    }
 }
 
 #[cfg(test)]
@@ -825,5 +871,18 @@ mod test {
             .expect("can submit update");
 
         assert!(!status);
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_can_fetch_active_sequencers() {
+        let gasp = Gasp::new(URI, ALITH_PKEY)
+            .await
+            .expect("can connect to gasp");
+        let at = gasp.latest_block().await.unwrap().1;
+
+        let active_sequencers = gasp.get_active_sequencers(ETHEREUM, at).await.unwrap();
+
+        assert!(!active_sequencers.is_empty());
     }
 }

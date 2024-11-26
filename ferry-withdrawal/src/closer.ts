@@ -1,12 +1,13 @@
 
 import { hexToU8a, u8aToHex } from "@polkadot/util";
-import type { PrivateKeyAccount } from "viem";
+import type { PrivateKeyAccount, ReadContractErrorType } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import "dotenv/config";
 import "gasp-types";
 
-import { toString } from "./Withdrawal.js";
+import { Withdrawal, isWithdrawal, toString } from "./Withdrawal.js";
+import { Cancel, isCancel, toString as cancelToString } from "./Cancel.js";
 import { L1Api } from "./l1/L1Api.js";
 import { L2Api, getApi } from "./l2/L2Api.js";
 import { logger } from "./logger.js";
@@ -18,6 +19,7 @@ import {
 	PRIVATE_KEY,
 	TOKENS_TO_TRACK,
 	TX_COST,
+  DELAY
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
 
@@ -48,6 +50,9 @@ async function main() {
 		);
 	});
 
+  await l1.isRolldownDeployed(0n)
+  await l1.isRolldownDeployed(DELAY)
+
 	const closerService = new CloserService(
 		l1,
 		l2,
@@ -62,11 +67,16 @@ async function main() {
 		async (header: HeaderExtended) => {
 			inProgress = true;
       logger.info(`#${header.number} updating withdrawals to close`);
-      await closerService.findWithdrawalsToClose();
-      const withdrawal = await closerService.getNextWithdrawalToClose();
-      if (withdrawal) { 
-        logger.info(`#${header.number} Closing withdrawal ${toString(withdrawal)}`);
-        await closerService.closeWithdrawal(withdrawal, hexToU8a(PRIVATE_KEY));
+      await closerService.findRequestToClose(DELAY);
+      const req = await closerService.getNextRequestToClose();
+      if (req) { 
+        if (isWithdrawal(req)) {
+          logger.info(`#${header.number} Closing withdrawal ${toString(req)}`);
+          await closerService.closeWithdrawal(req, hexToU8a(PRIVATE_KEY));
+        }else if (isCancel(req)) {
+          logger.info(`#${header.number} Closing withdrawal ${cancelToString(req)}`);
+          await closerService.closeCancel(req, hexToU8a(PRIVATE_KEY));
+        }
       }else{
         logger.debug(`#${header.number} nothing to close`);
       }
@@ -76,9 +86,7 @@ async function main() {
 }
 
 main()
-	.then(() => {
-	})
 	.catch((e) => {
-		console.error("Something went wrong", e);
+		console.error("Something went wrong", e.metaMessages || e);
 		process.exit(1);
 	});

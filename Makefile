@@ -66,7 +66,7 @@ bindings-rs: ## generates rust bindings
 	cp -rf ./avs-finalizer/bindings ./updater/
 
 bindings-rs-alloy: ## generates rust alloy bindings
-	forge bind --alloy --bindings-path ./sequencer/bindings --root ./contracts --crate-name bindings --overwrite  --select IERC20 --select Rolldown
+	forge bind --alloy --bindings-path ./sequencer/bindings --root ./contracts --crate-name bindings --overwrite  --select 'Rolldown$$' --select 'RolldownPrimitives$$'
 	cd ./sequencer/bindings && cargo fmt
 
 bindings-json: ## generate JS bindings

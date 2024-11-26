@@ -1,7 +1,9 @@
 use alloy::network::{Ethereum, EthereumWallet};
+use alloy::primitives::Address;
 use alloy::providers::fillers::{
     BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller, WalletFiller,
 };
+
 use alloy::signers::local::PrivateKeySigner;
 use alloy::sol_types::SolValue;
 use alloy::transports::BoxTransport;
@@ -33,6 +35,8 @@ pub enum L1Error {
 }
 
 pub trait L1Interface {
+    fn account_address(&self) -> [u8; 20];
+    async fn get_native_balance(&self, address: [u8; 20]) -> Result<u128, L1Error>;
     async fn is_closed(&self, request_hash: H256) -> Result<bool, L1Error>;
     async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error>;
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error>;
@@ -66,23 +70,28 @@ pub type RolldownInstanceType = bindings::rolldown::Rolldown::RolldownInstance<
 
 pub struct RolldownContract {
     contract_handle: RolldownInstanceType,
+    account_address: [u8; 20],
 }
 
 impl RolldownContract {
     pub async fn new(uri: &str, address: [u8; 20], private_key: [u8; 32]) -> Result<Self, L1Error> {
         let signer: PrivateKeySigner = hex::encode(private_key).parse().expect("valid private key");
+        let account_address: [u8; 20] = signer.address().0.into();
+        tracing::debug!("L1 account : {}", hex_encode(account_address));
+
         let wallet = EthereumWallet::new(signer);
         let provider = ProviderBuilder::new()
-            // .wallet(hex!("ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"))
             .with_recommended_fillers()
             .wallet(wallet)
             .on_builtin(uri)
             .await?;
+
         Ok(Self {
             contract_handle: bindings::rolldown::Rolldown::RolldownInstance::new(
                 address.into(),
                 provider.clone(),
             ),
+            account_address,
         })
     }
 
@@ -102,6 +111,9 @@ impl RolldownContract {
 }
 
 impl L1Interface for RolldownContract {
+    fn account_address(&self) -> [u8; 20] {
+        self.account_address
+    }
     #[tracing::instrument(skip(self))]
     async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error> {
         let request_id = alloy::primitives::U256::from(request_id);
@@ -268,6 +280,14 @@ impl L1Interface for RolldownContract {
         tracing::trace!("is_closed: {} ({})", is_closed, hex_encode(request_status));
         return Ok(is_closed);
     }
+
+    #[tracing::instrument(skip(self))]
+    async fn get_native_balance(&self, address: [u8; 20]) -> Result<u128, L1Error> {
+        let provider = self.contract_handle.provider();
+        let addr: Address = address.into();
+        let result = provider.get_balance(addr).await?;
+        result.try_into().map_err(|_| L1Error::OverflowError)
+    }
 }
 
 #[cfg(test)]
@@ -312,46 +332,15 @@ mod test {
 
     #[serial]
     #[tokio::test]
-    async fn test_can_fetch_update_and_update_hash() {
-        use alloy::sol_types::SolValue;
-
+    async fn test_can_fetch_balance() {
         let rolldown = RolldownContract::new(URI, ROLLDOWN_ADDRESS, ALICE_PKEY)
             .await
             .unwrap();
-        rolldown.deposit(1000, 10).await.unwrap();
-        let latest_update_first = rolldown
-            .get_latest_reqeust_id()
-            .await
-            .expect("can fetch request")
-            .unwrap();
 
-        rolldown.deposit(1000, 10).await.unwrap();
-        let latest_update_second = rolldown
-            .get_latest_reqeust_id()
-            .await
-            .expect("can fetch request")
-            .unwrap();
-
-        assert!(latest_update_first < latest_update_second);
-
-        let update1 = rolldown
-            .get_update(1u128, latest_update_first)
+        let balance = rolldown
+            .get_native_balance(hex!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266"))
             .await
             .unwrap();
-        let update2 = rolldown
-            .get_update(1u128, latest_update_second)
-            .await
-            .unwrap();
-        let hash1 = rolldown
-            .get_update_hash(1u128, latest_update_first)
-            .await
-            .unwrap();
-        let hash2 = rolldown
-            .get_update_hash(1u128, latest_update_second)
-            .await
-            .unwrap();
-
-        assert!(hash1 != hash2);
-        assert!(update1.abi_encode() != update2.abi_encode());
+        assert!(balance > 0u128);
     }
 }

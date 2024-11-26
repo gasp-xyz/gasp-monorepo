@@ -67,7 +67,7 @@ async function main() {
             return;
           }
 
-          if (!(await l1.isRolldownDeployed())) {
+          if (!(await l1.isRolldownDeployed(0n))) {
             logger.info(
               `rolldown contract ${MANGATA_CONTRACT_ADDRESS} not found yet`,
             );
@@ -88,7 +88,7 @@ async function main() {
             );
             const {range, root} = await l1.getMerkleRange(withdrawal.requestId);
             const proof = await l2.getMerkleProof(range[0], range[1], withdrawal.requestId);
-            await l1.close(pastWithdrawalsToClose[0], root, proof, hexToU8a(PRIVATE_KEY));
+            await l1.closeWithdrawal(pastWithdrawalsToClose[0], root, proof, hexToU8a(PRIVATE_KEY));
           } else {
             const pending = await ferry.getPendingWithdrawals();
             logger.info(`Found ${pending.length} pending withdrawals`);
