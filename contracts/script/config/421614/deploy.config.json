@@ -2,6 +2,7 @@
   "chainInfo": {
     "chainId": 421614
   },
+  "allow_non_root_gmrs_init": false,
   "permissions": {
     "owner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
     "upgrader": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",

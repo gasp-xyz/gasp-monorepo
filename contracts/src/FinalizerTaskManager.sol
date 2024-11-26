@@ -157,7 +157,7 @@ contract FinalizerTaskManager is
         OpTask calldata task,
         OpTaskResponse calldata taskResponse,
         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
-    ) external {
+    ) external onlyAggregator {
 
         require(!(lastCompletedOpTaskCreatedBlock == 0) || allowNonRootInit, "use root init");
 
