@@ -222,15 +222,21 @@ impl L1Interface for RolldownContract {
         let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
         let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) =
             self.estimate_gas_in_wei().await?;
-        let call = self
+        let mut call = self
             .contract_handle
-            .close_cancel(cancel, merkle_root.0.into(), proof)
-            .max_fee_per_gas(max_fee_per_gas_in_wei)
-            .max_priority_fee_per_gas(max_priority_fee_per_gas_in_wei);
+            .close_cancel(cancel, merkle_root.0.into(), proof);
         match call.call().await {
             Ok(_) => {
                 tracing::trace!("status ok");
-                Ok(call.send().await?.watch().await?.0.into())
+                Ok(call
+                    .max_fee_per_gas(max_fee_per_gas_in_wei)
+                    .max_priority_fee_per_gas(max_priority_fee_per_gas_in_wei)
+                    .send()
+                    .await?
+                    .watch()
+                    .await?
+                    .0
+                    .into())
             }
             Err(err) => {
                 tracing::error!("status nok {:?}", err);
