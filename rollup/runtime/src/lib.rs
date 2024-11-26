@@ -18,12 +18,12 @@ use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
 		AccountIdConversion, BlakeTwo256, Block as BlockT, Convert, ConvertInto, DispatchInfoOf,
-		Header as HeaderT, IdentifyAccount, IdentityLookup, Keccak256, MaybeConvert, NumberFor,
-		PostDispatchInfoOf, Saturating, SignedExtension, StaticLookup, Verify, Zero,
+		Dispatchable, Header as HeaderT, IdentifyAccount, IdentityLookup, Keccak256, NumberFor,
+		PostDispatchInfoOf, SignedExtension, StaticLookup, Verify, Zero,
 	},
 	transaction_validity::{InvalidTransaction, TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, BoundedVec, DispatchError, ExtrinsicInclusionMode, FixedPointNumber,
-	OpaqueExtrinsic, Perbill, Percent, Permill, RuntimeDebug, SaturatedConversion,
+	Perbill, Percent, Permill, RuntimeDebug,
 };
 use sp_std::{
 	cmp::Ordering,
@@ -46,7 +46,7 @@ pub use mangata_types::assets::{CustomMetadata, L1Asset, XcmMetadata, XykMetadat
 pub use frame_support::traits::OriginTrait;
 pub use frame_support::{
 	construct_runtime,
-	dispatch::{DispatchClass, DispatchResult},
+	dispatch::{DispatchClass, DispatchResult, Pays},
 	ensure, parameter_types,
 	traits::{
 		tokens::{
@@ -68,10 +68,12 @@ pub use frame_support::{
 	},
 	PalletId, StorageValue,
 };
+use frame_support::{dispatch::PostDispatchInfo, traits::SameOrOther};
 pub use frame_system::{
 	limits::{BlockLength, BlockWeights},
 	Call as SystemCall, ConsumedWeight, EnsureRoot, EnsureRootWithSuccess, SetCode,
 };
+
 pub use orml_tokens::Call as TokensCall;
 pub use pallet_timestamp::Call as TimestampCall;
 pub use runtime_config::*;
@@ -316,9 +318,9 @@ impl pallet_xyk::Config for Runtime {
 	type NativeCurrencyId = tokens::RxTokenId;
 	type TreasuryPalletId = cfg::TreasuryPalletIdOf<Runtime>;
 	type BnbTreasurySubAccDerive = cfg::pallet_xyk::BnbTreasurySubAccDerive;
-	type PoolFeePercentage = cfg::pallet_xyk::PoolFeePercentage;
-	type TreasuryFeePercentage = cfg::pallet_xyk::TreasuryFeePercentage;
-	type BuyAndBurnFeePercentage = cfg::pallet_xyk::BuyAndBurnFeePercentage;
+	type PoolFeePercentage = fees::PoolFeePercentage;
+	type TreasuryFeePercentage = fees::TreasuryFeePercentage;
+	type BuyAndBurnFeePercentage = fees::BuyAndBurnFeePercentage;
 	type LiquidityMiningRewards = ProofOfStake;
 	type VestingProvider = Vesting;
 	type DisallowedPools = Bootstrap;
@@ -327,6 +329,23 @@ impl pallet_xyk::Config for Runtime {
 	type AssetMetadataMutation = cfg::pallet_xyk::AssetMetadataMutation<Runtime>;
 	type FeeLockWeight = pallet_fee_lock::FeeLockWeightProvider<Runtime>;
 	type WeightInfo = weights::pallet_xyk_weights::ModuleWeight<Runtime>;
+}
+
+impl pallet_stable_swap::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = orml_tokens::MultiTokenCurrencyAdapter<Runtime>;
+	type Balance = Balance;
+	type HigherPrecisionBalance = sp_core::U256;
+	type CurrencyId = TokenId;
+	type TreasuryPalletId = cfg::TreasuryPalletIdOf<Runtime>;
+	type BnbTreasurySubAccDerive = cfg::pallet_xyk::BnbTreasurySubAccDerive;
+	type MarketTotalFee = fees::MarketTotalFee;
+	type MarketTreasuryFeePart = fees::MarketTreasuryFeePart;
+	type MarketBnBFeePart = fees::MarketBnBFeePart;
+	type MaxApmCoeff = ConstU128<1_000_000>;
+	type DefaultApmCoeff = ConstU128<1_000>;
+	type MaxAssetsInPool = ConstU32<2>;
+	type WeightInfo = ();
 }
 
 impl pallet_proof_of_stake::Config for Runtime {
@@ -396,58 +415,27 @@ where
 impl Into<CallType> for RuntimeCall {
 	fn into(self) -> CallType {
 		match self {
-			RuntimeCall::Xyk(pallet_xyk::Call::sell_asset {
-				sold_asset_id,
-				sold_asset_amount,
-				bought_asset_id,
+			RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+				swap_pool_list,
+				asset_id_in,
+				asset_amount_in,
+				asset_id_out,
 				min_amount_out,
-				..
-			}) => CallType::AtomicSell {
-				sold_asset_id,
-				sold_asset_amount,
-				bought_asset_id,
-				min_amount_out,
+			}) => CallType::Swap {
+				swap_pool_list,
+				asset_id_in,
+				asset_amount_in,
+				asset_id_out,
+				asset_amount_out: min_amount_out,
 			},
-			RuntimeCall::Xyk(pallet_xyk::Call::buy_asset {
-				sold_asset_id,
-				bought_asset_amount,
-				bought_asset_id,
-				max_amount_in,
-				..
-			}) => CallType::AtomicBuy {
-				sold_asset_id,
-				bought_asset_amount,
-				bought_asset_id,
-				max_amount_in,
-			},
-			RuntimeCall::Xyk(pallet_xyk::Call::multiswap_sell_asset {
-				swap_token_list,
-				sold_asset_amount,
-				min_amount_out,
-				..
-			}) => CallType::MultiSell { swap_token_list, sold_asset_amount, min_amount_out },
-			RuntimeCall::Xyk(pallet_xyk::Call::multiswap_buy_asset {
-				swap_token_list,
-				bought_asset_amount,
-				max_amount_in,
-				..
-			}) => CallType::MultiBuy { swap_token_list, bought_asset_amount, max_amount_in },
-			RuntimeCall::Xyk(pallet_xyk::Call::compound_rewards { .. }) =>
-				CallType::CompoundRewards,
-			RuntimeCall::Xyk(pallet_xyk::Call::provide_liquidity_with_conversion { .. }) =>
-				CallType::ProvideLiquidityWithConversion,
 			RuntimeCall::FeeLock(pallet_fee_lock::Call::unlock_fee { .. }) => CallType::UnlockFee,
 			_ => CallType::Other,
 		}
 	}
 }
 
-use sp_core::hexdisplay::HexDisplay;
-use sp_runtime::{
-	generic::{ExtendedCall, MetamaskSigningCtx},
-	AccountId20,
-};
-use sp_std::{fmt::Write, prelude::*};
+use sp_runtime::generic::{ExtendedCall, MetamaskSigningCtx};
+use sp_std::fmt::Write;
 
 impl ExtendedCall for RuntimeCall {
 	fn context(&self) -> Option<MetamaskSigningCtx> {
@@ -705,13 +693,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
 	fn filter(&self, c: &RuntimeCall) -> bool {
 		match self {
 			_ if matches!(c, RuntimeCall::Utility(..)) => true,
-			ProxyType::AutoCompound => {
-				matches!(
-					c,
-					RuntimeCall::Xyk(pallet_xyk::Call::provide_liquidity_with_conversion { .. }) |
-						RuntimeCall::Xyk(pallet_xyk::Call::compound_rewards { .. })
-				)
-			},
+			ProxyType::AutoCompound => false,
 		}
 	}
 	fn is_superset(&self, o: &Self) -> bool {
@@ -825,6 +807,26 @@ impl pallet_metamask_signature::Config for Runtime {
 	type UrlStringLimit = frame_support::traits::ConstU32<1024>;
 }
 
+impl pallet_market::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = orml_tokens::MultiTokenCurrencyAdapter<Runtime>;
+	type Balance = Balance;
+	type CurrencyId = TokenId;
+	type NativeCurrencyId = tokens::RxTokenId;
+	type Xyk = Xyk;
+	type StableSwap = StableSwap;
+	type Rewards = ProofOfStake;
+	type Vesting = Vesting;
+	type AssetRegistry = cfg::orml_asset_registry::AssetRegistryProvider<Runtime>;
+	type DisabledTokens =
+		(cfg::pallet_xyk::TestTokensFilter, cfg::pallet_xyk::AssetRegisterFilter<Runtime>);
+	type DisallowedPools = Bootstrap;
+	type MaintenanceStatusProvider = Maintenance;
+	type WeightInfo = weights::pallet_market_weights::ModuleWeight<Runtime>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type ComputeIssuance = Issuance;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub struct Runtime {
@@ -842,7 +844,8 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment = 11,
 
 		// Xyk stuff
-		Xyk: pallet_xyk = 13,
+		StableSwap: pallet_stable_swap exclude_parts { Call } = 12,
+		Xyk: pallet_xyk exclude_parts { Call } = 13,
 		ProofOfStake: pallet_proof_of_stake = 14,
 
 		// Fee Locks
@@ -862,6 +865,9 @@ construct_runtime!(
 
 		// Bootstrap
 		Bootstrap: pallet_bootstrap = 21,
+
+		// AMM
+		Market: pallet_market = 22,
 
 		// Collator support. The order of these 6 are important and shall not change.
 		Authorship: pallet_authorship = 29,
@@ -909,9 +915,9 @@ mod benches {
 		[pallet_fee_lock, FeeLock]
 		[pallet_proof_of_stake, ProofOfStake]
 		[pallet_rolldown, Rolldown]
+		[pallet_market, Market]
 	);
 }
-use codec::alloc::string::ToString;
 
 use frame_support::dispatch::GetDispatchInfo;
 
@@ -1223,16 +1229,12 @@ impl_runtime_apis! {
 					FeeHelpers::<
 								Runtime,
 								orml_tokens::MultiTokenCurrencyAdapter<Runtime>,
-								ToAuthor<Runtime>,
-								OnChargeTransactionHandler<Runtime>,
 								FeeLock,
 								>::is_high_value_swap(&feelock, *input, input_amount)
 									||
 					FeeHelpers::<
 								Runtime,
 								orml_tokens::MultiTokenCurrencyAdapter<Runtime>,
-								ToAuthor<Runtime>,
-								OnChargeTransactionHandler<Runtime>,
 								FeeLock,
 								>::is_high_value_swap(&feelock, *output, output_amount)
 								)
@@ -1262,16 +1264,12 @@ impl_runtime_apis! {
 					FeeHelpers::<
 								Runtime,
 								orml_tokens::MultiTokenCurrencyAdapter<Runtime>,
-								ToAuthor<Runtime>,
-								OnChargeTransactionHandler<Runtime>,
 								FeeLock,
 								>::is_high_value_swap(&feelock, *input, input_amount)
 									||
 					FeeHelpers::<
 								Runtime,
 								orml_tokens::MultiTokenCurrencyAdapter<Runtime>,
-								ToAuthor<Runtime>,
-								OnChargeTransactionHandler<Runtime>,
 								FeeLock,
 								>::is_high_value_swap(&feelock, *output, output_amount)
 								)
@@ -1308,6 +1306,72 @@ impl_runtime_apis! {
 
 		fn get_total_number_of_swaps() -> u128 {
 			Xyk::get_total_number_of_swaps()
+		}
+	}
+
+	impl pallet_market::MarketRuntimeApi<Block, Balance, TokenId> for Runtime {
+		fn calculate_sell_price(pool_id: TokenId, sell_asset_id: TokenId, sell_amount: Balance) -> Option<Balance> {
+			Market::calculate_sell_price(pool_id, sell_asset_id, sell_amount)
+		}
+
+		fn calculate_buy_price(pool_id: TokenId, buy_asset_id: TokenId, buy_amount: Balance) -> Option<Balance> {
+			Market::calculate_buy_price(pool_id, buy_asset_id, buy_amount)
+		}
+
+		fn get_burn_amount(pool_id: TokenId, lp_burn_amount: Balance) -> Option<(Balance, Balance)> {
+			Market::get_burn_amount(pool_id, lp_burn_amount)
+		}
+
+		fn get_tradeable_tokens() -> Vec<pallet_market::RpcAssetMetadata<TokenId>> {
+			orml_asset_registry::Metadata::<Runtime>::iter()
+			.filter_map(|(token_id, metadata)| {
+				if !metadata.name.is_empty()
+					&& !metadata.symbol.is_empty()
+					&& metadata.additional.xyk.as_ref().map_or(true, |xyk| !xyk.operations_disabled)
+				{
+					let rpc_metadata = pallet_market::RpcAssetMetadata {
+						token_id: token_id,
+						decimals: metadata.decimals,
+						name: metadata.name.to_vec(),
+						symbol: metadata.symbol.to_vec(),
+					};
+					Some(rpc_metadata)
+				} else {
+					None
+				}
+			})
+			.collect::<Vec<_>>()
+		}
+
+		fn get_pools_for_trading() -> Vec<TokenId> {
+			Market::get_pools_for_trading()
+		}
+
+		fn calculate_expected_amount_for_minting(
+			pool_id: TokenId,
+			asset_id: TokenId,
+			amount: Balance,
+		) -> Option<Balance> {
+			Market::calculate_expected_amount_for_minting(pool_id, asset_id, amount)
+		}
+
+		fn calculate_expected_lp_minted(
+			pool_id: TokenId,
+			amounts: (Balance, Balance),
+		) -> Option<Balance> {
+			Market::calculate_expected_lp_minted(pool_id, amounts)
+		}
+
+		fn get_pools(pool_id: Option<TokenId>) -> Vec<pallet_market::RpcPoolInfo<TokenId, Balance>> {
+			Market::get_pools(pool_id).into_iter()
+				.map(|(info, reserve)| pallet_market::RpcPoolInfo {
+					pool_id: info.pool_id,
+					kind: info.kind,
+					lp_token_id: info.pool_id,
+					assets: vec![info.pool.0, info.pool.1],
+					reserves: vec![reserve.0, reserve.1],
+				})
+				.collect()
 		}
 	}
 
