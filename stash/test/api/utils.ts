@@ -2,7 +2,7 @@ import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
 import * as crypto from 'crypto'
 
 export const TIMESERIES_HOST_DOCKER_IMAGE_NAME =
-  'mangatasolutions/redis-test-stash_ts:5'
+  'mangatasolutions/redis-test-stash_ts:8'
 export const REDIS_HOST_DOCKER_IMAGE_NAME = 'p1k1m4n/redis-test-stash:5'
 export const MAX_DAYS = 'max'
 export const MAX_INTERVAL = 'day'
