@@ -16,9 +16,9 @@ impl Watchdog {
     pub async fn run(&mut self) {
         loop {
             if timeout(self.duration, self.rx.recv())
-                .is_none()
                 .await
                 .expect("watchdog timeout")
+                .is_none()
             {
                 tracing::error!("Watchdog closed");
                 break;
