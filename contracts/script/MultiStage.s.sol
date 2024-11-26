@@ -18,7 +18,7 @@ contract MultiStage is Script, Utils, Test {
     function deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId chain) internal {
 
       Rolldown rolldown;
-      FinalizerTaskManager taskManager;
+      GaspMultiRollupService gmrs;
       address avsOwner;
       bool gmrsAllowNonRootInit;
 
@@ -31,18 +31,13 @@ contract MultiStage is Script, Utils, Test {
       string memory _CONFIG_PATH = "deploy.config";
       string memory configData = readConfig(_CONFIG_PATH);
       avsOwner = stdJson.readAddress(configData, ".permissions.owner");
-      gmrsAllowNonRootInit = stdJson.readAddress(configData, ".allow_non_root_gmrs_init");
+      gmrsAllowNonRootInit = stdJson.readBool(configData, ".allow_non_root_gmrs_init");
 
       console.log("################################################################################");
       console.log("Deploying gaspMultiRollupService contracts");
       console.log("################################################################################");
       GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
       gaspMultiRollupServiceDeployer.run(chain, gmrsAllowNonRootInit);
-
-
-      Rolldown rolldown;
-      GaspMultiRollupService gmrs;
-      address avsOwner;
 
       string memory _GMRS_OUTPUT_PATH = "gmrs_output";
       string memory gmrsDeployedContracts = readOutput(evmPrefixedPath(chain, _GMRS_OUTPUT_PATH));
