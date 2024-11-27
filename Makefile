@@ -75,8 +75,11 @@ bindings-json: ## generate JS bindings
 	cp contracts/out/Rolldown.sol/Rolldown.json ./ferry-withdrawal/src/Rolldown.json
 
 bindings-gasp:
+	rm -rf metadata.scale || true
+	rm -rf sequencer/sequencer/src/l2/gasp/gasp_bindings.rs || true
 	subxt metadata -f bytes -o metadata.scale --url http://127.0.0.1:9944
-	subxt codegen --attribute "#[allow(non_snake_case)]" --derive Clone --derive PartialEq --file metadata.scale | rustfmt --edition=2018 --emit=stdout > sequencer/sequencer/src/l2/gasp/gasp_bindings.rs
+	echo "#[allow(non_snake_case)]" >> sequencer/sequencer/src/l2/gasp/gasp_bindings.rs
+	subxt codegen --attribute "#[allow(non_snake_case)]" --derive Clone --derive PartialEq --file metadata.scale | rustfmt --edition=2018 --emit=stdout >> sequencer/sequencer/src/l2/gasp/gasp_bindings.rs
 	rm -rf metadata.scale
 
 

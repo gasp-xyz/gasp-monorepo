@@ -1,3 +1,4 @@
+#[allow(non_snake_case)]
 #[allow(dead_code, unused_imports, non_camel_case_types, unreachable_patterns)]
 #[allow(clippy::all)]
 #[allow(rustdoc::broken_intra_doc_links)]
@@ -6,7 +7,7 @@ pub mod api {
     mod root_mod {
         pub use super::*;
     }
-    pub static PALLETS: [&str; 30usize] = [
+    pub static PALLETS: [&str; 32usize] = [
         "System",
         "Timestamp",
         "Utility",
@@ -16,6 +17,7 @@ pub mod api {
         "Metamask",
         "Tokens",
         "TransactionPayment",
+        "StableSwap",
         "Xyk",
         "ProofOfStake",
         "FeeLock",
@@ -24,6 +26,7 @@ pub mod api {
         "Issuance",
         "MultiPurposeLiquidity",
         "Bootstrap",
+        "Market",
         "Authorship",
         "ParachainStaking",
         "SequencerStaking",
@@ -38,13 +41,14 @@ pub mod api {
         "Identity",
         "FoundationMembers",
     ];
-    pub static RUNTIME_APIS: [&str; 17usize] = [
+    pub static RUNTIME_APIS: [&str; 18usize] = [
         "MetamaskSignatureRuntimeApi",
         "RolldownRuntimeApi",
         "ProofOfStakeApi",
         "VerApi",
         "VerNonceApi",
         "XykRuntimeApi",
+        "MarketRuntimeApi",
         "Core",
         "Metadata",
         "BlockBuilder",
@@ -102,6 +106,9 @@ pub mod api {
             }
             pub fn xyk_runtime_api(&self) -> xyk_runtime_api::XykRuntimeApi {
                 xyk_runtime_api::XykRuntimeApi
+            }
+            pub fn market_runtime_api(&self) -> market_runtime_api::MarketRuntimeApi {
+                market_runtime_api::MarketRuntimeApi
             }
             pub fn core(&self) -> core::Core {
                 core::Core
@@ -2153,6 +2160,439 @@ pub mod api {
                 pub struct GetTotalNumberOfSwaps {}
             }
         }
+        pub mod market_runtime_api {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " This runtime api allows people to query the size of the liquidity pools"]
+            #[doc = " and quote prices for swaps."]
+            pub struct MarketRuntimeApi;
+            impl MarketRuntimeApi {
+                pub fn calculate_sell_price(
+                    &self,
+                    pool_id: types::calculate_sell_price::PoolId,
+                    sell_asset_id: types::calculate_sell_price::SellAssetId,
+                    sell_amount: types::calculate_sell_price::SellAmount,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::CalculateSellPrice,
+                    types::calculate_sell_price::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "MarketRuntimeApi",
+                        "calculate_sell_price",
+                        types::CalculateSellPrice {
+                            pool_id,
+                            sell_asset_id,
+                            sell_amount,
+                        },
+                        [
+                            31u8, 7u8, 234u8, 154u8, 167u8, 255u8, 116u8, 98u8, 220u8, 84u8, 205u8,
+                            227u8, 18u8, 53u8, 89u8, 172u8, 67u8, 9u8, 195u8, 186u8, 117u8, 229u8,
+                            206u8, 159u8, 92u8, 92u8, 165u8, 234u8, 185u8, 230u8, 62u8, 182u8,
+                        ],
+                    )
+                }
+                pub fn calculate_buy_price(
+                    &self,
+                    pool_id: types::calculate_buy_price::PoolId,
+                    buy_asset_id: types::calculate_buy_price::BuyAssetId,
+                    buy_amount: types::calculate_buy_price::BuyAmount,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::CalculateBuyPrice,
+                    types::calculate_buy_price::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "MarketRuntimeApi",
+                        "calculate_buy_price",
+                        types::CalculateBuyPrice {
+                            pool_id,
+                            buy_asset_id,
+                            buy_amount,
+                        },
+                        [
+                            209u8, 76u8, 202u8, 28u8, 8u8, 194u8, 66u8, 61u8, 206u8, 248u8, 211u8,
+                            118u8, 172u8, 212u8, 251u8, 0u8, 201u8, 148u8, 24u8, 226u8, 75u8, 84u8,
+                            179u8, 169u8, 136u8, 115u8, 193u8, 199u8, 115u8, 136u8, 23u8, 61u8,
+                        ],
+                    )
+                }
+                pub fn get_burn_amount(
+                    &self,
+                    pool_id: types::get_burn_amount::PoolId,
+                    lp_burn_amount: types::get_burn_amount::LpBurnAmount,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::GetBurnAmount,
+                    types::get_burn_amount::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "MarketRuntimeApi",
+                        "get_burn_amount",
+                        types::GetBurnAmount {
+                            pool_id,
+                            lp_burn_amount,
+                        },
+                        [
+                            180u8, 122u8, 55u8, 45u8, 172u8, 133u8, 215u8, 146u8, 8u8, 211u8,
+                            176u8, 236u8, 161u8, 182u8, 106u8, 115u8, 237u8, 54u8, 141u8, 192u8,
+                            213u8, 46u8, 201u8, 58u8, 196u8, 136u8, 54u8, 82u8, 151u8, 165u8, 75u8,
+                            153u8,
+                        ],
+                    )
+                }
+                pub fn calculate_expected_amount_for_minting(
+                    &self,
+                    pool_id: types::calculate_expected_amount_for_minting::PoolId,
+                    asset_id: types::calculate_expected_amount_for_minting::AssetId,
+                    amount: types::calculate_expected_amount_for_minting::Amount,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::CalculateExpectedAmountForMinting,
+                    types::calculate_expected_amount_for_minting::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "MarketRuntimeApi",
+                        "calculate_expected_amount_for_minting",
+                        types::CalculateExpectedAmountForMinting {
+                            pool_id,
+                            asset_id,
+                            amount,
+                        },
+                        [
+                            113u8, 61u8, 191u8, 236u8, 102u8, 202u8, 19u8, 89u8, 252u8, 60u8, 64u8,
+                            52u8, 187u8, 47u8, 70u8, 45u8, 161u8, 3u8, 189u8, 48u8, 70u8, 86u8,
+                            122u8, 170u8, 112u8, 112u8, 43u8, 62u8, 240u8, 178u8, 178u8, 199u8,
+                        ],
+                    )
+                }
+                pub fn calculate_expected_lp_minted(
+                    &self,
+                    pool_id: types::calculate_expected_lp_minted::PoolId,
+                    amounts: types::calculate_expected_lp_minted::Amounts,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::CalculateExpectedLpMinted,
+                    types::calculate_expected_lp_minted::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "MarketRuntimeApi",
+                        "calculate_expected_lp_minted",
+                        types::CalculateExpectedLpMinted { pool_id, amounts },
+                        [
+                            245u8, 102u8, 181u8, 27u8, 82u8, 18u8, 23u8, 238u8, 61u8, 200u8, 195u8,
+                            159u8, 140u8, 238u8, 224u8, 249u8, 223u8, 144u8, 32u8, 169u8, 168u8,
+                            24u8, 180u8, 232u8, 199u8, 14u8, 131u8, 102u8, 229u8, 45u8, 40u8,
+                            139u8,
+                        ],
+                    )
+                }
+                pub fn get_tradeable_tokens(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::GetTradeableTokens,
+                    types::get_tradeable_tokens::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "MarketRuntimeApi",
+                        "get_tradeable_tokens",
+                        types::GetTradeableTokens {},
+                        [
+                            16u8, 94u8, 100u8, 73u8, 61u8, 3u8, 206u8, 219u8, 194u8, 53u8, 111u8,
+                            44u8, 87u8, 28u8, 0u8, 130u8, 99u8, 13u8, 159u8, 14u8, 81u8, 223u8,
+                            15u8, 159u8, 183u8, 147u8, 62u8, 145u8, 164u8, 91u8, 136u8, 162u8,
+                        ],
+                    )
+                }
+                pub fn get_pools_for_trading(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::GetPoolsForTrading,
+                    types::get_pools_for_trading::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "MarketRuntimeApi",
+                        "get_pools_for_trading",
+                        types::GetPoolsForTrading {},
+                        [
+                            46u8, 229u8, 75u8, 169u8, 160u8, 172u8, 241u8, 37u8, 138u8, 40u8, 4u8,
+                            130u8, 242u8, 212u8, 160u8, 95u8, 8u8, 171u8, 104u8, 134u8, 255u8,
+                            251u8, 106u8, 212u8, 52u8, 212u8, 77u8, 147u8, 54u8, 184u8, 26u8,
+                            142u8,
+                        ],
+                    )
+                }
+                pub fn get_pools(
+                    &self,
+                    pool_id: types::get_pools::PoolId,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::GetPools,
+                    types::get_pools::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "MarketRuntimeApi",
+                        "get_pools",
+                        types::GetPools { pool_id },
+                        [
+                            69u8, 6u8, 198u8, 88u8, 141u8, 140u8, 22u8, 53u8, 142u8, 181u8, 24u8,
+                            224u8, 185u8, 154u8, 61u8, 152u8, 22u8, 106u8, 180u8, 236u8, 15u8,
+                            42u8, 4u8, 190u8, 91u8, 5u8, 93u8, 119u8, 154u8, 52u8, 30u8, 195u8,
+                        ],
+                    )
+                }
+            }
+            pub mod types {
+                use super::runtime_types;
+                pub mod calculate_sell_price {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type SellAssetId = ::core::primitive::u32;
+                    pub type SellAmount = ::core::primitive::u128;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::core::option::Option<::core::primitive::u128>;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct CalculateSellPrice {
+                    pub pool_id: calculate_sell_price::PoolId,
+                    pub sell_asset_id: calculate_sell_price::SellAssetId,
+                    pub sell_amount: calculate_sell_price::SellAmount,
+                }
+                pub mod calculate_buy_price {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type BuyAssetId = ::core::primitive::u32;
+                    pub type BuyAmount = ::core::primitive::u128;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::core::option::Option<::core::primitive::u128>;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct CalculateBuyPrice {
+                    pub pool_id: calculate_buy_price::PoolId,
+                    pub buy_asset_id: calculate_buy_price::BuyAssetId,
+                    pub buy_amount: calculate_buy_price::BuyAmount,
+                }
+                pub mod get_burn_amount {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type LpBurnAmount = ::core::primitive::u128;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::core::option::Option<(
+                            ::core::primitive::u128,
+                            ::core::primitive::u128,
+                        )>;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct GetBurnAmount {
+                    pub pool_id: get_burn_amount::PoolId,
+                    pub lp_burn_amount: get_burn_amount::LpBurnAmount,
+                }
+                pub mod calculate_expected_amount_for_minting {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type AssetId = ::core::primitive::u32;
+                    pub type Amount = ::core::primitive::u128;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::core::option::Option<::core::primitive::u128>;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct CalculateExpectedAmountForMinting {
+                    pub pool_id: calculate_expected_amount_for_minting::PoolId,
+                    pub asset_id: calculate_expected_amount_for_minting::AssetId,
+                    pub amount: calculate_expected_amount_for_minting::Amount,
+                }
+                pub mod calculate_expected_lp_minted {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type Amounts = (::core::primitive::u128, ::core::primitive::u128);
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::core::option::Option<::core::primitive::u128>;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct CalculateExpectedLpMinted {
+                    pub pool_id: calculate_expected_lp_minted::PoolId,
+                    pub amounts: calculate_expected_lp_minted::Amounts,
+                }
+                pub mod get_tradeable_tokens {
+                    use super::runtime_types;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
+                            runtime_types::pallet_market::RpcAssetMetadata<::core::primitive::u32>,
+                        >;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct GetTradeableTokens {}
+                pub mod get_pools_for_trading {
+                    use super::runtime_types;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output =
+                            ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct GetPoolsForTrading {}
+                pub mod get_pools {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::option::Option<::core::primitive::u32>;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
+                            runtime_types::pallet_market::RpcPoolInfo<
+                                ::core::primitive::u32,
+                                ::core::primitive::u128,
+                            >,
+                        >;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct GetPools {
+                    pub pool_id: get_pools::PoolId,
+                }
+            }
+        }
         pub mod core {
             use super::root_mod;
             use super::runtime_types;
@@ -3587,9 +4027,9 @@ pub mod api {
                         "query_call_info",
                         types::QueryCallInfo { call, len },
                         [
-                            206u8, 131u8, 229u8, 77u8, 87u8, 176u8, 57u8, 74u8, 72u8, 240u8, 90u8,
-                            116u8, 47u8, 229u8, 246u8, 31u8, 177u8, 216u8, 199u8, 42u8, 44u8, 21u8,
-                            61u8, 198u8, 10u8, 73u8, 191u8, 9u8, 198u8, 69u8, 14u8, 11u8,
+                            162u8, 146u8, 0u8, 99u8, 217u8, 251u8, 252u8, 6u8, 64u8, 246u8, 127u8,
+                            223u8, 122u8, 64u8, 179u8, 249u8, 79u8, 4u8, 198u8, 2u8, 16u8, 146u8,
+                            58u8, 193u8, 77u8, 92u8, 247u8, 12u8, 246u8, 249u8, 11u8, 152u8,
                         ],
                     )
                 }
@@ -3607,10 +4047,9 @@ pub mod api {
                         "query_call_fee_details",
                         types::QueryCallFeeDetails { call, len },
                         [
-                            202u8, 162u8, 203u8, 170u8, 103u8, 68u8, 141u8, 142u8, 113u8, 230u8,
-                            103u8, 148u8, 96u8, 236u8, 23u8, 22u8, 152u8, 54u8, 242u8, 157u8,
-                            203u8, 105u8, 74u8, 60u8, 154u8, 255u8, 196u8, 61u8, 217u8, 55u8,
-                            183u8, 2u8,
+                            108u8, 85u8, 86u8, 2u8, 112u8, 65u8, 42u8, 151u8, 23u8, 137u8, 82u8,
+                            35u8, 125u8, 55u8, 23u8, 14u8, 123u8, 151u8, 223u8, 164u8, 165u8, 56u8,
+                            207u8, 233u8, 231u8, 84u8, 94u8, 94u8, 119u8, 86u8, 89u8, 145u8,
                         ],
                     )
                 }
@@ -3816,6 +4255,9 @@ pub mod api {
         pub fn transaction_payment(&self) -> transaction_payment::constants::ConstantsApi {
             transaction_payment::constants::ConstantsApi
         }
+        pub fn stable_swap(&self) -> stable_swap::constants::ConstantsApi {
+            stable_swap::constants::ConstantsApi
+        }
         pub fn xyk(&self) -> xyk::constants::ConstantsApi {
             xyk::constants::ConstantsApi
         }
@@ -3884,6 +4326,9 @@ pub mod api {
         }
         pub fn transaction_payment(&self) -> transaction_payment::storage::StorageApi {
             transaction_payment::storage::StorageApi
+        }
+        pub fn stable_swap(&self) -> stable_swap::storage::StorageApi {
+            stable_swap::storage::StorageApi
         }
         pub fn xyk(&self) -> xyk::storage::StorageApi {
             xyk::storage::StorageApi
@@ -3972,9 +4417,6 @@ pub mod api {
         pub fn tokens(&self) -> tokens::calls::TransactionApi {
             tokens::calls::TransactionApi
         }
-        pub fn xyk(&self) -> xyk::calls::TransactionApi {
-            xyk::calls::TransactionApi
-        }
         pub fn proof_of_stake(&self) -> proof_of_stake::calls::TransactionApi {
             proof_of_stake::calls::TransactionApi
         }
@@ -3995,6 +4437,9 @@ pub mod api {
         }
         pub fn bootstrap(&self) -> bootstrap::calls::TransactionApi {
             bootstrap::calls::TransactionApi
+        }
+        pub fn market(&self) -> market::calls::TransactionApi {
+            market::calls::TransactionApi
         }
         pub fn parachain_staking(&self) -> parachain_staking::calls::TransactionApi {
             parachain_staking::calls::TransactionApi
@@ -4039,9 +4484,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                165u8, 60u8, 93u8, 14u8, 61u8, 183u8, 152u8, 209u8, 151u8, 94u8, 219u8, 145u8,
-                39u8, 219u8, 31u8, 15u8, 155u8, 173u8, 8u8, 12u8, 133u8, 204u8, 131u8, 84u8, 180u8,
-                42u8, 67u8, 141u8, 87u8, 226u8, 182u8, 239u8,
+                3u8, 184u8, 5u8, 196u8, 128u8, 146u8, 229u8, 62u8, 57u8, 141u8, 240u8, 143u8, 72u8,
+                104u8, 224u8, 192u8, 137u8, 248u8, 164u8, 51u8, 201u8, 113u8, 60u8, 71u8, 65u8,
+                11u8, 165u8, 163u8, 16u8, 7u8, 72u8, 155u8,
             ]
     }
     pub mod system {
@@ -5467,10 +5912,9 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            123u8, 202u8, 173u8, 49u8, 162u8, 104u8, 6u8, 230u8, 168u8, 174u8,
-                            248u8, 175u8, 85u8, 232u8, 163u8, 245u8, 49u8, 130u8, 206u8, 28u8,
-                            228u8, 176u8, 169u8, 139u8, 167u8, 105u8, 207u8, 210u8, 31u8, 82u8,
-                            152u8, 201u8,
+                            182u8, 137u8, 180u8, 159u8, 114u8, 234u8, 1u8, 35u8, 17u8, 143u8, 48u8,
+                            1u8, 181u8, 69u8, 223u8, 35u8, 189u8, 16u8, 202u8, 143u8, 168u8, 187u8,
+                            110u8, 141u8, 149u8, 128u8, 159u8, 160u8, 95u8, 120u8, 95u8, 56u8,
                         ],
                     )
                 }
@@ -6272,10 +6716,9 @@ pub mod api {
                         "batch",
                         types::Batch { calls },
                         [
-                            221u8, 185u8, 193u8, 27u8, 224u8, 161u8, 202u8, 233u8, 15u8, 173u8,
-                            190u8, 24u8, 17u8, 157u8, 121u8, 53u8, 206u8, 46u8, 133u8, 129u8, 45u8,
-                            210u8, 148u8, 168u8, 146u8, 90u8, 88u8, 216u8, 151u8, 234u8, 219u8,
-                            60u8,
+                            123u8, 121u8, 43u8, 243u8, 134u8, 131u8, 248u8, 178u8, 184u8, 109u8,
+                            4u8, 31u8, 172u8, 165u8, 46u8, 99u8, 205u8, 150u8, 245u8, 42u8, 146u8,
+                            182u8, 10u8, 17u8, 234u8, 15u8, 201u8, 123u8, 64u8, 115u8, 91u8, 249u8,
                         ],
                     )
                 }
@@ -6306,10 +6749,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            20u8, 73u8, 131u8, 134u8, 90u8, 221u8, 142u8, 38u8, 62u8, 27u8, 176u8,
-                            157u8, 243u8, 183u8, 51u8, 129u8, 226u8, 89u8, 246u8, 232u8, 158u8,
-                            16u8, 166u8, 111u8, 106u8, 250u8, 180u8, 60u8, 237u8, 32u8, 192u8,
-                            162u8,
+                            253u8, 129u8, 133u8, 22u8, 165u8, 22u8, 9u8, 196u8, 16u8, 205u8, 228u8,
+                            91u8, 80u8, 210u8, 38u8, 117u8, 163u8, 223u8, 255u8, 108u8, 159u8,
+                            55u8, 137u8, 218u8, 98u8, 131u8, 103u8, 179u8, 117u8, 110u8, 24u8,
+                            101u8,
                         ],
                     )
                 }
@@ -6336,10 +6779,10 @@ pub mod api {
                         "batch_all",
                         types::BatchAll { calls },
                         [
-                            158u8, 176u8, 161u8, 94u8, 224u8, 251u8, 220u8, 218u8, 179u8, 12u8,
-                            92u8, 153u8, 206u8, 103u8, 151u8, 66u8, 252u8, 62u8, 140u8, 168u8,
-                            96u8, 121u8, 30u8, 152u8, 166u8, 155u8, 32u8, 17u8, 128u8, 176u8,
-                            209u8, 111u8,
+                            162u8, 171u8, 9u8, 200u8, 236u8, 209u8, 141u8, 116u8, 141u8, 71u8,
+                            231u8, 199u8, 20u8, 213u8, 252u8, 7u8, 218u8, 172u8, 121u8, 242u8,
+                            255u8, 164u8, 198u8, 219u8, 141u8, 142u8, 222u8, 205u8, 31u8, 114u8,
+                            56u8, 81u8,
                         ],
                     )
                 }
@@ -6363,10 +6806,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            52u8, 6u8, 111u8, 97u8, 124u8, 40u8, 188u8, 191u8, 209u8, 207u8, 141u8,
-                            67u8, 79u8, 174u8, 236u8, 85u8, 145u8, 215u8, 134u8, 220u8, 114u8,
-                            186u8, 241u8, 155u8, 135u8, 54u8, 90u8, 109u8, 59u8, 55u8, 241u8,
-                            244u8,
+                            30u8, 222u8, 75u8, 32u8, 184u8, 161u8, 138u8, 205u8, 27u8, 128u8,
+                            104u8, 156u8, 131u8, 231u8, 88u8, 13u8, 253u8, 15u8, 79u8, 205u8,
+                            100u8, 217u8, 34u8, 132u8, 226u8, 220u8, 124u8, 78u8, 117u8, 50u8,
+                            183u8, 113u8,
                         ],
                     )
                 }
@@ -6393,10 +6836,10 @@ pub mod api {
                         "force_batch",
                         types::ForceBatch { calls },
                         [
-                            146u8, 113u8, 133u8, 233u8, 82u8, 224u8, 79u8, 34u8, 122u8, 240u8,
-                            172u8, 51u8, 45u8, 243u8, 226u8, 89u8, 94u8, 173u8, 31u8, 8u8, 81u8,
-                            118u8, 153u8, 165u8, 69u8, 202u8, 54u8, 37u8, 122u8, 172u8, 134u8,
-                            176u8,
+                            207u8, 90u8, 205u8, 193u8, 119u8, 220u8, 188u8, 240u8, 151u8, 214u8,
+                            159u8, 250u8, 107u8, 9u8, 170u8, 41u8, 98u8, 190u8, 217u8, 199u8, 64u8,
+                            214u8, 237u8, 111u8, 47u8, 172u8, 64u8, 195u8, 121u8, 32u8, 154u8,
+                            86u8,
                         ],
                     )
                 }
@@ -6420,9 +6863,10 @@ pub mod api {
                             weight,
                         },
                         [
-                            84u8, 68u8, 90u8, 78u8, 238u8, 38u8, 177u8, 207u8, 87u8, 98u8, 150u8,
-                            116u8, 68u8, 26u8, 164u8, 204u8, 228u8, 28u8, 33u8, 244u8, 53u8, 92u8,
-                            95u8, 146u8, 184u8, 200u8, 98u8, 136u8, 28u8, 65u8, 68u8, 183u8,
+                            53u8, 185u8, 171u8, 115u8, 240u8, 25u8, 51u8, 103u8, 131u8, 226u8,
+                            65u8, 216u8, 140u8, 189u8, 192u8, 158u8, 22u8, 94u8, 244u8, 219u8,
+                            255u8, 73u8, 74u8, 147u8, 150u8, 79u8, 122u8, 180u8, 184u8, 23u8, 26u8,
+                            22u8,
                         ],
                     )
                 }
@@ -7073,9 +7517,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            155u8, 213u8, 159u8, 104u8, 174u8, 161u8, 85u8, 129u8, 108u8, 192u8,
-                            83u8, 199u8, 70u8, 90u8, 254u8, 255u8, 21u8, 59u8, 133u8, 3u8, 131u8,
-                            56u8, 183u8, 143u8, 231u8, 44u8, 69u8, 13u8, 240u8, 164u8, 26u8, 43u8,
+                            41u8, 67u8, 156u8, 102u8, 107u8, 191u8, 210u8, 171u8, 73u8, 66u8, 63u8,
+                            27u8, 61u8, 85u8, 249u8, 241u8, 31u8, 52u8, 207u8, 113u8, 134u8, 139u8,
+                            65u8, 53u8, 95u8, 11u8, 63u8, 175u8, 181u8, 119u8, 107u8, 174u8,
                         ],
                     )
                 }
@@ -7363,9 +7807,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            32u8, 54u8, 118u8, 63u8, 160u8, 125u8, 104u8, 103u8, 59u8, 173u8,
-                            232u8, 39u8, 25u8, 22u8, 2u8, 159u8, 218u8, 179u8, 190u8, 112u8, 79u8,
-                            166u8, 104u8, 49u8, 26u8, 50u8, 28u8, 41u8, 147u8, 98u8, 151u8, 85u8,
+                            173u8, 83u8, 53u8, 37u8, 13u8, 27u8, 228u8, 171u8, 122u8, 252u8, 204u8,
+                            13u8, 211u8, 156u8, 212u8, 63u8, 153u8, 83u8, 58u8, 92u8, 172u8, 127u8,
+                            219u8, 224u8, 41u8, 89u8, 140u8, 79u8, 79u8, 90u8, 219u8, 11u8,
                         ],
                     )
                 }
@@ -12401,775 +12845,374 @@ pub mod api {
             }
         }
     }
-    pub mod xyk {
+    pub mod stable_swap {
         use super::root_mod;
         use super::runtime_types;
-        #[doc = "Errors"]
-        pub type Error = runtime_types::pallet_xyk::pallet::Error;
-        #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
-        pub type Call = runtime_types::pallet_xyk::pallet::Call;
-        pub mod calls {
-            use super::root_mod;
+        #[doc = "The `Error` enum of this pallet."]
+        pub type Error = runtime_types::pallet_stable_swap::pallet::Error;
+        #[doc = "The `Event` enum of this pallet"]
+        pub type Event = runtime_types::pallet_stable_swap::pallet::Event;
+        pub mod events {
             use super::runtime_types;
-            type DispatchError = runtime_types::sp_runtime::DispatchError;
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A successful call of the `CretaPool` extrinsic will create this event."]
+            pub struct PoolCreated {
+                pub creator: pool_created::Creator,
+                pub pool_id: pool_created::PoolId,
+                pub lp_token: pool_created::LpToken,
+                pub assets: pool_created::Assets,
+            }
+            pub mod pool_created {
+                use super::runtime_types;
+                pub type Creator = runtime_types::sp_runtime::account::AccountId20;
+                pub type PoolId = ::core::primitive::u32;
+                pub type LpToken = ::core::primitive::u32;
+                pub type Assets = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                    ::core::primitive::u32,
+                >;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for PoolCreated {
+                const PALLET: &'static str = "StableSwap";
+                const EVENT: &'static str = "PoolCreated";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A successful call of the `AddLiquidity` extrinsic will create this event."]
+            pub struct LiquidityMinted {
+                pub who: liquidity_minted::Who,
+                pub pool_id: liquidity_minted::PoolId,
+                pub amounts_provided: liquidity_minted::AmountsProvided,
+                pub lp_token: liquidity_minted::LpToken,
+                pub lp_token_minted: liquidity_minted::LpTokenMinted,
+                pub total_supply: liquidity_minted::TotalSupply,
+                pub fees: liquidity_minted::Fees,
+            }
+            pub mod liquidity_minted {
+                use super::runtime_types;
+                pub type Who = runtime_types::sp_runtime::account::AccountId20;
+                pub type PoolId = ::core::primitive::u32;
+                pub type AmountsProvided =
+                    runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        ::core::primitive::u128,
+                    >;
+                pub type LpToken = ::core::primitive::u32;
+                pub type LpTokenMinted = ::core::primitive::u128;
+                pub type TotalSupply = ::core::primitive::u128;
+                pub type Fees = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                    ::core::primitive::u128,
+                >;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for LiquidityMinted {
+                const PALLET: &'static str = "StableSwap";
+                const EVENT: &'static str = "LiquidityMinted";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Assets have been swapped, a successfull call to `Swap` will create this event."]
+            pub struct AssetsSwapped {
+                pub who: assets_swapped::Who,
+                pub pool_id: assets_swapped::PoolId,
+                pub asset_in: assets_swapped::AssetIn,
+                pub amount_in: assets_swapped::AmountIn,
+                pub asset_out: assets_swapped::AssetOut,
+                pub amount_out: assets_swapped::AmountOut,
+            }
+            pub mod assets_swapped {
+                use super::runtime_types;
+                pub type Who = runtime_types::sp_runtime::account::AccountId20;
+                pub type PoolId = ::core::primitive::u32;
+                pub type AssetIn = ::core::primitive::u32;
+                pub type AmountIn = ::core::primitive::u128;
+                pub type AssetOut = ::core::primitive::u32;
+                pub type AmountOut = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for AssetsSwapped {
+                const PALLET: &'static str = "StableSwap";
+                const EVENT: &'static str = "AssetsSwapped";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A successful call of the `RemoveLiquidityOneAsset` extrinsic will create this event."]
+            pub struct LiquidityBurnedOne {
+                pub who: liquidity_burned_one::Who,
+                pub pool_id: liquidity_burned_one::PoolId,
+                pub asset_id: liquidity_burned_one::AssetId,
+                pub amount: liquidity_burned_one::Amount,
+                pub burned_amount: liquidity_burned_one::BurnedAmount,
+                pub total_supply: liquidity_burned_one::TotalSupply,
+            }
+            pub mod liquidity_burned_one {
+                use super::runtime_types;
+                pub type Who = runtime_types::sp_runtime::account::AccountId20;
+                pub type PoolId = ::core::primitive::u32;
+                pub type AssetId = ::core::primitive::u32;
+                pub type Amount = ::core::primitive::u128;
+                pub type BurnedAmount = ::core::primitive::u128;
+                pub type TotalSupply = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for LiquidityBurnedOne {
+                const PALLET: &'static str = "StableSwap";
+                const EVENT: &'static str = "LiquidityBurnedOne";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A successful call of the `RemoveLiquidityImbalanced` & `RemoveLiquidity` extrinsic will create this event."]
+            pub struct LiquidityBurned {
+                pub who: liquidity_burned::Who,
+                pub pool_id: liquidity_burned::PoolId,
+                pub amounts: liquidity_burned::Amounts,
+                pub burned_amount: liquidity_burned::BurnedAmount,
+                pub total_supply: liquidity_burned::TotalSupply,
+                pub fees: liquidity_burned::Fees,
+            }
+            pub mod liquidity_burned {
+                use super::runtime_types;
+                pub type Who = runtime_types::sp_runtime::account::AccountId20;
+                pub type PoolId = ::core::primitive::u32;
+                pub type Amounts = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                    ::core::primitive::u128,
+                >;
+                pub type BurnedAmount = ::core::primitive::u128;
+                pub type TotalSupply = ::core::primitive::u128;
+                pub type Fees = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                    ::core::primitive::u128,
+                >;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for LiquidityBurned {
+                const PALLET: &'static str = "StableSwap";
+                const EVENT: &'static str = "LiquidityBurned";
+            }
+        }
+        pub mod storage {
+            use super::runtime_types;
             pub mod types {
                 use super::runtime_types;
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct CreatePool {
-                    pub first_asset_id: create_pool::FirstAssetId,
-                    pub first_asset_amount: create_pool::FirstAssetAmount,
-                    pub second_asset_id: create_pool::SecondAssetId,
-                    pub second_asset_amount: create_pool::SecondAssetAmount,
-                }
-                pub mod create_pool {
+                pub mod pools {
                     use super::runtime_types;
-                    pub type FirstAssetId = ::core::primitive::u32;
-                    pub type FirstAssetAmount = ::core::primitive::u128;
-                    pub type SecondAssetId = ::core::primitive::u32;
-                    pub type SecondAssetAmount = ::core::primitive::u128;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for CreatePool {
-                    const PALLET: &'static str = "Xyk";
-                    const CALL: &'static str = "create_pool";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                #[doc = "Executes sell_asset swap."]
-                #[doc = "First the swap is prevalidated, if it is successful then the extrinsic is accepted. Beyond this point the exchange commission will be charged."]
-                #[doc = "The sold amount of the sold asset is used to determine the bought asset amount."]
-                #[doc = "If the bought asset amount is lower than the min_amount_out then it will fail on slippage."]
-                #[doc = "The percentage exchange commission is still charged even if the swap fails on slippage. Though the swap itself will be a no-op."]
-                #[doc = "The slippage is calculated based upon the sold_asset_amount."]
-                #[doc = "Upon slippage failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                #[doc = ""]
-                #[doc = ""]
-                #[doc = "# Args:"]
-                #[doc = "- `sold_asset_id` - The token being sold"]
-                #[doc = "- `bought_asset_id` - The token being bought"]
-                #[doc = "- `sold_asset_amount`: The amount of the sold token being sold"]
-                #[doc = "- `min_amount_out` - The minimum amount of bought asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                pub struct SellAsset {
-                    pub sold_asset_id: sell_asset::SoldAssetId,
-                    pub bought_asset_id: sell_asset::BoughtAssetId,
-                    pub sold_asset_amount: sell_asset::SoldAssetAmount,
-                    pub min_amount_out: sell_asset::MinAmountOut,
-                }
-                pub mod sell_asset {
-                    use super::runtime_types;
-                    pub type SoldAssetId = ::core::primitive::u32;
-                    pub type BoughtAssetId = ::core::primitive::u32;
-                    pub type SoldAssetAmount = ::core::primitive::u128;
-                    pub type MinAmountOut = ::core::primitive::u128;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SellAsset {
-                    const PALLET: &'static str = "Xyk";
-                    const CALL: &'static str = "sell_asset";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                #[doc = "Executes a multiswap sell asset in a series of sell asset atomic swaps."]
-                #[doc = ""]
-                #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
-                #[doc = ""]
-                #[doc = "First the multiswap is prevalidated, if it is successful then the extrinsic is accepted"]
-                #[doc = "and the exchange commission will be charged upon execution on the **first** swap using **sold_asset_amount**."]
-                #[doc = ""]
-                #[doc = "Upon failure of an atomic swap or bad slippage, all the atomic swaps are reverted and the exchange commission is charged."]
-                #[doc = "Upon such a failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                #[doc = ""]
-                #[doc = "# Args:"]
-                #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
-                #[doc = "- `sold_asset_amount`: The amount of the first asset sold"]
-                #[doc = "- `min_amount_out` - The minimum amount of last asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                pub struct MultiswapSellAsset {
-                    pub swap_token_list: multiswap_sell_asset::SwapTokenList,
-                    pub sold_asset_amount: multiswap_sell_asset::SoldAssetAmount,
-                    pub min_amount_out: multiswap_sell_asset::MinAmountOut,
-                }
-                pub mod multiswap_sell_asset {
-                    use super::runtime_types;
-                    pub type SwapTokenList =
-                        ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>;
-                    pub type SoldAssetAmount = ::core::primitive::u128;
-                    pub type MinAmountOut = ::core::primitive::u128;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for MultiswapSellAsset {
-                    const PALLET: &'static str = "Xyk";
-                    const CALL: &'static str = "multiswap_sell_asset";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                #[doc = "Executes buy_asset swap."]
-                #[doc = "First the swap is prevalidated, if it is successful then the extrinsic is accepted. Beyond this point the exchange commission will be charged."]
-                #[doc = "The bought of the bought asset is used to determine the sold asset amount."]
-                #[doc = "If the sold asset amount is higher than the max_amount_in then it will fail on slippage."]
-                #[doc = "The percentage exchange commission is still charged even if the swap fails on slippage. Though the swap itself will be a no-op."]
-                #[doc = "The slippage is calculated based upon the sold asset amount."]
-                #[doc = "Upon slippage failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                #[doc = ""]
-                #[doc = ""]
-                #[doc = "# Args:"]
-                #[doc = "- `sold_asset_id` - The token being sold"]
-                #[doc = "- `bought_asset_id` - The token being bought"]
-                #[doc = "- `bought_asset_amount`: The amount of the bought token being bought"]
-                #[doc = "- `max_amount_in` - The maximum amount of sold asset that must be sold in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                pub struct BuyAsset {
-                    pub sold_asset_id: buy_asset::SoldAssetId,
-                    pub bought_asset_id: buy_asset::BoughtAssetId,
-                    pub bought_asset_amount: buy_asset::BoughtAssetAmount,
-                    pub max_amount_in: buy_asset::MaxAmountIn,
-                }
-                pub mod buy_asset {
-                    use super::runtime_types;
-                    pub type SoldAssetId = ::core::primitive::u32;
-                    pub type BoughtAssetId = ::core::primitive::u32;
-                    pub type BoughtAssetAmount = ::core::primitive::u128;
-                    pub type MaxAmountIn = ::core::primitive::u128;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for BuyAsset {
-                    const PALLET: &'static str = "Xyk";
-                    const CALL: &'static str = "buy_asset";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                #[doc = "Executes a multiswap buy asset in a series of buy asset atomic swaps."]
-                #[doc = ""]
-                #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
-                #[doc = ""]
-                #[doc = "First the multiswap is prevalidated, if it is successful then the extrinsic is accepted"]
-                #[doc = "and the exchange commission will be charged upon execution on the *first* swap using *max_amount_in*."]
-                #[doc = "multiswap_buy_asset cannot have two (or more) atomic swaps on the same pool."]
-                #[doc = "multiswap_buy_asset prevaildation only checks for whether there are enough funds to pay for the exchange commission."]
-                #[doc = "Failure to have the required amount of first asset funds will result in failure (and charging of the exchange commission)."]
-                #[doc = ""]
-                #[doc = "Upon failure of an atomic swap or bad slippage, all the atomic swaps are reverted and the exchange commission is charged."]
-                #[doc = "Upon such a failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                #[doc = ""]
-                #[doc = "# Args:"]
-                #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
-                #[doc = "- `bought_asset_amount`: The amount of the last asset bought"]
-                #[doc = "- `max_amount_in` - The maximum amount of first asset that can be sold in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                pub struct MultiswapBuyAsset {
-                    pub swap_token_list: multiswap_buy_asset::SwapTokenList,
-                    pub bought_asset_amount: multiswap_buy_asset::BoughtAssetAmount,
-                    pub max_amount_in: multiswap_buy_asset::MaxAmountIn,
-                }
-                pub mod multiswap_buy_asset {
-                    use super::runtime_types;
-                    pub type SwapTokenList =
-                        ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>;
-                    pub type BoughtAssetAmount = ::core::primitive::u128;
-                    pub type MaxAmountIn = ::core::primitive::u128;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for MultiswapBuyAsset {
-                    const PALLET: &'static str = "Xyk";
-                    const CALL: &'static str = "multiswap_buy_asset";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct MintLiquidityUsingVestingNativeTokensByVestingIndex { pub native_asset_vesting_index : mint_liquidity_using_vesting_native_tokens_by_vesting_index :: NativeAssetVestingIndex , pub vesting_native_asset_unlock_some_amount_or_all : mint_liquidity_using_vesting_native_tokens_by_vesting_index :: VestingNativeAssetUnlockSomeAmountOrAll , pub second_asset_id : mint_liquidity_using_vesting_native_tokens_by_vesting_index :: SecondAssetId , pub expected_second_asset_amount : mint_liquidity_using_vesting_native_tokens_by_vesting_index :: ExpectedSecondAssetAmount , }
-                pub mod mint_liquidity_using_vesting_native_tokens_by_vesting_index {
-                    use super::runtime_types;
-                    pub type NativeAssetVestingIndex = ::core::primitive::u32;
-                    pub type VestingNativeAssetUnlockSomeAmountOrAll =
-                        ::core::option::Option<::core::primitive::u128>;
-                    pub type SecondAssetId = ::core::primitive::u32;
-                    pub type ExpectedSecondAssetAmount = ::core::primitive::u128;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic
-                    for MintLiquidityUsingVestingNativeTokensByVestingIndex
-                {
-                    const PALLET: &'static str = "Xyk";
-                    const CALL: &'static str =
-                        "mint_liquidity_using_vesting_native_tokens_by_vesting_index";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct MintLiquidityUsingVestingNativeTokens {
-                    pub vesting_native_asset_amount:
-                        mint_liquidity_using_vesting_native_tokens::VestingNativeAssetAmount,
-                    pub second_asset_id: mint_liquidity_using_vesting_native_tokens::SecondAssetId,
-                    pub expected_second_asset_amount:
-                        mint_liquidity_using_vesting_native_tokens::ExpectedSecondAssetAmount,
-                }
-                pub mod mint_liquidity_using_vesting_native_tokens {
-                    use super::runtime_types;
-                    pub type VestingNativeAssetAmount = ::core::primitive::u128;
-                    pub type SecondAssetId = ::core::primitive::u32;
-                    pub type ExpectedSecondAssetAmount = ::core::primitive::u128;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for MintLiquidityUsingVestingNativeTokens {
-                    const PALLET: &'static str = "Xyk";
-                    const CALL: &'static str = "mint_liquidity_using_vesting_native_tokens";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct MintLiquidity {
-                    pub first_asset_id: mint_liquidity::FirstAssetId,
-                    pub second_asset_id: mint_liquidity::SecondAssetId,
-                    pub first_asset_amount: mint_liquidity::FirstAssetAmount,
-                    pub expected_second_asset_amount: mint_liquidity::ExpectedSecondAssetAmount,
-                }
-                pub mod mint_liquidity {
-                    use super::runtime_types;
-                    pub type FirstAssetId = ::core::primitive::u32;
-                    pub type SecondAssetId = ::core::primitive::u32;
-                    pub type FirstAssetAmount = ::core::primitive::u128;
-                    pub type ExpectedSecondAssetAmount = ::core::primitive::u128;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for MintLiquidity {
-                    const PALLET: &'static str = "Xyk";
-                    const CALL: &'static str = "mint_liquidity";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct CompoundRewards {
-                    pub liquidity_asset_id: compound_rewards::LiquidityAssetId,
-                    pub amount_permille: compound_rewards::AmountPermille,
-                }
-                pub mod compound_rewards {
-                    use super::runtime_types;
-                    pub type LiquidityAssetId = ::core::primitive::u32;
-                    pub type AmountPermille = runtime_types::sp_arithmetic::per_things::Permill;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for CompoundRewards {
-                    const PALLET: &'static str = "Xyk";
-                    const CALL: &'static str = "compound_rewards";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct ProvideLiquidityWithConversion {
-                    pub liquidity_asset_id: provide_liquidity_with_conversion::LiquidityAssetId,
-                    pub provided_asset_id: provide_liquidity_with_conversion::ProvidedAssetId,
-                    pub provided_asset_amount:
-                        provide_liquidity_with_conversion::ProvidedAssetAmount,
-                }
-                pub mod provide_liquidity_with_conversion {
-                    use super::runtime_types;
-                    pub type LiquidityAssetId = ::core::primitive::u32;
-                    pub type ProvidedAssetId = ::core::primitive::u32;
-                    pub type ProvidedAssetAmount = ::core::primitive::u128;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ProvideLiquidityWithConversion {
-                    const PALLET: &'static str = "Xyk";
-                    const CALL: &'static str = "provide_liquidity_with_conversion";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BurnLiquidity {
-                    pub first_asset_id: burn_liquidity::FirstAssetId,
-                    pub second_asset_id: burn_liquidity::SecondAssetId,
-                    pub liquidity_asset_amount: burn_liquidity::LiquidityAssetAmount,
-                }
-                pub mod burn_liquidity {
-                    use super::runtime_types;
-                    pub type FirstAssetId = ::core::primitive::u32;
-                    pub type SecondAssetId = ::core::primitive::u32;
-                    pub type LiquidityAssetAmount = ::core::primitive::u128;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for BurnLiquidity {
-                    const PALLET: &'static str = "Xyk";
-                    const CALL: &'static str = "burn_liquidity";
+                    pub type Pools = runtime_types::pallet_stable_swap::PoolInfo<
+                        ::core::primitive::u32,
+                        ::core::primitive::u128,
+                    >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
             }
-            pub struct TransactionApi;
-            impl TransactionApi {
-                pub fn create_pool(
+            pub struct StorageApi;
+            impl StorageApi {
+                pub fn pools_iter(
                     &self,
-                    first_asset_id: types::create_pool::FirstAssetId,
-                    first_asset_amount: types::create_pool::FirstAssetAmount,
-                    second_asset_id: types::create_pool::SecondAssetId,
-                    second_asset_amount: types::create_pool::SecondAssetAmount,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CreatePool>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Xyk",
-                        "create_pool",
-                        types::CreatePool {
-                            first_asset_id,
-                            first_asset_amount,
-                            second_asset_id,
-                            second_asset_amount,
-                        },
-                        [
-                            188u8, 47u8, 27u8, 221u8, 102u8, 106u8, 56u8, 121u8, 231u8, 60u8,
-                            113u8, 164u8, 72u8, 57u8, 170u8, 77u8, 50u8, 97u8, 188u8, 74u8, 168u8,
-                            99u8, 170u8, 41u8, 98u8, 214u8, 171u8, 106u8, 153u8, 106u8, 106u8,
-                            207u8,
-                        ],
-                    )
-                }
-                #[doc = "Executes sell_asset swap."]
-                #[doc = "First the swap is prevalidated, if it is successful then the extrinsic is accepted. Beyond this point the exchange commission will be charged."]
-                #[doc = "The sold amount of the sold asset is used to determine the bought asset amount."]
-                #[doc = "If the bought asset amount is lower than the min_amount_out then it will fail on slippage."]
-                #[doc = "The percentage exchange commission is still charged even if the swap fails on slippage. Though the swap itself will be a no-op."]
-                #[doc = "The slippage is calculated based upon the sold_asset_amount."]
-                #[doc = "Upon slippage failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                #[doc = ""]
-                #[doc = ""]
-                #[doc = "# Args:"]
-                #[doc = "- `sold_asset_id` - The token being sold"]
-                #[doc = "- `bought_asset_id` - The token being bought"]
-                #[doc = "- `sold_asset_amount`: The amount of the sold token being sold"]
-                #[doc = "- `min_amount_out` - The minimum amount of bought asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                pub fn sell_asset(
-                    &self,
-                    sold_asset_id: types::sell_asset::SoldAssetId,
-                    bought_asset_id: types::sell_asset::BoughtAssetId,
-                    sold_asset_amount: types::sell_asset::SoldAssetAmount,
-                    min_amount_out: types::sell_asset::MinAmountOut,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SellAsset>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Xyk",
-                        "sell_asset",
-                        types::SellAsset {
-                            sold_asset_id,
-                            bought_asset_id,
-                            sold_asset_amount,
-                            min_amount_out,
-                        },
-                        [
-                            192u8, 6u8, 95u8, 109u8, 153u8, 20u8, 195u8, 222u8, 24u8, 188u8, 254u8,
-                            140u8, 163u8, 170u8, 78u8, 33u8, 187u8, 226u8, 77u8, 145u8, 180u8,
-                            136u8, 238u8, 56u8, 18u8, 164u8, 253u8, 11u8, 0u8, 222u8, 137u8, 124u8,
-                        ],
-                    )
-                }
-                #[doc = "Executes a multiswap sell asset in a series of sell asset atomic swaps."]
-                #[doc = ""]
-                #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
-                #[doc = ""]
-                #[doc = "First the multiswap is prevalidated, if it is successful then the extrinsic is accepted"]
-                #[doc = "and the exchange commission will be charged upon execution on the **first** swap using **sold_asset_amount**."]
-                #[doc = ""]
-                #[doc = "Upon failure of an atomic swap or bad slippage, all the atomic swaps are reverted and the exchange commission is charged."]
-                #[doc = "Upon such a failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                #[doc = ""]
-                #[doc = "# Args:"]
-                #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
-                #[doc = "- `sold_asset_amount`: The amount of the first asset sold"]
-                #[doc = "- `min_amount_out` - The minimum amount of last asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                pub fn multiswap_sell_asset(
-                    &self,
-                    swap_token_list: types::multiswap_sell_asset::SwapTokenList,
-                    sold_asset_amount: types::multiswap_sell_asset::SoldAssetAmount,
-                    min_amount_out: types::multiswap_sell_asset::MinAmountOut,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::MultiswapSellAsset>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Xyk",
-                        "multiswap_sell_asset",
-                        types::MultiswapSellAsset {
-                            swap_token_list,
-                            sold_asset_amount,
-                            min_amount_out,
-                        },
-                        [
-                            219u8, 112u8, 107u8, 89u8, 188u8, 174u8, 52u8, 131u8, 51u8, 110u8,
-                            173u8, 138u8, 11u8, 213u8, 90u8, 252u8, 66u8, 182u8, 212u8, 227u8,
-                            103u8, 9u8, 172u8, 100u8, 97u8, 123u8, 220u8, 109u8, 23u8, 69u8, 32u8,
-                            236u8,
-                        ],
-                    )
-                }
-                #[doc = "Executes buy_asset swap."]
-                #[doc = "First the swap is prevalidated, if it is successful then the extrinsic is accepted. Beyond this point the exchange commission will be charged."]
-                #[doc = "The bought of the bought asset is used to determine the sold asset amount."]
-                #[doc = "If the sold asset amount is higher than the max_amount_in then it will fail on slippage."]
-                #[doc = "The percentage exchange commission is still charged even if the swap fails on slippage. Though the swap itself will be a no-op."]
-                #[doc = "The slippage is calculated based upon the sold asset amount."]
-                #[doc = "Upon slippage failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                #[doc = ""]
-                #[doc = ""]
-                #[doc = "# Args:"]
-                #[doc = "- `sold_asset_id` - The token being sold"]
-                #[doc = "- `bought_asset_id` - The token being bought"]
-                #[doc = "- `bought_asset_amount`: The amount of the bought token being bought"]
-                #[doc = "- `max_amount_in` - The maximum amount of sold asset that must be sold in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                pub fn buy_asset(
-                    &self,
-                    sold_asset_id: types::buy_asset::SoldAssetId,
-                    bought_asset_id: types::buy_asset::BoughtAssetId,
-                    bought_asset_amount: types::buy_asset::BoughtAssetAmount,
-                    max_amount_in: types::buy_asset::MaxAmountIn,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::BuyAsset>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Xyk",
-                        "buy_asset",
-                        types::BuyAsset {
-                            sold_asset_id,
-                            bought_asset_id,
-                            bought_asset_amount,
-                            max_amount_in,
-                        },
-                        [
-                            39u8, 163u8, 21u8, 37u8, 36u8, 158u8, 59u8, 173u8, 200u8, 232u8, 189u8,
-                            124u8, 145u8, 59u8, 214u8, 244u8, 154u8, 246u8, 202u8, 206u8, 108u8,
-                            177u8, 229u8, 99u8, 212u8, 1u8, 63u8, 82u8, 219u8, 87u8, 87u8, 197u8,
-                        ],
-                    )
-                }
-                #[doc = "Executes a multiswap buy asset in a series of buy asset atomic swaps."]
-                #[doc = ""]
-                #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
-                #[doc = ""]
-                #[doc = "First the multiswap is prevalidated, if it is successful then the extrinsic is accepted"]
-                #[doc = "and the exchange commission will be charged upon execution on the *first* swap using *max_amount_in*."]
-                #[doc = "multiswap_buy_asset cannot have two (or more) atomic swaps on the same pool."]
-                #[doc = "multiswap_buy_asset prevaildation only checks for whether there are enough funds to pay for the exchange commission."]
-                #[doc = "Failure to have the required amount of first asset funds will result in failure (and charging of the exchange commission)."]
-                #[doc = ""]
-                #[doc = "Upon failure of an atomic swap or bad slippage, all the atomic swaps are reverted and the exchange commission is charged."]
-                #[doc = "Upon such a failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                #[doc = ""]
-                #[doc = "# Args:"]
-                #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
-                #[doc = "- `bought_asset_amount`: The amount of the last asset bought"]
-                #[doc = "- `max_amount_in` - The maximum amount of first asset that can be sold in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                pub fn multiswap_buy_asset(
-                    &self,
-                    swap_token_list: types::multiswap_buy_asset::SwapTokenList,
-                    bought_asset_amount: types::multiswap_buy_asset::BoughtAssetAmount,
-                    max_amount_in: types::multiswap_buy_asset::MaxAmountIn,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::MultiswapBuyAsset>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Xyk",
-                        "multiswap_buy_asset",
-                        types::MultiswapBuyAsset {
-                            swap_token_list,
-                            bought_asset_amount,
-                            max_amount_in,
-                        },
-                        [
-                            144u8, 0u8, 211u8, 62u8, 176u8, 154u8, 100u8, 140u8, 29u8, 66u8, 201u8,
-                            119u8, 182u8, 128u8, 79u8, 114u8, 30u8, 27u8, 84u8, 243u8, 123u8,
-                            194u8, 206u8, 199u8, 4u8, 79u8, 234u8, 208u8, 168u8, 198u8, 180u8,
-                            225u8,
-                        ],
-                    )
-                }
-                pub fn mint_liquidity_using_vesting_native_tokens_by_vesting_index(
-                    &self,
-                    native_asset_vesting_index : types :: mint_liquidity_using_vesting_native_tokens_by_vesting_index :: NativeAssetVestingIndex,
-                    vesting_native_asset_unlock_some_amount_or_all : types :: mint_liquidity_using_vesting_native_tokens_by_vesting_index :: VestingNativeAssetUnlockSomeAmountOrAll,
-                    second_asset_id : types :: mint_liquidity_using_vesting_native_tokens_by_vesting_index :: SecondAssetId,
-                    expected_second_asset_amount : types :: mint_liquidity_using_vesting_native_tokens_by_vesting_index :: ExpectedSecondAssetAmount,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
-                    types::MintLiquidityUsingVestingNativeTokensByVestingIndex,
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+                    (),
+                    types::pools::Pools,
+                    (),
+                    (),
+                    ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Xyk",
-                        "mint_liquidity_using_vesting_native_tokens_by_vesting_index",
-                        types::MintLiquidityUsingVestingNativeTokensByVestingIndex {
-                            native_asset_vesting_index,
-                            vesting_native_asset_unlock_some_amount_or_all,
-                            second_asset_id,
-                            expected_second_asset_amount,
-                        },
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+                        "StableSwap",
+                        "Pools",
+                        (),
                         [
-                            84u8, 236u8, 127u8, 219u8, 189u8, 240u8, 169u8, 76u8, 21u8, 96u8,
-                            134u8, 9u8, 150u8, 25u8, 247u8, 153u8, 93u8, 162u8, 19u8, 232u8, 41u8,
-                            1u8, 139u8, 17u8, 176u8, 250u8, 66u8, 137u8, 11u8, 231u8, 92u8, 9u8,
+                            0u8, 18u8, 212u8, 71u8, 122u8, 93u8, 215u8, 167u8, 126u8, 218u8, 85u8,
+                            145u8, 80u8, 158u8, 35u8, 144u8, 103u8, 30u8, 72u8, 13u8, 5u8, 225u8,
+                            134u8, 203u8, 180u8, 103u8, 25u8, 201u8, 91u8, 54u8, 200u8, 8u8,
                         ],
                     )
                 }
-                pub fn mint_liquidity_using_vesting_native_tokens(
+                pub fn pools(
                     &self,
-                    vesting_native_asset_amount : types :: mint_liquidity_using_vesting_native_tokens :: VestingNativeAssetAmount,
-                    second_asset_id : types :: mint_liquidity_using_vesting_native_tokens :: SecondAssetId,
-                    expected_second_asset_amount : types :: mint_liquidity_using_vesting_native_tokens :: ExpectedSecondAssetAmount,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
-                    types::MintLiquidityUsingVestingNativeTokens,
+                    _0: impl ::core::borrow::Borrow<types::pools::Param0>,
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+                    ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+                        types::pools::Param0,
+                    >,
+                    types::pools::Pools,
+                    ::subxt::ext::subxt_core::utils::Yes,
+                    (),
+                    (),
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Xyk",
-                        "mint_liquidity_using_vesting_native_tokens",
-                        types::MintLiquidityUsingVestingNativeTokens {
-                            vesting_native_asset_amount,
-                            second_asset_id,
-                            expected_second_asset_amount,
-                        },
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+                        "StableSwap",
+                        "Pools",
+                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+                            _0.borrow(),
+                        ),
                         [
-                            129u8, 184u8, 252u8, 252u8, 215u8, 34u8, 127u8, 207u8, 220u8, 183u8,
-                            95u8, 95u8, 230u8, 252u8, 2u8, 94u8, 238u8, 157u8, 197u8, 70u8, 196u8,
-                            42u8, 214u8, 51u8, 184u8, 29u8, 199u8, 62u8, 120u8, 127u8, 48u8, 116u8,
-                        ],
-                    )
-                }
-                pub fn mint_liquidity(
-                    &self,
-                    first_asset_id: types::mint_liquidity::FirstAssetId,
-                    second_asset_id: types::mint_liquidity::SecondAssetId,
-                    first_asset_amount: types::mint_liquidity::FirstAssetAmount,
-                    expected_second_asset_amount: types::mint_liquidity::ExpectedSecondAssetAmount,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::MintLiquidity>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Xyk",
-                        "mint_liquidity",
-                        types::MintLiquidity {
-                            first_asset_id,
-                            second_asset_id,
-                            first_asset_amount,
-                            expected_second_asset_amount,
-                        },
-                        [
-                            159u8, 82u8, 156u8, 56u8, 170u8, 240u8, 190u8, 30u8, 181u8, 96u8, 67u8,
-                            19u8, 201u8, 242u8, 101u8, 146u8, 52u8, 20u8, 228u8, 249u8, 144u8,
-                            82u8, 43u8, 143u8, 145u8, 203u8, 205u8, 3u8, 58u8, 252u8, 23u8, 198u8,
-                        ],
-                    )
-                }
-                pub fn compound_rewards(
-                    &self,
-                    liquidity_asset_id: types::compound_rewards::LiquidityAssetId,
-                    amount_permille: types::compound_rewards::AmountPermille,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CompoundRewards>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Xyk",
-                        "compound_rewards",
-                        types::CompoundRewards {
-                            liquidity_asset_id,
-                            amount_permille,
-                        },
-                        [
-                            38u8, 249u8, 146u8, 237u8, 27u8, 41u8, 94u8, 76u8, 61u8, 107u8, 215u8,
-                            110u8, 23u8, 213u8, 43u8, 64u8, 246u8, 238u8, 86u8, 151u8, 244u8,
-                            184u8, 150u8, 169u8, 58u8, 142u8, 192u8, 129u8, 163u8, 64u8, 202u8,
-                            121u8,
-                        ],
-                    )
-                }
-                pub fn provide_liquidity_with_conversion(
-                    &self,
-                    liquidity_asset_id: types::provide_liquidity_with_conversion::LiquidityAssetId,
-                    provided_asset_id: types::provide_liquidity_with_conversion::ProvidedAssetId,
-                    provided_asset_amount : types :: provide_liquidity_with_conversion :: ProvidedAssetAmount,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
-                    types::ProvideLiquidityWithConversion,
-                > {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Xyk",
-                        "provide_liquidity_with_conversion",
-                        types::ProvideLiquidityWithConversion {
-                            liquidity_asset_id,
-                            provided_asset_id,
-                            provided_asset_amount,
-                        },
-                        [
-                            20u8, 129u8, 199u8, 132u8, 27u8, 72u8, 33u8, 68u8, 248u8, 143u8, 39u8,
-                            254u8, 34u8, 8u8, 11u8, 2u8, 105u8, 60u8, 244u8, 245u8, 249u8, 132u8,
-                            109u8, 108u8, 245u8, 129u8, 159u8, 97u8, 118u8, 13u8, 250u8, 225u8,
-                        ],
-                    )
-                }
-                pub fn burn_liquidity(
-                    &self,
-                    first_asset_id: types::burn_liquidity::FirstAssetId,
-                    second_asset_id: types::burn_liquidity::SecondAssetId,
-                    liquidity_asset_amount: types::burn_liquidity::LiquidityAssetAmount,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::BurnLiquidity>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Xyk",
-                        "burn_liquidity",
-                        types::BurnLiquidity {
-                            first_asset_id,
-                            second_asset_id,
-                            liquidity_asset_amount,
-                        },
-                        [
-                            254u8, 13u8, 20u8, 241u8, 170u8, 112u8, 37u8, 41u8, 139u8, 168u8,
-                            190u8, 251u8, 219u8, 222u8, 199u8, 241u8, 233u8, 133u8, 35u8, 169u8,
-                            86u8, 188u8, 60u8, 21u8, 160u8, 213u8, 30u8, 210u8, 51u8, 177u8, 124u8,
-                            119u8,
+                            0u8, 18u8, 212u8, 71u8, 122u8, 93u8, 215u8, 167u8, 126u8, 218u8, 85u8,
+                            145u8, 80u8, 158u8, 35u8, 144u8, 103u8, 30u8, 72u8, 13u8, 5u8, 225u8,
+                            134u8, 203u8, 180u8, 103u8, 25u8, 201u8, 91u8, 54u8, 200u8, 8u8,
                         ],
                     )
                 }
             }
         }
+        pub mod constants {
+            use super::runtime_types;
+            pub struct ConstantsApi;
+            impl ConstantsApi {
+                #[doc = " Total fee applied to a swap."]
+                #[doc = " Part goes back to pool, part to treasury, and part is burned."]
+                pub fn market_total_fee(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+                        "StableSwap",
+                        "MarketTotalFee",
+                        [
+                            84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+                            27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+                            136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
+                        ],
+                    )
+                }
+                #[doc = " Percentage of total fee that goes into the treasury."]
+                pub fn market_treasury_fee_part(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+                        "StableSwap",
+                        "MarketTreasuryFeePart",
+                        [
+                            84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+                            27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+                            136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
+                        ],
+                    )
+                }
+                #[doc = " Percentage of treasury fee that gets burned if possible."]
+                pub fn market_bn_b_fee_part(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+                        "StableSwap",
+                        "MarketBnBFeePart",
+                        [
+                            84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+                            27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+                            136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
+                        ],
+                    )
+                }
+                pub fn max_apm_coeff(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+                        "StableSwap",
+                        "MaxApmCoeff",
+                        [
+                            84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+                            27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+                            136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
+                        ],
+                    )
+                }
+                pub fn default_apm_coeff(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+                        "StableSwap",
+                        "DefaultApmCoeff",
+                        [
+                            84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+                            27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+                            136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
+                        ],
+                    )
+                }
+                pub fn max_assets_in_pool(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+                        "StableSwap",
+                        "MaxAssetsInPool",
+                        [
+                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+                            145u8,
+                        ],
+                    )
+                }
+            }
+        }
+    }
+    pub mod xyk {
+        use super::root_mod;
+        use super::runtime_types;
+        #[doc = "Errors"]
+        pub type Error = runtime_types::pallet_xyk::pallet::Error;
         #[doc = "The `Event` enum of this pallet"]
         pub type Event = runtime_types::pallet_xyk::pallet::Event;
         pub mod events {
@@ -20935,6 +20978,703 @@ pub mod api {
                         ],
                     )
                 }
+            }
+        }
+    }
+    pub mod market {
+        use super::root_mod;
+        use super::runtime_types;
+        #[doc = "The `Error` enum of this pallet."]
+        pub type Error = runtime_types::pallet_market::pallet::Error;
+        #[doc = "Pallet's callable functions."]
+        pub type Call = runtime_types::pallet_market::pallet::Call;
+        pub mod calls {
+            use super::root_mod;
+            use super::runtime_types;
+            type DispatchError = runtime_types::sp_runtime::DispatchError;
+            pub mod types {
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Creates a liquidity pool and an associated new `lp_token` asset"]
+                pub struct CreatePool {
+                    pub kind: create_pool::Kind,
+                    pub first_asset_id: create_pool::FirstAssetId,
+                    pub first_asset_amount: create_pool::FirstAssetAmount,
+                    pub second_asset_id: create_pool::SecondAssetId,
+                    pub second_asset_amount: create_pool::SecondAssetAmount,
+                }
+                pub mod create_pool {
+                    use super::runtime_types;
+                    pub type Kind = runtime_types::pallet_market::PoolKind;
+                    pub type FirstAssetId = ::core::primitive::u32;
+                    pub type FirstAssetAmount = ::core::primitive::u128;
+                    pub type SecondAssetId = ::core::primitive::u32;
+                    pub type SecondAssetAmount = ::core::primitive::u128;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for CreatePool {
+                    const PALLET: &'static str = "Market";
+                    const CALL: &'static str = "create_pool";
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Provide liquidity into the pool of `pool_id`, suitable for Xyk pools."]
+                #[doc = "An optimal amount of the other asset will be calculated on current rate,"]
+                #[doc = "a maximum amount should be provided to limit possible rate slippage."]
+                #[doc = "For a StableSwap pool a rate of 1:1 is used."]
+                #[doc = "Liquidity tokens that represent this share of the pool will be sent to origin."]
+                pub struct MintLiquidity {
+                    pub pool_id: mint_liquidity::PoolId,
+                    pub asset_id: mint_liquidity::AssetId,
+                    pub asset_amount: mint_liquidity::AssetAmount,
+                    pub max_other_asset_amount: mint_liquidity::MaxOtherAssetAmount,
+                }
+                pub mod mint_liquidity {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type AssetId = ::core::primitive::u32;
+                    pub type AssetAmount = ::core::primitive::u128;
+                    pub type MaxOtherAssetAmount = ::core::primitive::u128;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for MintLiquidity {
+                    const PALLET: &'static str = "Market";
+                    const CALL: &'static str = "mint_liquidity";
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Provide fixed liquidity into the pool of `pool_id`, suitable for StableSwap pools."]
+                #[doc = "For Xyk pools, if a single amount is defined, it will swap internally to to match current rate,"]
+                #[doc = "setting both values results in error."]
+                #[doc = "Liquidity tokens that represent this share of the pool will be sent to origin."]
+                pub struct MintLiquidityFixedAmounts {
+                    pub pool_id: mint_liquidity_fixed_amounts::PoolId,
+                    pub amounts: mint_liquidity_fixed_amounts::Amounts,
+                    pub min_amount_lp_tokens: mint_liquidity_fixed_amounts::MinAmountLpTokens,
+                }
+                pub mod mint_liquidity_fixed_amounts {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type Amounts = (::core::primitive::u128, ::core::primitive::u128);
+                    pub type MinAmountLpTokens = ::core::primitive::u128;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for MintLiquidityFixedAmounts {
+                    const PALLET: &'static str = "Market";
+                    const CALL: &'static str = "mint_liquidity_fixed_amounts";
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Provides liquidity from vested native asset. Tokens are added to pool and"]
+                #[doc = "minted LP tokens are then vested instead."]
+                #[doc = "Only pools paired with native asset are allowed."]
+                pub struct MintLiquidityUsingVestingNativeTokensByVestingIndex { pub pool_id : mint_liquidity_using_vesting_native_tokens_by_vesting_index :: PoolId , pub native_asset_vesting_index : mint_liquidity_using_vesting_native_tokens_by_vesting_index :: NativeAssetVestingIndex , pub vesting_native_asset_unlock_some_amount_or_all : mint_liquidity_using_vesting_native_tokens_by_vesting_index :: VestingNativeAssetUnlockSomeAmountOrAll , pub max_other_asset_amount : mint_liquidity_using_vesting_native_tokens_by_vesting_index :: MaxOtherAssetAmount , }
+                pub mod mint_liquidity_using_vesting_native_tokens_by_vesting_index {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type NativeAssetVestingIndex = ::core::primitive::u32;
+                    pub type VestingNativeAssetUnlockSomeAmountOrAll =
+                        ::core::option::Option<::core::primitive::u128>;
+                    pub type MaxOtherAssetAmount = ::core::primitive::u128;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic
+                    for MintLiquidityUsingVestingNativeTokensByVestingIndex
+                {
+                    const PALLET: &'static str = "Market";
+                    const CALL: &'static str =
+                        "mint_liquidity_using_vesting_native_tokens_by_vesting_index";
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct MintLiquidityUsingVestingNativeTokens {
+                    pub pool_id: mint_liquidity_using_vesting_native_tokens::PoolId,
+                    pub native_asset_vesting_amount:
+                        mint_liquidity_using_vesting_native_tokens::NativeAssetVestingAmount,
+                    pub max_other_asset_amount:
+                        mint_liquidity_using_vesting_native_tokens::MaxOtherAssetAmount,
+                }
+                pub mod mint_liquidity_using_vesting_native_tokens {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type NativeAssetVestingAmount = ::core::primitive::u128;
+                    pub type MaxOtherAssetAmount = ::core::primitive::u128;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for MintLiquidityUsingVestingNativeTokens {
+                    const PALLET: &'static str = "Market";
+                    const CALL: &'static str = "mint_liquidity_using_vesting_native_tokens";
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Allows you to remove liquidity by providing the `lp_burn_amount` tokens that will be"]
+                #[doc = "burned in the process. The usage of `min_first_asset_amount`/`min_second_asset_amount`"]
+                #[doc = "controls the min amount of returned tokens."]
+                pub struct BurnLiquidity {
+                    pub pool_id: burn_liquidity::PoolId,
+                    pub liquidity_burn_amount: burn_liquidity::LiquidityBurnAmount,
+                    pub min_first_asset_amount: burn_liquidity::MinFirstAssetAmount,
+                    pub min_second_asset_amount: burn_liquidity::MinSecondAssetAmount,
+                }
+                pub mod burn_liquidity {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type LiquidityBurnAmount = ::core::primitive::u128;
+                    pub type MinFirstAssetAmount = ::core::primitive::u128;
+                    pub type MinSecondAssetAmount = ::core::primitive::u128;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for BurnLiquidity {
+                    const PALLET: &'static str = "Market";
+                    const CALL: &'static str = "burn_liquidity";
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Executes a multiswap asset in a series of swap asset atomic swaps."]
+                #[doc = ""]
+                #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
+                #[doc = ""]
+                #[doc = "# Args:"]
+                #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
+                #[doc = "- `asset_id_in`: The id of the asset sold"]
+                #[doc = "- `asset_amount_in`: The amount of the asset sold"]
+                #[doc = "- `asset_id_out`: The id of the asset received"]
+                #[doc = "- `min_amount_out` - The minimum amount of requested asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
+                pub struct MultiswapAsset {
+                    pub swap_pool_list: multiswap_asset::SwapPoolList,
+                    pub asset_id_in: multiswap_asset::AssetIdIn,
+                    pub asset_amount_in: multiswap_asset::AssetAmountIn,
+                    pub asset_id_out: multiswap_asset::AssetIdOut,
+                    pub min_amount_out: multiswap_asset::MinAmountOut,
+                }
+                pub mod multiswap_asset {
+                    use super::runtime_types;
+                    pub type SwapPoolList =
+                        ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>;
+                    pub type AssetIdIn = ::core::primitive::u32;
+                    pub type AssetAmountIn = ::core::primitive::u128;
+                    pub type AssetIdOut = ::core::primitive::u32;
+                    pub type MinAmountOut = ::core::primitive::u128;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for MultiswapAsset {
+                    const PALLET: &'static str = "Market";
+                    const CALL: &'static str = "multiswap_asset";
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Buy variant of the multiswap, a precise output amount should be provided instead."]
+                pub struct MultiswapAssetBuy {
+                    pub swap_pool_list: multiswap_asset_buy::SwapPoolList,
+                    pub asset_id_out: multiswap_asset_buy::AssetIdOut,
+                    pub asset_amount_out: multiswap_asset_buy::AssetAmountOut,
+                    pub asset_id_in: multiswap_asset_buy::AssetIdIn,
+                    pub max_amount_in: multiswap_asset_buy::MaxAmountIn,
+                }
+                pub mod multiswap_asset_buy {
+                    use super::runtime_types;
+                    pub type SwapPoolList =
+                        ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>;
+                    pub type AssetIdOut = ::core::primitive::u32;
+                    pub type AssetAmountOut = ::core::primitive::u128;
+                    pub type AssetIdIn = ::core::primitive::u32;
+                    pub type MaxAmountIn = ::core::primitive::u128;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for MultiswapAssetBuy {
+                    const PALLET: &'static str = "Market";
+                    const CALL: &'static str = "multiswap_asset_buy";
+                }
+            }
+            pub struct TransactionApi;
+            impl TransactionApi {
+                #[doc = "Creates a liquidity pool and an associated new `lp_token` asset"]
+                pub fn create_pool(
+                    &self,
+                    kind: types::create_pool::Kind,
+                    first_asset_id: types::create_pool::FirstAssetId,
+                    first_asset_amount: types::create_pool::FirstAssetAmount,
+                    second_asset_id: types::create_pool::SecondAssetId,
+                    second_asset_amount: types::create_pool::SecondAssetAmount,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CreatePool>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Market",
+                        "create_pool",
+                        types::CreatePool {
+                            kind,
+                            first_asset_id,
+                            first_asset_amount,
+                            second_asset_id,
+                            second_asset_amount,
+                        },
+                        [
+                            233u8, 210u8, 152u8, 75u8, 103u8, 36u8, 169u8, 131u8, 220u8, 241u8,
+                            48u8, 36u8, 178u8, 181u8, 160u8, 139u8, 254u8, 19u8, 13u8, 138u8,
+                            250u8, 91u8, 27u8, 53u8, 87u8, 187u8, 97u8, 113u8, 231u8, 87u8, 245u8,
+                            195u8,
+                        ],
+                    )
+                }
+                #[doc = "Provide liquidity into the pool of `pool_id`, suitable for Xyk pools."]
+                #[doc = "An optimal amount of the other asset will be calculated on current rate,"]
+                #[doc = "a maximum amount should be provided to limit possible rate slippage."]
+                #[doc = "For a StableSwap pool a rate of 1:1 is used."]
+                #[doc = "Liquidity tokens that represent this share of the pool will be sent to origin."]
+                pub fn mint_liquidity(
+                    &self,
+                    pool_id: types::mint_liquidity::PoolId,
+                    asset_id: types::mint_liquidity::AssetId,
+                    asset_amount: types::mint_liquidity::AssetAmount,
+                    max_other_asset_amount: types::mint_liquidity::MaxOtherAssetAmount,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::MintLiquidity>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Market",
+                        "mint_liquidity",
+                        types::MintLiquidity {
+                            pool_id,
+                            asset_id,
+                            asset_amount,
+                            max_other_asset_amount,
+                        },
+                        [
+                            79u8, 19u8, 196u8, 130u8, 5u8, 14u8, 144u8, 209u8, 116u8, 175u8, 15u8,
+                            226u8, 4u8, 217u8, 195u8, 92u8, 6u8, 210u8, 219u8, 145u8, 62u8, 151u8,
+                            81u8, 150u8, 159u8, 252u8, 68u8, 188u8, 80u8, 154u8, 16u8, 206u8,
+                        ],
+                    )
+                }
+                #[doc = "Provide fixed liquidity into the pool of `pool_id`, suitable for StableSwap pools."]
+                #[doc = "For Xyk pools, if a single amount is defined, it will swap internally to to match current rate,"]
+                #[doc = "setting both values results in error."]
+                #[doc = "Liquidity tokens that represent this share of the pool will be sent to origin."]
+                pub fn mint_liquidity_fixed_amounts(
+                    &self,
+                    pool_id: types::mint_liquidity_fixed_amounts::PoolId,
+                    amounts: types::mint_liquidity_fixed_amounts::Amounts,
+                    min_amount_lp_tokens: types::mint_liquidity_fixed_amounts::MinAmountLpTokens,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::MintLiquidityFixedAmounts,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Market",
+                        "mint_liquidity_fixed_amounts",
+                        types::MintLiquidityFixedAmounts {
+                            pool_id,
+                            amounts,
+                            min_amount_lp_tokens,
+                        },
+                        [
+                            28u8, 12u8, 58u8, 87u8, 51u8, 4u8, 55u8, 218u8, 112u8, 195u8, 153u8,
+                            96u8, 125u8, 113u8, 55u8, 111u8, 13u8, 146u8, 81u8, 166u8, 29u8, 59u8,
+                            7u8, 221u8, 234u8, 52u8, 232u8, 120u8, 36u8, 114u8, 181u8, 37u8,
+                        ],
+                    )
+                }
+                #[doc = "Provides liquidity from vested native asset. Tokens are added to pool and"]
+                #[doc = "minted LP tokens are then vested instead."]
+                #[doc = "Only pools paired with native asset are allowed."]
+                pub fn mint_liquidity_using_vesting_native_tokens_by_vesting_index(
+                    &self,
+                    pool_id : types :: mint_liquidity_using_vesting_native_tokens_by_vesting_index :: PoolId,
+                    native_asset_vesting_index : types :: mint_liquidity_using_vesting_native_tokens_by_vesting_index :: NativeAssetVestingIndex,
+                    vesting_native_asset_unlock_some_amount_or_all : types :: mint_liquidity_using_vesting_native_tokens_by_vesting_index :: VestingNativeAssetUnlockSomeAmountOrAll,
+                    max_other_asset_amount : types :: mint_liquidity_using_vesting_native_tokens_by_vesting_index :: MaxOtherAssetAmount,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::MintLiquidityUsingVestingNativeTokensByVestingIndex,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Market",
+                        "mint_liquidity_using_vesting_native_tokens_by_vesting_index",
+                        types::MintLiquidityUsingVestingNativeTokensByVestingIndex {
+                            pool_id,
+                            native_asset_vesting_index,
+                            vesting_native_asset_unlock_some_amount_or_all,
+                            max_other_asset_amount,
+                        },
+                        [
+                            129u8, 225u8, 234u8, 124u8, 206u8, 231u8, 117u8, 67u8, 183u8, 160u8,
+                            241u8, 35u8, 23u8, 34u8, 226u8, 154u8, 148u8, 243u8, 186u8, 223u8,
+                            149u8, 110u8, 103u8, 150u8, 225u8, 137u8, 157u8, 28u8, 26u8, 167u8,
+                            138u8, 242u8,
+                        ],
+                    )
+                }
+                pub fn mint_liquidity_using_vesting_native_tokens(
+                    &self,
+                    pool_id: types::mint_liquidity_using_vesting_native_tokens::PoolId,
+                    native_asset_vesting_amount : types :: mint_liquidity_using_vesting_native_tokens :: NativeAssetVestingAmount,
+                    max_other_asset_amount : types :: mint_liquidity_using_vesting_native_tokens :: MaxOtherAssetAmount,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::MintLiquidityUsingVestingNativeTokens,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Market",
+                        "mint_liquidity_using_vesting_native_tokens",
+                        types::MintLiquidityUsingVestingNativeTokens {
+                            pool_id,
+                            native_asset_vesting_amount,
+                            max_other_asset_amount,
+                        },
+                        [
+                            101u8, 71u8, 211u8, 12u8, 73u8, 34u8, 31u8, 83u8, 118u8, 21u8, 185u8,
+                            163u8, 66u8, 0u8, 10u8, 252u8, 128u8, 249u8, 51u8, 127u8, 97u8, 212u8,
+                            156u8, 14u8, 233u8, 220u8, 136u8, 174u8, 242u8, 118u8, 62u8, 244u8,
+                        ],
+                    )
+                }
+                #[doc = "Allows you to remove liquidity by providing the `lp_burn_amount` tokens that will be"]
+                #[doc = "burned in the process. The usage of `min_first_asset_amount`/`min_second_asset_amount`"]
+                #[doc = "controls the min amount of returned tokens."]
+                pub fn burn_liquidity(
+                    &self,
+                    pool_id: types::burn_liquidity::PoolId,
+                    liquidity_burn_amount: types::burn_liquidity::LiquidityBurnAmount,
+                    min_first_asset_amount: types::burn_liquidity::MinFirstAssetAmount,
+                    min_second_asset_amount: types::burn_liquidity::MinSecondAssetAmount,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::BurnLiquidity>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Market",
+                        "burn_liquidity",
+                        types::BurnLiquidity {
+                            pool_id,
+                            liquidity_burn_amount,
+                            min_first_asset_amount,
+                            min_second_asset_amount,
+                        },
+                        [
+                            123u8, 32u8, 202u8, 56u8, 4u8, 158u8, 83u8, 84u8, 245u8, 17u8, 167u8,
+                            46u8, 155u8, 139u8, 154u8, 114u8, 197u8, 7u8, 139u8, 215u8, 247u8,
+                            219u8, 17u8, 211u8, 101u8, 123u8, 90u8, 188u8, 77u8, 31u8, 206u8, 70u8,
+                        ],
+                    )
+                }
+                #[doc = "Executes a multiswap asset in a series of swap asset atomic swaps."]
+                #[doc = ""]
+                #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
+                #[doc = ""]
+                #[doc = "# Args:"]
+                #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
+                #[doc = "- `asset_id_in`: The id of the asset sold"]
+                #[doc = "- `asset_amount_in`: The amount of the asset sold"]
+                #[doc = "- `asset_id_out`: The id of the asset received"]
+                #[doc = "- `min_amount_out` - The minimum amount of requested asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
+                pub fn multiswap_asset(
+                    &self,
+                    swap_pool_list: types::multiswap_asset::SwapPoolList,
+                    asset_id_in: types::multiswap_asset::AssetIdIn,
+                    asset_amount_in: types::multiswap_asset::AssetAmountIn,
+                    asset_id_out: types::multiswap_asset::AssetIdOut,
+                    min_amount_out: types::multiswap_asset::MinAmountOut,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::MultiswapAsset>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Market",
+                        "multiswap_asset",
+                        types::MultiswapAsset {
+                            swap_pool_list,
+                            asset_id_in,
+                            asset_amount_in,
+                            asset_id_out,
+                            min_amount_out,
+                        },
+                        [
+                            222u8, 5u8, 142u8, 25u8, 32u8, 128u8, 16u8, 85u8, 88u8, 4u8, 154u8,
+                            116u8, 120u8, 113u8, 20u8, 100u8, 5u8, 4u8, 12u8, 42u8, 145u8, 28u8,
+                            240u8, 145u8, 254u8, 76u8, 127u8, 233u8, 245u8, 141u8, 37u8, 35u8,
+                        ],
+                    )
+                }
+                #[doc = "Buy variant of the multiswap, a precise output amount should be provided instead."]
+                pub fn multiswap_asset_buy(
+                    &self,
+                    swap_pool_list: types::multiswap_asset_buy::SwapPoolList,
+                    asset_id_out: types::multiswap_asset_buy::AssetIdOut,
+                    asset_amount_out: types::multiswap_asset_buy::AssetAmountOut,
+                    asset_id_in: types::multiswap_asset_buy::AssetIdIn,
+                    max_amount_in: types::multiswap_asset_buy::MaxAmountIn,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::MultiswapAssetBuy>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Market",
+                        "multiswap_asset_buy",
+                        types::MultiswapAssetBuy {
+                            swap_pool_list,
+                            asset_id_out,
+                            asset_amount_out,
+                            asset_id_in,
+                            max_amount_in,
+                        },
+                        [
+                            122u8, 197u8, 148u8, 233u8, 35u8, 165u8, 173u8, 115u8, 220u8, 64u8,
+                            200u8, 236u8, 139u8, 155u8, 198u8, 22u8, 42u8, 48u8, 181u8, 88u8, 87u8,
+                            239u8, 45u8, 246u8, 16u8, 6u8, 239u8, 235u8, 156u8, 103u8, 28u8, 224u8,
+                        ],
+                    )
+                }
+            }
+        }
+        #[doc = "The `Event` enum of this pallet"]
+        pub type Event = runtime_types::pallet_market::pallet::Event;
+        pub mod events {
+            use super::runtime_types;
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Assets were swapped successfully"]
+            pub struct AssetsSwapped {
+                pub who: assets_swapped::Who,
+                pub swaps: assets_swapped::Swaps,
+            }
+            pub mod assets_swapped {
+                use super::runtime_types;
+                pub type Who = runtime_types::sp_runtime::account::AccountId20;
+                pub type Swaps = ::subxt::ext::subxt_core::alloc::vec::Vec<
+                    runtime_types::pallet_market::AtomicSwap<
+                        ::core::primitive::u32,
+                        ::core::primitive::u128,
+                    >,
+                >;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for AssetsSwapped {
+                const PALLET: &'static str = "Market";
+                const EVENT: &'static str = "AssetsSwapped";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A successful call of the `CretaPool` extrinsic will create this event."]
+            pub struct PoolCreated {
+                pub creator: pool_created::Creator,
+                pub pool_id: pool_created::PoolId,
+                pub lp_token: pool_created::LpToken,
+                pub assets: pool_created::Assets,
+            }
+            pub mod pool_created {
+                use super::runtime_types;
+                pub type Creator = runtime_types::sp_runtime::account::AccountId20;
+                pub type PoolId = ::core::primitive::u32;
+                pub type LpToken = ::core::primitive::u32;
+                pub type Assets = (::core::primitive::u32, ::core::primitive::u32);
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for PoolCreated {
+                const PALLET: &'static str = "Market";
+                const EVENT: &'static str = "PoolCreated";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A successful call of the `AddLiquidity` extrinsic will create this event."]
+            pub struct LiquidityMinted {
+                pub who: liquidity_minted::Who,
+                pub pool_id: liquidity_minted::PoolId,
+                pub amounts_provided: liquidity_minted::AmountsProvided,
+                pub lp_token: liquidity_minted::LpToken,
+                pub lp_token_minted: liquidity_minted::LpTokenMinted,
+                pub total_supply: liquidity_minted::TotalSupply,
+            }
+            pub mod liquidity_minted {
+                use super::runtime_types;
+                pub type Who = runtime_types::sp_runtime::account::AccountId20;
+                pub type PoolId = ::core::primitive::u32;
+                pub type AmountsProvided = (::core::primitive::u128, ::core::primitive::u128);
+                pub type LpToken = ::core::primitive::u32;
+                pub type LpTokenMinted = ::core::primitive::u128;
+                pub type TotalSupply = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for LiquidityMinted {
+                const PALLET: &'static str = "Market";
+                const EVENT: &'static str = "LiquidityMinted";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A successful call of the `RemoveLiquidity` extrinsic will create this event."]
+            pub struct LiquidityBurned {
+                pub who: liquidity_burned::Who,
+                pub pool_id: liquidity_burned::PoolId,
+                pub amounts: liquidity_burned::Amounts,
+                pub burned_amount: liquidity_burned::BurnedAmount,
+                pub total_supply: liquidity_burned::TotalSupply,
+            }
+            pub mod liquidity_burned {
+                use super::runtime_types;
+                pub type Who = runtime_types::sp_runtime::account::AccountId20;
+                pub type PoolId = ::core::primitive::u32;
+                pub type Amounts = (::core::primitive::u128, ::core::primitive::u128);
+                pub type BurnedAmount = ::core::primitive::u128;
+                pub type TotalSupply = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for LiquidityBurned {
+                const PALLET: &'static str = "Market";
+                const EVENT: &'static str = "LiquidityBurned";
             }
         }
     }
@@ -29387,9 +30127,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            34u8, 145u8, 222u8, 177u8, 26u8, 34u8, 60u8, 193u8, 194u8, 110u8,
-                            177u8, 70u8, 37u8, 83u8, 18u8, 98u8, 95u8, 114u8, 142u8, 134u8, 1u8,
-                            14u8, 79u8, 9u8, 26u8, 150u8, 140u8, 135u8, 217u8, 235u8, 34u8, 46u8,
+                            99u8, 101u8, 137u8, 192u8, 152u8, 17u8, 108u8, 91u8, 35u8, 67u8, 175u8,
+                            171u8, 63u8, 214u8, 14u8, 6u8, 244u8, 211u8, 246u8, 232u8, 52u8, 251u8,
+                            84u8, 21u8, 240u8, 24u8, 198u8, 157u8, 59u8, 80u8, 82u8, 249u8,
                         ],
                     )
                 }
@@ -29412,9 +30152,9 @@ pub mod api {
                             weight,
                         },
                         [
-                            51u8, 156u8, 42u8, 103u8, 25u8, 67u8, 243u8, 42u8, 223u8, 31u8, 101u8,
-                            22u8, 8u8, 86u8, 253u8, 73u8, 195u8, 174u8, 16u8, 152u8, 184u8, 55u8,
-                            75u8, 214u8, 121u8, 244u8, 173u8, 34u8, 128u8, 151u8, 231u8, 228u8,
+                            2u8, 35u8, 198u8, 217u8, 126u8, 191u8, 78u8, 239u8, 13u8, 78u8, 73u8,
+                            9u8, 218u8, 139u8, 47u8, 193u8, 110u8, 182u8, 91u8, 176u8, 90u8, 13u8,
+                            240u8, 101u8, 96u8, 223u8, 250u8, 207u8, 62u8, 129u8, 64u8, 139u8,
                         ],
                     )
                 }
@@ -29454,10 +30194,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            2u8, 0u8, 149u8, 231u8, 141u8, 205u8, 70u8, 10u8, 157u8, 231u8, 100u8,
-                            54u8, 197u8, 48u8, 11u8, 223u8, 213u8, 196u8, 128u8, 153u8, 20u8,
-                            238u8, 235u8, 179u8, 86u8, 183u8, 80u8, 95u8, 195u8, 213u8, 235u8,
-                            69u8,
+                            3u8, 104u8, 231u8, 24u8, 198u8, 7u8, 80u8, 136u8, 233u8, 129u8, 81u8,
+                            244u8, 188u8, 248u8, 15u8, 170u8, 241u8, 41u8, 109u8, 66u8, 128u8,
+                            168u8, 227u8, 196u8, 75u8, 51u8, 113u8, 158u8, 164u8, 126u8, 57u8,
+                            187u8,
                         ],
                     )
                 }
@@ -29779,9 +30519,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            34u8, 145u8, 222u8, 177u8, 26u8, 34u8, 60u8, 193u8, 194u8, 110u8,
-                            177u8, 70u8, 37u8, 83u8, 18u8, 98u8, 95u8, 114u8, 142u8, 134u8, 1u8,
-                            14u8, 79u8, 9u8, 26u8, 150u8, 140u8, 135u8, 217u8, 235u8, 34u8, 46u8,
+                            99u8, 101u8, 137u8, 192u8, 152u8, 17u8, 108u8, 91u8, 35u8, 67u8, 175u8,
+                            171u8, 63u8, 214u8, 14u8, 6u8, 244u8, 211u8, 246u8, 232u8, 52u8, 251u8,
+                            84u8, 21u8, 240u8, 24u8, 198u8, 157u8, 59u8, 80u8, 82u8, 249u8,
                         ],
                     )
                 }
@@ -29807,9 +30547,9 @@ pub mod api {
                             weight,
                         },
                         [
-                            51u8, 156u8, 42u8, 103u8, 25u8, 67u8, 243u8, 42u8, 223u8, 31u8, 101u8,
-                            22u8, 8u8, 86u8, 253u8, 73u8, 195u8, 174u8, 16u8, 152u8, 184u8, 55u8,
-                            75u8, 214u8, 121u8, 244u8, 173u8, 34u8, 128u8, 151u8, 231u8, 228u8,
+                            2u8, 35u8, 198u8, 217u8, 126u8, 191u8, 78u8, 239u8, 13u8, 78u8, 73u8,
+                            9u8, 218u8, 139u8, 47u8, 193u8, 110u8, 182u8, 91u8, 176u8, 90u8, 13u8,
+                            240u8, 101u8, 96u8, 223u8, 250u8, 207u8, 62u8, 129u8, 64u8, 139u8,
                         ],
                     )
                 }
@@ -29836,10 +30576,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            2u8, 0u8, 149u8, 231u8, 141u8, 205u8, 70u8, 10u8, 157u8, 231u8, 100u8,
-                            54u8, 197u8, 48u8, 11u8, 223u8, 213u8, 196u8, 128u8, 153u8, 20u8,
-                            238u8, 235u8, 179u8, 86u8, 183u8, 80u8, 95u8, 195u8, 213u8, 235u8,
-                            69u8,
+                            3u8, 104u8, 231u8, 24u8, 198u8, 7u8, 80u8, 136u8, 233u8, 129u8, 81u8,
+                            244u8, 188u8, 248u8, 15u8, 170u8, 241u8, 41u8, 109u8, 66u8, 128u8,
+                            168u8, 227u8, 196u8, 75u8, 51u8, 113u8, 158u8, 164u8, 126u8, 57u8,
+                            187u8,
                         ],
                     )
                 }
@@ -30279,10 +31019,10 @@ pub mod api {
                             length_bound,
                         },
                         [
-                            39u8, 178u8, 183u8, 59u8, 112u8, 132u8, 153u8, 146u8, 80u8, 35u8,
-                            104u8, 150u8, 72u8, 102u8, 132u8, 105u8, 183u8, 8u8, 216u8, 68u8,
-                            167u8, 164u8, 156u8, 171u8, 250u8, 117u8, 72u8, 89u8, 224u8, 12u8,
-                            148u8, 182u8,
+                            224u8, 142u8, 253u8, 73u8, 125u8, 193u8, 158u8, 216u8, 254u8, 246u8,
+                            221u8, 22u8, 21u8, 131u8, 21u8, 67u8, 156u8, 167u8, 143u8, 156u8,
+                            202u8, 197u8, 20u8, 114u8, 94u8, 223u8, 73u8, 180u8, 19u8, 163u8,
+                            201u8, 159u8,
                         ],
                     )
                 }
@@ -30316,10 +31056,10 @@ pub mod api {
                             length_bound,
                         },
                         [
-                            214u8, 8u8, 176u8, 117u8, 97u8, 206u8, 8u8, 116u8, 85u8, 80u8, 159u8,
-                            231u8, 78u8, 126u8, 246u8, 87u8, 119u8, 91u8, 126u8, 120u8, 81u8,
-                            197u8, 118u8, 111u8, 46u8, 130u8, 224u8, 134u8, 105u8, 147u8, 207u8,
-                            173u8,
+                            218u8, 238u8, 255u8, 157u8, 242u8, 204u8, 152u8, 71u8, 160u8, 177u8,
+                            40u8, 69u8, 50u8, 7u8, 84u8, 26u8, 146u8, 246u8, 2u8, 132u8, 188u8,
+                            132u8, 100u8, 86u8, 223u8, 253u8, 137u8, 152u8, 139u8, 94u8, 27u8,
+                            240u8,
                         ],
                     )
                 }
@@ -30781,10 +31521,9 @@ pub mod api {
                         "ProposalOf",
                         (),
                         [
-                            176u8, 163u8, 74u8, 195u8, 123u8, 227u8, 222u8, 48u8, 70u8, 33u8,
-                            108u8, 120u8, 202u8, 74u8, 21u8, 145u8, 5u8, 151u8, 231u8, 222u8, 49u8,
-                            29u8, 31u8, 174u8, 182u8, 134u8, 232u8, 251u8, 134u8, 206u8, 57u8,
-                            64u8,
+                            179u8, 89u8, 162u8, 72u8, 2u8, 108u8, 192u8, 139u8, 118u8, 20u8, 4u8,
+                            174u8, 244u8, 216u8, 76u8, 46u8, 131u8, 107u8, 185u8, 138u8, 208u8,
+                            2u8, 76u8, 128u8, 8u8, 199u8, 94u8, 233u8, 133u8, 128u8, 3u8, 241u8,
                         ],
                     )
                 }
@@ -30808,10 +31547,9 @@ pub mod api {
                             _0.borrow(),
                         ),
                         [
-                            176u8, 163u8, 74u8, 195u8, 123u8, 227u8, 222u8, 48u8, 70u8, 33u8,
-                            108u8, 120u8, 202u8, 74u8, 21u8, 145u8, 5u8, 151u8, 231u8, 222u8, 49u8,
-                            29u8, 31u8, 174u8, 182u8, 134u8, 232u8, 251u8, 134u8, 206u8, 57u8,
-                            64u8,
+                            179u8, 89u8, 162u8, 72u8, 2u8, 108u8, 192u8, 139u8, 118u8, 20u8, 4u8,
+                            174u8, 244u8, 216u8, 76u8, 46u8, 131u8, 107u8, 185u8, 138u8, 208u8,
+                            2u8, 76u8, 128u8, 8u8, 199u8, 94u8, 233u8, 133u8, 128u8, 3u8, 241u8,
                         ],
                     )
                 }
@@ -38069,6 +38807,319 @@ pub mod api {
                 }
             }
         }
+        pub mod pallet_market {
+            use super::runtime_types;
+            pub mod pallet {
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Pallet's callable functions."]
+                pub enum Call {
+                    #[codec(index = 0)]
+                    #[doc = "Creates a liquidity pool and an associated new `lp_token` asset"]
+                    create_pool {
+                        kind: runtime_types::pallet_market::PoolKind,
+                        first_asset_id: ::core::primitive::u32,
+                        first_asset_amount: ::core::primitive::u128,
+                        second_asset_id: ::core::primitive::u32,
+                        second_asset_amount: ::core::primitive::u128,
+                    },
+                    #[codec(index = 1)]
+                    #[doc = "Provide liquidity into the pool of `pool_id`, suitable for Xyk pools."]
+                    #[doc = "An optimal amount of the other asset will be calculated on current rate,"]
+                    #[doc = "a maximum amount should be provided to limit possible rate slippage."]
+                    #[doc = "For a StableSwap pool a rate of 1:1 is used."]
+                    #[doc = "Liquidity tokens that represent this share of the pool will be sent to origin."]
+                    mint_liquidity {
+                        pool_id: ::core::primitive::u32,
+                        asset_id: ::core::primitive::u32,
+                        asset_amount: ::core::primitive::u128,
+                        max_other_asset_amount: ::core::primitive::u128,
+                    },
+                    #[codec(index = 2)]
+                    #[doc = "Provide fixed liquidity into the pool of `pool_id`, suitable for StableSwap pools."]
+                    #[doc = "For Xyk pools, if a single amount is defined, it will swap internally to to match current rate,"]
+                    #[doc = "setting both values results in error."]
+                    #[doc = "Liquidity tokens that represent this share of the pool will be sent to origin."]
+                    mint_liquidity_fixed_amounts {
+                        pool_id: ::core::primitive::u32,
+                        amounts: (::core::primitive::u128, ::core::primitive::u128),
+                        min_amount_lp_tokens: ::core::primitive::u128,
+                    },
+                    #[codec(index = 3)]
+                    #[doc = "Provides liquidity from vested native asset. Tokens are added to pool and"]
+                    #[doc = "minted LP tokens are then vested instead."]
+                    #[doc = "Only pools paired with native asset are allowed."]
+                    mint_liquidity_using_vesting_native_tokens_by_vesting_index {
+                        pool_id: ::core::primitive::u32,
+                        native_asset_vesting_index: ::core::primitive::u32,
+                        vesting_native_asset_unlock_some_amount_or_all:
+                            ::core::option::Option<::core::primitive::u128>,
+                        max_other_asset_amount: ::core::primitive::u128,
+                    },
+                    #[codec(index = 4)]
+                    mint_liquidity_using_vesting_native_tokens {
+                        pool_id: ::core::primitive::u32,
+                        native_asset_vesting_amount: ::core::primitive::u128,
+                        max_other_asset_amount: ::core::primitive::u128,
+                    },
+                    #[codec(index = 5)]
+                    #[doc = "Allows you to remove liquidity by providing the `lp_burn_amount` tokens that will be"]
+                    #[doc = "burned in the process. The usage of `min_first_asset_amount`/`min_second_asset_amount`"]
+                    #[doc = "controls the min amount of returned tokens."]
+                    burn_liquidity {
+                        pool_id: ::core::primitive::u32,
+                        liquidity_burn_amount: ::core::primitive::u128,
+                        min_first_asset_amount: ::core::primitive::u128,
+                        min_second_asset_amount: ::core::primitive::u128,
+                    },
+                    #[codec(index = 6)]
+                    #[doc = "Executes a multiswap asset in a series of swap asset atomic swaps."]
+                    #[doc = ""]
+                    #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
+                    #[doc = ""]
+                    #[doc = "# Args:"]
+                    #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
+                    #[doc = "- `asset_id_in`: The id of the asset sold"]
+                    #[doc = "- `asset_amount_in`: The amount of the asset sold"]
+                    #[doc = "- `asset_id_out`: The id of the asset received"]
+                    #[doc = "- `min_amount_out` - The minimum amount of requested asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
+                    multiswap_asset {
+                        swap_pool_list:
+                            ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>,
+                        asset_id_in: ::core::primitive::u32,
+                        asset_amount_in: ::core::primitive::u128,
+                        asset_id_out: ::core::primitive::u32,
+                        min_amount_out: ::core::primitive::u128,
+                    },
+                    #[codec(index = 7)]
+                    #[doc = "Buy variant of the multiswap, a precise output amount should be provided instead."]
+                    multiswap_asset_buy {
+                        swap_pool_list:
+                            ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>,
+                        asset_id_out: ::core::primitive::u32,
+                        asset_amount_out: ::core::primitive::u128,
+                        asset_id_in: ::core::primitive::u32,
+                        max_amount_in: ::core::primitive::u128,
+                    },
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "The `Error` enum of this pallet."]
+                pub enum Error {
+                    #[codec(index = 0)]
+                    #[doc = "No such pool exists"]
+                    NoSuchPool,
+                    #[codec(index = 1)]
+                    #[doc = "Asset id is not allowed"]
+                    FunctionNotAvailableForThisToken,
+                    #[codec(index = 2)]
+                    #[doc = "Asset ids are not allowed to create a pool"]
+                    DisallowedPool,
+                    #[codec(index = 3)]
+                    #[doc = "Insufficient output amount does not meet min requirements"]
+                    InsufficientOutputAmount,
+                    #[codec(index = 4)]
+                    #[doc = "Excesive input amount does not meet max requirements"]
+                    ExcesiveInputAmount,
+                    #[codec(index = 5)]
+                    #[doc = "Pool is not paired with native currency id"]
+                    NotPairedWithNativeAsset,
+                    #[codec(index = 6)]
+                    #[doc = "Not a promoted pool"]
+                    NotAPromotedPool,
+                    #[codec(index = 7)]
+                    #[doc = "Asset does not exists"]
+                    AssetDoesNotExists,
+                    #[codec(index = 8)]
+                    #[doc = "Operation not available for such pool type"]
+                    FunctionNotAvailableForThisPoolKind,
+                    #[codec(index = 9)]
+                    #[doc = "Trading blocked by maintenance mode"]
+                    TradingBlockedByMaintenanceMode,
+                    #[codec(index = 10)]
+                    #[doc = "Multi swap path contains repetive pools"]
+                    MultiSwapSamePool,
+                    #[codec(index = 11)]
+                    #[doc = "Input asset id is not connected with output asset id for given pools"]
+                    MultiSwapPathInvalid,
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "The `Event` enum of this pallet"]
+                pub enum Event {
+                    #[codec(index = 0)]
+                    #[doc = "Assets were swapped successfully"]
+                    AssetsSwapped {
+                        who: runtime_types::sp_runtime::account::AccountId20,
+                        swaps: ::subxt::ext::subxt_core::alloc::vec::Vec<
+                            runtime_types::pallet_market::AtomicSwap<
+                                ::core::primitive::u32,
+                                ::core::primitive::u128,
+                            >,
+                        >,
+                    },
+                    #[codec(index = 1)]
+                    #[doc = "A successful call of the `CretaPool` extrinsic will create this event."]
+                    PoolCreated {
+                        creator: runtime_types::sp_runtime::account::AccountId20,
+                        pool_id: ::core::primitive::u32,
+                        lp_token: ::core::primitive::u32,
+                        assets: (::core::primitive::u32, ::core::primitive::u32),
+                    },
+                    #[codec(index = 2)]
+                    #[doc = "A successful call of the `AddLiquidity` extrinsic will create this event."]
+                    LiquidityMinted {
+                        who: runtime_types::sp_runtime::account::AccountId20,
+                        pool_id: ::core::primitive::u32,
+                        amounts_provided: (::core::primitive::u128, ::core::primitive::u128),
+                        lp_token: ::core::primitive::u32,
+                        lp_token_minted: ::core::primitive::u128,
+                        total_supply: ::core::primitive::u128,
+                    },
+                    #[codec(index = 3)]
+                    #[doc = "A successful call of the `RemoveLiquidity` extrinsic will create this event."]
+                    LiquidityBurned {
+                        who: runtime_types::sp_runtime::account::AccountId20,
+                        pool_id: ::core::primitive::u32,
+                        amounts: (::core::primitive::u128, ::core::primitive::u128),
+                        burned_amount: ::core::primitive::u128,
+                        total_supply: ::core::primitive::u128,
+                    },
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub struct AtomicSwap<_0, _1> {
+                pub pool_id: _0,
+                pub kind: runtime_types::pallet_market::PoolKind,
+                pub asset_in: _0,
+                pub asset_out: _0,
+                pub amount_in: _1,
+                pub amount_out: _1,
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub enum PoolKind {
+                #[codec(index = 0)]
+                Xyk,
+                #[codec(index = 1)]
+                StableSwap,
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub struct RpcAssetMetadata<_0> {
+                pub token_id: _0,
+                pub decimals: ::core::primitive::u32,
+                pub name: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+                pub symbol: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub struct RpcPoolInfo<_0, _1> {
+                pub pool_id: _0,
+                pub kind: runtime_types::pallet_market::PoolKind,
+                pub lp_token_id: _0,
+                pub assets: ::subxt::ext::subxt_core::alloc::vec::Vec<_0>,
+                pub reserves: ::subxt::ext::subxt_core::alloc::vec::Vec<_1>,
+            }
+        }
         pub mod pallet_membership {
             use super::runtime_types;
             pub mod pallet {
@@ -40131,6 +41182,183 @@ pub mod api {
                 }
             }
         }
+        pub mod pallet_stable_swap {
+            use super::runtime_types;
+            pub mod pallet {
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "The `Error` enum of this pallet."]
+                pub enum Error {
+                    #[codec(index = 0)]
+                    #[doc = "Amplification coefficient lower then 1 or too large"]
+                    AmpCoeffOutOfRange,
+                    #[codec(index = 1)]
+                    #[doc = "Too many assets for pool creation"]
+                    TooManyAssets,
+                    #[codec(index = 2)]
+                    #[doc = "Pool already exists"]
+                    PoolAlreadyExists,
+                    #[codec(index = 3)]
+                    #[doc = "Asset does not exist"]
+                    AssetDoesNotExist,
+                    #[codec(index = 4)]
+                    #[doc = "Asset ids cannot be the same"]
+                    SameAsset,
+                    #[codec(index = 5)]
+                    #[doc = "No such pool exists"]
+                    NoSuchPool,
+                    #[codec(index = 6)]
+                    #[doc = "Provided arguments do not match in length"]
+                    ArgumentsLengthMismatch,
+                    #[codec(index = 7)]
+                    #[doc = "Pool is broken, remove liquidity"]
+                    PoolInvariantBroken,
+                    #[codec(index = 8)]
+                    #[doc = "Initial liquidity provision needs all assets"]
+                    InitialLiquidityZeroAmount,
+                    #[codec(index = 9)]
+                    #[doc = "Asset does not exist in pool."]
+                    NoSuchAssetInPool,
+                    #[codec(index = 10)]
+                    #[doc = "Unexpected failure"]
+                    UnexpectedFailure,
+                    #[codec(index = 11)]
+                    #[doc = "Insufficient output amount does not meet min requirements"]
+                    InsufficientOutputAmount,
+                    #[codec(index = 12)]
+                    #[doc = "Insufficient input amount"]
+                    InsufficientInputAmount,
+                    #[codec(index = 13)]
+                    #[doc = "Excesive output amount does not meet max requirements"]
+                    ExcesiveOutputAmount,
+                    #[codec(index = 14)]
+                    #[doc = "Math overflow"]
+                    MathOverflow,
+                    #[codec(index = 15)]
+                    #[doc = "Liquidity token creation failed"]
+                    LiquidityTokenCreationFailed,
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "The `Event` enum of this pallet"]
+                pub enum Event {
+                    #[codec(index = 0)]
+                    #[doc = "A successful call of the `CretaPool` extrinsic will create this event."]
+                    PoolCreated {
+                        creator: runtime_types::sp_runtime::account::AccountId20,
+                        pool_id: ::core::primitive::u32,
+                        lp_token: ::core::primitive::u32,
+                        assets: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                            ::core::primitive::u32,
+                        >,
+                    },
+                    #[codec(index = 1)]
+                    #[doc = "A successful call of the `AddLiquidity` extrinsic will create this event."]
+                    LiquidityMinted {
+                        who: runtime_types::sp_runtime::account::AccountId20,
+                        pool_id: ::core::primitive::u32,
+                        amounts_provided:
+                            runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                                ::core::primitive::u128,
+                            >,
+                        lp_token: ::core::primitive::u32,
+                        lp_token_minted: ::core::primitive::u128,
+                        total_supply: ::core::primitive::u128,
+                        fees: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                            ::core::primitive::u128,
+                        >,
+                    },
+                    #[codec(index = 2)]
+                    #[doc = "Assets have been swapped, a successfull call to `Swap` will create this event."]
+                    AssetsSwapped {
+                        who: runtime_types::sp_runtime::account::AccountId20,
+                        pool_id: ::core::primitive::u32,
+                        asset_in: ::core::primitive::u32,
+                        amount_in: ::core::primitive::u128,
+                        asset_out: ::core::primitive::u32,
+                        amount_out: ::core::primitive::u128,
+                    },
+                    #[codec(index = 3)]
+                    #[doc = "A successful call of the `RemoveLiquidityOneAsset` extrinsic will create this event."]
+                    LiquidityBurnedOne {
+                        who: runtime_types::sp_runtime::account::AccountId20,
+                        pool_id: ::core::primitive::u32,
+                        asset_id: ::core::primitive::u32,
+                        amount: ::core::primitive::u128,
+                        burned_amount: ::core::primitive::u128,
+                        total_supply: ::core::primitive::u128,
+                    },
+                    #[codec(index = 4)]
+                    #[doc = "A successful call of the `RemoveLiquidityImbalanced` & `RemoveLiquidity` extrinsic will create this event."]
+                    LiquidityBurned {
+                        who: runtime_types::sp_runtime::account::AccountId20,
+                        pool_id: ::core::primitive::u32,
+                        amounts: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                            ::core::primitive::u128,
+                        >,
+                        burned_amount: ::core::primitive::u128,
+                        total_supply: ::core::primitive::u128,
+                        fees: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                            ::core::primitive::u128,
+                        >,
+                    },
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Clone,
+                Debug,
+                PartialEq,
+            )]
+            #[allow(non_snake_case)]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub struct PoolInfo<_0, _1> {
+                pub lp_token: _0,
+                pub assets: runtime_types::bounded_collections::bounded_vec::BoundedVec<_0>,
+                pub amp_coeff: ::core::primitive::u128,
+                pub rate_multipliers:
+                    runtime_types::bounded_collections::bounded_vec::BoundedVec<_1>,
+            }
+        }
         pub mod pallet_sudo_mangata {
             use super::runtime_types;
             pub mod pallet {
@@ -41532,159 +42760,6 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
-                pub enum Call {
-                    #[codec(index = 0)]
-                    create_pool {
-                        first_asset_id: ::core::primitive::u32,
-                        first_asset_amount: ::core::primitive::u128,
-                        second_asset_id: ::core::primitive::u32,
-                        second_asset_amount: ::core::primitive::u128,
-                    },
-                    #[codec(index = 1)]
-                    #[doc = "Executes sell_asset swap."]
-                    #[doc = "First the swap is prevalidated, if it is successful then the extrinsic is accepted. Beyond this point the exchange commission will be charged."]
-                    #[doc = "The sold amount of the sold asset is used to determine the bought asset amount."]
-                    #[doc = "If the bought asset amount is lower than the min_amount_out then it will fail on slippage."]
-                    #[doc = "The percentage exchange commission is still charged even if the swap fails on slippage. Though the swap itself will be a no-op."]
-                    #[doc = "The slippage is calculated based upon the sold_asset_amount."]
-                    #[doc = "Upon slippage failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                    #[doc = ""]
-                    #[doc = ""]
-                    #[doc = "# Args:"]
-                    #[doc = "- `sold_asset_id` - The token being sold"]
-                    #[doc = "- `bought_asset_id` - The token being bought"]
-                    #[doc = "- `sold_asset_amount`: The amount of the sold token being sold"]
-                    #[doc = "- `min_amount_out` - The minimum amount of bought asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                    sell_asset {
-                        sold_asset_id: ::core::primitive::u32,
-                        bought_asset_id: ::core::primitive::u32,
-                        sold_asset_amount: ::core::primitive::u128,
-                        min_amount_out: ::core::primitive::u128,
-                    },
-                    #[codec(index = 2)]
-                    #[doc = "Executes a multiswap sell asset in a series of sell asset atomic swaps."]
-                    #[doc = ""]
-                    #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
-                    #[doc = ""]
-                    #[doc = "First the multiswap is prevalidated, if it is successful then the extrinsic is accepted"]
-                    #[doc = "and the exchange commission will be charged upon execution on the **first** swap using **sold_asset_amount**."]
-                    #[doc = ""]
-                    #[doc = "Upon failure of an atomic swap or bad slippage, all the atomic swaps are reverted and the exchange commission is charged."]
-                    #[doc = "Upon such a failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                    #[doc = ""]
-                    #[doc = "# Args:"]
-                    #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
-                    #[doc = "- `sold_asset_amount`: The amount of the first asset sold"]
-                    #[doc = "- `min_amount_out` - The minimum amount of last asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                    multiswap_sell_asset {
-                        swap_token_list:
-                            ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>,
-                        sold_asset_amount: ::core::primitive::u128,
-                        min_amount_out: ::core::primitive::u128,
-                    },
-                    #[codec(index = 3)]
-                    #[doc = "Executes buy_asset swap."]
-                    #[doc = "First the swap is prevalidated, if it is successful then the extrinsic is accepted. Beyond this point the exchange commission will be charged."]
-                    #[doc = "The bought of the bought asset is used to determine the sold asset amount."]
-                    #[doc = "If the sold asset amount is higher than the max_amount_in then it will fail on slippage."]
-                    #[doc = "The percentage exchange commission is still charged even if the swap fails on slippage. Though the swap itself will be a no-op."]
-                    #[doc = "The slippage is calculated based upon the sold asset amount."]
-                    #[doc = "Upon slippage failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                    #[doc = ""]
-                    #[doc = ""]
-                    #[doc = "# Args:"]
-                    #[doc = "- `sold_asset_id` - The token being sold"]
-                    #[doc = "- `bought_asset_id` - The token being bought"]
-                    #[doc = "- `bought_asset_amount`: The amount of the bought token being bought"]
-                    #[doc = "- `max_amount_in` - The maximum amount of sold asset that must be sold in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                    buy_asset {
-                        sold_asset_id: ::core::primitive::u32,
-                        bought_asset_id: ::core::primitive::u32,
-                        bought_asset_amount: ::core::primitive::u128,
-                        max_amount_in: ::core::primitive::u128,
-                    },
-                    #[codec(index = 4)]
-                    #[doc = "Executes a multiswap buy asset in a series of buy asset atomic swaps."]
-                    #[doc = ""]
-                    #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
-                    #[doc = ""]
-                    #[doc = "First the multiswap is prevalidated, if it is successful then the extrinsic is accepted"]
-                    #[doc = "and the exchange commission will be charged upon execution on the *first* swap using *max_amount_in*."]
-                    #[doc = "multiswap_buy_asset cannot have two (or more) atomic swaps on the same pool."]
-                    #[doc = "multiswap_buy_asset prevaildation only checks for whether there are enough funds to pay for the exchange commission."]
-                    #[doc = "Failure to have the required amount of first asset funds will result in failure (and charging of the exchange commission)."]
-                    #[doc = ""]
-                    #[doc = "Upon failure of an atomic swap or bad slippage, all the atomic swaps are reverted and the exchange commission is charged."]
-                    #[doc = "Upon such a failure, the extrinsic is marked \"successful\", but an event for the failure is emitted"]
-                    #[doc = ""]
-                    #[doc = "# Args:"]
-                    #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
-                    #[doc = "- `bought_asset_amount`: The amount of the last asset bought"]
-                    #[doc = "- `max_amount_in` - The maximum amount of first asset that can be sold in order to not fail on slippage. Slippage failures still charge exchange commission."]
-                    multiswap_buy_asset {
-                        swap_token_list:
-                            ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>,
-                        bought_asset_amount: ::core::primitive::u128,
-                        max_amount_in: ::core::primitive::u128,
-                    },
-                    #[codec(index = 5)]
-                    mint_liquidity_using_vesting_native_tokens_by_vesting_index {
-                        native_asset_vesting_index: ::core::primitive::u32,
-                        vesting_native_asset_unlock_some_amount_or_all:
-                            ::core::option::Option<::core::primitive::u128>,
-                        second_asset_id: ::core::primitive::u32,
-                        expected_second_asset_amount: ::core::primitive::u128,
-                    },
-                    #[codec(index = 6)]
-                    mint_liquidity_using_vesting_native_tokens {
-                        vesting_native_asset_amount: ::core::primitive::u128,
-                        second_asset_id: ::core::primitive::u32,
-                        expected_second_asset_amount: ::core::primitive::u128,
-                    },
-                    #[codec(index = 7)]
-                    mint_liquidity {
-                        first_asset_id: ::core::primitive::u32,
-                        second_asset_id: ::core::primitive::u32,
-                        first_asset_amount: ::core::primitive::u128,
-                        expected_second_asset_amount: ::core::primitive::u128,
-                    },
-                    #[codec(index = 8)]
-                    compound_rewards {
-                        liquidity_asset_id: ::core::primitive::u32,
-                        amount_permille: runtime_types::sp_arithmetic::per_things::Permill,
-                    },
-                    #[codec(index = 9)]
-                    provide_liquidity_with_conversion {
-                        liquidity_asset_id: ::core::primitive::u32,
-                        provided_asset_id: ::core::primitive::u32,
-                        provided_asset_amount: ::core::primitive::u128,
-                    },
-                    #[codec(index = 10)]
-                    burn_liquidity {
-                        first_asset_id: ::core::primitive::u32,
-                        second_asset_id: ::core::primitive::u32,
-                        liquidity_asset_amount: ::core::primitive::u128,
-                    },
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Clone,
-                    Debug,
-                    PartialEq,
-                )]
-                #[allow(non_snake_case)]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
                 #[doc = "Errors"]
                 pub enum Error {
                     #[codec(index = 0)]
@@ -43060,8 +44135,6 @@ pub mod api {
                 Metamask(runtime_types::pallet_metamask_signature::pallet::Call),
                 #[codec(index = 10)]
                 Tokens(runtime_types::orml_tokens::module::Call),
-                #[codec(index = 13)]
-                Xyk(runtime_types::pallet_xyk::pallet::Call),
                 #[codec(index = 14)]
                 ProofOfStake(runtime_types::pallet_proof_of_stake::pallet::Call),
                 #[codec(index = 15)]
@@ -43076,6 +44149,8 @@ pub mod api {
                 MultiPurposeLiquidity(runtime_types::pallet_multipurpose_liquidity::pallet::Call),
                 #[codec(index = 21)]
                 Bootstrap(runtime_types::pallet_bootstrap::pallet::Call),
+                #[codec(index = 22)]
+                Market(runtime_types::pallet_market::pallet::Call),
                 #[codec(index = 30)]
                 ParachainStaking(runtime_types::parachain_staking::pallet::Call),
                 #[codec(index = 31)]
@@ -43128,6 +44203,8 @@ pub mod api {
                 Metamask(runtime_types::pallet_metamask_signature::pallet::Error),
                 #[codec(index = 10)]
                 Tokens(runtime_types::orml_tokens::module::Error),
+                #[codec(index = 12)]
+                StableSwap(runtime_types::pallet_stable_swap::pallet::Error),
                 #[codec(index = 13)]
                 Xyk(runtime_types::pallet_xyk::pallet::Error),
                 #[codec(index = 14)]
@@ -43144,6 +44221,8 @@ pub mod api {
                 MultiPurposeLiquidity(runtime_types::pallet_multipurpose_liquidity::pallet::Error),
                 #[codec(index = 21)]
                 Bootstrap(runtime_types::pallet_bootstrap::pallet::Error),
+                #[codec(index = 22)]
+                Market(runtime_types::pallet_market::pallet::Error),
                 #[codec(index = 30)]
                 ParachainStaking(runtime_types::parachain_staking::pallet::Error),
                 #[codec(index = 31)]
@@ -43198,6 +44277,8 @@ pub mod api {
                 Tokens(runtime_types::orml_tokens::module::Event),
                 #[codec(index = 11)]
                 TransactionPayment(runtime_types::pallet_transaction_payment::pallet::Event),
+                #[codec(index = 12)]
+                StableSwap(runtime_types::pallet_stable_swap::pallet::Event),
                 #[codec(index = 13)]
                 Xyk(runtime_types::pallet_xyk::pallet::Event),
                 #[codec(index = 14)]
@@ -43214,6 +44295,8 @@ pub mod api {
                 MultiPurposeLiquidity(runtime_types::pallet_multipurpose_liquidity::pallet::Event),
                 #[codec(index = 21)]
                 Bootstrap(runtime_types::pallet_bootstrap::pallet::Event),
+                #[codec(index = 22)]
+                Market(runtime_types::pallet_market::pallet::Event),
                 #[codec(index = 30)]
                 ParachainStaking(runtime_types::parachain_staking::pallet::Event),
                 #[codec(index = 31)]
