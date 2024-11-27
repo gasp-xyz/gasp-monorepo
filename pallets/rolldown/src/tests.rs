@@ -981,6 +981,31 @@ fn reject_update_with_invalid_too_high_request_id() {
 
 #[test]
 #[serial]
+fn reject_update_without_new_updates() {
+	ExtBuilder::new().execute_with_default_mocks(|| {
+		forward_to_block::<Test>(10);
+
+		let deposit_update = L1UpdateBuilder::default()
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default())])
+			.with_offset(1u128)
+			.build();
+
+		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update.clone())
+			.unwrap();
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 0u128.into());
+
+		forward_to_block::<Test>(16);
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
+
+		assert_err!(
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update),
+			Error::<Test>::WrongRequestId
+		);
+	});
+}
+
+#[test]
+#[serial]
 fn reject_second_update_in_the_same_block() {
 	ExtBuilder::new().execute_with_default_mocks(|| {
 		forward_to_block::<Test>(10);
