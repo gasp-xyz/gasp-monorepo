@@ -55,10 +55,12 @@ where
 		pallet_rolldown::messages::L1Update,
 		pallet_rolldown::messages::Chain,
 	>,
+	C::Api: pallet_market::MarketRuntimeApi<Block, Balance, TokenId>,
 	C::Api: BlockBuilder<Block>,
 	C::Api: VerNonceApi<Block, AccountId>,
 	P: TransactionPool + 'static,
 {
+	use market_rpc::{Market, MarketApiServer};
 	use metamask_signature_rpc::MetamaskSignature;
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use proof_of_stake_rpc::{ProofOfStake, ProofOfStakeApiServer};
@@ -74,7 +76,8 @@ where
 	module.merge(Xyk::new(client.clone()).into_rpc())?;
 	module.merge(Rolldown::new(client.clone()).into_rpc())?;
 	module.merge(ProofOfStake::new(client.clone()).into_rpc())?;
-	module.merge(MetamaskSignature::new(client).into_rpc())?;
+	module.merge(MetamaskSignature::new(client.clone()).into_rpc())?;
+	module.merge(Market::new(client).into_rpc())?;
 
 	// Extend this RPC with a custom API by using the following syntax.
 	// `YourRpcStruct` should have a reference to a client, which is needed

@@ -17,6 +17,7 @@ pallet-identity = { workspace = true }
 pallet-membership = { workspace = true }
 pallet-proxy = { workspace = true }
 pallet-session = { workspace = true }
+pallet-transaction-payment = { workspace = true }
 sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-storage = { workspace = true }
@@ -29,18 +30,20 @@ orml-tokens = { workspace = true }
 orml-traits = { workspace = true }
 
 # Local
-rollup-runtime = { path = "../" }
 pallet-bootstrap = { path = "../../../pallets/bootstrap" }
 pallet-issuance = { path = "../../../pallets/issuance" }
+pallet-fee-lock = { path = "../../../pallets/fee-lock" }
+pallet-maintenance = { path = "../../../pallets/maintenance" }
+pallet-market = { path = "../../../pallets/market" }
 pallet-multipurpose-liquidity = { path = "../../../pallets/multipurpose-liquidity" }
 pallet-proof-of-stake = { path = "../../../pallets/proof-of-stake" }
+pallet-rolldown = { path = "../../../pallets/rolldown" }
 pallet-sudo-origin = { path = "../../../pallets/sudo-origin" }
 pallet-xyk = { path = "../../../pallets/xyk" }
-pallet-maintenance = { path = "../../../pallets/maintenance" }
-pallet-rolldown = { path = "../../../pallets/rolldown" }
 parachain-staking = { path = "../../../pallets/parachain-staking" }
-xyk-runtime-api = { path = "../../../pallets/xyk/runtime-api" }
 rolldown-runtime-api = { path = "../../../pallets/rolldown/runtime-api" }
+rollup-runtime = { path = "../" }
+xyk-runtime-api = { path = "../../../pallets/xyk/runtime-api" }
 
 [features]
 default = []
