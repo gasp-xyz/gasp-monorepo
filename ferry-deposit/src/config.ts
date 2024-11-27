@@ -20,7 +20,7 @@ export const appConfigSchema = z.object({
 	TX_COST: z.bigint(),
 	BLOCK_DELAY: z.bigint(),
 	TOKENS_TO_TRACK: z.string().transform(elem => tokensToTrackSchema.parse(JSONbig({ alwaysParseAsBig: true, useNativeBigInt: true }).parse(elem))),
-  LOG: z.string(),
+  LOG: z.string().default("info"),
 });
 
 const configuration = appConfigSchema.parse({
@@ -32,7 +32,7 @@ const configuration = appConfigSchema.parse({
 		TX_COST: BigInt(process.env.TX_COST!),
 		BLOCK_DELAY: BigInt(process.env.BLOCK_DELAY!),
     TOKENS_TO_TRACK: process.env.TOKENS_TO_TRACK!,
-    LOG: process.env.LOG!,
+    LOG: process.env.LOG,
 	});
 
 
