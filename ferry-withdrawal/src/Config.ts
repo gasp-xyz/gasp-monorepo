@@ -17,13 +17,18 @@ const cliConfigSchemat = z.object({
 	MANGATA_NODE_URL: z.string(),
 	PRIVATE_KEY: z.string(),
 	L1_CHAIN: z.string(),
-	TOKENS_TO_TRACK: z.string().transform(elem => tokensToTrackSchema.parse(JSONbig({ alwaysParseAsBig: true, useNativeBigInt: true }).parse(elem))),
+	TOKENS_TO_TRACK: z
+		.string()
+		.transform((elem) =>
+			tokensToTrackSchema.parse(
+				JSONbig({ alwaysParseAsBig: true, useNativeBigInt: true }).parse(elem),
+			),
+		),
 	TX_COST: z.bigint(),
 	LOOK_BACK_HOURS: z.number().default(24),
 	LOG: z.string().default("info"),
 	DELAY: z.bigint().default(0n),
 });
-
 
 function createCliConfig() {
 	return cliConfigSchemat.parse({
@@ -34,7 +39,9 @@ function createCliConfig() {
 		L1_CHAIN: process.env.L1_CHAIN!,
 		TOKENS_TO_TRACK: process.env.TOKENS_TO_TRACK!,
 		TX_COST: BigInt(process.env.TX_COST!),
-		LOOK_BACK_HOURS: process.env.LOOK_BACK_HOURS ? Number(process.env.LOOK_BACK_HOURS) : undefined,
+		LOOK_BACK_HOURS: process.env.LOOK_BACK_HOURS
+			? Number(process.env.LOOK_BACK_HOURS)
+			: undefined,
 		LOG: process.env.LOG,
 		DELAY: process.env.DELAY ? BigInt(process.env.DELAY) : undefined,
 	});
@@ -42,7 +49,8 @@ function createCliConfig() {
 
 const configuration = createCliConfig();
 
-export const MANGATA_CONTRACT_ADDRESS = configuration.MANGATA_CONTRACT_ADDRESS as `0x${string}`;
+export const MANGATA_CONTRACT_ADDRESS =
+	configuration.MANGATA_CONTRACT_ADDRESS as `0x${string}`;
 export const ETH_CHAIN_URL = configuration.ETH_CHAIN_URL;
 export const MANGATA_NODE_URL = configuration.MANGATA_NODE_URL;
 export const PRIVATE_KEY = configuration.PRIVATE_KEY;

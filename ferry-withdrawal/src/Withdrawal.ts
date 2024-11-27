@@ -10,11 +10,15 @@ interface Withdrawal {
 }
 
 function toString(withdrawal: Withdrawal): string {
-	return `rid:${withdrawal.requestId} recipient:${u8aToHex(withdrawal.withdrawalRecipient)} token:${u8aToHex(withdrawal.tokenAddress)} amount:${withdrawal.amount} tip:${withdrawal.ferryTip} hash:${u8aToHex(withdrawal.hash)}`;
+	return `rid:${withdrawal.requestId} recipient:${u8aToHex(
+		withdrawal.withdrawalRecipient,
+	)} token:${u8aToHex(withdrawal.tokenAddress)} amount:${
+		withdrawal.amount
+	} tip:${withdrawal.ferryTip} hash:${u8aToHex(withdrawal.hash)}`;
 }
 
-function isWithdrawal(obj:any): obj is Withdrawal {
-  return "ferryTip" in obj;
+function isWithdrawal(obj: any): obj is Withdrawal {
+	return "ferryTip" in obj;
 }
 
 export { type Withdrawal, toString, isWithdrawal };
