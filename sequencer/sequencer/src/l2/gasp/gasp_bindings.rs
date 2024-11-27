@@ -1,3 +1,4 @@
+#[allow(non_snake_case)]
 #[allow(dead_code, unused_imports, non_camel_case_types, unreachable_patterns)]
 #[allow(clippy::all)]
 #[allow(rustdoc::broken_intra_doc_links)]
