@@ -70,7 +70,9 @@ bindings-rs-alloy: ## generates rust alloy bindings
 	cd ./sequencer/bindings && cargo fmt
 
 bindings-json: ## generate JS bindings
-	cd ./contracts && forge build && cp out/Rolldown.sol/Rolldown.json ../rollup-sequencer/src/Rolldown.json
+	forge build --root ./contracts 
+	cp contracts/out/Rolldown.sol/Rolldown.json ./ferry-deposit//src/Rolldown.json
+	cp contracts/out/Rolldown.sol/Rolldown.json ./ferry-withdrawal/src/Rolldown.json
 
 bindings-gasp:
 	subxt metadata -f bytes -o metadata.scale --url http://127.0.0.1:9944
