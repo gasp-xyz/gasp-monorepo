@@ -19,7 +19,7 @@ struct Config {
     #[envconfig(from = "ETH_CHAIN_URL")]
     pub l1_uri: String,
 
-    #[envconfig(from = "ETH_PRIV_KEY")]
+    #[envconfig(from = "PRIVATE_KEY")]
     pub l1_private_key: String,
 
     #[envconfig(from = "MANGATA_NODE_URL")]

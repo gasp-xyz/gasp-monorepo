@@ -1,4 +1,3 @@
-
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import type { PrivateKeyAccount, ReadContractErrorType } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -19,7 +18,7 @@ import {
 	PRIVATE_KEY,
 	TOKENS_TO_TRACK,
 	TX_COST,
-  DELAY
+	DELAY,
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
 
@@ -30,7 +29,7 @@ async function main() {
 	const l2 = new L2Api(api);
 	const l1 = new L1Api(ETH_CHAIN_URL);
 
-  logger.info(`Closer Serivce`);
+	logger.info(`Closer Serivce`);
 
 	if (!(await api.isReady)) {
 		throw `Cannot connect to ${MANGATA_NODE_URL}`;
@@ -50,15 +49,15 @@ async function main() {
 		);
 	});
 
-  await l1.isRolldownDeployed(0n)
-  await l1.isRolldownDeployed(DELAY)
+	await l1.isRolldownDeployed(0n);
+	await l1.isRolldownDeployed(DELAY);
 
 	const closerService = new CloserService(
 		l1,
 		l2,
 		TOKENS_TO_TRACK,
 		TX_COST,
-    BATCH_SIZE,
+		BATCH_SIZE,
 	);
 
 	let inProgress = false;
@@ -66,27 +65,28 @@ async function main() {
 	const unwatch = await api.derive.chain.subscribeFinalizedHeads(
 		async (header: HeaderExtended) => {
 			inProgress = true;
-      logger.info(`#${header.number} updating withdrawals to close`);
-      await closerService.findRequestToClose(DELAY);
-      const req = await closerService.getNextRequestToClose();
-      if (req) { 
-        if (isWithdrawal(req)) {
-          logger.info(`#${header.number} Closing withdrawal ${toString(req)}`);
-          await closerService.closeWithdrawal(req, hexToU8a(PRIVATE_KEY));
-        }else if (isCancel(req)) {
-          logger.info(`#${header.number} Closing withdrawal ${cancelToString(req)}`);
-          await closerService.closeCancel(req, hexToU8a(PRIVATE_KEY));
-        }
-      }else{
-        logger.debug(`#${header.number} nothing to close`);
-      }
+			logger.info(`#${header.number} updating withdrawals to close`);
+			await closerService.findRequestToClose(DELAY);
+			const req = await closerService.getNextRequestToClose();
+			if (req) {
+				if (isWithdrawal(req)) {
+					logger.info(`#${header.number} Closing withdrawal ${toString(req)}`);
+					await closerService.closeWithdrawal(req, hexToU8a(PRIVATE_KEY));
+				} else if (isCancel(req)) {
+					logger.info(
+						`#${header.number} Closing withdrawal ${cancelToString(req)}`,
+					);
+					await closerService.closeCancel(req, hexToU8a(PRIVATE_KEY));
+				}
+			} else {
+				logger.debug(`#${header.number} nothing to close`);
+			}
 			inProgress = false;
 		},
 	);
 }
 
-main()
-	.catch((e) => {
-		console.error("Something went wrong", e.metaMessages || e);
-		process.exit(1);
-	});
+main().catch((e) => {
+	console.error("Something went wrong", e.metaMessages || e);
+	process.exit(1);
+});
