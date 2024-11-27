@@ -4,7 +4,7 @@ import {
   MANGATA_CONTRACT_ADDRESS,
 } from "../Config.js";
 
-import { PrivateKeyAccount, createPublicClient, createWalletClient } from "viem";
+import { BlockTag, PrivateKeyAccount, UnauthorizedProviderError, createPublicClient, createWalletClient } from "viem";
 import { type PublicClient } from "viem";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import {
@@ -12,11 +12,13 @@ import {
   webSocket,
 } from "viem";
 import { Withdrawal } from "../Withdrawal.js";
+import { Cancel } from "../Cancel.js";
 import { privateKeyToAccount } from "viem/accounts";
 import { anvil } from "viem/chains";
 import { isEqual } from "../utils.js";
 import { estimateMaxPriorityFeePerGas } from "viem/actions";
 import { L1Interface } from "./L1Interface.js";
+import { logger } from "../logger.js";
 
 async function estimateGasInWei(publicClient: PublicClient) {
   // https://www.blocknative.com/blog/eip-1559-fees
@@ -32,13 +34,21 @@ async function estimateGasInWei(publicClient: PublicClient) {
   return {maxFeeInWei, maxPriorityFeePerGasInWei}
 }
 
-function toViemFormat(withdrawal: Withdrawal): unknown[]  {
+function withdrawalToViemFormat(withdrawal: Withdrawal): unknown[]  {
   return [
     [1, withdrawal.requestId], 
     u8aToHex(withdrawal.withdrawalRecipient, 160), 
     u8aToHex(withdrawal.tokenAddress, 160), 
     withdrawal.amount, 
     withdrawal.ferryTip];
+}
+
+function cancelToViemFormat(cancel: Cancel): unknown[]  {
+  return [
+    [1, cancel.requestId], 
+    [cancel.startRange, cancel.endRange],
+    u8aToHex(cancel.properHash), 
+    ];
 }
 
 class L1Api implements L1Interface {
@@ -172,20 +182,54 @@ class L1Api implements L1Interface {
     return status !== closedStatus && status !== zeros;
   }
 
-  async isRolldownDeployed(): Promise<boolean> {
-    const code = await this.client.getCode({
+  async isRolldownDeployed(delay: bigint): Promise<boolean> {
+
+    let currentBlock = await this.client.getBlockNumber();
+    let atBlock: bigint;
+
+    if (delay > currentBlock) {
+      atBlock = 1n;
+    }else{
+      atBlock = currentBlock - delay;
+    }
+
+    if (delay > 0n) {
+      logger.info(`Checking if rolldown is deployed at past block #${atBlock}`);
+    }else{
+      logger.info(`Checking if rolldown is deployed at current block #${currentBlock}`);
+    }
+
+
+    let val = await this.client.readContract({
       address: MANGATA_CONTRACT_ADDRESS,
-      blockTag: "latest",
+      abi: ABI,
+      functionName: "NATIVE_TOKEN_ADDRESS",
+      blockNumber: atBlock
     });
-    return code !== undefined && code !== "0x";
+    return val as string != "0x00000000000000000000000000000000000000000";
   }
 
-  async getLatestRequestId(): Promise<bigint | null> {
+  async getLatestRequestId(delay: bigint = 0n): Promise<bigint | null> {
+    let blockTag: BlockTag | undefined = 'latest';
+    let blockNumber: bigint | undefined = undefined;
+
+    if (delay > 0n ) {
+      let currentBlock = await this.client.getBlockNumber();
+      if (currentBlock < delay) {
+        blockTag = undefined;
+        blockNumber = 0n;
+      }else{
+        blockTag = undefined;
+        blockNumber = currentBlock - delay;
+      }
+    }
+
     const value = BigInt(await this.client.readContract({
       address: MANGATA_CONTRACT_ADDRESS,
       abi: ABI,
       functionName: "getMerkleRootsLength",
-      blockTag: "latest"
+      blockTag,
+      blockNumber
     }) as any);
 
     if (value === 0n) {
@@ -197,7 +241,8 @@ class L1Api implements L1Interface {
         abi: ABI,
         functionName: "roots",
         args: [value-1n],
-        blockTag: "latest"
+        blockTag,
+        blockNumber
       });
 
 
@@ -206,7 +251,8 @@ class L1Api implements L1Interface {
         abi: ABI,
         functionName: "merkleRootRange",
         args: [lastHash],
-        blockTag: "latest"
+        blockTag,
+        blockNumber
       });
       return (range as any)[1];
     }
@@ -244,7 +290,7 @@ class L1Api implements L1Interface {
       address: MANGATA_CONTRACT_ADDRESS,
       abi: ABI,
       functionName: "ferry_withdrawal",
-      args: [toViemFormat(withdrawal)],
+      args: [withdrawalToViemFormat(withdrawal)],
       maxFeePerGas: maxFeeInWei,
       maxPriorityFeePerGas: maxPriorityFeePerGasInWei
     });
@@ -255,7 +301,7 @@ class L1Api implements L1Interface {
   }
 
 
-  async close(withdrawal: Withdrawal, merkleRoot: Uint8Array, proof: Uint8Array[], privateKey: Uint8Array): Promise<boolean>{
+  async closeWithdrawal(withdrawal: Withdrawal, merkleRoot: Uint8Array, proof: Uint8Array[], privateKey: Uint8Array): Promise<boolean>{
     const acc: PrivateKeyAccount = privateKeyToAccount(u8aToHex(privateKey) as `0x{string}`);
     const wc = createWalletClient({
       account: acc,
@@ -270,7 +316,32 @@ class L1Api implements L1Interface {
       address: MANGATA_CONTRACT_ADDRESS,
       abi: ABI,
       functionName: "close_withdrawal",
-      args: [toViemFormat(withdrawal), u8aToHex(merkleRoot), proof.map((p) => u8aToHex(p))],
+      args: [withdrawalToViemFormat(withdrawal), u8aToHex(merkleRoot), proof.map((p) => u8aToHex(p))],
+      maxFeePerGas: maxFeeInWei,
+      maxPriorityFeePerGas: maxPriorityFeePerGasInWei
+    });
+
+    const ferrytxHash = await wc.writeContract(ferryRequest.request);
+    const status = await this.client.waitForTransactionReceipt({ hash: ferrytxHash });
+    return status.status === "success";
+  }
+
+  async closeCancel(cancel: Cancel, merkleRoot: Uint8Array, proof: Uint8Array[], privateKey: Uint8Array): Promise<boolean>{
+    const acc: PrivateKeyAccount = privateKeyToAccount(u8aToHex(privateKey) as `0x{string}`);
+    const wc = createWalletClient({
+      account: acc,
+      chain: anvil,
+      transport: this.transport,
+    });
+
+
+    const {maxFeeInWei, maxPriorityFeePerGasInWei} = await estimateGasInWei(this.client);
+    const ferryRequest = await this.client.simulateContract({
+      account: acc,
+      address: MANGATA_CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: "close_cancel",
+      args: [cancelToViemFormat(cancel), u8aToHex(merkleRoot), proof.map((p) => u8aToHex(p))],
       maxFeePerGas: maxFeeInWei,
       maxPriorityFeePerGas: maxPriorityFeePerGasInWei
     });
@@ -282,4 +353,4 @@ class L1Api implements L1Interface {
 }
 
 
-export { L1Interface, L1Api, toViemFormat };
+export { L1Interface, L1Api, withdrawalToViemFormat, cancelToViemFormat };

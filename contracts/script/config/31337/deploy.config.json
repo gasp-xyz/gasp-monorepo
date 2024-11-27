@@ -15,6 +15,7 @@
   },
 
   "allow_non_root_tm_init": true,
+  "allow_non_root_gmrs_init": true,
 
   "minimumStakes": [1],
 
