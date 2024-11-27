@@ -5,12 +5,8 @@ import type {
 	PalletRolldownMessagesChain,
 } from "@polkadot/types/lookup";
 
-import {
-	L1_CHAIN,
-} from "../config.js";
+import { L1_CHAIN } from "../config.js";
 import { L2Interface } from "./L2Interface.js";
-
-
 
 function getL1ChainType(api: ApiPromise): PalletRolldownMessagesChain {
 	return api.createType("PalletRolldownMessagesChain", L1_CHAIN);
@@ -37,7 +33,6 @@ function createL1Asset(
 		throw new Error(`Unknown chain id ${chain.toHuman()}`);
 	}
 }
-
 
 class L2Api implements L2Interface {
 	api!: ApiPromise;
@@ -142,6 +137,5 @@ class L2Api implements L2Interface {
 		]);
 		return status.isSome;
 	}
-
 }
 export { L2Api, getL1ChainType };
