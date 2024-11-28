@@ -24,7 +24,7 @@ collator:
       memory: 6Gi
   image:
     repository: mangatasolutions/rollup-node
-    tag: eth-rollup-develop
+    tag: eth-rollup-develop-fast
   disableChainspecGeneration: true
   customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json
   storageClass: standard
@@ -248,7 +248,7 @@ closerEnvEth:
   ETH_CHAIN_URL: ws://evm-node-eth:8546
   MANGATA_CONTRACT_ADDRESS: "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f"
   L1_CHAIN: "Ethereum"
-  TOKENS_TO_TRACK: "[]"
+  TOKENS_TO_TRACK: "[['0xfd471836031dc5108809d173a067e8486b9047a3', 1 ,1]]"
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
