@@ -1,6 +1,6 @@
 import { describe, beforeAll, expect, it } from "vitest";
 import { isEqual} from "../src/utils.js";
-import { L1Api , toViemFormat } from "../src/l1/L1Api.js";
+import { L1Api , withdrawalToViemFormat } from "../src/l1/L1Api.js";
 import { L1Interface } from "../src/l1/L1Interface.js";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import { anvil } from "viem/chains";
@@ -40,7 +40,7 @@ const ANVIL_TEST_ACCOUNT = "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d334
 function hashWithdrawal(withdrawal: Withdrawal) {
   const encoded = encodeAbiParameters(
     ABI.find((e: any) => e!.name === "ferry_withdrawal")!.inputs!,
-    [toViemFormat(withdrawal)]
+    [withdrawalToViemFormat(withdrawal)]
   );
   const input = new Uint8Array([...hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000"), ...hexToU8a(encoded.toString())])
   return hexToU8a(keccak256(input));
@@ -148,12 +148,12 @@ describe('L1Interface', () => {
 
   it('should successfully connect through websocket', async () => {
     l1Api = new L1Api(WS_URI);
-    expect(await l1Api.isRolldownDeployed()).toBeTruthy()
+    expect(await l1Api.isRolldownDeployed(0n)).toBeTruthy()
   });
 
   it('should successfully connect through http', async () => {
     l1Api = new L1Api(HTTP_URI);
-    expect(await l1Api.isRolldownDeployed()).toBeTruthy()
+    expect(await l1Api.isRolldownDeployed(0n)).toBeTruthy()
   });
 
   it('can fetch latestRequestId', async () => {
@@ -166,7 +166,7 @@ describe('L1Interface', () => {
     } catch (e) {
       console.info("update already injected");
     }
-    let latestRequestId = await l1Api.getLatestRequestId();
+    let latestRequestId = await l1Api.getLatestRequestId(0n);
     expect(latestRequestId).toBeGreaterThanOrEqual(rangeEnd);
   });
 
@@ -234,7 +234,7 @@ describe('L1Interface', () => {
     await updateUpdaterAccount(WS_URI);
     await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
     const randomAddress = getRandomUintArray(20);
-    const lastRequestId = await l1Api.getLatestRequestId();
+    const lastRequestId = await l1Api.getLatestRequestId(0n);
 
     let withdrawal = {
         requestId: lastRequestId! + 1n,
@@ -255,7 +255,7 @@ describe('L1Interface', () => {
     await updateUpdaterAccount(WS_URI);
     await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
     const randomAddress = getRandomUintArray(20);
-    const lastRequestId = await l1Api.getLatestRequestId();
+    const lastRequestId = await l1Api.getLatestRequestId(0n);
 
     let withdrawal = {
         requestId: lastRequestId! + 1n,
@@ -272,14 +272,14 @@ describe('L1Interface', () => {
     expect(await l1Api.isFerried(hashWithdrawal(withdrawal))).toBeFalsy();
     expect(await l1Api.isClosed(hashWithdrawal(withdrawal))).toBeFalsy();
     const proof: Uint8Array[] = [];
-    await l1Api.close(withdrawal, withdrawal.hash, proof, privateKey);
+    await l1Api.closeWithdrawal(withdrawal, withdrawal.hash, proof, privateKey);
     }, {timeout: 30000});
 
   it('getFerry works', async () => {
     await updateUpdaterAccount(WS_URI);
     await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
     const randomAddress = getRandomUintArray(20);
-    const lastRequestId = await l1Api.getLatestRequestId();
+    const lastRequestId = await l1Api.getLatestRequestId(0n);
 
     let withdrawal1 = {
         requestId: lastRequestId! + 1n,
