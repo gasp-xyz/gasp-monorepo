@@ -1162,6 +1162,113 @@
         }
       }
     },
+    "/mgx-airdrop/eligibility/{address}": {
+      "get": {
+        "tags": [
+          "mgx-airdrop"
+        ],
+        "summary": "Check eligibility for MGX airdrop",
+        "description": "Verifies if the provided address is eligible for the airdrop based on snapshots.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "MangataX address"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mangataXAddress": {
+                  "type": "string",
+                  "example": "5Gxkb...PDnnR"
+                },
+                "isEligible": {
+                  "type": "boolean",
+                  "example": true
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/mgx-airdrop/link-address": {
+      "post": {
+        "tags": [
+          "mgx-airdrop"
+        ],
+        "summary": "Link Ethereum address to MangataX address",
+        "description": "Links the provided Ethereum address to the provided MangataX address.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "JSON object containing the Ethereum and MangataX addresses to be linked",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ethereumAddress": {
+                  "type": "string",
+                  "example": "0x..."
+                },
+                "mangataXAddress": {
+                  "type": "string",
+                  "example": "5Gxkb...PDnnR"
+                }
+              }
+            }
+          },
+          {
+            "name": "x-signature",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ethereumAddress": {
+                  "type": "string",
+                  "example": "0x..."
+                },
+                "mangataXAddress": {
+                  "type": "string",
+                  "example": "5Gxkb...PDnnR"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/coinmarketcap/v1/summary": {
       "get": {
         "tags": [
