@@ -10,6 +10,10 @@ interface Deposit {
 }
 
 function toString(withdrawal: Deposit): string {
-	return `rid:${withdrawal.requestId} recipient:${u8aToHex(withdrawal.depositRecipient)} token:${u8aToHex(withdrawal.tokenAddress)} amount:${withdrawal.amount} tip:${withdrawal.ferryTip}`;
+	return `rid:${withdrawal.requestId} recipient:${u8aToHex(
+		withdrawal.depositRecipient,
+	)} token:${u8aToHex(withdrawal.tokenAddress)} amount:${
+		withdrawal.amount
+	} tip:${withdrawal.ferryTip}`;
 }
 export { type Deposit, toString };

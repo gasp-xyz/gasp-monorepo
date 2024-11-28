@@ -19,5 +19,3 @@ export async function asyncFilter<T>(arr: T[], predicate: any) {
 		return results[index];
 	});
 }
-
-
