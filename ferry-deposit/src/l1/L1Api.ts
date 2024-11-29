@@ -1,27 +1,19 @@
-
 import { Deposit } from "../Deposit.js";
 
-import {
-	ABI,
-	MANGATA_CONTRACT_ADDRESS,
-} from "../config.js";
+import { ABI, MANGATA_CONTRACT_ADDRESS } from "../config.js";
 
-import {  createPublicClient } from "viem";
+import { createPublicClient } from "viem";
 import { type PublicClient, encodeAbiParameters, keccak256 } from "viem";
 import { hexToU8a } from "@polkadot/util";
 import { L1Interface } from "./L1Interface.js";
-import {
-	http,
-	webSocket,
-} from "viem";
-
+import { http, webSocket } from "viem";
 
 class L1Api implements L1Interface {
 	client!: PublicClient;
-  delay: bigint;
+	delay: bigint;
 
 	constructor(uri: string, delay: bigint) {
-    this.delay = delay;
+		this.delay = delay;
 		if (uri.startsWith("ws")) {
 			this.client = createPublicClient({
 				transport: webSocket(uri, { retryCount: 5 }),
@@ -51,11 +43,11 @@ class L1Api implements L1Interface {
 	}
 
 	async getLatestRequestId(): Promise<bigint | null> {
-    const blockNumber = await this.client.getBlockNumber({cacheTime: 0});
-    if (blockNumber < this.delay) {
-      return null;
-    }
-    const blockToReadAt = blockNumber - this.delay;
+		const blockNumber = await this.client.getBlockNumber({ cacheTime: 0 });
+		if (blockNumber < this.delay) {
+			return null;
+		}
+		const blockToReadAt = blockNumber - this.delay;
 
 		const value = await this.client.readContract({
 			address: MANGATA_CONTRACT_ADDRESS,
@@ -71,11 +63,11 @@ class L1Api implements L1Interface {
 	}
 
 	async getDeposits(rangeStart: bigint, rangeEnd: bigint): Promise<Deposit[]> {
-    const blockNumber = await this.client.getBlockNumber();
-    if (blockNumber < this.delay) {
-      return Promise.resolve([]);
-    }
-    const blockToReadAt = blockNumber - this.delay;
+		const blockNumber = await this.client.getBlockNumber();
+		if (blockNumber < this.delay) {
+			return Promise.resolve([]);
+		}
+		const blockToReadAt = blockNumber - this.delay;
 
 		const selector = "getPendingRequests";
 		const contractData = await this.client.readContract({
@@ -83,7 +75,7 @@ class L1Api implements L1Interface {
 			abi: ABI,
 			functionName: selector,
 			args: [rangeStart, rangeEnd],
-      blockNumber: blockToReadAt
+			blockNumber: blockToReadAt,
 		});
 
 		return (contractData as any).pendingDeposits.map((deposit: any) => {
@@ -99,11 +91,11 @@ class L1Api implements L1Interface {
 	}
 
 	async isRolldownDeployed(): Promise<boolean> {
-    const blockNumber = await this.client.getBlockNumber();
-    if (blockNumber < this.delay) {
-      return false;
-    }
-    const blockToReadAt = blockNumber - this.delay;
+		const blockNumber = await this.client.getBlockNumber();
+		if (blockNumber < this.delay) {
+			return false;
+		}
+		const blockToReadAt = blockNumber - this.delay;
 
 		const code = await this.client.getCode({
 			address: MANGATA_CONTRACT_ADDRESS,

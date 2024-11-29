@@ -13,7 +13,7 @@ import {
 	TOKENS_TO_TRACK,
 	MNEMONIC,
 	TX_COST,
-  LOG,
+	LOG,
 } from "./config.js";
 
 import { Ferry } from "./Ferry.js";
@@ -27,11 +27,11 @@ async function main() {
 	const l2 = new L2Api(api);
 	const l1 = new L1Api(ETH_CHAIN_URL, BLOCK_DELAY);
 
-  logger.info(`Ferry Deposit`);
-  logger.info(`L1             : ${ETH_CHAIN_URL}`);
-  logger.info(`L1 Block Delay : ${ETH_CHAIN_URL}`);
-  logger.info(`L2             : ${MANGATA_NODE_URL}`);
-  logger.info(`Log level      : ${LOG}`);
+	logger.info(`Ferry Deposit`);
+	logger.info(`L1             : ${ETH_CHAIN_URL}`);
+	logger.info(`L1 Block Delay : ${ETH_CHAIN_URL}`);
+	logger.info(`L2             : ${MANGATA_NODE_URL}`);
+	logger.info(`Log level      : ${LOG}`);
 
 	TOKENS_TO_TRACK.forEach((token) => {
 		logger.info(
@@ -40,7 +40,6 @@ async function main() {
 			} weight : ${token[2]}`,
 		);
 	});
-
 
 	if (!(await api.isReady)) {
 		throw `Cannot connect to ${MANGATA_NODE_URL}`;
@@ -114,8 +113,7 @@ async function main() {
 }
 
 main()
-	.then(() => {
-	})
+	.then(() => {})
 	.catch((e) => {
 		logger.error("Something went wrong", e);
 		process.exit(1);

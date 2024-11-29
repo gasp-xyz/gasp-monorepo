@@ -23,6 +23,7 @@ interface IRolldownPrimitives {
     error WithdrawalAlreadyFerried(bytes32 withdrawalHash);
     error ZeroAdmin();
     error ZeroAmount();
+    error ZeroRecipient();
     error ZeroRootCount();
     error ZeroToken();
     error ZeroTransferAmount();
@@ -480,6 +481,11 @@ interface IRolldownPrimitives {
   {
     "type": "error",
     "name": "ZeroAmount",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroRecipient",
     "inputs": []
   },
   {
@@ -1792,6 +1798,66 @@ pub mod IRolldownPrimitives {
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str = "ZeroAmount()";
             const SELECTOR: [u8; 4] = [31u8, 42u8, 32u8, 5u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+        }
+    };
+    /**Custom error with signature `ZeroRecipient()` and selector `0xd27b4443`.
+    ```solidity
+    error ZeroRecipient();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct ZeroRecipient {}
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<ZeroRecipient> for UnderlyingRustTuple<'_> {
+            fn from(value: ZeroRecipient) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for ZeroRecipient {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self {}
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for ZeroRecipient {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "ZeroRecipient()";
+            const SELECTOR: [u8; 4] = [210u8, 123u8, 68u8, 67u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -3287,6 +3353,7 @@ pub mod IRolldownPrimitives {
         WithdrawalAlreadyFerried(WithdrawalAlreadyFerried),
         ZeroAdmin(ZeroAdmin),
         ZeroAmount(ZeroAmount),
+        ZeroRecipient(ZeroRecipient),
         ZeroRootCount(ZeroRootCount),
         ZeroToken(ZeroToken),
         ZeroTransferAmount(ZeroTransferAmount),
@@ -3316,6 +3383,7 @@ pub mod IRolldownPrimitives {
             [173u8, 25u8, 145u8, 245u8],
             [201u8, 105u8, 224u8, 242u8],
             [202u8, 0u8, 142u8, 96u8],
+            [210u8, 123u8, 68u8, 67u8],
             [228u8, 29u8, 110u8, 132u8],
             [228u8, 95u8, 135u8, 238u8],
             [233u8, 151u8, 17u8, 241u8],
@@ -3328,7 +3396,7 @@ pub mod IRolldownPrimitives {
     impl alloy_sol_types::SolInterface for IRolldownPrimitivesErrors {
         const NAME: &'static str = "IRolldownPrimitivesErrors";
         const MIN_DATA_LENGTH: usize = 0usize;
-        const COUNT: usize = 20usize;
+        const COUNT: usize = 21usize;
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
@@ -3373,6 +3441,7 @@ pub mod IRolldownPrimitives {
                 }
                 Self::ZeroAdmin(_) => <ZeroAdmin as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroAmount(_) => <ZeroAmount as alloy_sol_types::SolError>::SELECTOR,
+                Self::ZeroRecipient(_) => <ZeroRecipient as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroRootCount(_) => <ZeroRootCount as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroToken(_) => <ZeroToken as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroTransferAmount(_) => {
@@ -3565,6 +3634,16 @@ pub mod IRolldownPrimitives {
                     PreviousUpdateMissed
                 },
                 {
+                    fn ZeroRecipient(
+                        data: &[u8],
+                        validate: bool,
+                    ) -> alloy_sol_types::Result<IRolldownPrimitivesErrors> {
+                        <ZeroRecipient as alloy_sol_types::SolError>::abi_decode_raw(data, validate)
+                            .map(IRolldownPrimitivesErrors::ZeroRecipient)
+                    }
+                    ZeroRecipient
+                },
+                {
                     fn UnexpectedMerkleRoot(
                         data: &[u8],
                         validate: bool,
@@ -3693,6 +3772,9 @@ pub mod IRolldownPrimitives {
                 Self::ZeroAmount(inner) => {
                     <ZeroAmount as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
+                Self::ZeroRecipient(inner) => {
+                    <ZeroRecipient as alloy_sol_types::SolError>::abi_encoded_size(inner)
+                }
                 Self::ZeroRootCount(inner) => {
                     <ZeroRootCount as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
@@ -3761,6 +3843,9 @@ pub mod IRolldownPrimitives {
                 }
                 Self::ZeroAmount(inner) => {
                     <ZeroAmount as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
+                }
+                Self::ZeroRecipient(inner) => {
+                    <ZeroRecipient as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
                 }
                 Self::ZeroRootCount(inner) => {
                     <ZeroRootCount as alloy_sol_types::SolError>::abi_encode_raw(inner, out)

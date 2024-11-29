@@ -32,7 +32,7 @@ function getRandomUintArray(length: number) {
 
 const WS_URI = "ws://localhost:8545";
 const HTTP_URI = "http://localhost:8545";
-const TOKEN_ADDRESS = hexToU8a("0xFD471836031dc5108809D173A067e8486B9047A3", 160);
+const TOKEN_ADDRESS = hexToU8a("0xc351628EB244ec633d5f21fBD6621e1a683B1181", 160);
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
 const ANVIL_TEST_ACCOUNT = "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba";
 
@@ -83,7 +83,7 @@ async function injectMerkleRoot(uri: string, merkleRoot: Uint8Array, startRange:
 		account: acc,
 		address: MANGATA_CONTRACT_ADDRESS,
 		abi: ABI,
-		functionName: "update_l1_from_l2",
+		functionName: "updateL1FromL2",
 		args: [u8aToHex(merkleRoot), [startRange, endRange]]
 	});
 
@@ -236,7 +236,7 @@ describe('L1Interface', () => {
     const randomAddress = getRandomUintArray(20);
     const lastRequestId = await l1Api.getLatestRequestId(0n);
 
-    let withdrawal = {
+    const withdrawal = {
         requestId: lastRequestId! + 1n,
         withdrawalRecipient: randomAddress,
         tokenAddress: TOKEN_ADDRESS,
@@ -281,7 +281,7 @@ describe('L1Interface', () => {
     const randomAddress = getRandomUintArray(20);
     const lastRequestId = await l1Api.getLatestRequestId(0n);
 
-    let withdrawal1 = {
+    const withdrawal1 = {
         requestId: lastRequestId! + 1n,
         withdrawalRecipient: randomAddress,
         tokenAddress: TOKEN_ADDRESS,

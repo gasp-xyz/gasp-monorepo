@@ -16,6 +16,7 @@ import * as tokenNetworkPortfolioController from './controller/tokenNetworkPortf
 import * as faucetController from './controller/FaucetController.js'
 import * as tracingController from './controller/TracingController.js'
 import * as tradingController from './controller/TradingController.js'
+import * as airdropController from './controller/mgxAirdropController.js'
 
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
@@ -122,6 +123,10 @@ app.get(
 
 // Dashboard endpoint
 app.get('/account/:wallet/dashboard', tradingController.getData)
+
+// Airdrop endpoints
+app.get('/mgx-airdrop/eligibility/:address', airdropController.checkEligibility)
+app.post('/mgx-airdrop/link-address', airdropController.linkAddress)
 
 // Coinmarketcap listing endpoints
 app.get('/coinmarketcap/v1/summary', coinmarketcapController.summary)
