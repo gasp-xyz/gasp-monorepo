@@ -127,8 +127,8 @@ releases:
       - image:
           repository: gaspxyz/ferry-withdrawal
           tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        # `args` param is used to override the default command in the Dockerfile
-        args: ["node", "build/src/closer.js"]
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
   - name: closer-arb
@@ -139,8 +139,8 @@ releases:
       - image:
           repository: gaspxyz/ferry-withdrawal
           tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        # `args` param is used to override the default command in the Dockerfile
-        args: ["node", "build/src/closer.js"]
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
 
