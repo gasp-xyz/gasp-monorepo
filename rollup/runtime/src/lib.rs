@@ -780,7 +780,6 @@ impl pallet_rolldown::Config for Runtime {
 	type SequencerStakingProvider = SequencerStaking;
 	type Tokens = orml_tokens::MultiTokenCurrencyAdapter<Runtime>;
 	type AssetRegistryProvider = cfg::orml_asset_registry::AssetRegistryProvider<Runtime>;
-	type DisputePeriodLength = cfg::pallet_rolldown::DisputePeriodLength;
 	type RequestsPerBlock = cfg::pallet_rolldown::RequestsPerBlock;
 	// We havent spent any time considering rights multiplier being > 1. There might be some corner
 	// cases that should be investigated.

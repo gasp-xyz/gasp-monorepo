@@ -1,11 +1,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use messages::{EthAbi, EthAbiHash};
+use messages::{EthAbi, EthAbiHash, L1UpdateRequest};
 pub mod messages;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+mod weight_utils;
 pub mod weights;
 pub use weights::WeightInfo;
 
@@ -154,25 +155,73 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn on_initialize(now: BlockNumberFor<T>) -> Weight {
-			let mut total_weight: Weight = Weight::default();
+			let mut total_weight: Weight = T::DbWeight::get().reads(1);
+
 			if T::MaintenanceStatusProvider::is_maintenance() {
 				LastMaintananceMode::<T>::put(now.saturated_into::<u128>());
+				total_weight += T::DbWeight::get().writes(1);
+			} else {
+				Self::maybe_create_batch(now);
+				total_weight += <T as Config>::WeightInfo::maybe_create_batch();
 			}
-			// weight for is_maintenance
-			total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
-			let weight = Self::maybe_create_batch(now);
-			total_weight = total_weight.saturating_add(weight);
-			let weight = Self::schedule_request_for_execution_if_dispute_period_has_passsed(now);
-			total_weight = total_weight.saturating_add(weight);
-			let weight = Self::execute_requests_from_execute_queue(now);
-			total_weight = total_weight.saturating_add(weight);
-			// We multiply by two so that we can have our large storage access (update requests)
-			// go upto 500 requests per update
-			// 500 also is really pushing it - it should probably be something like 100...
-			// https://substrate.stackexchange.com/questions/525/how-expensive-is-it-to-access-storage-items
+
+			Self::schedule_request_for_execution_if_dispute_period_has_passsed(now);
+			total_weight += <T as Config>::WeightInfo::schedule_request_for_execution_if_dispute_period_has_passsed();
+
+			Self::load_next_update_from_execution_queue();
+			total_weight += <T as Config>::WeightInfo::load_next_update_from_execution_queue();
 			total_weight
-				.saturating_mul(2)
-				.saturating_add(Weight::from_parts(200__000_000, 0))
+		}
+
+		fn on_idle(_now: BlockNumberFor<T>, mut remaining_weight: Weight) -> Weight {
+			let mut used_weight = Weight::default();
+
+			// already cached by using in on_initialize hook
+			if !T::MaintenanceStatusProvider::is_maintenance() {
+				let get_update_size_cost = T::DbWeight::get().reads(2);
+
+				if remaining_weight.ref_time() < get_update_size_cost.ref_time() {
+					return used_weight;
+				}
+
+				remaining_weight -= get_update_size_cost;
+				used_weight += get_update_size_cost;
+
+				let update_size =
+					Self::get_current_update_size_from_execution_queue().unwrap_or(1u128);
+
+				// NOTE: execute_requests_from_execute_queue accounts for overal cost of processing
+				// biggest expected update (with 10k requests) assuming that all of them are deposits
+				// to accounts for most expensive case now need to substract cost of processing deposits
+				// and add cost of processing cancels instead
+				let mut cost_of_processing_requests =
+					<T as Config>::WeightInfo::execute_requests_from_execute_queue();
+
+				cost_of_processing_requests +=
+					<T as Config>::WeightInfo::process_cancel_resolution()
+						.saturating_mul(Self::get_max_requests_per_block().saturated_into());
+				cost_of_processing_requests -= <T as Config>::WeightInfo::process_deposit()
+					.saturating_mul(Self::get_max_requests_per_block().saturated_into());
+
+				// account for huge read cost when reading huge update
+				cost_of_processing_requests += T::DbWeight::get().reads(1).saturating_mul(
+					weight_utils::get_read_scalling_factor(update_size.saturated_into())
+						.saturated_into(),
+				);
+
+				if remaining_weight.ref_time() < cost_of_processing_requests.ref_time() {
+					return used_weight;
+				}
+
+				// NOTE: here we could adjust the used weight based on the actual executed requests
+				// as the benchmarks accounts for the worst case scenario which is cancel_resultion
+				// processing
+				let _executed: Vec<L1UpdateRequest> = Self::execute_requests_from_execute_queue();
+
+				used_weight += cost_of_processing_requests;
+				remaining_weight -= cost_of_processing_requests;
+			}
+			used_weight
 		}
 	}
 
@@ -182,6 +231,15 @@ pub mod pallet {
 	pub struct SequencerRights {
 		pub read_rights: u128,
 		pub cancel_rights: u128,
+	}
+
+	#[derive(Eq, PartialEq, RuntimeDebug, Clone, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub struct UpdateMetadata<AccountId> {
+		pub max_id: u128,
+		pub min_id: u128,
+		pub update_size: u128,
+		pub sequencer: AccountId,
+		pub update_hash: H256,
 	}
 
 	#[derive(Eq, PartialEq, RuntimeDebug, Clone, Copy, Encode, Decode, TypeInfo)]
@@ -245,9 +303,15 @@ pub mod pallet {
 		u128,
 		Blake2_128Concat,
 		<T as Config>::ChainId,
-		(T::AccountId, messages::L1Update, H256),
+		UpdateMetadata<T::AccountId>,
 		OptionQuery,
 	>;
+
+	#[pallet::storage]
+	#[pallet::unbounded]
+	// Stores requests brought by sequencer that are under dispute period.
+	pub type PendingSequencerUpdateContent<T: Config> =
+		StorageMap<_, Blake2_128Concat, H256, messages::L1Update, OptionQuery>;
 
 	#[pallet::storage]
 	#[pallet::unbounded]
@@ -256,7 +320,8 @@ pub mod pallet {
 		_,
 		Blake2_128Concat,
 		u128,
-		(BlockNumberFor<T>, <T as Config>::ChainId, messages::L1Update),
+		// scheduled_at, chain, update_hash, update_size
+		(BlockNumberFor<T>, <T as Config>::ChainId, H256, u128),
 		OptionQuery,
 	>;
 
@@ -344,6 +409,10 @@ pub mod pallet {
 		ValueQuery,
 	>;
 
+	#[pallet::storage]
+	pub type DisputePeriod<T: Config> =
+		StorageMap<_, Blake2_128Concat, ChainIdOf<T>, u128, OptionQuery>;
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -394,10 +463,22 @@ pub mod pallet {
 			chain: <T as Config>::ChainId,
 			hash: H256,
 		},
+		L1ReadIgnoredBecauseOfUnknownDisputePeriod {
+			chain: <T as Config>::ChainId,
+			hash: H256,
+		},
 		DepositFerried {
 			chain: <T as Config>::ChainId,
 			deposit: messages::Deposit,
 			deposit_hash: H256,
+		},
+		L1ReadExecuted {
+			chain: <T as Config>::ChainId,
+			hash: H256,
+		},
+		DisputePeriodSet {
+			chain: <T as Config>::ChainId,
+			dispute_period_length: u128,
 		},
 	}
 
@@ -437,6 +518,7 @@ pub mod pallet {
 		AssetRegistrationProblem,
 		UpdateHashMishmatch,
 		AlreadyExecuted,
+		UninitializedChainId,
 	}
 
 	#[cfg(feature = "runtime-benchmarks")]
@@ -460,8 +542,6 @@ pub mod pallet {
 			+ MultiTokenReservableCurrency<Self::AccountId>
 			+ MultiTokenCurrencyExtended<Self::AccountId>;
 		type AssetRegistryProvider: AssetRegistryProviderTrait<CurrencyIdOf<Self>>;
-		#[pallet::constant]
-		type DisputePeriodLength: Get<u128>;
 		#[pallet::constant]
 		type RightsMultiplier: Get<u128>;
 		#[pallet::constant]
@@ -499,17 +579,22 @@ pub mod pallet {
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
 		pub _phantom: PhantomData<T>,
+		pub dispute_periods: BTreeMap<ChainIdOf<T>, u128>,
 	}
 
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
-			GenesisConfig { _phantom: Default::default() }
+			GenesisConfig { _phantom: Default::default(), dispute_periods: Default::default() }
 		}
 	}
 
 	#[pallet::genesis_build]
 	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
-		fn build(&self) {}
+		fn build(&self) {
+			for (chain, period) in &self.dispute_periods {
+				DisputePeriod::<T>::insert(chain, *period);
+			}
+		}
 	}
 
 	// Many calls that deal with large storage items have their weight mutiplied by 2
@@ -520,7 +605,9 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::call_index(0)]
-		#[pallet::weight(<T as Config>::WeightInfo::update_l2_from_l1(requests.pendingDeposits.len().saturating_add(requests.pendingCancelResolutions.len()).saturating_mul(2) as u32))]
+		#[pallet::weight(<T as Config>::WeightInfo::update_l2_from_l1(
+            requests.get_requests_count().saturated_into()
+        ).saturating_add(T::DbWeight::get().reads(weight_utils::get_read_scalling_factor(requests.get_requests_count().saturated_into()).saturated_into())))]
 		pub fn update_l2_from_l1(
 			origin: OriginFor<T>,
 			requests: messages::L1Update,
@@ -540,7 +627,7 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			update: messages::L1Update,
 		) -> DispatchResultWithPostInfo {
-			let _ = ensure_root(origin)?;
+			let root = ensure_root(origin)?;
 			let chain: <T as Config>::ChainId = update.chain.into();
 
 			ensure!(
@@ -548,15 +635,21 @@ pub mod pallet {
 				Error::<T>::BlockedByMaintenanceMode
 			);
 
-			Self::validate_l1_update(chain, &update)?;
+			let metadata =
+				Self::validate_l1_update(chain, &update, T::AddressConverter::convert([0u8; 20]))?;
+
 			let now = <frame_system::Pallet<T>>::block_number();
-			Self::schedule_requests(now, chain, update.into());
+			let update_size = update.get_requests_count();
+			PendingSequencerUpdateContent::<T>::insert(metadata.update_hash, update);
+
+			Self::schedule_requests(now, chain, metadata);
 			Ok(().into())
 		}
 
 		#[pallet::call_index(3)]
-		#[pallet::weight(<T as Config>::WeightInfo::cancel_requests_from_l1().saturating_mul(2))]
-		//EXTRINSIC2 (who canceled, dispute_period_end(u32-blocknum)))
+		// NOTE: account for worst case scenario, in the future we should introduce the mandatory
+		// parameter 'update_size' so we can parametrize weight with it
+		#[pallet::weight(<T as Config>::WeightInfo::cancel_requests_from_l1().saturating_mul(weight_utils::get_read_scalling_factor(10_000).saturated_into()))]
 		pub fn cancel_requests_from_l1(
 			origin: OriginFor<T>,
 			chain: <T as Config>::ChainId,
@@ -577,11 +670,14 @@ pub mod pallet {
 				Ok::<_, Error<T>>(())
 			})?;
 
-			let (submitter, request, _) =
-				PendingSequencerUpdates::<T>::take(requests_to_cancel, chain)
-					.ok_or(Error::<T>::RequestDoesNotExist)?;
+			let metadata = PendingSequencerUpdates::<T>::take(requests_to_cancel, chain)
+				.ok_or(Error::<T>::RequestDoesNotExist)?;
 
-			let hash_of_pending_request = Self::calculate_hash_of_sequencer_update(request.clone());
+			let submitter = metadata.sequencer;
+			let request_hash = metadata.update_hash;
+
+			let request = PendingSequencerUpdateContent::<T>::take(request_hash)
+				.ok_or(Error::<T>::RequestDoesNotExist)?;
 
 			let l2_request_id = Self::acquire_l2_request_id(chain);
 
@@ -590,7 +686,7 @@ pub mod pallet {
 				updater: submitter.clone(),
 				canceler: canceler.clone(),
 				range: request.range().ok_or(Error::<T>::InvalidUpdate)?,
-				hash: hash_of_pending_request,
+				hash: request_hash,
 			};
 
 			AwaitingCancelResolution::<T>::mutate(chain, |v| {
@@ -723,9 +819,11 @@ pub mod pallet {
 				Error::<T>::BlockedByMaintenanceMode
 			);
 
-			let (submitter, _request, _hash) =
-				PendingSequencerUpdates::<T>::take(requests_to_cancel, chain)
-					.ok_or(Error::<T>::RequestDoesNotExist)?;
+			let metadata = PendingSequencerUpdates::<T>::take(requests_to_cancel, chain)
+				.ok_or(Error::<T>::RequestDoesNotExist)?;
+
+			let submitter = metadata.sequencer;
+			let hash = metadata.update_hash;
 
 			if T::SequencerStakingProvider::is_active_sequencer(chain, &submitter) {
 				SequencersRights::<T>::mutate(chain, |sequencers| {
@@ -923,12 +1021,25 @@ pub mod pallet {
 			let sequencer = ensure_signed(origin)?;
 			Self::update_impl(sequencer, requests)
 		}
+
+		#[pallet::call_index(13)]
+		#[pallet::weight(T::DbWeight::get().reads_writes(0, 2))]
+		pub fn set_dispute_period(
+			origin: OriginFor<T>,
+			chain: <T as Config>::ChainId,
+			dispute_period_length: u128,
+		) -> DispatchResult {
+			let _ = ensure_root(origin)?;
+			DisputePeriod::<T>::insert(chain, dispute_period_length);
+			Self::deposit_event(Event::DisputePeriodSet { chain, dispute_period_length });
+			Ok(())
+		}
 	}
 }
 
 impl<T: Config> Pallet<T> {
-	fn get_dispute_period() -> u128 {
-		T::DisputePeriodLength::get()
+	fn get_dispute_period(chain: ChainIdOf<T>) -> Option<u128> {
+		DisputePeriod::<T>::get(chain)
 	}
 
 	fn get_max_requests_per_block() -> u128 {
@@ -941,31 +1052,28 @@ impl<T: Config> Pallet<T> {
 		request_id: u128,
 	) -> Option<bool> {
 		let pending_requests_to_process = PendingSequencerUpdates::<T>::get(request_id, chain);
-		if let Some((_, l1_update, _hash)) = pending_requests_to_process {
-			let calculated_hash = Self::calculate_hash_of_sequencer_update(l1_update);
-			Some(hash == calculated_hash)
+		if let Some(metadata) = pending_requests_to_process {
+			if let Some(l1_update) = PendingSequencerUpdateContent::<T>::get(metadata.update_hash) {
+				let calculated_hash = l1_update.abi_encode_hash();
+				Some(hash == calculated_hash)
+			} else {
+				None
+			}
 		} else {
 			None
 		}
 	}
 
-	fn maybe_create_batch(now: BlockNumberFor<T>) -> Weight {
-		let mut total_weight: Weight = Weight::default();
+	fn maybe_create_batch(now: BlockNumberFor<T>) {
 		let batch_size = Self::automatic_batch_size();
 		let batch_period: BlockNumberFor<T> = Self::automatic_batch_period().saturated_into();
 
 		// weight for is_maintenance
-		total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
 		if T::MaintenanceStatusProvider::is_maintenance() {
-			return total_weight
+			return;
 		}
 
-		// weight for L2OriginRequestId iter extra read incase empty
-		total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
 		for (chain, next_id) in L2OriginRequestId::<T>::get().iter() {
-			// weight for L2OriginRequestId iter
-			total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
-
 			let last_id = next_id.saturating_sub(1);
 
 			let (last_batch_block_number, last_batch_id, last_id_in_batch) =
@@ -976,8 +1084,6 @@ impl<T: Config> Pallet<T> {
 						(block_number, batch_id, last_reqeust_id)
 					})
 					.unwrap_or_default();
-			// weight for L2RequestsBatchLast
-			total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
 
 			let trigger = if last_id >= last_id_in_batch + batch_size {
 				Some(BatchSource::AutomaticSizeReached)
@@ -988,8 +1094,6 @@ impl<T: Config> Pallet<T> {
 			};
 
 			if let Some(trigger) = trigger {
-				// weight for selected_sequencer
-				total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
 				let updater = T::SequencerStakingProvider::selected_sequencer(*chain)
 					.unwrap_or(T::AddressConverter::convert([0u8; 20]));
 				let batch_id = last_batch_id.saturating_add(1);
@@ -1003,13 +1107,9 @@ impl<T: Config> Pallet<T> {
 						(chain, batch_id),
 						(now, (range_start, range_end), updater.clone()),
 					);
-					// weight for L2RequestsBatch
-					total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
 					L2RequestsBatchLast::<T>::mutate(|batches| {
 						batches.insert(chain.clone(), (now, batch_id, (range_start, range_end)));
 					});
-					// weight for L2RequestsBatchLast
-					total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
 					Pallet::<T>::deposit_event(Event::TxBatchCreated {
 						chain: *chain,
 						source: trigger,
@@ -1017,249 +1117,177 @@ impl<T: Config> Pallet<T> {
 						batch_id,
 						range: (range_start, range_end),
 					});
-					// Not sure about this - not sure exactly what is cached and how across extrinsics (/hooks)
-					// weight for deposit_event
-					total_weight =
-						total_weight.saturating_add(T::DbWeight::get().reads_writes(2, 3));
 					break
 				}
 			}
 		}
-		total_weight
+		Default::default()
 	}
 
-	fn schedule_request_for_execution_if_dispute_period_has_passsed(
-		now: BlockNumberFor<T>,
-	) -> Weight {
-		// weight = 0 -> pretty sure reading blocknumber is free
+	fn schedule_request_for_execution_if_dispute_period_has_passsed(now: BlockNumberFor<T>) {
 		let block_number = <frame_system::Pallet<T>>::block_number().saturated_into::<u128>();
 
-		let mut total_weight: Weight = Weight::default();
-		let mut number_of_updates: u32 = u32::zero();
-		// weight for PendingSequencerUpdates iter extra read incase empty
-		total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
-		for (l1, (sequencer, requests, l1_read_hash)) in
-			PendingSequencerUpdates::<T>::iter_prefix(block_number)
-		{
-			number_of_updates = number_of_updates.saturating_add(1u32);
-			// weight for PendingSequencerUpdates iter
-			total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
+		for (l1, metadata) in PendingSequencerUpdates::<T>::iter_prefix(block_number) {
+			let sequencer = metadata.sequencer.clone();
+			let l1_read_hash = metadata.update_hash.clone();
+			let update_size = metadata.update_size.clone();
+			if let Some(dispute_period) = Self::get_dispute_period(l1) {
+				if T::SequencerStakingProvider::is_active_sequencer(l1, &sequencer) {
+					SequencersRights::<T>::mutate(l1, |sequencers| {
+						if let Some(rights) = sequencers.get_mut(&sequencer) {
+							rights.read_rights.saturating_accrue(T::RightsMultiplier::get());
+						}
+					});
+				}
 
-			if T::SequencerStakingProvider::is_active_sequencer(l1, &sequencer) {
-				SequencersRights::<T>::mutate(l1, |sequencers| {
-					if let Some(rights) = sequencers.get_mut(&sequencer) {
-						rights.read_rights.saturating_accrue(T::RightsMultiplier::get());
-					}
+				let update_creation_block = block_number.saturating_sub(dispute_period);
+
+				match LastMaintananceMode::<T>::get() {
+					Some(last_maintanance_mode)
+						if update_creation_block <= last_maintanance_mode =>
+					{
+						Self::deposit_event(Event::L1ReadIgnoredBecauseOfMaintenanceMode {
+							chain: l1,
+							hash: l1_read_hash,
+						});
+					},
+					_ => {
+						Self::schedule_requests(now, l1, metadata);
+						Self::deposit_event(Event::L1ReadScheduledForExecution {
+							chain: l1,
+							hash: l1_read_hash,
+						});
+					},
+				}
+			} else {
+				Self::deposit_event(Event::L1ReadIgnoredBecauseOfUnknownDisputePeriod {
+					chain: l1,
+					hash: l1_read_hash,
 				});
-			}
-			// weight for above block
-			total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(2, 1));
-
-			let update_creation_block = block_number.saturating_sub(Self::get_dispute_period());
-			// weight for LastMaintananceMode
-			total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
-			match LastMaintananceMode::<T>::get() {
-				Some(last_maintanance_mode) if update_creation_block < last_maintanance_mode => {
-					Self::deposit_event(Event::L1ReadIgnoredBecauseOfMaintenanceMode {
-						chain: l1,
-						hash: l1_read_hash,
-					});
-
-					// Not sure about this - not sure exactly what is cached and how across extrinsics (/hooks)
-					// weight for deposit_event
-					total_weight =
-						total_weight.saturating_add(T::DbWeight::get().reads_writes(2, 3));
-				},
-				_ => {
-					Self::schedule_requests(now, l1, requests.clone());
-					// weight for schedule_requests
-					total_weight =
-						total_weight.saturating_add(<T as Config>::WeightInfo::schedule_requests(
-							requests
-								.pendingDeposits
-								.len()
-								.saturating_add(requests.pendingCancelResolutions.len()) as u32,
-						));
-					Self::deposit_event(Event::L1ReadScheduledForExecution {
-						chain: l1,
-						hash: l1_read_hash,
-					});
-					// Not sure about this - not sure exactly what is cached and how across extrinsics (/hooks)
-					// weight for deposit_event
-					total_weight =
-						total_weight.saturating_add(T::DbWeight::get().reads_writes(2, 3));
-				},
 			}
 		}
 
-		// weight for PendingSequencerUpdates iter
-		total_weight =
-			total_weight.saturating_add(T::DbWeight::get().writes(number_of_updates.into()));
-		let _ = PendingSequencerUpdates::<T>::clear_prefix(
-			<frame_system::Pallet<T>>::block_number().saturated_into::<u128>(),
-			u32::MAX,
-			None,
-		);
-
-		total_weight
+		let _ = PendingSequencerUpdates::<T>::clear_prefix(block_number, u32::MAX, None);
 	}
 
 	fn process_single_request(
 		l1: <T as Config>::ChainId,
-		request: messages::L1UpdateRequest,
-	) -> Weight {
-		let mut total_weight: Weight = Weight::default();
-
-		// weight for LastProcessedRequestOnL2
-		total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
-		if request.id() <= LastProcessedRequestOnL2::<T>::get(l1) {
-			return total_weight
+		request: &messages::L1UpdateRequest,
+	) -> bool {
+		let request_id = request.id();
+		if request_id <= LastProcessedRequestOnL2::<T>::get(l1) {
+			return true;
 		}
 
 		let status = match request.clone() {
 			messages::L1UpdateRequest::Deposit(deposit) => {
 				let deposit_status = Self::process_deposit(l1, &deposit);
-				total_weight =
-					total_weight.saturating_add(<T as Config>::WeightInfo::process_deposit());
 				TotalNumberOfDeposits::<T>::mutate(|v| *v = v.saturating_add(One::one()));
-				// weight for TotalNumberOfDeposits
-				total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
 				deposit_status.or_else(|err| {
 					let who: T::AccountId = T::AddressConverter::convert(deposit.depositRecipient);
 					FailedL1Deposits::<T>::insert(
 						(l1, deposit.requestId.id),
 						(who, deposit.abi_encode_hash()),
 					);
-					// weight for FailedL1Deposits
-					total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
 					Err(err.into())
 				})
 			},
-			messages::L1UpdateRequest::CancelResolution(cancel) => {
-				total_weight = total_weight
-					.saturating_add(<T as Config>::WeightInfo::process_cancel_resolution());
+			messages::L1UpdateRequest::CancelResolution(cancel) =>
 				Self::process_cancel_resolution(l1, &cancel).or_else(|err| {
 					T::MaintenanceStatusProvider::trigger_maintanance_mode();
 					Err(err)
-				})
-			},
+				}),
 		};
 
 		Pallet::<T>::deposit_event(Event::RequestProcessedOnL2 {
 			chain: l1,
-			request_id: request.id(),
-			status,
+			request_id,
+			status: status.clone(),
 		});
-		// Not sure about this - not sure exactly what is cached and how across extrinsics (/hooks)
-		// weight for deposit_event
-		total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(2, 3));
-
 		LastProcessedRequestOnL2::<T>::insert(l1, request.id());
-		// weight for LastProcessedRequestOnL2
-		total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
-		total_weight
+		status.is_ok()
 	}
 
-	fn execute_requests_from_execute_queue(now: BlockNumberFor<T>) -> Weight {
-		let mut total_weight: Weight = Weight::default();
+	fn get_current_update_size_from_execution_queue() -> Option<u128> {
+		UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get())
+			.map(|(_, _, _, size)| size)
+	}
 
-		// weight for the if in the below block
-		total_weight = total_weight.saturating_add(T::DbWeight::get().reads(3));
-		if T::MaintenanceStatusProvider::is_maintenance() &&
-			UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get()).is_some()
-		{
-			let new_id: u128 = LastScheduledUpdateIdInExecutionQueue::<T>::mutate(|v| {
-				v.saturating_inc();
-				*v
-			});
-			UpdatesExecutionQueueNextId::<T>::put(new_id);
-
-			// weight for this block
-			total_weight = total_weight.saturating_add(T::DbWeight::get().writes(2));
-			return total_weight
+	fn load_next_update_from_execution_queue() -> bool {
+		let current_execution_id = UpdatesExecutionQueueNextId::<T>::get();
+		let next_execution_id = current_execution_id.saturating_add(1u128);
+		match (
+			UpdatesExecutionQueue::<T>::get(current_execution_id),
+			UpdatesExecutionQueue::<T>::get(next_execution_id),
+		) {
+			(None, Some(_)) => {
+				UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
+				true
+			},
+			_ => false,
 		}
+	}
 
-		let mut limit = Self::get_max_requests_per_block();
-		loop {
-			if limit == 0 {
-				return total_weight
-			}
-
-			// weight for the if in the below block
-			total_weight = total_weight.saturating_add(T::DbWeight::get().reads(2));
-			if let Some((scheduled_at, l1, r)) =
-				UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get())
+	fn execute_requests_from_execute_queue() -> Vec<L1UpdateRequest> {
+		let limit = Self::get_max_requests_per_block();
+		match (
+			UpdatesExecutionQueue::<T>::get(UpdatesExecutionQueueNextId::<T>::get()),
+			LastMaintananceMode::<T>::get(),
+		) {
+			(Some((scheduled_at, _, _, _)), Some(last_maintanance_mode))
+				if scheduled_at.saturated_into::<u128>() <= last_maintanance_mode =>
 			{
-				if scheduled_at == now {
-					return total_weight
-				}
+				UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
+				UpdatesExecutionQueueNextId::<T>::mutate(Saturating::saturating_inc);
+				Default::default()
+			},
+			(Some((_, l1, hash, _)), _) => {
+				if let Some(update) = PendingSequencerUpdateContent::<T>::get(hash) {
+					let requests = update
+						.into_requests()
+						.into_iter()
+						.filter(|request| request.id() > LastProcessedRequestOnL2::<T>::get(l1))
+						.take(limit.saturated_into())
+						.collect::<Vec<_>>();
 
-				// Repeated reads of the same value should be cached
-				// weight for LastProcessedRequestOnL2
-				total_weight = total_weight.saturating_add(T::DbWeight::get().reads(1));
-				for req in r
-					.into_requests()
-					.into_iter()
-					.filter(|request| request.id() > LastProcessedRequestOnL2::<T>::get(l1))
-					.map(|val| Some(val))
-					.chain(sp_std::iter::repeat(None))
-					.take(limit.try_into().unwrap())
-				{
-					if let Some(request) = req {
-						let weight = Self::process_single_request(l1, request);
-						// weight for process_single_request
-						total_weight = total_weight.saturating_add(weight);
-						limit -= 1;
-					} else {
+					if requests.is_empty() {
 						UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
-						UpdatesExecutionQueueNextId::<T>::mutate(|v| *v += 1);
-						// weight for this block
-						total_weight =
-							total_weight.saturating_add(T::DbWeight::get().reads_writes(1, 2));
-						break
+						PendingSequencerUpdateContent::<T>::remove(hash);
+						Self::deposit_event(Event::L1ReadExecuted { chain: l1, hash });
+						Default::default()
+					} else {
+						for r in requests.iter() {
+							if !Self::process_single_request(l1, &r) {
+								// maintanance mode triggered
+								break;
+							}
+						}
+						requests
 					}
-				}
-			} else {
-				// weight for the if in the below block
-				total_weight = total_weight.saturating_add(T::DbWeight::get().reads(2));
-				if UpdatesExecutionQueue::<T>::contains_key(
-					UpdatesExecutionQueueNextId::<T>::get() + 1,
-				) {
-					UpdatesExecutionQueueNextId::<T>::mutate(|v| *v += 1);
-					// weight for UpdatesExecutionQueueNextId
-					total_weight = total_weight.saturating_add(T::DbWeight::get().writes(1));
 				} else {
-					break
+					PendingSequencerUpdateContent::<T>::remove(hash);
+					Default::default()
 				}
-			}
+			},
+			_ => Default::default(),
 		}
-		total_weight
 	}
 
 	fn schedule_requests(
 		now: BlockNumberFor<T>,
 		chain: <T as Config>::ChainId,
-		update: messages::L1Update,
+		metadata: UpdateMetadata<T::AccountId>,
 	) {
-		let max_id = [
-			update.pendingDeposits.iter().map(|r| r.requestId.id).max(),
-			update.pendingCancelResolutions.iter().map(|r| r.requestId.id).max(),
-		]
-		.iter()
-		.filter_map(|elem| elem.clone())
-		.max();
-
-		if let Some(max_id) = max_id {
-			MaxAcceptedRequestIdOnl2::<T>::mutate(chain, |cnt| {
-				*cnt = sp_std::cmp::max(*cnt, max_id)
-			});
-		}
+		MaxAcceptedRequestIdOnl2::<T>::mutate(chain, |cnt| {
+			*cnt = sp_std::cmp::max(*cnt, metadata.max_id)
+		});
 
 		let id = LastScheduledUpdateIdInExecutionQueue::<T>::mutate(|id| {
 			id.saturating_inc();
 			*id
 		});
-		UpdatesExecutionQueue::<T>::insert(id, (now, chain, update));
+		let size = metadata.max_id.saturating_sub(metadata.min_id).saturating_add(1);
+		UpdatesExecutionQueue::<T>::insert(id, (now, chain, metadata.update_hash, size));
 	}
 
 	/// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1347,12 +1375,6 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	fn calculate_hash_of_sequencer_update(update: messages::L1Update) -> H256 {
-		let update: messages::eth_abi::L1Update = update.into();
-		let hash: [u8; 32] = keccak_256(&update.abi_encode()[..]).into();
-		H256::from(hash)
-	}
-
 	fn handle_sequencer_deactivation(
 		chain: <T as Config>::ChainId,
 		deactivated_sequencers: BTreeSet<T::AccountId>,
@@ -1386,7 +1408,8 @@ impl<T: Config> Pallet<T> {
 	pub fn validate_l1_update(
 		l1: <T as Config>::ChainId,
 		update: &messages::L1Update,
-	) -> DispatchResult {
+		sequencer: T::AccountId,
+	) -> Result<UpdateMetadata<T::AccountId>, Error<T>> {
 		ensure!(
 			!update.pendingDeposits.is_empty() || !update.pendingCancelResolutions.is_empty(),
 			Error::<T>::EmptyUpdate
@@ -1473,7 +1496,14 @@ impl<T: Config> Pallet<T> {
 			}
 		}
 
-		Ok(().into())
+		Ok(UpdateMetadata {
+			sequencer,
+			update_hash: update.abi_encode_hash(),
+			update_size: update.pendingDeposits.len() as u128 +
+				update.pendingCancelResolutions.len() as u128,
+			max_id: lowest_id,
+			min_id: last_id,
+		})
 	}
 
 	pub fn update_impl(sequencer: T::AccountId, read: messages::L1Update) -> DispatchResult {
@@ -1488,12 +1518,14 @@ impl<T: Config> Pallet<T> {
 			T::SequencerStakingProvider::is_selected_sequencer(l1, &sequencer),
 			Error::<T>::OnlySelectedSequencerisAllowedToUpdate
 		);
-		Self::validate_l1_update(l1, &read)?;
+		let metadata = Self::validate_l1_update(l1, &read, sequencer.clone())?;
 
 		// check json length to prevent big data spam, maybe not necessary as it will be checked later and slashed
 		let current_block_number =
 			<frame_system::Pallet<T>>::block_number().saturated_into::<u128>();
-		let dispute_period_length = Self::get_dispute_period();
+		let dispute_period_length =
+			Self::get_dispute_period(l1).ok_or(Error::<T>::UninitializedChainId)?;
+
 		let dispute_period_end: u128 = current_block_number + dispute_period_length;
 
 		// ensure sequencer has rights to update
@@ -1519,15 +1551,9 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::MultipleUpdatesInSingleBlock
 		);
 
-		let update: messages::eth_abi::L1Update = read.clone().into();
-		let request_hash = keccak_256(&update.abi_encode());
-		let l1_read_hash = H256::from_slice(request_hash.as_slice());
+		PendingSequencerUpdates::<T>::insert(dispute_period_end, l1, metadata.clone());
 
-		PendingSequencerUpdates::<T>::insert(
-			dispute_period_end,
-			l1,
-			(sequencer.clone(), read.clone(), l1_read_hash),
-		);
+		PendingSequencerUpdateContent::<T>::insert(metadata.update_hash, read.clone());
 
 		LastUpdateBySequencer::<T>::insert((l1, &sequencer), current_block_number);
 
@@ -1538,7 +1564,7 @@ impl<T: Config> Pallet<T> {
 			sequencer: sequencer.clone(),
 			dispute_period_end,
 			range: requests_range,
-			hash: l1_read_hash,
+			hash: metadata.update_hash,
 		});
 
 		// 2 storage reads & writes in seqs pallet
@@ -1550,9 +1576,10 @@ impl<T: Config> Pallet<T> {
 	fn count_of_read_rights_under_dispute(chain: ChainIdOf<T>, sequencer: &AccountIdOf<T>) -> u128 {
 		let mut read_rights = 0u128;
 		let last_update = LastUpdateBySequencer::<T>::get((chain, sequencer));
+		let dispute_period = Self::get_dispute_period(chain).unwrap_or(u128::MAX);
 
 		if last_update != 0 &&
-			last_update.saturating_add(T::DisputePeriodLength::get()) >=
+			last_update.saturating_add(dispute_period) >=
 				<frame_system::Pallet<T>>::block_number().saturated_into::<u128>()
 		{
 			read_rights += 1;
