@@ -21,9 +21,21 @@ describe('processSwapEvents', () => {
         [
           0,
           {
-            section: 'xyk',
+            section: 'market',
             method: 'AssetsSwapped',
-            data: ['0xaccount', ['0', '1'], null, '10000000000000000000000'],
+            data: {
+              who: '0x0404040404040404040404040404040404040404',
+              swaps: [
+                {
+                  pool_id: 6,
+                  kind: 'Xyk',
+                  asset_in: 0,
+                  asset_out: 1,
+                  amount_in: '40648650414565365',
+                  amount_out: '20181563007698743',
+                },
+              ],
+            },
           },
         ],
       ],
@@ -124,7 +136,7 @@ describe('calculateVolume', () => {
 
     const result = await calculateVolume('1', 18, '10000000000000000000000')
 
-    expect(result).toBeNull()
+    expect(result).toBe(0)
     expect(logger.error).toHaveBeenCalledWith(
       'Error: Unable to retrieve token price data for token id 1',
       error
