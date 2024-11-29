@@ -121,6 +121,7 @@ finalizerEnv:
   RUST_LOG: info,substrate=warn
   ETH_RPC_URL: http://evm-node-eth:8545
   ETH_WS_URL: ws://evm-node-eth:8546
+  SUBSTRATE_RPC_URL: ws://collator-01:9944
   AVS_REGISTRY_COORDINATOR_ADDR: 0xf5059a5D33d5853360D16C683c16e67980206f36
   AVS_RPC_URL: http://avs-aggregator:8090
   ECDSA_EPHEMERAL_KEY: "true"
