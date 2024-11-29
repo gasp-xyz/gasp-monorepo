@@ -1,20 +1,18 @@
-//! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 4.0.0-dev
-//! DATE: 2024-01-09 (Y/M/D)
-//! HOSTNAME: `af2cb189db8d`, CPU: `AMD EPYC 7B13`
+//! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 32.0.0
+//! DATE: 2024-11-29 (Y/M/D)
+//! HOSTNAME: `98ec9bd8ef1f`, CPU: `AMD EPYC 7B13`
 //!
-//! SHORT-NAME: `block`, LONG-NAME: `BlockExecution`, RUNTIME: `Mangata Kusama Local`
+//! SHORT-NAME: `block`, LONG-NAME: `BlockExecution`, RUNTIME: `Rollup Local`
 //! WARMUPS: `10`, REPEAT: `100`
 //! WEIGHT-PATH: ``
 //! WEIGHT-METRIC: `Average`, WEIGHT-MUL: `1.0`, WEIGHT-ADD: `0`
 
 // Executed Command:
-//   target/release/mangata-node
+//   target/release/rollup-node
 //   benchmark
 //   overhead
-//   --execution
-//   native
 //   --chain
-//   mangata-kusama-local
+//   rollup-local
 //   -lblock_builder=debug
 //   --max-ext-per-block
 //   50000
@@ -29,17 +27,17 @@ parameter_types! {
 	/// Calculated by multiplying the *Average* with `1.0` and adding `0`.
 	///
 	/// Stats nanoseconds:
-	///   Min, Max: 26_916_778, 31_638_388
-	///   Average:  28_489_486
-	///   Median:   28_464_418
-	///   Std-Dev:  976072.11
+	///   Min, Max: 30_924_759, 36_916_389
+	///   Average:  31_490_935
+	///   Median:   31_336_589
+	///   Std-Dev:  697753.75
 	///
 	/// Percentiles nanoseconds:
-	///   99th: 31_225_878
-	///   95th: 30_092_347
-	///   75th: 29_178_298
+	///   99th: 33_779_619
+	///   95th: 32_274_600
+	///   75th: 31_631_190
 	pub const BlockExecutionWeight: Weight =
-		Weight::from_parts(WEIGHT_REF_TIME_PER_NANOS.saturating_mul(28_489_486), 0);
+		Weight::from_parts(WEIGHT_REF_TIME_PER_NANOS.saturating_mul(31_490_935), 0);
 }
 
 #[cfg(test)]
