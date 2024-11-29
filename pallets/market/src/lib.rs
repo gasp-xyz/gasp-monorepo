@@ -7,7 +7,7 @@ use codec::Codec;
 use serde::{Deserialize, Serialize};
 
 use frame_support::{
-	ensure, fail,
+	ensure,
 	pallet_prelude::*,
 	traits::{
 		tokens::{
@@ -159,6 +159,15 @@ pub mod pallet {
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 
+		/// Tokens which cannot be transfered by extrinsics/user or use in pool, unless foundation override
+		type NontransferableTokens: Contains<Self::CurrencyId>;
+
+		/// A list of Foundation members with elevated rights
+		type FoundationAccountsProvider: Get<Vec<Self::AccountId>>;
+
+		/// A special account used for nontransferable tokens to allow 'selling' to balance pools
+		type ArbitrageBot: Contains<Self::AccountId>;
+
 		#[cfg(feature = "runtime-benchmarks")]
 		type ComputeIssuance: ComputeIssuance;
 	}
@@ -189,6 +198,8 @@ pub mod pallet {
 		MultiSwapSamePool,
 		/// Input asset id is not connected with output asset id for given pools
 		MultiSwapPathInvalid,
+		/// Asset cannot be used to create or modify a pool
+		NontransferableToken,
 	}
 
 	// Pallet's events.
@@ -259,6 +270,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Creates a liquidity pool and an associated new `lp_token` asset
+		/// For a StableSwap pool, the "stable" rate is computed from the ratio of input amounts, max rate is 1e18:1
 		#[pallet::call_index(0)]
 		#[pallet::weight(
 			T::WeightInfo::create_pool_xyk().max(
@@ -273,6 +285,14 @@ pub mod pallet {
 			second_asset_amount: T::Balance,
 		) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
+
+			// check assets id, or the foundation has a veto
+			ensure!(
+				(!T::NontransferableTokens::contains(&first_asset_id) &&
+					!T::NontransferableTokens::contains(&second_asset_id)) ||
+					T::FoundationAccountsProvider::get().contains(&sender),
+				Error::<T>::NontransferableToken
+			);
 
 			Self::check_assets_allowed((first_asset_id, second_asset_id))?;
 
@@ -293,22 +313,12 @@ pub mod pallet {
 					lp_token
 				},
 				PoolKind::StableSwap => {
-					let first_decimal = Self::get_decimals(&first_asset_id)?;
-					let second_decimal = Self::get_decimals(&second_asset_id)?;
-
 					let lp_token = T::StableSwap::create_pool(
 						&sender,
 						first_asset_id,
-						first_decimal,
+						first_asset_amount,
 						second_asset_id,
-						second_decimal,
-					)?;
-
-					T::StableSwap::add_liquidity(
-						&sender,
-						lp_token,
-						(first_asset_amount, second_asset_amount),
-						Zero::zero(),
+						second_asset_amount,
 					)?;
 
 					T::AssetRegistry::create_pool_asset(lp_token, first_asset_id, second_asset_id)?;
@@ -356,6 +366,12 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 
 			let pool_info = Self::get_pool_info(pool_id)?;
+			// check assets id, foundation has no veto
+			ensure!(
+				!T::NontransferableTokens::contains(&pool_info.pool.0) &&
+					!T::NontransferableTokens::contains(&pool_info.pool.1),
+				Error::<T>::NontransferableToken
+			);
 			Self::check_assets_allowed(pool_info.pool)?;
 
 			let (lp_amount, other_asset_amount) = Self::do_mint_liquidity(
@@ -398,6 +414,12 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 
 			let pool_info = Self::get_pool_info(pool_id)?;
+			// check assets id, foundation has no veto
+			ensure!(
+				!T::NontransferableTokens::contains(&pool_info.pool.0) &&
+					!T::NontransferableTokens::contains(&pool_info.pool.1),
+				Error::<T>::NontransferableToken
+			);
 			Self::check_assets_allowed(pool_info.pool)?;
 
 			let lp_amount = match pool_info.kind {
@@ -474,6 +496,12 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 
 			let pool_info = Self::get_pool_info(pool_id)?;
+			// check assets id, foundation has no veto
+			ensure!(
+				!T::NontransferableTokens::contains(&pool_info.pool.0) &&
+					!T::NontransferableTokens::contains(&pool_info.pool.1),
+				Error::<T>::NontransferableToken
+			);
 			Self::check_assets_allowed(pool_info.pool)?;
 
 			let native_id = T::NativeCurrencyId::get();
@@ -536,6 +564,12 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 
 			let pool_info = Self::get_pool_info(pool_id)?;
+			// check assets id, foundation has no veto
+			ensure!(
+				!T::NontransferableTokens::contains(&pool_info.pool.0) &&
+					!T::NontransferableTokens::contains(&pool_info.pool.1),
+				Error::<T>::NontransferableToken
+			);
 			Self::check_assets_allowed(pool_info.pool)?;
 
 			let native_id = T::NativeCurrencyId::get();
@@ -597,6 +631,13 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 
 			let pool_info = Self::get_pool_info(pool_id)?;
+			// check assets id, or the foundation has a veto
+			ensure!(
+				(!T::NontransferableTokens::contains(&pool_info.pool.0) &&
+					!T::NontransferableTokens::contains(&pool_info.pool.1)) ||
+					T::FoundationAccountsProvider::get().contains(&sender),
+				Error::<T>::NontransferableToken
+			);
 			Self::check_assets_allowed(pool_info.pool)?;
 
 			let amounts = match pool_info.kind {
@@ -649,15 +690,16 @@ pub mod pallet {
 		/// Executes a multiswap asset in a series of swap asset atomic swaps.
 		///
 		/// Multiswaps must fee lock instead of paying transaction fees.
+		/// For a single atomic swap, both `asset_amount_in` and `min_amount_out` are considered to allow free execution without locks.
 		///
 		/// # Args:
 		/// - `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought
 		/// - `asset_id_in`: The id of the asset sold
 		/// - `asset_amount_in`: The amount of the asset sold
 		/// - `asset_id_out`: The id of the asset received
-		/// - `min_amount_out` - The minimum amount of requested asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission.
-		// This call is part of the fee lock mechanism, which allows free execution in some cases
-		// in case of an error a 'trade fee' is subtracted from input swap asset to avoid DOS attacks
+		/// - `min_amount_out` - The minimum amount of requested asset that must be bought in order to not fail on slippage, use RPC calls to calc expected value
+		// This call is part of the fee lock mechanism, which allows free execution on success
+		// in case of an error & no native asset to cover fees, a fixed % is subtracted from input swap asset to avoid DOS attacks
 		// `OnChargeTransaction` impl should check whether the sender has funds to cover such fee
 		// or consider transaction invalid
 		#[pallet::call_index(6)]
@@ -693,7 +735,22 @@ pub mod pallet {
 			Ok(Pays::No.into())
 		}
 
-		/// Buy variant of the multiswap, a precise output amount should be provided instead.
+		/// Executes a multiswap asset in a series of swap asset atomic swaps.
+		/// The precise output amount is provided instead.
+		///
+		/// Multiswaps must fee lock instead of paying transaction fees.
+		/// For a single atomic swap, both `asset_amount_out` and `max_amount_in` are considered to allow free execution without locks.
+		///
+		/// # Args:
+		/// - `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought
+		/// - `asset_id_out`: The id of the asset received
+		/// - `asset_amount_out`: The amount of the asset received
+		/// - `asset_id_in`: The id of the asset sold
+		/// - `max_amount_in` - The maximum amount of sold asset in order to not fail on slippage, use RPC calls to calc expected value
+		// This call is part of the fee lock mechanism, which allows free execution on success
+		// in case of an error & no native asset to cover fees, a fixed % is subtracted from input swap asset to avoid DOS attacks
+		// `OnChargeTransaction` impl should check whether the sender has funds to cover such fee
+		// or consider transaction invalid
 		#[pallet::call_index(7)]
 		#[pallet::weight(
 			T::WeightInfo::multiswap_asset_buy_xyk(swap_pool_list.len() as u32).max(
@@ -753,6 +810,21 @@ pub mod pallet {
 			}
 		}
 
+		pub fn calculate_sell_price_with_impact(
+			pool_id: T::CurrencyId,
+			sell_asset_id: T::CurrencyId,
+			sell_amount: T::Balance,
+		) -> Option<(T::Balance, T::Balance)> {
+			let pool_info = Self::get_pool_info(pool_id).ok()?;
+			let (_, other) = pool_info.same_and_other(sell_asset_id)?;
+			match pool_info.kind {
+				PoolKind::Xyk =>
+					T::Xyk::get_dy_with_impact(pool_id, sell_asset_id, other, sell_amount),
+				PoolKind::StableSwap =>
+					T::StableSwap::get_dy_with_impact(pool_id, sell_asset_id, other, sell_amount),
+			}
+		}
+
 		pub fn calculate_buy_price(
 			pool_id: T::CurrencyId,
 			bought_asset_id: T::CurrencyId,
@@ -764,6 +836,21 @@ pub mod pallet {
 				PoolKind::Xyk => T::Xyk::get_dx(pool_id, other, bought_asset_id, buy_amount),
 				PoolKind::StableSwap =>
 					T::StableSwap::get_dx(pool_id, other, bought_asset_id, buy_amount),
+			}
+		}
+
+		pub fn calculate_buy_price_with_impact(
+			pool_id: T::CurrencyId,
+			bought_asset_id: T::CurrencyId,
+			buy_amount: T::Balance,
+		) -> Option<(T::Balance, T::Balance)> {
+			let pool_info = Self::get_pool_info(pool_id).ok()?;
+			let (_, other) = pool_info.same_and_other(bought_asset_id)?;
+			match pool_info.kind {
+				PoolKind::Xyk =>
+					T::Xyk::get_dx_with_impact(pool_id, other, bought_asset_id, buy_amount),
+				PoolKind::StableSwap =>
+					T::StableSwap::get_dx_with_impact(pool_id, other, bought_asset_id, buy_amount),
 			}
 		}
 
@@ -826,13 +913,6 @@ pub mod pallet {
 				PoolKind::Xyk => T::Xyk::get_mint_amount(pool_id, amounts),
 				PoolKind::StableSwap => T::StableSwap::get_mint_amount(pool_id, amounts),
 			}
-		}
-
-		// private helpers
-		fn get_decimals(asset_id: &T::CurrencyId) -> Result<u32, Error<T>> {
-			T::AssetRegistry::metadata(&asset_id)
-				.map(|meta| meta.decimals)
-				.ok_or(Error::<T>::AssetDoesNotExists)
 		}
 
 		fn get_pool_info(pool_id: PoolIdOf<T>) -> Result<PoolInfoOf<T>, Error<T>> {
@@ -950,6 +1030,13 @@ pub mod pallet {
 			let mut swaps: Vec<AtomicSwapOf<T>> = vec![];
 			let mut amount_out = amount_in;
 			for (pool, swap) in pools.iter().zip(path.into_iter()) {
+				// check input asset id, or the foundation has a veto
+				ensure!(
+					!T::NontransferableTokens::contains(&swap.0) ||
+						T::ArbitrageBot::contains(sender),
+					Error::<T>::NontransferableToken
+				);
+
 				let amount_in = amount_out;
 				amount_out = match pool.kind {
 					PoolKind::StableSwap => {
@@ -1029,11 +1116,23 @@ sp_api::decl_runtime_apis! {
 			sell_amount: Balance
 		) -> Option<Balance>;
 
+		fn calculate_sell_price_with_impact(
+			pool_id: AssetId,
+			sell_asset_id: AssetId,
+			sell_amount: Balance
+		) -> Option<(Balance, Balance)>;
+
 		fn calculate_buy_price(
 			pool_id: AssetId,
 			buy_asset_id: AssetId,
 			buy_amount: Balance
 		) -> Option<Balance>;
+
+		fn calculate_buy_price_with_impact(
+			pool_id: AssetId,
+			buy_asset_id: AssetId,
+			buy_amount: Balance
+		) -> Option<(Balance, Balance)>;
 
 		fn get_burn_amount(
 			pool_id: AssetId,

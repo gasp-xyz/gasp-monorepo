@@ -55,8 +55,8 @@ pub use frame_support::{
 			UnityAssetBalanceConversion,
 		},
 		ConstBool, ConstU128, ConstU32, ConstU64, ConstU8, Contains, EitherOfDiverse, EnsureOrigin,
-		EnsureOriginWithArg, Everything, ExistenceRequirement, FindAuthor, Get, Imbalance,
-		InstanceFilter, KeyOwnerProofSystem, NeverEnsureOrigin, Randomness, StorageInfo,
+		EnsureOriginWithArg, Equals, Everything, ExistenceRequirement, FindAuthor, Get, Imbalance,
+		InstanceFilter, KeyOwnerProofSystem, NeverEnsureOrigin, Nothing, Randomness, StorageInfo,
 		WithdrawReasons,
 	},
 	unsigned::TransactionValidityError,
@@ -308,6 +308,7 @@ impl orml_tokens::Config for Runtime {
 	type CurrencyHooks = ();
 	type MaxReserves = ();
 	type ReserveIdentifier = cfg::orml_tokens::ReserveIdentifier;
+	type NontransferableTokens = tokens::NontransferableTokens;
 }
 
 impl pallet_xyk::Config for Runtime {
@@ -427,6 +428,19 @@ impl Into<CallType> for RuntimeCall {
 				asset_amount_in,
 				asset_id_out,
 				asset_amount_out: min_amount_out,
+			},
+			RuntimeCall::Market(pallet_market::Call::multiswap_asset_buy {
+				swap_pool_list,
+				asset_id_out,
+				asset_amount_out,
+				asset_id_in,
+				max_amount_in,
+			}) => CallType::Swap {
+				swap_pool_list,
+				asset_id_in,
+				asset_amount_in: max_amount_in,
+				asset_id_out,
+				asset_amount_out,
 			},
 			RuntimeCall::FeeLock(pallet_fee_lock::Call::unlock_fee { .. }) => CallType::UnlockFee,
 			_ => CallType::Other,
@@ -766,7 +780,6 @@ impl pallet_rolldown::Config for Runtime {
 	type SequencerStakingProvider = SequencerStaking;
 	type Tokens = orml_tokens::MultiTokenCurrencyAdapter<Runtime>;
 	type AssetRegistryProvider = cfg::orml_asset_registry::AssetRegistryProvider<Runtime>;
-	type DisputePeriodLength = cfg::pallet_rolldown::DisputePeriodLength;
 	type RequestsPerBlock = cfg::pallet_rolldown::RequestsPerBlock;
 	// We havent spent any time considering rights multiplier being > 1. There might be some corner
 	// cases that should be investigated.
@@ -825,6 +838,9 @@ impl pallet_market::Config for Runtime {
 	type WeightInfo = weights::pallet_market_weights::ModuleWeight<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type ComputeIssuance = Issuance;
+	type NontransferableTokens = tokens::NontransferableTokens;
+	type FoundationAccountsProvider = cfg::pallet_membership::FoundationAccountsProvider;
+	type ArbitrageBot = tokens::ArbitrageBot;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -1314,8 +1330,16 @@ impl_runtime_apis! {
 			Market::calculate_sell_price(pool_id, sell_asset_id, sell_amount)
 		}
 
+		fn calculate_sell_price_with_impact(pool_id: TokenId, sell_asset_id: TokenId, sell_amount: Balance) -> Option<(Balance, Balance)> {
+			Market::calculate_sell_price_with_impact(pool_id, sell_asset_id, sell_amount)
+		}
+
 		fn calculate_buy_price(pool_id: TokenId, buy_asset_id: TokenId, buy_amount: Balance) -> Option<Balance> {
 			Market::calculate_buy_price(pool_id, buy_asset_id, buy_amount)
+		}
+
+		fn calculate_buy_price_with_impact(pool_id: TokenId, buy_asset_id: TokenId, buy_amount: Balance) -> Option<(Balance, Balance)> {
+			Market::calculate_buy_price_with_impact(pool_id, buy_asset_id, buy_amount)
 		}
 
 		fn get_burn_amount(pool_id: TokenId, lp_burn_amount: Balance) -> Option<(Balance, Balance)> {

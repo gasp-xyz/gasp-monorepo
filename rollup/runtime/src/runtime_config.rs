@@ -48,9 +48,22 @@ pub mod tokens {
 	pub const RX_TOKEN_ID: TokenId = 0;
 	pub const ETH_TOKEN_ID: TokenId = 1;
 
+	#[cfg(any(feature = "unlocked", feature = "runtime-benchmarks"))]
+	pub type NontransferableTokens = Nothing;
+	#[cfg(not(any(feature = "unlocked", feature = "runtime-benchmarks")))]
+	pub type NontransferableTokens = Equals<ConstU32<RX_TOKEN_ID>>;
+
+	#[cfg(any(feature = "unlocked", feature = "runtime-benchmarks"))]
+	pub type ArbitrageBot = Nothing;
+	#[cfg(not(any(feature = "unlocked", feature = "runtime-benchmarks")))]
+	pub type ArbitrageBot = Equals<ArbitrageBotAddr>;
+
 	parameter_types! {
 		pub const RxTokenId: TokenId = RX_TOKEN_ID;
 		pub const EthTokenId: TokenId = ETH_TOKEN_ID;
+		pub ArbitrageBotAddr: AccountId = sp_runtime::AccountId20::from(
+			hex_literal::hex!["fc741134c82b81b7ab7efbf334b0c90ff8dbf22c"]
+		);
 	}
 }
 
@@ -1311,14 +1324,12 @@ pub mod config {
 
 		#[cfg(feature = "fast-runtime")]
 		parameter_types! {
-			pub const DisputePeriodLength: u32 = 10;
 			pub const MerkleRootAutomaticBatchPeriod: u128 = 25;
 			pub const MerkleRootAutomaticBatchSize: u128 = 32;
 		}
 
 		#[cfg(not(feature = "fast-runtime"))]
 		parameter_types! {
-			pub const DisputePeriodLength: u32 = 300;
 			pub const MerkleRootAutomaticBatchPeriod: u128 = 1200;
 			pub const MerkleRootAutomaticBatchSize: u128 = 1024;
 		}

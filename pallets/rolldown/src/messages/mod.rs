@@ -234,6 +234,12 @@ pub struct L1Update {
 	pub pendingCancelResolutions: Vec<CancelResolution>,
 }
 
+impl L1Update {
+	pub fn get_requests_count(&self) -> u128 {
+		self.pendingDeposits.len() as u128 + self.pendingCancelResolutions.len() as u128
+	}
+}
+
 impl NativeToEthMapping for L1Update
 where
 	Self: Clone,

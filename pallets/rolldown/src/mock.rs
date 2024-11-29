@@ -4,7 +4,7 @@ use super::*;
 
 use crate as rolldown;
 use core::convert::TryFrom;
-use frame_support::{construct_runtime, derive_impl, parameter_types, traits::Everything};
+use frame_support::{construct_runtime, derive_impl, parameter_types, traits::Nothing};
 use sp_runtime::traits::One;
 use std::collections::HashSet;
 
@@ -66,6 +66,7 @@ impl orml_tokens::Config for Test {
 	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
 	type CurrencyHooks = ();
+	type NontransferableTokens = Nothing;
 }
 
 mockall::mock! {
@@ -142,7 +143,6 @@ impl rolldown::Config for Test {
 	type Tokens = orml_tokens::MultiTokenCurrencyAdapter<Test>;
 	type AssetRegistryProvider = MockAssetRegistryProviderApi;
 	type AddressConverter = DummyAddressConverter;
-	type DisputePeriodLength = ConstU128<5>;
 	type RequestsPerBlock = ConstU128<10>;
 	type MaintenanceStatusProvider = MockMaintenanceStatusProviderApi;
 	type ChainId = messages::Chain;
@@ -167,9 +167,12 @@ impl ExtBuilder {
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");
 
-		rolldown::GenesisConfig::<Test> { _phantom: Default::default() }
-			.assimilate_storage(&mut t)
-			.expect("Tokens storage can be assimilated");
+		rolldown::GenesisConfig::<Test> {
+			_phantom: Default::default(),
+			dispute_periods: [(crate::messages::Chain::Ethereum, 5u128)].iter().cloned().collect(),
+		}
+		.assimilate_storage(&mut t)
+		.expect("Tokens storage can be assimilated");
 
 		let mut ext = sp_io::TestExternalities::new(t);
 
@@ -187,21 +190,15 @@ impl ExtBuilder {
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");
 
-		rolldown::GenesisConfig::<Test> { _phantom: Default::default() }
-			.assimilate_storage(&mut t)
-			.expect("Tokens storage can be assimilated");
+		rolldown::GenesisConfig::<Test> {
+			_phantom: Default::default(),
+			dispute_periods: [(crate::messages::Chain::Ethereum, 5u128)].iter().cloned().collect(),
+		}
+		.assimilate_storage(&mut t)
+		.expect("Tokens storage can be assimilated");
 
 		let ext = sp_io::TestExternalities::new(t);
 
-		Self { ext }
-	}
-
-	pub fn single_sequencer(_seq: AccountId) -> Self {
-		let t = frame_system::GenesisConfig::<Test>::default()
-			.build_storage()
-			.expect("Frame system builds valid default genesis config");
-
-		let ext = sp_io::TestExternalities::new(t);
 		Self { ext }
 	}
 
@@ -318,6 +315,7 @@ where
 
 		frame_system::Pallet::<T>::on_initialize(new_block_number);
 		rolldown::Pallet::<T>::on_initialize(new_block_number);
+		rolldown::Pallet::<T>::on_idle(new_block_number, Weight::from_parts(u64::MAX, 0u64));
 	}
 }
 
