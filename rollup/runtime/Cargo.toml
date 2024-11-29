@@ -209,7 +209,8 @@ try-runtime = [
 	"sp-runtime/try-runtime",
 ]
 
-fast-runtime = []
+fast-runtime = ["unlocked"]
+unlocked = []
 
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
