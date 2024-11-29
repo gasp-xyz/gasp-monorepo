@@ -13,11 +13,18 @@ import { http, webSocket } from "viem";
 import { Withdrawal } from "../Withdrawal.js";
 import { Cancel } from "../Cancel.js";
 import { privateKeyToAccount } from "viem/accounts";
-import { anvil } from "viem/chains";
+import {
+	anvil,
+	holesky,
+	arbitrumSepolia,
+	localhost,
+	type Chain,
+} from "viem/chains";
 import { isEqual } from "../utils.js";
 import { estimateMaxPriorityFeePerGas } from "viem/actions";
 import { L1Interface } from "./L1Interface.js";
 import { logger } from "../logger.js";
+import { L1_CHAIN } from "../Config.js";
 
 async function estimateGasInWei(publicClient: PublicClient) {
 	// https://www.blocknative.com/blog/eip-1559-fees
@@ -53,20 +60,36 @@ function cancelToViemFormat(cancel: Cancel): unknown[] {
 	];
 }
 
+const CONFIG_TO_CHAIN = new Map<string, Chain>([
+	["anvil-arbitrum", anvil],
+	["anvil-ethereum", anvil],
+	["holesky", holesky],
+	["arbitrum-sepolia", arbitrumSepolia],
+	["reth-arbitrum", localhost],
+	["reth-ethereum", localhost],
+]);
+
 class L1Api implements L1Interface {
 	client!: PublicClient;
 	transport: any;
 
 	constructor(uri: string) {
+		if (!CONFIG_TO_CHAIN.has(L1_CHAIN)) {
+			throw new Error(`unknown chain '${L1_CHAIN}'`);
+		}
+
+		const chain = CONFIG_TO_CHAIN.get(L1_CHAIN);
 		if (uri.startsWith("ws")) {
 			this.transport = webSocket(uri, { retryCount: 5 });
 			this.client = createPublicClient({
 				transport: this.transport,
+				chain,
 			});
 		} else if (uri.startsWith("http")) {
 			this.transport = http(uri, { retryCount: 5 });
 			this.client = createPublicClient({
 				transport: this.transport,
+				chain,
 			});
 		} else {
 			throw new Error("Invalid uri");
@@ -279,7 +302,7 @@ class L1Api implements L1Interface {
 		);
 		const wc = createWalletClient({
 			account: acc,
-			chain: anvil,
+			chain: this.client.chain,
 			transport: this.transport,
 		});
 
@@ -336,7 +359,7 @@ class L1Api implements L1Interface {
 		);
 		const wc = createWalletClient({
 			account: acc,
-			chain: anvil,
+			chain: this.client.chain,
 			transport: this.transport,
 		});
 
@@ -375,7 +398,7 @@ class L1Api implements L1Interface {
 		);
 		const wc = createWalletClient({
 			account: acc,
-			chain: anvil,
+			chain: this.client.chain,
 			transport: this.transport,
 		});
 
