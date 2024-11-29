@@ -29,22 +29,14 @@ contract RolldownTest is Test, IRolldownPrimitives {
         utils = new Utilities();
         admins = utils.createUsers(1);
 
-        PauserRegistry avsPauserReg;
         address avsOwner = admins[0];
-        address unpauseMultisig = avsOwner;
-        {
-            address[] memory pausers = new address[](2);
-            pausers[0] = avsOwner;
-            pausers[1] = unpauseMultisig;
-            avsPauserReg = new PauserRegistry(pausers, unpauseMultisig);
-        }
 
         users = utils.createUsers(3);
         ALICE = users[0];
         BOB = users[1];
         CHARLIE = users[2];
         rolldown = new Rolldown();
-        rolldown.initialize(avsPauserReg, avsOwner, ChainId.Ethereum, users[0]);
+        rolldown.initialize(avsOwner, ChainId.Ethereum, users[0]);
         NATIVE_TOKEN_ADDRESS = payable(0x0000000000000000000000000000000000000001);
         token = new MyERC20();
     }
@@ -719,7 +711,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         uint256 test_cases_amount = stdJson.readUint(config_data, ".cases_count");
 
         for (uint256 i = 0; i < test_cases_amount; ++i) {
-            console.log("TEST case: ", i);
+            // console.log("TEST case: ", i);
             uint256 leavePos =
                 stdJson.readUint(config_data, string.concat(".cases.[", Strings.toString(i), "].leave_pos"));
             bytes32 leaveHash =
