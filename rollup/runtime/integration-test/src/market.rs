@@ -115,15 +115,14 @@ fn create_pool_works() {
 #[test]
 fn add_liquidity_works() {
 	test_env().execute_with(|| {
-		assert_ok!(create_pool_unb(PoolKind::Xyk, (NATIVE_ASSET_ID, ASSET_ID_1)));
-		assert_ok!(create_pool_unb(PoolKind::StableSwap, (NATIVE_ASSET_ID, ASSET_ID_1)));
+		assert_ok!(create_pool_unb(PoolKind::Xyk, (ASSET_ID_2, ASSET_ID_1)));
+		assert_ok!(create_pool_unb(PoolKind::StableSwap, (ASSET_ID_2, ASSET_ID_1)));
 
 		let expected =
-			Market::calculate_expected_amount_for_minting(POOL_ID_1, NATIVE_ASSET_ID, UNIT)
-				.unwrap();
+			Market::calculate_expected_amount_for_minting(POOL_ID_1, ASSET_ID_2, UNIT).unwrap();
 		let lp_expected =
 			Market::calculate_expected_lp_minted(POOL_ID_1, (UNIT, expected)).unwrap();
-		assert_ok!(Market::mint_liquidity(origin(), POOL_ID_1, NATIVE_ASSET_ID, UNIT, 10 * UNIT));
+		assert_ok!(Market::mint_liquidity(origin(), POOL_ID_1, ASSET_ID_2, UNIT, 10 * UNIT));
 		System::assert_last_event(RuntimeEvent::Market(Event::LiquidityMinted {
 			who: AccountId::from(ALICE),
 			pool_id: POOL_ID_1,
@@ -134,11 +133,10 @@ fn add_liquidity_works() {
 		}));
 
 		let expected =
-			Market::calculate_expected_amount_for_minting(POOL_ID_2, NATIVE_ASSET_ID, UNIT)
-				.unwrap();
+			Market::calculate_expected_amount_for_minting(POOL_ID_2, ASSET_ID_2, UNIT).unwrap();
 		let lp_expected =
 			Market::calculate_expected_lp_minted(POOL_ID_2, (UNIT, expected)).unwrap();
-		assert_ok!(Market::mint_liquidity(origin(), POOL_ID_2, NATIVE_ASSET_ID, UNIT, 10 * UNIT));
+		assert_ok!(Market::mint_liquidity(origin(), POOL_ID_2, ASSET_ID_2, UNIT, 10 * UNIT));
 		System::assert_last_event(RuntimeEvent::Market(Event::LiquidityMinted {
 			who: AccountId::from(ALICE),
 			pool_id: POOL_ID_2,
@@ -153,8 +151,8 @@ fn add_liquidity_works() {
 #[test]
 fn add_liquidity_fixed_works() {
 	test_env().execute_with(|| {
-		assert_ok!(create_pool_unb(PoolKind::Xyk, (NATIVE_ASSET_ID, ASSET_ID_1)));
-		assert_ok!(create_pool_unb(PoolKind::StableSwap, (NATIVE_ASSET_ID, ASSET_ID_1)));
+		assert_ok!(create_pool_unb(PoolKind::Xyk, (ASSET_ID_2, ASSET_ID_1)));
+		assert_ok!(create_pool_unb(PoolKind::StableSwap, (ASSET_ID_2, ASSET_ID_1)));
 
 		assert_ok!(Market::mint_liquidity_fixed_amounts(origin(), POOL_ID_1, (UNIT, 0), 0));
 		System::assert_last_event(RuntimeEvent::Market(Event::LiquidityMinted {
@@ -166,12 +164,12 @@ fn add_liquidity_fixed_works() {
 			total_supply: 7865524961509654622,
 		}));
 
-		let expected = Market::calculate_expected_lp_minted(POOL_ID_2, (UNIT, 5 * UNIT)).unwrap();
-		assert_ok!(Market::mint_liquidity_fixed_amounts(origin(), POOL_ID_2, (UNIT, 5 * UNIT), 0));
+		let expected = Market::calculate_expected_lp_minted(POOL_ID_2, (5 * UNIT, UNIT)).unwrap();
+		assert_ok!(Market::mint_liquidity_fixed_amounts(origin(), POOL_ID_2, (5 * UNIT, UNIT), 0));
 		System::assert_last_event(RuntimeEvent::Market(Event::LiquidityMinted {
 			who: AccountId::from(ALICE),
 			pool_id: POOL_ID_2,
-			amounts_provided: (1000000000000000000, 5000000000000000000),
+			amounts_provided: (5000000000000000000, 1000000000000000000),
 			lp_token: POOL_ID_2,
 			lp_token_minted: expected,
 			total_supply: 154925100814226884776,
@@ -208,14 +206,14 @@ fn remove_liquidity_works() {
 #[test]
 fn multiswap_should_work_xyk() {
 	test_env().execute_with(|| {
-		assert_ok!(create_pool_unb(PoolKind::Xyk, (NATIVE_ASSET_ID, ASSET_ID_1)));
+		assert_ok!(create_pool_unb(PoolKind::Xyk, (ASSET_ID_3, ASSET_ID_1)));
 		assert_ok!(create_pool_unb(PoolKind::Xyk, (ASSET_ID_1, ASSET_ID_2)));
 		assert_ok!(create_pool_unb(PoolKind::Xyk, (ASSET_ID_2, ASSET_ID_3)));
 
 		assert_ok!(Market::multiswap_asset(
 			origin(),
 			vec![POOL_ID_1, POOL_ID_2, POOL_ID_3],
-			NATIVE_ASSET_ID,
+			ASSET_ID_3,
 			UNIT,
 			ASSET_ID_3,
 			Zero::zero(),
@@ -229,7 +227,7 @@ fn multiswap_should_work_xyk() {
 				AtomicSwap {
 					pool_id: POOL_ID_1,
 					kind: PoolKind::Xyk,
-					asset_in: 0,
+					asset_in: 3,
 					asset_out: 1,
 					amount_in: 1000000000000000000,
 					amount_out: 453305446940074565,
@@ -259,7 +257,7 @@ fn multiswap_should_work_xyk() {
 fn multiswap_should_work_stable_swap_with_bnb() {
 	test_env().execute_with(|| {
 		// 2:1 rate
-		assert_ok!(create_pool_unb(PoolKind::StableSwap, (NATIVE_ASSET_ID, ASSET_ID_1)));
+		assert_ok!(create_pool_unb(PoolKind::StableSwap, (ASSET_ID_3, ASSET_ID_1)));
 		assert_ok!(create_pool_unb(PoolKind::StableSwap, (ASSET_ID_1, ASSET_ID_2)));
 		// 1:1 rate
 		assert_ok!(create_pool(PoolKind::StableSwap, (ASSET_ID_2, ASSET_ID_3)));
@@ -268,12 +266,19 @@ fn multiswap_should_work_stable_swap_with_bnb() {
 		assert_ok!(create_pool_unb(PoolKind::Xyk, (NATIVE_ASSET_ID, ASSET_ID_2)));
 		assert_ok!(create_pool_unb(PoolKind::Xyk, (NATIVE_ASSET_ID, ASSET_ID_3)));
 
+		let p = pallet_stable_swap::Pools::<Runtime>::get(POOL_ID_1).unwrap();
+		// println!("{:#?}", p);
+		// assets are ordered by id, same sa as the corresponding rates
+		assert_eq!(p.assets, vec![ASSET_ID_1, ASSET_ID_3]);
+		assert_eq!(p.rate_multipliers[0], 10 * UNIT);
+		assert_eq!(p.rate_multipliers[1], 5 * UNIT);
+
 		let before = Tokens::total_issuance(NATIVE_ASSET_ID);
 
 		assert_ok!(Market::multiswap_asset(
 			origin(),
 			vec![POOL_ID_1, POOL_ID_2, POOL_ID_3],
-			NATIVE_ASSET_ID,
+			ASSET_ID_3,
 			UNIT,
 			ASSET_ID_3,
 			Zero::zero(),
@@ -285,7 +290,7 @@ fn multiswap_should_work_stable_swap_with_bnb() {
 		assert_eq!(before, 100000000000000000000);
 		assert_eq!(after, 99999001734203514767);
 
-		println!("{:#?}", events());
+		// println!("{:#?}", events());
 
 		System::assert_last_event(RuntimeEvent::Market(Event::AssetsSwapped {
 			who: AccountId::from(ALICE),
@@ -293,7 +298,7 @@ fn multiswap_should_work_stable_swap_with_bnb() {
 				AtomicSwap {
 					pool_id: POOL_ID_1,
 					kind: PoolKind::StableSwap,
-					asset_in: 0,
+					asset_in: ASSET_ID_3,
 					asset_out: 1,
 					amount_in: 1000000000000000000,
 					amount_out: 498447826003559573,
@@ -322,14 +327,14 @@ fn multiswap_should_work_stable_swap_with_bnb() {
 #[test]
 fn multiswap_should_work_mixed() {
 	test_env().execute_with(|| {
-		assert_ok!(create_pool_unb(PoolKind::Xyk, (NATIVE_ASSET_ID, ASSET_ID_1)));
+		assert_ok!(create_pool_unb(PoolKind::Xyk, (ASSET_ID_3, ASSET_ID_1)));
 		assert_ok!(create_pool_unb(PoolKind::StableSwap, (ASSET_ID_1, ASSET_ID_2)));
 		assert_ok!(create_pool_unb(PoolKind::Xyk, (ASSET_ID_2, ASSET_ID_3)));
 
 		assert_ok!(Market::multiswap_asset(
 			origin(),
 			vec![POOL_ID_1, POOL_ID_2, POOL_ID_3],
-			NATIVE_ASSET_ID,
+			ASSET_ID_3,
 			UNIT,
 			ASSET_ID_3,
 			Zero::zero(),
@@ -343,7 +348,7 @@ fn multiswap_should_work_mixed() {
 				AtomicSwap {
 					pool_id: POOL_ID_1,
 					kind: PoolKind::Xyk,
-					asset_in: 0,
+					asset_in: ASSET_ID_3,
 					asset_out: 1,
 					amount_in: 1000000000000000000,
 					amount_out: 453305446940074565,

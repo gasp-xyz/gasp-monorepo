@@ -3,7 +3,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use frame_support::{
-	ensure,
+	ensure, fail,
 	pallet_prelude::*,
 	traits::{
 		tokens::{Balance, CurrencyId},
@@ -565,8 +565,11 @@ pub mod pallet {
 			);
 			ensure!(rates.len() == assets_in_len, Error::<T>::ArgumentsLengthMismatch);
 
-			let mut assets = assets.clone();
-			assets.sort();
+			let mut to_sort: Vec<(T::CurrencyId, T::Balance)> =
+				assets.into_iter().zip(rates.into_iter()).collect();
+			to_sort.sort_by_key(|&(a, _)| a);
+			let (mut assets, rates): (Vec<T::CurrencyId>, Vec<T::Balance>) =
+				to_sort.into_iter().unzip();
 			assets.dedup();
 			ensure!(assets_in_len == assets.len(), Error::<T>::SameAsset);
 
@@ -931,6 +934,7 @@ pub mod pallet {
 			let i = pool.get_asset_index::<T>(asset_in)?;
 			let j = pool.get_asset_index::<T>(asset_out)?;
 
+			log::debug!(target: "", "{:?} {:?} {:?} {:?}", i, j, dx, xp);
 			Self::get_dy_xp(&pool, i, j, dx, xp)
 		}
 
@@ -1823,6 +1827,17 @@ impl<T: Config> Mutate<T::AccountId> for Pallet<T> {
 
 		let rates = vec![rate_1, rate_2];
 		let info = Self::do_create_pool(sender, assets, rates, T::DefaultApmCoeff::get())?;
+
+		// asset ids are ordered
+		let asset_pool_1 = *info.assets.get(0).ok_or(Error::<T>::UnexpectedFailure)?;
+		let amounts = if asset_pool_1 == asset_1 {
+			vec![amount_1, amount_2]
+		} else {
+			vec![amount_2, amount_1]
+		};
+
+		let _ = Self::do_add_liquidity(&sender, info.lp_token, amounts, Zero::zero())?;
+
 		Ok(info.lp_token)
 	}
 
