@@ -2,6 +2,7 @@ import rolldownAbi from "./Rolldown.json" assert { type: "json" };
 import { hexToU8a } from "@polkadot/util";
 import JSONbig from "json-bigint";
 import { z } from "zod";
+import { anvil, holesky, arbitrumSepolia, hardhat } from "viem/chains";
 
 const tokensToTrackSchema = z
 	.tuple([
@@ -11,12 +12,27 @@ const tokensToTrackSchema = z
 	])
 	.array();
 
+const SUPPORTED_CHAINS = new Map<string, string>([
+	["anvil-arbitrum", "arbitrum"],
+	["anvil-ethereum", "ethereum"],
+	["holesky", "ethereum"],
+	["arbitrum-sepolia", "arbitrum"],
+	["reth-arbitrum", "arbitrum"],
+	["reth-ethereum", "ethereum"],
+]);
+
 const cliConfigSchemat = z.object({
 	MANGATA_CONTRACT_ADDRESS: z.string(),
 	ETH_CHAIN_URL: z.string(),
 	MANGATA_NODE_URL: z.string(),
 	PRIVATE_KEY: z.string(),
-	L1_CHAIN: z.string(),
+	L1_CHAIN: z
+		.string()
+		.refine((chain) => SUPPORTED_CHAINS.has(chain), {
+			message: `env::L1_CHAIN needs to be one of ${Array.from(
+				SUPPORTED_CHAINS.keys(),
+			)}`,
+		}),
 	TOKENS_TO_TRACK: z
 		.string()
 		.transform((elem) =>
@@ -55,6 +71,7 @@ export const ETH_CHAIN_URL = configuration.ETH_CHAIN_URL;
 export const MANGATA_NODE_URL = configuration.MANGATA_NODE_URL;
 export const PRIVATE_KEY = configuration.PRIVATE_KEY;
 export const L1_CHAIN = configuration.L1_CHAIN;
+export const L2_CHAIN = SUPPORTED_CHAINS.get(L1_CHAIN)!;
 export const TOKENS_TO_TRACK = configuration.TOKENS_TO_TRACK;
 export const TX_COST = configuration.TX_COST;
 export const LOOK_BACK_HOURS = configuration.LOOK_BACK_HOURS;

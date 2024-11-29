@@ -6,7 +6,7 @@ import type { L2Interface } from "./L2Interface.js";
 import type { Option } from "@polkadot/types-codec";
 import type { PalletRolldownMessagesChain } from "@polkadot/types/lookup";
 import { PalletRolldownL2Request } from "@polkadot/types/lookup";
-import { L1_CHAIN } from "../Config.js";
+import { L2_CHAIN } from "../Config.js";
 import { Mangata } from "gasp-sdk";
 import { Withdrawal } from "../Withdrawal.js";
 import { Cancel } from "../Cancel.js";
@@ -27,7 +27,7 @@ function createBigIntArrayFromRange(start: bigint, end: bigint) {
 }
 
 function getL1ChainType(api: ApiPromise): PalletRolldownMessagesChain {
-	return api.createType("PalletRolldownMessagesChain", L1_CHAIN);
+	return api.createType("PalletRolldownMessagesChain", L2_CHAIN);
 }
 
 class L2Api implements L2Interface {
