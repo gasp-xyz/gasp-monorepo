@@ -27,15 +27,21 @@ contract RolldownGasUsage is Script {
     bytes32 private _merkleRoot;
     bytes32[] private _merkleProof;
     uint256 private _amount = 1 ether;
-    uint256 private _gasPrice = 20 gwei;
+    uint256 txGasPrice = vm.envUint("BENCHMARKS_GAS_PRICE_GWEI") * 10 ** 9;
 
     function run() external {
+        console.log("Rolldown contract");
+        console.log("Gas price (wei): %s", txGasPrice);
+        console.log("-------------------------------------------------------------------");
+
         _calculateGasToFerryWithdrawall();
         _calculateGasToUpdateL1FromL2();
         _calculateGasToCloseWithdrawal();
     }
 
     function _setUp() private {
+        vm.txGasPrice(txGasPrice);
+
         string memory mnemonic = vm.envString("MNEMONIC");
 
         users = Users({
@@ -80,9 +86,8 @@ contract RolldownGasUsage is Script {
     }
 
     function _calculateGasToFerryWithdrawall() private {
+        console.log("Call ferryWithdrawal method");
         _setUp();
-
-        vm.txGasPrice(_gasPrice);
 
         uint256 gasStart = gasleft();
 
@@ -90,15 +95,12 @@ contract RolldownGasUsage is Script {
         rolldown.ferryWithdrawal{value: _amount}(_withdrawalA);
 
         uint256 gasEnd = gasleft();
-
-        console.log("ferryWithdrawal gas used (wei): %s", gasStart - gasEnd);
-        console.log("-------------------------------------------------------------------");
+        _printMethodCallReport(gasStart - gasEnd);
     }
 
     function _calculateGasToUpdateL1FromL2() private {
+        console.log("Call updateL1FromL2");
         _setUp();
-
-        vm.txGasPrice(_gasPrice);
 
         uint256 gasStart = gasleft();
 
@@ -106,15 +108,12 @@ contract RolldownGasUsage is Script {
         rolldown.updateL1FromL2(_merkleRoot, _range);
 
         uint256 gasEnd = gasleft();
-
-        console.log("updateL1FromL2 gas used (wei): %s", gasStart - gasEnd);
-        console.log("-------------------------------------------------------------------");
+        _printMethodCallReport(gasStart - gasEnd);
     }
 
     function _calculateGasToCloseWithdrawal() private {
+        console.log("Call closeWithdrawal method");
         _setUp();
-
-        vm.txGasPrice(_gasPrice);
 
         vm.broadcast(users.updater);
         rolldown.updateL1FromL2(_merkleRoot, _range);
@@ -125,9 +124,7 @@ contract RolldownGasUsage is Script {
         rolldown.closeWithdrawal(_withdrawalA, _merkleRoot, _merkleProof);
 
         uint256 gasEnd = gasleft();
-
-        console.log("closeWithdrawal gas used: %s", gasStart - gasEnd);
-        console.log("-------------------------------------------------------------------");
+        _printMethodCallReport(gasStart - gasEnd);
     }
 
     function _createRequestId(IRolldownPrimitives.Origin origin)
@@ -136,5 +133,11 @@ contract RolldownGasUsage is Script {
         returns (IRolldownPrimitives.RequestId memory)
     {
         return IRolldownPrimitives.RequestId({origin: origin, id: rolldown.counter()});
+    }
+
+    function _printMethodCallReport(uint256 gasUsed) private view {
+        console.log("Gas used (wei): %d", gasUsed);
+        console.log("Transaction cost (wei): %d", gasUsed * txGasPrice);
+        console.log("-------------------------------------------------------------------");
     }
 }

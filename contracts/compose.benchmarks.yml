@@ -3,8 +3,8 @@ services:
     image: ghcr.io/foundry-rs/foundry:latest
     container_name: anvil
     environment:
-      - ANVIL_IP_ADDR=0.0.0.0
-    command: ["anvil", "--port", "8545", "--chain-id", "31337"]
+      ANVIL_IP_ADDR: "0.0.0.0"
+    command: ["anvil", "--accounts", "10", "--port", "8545", "--chain-id", "31337"]
     ports:
       - "8545:8545"
     networks:
@@ -25,9 +25,12 @@ services:
     volumes:
       - .:/app
     environment:
-      - MNEMONIC="test test test test test test test test test test test junk"
+      MNEMONIC: test test test test test test test test test test test junk
+      BENCHMARKS_GAS_PRICE_GWEI: ${BENCHMARKS_GAS_PRICE_GWEI:-10}
     entrypoint: >
-      forge script script/RolldownGasUsage.s.sol:RolldownGasUsage --rpc-url http://anvil:8545 --broadcast
+      forge script script/RolldownGasUsage.s.sol:RolldownGasUsage
+        --rpc-url http://anvil:8545
+        --broadcast
     networks:
       - localnet
 
