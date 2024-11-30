@@ -12,6 +12,7 @@ import {Rolldown} from "../src/Rolldown.sol";
 contract RolldownGasUsage is Script {
     struct Users {
         address admin;
+        address depositor;
         address updater;
         address withdrawer;
         address recipient;
@@ -29,18 +30,23 @@ contract RolldownGasUsage is Script {
     uint256 private _gasPrice = 20 gwei;
 
     function run() external {
-        _gasEndFerryWithdrawal();
-        _gasEndUpdateL1FromL2();
-        _gasEndCloseWithdrawal();
+        _calculateGasToFerryWithdrawall();
+        _calculateGasToUpdateL1FromL2();
+        _calculateGasToCloseWithdrawal();
     }
 
     function _setUp() private {
+        string memory mnemonic = vm.envString("MNEMONIC");
+
         users = Users({
-            admin: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266,
-            updater: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8,
-            withdrawer: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC,
-            recipient: 0x90F79bf6EB2c4f870365E785982E1f101E93b906
+            admin: vm.rememberKey(vm.deriveKey(mnemonic, 0)),
+            depositor: vm.rememberKey(vm.deriveKey(mnemonic, 1)),
+            updater: vm.rememberKey(vm.deriveKey(mnemonic, 2)),
+            withdrawer: vm.rememberKey(vm.deriveKey(mnemonic, 3)),
+            recipient: vm.rememberKey(vm.deriveKey(mnemonic, 4))
         });
+
+        vm.startBroadcast(users.admin);
 
         Rolldown implementation = new Rolldown();
         ProxyAdmin proxyAdmin = new ProxyAdmin();
@@ -49,9 +55,12 @@ contract RolldownGasUsage is Script {
             address(proxyAdmin),
             abi.encodeCall(Rolldown.initialize, (users.admin, IRolldownPrimitives.ChainId.Ethereum, users.updater))
         );
+
+        vm.stopBroadcast();
+
         rolldown = Rolldown(address(proxy));
 
-        vm.prank(users.admin);
+        vm.broadcast(users.depositor);
         rolldown.depositNative{value: _amount}();
 
         address nativeTokenAddress = rolldown.NATIVE_TOKEN_ADDRESS();
@@ -70,57 +79,54 @@ contract RolldownGasUsage is Script {
         _merkleProof[0] = _withdrawalHashB;
     }
 
-    function _gasEndFerryWithdrawal() private {
+    function _calculateGasToFerryWithdrawall() private {
         _setUp();
 
         vm.txGasPrice(_gasPrice);
+
         uint256 gasStart = gasleft();
 
-        vm.startBroadcast(users.withdrawer);
+        vm.broadcast(users.withdrawer);
         rolldown.ferryWithdrawal{value: _amount}(_withdrawalA);
-        vm.stopBroadcast();
 
         uint256 gasEnd = gasleft();
-        uint256 gasUsed = (gasStart - gasEnd) * tx.gasprice;
 
-        console.log("ferryWithdrawal gas used: %s", gasUsed);
+        console.log("ferryWithdrawal gas used (wei): %s", gasStart - gasEnd);
         console.log("-------------------------------------------------------------------");
     }
 
-    function _gasEndUpdateL1FromL2() private {
+    function _calculateGasToUpdateL1FromL2() private {
         _setUp();
 
         vm.txGasPrice(_gasPrice);
+
         uint256 gasStart = gasleft();
 
-        vm.startBroadcast(users.updater);
+        vm.broadcast(users.updater);
         rolldown.updateL1FromL2(_merkleRoot, _range);
-        vm.stopBroadcast();
 
         uint256 gasEnd = gasleft();
-        uint256 gasUsed = (gasStart - gasEnd) * tx.gasprice;
 
-        console.log("updateL1FromL2 gas used: %s", gasUsed);
+        console.log("updateL1FromL2 gas used (wei): %s", gasStart - gasEnd);
         console.log("-------------------------------------------------------------------");
     }
 
-    function _gasEndCloseWithdrawal() private {
+    function _calculateGasToCloseWithdrawal() private {
         _setUp();
 
         vm.txGasPrice(_gasPrice);
-        uint256 gasStart = gasleft();
 
-        vm.prank(users.updater);
+        vm.broadcast(users.updater);
         rolldown.updateL1FromL2(_merkleRoot, _range);
 
-        vm.startBroadcast(users.withdrawer);
+        uint256 gasStart = gasleft();
+
+        vm.broadcast(users.withdrawer);
         rolldown.closeWithdrawal(_withdrawalA, _merkleRoot, _merkleProof);
-        vm.stopBroadcast();
 
         uint256 gasEnd = gasleft();
-        uint256 gasUsed = (gasStart - gasEnd) * tx.gasprice;
 
-        console.log("closeWithdrawal gas used: %s", gasUsed);
+        console.log("closeWithdrawal gas used: %s", gasStart - gasEnd);
         console.log("-------------------------------------------------------------------");
     }
 
