@@ -1472,7 +1472,7 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::WrongRequestId
 		);
 
-		let last_id = lowest_id +
+		let last_id = lowest_id.saturating_sub(1u128) +
 			(update.pendingDeposits.len() as u128) +
 			(update.pendingCancelResolutions.len() as u128);
 
