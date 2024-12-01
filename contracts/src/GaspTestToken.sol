@@ -1,21 +1,19 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.12;
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MintableERC20 is ERC20 {
-    address public owner;
-    constructor(string memory name_, string memory symbol_) ERC20(name_, symbol_) {
-        owner = msg.sender;
-        _mint(msg.sender, 1000000000 * 10 ** decimals());
+contract MintableERC20 is Context, Ownable, ERC20 {
+    constructor(string memory name_, string memory symbol_) Ownable() ERC20(name_, symbol_) {
+        _mint(_msgSender(), 1_000_000_000 * 10 ** decimals());
     }
 
-    function mint(address account, uint256 amount) public {
-      require((owner == msg.sender), "Only one who deployed contract can mint tokens");
-      _mint(account, amount);
+    function mint(address to, uint256 amount) external onlyOwner {
+        _mint(to, amount);
     }
 }
-
 
 contract GaspTestToken is MintableERC20 {
     constructor() MintableERC20("GaspV2", "GASPV2") {}
