@@ -17,7 +17,7 @@ contract MintableERC20 is ERC20 {
 }
 
 
-contract Gasp is MintableERC20 {
+contract GaspTestToken is MintableERC20 {
     constructor() MintableERC20("GaspV2", "GASPV2") {}
 }
 
