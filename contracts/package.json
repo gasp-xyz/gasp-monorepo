@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Gasp smart contracts for an EVM compatible virtual machine",
   "scripts": {
-    "format": "bun prettier --check '**/*.{json,md,yml}' && forge fmt --check src/{IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
-    "format:fix": "bun prettier --check '**/*.{json,md,yml}' && forge fmt {src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/rolldownDeployer.t}.sol",
-    "lint": "bun solhint {script,src,test}/**/{IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
-    "lint:fix": "bun solhint --fix {script,src,test}/**/{IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
+    "format": "bun prettier --check '**/*.{json,md,yml}' && forge fmt --check interfaces/IGaspToken.sol src/{GaspToken.sol,IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
+    "format:fix": "bun prettier --check '**/*.{json,md,yml}' && forge fmt interfaces/IGaspToken.sol {src/GaspToken.sol,src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/rolldownDeployer.t}.sol",
+    "lint": "bun solhint {script,src,test}/**/{GaspToken,IGaspToken,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
+    "lint:fix": "bun solhint --fix {script,src,test}/**/{GaspToken,IGaspToken,IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
     "analyze": "slitherin . --separated",
     "analyze:ci": "slitherin --separated . --skip-clean --ignore-compile"
   },
