@@ -1,0 +1,31 @@
+{
+  "name": "testnetv2tov3",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "build": "rimraf ./build && npx tsc",
+    "execute": "node build/src/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/json-bigint": "^1.0.4",
+    "@types/node": "20.10.3",
+    "rimraf": "5.0.5",
+    "typescript": "5.3.2"
+  },
+  "dependencies": {
+    "@polkadot/api": "^11.1.1",
+    "dotenv": "^16.4.5",
+    "gasp-sdk-source": "npm:gasp-sdk@0.0.2-eth-rollup-develop.24",
+    "gasp-types-source": "npm:gasp-types@0.0.2-eth-rollup-develop.24",
+    "gasp-sdk-target": "npm:gasp-sdk@0.0.2-eth-rollup-develop.24",
+    "gasp-types-target": "npm:gasp-types@0.0.2-eth-rollup-develop.24",
+    "json-bigint": "^1.0.0",
+    "winston": "^3.15.0",
+    "zod": "^3.22.5"
+  }
+}
