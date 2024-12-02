@@ -20,6 +20,8 @@ interface IGaspToken is IERC20 {
 
     error ZeroRecipient();
 
+    error TransfersAlreadyAllowed();
+
     error SenderAlreadyWhitelisted(address sender);
 
     error RecipientAlreadyWhitelisted(address recipient);

@@ -33,6 +33,7 @@ contract GaspTokenTest is Test {
     error ZeroL1Council();
     error ZeroSender();
     error ZeroRecipient();
+    error TransfersAlreadyAllowed();
     error SenderAlreadyWhitelisted(address sender);
     error RecipientAlreadyWhitelisted(address recipient);
     error SenderNotWhitelisted(address sender);
@@ -133,8 +134,17 @@ contract TransferOwnership is GaspTokenTest {
 }
 
 contract SetAllowTransfers is GaspTokenTest {
-    function test_EmitAllowTransfersSet() external {
+    function test_EmitAllowTransfersSet_IfAllowed() external {
         bool allowTransfers = true;
+
+        vm.prank(users.l1Council);
+        vm.expectEmit();
+        emit AllowTransfersSet(allowTransfers);
+        gaspToken.setAllowTransfers(allowTransfers);
+    }
+
+    function test_EmitAllowTransfersSet_IfNotAllowed() external {
+        bool allowTransfers = false;
 
         vm.prank(users.l1Council);
         vm.expectEmit();
@@ -148,6 +158,17 @@ contract SetAllowTransfers is GaspTokenTest {
 
         bool allowTransfers = gaspToken.allowTransfers();
         assertTrue(allowTransfers);
+    }
+
+    function test_RevertIf_TransfersAlreadyAllowed() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.setAllowTransfers(true);
+
+        vm.expectRevert(TransfersAlreadyAllowed.selector);
+        gaspToken.setAllowTransfers(false);
+
+        vm.stopPrank();
     }
 
     function test_RevertIf_NotOwner() external {
@@ -363,9 +384,9 @@ contract Approve is GaspTokenTest {
     function test_GetAllowance_IfNotAllowTransfers() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.setAllowTransfers(true);
+        gaspToken.whitelistRecipient(users.spender);
         gaspToken.approve(users.spender, amount);
-        gaspToken.setAllowTransfers(false);
+        gaspToken.dewhitelistRecipient(users.spender);
 
         vm.stopPrank();
 
