@@ -3,6 +3,7 @@ Service responsible for ferrying withdrawals from `GASP` to `L1`. To speed up th
 
 ## Configuration
 Service is configurable through env file supporting below parameters:
+
  * `MANGATA_NODE_URL` - L2 websocket address
  * `ETH_CHAIN_URL` -  L1 websocket address
  * `MANGATA_CONTRACT_ADDRESS` - Rolldown contract address
@@ -13,7 +14,7 @@ Service is configurable through env file supporting below parameters:
       TOKEN ADDRESS                               MINIMUM PROFIT   WEIGHT
 
 ```
- * `L1_CHAIN` - `Ethereum` or `Arbitrum`
+ * `L1_CHAIN` - oneof [`anvil-arbitrum` ,`anvil-ethereum` ,`holesky` ,`arbitrum-sepolia` ,`reth-arbitrum` ,`reth-ethereum`]
  * `TX_COST` - Estimated tx cost in gwei (to take into account when considering native token ferries)
  * `LOOK_BACK_HOURS` - period of time in past that ferry should be looking for past withdrawals that might be ready to close
  * `LOG` - log level as in `winston` (`error`,`info`, `debug`, `silly`)
@@ -32,7 +33,7 @@ Service is configurable through env file supporting below parameters:
  '[["0xc351628EB244ec633d5f21fBD6621e1a683B1181", 100000000000000, 1]]'
       TOKEN ADDRESS                               MINIMUM PROFIT   WEIGHT
 ```
- * `L1_CHAIN` - `Ethereum` or `Arbitrum`
+ * `L1_CHAIN` - oneof [`anvil-arbitrum` ,`anvil-ethereum` ,`holesky` ,`arbitrum-sepolia` ,`reth-arbitrum` ,`reth-ethereum`]
  * `TX_COST` - Estimated tx cost in gwei (to take into account when considering native token ferries)
  * `LOOK_BACK_HOURS` - in case of Closer service should be set to 0 (unused)
  * `LOG` - log level as in `winston` (`error`,`info`, `debug`, `silly`)
