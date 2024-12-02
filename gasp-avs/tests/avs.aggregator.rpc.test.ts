@@ -45,7 +45,7 @@ describe('AVS Aggregator', () => {
         });
         // opt-in to avoid avs completeness.
         const POperatorAddress = waitForOperatorRegistered(publicClient as any);
-        await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE, dockerUtils.bigStakeWithWrongAvsPort);
+        await dockerUtils.startContainer(dockerUtils.GASP_AVS_IMAGE, dockerUtils.bigStakeWithWrongAvsPort);
         await POperatorAddress;
 
         const keys = await getNewKeys();

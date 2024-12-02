@@ -21,14 +21,14 @@ export async function getNewKeys() {
 export class DockerUtils{
     container?: StartedTestContainer;
     containerName: string;
-    FINALIZER_IMAGE: string;
+    GASP_AVS_IMAGE: string;
     constructor() {
         this.container = undefined;
         this.containerName = "";
-        this.FINALIZER_IMAGE = "gaspxyz/gasp-avs:" + ( process.env.GASP_AVS_VERSION || 'local' );
-        console.info("Using image: " + this.FINALIZER_IMAGE);
+        this.GASP_AVS_IMAGE = "gaspxyz/gasp-avs:" + ( process.env.GASP_AVS_VERSION || 'local' );
+        console.info("Using image: " + this.GASP_AVS_IMAGE);
     }
-    async startContainer(image: string = this.FINALIZER_IMAGE, env = this.finalizerLocalEnvironment, opKeys : Partial<operatorKeys>  = {}, logMessage = "Testnet setup sucessfully, starting AVS verification") {
+    async startContainer(image: string = this.GASP_AVS_IMAGE, env = this.finalizerLocalEnvironment, opKeys : Partial<operatorKeys>  = {}, logMessage = "Testnet setup sucessfully, starting AVS verification") {
         this.containerName = image;
         const json = await getNewKeys();
         env.ECDSA_KEY_JSON =  JSON.stringify(json.edcsa);
