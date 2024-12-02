@@ -127,6 +127,8 @@ interface IRolldownPrimitives {
 
     error L2RequestAlreadyProcessed(bytes32 requestHash);
 
+    error ZeroRecipient();
+
     error InvalidFerriedAmount(uint256 actualAmount, uint256 expectedAmount);
 
     error InvalidRequestId(uint256 requestId);

@@ -9,7 +9,7 @@ Service is configurable through env file supporting below parameters:
  * `MNEMONIC` - Polkadot account mnemonic or raw private key
  * `TOKENS_TO_TRACK` - List of tokens to track in json format. Input is expected to have following format: 
 ```
- '[["0xFD471836031dc5108809D173A067e8486B9047A3", 100000000000000, 1]]'
+ '[["0xc351628EB244ec633d5f21fBD6621e1a683B1181", 100000000000000, 1]]'
       TOKEN ADDRESS                               MINIMUM PROFIT   WEIGHT
 
 ```

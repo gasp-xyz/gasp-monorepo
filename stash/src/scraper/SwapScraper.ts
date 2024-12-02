@@ -16,45 +16,49 @@ export const processSwapEvents = async (api: ApiPromise, block: Block) => {
       for (const event of eventGroup) {
         try {
           logger.info('event asset swapped received: ', event)
-          const account = event.data[0]
-          const tokenId = event.data[1][1]
-          const eventVolume = event.data[3]
-          const existingRecord = await swapRepository
-            .search()
-            .where('account')
-            .equals(account)
-            .returnFirst()
-          if (existingRecord) {
-            logger.info('existing record found: ', existingRecord)
-            const currentDate = new Date()
-            const lastTradeDate = new Date(existingRecord.lastTradeTimestamp)
-            existingRecord.daysActive =
-              currentDate.toDateString() === lastTradeDate.toDateString()
-                ? existingRecord.daysActive
-                : existingRecord.daysActive + 1
-            existingRecord.lastTradeTimestamp = currentDate
-            existingRecord.totalTrades += 1
-            const { decimals } = await decimalsFromTokenId(api, tokenId)
-            existingRecord.totalVolume =
-              decimals !== null
-                ? await calculateVolume(tokenId, decimals, eventVolume)
-                : 0
-            await swapRepository.save(existingRecord)
-          } else {
-            //we got the trade for new account
-            const { decimals } = await decimalsFromTokenId(api, tokenId)
-            const volume =
-              decimals !== null
-                ? await calculateVolume(tokenId, decimals, eventVolume)
-                : 0
-            const newRecord = {
-              account: account,
-              lastTradeTimestamp: new Date(),
-              daysActive: 1,
-              totalVolume: volume,
-              totalTrades: 1,
+          const account = (event.data as any).who
+          for (const swap of (event.data as any).swaps) {
+            const tokenId = swap.assetOut
+            const eventVolume = swap.amountOut
+            const existingRecord = await swapRepository
+              .search()
+              .where('account')
+              .equals(account)
+              .returnFirst()
+            if (existingRecord) {
+              logger.info('existing record found: ', existingRecord)
+              const currentDate = new Date()
+              const lastTradeDate = new Date(existingRecord.lastTradeTimestamp)
+              existingRecord.daysActive =
+                currentDate.toDateString() === lastTradeDate.toDateString()
+                  ? existingRecord.daysActive
+                  : existingRecord.daysActive + 1
+              existingRecord.lastTradeTimestamp = currentDate
+              existingRecord.totalTrades += 1
+              const { decimals } = await decimalsFromTokenId(api, tokenId)
+              const newVolume =
+                decimals !== null
+                  ? await calculateVolume(tokenId, decimals, eventVolume)
+                  : 0
+              existingRecord.totalVolume =
+                existingRecord.totalVolume + newVolume
+              await swapRepository.save(existingRecord)
+            } else {
+              //we got the trade for new account
+              const { decimals } = await decimalsFromTokenId(api, tokenId)
+              const volume =
+                decimals !== null
+                  ? await calculateVolume(tokenId, decimals, eventVolume)
+                  : 0
+              const newRecord = {
+                account: account,
+                lastTradeTimestamp: new Date(),
+                daysActive: 1,
+                totalVolume: volume,
+                totalTrades: 1,
+              }
+              await swapRepository.save(newRecord)
             }
-            await swapRepository.save(newRecord)
           }
         } catch (e) {
           logger.error('Error processing swap event:', e)
@@ -65,7 +69,7 @@ export const processSwapEvents = async (api: ApiPromise, block: Block) => {
 }
 
 export const filterEvents = (ev: Event) => {
-  return ev.section === 'xyk' && ev.method === 'AssetsSwapped'
+  return ev.section === 'market' && ev.method === 'AssetsSwapped'
 }
 
 export async function decimalsFromTokenId(api: ApiPromise, tokenId: any) {

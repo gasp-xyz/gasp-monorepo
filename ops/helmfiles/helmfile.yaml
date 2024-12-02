@@ -32,17 +32,17 @@ releases:
         envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.aggregatorEnv | toYaml | nindent 10 }}
 
-  - name: avs-finalizer
+  - name: gasp-avs
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.finalizerEnabled }}
-    chart: ../helm-charts/avs-finalizer
+    installed: {{ .Values.gaspAvsEnabled }}
+    chart: ../helm-charts/gasp-avs
     values:
       - image:
-          repository: gaspxyz/avs-finalizer
-          tag: {{ .Values | get "finalizerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+          repository: gaspxyz/gasp-avs
+          tag: {{ .Values | get "gaspAvsImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
-        envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.finalizerEnv | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.gaspAvsEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        env: {{ .Values.gaspAvsEnv | toYaml | nindent 10 }}
 
   - name: updater
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -127,8 +127,8 @@ releases:
       - image:
           repository: gaspxyz/ferry-withdrawal
           tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        # `args` param is used to override the default command in the Dockerfile
-        args: ["node", "build/src/closer.js"]
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
   - name: closer-arb
@@ -139,8 +139,8 @@ releases:
       - image:
           repository: gaspxyz/ferry-withdrawal
           tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        # `args` param is used to override the default command in the Dockerfile
-        args: ["node", "build/src/closer.js"]
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
 

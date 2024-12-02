@@ -1,9 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
+import {IAccessControlUpgradeable} from "@openzeppelin-upgrades/contracts/access/IAccessControlUpgradeable.sol";
 import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
 
-interface IRolldown is IRolldownPrimitives {
+interface IRolldown is IAccessControlUpgradeable, IRolldownPrimitives {
+    function initialize(address admin, ChainId chainId, address updater) external;
+
+    function pause() external;
+
+    function unpause() external;
+
     function setUpdater(address updater) external;
 
     function deposit_native() external payable;
@@ -84,4 +91,10 @@ interface IRolldown is IRolldownPrimitives {
     function updaterAccount() external view returns (address);
 
     function processedL2Requests(bytes32 requestId) external view returns (address);
+
+    function UPDATER_ROLE() external view returns (bytes32);
+
+    function NATIVE_TOKEN_ADDRESS() external view returns (address);
+
+    function CLOSED() external view returns (address);
 }

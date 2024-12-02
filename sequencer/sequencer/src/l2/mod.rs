@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 use std::pin::Pin;
 
+use futures::future::join_all;
 use futures::Stream;
 use hex::encode as hex_encode;
 
 use futures::StreamExt;
 use primitive_types::H256;
-// use subxt::config::Header;
 use subxt::ext::subxt_core;
 use subxt::ext::subxt_core::storage::address::StorageHashers;
 use subxt::storage::StorageKey;
@@ -48,7 +48,7 @@ use gasp::api::runtime_types::rollup_runtime::RuntimeEvent;
 pub type L2Event = EventRecord<RuntimeEvent, H256>;
 
 pub trait L2Interface {
-    fn address(&self) -> [u8; 20];
+    fn account_address(&self) -> [u8; 20];
     async fn get_latest_processed_request_id(
         &self,
         chain: types::Chain,
@@ -114,6 +114,14 @@ pub trait L2Interface {
         chain: types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Vec<u8>, L2Error>;
+
+    async fn get_active_sequencers(
+        &self,
+        chain: types::Chain,
+        at: H256,
+    ) -> Result<Vec<[u8; 20]>, L2Error>;
+
+    async fn get_dispute_period(&self, chain: types::Chain, at: H256) -> Result<u128, L2Error>;
 }
 
 pub struct Gasp {
@@ -145,6 +153,10 @@ pub enum L2Error {
     HeaderSubscriptionFailed,
     #[error("awaiting cancel resolution fetch error")]
     PendingCancelFetchError,
+    #[error("unknown dispute period length")]
+    UnknownDisputePeriodLength(types::Chain),
+    #[error("unknown pending update `{0}`")]
+    UnknownPendingUpdate(H256),
 }
 
 pub type HashOf<T> = <T as Config>::Hash;
@@ -293,7 +305,7 @@ impl Gasp {
 }
 
 impl L2Interface for Gasp {
-    fn address(&self) -> [u8; 20] {
+    fn account_address(&self) -> [u8; 20] {
         self.keypair.address().into_inner()
     }
 
@@ -491,15 +503,27 @@ impl L2Interface for Gasp {
         let iter = gasp::api::storage()
             .rolldown()
             .pending_sequencer_updates_iter();
-        let result: Vec<Result<_, L2Error>> = self
+
+        let result = self
             .client
             .storage()
             .at(at)
             .iter(iter)
             .await?
-            .map(|result| -> Result<_, L2Error> {
+            .map(|result| async {
                 let storage_kv = result?;
-                let (_acc, update, hash) = storage_kv.value;
+                let update_hash = storage_kv.value.update_hash;
+                let storage_entry = gasp::api::storage()
+                    .rolldown()
+                    .pending_sequencer_update_content(update_hash);
+
+                let update = self
+                    .client
+                    .storage()
+                    .at(at)
+                    .fetch(&storage_entry)
+                    .await?
+                    .ok_or(L2Error::UnknownPendingUpdate(update_hash))?;
 
                 let keys = <(
                     StaticStorageKey<gasp_types::pending_sequencer_updates::Param0>,
@@ -509,13 +533,15 @@ impl L2Interface for Gasp {
                     &mut hashers.iter(),
                     metadata.types(),
                 )?;
-
-                Ok((keys.0.decoded()?, update, hash))
+                Ok::<_, L2Error>((keys.0.decoded()?, update, update_hash))
             })
-            .collect()
+            .collect::<Vec<_>>()
             .await;
 
-        result.into_iter().collect()
+        join_all(result)
+            .await
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()
     }
 
     #[tracing::instrument(skip(self))]
@@ -620,6 +646,42 @@ impl L2Interface for Gasp {
                     .map_err(L2Error::from)
             })
             .boxed())
+    }
+
+    #[tracing::instrument(skip(self))]
+    async fn get_active_sequencers(
+        &self,
+        chain: types::Chain,
+        at: H256,
+    ) -> Result<Vec<[u8; 20]>, L2Error> {
+        let storage = gasp::api::storage().sequencer_staking().active_sequencers();
+
+        let active = self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&storage)
+            .await?
+            .unwrap_or_default();
+
+        let active = active
+            .into_iter()
+            .find(|(c, _)| c == &chain)
+            .map(|(_, account)| account.0)
+            .unwrap_or_default();
+
+        Ok(active.into_iter().map(|elem| elem.0).collect())
+    }
+
+    #[tracing::instrument(skip(self))]
+    async fn get_dispute_period(&self, chain: types::Chain, at: H256) -> Result<u128, L2Error> {
+        let storage = gasp::api::storage()
+            .rolldown()
+            .dispute_period(chain.clone());
+        let active = self.client.storage().at(at).fetch(&storage).await?;
+
+        tracing::trace!("dispute period: {active:?}");
+        active.ok_or(L2Error::UnknownDisputePeriodLength(chain))
     }
 }
 
@@ -825,5 +887,18 @@ mod test {
             .expect("can submit update");
 
         assert!(!status);
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_can_fetch_active_sequencers() {
+        let gasp = Gasp::new(URI, ALITH_PKEY)
+            .await
+            .expect("can connect to gasp");
+        let at = gasp.latest_block().await.unwrap().1;
+
+        let active_sequencers = gasp.get_active_sequencers(ETHEREUM, at).await.unwrap();
+
+        assert!(!active_sequencers.is_empty());
     }
 }
