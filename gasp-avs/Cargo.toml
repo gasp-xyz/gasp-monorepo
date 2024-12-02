@@ -4,7 +4,7 @@ members = [
 ]
 
 [package]
-name = "avs-finalizer"
+name = "gasp-avs"
 version = "0.1.0"
 edition = "2021"
 

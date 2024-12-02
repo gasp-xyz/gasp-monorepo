@@ -61,24 +61,24 @@ jobs:
           docker buildx create --use
           docker buildx build --push --platform linux/amd64,linux/arm64 -t gaspxyz/avs-aggregator:${{ inputs.version }} -f avs-aggregator/Dockerfile .
 
-  build-avs-finalizer-image:
-    name: Build avs-finalizer Docker image
+  build-gasp-avs-image:
+    name: Build gasp-avs Docker image
     uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
       version: ${{ inputs.version }}
-      service_folder: avs-finalizer
-      docker_image_repository: gaspxyz/avs-finalizer
+      service_folder: gasp-avs
+      docker_image_repository: gaspxyz/gasp-avs
 
-  build-avs-finalizer-image-with-fast-runtime:
-    name: Build avs-finalizer Docker image with fast runtime
+  build-gasp-avs-image-with-fast-runtime:
+    name: Build gasp-avs Docker image with fast runtime
     uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
       version: ${{ inputs.version }}
-      service_folder: avs-finalizer
-      docker_image_repository: gaspxyz/avs-finalizer
-      finalizer_fast_runtime: true
+      service_folder: gasp-avs
+      docker_image_repository: gaspxyz/gasp-avs
+      gasp_avs_fast_runtime: true
 
   build-updater-image:
     name: Build updater Docker image

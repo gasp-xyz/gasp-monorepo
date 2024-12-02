@@ -27,8 +27,8 @@ on:
         description: Docker image repository
         required: true
         type: string
-      finalizer_fast_runtime:
-        description: Use `rollup-node` with fast runtime when building `avs-finalizer` image
+      gasp_avs_fast_runtime:
+        description: Use `rollup-node` with fast runtime when building `gasp-avs` image
         required: false
         type: boolean
         default: false
@@ -100,7 +100,7 @@ jobs:
           fi
 
   docker-image-build:
-    name: "[${{ inputs.service_folder }}] [${{ matrix.platform.name }}] image${{ inputs.finalizer_fast_runtime && ' with fast runtime' || '' }}"
+    name: "[${{ inputs.service_folder }}] [${{ matrix.platform.name }}] image${{ inputs.gasp_avs_fast_runtime && ' with fast runtime' || '' }}"
     strategy:
       matrix:
         platform:
@@ -110,11 +110,11 @@ jobs:
             runner: compile-gke-arm
     runs-on: ${{ matrix.platform.runner }}
     env:
-      JOB_CACHE_PREFIX: ${{ inputs.service_folder }}-${{ matrix.platform.name }}${{ inputs.finalizer_fast_runtime && 'fast' || 'regular' }}-${{ inputs.cache-version }}
+      JOB_CACHE_PREFIX: ${{ inputs.service_folder }}-${{ matrix.platform.name }}${{ inputs.gasp_avs_fast_runtime && 'fast' || 'regular' }}-${{ inputs.cache-version }}
       SERVICE_FOLDER: ${{ inputs.service_folder }}
       DOCKER_IMAGE_REPOSITORY: ${{ inputs.docker_image_repository }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
-      IMAGE_TAG: ${{ inputs.version }}${{ inputs.finalizer_fast_runtime && '-fast' || '' }}
+      IMAGE_TAG: ${{ inputs.version }}${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
     steps:
       - uses: actions/checkout@v4
     
@@ -165,7 +165,7 @@ jobs:
           platforms: linux/${{ matrix.platform.name }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
-          build-args: ROLLUP_NODE_VERSION=eth-rollup-develop${{ inputs.finalizer_fast_runtime && '-fast' || '' }}
+          build-args: ROLLUP_NODE_VERSION=eth-rollup-develop${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
       
       - name: Export digest
         run: |
@@ -176,7 +176,7 @@ jobs:
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.service_folder }}-${{ inputs.finalizer_fast_runtime && 'fast' || 'regular' }}-linux-${{ matrix.platform.name }}
+          name: ${{ inputs.service_folder }}-${{ inputs.gasp_avs_fast_runtime && 'fast' || 'regular' }}-linux-${{ matrix.platform.name }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -210,13 +210,13 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKER_IMAGE_REPOSITORY: ${{ inputs.docker_image_repository }}
-      IMAGE_TAG: ${{ inputs.version }}${{ inputs.finalizer_fast_runtime && '-fast' || '' }}
+      IMAGE_TAG: ${{ inputs.version }}${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
           path: /tmp/digests
-          pattern: ${{ inputs.service_folder }}-${{ inputs.finalizer_fast_runtime && 'fast' || 'regular' }}-*
+          pattern: ${{ inputs.service_folder }}-${{ inputs.gasp_avs_fast_runtime && 'fast' || 'regular' }}-*
           merge-multiple: true
       
       - uses: docker/setup-buildx-action@v3

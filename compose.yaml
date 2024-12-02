@@ -5,7 +5,7 @@ include:
   # - path: ./contracts/compose.reth-stubs.yml # reth stubs
 
   - path: ./avs-aggregator/compose.yml
-  - path: ./avs-finalizer/compose.yml
+  - path: ./gasp-avs/compose.yml
   # - path: ./rollup-sequencer/compose.yml
   - path: ./sequencer/compose.yml
   - path: ./contracts/compose.yml
