@@ -42,12 +42,6 @@ releases:
             - hosts: ["avs-aggregator-{{ .Values.environmentName }}.gasp.xyz"]
               secretName: avs-aggregator-tls
         podReplacementPolicy: Failed
-        podFailurePolicy:
-          rules:
-            - action: 
-            - action: Ignore
-              onPodConditions:
-                - type: DisruptionTarget
 
   - name: gasp-avs
     namespace: 'rollup-{{ .Values.environmentName }}'
