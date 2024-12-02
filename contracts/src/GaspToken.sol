@@ -11,8 +11,8 @@ import {IGaspToken} from "./interfaces/IGaspToken.sol";
 contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    uint256 public constant TOTAL_SUPPLY = 1_000_000_000 * 10 ** 18;
-    string private constant _NAME = "Gasp Token";
+    uint256 private constant _TOTAL_SUPPLY = 1_000_000_000 * 10 ** 18;
+    string private constant _NAME = "GASP";
     string private constant _SYMBOL = "GASP";
 
     bool public allowTransfers;
@@ -31,10 +31,11 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
             revert ZeroL1Council();
         }
 
+        _transferOwnership(l1Council);
+        _mint(l1Council, _TOTAL_SUPPLY);
+
         _senderWhitelist.add(l1Council);
         _recipientWhitelist.add(l1Council);
-
-        _mint(l1Council, TOTAL_SUPPLY);
     }
 
     function setAllowTransfers(bool allowTransfers_) external override onlyOwner {
@@ -42,7 +43,7 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         emit AllowTransfersSet(allowTransfers_);
     }
 
-    function whiltelistSender(address sender) external override onlyOwner {
+    function whitelistSender(address sender) external override onlyOwner {
         if (sender == address(0)) {
             revert ZeroSender();
         }
@@ -123,7 +124,7 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     function transferFrom(address sender, address recipient, uint256 amount)
         public
         override(ERC20, IERC20)
-        isOperationForbidden(IERC20.transferFrom.selector, sender, recipient)
+        isOperationForbidden(IERC20.transferFrom.selector, _msgSender(), recipient)
         returns (bool)
     {
         return super.transferFrom(sender, recipient, amount);
