@@ -1,6 +1,6 @@
 remoteCluster: true
 
-blockscoutEnabled: false
+blockscoutEnabled: true
 enableArbitrumServices: true
 
 ####################
@@ -26,65 +26,38 @@ collator:
     repository: mangatasolutions/rollup-node
     tag: 456a53b8bdd546d99507884cf4a82b844366c2eb-fast
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/eb43d6a85f5152cc5f4bae0996bf7b74ad1c516d/rollup-dev-env-chainspecs/rollup-fungible-456a53b8-raw.json
-  storageClass: standard
-  storageSize: 5Gi
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/7358269f21bf921b541f07db5ab80badb03288b7/rollup-dev-env-chainspecs/rollup-frontend-456a53b-raw.json
+  storageClass: node-data-volume-retain
+  storageSize: 50Gi
   enableServiceMonitorCollectors: true
   wsHealthExporter:
-    enabled: false
+    enabled: true
+    image: paritytech/ws-health-exporter:bc071a44-20230830
+    env:
+      WSHE_NODE_MIN_PEERS: 2
+  tolerations:
+    - key: production
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
   collator01:
-    # Identity ID: 12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-    customNodeKey: "5ad94653edf592f59d1b54960cda1334596cc3dcab8dd96adb334d3e22e912ef"
-    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
+    # Identity ID: 12D3KooWJCggfzsr6LAdXSdfgFLxsMtgCq9qSq79vqYtdG2oT8Za
+    customNodeKey: "a9a20a5fa298fdd68ae5516c60c060c419e37bae4440d6f52ae3439162522fa2"
+    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWB7YXuwmv55wy5UFDe9yRGYJFPk1r3DpFMSyFx5KqMi3G
     extraArgs:
       - --alith
       - --pruning=archive
+    nodeSelector:
+      production: "true"
   collator02:
-    # Identity ID: 12D3KooWFz4zM26EKYTpX98GhLhS3KLv7mUyvpYXCdzxdrorSVCu
-    customNodeKey: "bcaf1bb787b48156aadaf318603e5b37e637883edafb850912e364e913e2c35b"
-    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
+    # Identity ID: 12D3KooWB7YXuwmv55wy5UFDe9yRGYJFPk1r3DpFMSyFx5KqMi3G
+    customNodeKey: "bf08651f3aa5b9fed7ce2e82a5fce8c31f1889e93e3019476b3052f33d57116f"
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWJCggfzsr6LAdXSdfgFLxsMtgCq9qSq79vqYtdG2oT8Za
     extraArgs:
       - --baltathar
       - --pruning=archive
-
-####################
-# evm-node configs #
-####################
-envEth:
-  # rpc
-  ETH_RPC_URL: http://evm-node-eth:8545
-  ETH_WS_URL: ws://evm-node-eth:8546
-  SUBSTRATE_RPC_URL: ws://collator-01:9944
-  # contracts
-  CHAIN_ID: "1337"
-  AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
-  # AVS
-  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  AVS_BLOCK_VALIDATION_PERIOD: "5"
-  # OP
-  RUST_LOG: info
-  AVS_RPC_URL: http://avs-aggregator:8090
-  TESTNET: "true"
-  ECDSA_EPHEMERAL_KEY: "true"
-  BLS_EPHEMERAL_KEY: "true"
-
-envArb:
-  # rpc
-  ETH_RPC_URL: http://evm-node-arb:8545
-  ETH_WS_URL: ws://evm-node-arb:8546
-  SUBSTRATE_RPC_URL: ws://collator-01:9944
-  # contracts
-  CHAIN_ID: "1337"
-  AVS_REGISTRY_COORDINATOR_ADDR: 0x851356ae760d987E095750cCeb3bC6014560891C
-  # AVS
-  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  AVS_BLOCK_VALIDATION_PERIOD: "5"
-  # OP
-  RUST_LOG: info
-  AVS_RPC_URL: http://avs-aggregator-eth:8090
-  TESTNET: "true"
-  ECDSA_EPHEMERAL_KEY: "true"
-  BLS_EPHEMERAL_KEY: "true"
+    nodeSelector:
+      production: "true"
 
 ######################
 # aggregator configs #
@@ -128,8 +101,8 @@ gaspAvsEnv:
   BLS_EPHEMERAL_KEY: "true"
   TESTNET: "true"
   # rollup-node configs
-  ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-  ROLLUP_NODE_CHAIN: /app/fungible-chainspec.json
+  ROLLUP_NODE_CHAIN: /app/frontend-chainspec.json
+  ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWJCggfzsr6LAdXSdfgFLxsMtgCq9qSq79vqYtdG2oT8Za
 
 ###########################
 # updater configs #
@@ -170,7 +143,6 @@ sequencerEnvSecretsEth:
   PRIVATE_KEY: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
   MNEMONIC: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
 
-sequencerChainUrlArb: ws://evm-node-arb:8546
 sequencerEnvArb:
   CHAIN: "reth"
   L1_CHAIN: "Arbitrum"
