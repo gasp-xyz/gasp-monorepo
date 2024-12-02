@@ -25,7 +25,7 @@ export class DockerUtils{
     constructor() {
         this.container = undefined;
         this.containerName = "";
-        this.FINALIZER_IMAGE = "gaspxyz/avs-finalizer:" + ( process.env.AVS_FINALIZER_VERSION || 'local' );
+        this.FINALIZER_IMAGE = "gaspxyz/gasp-avs:" + ( process.env.GASP_AVS_VERSION || 'local' );
         console.info("Using image: " + this.FINALIZER_IMAGE);
     }
     async startContainer(image: string = this.FINALIZER_IMAGE, env = this.finalizerLocalEnvironment, opKeys : Partial<operatorKeys>  = {}, logMessage = "Testnet setup sucessfully, starting AVS verification") {
@@ -42,7 +42,7 @@ export class DockerUtils{
         if(opKeys.edcsa && opKeys.bls){
             env.STAKE = "1";
         }
-        const name = "rollup-avs-finalizer-TEST-" + randomBytes(4).toString("hex")
+        const name = "rollup-gasp-avs-TEST-" + randomBytes(4).toString("hex")
         console.info("name" + name + "keys: " + env.ECDSA_KEY_JSON  + env.BLS_KEY_JSON );
         console.info("Starting container: " + image);
         if(!this.container){
@@ -82,7 +82,7 @@ export class DockerUtils{
     -e ROLLUP_NODE_CHAIN:"rollup-local-seq",
     -e ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
     --entrypoint /bin/bash \
-    gaspxyz/avs-finalizer:local 
+    gaspxyz/gasp-avs:local 
     cc: ./main --bls-ephemeral-key --ecdsa-ephemeral-key
     */
     finalizerLocalEnvironment : Environment = {

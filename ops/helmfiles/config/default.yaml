@@ -73,11 +73,11 @@ aggregatorEnv:
   AVS_MIN_OP_UPDATE_INTERVAL: 1
 
 #####################
-# finalizer configs #
+# gaspAvs configs #
 #####################
-finalizerEnabled: true
-finalizerEnvSecrets: {}
-finalizerEnv:
+gaspAvsEnabled: true
+gaspAvsEnvSecrets: {}
+gaspAvsEnv:
   # rpc
   ETH_RPC_URL: http://evm-node-eth:8545
   ETH_WS_URL: ws://evm-node-eth:8546

@@ -1,10 +1,10 @@
 services:
-  avs-finalizer:
+  gasp-avs:
     build:
       context: .
       args:
         ROLLUP_NODE_VERSION: ${ROLLUP_NODE_VERSION}
-    image: gaspxyz/avs-finalizer:${AVS_FINALIZER_VERSION:-local}
+    image: gaspxyz/gasp-avs:${GASP_AVS_VERSION:-local}
     restart: unless-stopped
     depends_on:
       eth-stub:

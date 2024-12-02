@@ -21,7 +21,7 @@ envSecrets: {}
 nameOverride: ''
 
 image:
-  repository: gaspxyz/avs-finalizer
+  repository: gaspxyz/gasp-avs
   pullPolicy: Always
   ## Overrides the image tag whose default is the chart appVersion.
   tag: latest
