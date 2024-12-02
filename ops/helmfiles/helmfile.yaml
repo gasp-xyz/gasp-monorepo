@@ -42,6 +42,13 @@ releases:
             - hosts: ["avs-aggregator-{{ .Values.environmentName }}.gasp.xyz"]
               secretName: avs-aggregator-tls
         podReplacementPolicy: Failed
+        resources:
+          requests:
+            cpu: 1
+            memory: 1Gi
+          limits:
+            cpu: 2
+            memory: 4Gi
 
   - name: gasp-avs
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -54,6 +61,13 @@ releases:
         environment: {{ .Values.environmentName }}
         envSecrets: {{ .Values.gaspAvsEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.gaspAvsEnv | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 1
+            memory: 1Gi
+          limits:
+            cpu: 2
+            memory: 4Gi
 
   - name: updater
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -65,6 +79,13 @@ releases:
           tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.updaterEnv | toYaml | nindent 10 }}
         envSecrets: {{ .Values.updaterEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
   
   - name: sequencer-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -76,6 +97,13 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
 
   - name: sequencer-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -87,6 +115,13 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
   
   - name: ferry-deposit-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -98,6 +133,13 @@ releases:
           tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryDepositEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryDepositEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
   - name: ferry-deposit-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.ferryDepositEnabled }}
@@ -108,6 +150,13 @@ releases:
           tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryDepositEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryDepositEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
 
   - name: ferry-withdrawal-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -119,6 +168,13 @@ releases:
           tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryWithdrawalEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryWithdrawalEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
   - name: ferry-withdrawal-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.ferryWithdrawalEnabled }}
@@ -129,6 +185,13 @@ releases:
           tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryWithdrawalEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryWithdrawalEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
 
   - name: closer-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -142,6 +205,13 @@ releases:
           args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
   - name: closer-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.closerEnabled }}
@@ -154,6 +224,13 @@ releases:
           args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
 
   - name: evm-node-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
