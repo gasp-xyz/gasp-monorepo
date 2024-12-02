@@ -12,7 +12,7 @@ async fn main() -> Result<()> {
 
     color_eyre::install()?;
 
-    avs_finalizer::start().await?;
+    gasp_avs::start().await?;
 
     Ok(())
 }

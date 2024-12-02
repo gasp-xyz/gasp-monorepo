@@ -60,10 +60,10 @@ bindings-go: ## generates contract bindings
 	cd contracts && ./generate-go-bindings.sh
 
 bindings-rs: ## generates rust bindings
-	forge bind --bindings-path ./avs-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX}
-	cd ./avs-finalizer && cargo fmt
+	forge bind --bindings-path ./gasp-avs/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX}
+	cd ./gasp-avs && cargo fmt
 	cd ./updater && cargo fmt
-	cp -rf ./avs-finalizer/bindings ./updater/
+	cp -rf ./gasp-avs/bindings ./updater/
 
 bindings-rs-alloy: ## generates rust alloy bindings
 	forge bind --alloy --bindings-path ./sequencer/bindings --root ./contracts --crate-name bindings --overwrite  --select 'Rolldown$$' --select 'RolldownPrimitives$$'
@@ -95,15 +95,15 @@ start-avs-aggregator: ##
 		--ecdsa-key-file tests/keys/aggregator.ecdsa.key.json \
 		2>&1 | zap-pretty
 
-start-avs-finalizer: ## 
-	RUST_LOG=avs_finalizer=debug cargo run --manifest-path=avs-finalizer/Cargo.toml -- \
+start-gasp-avs: ## 
+	RUST_LOG=gasp_avs=debug cargo run --manifest-path=gasp-avs/Cargo.toml -- \
 		--ecdsa-ephemeral-key \
 		--bls-ephemeral-key \
 		--testnet \
 		--stake 50
 
-start-avs-finalizer-testkeys: ## 
-	RUST_LOG=avs_finalizer=debug cargo run --manifest-path=avs-finalizer/Cargo.toml -- \
+start-gasp-avs-testkeys: ## 
+	RUST_LOG=gasp_avs=debug cargo run --manifest-path=gasp-avs/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
 		--bls-key-file tests/keys/test.bls.key.json \
 		--opt-in-at-startup

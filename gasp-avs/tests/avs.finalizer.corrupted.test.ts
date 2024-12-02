@@ -17,9 +17,9 @@ jest.setTimeout(1500000);
 let dockerUtils: DockerUtils;
 
 //TODO: Unskip when syncer is developed and in place.
-describe.skip('Corrupted AVS Finalizer', () => {
+describe.skip('Corrupted Gasp AVS', () => {
     it.skip('It Responds to tasks, but wont be considered - avs wont store any Completeness - 2 mins', async () => {
-        console.info("Starting Corrupted Finalizer");
+        console.info("Starting Corrupted Gasp AVS");
         dockerUtils = new DockerUtils();
         const transport = webSocket(anvil.rpcUrls.default.http[0] , {
             retryCount: 5,
@@ -29,7 +29,7 @@ describe.skip('Corrupted AVS Finalizer', () => {
             chain: anvil,
         });
         const POperatorAddress = waitForOperatorRegistered(publicClient);
-        await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE , dockerUtils.corruptedFinalizerLocalEnvironment);
+        await dockerUtils.startContainer(dockerUtils.GASP_AVS_IMAGE , dockerUtils.corruptedFinalizerLocalEnvironment);
         const address = await POperatorAddress;
         console.info("Started");
         const operatorId = await getOperatorId(publicClient, address as string);
@@ -50,9 +50,9 @@ describe.skip('Corrupted AVS Finalizer', () => {
     });
 });
 
-describe.skip('Non Corrupted AVS Finalizer', () => {
+describe.skip('Non Corrupted Gasp AVS', () => {
     it.skip('It Responds to tasks, and completeness - 2 mins', async () => {
-        console.info("Starting Non-Corrupted Finalizer");
+        console.info("Starting Non-Corrupted Gasp AVS");
         dockerUtils = new DockerUtils();
         const transport = webSocket(anvil.rpcUrls.default.http[0] , {
             retryCount: 5,
@@ -63,7 +63,7 @@ describe.skip('Non Corrupted AVS Finalizer', () => {
         });
         const POperatorAddress = waitForOperatorRegistered(publicClient);
         const completedBefore = await waitFor(publicClient, 1, "RdTaskCompleted");
-        await dockerUtils.startContainer(dockerUtils.FINALIZER_IMAGE , dockerUtils.finalizerLocalEnvironment);
+        await dockerUtils.startContainer(dockerUtils.GASP_AVS_IMAGE , dockerUtils.finalizerLocalEnvironment);
         const address = await POperatorAddress;
         console.info("Started");
         await waitFor(publicClient, 1, "OpTaskCompleted");
