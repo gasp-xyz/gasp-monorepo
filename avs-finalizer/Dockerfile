@@ -49,7 +49,7 @@ RUN apt-get update && \
 # Add pre-generated chainspecs from `chainspec` repo
 ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json /app/fungible-chainspec.json
 ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json /app/dev-chainspec.json
-ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-frontend-4d76522-chainspec-raw.json /app/frontend-chainspec.json
+ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/985a889f8e39ecc960249f7d69eb967bd37565c6/rollup-dev-env-chainspecs/rollup-frontend-456a53b8-raw.json /app/frontend-chainspec.json
 ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json /app/holesky-chainspec.json
 
 COPY --chown=appuser:appuser --from=builder /app/main /app/finalizer
