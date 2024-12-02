@@ -32,7 +32,7 @@ interface IGaspToken is IERC20 {
 
     function setAllowTransfers(bool allowTransfers_) external;
 
-    function whiltelistSender(address sender) external;
+    function whitelistSender(address sender) external;
 
     function whitelistRecipient(address recipient) external;
 

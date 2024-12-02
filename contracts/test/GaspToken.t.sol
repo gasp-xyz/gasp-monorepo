@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { Test } from "forge-std/Test.sol";
-import { GaspToken } from "../src/GaspToken.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Test} from "forge-std/Test.sol";
+import {GaspToken} from "../src/GaspToken.sol";
 
 contract GaspTokenTest is Test {
     struct Users {
+        address deployer;
         address l1Council;
         address sender;
         address recipient;
@@ -14,12 +15,13 @@ contract GaspTokenTest is Test {
     }
 
     uint256 public constant TOTAL_SUPPLY = 1_000_000_000 * 10 ** 18;
-    string public constant NAME = "Gasp Token";
+    string public constant NAME = "GASP";
     string public constant SYMBOL = "GASP";
 
     Users public users;
     GaspToken public gaspToken;
 
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     event AllowTransfersSet(bool allowTransfers_);
     event SenderWhitelisted(address indexed sender);
     event RecipientWhitelisted(address indexed recipient);
@@ -39,30 +41,21 @@ contract GaspTokenTest is Test {
 
     function setUp() public virtual {
         users = Users({
+            deployer: makeAddr("deployer"),
             l1Council: makeAddr("l1Council"),
             sender: makeAddr("sender"),
             recipient: makeAddr("recipient"),
             spender: makeAddr("spender")
         });
 
+        deal(payable(users.deployer), 100 ether);
         deal(payable(users.l1Council), 100 ether);
         deal(payable(users.sender), 100 ether);
         deal(payable(users.recipient), 100 ether);
         deal(payable(users.spender), 100 ether);
 
-        vm.prank(users.l1Council);
+        vm.prank(users.deployer);
         gaspToken = new GaspToken(users.l1Council);
-    }
-
-    function _addAddressesToWhiteLists() internal {
-        vm.startPrank(users.l1Council);
-
-        gaspToken.whiltelistSender(users.sender);
-        gaspToken.whiltelistSender(users.recipient);
-        gaspToken.whitelistRecipient(users.sender);
-        gaspToken.whitelistRecipient(users.recipient);
-
-        vm.stopPrank();
     }
 }
 
@@ -80,6 +73,11 @@ contract Initialize is GaspTokenTest {
     function test_GetSymbol() external view {
         string memory symbol = gaspToken.symbol();
         assertEq(symbol, SYMBOL);
+    }
+
+    function test_GetTotalSupply() external view {
+        uint256 totalSupply = gaspToken.totalSupply();
+        assertEq(totalSupply, TOTAL_SUPPLY);
     }
 
     function test_GetAllowTransfers() external view {
@@ -100,13 +98,37 @@ contract Initialize is GaspTokenTest {
     }
 
     function test_GetL1CouncilBalance() external view {
-        uint256 l1CouncilBalance = gaspToken.balanceOf(users.l1Council);
-        assertEq(l1CouncilBalance, TOTAL_SUPPLY);
+        uint256 currentL1CouncilBalance = gaspToken.balanceOf(users.l1Council);
+        assertEq(currentL1CouncilBalance, TOTAL_SUPPLY);
     }
 
     function test_RevertIf_ZeroL1Council() external {
+        vm.prank(users.deployer);
         vm.expectRevert(ZeroL1Council.selector);
         gaspToken = new GaspToken(address(0));
+    }
+}
+
+contract TransferOwnership is GaspTokenTest {
+    function test_EmitOwnershipTransferred() external {
+        vm.prank(users.l1Council);
+        vm.expectEmit();
+        emit OwnershipTransferred(users.l1Council, users.deployer);
+        gaspToken.transferOwnership(users.deployer);
+    }
+
+    function test_GetOwner() external {
+        vm.prank(users.l1Council);
+        gaspToken.transferOwnership(users.deployer);
+
+        address owner = gaspToken.owner();
+        assertEq(owner, users.deployer);
+    }
+
+    function test_RevertIf_NotOwner() external {
+        vm.prank(users.deployer);
+        vm.expectRevert("Ownable: caller is not the owner");
+        gaspToken.transferOwnership(users.deployer);
     }
 }
 
@@ -140,12 +162,12 @@ contract WhitelistSender is GaspTokenTest {
         vm.prank(users.l1Council);
         vm.expectEmit();
         emit SenderWhitelisted(users.sender);
-        gaspToken.whiltelistSender(users.sender);
+        gaspToken.whitelistSender(users.sender);
     }
 
     function test_GetSenderWhitelist() external {
         vm.prank(users.l1Council);
-        gaspToken.whiltelistSender(users.sender);
+        gaspToken.whitelistSender(users.sender);
 
         address[] memory senderWhitelist = gaspToken.getSenderWhitelist();
         assertEq(senderWhitelist.length, 2);
@@ -156,22 +178,22 @@ contract WhitelistSender is GaspTokenTest {
     function test_RevertIf_NotOwner() external {
         vm.prank(users.sender);
         vm.expectRevert("Ownable: caller is not the owner");
-        gaspToken.whiltelistSender(users.sender);
+        gaspToken.whitelistSender(users.sender);
     }
 
     function test_RevertIf_ZeroSender() external {
         vm.prank(users.l1Council);
         vm.expectRevert(ZeroSender.selector);
-        gaspToken.whiltelistSender(address(0));
+        gaspToken.whitelistSender(address(0));
     }
 
     function test_RevertIf_SenderAlreadyWhitelisted() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whiltelistSender(users.sender);
+        gaspToken.whitelistSender(users.sender);
 
         vm.expectRevert(abi.encodeWithSelector(SenderAlreadyWhitelisted.selector, users.sender));
-        gaspToken.whiltelistSender(users.sender);
+        gaspToken.whitelistSender(users.sender);
 
         vm.stopPrank();
     }
@@ -230,7 +252,7 @@ contract DewhitelistSender is GaspTokenTest {
     function test_GetSenderWhitelist() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whiltelistSender(users.sender);
+        gaspToken.whitelistSender(users.sender);
         gaspToken.dewhitelistSender(users.sender);
 
         vm.stopPrank();
@@ -302,7 +324,7 @@ contract DewhitelistRecipient is GaspTokenTest {
 contract Approve is GaspTokenTest {
     uint256 public amount = 1 * 10 ** 18;
 
-    function test_EmitApproval_AllowTransfers() external {
+    function test_EmitApproval_IfAllowTransfers() external {
         vm.startPrank(users.l1Council);
 
         gaspToken.setAllowTransfers(true);
@@ -314,7 +336,7 @@ contract Approve is GaspTokenTest {
         vm.stopPrank();
     }
 
-    function test_EmitApproval_NotAllowTransfers() external {
+    function test_EmitApproval_IfRecipientWhitelisted() external {
         vm.startPrank(users.l1Council);
 
         gaspToken.whitelistRecipient(users.spender);
@@ -326,7 +348,7 @@ contract Approve is GaspTokenTest {
         vm.stopPrank();
     }
 
-    function test_GetAllowance_AllowTransfers() external {
+    function test_GetAllowance_IfAllowTransfers() external {
         vm.startPrank(users.l1Council);
 
         gaspToken.setAllowTransfers(true);
@@ -338,7 +360,7 @@ contract Approve is GaspTokenTest {
         assertEq(allowance, amount);
     }
 
-    function test_GetAllowance_NotAllowTransfers() external {
+    function test_GetAllowance_IfNotAllowTransfers() external {
         vm.startPrank(users.l1Council);
 
         gaspToken.setAllowTransfers(true);
@@ -384,5 +406,207 @@ contract Approve is GaspTokenTest {
 
         vm.expectRevert("ERC20: approve to the zero address");
         gaspToken.approve(address(0), amount);
+    }
+}
+
+contract TransferToken is GaspTokenTest {
+    uint256 public amount = 1 * 10 ** 18;
+
+    function test_EmitTransfer_IfAllowTransfers() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.setAllowTransfers(true);
+
+        vm.expectEmit();
+        emit Transfer(users.l1Council, users.recipient, amount);
+        gaspToken.transfer(users.recipient, amount);
+
+        vm.stopPrank();
+    }
+
+    function test_EmitTransfer_IfRecipientWhitelisted() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.whitelistRecipient(users.recipient);
+
+        vm.expectEmit();
+        emit Transfer(users.l1Council, users.recipient, amount);
+        gaspToken.transfer(users.recipient, amount);
+
+        vm.stopPrank();
+    }
+
+    function test_ChangeBalances() external {
+        uint256 initialL1CouncilBalance = gaspToken.balanceOf(users.l1Council);
+        uint256 initialRecipientBalance = gaspToken.balanceOf(users.recipient);
+
+        vm.startPrank(users.l1Council);
+
+        gaspToken.whitelistRecipient(users.recipient);
+        gaspToken.transfer(users.recipient, amount);
+
+        vm.stopPrank();
+
+        uint256 currentL1CouncilBalance = gaspToken.balanceOf(users.l1Council);
+        assertEq(currentL1CouncilBalance, initialL1CouncilBalance - amount);
+
+        uint256 currentRecipientBalance = gaspToken.balanceOf(users.recipient);
+        assertEq(currentRecipientBalance, initialRecipientBalance + amount);
+    }
+
+    function test_RevertIf_OperationForbidden_IfSenderNotWhitelisted() external {
+        vm.prank(users.l1Council);
+        gaspToken.whitelistRecipient(users.recipient);
+
+        vm.prank(users.sender);
+        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.transfer.selector));
+        gaspToken.transfer(users.recipient, amount);
+    }
+
+    function test_RevertIf_OperationForbidden_IfRecipientNotWhitelisted() external {
+        vm.prank(users.l1Council);
+        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.transfer.selector));
+        gaspToken.transfer(users.recipient, amount);
+    }
+
+    function test_RevertIf_TransferFromZeroAddress() external {
+        vm.prank(users.l1Council);
+        gaspToken.setAllowTransfers(true);
+
+        vm.prank(address(0));
+        vm.expectRevert("ERC20: transfer from the zero address");
+        gaspToken.transfer(users.recipient, amount);
+    }
+
+    function test_RevertIf_TransferToZeroAddress() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.setAllowTransfers(true);
+
+        vm.expectRevert("ERC20: transfer to the zero address");
+        gaspToken.transfer(address(0), amount);
+
+        vm.stopPrank();
+    }
+
+    function test_RevertIf_InsufficientBalance() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.whitelistSender(users.sender);
+        gaspToken.whitelistRecipient(users.recipient);
+
+        vm.stopPrank();
+
+        vm.prank(users.sender);
+        vm.expectRevert("ERC20: transfer amount exceeds balance");
+        gaspToken.transfer(users.recipient, amount);
+    }
+}
+
+contract TransferTokenFrom is GaspTokenTest {
+    uint256 public amount = 1 * 10 ** 18;
+
+    function test_EmitTransfer_IfAllowTransfers() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.setAllowTransfers(true);
+        gaspToken.approve(users.spender, amount);
+
+        vm.stopPrank();
+
+        vm.prank(users.spender);
+        vm.expectEmit();
+        emit Transfer(users.l1Council, users.recipient, amount);
+        gaspToken.transferFrom(users.l1Council, users.recipient, amount);
+    }
+
+    function test_EmitTransfer_IfSenderAndRecipientWhitelisted() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.whitelistRecipient(users.spender);
+        gaspToken.approve(users.spender, amount);
+
+        gaspToken.whitelistSender(users.spender);
+        gaspToken.whitelistRecipient(users.recipient);
+
+        vm.stopPrank();
+
+        vm.prank(users.spender);
+        vm.expectEmit();
+        emit Transfer(users.l1Council, users.recipient, amount);
+        gaspToken.transferFrom(users.l1Council, users.recipient, amount);
+    }
+
+    function test_ChangeBalances() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.whitelistRecipient(users.spender);
+        gaspToken.approve(users.spender, amount);
+
+        gaspToken.whitelistSender(users.spender);
+        gaspToken.whitelistRecipient(users.recipient);
+
+        vm.stopPrank();
+
+        uint256 initialL1CouncilBalance = gaspToken.balanceOf(users.l1Council);
+        uint256 initialRecipientBalance = gaspToken.balanceOf(users.recipient);
+
+        vm.prank(users.spender);
+        gaspToken.transferFrom(users.l1Council, users.recipient, amount);
+
+        uint256 currentL1CouncilBalance = gaspToken.balanceOf(users.l1Council);
+        assertEq(currentL1CouncilBalance, initialL1CouncilBalance - amount);
+
+        uint256 currentRecipientBalance = gaspToken.balanceOf(users.recipient);
+        assertEq(currentRecipientBalance, initialRecipientBalance + amount);
+
+        uint256 currentSpenderBalance = gaspToken.balanceOf(users.spender);
+        assertEq(currentSpenderBalance, 0);
+    }
+
+    function test_GetAllowance() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.whitelistRecipient(users.spender);
+        gaspToken.approve(users.spender, amount);
+
+        gaspToken.whitelistSender(users.spender);
+        gaspToken.whitelistRecipient(users.recipient);
+
+        vm.stopPrank();
+
+        vm.prank(users.spender);
+        gaspToken.transferFrom(users.l1Council, users.recipient, amount);
+
+        uint256 allowance = gaspToken.allowance(users.l1Council, users.spender);
+        assertEq(allowance, 0);
+    }
+
+    function test_RevertIf_OperationForbidden_IfSpenderNotWhitelisted() external {
+        vm.prank(users.spender);
+        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.transferFrom.selector));
+        gaspToken.transferFrom(users.l1Council, users.recipient, amount);
+    }
+
+    function test_RevertIf_OperationForbidden_IfRecipientNotWhitelisted() external {
+        vm.prank(users.l1Council);
+        gaspToken.whitelistSender(users.spender);
+
+        vm.prank(users.spender);
+        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.transferFrom.selector));
+        gaspToken.transferFrom(users.l1Council, users.recipient, amount);
+    }
+
+    function test_RevertIf_TransferToZeroAddress() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.setAllowTransfers(true);
+        gaspToken.approve(users.spender, amount);
+
+        vm.stopPrank();
+
+        vm.prank(users.spender);
+        vm.expectRevert("ERC20: transfer to the zero address");
+        gaspToken.transferFrom(users.l1Council, address(0), amount);
     }
 }
