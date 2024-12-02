@@ -28,14 +28,9 @@ spec:
   parallelism: {{ .Values.parallelism | default "1" }}
   {{- end }}
   
-  {{- if .Values.manualSelector }}
-  manualSelector: {{ .Values.manualSelector }}
-  {{- end }}
-  
   {{- if .Values.podFailurePolicy }}
   # Specifies the policy for handling failed pods
-  podFailurePolicy:
-  {{ toYaml .Values.podFailurePolicy | indent 4 }}
+  podFailurePolicy: {{ toYaml .Values.podFailurePolicy | nindent 4 }}
   {{- end }}
 
   {{- if .Values.podReplacementPolicy }}
@@ -56,16 +51,10 @@ spec:
   managedBy: {{ .Values.managedBy }}
   {{- end }}
 
-  # These selectors to match this object with previous versions of this object
-  selector:
-    matchLabels:
-{{- if .Values.labelsEnableDefault }}
-      app.kubernetes.io/name: {{ template "name" . }}
-{{- end }}
-
-{{- if .Values.labels }}
-{{ toYaml .Values.labels | indent 6 }}
-{{- end }}
+  {{- if .Values.manualSelector }}
+  manualSelector: {{ .Values.manualSelector }}
+  selector: {{ toYaml .Values.selector | nindent 4 }}
+  {{- end }}
 
   # This is the podTemplate, the bread and butter
   template:

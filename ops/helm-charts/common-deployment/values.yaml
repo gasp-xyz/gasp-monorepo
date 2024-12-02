@@ -76,7 +76,7 @@ ingress:
   # If we want to have affinity in nginx enabled
   nginx_affinity: false
   # This is the "new" name for ingress classes, optional
-  ingressClassName: ""
+  ingressClassName: "nginx"
   # The path type
   pathType: ImplementationSpecific # or Prefix
   annotations: {}
@@ -92,7 +92,7 @@ ingress_secondary:
   # If we want to override the name, RECOMMEND YOU DO NOT DO THIS UNLESS YOU NEED, it has a sane default
   name: ""
   # If we want to have affinity in nginx enabled
-  nginx_affinity: true
+  nginx_affinity: false
   # Ingress class name
   ingressClassName: "nginx"
   # The path type

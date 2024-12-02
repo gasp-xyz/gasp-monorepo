@@ -24,9 +24,9 @@ collator:
       memory: 6Gi
   image:
     repository: mangatasolutions/rollup-node
-    tag: 456a53b8bdd546d99507884cf4a82b844366c2eb-fast
+    tag: 456a53b8bdd546d99507884cf4a82b844366c2eb
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/eb43d6a85f5152cc5f4bae0996bf7b74ad1c516d/rollup-dev-env-chainspecs/rollup-fungible-456a53b8-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json
   storageClass: standard
   storageSize: 5Gi
   enableServiceMonitorCollectors: true
@@ -79,7 +79,7 @@ gaspAvsEnabled: true
 gaspAvsEnvSecrets: {}
 gaspAvsEnv:
   CHAIN_ID: "1337"
-  RUST_LOG: info,substrate=warn
+  RUST_LOG: info
   ETH_RPC_URL: http://evm-node-eth:8545
   ETH_WS_URL: ws://evm-node-eth:8546
   SUBSTRATE_RPC_URL: ws://collator-01:9944

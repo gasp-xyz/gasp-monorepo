@@ -3,9 +3,9 @@ bases: ['environments.yaml']
 helmDefaults:
   kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
   wait: false
-  diffArgs:
-    - "--suppress" 
-    - "Job"
+  # diffArgs:
+  #   - "--suppress" 
+  #   - "Job"
   # # TODO: To remove after updating Helm charts
   #   - "--suppress-output-line-regex"
   #   - "(application|component|heritage|service|isP2P|isRpc):.+"
@@ -22,15 +22,32 @@ releases:
   - name: avs-aggregator
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.aggregatorEnabled }}
-    chart: ../helm-charts/rollup-node
+    chart: ../helm-charts/avs-aggregator
     values:
       - image:
           repository: gaspxyz/avs-aggregator
           tag: {{ .Values | get "aggregatorImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
-        remoteCluster: {{ .Values.remoteCluster }}
         envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.aggregatorEnv | toYaml | nindent 10 }}
+        service:
+          enabled: true
+          port: 8090
+          targetPort: 8090
+        ingress:
+          enabled: true
+          hosts:
+            - host: avs-aggregator-{{ .Values.environmentName }}.gasp.xyz
+              paths: ["/"]
+          tls:
+            - hosts: ["avs-aggregator-{{ .Values.environmentName }}.gasp.xyz"]
+              secretName: avs-aggregator-tls
+        podReplacementPolicy: Failed
+        podFailurePolicy:
+          rules:
+            - action: 
+            - action: Ignore
+              onPodConditions:
+                - type: DisruptionTarget
 
   - name: gasp-avs
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -39,7 +56,7 @@ releases:
     values:
       - image:
           repository: gaspxyz/gasp-avs
-          tag: {{ .Values | get "gaspAvsImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+          tag: '{{ printf "%s%s" (.Values | get "gaspAvsImageTag" (requiredEnv "IMAGE_TAG")) (eq (env "GASP_AVS_FAST_RUNTIME") "true" | ternary "-fast" "") }}'
         environment: {{ .Values.environmentName }}
         envSecrets: {{ .Values.gaspAvsEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.gaspAvsEnv | toYaml | nindent 10 }}
