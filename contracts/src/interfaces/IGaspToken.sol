@@ -14,7 +14,7 @@ interface IGaspToken is IERC20 {
 
     event RecipientDewhitelisted(address indexed recipient);
 
-    error ZeroAdmin();
+    error ZeroL1Council();
 
     error ZeroSender();
 

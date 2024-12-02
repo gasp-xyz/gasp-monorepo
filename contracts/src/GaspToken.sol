@@ -28,7 +28,7 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
 
     constructor(address l1Council) Ownable() ERC20(_NAME, _SYMBOL) {
         if (l1Council == address(0)) {
-            revert ZeroAdmin();
+            revert ZeroL1Council();
         }
 
         _senderWhitelist.add(l1Council);
