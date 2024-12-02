@@ -1,7 +1,7 @@
 apiVersion: v1
-name: deployment
+name: avs-aggregator
 version: 1.0.0
-description: The Universal Deployment Helm Chart
+description: The avs-aggregator Job Helm Chart
 keywords:
-  - deployment
+  - avs-aggregator
   - helm
