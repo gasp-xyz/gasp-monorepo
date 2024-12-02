@@ -26,7 +26,7 @@ collator:
     repository: mangatasolutions/rollup-node
     tag: 456a53b8bdd546d99507884cf4a82b844366c2eb-fast
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/eb43d6a85f5152cc5f4bae0996bf7b74ad1c516d/rollup-dev-env-chainspecs/rollup-fungible-456a53b8-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/7358269f21bf921b541f07db5ab80badb03288b7/rollup-dev-env-chainspecs/rollup-frontend-456a53b-raw.json
   storageClass: node-data-volume-retain
   storageSize: 50Gi
   enableServiceMonitorCollectors: true
