@@ -39,6 +39,10 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     }
 
     function setAllowTransfers(bool allowTransfers_) external override onlyOwner {
+        if (allowTransfers) {
+            revert TransfersAlreadyAllowed();
+        }
+
         allowTransfers = allowTransfers_;
         emit AllowTransfersSet(allowTransfers_);
     }
