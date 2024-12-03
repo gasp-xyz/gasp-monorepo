@@ -1,8 +1,8 @@
 services:
   eth-contracts-deployment:
+    build: .
     image: gaspxyz/gasp-contracts:local
     platform: linux/amd64
-    build: .
     depends_on:
       eth-stub:
           condition: service_healthy
@@ -22,12 +22,10 @@ services:
       - -v
     environment:
       ENV_SELECTOR: ethereum-stub
-    #extra_hosts:
-    #      - "host.docker.internal:host-gateway"
   arbitrum-contracts-deployment:
-    image: gaspxyz/gasp-contracts:local
-    platform: linux/amd64
     build: .
+    image: gaspxyz/gasp-contracts:local-arb
+    platform: linux/amd64
     depends_on:
       arbitrum-stub:
         condition: service_healthy
@@ -42,9 +40,9 @@ services:
     environment:
       ENV_SELECTOR: arbitrum-stub
   base-contracts-deployment:
-    image: gaspxyz/gasp-contracts:local
-    platform: linux/amd64
     build: .
+    image: gaspxyz/gasp-contracts:local-base
+    platform: linux/amd64
     depends_on:
       base-stub:
         condition: service_healthy

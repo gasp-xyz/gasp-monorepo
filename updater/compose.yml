@@ -1,8 +1,7 @@
 services:
   updater:
+    build: .
     image: gaspxyz/updater:${UPDATER_VERSION:-local}
-    build:
-      context: .
     restart: unless-stopped
     depends_on:
       eth-stub:
@@ -30,9 +29,8 @@ services:
       TARGET_CHAIN_INDEX: 1
 
   updater-base:
-    image: gaspxyz/updater:${UPDATER_VERSION:-local}
-    build:
-      context: .
+    build: .
+    image: gaspxyz/updater:${UPDATER_VERSION:-localbase}
     depends_on:
       eth-stub:
         condition: service_healthy

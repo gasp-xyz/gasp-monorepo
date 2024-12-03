@@ -1,7 +1,7 @@
 services:
   ferry-withdrawal-eth:
-    image: gaspxyz/ferry-withdrawal:local
     build: .
+    image: gaspxyz/ferry-withdrawal:local
     restart: unless-stopped
     depends_on:
       eth-contracts-deployment:
@@ -23,8 +23,8 @@ services:
       LOG: ${ETH_FERRY_WITHDRAWAL_LOG}
 
   closer-eth:
-    image: gaspxyz/ferry-withdrawal:local
     build: .
+    image: gaspxyz/ferry-withdrawal:local-closer
     restart: unless-stopped
     command: ["node", "build/src/closer.js"]
     depends_on:
