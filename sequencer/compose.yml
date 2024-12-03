@@ -1,8 +1,7 @@
 services:
   sequencer-eth:
-    image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
-    build:
-      context: .
+    build: .
+    image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-localeth}
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully
@@ -20,9 +19,8 @@ services:
       TX_COST: ${ETH_SEQUENCER_TX_COST}
 
   sequencer-arb:
-    image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
-    build:
-      context: .
+    build: .
+    image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-localarb}
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully
@@ -40,9 +38,8 @@ services:
       TX_COST: ${ARB_SEQUENCER_TX_COST}
 
   sequencer-base:
-    image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
-    build:
-      context: .
+    build: .
+    image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-localbase}
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully
