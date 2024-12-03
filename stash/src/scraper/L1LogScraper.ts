@@ -21,7 +21,8 @@ export const watchDepositAcceptedIntoQueue = async (
   api: any,
   chainUrl: string,
   chain: any,
-  chainName: string
+  chainName: string,
+  contractAddress: string
 ) => {
   const publicClient = getPublicClient({
     transport: http(chainUrl),
@@ -39,7 +40,7 @@ export const watchDepositAcceptedIntoQueue = async (
         message: `Deposit: chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
       })
       const logs = await publicClient.getContractEvents({
-        address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
+        address: `0x${contractAddress}` as `0x${string}`,
         abi: RolldownContract.abi,
         eventName: 'DepositAcceptedIntoQueue',
         fromBlock,
@@ -85,7 +86,8 @@ export const watchWithdrawalClosed = async (
   api: any,
   chainUrl: string,
   chain: any,
-  chainName: string
+  chainName: string,
+  contractAddress: string
 ) => {
   const publicClient = getPublicClient({
     transport: http(chainUrl),
@@ -103,14 +105,14 @@ export const watchWithdrawalClosed = async (
         message: ` Withdrawal: chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
       })
       const eventsFerried = await publicClient.getContractEvents({
-        address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
+        address: `0x${contractAddress}` as `0x${string}`,
         abi: RolldownContract.abi,
         eventName: 'FerriedWithdrawalClosed',
         fromBlock,
         toBlock,
       })
       const eventsNotFerried = await publicClient.getContractEvents({
-        address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
+        address: `0x${contractAddress}` as `0x${string}`,
         abi: RolldownContract.abi,
         eventName: 'WithdrawalClosed',
         fromBlock,

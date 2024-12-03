@@ -16,13 +16,15 @@ export const initService = async () => {
       api,
       process.env.ETH_CHAIN_URL,
       holesky,
-      ETH_CHAIN
+      ETH_CHAIN,
+      process.env.CONTRACT_ADDRESS_ETH
     ),
     watchDepositAcceptedIntoQueue(
       api,
       process.env.ARBITRUM_SEPOLIA_CHAIN_URL,
       arbitrumSepolia,
-      ARB_CHAIN
+      ARB_CHAIN,
+      process.env.CONTRACT_ADDRESS_ARB
     ),
     new Promise((resolve) => {
       setTimeout(() => {
@@ -30,7 +32,8 @@ export const initService = async () => {
           api,
           process.env.ETH_CHAIN_URL,
           holesky,
-          ETH_CHAIN
+          ETH_CHAIN,
+          process.env.CONTRACT_ADDRESS_ETH
         ).then(resolve)
       }, 10000) // Delay of 10000 milliseconds (10 seconds) to allow past withdrawals to be started and confirmed first
     }),
@@ -40,7 +43,8 @@ export const initService = async () => {
           api,
           process.env.ARBITRUM_SEPOLIA_CHAIN_URL,
           arbitrumSepolia,
-          ARB_CHAIN
+          ARB_CHAIN,
+          process.env.CONTRACT_ADDRESS_ARB
         ).then(resolve)
       }, 10000)
     }),
