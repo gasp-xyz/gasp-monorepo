@@ -360,7 +360,7 @@ contract Approve is GaspTokenTest {
     function test_EmitApproval_IfRecipientWhitelisted() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistRecipient(users.spender);
+        gaspToken.whitelistSender(users.spender);
 
         vm.expectEmit();
         emit Approval(users.l1Council, users.spender, amount);
@@ -384,9 +384,10 @@ contract Approve is GaspTokenTest {
     function test_GetAllowance_IfNotAllowTransfers() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistRecipient(users.spender);
+        gaspToken.whitelistSender(users.spender);
         gaspToken.approve(users.spender, amount);
-        gaspToken.dewhitelistRecipient(users.spender);
+
+        gaspToken.dewhitelistSender(users.spender);
 
         vm.stopPrank();
 
@@ -397,7 +398,7 @@ contract Approve is GaspTokenTest {
     function test_GetAllowance_Whitelisted() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistRecipient(users.spender);
+        gaspToken.whitelistSender(users.spender);
         gaspToken.approve(users.spender, amount);
 
         vm.stopPrank();
@@ -544,10 +545,9 @@ contract TransferTokenFrom is GaspTokenTest {
     function test_EmitTransfer_IfSenderAndRecipientWhitelisted() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistRecipient(users.spender);
+        gaspToken.whitelistSender(users.spender);
         gaspToken.approve(users.spender, amount);
 
-        gaspToken.whitelistSender(users.spender);
         gaspToken.whitelistRecipient(users.recipient);
 
         vm.stopPrank();
@@ -561,10 +561,9 @@ contract TransferTokenFrom is GaspTokenTest {
     function test_ChangeBalances() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistRecipient(users.spender);
+        gaspToken.whitelistSender(users.spender);
         gaspToken.approve(users.spender, amount);
 
-        gaspToken.whitelistSender(users.spender);
         gaspToken.whitelistRecipient(users.recipient);
 
         vm.stopPrank();
@@ -588,10 +587,9 @@ contract TransferTokenFrom is GaspTokenTest {
     function test_GetAllowance() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistRecipient(users.spender);
+        gaspToken.whitelistSender(users.spender);
         gaspToken.approve(users.spender, amount);
 
-        gaspToken.whitelistSender(users.spender);
         gaspToken.whitelistRecipient(users.recipient);
 
         vm.stopPrank();
