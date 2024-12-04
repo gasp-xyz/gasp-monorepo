@@ -60,7 +60,7 @@ contract GaspTokenTest is Test {
     }
 }
 
-contract Initialize is GaspTokenTest {
+contract Deploy is GaspTokenTest {
     function test_GetOwner() external view {
         address owner = gaspToken.owner();
         assertEq(owner, users.l1Council);
@@ -381,21 +381,7 @@ contract Approve is GaspTokenTest {
         assertEq(allowance, amount);
     }
 
-    function test_GetAllowance_IfNotAllowTransfers() external {
-        vm.startPrank(users.l1Council);
-
-        gaspToken.whitelistSender(users.spender);
-        gaspToken.approve(users.spender, amount);
-
-        gaspToken.dewhitelistSender(users.spender);
-
-        vm.stopPrank();
-
-        uint256 allowance = gaspToken.allowance(users.l1Council, users.spender);
-        assertEq(allowance, 0);
-    }
-
-    function test_GetAllowance_Whitelisted() external {
+    function test_GetAllowance_IfWhitelisted() external {
         vm.startPrank(users.l1Council);
 
         gaspToken.whitelistSender(users.spender);
@@ -405,6 +391,14 @@ contract Approve is GaspTokenTest {
 
         uint256 allowance = gaspToken.allowance(users.l1Council, users.spender);
         assertEq(allowance, amount);
+    }
+
+    function test_GetAllowance_IfNotWhitelisted() external {
+        vm.prank(users.l1Council);
+        gaspToken.transfer(users.spender, amount);
+
+        uint256 allowance = gaspToken.allowance(users.spender, users.recipient);
+        assertEq(allowance, 0);
     }
 
     function test_RevertIf_OperationForbidden() external {
@@ -476,17 +470,8 @@ contract TransferToken is GaspTokenTest {
         assertEq(currentRecipientBalance, initialRecipientBalance + amount);
     }
 
-    function test_RevertIf_OperationForbidden_IfSenderNotWhitelisted() external {
-        vm.prank(users.l1Council);
-        gaspToken.whitelistRecipient(users.recipient);
-
+    function test_RevertIf_OperationForbidden_IfNotWhitelisted() external {
         vm.prank(users.sender);
-        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.transfer.selector));
-        gaspToken.transfer(users.recipient, amount);
-    }
-
-    function test_RevertIf_OperationForbidden_IfRecipientNotWhitelisted() external {
-        vm.prank(users.l1Council);
         vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.transfer.selector));
         gaspToken.transfer(users.recipient, amount);
     }
@@ -601,19 +586,10 @@ contract TransferTokenFrom is GaspTokenTest {
         assertEq(allowance, 0);
     }
 
-    function test_RevertIf_OperationForbidden_IfSpenderNotWhitelisted() external {
+    function test_RevertIf_OperationForbidden_IfNotWhitelisted() external {
         vm.prank(users.spender);
         vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.transferFrom.selector));
-        gaspToken.transferFrom(users.l1Council, users.recipient, amount);
-    }
-
-    function test_RevertIf_OperationForbidden_IfRecipientNotWhitelisted() external {
-        vm.prank(users.l1Council);
-        gaspToken.whitelistSender(users.spender);
-
-        vm.prank(users.spender);
-        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.transferFrom.selector));
-        gaspToken.transferFrom(users.l1Council, users.recipient, amount);
+        gaspToken.transferFrom(users.spender, users.recipient, amount);
     }
 
     function test_RevertIf_TransferToZeroAddress() external {
