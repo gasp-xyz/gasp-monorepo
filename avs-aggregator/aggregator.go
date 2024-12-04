@@ -79,6 +79,9 @@ type Aggregator struct {
 	retryNumber              uint8
 	maxRetryNumber           uint8
 
+	startIdle          bool
+	apiKey             string
+
 	kicker         *Kicker
 	opStateUpdater *OpStateUpdater
 }
@@ -172,13 +175,23 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		kicker:                  kicker,
 		opStateUpdater:          opStateUpdater,
 		expiration:              uint32(c.Expiration),
+		startIdle:			   	 c.AggIdleStart,
+		apiKey:			   	     c.AggRunTriggerApiKey,		
 	}, nil
 }
 
 func (agg *Aggregator) Start(ctx context.Context) error {
 	agg.logger.Infof("Starting aggregator.")
 	agg.logger.Infof("Starting aggregator rpc server.")
-	go agg.startServer(ctx)
+	runTriggerC := make(chan struct{})
+	go agg.startServer(ctx, agg.apiKey, runTriggerC)
+
+	if agg.startIdle {
+		// blocking wait for the run trigger
+		agg.logger.Infof("Aggregator awaiting run trigger.")
+		<- runTriggerC
+		agg.logger.Infof("Aggregator received run trigger. Continuing.")
+	}
 
 	err := agg.checkAndProcessPendingTasks()
 	if err != nil {

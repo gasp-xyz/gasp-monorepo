@@ -39,6 +39,9 @@ type Config struct {
 	ReinitOpStateAtInit bool
 	CheckTriggerOpStateUpdate bool
 	CheckTriggerOpStateUpdateWindow bool
+
+	AggIdleStart bool
+	AggRunTriggerApiKey string
 }
 
 // NewConfig parses the Config from the provided flags or environment variables and
@@ -106,6 +109,8 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		ReinitOpStateAtInit:  ctx.GlobalBool(config.AggOsuReinitOpStateAtInit.Name),
 		CheckTriggerOpStateUpdate:  ctx.GlobalBool(config.AggOsuCheckTriggerOpStateUpdate.Name),
 		CheckTriggerOpStateUpdateWindow:  ctx.GlobalBool(config.AggOsuCheckTriggerOpStateUpdateWindow.Name),
+		AggIdleStart: ctx.GlobalBool(config.AggIdleStart.Name),
+		AggRunTriggerApiKey: ctx.GlobalString(config.AggRunTriggerApiKey.Name),
 	}, nil
 }
 
@@ -132,4 +137,6 @@ var Flags = []cli.Flag{
 	config.AggOsuReinitOpStateAtInit,
 	config.AggOsuCheckTriggerOpStateUpdate,
 	config.AggOsuCheckTriggerOpStateUpdateWindow,
+	config.AggIdleStart,
+	config.AggRunTriggerApiKey,
 }
