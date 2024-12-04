@@ -342,6 +342,7 @@ class L1Api implements L1Interface {
 			args: [withdrawalToViemFormat(withdrawal)],
 			maxFeePerGas: maxFeeInWei,
 			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
+			value: withdrawal.amount - withdrawal.ferryTip,
 		});
 
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
