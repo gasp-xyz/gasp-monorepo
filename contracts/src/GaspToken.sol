@@ -20,14 +20,14 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     EnumerableSet.AddressSet private _recipientWhitelist;
 
     modifier isApproveOperationForbidden(address owner, address spender) {
-        if (!allowTransfers && !_checkOwnerAndSpenderWhitelisted(owner, spender)) {
+        if (!allowTransfers && !_checkOwnerOrSpenderWhitelisted(owner, spender)) {
             revert OperationForbidden(IERC20.approve.selector);
         }
         _;
     }
 
     modifier isTransferOperationForbidden(address sender, address recipient) {
-        if (!allowTransfers && !_checkSenderAndRecipientWhitelisted(sender, recipient)) {
+        if (!allowTransfers && !_checkSenderOrRecipientWhitelisted(sender, recipient)) {
             revert OperationForbidden(IERC20.transfer.selector);
         }
         _;
@@ -37,8 +37,8 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         if (
             !allowTransfers
                 && (
-                    !_checkOwnerAndSpenderWhitelisted(owner, spender)
-                        || !_checkSenderAndRecipientWhitelisted(owner, recipient)
+                    !_checkOwnerOrSpenderWhitelisted(owner, spender)
+                        || !_checkSenderOrRecipientWhitelisted(owner, recipient)
                 )
         ) {
             revert OperationForbidden(IERC20.transferFrom.selector);
@@ -155,14 +155,14 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     }
 
     function allowance(address owner, address spender) public view override(ERC20, IERC20) returns (uint256) {
-        return !allowTransfers && !_checkOwnerAndSpenderWhitelisted(owner, spender) ? 0 : super.allowance(owner, spender);
+        return !allowTransfers && !_checkOwnerOrSpenderWhitelisted(owner, spender) ? 0 : super.allowance(owner, spender);
     }
 
-    function _checkOwnerAndSpenderWhitelisted(address owner, address spender) private view returns (bool) {
-        return (_senderWhitelist.contains(owner) && _senderWhitelist.contains(spender));
+    function _checkOwnerOrSpenderWhitelisted(address owner, address spender) private view returns (bool) {
+        return (_senderWhitelist.contains(owner) || _senderWhitelist.contains(spender));
     }
 
-    function _checkSenderAndRecipientWhitelisted(address sender, address recipient) private view returns (bool) {
-        return (_senderWhitelist.contains(sender) && _recipientWhitelist.contains(recipient));
+    function _checkSenderOrRecipientWhitelisted(address sender, address recipient) private view returns (bool) {
+        return (_senderWhitelist.contains(sender) || _recipientWhitelist.contains(recipient));
     }
 }
