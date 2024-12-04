@@ -135,15 +135,16 @@ contract MultiStage is Script, Utils, Test {
         deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId.Arbitrum);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("ethereum-holesky"))){
-
-        if (!outputExists(Deployer._OUTPUT_PATH)) {
-            revert("Already deployed");
-        }
         
         console.log("################################################################################");
         console.log("Deploying finalizer contracts");
         console.log("################################################################################");
         Deployer finalizerDeployer = new Deployer();
+
+        if (outputExists(finalizerDeployer.getOutputPath())) {
+            revert("Already deployed");
+        }
+
         finalizerDeployer.run();
 
         console.log("################################################################################");
@@ -151,6 +152,29 @@ contract MultiStage is Script, Utils, Test {
         console.log("################################################################################");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
         rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+
+        Rolldown rolldown;
+        FinalizerTaskManager taskManager;
+        address avsOwner;
+
+        string memory _EIGEN_OUTPUT_PATH = "avs_deployment_output";
+        string memory eigenlayerDeployedContracts = readOutput(_EIGEN_OUTPUT_PATH);
+        taskManager = FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
+
+        string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
+        string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Ethereum, _ROLLDOWN_OUTPUT_PATH));
+        rolldown = Rolldown(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown"));
+
+        string memory _CONFIG_PATH = "deploy.config";
+        string memory configData = readConfig(_CONFIG_PATH);
+        avsOwner = stdJson.readAddress(configData, ".permissions.owner");
+
+        vm.startBroadcast(avsOwner);
+
+        taskManager.setRolldown(IRolldown(address(rolldown)));
+        rolldown.setUpdater(address(taskManager));
+
+        vm.stopBroadcast();
 
       }else{
  

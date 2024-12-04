@@ -126,13 +126,13 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
         _writeOutput(chain);
     }
 
-    function run(IRolldownPrimitives.ChainId chain, bool allowNonRootInit) external {
+    function run(IRolldownPrimitives.ChainId chain) external {
       if (isProxyDeployed(chain)){
         console.log("Upgrading proxy");
         upgrade(chain);
       }else{
         console.log("Initial deployment");
-        initialDeployment(chain, allowNonRootInit);
+        initialDeployment(chain);
       }
     }
 
