@@ -24,7 +24,7 @@ export const getData = async (req: Request, res: Response): Promise<void> => {
   try {
     const { wallet } = req.params
     getDataByWalletSchema.validateSync({ wallet })
-    const data = await getDataByWallet(wallet)
+    const data = (await getDataByWallet(wallet)) || {}
     res.json(data)
   } catch (e) {
     await errorHandler.handle(res, e)
