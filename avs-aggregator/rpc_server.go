@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"encoding/hex"
@@ -29,8 +30,28 @@ var (
 	CallToGetCheckSignaturesIndicesFailed500 = errors.New("500. Failed to get check signatures indices")
 )
 
-func (agg *Aggregator) startServer(ctx context.Context) error {
+func (agg *Aggregator) startServer(ctx context.Context, apiKey string, runTrigger chan struct{} ) error {
 	http.HandleFunc("/", agg.handler)
+	http.HandleFunc("/run", func(w http.ResponseWriter, r *http.Request) {
+		// Parse query parameters
+		key := r.URL.Query().Get("SECRET_API_KEY")
+	
+		if key != apiKey {
+			agg.logger.Error("Api key no match", "Received", key)
+			http.Error(w, "Api key no match", http.StatusBadRequest)
+			return
+		}
+	
+		// Respond with JSON named data
+		response := map[string]string{
+			"message": fmt.Sprintf("Triggered run on agg"),
+			"status":  "OK",
+		}
+	
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response) // Encode and send JSON response
+		runTrigger <- struct{}{}
+	})
 	err := http.ListenAndServe(agg.serverIpPortAddr, nil)
 	if err != nil {
 		agg.logger.Fatal("ListenAndServe", "err", err)

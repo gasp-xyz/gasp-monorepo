@@ -28,6 +28,9 @@ services:
       - AGG_OSU_REINIT_OP=false
       - AGG_OSU_CHECK_UPDATE_TRIGGER=true
       - AGG_OSU_CHECK_UPDATE_TRIGGER_WINDOW=true
+      - AGG_IDLE_START=false
+      # unnecessary here since AGG_IDLE_START is false
+      - AGG_RUN_TRIGGER_API_KEY=""
     ports:
       - "8090:8090"
   

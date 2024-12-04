@@ -93,6 +93,19 @@ var (
 		EnvVar:   "AVS_ENABLE_KICKER",
 	}
 
+	AggRunTriggerApiKey = cli.StringFlag{
+		Name:     "agg-run-trigger-api-key",
+		Usage:    "The api key that is required to trigger the /run endpoint",
+		Required: false,
+		EnvVar:   "AGG_RUN_TRIGGER_API_KEY",
+	}
+	AggIdleStart = cli.BoolFlag{
+		Name:     "agg-idle-start",
+		Usage:    "BoolFlag defaults to false. If this flag is set to true then the aggregator will start in idle mode and wait for /run endpoint to be triggered before continuing",
+		Required: false,
+		EnvVar:   "AGG_IDLE_START",
+	}
+
 	// Aggregator OpStateUpdaterFlags
 	AvsMinOpUpdateInterval = cli.IntFlag{
 		Name:     "avs-min-op-update-interval",
