@@ -3,7 +3,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use frame_support::{
-	ensure, fail,
+	ensure,
 	pallet_prelude::*,
 	traits::{
 		tokens::{Balance, CurrencyId},
@@ -13,7 +13,9 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 
-use mangata_support::pools::{Inspect, Mutate, SwapResult};
+use mangata_support::pools::{
+	ComputeBalances, Inspect, Mutate, PoolPair, PoolReserves, SwapResult,
+};
 use sp_arithmetic::traits::Unsigned;
 use sp_runtime::traits::{
 	checked_pow, AccountIdConversion, CheckedAdd, CheckedDiv, CheckedMul, CheckedSub, Ensure, One,
@@ -1702,28 +1704,35 @@ pub mod pallet {
 	}
 }
 
-impl<T: Config> Inspect<T::AccountId> for Pallet<T> {
+impl<T: Config> Inspect for Pallet<T> {
 	type CurrencyId = T::CurrencyId;
 	type Balance = T::Balance;
 
-	fn get_pool_info(
-		pool_id: Self::CurrencyId,
-	) -> Option<mangata_support::pools::PoolInfo<Self::CurrencyId>> {
+	fn get_pool_info(pool_id: Self::CurrencyId) -> Option<PoolPair<Self::CurrencyId>> {
 		let info = Pools::<T>::get(pool_id)?;
 		let asset1 = info.assets.get(0)?;
 		let asset2 = info.assets.get(1)?;
 		Some((*asset1, *asset2))
 	}
 
-	fn get_pool_reserves(
-		pool_id: Self::CurrencyId,
-	) -> Option<mangata_support::pools::PoolReserves<Self::Balance>> {
+	fn get_pool_reserves(pool_id: Self::CurrencyId) -> Option<PoolReserves<Self::Balance>> {
 		let reserves = Self::get_pool_reserves(&pool_id).ok()?;
 		let balance1 = reserves.get(0)?;
 		let balance2 = reserves.get(1)?;
 		Some((*balance1, *balance2))
 	}
 
+	fn get_non_empty_pools() -> Option<Vec<Self::CurrencyId>> {
+		let result = Pools::<T>::iter_values()
+			.map(|v| v.lp_token)
+			.filter(|v| !T::Currency::total_issuance((*v).into()).is_zero())
+			.collect();
+
+		Some(result)
+	}
+}
+
+impl<T: Config> ComputeBalances for Pallet<T> {
 	fn get_dy(
 		pool_id: Self::CurrencyId,
 		asset_in: Self::CurrencyId,
@@ -1768,15 +1777,6 @@ impl<T: Config> Inspect<T::AccountId> for Pallet<T> {
 		let asset1 = amounts.get(0)?;
 		let asset2 = amounts.get(1)?;
 		Some((*asset1, *asset2))
-	}
-
-	fn get_non_empty_pools() -> Option<Vec<Self::CurrencyId>> {
-		let result = Pools::<T>::iter_values()
-			.map(|v| v.lp_token)
-			.filter(|v| !T::Currency::total_issuance((*v).into()).is_zero())
-			.collect();
-
-		Some(result)
 	}
 
 	fn get_mint_amount(

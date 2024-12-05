@@ -161,10 +161,9 @@ use frame_support::{
 	dispatch::{DispatchErrorWithPostInfo, DispatchResult, PostDispatchInfo},
 	ensure,
 	storage::bounded_btree_map::BoundedBTreeMap,
-	traits::Currency,
 };
 use frame_system::ensure_signed;
-use mangata_support::traits::Valuate;
+use mangata_support::pools::{Valuate, ValuateFor};
 use mangata_types::multipurpose_liquidity::ActivateKind;
 use orml_tokens::{MultiTokenCurrencyExtended, MultiTokenReservableCurrency};
 use sp_core::U256;
@@ -394,33 +393,6 @@ pub mod pallet {
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	impl<T> PoSBenchmarkingConfig for T {}
 
-	#[cfg(not(feature = "runtime-benchmarks"))]
-	pub trait ValutationApiTrait<T: Config>: Valuate<BalanceOf<T>, CurrencyIdOf<T>> {}
-
-	#[cfg(feature = "runtime-benchmarks")]
-	pub trait ValutationApiTrait<T: Config>:
-		Valuate<BalanceOf<T>, CurrencyIdOf<T>>
-		+ XykFunctionsTrait<AccountIdOf<T>, BalanceOf<T>, CurrencyIdOf<T>>
-	{
-	}
-
-	#[cfg(not(feature = "runtime-benchmarks"))]
-	impl<T, C> ValutationApiTrait<C> for T
-	where
-		C: Config,
-		T: Valuate<BalanceOf<C>, CurrencyIdOf<C>>,
-	{
-	}
-
-	#[cfg(feature = "runtime-benchmarks")]
-	impl<T, C> ValutationApiTrait<C> for T
-	where
-		C: Config,
-		T: Valuate<BalanceOf<C>, CurrencyIdOf<C>>,
-		T: XykFunctionsTrait<AccountIdOf<C>, BalanceOf<C>, CurrencyIdOf<C>>,
-	{
-	}
-
 	#[pallet::config]
 	pub trait Config: frame_system::Config + PoSBenchmarkingConfig {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
@@ -445,10 +417,18 @@ pub mod pallet {
 		type SchedulesPerBlock: Get<u32>;
 
 		type WeightInfo: WeightInfo;
-		type ValuationApi: ValutationApiTrait<Self>;
+
+		type ValuationApi: ValuateFor<
+			<Self as pallet::Config>::NativeCurrencyId,
+			CurrencyId = CurrencyIdOf<Self>,
+			Balance = BalanceOf<Self>,
+		>;
 
 		/// Tokens which cannot be transfered by extrinsics/user or use in pool, unless foundation override
 		type NontransferableTokens: Contains<CurrencyIdOf<Self>>;
+
+		#[cfg(feature = "runtime-benchmarks")]
+		type Xyk: XykFunctionsTrait<Self::AccountId, BalanceOf<Self>, CurrencyIdOf<Self>>;
 	}
 
 	#[pallet::error]
@@ -703,7 +683,7 @@ pub mod pallet {
 			ensure_root(origin)?;
 
 			ensure!(
-				<<T as Config>::ValuationApi as Valuate<BalanceOf<T>, CurrencyIdOf<T>>>::is_liquidity_token(liquidity_token_id),
+				T::ValuationApi::check_pool_exist(liquidity_token_id).is_ok(),
 				Error::<T>::SoloTokenPromotionForbiddenError
 			);
 
@@ -769,7 +749,7 @@ pub mod pallet {
 		#[pallet::weight(<<T as Config>::WeightInfo>::reward_pool())]
 		pub fn reward_pool(
 			origin: OriginFor<T>,
-			pool: (CurrencyIdOf<T>, CurrencyIdOf<T>),
+			pool_id: CurrencyIdOf<T>,
 			token_id: CurrencyIdOf<T>,
 			amount: BalanceOf<T>,
 			schedule_end: SessionId,
@@ -781,7 +761,7 @@ pub mod pallet {
 				Error::<T>::NontransferableToken
 			);
 
-			Self::reward_pool_impl(sender, pool, token_id, amount, schedule_end)
+			Self::reward_pool_impl(sender, pool_id, token_id, amount, schedule_end)
 		}
 
 		/// Increases number of tokens used for liquidity mining purposes.
@@ -1496,13 +1476,12 @@ impl<T: Config> Pallet<T> {
 
 	pub(crate) fn reward_pool_impl(
 		sender: T::AccountId,
-		pool: (CurrencyIdOf<T>, CurrencyIdOf<T>),
+		pool_id: CurrencyIdOf<T>,
 		token_id: CurrencyIdOf<T>,
 		amount: BalanceOf<T>,
 		schedule_end: SessionId,
 	) -> DispatchResult {
-		let liquidity_token_id = <T as Config>::ValuationApi::get_liquidity_asset(pool.0, pool.1)
-			.map_err(|_| Error::<T>::PoolDoesNotExist)?;
+		T::ValuationApi::check_pool_exist(pool_id).map_err(|_| Error::<T>::PoolDoesNotExist)?;
 
 		let current_session = Self::session_index();
 		ensure!(
@@ -1525,7 +1504,7 @@ impl<T: Config> Pallet<T> {
 
 		ensure!(Self::verify_rewards_min_volume(token_id), Error::<T>::TooSmallVolume);
 
-		RewardTokensPerPool::<T>::insert(liquidity_token_id, token_id, ());
+		RewardTokensPerPool::<T>::insert(pool_id, token_id, ());
 
 		T::Currency::transfer(
 			token_id.into(),
@@ -1541,7 +1520,7 @@ impl<T: Config> Pallet<T> {
 		let schedule = Schedule {
 			scheduled_at: Self::session_index(),
 			last_session: schedule_end,
-			liq_token: liquidity_token_id,
+			liq_token: pool_id,
 			reward_token: token_id,
 			amount_per_session,
 		};
@@ -1577,10 +1556,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		Pallet::<T>::deposit_event(Event::ThirdPartySuccessfulPoolPromotion(
-			sender,
-			liquidity_token_id,
-			token_id,
-			amount,
+			sender, pool_id, token_id, amount,
 		));
 
 		Ok(())
@@ -1590,7 +1566,7 @@ impl<T: Config> Pallet<T> {
 		token_id: CurrencyIdOf<T>,
 		amount_per_session: BalanceOf<T>,
 	) -> bool {
-		if <T as Config>::ValuationApi::valuate_liquidity_token(token_id, amount_per_session).into() >=
+		if T::ValuationApi::get_valuation_for_paired_for(token_id, amount_per_session).into() >=
 			T::Min3rdPartyRewardValutationPerSession::get()
 		{
 			return true
@@ -1602,7 +1578,8 @@ impl<T: Config> Pallet<T> {
 			return true
 		}
 
-		if <T as Config>::ValuationApi::valuate_non_liquidity_token(token_id, amount_per_session)
+		if T::ValuationApi::find_valuation_for(token_id, amount_per_session)
+			.unwrap_or_default()
 			.into() >= T::Min3rdPartyRewardValutationPerSession::get()
 		{
 			return true
@@ -1616,14 +1593,16 @@ impl<T: Config> Pallet<T> {
 			return true
 		}
 
-		if let Some((mga_reserves, _)) = <T as Config>::ValuationApi::get_pool_state(token_id) {
-			return mga_reserves.into() >= T::Min3rdPartyRewardVolume::get()
+		if let Some((native_reserves, _)) =
+			<T as Config>::ValuationApi::get_reserve_and_lp_supply_for(token_id)
+		{
+			return native_reserves.into() >= T::Min3rdPartyRewardVolume::get()
 		}
 
-		if let Ok((mga_reserves, _)) =
-			<T as Config>::ValuationApi::get_reserves(Self::native_token_id(), token_id)
-		{
-			return mga_reserves.into() >= T::Min3rdPartyRewardVolume::get()
+		if let Ok((_, ids, reserves)) = T::ValuationApi::find_paired_pool_for(token_id) {
+			let native_reserves =
+				if ids.0 == Self::native_token_id() { reserves.0 } else { reserves.1 };
+			return native_reserves.into() >= T::Min3rdPartyRewardVolume::get()
 		}
 
 		return false
@@ -1634,13 +1613,12 @@ impl<T: Config> ProofOfStakeRewardsApi<T::AccountId, BalanceOf<T>, CurrencyIdOf<
 	#[cfg(feature = "runtime-benchmarks")]
 	fn enable_3rdparty_rewards(
 		account: T::AccountId,
-		pool: (CurrencyIdOf<T>, CurrencyIdOf<T>),
+		pool: CurrencyIdOf<T>,
 		reward_token_id: CurrencyIdOf<T>,
 		last_session: u32,
 		amount: BalanceOf<T>,
 	) {
-		let liquidity_token_id =
-			<T as Config>::ValuationApi::get_liquidity_asset(pool.0, pool.1).expect("pool exist");
+		<T as Config>::ValuationApi::check_pool_exist(pool).expect("pool exist");
 		Pallet::<T>::reward_pool_impl(
 			account.clone(),
 			pool,

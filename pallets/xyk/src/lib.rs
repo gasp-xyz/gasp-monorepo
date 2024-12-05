@@ -309,7 +309,7 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 use mangata_support::{
-	pools::{Inspect, PoolInfo, PoolReserves, TreasuryBurn},
+	pools::{ComputeBalances, Inspect, PoolPair, PoolReserves, TreasuryBurn},
 	traits::{
 		ActivationReservesProviderTrait, GetMaintenanceStatusTrait, PoolCreateApi,
 		PreValidateSwaps, ProofOfStakeRewardsApi, Valuate, XykFunctionsTrait,
@@ -3681,11 +3681,11 @@ impl<T: Config> PoolCreateApi<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> for P
 	}
 }
 
-impl<T: Config> Inspect<T::AccountId> for Pallet<T> {
+impl<T: Config> Inspect for Pallet<T> {
 	type CurrencyId = CurrencyIdOf<T>;
 	type Balance = BalanceOf<T>;
 
-	fn get_pool_info(pool_id: Self::CurrencyId) -> Option<PoolInfo<Self::CurrencyId>> {
+	fn get_pool_info(pool_id: Self::CurrencyId) -> Option<PoolPair<Self::CurrencyId>> {
 		LiquidityPools::<T>::get(pool_id)
 	}
 
@@ -3694,6 +3694,12 @@ impl<T: Config> Inspect<T::AccountId> for Pallet<T> {
 		Some(Pools::<T>::get(info))
 	}
 
+	fn get_non_empty_pools() -> Option<Vec<Self::CurrencyId>> {
+		Self::get_liq_tokens_for_trading().ok()
+	}
+}
+
+impl<T: Config> ComputeBalances for Pallet<T> {
 	fn get_dy(
 		_: Self::CurrencyId,
 		asset_in: Self::CurrencyId,
@@ -3746,10 +3752,6 @@ impl<T: Config> Inspect<T::AccountId> for Pallet<T> {
 	) -> Option<(Self::Balance, Self::Balance)> {
 		let pool = Self::get_pool_info(pool_id)?;
 		Self::get_burn_amount(pool.0, pool.1, lp_burn_amount).ok()
-	}
-
-	fn get_non_empty_pools() -> Option<Vec<Self::CurrencyId>> {
-		Self::get_liq_tokens_for_trading().ok()
 	}
 
 	fn get_mint_amount(
@@ -3820,7 +3822,7 @@ impl<T: Config> Inspect<T::AccountId> for Pallet<T> {
 	}
 }
 
-impl<T: Config> TreasuryBurn<T::AccountId> for Pallet<T> {
+impl<T: Config> TreasuryBurn for Pallet<T> {
 	fn settle_treasury_and_burn(
 		asset_id: Self::CurrencyId,
 		burn_amount: Self::Balance,

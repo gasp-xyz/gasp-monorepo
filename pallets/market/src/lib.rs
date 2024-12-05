@@ -19,10 +19,10 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 use mangata_support::{
-	pools::{Inspect, Mutate, SwapResult, TreasuryBurn},
+	pools::{ComputeBalances, Inspect, Mutate, PoolPair, SwapResult, TreasuryBurn, Valuate},
 	traits::{
 		AssetRegistryProviderTrait, GetMaintenanceStatusTrait, ProofOfStakeRewardsApi,
-		XykFunctionsTrait,
+		Valuate as ValuateXyk, XykFunctionsTrait,
 	},
 };
 use mangata_types::multipurpose_liquidity::ActivateKind;
@@ -61,7 +61,7 @@ pub enum PoolKind {
 pub struct PoolInfo<CurrencyId> {
 	pub pool_id: CurrencyId,
 	pub kind: PoolKind,
-	pub pool: mangata_support::pools::PoolInfo<CurrencyId>,
+	pub pool: PoolPair<CurrencyId>,
 }
 
 impl<C: PartialEq + Copy> PoolInfo<C> {
@@ -124,14 +124,14 @@ pub mod pallet {
 
 		/// Xyk pools
 		type Xyk: XykFunctionsTrait<Self::AccountId, Self::Balance, Self::CurrencyId>
-			+ TreasuryBurn<Self::AccountId, CurrencyId = Self::CurrencyId, Balance = Self::Balance>;
+			+ Inspect<CurrencyId = Self::CurrencyId, Balance = Self::Balance>
+			+ ValuateXyk<Self::Balance, Self::CurrencyId>
+			+ TreasuryBurn
+			+ ComputeBalances;
 
 		/// StableSwap pools
-		type StableSwap: Mutate<
-			Self::AccountId,
-			CurrencyId = Self::CurrencyId,
-			Balance = Self::Balance,
-		>;
+		type StableSwap: Mutate<Self::AccountId, CurrencyId = Self::CurrencyId, Balance = Self::Balance>
+			+ ComputeBalances;
 
 		/// Reward apis for native asset LP tokens activation
 		type Rewards: ProofOfStakeRewardsApi<Self::AccountId, Self::Balance, Self::CurrencyId>;
@@ -916,7 +916,7 @@ pub mod pallet {
 			}
 		}
 
-		fn get_pool_info(pool_id: PoolIdOf<T>) -> Result<PoolInfoOf<T>, Error<T>> {
+		pub(crate) fn get_pool_info(pool_id: PoolIdOf<T>) -> Result<PoolInfoOf<T>, Error<T>> {
 			if let Some(pool) = T::Xyk::get_pool_info(pool_id) {
 				return Ok(PoolInfo { pool_id, kind: PoolKind::Xyk, pool })
 			}
@@ -984,7 +984,7 @@ pub mod pallet {
 			activate: bool,
 		) -> Result<(T::Balance, T::Balance), DispatchError> {
 			let (asset_with_amount, asset_other) =
-				pool_info.same_and_other(asset_id).ok_or(Error::<T>::MultiSwapPathInvalid)?;
+				pool_info.same_and_other(asset_id).ok_or(Error::<T>::NoSuchPool)?;
 
 			let amounts = match pool_info.kind {
 				PoolKind::Xyk => {
@@ -1093,6 +1093,76 @@ pub mod pallet {
 
 			Ok(swaps)
 		}
+	}
+}
+
+// for now ignore the stable swap
+// native token is not a stablecoin
+// so we don't expect a direct stable pool of (native, token_x)
+// stables can be used for multipath evals eg. token_x -> usdc -> usdt -> native
+impl<T: Config> Valuate for Pallet<T> {
+	type CurrencyId = T::CurrencyId;
+	type Balance = T::Balance;
+
+	// a pool's pair has to be connected to base
+	fn check_can_valuate(
+		base_id: Self::CurrencyId,
+		pool_id: Self::CurrencyId,
+	) -> Result<(), DispatchError> {
+		let pair = Self::get_pool_info(pool_id)?.pool;
+		if pair.0 == base_id || pair.1 == base_id {
+			return Ok(());
+		}
+		Err(Error::<T>::NoSuchPool.into())
+	}
+
+	fn check_pool_exist(pool_id: Self::CurrencyId) -> Result<(), DispatchError> {
+		Self::get_pool_info(pool_id)?;
+		Ok(())
+	}
+
+	fn find_paired_pool(
+		base_id: Self::CurrencyId,
+		asset_id: Self::CurrencyId,
+	) -> Result<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>, DispatchError> {
+		let pool_id = T::Xyk::get_liquidity_asset(base_id, asset_id)?;
+		let maybe_pool = Self::get_pools(Some(pool_id));
+		let (info, reserves) = maybe_pool.first().ok_or(Error::<T>::NoSuchPool)?;
+		Ok((pool_id, info.pool, *reserves))
+	}
+
+	fn find_valuation(
+		_: Self::CurrencyId,
+		asset_id: Self::CurrencyId,
+		amount: Self::Balance,
+	) -> Result<Self::Balance, DispatchError> {
+		Ok(T::Xyk::valuate_non_liquidity_token(asset_id, amount))
+	}
+
+	fn get_reserve_and_lp_supply(
+		base_id: Self::CurrencyId,
+		pool_id: Self::CurrencyId,
+	) -> Option<(Self::Balance, Self::Balance)> {
+		let maybe_pool = Self::get_pools(Some(pool_id));
+		let (info, reserves) = maybe_pool.first()?;
+		let reserve = match info.pool {
+			(id, _) if id == base_id => reserves.0,
+			(_, id) if id == base_id => reserves.1,
+			_ => Zero::zero(),
+		};
+		let issuance = T::Currency::total_issuance(pool_id);
+		if reserve.is_zero() || issuance.is_zero() {
+			return None;
+		}
+		Some((reserve, issuance))
+	}
+
+	fn get_valuation_for_paired(
+		_: Self::CurrencyId,
+		pool_id: Self::CurrencyId,
+		amount: Self::Balance,
+	) -> Self::Balance {
+		T::Xyk::valuate_liquidity_token(pool_id, amount)
 	}
 }
 

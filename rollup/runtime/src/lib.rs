@@ -35,9 +35,12 @@ use sp_std::{
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
-pub use mangata_support::traits::{
-	AssetRegistryApi, AssetRegistryProviderTrait, FeeLockTriggerTrait, GetMaintenanceStatusTrait,
-	PreValidateSwaps, ProofOfStakeRewardsApi,
+pub use mangata_support::{
+	pools::ValuateFor,
+	traits::{
+		AssetRegistryApi, AssetRegistryProviderTrait, FeeLockTriggerTrait,
+		GetMaintenanceStatusTrait, PreValidateSwaps, ProofOfStakeRewardsApi,
+	},
 };
 pub use mangata_types::assets::{CustomMetadata, L1Asset, XcmMetadata, XykMetadata};
 
@@ -362,8 +365,10 @@ impl pallet_proof_of_stake::Config for Runtime {
 		cfg::pallet_proof_of_stake::Min3rdPartyRewardValutationPerSession;
 	type Min3rdPartyRewardVolume = cfg::pallet_proof_of_stake::Min3rdPartyRewardVolume;
 	type SchedulesPerBlock = cfg::pallet_proof_of_stake::SchedulesPerBlock;
-	type ValuationApi = Xyk;
+	type ValuationApi = Market;
 	type NontransferableTokens = tokens::NontransferableTokens;
+	#[cfg(feature = "runtime-benchmarks")]
+	type Xyk = Xyk;
 }
 
 impl pallet_bootstrap::BootstrapBenchmarkingConfig for Runtime {}
@@ -495,9 +500,11 @@ impl pallet_fee_lock::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type MaxCuratedTokens = cfg::pallet_fee_lock::MaxCuratedTokens;
 	type Tokens = orml_tokens::MultiTokenCurrencyAdapter<Runtime>;
-	type PoolReservesProvider = Xyk;
+	type ValuateForNative = Market;
 	type NativeTokenId = tokens::RxTokenId;
 	type WeightInfo = weights::pallet_fee_lock_weights::ModuleWeight<Runtime>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type Xyk = Xyk;
 }
 
 impl pallet_session::Config for Runtime {
@@ -589,7 +596,7 @@ impl parachain_staking::Config for Runtime {
 	type MinCandidateStk = cfg::parachain_staking::MinCandidateStk;
 	type MinDelegation = cfg::parachain_staking::MinDelegatorStk;
 	type NativeTokenId = tokens::RxTokenId;
-	type StakingLiquidityTokenValuator = Xyk;
+	type ValuateForNative = Market;
 	type Issuance = Issuance;
 	type StakingIssuanceVault = cfg::parachain_staking::StakingIssuanceVaultOf<Runtime>;
 	type FallbackProvider = Council;
