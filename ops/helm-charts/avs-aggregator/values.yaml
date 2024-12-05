@@ -6,14 +6,28 @@ name: ''
 # But you can override it with nameOverride value
 # nameOverride: ''
 
-# Number of pods in deployment, default of not highly available (override on HA environments)
-replicaCount: 1
-
-# minReadySeconds
-minReadySeconds: false
-
-# Rollback limit
-revisionHistoryLimit: 10
+activeDeadlineSeconds: ''
+backoffLimit: 6
+completionMode: NonIndexed
+completions: ''
+parallelism: ''
+manualSelector: false
+selector: {}
+podFailurePolicy: {}
+  # rules:
+  # - action: FailJob
+  #   onExitCodes:
+  #     containerName: main      # optional
+  #     operator: In             # one of: In, NotIn
+  #     values: [42]
+  # - action: Ignore             # one of: Ignore, FailJob, Count
+  #   onPodConditions:
+  #   - type: DisruptionTarget   # indicates Pod disruption
+podReplacementPolicy: ''
+suspend: false
+ttlSecondsAfterFinished: ''
+managedBy: ''
+podRestartPolicy: 'Never'
 
 # The pod priority, to make things more critical
 # See: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
@@ -248,30 +262,6 @@ volumeMounts: []
 
 # For AWS Security Groups
 securityGroupIDs: []
-
-# Whether or not to enable autoscaling
-autoscaling:
-  enabled: false
-  minReplicas: 2
-  maxReplicas: 8
-  targetCPUUtilizationPercentage: 75
-  targetMemoryUtilizationPercentage: 90
-
-# Whether or not we want a pod disruption budget, enabled by default, but this only is enabled if replicaCount > 1
-podDistuptionBudget:
-  enabled: true
-  # maxUnavailable: 1
-  minAvailable: 1
-
-# What deployment strategy to use
-deploymentStrategy:
-  # Recreate / RollingUpdate
-  type: RollingUpdate
-  rollingUpdate:
-    # Minimize downtime by only having only 25 percent max unavailable.  If you're only at 3 pods, because 33% it won't kill any pods before one gets healthy first.
-    maxUnavailable: 25%
-    # Allows up to 25% more pods to be created when trying to roll out.  If you're at 10 pods, it'll spin up 2 new ones (20%) and when healthy will wait for termination of old ones to ensure compliance of 25%
-    maxSurge: 25%
 
 # This is so we can use the same tag on various different objects (eg: statefulsets, crons, etc) via our Gitlab CI Automation
 global:
