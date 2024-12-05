@@ -1,8 +1,8 @@
 services:
-  eth-ferry-deposit:
+  ferry-deposit-eth:
+    build: .
+    image: gaspxyz/ferry-deposit:local
     restart: unless-stopped
-    platform: linux/amd64
-    image: mangatasolutions/ferry-deposit:local-eth
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully
@@ -10,7 +10,6 @@ services:
         condition: service_started
       node-bob:
         condition: service_started
-    build: .
     environment:
       MANGATA_NODE_URL: ${ETH_FERRY_DEPOSIT_MANGATA_NODE_URL:-wss://collator-01-ws-rococo.mangata.online}
       ETH_CHAIN_URL: ${ETH_FERRY_DEPOSIT_CHAIN_URL:-wss://ethereum.publicnode.com}

@@ -7,6 +7,7 @@ includes:
 
 env_variables:
   MANGATA_NODE_URL: 'wss://collator-01-ws-rollup-frontend.gasp.xyz'
+  OLD_MANGATA_NODE_URL: 'wss://kusama-archive.mangata.online'
   REDIS_HOST: '10.15.245.67'
   REDIS_PORT: 6379
   TIMESERIES_HOST: 'redis-14581.c124.us-central1-1.gce.redns.redis-cloud.com'
@@ -17,16 +18,19 @@ env_variables:
   CAPTCHA_SITEKEY: $CAPTCHA_SITEKEY
   CAPTCHA_SECRET: $CAPTCHA_SECRET
   ORIGIN_ACCOUNT_PRIVATE_KEY: $ORIGIN_ACCOUNT_PRIVATE_KEY
-  HOLESKY_ADDRESS: $HOLESKY_ADDRESS
+  RPC_ADDRESS: $RPC_ADDRESS
   GASPV2_TOKEN_ADDRESS: $GASPV2_TOKEN_ADDRESS
-  CONTRACT_ADDRESS: $CONTRACT_ADDRESS
+  CONTRACT_ADDRESS_ETH: $CONTRACT_ADDRESS_ETH
+  CONTRACT_ADDRESS_ARB: $CONTRACT_ADDRESS_ARB
   ETH_CHAIN_URL: $ETH_CHAIN_URL
   ARBITRUM_SEPOLIA_CHAIN_URL: $ARBITRUM_SEPOLIA_CHAIN_URL
+  MGX_TOKEN_ID: '0'
+  MGX_AIRDROP_SNAPSHOTS: '0x8de8328944b57a0fae7b6780d98c8d98e31a8539a393b64e299a38db0f200edf,0x90f9f232b2a8e142a5b268effa53aa47963739dfa73a893962a42f67be60e282'
 
 manual_scaling:
   instances: 1
 
-instance_class: B1
+instance_class: B2
 
 vpc_access_connector:
   name: 'projects/direct-pixel-353917/locations/europe-west6/connectors/redis-app-engine'

@@ -157,7 +157,7 @@ contract FinalizerTaskManager is
         OpTask calldata task,
         OpTaskResponse calldata taskResponse,
         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
-    ) external {
+    ) external onlyAggregator {
 
         require(!(lastCompletedOpTaskCreatedBlock == 0) || allowNonRootInit, "use root init");
 
@@ -182,6 +182,14 @@ contract FinalizerTaskManager is
         _processOpTaskResponse(taskResponse.operatorsStateInfoHash, task);
 
         emit OpTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
+    }
+
+    function cancelPendingTasks()
+        external
+        onlyTaskGenerator()
+    {
+        require(isTaskPending == true, "No task pending");
+        _cancelPendingTasks();
     }
 
     function forceCancelPendingTasks()

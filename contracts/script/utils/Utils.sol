@@ -3,11 +3,10 @@ pragma solidity =0.8.13;
 
 import "@eigenlayer-middleware/src/interfaces/IRegistryCoordinator.sol";
 import "@eigenlayer/contracts/strategies/StrategyBase.sol";
-import "../../src/ERC20Mock.sol";
-
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";
-import {IRolldownPrimitives} from "../../src/Rolldown.sol";
+import "../../src/ERC20Mock.sol";
+import {IRolldownPrimitives} from "../../src/IRolldownPrimitives.sol";
 
 contract Utils is Script {
     // Note that this fct will only work for the ERC20Mock that has a public mint function
@@ -148,6 +147,8 @@ contract Utils is Script {
         evm = "ethereum_";
       } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
         evm = "arbitrum_"; 
+      } else if (chain == IRolldownPrimitives.ChainId.Base) {
+        evm = "base_"; 
       } else {
         revert("Unsupported chain");
       }

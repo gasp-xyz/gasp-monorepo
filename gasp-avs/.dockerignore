@@ -1,0 +1,12 @@
+.git
+.github
+.vscode
+Dockerfile
+ops/**/data
+.env
+
+target
+# **/target
+# !**/target/**/main
+
+tmp

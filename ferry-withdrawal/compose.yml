@@ -1,8 +1,8 @@
 services:
-  eth-ferry-withdrawal:
+  ferry-withdrawal-eth:
+    build: .
+    image: gaspxyz/ferry-withdrawal:local
     restart: unless-stopped
-    platform: linux/amd64
-    image: mangatasolutions/ferry-withdrawal:local-eth
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully
@@ -10,7 +10,7 @@ services:
         condition: service_started
       node-bob:
         condition: service_started
-    build: .
+
     environment:
       MANGATA_NODE_URL: ${ETH_FERRY_WITHDRAWAL_MANGATA_NODE_URL}
       ETH_CHAIN_URL: ${ETH_FERRY_WITHDRAWAL_ETH_CHAIN_URL}
@@ -22,10 +22,10 @@ services:
       LOOK_BACK_HOURS: ${ETH_FERRY_WITHDRAWAL_LOOK_BACK_HOURS}
       LOG: ${ETH_FERRY_WITHDRAWAL_LOG}
 
-  eth-closer:
+  closer-eth:
+    build: .
+    image: gaspxyz/ferry-withdrawal:local-closer
     restart: unless-stopped
-    platform: linux/amd64
-    image: mangatasolutions/closer:local-eth
     command: ["node", "build/src/closer.js"]
     depends_on:
       eth-contracts-deployment:
@@ -34,7 +34,6 @@ services:
         condition: service_started
       node-bob:
         condition: service_started
-    build: .
     environment:
       MANGATA_NODE_URL: ${ETH_CLOSER_MANGATA_NODE_URL}
       ETH_CHAIN_URL: ${ETH_CLOSER_ETH_CHAIN_URL}
@@ -44,4 +43,4 @@ services:
       L1_CHAIN: ${ETH_CLOSER_L1_CHAIN}
       TX_COST: ${ETH_CLOSER_TX_COST}
       LOG: ${ETH_CLOSER_LOG}
-      LOOK_BACK_HOURS: 0
+      DELAY: ${ETH_CLOSER_DELAY}

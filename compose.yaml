@@ -1,44 +1,22 @@
 name: rollup
 
 include:
+  - path: ./contracts/compose.anvil-stubs.yml # anvil stubs
+  # - path: ./contracts/compose.reth-stubs.yml # reth stubs
+
   - path: ./avs-aggregator/compose.yml
-  - path: ./avs-finalizer/compose.yml
-  - path: ./rollup-sequencer/compose.yml
+  - path: ./gasp-avs/compose.yml
+  # - path: ./rollup-sequencer/compose.yml
+  - path: ./sequencer/compose.yml
   - path: ./contracts/compose.yml
-  - path: ./gasp-syncer/compose.yml
+  - path: ./updater/compose.yml
   - path: ./ferry-deposit/compose.yml
   - path: ./ferry-withdrawal/compose.yml
 
 services:
-  eth-stub:
-    image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
-    platform: linux/amd64
-    ports:
-      - 8545:8545
-    entrypoint: anvil
-    command: --host 0.0.0.0 --balance 1000000000000000000 #-b 2
-    healthcheck:
-      test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
-      interval: 2s
-      timeout: 10s
-      retries: 3
-
-  arbitrum-stub:
-    image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
-    platform: linux/amd64
-    ports:
-      - 8546:8546
-    entrypoint: anvil
-    command: --host 0.0.0.0 --disable-block-gas-limit  --balance 1000000000000000000 --port 8546
-    healthcheck:
-      test: ["CMD", "nc", "-vz", "127.0.0.1", "8546"]
-      interval: 2s
-      timeout: 10s
-      retries: 3
-
   node-alice:
-    image: mangatasolutions/rollup-node:${MANGATA_NODE_VERSION:-eth-rollup-develop}
-    platform: linux/amd64
+    image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION}
+    pull_policy: always
     command:
       - --alith
       - --chain=rollup-local-seq
@@ -52,8 +30,8 @@ services:
       - 30333:30333
 
   node-bob:
-    image: mangatasolutions/rollup-node:${MANGATA_NODE_VERSION:-eth-rollup-develop}
-    platform: linux/amd64
+    image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION}
+    pull_policy: always
     command:
       - --baltathar
       - --chain=rollup-local-seq

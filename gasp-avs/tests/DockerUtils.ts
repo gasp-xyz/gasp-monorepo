@@ -1,0 +1,140 @@
+import {GenericContainer, StartedTestContainer, Wait} from "testcontainers";
+import {Environment} from "testcontainers/build/types";
+import { randomBytes } from "crypto";
+//@ts-ignore
+import  { Wallet } from '@ethereumjs/wallet'
+import {generateBls12381G2KeyPair} from "@mattrglobal/bbs-signatures";
+
+interface operatorKeys {
+    edcsa: string,
+    bls: string
+}
+
+export async function getNewKeys() {
+    const key = randomBytes(32).toString("hex");
+    const keyp =  await generateBls12381G2KeyPair();
+    const wbls =   Wallet.fromPrivateKey(Buffer.from(keyp.secretKey));
+    const wecdsa =  Wallet.fromPrivateKey(Buffer.from(key, 'hex'));
+    return  { edcsa : await  wecdsa.toV3(""), bls:  await wbls.toV3("") };
+}
+
+export class DockerUtils{
+    container?: StartedTestContainer;
+    containerName: string;
+    GASP_AVS_IMAGE: string;
+    constructor() {
+        this.container = undefined;
+        this.containerName = "";
+        this.GASP_AVS_IMAGE = "gaspxyz/gasp-avs:" + ( process.env.GASP_AVS_VERSION || 'local' );
+        console.info("Using image: " + this.GASP_AVS_IMAGE);
+    }
+    async startContainer(image: string = this.GASP_AVS_IMAGE, env = this.finalizerLocalEnvironment, opKeys : Partial<operatorKeys>  = {}, logMessage = "Testnet setup sucessfully, starting AVS verification") {
+        this.containerName = image;
+        const json = await getNewKeys();
+        env.ECDSA_KEY_JSON =  JSON.stringify(json.edcsa);
+        env.BLS_KEY_JSON =  JSON.stringify(json.bls);
+        if(opKeys.edcsa){
+            env.ECDSA_KEY_JSON = opKeys.edcsa!;
+        }
+        if(opKeys.bls){
+            env.BLS_KEY_JSON = opKeys.bls!;
+        }
+        if(opKeys.edcsa && opKeys.bls){
+            env.STAKE = "1";
+        }
+        const name = "rollup-gasp-avs-TEST-" + randomBytes(4).toString("hex")
+        console.info("name" + name + "keys: " + env.ECDSA_KEY_JSON  + env.BLS_KEY_JSON );
+        console.info("Starting container: " + image);
+        if(!this.container){
+            this.container = await new GenericContainer(image)
+                .withWaitStrategy(Wait.forLogMessage(logMessage))
+                .withEnvironment(env)
+                .withNetworkMode("host")
+                .withName(name)
+                .withLogConsumer(stream => {
+                    stream.on("data", line => console.debug(line));
+                    stream.on("err", line => console.debug(line));
+                    stream.on("end", () => console.debug("Stream closed"));
+                })
+                .start();
+        }else{
+            console.info("Container already started: " + this.container.getName());
+        }
+        return { container: this.container , edcsa: env.ECDSA_KEY_JSON , bls: env.BLS_KEY_JSON };
+    }
+    async stopContainer() {
+        console.info("Stopping container .... " + this.containerName);
+        await this.container!.stop();
+        console.info(".... Done! ");
+    }
+
+    /** 
+    docker run -it --network=host \
+    -e RUST_LOG=info \
+    -e ETH_RPC_URL=http://0.0.0.0:8545 \
+    -e ETH_WS_URL=ws://0.0.0.0:8545 \
+    -e CHAIN_ID=31337 \
+    -e SUBSTRATE_RPC_URL=ws://0.0.0.0:9946 \
+    -e AVS_RPC_URL=http://0.0.0.0:8090 \
+    -e AVS_REGISTRY_COORDINATOR_ADDR=0xf5059a5D33d5853360D16C683c16e67980206f36 \
+    -e TESTNET=true \
+    -e STAKE=60 \
+    -e ROLLUP_NODE_CHAIN:"rollup-local-seq",
+    -e ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+    --entrypoint /bin/bash \
+    gaspxyz/gasp-avs:local 
+    cc: ./main --bls-ephemeral-key --ecdsa-ephemeral-key
+    */
+    finalizerLocalEnvironment : Environment = {
+        RUST_LOG: "info",
+        ETH_RPC_URL:"http://0.0.0.0:8545" ,
+        ETH_WS_URL:"ws://0.0.0.0:8545" ,
+        CHAIN_ID:"31337" ,
+        SUBSTRATE_RPC_URL:"ws://0.0.0.0:9946" ,
+        AVS_RPC_URL:"http://0.0.0.0:8090" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0xf5059a5D33d5853360D16C683c16e67980206f36" ,
+        TESTNET:"true",
+        STAKE:"45",
+        ROLLUP_NODE_CHAIN:"rollup-local-seq",
+        ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+    }
+    bigStakeLocalEnvironment : Environment = {
+        RUST_LOG: "info",
+        ETH_RPC_URL:"http://0.0.0.0:8545" ,
+        ETH_WS_URL:"ws://0.0.0.0:8545" ,
+        CHAIN_ID:"31337" ,
+        SUBSTRATE_RPC_URL:"ws://0.0.0.0:9946" ,
+        AVS_RPC_URL:"http://0.0.0.0:8090" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0xf5059a5D33d5853360D16C683c16e67980206f36" ,
+        TESTNET:"true",
+        STAKE:"100",
+        ROLLUP_NODE_CHAIN:"rollup-local-seq",
+        ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+    }
+    bigStakeWithWrongAvsPort : Environment = {
+        RUST_LOG: "info",
+        ETH_RPC_URL:"http://0.0.0.0:8545" ,
+        ETH_WS_URL:"ws://0.0.0.0:8545" ,
+        CHAIN_ID:"31337" ,
+        SUBSTRATE_RPC_URL:"ws://0.0.0.0:9946" ,
+        AVS_RPC_URL:"http://0.0.0.0:6666" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0x851356ae760d987E095750cCeb3bC6014560891C" ,
+        TESTNET:"true",
+        STAKE:"100",
+        ROLLUP_NODE_CHAIN:"rollup-local-seq",
+        ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+    }
+    corruptedFinalizerLocalEnvironment : Environment = {
+        RUST_LOG: "info",
+        ETH_RPC_URL:"http://0.0.0.0:8545" ,
+        ETH_WS_URL:"ws://0.0.0.0:8545" ,
+        CHAIN_ID:"31337" ,
+        SUBSTRATE_RPC_URL:"wss://kusama-archive.mangata.online:443" ,
+        AVS_RPC_URL:"http://0.0.0.0:8090" ,
+        AVS_REGISTRY_COORDINATOR_ADDR:"0xf5059a5D33d5853360D16C683c16e67980206f36" ,
+        TESTNET:"true",
+        STAKE:"90",
+        ROLLUP_NODE_CHAIN:"rollup-local-seq",
+        ROLLUP_NODE_BOOTNODE: "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+    }
+}

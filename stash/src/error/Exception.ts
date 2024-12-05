@@ -9,3 +9,5 @@ export class NotEnoughException extends Error {}
 export class HttpResponseException extends Error {}
 
 export class ForbiddenException extends Error {}
+
+export class ValidationException extends Error {}

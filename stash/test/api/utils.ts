@@ -2,7 +2,7 @@ import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
 import * as crypto from 'crypto'
 
 export const TIMESERIES_HOST_DOCKER_IMAGE_NAME =
-  'mangatasolutions/redis-test-stash_ts:5'
+  'mangatasolutions/redis-test-stash_ts:8'
 export const REDIS_HOST_DOCKER_IMAGE_NAME = 'p1k1m4n/redis-test-stash:5'
 export const MAX_DAYS = 'max'
 export const MAX_INTERVAL = 'day'
@@ -18,11 +18,6 @@ export async function startContainer(image: string) {
       .withWorkingDir('/')
       .withEntrypoint(['./entrypoint.sh'])
       .withExposedPorts({ container: 6379, host: 6379 })
-      .withLogConsumer(stream => {
-        stream.on("data", line => console.debug("redis_ts ->" + line));
-        stream.on("err", line => console.debug("redis_ts ->" + line));
-        stream.on('end', () => console.debug("redis_ts ->" + 'Stream closed'))
-      })
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
       .start()
   } else {
@@ -31,11 +26,6 @@ export async function startContainer(image: string) {
       .withEntrypoint(['redis-server', '--protected-mode no'])
       .withExposedPorts({ container: 6379, host: 6380 })
       .withName('redis-container')
-      .withLogConsumer(stream => {
-        stream.on("data", line => console.debug("redis_db ->" + line));
-        stream.on("err", line => console.debug("redis_db ->" + line));
-        stream.on('end', () => console.debug("redis_db ->" + 'Stream closed'))
-      })
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
       .start()
   }
