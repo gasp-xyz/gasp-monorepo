@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	aggregator "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator"
+	aggregator "github.com/gasp-xyz/gasp-monorepo/avs-aggregator"
 )
 
 var (
