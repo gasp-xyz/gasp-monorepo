@@ -22,7 +22,7 @@ releases:
   - name: avs-aggregator
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.aggregatorEnabled }}
-    chart: ../helm-charts/avs-aggregator
+    chart: ../helm-charts/common-deployment
     values:
       - image:
           repository: gaspxyz/avs-aggregator

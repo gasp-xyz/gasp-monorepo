@@ -82,6 +82,8 @@ aggregatorEnv:
   BLS_EPHEMERAL_KEY: "true"
   AVS_KICK_PERIOD: 5
   AVS_MIN_OP_UPDATE_INTERVAL: 1
+  AGG_IDLE_START: true
+  AGG_RUN_TRIGGER_API_KEY: "secrettoken"
 
 #####################
 # gaspAvs configs #

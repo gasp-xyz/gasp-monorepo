@@ -1,7 +1,0 @@
-apiVersion: v1
-name: avs-aggregator
-version: 1.0.0
-description: The avs-aggregator Job Helm Chart
-keywords:
-  - avs-aggregator
-  - helm
