@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core/chainio"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
 )
 
 type Kicker struct {

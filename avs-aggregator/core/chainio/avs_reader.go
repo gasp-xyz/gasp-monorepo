@@ -2,25 +2,25 @@ package chainio
 
 import (
 	"context"
+	"errors"
 	"math/big"
 	"strings"
-	"errors"
 
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
-	"github.com/Layr-Labs/eigensdk-go/utils"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	logging "github.com/Layr-Labs/eigensdk-go/logging"
+	"github.com/Layr-Labs/eigensdk-go/utils"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
-	// blsSignatureChecker "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	// blsSignatureChecker "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
 	// opstateretriever "github.com/Layr-Labs/eigensdk-go/contracts/bindings/OperatorStateRetriever"
 
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
 )
 
 type AvsReaderer interface {

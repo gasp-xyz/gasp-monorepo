@@ -10,9 +10,9 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/MangataTaskManager"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/MangataTaskManager"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
 
 	gsrpc_types "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
