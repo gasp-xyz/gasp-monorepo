@@ -35,6 +35,7 @@ releases:
           targetPort: 8090
         ingress:
           enabled: true
+          annotations: { kubernetes.io/tls-acme: 'true' }
           hosts:
             - host: avs-aggregator-{{ .Values.environmentName }}.gasp.xyz
               paths: ["/"]
