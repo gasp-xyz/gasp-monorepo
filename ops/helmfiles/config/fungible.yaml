@@ -81,7 +81,7 @@ gaspAvsEnabled: true
 gaspAvsEnvSecrets: {}
 gaspAvsEnv:
   CHAIN_ID: "1337"
-  RUST_LOG: info
+  RUST_LOG: info,substrate=warn
   ETH_RPC_URL: http://evm-node-eth:8545
   ETH_WS_URL: ws://evm-node-eth:8546
   SUBSTRATE_RPC_URL: ws://collator-01:9944
