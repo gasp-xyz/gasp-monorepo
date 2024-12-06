@@ -143,11 +143,15 @@ contract MultiStage is Script, Utils, Test {
         deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId.Base);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("base-sepolia"))){
-
+        if (outputExists("base_rolldown_output") || outputExists("arbitrum_gmrs_output")) {
+            revert("Already deployed");
+        }
         deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId.Base);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("arbitrum-sepolia"))){
-
+        if (outputExists("arbitrum_rolldown_output") || outputExists("arbitrum_gmrs_output")) {
+            revert("Already deployed");
+        }
         deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId.Arbitrum);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("ethereum-holesky"))){
