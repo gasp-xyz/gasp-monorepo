@@ -19,6 +19,11 @@ contract MultiStage is Script, Utils, Test {
 
     function deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId chain) internal {
 
+      vm.startBroadcast();
+      // added some extra call here so nonce does inc
+      new EmptyContract();
+      vm.stopBroadcast();
+
       Rolldown rolldown;
       GaspMultiRollupService gmrs;
       address avsOwner;

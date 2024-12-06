@@ -157,6 +157,9 @@ contract Deployer_M2 is Script, Test {
         // START RECORDING TRANSACTIONS FOR DEPLOYMENT
         vm.startBroadcast();
 
+        // added some extra call here so nonce does inc
+        new EmptyContract();
+
         // deploy proxy admin for ability to upgrade proxy contracts
         eigenLayerProxyAdmin = new ProxyAdmin();
 
