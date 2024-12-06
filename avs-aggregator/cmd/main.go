@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator"
+	aggregator "github.com/gasp-xyz/gasp-monorepo/avs-aggregator"
 )
 
 var (
@@ -27,9 +27,9 @@ func main() {
 	app.Description = "Service that sends block number to be finalized by operator nodes."
 
 	app.Action = aggregatorMain
-	err := app.Run(os.Args)
-	if err != nil {
-		fmt.Println("Application failed with error:", err)
+	if err := app.Run(os.Args); err != nil {
+		fmt.Fprintf(os.Stderr, "Application failed with error: %v\n", err)
+		os.Exit(1)
 	}
 }
 

@@ -8,7 +8,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/config"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core/config"
 	"github.com/urfave/cli"
 )
 
