@@ -306,27 +306,30 @@ class L1Api implements L1Interface {
 			transport: this.transport,
 		});
 
-		// TODO: submit as a batch
-		const approveRequest = await this.client.simulateContract({
-			account: acc,
-			address: u8aToHex(withdrawal.tokenAddress),
-			abi: [
-				{
-					constant: true,
-					inputs: [
-						{ name: "spender", type: "address" },
-						{ name: "amount", type: "uint256" },
-					],
-					name: "approve",
-					outputs: [{ name: "status", type: "bool" }],
-					type: "function",
-				},
-			],
-			functionName: "approve",
-			args: [MANGATA_CONTRACT_ADDRESS, withdrawal.amount],
-		});
-		const approvetxHash = await wc.writeContract(approveRequest.request);
-		await this.client.waitForTransactionReceipt({ hash: approvetxHash });
+		const native_addr = await this.getNativeTokenAddress();
+		if (withdrawal.tokenAddress != native_addr) {
+			// TODO: submit as a batch
+			const approveRequest = await this.client.simulateContract({
+				account: acc,
+				address: u8aToHex(withdrawal.tokenAddress),
+				abi: [
+					{
+						constant: true,
+						inputs: [
+							{ name: "spender", type: "address" },
+							{ name: "amount", type: "uint256" },
+						],
+						name: "approve",
+						outputs: [{ name: "status", type: "bool" }],
+						type: "function",
+					},
+				],
+				functionName: "approve",
+				args: [MANGATA_CONTRACT_ADDRESS, withdrawal.amount],
+			});
+			const approvetxHash = await wc.writeContract(approveRequest.request);
+			await this.client.waitForTransactionReceipt({ hash: approvetxHash });
+		}
 
 		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
 			this.client,
@@ -339,6 +342,7 @@ class L1Api implements L1Interface {
 			args: [withdrawalToViemFormat(withdrawal)],
 			maxFeePerGas: maxFeeInWei,
 			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
+			value: withdrawal.amount - withdrawal.ferryTip,
 		});
 
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
