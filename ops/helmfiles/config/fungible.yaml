@@ -24,9 +24,9 @@ collator:
       memory: 6Gi
   image:
     repository: mangatasolutions/rollup-node
-    tag: 456a53b8bdd546d99507884cf4a82b844366c2eb-fast
+    tag: 456a53b8bdd546d99507884cf4a82b844366c2eb
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/eb43d6a85f5152cc5f4bae0996bf7b74ad1c516d/rollup-dev-env-chainspecs/rollup-fungible-456a53b8-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json
   storageClass: standard
   storageSize: 5Gi
   enableServiceMonitorCollectors: true
@@ -71,6 +71,8 @@ aggregatorEnv:
   BLS_EPHEMERAL_KEY: "true"
   AVS_KICK_PERIOD: 5
   AVS_MIN_OP_UPDATE_INTERVAL: 1
+  AGG_IDLE_START: true
+  AGG_RUN_TRIGGER_API_KEY: "secrettoken"
 
 #####################
 # gaspAvs configs #

@@ -10,7 +10,7 @@ import (
 
 	"go.uber.org/mock/mockgen/model"
 
-	pkg_ "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
+	pkg_ "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core/chainio"
 )
 
 var output = flag.String("output", "", "The output file name, or empty to use stdout.")

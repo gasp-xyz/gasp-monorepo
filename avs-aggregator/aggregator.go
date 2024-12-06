@@ -17,14 +17,14 @@ import (
 	blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
 	oprsinfoserv "github.com/Layr-Labs/eigensdk-go/services/operatorsinfo"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core/chainio"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
 
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	gsrpcrpcchain "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/chain"
 	gsrpctypes "github.com/centrifuge/go-substrate-rpc-client/v4/types"
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 )
 
 // Aggregator sends tasks onchain, then listens for operator signed TaskResponses.
@@ -78,6 +78,9 @@ type Aggregator struct {
 	asyncOpStateUpdaterError error
 	retryNumber              uint8
 	maxRetryNumber           uint8
+
+	startIdle          bool
+	apiKey             string
 
 	kicker         *Kicker
 	opStateUpdater *OpStateUpdater
@@ -172,13 +175,23 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		kicker:                  kicker,
 		opStateUpdater:          opStateUpdater,
 		expiration:              uint32(c.Expiration),
+		startIdle:			   	 c.AggIdleStart,
+		apiKey:			   	     c.AggRunTriggerApiKey,		
 	}, nil
 }
 
 func (agg *Aggregator) Start(ctx context.Context) error {
 	agg.logger.Infof("Starting aggregator.")
 	agg.logger.Infof("Starting aggregator rpc server.")
-	go agg.startServer(ctx)
+	runTriggerC := make(chan struct{})
+	go agg.startServer(ctx, agg.apiKey, runTriggerC)
+
+	if agg.startIdle {
+		// blocking wait for the run trigger
+		agg.logger.Infof("Aggregator awaiting run trigger.")
+		<- runTriggerC
+		agg.logger.Infof("Aggregator received run trigger. Continuing.")
+	}
 
 	err := agg.checkAndProcessPendingTasks()
 	if err != nil {
