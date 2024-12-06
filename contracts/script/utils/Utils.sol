@@ -86,6 +86,14 @@ contract Utils is Script {
         return string.concat(outputdir, chaindir, file);
     }
 
+    // Forge scripts best practice: https://book.getfoundry.sh/tutorials/best-practices#scripts
+    function outputExists(
+        string memory outputFileName
+    ) internal returns (bool) {
+        string memory output = calculateOutputPath(outputFileName);
+        console.log(output);
+        return vm.exists(calculateOutputPath(outputFileName));
+    }
 
     // Forge scripts best practice: https://book.getfoundry.sh/tutorials/best-practices#scripts
     function inputExists(

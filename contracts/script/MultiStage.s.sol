@@ -22,7 +22,6 @@ contract MultiStage is Script, Utils, Test {
       Rolldown rolldown;
       GaspMultiRollupService gmrs;
       address avsOwner;
-      bool gmrsAllowNonRootInit;
 
       console.log("################################################################################");
       console.log("Deploying rolldown contracts");
@@ -33,13 +32,12 @@ contract MultiStage is Script, Utils, Test {
       string memory _CONFIG_PATH = "deploy.config";
       string memory configData = readConfig(_CONFIG_PATH);
       avsOwner = stdJson.readAddress(configData, ".permissions.owner");
-      gmrsAllowNonRootInit = stdJson.readBool(configData, ".allow_non_root_gmrs_init");
 
       console.log("################################################################################");
       console.log("Deploying gaspMultiRollupService contracts");
       console.log("################################################################################");
       GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
-      gaspMultiRollupServiceDeployer.run(chain, gmrsAllowNonRootInit);
+      gaspMultiRollupServiceDeployer.run(chain);
 
       string memory _GMRS_OUTPUT_PATH = "gmrs_output";
       string memory gmrsDeployedContracts = readOutput(evmPrefixedPath(chain, _GMRS_OUTPUT_PATH));
@@ -145,20 +143,58 @@ contract MultiStage is Script, Utils, Test {
         deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId.Base);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("base-sepolia"))){
-
+        if (outputExists("base_rolldown_output") || outputExists("arbitrum_gmrs_output")) {
+            revert("Already deployed");
+        }
         deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId.Base);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("arbitrum-sepolia"))){
-
+        if (outputExists("arbitrum_rolldown_output") || outputExists("arbitrum_gmrs_output")) {
+            revert("Already deployed");
+        }
         deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId.Arbitrum);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("ethereum-holesky"))){
+        
+        console.log("################################################################################");
+        console.log("Deploying finalizer contracts");
+        console.log("################################################################################");
+        Deployer finalizerDeployer = new Deployer();
+
+        if (outputExists(finalizerDeployer.getOutputPath())) {
+            revert("Already deployed");
+        }
+
+        finalizerDeployer.run();
 
         console.log("################################################################################");
         console.log("Deploying rolldown contracts");
         console.log("################################################################################");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
         rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+
+        Rolldown rolldown;
+        FinalizerTaskManager taskManager;
+        address avsOwner;
+
+        string memory _EIGEN_OUTPUT_PATH = "avs_deployment_output";
+        string memory eigenlayerDeployedContracts = readOutput(_EIGEN_OUTPUT_PATH);
+        taskManager = FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
+
+        string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
+        string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Ethereum, _ROLLDOWN_OUTPUT_PATH));
+        rolldown = Rolldown(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown"));
+
+        string memory _CONFIG_PATH = "deploy.config";
+        string memory configData = readConfig(_CONFIG_PATH);
+        avsOwner = stdJson.readAddress(configData, ".permissions.owner");
+
+        vm.startBroadcast(avsOwner);
+
+        taskManager.setRolldown(IRolldown(address(rolldown)));
+        rolldown.setUpdater(address(taskManager));
+
+        vm.stopBroadcast();
 
       }else{
  

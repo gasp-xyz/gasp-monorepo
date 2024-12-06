@@ -29,6 +29,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
     address public owner;
     address public upgrader;
     address public updaterAccount;
+    bool public allowNonRootInit;
 
     function evmPrefixedPath(IRolldownPrimitives.ChainId chain) public view returns (string memory) {
       string memory evm;
@@ -79,11 +80,12 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
       return proxyAdmin.code.length > 0;
     }
 
-    function initialDeployment(IRolldownPrimitives.ChainId chain, bool allowNonRootInit) public {
+    function initialDeployment(IRolldownPrimitives.ChainId chain) public {
       string memory configData = readConfig(_CONFIG_PATH);
       owner = stdJson.readAddress(configData, ".permissions.owner");
       upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
       updaterAccount = stdJson.readAddress(configData, ".permissions.gmrsUpdater");
+      allowNonRootInit = stdJson.readBool(configData, ".allow_non_root_gmrs_init");
 
 
       vm.startBroadcast();
@@ -124,13 +126,13 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
         _writeOutput(chain);
     }
 
-    function run(IRolldownPrimitives.ChainId chain, bool allowNonRootInit) external {
+    function run(IRolldownPrimitives.ChainId chain) external {
       if (isProxyDeployed(chain)){
         console.log("Upgrading proxy");
         upgrade(chain);
       }else{
         console.log("Initial deployment");
-        initialDeployment(chain, allowNonRootInit);
+        initialDeployment(chain);
       }
     }
 
