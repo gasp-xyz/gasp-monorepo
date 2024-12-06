@@ -4,17 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"net/http"
 	"fmt"
+	"net/http"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"encoding/hex"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
-	"github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
+	blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
 	"github.com/Layr-Labs/eigensdk-go/types"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 )

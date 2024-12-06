@@ -1,20 +1,20 @@
 package chainio
 
 import (
-	"github.com/Layr-Labs/eigensdk-go/logging"
 	regcoord "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RegistryCoordinator"
+	"github.com/Layr-Labs/eigensdk-go/logging"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
-	servicemanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerServiceManager"
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
-	blsSignatureChecker "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
-	delegationManager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/DelegationManager"
-	stakeRegistry "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/StakeRegistry"
-	indexRegistry "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/IndexRegistry"
-	operatorStateRetrieverExtended "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/OperatorStateRetrieverExtended"
+	blsSignatureChecker "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
+	delegationManager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/DelegationManager"
+	servicemanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerServiceManager"
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	indexRegistry "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/IndexRegistry"
+	operatorStateRetrieverExtended "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/OperatorStateRetrieverExtended"
+	stakeRegistry "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/StakeRegistry"
 )
 
 type AvsServiceBindings struct {

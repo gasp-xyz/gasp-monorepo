@@ -5,8 +5,8 @@ import (
 
 	opstateretriever "github.com/Layr-Labs/eigensdk-go/contracts/bindings/BLSOperatorStateRetriever"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/MangataTaskManager"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/MangataTaskManager"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
 )
 
 // ====== TaskManager Mocks ======

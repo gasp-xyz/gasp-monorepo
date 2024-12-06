@@ -91,6 +91,8 @@ aggregatorEnv:
   OPT_IN_AT_STARTUP: "true"
   LOG_LEVEL: "info"
   RUST_LOG: avs=debug
+  AGG_IDLE_START: true
+  AGG_RUN_TRIGGER_API_KEY: "secrettoken"
 
 #####################
 # gaspAvs configs #

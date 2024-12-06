@@ -13,16 +13,16 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core/chainio"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
 
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
-	delegationManager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/DelegationManager"
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
-	stakeRegistry "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/StakeRegistry"
-	// operatorStateRetrieverExtended "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/OperatorStateRetrieverExtended"
+	delegationManager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/DelegationManager"
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	stakeRegistry "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/StakeRegistry"
+	// operatorStateRetrieverExtended "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/OperatorStateRetrieverExtended"
 )
 
 type OpStateUpdater struct {

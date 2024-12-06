@@ -8,7 +8,7 @@ import {
   http,
   publicActions,
 } from 'viem'
-import { holesky } from 'viem/chains'
+import { CONFIG_TO_CHAIN } from '../util/ConfigToChain.js'
 import { privateKeyToAccount } from 'viem/accounts'
 import Gasp from '../Gasp.json' assert { type: 'json' }
 import { ForbiddenException } from '../error/Exception.js'
@@ -80,7 +80,7 @@ const send = async (
 ) => {
   // Create a new wallet client
   const client = createWalletClient({
-    chain: holesky,
+    chain: CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-ethereum'),
     transport: http(process.env.RPC_ADDRESS),
   }).extend(publicActions)
   const account = privateKeyToAccount(
@@ -101,7 +101,7 @@ const send = async (
 
 const simulateTransaction = async (transaction: SimulateTransactionRequest) => {
   const publicClient = createPublicClient({
-    chain: holesky,
+    chain: CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-ethereum'),
     transport: http(process.env.RPC_ADDRESS),
   })
   const baseFeeInWei = await publicClient.getGasPrice()
@@ -112,7 +112,7 @@ const simulateTransaction = async (transaction: SimulateTransactionRequest) => {
 
   const { request } = await transaction.client.simulateContract({
     account: transaction.account,
-    chain: holesky,
+    chain: CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-ethereum'),
     abi: Gasp.abi,
     address: transaction.tokenToSendAddress,
     args: [transaction.toAddress, transaction.amount],

@@ -9,8 +9,10 @@ metadata:
     "helm.sh/hook-weight": "5"
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
-  # This job will be automatically deleted in 10 mins after it completes
-  ttlSecondsAfterFinished: 600
+  {{- if .Values.ttlSecondsAfterFinished }}
+  # Specifies the time to live in seconds after the job finishes
+  ttlSecondsAfterFinished: {{ .Values.ttlSecondsAfterFinished }}
+  {{- end }}
   template:
     spec:
       initContainers:

@@ -1,4 +1,4 @@
-module github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator
+module github.com/gasp-xyz/gasp-monorepo/avs-aggregator
 
 go 1.21
 

@@ -14,6 +14,9 @@ verifierEnabled: false
 verifierName: blockscout
 verifierUrl: "http://blockscout-eth-blockscout-stack-blockscout-svc:80/api"
 
+# ttlSecondsAfterFinished is the time to keep the job before deleting it in seconds after the job finishes
+ttlSecondsAfterFinished: ''
+
 dataMountPath: /data
 
 evmNodeImage: "ghcr.io/paradigmxyz/reth:v1.0.7"

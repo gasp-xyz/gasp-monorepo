@@ -60,6 +60,12 @@ contract MultiStage is Script, Utils, Test {
     function run() external {
       string memory variant = vm.envString("ENV_SELECTOR");
       if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("ethereum-stub"))){
+
+        vm.startBroadcast();
+        // added some extra call here so nonce does inc
+        new EmptyContract();
+        vm.stopBroadcast();
+        
         Deployer_M2 eigenDeployer = new Deployer_M2();
         AnvilSetup anvilDeployer = new AnvilSetup();
         Deployer finalizerDeployer = new Deployer();
@@ -122,9 +128,19 @@ contract MultiStage is Script, Utils, Test {
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("arbitrum-stub"))){
 
+        vm.startBroadcast();
+        // added some extra call here so nonce does inc
+        new EmptyContract();
+        vm.stopBroadcast();
+
         deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId.Arbitrum);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("base-stub"))){
+
+        vm.startBroadcast();
+        // added some extra call here so nonce does inc
+        new EmptyContract();
+        vm.stopBroadcast();
 
         deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId.Base);
 
