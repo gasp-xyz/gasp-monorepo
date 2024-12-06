@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # First import the deployer account into the foundry wallet (named here as "testnet-actual-0")
-# Use as `RPC_URL=[InsertUrl] ./script/deploy/deploy-base-sepolia.sh`
+# Use as `RPC_URL=[InsertUrl] ./script/deploy/deploy-eth-holesky.sh`
 # Run it once without `--broadcast` to simulate execution
 # Once sure - run with `--broadcast`
 
