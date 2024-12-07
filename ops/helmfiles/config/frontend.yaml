@@ -24,7 +24,7 @@ collator:
       memory: 12Gi
   image:
     repository: mangatasolutions/rollup-node
-    tag: 456a53b8bdd546d99507884cf4a82b844366c2eb-fast
+    tag: 041b37e0d6c8289f7a734bca47571d4fc4373da3
   disableChainspecGeneration: true
   customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/7358269f21bf921b541f07db5ab80badb03288b7/rollup-dev-env-chainspecs/rollup-frontend-456a53b-raw.json
   storageClass: node-data-volume-retain
