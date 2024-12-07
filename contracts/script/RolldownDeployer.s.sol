@@ -75,10 +75,15 @@ contract RolldownDeployer is Script, Utils, Test {
 
     }
 
-    function isProxyDeployed(IRolldownPrimitives.ChainId chain) public view returns (bool){
-      string memory configData = readInput(evmPrefixedPath(chain));
-      address proxyAdmin = stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin");
-      return proxyAdmin.code.length == 0;
+    function isProxyDeployed(IRolldownPrimitives.ChainId chain) public returns (bool) {
+        if (!inputExists(evmPrefixedPath(chain))) {
+            return false;
+        }
+
+        string memory configData = readInput(evmPrefixedPath(chain));
+        address proxyAdmin = stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin");
+
+        return proxyAdmin.code.length > 0;
     }
 
     function initialDeployment(IRolldownPrimitives.ChainId chain) public {
@@ -129,13 +134,13 @@ contract RolldownDeployer is Script, Utils, Test {
     }
 
     function run(IRolldownPrimitives.ChainId chain) external {
-      if (isProxyDeployed(chain)){
-        console.log("Initial deployment");
-        initialDeployment(chain);
-      }else{
-        console.log("Upgrading proxy");
-        upgrade(chain);
-      }
+        if (isProxyDeployed(chain)) {
+            console.log("Upgrading proxy");
+            upgrade(chain);
+        } else {
+            console.log("Initial deployment");
+            initialDeployment(chain);
+        }
     }
 
     function _writeOutput(IRolldownPrimitives.ChainId chain) internal {

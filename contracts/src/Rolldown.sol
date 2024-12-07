@@ -518,4 +518,19 @@ contract Rolldown is
 
         return result;
     }
+
+    function transferNative(address recipient, uint256 amount) public onlyOwner whenNotPaused {
+        require(amount > 0, "Amount must be greater than zero");
+        require(payable(address(this)).balance >= amount, "not enough eth funds");
+        emit NativeFundsTransfered(recipient, amount);
+        Address.sendValue(payable(recipient), amount);
+    }
+
+    function transferErc20(address tokenAddress, address recipient, uint256 amount) public onlyOwner whenNotPaused {
+        require(amount > 0, "Amount must be greater than zero");
+        IERC20 token = IERC20(tokenAddress);
+        require(token.balanceOf(address(this)) >= amount, "not enough token funds");
+        token.safeTransfer(recipient, amount);
+    }
+
 }

@@ -20,7 +20,7 @@ contract MultiStage is Script, Utils, Test {
         Deployer finalizerDeployer = new Deployer();
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
 
-        if (rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Ethereum)) {
+        if (!rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Ethereum)) {
           console.log("################################################################################");
           console.log("Deploying eigen layer infra");
           console.log("################################################################################");
@@ -56,6 +56,25 @@ contract MultiStage is Script, Utils, Test {
         console.log("Deploying rolldown contracts");
         console.log("################################################################################");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
+        rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
+
+      }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("ethereum-holesky"))){
+        console.log("################################################################################");
+        console.log("Deploying rolldown contracts");
+        console.log("################################################################################");
+        RolldownDeployer rolldownDeployer = new RolldownDeployer();
+        // We only want upgrade and not deploy from scratch
+        require(rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Ethereum), "Proxy not deployed");
+        rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+
+      }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("arbitrum-sepolia"))){
+
+        console.log("################################################################################");
+        console.log("Deploying rolldown contracts");
+        console.log("################################################################################");
+        RolldownDeployer rolldownDeployer = new RolldownDeployer();
+        // We only want upgrade and not deploy from scratch
+        require(rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Arbitrum), "Proxy not deployed");
         rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
 
       }else{

@@ -36,6 +36,16 @@ interface IRolldownPrimitives {
     event PendingEthWithdrawn(address sender, uint amount);
     event NewUpdaterSet(address updater);
 
+    event NativeFundsTransfered(
+        address recipient,
+        uint256 amount
+    );
+    event Erc20FundsTransfered(
+        address recipient,
+        address tokenAddress,
+        uint256 amount
+    );
+
     enum Origin {
         L1,
         L2
