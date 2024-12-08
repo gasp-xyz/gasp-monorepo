@@ -2134,13 +2134,13 @@ function-bind@^1.1.2:
     viem "^2.17.4"
     wagmi "^2.10.10"
 
-"gasp-sdk-target@npm:gasp-sdk@0.0.2-eth-rollup-develop.24":
-  version "0.0.2-eth-rollup-develop.24"
-  resolved "https://registry.yarnpkg.com/gasp-sdk/-/gasp-sdk-0.0.2-eth-rollup-develop.24.tgz#ef8880848c595e249ee5c9ab0698999afffa6937"
-  integrity sha512-UzlmnkisIRrBNuPUUxSlefP1SjG+yqBO1xL6ScMpZqH9KT30drnTpBbdmRoyNgFh4Wj+eVlrmYSyIlyBBXQYKw==
+"gasp-sdk-target@npm:gasp-sdk@0.0.2-eth-rollup-develop.78":
+  version "0.0.2-eth-rollup-develop.78"
+  resolved "https://registry.yarnpkg.com/gasp-sdk/-/gasp-sdk-0.0.2-eth-rollup-develop.78.tgz#00a2150cfa17febcd2175c27943cc3d3dfd2f001"
+  integrity sha512-cMMVFRUYZBiYJYh+bSUE8Gsi+kkE8DkC9gxFNqWFnOR4r+n7eZH8SA/1AjTqfyFREeBII8xg3ZJROlNrPVDz6g==
   dependencies:
     big.js "6.2.1"
-    gasp-type-definitions "0.0.2-eth-rollup-develop.25"
+    gasp-type-definitions "0.0.2-eth-rollup-develop.80"
     tslib "^2.3.0"
     tslog "4.8.2"
     viem "^2.17.4"
@@ -2151,15 +2151,20 @@ gasp-type-definitions@0.0.2-eth-rollup-develop.25:
   resolved "https://registry.yarnpkg.com/gasp-type-definitions/-/gasp-type-definitions-0.0.2-eth-rollup-develop.25.tgz#4cb89e9223654524755220ab691940e96894a439"
   integrity sha512-szsZTG5MtiDjb8oJtWmQqzlMx2QL90X6Ho8+4DV+B5K/aptsrbNChP429mG+wuHIolFEjObJ2Neo9t3+RSXCEA==
 
+gasp-type-definitions@0.0.2-eth-rollup-develop.80:
+  version "0.0.2-eth-rollup-develop.80"
+  resolved "https://registry.yarnpkg.com/gasp-type-definitions/-/gasp-type-definitions-0.0.2-eth-rollup-develop.80.tgz#9db57a620db053a561f872c14ab2747b64353b69"
+  integrity sha512-m+dWHA11ogvNDnXCcX9uPOGwwORd3bWLCEIw/3iMPMf3zzauKPGmrnuOKKbUq8CxHBEQ9LQckhnHZPc5VNHF2A==
+
 "gasp-types-source@npm:gasp-types@0.0.2-eth-rollup-develop.24":
   version "0.0.2-eth-rollup-develop.24"
   resolved "https://registry.yarnpkg.com/gasp-types/-/gasp-types-0.0.2-eth-rollup-develop.24.tgz#b6441d029045e0912399ccee23bea005f17cef4c"
   integrity sha512-Zcl6Llyjr2ff6URj6rJ0T4SEYVmsfQ6vT46YTvcP2rp18I4kp69Ped0Hx4soE+7ZazXOZIQLGd2NMIfyFsOrQw==
 
-"gasp-types-target@npm:gasp-types@0.0.2-eth-rollup-develop.24":
-  version "0.0.2-eth-rollup-develop.24"
-  resolved "https://registry.yarnpkg.com/gasp-types/-/gasp-types-0.0.2-eth-rollup-develop.24.tgz#b6441d029045e0912399ccee23bea005f17cef4c"
-  integrity sha512-Zcl6Llyjr2ff6URj6rJ0T4SEYVmsfQ6vT46YTvcP2rp18I4kp69Ped0Hx4soE+7ZazXOZIQLGd2NMIfyFsOrQw==
+"gasp-types-target@npm:gasp-types@0.0.2-eth-rollup-develop.78":
+  version "0.0.2-eth-rollup-develop.78"
+  resolved "https://registry.yarnpkg.com/gasp-types/-/gasp-types-0.0.2-eth-rollup-develop.78.tgz#b5ab73d595299ae8fedfb0c85d3f146efd219ca9"
+  integrity sha512-PbeTMZR0SgabGH7DSxY1YxaEPFNqWp1mhbJrAhvtdikkh8A7kLTzIe2gB4sKLjm/OjNaXJBkYYknwhLrZAy0ug==
 
 get-caller-file@^2.0.1:
   version "2.0.5"

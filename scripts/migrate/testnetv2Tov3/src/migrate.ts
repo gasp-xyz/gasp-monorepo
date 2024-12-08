@@ -7,6 +7,8 @@ import { Call } from "@polkadot/types/interfaces";
 import {getKeyPair} from "./keyring.js";
 import { TARGET_SUDO_MNEMONIC } from "./Config.js";
 import { signTx } from "gasp-sdk-target";
+import type { BlockHash } from '@polkadot/types/interfaces/chain';
+import type { StorageChangeSet, KeyValueOption } from "@polkadot/types/interfaces/state";
 
 
 export type Extrinsic = SubmittableExtrinsic<"promise">;
@@ -23,7 +25,7 @@ export type Extrinsic = SubmittableExtrinsic<"promise">;
 
 // }
 
-export async function migrateWithoutTransform() {
+export async function migrateWithoutTransform( sourceBlockHashAt: BlockHash) {
     const sourceApi = await getSourceApi();
     const targetApi = await getTargetApi();
 
@@ -33,17 +35,17 @@ export async function migrateWithoutTransform() {
 
     // toMigrateWithoutTransform
     const storageToMigrate = [
-        ["Xyk", "Pools"],
-        ["Xyk", "LiquidityAssets"],
-        ["Xyk", "LiquidityPools"],
-        ["AssetRegistry", "Metadata"],
-        ["AssetRegistry", "IdToL1Asset"],
-        ["AssetRegistry", "L1AssetToId"],
-        ["Tokens", "TotalIssuance"],
-        ["Tokens", "NextCurrencyId"],
-        ["Tokens", "Locks"],
+        // ["Xyk", "Pools"],
+        // ["Xyk", "LiquidityAssets"],
+        // ["Xyk", "LiquidityPools"],
+        // ["AssetRegistry", "Metadata"],
+        // ["AssetRegistry", "IdToL1Asset"],
+        // ["AssetRegistry", "L1AssetToId"],
+        // ["Tokens", "TotalIssuance"],
+        // ["Tokens", "NextCurrencyId"],
+        // ["Tokens", "Locks"],
         ["Tokens", "Accounts"],
-        ["Tokens", "Reserves"],
+        // ["Tokens", "Reserves"],
     ]
 
     for (let dataId = 0; dataId < storageToMigrate.length; dataId++) {
@@ -51,29 +53,32 @@ export async function migrateWithoutTransform() {
         storageToMigrate[dataId][0],
         storageToMigrate[dataId][1],
       );
+      const pageItemCount = 400;
       console.warn(
         "::: starting with :::" + JSON.stringify(storageToMigrate[dataId]),
       );
       let allKeys = [];
       let cont = true;
-      let keys = await sourceApi.rpc.state.getKeysPaged(key, 100);
+      let keys = await sourceApi.rpc.state.getKeysPaged(key, pageItemCount, undefined, sourceBlockHashAt);
       let loop: number = 0;
       while (cont) {
+        const storage  = await sourceApi.rpc.state.queryStorage(keys, sourceBlockHashAt, sourceBlockHashAt);
         for (let index = 0; index < keys.length; index++) {
-          const storage = await sourceApi.rpc.state.getStorage<Codec>(keys[index]);
-          allKeys.push([keys[index], storage]);
+          allKeys.push([keys[index], (storage[0][1] as KeyValueOption[])[index].toHex()]);
         }
+        
         console.info("Found:" + JSON.stringify(allKeys.length));
         const nextkeys = await sourceApi.rpc.state.getKeysPaged(
           key,
-          100,
+          pageItemCount,
           keys[keys.length - 1],
+          sourceBlockHashAt
         );
         if (loop % 8 === 0) {
           const txs: Extrinsic[] = [];
           allKeys.forEach((x) => {
             const storageKey = targetApi.createType("StorageKey", x[0]);
-            const storageData = targetApi.createType("StorageData", x[1].toHex());
+            const storageData = targetApi.createType("StorageData", x[1]);
             const tx = targetApi.tx.system.setStorage([
               [storageKey, storageData] as ITuple<[StorageKey, Bytes]>,
             ]);
@@ -85,6 +90,7 @@ export async function migrateWithoutTransform() {
             sudo_signer,
           );
           allKeys = [];
+          console.log("lastKeyMigrated", keys[keys.length - 1]);
         }
         if (nextkeys.includes(keys[keys.length - 1]) || nextkeys.length === 0) {
           cont = false;
@@ -96,7 +102,7 @@ export async function migrateWithoutTransform() {
       const txs: Extrinsic[] = [];
       allKeys.forEach((x) => {
         const storageKey = targetApi.createType("StorageKey", x[0]);
-        const storageData = targetApi.createType("StorageData", x[1].toHex());
+        const storageData = targetApi.createType("StorageData", x[1]);
         const tx = targetApi.tx.system.setStorage([
           [storageKey, storageData] as ITuple<[StorageKey, Bytes]>,
         ]);
