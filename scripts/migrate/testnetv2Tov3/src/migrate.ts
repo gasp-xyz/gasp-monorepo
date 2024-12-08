@@ -61,6 +61,7 @@ export async function migrateWithoutTransform( sourceBlockHashAt: BlockHash) {
       let cont = true;
       let keys = await sourceApi.rpc.state.getKeysPaged(key, pageItemCount, undefined, sourceBlockHashAt);
       let loop: number = 0;
+      let totalNumberOfKeys: number = keys.length;
       while (cont) {
         const storage  = await sourceApi.rpc.state.queryStorage(keys, sourceBlockHashAt, sourceBlockHashAt);
         for (let index = 0; index < keys.length; index++) {
@@ -92,12 +93,14 @@ export async function migrateWithoutTransform( sourceBlockHashAt: BlockHash) {
           allKeys = [];
           console.log("using sourceBlockHashAt", sourceBlockHashAt.toHex());
           console.log("lastKeyMigrated", keys[keys.length - 1].toHex());
+          console.log("totalNumberOfKeys", totalNumberOfKeys);
         }
         if (nextkeys.includes(keys[keys.length - 1]) || nextkeys.length === 0) {
           cont = false;
         } else {
           keys = nextkeys;
         }
+        totalNumberOfKeys = totalNumberOfKeys + keys.length;
         loop++;
       }
       const txs: Extrinsic[] = [];
