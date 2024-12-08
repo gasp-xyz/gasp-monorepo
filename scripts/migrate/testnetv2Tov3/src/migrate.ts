@@ -53,7 +53,7 @@ export async function migrateWithoutTransform( sourceBlockHashAt: BlockHash) {
         storageToMigrate[dataId][0],
         storageToMigrate[dataId][1],
       );
-      const pageItemCount = 400;
+      const pageItemCount = 500;
       console.warn(
         "::: starting with :::" + JSON.stringify(storageToMigrate[dataId]),
       );
@@ -90,7 +90,8 @@ export async function migrateWithoutTransform( sourceBlockHashAt: BlockHash) {
             sudo_signer,
           );
           allKeys = [];
-          console.log("lastKeyMigrated", keys[keys.length - 1]);
+          console.log("using sourceBlockHashAt", sourceBlockHashAt.toHex());
+          console.log("lastKeyMigrated", keys[keys.length - 1].toHex());
         }
         if (nextkeys.includes(keys[keys.length - 1]) || nextkeys.length === 0) {
           cont = false;
