@@ -35,17 +35,17 @@ export async function migrateWithoutTransform( sourceBlockHashAt: BlockHash) {
 
     // toMigrateWithoutTransform
     const storageToMigrate = [
-        ["Xyk", "Pools"],
-        ["Xyk", "LiquidityAssets"],
-        ["Xyk", "LiquidityPools"],
-        ["AssetRegistry", "Metadata"],
-        ["AssetRegistry", "IdToL1Asset"],
-        ["AssetRegistry", "L1AssetToId"],
-        ["Tokens", "TotalIssuance"],
-        ["Tokens", "NextCurrencyId"],
-        ["Tokens", "Locks"],
-        ["Tokens", "Reserves"],
-        // ["Tokens", "Accounts"],
+        // ["Xyk", "Pools"],
+        // ["Xyk", "LiquidityAssets"],
+        // ["Xyk", "LiquidityPools"],
+        // ["AssetRegistry", "Metadata"],
+        // ["AssetRegistry", "IdToL1Asset"],
+        // ["AssetRegistry", "L1AssetToId"],
+        // ["Tokens", "TotalIssuance"],
+        // ["Tokens", "NextCurrencyId"],
+        // ["Tokens", "Locks"],
+        // ["Tokens", "Reserves"],
+        ["Tokens", "Accounts"],
     ]
 
     for (let dataId = 0; dataId < storageToMigrate.length; dataId++) {
@@ -62,7 +62,7 @@ export async function migrateWithoutTransform( sourceBlockHashAt: BlockHash) {
       let startKey = undefined;
 
       // Uncomment and edit this to start from a specific key and blockHash
-      // let sourceBlockHashAt: BlockHash = sourceApi.createType('BlockHash', '0x2e6c4f9034f56633c2335a44368a367fe0fea671284545c9949e0f84dfb30e08');
+      let sourceBlockHashAt: BlockHash = sourceApi.createType('BlockHash', '0xb1b909f7eb6c4dd59ecf08643940eeaae9c6d9db05dea9635e9154d5fa9efd4a');
       // let startKey = "0x99971b5749ac43e0235e41b0d37869188ee7418a6531173d60d1f6a82d8f4d5161fbc00ad44a2d08686b0842589456b6b2bee3a3260d30216434b880633cda2852463c8cb4def25cfda6ef3a00000000";
       
       let keys = await sourceApi.rpc.state.getKeysPaged(key, pageItemCount, startKey, sourceBlockHashAt);
@@ -98,7 +98,9 @@ export async function migrateWithoutTransform( sourceBlockHashAt: BlockHash) {
           );
           allKeys = [];
           console.log("using sourceBlockHashAt", sourceBlockHashAt.toHex());
-          console.log("lastKeyMigrated", keys[keys.length - 1].toHex());
+          if (keys.length !== 0) {
+            console.log("lastKeyMigrated", keys[keys.length - 1].toHex());
+          }
           console.log("totalNumberOfKeys", totalNumberOfKeys);
         }
         if (nextkeys.includes(keys[keys.length - 1]) || nextkeys.length === 0) {
