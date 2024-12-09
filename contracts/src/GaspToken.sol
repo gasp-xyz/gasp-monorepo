@@ -16,36 +16,30 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     string private constant _SYMBOL = "GASP";
 
     bool public allowTransfers;
-    EnumerableSet.AddressSet private _senderWhitelist;
-    EnumerableSet.AddressSet private _recipientWhitelist;
+    EnumerableSet.AddressSet private _whitelist;
 
     modifier isApproveOperationForbidden(address owner, address spender) {
-        if (!allowTransfers && !_checkOwnerOrSpenderWhitelisted(owner, spender)) {
+        if (!allowTransfers && !_checkWhitelisted(owner, spender)) {
             revert OperationForbidden(IERC20.approve.selector);
         }
         _;
     }
 
     modifier isTransferOperationForbidden(address sender, address recipient) {
-        if (!allowTransfers && !_checkSenderOrRecipientWhitelisted(sender, recipient)) {
+        if (!allowTransfers && !_checkWhitelisted(sender, recipient)) {
             revert OperationForbidden(IERC20.transfer.selector);
         }
         _;
     }
 
-    // forgefmt: disable-start
     modifier isTransferFromOperationForbidden(address owner, address spender, address recipient) {
-        if (
-            !allowTransfers && (
-                !_checkOwnerOrSpenderWhitelisted(owner, spender) || 
-                !_checkSenderOrRecipientWhitelisted(owner, recipient)
-            )
+        if (!allowTransfers
+                && (!_checkWhitelisted(owner, spender))
         ) {
             revert OperationForbidden(IERC20.transferFrom.selector);
         }
         _;
     }
-    // forgefmt: disable-end
 
     constructor(address l1Council) Ownable() ERC20(_NAME, _SYMBOL) {
         if (l1Council == address(0)) {
@@ -55,8 +49,7 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         _transferOwnership(l1Council);
         _mint(l1Council, _TOTAL_SUPPLY);
 
-        _senderWhitelist.add(l1Council);
-        _recipientWhitelist.add(l1Council);
+        _whitelist.add(l1Council);
     }
 
     function setAllowTransfers(bool allowTransfers_) external override onlyOwner {
@@ -68,64 +61,34 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         emit AllowTransfersSet(allowTransfers_);
     }
 
-    function whitelistSender(address sender) external override onlyOwner {
-        if (sender == address(0)) {
-            revert ZeroSender();
+    function whitelist(address addr) external override onlyOwner {
+        if (addr == address(0)) {
+            revert ZeroAddress();
         }
 
-        bool isAdded = _senderWhitelist.add(sender);
+        bool isAdded = _whitelist.add(addr);
         if (!isAdded) {
-            revert SenderAlreadyWhitelisted(sender);
+            revert AddressAlreadyWhitelisted(addr);
         }
 
-        emit SenderWhitelisted(sender);
+        emit AddressWhitelisted(addr);
     }
 
-    function whitelistRecipient(address recipient) external override onlyOwner {
-        if (recipient == address(0)) {
-            revert ZeroRecipient();
+    function dewhitelist(address addr) external override onlyOwner {
+        if (addr == address(0)) {
+            revert ZeroAddress();
         }
 
-        bool isAdded = _recipientWhitelist.add(recipient);
-        if (!isAdded) {
-            revert RecipientAlreadyWhitelisted(recipient);
-        }
-
-        emit RecipientWhitelisted(recipient);
-    }
-
-    function dewhitelistSender(address sender) external override onlyOwner {
-        if (sender == address(0)) {
-            revert ZeroSender();
-        }
-
-        bool isRemoved = _senderWhitelist.remove(sender);
+        bool isRemoved = _whitelist.remove(addr);
         if (!isRemoved) {
-            revert SenderNotWhitelisted(sender);
+            revert AddressNotWhitelisted(addr);
         }
 
-        emit SenderDewhitelisted(sender);
+        emit AddressDewhitelisted(addr);
     }
 
-    function dewhitelistRecipient(address recipient) external override onlyOwner {
-        if (recipient == address(0)) {
-            revert ZeroRecipient();
-        }
-
-        bool isRemoved = _recipientWhitelist.remove(recipient);
-        if (!isRemoved) {
-            revert RecipientNotWhitelisted(recipient);
-        }
-
-        emit RecipientDewhitelisted(recipient);
-    }
-
-    function getSenderWhitelist() external view override returns (address[] memory) {
-        return _senderWhitelist.values();
-    }
-
-    function getRecipientWhitelist() external view override returns (address[] memory) {
-        return _recipientWhitelist.values();
+    function getWhitelist() external view override returns (address[] memory) {
+        return _whitelist.values();
     }
 
     function approve(address spender, uint256 amount)
@@ -156,14 +119,10 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     }
 
     function allowance(address owner, address spender) public view override(ERC20, IERC20) returns (uint256) {
-        return !allowTransfers && !_checkOwnerOrSpenderWhitelisted(owner, spender) ? 0 : super.allowance(owner, spender);
+        return !allowTransfers && !_checkWhitelisted(owner, spender) ? 0 : super.allowance(owner, spender);
     }
 
-    function _checkOwnerOrSpenderWhitelisted(address owner, address spender) private view returns (bool) {
-        return (_senderWhitelist.contains(owner) || _senderWhitelist.contains(spender));
-    }
-
-    function _checkSenderOrRecipientWhitelisted(address sender, address recipient) private view returns (bool) {
-        return (_senderWhitelist.contains(sender) || _recipientWhitelist.contains(recipient));
+    function _checkWhitelisted(address sender, address recipient) private view returns (bool) {
+        return (_whitelist.contains(sender) || _whitelist.contains(recipient));
     }
 }
