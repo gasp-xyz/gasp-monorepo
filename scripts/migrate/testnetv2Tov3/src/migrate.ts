@@ -63,6 +63,7 @@ export async function migrateWithoutTransform( sourceBlockHashAt: BlockHash) {
 
       // Uncomment and edit this to start from a specific key and blockHash
       let sourceBlockHashAt: BlockHash = sourceApi.createType('BlockHash', '0xb1b909f7eb6c4dd59ecf08643940eeaae9c6d9db05dea9635e9154d5fa9efd4a');
+      // 176500 done at 0x99971b5749ac43e0235e41b0d37869188ee7418a6531173d60d1f6a82d8f4d51172ee63239e33e39502de6dfa6f5a5ae7db676f79bbe73c870dad45b053a5b2b238d5dedd9c986912843223804000000
       let startKey = "0x99971b5749ac43e0235e41b0d37869188ee7418a6531173d60d1f6a82d8f4d51172ee63239e33e39502de6dfa6f5a5ae7db676f79bbe73c870dad45b053a5b2b238d5dedd9c986912843223804000000";
       
       let keys = await sourceApi.rpc.state.getKeysPaged(key, pageItemCount, startKey, sourceBlockHashAt);
