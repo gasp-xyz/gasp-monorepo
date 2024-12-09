@@ -23,21 +23,16 @@ contract GaspTokenTest is Test {
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     event AllowTransfersSet(bool allowTransfers_);
-    event SenderWhitelisted(address indexed sender);
-    event RecipientWhitelisted(address indexed recipient);
-    event SenderDewhitelisted(address indexed sender);
-    event RecipientDewhitelisted(address indexed recipient);
+    event AddressWhitelisted(address indexed addr);
+    event AddressDewhitelisted(address indexed addr);
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     error ZeroL1Council();
-    error ZeroSender();
-    error ZeroRecipient();
+    error ZeroAddress();
     error TransfersAlreadyAllowed();
-    error SenderAlreadyWhitelisted(address sender);
-    error RecipientAlreadyWhitelisted(address recipient);
-    error SenderNotWhitelisted(address sender);
-    error RecipientNotWhitelisted(address recipient);
+    error AddressAlreadyWhitelisted(address addr);
+    error AddressNotWhitelisted(address addr);
     error OperationForbidden(bytes32 selector);
 
     function setUp() public virtual {
@@ -86,16 +81,10 @@ contract Deploy is GaspTokenTest {
         assertFalse(allowTransfers);
     }
 
-    function test_GetSenderWhitelist() external view {
-        address[] memory senderWhitelist = gaspToken.getSenderWhitelist();
+    function test_GetWhitelist() external view {
+        address[] memory senderWhitelist = gaspToken.getWhitelist();
         assertEq(senderWhitelist.length, 1);
         assertEq(senderWhitelist[0], users.l1Council);
-    }
-
-    function test_GetRecipientWhitelist() external view {
-        address[] memory recipientWhitelist = gaspToken.getRecipientWhitelist();
-        assertEq(recipientWhitelist.length, 1);
-        assertEq(recipientWhitelist[0], users.l1Council);
     }
 
     function test_GetL1CouncilBalance() external view {
@@ -178,19 +167,19 @@ contract SetAllowTransfers is GaspTokenTest {
     }
 }
 
-contract WhitelistSender is GaspTokenTest {
-    function test_EmitSenderWhitelisted() external {
+contract Whitelist is GaspTokenTest {
+    function test_EmitAddressWhitelisted() external {
         vm.prank(users.l1Council);
         vm.expectEmit();
-        emit SenderWhitelisted(users.sender);
-        gaspToken.whitelistSender(users.sender);
+        emit AddressWhitelisted(users.sender);
+        gaspToken.whitelist(users.sender);
     }
 
-    function test_GetSenderWhitelist() external {
+    function test_GetWhitelist() external {
         vm.prank(users.l1Council);
-        gaspToken.whitelistSender(users.sender);
+        gaspToken.whitelist(users.sender);
 
-        address[] memory senderWhitelist = gaspToken.getSenderWhitelist();
+        address[] memory senderWhitelist = gaspToken.getWhitelist();
         assertEq(senderWhitelist.length, 2);
         assertEq(senderWhitelist[0], users.l1Council);
         assertEq(senderWhitelist[1], users.sender);
@@ -199,86 +188,44 @@ contract WhitelistSender is GaspTokenTest {
     function test_RevertIf_NotOwner() external {
         vm.prank(users.sender);
         vm.expectRevert("Ownable: caller is not the owner");
-        gaspToken.whitelistSender(users.sender);
+        gaspToken.whitelist(users.sender);
     }
 
-    function test_RevertIf_ZeroSender() external {
+    function test_RevertIf_ZeroAddress() external {
         vm.prank(users.l1Council);
-        vm.expectRevert(ZeroSender.selector);
-        gaspToken.whitelistSender(address(0));
+        vm.expectRevert(ZeroAddress.selector);
+        gaspToken.whitelist(address(0));
     }
 
-    function test_RevertIf_SenderAlreadyWhitelisted() external {
+    function test_RevertIf_AddressAlreadyWhitelisted() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistSender(users.sender);
+        gaspToken.whitelist(users.sender);
 
-        vm.expectRevert(abi.encodeWithSelector(SenderAlreadyWhitelisted.selector, users.sender));
-        gaspToken.whitelistSender(users.sender);
+        vm.expectRevert(abi.encodeWithSelector(AddressAlreadyWhitelisted.selector, users.sender));
+        gaspToken.whitelist(users.sender);
 
         vm.stopPrank();
     }
 }
 
-contract WhitelistRecipient is GaspTokenTest {
-    function test_EmitRecipientWhitelisted() external {
+contract Dewhitelist is GaspTokenTest {
+    function test_EmitAddressDewhitelisted() external {
         vm.prank(users.l1Council);
         vm.expectEmit();
-        emit RecipientWhitelisted(users.sender);
-        gaspToken.whitelistRecipient(users.sender);
+        emit AddressDewhitelisted(users.l1Council);
+        gaspToken.dewhitelist(users.l1Council);
     }
 
-    function test_GetRecipientWhitelist() external {
-        vm.prank(users.l1Council);
-        gaspToken.whitelistRecipient(users.recipient);
-
-        address[] memory recipientWhitelist = gaspToken.getRecipientWhitelist();
-        assertEq(recipientWhitelist.length, 2);
-        assertEq(recipientWhitelist[0], users.l1Council);
-        assertEq(recipientWhitelist[1], users.recipient);
-    }
-
-    function test_RevertIf_NotOwner() external {
-        vm.prank(users.sender);
-        vm.expectRevert("Ownable: caller is not the owner");
-        gaspToken.whitelistRecipient(users.sender);
-    }
-
-    function test_RevertIf_ZeroRecipient() external {
-        vm.prank(users.l1Council);
-        vm.expectRevert(ZeroRecipient.selector);
-        gaspToken.whitelistRecipient(address(0));
-    }
-
-    function test_RevertIf_RecipientAlreadyWhitelisted() external {
+    function test_GetWhitelist() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistRecipient(users.recipient);
-
-        vm.expectRevert(abi.encodeWithSelector(RecipientAlreadyWhitelisted.selector, users.recipient));
-        gaspToken.whitelistRecipient(users.recipient);
-
-        vm.stopPrank();
-    }
-}
-
-contract DewhitelistSender is GaspTokenTest {
-    function test_EmitSenderDewhitelisted() external {
-        vm.prank(users.l1Council);
-        vm.expectEmit();
-        emit SenderDewhitelisted(users.l1Council);
-        gaspToken.dewhitelistSender(users.l1Council);
-    }
-
-    function test_GetSenderWhitelist() external {
-        vm.startPrank(users.l1Council);
-
-        gaspToken.whitelistSender(users.sender);
-        gaspToken.dewhitelistSender(users.sender);
+        gaspToken.whitelist(users.sender);
+        gaspToken.dewhitelist(users.sender);
 
         vm.stopPrank();
 
-        address[] memory senderWhitelist = gaspToken.getSenderWhitelist();
+        address[] memory senderWhitelist = gaspToken.getWhitelist();
         assertEq(senderWhitelist.length, 1);
         assertNotEq(senderWhitelist[0], users.sender);
     }
@@ -286,59 +233,19 @@ contract DewhitelistSender is GaspTokenTest {
     function test_RevertIf_NotOwner() external {
         vm.prank(users.sender);
         vm.expectRevert("Ownable: caller is not the owner");
-        gaspToken.dewhitelistSender(users.sender);
+        gaspToken.dewhitelist(users.sender);
     }
 
-    function test_RevertIf_ZeroSender() external {
+    function test_RevertIf_ZeroAddress() external {
         vm.prank(users.l1Council);
-        vm.expectRevert(ZeroSender.selector);
-        gaspToken.dewhitelistSender(address(0));
+        vm.expectRevert(ZeroAddress.selector);
+        gaspToken.dewhitelist(address(0));
     }
 
-    function test_RevertIf_SenderNotWhitelisted() external {
+    function test_RevertIf_AddressNotWhitelisted() external {
         vm.prank(users.l1Council);
-        vm.expectRevert(abi.encodeWithSelector(SenderNotWhitelisted.selector, users.sender));
-        gaspToken.dewhitelistSender(users.sender);
-    }
-}
-
-contract DewhitelistRecipient is GaspTokenTest {
-    function test_EmitSenderDewhitelisted() external {
-        vm.prank(users.l1Council);
-        vm.expectEmit();
-        emit RecipientDewhitelisted(users.l1Council);
-        gaspToken.dewhitelistRecipient(users.l1Council);
-    }
-
-    function test_GetRecipientWhitelist() external {
-        vm.startPrank(users.l1Council);
-
-        gaspToken.whitelistRecipient(users.recipient);
-        gaspToken.dewhitelistRecipient(users.recipient);
-
-        vm.stopPrank();
-
-        address[] memory recipientWhitelist = gaspToken.getRecipientWhitelist();
-        assertEq(recipientWhitelist.length, 1);
-        assertNotEq(recipientWhitelist[0], users.recipient);
-    }
-
-    function test_RevertIf_NotOwner() external {
-        vm.prank(users.sender);
-        vm.expectRevert("Ownable: caller is not the owner");
-        gaspToken.dewhitelistRecipient(users.l1Council);
-    }
-
-    function test_RevertIf_ZeroRecipient() external {
-        vm.prank(users.l1Council);
-        vm.expectRevert(ZeroRecipient.selector);
-        gaspToken.dewhitelistRecipient(address(0));
-    }
-
-    function test_RevertIf_RecipientNotWhitelisted() external {
-        vm.prank(users.l1Council);
-        vm.expectRevert(abi.encodeWithSelector(RecipientNotWhitelisted.selector, users.recipient));
-        gaspToken.dewhitelistRecipient(users.recipient);
+        vm.expectRevert(abi.encodeWithSelector(AddressNotWhitelisted.selector, users.sender));
+        gaspToken.dewhitelist(users.sender);
     }
 }
 
@@ -360,7 +267,7 @@ contract Approve is GaspTokenTest {
     function test_EmitApproval_IfRecipientWhitelisted() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistSender(users.spender);
+        gaspToken.whitelist(users.spender);
 
         vm.expectEmit();
         emit Approval(users.l1Council, users.spender, amount);
@@ -384,7 +291,7 @@ contract Approve is GaspTokenTest {
     function test_GetAllowance_IfWhitelisted() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistSender(users.spender);
+        gaspToken.whitelist(users.spender);
         gaspToken.approve(users.spender, amount);
 
         vm.stopPrank();
@@ -442,8 +349,7 @@ contract TransferToken is GaspTokenTest {
 
     function test_EmitTransfer_IfRecipientWhitelisted() external {
         vm.startPrank(users.l1Council);
-
-        gaspToken.whitelistRecipient(users.recipient);
+        gaspToken.whitelist(users.recipient);
 
         vm.expectEmit();
         emit Transfer(users.l1Council, users.recipient, amount);
@@ -458,7 +364,7 @@ contract TransferToken is GaspTokenTest {
 
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistRecipient(users.recipient);
+        gaspToken.whitelist(users.recipient);
         gaspToken.transfer(users.recipient, amount);
 
         vm.stopPrank();
@@ -499,8 +405,8 @@ contract TransferToken is GaspTokenTest {
     function test_RevertIf_InsufficientBalance() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistSender(users.sender);
-        gaspToken.whitelistRecipient(users.recipient);
+        gaspToken.whitelist(users.sender);
+        gaspToken.whitelist(users.recipient);
 
         vm.stopPrank();
 
@@ -530,10 +436,10 @@ contract TransferTokenFrom is GaspTokenTest {
     function test_EmitTransfer_IfSenderAndRecipientWhitelisted() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistSender(users.spender);
+        gaspToken.whitelist(users.spender);
         gaspToken.approve(users.spender, amount);
 
-        gaspToken.whitelistRecipient(users.recipient);
+        gaspToken.whitelist(users.recipient);
 
         vm.stopPrank();
 
@@ -546,10 +452,10 @@ contract TransferTokenFrom is GaspTokenTest {
     function test_ChangeBalances() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistSender(users.spender);
+        gaspToken.whitelist(users.spender);
         gaspToken.approve(users.spender, amount);
 
-        gaspToken.whitelistRecipient(users.recipient);
+        gaspToken.whitelist(users.recipient);
 
         vm.stopPrank();
 
@@ -572,10 +478,10 @@ contract TransferTokenFrom is GaspTokenTest {
     function test_GetAllowance() external {
         vm.startPrank(users.l1Council);
 
-        gaspToken.whitelistSender(users.spender);
+        gaspToken.whitelist(users.spender);
         gaspToken.approve(users.spender, amount);
 
-        gaspToken.whitelistRecipient(users.recipient);
+        gaspToken.whitelist(users.recipient);
 
         vm.stopPrank();
 
