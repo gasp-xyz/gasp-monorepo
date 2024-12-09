@@ -29,7 +29,7 @@ collator:
   customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
-  storageSize: 50Gi
+  storageSize: 100Gi
   wsHealthExporter:
     enabled: true
     image: paritytech/ws-health-exporter:bc071a44-20230830
