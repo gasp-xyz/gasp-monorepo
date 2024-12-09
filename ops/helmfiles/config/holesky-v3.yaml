@@ -27,7 +27,7 @@ collator:
     # Ref: https://github.com/gasp-xyz/mangata-node/tree/3722076d06f7c1ff7c727a799260c5df2a5eb62f
     tag: 3722076d06f7c1ff7c727a799260c5df2a5eb62f
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-holesky-v3-3722076-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/485165d5cac39607183994e9122404387dcdd49d/rollup-holesky-v3-3722076-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 150Gi
