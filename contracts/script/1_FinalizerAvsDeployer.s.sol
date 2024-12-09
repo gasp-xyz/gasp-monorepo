@@ -469,4 +469,8 @@ contract Deployer is Script, Utils, Test {
         console.logString(finalJson);
         writeOutput(finalJson, _OUTPUT_PATH);
     }
+
+    function getOutputPath() external view returns (string memory) {
+        return _OUTPUT_PATH;
+    }
 }
