@@ -178,6 +178,10 @@ pub mod pallet {
 		fn on_idle(_now: BlockNumberFor<T>, mut remaining_weight: Weight) -> Weight {
 			let mut used_weight = Weight::default();
 
+			// given aproximated nature of weights for huge blob read/wirtes and complicated
+			// benchmarks of on_idle_hook lets consider only 80% of remaining weight
+			remaining_weight = remaining_weight.saturating_mul(8).saturating_div(10);
+
 			// already cached by using in on_initialize hook
 			if !T::MaintenanceStatusProvider::is_maintenance() {
 				let get_update_size_cost = T::DbWeight::get().reads(2);
