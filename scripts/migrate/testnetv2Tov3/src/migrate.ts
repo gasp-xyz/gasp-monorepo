@@ -8,7 +8,7 @@ import {getKeyPair} from "./keyring.js";
 import { TARGET_SUDO_MNEMONIC } from "./Config.js";
 import { signTx } from "gasp-sdk-target";
 import type { BlockHash } from '@polkadot/types/interfaces/chain';
-import type { StorageChangeSet, KeyValueOption } from "@polkadot/types/interfaces/state";
+import type { KeyValueOption } from "@polkadot/types/interfaces/state";
 
 
 export type Extrinsic = SubmittableExtrinsic<"promise">;
@@ -35,17 +35,17 @@ export async function migrateWithoutTransform( sourceBlockHashAt: BlockHash) {
 
     // toMigrateWithoutTransform
     const storageToMigrate = [
-        // ["Xyk", "Pools"],
-        // ["Xyk", "LiquidityAssets"],
-        // ["Xyk", "LiquidityPools"],
-        // ["AssetRegistry", "Metadata"],
-        // ["AssetRegistry", "IdToL1Asset"],
-        // ["AssetRegistry", "L1AssetToId"],
-        // ["Tokens", "TotalIssuance"],
-        // ["Tokens", "NextCurrencyId"],
-        // ["Tokens", "Locks"],
-        ["Tokens", "Accounts"],
-        // ["Tokens", "Reserves"],
+        ["Xyk", "Pools"],
+        ["Xyk", "LiquidityAssets"],
+        ["Xyk", "LiquidityPools"],
+        ["AssetRegistry", "Metadata"],
+        ["AssetRegistry", "IdToL1Asset"],
+        ["AssetRegistry", "L1AssetToId"],
+        ["Tokens", "TotalIssuance"],
+        ["Tokens", "NextCurrencyId"],
+        ["Tokens", "Locks"],
+        ["Tokens", "Reserves"],
+        // ["Tokens", "Accounts"],
     ]
 
     for (let dataId = 0; dataId < storageToMigrate.length; dataId++) {

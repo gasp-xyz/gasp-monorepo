@@ -22,7 +22,7 @@
     "dotenv": "^16.4.5",
     "gasp-sdk-source": "npm:gasp-sdk@0.0.2-eth-rollup-develop.24",
     "gasp-types-source": "npm:gasp-types@0.0.2-eth-rollup-develop.24",
-    "gasp-sdk-target": "npm:gasp-sdk@0.0.2-eth-rollup-develop.78",
+    "gasp-sdk-target": "npm:gasp-sdk@0.0.2-eth-rollup-develop.79",
     "gasp-types-target": "npm:gasp-types@0.0.2-eth-rollup-develop.78",
     "json-bigint": "^1.0.0",
     "winston": "^3.15.0",
