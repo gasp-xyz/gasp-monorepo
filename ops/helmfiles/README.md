@@ -38,3 +38,12 @@ helmfile sync -e holesky
 
 Aggregator will be available by this URL: <https://rollup-aggregator-holesky.gasp.xyz/>
 You can find all of the deployed resources in `rollup-holesky` namespace of GKE cluster.
+
+
+## How to expand storage size on collator node (example)
+```bash
+export SERVICE='collator-01'
+kubectl -n rollup-holesky patch pvc chain-data-${SERVICE}-0 -p '{"spec":{"resources":{"requests":{"storage":"100Gi"}}}}'
+kubectl -n rollup-holesky delete sts ${SERVICE} --cascade=orphan
+hf sync -e holesky -l name=${SERVICE}
+```

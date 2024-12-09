@@ -19,3 +19,7 @@ environments:
     values:
     - environmentName: holesky
     - config/holesky.yaml
+  holesky-v3:
+    values:
+    - environmentName: holesky-v3
+    - config/holesky-v3.yaml
