@@ -33,18 +33,19 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         _;
     }
 
+    // forgefmt: disable-start
     modifier isTransferFromOperationForbidden(address owner, address spender, address recipient) {
         if (
-            !allowTransfers
-                && (
-                    !_checkOwnerOrSpenderWhitelisted(owner, spender)
-                        || !_checkSenderOrRecipientWhitelisted(owner, recipient)
-                )
+            !allowTransfers && (
+                !_checkOwnerOrSpenderWhitelisted(owner, spender) || 
+                !_checkSenderOrRecipientWhitelisted(owner, recipient)
+            )
         ) {
             revert OperationForbidden(IERC20.transferFrom.selector);
         }
         _;
     }
+    // forgefmt: disable-end
 
     constructor(address l1Council) Ownable() ERC20(_NAME, _SYMBOL) {
         if (l1Council == address(0)) {
