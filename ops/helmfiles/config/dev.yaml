@@ -89,6 +89,8 @@ aggregatorEnv:
 # gaspAvs configs #
 #####################
 gaspAvsEnabled: true
+gaspAvsStorageClass: node-data-volume-retain
+gaspAvsStorageSize: 50Gi
 gaspAvsEnvSecrets: {}
 gaspAvsEnv:
   # rpc

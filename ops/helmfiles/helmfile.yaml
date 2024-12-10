@@ -62,6 +62,9 @@ releases:
         environment: {{ .Values.environmentName }}
         envSecrets: {{ .Values.gaspAvsEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.gaspAvsEnv | toYaml | nindent 10 }}
+        data:
+          storageClass: {{ .Values | get "gaspAvsStorageClass" "standard-rwo" }}
+          storageSize: {{ .Values | get "gaspAvsStorageSize" "10Gi" }}
         resources:
           requests:
             cpu: 1
