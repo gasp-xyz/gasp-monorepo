@@ -329,6 +329,12 @@ class L1Api implements L1Interface {
 			});
 			const approvetxHash = await wc.writeContract(approveRequest.request);
 			await this.client.waitForTransactionReceipt({ hash: approvetxHash });
+			const status = await this.client.waitForTransactionReceipt({
+				hash: approvetxHash,
+			});
+			if (status.status !== "success") {
+				return false;
+			}
 		}
 
 		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
