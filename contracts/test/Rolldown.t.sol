@@ -65,7 +65,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
             address(proxyAdmin),
             abi.encodeCall(Rolldown.initialize, (users.admin, ChainId.Ethereum, users.updater))
         );
-        rolldown = Rolldown(address(proxy));
+        rolldown = Rolldown(payable(address(proxy)));
 
         updaterRole = rolldown.UPDATER_ROLE();
         nativeTokenAddress = rolldown.NATIVE_TOKEN_ADDRESS();
