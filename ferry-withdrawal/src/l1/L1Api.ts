@@ -307,7 +307,7 @@ class L1Api implements L1Interface {
 		});
 
 		const native_addr = await this.getNativeTokenAddress();
-		if (withdrawal.tokenAddress != native_addr) {
+		if (u8aToHex(withdrawal.tokenAddress) !== u8aToHex(native_addr)) {
 			// TODO: submit as a batch
 			const approveRequest = await this.client.simulateContract({
 				account: acc,
