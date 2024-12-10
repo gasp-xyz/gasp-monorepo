@@ -230,6 +230,26 @@ describe('L1Interface', () => {
     expect(await l1Api.isFerried(hashWithdrawal(withdrawal))).toBeTruthy();
     }, {timeout: 10000});
 
+  it('native ferryWithdrawal works', async () => {
+    const randomAddress = getRandomUintArray(20);
+
+    const nativeTokenAddress = await l1Api.getNativeTokenAddress();
+
+    const withdrawal: Withdrawal = {
+        requestId: 1n,
+        withdrawalRecipient: randomAddress,
+        tokenAddress: nativeTokenAddress,
+        amount: 1n,
+        ferryTip: 0n,
+        hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+    };
+
+    const privateKey = hexToU8a("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
+    expect(await l1Api.isFerried(hashWithdrawal(withdrawal))).toBeFalsy();
+    await l1Api.ferry(withdrawal, privateKey);
+    expect(await l1Api.isFerried(hashWithdrawal(withdrawal))).toBeTruthy();
+    }, {timeout: 10000});
+
   it('getMerkleRange works', async () => {
     await updateUpdaterAccount(WS_URI);
     await transfer(WS_URI, hexToU8a(MANGATA_CONTRACT_ADDRESS), 10000n);
