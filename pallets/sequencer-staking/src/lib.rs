@@ -380,8 +380,9 @@ pub mod pallet {
 			stake_amount: BalanceOf<T>,
 			alias_account: Option<T::AccountId>,
 			stake_action: StakeAction,
+			sender: T::AccountId,
 		) -> DispatchResultWithPostInfo {
-			let sender = ensure_signed(origin)?;
+			let _ = ensure_root(origin)?;
 
 			ensure!(
 				!AliasAccountInUse::<T>::contains_key(sender.clone()),
@@ -468,8 +469,9 @@ pub mod pallet {
 		pub fn rejoin_active_sequencers(
 			origin: OriginFor<T>,
 			chain: T::ChainId,
+			sender: T::AccountId,
 		) -> DispatchResultWithPostInfo {
-			let sender = ensure_signed(origin)?;
+			let _ = ensure_root(origin)?;
 			ensure!(
 				!Self::is_active_sequencer(chain, &sender),
 				Error::<T>::SequencerAlreadyInActiveSet
