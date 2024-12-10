@@ -71,7 +71,7 @@ contract RolldownDeployer is Script, Utils, Test {
         string memory configData = readInput(evmPrefixedPath(chain));
         upgrader = stdJson.readAddress(configData, ".permissions.rolldownUpgrader");
         address proxyAdmin = stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin");
-        address rolldownAddress = stdJson.readAddress(configData, ".addresses.rolldown");
+        address payable rolldownAddress = payable(stdJson.readAddress(configData, ".addresses.rolldown"));
 
         rolldownProxyAdmin = ProxyAdmin(proxyAdmin);
         rolldown = Rolldown(rolldownAddress);
@@ -102,7 +102,7 @@ contract RolldownDeployer is Script, Utils, Test {
 
         EmptyContract emptyContract = new EmptyContract();
         rolldown =
-            Rolldown(address(new TransparentUpgradeableProxy(address(emptyContract), address(rolldownProxyAdmin), "")));
+            Rolldown(payable(address(new TransparentUpgradeableProxy(address(emptyContract), address(rolldownProxyAdmin), ""))));
         rolldownImplementation = new Rolldown();
 
         rolldownProxyAdmin.upgradeAndCall(

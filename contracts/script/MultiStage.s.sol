@@ -45,7 +45,7 @@ contract MultiStage is Script, Utils, Test {
 
       string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
       string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(chain, _ROLLDOWN_OUTPUT_PATH));
-      rolldown = Rolldown(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown"));
+      rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
 
       vm.startBroadcast(avsOwner);
 
@@ -110,7 +110,7 @@ contract MultiStage is Script, Utils, Test {
 
         string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
         string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Ethereum, _ROLLDOWN_OUTPUT_PATH));
-        rolldown = Rolldown(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown"));
+        rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
 
         string memory _CONFIG_PATH = "deploy.config";
         string memory configData = readConfig(_CONFIG_PATH);
@@ -183,7 +183,7 @@ contract MultiStage is Script, Utils, Test {
 
         string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
         string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Ethereum, _ROLLDOWN_OUTPUT_PATH));
-        rolldown = Rolldown(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown"));
+        rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
 
         string memory _CONFIG_PATH = "deploy.config";
         string memory configData = readConfig(_CONFIG_PATH);
@@ -195,6 +195,35 @@ contract MultiStage is Script, Utils, Test {
         rolldown.setUpdater(address(taskManager));
 
         vm.stopBroadcast();
+
+      }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("upgrade-rolldown-ethereum-holesky"))){
+        console.log("################################################################################");
+        console.log("Upgrading rolldown contracts");
+        console.log("################################################################################");
+        RolldownDeployer rolldownDeployer = new RolldownDeployer();
+        // We only want upgrade and not deploy from scratch
+        require(rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Ethereum), "Proxy not deployed");
+        rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+
+      }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("upgrade-rolldown-arbitrum-sepolia"))){
+
+        console.log("################################################################################");
+        console.log("Upgrading rolldown contracts");
+        console.log("################################################################################");
+        RolldownDeployer rolldownDeployer = new RolldownDeployer();
+        // We only want upgrade and not deploy from scratch
+        require(rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Arbitrum), "Proxy not deployed");
+        rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
+
+      }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("upgrade-rolldown-base-sepolia"))){
+
+        console.log("################################################################################");
+        console.log("Upgrading rolldown contracts");
+        console.log("################################################################################");
+        RolldownDeployer rolldownDeployer = new RolldownDeployer();
+        // We only want upgrade and not deploy from scratch
+        require(rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Base), "Proxy not deployed");
+        rolldownDeployer.run(IRolldownPrimitives.ChainId.Base);
 
       }else{
  
