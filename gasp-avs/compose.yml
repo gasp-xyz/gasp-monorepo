@@ -11,8 +11,6 @@ services:
         condition: service_healthy
       eth-contracts-deployment:
         condition: service_started
-    volumes:
-      - gasp-avs-data:/data
     environment:
       CHAIN_ID: ${CHAIN_ID:-31337}
       RUST_LOG: info
@@ -28,7 +26,3 @@ services:
       ROLLUP_NODE_CHAIN: /data/chainspec.json
       ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json
       ROLLUP_NODE_FORCE_DOWNLOAD_CHAINSPEC: false
-
-
-volumes:
-  gasp-avs-data:

@@ -3,7 +3,6 @@ name: rollup
 include:
   - path: ./contracts/compose.anvil-stubs.yml # anvil stubs
   # - path: ./contracts/compose.reth-stubs.yml # reth stubs
-
   - path: ./avs-aggregator/compose.yml
   - path: ./gasp-avs/compose.yml
   - path: ./sequencer/compose.yml
@@ -27,8 +26,6 @@ services:
     ports:
       - 9944:9944
       - 30333:30333
-    volumes:
-      - node-alice-data:/data
 
   node-bob:
     image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION}
@@ -43,9 +40,3 @@ services:
       - --pruning=archive
     ports:
       - 9946:9944
-    volumes:
-      - node-bob-data:/data
-
-volumes:
-  node-alice-data:
-  node-bob-data:
