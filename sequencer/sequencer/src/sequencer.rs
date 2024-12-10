@@ -162,7 +162,7 @@ where
                             tracing::error!("{ALERT_WARNING} update submission failed");
                             return Err(Error::UpdateSubmissionFailure);
                         } else {
-                            tracing::error!("{ALERT_INFO} update submission succeded");
+                            tracing::info!("{ALERT_INFO} update submission succeded");
                             stream = Self::consume_stream_with_timeout(stream).await;
                         }
                     }
