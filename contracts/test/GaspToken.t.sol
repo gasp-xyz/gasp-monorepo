@@ -165,7 +165,7 @@ contract SetAllowTransfers is GaspTokenTest {
     }
 }
 
-contract Whitelist is GaspTokenTest {
+contract AddToWhitelist is GaspTokenTest {
     function test_EmitAddressWhitelisted() external {
         vm.prank(users.l1Council);
         vm.expectEmit();
@@ -187,6 +187,17 @@ contract Whitelist is GaspTokenTest {
         gaspToken.addToWhitelist(users.sender);
     }
 
+    function test_RevertIf_TransfersAlreadyAllowed() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.setAllowTransfers(true);
+
+        vm.expectRevert(TransfersAlreadyAllowed.selector);
+        gaspToken.addToWhitelist(users.sender);
+
+        vm.stopPrank();
+    }
+
     function test_RevertIf_ZeroAddress() external {
         vm.prank(users.l1Council);
         vm.expectRevert(ZeroAddress.selector);
@@ -205,7 +216,7 @@ contract Whitelist is GaspTokenTest {
     }
 }
 
-contract Dewhitelist is GaspTokenTest {
+contract RemoveFromWhitelist is GaspTokenTest {
     function test_EmitAddressDewhitelisted() external {
         vm.prank(users.l1Council);
         vm.expectEmit();
@@ -228,6 +239,18 @@ contract Dewhitelist is GaspTokenTest {
         vm.prank(users.sender);
         vm.expectRevert("Ownable: caller is not the owner");
         gaspToken.removeFromWhitelist(users.sender);
+    }
+
+    function test_RevertIf_TransfersAlreadyAllowed() external {
+        vm.startPrank(users.l1Council);
+
+        gaspToken.addToWhitelist(users.sender);
+        gaspToken.setAllowTransfers(true);
+
+        vm.expectRevert(TransfersAlreadyAllowed.selector);
+        gaspToken.removeFromWhitelist(users.sender);
+
+        vm.stopPrank();
     }
 
     function test_RevertIf_ZeroAddress() external {
