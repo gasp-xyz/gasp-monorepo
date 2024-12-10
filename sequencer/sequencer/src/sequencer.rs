@@ -10,6 +10,10 @@ use tokio::time::timeout;
 use crate::l1::{types as l1types, L1Error, L1Interface};
 use crate::l2::{types as l2types, HeaderStream, L2Error, L2Interface, PendingUpdate};
 
+const ALERT_ERROR: &str = "ALERT::ERROR";
+const ALERT_WARNING: &str = "ALERT::WARNING";
+const ALERT_INFO: &str = "ALERT::INFO";
+
 pub struct Sequencer<L1, L2> {
     l1: L1,
     l2: L2,
@@ -91,12 +95,27 @@ where
                 return Err(Error::NotASequencer);
             }
 
-            if self.has_cancel_rights_available().await? {
-                if let Some(update) = self.find_malicious_update(at).await? {
-                    tracing::info!("Found malicious update: {}", update);
-                    self.cancel_update(update).await?;
+            if let Some(update) = self.find_malicious_update(at).await? {
+                tracing::warn!("{ALERT_ERROR} Found malicious update: {}", update);
+                if self.has_cancel_rights_available().await? {
+                    self.cancel_update(update)
+                        .await
+                        .inspect(|result| {
+                            if *result {
+                                tracing::warn!(
+                                    "{ALERT_ERROR} cancel malicious update has succeded"
+                                );
+                            } else {
+                                tracing::error!("{ALERT_ERROR} cancel malicious update has failed");
+                            }
+                        })
+                        .inspect_err(|_| {
+                            tracing::error!("{ALERT_ERROR} cancel malicious update has failed");
+                        })?;
                     stream = Self::consume_stream_with_timeout(stream).await;
                     continue;
+                } else {
+                    tracing::error!("{ALERT_ERROR} there are no cancel rights available to cancel malicous update");
                 }
             }
 
@@ -140,9 +159,10 @@ where
                         tracing::info!("Found update to submit: {:?}", update);
                         let result = self.l2.update_l1_from_l2(update, update_hash).await?;
                         if !result {
-                            tracing::error!("update submission failed");
+                            tracing::error!("${ALERT_WARNING} update submission failed");
                             return Err(Error::UpdateSubmissionFailure);
                         } else {
+                            tracing::error!("${ALERT_INFO} update submission succeded");
                             stream = Self::consume_stream_with_timeout(stream).await;
                         }
                     }
