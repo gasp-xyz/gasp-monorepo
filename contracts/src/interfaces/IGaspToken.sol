@@ -6,9 +6,9 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 interface IGaspToken is IERC20 {
     event AllowTransfersSet(bool allowTransfers_);
 
-    event AddressWhitelisted(address indexed addr);
+    event AddedToWhitelist(address indexed address_);
 
-    event AddressDewhitelisted(address indexed addr);
+    event RemoveFromWhitelist(address indexed address_);
 
     error ZeroL1Council();
 
@@ -16,17 +16,15 @@ interface IGaspToken is IERC20 {
 
     error TransfersAlreadyAllowed();
 
-    error AddressAlreadyWhitelisted(address addr);
+    error AddressAlreadyWhitelisted(address address_);
 
-    error AddressNotWhitelisted(address addr);
+    error AddressNotWhitelisted(address address_);
 
-    error OperationForbidden(bytes32 selector);
+    error OperationForbidden(bytes32 selector_);
 
     function setAllowTransfers(bool allowTransfers_) external;
 
-    function whitelist(address addr) external;
+    function addToWhitelist(address address_) external;
 
-    function dewhitelist(address addr) external;
-
-    function getWhitelist() external view returns (address[] memory);
+    function removeFromWhitelist(address address_) external;
 }

@@ -5,41 +5,15 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IGaspToken} from "./interfaces/IGaspToken.sol";
 
 contract GaspToken is Context, Ownable, ERC20, IGaspToken {
-    using EnumerableSet for EnumerableSet.AddressSet;
-
     uint256 private constant _TOTAL_SUPPLY = 1_000_000_000 * 10 ** 18;
     string private constant _NAME = "GASP";
     string private constant _SYMBOL = "GASP";
 
+    mapping (address => bool) public whitelist;
     bool public allowTransfers;
-    EnumerableSet.AddressSet private _whitelist;
-
-    modifier isApproveOperationForbidden(address owner, address spender) {
-        if (!allowTransfers && !_checkWhitelisted(owner, spender)) {
-            revert OperationForbidden(IERC20.approve.selector);
-        }
-        _;
-    }
-
-    modifier isTransferOperationForbidden(address sender, address recipient) {
-        if (!allowTransfers && !_checkWhitelisted(sender, recipient)) {
-            revert OperationForbidden(IERC20.transfer.selector);
-        }
-        _;
-    }
-
-    modifier isTransferFromOperationForbidden(address owner, address spender, address recipient) {
-        if (!allowTransfers
-                && (!_checkWhitelisted(owner, spender))
-        ) {
-            revert OperationForbidden(IERC20.transferFrom.selector);
-        }
-        _;
-    }
 
     constructor(address l1Council) Ownable() ERC20(_NAME, _SYMBOL) {
         if (l1Council == address(0)) {
@@ -49,7 +23,7 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         _transferOwnership(l1Council);
         _mint(l1Council, _TOTAL_SUPPLY);
 
-        _whitelist.add(l1Council);
+        whitelist[l1Council] = true;
     }
 
     function setAllowTransfers(bool allowTransfers_) external override onlyOwner {
@@ -61,68 +35,70 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         emit AllowTransfersSet(allowTransfers_);
     }
 
-    function whitelist(address addr) external override onlyOwner {
-        if (addr == address(0)) {
+    function addToWhitelist(address address_) external override onlyOwner {
+        if (address_ == address(0)) {
             revert ZeroAddress();
         }
 
-        bool isAdded = _whitelist.add(addr);
-        if (!isAdded) {
-            revert AddressAlreadyWhitelisted(addr);
+        if (whitelist[address_]) {
+            revert AddressAlreadyWhitelisted(address_);
         }
+        whitelist[address_] = true;
 
-        emit AddressWhitelisted(addr);
+        emit AddedToWhitelist(address_);
     }
 
-    function dewhitelist(address addr) external override onlyOwner {
-        if (addr == address(0)) {
+    function removeFromWhitelist(address address_) external override onlyOwner {
+        if (address_ == address(0)) {
             revert ZeroAddress();
         }
 
-        bool isRemoved = _whitelist.remove(addr);
-        if (!isRemoved) {
-            revert AddressNotWhitelisted(addr);
+        if (!whitelist[address_]) {
+            revert AddressNotWhitelisted(address_);
         }
+        delete whitelist[address_];
 
-        emit AddressDewhitelisted(addr);
-    }
-
-    function getWhitelist() external view override returns (address[] memory) {
-        return _whitelist.values();
+        emit RemoveFromWhitelist(address_);
     }
 
     function approve(address spender, uint256 amount)
         public
         override(ERC20, IERC20)
-        isApproveOperationForbidden(_msgSender(), spender)
         returns (bool)
     {
+        if (!allowTransfers && !_isWhitelisted([_msgSender(), spender])) {
+            revert OperationForbidden(IERC20.approve.selector);
+        }
         return super.approve(spender, amount);
     }
 
     function transfer(address recipient, uint256 amount)
         public
         override(ERC20, IERC20)
-        isTransferOperationForbidden(_msgSender(), recipient)
         returns (bool)
     {
+        if (!allowTransfers && !_isWhitelisted([_msgSender(), recipient])) {
+            revert OperationForbidden(IERC20.transfer.selector);
+        }
         return super.transfer(recipient, amount);
     }
 
     function transferFrom(address owner, address recipient, uint256 amount)
         public
         override(ERC20, IERC20)
-        isTransferFromOperationForbidden(owner, _msgSender(), recipient)
         returns (bool)
     {
+        if (!allowTransfers && (!_isWhitelisted([owner, _msgSender(), recipient]))) {
+            revert OperationForbidden(IERC20.transferFrom.selector);
+        }
         return super.transferFrom(owner, recipient, amount);
     }
 
-    function allowance(address owner, address spender) public view override(ERC20, IERC20) returns (uint256) {
-        return !allowTransfers && !_checkWhitelisted(owner, spender) ? 0 : super.allowance(owner, spender);
+    function _isWhitelisted(address[2] memory addresses) private view returns (bool) {
+        return (whitelist[addresses[0]] || whitelist[addresses[1]]);
     }
 
-    function _checkWhitelisted(address sender, address recipient) private view returns (bool) {
-        return (_whitelist.contains(sender) || _whitelist.contains(recipient));
+    function _isWhitelisted(address[3] memory addresses) private view returns (bool) {
+        return (whitelist[addresses[0]] || whitelist[addresses[1]] || whitelist[addresses[2]]);
     }
 }
