@@ -44,7 +44,7 @@ contract RolldownDeployerTest is Test {
 
         EmptyContract emptyContract = new EmptyContract();
         rolldown =
-            Rolldown(address(new TransparentUpgradeableProxy(address(emptyContract), address(rolldownProxyAdmin), "")));
+            Rolldown(payable(address(new TransparentUpgradeableProxy(address(emptyContract), address(rolldownProxyAdmin), ""))));
 
         vm.stopBroadcast();
     }
@@ -63,7 +63,7 @@ contract RolldownDeployerTest is Test {
 
         vm.stopBroadcast();
 
-        Rolldown rolldown2 = Rolldown(address(rolldown));
+        Rolldown rolldown2 = Rolldown(payable(address(rolldown)));
         assertTrue(rolldown2.hasRole(DEFAULT_ADMIN_ROLE, owner));
         assertTrue(rolldown2.hasRole(UPDATER_ROLE, updaterAccount));
     }
@@ -92,7 +92,7 @@ contract RolldownDeployerTest is Test {
 
         vm.stopBroadcast();
 
-        Rolldown rolldown2 = Rolldown(address(rolldown));
+        Rolldown rolldown2 = Rolldown(payable(address(rolldown)));
         assertTrue(rolldown2.hasRole(DEFAULT_ADMIN_ROLE, owner));
         assertTrue(rolldown2.hasRole(UPDATER_ROLE, updaterAccount));
     }
@@ -115,7 +115,7 @@ contract RolldownDeployerTest is Test {
 
         vm.stopBroadcast();
 
-        RollDownUpg rolldown2 = RollDownUpg(address(rolldown));
+        RollDownUpg rolldown2 = RollDownUpg(payable(address(rolldown)));
         vm.expectRevert();
         bool res = rolldown2.imUpgraded();
         Rolldown rd2 = new RollDownUpg();
@@ -129,7 +129,7 @@ contract RolldownDeployerTest is Test {
 
         vm.stopBroadcast();
 
-        rolldown2 = RollDownUpg(address(rolldown));
+        rolldown2 = RollDownUpg(payable(address(rolldown)));
         res = rolldown2.imUpgraded();
         assertTrue(res);
     }
@@ -152,7 +152,7 @@ contract RolldownDeployerTest is Test {
 
         vm.stopBroadcast();
 
-        RollDownUpg rolldown2 = RollDownUpg(address(rolldown));
+        RollDownUpg rolldown2 = RollDownUpg(payable(address(rolldown)));
         vm.expectRevert();
         rolldown2.imUpgraded();
 
