@@ -105,4 +105,25 @@ contract Utils is Script {
         );
         vm.writeJson(outputJson, outputFilePath);
     }
+
+    // Forge scripts best practice: https://book.getfoundry.sh/tutorials/best-practices#scripts
+    function inputExists(
+        string memory inputFileName
+    ) internal returns (bool) {
+        string memory input = calculateInputPath(inputFileName);
+        console.log(input);
+        return vm.exists(calculateInputPath(inputFileName));
+    }
+    
+    function calculateInputPath(
+        string memory inputfilename
+    ) internal view returns (string memory) {
+        string memory inputdir = string.concat(
+            vm.projectRoot(),
+            "/script/input/"
+        );
+        string memory chaindir = string.concat(vm.toString(block.chainid), "/");
+        string memory file = string.concat(inputfilename, ".json");
+        return string.concat(inputdir, chaindir, file);
+    }
 }

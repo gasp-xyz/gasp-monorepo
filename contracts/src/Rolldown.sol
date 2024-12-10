@@ -11,6 +11,8 @@ import "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
 import "@eigenlayer/contracts/permissions/Pausable.sol";
 import "./RolldownStorage.sol";
 
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
 contract Rolldown is
     Initializable,
     OwnableUpgradeable,
@@ -20,6 +22,8 @@ contract Rolldown is
 
     address public constant ETH_TOKEN_ADDRESS =
         0x5748395867463837537395739375937493733457;
+
+    using SafeERC20 for IERC20;
 
     function initialize(IPauserRegistry _pauserRegistry, address initialOwner, ChainId chainId, address updater)
         public
