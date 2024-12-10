@@ -159,10 +159,10 @@ where
                         tracing::info!("Found update to submit: {:?}", update);
                         let result = self.l2.update_l1_from_l2(update, update_hash).await?;
                         if !result {
-                            tracing::error!("${ALERT_WARNING} update submission failed");
+                            tracing::error!("{ALERT_WARNING} update submission failed");
                             return Err(Error::UpdateSubmissionFailure);
                         } else {
-                            tracing::error!("${ALERT_INFO} update submission succeded");
+                            tracing::error!("{ALERT_INFO} update submission succeded");
                             stream = Self::consume_stream_with_timeout(stream).await;
                         }
                     }
