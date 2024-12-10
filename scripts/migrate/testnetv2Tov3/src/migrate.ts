@@ -63,16 +63,6 @@ export async function migrateWithoutTransform( sourceBlockHashAt: BlockHash) {
 
       // Uncomment and edit this to start from a specific key and blockHash
       let sourceBlockHashAt: BlockHash = sourceApi.createType('BlockHash', '0xb1b909f7eb6c4dd59ecf08643940eeaae9c6d9db05dea9635e9154d5fa9efd4a');
-
-      // The first migration block at target was (maybe - not sure) 0x5d4165245f4353907381916bced628e4aad680d59128a00023c5e93be704cf5f
-      // The first migration block at target for Tokens Account was 0x4b84095a1a211649946a1f4b3459d323425a89989698e5d17961c33c388fcbee
-      // 176500 done at 0x99971b5749ac43e0235e41b0d37869188ee7418a6531173d60d1f6a82d8f4d51172ee63239e33e39502de6dfa6f5a5ae7db676f79bbe73c870dad45b053a5b2b238d5dedd9c986912843223804000000
-      // Another 652500 done at 0x99971b5749ac43e0235e41b0d37869188ee7418a6531173d60d1f6a82d8f4d516bff0d30eb5a349f2666469fea4a1d515b6ed2fb85fc681786d2c636749ef2979bb2dd21b4def25cfda6ef3a00000000
-      // Another 736500 done at 0x99971b5749ac43e0235e41b0d37869188ee7418a6531173d60d1f6a82d8f4d51cb76f13fd77bab283f9d65271bc72ab94308a9f4cbd9420fb1a0df332f911a8b279c6c1e5153cb1f00942ff401000000
-      // Another 404500 done at 0x99971b5749ac43e0235e41b0d37869188ee7418a6531173d60d1f6a82d8f4d51fff886bd2b46f082ecbcbaa9631f139c771683cd5b0a017ac1220a931e16f1a551c23c5cb4def25cfda6ef3a00000000
-      // Another 220 at tail (missing logs)
-      // Last key migrated was (checked via ui) 0x99971b5749ac43e0235e41b0d37869188ee7418a6531173d60d1f6a82d8f4d51ffff8cd340bef6a1032d690d22a1d9a47f20bc643614969444105be1576619be20238363d9c986912843223804000000
-      // The last migration block at target was 0x6b32638e7c89c0b9ffeb6bcf4d1005cf115f095b1567766e4b31765019e83490
       // let startKey = "0x99971b5749ac43e0235e41b0d37869188ee7418a6531173d60d1f6a82d8f4d51fff886bd2b46f082ecbcbaa9631f139c771683cd5b0a017ac1220a931e16f1a551c23c5cb4def25cfda6ef3a00000000";
 
       let keys = await sourceApi.rpc.state.getKeysPaged(key, pageItemCount, startKey, sourceBlockHashAt);
