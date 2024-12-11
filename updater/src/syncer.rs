@@ -461,21 +461,66 @@ impl Syncer {
         let task_manager_addr = self.avs_contracts.task_manager.address();
         let task_manager = FinalizerTaskManager::new(task_manager_addr, source_client.clone());
 
-        // Create a new opTask via forceCreateNewOpTask
+        let source_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
 
         let is_task_pending = 
             self.clone()
                 .avs_contracts
                 .task_manager
                 .is_task_pending()
+                .block(source_block_number)
                 .await?;
         if !is_task_pending {
             return Err(eyre!("no task is pending"));
         }
 
-        let lastest_op_task
+        let latest_op_task_num = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .latest_op_task_num()
+            .block(source_block_number)
+            .await?;
+        
+        let task_status = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .id_to_task_status(0u8, task_num)
+            .block(source_block_number)
+            .await?;
+        
+        // TODO
+        // Use a constant for the enum variant index
+        if task_status != 1 {
+            return Err(eyre!(
+                "pending task not is not op task: {:?}",
+                task_num
+            ));
+        }
 
-        let task = new_op_task_created_event.task;
+        let last_op_task_created_block = self.clone().avs_contracts.task_manager.last_op_task_created_block().block(source_block_number).await?;
+
+        let mut block_events: Vec<NewOpTaskCreatedFilter> = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .event_with_filter(
+                Filter::new()
+                    .event(&NewOpTaskCreatedFilter::abi_signature())
+                    .select(u64::from(last_op_task_created_block)),
+            )
+            .query()
+            .await?;
+
+        let mut last_task = match block_events.pop() {
+            Some(e) if e.task_index == task_num => e.task,
+            _ => {
+                return Err(eyre!("task not in events for reinit {:?}", task_num));
+            }
+        };
+        
+        let task = last_task;
 
         let operators_state_info = self.clone().get_operators_state_info(task.clone()).await?;
         debug!("{:?}", operators_state_info);
