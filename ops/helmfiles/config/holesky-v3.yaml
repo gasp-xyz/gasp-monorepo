@@ -126,7 +126,7 @@ gaspAvsEnv:
   TESTNET: "false"
   # rollup-node configs
   ROLLUP_NODE_CHAIN: /app/holesky-v3-chainspec.json
-  ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
+  ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
 
 ###########################
 # updater configs #
