@@ -18,6 +18,7 @@ contract GaspTokenTest is Test {
         address rolldown;
     }
 
+    event UniswapPoolSet(address indexed uniswapPool_);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     event AllowTransfersSet(bool allowTransfers_);
     event AddedToWhitelist(address indexed address_);
@@ -28,10 +29,10 @@ contract GaspTokenTest is Test {
     error ZeroL1Council();
     error ZeroUniswapPool();
     error ZeroRolldown();
-    error ZeroWhitelistAddress();
+    error ZeroWhitelistAccount();
     error TransfersAlreadyAllowed();
-    error AddressAlreadyWhitelisted(address addr);
-    error AddressNotWhitelisted(address addr);
+    error AccountAlreadyWhitelisted(address addr);
+    error AccountNotWhitelisted(address addr);
     error OperationForbidden(bytes32 selector);
 
     uint8 public constant DECIMALS = 18;
@@ -61,7 +62,7 @@ contract GaspTokenTest is Test {
         deal(payable(accounts.recipient), 100 ether);
 
         vm.prank(accounts.deployer);
-        gaspToken = new GaspToken(accounts.l1Council, accounts.uniswapPool);
+        gaspToken = new GaspToken(accounts.l1Council);
 
         vm.prank(accounts.l1Council);
         gaspToken.addToWhitelist(accounts.rolldown);
@@ -95,8 +96,6 @@ contract Deploy is GaspTokenTest {
 
     function test_GetWhitelist() external view {
         assertTrue(gaspToken.whitelist(accounts.l1Council));
-        assertTrue(gaspToken.whitelist(accounts.uniswapPool));
-        assertTrue(gaspToken.whitelist(accounts.rolldown));
     }
 
     function test_GetL1CouncilBalance() external view {
@@ -106,13 +105,7 @@ contract Deploy is GaspTokenTest {
     function test_RevertIf_ZeroL1Council() external {
         vm.prank(accounts.deployer);
         vm.expectRevert(ZeroL1Council.selector);
-        gaspToken = new GaspToken(address(0), accounts.uniswapPool);
-    }
-
-    function test_RevertIf_ZeroUniswapPool() external {
-        vm.prank(accounts.deployer);
-        vm.expectRevert(ZeroUniswapPool.selector);
-        gaspToken = new GaspToken(accounts.l1Council, address(0));
+        gaspToken = new GaspToken(address(0));
     }
 }
 
@@ -134,6 +127,37 @@ contract TransferOwnership is GaspTokenTest {
         vm.prank(accounts.deployer);
         vm.expectRevert("Ownable: caller is not the owner");
         gaspToken.transferOwnership(accounts.deployer);
+    }
+}
+
+contract SetUniswapPool is GaspTokenTest {
+    address public uniswapPool = address(new EmptyContract());
+
+    function test_EmitUniswapPoolSet() external {
+        vm.prank(accounts.l1Council);
+        vm.expectEmit();
+        emit UniswapPoolSet(uniswapPool);
+        gaspToken.setUniswapPool(uniswapPool);
+    }
+
+    function test_GetUniswapPool() external {
+        vm.prank(accounts.l1Council);
+        gaspToken.setUniswapPool(uniswapPool);
+
+        assertEq(gaspToken.uniswapPool(), uniswapPool);
+        assertTrue(gaspToken.whitelist(uniswapPool));
+    }
+
+    function test_RevertIf_NotOwner() external {
+        vm.prank(accounts.sender);
+        vm.expectRevert("Ownable: caller is not the owner");
+        gaspToken.setUniswapPool(uniswapPool);
+    }
+
+     function test_RevertIf_ZeroUniswapPool() external {
+        vm.prank(accounts.l1Council);
+        vm.expectRevert(ZeroUniswapPool.selector);
+        gaspToken.setUniswapPool(address(0));
     }
 }
 
@@ -200,18 +224,18 @@ contract AddToWhitelist is GaspTokenTest {
         gaspToken.addToWhitelist(accounts.sender);
     }
 
-    function test_RevertIf_ZeroWhitelistAddress() external {
+    function test_RevertIf_ZeroWhitelistAccount() external {
         vm.prank(accounts.l1Council);
-        vm.expectRevert(ZeroWhitelistAddress.selector);
+        vm.expectRevert(ZeroWhitelistAccount.selector);
         gaspToken.addToWhitelist(address(0));
     }
 
-    function test_RevertIf_AddressAlreadyWhitelisted() external {
+    function test_RevertIf_AccountAlreadyWhitelisted() external {
         vm.startPrank(accounts.l1Council);
 
         gaspToken.addToWhitelist(accounts.sender);
 
-        vm.expectRevert(abi.encodeWithSelector(AddressAlreadyWhitelisted.selector, accounts.sender));
+        vm.expectRevert(abi.encodeWithSelector(AccountAlreadyWhitelisted.selector, accounts.sender));
         gaspToken.addToWhitelist(accounts.sender);
 
         vm.stopPrank();
@@ -243,15 +267,15 @@ contract RemoveFromWhitelist is GaspTokenTest {
         gaspToken.removeFromWhitelist(accounts.sender);
     }
 
-    function test_RevertIf_ZeroWhitelistAddress() external {
+    function test_RevertIf_ZeroWhitelistAccount() external {
         vm.prank(accounts.l1Council);
-        vm.expectRevert(ZeroWhitelistAddress.selector);
+        vm.expectRevert(ZeroWhitelistAccount.selector);
         gaspToken.removeFromWhitelist(address(0));
     }
 
-    function test_RevertIf_AddressNotWhitelisted() external {
+    function test_RevertIf_AccountNotWhitelisted() external {
         vm.prank(accounts.l1Council);
-        vm.expectRevert(abi.encodeWithSelector(AddressNotWhitelisted.selector, accounts.sender));
+        vm.expectRevert(abi.encodeWithSelector(AccountNotWhitelisted.selector, accounts.sender));
         gaspToken.removeFromWhitelist(accounts.sender);
     }
 }
@@ -302,9 +326,14 @@ contract ApproveToken is GaspTokenTest {
     }
 
     function test_RevertIf_OperationForbidden_IfIsUniswapPool() external {
-        vm.prank(accounts.l1Council);
+        vm.startPrank(accounts.l1Council);
+
+        gaspToken.setUniswapPool(accounts.uniswapPool);
+
         vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.approve.selector));
         gaspToken.approve(accounts.uniswapPool, amount);
+
+        vm.stopPrank();
     }
 
     function test_RevertIf_ApproveFromZeroAddress() external {
@@ -382,9 +411,14 @@ contract TransferToken is GaspTokenTest {
     }
 
     function test_RevertIf_OperationForbidden_IfIsUniswapPool() external {
-        vm.prank(accounts.l1Council);
+        vm.startPrank(accounts.l1Council);
+
+        gaspToken.setUniswapPool(accounts.uniswapPool);
+
         vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.transfer.selector));
         gaspToken.transfer(accounts.uniswapPool, amount);
+
+        vm.stopPrank();
     }
 
     function test_RevertIf_TransferFromZeroAddress() external {
