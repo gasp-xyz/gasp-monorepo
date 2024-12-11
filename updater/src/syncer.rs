@@ -14,7 +14,7 @@ use bindings::{
 use ethers::providers::{Middleware, SubscriptionStream};
 use ethers::{
     abi::AbiDecode,
-    contract::{stream, EthEvent, EthLogDecode, LogMeta},
+    contract::{stream, EthEvent, EthLogDecode, LogMeta, builders::ContractCall},
     providers::StreamExt,
     types::{Bytes, Filter},
 };
@@ -269,8 +269,50 @@ impl Syncer {
     }
 
     #[instrument(skip_all)]
+    pub async fn reinit_only_print(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
+        let reinit_txn = self.get_reinit_txn().await?;
+        info!("reinit_txn: {:?}", reinit_txn);
+        let reinit_txn_data = reinit_txn.tx.0.data.ok_or_eyre("failed to unwrap reinit_txn data")?;
+        info!("reinit_txn_data: {:?}", reinit_txn_data);
+    }
+    
+    #[instrument(skip_all)]
     pub async fn reinit(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
-        let alt_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
+        let reinit_txn = self.get_reinit_txn().await?;
+        debug!("{:?}", reinit_txn);
+        let reinit_txn_pending = reinit_txn.send().await;
+        debug!("{:?}", reinit_txn_pending);
+        let reinit_txn_receipt = reinit_txn_pending?.await?;
+        debug!("{:?}", reinit_txn_receipt);
+        match reinit_txn_receipt
+            .clone()
+            .ok_or_eyre("failed to unwrap reinit_txn_receipt")?
+            .status
+        {
+            Some(status) if status.is_zero() => {
+                return Err(eyre!("reinit_txn failed {:?}", reinit_txn_receipt))
+            }
+            _ => {}
+        }
+
+        info!(
+            "Sucessfully completed reinit - {:?}",
+            (
+                last_task,
+                operators_state_info,
+                merkle_roots,
+                ranges,
+                last_batch_id,
+            )
+        );
+
+        Ok(())
+    }
+
+
+    #[instrument(skip_all)]
+    pub async fn get_reinit_txn(self: Arc<Self>) -> eyre::Result<ContractCall<TargetClient>> {
+        let alt_block_number: u64 = self.target_client.get_block_number().await?.as_u64();
         let latest_completed_op_task_created_block = self
             .gasp_service_contract
             .latest_completed_op_task_created_block()
@@ -385,32 +427,87 @@ impl Syncer {
                 ranges.clone(),
                 last_batch_id,
             );
-        debug!("{:?}", reinit_txn);
-        let reinit_txn_pending = reinit_txn.send().await;
-        debug!("{:?}", reinit_txn_pending);
-        let reinit_txn_receipt = reinit_txn_pending?.await?;
-        debug!("{:?}", reinit_txn_receipt);
-        match reinit_txn_receipt
-            .clone()
-            .ok_or_eyre("failed to unwrap reinit_txn_receipt")?
-            .status
-        {
-            Some(status) if status.is_zero() => {
-                return Err(eyre!("reinit_txn failed {:?}", reinit_txn_receipt))
-            }
-            _ => {}
-        }
+        Ok(reinit_txn)
+    }
 
-        info!(
-            "Sucessfully completed reinit - {:?}",
-            (
-                last_task,
-                operators_state_info,
-                merkle_roots,
-                ranges,
-                last_batch_id,
-            )
+    #[instrument(skip_all)]
+    pub async fn reinit_eth_only_print_op_task_creation(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
+        // Get the root_target_client here, this should exist at this point
+        let source_client = self
+            .source_client
+            .clone();
+
+        // Build the root_task_manager here using the address from the source avs_contracts
+        let task_manager_addr = self.avs_contracts.task_manager.address();
+        let task_manager = FinalizerTaskManager::new(task_manager_addr, source_client.clone());
+
+        // Create a new opTask via forceCreateNewOpTask
+        let force_task_txn = task_manager.force_create_new_op_task(66u32, vec![0u8].into());
+        info!("{:?}", force_task_txn);
+        let force_task_txn_data = force_task_txn.tx.0.data.ok_or_eyre("failed to unwrap force_task_txn data")?;
+        info!("force_task_txn_data: {:?}", force_task_txn_data);
+        
+        Ok(())
+    }
+
+    #[instrument(skip_all)]
+    pub async fn reinit_eth_only_print_op_task_response(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
+        // Get the root_target_client here, this should exist at this point
+        let source_client = self
+            .source_client
+            .clone();
+
+        // Build the root_task_manager here using the address from the source avs_contracts
+        let task_manager_addr = self.avs_contracts.task_manager.address();
+        let task_manager = FinalizerTaskManager::new(task_manager_addr, source_client.clone());
+
+        // Create a new opTask via forceCreateNewOpTask
+
+        let is_task_pending = 
+            self.clone()
+                .avs_contracts
+                .task_manager
+                .is_task_pending()
+                .await?;
+        if !is_task_pending {
+            return Err(eyre!("no task is pending"))
+        }
+        let task = new_op_task_created_event.task;
+
+        let operators_state_info = self.clone().get_operators_state_info(task.clone()).await?;
+        debug!("{:?}", operators_state_info);
+        let operators_state_info_hash = Keccak256::hash(
+            vec![0u8; 31]
+                .into_iter()
+                .chain(vec![32u8])
+                .chain(operators_state_info.clone().encode().into_iter())
+                .collect::<Vec<_>>()
+                .as_ref(),
         );
+        debug!("{:?}", operators_state_info_hash);
+
+        let task_hash = Keccak256::hash(
+            vec![0u8; 31]
+                .into_iter()
+                .chain(vec![32u8])
+                .chain(task.clone().encode().into_iter())
+                .collect::<Vec<_>>()
+                .as_ref(),
+        );
+
+        // Respond to the opTask via forceRespondToOpTask
+
+        let force_respond_txn = task_manager.force_respond_to_op_task(
+            task.clone(),
+            OpTaskResponse {
+                reference_task_index: new_op_task_created_event.task_index,
+                reference_task_hash: task_hash.into(),
+                operators_state_info_hash: operators_state_info_hash.into(),
+            },
+        );
+        info!("{:?}", force_respond_txn);
+        let force_respond_txn_data = force_respond_txn.tx.0.data.ok_or_eyre("failed to unwrap force_respond_txn data")?;
+        info!("force_respond_txn_data: {:?}", force_respond_txn_data);
 
         Ok(())
     }

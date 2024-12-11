@@ -49,20 +49,35 @@ pub struct CliArgs {
     /// To use this please set both the source and target chain
     /// to the eth chain. The gasp_service_addr can be ignored
     // This can be improved later on...
-    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit, only_reinit, push_first_init"])]
+    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit, only_reinit, push_first_init, reinit_eth_only_print_op_task_response, reinit_only_print, reinit_eth_only_print_op_task_creation"])]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub only_reinit_eth: bool,
 
-    // #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit"])]
-    // #[serde(skip_serializing_if = "std::ops::Not::not")]
-    // pub force: bool,
-    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["only_reinit"])]
+    /// To use this you only need to set the source chain
+    /// to the eth chain. The gasp_service_addr can be ignored
+    // This can be improved later on...
+    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit, only_reinit, push_first_init, only_reinit_eth, reinit_only_print, reinit_eth_only_print_op_task_creation"])]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub reinit_eth_only_print_op_task_creation: bool,
+
+    /// To use this you only need to set the source chain
+    /// to the eth chain. The gasp_service_addr can be ignored
+    // This can be improved later on...
+    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit, only_reinit, push_first_init, only_reinit_eth, reinit_only_print, reinit_eth_only_print_op_task_creation"])]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub reinit_eth_only_print_op_task_response: bool,
+
+    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["only_reinit, push_first_init, only_reinit_eth, reinit_eth_only_print_op_task_response, reinit_only_print, reinit_eth_only_print_op_task_creation"])]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub reinit: bool,
 
-    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit, push_first_init"])]
+    #[arg(long, env, default_value_t = false, requires = "root", conflicts_with_all = &["reinit, push_first_init, only_reinit_eth, reinit_eth_only_print_op_task_response, reinit_only_print, reinit_eth_only_print_op_task_creation"])]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub only_reinit: bool,
+
+    #[arg(long, env, default_value_t = false, conflicts_with_all = &["reinit, push_first_init, only_reinit, reinit_eth_only_print_op_task_response, reinit_eth_only_print_op_task_creation"])]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub reinit_only_print: bool,
 
     #[command(flatten)]
     pub root_ecdsa_key: RootEcdsaKey,
