@@ -272,8 +272,7 @@ impl Syncer {
     pub async fn reinit_only_print(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
         let reinit_txn = self.get_reinit_txn().await?;
         info!("reinit_txn: {:?}", reinit_txn);
-        let reinit_txn_data = reinit_txn.tx.0.data.ok_or_eyre("failed to unwrap reinit_txn data")?;
-        info!("reinit_txn_data: {:?}", reinit_txn_data);
+        Ok(())
     }
     
     #[instrument(skip_all)]
@@ -296,14 +295,7 @@ impl Syncer {
         }
 
         info!(
-            "Sucessfully completed reinit - {:?}",
-            (
-                last_task,
-                operators_state_info,
-                merkle_roots,
-                ranges,
-                last_batch_id,
-            )
+            "Sucessfully completed reinit"
         );
 
         Ok(())
@@ -311,7 +303,7 @@ impl Syncer {
 
 
     #[instrument(skip_all)]
-    pub async fn get_reinit_txn(self: Arc<Self>) -> eyre::Result<ContractCall<TargetClient>> {
+    pub async fn get_reinit_txn(self: Arc<Self>) -> eyre::Result<ContractCall<TargetClient, ()>> {
         let alt_block_number: u64 = self.target_client.get_block_number().await?.as_u64();
         let latest_completed_op_task_created_block = self
             .gasp_service_contract
@@ -427,6 +419,17 @@ impl Syncer {
                 ranges.clone(),
                 last_batch_id,
             );
+
+        info!(
+            "reinit info - {:?}",
+            (
+                last_task,
+                operators_state_info,
+                merkle_roots,
+                ranges,
+                last_batch_id,
+            )
+        );
         Ok(reinit_txn)
     }
 
@@ -444,8 +447,6 @@ impl Syncer {
         // Create a new opTask via forceCreateNewOpTask
         let force_task_txn = task_manager.force_create_new_op_task(66u32, vec![0u8].into());
         info!("{:?}", force_task_txn);
-        let force_task_txn_data = force_task_txn.tx.0.data.ok_or_eyre("failed to unwrap force_task_txn data")?;
-        info!("force_task_txn_data: {:?}", force_task_txn_data);
         
         Ok(())
     }
@@ -474,7 +475,7 @@ impl Syncer {
             return Err(eyre!("no task is pending"));
         }
 
-        let latest_op_task_num = self
+        let task_num = self
             .clone()
             .avs_contracts
             .task_manager
@@ -548,14 +549,12 @@ impl Syncer {
         let force_respond_txn = task_manager.force_respond_to_op_task(
             task.clone(),
             OpTaskResponse {
-                reference_task_index: new_op_task_created_event.task_index,
+                reference_task_index: task.task_num,
                 reference_task_hash: task_hash.into(),
                 operators_state_info_hash: operators_state_info_hash.into(),
             },
         );
         info!("{:?}", force_respond_txn);
-        let force_respond_txn_data = force_respond_txn.tx.0.data.ok_or_eyre("failed to unwrap force_respond_txn data")?;
-        info!("force_respond_txn_data: {:?}", force_respond_txn_data);
 
         Ok(())
     }
