@@ -14,7 +14,7 @@ import { Withdrawal, toString } from "./Withdrawal.js";
 import { Ferry } from "./Ferry.js";
 import { L1Api } from "./l1/L1Api.js";
 import { L2Api, getApi } from "./l2/L2Api.js";
-import { logger } from "./logger.js";
+import { ALERT_WARNING, logger } from "./logger.js";
 import {
 	ETH_CHAIN_URL,
 	LOG,
@@ -98,12 +98,19 @@ async function main() {
 							range[1],
 							withdrawal.requestId,
 						);
-						await l1.closeWithdrawal(
+						const status = await l1.closeWithdrawal(
 							pastWithdrawalsToClose[0],
 							root,
 							proof,
 							hexToU8a(PRIVATE_KEY),
 						);
+						if (!status) {
+							logger.warning(
+								`${ALERT_WARNING} Failed to close withdrawal ${toString(
+									withdrawal,
+								)}`,
+							);
+						}
 					} else {
 						const pending = await ferry.getPendingWithdrawals();
 						logger.info(`Found ${pending.length} pending withdrawals`);
@@ -114,7 +121,14 @@ async function main() {
 						}
 						const withdrawal: Withdrawal = rated[0];
 						logger.info(`Ferrying withdrawal ${toString(withdrawal)}`);
-						await l1.ferry(rated[0], hexToU8a(PRIVATE_KEY));
+						const status = await l1.ferry(rated[0], hexToU8a(PRIVATE_KEY));
+						if (!status) {
+							logger.warning(
+								`${ALERT_WARNING} Failed to ferry withdrawal ${toString(
+									withdrawal,
+								)}`,
+							);
+						}
 					}
 					inProgress = false;
 				} catch (e) {

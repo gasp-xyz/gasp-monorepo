@@ -3,9 +3,9 @@ import { u8aToHex } from "@polkadot/util";
 import { L1Interface } from "./l1/L1Interface.js";
 import { L2Interface } from "./l2/L2Interface.js";
 import { isEqual, maxBigInt, minBigInt } from "./utils.js";
-import { logger } from "./logger.js";
+import { ALERT_WARNING, logger } from "./logger.js";
 import { Withdrawal, toString, isWithdrawal } from "./Withdrawal.js";
-import { Cancel, isCancel } from "./Cancel.js";
+import { Cancel, isCancel, toString as cancelToString } from "./Cancel.js";
 import { closeSync } from "fs";
 
 async function asyncFilter(arr: (Withdrawal | Cancel)[], predicate: any) {
@@ -141,7 +141,17 @@ class CloserService {
 				range[1],
 				withdrawal.requestId,
 			);
-			await this.l1.closeWithdrawal(withdrawal, root, proof, privateKey);
+			const status = await this.l1.closeWithdrawal(
+				withdrawal,
+				root,
+				proof,
+				privateKey,
+			);
+			if (!status) {
+				logger.warning(
+					`${ALERT_WARNING} Failed to close withdrawal ${toString(withdrawal)}`,
+				);
+			}
 		}
 	}
 
@@ -155,7 +165,12 @@ class CloserService {
 				range[1],
 				cancel.requestId,
 			);
-			await this.l1.closeCancel(cancel, root, proof, privateKey);
+			const status = await this.l1.closeCancel(cancel, root, proof, privateKey);
+			if (!status) {
+				logger.warning(
+					`${ALERT_WARNING} Failed to close cancel ${cancelToString(cancel)}`,
+				);
+			}
 		}
 	}
 }
