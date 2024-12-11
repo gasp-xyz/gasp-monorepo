@@ -54,6 +54,7 @@ contract FinalizerTaskManager is
     mapping(TaskType => mapping(uint32 => TaskStatus)) public idToTaskStatus;
 
     uint32 public lastOpTaskCreatedBlock;
+    uint32 public lastRdTaskCreatedBlock;
     uint32 public lastCompletedOpTaskNum;
     // If zero then no opTask has yet been completed
     // And hence no reference opState has been established
@@ -264,6 +265,7 @@ contract FinalizerTaskManager is
 
         // store hash of task onchain, emit event, and increase taskNum
         _processTaskMetadata(TaskType.RD_TASK, latestRdTaskNumMem, keccak256(abi.encode(newTask)), TaskStatus.INITIALIZED);
+        lastRdTaskCreatedBlock = uint32(block.number);
         emit NewRdTaskCreated(latestRdTaskNumMem, newTask);
         latestRdTaskNum = latestRdTaskNumMem + 1;
     }
