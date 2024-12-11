@@ -157,6 +157,19 @@ sequencerEnvSecretsArb:
   ETH_PRIV_KEY: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
   MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
 
+sequencerEnvBase:
+  CHAIN: "reth"
+  L1_CHAIN: "Base"
+  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
+  TX_COST: '1000000000000000000000'
+  ETH_CHAIN_URL: ws://evm-node-base:8546
+  LIMIT: 10000
+  WATCHDOG: 30
+sequencerEnvSecretsBase:
+  ETH_PRIV_KEY: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+  MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+
 #########################
 # ferry-deposit configs #
 #########################
@@ -183,6 +196,18 @@ ferryDepositEnvArb:
   BLOCK_DELAY: 0
   LOG: silly
 ferryDepositEnvSecretsArb:
+  MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+
+ferryDepositEnvBase:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-base:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Base"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  BLOCK_DELAY: 0
+  LOG: silly
+ferryDepositEnvSecretsBase:
   MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
 
 ############################
@@ -213,6 +238,18 @@ ferryWithdrawalEnvArb:
 ferryWithdrawalEnvSecretsArb:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
 
+ferryWithdrawalEnvBase:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-base:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Base"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  LOOK_BACK_HOURS: 1
+  LOG: silly
+ferryWithdrawalEnvSecretsBase:
+  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+
 ########################
 # ferry-closer configs #
 ########################
@@ -238,4 +275,15 @@ closerEnvArb:
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsArb:
+  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+closerEnvBase:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-base:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Base"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  LOOK_BACK_HOURS: 1
+  LOG: silly
+closerEnvSecretsBase:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
