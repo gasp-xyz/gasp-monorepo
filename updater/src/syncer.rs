@@ -270,14 +270,69 @@ impl Syncer {
 
     #[instrument(skip_all)]
     pub async fn reinit_only_print(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
-        let reinit_txn = self.get_reinit_txn().await?;
+        let (
+            last_task,
+            operators_state_info,
+            merkle_roots,
+            ranges,
+            last_batch_id,
+        )= self.clone().get_reinit_info().await?;
+        info!(
+            "reinit info - {:?}",
+            (
+                last_task.clone(),
+                operators_state_info.clone(),
+                merkle_roots.clone(),
+                ranges.clone(),
+                last_batch_id,
+            )
+        );
+        let reinit_txn = self
+        .clone()
+        .gasp_service_contract
+        .clone()
+        .process_eigen_reinit(
+            last_task.clone(),
+            operators_state_info.clone(),
+            merkle_roots.clone(),
+            ranges.clone(),
+            last_batch_id,
+        );
         info!("reinit_txn: {:?}", reinit_txn);
         Ok(())
     }
     
     #[instrument(skip_all)]
     pub async fn reinit(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
-        let reinit_txn = self.get_reinit_txn().await?;
+        let (
+            last_task,
+            operators_state_info,
+            merkle_roots,
+            ranges,
+            last_batch_id,
+        )= self.clone().get_reinit_info().await?;
+        info!(
+            "reinit info - {:?}",
+            (
+            last_task.clone(),
+            operators_state_info.clone(),
+            merkle_roots.clone(),
+            ranges.clone(),
+            last_batch_id,
+        )
+        );
+        let reinit_txn = self
+        .clone()
+        .root_gasp_service_contract
+        .clone()
+        .expect("should work in reinit")
+        .process_eigen_reinit(
+            last_task.clone(),
+            operators_state_info.clone(),
+            merkle_roots.clone(),
+            ranges.clone(),
+            last_batch_id,
+        );
         debug!("{:?}", reinit_txn);
         let reinit_txn_pending = reinit_txn.send().await;
         debug!("{:?}", reinit_txn_pending);
@@ -303,7 +358,12 @@ impl Syncer {
 
 
     #[instrument(skip_all)]
-    pub async fn get_reinit_txn(self: Arc<Self>) -> eyre::Result<ContractCall<TargetClient, ()>> {
+    pub async fn get_reinit_info(self: Arc<Self>) -> eyre::Result<
+            (OpTask,
+            OperatorStateInfo,
+            Vec<[u8; 32]>,
+            Vec<Range>,
+            u32)> {
         let alt_block_number: u64 = self.target_client.get_block_number().await?.as_u64();
         let latest_completed_op_task_created_block = self
             .gasp_service_contract
@@ -406,31 +466,14 @@ impl Syncer {
             .clone()
             .get_operators_state_info(last_task.clone())
             .await?;
-
-        let reinit_txn = self
-            .clone()
-            .root_gasp_service_contract
-            .clone()
-            .expect("should work in reinit")
-            .process_eigen_reinit(
-                last_task.clone(),
-                operators_state_info.clone(),
-                merkle_roots.clone(),
-                ranges.clone(),
-                last_batch_id,
-            );
-
-        info!(
-            "reinit info - {:?}",
-            (
-                last_task,
-                operators_state_info,
-                merkle_roots,
-                ranges,
-                last_batch_id,
-            )
-        );
-        Ok(reinit_txn)
+            
+        Ok((
+            last_task.clone(),
+            operators_state_info.clone(),
+            merkle_roots.clone(),
+            ranges.clone(),
+            last_batch_id,
+        ))
     }
 
     #[instrument(skip_all)]
