@@ -470,8 +470,11 @@ impl Syncer {
                 .is_task_pending()
                 .await?;
         if !is_task_pending {
-            return Err(eyre!("no task is pending"))
+            return Err(eyre!("no task is pending"));
         }
+
+        let lastest_op_task
+
         let task = new_op_task_created_event.task;
 
         let operators_state_info = self.clone().get_operators_state_info(task.clone()).await?;
