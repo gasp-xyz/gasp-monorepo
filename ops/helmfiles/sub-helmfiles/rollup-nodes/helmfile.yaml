@@ -161,63 +161,12 @@ releases:
         nodeSelector:
           production: "true"
           topology.kubernetes.io/zone: europe-west1-b
-  
-  - name: rpc-04
-    installed: {{ .Values.collatorRpcNodesEnabled }}
-    chart: mangata-node/node
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    values:
-      - image:
-          repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
-        environment: 'rollup-{{ .Values.environmentName }}'
-        chain: {{ .Values | getOrNil "collator.chain" }}
-        disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
-        customChainspecUrl: {{ .Values | get "collator.customChainspecUrl" "" }}
-        domainZone: gasp.xyz
-        command: '/app/node'
-        isParachain: false
-        isCollator: false
-        role: rpc
-        remoteCluster: {{ .Values.remoteCluster }}
-        wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
-        enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
-        storageClass: {{ .Values.collator.storageClass | quote }}
-        storageSize: {{ .Values.collator.storageSize | quote }}
-        resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
-        tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
-        # rpc-01 specific configs
-        bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
-        extraArgs:
-          - --pruning=archive
-          - --rpc-max-connections=20000
-        nodeSelector:
-          production: "true"
-          topology.kubernetes.io/zone: europe-west1-c
 
   - name: rpc-shared-dns-record
-    installed: {{ eq .Values.environmentName "holesky" }}
+    installed: {{ eq .Values.environmentName "holesky-v3" }}
     namespace: 'rollup-{{ .Values.environmentName }}'
-    chart: ../helm-charts/shared-dns-record
+    chart: ../../../helm-charts/shared-dns-record
     values:
       - url: 'rollup-{{ .Values.environmentName }}-rpc.gasp.xyz'
-        serviceSelector:
-          role: rpc
-
-  - name: rpc-shared-dns-record-testnet
-    installed: {{ eq .Values.environmentName "holesky" }}
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    chart: ../helm-charts/shared-dns-record
-    values:
-      - url: 'rollup-testnet-rpc.gasp.xyz'
-        serviceSelector:
-          role: rpc
-
-  - name: rpc-shared-dns-record-legacy
-    installed: {{ eq .Values.environmentName "holesky" }}
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    chart: ../helm-charts/shared-dns-record
-    values:
-      - url: 'rollup-testnet-rpc.mangata.online'
         serviceSelector:
           role: rpc
