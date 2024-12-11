@@ -51,6 +51,9 @@ interface IFinalizerTaskManager {
     event AggregatorUpdated(address aggregatorAddress);
     event GeneratorUpdated(address generatorAddress);
 
+    event OwnerApproved(bytes32 approveHash);
+    event OwnerApprovedRequired(bool approvalRequired);
+
     // DATA STRUCTURES
     enum TaskStatus
     {

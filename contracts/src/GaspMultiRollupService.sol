@@ -54,7 +54,7 @@ contract GaspMultiRollupService is
       emit RolldownTargetUpdated(address(_rolldown));
     }
 
-    function processEigenReinit(IFinalizerTaskManager.OpTask calldata task, OperatorStateInfo calldata operatorStateInfo, bytes32[] calldata merkleRoots, IRolldown.Range[] calldata ranges, uint32 lastBatchId) public onlyOwner{
+    function processEigenReinit(IFinalizerTaskManager.OpTask calldata task, OperatorStateInfo calldata operatorStateInfo, bytes32[] calldata merkleRoots, IRolldown.Range[] calldata ranges, uint32 lastBatchId) public onlyUpdater{
 
         require(merkleRoots.length == ranges.length, "rdUpdate info length mismatch");
 
@@ -78,7 +78,7 @@ contract GaspMultiRollupService is
         
     }
 
-    function processEigenOpUpdate(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public {
+    function processEigenOpUpdate(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public onlyUpdater  {
 
         uint32 latestCompletedOpTaskCreatedBlockCached = latestCompletedOpTaskCreatedBlock;
         if (!(latestCompletedOpTaskCreatedBlockCached == 0) || allowNonRootInit) {

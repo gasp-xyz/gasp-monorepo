@@ -77,7 +77,9 @@ contract FinalizerTaskManager is
     bytes32 public operatorsStateInfoHash;
 
     bool public allowNonRootInit;
+    bool public ownerApprovalHash;
 
+    bytes32 public constant BYTES32_MAX = bytes32(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
 
     /* MODIFIERS */
     modifier onlyAggregator() {
@@ -192,9 +194,17 @@ contract FinalizerTaskManager is
         _cancelPendingTasks();
     }
 
-    function forceCancelPendingTasks()
+    function ownerApprove(bytes32 approveHash)
         external
         onlyOwner
+    {
+        ownerApprovalHash = approveHash;
+        emit OwnerApproved(approveHash);
+    }
+
+    function forceCancelPendingTasks()
+        external
+        onlyUpdater
     {
         require(isTaskPending == true, "No task pending");
         _cancelPendingTasks();
@@ -202,7 +212,7 @@ contract FinalizerTaskManager is
 
     function forceCreateNewOpTask(uint32 quorumThresholdPercentage, bytes calldata quorumNumbers)
         external
-        onlyOwner
+        onlyUpdater
     {
         if (isTaskPending) {
         _cancelPendingTasks();
@@ -216,7 +226,13 @@ contract FinalizerTaskManager is
     function forceRespondToOpTask(
         OpTask calldata task,
         OpTaskResponse calldata taskResponse
-    ) external onlyOwner {
+    ) external onlyUpdater {
+
+        bytes32 ownerApprovalHashCached = ownerApprovalHash;
+
+        if ownerApprovalHashCached != BYTES32_MAX {
+            
+        }
 
         _validateTaskResponse(keccak256(abi.encode(task)), TaskType.OP_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock);
 
