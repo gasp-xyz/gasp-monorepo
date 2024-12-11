@@ -27,13 +27,13 @@ export const initService = async () => {
       ARB_CHAIN,
       process.env.CONTRACT_ADDRESS_ARB
     ),
-    watchDepositAcceptedIntoQueue(
-      api,
-      process.env.BASE_CHAIN_URL,
-      CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-base'),
-      BASE_CHAIN,
-      process.env.CONTRACT_ADDRESS_BASE
-    ),
+    // watchDepositAcceptedIntoQueue(
+    //   api,
+    //   process.env.BASE_CHAIN_URL,
+    //   CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-base'),
+    //   BASE_CHAIN,
+    //   process.env.CONTRACT_ADDRESS_BASE
+    // ),
     new Promise((resolve) => {
       setTimeout(() => {
         watchWithdrawalClosed(
@@ -56,20 +56,20 @@ export const initService = async () => {
         ).then(resolve)
       }, 10000)
     }),
-    new Promise((resolve) => {
-      setTimeout(() => {
-        watchWithdrawalClosed(
-          api,
-          process.env.BASE_CHAIN_URL,
-          CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-base'),
-          BASE_CHAIN,
-          process.env.CONTRACT_ADDRESS_BASE
-        ).then(resolve)
-      }, 10000)
-    }),
+    // new Promise((resolve) => {
+    //   setTimeout(() => {
+    //     watchWithdrawalClosed(
+    //       api,
+    //       process.env.BASE_CHAIN_URL,
+    //       CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-base'),
+    //       BASE_CHAIN,
+    //       process.env.CONTRACT_ADDRESS_BASE
+    //     ).then(resolve)
+    //   }, 10000)
+    // }),
     processRequests(api, 'Arbitrum'),
     processRequests(api, 'Ethereum'),
-    processRequests(api, 'Base'),
+    // processRequests(api, 'Base'),
   ]).then((results) => {
     results.forEach((result) => {
       if (result.status === 'fulfilled') {
