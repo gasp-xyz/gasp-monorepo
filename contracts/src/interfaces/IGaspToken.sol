@@ -14,8 +14,6 @@ interface IGaspToken is IERC20 {
 
     error ZeroUniswapPool();
 
-    error ZeroRolldown();
-
     error ZeroWhitelistAddress();
 
     error TransfersAlreadyAllowed();
