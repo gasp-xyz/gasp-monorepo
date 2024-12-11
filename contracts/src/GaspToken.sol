@@ -13,31 +13,24 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     string private constant _SYMBOL = "GASP";
 
     mapping(address => bool) public whitelist;
-    address public uniswapV3Pool;
+    address public uniswapPool;
     bool public allowTransfers;
 
     modifier isWhitelisted(address[2] memory addresses, bytes4 selector) {
         if (!allowTransfers) {
-            if (!whitelist[addresses[0]] && !whitelist[addresses[1]] || addresses[1] == uniswapV3Pool) {
+            if (!whitelist[addresses[0]] && !whitelist[addresses[1]] || addresses[1] == uniswapPool) {
                 revert OperationForbidden(selector);
             }
         }
         _;
     }
 
-    modifier transfersAllowed() {
-        if (allowTransfers) {
-            revert TransfersAlreadyAllowed();
-        }
-        _;
-    }
-
-    constructor(address l1Council_, address uniswapV3Pool_, address rolldown_) Ownable() ERC20(_NAME, _SYMBOL) {
+    constructor(address l1Council_, address uniswapPool_, address rolldown_) Ownable() ERC20(_NAME, _SYMBOL) {
         if (l1Council_ == address(0)) {
             revert ZeroL1Council();
         }
-        if (uniswapV3Pool_ == address(0)) {
-            revert ZeroUniswapV3Pool();
+        if (uniswapPool_ == address(0)) {
+            revert ZeroUniswapPool();
         }
         if (rolldown_ == address(0)) {
             revert ZeroRolldown();
@@ -46,19 +39,23 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         _transferOwnership(l1Council_);
         _mint(l1Council_, _TOTAL_SUPPLY);
 
-        uniswapV3Pool = uniswapV3Pool_;
-
         whitelist[l1Council_] = true;
-        whitelist[uniswapV3Pool_] = true;
+        whitelist[uniswapPool_] = true;
         whitelist[rolldown_] = true;
+
+        uniswapPool = uniswapPool_;
     }
 
-    function setAllowTransfers(bool allowTransfers_) external override onlyOwner transfersAllowed {
+    function setAllowTransfers(bool allowTransfers_) external override onlyOwner {
+        if (allowTransfers) {
+            revert TransfersAlreadyAllowed();
+        }
+
         allowTransfers = allowTransfers_;
         emit AllowTransfersSet(allowTransfers_);
     }
 
-    function addToWhitelist(address address_) external override onlyOwner transfersAllowed {
+    function addToWhitelist(address address_) external override onlyOwner {
         if (address_ == address(0)) {
             revert ZeroWhitelistAddress();
         }
@@ -70,7 +67,7 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         emit AddedToWhitelist(address_);
     }
 
-    function removeFromWhitelist(address address_) external override onlyOwner transfersAllowed {
+    function removeFromWhitelist(address address_) external override onlyOwner {
         if (address_ == address(0)) {
             revert ZeroWhitelistAddress();
         }
@@ -79,7 +76,7 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         }
 
         delete whitelist[address_];
-        emit RemoveFromWhitelist(address_);
+        emit RemovedFromWhitelist(address_);
     }
 
     function approve(address spender, uint256 amount)

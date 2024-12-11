@@ -8,11 +8,11 @@ interface IGaspToken is IERC20 {
 
     event AddedToWhitelist(address indexed addr);
 
-    event RemoveFromWhitelist(address indexed addr);
+    event RemovedFromWhitelist(address indexed addr);
 
     error ZeroL1Council();
 
-    error ZeroUniswapV3Pool();
+    error ZeroUniswapPool();
 
     error ZeroRolldown();
 
