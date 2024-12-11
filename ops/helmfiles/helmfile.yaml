@@ -159,7 +159,7 @@ releases:
             memory: 1Gi
   - name: ferry-deposit-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.ferryDepositEnabled .Values.enableArbServices | toYaml   }}
+    installed: {{ and .Values.ferryDepositEnabled .Values.enableArbitrumServices | toYaml   }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -211,7 +211,7 @@ releases:
             memory: 1Gi
   - name: ferry-withdrawal-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.ferryWithdrawalEnabled .Values.enableArbServices | toYaml  }}
+    installed: {{ and .Values.ferryWithdrawalEnabled .Values.enableArbitrumServices | toYaml  }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -265,7 +265,7 @@ releases:
             memory: 1Gi
   - name: closer-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.closerEnabled .Values.enableArbServices | toYaml }}
+    installed: {{ and .Values.closerEnabled .Values.enableArbitrumServices | toYaml }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
