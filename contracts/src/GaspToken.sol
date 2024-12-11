@@ -25,21 +25,25 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         _;
     }
 
-    constructor(address l1Council_, address uniswapPool_) Ownable() ERC20(_NAME, _SYMBOL) {
+    constructor(address l1Council_) Ownable() ERC20(_NAME, _SYMBOL) {
         if (l1Council_ == address(0)) {
             revert ZeroL1Council();
-        }
-        if (uniswapPool_ == address(0)) {
-            revert ZeroUniswapPool();
         }
 
         _transferOwnership(l1Council_);
         _mint(l1Council_, _TOTAL_SUPPLY);
 
         whitelist[l1Council_] = true;
-        whitelist[uniswapPool_] = true;
+    }
+
+    function setUniswapPool(address uniswapPool_) external override onlyOwner {
+        if (uniswapPool_ == address(0)) {
+            revert ZeroUniswapPool();
+        }
 
         uniswapPool = uniswapPool_;
+        whitelist[uniswapPool_] = true;
+        emit UniswapPoolSet(uniswapPool_);
     }
 
     function setAllowTransfers(bool allowTransfers_) external override onlyOwner {
@@ -51,28 +55,28 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         emit AllowTransfersSet(allowTransfers_);
     }
 
-    function addToWhitelist(address address_) external override onlyOwner {
-        if (address_ == address(0)) {
-            revert ZeroWhitelistAddress();
+    function addToWhitelist(address account) external override onlyOwner {
+        if (account == address(0)) {
+            revert ZeroWhitelistAccount();
         }
-        if (whitelist[address_]) {
-            revert AddressAlreadyWhitelisted(address_);
+        if (whitelist[account]) {
+            revert AccountAlreadyWhitelisted(account);
         }
 
-        whitelist[address_] = true;
-        emit AddedToWhitelist(address_);
+        whitelist[account] = true;
+        emit AddedToWhitelist(account);
     }
 
-    function removeFromWhitelist(address address_) external override onlyOwner {
-        if (address_ == address(0)) {
-            revert ZeroWhitelistAddress();
+    function removeFromWhitelist(address account) external override onlyOwner {
+        if (account == address(0)) {
+            revert ZeroWhitelistAccount();
         }
-        if (!whitelist[address_]) {
-            revert AddressNotWhitelisted(address_);
+        if (!whitelist[account]) {
+            revert AccountNotWhitelisted(account);
         }
 
-        delete whitelist[address_];
-        emit RemovedFromWhitelist(address_);
+        delete whitelist[account];
+        emit RemovedFromWhitelist(account);
     }
 
     function approve(address spender, uint256 amount)
