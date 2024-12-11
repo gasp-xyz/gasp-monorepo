@@ -78,7 +78,7 @@ contract GaspMultiRollupService is
         
     }
 
-    function processEigenOpUpdate(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public {
+    function processEigenOpUpdate(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public onlyUpdater {
 
         uint32 latestCompletedOpTaskCreatedBlockCached = latestCompletedOpTaskCreatedBlock;
         if (!(latestCompletedOpTaskCreatedBlockCached == 0) || allowNonRootInit) {
