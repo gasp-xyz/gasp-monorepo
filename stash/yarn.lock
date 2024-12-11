@@ -6243,37 +6243,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gasp-sdk@npm:0.0.2-eth-rollup-develop.46":
-  version: 0.0.2-eth-rollup-develop.46
-  resolution: "gasp-sdk@npm:0.0.2-eth-rollup-develop.46"
+"gasp-sdk@npm:0.0.2-eth-rollup-develop.79":
+  version: 0.0.2-eth-rollup-develop.79
+  resolution: "gasp-sdk@npm:0.0.2-eth-rollup-develop.79"
   dependencies:
     big.js: 6.2.1
-    gasp-type-definitions: 0.0.2-eth-rollup-develop.48
+    gasp-type-definitions: 0.0.2-eth-rollup-develop.81
     tslib: ^2.3.0
     tslog: 4.8.2
     viem: ^2.17.4
     wagmi: ^2.10.10
   peerDependencies:
     "@polkadot/api": ^11.1.1
-  checksum: e05597ad793da20b5192f126063fe3d61929999ac4a339d10b7c894fadc0d50418c047817f72df7a4a0f996478b15ee23257fffd8c2a0c0184ab3d451d5001e1
+  checksum: 4fbf0e42e0b0e7100bf598c3b064457120e4cdc12f9385926593d3660c1aecbc05cea950c811b2b83e79156d0198dd1d2babd99c78e72197b534d295772bd49d
   languageName: node
   linkType: hard
 
-"gasp-type-definitions@npm:0.0.2-eth-rollup-develop.48":
-  version: 0.0.2-eth-rollup-develop.48
-  resolution: "gasp-type-definitions@npm:0.0.2-eth-rollup-develop.48"
+"gasp-type-definitions@npm:0.0.2-eth-rollup-develop.81":
+  version: 0.0.2-eth-rollup-develop.81
+  resolution: "gasp-type-definitions@npm:0.0.2-eth-rollup-develop.81"
   peerDependencies:
     "@polkadot/types": ^11.1.1
-  checksum: 34320ecf550d337d30990175b41a234b1966d76d1602a02622b10e602215b1d1e0952ad1faf8ee093bb4c508cb47f8e9580c2de6eba9cb73c62d0989e945a26e
+  checksum: 748e6eafd64686a75e41dbe99270c6d994e5a18df3e3ecae6a8ce7d3ff48e763f41a6ba5404676448a355597154faca4ae9f6dd3e796d9fd77a6b3cc94388202
   languageName: node
   linkType: hard
 
-"gasp-types@npm:0.0.2-eth-rollup-develop.46":
-  version: 0.0.2-eth-rollup-develop.46
-  resolution: "gasp-types@npm:0.0.2-eth-rollup-develop.46"
+"gasp-types@npm:0.0.2-eth-rollup-develop.78":
+  version: 0.0.2-eth-rollup-develop.78
+  resolution: "gasp-types@npm:0.0.2-eth-rollup-develop.78"
   peerDependencies:
     "@polkadot/api": ^11.1.1
-  checksum: 8564139a6a00d0c8e96c5018134a2b6c9a54e2774d411179382d34eb8d442b54749fad39cc14ef0a8e964a9ea203585b8a16f9f4ff1d2491e547df3a202a2fab
+  checksum: 84eb999300d9b60e9f426e5d33825c4d26c3a4e5750f7f282032d624801ef8acfe94bd70c2da67810170477464d4db2e110559abac6e14788390a5bee261bd7f
   languageName: node
   linkType: hard
 
@@ -10389,8 +10389,8 @@ __metadata:
     eslint-plugin-sort-imports-es6-autofix: ^0.6.0
     express: ^4.19.2
     express-validator: 6.14.2
-    gasp-sdk: 0.0.2-eth-rollup-develop.46
-    gasp-types: 0.0.2-eth-rollup-develop.46
+    gasp-sdk: 0.0.2-eth-rollup-develop.79
+    gasp-types: 0.0.2-eth-rollup-develop.78
     husky: ^8.0.3
     ioredis: ^5.3.0
     joi: ^17.10.1
