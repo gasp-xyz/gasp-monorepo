@@ -14,7 +14,7 @@ evmNode:
 # collator configs #
 #####################
 collatorsEnabled: true
-collatorRpcNodesEnabled: false
+collatorRpcNodesEnabled: true
 collator:
   resources:
     requests:
