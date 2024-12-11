@@ -61,7 +61,10 @@ contract GaspTokenTest is Test {
         deal(payable(accounts.recipient), 100 ether);
 
         vm.prank(accounts.deployer);
-        gaspToken = new GaspToken(accounts.l1Council, accounts.uniswapPool, accounts.rolldown);
+        gaspToken = new GaspToken(accounts.l1Council, accounts.uniswapPool);
+
+        vm.prank(accounts.l1Council);
+        gaspToken.addToWhitelist(accounts.rolldown);
     }
 }
 
@@ -103,19 +106,13 @@ contract Deploy is GaspTokenTest {
     function test_RevertIf_ZeroL1Council() external {
         vm.prank(accounts.deployer);
         vm.expectRevert(ZeroL1Council.selector);
-        gaspToken = new GaspToken(address(0), accounts.uniswapPool, accounts.rolldown);
+        gaspToken = new GaspToken(address(0), accounts.uniswapPool);
     }
 
     function test_RevertIf_ZeroUniswapPool() external {
         vm.prank(accounts.deployer);
         vm.expectRevert(ZeroUniswapPool.selector);
-        gaspToken = new GaspToken(accounts.l1Council, address(0), accounts.rolldown);
-    }
-
-    function test_RevertIf_ZeroRolldown() external {
-        vm.prank(accounts.deployer);
-        vm.expectRevert(ZeroRolldown.selector);
-        gaspToken = new GaspToken(accounts.l1Council, accounts.uniswapPool, address(0));
+        gaspToken = new GaspToken(accounts.l1Council, address(0));
     }
 }
 

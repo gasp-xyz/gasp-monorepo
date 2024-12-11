@@ -25,15 +25,12 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         _;
     }
 
-    constructor(address l1Council_, address uniswapPool_, address rolldown_) Ownable() ERC20(_NAME, _SYMBOL) {
+    constructor(address l1Council_, address uniswapPool_) Ownable() ERC20(_NAME, _SYMBOL) {
         if (l1Council_ == address(0)) {
             revert ZeroL1Council();
         }
         if (uniswapPool_ == address(0)) {
             revert ZeroUniswapPool();
-        }
-        if (rolldown_ == address(0)) {
-            revert ZeroRolldown();
         }
 
         _transferOwnership(l1Council_);
@@ -41,7 +38,6 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
 
         whitelist[l1Council_] = true;
         whitelist[uniswapPool_] = true;
-        whitelist[rolldown_] = true;
 
         uniswapPool = uniswapPool_;
     }
