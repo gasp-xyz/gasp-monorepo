@@ -120,8 +120,8 @@ releases:
         storageSize: {{ .Values.collator.storageSize | quote }}
         resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
         tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
-        # rpc-01 specific configs
-        bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5K
+        # rpc-02 specific configs
+        bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
         extraArgs:
           - --pruning=archive
           - --rpc-max-connections=20000
@@ -153,7 +153,7 @@ releases:
         storageSize: {{ .Values.collator.storageSize | quote }}
         resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
         tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
-        # rpc-01 specific configs
+        # rpc-03 specific configs
         bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
         extraArgs:
           - --pruning=archive
