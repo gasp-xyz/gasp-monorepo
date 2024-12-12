@@ -91,17 +91,24 @@ impl Syncer {
         }))
     }
 
-
     #[instrument(skip_all, err)]
-    pub async fn handle_sync_event(self: Arc<Self>, event: FinalizerTaskManagerEvents, log: LogMeta, latest_completed_op_task_created_block: &mut u32, latest_completed_rd_task_number: &mut u32) -> eyre::Result<()> {
+    pub async fn handle_sync_event(
+        self: Arc<Self>,
+        event: FinalizerTaskManagerEvents,
+        log: LogMeta,
+        latest_completed_op_task_created_block: &mut u32,
+        latest_completed_rd_task_number: &mut u32,
+    ) -> eyre::Result<()> {
         match event {
             FinalizerTaskManagerEvents::OpTaskCompletedFilter(_event) => {
                 let txn_hash = log.transaction_hash;
-                let txn = self.clone().avs_contracts.ws_client.get_transaction(txn_hash).await?
-                .ok_or_else(
-                    || {eyre!("missing expected txn {:?}", txn_hash)}
-                )?
-                ;
+                let txn = self
+                    .clone()
+                    .avs_contracts
+                    .ws_client
+                    .get_transaction(txn_hash)
+                    .await?
+                    .ok_or_else(|| eyre!("missing expected txn {:?}", txn_hash))?;
                 debug!("{:?}", txn);
                 let call = match FinalizerTaskManagerCalls::decode(txn.input)?{
                     FinalizerTaskManagerCalls::RespondToOpTask(c) => c,
@@ -115,114 +122,183 @@ impl Syncer {
                 debug!("{:?}", call);
                 debug!("{:?}", call.task.clone());
                 debug!("encoded - {:?}", call.task.clone().encode());
-                debug!("encoded - {:?}", array_bytes::bytes2hex("0x",call.task.clone().encode()));
-                let task_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
-                    call.task.clone().encode().into_iter()
-                ).collect::<Vec<_>>().as_ref());
+                debug!(
+                    "encoded - {:?}",
+                    array_bytes::bytes2hex("0x", call.task.clone().encode())
+                );
+                let task_hash = Keccak256::hash(
+                    vec![0u8; 31]
+                        .into_iter()
+                        .chain(vec![32u8])
+                        .chain(call.task.clone().encode().into_iter())
+                        .collect::<Vec<_>>()
+                        .as_ref(),
+                );
                 debug!("{:?}", task_hash);
-                debug!("{:?}", task_hash == call.task_response.reference_task_hash.into());
+                debug!(
+                    "{:?}",
+                    task_hash == call.task_response.reference_task_hash.into()
+                );
 
                 if task_hash != call.task_response.reference_task_hash.into() {
-                    return Err(eyre!("task_hash mismatch {:?}", task_hash))
+                    return Err(eyre!("task_hash mismatch {:?}", task_hash));
                 }
 
-                let operators_state_info = self.clone().get_operators_state_info(call.task.clone()).await?;
+                let operators_state_info = self
+                    .clone()
+                    .get_operators_state_info(call.task.clone())
+                    .await?;
                 debug!("{:?}", operators_state_info);
-                let operators_state_info_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
-                    operators_state_info.clone().encode().into_iter()
-                ).collect::<Vec<_>>().as_ref());
+                let operators_state_info_hash = Keccak256::hash(
+                    vec![0u8; 31]
+                        .into_iter()
+                        .chain(vec![32u8])
+                        .chain(operators_state_info.clone().encode().into_iter())
+                        .collect::<Vec<_>>()
+                        .as_ref(),
+                );
                 debug!("{:?}", operators_state_info_hash);
-                debug!("{:?}", operators_state_info_hash == call.task_response.operators_state_info_hash.into());
+                debug!(
+                    "{:?}",
+                    operators_state_info_hash
+                        == call.task_response.operators_state_info_hash.into()
+                );
 
-                if operators_state_info_hash != call.task_response.operators_state_info_hash.into() {
-                    return Err(eyre!("operators_state_info_hash mismatch {:?}", operators_state_info_hash))
+                if operators_state_info_hash != call.task_response.operators_state_info_hash.into()
+                {
+                    return Err(eyre!(
+                        "operators_state_info_hash mismatch {:?}",
+                        operators_state_info_hash
+                    ));
                 }
 
-                if *latest_completed_op_task_created_block !=0 && *latest_completed_op_task_created_block < call.task.last_completed_op_task_created_block {
-                    return Err(eyre!("missing expected task response {:?}", *latest_completed_op_task_created_block))
+                if *latest_completed_op_task_created_block != 0
+                    && *latest_completed_op_task_created_block
+                        < call.task.last_completed_op_task_created_block
+                {
+                    return Err(eyre!(
+                        "missing expected task response {:?}",
+                        *latest_completed_op_task_created_block
+                    ));
                 }
 
                 // This branch is to account for the case where
                 // a task is completed in a block and another task is created
                 // in the same block and then that one is also completed in the same block
-                if *latest_completed_op_task_created_block > call.task.last_completed_op_task_created_block {
+                if *latest_completed_op_task_created_block
+                    > call.task.last_completed_op_task_created_block
+                {
                     return Ok(());
                 }
 
-                let update_txn = self.clone().gasp_service_contract.process_eigen_op_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature, operators_state_info);
+                let update_txn = self.clone().gasp_service_contract.process_eigen_op_update(
+                    call.task.clone(),
+                    call.task_response,
+                    call.non_signer_stakes_and_signature,
+                    operators_state_info,
+                );
                 debug!("{:?}", update_txn);
                 let update_txn_pending = update_txn.send().await;
                 debug!("{:?}", update_txn_pending);
                 let update_txn_receipt = update_txn_pending?.await?;
                 debug!("{:?}", update_txn_receipt);
-                match update_txn_receipt.clone().ok_or_eyre("failed to unwrap update_txn_receipt")?.status{
-                    Some(status) if status.is_zero()=>{
+                match update_txn_receipt
+                    .clone()
+                    .ok_or_eyre("failed to unwrap update_txn_receipt")?
+                    .status
+                {
+                    Some(status) if status.is_zero() => {
                         return Err(eyre!("update_txn failed {:?}", update_txn_receipt))
                     }
-                    _=>{}
+                    _ => {}
                 }
 
                 info!("sucessfully synced op task - {:?}", call.task.clone());
                 *latest_completed_op_task_created_block = call.task.task_created_block;
-            },
+            }
             FinalizerTaskManagerEvents::RdTaskCompletedFilter(_event) => {
                 let txn_hash = log.transaction_hash;
-                let txn = self.clone().avs_contracts.ws_client.get_transaction(txn_hash).await?
-                .ok_or_else(
-                    || {eyre!("missing expected txn {:?}", txn_hash)}
-                )?
-                ;
+                let txn = self
+                    .clone()
+                    .avs_contracts
+                    .ws_client
+                    .get_transaction(txn_hash)
+                    .await?
+                    .ok_or_else(|| eyre!("missing expected txn {:?}", txn_hash))?;
                 debug!("{:?}", txn);
-                let call = match FinalizerTaskManagerCalls::decode(txn.input)?{
+                let call = match FinalizerTaskManagerCalls::decode(txn.input)? {
                     FinalizerTaskManagerCalls::RespondToRdTask(c) => c,
-                    _ => {
-                        return Err(eyre!("wrong call decoded"))
-                    }
+                    _ => return Err(eyre!("wrong call decoded")),
                 };
                 debug!("{:?}", call);
                 debug!("{:?}", call.task.clone());
                 debug!("encoded - {:?}", call.task.clone().encode());
-                debug!("encoded - {:?}", array_bytes::bytes2hex("0x",call.task.clone().encode()));
-                let task_hash = Keccak256::hash(vec![0u8;31].into_iter().chain(vec![32u8]).chain(
-                    call.task.clone().encode().into_iter()
-                ).collect::<Vec<_>>().as_ref());
+                debug!(
+                    "encoded - {:?}",
+                    array_bytes::bytes2hex("0x", call.task.clone().encode())
+                );
+                let task_hash = Keccak256::hash(
+                    vec![0u8; 31]
+                        .into_iter()
+                        .chain(vec![32u8])
+                        .chain(call.task.clone().encode().into_iter())
+                        .collect::<Vec<_>>()
+                        .as_ref(),
+                );
                 debug!("{:?}", task_hash);
-                debug!("{:?}", task_hash == call.task_response.reference_task_hash.into());
+                debug!(
+                    "{:?}",
+                    task_hash == call.task_response.reference_task_hash.into()
+                );
 
-                if call.task.chain_id != self.target_chain_index{
+                if call.task.chain_id != self.target_chain_index {
                     return Ok(());
                 }
 
                 if task_hash != call.task_response.reference_task_hash.into() {
-                    return Err(eyre!("task_hash mismatch {:?}", task_hash))
+                    return Err(eyre!("task_hash mismatch {:?}", task_hash));
                 }
 
-                if *latest_completed_rd_task_number !=0 && *latest_completed_rd_task_number >= call.task.task_num {
+                if *latest_completed_rd_task_number != 0
+                    && *latest_completed_rd_task_number >= call.task.task_num
+                {
                     return Ok(());
                 }
 
-                if *latest_completed_op_task_created_block != call.task.last_completed_op_task_created_block {
-                    return Err(eyre!("latest_completed_op_task_created_block mismatch {:?}", *latest_completed_op_task_created_block))
+                if *latest_completed_op_task_created_block
+                    != call.task.last_completed_op_task_created_block
+                {
+                    return Err(eyre!(
+                        "latest_completed_op_task_created_block mismatch {:?}",
+                        *latest_completed_op_task_created_block
+                    ));
                 }
 
-                let update_txn = self.clone().gasp_service_contract.process_eigen_rd_update(call.task.clone(), call.task_response, call.non_signer_stakes_and_signature);
+                let update_txn = self.clone().gasp_service_contract.process_eigen_rd_update(
+                    call.task.clone(),
+                    call.task_response,
+                    call.non_signer_stakes_and_signature,
+                );
                 debug!("{:?}", update_txn);
                 let update_txn_pending = update_txn.send().await;
                 debug!("{:?}", update_txn_pending);
                 let update_txn_receipt = update_txn_pending?.await?;
                 debug!("{:?}", update_txn_receipt);
-                match update_txn_receipt.clone().ok_or_eyre("failed to unwrap update_txn_receipt")?.status{
-                    Some(status) if status.is_zero()=>{
+                match update_txn_receipt
+                    .clone()
+                    .ok_or_eyre("failed to unwrap update_txn_receipt")?
+                    .status
+                {
+                    Some(status) if status.is_zero() => {
                         return Err(eyre!("update_txn failed {:?}", update_txn_receipt))
                     }
-                    _=>{}
+                    _ => {}
                 }
 
                 info!("sucessfully synced rd task - {:?}", call.task.clone());
                 *latest_completed_rd_task_number = call.task.task_num;
-
-            },
-            _ => return Err(eyre!("Got unexpected stream event"))
+            }
+            _ => return Err(eyre!("Got unexpected stream event")),
         }
         Ok(())
     }
@@ -257,18 +333,32 @@ impl Syncer {
         let mut from_block = latest_completed_op_task_created_block;
 
         if target_block_number >= from_block {
-            let mut to_block = latest_completed_op_task_created_block.saturating_add(self.filter_limit).saturating_sub(1u64);
+            let mut to_block = latest_completed_op_task_created_block
+                .saturating_add(self.filter_limit)
+                .saturating_sub(1u64);
             if to_block > target_block_number {
                 to_block = target_block_number;
             }
 
             loop {
-                self.clone().get_rd_update(latest_completed_rd_task_number, from_block, to_block, &mut merkle_roots, &mut ranges, &mut expected_rd_task_number, &mut expected_batch_id).await?;
+                self.clone()
+                    .get_rd_update(
+                        latest_completed_rd_task_number,
+                        from_block,
+                        to_block,
+                        &mut merkle_roots,
+                        &mut ranges,
+                        &mut expected_rd_task_number,
+                        &mut expected_batch_id,
+                    )
+                    .await?;
                 if to_block == target_block_number {
                     break;
                 }
                 from_block = to_block.saturating_add(1u64);
-                to_block = from_block.saturating_add(self.filter_limit).saturating_sub(1u64);
+                to_block = from_block
+                    .saturating_add(self.filter_limit)
+                    .saturating_sub(1u64);
                 if to_block > target_block_number {
                     to_block = target_block_number;
                 }
@@ -307,8 +397,15 @@ impl Syncer {
 
     #[instrument(skip_all)]
     pub async fn reinit_only_print(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
-        let (last_task, operators_state_info, merkle_roots, ranges, last_batch_id, latest_completed_rd_task_number, latest_completed_rd_task_created_block) =
-            self.clone().get_reinit_info().await?;
+        let (
+            last_task,
+            operators_state_info,
+            merkle_roots,
+            ranges,
+            last_batch_id,
+            latest_completed_rd_task_number,
+            latest_completed_rd_task_created_block,
+        ) = self.clone().get_reinit_info().await?;
         info!(
             "reinit info - {:?}",
             (
@@ -317,7 +414,8 @@ impl Syncer {
                 merkle_roots.clone(),
                 ranges.clone(),
                 last_batch_id,
-                latest_completed_rd_task_number, latest_completed_rd_task_created_block
+                latest_completed_rd_task_number,
+                latest_completed_rd_task_created_block
             )
         );
         let reinit_txn = self
@@ -330,7 +428,8 @@ impl Syncer {
                 merkle_roots.clone(),
                 ranges.clone(),
                 last_batch_id,
-                latest_completed_rd_task_number, latest_completed_rd_task_created_block
+                latest_completed_rd_task_number,
+                latest_completed_rd_task_created_block,
             );
         info!("reinit_txn: {:?}", reinit_txn);
         Ok(())
@@ -338,8 +437,15 @@ impl Syncer {
 
     #[instrument(skip_all)]
     pub async fn reinit(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
-        let (last_task, operators_state_info, merkle_roots, ranges, last_batch_id, latest_completed_rd_task_number, latest_completed_rd_task_created_block) =
-            self.clone().get_reinit_info().await?;
+        let (
+            last_task,
+            operators_state_info,
+            merkle_roots,
+            ranges,
+            last_batch_id,
+            latest_completed_rd_task_number,
+            latest_completed_rd_task_created_block,
+        ) = self.clone().get_reinit_info().await?;
         info!(
             "reinit info - {:?}",
             (
@@ -348,7 +454,8 @@ impl Syncer {
                 merkle_roots.clone(),
                 ranges.clone(),
                 last_batch_id,
-                latest_completed_rd_task_number, latest_completed_rd_task_created_block
+                latest_completed_rd_task_number,
+                latest_completed_rd_task_created_block
             )
         );
         let reinit_txn = self
@@ -362,7 +469,8 @@ impl Syncer {
                 merkle_roots.clone(),
                 ranges.clone(),
                 last_batch_id,
-                latest_completed_rd_task_number, latest_completed_rd_task_created_block
+                latest_completed_rd_task_number,
+                latest_completed_rd_task_created_block,
             );
         debug!("{:?}", reinit_txn);
         let reinit_txn_pending = reinit_txn.send().await;
@@ -389,7 +497,15 @@ impl Syncer {
     #[instrument(skip_all)]
     pub async fn get_reinit_info(
         self: Arc<Self>,
-    ) -> eyre::Result<(OpTask, OperatorStateInfo, Vec<[u8; 32]>, Vec<Range>, u32, u32 u32)> {
+    ) -> eyre::Result<(
+        OpTask,
+        OperatorStateInfo,
+        Vec<[u8; 32]>,
+        Vec<Range>,
+        u32,
+        u32,
+        u32,
+    )> {
         let alt_block_number: u64 = self.target_client.get_block_number().await?.as_u64();
         let latest_completed_op_task_created_block = self
             .gasp_service_contract
@@ -478,7 +594,13 @@ impl Syncer {
         last_task.last_completed_op_task_quorum_threshold_percentage =
             latest_completed_op_task_quorum_threshold_percentage;
 
-        let (merkle_roots, ranges, last_batch_id, latest_completed_rd_task_number, latest_completed_rd_task_created_block) = self
+        let (
+            merkle_roots,
+            ranges,
+            last_batch_id,
+            latest_completed_rd_task_number,
+            latest_completed_rd_task_created_block,
+        ) = self
             .clone()
             .get_cumulative_rd_update(
                 chain_rd_batch_nonce,
@@ -499,7 +621,8 @@ impl Syncer {
             merkle_roots.clone(),
             ranges.clone(),
             last_batch_id,
-            latest_completed_rd_task_number, latest_completed_rd_task_created_block
+            latest_completed_rd_task_number,
+            latest_completed_rd_task_created_block,
         ))
     }
 
@@ -763,18 +886,32 @@ impl Syncer {
         let mut expected_batch_id = chain_rd_batch_nonce;
 
         let mut from_block = latest_completed_op_task_created_block;
-        let mut to_block = latest_completed_op_task_created_block.saturating_add(self.filter_limit).saturating_sub(1u64);
+        let mut to_block = latest_completed_op_task_created_block
+            .saturating_add(self.filter_limit)
+            .saturating_sub(1u64);
         if to_block > eth_block_number {
             to_block = eth_block_number;
         }
 
         loop {
-            self.clone().get_rd_update(latest_completed_rd_task_number, from_block, to_block, &mut merkle_roots, &mut ranges, &mut expected_rd_task_number, &mut expected_batch_id).await?;
+            self.clone()
+                .get_rd_update(
+                    latest_completed_rd_task_number,
+                    from_block,
+                    to_block,
+                    &mut merkle_roots,
+                    &mut ranges,
+                    &mut expected_rd_task_number,
+                    &mut expected_batch_id,
+                )
+                .await?;
             if to_block == eth_block_number {
                 break;
             }
             from_block = to_block.saturating_add(1u64);
-            to_block = from_block.saturating_add(self.filter_limit).saturating_sub(1u64);
+            to_block = from_block
+                .saturating_add(self.filter_limit)
+                .saturating_sub(1u64);
             if to_block > eth_block_number {
                 to_block = eth_block_number;
             }
@@ -789,7 +926,7 @@ impl Syncer {
             .last_completed_rd_task_num()
             .block(eth_block_number)
             .await?;
-        
+
         let latest_completed_rd_task_created_block = self
             .clone()
             .avs_contracts
@@ -798,11 +935,26 @@ impl Syncer {
             .block(eth_block_number)
             .await?;
 
-        Ok((merkle_roots, ranges, last_batch_id, latest_completed_rd_task_number, latest_completed_rd_task_created_block))
+        Ok((
+            merkle_roots,
+            ranges,
+            last_batch_id,
+            latest_completed_rd_task_number,
+            latest_completed_rd_task_created_block,
+        ))
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub(crate) async fn get_rd_update(self: Arc<Self>, latest_completed_rd_task_number: u32, from_block: u64, to_block:u64, merkle_roots: &mut Vec<[u8; 32]>, ranges: &mut Vec<Range>, expected_rd_task_number: &mut u32, expected_batch_id: &mut u32) -> eyre::Result<()> {
+    pub(crate) async fn get_rd_update(
+        self: Arc<Self>,
+        latest_completed_rd_task_number: u32,
+        from_block: u64,
+        to_block: u64,
+        merkle_roots: &mut Vec<[u8; 32]>,
+        ranges: &mut Vec<Range>,
+        expected_rd_task_number: &mut u32,
+        expected_batch_id: &mut u32,
+    ) -> eyre::Result<()> {
         let events: Vec<RdTaskCompletedFilter> = self
             .clone()
             .avs_contracts
