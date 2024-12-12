@@ -19,6 +19,7 @@ abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
     uint256 public lastOpUpdateBlockTimestamp;
 
     uint32 public latestCompletedRdTaskNumber;
+    uint32 public latestCompletedRdTaskCreatedBlock;
 
     uint32 public latestCompletedOpTaskNumber;
     uint32 public latestCompletedOpTaskCreatedBlock;
