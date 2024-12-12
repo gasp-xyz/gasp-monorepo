@@ -8,9 +8,9 @@ interface IGaspToken is IERC20 {
 
     event AllowTransfersSet(bool allowTransfers_);
 
-    event AddedToWhitelist(address indexed address_);
+    event AddedToWhitelist(address indexed account);
 
-    event RemovedFromWhitelist(address indexed address_);
+    event RemovedFromWhitelist(address indexed account);
 
     error ZeroL1Council();
 
@@ -20,9 +20,9 @@ interface IGaspToken is IERC20 {
 
     error TransfersAlreadyAllowed();
 
-    error AccountAlreadyWhitelisted(address addr);
+    error AccountAlreadyWhitelisted(address account);
 
-    error AccountNotWhitelisted(address addr);
+    error AccountNotWhitelisted(address account);
 
     error OperationForbidden(bytes32 selector);
 
@@ -30,7 +30,11 @@ interface IGaspToken is IERC20 {
 
     function setAllowTransfers(bool allowTransfers_) external;
 
-    function addToWhitelist(address addr) external;
+    function addToWhitelist(address account) external;
 
-    function removeFromWhitelist(address addr) external;
+    function removeFromWhitelist(address account) external;
+
+    function increaseAllowance(address spender, uint256 addedAmount) external returns (bool);
+
+    function decreaseAllowance(address spender, uint256 subtractedAmount) external returns (bool);
 }
