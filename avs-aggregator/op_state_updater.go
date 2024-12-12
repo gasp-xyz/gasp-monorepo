@@ -200,6 +200,9 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		// So we get the lastCompletedOpTaskCreatedBlock and start reading
 		// events from that point on...
 		osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
+		// We can set atBlock to the current block, but in doing so we will miss the quorum config updates
+		// Which is potentially catatrophic even though rare, if there was a change in the quorum config and we didn't
+		// start the aggregator with reinitOpStateAtInit flag
 		osu.atBlock = lastCompletedOpTaskCreatedBlock
 
 		err := osu.updateOpStates()

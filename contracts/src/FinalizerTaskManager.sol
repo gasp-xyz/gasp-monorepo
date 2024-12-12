@@ -78,6 +78,11 @@ contract FinalizerTaskManager is
 
     bool public allowNonRootInit;
 
+    uint32 public lastCompletedRdTaskNum;
+    uint32 public lastCompletedRdTaskCreatedBlock;
+
+    uint32 public lastCompletedOpTaskCompletedBlock;
+    uint32 public lastCompletedRdTaskCompletedBlock;
 
     /* MODIFIERS */
     modifier onlyAggregator() {
@@ -306,6 +311,10 @@ contract FinalizerTaskManager is
         }
         chainRdBatchNonce[taskResponse.chainId] = taskResponse.batchId + 1;
 
+        lastCompletedRdTaskNum = task.taskNum;
+        lastCompletedRdTaskCreatedBlock = task.taskCreatedBlock;
+        lastCompletedRdTaskCompletedBlock = uint32(block.number);
+
         // emitting completed event
         emit RdTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
     }
@@ -437,6 +446,7 @@ contract FinalizerTaskManager is
         lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
         lastCompletedOpTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
         lastCompletedOpTaskNum = task.taskNum;
+        lastCompletedOpTaskCompletedBlock = uint32(block.number);
     }
 
     function _processTaskMetadata(TaskType taskType, uint32 taskIndex, bytes32 taskHash, TaskStatus taskStatus) internal{
