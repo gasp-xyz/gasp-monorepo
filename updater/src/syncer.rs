@@ -14,7 +14,7 @@ use bindings::{
 use ethers::providers::{Middleware, SubscriptionStream};
 use ethers::{
     abi::AbiDecode,
-    contract::{stream, EthEvent, EthLogDecode, LogMeta, builders::ContractCall},
+    contract::{builders::ContractCall, stream, EthEvent, EthLogDecode, LogMeta},
     providers::StreamExt,
     types::{Bytes, Filter},
 };
@@ -270,13 +270,8 @@ impl Syncer {
 
     #[instrument(skip_all)]
     pub async fn reinit_only_print(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
-        let (
-            last_task,
-            operators_state_info,
-            merkle_roots,
-            ranges,
-            last_batch_id,
-        )= self.clone().get_reinit_info().await?;
+        let (last_task, operators_state_info, merkle_roots, ranges, last_batch_id) =
+            self.clone().get_reinit_info().await?;
         info!(
             "reinit info - {:?}",
             (
@@ -288,51 +283,46 @@ impl Syncer {
             )
         );
         let reinit_txn = self
-        .clone()
-        .gasp_service_contract
-        .clone()
-        .process_eigen_reinit(
-            last_task.clone(),
-            operators_state_info.clone(),
-            merkle_roots.clone(),
-            ranges.clone(),
-            last_batch_id,
-        );
+            .clone()
+            .gasp_service_contract
+            .clone()
+            .process_eigen_reinit(
+                last_task.clone(),
+                operators_state_info.clone(),
+                merkle_roots.clone(),
+                ranges.clone(),
+                last_batch_id,
+            );
         info!("reinit_txn: {:?}", reinit_txn);
         Ok(())
     }
-    
+
     #[instrument(skip_all)]
     pub async fn reinit(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
-        let (
-            last_task,
-            operators_state_info,
-            merkle_roots,
-            ranges,
-            last_batch_id,
-        )= self.clone().get_reinit_info().await?;
+        let (last_task, operators_state_info, merkle_roots, ranges, last_batch_id) =
+            self.clone().get_reinit_info().await?;
         info!(
             "reinit info - {:?}",
             (
-            last_task.clone(),
-            operators_state_info.clone(),
-            merkle_roots.clone(),
-            ranges.clone(),
-            last_batch_id,
-        )
+                last_task.clone(),
+                operators_state_info.clone(),
+                merkle_roots.clone(),
+                ranges.clone(),
+                last_batch_id,
+            )
         );
         let reinit_txn = self
-        .clone()
-        .root_gasp_service_contract
-        .clone()
-        .expect("should work in reinit")
-        .process_eigen_reinit(
-            last_task.clone(),
-            operators_state_info.clone(),
-            merkle_roots.clone(),
-            ranges.clone(),
-            last_batch_id,
-        );
+            .clone()
+            .root_gasp_service_contract
+            .clone()
+            .expect("should work in reinit")
+            .process_eigen_reinit(
+                last_task.clone(),
+                operators_state_info.clone(),
+                merkle_roots.clone(),
+                ranges.clone(),
+                last_batch_id,
+            );
         debug!("{:?}", reinit_txn);
         let reinit_txn_pending = reinit_txn.send().await;
         debug!("{:?}", reinit_txn_pending);
@@ -349,21 +339,15 @@ impl Syncer {
             _ => {}
         }
 
-        info!(
-            "Sucessfully completed reinit"
-        );
+        info!("Sucessfully completed reinit");
 
         Ok(())
     }
 
-
     #[instrument(skip_all)]
-    pub async fn get_reinit_info(self: Arc<Self>) -> eyre::Result<
-            (OpTask,
-            OperatorStateInfo,
-            Vec<[u8; 32]>,
-            Vec<Range>,
-            u32)> {
+    pub async fn get_reinit_info(
+        self: Arc<Self>,
+    ) -> eyre::Result<(OpTask, OperatorStateInfo, Vec<[u8; 32]>, Vec<Range>, u32)> {
         let alt_block_number: u64 = self.target_client.get_block_number().await?.as_u64();
         let latest_completed_op_task_created_block = self
             .gasp_service_contract
@@ -466,7 +450,7 @@ impl Syncer {
             .clone()
             .get_operators_state_info(last_task.clone())
             .await?;
-            
+
         Ok((
             last_task.clone(),
             operators_state_info.clone(),
@@ -477,11 +461,12 @@ impl Syncer {
     }
 
     #[instrument(skip_all)]
-    pub async fn reinit_eth_only_print_op_task_creation(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
+    pub async fn reinit_eth_only_print_op_task_creation(
+        self: Arc<Self>,
+        _cfg: &CliArgs,
+    ) -> eyre::Result<()> {
         // Get the root_target_client here, this should exist at this point
-        let source_client = self
-            .source_client
-            .clone();
+        let source_client = self.source_client.clone();
 
         // Build the root_task_manager here using the address from the source avs_contracts
         let task_manager_addr = self.avs_contracts.task_manager.address();
@@ -490,16 +475,17 @@ impl Syncer {
         // Create a new opTask via forceCreateNewOpTask
         let force_task_txn = task_manager.force_create_new_op_task(66u32, vec![0u8].into());
         info!("{:?}", force_task_txn);
-        
+
         Ok(())
     }
 
     #[instrument(skip_all)]
-    pub async fn reinit_eth_only_print_op_task_response(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
+    pub async fn reinit_eth_only_print_op_task_response(
+        self: Arc<Self>,
+        _cfg: &CliArgs,
+    ) -> eyre::Result<()> {
         // Get the root_target_client here, this should exist at this point
-        let source_client = self
-            .source_client
-            .clone();
+        let source_client = self.source_client.clone();
 
         // Build the root_task_manager here using the address from the source avs_contracts
         let task_manager_addr = self.avs_contracts.task_manager.address();
@@ -507,13 +493,13 @@ impl Syncer {
 
         let source_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
 
-        let is_task_pending = 
-            self.clone()
-                .avs_contracts
-                .task_manager
-                .is_task_pending()
-                .block(source_block_number)
-                .await?;
+        let is_task_pending = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .is_task_pending()
+            .block(source_block_number)
+            .await?;
         if !is_task_pending {
             return Err(eyre!("no task is pending"));
         }
@@ -525,7 +511,7 @@ impl Syncer {
             .latest_op_task_num()
             .block(source_block_number)
             .await?;
-        
+
         let task_status = self
             .clone()
             .avs_contracts
@@ -533,17 +519,20 @@ impl Syncer {
             .id_to_task_status(0u8, task_num)
             .block(source_block_number)
             .await?;
-        
+
         // TODO
         // Use a constant for the enum variant index
         if task_status != 1 {
-            return Err(eyre!(
-                "pending task not is not op task: {:?}",
-                task_num
-            ));
+            return Err(eyre!("pending task not is not op task: {:?}", task_num));
         }
 
-        let last_op_task_created_block = self.clone().avs_contracts.task_manager.last_op_task_created_block().block(source_block_number).await?;
+        let last_op_task_created_block = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .last_op_task_created_block()
+            .block(source_block_number)
+            .await?;
 
         let mut block_events: Vec<NewOpTaskCreatedFilter> = self
             .clone()
@@ -563,7 +552,7 @@ impl Syncer {
                 return Err(eyre!("task not in events for reinit {:?}", task_num));
             }
         };
-        
+
         let task = last_task;
 
         let operators_state_info = self.clone().get_operators_state_info(task.clone()).await?;
