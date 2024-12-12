@@ -49,7 +49,7 @@ contract GaspMultiRollupService is
         updater = _updater;
     }
 
-    function setRolldown(IRolldown _rolldown) external whenNotPaused onlyOwner {
+    function setRolldown(IRolldown _rolldown) external onlyOwner {
       rolldown = _rolldown;
       emit RolldownTargetUpdated(address(_rolldown));
     }
@@ -78,7 +78,7 @@ contract GaspMultiRollupService is
         
     }
 
-    function processEigenOpUpdate(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public {
+    function processEigenOpUpdate(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public whenNotPaused onlyUpdater {
 
         uint32 latestCompletedOpTaskCreatedBlockCached = latestCompletedOpTaskCreatedBlock;
         if (!(latestCompletedOpTaskCreatedBlockCached == 0) || allowNonRootInit) {
@@ -125,7 +125,7 @@ contract GaspMultiRollupService is
         
     }
 
-    function processEigenRdUpdate(IFinalizerTaskManager.RdTask calldata task, IFinalizerTaskManager.RdTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature) public onlyUpdater {
+    function processEigenRdUpdate(IFinalizerTaskManager.RdTask calldata task, IFinalizerTaskManager.RdTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature) public whenNotPaused onlyUpdater {
 
         require(taskResponse.batchId == chainRdBatchNonce, "chainRdBatchNonce mismatch"); 
 
