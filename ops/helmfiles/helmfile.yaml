@@ -65,10 +65,10 @@ releases:
         resources:
           requests:
             cpu: 1
-            memory: 1Gi
+            memory: 4Gi
           limits:
             cpu: 2
-            memory: 4Gi
+            memory: 12Gi
 
   - name: updater
     namespace: 'rollup-{{ .Values.environmentName }}'

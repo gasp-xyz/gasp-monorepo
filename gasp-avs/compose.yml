@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        ROLLUP_NODE_VERSION: ${ROLLUP_NODE_VERSION}
+        ROLLUP_NODE_VERSION: 3722076d06f7c1ff7c727a799260c5df2a5eb62f
     image: gaspxyz/gasp-avs:${GASP_AVS_VERSION:-local}
     restart: unless-stopped
     depends_on:
