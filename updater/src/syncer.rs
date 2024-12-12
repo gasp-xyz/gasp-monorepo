@@ -6,7 +6,7 @@ use bindings::{
         FinalizerTaskManager, FinalizerTaskManagerCalls, FinalizerTaskManagerEvents,
         NewOpTaskCreatedFilter, Operator as TMOperator, OperatorStateInfo, OperatorsAdded,
         OperatorsQuorumCountUpdate, OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate,
-        QuorumsStakeUpdate, RdTaskCompletedFilter,
+        QuorumsStakeUpdate, RdTaskCompletedFilter, OpTaskCompletedFilter
     },
     gasp_multi_rollup_service::{GaspMultiRollupService, Range},
     shared_types::{OpTask, OpTaskResponse},
@@ -325,15 +325,15 @@ impl Syncer {
 
         let source_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
 
-        if source_block_number < latest_completed_op_task_created_block {
+        if source_block_number < latest_completed_op_task_created_block.into() {
             return Err(eyre!("invalid latest_completed_op_task_created_block"));
         }
 
         let mut target_block_number: u64 = source_block_number.saturating_sub(1u64);
-        let mut from_block = latest_completed_op_task_created_block;
+        let mut from_block: u64 = latest_completed_op_task_created_block.into();
 
         if target_block_number >= from_block {
-            let mut to_block = latest_completed_op_task_created_block
+            let mut to_block = from_block
                 .saturating_add(self.filter_limit)
                 .saturating_sub(1u64);
             if to_block > target_block_number {
@@ -341,17 +341,27 @@ impl Syncer {
             }
 
             loop {
-                self.clone()
-                    .get_rd_update(
-                        latest_completed_rd_task_number,
-                        from_block,
-                        to_block,
-                        &mut merkle_roots,
-                        &mut ranges,
-                        &mut expected_rd_task_number,
-                        &mut expected_batch_id,
+                let events: Vec<(FinalizerTaskManagerEvents, LogMeta)> = self
+                    .clone()
+                    .avs_contracts
+                    .task_manager
+                    .event_with_filter(
+                        Filter::new()
+                            .events([
+                                OpTaskCompletedFilter::abi_signature().into_owned(),
+                                RdTaskCompletedFilter::abi_signature().into_owned(),
+                            ])
+                            .select(from_block..to_block),
                     )
+                    .query_with_meta()
                     .await?;
+                
+                for (event, log) in events {
+                    self.clone()
+                        .handle_sync_event(event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_rd_task_number)
+                        .await?;
+                }
+
                 if to_block == target_block_number {
                     break;
                 }
