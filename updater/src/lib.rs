@@ -27,6 +27,12 @@ pub async fn start() -> eyre::Result<()> {
         _ if cli.only_reinit_eth => {
             syncer.reinit_eth(&cli).await?;
         }
+        _ if cli.reinit_eth_only_print_op_task_response => {
+            syncer.reinit_eth_only_print_op_task_response(&cli).await?;
+        }
+        _ if cli.reinit_only_print => {
+            syncer.reinit_only_print(&cli).await?;
+        }
         _ => {
             syncer.sync(&cli).await?;
         }
