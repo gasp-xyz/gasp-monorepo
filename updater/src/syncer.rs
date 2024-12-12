@@ -269,7 +269,86 @@ impl Syncer {
     }
 
     #[instrument(skip_all)]
+    pub async fn reinit_only_print(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
+        let (last_task, operators_state_info, merkle_roots, ranges, last_batch_id) =
+            self.clone().get_reinit_info().await?;
+        info!(
+            "reinit info - {:?}",
+            (
+                last_task.clone(),
+                operators_state_info.clone(),
+                merkle_roots.clone(),
+                ranges.clone(),
+                last_batch_id,
+            )
+        );
+        let reinit_txn = self
+            .clone()
+            .gasp_service_contract
+            .clone()
+            .process_eigen_reinit(
+                last_task.clone(),
+                operators_state_info.clone(),
+                merkle_roots.clone(),
+                ranges.clone(),
+                last_batch_id,
+            );
+        info!("reinit_txn: {:?}", reinit_txn);
+        Ok(())
+    }
+
+    #[instrument(skip_all)]
     pub async fn reinit(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
+        let (last_task, operators_state_info, merkle_roots, ranges, last_batch_id) =
+            self.clone().get_reinit_info().await?;
+        info!(
+            "reinit info - {:?}",
+            (
+                last_task.clone(),
+                operators_state_info.clone(),
+                merkle_roots.clone(),
+                ranges.clone(),
+                last_batch_id,
+            )
+        );
+        let reinit_txn = self
+            .clone()
+            .root_gasp_service_contract
+            .clone()
+            .expect("should work in reinit")
+            .process_eigen_reinit(
+                last_task.clone(),
+                operators_state_info.clone(),
+                merkle_roots.clone(),
+                ranges.clone(),
+                last_batch_id,
+            );
+        debug!("{:?}", reinit_txn);
+        let reinit_txn_pending = reinit_txn.send().await;
+        debug!("{:?}", reinit_txn_pending);
+        let reinit_txn_receipt = reinit_txn_pending?.await?;
+        debug!("{:?}", reinit_txn_receipt);
+        match reinit_txn_receipt
+            .clone()
+            .ok_or_eyre("failed to unwrap reinit_txn_receipt")?
+            .status
+        {
+            Some(status) if status.is_zero() => {
+                return Err(eyre!("reinit_txn failed {:?}", reinit_txn_receipt))
+            }
+            _ => {}
+        }
+
+        info!("Sucessfully completed reinit");
+
+        Ok(())
+    }
+
+    #[allow(clippy::type_complexity)]
+    #[instrument(skip_all)]
+    pub async fn get_reinit_info(
+        self: Arc<Self>,
+    ) -> eyre::Result<(OpTask, OperatorStateInfo, Vec<[u8; 32]>, Vec<Range>, u32)> {
         let alt_block_number: u64 = self.target_client.get_block_number().await?.as_u64();
         let latest_completed_op_task_created_block = self
             .gasp_service_contract
@@ -373,44 +452,142 @@ impl Syncer {
             .get_operators_state_info(last_task.clone())
             .await?;
 
-        let reinit_txn = self
+        Ok((
+            last_task.clone(),
+            operators_state_info.clone(),
+            merkle_roots.clone(),
+            ranges.clone(),
+            last_batch_id,
+        ))
+    }
+
+    #[instrument(skip_all)]
+    pub async fn reinit_eth_only_print_op_task_creation(
+        self: Arc<Self>,
+        _cfg: &CliArgs,
+    ) -> eyre::Result<()> {
+        // Get the root_target_client here, this should exist at this point
+        let source_client = self.source_client.clone();
+
+        // Build the root_task_manager here using the address from the source avs_contracts
+        let task_manager_addr = self.avs_contracts.task_manager.address();
+        let task_manager = FinalizerTaskManager::new(task_manager_addr, source_client.clone());
+
+        // Create a new opTask via forceCreateNewOpTask
+        let force_task_txn = task_manager.force_create_new_op_task(66u32, vec![0u8].into());
+        info!("{:?}", force_task_txn);
+
+        Ok(())
+    }
+
+    #[instrument(skip_all)]
+    pub async fn reinit_eth_only_print_op_task_response(
+        self: Arc<Self>,
+        _cfg: &CliArgs,
+    ) -> eyre::Result<()> {
+        // Get the root_target_client here, this should exist at this point
+        let source_client = self.source_client.clone();
+
+        // Build the root_task_manager here using the address from the source avs_contracts
+        let task_manager_addr = self.avs_contracts.task_manager.address();
+        let task_manager = FinalizerTaskManager::new(task_manager_addr, source_client.clone());
+
+        let source_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
+
+        let is_task_pending = self
             .clone()
-            .root_gasp_service_contract
-            .clone()
-            .expect("should work in reinit")
-            .process_eigen_reinit(
-                last_task.clone(),
-                operators_state_info.clone(),
-                merkle_roots.clone(),
-                ranges.clone(),
-                last_batch_id,
-            );
-        debug!("{:?}", reinit_txn);
-        let reinit_txn_pending = reinit_txn.send().await;
-        debug!("{:?}", reinit_txn_pending);
-        let reinit_txn_receipt = reinit_txn_pending?.await?;
-        debug!("{:?}", reinit_txn_receipt);
-        match reinit_txn_receipt
-            .clone()
-            .ok_or_eyre("failed to unwrap reinit_txn_receipt")?
-            .status
-        {
-            Some(status) if status.is_zero() => {
-                return Err(eyre!("reinit_txn failed {:?}", reinit_txn_receipt))
-            }
-            _ => {}
+            .avs_contracts
+            .task_manager
+            .is_task_pending()
+            .block(source_block_number)
+            .await?;
+        if !is_task_pending {
+            return Err(eyre!("no task is pending"));
         }
 
-        info!(
-            "Sucessfully completed reinit - {:?}",
-            (
-                last_task,
-                operators_state_info,
-                merkle_roots,
-                ranges,
-                last_batch_id,
+        let task_num = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .latest_op_task_num()
+            .block(source_block_number)
+            .await?;
+
+        let task_status = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .id_to_task_status(0u8, task_num)
+            .block(source_block_number)
+            .await?;
+
+        // TODO
+        // Use a constant for the enum variant index
+        if task_status != 1 {
+            return Err(eyre!("pending task not is not op task: {:?}", task_num));
+        }
+
+        let last_op_task_created_block = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .last_op_task_created_block()
+            .block(source_block_number)
+            .await?;
+
+        let mut block_events: Vec<NewOpTaskCreatedFilter> = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .event_with_filter(
+                Filter::new()
+                    .event(&NewOpTaskCreatedFilter::abi_signature())
+                    .select(u64::from(last_op_task_created_block)),
             )
+            .query()
+            .await?;
+
+        let last_task = match block_events.pop() {
+            Some(e) if e.task_index == task_num => e.task,
+            _ => {
+                return Err(eyre!("task not in events for reinit {:?}", task_num));
+            }
+        };
+
+        let task = last_task;
+
+        let operators_state_info = self.clone().get_operators_state_info(task.clone()).await?;
+        debug!("{:?}", operators_state_info);
+        let operators_state_info_hash = Keccak256::hash(
+            vec![0u8; 31]
+                .into_iter()
+                .chain(vec![32u8])
+                .chain(operators_state_info.clone().encode().into_iter())
+                .collect::<Vec<_>>()
+                .as_ref(),
         );
+        debug!("{:?}", operators_state_info_hash);
+
+        let task_hash = Keccak256::hash(
+            vec![0u8; 31]
+                .into_iter()
+                .chain(vec![32u8])
+                .chain(task.clone().encode().into_iter())
+                .collect::<Vec<_>>()
+                .as_ref(),
+        );
+
+        // Respond to the opTask via forceRespondToOpTask
+
+        let force_respond_txn = task_manager.force_respond_to_op_task(
+            task.clone(),
+            OpTaskResponse {
+                reference_task_index: task.task_num,
+                reference_task_hash: task_hash.into(),
+                operators_state_info_hash: operators_state_info_hash.into(),
+            },
+        );
+        info!("{:?}", force_respond_txn);
 
         Ok(())
     }
