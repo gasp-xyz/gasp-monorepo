@@ -1,3 +1,4 @@
+.vscode/
 !broadcast
 broadcast/*
 broadcast/*/31337/
