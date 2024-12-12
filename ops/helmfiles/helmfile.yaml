@@ -87,6 +87,23 @@ releases:
           limits:
             cpu: 1
             memory: 1Gi
+  - name: updater-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.updaterEnabled .Values.enableBaseServices }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/updater
+          tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.updaterEnvBase | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.updaterEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
   
   - name: sequencer-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
