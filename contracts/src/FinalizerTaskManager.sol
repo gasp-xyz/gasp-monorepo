@@ -111,17 +111,17 @@ contract FinalizerTaskManager is
         rolldown = _rolldown;
     }
 
-    function setAggregator(address _aggregator) external whenNotPaused onlyOwner {
+    function setAggregator(address _aggregator) external onlyOwner {
       aggregator = _aggregator;
       emit AggregatorUpdated(_aggregator);
     }
 
-    function setGenerator(address _generator) external whenNotPaused onlyOwner {
+    function setGenerator(address _generator) external onlyOwner {
       generator = _generator;
       emit GeneratorUpdated(_generator);
     }
 
-    function setRolldown(IRolldown _rolldown) external whenNotPaused onlyOwner {
+    function setRolldown(IRolldown _rolldown) external onlyOwner {
       rolldown = _rolldown;
       emit RolldownTargetUpdated(address(_rolldown));
     }
@@ -162,7 +162,7 @@ contract FinalizerTaskManager is
         OpTask calldata task,
         OpTaskResponse calldata taskResponse,
         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
-    ) external onlyAggregator {
+    ) external whenNotPaused onlyAggregator {
 
         require(!(lastCompletedOpTaskCreatedBlock == 0) || allowNonRootInit, "use root init");
 
@@ -280,7 +280,7 @@ contract FinalizerTaskManager is
         RdTask calldata task,
         RdTaskResponse calldata taskResponse,
         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature
-    ) external onlyAggregator {
+    ) external whenNotPaused onlyAggregator {
         bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
         uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
 
