@@ -82,7 +82,17 @@ class CloserService {
 									request.ferryTip >= elem[1]
 								);
 							}) !== undefined;
-						return shouldBeClosed && !(await this.l1.isClosed(request.hash));
+
+						// TODO: introduce proper env variable
+						const shouldCloseAll =
+							this.tokensToClose.find((elem) => {
+								return isEqual(elem[0], new Uint8Array(20));
+							}) !== undefined;
+
+						return (
+							(shouldCloseAll || shouldBeClosed) &&
+							!(await this.l1.isClosed(request.hash))
+						);
 					} else {
 						logger.error(`ignoring unkonwn request`);
 						return false;
