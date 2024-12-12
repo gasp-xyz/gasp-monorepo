@@ -14,7 +14,7 @@ use bindings::{
 use ethers::providers::{Middleware, SubscriptionStream};
 use ethers::{
     abi::AbiDecode,
-    contract::{builders::ContractCall, stream, EthEvent, EthLogDecode, LogMeta},
+    contract::{stream, EthEvent, EthLogDecode, LogMeta},
     providers::StreamExt,
     types::{Bytes, Filter},
 };
@@ -55,6 +55,7 @@ pub struct Syncer {
     avs_contracts: AvsContracts,
     gasp_service_contract: GaspMultiRollupService<TargetClient>,
     root_gasp_service_contract: Option<GaspMultiRollupService<TargetClient>>,
+    filter_limit: u64,
 }
 impl Syncer {
     #[instrument(name = "create_syncer", skip_all)]
@@ -86,6 +87,7 @@ impl Syncer {
             avs_contracts,
             gasp_service_contract,
             root_gasp_service_contract,
+            filter_limit: cfg.filter_limit,
         }))
     }
 
@@ -344,6 +346,7 @@ impl Syncer {
         Ok(())
     }
 
+    #[allow(clippy::type_complexity)]
     #[instrument(skip_all)]
     pub async fn get_reinit_info(
         self: Arc<Self>,
@@ -442,7 +445,7 @@ impl Syncer {
                 chain_rd_batch_nonce,
                 latest_completed_rd_task_number,
                 eth_block_number,
-                latest_completed_op_task_created_block,
+                u64::from(latest_completed_op_task_created_block),
             )
             .await?;
 
@@ -546,7 +549,7 @@ impl Syncer {
             .query()
             .await?;
 
-        let mut last_task = match block_events.pop() {
+        let last_task = match block_events.pop() {
             Some(e) if e.task_index == task_num => e.task,
             _ => {
                 return Err(eyre!("task not in events for reinit {:?}", task_num));
@@ -712,13 +715,38 @@ impl Syncer {
         chain_rd_batch_nonce: u32,
         latest_completed_rd_task_number: u32,
         eth_block_number: u64,
-        latest_completed_op_task_created_block: u32,
+        latest_completed_op_task_created_block: u64,
     ) -> eyre::Result<(Vec<[u8; 32]>, Vec<Range>, u32)> {
         let mut merkle_roots: Vec<[u8; 32]> = Default::default();
         let mut ranges: Vec<Range> = Default::default();
         let mut expected_rd_task_number = latest_completed_rd_task_number + 1;
         let mut expected_batch_id = chain_rd_batch_nonce;
 
+        let mut from_block = latest_completed_op_task_created_block;
+        let mut to_block = latest_completed_op_task_created_block.saturating_add(self.filter_limit).saturating_sub(1u64);
+        if to_block > eth_block_number {
+            to_block = eth_block_number;
+        }
+
+        loop {
+            self.clone().get_rd_update(latest_completed_rd_task_number, from_block, to_block, &mut merkle_roots, &mut ranges, &mut expected_rd_task_number, &mut expected_batch_id).await?;
+            if to_block == eth_block_number {
+                break;
+            }
+            from_block = to_block.saturating_add(1u64);
+            to_block = from_block.saturating_add(self.filter_limit).saturating_sub(1u64);
+            if to_block > eth_block_number {
+                to_block = eth_block_number;
+            }
+        }
+
+        let last_batch_id = expected_batch_id.saturating_sub(1);
+
+        Ok((merkle_roots, ranges, last_batch_id))
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) async fn get_rd_update(self: Arc<Self>, latest_completed_rd_task_number: u32, from_block: u64, to_block:u64, merkle_roots: &mut Vec<[u8; 32]>, ranges: &mut Vec<Range>, expected_rd_task_number: &mut u32, expected_batch_id: &mut u32) -> eyre::Result<()> {
         let events: Vec<RdTaskCompletedFilter> = self
             .clone()
             .avs_contracts
@@ -726,8 +754,8 @@ impl Syncer {
             .event_with_filter(
                 Filter::new()
                     .event(&RdTaskCompletedFilter::abi_signature())
-                    .from_block(u64::from(latest_completed_op_task_created_block))
-                    .to_block(eth_block_number),
+                    .from_block(from_block)
+                    .to_block(to_block),
             )
             .query()
             .await?;
@@ -736,7 +764,7 @@ impl Syncer {
             if latest_completed_rd_task_number >= event.task_response.reference_task_index {
                 continue;
             }
-            if event.task_response.reference_task_index > expected_rd_task_number {
+            if event.task_response.reference_task_index > *expected_rd_task_number {
                 return Err(eyre!(
                     "missing expected_rd_task_number {:?}",
                     expected_rd_task_number
@@ -745,7 +773,7 @@ impl Syncer {
 
             // Here expected_rd_task_number == event.task_response.reference_task_index
             if event.task_response.chain_id == self.target_chain_index {
-                if expected_batch_id != event.task_response.batch_id {
+                if *expected_batch_id != event.task_response.batch_id {
                     return Err(eyre!("missing expected_batch_id {:?}", expected_batch_id));
                 }
                 merkle_roots.push(event.task_response.rd_update);
@@ -753,15 +781,12 @@ impl Syncer {
                     start: event.task_response.range_start,
                     end: event.task_response.range_end,
                 });
-                expected_batch_id += 1;
+                *expected_batch_id += 1;
             }
 
-            expected_rd_task_number += 1;
+            *expected_rd_task_number += 1;
         }
-
-        let last_batch_id = expected_batch_id.saturating_sub(1);
-
-        Ok((merkle_roots, ranges, last_batch_id))
+        Ok(())
     }
 
     pub(crate) async fn get_operators_state_info(
