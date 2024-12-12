@@ -14,7 +14,7 @@ use bindings::{
 use ethers::providers::{Middleware, SubscriptionStream};
 use ethers::{
     abi::AbiDecode,
-    contract::{builders::ContractCall, stream, EthEvent, EthLogDecode, LogMeta},
+    contract::{stream, EthEvent, EthLogDecode, LogMeta},
     providers::StreamExt,
     types::{Bytes, Filter},
 };
@@ -344,6 +344,7 @@ impl Syncer {
         Ok(())
     }
 
+    #[allow(clippy::type_complexity)]
     #[instrument(skip_all)]
     pub async fn get_reinit_info(
         self: Arc<Self>,
@@ -546,7 +547,7 @@ impl Syncer {
             .query()
             .await?;
 
-        let mut last_task = match block_events.pop() {
+        let last_task = match block_events.pop() {
             Some(e) if e.task_index == task_num => e.task,
             _ => {
                 return Err(eyre!("task not in events for reinit {:?}", task_num));
