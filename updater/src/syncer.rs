@@ -270,7 +270,7 @@ impl Syncer {
 
     #[instrument(skip_all)]
     pub async fn reinit(self: Arc<Self>, _cfg: &CliArgs) -> eyre::Result<()> {
-        let alt_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
+        let alt_block_number: u64 = self.target_client.get_block_number().await?.as_u64();
         let latest_completed_op_task_created_block = self
             .gasp_service_contract
             .latest_completed_op_task_created_block()

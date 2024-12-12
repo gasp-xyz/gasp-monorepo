@@ -51,42 +51,6 @@ pub mod avs_directory_storage {
                     },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("OPERATOR_SET_FORCE_DEREGISTRATION_TYPEHASH"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned(
-                            "OPERATOR_SET_FORCE_DEREGISTRATION_TYPEHASH",
-                        ),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("OPERATOR_SET_REGISTRATION_TYPEHASH"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned(
-                            "OPERATOR_SET_REGISTRATION_TYPEHASH",
-                        ),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("avsOperatorStatus"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("avsOperatorStatus"),
@@ -117,16 +81,6 @@ pub mod avs_directory_storage {
                         },],
                         constant: ::core::option::Option::None,
                         state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("becomeOperatorSetAVS"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("becomeOperatorSetAVS",),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
                     },],
                 ),
                 (
@@ -177,146 +131,6 @@ pub mod avs_directory_storage {
                     },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned(
-                        "calculateOperatorSetForceDeregistrationTypehash",
-                    ),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned(
-                            "calculateOperatorSetForceDeregistrationTypehash",
-                        ),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("avs"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSetIds"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint32[]"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("salt"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("bytes32"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("expiry"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint256"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("calculateOperatorSetRegistrationDigestHash"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned(
-                            "calculateOperatorSetRegistrationDigestHash",
-                        ),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("avs"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSetIds"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint32[]"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("salt"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("bytes32"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("expiry"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint256"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("cancelSalt"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("cancelSalt"),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("salt"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
-                            ),
-                        },],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("createOperatorSets"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("createOperatorSets"),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::borrow::ToOwned::to_owned("operatorSetIds"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                ::std::boxed::Box::new(
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                ),
-                            ),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("uint32[]"),
-                            ),
-                        },],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("delegation"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("delegation"),
@@ -343,230 +157,6 @@ pub mod avs_directory_storage {
                                 ::std::borrow::ToOwned::to_owned("address"),
                             ),
                         },],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("deregisterOperatorFromOperatorSets"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned(
-                            "deregisterOperatorFromOperatorSets",
-                        ),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operator"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSetIds"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint32[]"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("domainSeparator"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("domainSeparator"),
-                        inputs: ::std::vec![],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bytes32"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("forceDeregisterFromOperatorSets"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("forceDeregisterFromOperatorSets",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operator"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("avs"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSetIds"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint32[]"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSignature"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                ],),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned(
-                                        "struct ISignatureUtils.SignatureWithSaltAndExpiry",
-                                    ),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("isMember"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("isMember"),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operator"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSet"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                ],),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned(
-                                        "struct IAVSDirectory.OperatorSet",
-                                    ),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bool"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("isOperatorSet"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("isOperatorSet"),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint32"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bool"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("isOperatorSetAVS"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("isOperatorSetAVS"),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("address"),
-                            ),
-                        },],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Bool,
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("bool"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("migrateOperatorsToOperatorSets"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("migrateOperatorsToOperatorSets",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operators"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address[]"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSetIds"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Array(
-                                            ::std::boxed::Box::new(
-                                                ::ethers::core::abi::ethabi::ParamType::Uint(
-                                                    32usize
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint32[][]"),
-                                ),
-                            },
-                        ],
                         outputs: ::std::vec![],
                         constant: ::core::option::Option::None,
                         state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
@@ -604,37 +194,6 @@ pub mod avs_directory_storage {
                     },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("operatorSetMemberCount"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("operatorSetMemberCount",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::string::String::new(),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint32"),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
-                            name: ::std::string::String::new(),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(256usize,),
-                            internal_type: ::core::option::Option::Some(
-                                ::std::borrow::ToOwned::to_owned("uint256"),
-                            ),
-                        },],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
-                    },],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("registerOperatorToAVS"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("registerOperatorToAVS",),
@@ -644,48 +203,6 @@ pub mod avs_directory_storage {
                                 kind: ::ethers::core::abi::ethabi::ParamType::Address,
                                 internal_type: ::core::option::Option::Some(
                                     ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSignature"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Bytes,
-                                    ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                ],),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned(
-                                        "struct ISignatureUtils.SignatureWithSaltAndExpiry",
-                                    ),
-                                ),
-                            },
-                        ],
-                        outputs: ::std::vec![],
-                        constant: ::core::option::Option::None,
-                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::NonPayable,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("registerOperatorToOperatorSets"),
-                    ::std::vec![::ethers::core::abi::ethabi::Function {
-                        name: ::std::borrow::ToOwned::to_owned("registerOperatorToOperatorSets",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operator"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("address"),
-                                ),
-                            },
-                            ::ethers::core::abi::ethabi::Param {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSetIds"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ),
-                                ),
-                                internal_type: ::core::option::Option::Some(
-                                    ::std::borrow::ToOwned::to_owned("uint32[]"),
                                 ),
                             },
                             ::ethers::core::abi::ethabi::Param {
@@ -745,18 +262,6 @@ pub mod avs_directory_storage {
                     },],
                 ),
                 (
-                    ::std::borrow::ToOwned::to_owned("AVSMigratedToOperatorSets"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("AVSMigratedToOperatorSets",),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
-                            name: ::std::borrow::ToOwned::to_owned("avs"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                            indexed: true,
-                        },],
-                        anonymous: false,
-                    },],
-                ),
-                (
                     ::std::borrow::ToOwned::to_owned("OperatorAVSRegistrationStatusUpdated"),
                     ::std::vec![::ethers::core::abi::ethabi::Event {
                         name: ::std::borrow::ToOwned::to_owned(
@@ -779,93 +284,6 @@ pub mod avs_directory_storage {
                                 indexed: false,
                             },
                         ],
-                        anonymous: false,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("OperatorAddedToOperatorSet"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("OperatorAddedToOperatorSet",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("operator"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: true,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSet"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                ],),
-                                indexed: false,
-                            },
-                        ],
-                        anonymous: false,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("OperatorMigratedToOperatorSets"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("OperatorMigratedToOperatorSets",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("operator"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: true,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("avs"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: true,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSetIds"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Array(
-                                    ::std::boxed::Box::new(
-                                        ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                    ),
-                                ),
-                                indexed: false,
-                            },
-                        ],
-                        anonymous: false,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("OperatorRemovedFromOperatorSet"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("OperatorRemovedFromOperatorSet",),
-                        inputs: ::std::vec![
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("operator"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Address,
-                                indexed: true,
-                            },
-                            ::ethers::core::abi::ethabi::EventParam {
-                                name: ::std::borrow::ToOwned::to_owned("operatorSet"),
-                                kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                    ::ethers::core::abi::ethabi::ParamType::Address,
-                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                                ],),
-                                indexed: false,
-                            },
-                        ],
-                        anonymous: false,
-                    },],
-                ),
-                (
-                    ::std::borrow::ToOwned::to_owned("OperatorSetCreated"),
-                    ::std::vec![::ethers::core::abi::ethabi::Event {
-                        name: ::std::borrow::ToOwned::to_owned("OperatorSetCreated"),
-                        inputs: ::std::vec![::ethers::core::abi::ethabi::EventParam {
-                            name: ::std::borrow::ToOwned::to_owned("operatorSet"),
-                            kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
-                                ::ethers::core::abi::ethabi::ParamType::Address,
-                                ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
-                            ],),
-                            indexed: false,
-                        },],
                         anonymous: false,
                     },],
                 ),
@@ -929,22 +347,6 @@ pub mod avs_directory_storage {
                 .method_hash([215, 154, 206, 171], ())
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `OPERATOR_SET_FORCE_DEREGISTRATION_TYPEHASH` (0xdce974b9) function
-        pub fn operator_set_force_deregistration_typehash(
-            &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
-            self.0
-                .method_hash([220, 233, 116, 185], ())
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `OPERATOR_SET_REGISTRATION_TYPEHASH` (0xc825fe68) function
-        pub fn operator_set_registration_typehash(
-            &self,
-        ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
-            self.0
-                .method_hash([200, 37, 254, 104], ())
-                .expect("method not found (this should never happen)")
-        }
         ///Calls the contract's `avsOperatorStatus` (0x49075da3) function
         pub fn avs_operator_status(
             &self,
@@ -953,12 +355,6 @@ pub mod avs_directory_storage {
         ) -> ::ethers::contract::builders::ContractCall<M, u8> {
             self.0
                 .method_hash([73, 7, 93, 163], (p0, p1))
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `becomeOperatorSetAVS` (0xaec205c5) function
-        pub fn become_operator_set_avs(&self) -> ::ethers::contract::builders::ContractCall<M, ()> {
-            self.0
-                .method_hash([174, 194, 5, 197], ())
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `calculateOperatorAVSRegistrationDigestHash` (0xa1060c88) function
@@ -971,48 +367,6 @@ pub mod avs_directory_storage {
         ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
             self.0
                 .method_hash([161, 6, 12, 136], (operator, avs, salt, expiry))
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `calculateOperatorSetForceDeregistrationTypehash` (0xb2841d48) function
-        pub fn calculate_operator_set_force_deregistration_typehash(
-            &self,
-            avs: ::ethers::core::types::Address,
-            operator_set_ids: ::std::vec::Vec<u32>,
-            salt: [u8; 32],
-            expiry: ::ethers::core::types::U256,
-        ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
-            self.0
-                .method_hash([178, 132, 29, 72], (avs, operator_set_ids, salt, expiry))
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `calculateOperatorSetRegistrationDigestHash` (0x955e6696) function
-        pub fn calculate_operator_set_registration_digest_hash(
-            &self,
-            avs: ::ethers::core::types::Address,
-            operator_set_ids: ::std::vec::Vec<u32>,
-            salt: [u8; 32],
-            expiry: ::ethers::core::types::U256,
-        ) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
-            self.0
-                .method_hash([149, 94, 102, 150], (avs, operator_set_ids, salt, expiry))
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `cancelSalt` (0xec76f442) function
-        pub fn cancel_salt(
-            &self,
-            salt: [u8; 32],
-        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
-            self.0
-                .method_hash([236, 118, 244, 66], salt)
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `createOperatorSets` (0xafe02ed5) function
-        pub fn create_operator_sets(
-            &self,
-            operator_set_ids: ::std::vec::Vec<u32>,
-        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
-            self.0
-                .method_hash([175, 224, 46, 213], operator_set_ids)
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `delegation` (0xdf5cf723) function
@@ -1032,76 +386,6 @@ pub mod avs_directory_storage {
                 .method_hash([163, 100, 244, 218], operator)
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `deregisterOperatorFromOperatorSets` (0xc1a8e2c5) function
-        pub fn deregister_operator_from_operator_sets(
-            &self,
-            operator: ::ethers::core::types::Address,
-            operator_set_ids: ::std::vec::Vec<u32>,
-        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
-            self.0
-                .method_hash([193, 168, 226, 197], (operator, operator_set_ids))
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `domainSeparator` (0xf698da25) function
-        pub fn domain_separator(&self) -> ::ethers::contract::builders::ContractCall<M, [u8; 32]> {
-            self.0
-                .method_hash([246, 152, 218, 37], ())
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `forceDeregisterFromOperatorSets` (0x3fee332d) function
-        pub fn force_deregister_from_operator_sets(
-            &self,
-            operator: ::ethers::core::types::Address,
-            avs: ::ethers::core::types::Address,
-            operator_set_ids: ::std::vec::Vec<u32>,
-            operator_signature: SignatureWithSaltAndExpiry,
-        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
-            self.0
-                .method_hash(
-                    [63, 238, 51, 45],
-                    (operator, avs, operator_set_ids, operator_signature),
-                )
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `isMember` (0xda2ff05d) function
-        pub fn is_member(
-            &self,
-            operator: ::ethers::core::types::Address,
-            operator_set: OperatorSet,
-        ) -> ::ethers::contract::builders::ContractCall<M, bool> {
-            self.0
-                .method_hash([218, 47, 240, 93], (operator, operator_set))
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `isOperatorSet` (0x84d76f7b) function
-        pub fn is_operator_set(
-            &self,
-            p0: ::ethers::core::types::Address,
-            p1: u32,
-        ) -> ::ethers::contract::builders::ContractCall<M, bool> {
-            self.0
-                .method_hash([132, 215, 111, 123], (p0, p1))
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `isOperatorSetAVS` (0x7673e93a) function
-        pub fn is_operator_set_avs(
-            &self,
-            p0: ::ethers::core::types::Address,
-        ) -> ::ethers::contract::builders::ContractCall<M, bool> {
-            self.0
-                .method_hash([118, 115, 233, 58], p0)
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `migrateOperatorsToOperatorSets` (0xef2dfa8d) function
-        pub fn migrate_operators_to_operator_sets(
-            &self,
-            operators: ::std::vec::Vec<::ethers::core::types::Address>,
-            operator_set_ids: ::std::vec::Vec<::std::vec::Vec<u32>>,
-        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
-            self.0
-                .method_hash([239, 45, 250, 141], (operators, operator_set_ids))
-                .expect("method not found (this should never happen)")
-        }
         ///Calls the contract's `operatorSaltIsSpent` (0x374823b5) function
         pub fn operator_salt_is_spent(
             &self,
@@ -1112,16 +396,6 @@ pub mod avs_directory_storage {
                 .method_hash([55, 72, 35, 181], (p0, p1))
                 .expect("method not found (this should never happen)")
         }
-        ///Calls the contract's `operatorSetMemberCount` (0xdae226b6) function
-        pub fn operator_set_member_count(
-            &self,
-            p0: ::ethers::core::types::Address,
-            p1: u32,
-        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::U256> {
-            self.0
-                .method_hash([218, 226, 38, 182], (p0, p1))
-                .expect("method not found (this should never happen)")
-        }
         ///Calls the contract's `registerOperatorToAVS` (0x9926ee7d) function
         pub fn register_operator_to_avs(
             &self,
@@ -1130,20 +404,6 @@ pub mod avs_directory_storage {
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash([153, 38, 238, 125], (operator, operator_signature))
-                .expect("method not found (this should never happen)")
-        }
-        ///Calls the contract's `registerOperatorToOperatorSets` (0x1e2199e2) function
-        pub fn register_operator_to_operator_sets(
-            &self,
-            operator: ::ethers::core::types::Address,
-            operator_set_ids: ::std::vec::Vec<u32>,
-            operator_signature: SignatureWithSaltAndExpiry,
-        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
-            self.0
-                .method_hash(
-                    [30, 33, 153, 226],
-                    (operator, operator_set_ids, operator_signature),
-                )
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `updateAVSMetadataURI` (0xa98fb355) function
@@ -1162,16 +422,6 @@ pub mod avs_directory_storage {
         {
             self.0.event()
         }
-        ///Gets the contract's `AVSMigratedToOperatorSets` event
-        pub fn avs_migrated_to_operator_sets_filter(
-            &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            AvsmigratedToOperatorSetsFilter,
-        > {
-            self.0.event()
-        }
         ///Gets the contract's `OperatorAVSRegistrationStatusUpdated` event
         pub fn operator_avs_registration_status_updated_filter(
             &self,
@@ -1180,43 +430,6 @@ pub mod avs_directory_storage {
             M,
             OperatorAVSRegistrationStatusUpdatedFilter,
         > {
-            self.0.event()
-        }
-        ///Gets the contract's `OperatorAddedToOperatorSet` event
-        pub fn operator_added_to_operator_set_filter(
-            &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            OperatorAddedToOperatorSetFilter,
-        > {
-            self.0.event()
-        }
-        ///Gets the contract's `OperatorMigratedToOperatorSets` event
-        pub fn operator_migrated_to_operator_sets_filter(
-            &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            OperatorMigratedToOperatorSetsFilter,
-        > {
-            self.0.event()
-        }
-        ///Gets the contract's `OperatorRemovedFromOperatorSet` event
-        pub fn operator_removed_from_operator_set_filter(
-            &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            OperatorRemovedFromOperatorSetFilter,
-        > {
-            self.0.event()
-        }
-        ///Gets the contract's `OperatorSetCreated` event
-        pub fn operator_set_created_filter(
-            &self,
-        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, OperatorSetCreatedFilter>
-        {
             self.0.event()
         }
         /// Returns an `Event` builder for all the events of this contract.
@@ -1269,26 +482,6 @@ pub mod avs_directory_storage {
         Hash,
     )]
     #[ethevent(
-        name = "AVSMigratedToOperatorSets",
-        abi = "AVSMigratedToOperatorSets(address)"
-    )]
-    pub struct AvsmigratedToOperatorSetsFilter {
-        #[ethevent(indexed)]
-        pub avs: ::ethers::core::types::Address,
-    }
-    #[derive(
-        Clone,
-        ::ethers::contract::EthEvent,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethevent(
         name = "OperatorAVSRegistrationStatusUpdated",
         abi = "OperatorAVSRegistrationStatusUpdated(address,address,uint8)"
     )]
@@ -1298,90 +491,6 @@ pub mod avs_directory_storage {
         #[ethevent(indexed)]
         pub avs: ::ethers::core::types::Address,
         pub status: u8,
-    }
-    #[derive(
-        Clone,
-        ::ethers::contract::EthEvent,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethevent(
-        name = "OperatorAddedToOperatorSet",
-        abi = "OperatorAddedToOperatorSet(address,(address,uint32))"
-    )]
-    pub struct OperatorAddedToOperatorSetFilter {
-        #[ethevent(indexed)]
-        pub operator: ::ethers::core::types::Address,
-        pub operator_set: OperatorSet,
-    }
-    #[derive(
-        Clone,
-        ::ethers::contract::EthEvent,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethevent(
-        name = "OperatorMigratedToOperatorSets",
-        abi = "OperatorMigratedToOperatorSets(address,address,uint32[])"
-    )]
-    pub struct OperatorMigratedToOperatorSetsFilter {
-        #[ethevent(indexed)]
-        pub operator: ::ethers::core::types::Address,
-        #[ethevent(indexed)]
-        pub avs: ::ethers::core::types::Address,
-        pub operator_set_ids: ::std::vec::Vec<u32>,
-    }
-    #[derive(
-        Clone,
-        ::ethers::contract::EthEvent,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethevent(
-        name = "OperatorRemovedFromOperatorSet",
-        abi = "OperatorRemovedFromOperatorSet(address,(address,uint32))"
-    )]
-    pub struct OperatorRemovedFromOperatorSetFilter {
-        #[ethevent(indexed)]
-        pub operator: ::ethers::core::types::Address,
-        pub operator_set: OperatorSet,
-    }
-    #[derive(
-        Clone,
-        ::ethers::contract::EthEvent,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethevent(
-        name = "OperatorSetCreated",
-        abi = "OperatorSetCreated((address,uint32))"
-    )]
-    pub struct OperatorSetCreatedFilter {
-        pub operator_set: OperatorSet,
     }
     ///Container type for all of the contract's events
     #[derive(
@@ -1396,12 +505,7 @@ pub mod avs_directory_storage {
     )]
     pub enum AVSDirectoryStorageEvents {
         AvsmetadataURIUpdatedFilter(AvsmetadataURIUpdatedFilter),
-        AvsmigratedToOperatorSetsFilter(AvsmigratedToOperatorSetsFilter),
         OperatorAVSRegistrationStatusUpdatedFilter(OperatorAVSRegistrationStatusUpdatedFilter),
-        OperatorAddedToOperatorSetFilter(OperatorAddedToOperatorSetFilter),
-        OperatorMigratedToOperatorSetsFilter(OperatorMigratedToOperatorSetsFilter),
-        OperatorRemovedFromOperatorSetFilter(OperatorRemovedFromOperatorSetFilter),
-        OperatorSetCreatedFilter(OperatorSetCreatedFilter),
     }
     impl ::ethers::contract::EthLogDecode for AVSDirectoryStorageEvents {
         fn decode_log(
@@ -1412,33 +516,10 @@ pub mod avs_directory_storage {
                     decoded,
                 ));
             }
-            if let Ok(decoded) = AvsmigratedToOperatorSetsFilter::decode_log(log) {
-                return Ok(AVSDirectoryStorageEvents::AvsmigratedToOperatorSetsFilter(
-                    decoded,
-                ));
-            }
             if let Ok(decoded) = OperatorAVSRegistrationStatusUpdatedFilter::decode_log(log) {
                 return Ok(
                     AVSDirectoryStorageEvents::OperatorAVSRegistrationStatusUpdatedFilter(decoded),
                 );
-            }
-            if let Ok(decoded) = OperatorAddedToOperatorSetFilter::decode_log(log) {
-                return Ok(AVSDirectoryStorageEvents::OperatorAddedToOperatorSetFilter(
-                    decoded,
-                ));
-            }
-            if let Ok(decoded) = OperatorMigratedToOperatorSetsFilter::decode_log(log) {
-                return Ok(
-                    AVSDirectoryStorageEvents::OperatorMigratedToOperatorSetsFilter(decoded),
-                );
-            }
-            if let Ok(decoded) = OperatorRemovedFromOperatorSetFilter::decode_log(log) {
-                return Ok(
-                    AVSDirectoryStorageEvents::OperatorRemovedFromOperatorSetFilter(decoded),
-                );
-            }
-            if let Ok(decoded) = OperatorSetCreatedFilter::decode_log(log) {
-                return Ok(AVSDirectoryStorageEvents::OperatorSetCreatedFilter(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData)
         }
@@ -1447,22 +528,9 @@ pub mod avs_directory_storage {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
                 Self::AvsmetadataURIUpdatedFilter(element) => ::core::fmt::Display::fmt(element, f),
-                Self::AvsmigratedToOperatorSetsFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
                 Self::OperatorAVSRegistrationStatusUpdatedFilter(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::OperatorAddedToOperatorSetFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::OperatorMigratedToOperatorSetsFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::OperatorRemovedFromOperatorSetFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::OperatorSetCreatedFilter(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
@@ -1471,36 +539,11 @@ pub mod avs_directory_storage {
             Self::AvsmetadataURIUpdatedFilter(value)
         }
     }
-    impl ::core::convert::From<AvsmigratedToOperatorSetsFilter> for AVSDirectoryStorageEvents {
-        fn from(value: AvsmigratedToOperatorSetsFilter) -> Self {
-            Self::AvsmigratedToOperatorSetsFilter(value)
-        }
-    }
     impl ::core::convert::From<OperatorAVSRegistrationStatusUpdatedFilter>
         for AVSDirectoryStorageEvents
     {
         fn from(value: OperatorAVSRegistrationStatusUpdatedFilter) -> Self {
             Self::OperatorAVSRegistrationStatusUpdatedFilter(value)
-        }
-    }
-    impl ::core::convert::From<OperatorAddedToOperatorSetFilter> for AVSDirectoryStorageEvents {
-        fn from(value: OperatorAddedToOperatorSetFilter) -> Self {
-            Self::OperatorAddedToOperatorSetFilter(value)
-        }
-    }
-    impl ::core::convert::From<OperatorMigratedToOperatorSetsFilter> for AVSDirectoryStorageEvents {
-        fn from(value: OperatorMigratedToOperatorSetsFilter) -> Self {
-            Self::OperatorMigratedToOperatorSetsFilter(value)
-        }
-    }
-    impl ::core::convert::From<OperatorRemovedFromOperatorSetFilter> for AVSDirectoryStorageEvents {
-        fn from(value: OperatorRemovedFromOperatorSetFilter) -> Self {
-            Self::OperatorRemovedFromOperatorSetFilter(value)
-        }
-    }
-    impl ::core::convert::From<OperatorSetCreatedFilter> for AVSDirectoryStorageEvents {
-        fn from(value: OperatorSetCreatedFilter) -> Self {
-            Self::OperatorSetCreatedFilter(value)
         }
     }
     ///Container type for all input parameters for the `DOMAIN_TYPEHASH` function with signature `DOMAIN_TYPEHASH()` and selector `0x20606b70`
@@ -1536,42 +579,6 @@ pub mod avs_directory_storage {
         abi = "OPERATOR_AVS_REGISTRATION_TYPEHASH()"
     )]
     pub struct OperatorAvsRegistrationTypehashCall;
-    ///Container type for all input parameters for the `OPERATOR_SET_FORCE_DEREGISTRATION_TYPEHASH` function with signature `OPERATOR_SET_FORCE_DEREGISTRATION_TYPEHASH()` and selector `0xdce974b9`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "OPERATOR_SET_FORCE_DEREGISTRATION_TYPEHASH",
-        abi = "OPERATOR_SET_FORCE_DEREGISTRATION_TYPEHASH()"
-    )]
-    pub struct OperatorSetForceDeregistrationTypehashCall;
-    ///Container type for all input parameters for the `OPERATOR_SET_REGISTRATION_TYPEHASH` function with signature `OPERATOR_SET_REGISTRATION_TYPEHASH()` and selector `0xc825fe68`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "OPERATOR_SET_REGISTRATION_TYPEHASH",
-        abi = "OPERATOR_SET_REGISTRATION_TYPEHASH()"
-    )]
-    pub struct OperatorSetRegistrationTypehashCall;
     ///Container type for all input parameters for the `avsOperatorStatus` function with signature `avsOperatorStatus(address,address)` and selector `0x49075da3`
     #[derive(
         Clone,
@@ -1590,21 +597,6 @@ pub mod avs_directory_storage {
         pub ::ethers::core::types::Address,
         pub ::ethers::core::types::Address,
     );
-    ///Container type for all input parameters for the `becomeOperatorSetAVS` function with signature `becomeOperatorSetAVS()` and selector `0xaec205c5`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "becomeOperatorSetAVS", abi = "becomeOperatorSetAVS()")]
-    pub struct BecomeOperatorSetAVSCall;
     ///Container type for all input parameters for the `calculateOperatorAVSRegistrationDigestHash` function with signature `calculateOperatorAVSRegistrationDigestHash(address,address,bytes32,uint256)` and selector `0xa1060c88`
     #[derive(
         Clone,
@@ -1627,86 +619,6 @@ pub mod avs_directory_storage {
         pub avs: ::ethers::core::types::Address,
         pub salt: [u8; 32],
         pub expiry: ::ethers::core::types::U256,
-    }
-    ///Container type for all input parameters for the `calculateOperatorSetForceDeregistrationTypehash` function with signature `calculateOperatorSetForceDeregistrationTypehash(address,uint32[],bytes32,uint256)` and selector `0xb2841d48`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "calculateOperatorSetForceDeregistrationTypehash",
-        abi = "calculateOperatorSetForceDeregistrationTypehash(address,uint32[],bytes32,uint256)"
-    )]
-    pub struct CalculateOperatorSetForceDeregistrationTypehashCall {
-        pub avs: ::ethers::core::types::Address,
-        pub operator_set_ids: ::std::vec::Vec<u32>,
-        pub salt: [u8; 32],
-        pub expiry: ::ethers::core::types::U256,
-    }
-    ///Container type for all input parameters for the `calculateOperatorSetRegistrationDigestHash` function with signature `calculateOperatorSetRegistrationDigestHash(address,uint32[],bytes32,uint256)` and selector `0x955e6696`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "calculateOperatorSetRegistrationDigestHash",
-        abi = "calculateOperatorSetRegistrationDigestHash(address,uint32[],bytes32,uint256)"
-    )]
-    pub struct CalculateOperatorSetRegistrationDigestHashCall {
-        pub avs: ::ethers::core::types::Address,
-        pub operator_set_ids: ::std::vec::Vec<u32>,
-        pub salt: [u8; 32],
-        pub expiry: ::ethers::core::types::U256,
-    }
-    ///Container type for all input parameters for the `cancelSalt` function with signature `cancelSalt(bytes32)` and selector `0xec76f442`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "cancelSalt", abi = "cancelSalt(bytes32)")]
-    pub struct CancelSaltCall {
-        pub salt: [u8; 32],
-    }
-    ///Container type for all input parameters for the `createOperatorSets` function with signature `createOperatorSets(uint32[])` and selector `0xafe02ed5`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "createOperatorSets", abi = "createOperatorSets(uint32[])")]
-    pub struct CreateOperatorSetsCall {
-        pub operator_set_ids: ::std::vec::Vec<u32>,
     }
     ///Container type for all input parameters for the `delegation` function with signature `delegation()` and selector `0xdf5cf723`
     #[derive(
@@ -1743,134 +655,6 @@ pub mod avs_directory_storage {
     pub struct DeregisterOperatorFromAVSCall {
         pub operator: ::ethers::core::types::Address,
     }
-    ///Container type for all input parameters for the `deregisterOperatorFromOperatorSets` function with signature `deregisterOperatorFromOperatorSets(address,uint32[])` and selector `0xc1a8e2c5`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "deregisterOperatorFromOperatorSets",
-        abi = "deregisterOperatorFromOperatorSets(address,uint32[])"
-    )]
-    pub struct DeregisterOperatorFromOperatorSetsCall {
-        pub operator: ::ethers::core::types::Address,
-        pub operator_set_ids: ::std::vec::Vec<u32>,
-    }
-    ///Container type for all input parameters for the `domainSeparator` function with signature `domainSeparator()` and selector `0xf698da25`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "domainSeparator", abi = "domainSeparator()")]
-    pub struct DomainSeparatorCall;
-    ///Container type for all input parameters for the `forceDeregisterFromOperatorSets` function with signature `forceDeregisterFromOperatorSets(address,address,uint32[],(bytes,bytes32,uint256))` and selector `0x3fee332d`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "forceDeregisterFromOperatorSets",
-        abi = "forceDeregisterFromOperatorSets(address,address,uint32[],(bytes,bytes32,uint256))"
-    )]
-    pub struct ForceDeregisterFromOperatorSetsCall {
-        pub operator: ::ethers::core::types::Address,
-        pub avs: ::ethers::core::types::Address,
-        pub operator_set_ids: ::std::vec::Vec<u32>,
-        pub operator_signature: SignatureWithSaltAndExpiry,
-    }
-    ///Container type for all input parameters for the `isMember` function with signature `isMember(address,(address,uint32))` and selector `0xda2ff05d`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "isMember", abi = "isMember(address,(address,uint32))")]
-    pub struct IsMemberCall {
-        pub operator: ::ethers::core::types::Address,
-        pub operator_set: OperatorSet,
-    }
-    ///Container type for all input parameters for the `isOperatorSet` function with signature `isOperatorSet(address,uint32)` and selector `0x84d76f7b`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "isOperatorSet", abi = "isOperatorSet(address,uint32)")]
-    pub struct IsOperatorSetCall(pub ::ethers::core::types::Address, pub u32);
-    ///Container type for all input parameters for the `isOperatorSetAVS` function with signature `isOperatorSetAVS(address)` and selector `0x7673e93a`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(name = "isOperatorSetAVS", abi = "isOperatorSetAVS(address)")]
-    pub struct IsOperatorSetAVSCall(pub ::ethers::core::types::Address);
-    ///Container type for all input parameters for the `migrateOperatorsToOperatorSets` function with signature `migrateOperatorsToOperatorSets(address[],uint32[][])` and selector `0xef2dfa8d`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "migrateOperatorsToOperatorSets",
-        abi = "migrateOperatorsToOperatorSets(address[],uint32[][])"
-    )]
-    pub struct MigrateOperatorsToOperatorSetsCall {
-        pub operators: ::std::vec::Vec<::ethers::core::types::Address>,
-        pub operator_set_ids: ::std::vec::Vec<::std::vec::Vec<u32>>,
-    }
     ///Container type for all input parameters for the `operatorSaltIsSpent` function with signature `operatorSaltIsSpent(address,bytes32)` and selector `0x374823b5`
     #[derive(
         Clone,
@@ -1889,24 +673,6 @@ pub mod avs_directory_storage {
         abi = "operatorSaltIsSpent(address,bytes32)"
     )]
     pub struct OperatorSaltIsSpentCall(pub ::ethers::core::types::Address, pub [u8; 32]);
-    ///Container type for all input parameters for the `operatorSetMemberCount` function with signature `operatorSetMemberCount(address,uint32)` and selector `0xdae226b6`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "operatorSetMemberCount",
-        abi = "operatorSetMemberCount(address,uint32)"
-    )]
-    pub struct OperatorSetMemberCountCall(pub ::ethers::core::types::Address, pub u32);
     ///Container type for all input parameters for the `registerOperatorToAVS` function with signature `registerOperatorToAVS(address,(bytes,bytes32,uint256))` and selector `0x9926ee7d`
     #[derive(
         Clone,
@@ -1926,28 +692,6 @@ pub mod avs_directory_storage {
     )]
     pub struct RegisterOperatorToAVSCall {
         pub operator: ::ethers::core::types::Address,
-        pub operator_signature: SignatureWithSaltAndExpiry,
-    }
-    ///Container type for all input parameters for the `registerOperatorToOperatorSets` function with signature `registerOperatorToOperatorSets(address,uint32[],(bytes,bytes32,uint256))` and selector `0x1e2199e2`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthCall,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    #[ethcall(
-        name = "registerOperatorToOperatorSets",
-        abi = "registerOperatorToOperatorSets(address,uint32[],(bytes,bytes32,uint256))"
-    )]
-    pub struct RegisterOperatorToOperatorSetsCall {
-        pub operator: ::ethers::core::types::Address,
-        pub operator_set_ids: ::std::vec::Vec<u32>,
         pub operator_signature: SignatureWithSaltAndExpiry,
     }
     ///Container type for all input parameters for the `updateAVSMetadataURI` function with signature `updateAVSMetadataURI(string)` and selector `0xa98fb355`
@@ -1981,30 +725,12 @@ pub mod avs_directory_storage {
     pub enum AVSDirectoryStorageCalls {
         DomainTypehash(DomainTypehashCall),
         OperatorAvsRegistrationTypehash(OperatorAvsRegistrationTypehashCall),
-        OperatorSetForceDeregistrationTypehash(OperatorSetForceDeregistrationTypehashCall),
-        OperatorSetRegistrationTypehash(OperatorSetRegistrationTypehashCall),
         AvsOperatorStatus(AvsOperatorStatusCall),
-        BecomeOperatorSetAVS(BecomeOperatorSetAVSCall),
         CalculateOperatorAVSRegistrationDigestHash(CalculateOperatorAVSRegistrationDigestHashCall),
-        CalculateOperatorSetForceDeregistrationTypehash(
-            CalculateOperatorSetForceDeregistrationTypehashCall,
-        ),
-        CalculateOperatorSetRegistrationDigestHash(CalculateOperatorSetRegistrationDigestHashCall),
-        CancelSalt(CancelSaltCall),
-        CreateOperatorSets(CreateOperatorSetsCall),
         Delegation(DelegationCall),
         DeregisterOperatorFromAVS(DeregisterOperatorFromAVSCall),
-        DeregisterOperatorFromOperatorSets(DeregisterOperatorFromOperatorSetsCall),
-        DomainSeparator(DomainSeparatorCall),
-        ForceDeregisterFromOperatorSets(ForceDeregisterFromOperatorSetsCall),
-        IsMember(IsMemberCall),
-        IsOperatorSet(IsOperatorSetCall),
-        IsOperatorSetAVS(IsOperatorSetAVSCall),
-        MigrateOperatorsToOperatorSets(MigrateOperatorsToOperatorSetsCall),
         OperatorSaltIsSpent(OperatorSaltIsSpentCall),
-        OperatorSetMemberCount(OperatorSetMemberCountCall),
         RegisterOperatorToAVS(RegisterOperatorToAVSCall),
-        RegisterOperatorToOperatorSets(RegisterOperatorToOperatorSetsCall),
         UpdateAVSMetadataURI(UpdateAVSMetadataURICall),
     }
     impl ::ethers::core::abi::AbiDecode for AVSDirectoryStorageCalls {
@@ -2024,52 +750,15 @@ pub mod avs_directory_storage {
             {
                 return Ok(Self::OperatorAvsRegistrationTypehash(decoded));
             }
-            if let Ok(decoded) = <OperatorSetForceDeregistrationTypehashCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
-                return Ok(Self::OperatorSetForceDeregistrationTypehash(decoded));
-            }
-            if let Ok(decoded) =
-                <OperatorSetRegistrationTypehashCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                )
-            {
-                return Ok(Self::OperatorSetRegistrationTypehash(decoded));
-            }
             if let Ok(decoded) =
                 <AvsOperatorStatusCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::AvsOperatorStatus(decoded));
             }
-            if let Ok(decoded) =
-                <BecomeOperatorSetAVSCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::BecomeOperatorSetAVS(decoded));
-            }
             if let Ok(decoded) = <CalculateOperatorAVSRegistrationDigestHashCall as ::ethers::core::abi::AbiDecode>::decode(
                 data,
             ) {
                 return Ok(Self::CalculateOperatorAVSRegistrationDigestHash(decoded));
-            }
-            if let Ok(decoded) = <CalculateOperatorSetForceDeregistrationTypehashCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
-                return Ok(
-                    Self::CalculateOperatorSetForceDeregistrationTypehash(decoded),
-                );
-            }
-            if let Ok(decoded) = <CalculateOperatorSetRegistrationDigestHashCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
-                return Ok(Self::CalculateOperatorSetRegistrationDigestHash(decoded));
-            }
-            if let Ok(decoded) = <CancelSaltCall as ::ethers::core::abi::AbiDecode>::decode(data) {
-                return Ok(Self::CancelSalt(decoded));
-            }
-            if let Ok(decoded) =
-                <CreateOperatorSetsCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::CreateOperatorSets(decoded));
             }
             if let Ok(decoded) = <DelegationCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::Delegation(decoded));
@@ -2080,60 +769,14 @@ pub mod avs_directory_storage {
                 return Ok(Self::DeregisterOperatorFromAVS(decoded));
             }
             if let Ok(decoded) =
-                <DeregisterOperatorFromOperatorSetsCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                )
-            {
-                return Ok(Self::DeregisterOperatorFromOperatorSets(decoded));
-            }
-            if let Ok(decoded) =
-                <DomainSeparatorCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::DomainSeparator(decoded));
-            }
-            if let Ok(decoded) =
-                <ForceDeregisterFromOperatorSetsCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                )
-            {
-                return Ok(Self::ForceDeregisterFromOperatorSets(decoded));
-            }
-            if let Ok(decoded) = <IsMemberCall as ::ethers::core::abi::AbiDecode>::decode(data) {
-                return Ok(Self::IsMember(decoded));
-            }
-            if let Ok(decoded) = <IsOperatorSetCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::IsOperatorSet(decoded));
-            }
-            if let Ok(decoded) =
-                <IsOperatorSetAVSCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::IsOperatorSetAVS(decoded));
-            }
-            if let Ok(decoded) =
-                <MigrateOperatorsToOperatorSetsCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::MigrateOperatorsToOperatorSets(decoded));
-            }
-            if let Ok(decoded) =
                 <OperatorSaltIsSpentCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::OperatorSaltIsSpent(decoded));
             }
             if let Ok(decoded) =
-                <OperatorSetMemberCountCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::OperatorSetMemberCount(decoded));
-            }
-            if let Ok(decoded) =
                 <RegisterOperatorToAVSCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::RegisterOperatorToAVS(decoded));
-            }
-            if let Ok(decoded) =
-                <RegisterOperatorToOperatorSetsCall as ::ethers::core::abi::AbiDecode>::decode(data)
-            {
-                return Ok(Self::RegisterOperatorToOperatorSets(decoded));
             }
             if let Ok(decoded) =
                 <UpdateAVSMetadataURICall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -2150,56 +793,18 @@ pub mod avs_directory_storage {
                 Self::OperatorAvsRegistrationTypehash(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::OperatorSetForceDeregistrationTypehash(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::OperatorSetRegistrationTypehash(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
                 Self::AvsOperatorStatus(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::BecomeOperatorSetAVS(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
                 Self::CalculateOperatorAVSRegistrationDigestHash(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::CalculateOperatorSetForceDeregistrationTypehash(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::CalculateOperatorSetRegistrationDigestHash(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::CancelSalt(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::CreateOperatorSets(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::Delegation(element) => ::ethers::core::abi::AbiEncode::encode(element),
                 Self::DeregisterOperatorFromAVS(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::DeregisterOperatorFromOperatorSets(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::DomainSeparator(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::ForceDeregisterFromOperatorSets(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::IsMember(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::IsOperatorSet(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::IsOperatorSetAVS(element) => ::ethers::core::abi::AbiEncode::encode(element),
-                Self::MigrateOperatorsToOperatorSets(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
                 Self::OperatorSaltIsSpent(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
-                Self::OperatorSetMemberCount(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
                 Self::RegisterOperatorToAVS(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::RegisterOperatorToOperatorSets(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
                 Self::UpdateAVSMetadataURI(element) => {
@@ -2215,46 +820,14 @@ pub mod avs_directory_storage {
                 Self::OperatorAvsRegistrationTypehash(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::OperatorSetForceDeregistrationTypehash(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::OperatorSetRegistrationTypehash(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
                 Self::AvsOperatorStatus(element) => ::core::fmt::Display::fmt(element, f),
-                Self::BecomeOperatorSetAVS(element) => ::core::fmt::Display::fmt(element, f),
                 Self::CalculateOperatorAVSRegistrationDigestHash(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
-                Self::CalculateOperatorSetForceDeregistrationTypehash(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::CalculateOperatorSetRegistrationDigestHash(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::CancelSalt(element) => ::core::fmt::Display::fmt(element, f),
-                Self::CreateOperatorSets(element) => ::core::fmt::Display::fmt(element, f),
                 Self::Delegation(element) => ::core::fmt::Display::fmt(element, f),
                 Self::DeregisterOperatorFromAVS(element) => ::core::fmt::Display::fmt(element, f),
-                Self::DeregisterOperatorFromOperatorSets(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::DomainSeparator(element) => ::core::fmt::Display::fmt(element, f),
-                Self::ForceDeregisterFromOperatorSets(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::IsMember(element) => ::core::fmt::Display::fmt(element, f),
-                Self::IsOperatorSet(element) => ::core::fmt::Display::fmt(element, f),
-                Self::IsOperatorSetAVS(element) => ::core::fmt::Display::fmt(element, f),
-                Self::MigrateOperatorsToOperatorSets(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
                 Self::OperatorSaltIsSpent(element) => ::core::fmt::Display::fmt(element, f),
-                Self::OperatorSetMemberCount(element) => ::core::fmt::Display::fmt(element, f),
                 Self::RegisterOperatorToAVS(element) => ::core::fmt::Display::fmt(element, f),
-                Self::RegisterOperatorToOperatorSets(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
                 Self::UpdateAVSMetadataURI(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
@@ -2269,26 +842,9 @@ pub mod avs_directory_storage {
             Self::OperatorAvsRegistrationTypehash(value)
         }
     }
-    impl ::core::convert::From<OperatorSetForceDeregistrationTypehashCall>
-        for AVSDirectoryStorageCalls
-    {
-        fn from(value: OperatorSetForceDeregistrationTypehashCall) -> Self {
-            Self::OperatorSetForceDeregistrationTypehash(value)
-        }
-    }
-    impl ::core::convert::From<OperatorSetRegistrationTypehashCall> for AVSDirectoryStorageCalls {
-        fn from(value: OperatorSetRegistrationTypehashCall) -> Self {
-            Self::OperatorSetRegistrationTypehash(value)
-        }
-    }
     impl ::core::convert::From<AvsOperatorStatusCall> for AVSDirectoryStorageCalls {
         fn from(value: AvsOperatorStatusCall) -> Self {
             Self::AvsOperatorStatus(value)
-        }
-    }
-    impl ::core::convert::From<BecomeOperatorSetAVSCall> for AVSDirectoryStorageCalls {
-        fn from(value: BecomeOperatorSetAVSCall) -> Self {
-            Self::BecomeOperatorSetAVS(value)
         }
     }
     impl ::core::convert::From<CalculateOperatorAVSRegistrationDigestHashCall>
@@ -2296,30 +852,6 @@ pub mod avs_directory_storage {
     {
         fn from(value: CalculateOperatorAVSRegistrationDigestHashCall) -> Self {
             Self::CalculateOperatorAVSRegistrationDigestHash(value)
-        }
-    }
-    impl ::core::convert::From<CalculateOperatorSetForceDeregistrationTypehashCall>
-        for AVSDirectoryStorageCalls
-    {
-        fn from(value: CalculateOperatorSetForceDeregistrationTypehashCall) -> Self {
-            Self::CalculateOperatorSetForceDeregistrationTypehash(value)
-        }
-    }
-    impl ::core::convert::From<CalculateOperatorSetRegistrationDigestHashCall>
-        for AVSDirectoryStorageCalls
-    {
-        fn from(value: CalculateOperatorSetRegistrationDigestHashCall) -> Self {
-            Self::CalculateOperatorSetRegistrationDigestHash(value)
-        }
-    }
-    impl ::core::convert::From<CancelSaltCall> for AVSDirectoryStorageCalls {
-        fn from(value: CancelSaltCall) -> Self {
-            Self::CancelSalt(value)
-        }
-    }
-    impl ::core::convert::From<CreateOperatorSetsCall> for AVSDirectoryStorageCalls {
-        fn from(value: CreateOperatorSetsCall) -> Self {
-            Self::CreateOperatorSets(value)
         }
     }
     impl ::core::convert::From<DelegationCall> for AVSDirectoryStorageCalls {
@@ -2332,59 +864,14 @@ pub mod avs_directory_storage {
             Self::DeregisterOperatorFromAVS(value)
         }
     }
-    impl ::core::convert::From<DeregisterOperatorFromOperatorSetsCall> for AVSDirectoryStorageCalls {
-        fn from(value: DeregisterOperatorFromOperatorSetsCall) -> Self {
-            Self::DeregisterOperatorFromOperatorSets(value)
-        }
-    }
-    impl ::core::convert::From<DomainSeparatorCall> for AVSDirectoryStorageCalls {
-        fn from(value: DomainSeparatorCall) -> Self {
-            Self::DomainSeparator(value)
-        }
-    }
-    impl ::core::convert::From<ForceDeregisterFromOperatorSetsCall> for AVSDirectoryStorageCalls {
-        fn from(value: ForceDeregisterFromOperatorSetsCall) -> Self {
-            Self::ForceDeregisterFromOperatorSets(value)
-        }
-    }
-    impl ::core::convert::From<IsMemberCall> for AVSDirectoryStorageCalls {
-        fn from(value: IsMemberCall) -> Self {
-            Self::IsMember(value)
-        }
-    }
-    impl ::core::convert::From<IsOperatorSetCall> for AVSDirectoryStorageCalls {
-        fn from(value: IsOperatorSetCall) -> Self {
-            Self::IsOperatorSet(value)
-        }
-    }
-    impl ::core::convert::From<IsOperatorSetAVSCall> for AVSDirectoryStorageCalls {
-        fn from(value: IsOperatorSetAVSCall) -> Self {
-            Self::IsOperatorSetAVS(value)
-        }
-    }
-    impl ::core::convert::From<MigrateOperatorsToOperatorSetsCall> for AVSDirectoryStorageCalls {
-        fn from(value: MigrateOperatorsToOperatorSetsCall) -> Self {
-            Self::MigrateOperatorsToOperatorSets(value)
-        }
-    }
     impl ::core::convert::From<OperatorSaltIsSpentCall> for AVSDirectoryStorageCalls {
         fn from(value: OperatorSaltIsSpentCall) -> Self {
             Self::OperatorSaltIsSpent(value)
         }
     }
-    impl ::core::convert::From<OperatorSetMemberCountCall> for AVSDirectoryStorageCalls {
-        fn from(value: OperatorSetMemberCountCall) -> Self {
-            Self::OperatorSetMemberCount(value)
-        }
-    }
     impl ::core::convert::From<RegisterOperatorToAVSCall> for AVSDirectoryStorageCalls {
         fn from(value: RegisterOperatorToAVSCall) -> Self {
             Self::RegisterOperatorToAVS(value)
-        }
-    }
-    impl ::core::convert::From<RegisterOperatorToOperatorSetsCall> for AVSDirectoryStorageCalls {
-        fn from(value: RegisterOperatorToOperatorSetsCall) -> Self {
-            Self::RegisterOperatorToOperatorSets(value)
         }
     }
     impl ::core::convert::From<UpdateAVSMetadataURICall> for AVSDirectoryStorageCalls {
@@ -2420,34 +907,6 @@ pub mod avs_directory_storage {
         Hash,
     )]
     pub struct OperatorAvsRegistrationTypehashReturn(pub [u8; 32]);
-    ///Container type for all return fields from the `OPERATOR_SET_FORCE_DEREGISTRATION_TYPEHASH` function with signature `OPERATOR_SET_FORCE_DEREGISTRATION_TYPEHASH()` and selector `0xdce974b9`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct OperatorSetForceDeregistrationTypehashReturn(pub [u8; 32]);
-    ///Container type for all return fields from the `OPERATOR_SET_REGISTRATION_TYPEHASH` function with signature `OPERATOR_SET_REGISTRATION_TYPEHASH()` and selector `0xc825fe68`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct OperatorSetRegistrationTypehashReturn(pub [u8; 32]);
     ///Container type for all return fields from the `avsOperatorStatus` function with signature `avsOperatorStatus(address,address)` and selector `0x49075da3`
     #[derive(
         Clone,
@@ -2476,34 +935,6 @@ pub mod avs_directory_storage {
         Hash,
     )]
     pub struct CalculateOperatorAVSRegistrationDigestHashReturn(pub [u8; 32]);
-    ///Container type for all return fields from the `calculateOperatorSetForceDeregistrationTypehash` function with signature `calculateOperatorSetForceDeregistrationTypehash(address,uint32[],bytes32,uint256)` and selector `0xb2841d48`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct CalculateOperatorSetForceDeregistrationTypehashReturn(pub [u8; 32]);
-    ///Container type for all return fields from the `calculateOperatorSetRegistrationDigestHash` function with signature `calculateOperatorSetRegistrationDigestHash(address,uint32[],bytes32,uint256)` and selector `0x955e6696`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct CalculateOperatorSetRegistrationDigestHashReturn(pub [u8; 32]);
     ///Container type for all return fields from the `delegation` function with signature `delegation()` and selector `0xdf5cf723`
     #[derive(
         Clone,
@@ -2518,62 +949,6 @@ pub mod avs_directory_storage {
         Hash,
     )]
     pub struct DelegationReturn(pub ::ethers::core::types::Address);
-    ///Container type for all return fields from the `domainSeparator` function with signature `domainSeparator()` and selector `0xf698da25`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct DomainSeparatorReturn(pub [u8; 32]);
-    ///Container type for all return fields from the `isMember` function with signature `isMember(address,(address,uint32))` and selector `0xda2ff05d`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct IsMemberReturn(pub bool);
-    ///Container type for all return fields from the `isOperatorSet` function with signature `isOperatorSet(address,uint32)` and selector `0x84d76f7b`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct IsOperatorSetReturn(pub bool);
-    ///Container type for all return fields from the `isOperatorSetAVS` function with signature `isOperatorSetAVS(address)` and selector `0x7673e93a`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct IsOperatorSetAVSReturn(pub bool);
     ///Container type for all return fields from the `operatorSaltIsSpent` function with signature `operatorSaltIsSpent(address,bytes32)` and selector `0x374823b5`
     #[derive(
         Clone,
@@ -2588,18 +963,4 @@ pub mod avs_directory_storage {
         Hash,
     )]
     pub struct OperatorSaltIsSpentReturn(pub bool);
-    ///Container type for all return fields from the `operatorSetMemberCount` function with signature `operatorSetMemberCount(address,uint32)` and selector `0xdae226b6`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthAbiType,
-        ::ethers::contract::EthAbiCodec,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-    )]
-    pub struct OperatorSetMemberCountReturn(pub ::ethers::core::types::U256);
 }
