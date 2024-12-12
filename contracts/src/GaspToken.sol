@@ -105,4 +105,22 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     {
         return super.transferFrom(owner, recipient, amount);
     }
+
+    function increaseAllowance(address spender, uint256 addedAmount)
+        public
+        override(ERC20, IGaspToken)
+        isWhitelisted([_msgSender(), spender], IGaspToken.increaseAllowance.selector)
+        returns (bool)
+    {
+        return super.increaseAllowance(spender, addedAmount);
+    }
+
+    function decreaseAllowance(address spender, uint256 subtractedAmount)
+        public
+        override(ERC20, IGaspToken)
+        isWhitelisted([_msgSender(), spender], IGaspToken.decreaseAllowance.selector)
+        returns (bool)
+    {
+        return super.decreaseAllowance(spender, subtractedAmount);
+    }
 }
