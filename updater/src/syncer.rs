@@ -1036,7 +1036,7 @@ impl Syncer {
         expected_batch_id: &mut u32,
         last_log: &mut Option<LogMeta>,
     ) -> eyre::Result<()> {
-        let events: Vec<RdTaskCompletedFilter> = self
+        let events: Vec<(RdTaskCompletedFilter, LogMeta)> = self
             .clone()
             .avs_contracts
             .task_manager
