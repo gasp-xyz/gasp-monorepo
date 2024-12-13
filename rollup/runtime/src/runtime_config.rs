@@ -980,7 +980,7 @@ pub mod config {
 				1 * currency::DOLLARS
 			} else {
 				// ACTUAL
-				1_500_000 * currency::DOLLARS
+				1_000_000 * currency::DOLLARS
 			};
 			/// Minimum stake required to be reserved to be a delegator
 			pub const MinDelegatorStk: u128 = 1 * currency::CENTS;
@@ -1323,8 +1323,8 @@ pub mod config {
 
 		#[cfg(not(feature = "fast-runtime"))]
 		parameter_types! {
-			pub const MerkleRootAutomaticBatchPeriod: u128 = 1200;
-			pub const MerkleRootAutomaticBatchSize: u128 = 1024;
+			pub const MerkleRootAutomaticBatchPeriod: u128 = 600;
+			pub const MerkleRootAutomaticBatchSize: u128 = 500;
 		}
 
 		pub struct WithdrawFee;

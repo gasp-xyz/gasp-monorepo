@@ -106,6 +106,8 @@ impl SubstrateCli for Cli {
 			"holesky" => Box::new(chain_spec::rollup_local_config(self.randomize_chain_genesis_salt, self.chain_genesis_salt.clone(), eth_sequencers, arb_sequencers, base_sequencers, EvmChain::Holesky,
 				Some(String::from("https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Frollup-holesky-rpc.gasp.xyz#/extrinsics/decode/"))
 			)),
+			"ethereum-mainnet" => Box::new(chain_spec::ethereum_mainnet( Some(String::from("https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Frollup-holesky-rpc.gasp.xyz#/extrinsics/decode/"))
+			)),
 			path =>
 			Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 		})
