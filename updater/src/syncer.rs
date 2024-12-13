@@ -468,9 +468,9 @@ impl Syncer {
             operators_state_info,
             merkle_roots,
             ranges,
-            last_batch_id,
-            latest_completed_rd_task_number,
-            latest_completed_rd_task_created_block,
+            expected_batch_id,
+            latest_completed_rd_task_number_update,
+            latest_completed_rd_task_created_block_update,
         ) = self.clone().get_reinit_info().await?;
         info!(
             "reinit info - {:?}",
@@ -479,9 +479,9 @@ impl Syncer {
                 operators_state_info.clone(),
                 merkle_roots.clone(),
                 ranges.clone(),
-                last_batch_id,
-                latest_completed_rd_task_number,
-                latest_completed_rd_task_created_block
+                expected_batch_id,
+                latest_completed_rd_task_number_update,
+                latest_completed_rd_task_created_block_update
             )
         );
         let reinit_txn = self
@@ -493,9 +493,9 @@ impl Syncer {
                 operators_state_info.clone(),
                 merkle_roots.clone(),
                 ranges.clone(),
-                last_batch_id,
-                latest_completed_rd_task_number,
-                latest_completed_rd_task_created_block,
+                expected_batch_id,
+                latest_completed_rd_task_number_update,
+                latest_completed_rd_task_created_block_update,
             );
         info!("reinit_txn: {:?}", reinit_txn);
         Ok(())
@@ -508,9 +508,9 @@ impl Syncer {
             operators_state_info,
             merkle_roots,
             ranges,
-            last_batch_id,
-            latest_completed_rd_task_number,
-            latest_completed_rd_task_created_block,
+            expected_batch_id,
+            latest_completed_rd_task_number_update,
+            latest_completed_rd_task_created_block_update,
         ) = self.clone().get_reinit_info().await?;
         info!(
             "reinit info - {:?}",
@@ -519,9 +519,9 @@ impl Syncer {
                 operators_state_info.clone(),
                 merkle_roots.clone(),
                 ranges.clone(),
-                last_batch_id,
-                latest_completed_rd_task_number,
-                latest_completed_rd_task_created_block
+                expected_batch_id,
+                latest_completed_rd_task_number_update,
+                latest_completed_rd_task_created_block_update
             )
         );
         let reinit_txn = self
@@ -534,9 +534,9 @@ impl Syncer {
                 operators_state_info.clone(),
                 merkle_roots.clone(),
                 ranges.clone(),
-                last_batch_id,
-                latest_completed_rd_task_number,
-                latest_completed_rd_task_created_block,
+                expected_batch_id,
+                latest_completed_rd_task_number_update,
+                latest_completed_rd_task_created_block_update,
             );
         debug!("{:?}", reinit_txn);
         let reinit_txn_pending = reinit_txn.send().await;
@@ -591,6 +591,11 @@ impl Syncer {
         let latest_completed_rd_task_number = self
             .gasp_service_contract
             .latest_completed_rd_task_number()
+            .block(alt_block_number)
+            .await?;
+        let latest_completed_rd_task_created_block = self
+            .gasp_service_contract
+            .latest_completed_rd_task_created_block()
             .block(alt_block_number)
             .await?;
         let chain_rd_batch_nonce = self
@@ -663,14 +668,15 @@ impl Syncer {
         let (
             merkle_roots,
             ranges,
-            last_batch_id,
-            latest_completed_rd_task_number,
-            latest_completed_rd_task_created_block,
+            expected_batch_id,
+            latest_completed_rd_task_number_update,
+            latest_completed_rd_task_created_block_update,
         ) = self
             .clone()
             .get_cumulative_rd_update(
                 chain_rd_batch_nonce,
                 latest_completed_rd_task_number,
+                latest_completed_rd_task_created_block,
                 eth_block_number,
                 u64::from(latest_completed_op_task_created_block),
             )
@@ -686,9 +692,9 @@ impl Syncer {
             operators_state_info.clone(),
             merkle_roots.clone(),
             ranges.clone(),
-            last_batch_id,
-            latest_completed_rd_task_number,
-            latest_completed_rd_task_created_block,
+            expected_batch_id,
+            latest_completed_rd_task_number_update,
+            latest_completed_rd_task_created_block_update,
         ))
     }
 
@@ -943,13 +949,15 @@ impl Syncer {
         self: Arc<Self>,
         chain_rd_batch_nonce: u32,
         latest_completed_rd_task_number: u32,
+        latest_completed_rd_task_created_block: u32,
         eth_block_number: u64,
         latest_completed_op_task_created_block: u64,
     ) -> eyre::Result<(Vec<[u8; 32]>, Vec<Range>, u32, u32, u32)> {
         let mut merkle_roots: Vec<[u8; 32]> = Default::default();
         let mut ranges: Vec<Range> = Default::default();
-        let mut expected_rd_task_number = latest_completed_rd_task_number + 1;
         let mut expected_batch_id = chain_rd_batch_nonce;
+
+        let mut last_log: Option<LogMeta> = None;
 
         let mut from_block = latest_completed_op_task_created_block;
         let mut to_block = latest_completed_op_task_created_block
@@ -967,8 +975,8 @@ impl Syncer {
                     to_block,
                     &mut merkle_roots,
                     &mut ranges,
-                    &mut expected_rd_task_number,
                     &mut expected_batch_id,
+                    &mut last_log,
                 )
                 .await?;
             if to_block == eth_block_number {
@@ -983,30 +991,34 @@ impl Syncer {
             }
         }
 
-        let last_batch_id = expected_batch_id.saturating_sub(1);
-
-        let latest_completed_rd_task_number = self
-            .clone()
-            .avs_contracts
-            .task_manager
-            .last_completed_rd_task_num()
-            .block(eth_block_number)
-            .await?;
-
-        let latest_completed_rd_task_created_block = self
-            .clone()
-            .avs_contracts
-            .task_manager
-            .last_completed_rd_task_created_block()
-            .block(eth_block_number)
-            .await?;
+        let (latest_completed_rd_task_number_update, latest_completed_rd_task_created_block_update) =
+            if let Some(log) = last_log {
+                let txn_hash = log.transaction_hash;
+                let txn = self
+                    .clone()
+                    .avs_contracts
+                    .ws_client
+                    .get_transaction(txn_hash)
+                    .await?
+                    .ok_or_else(|| eyre!("missing expected txn {:?}", txn_hash))?;
+                debug!("{:?}", txn);
+                let call = match FinalizerTaskManagerCalls::decode(txn.input)? {
+                    FinalizerTaskManagerCalls::RespondToRdTask(c) => c,
+                    _ => return Err(eyre!("wrong call decoded")),
+                };
+                debug!("{:?}", call);
+                debug!("{:?}", call.task.clone());
+                (call.task.task_num, call.task.task_created_block)
+            } else {
+                (latest_completed_rd_task_number, latest_completed_rd_task_created_block)
+            };
 
         Ok((
             merkle_roots,
             ranges,
-            last_batch_id,
-            latest_completed_rd_task_number,
-            latest_completed_rd_task_created_block,
+            expected_batch_id,
+            latest_completed_rd_task_number_update,
+            latest_completed_rd_task_created_block_update,
         ))
     }
 
@@ -1018,8 +1030,8 @@ impl Syncer {
         to_block: u64,
         merkle_roots: &mut Vec<[u8; 32]>,
         ranges: &mut Vec<Range>,
-        expected_rd_task_number: &mut u32,
         expected_batch_id: &mut u32,
+        last_log: &mut Option<LogMeta>,
     ) -> eyre::Result<()> {
         let events: Vec<RdTaskCompletedFilter> = self
             .clone()
@@ -1031,18 +1043,12 @@ impl Syncer {
                     .from_block(from_block)
                     .to_block(to_block),
             )
-            .query()
+            .query_with_meta()
             .await?;
 
-        for event in events {
+        for (event, log) in events {
             if latest_completed_rd_task_number >= event.task_response.reference_task_index {
                 continue;
-            }
-            if event.task_response.reference_task_index > *expected_rd_task_number {
-                return Err(eyre!(
-                    "missing expected_rd_task_number {:?}",
-                    expected_rd_task_number
-                ));
             }
 
             // Here expected_rd_task_number == event.task_response.reference_task_index
@@ -1056,9 +1062,9 @@ impl Syncer {
                     end: event.task_response.range_end,
                 });
                 *expected_batch_id += 1;
+                *last_log = Some(log);
             }
 
-            *expected_rd_task_number += 1;
         }
         Ok(())
     }
