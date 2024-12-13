@@ -81,7 +81,7 @@ impl AvsContracts {
     // Maybe add the task cancel event stream to check against that for early  exit
     pub fn source_response_stream(
         &self,
-        from_block: u32,
+        from_block: u64,
     ) -> Event<Arc<Provider<Ws>>, Provider<Ws>, FinalizerTaskManagerEvents> {
         self.task_manager_sub.event_with_filter(
             Filter::new()
@@ -89,7 +89,7 @@ impl AvsContracts {
                     OpTaskCompletedFilter::abi_signature().into_owned(),
                     RdTaskCompletedFilter::abi_signature().into_owned(),
                 ])
-                .from_block(u64::from(from_block)),
+                .from_block(from_block),
         )
     }
 }
