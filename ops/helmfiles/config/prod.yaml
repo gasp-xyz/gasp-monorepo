@@ -269,7 +269,8 @@ ferryWithdrawalEnvEth:
   LOOK_BACK_HOURS: 1
   LOG: silly
 ferryWithdrawalEnvSecretsEth:
-  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  # Address: 0x30f16a06B51649559438dABaf48c2b9D40aE1E0B
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-withdrawal-private-key
 
 ferryWithdrawalEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -281,7 +282,8 @@ ferryWithdrawalEnvArb:
   LOOK_BACK_HOURS: 1
   LOG: silly
 ferryWithdrawalEnvSecretsArb:
-  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  # Address: 0x30f16a06B51649559438dABaf48c2b9D40aE1E0B
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-withdrawal-private-key
 
 ferryWithdrawalEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -293,7 +295,8 @@ ferryWithdrawalEnvBase:
   LOG: silly
 ferryWithdrawalEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sepoliaBaseWssUrl
-  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  # Address: 0x30f16a06B51649559438dABaf48c2b9D40aE1E0B
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-withdrawal-private-key
 
 ########################
 # ferry-closer configs #
@@ -309,7 +312,8 @@ closerEnvEth:
   LOG: silly
 closerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
-  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-private-key
 
 closerEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -321,7 +325,8 @@ closerEnvArb:
   LOG: silly
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sepoliaArbitrumWssUrl
-  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-private-key
 
 closerEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -333,4 +338,5 @@ closerEnvBase:
   LOG: silly
 closerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sepoliaBaseWssUrl
-  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-private-key
