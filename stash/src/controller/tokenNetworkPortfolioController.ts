@@ -17,9 +17,12 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
       async ([storageKey, value]) => {
         const free = JSON.parse(JSON.stringify(value.toHuman())).free.toString()
         const freeWithoutCommas = free.replace(/,/g, '')
-        const frozen = JSON.parse(JSON.stringify(value)).frozen.toString()
+        const frozen = JSON.parse(
+          JSON.stringify(value.toHuman())
+        ).frozen.toString()
+        const frozenWithoutCommas = frozen.replace(/,/g, '')
         const freeTokens = new BN(freeWithoutCommas)
-        const frozenTokens = new BN(frozen)
+        const frozenTokens = new BN(frozenWithoutCommas)
         const freeBalance = freeTokens.sub(frozenTokens)
         const tokenId = storageKey.args[1].toString()
         let tokenBalanceInUsd: string
