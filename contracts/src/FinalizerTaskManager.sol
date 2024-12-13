@@ -265,7 +265,8 @@ contract FinalizerTaskManager is
             taskCreatedBlock: uint32(block.number),
             lastCompletedOpTaskQuorumThresholdPercentage: lastCompletedOpTaskQuorumThresholdPercentage,
             lastCompletedOpTaskQuorumNumbers: lastCompletedOpTaskQuorumNumbers,
-            lastCompletedOpTaskCreatedBlock: lastCompletedOpTaskCreatedBlock
+            lastCompletedOpTaskCreatedBlock: lastCompletedOpTaskCreatedBlock,
+            lastCompletedOpTaskNum: lastCompletedOpTaskNum
         });
 
         // store hash of task onchain, emit event, and increase taskNum
@@ -365,17 +366,19 @@ contract FinalizerTaskManager is
 
         // create a new task struct
         OpTask memory newTask;
-        newTask.taskNum = latestOpTaskNum;
+        newTask.taskNum = latestOpTaskNumMem;
         newTask.taskCreatedBlock = uint32(block.number);
         newTask.quorumThresholdPercentage = quorumThresholdPercentage;
         newTask.quorumNumbers = quorumNumbers;
         // This is to help the aggregator function as it currently is while 
         // being compatible with past op state verficiation
         if (lastCompletedOpTaskCreatedBlock == 0) {
+            newTask.lastCompletedOpTaskNum = latestOpTaskNumMem;
             newTask.lastCompletedOpTaskCreatedBlock = uint32(block.number);
             newTask.lastCompletedOpTaskQuorumNumbers = quorumNumbers;
             newTask.lastCompletedOpTaskQuorumThresholdPercentage = quorumThresholdPercentage;
         } else {
+            newTask.lastCompletedOpTaskNum = lastCompletedOpTaskNum;
             newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
             newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
             newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;

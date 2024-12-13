@@ -97,6 +97,7 @@ impl Syncer {
         event: FinalizerTaskManagerEvents,
         log: LogMeta,
         latest_completed_op_task_created_block: &mut u32,
+        latest_completed_op_task_number: &mut u32,
         latest_completed_rd_task_number: &mut u32,
     ) -> eyre::Result<()> {
         match event {
@@ -182,13 +183,17 @@ impl Syncer {
                     ));
                 }
 
-                // This branch is to account for the case where
-                // a task is completed in a block and another task is created
-                // in the same block and then that one is also completed in the same block
                 if *latest_completed_op_task_created_block
                     > call.task.last_completed_op_task_created_block
                 {
                     return Ok(());
+                }
+
+                // At this point either *latest_completed_op_task_created_block == 0
+                // or *latest_completed_op_task_created_block == call.task.last_completed_op_task_created_block
+
+                if *latest_completed_op_task_created_block != 0 && *latest_completed_op_task_number != call.task.last_completed_op_task_num {
+                    return Err(eyre!("missing expected task response {:?}, {:?}", *latest_completed_op_task_number, *latest_completed_op_task_created_block));
                 }
 
                 let update_txn = self.clone().gasp_service_contract.process_eigen_op_update(
@@ -215,6 +220,7 @@ impl Syncer {
 
                 info!("sucessfully synced op task - {:?}", call.task.clone());
                 *latest_completed_op_task_created_block = call.task.task_created_block;
+                *latest_completed_op_task_number = call.task.task_num;
             }
             FinalizerTaskManagerEvents::RdTaskCompletedFilter(_event) => {
                 let txn_hash = log.transaction_hash;
@@ -305,19 +311,22 @@ impl Syncer {
 
     #[instrument(skip_all, err)]
     pub async fn sync(self: Arc<Self>, cfg: &CliArgs) -> eyre::Result<()> {
-        // let latest_completed_op_task_number = self
-        //     .gasp_service_contract
-        //     .latest_completed_op_task_number()
-        //     .await?;
+        let alt_block_number: u64 = self.target_client.get_block_number().await?.as_u64();
+        let mut latest_completed_op_task_number = self
+            .gasp_service_contract
+            .latest_completed_op_task_number()
+            .block(alt_block_number)
+            .await?;
         let mut latest_completed_op_task_created_block = self
             .gasp_service_contract
             .latest_completed_op_task_created_block()
+            .block(alt_block_number)
             .await?;
         let mut latest_completed_rd_task_number = self
             .gasp_service_contract
             .latest_completed_rd_task_number()
+            .block(alt_block_number)
             .await?;
-        // let mut task_number_expected = latest_completed_task_number + 1;
 
         if latest_completed_op_task_created_block.is_zero() && !cfg.push_first_init {
             return Err(eyre!("target uninit and push_first_init set to false"));
@@ -358,7 +367,7 @@ impl Syncer {
                 
                 for (event, log) in events {
                     self.clone()
-                        .handle_sync_event(event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_rd_task_number)
+                        .handle_sync_event(event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number)
                         .await?;
                 }
 
@@ -390,7 +399,7 @@ impl Syncer {
             select! {
                 Some(stream_event) = stream.next() => match stream_event {
                     Ok((stream_event, log)) => {
-                        self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_rd_task_number).await?;
+                        self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number).await?;
                     }
                     Err(e) => error!("EthWs subscription error {:?}", e),
                 },
