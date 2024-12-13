@@ -241,6 +241,191 @@ pub fn rollup_local_config(
 	)
 }
 
+pub fn alpha_config(
+	randomize_chain_genesis_salt: bool,
+	chain_genesis_salt: Option<String>,
+	eth_sequencers: Vec<AccountId>,
+	arb_sequencers: Vec<AccountId>,
+	base_sequencers: Vec<AccountId>,
+	evm_chain: EvmChain,
+	decode_url: Option<String>,
+) -> ChainSpec {
+	let (gasp_token_address, eth_chain_id) = match evm_chain {
+		EvmChain::Holesky => (
+			array_bytes::hex2array("0x5620cDb94BaAaD10c20483bd8705DA711b2Bc0a3")
+				.expect("is correct address"),
+			17000u64,
+		),
+		EvmChain::Anvil => (
+			array_bytes::hex2array("0xc351628EB244ec633d5f21fBD6621e1a683B1181")
+				.expect("is correct address"),
+			31337u64,
+		),
+		EvmChain::Reth => (
+			array_bytes::hex2array("0xc351628EB244ec633d5f21fBD6621e1a683B1181")
+				.expect("is correct address"),
+			1337u64,
+		),
+	};
+
+	let mut chain_genesis_salt_arr: [u8; 32] = [0u8; 32];
+	if randomize_chain_genesis_salt {
+		thread_rng().fill(&mut chain_genesis_salt_arr[..]);
+	} else if let Some(salt) = chain_genesis_salt {
+		chain_genesis_salt_arr = array_bytes::hex2bytes(salt)
+			.expect("chain_genesis_salt should be hex")
+			.iter()
+			.chain(sp_std::iter::repeat(&0u8))
+			.take(32)
+			.cloned()
+			.collect::<Vec<_>>()
+			.try_into()
+			.expect("32 bytes");
+	}
+
+	// Give your base currency a unit name and decimal places
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "GASP".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42u32.into());
+	properties.insert("isEthereum".into(), true.into());
+	// This is quite useless here :/
+	properties.insert(
+		"chainGenesisSalt".into(),
+		array_bytes::bytes2hex("0x", chain_genesis_salt_arr).into(),
+	);
+
+	let decode_url = decode_url.unwrap_or(String::from(
+		"https://polkadot.js.org/apps/?rpc=ws%253A%252F%252F127.0.0.1%253A9944#/extrinsics/decode/",
+	));
+	// todo builder
+	ChainSpec::from_genesis(
+		// Name
+		"Rollup Local",
+		// ID
+		"rollup_local",
+		ChainType::Local,
+		move || {
+			let eth = eth_sequencers.clone();
+			let arb = arb_sequencers.clone();
+			let base = base_sequencers.clone();
+
+			let tokens_endowment = [
+				eth_sequencers.clone(),
+				arb_sequencers.clone(),
+				base_sequencers.clone(),
+				vec![
+					get_account_id_from_seed::<ecdsa::Public>("Alith"),
+					get_account_id_from_seed::<ecdsa::Public>("Baltathar"),
+					get_account_id_from_seed::<ecdsa::Public>("Charleth"),
+				],
+			]
+			.iter()
+			.flatten()
+			.cloned()
+			.map(|account_id| (0u32, 300_000_000__000_000_000_000_000_000u128, account_id))
+			.collect::<Vec<_>>();
+
+			rollup_genesis(
+				// chain genesis salt
+				H256::from(chain_genesis_salt_arr),
+				// initial collators.
+				vec![
+					(
+						get_account_id_from_seed::<ecdsa::Public>("Alith"),
+						authority_keys_from_seed("Alith"),
+					),
+					(
+						get_account_id_from_seed::<ecdsa::Public>("Baltathar"),
+						authority_keys_from_seed("Baltathar"),
+					),
+				],
+				// Sudo account
+				get_account_id_from_seed::<ecdsa::Public>("Alith"),
+				// Tokens endowment
+				tokens_endowment,
+				// Config for Staking
+				// Make sure it works with initial-authorities as staking uses both
+				(
+					vec![
+						(
+							// Who gets to stake initially
+							get_account_id_from_seed::<ecdsa::Public>("Alith"),
+							// Id of MGA token,
+							0u32,
+							// How much mangata they stake
+							100_000_000__000_000_000_000_000_000_u128,
+						),
+						(
+							// Who gets to stake initially
+							get_account_id_from_seed::<ecdsa::Public>("Baltathar"),
+							// Id of MGA token,
+							0u32,
+							// How much mangata they stake
+							80_000_000__000_000_000_000_000_000_u128,
+						),
+					],
+					vec![
+						// Who gets to stake initially
+						// Id of MGA token,
+						// How much mangata they pool
+						// Id of the dummy token,
+						// How many dummy tokens they pool,
+						// Id of the liquidity token that is generated
+						// How many liquidity tokens they stake,
+					],
+				),
+				vec![
+					(
+						RX_TOKEN_ID,
+						AssetMetadataOf {
+							decimals: 18,
+							name: BoundedVec::truncate_from(b"Gasp".to_vec()),
+							symbol: BoundedVec::truncate_from(b"GASP".to_vec()),
+							additional: Default::default(),
+							existential_deposit: Default::default(),
+						},
+						Some(L1Asset::Ethereum(gasp_token_address)),
+					),
+					(
+						1,
+						AssetMetadataOf {
+							decimals: 18,
+							name: BoundedVec::truncate_from(b"Gasp Ethereum".to_vec()),
+							symbol: BoundedVec::truncate_from(b"GETH".to_vec()),
+							additional: Default::default(),
+							existential_deposit: Default::default(),
+						},
+						Some(L1Asset::Ethereum(
+							array_bytes::hex2array("0x0000000000000000000000000000000000000001")
+								.unwrap(),
+						)),
+					),
+				],
+				eth,
+				arb,
+				base,
+				eth_chain_id,
+				decode_url.clone(),
+			)
+		},
+		// Bootnodes
+		Vec::new(),
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// ForkId
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		None,
+		// code
+		rollup_runtime::WASM_BINARY.expect("WASM binary was not build, please build it!"),
+	)
+}
+
 /// Configure initial storage state for FRAME modules.
 fn rollup_genesis(
 	chain_genesis_salt: H256,
