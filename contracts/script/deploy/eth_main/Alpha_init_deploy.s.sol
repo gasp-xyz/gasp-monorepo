@@ -48,6 +48,8 @@ contract Deployer is Script, Utils, Test {
     bool public allowNonRootTmInit;
     uint32 public taskResponseWindowBlocks;
 
+    uint256 public regCoordPaused;
+
     // non-upgradable contracts
     BLSSignatureChecker public blsSignatureChecker;
     OperatorStateRetrieverExtended public operatorStateRetreiverExtended;
@@ -110,6 +112,8 @@ contract Deployer is Script, Utils, Test {
         taskResponseWindowBlocks = uint32(stdJson.readUint(configData, ".taskManagerParams.taskResponseWindowBlocks"));
 
         allowNonRootTmInit = stdJson.readBool(configData, ".allowNonRootTmInit");
+
+        regCoordPaused = uint256(stdJson.readUint(configData, ".registryCoordinator.paused"));
 
         // START BROADCAST
         vm.startBroadcast();
@@ -221,7 +225,7 @@ contract Deployer is Script, Utils, Test {
                 churner,
                 address(serviceManager),
                 avsPauserReg,
-                0,
+                regCoordPaused,
                 operatorSetParams,
                 minimumStakeForQuorum,
                 strategyAndWeightingMultipliers
@@ -296,6 +300,8 @@ contract Deployer is Script, Utils, Test {
         _verifyInitalizations(
             churner, ejector, operatorSetParams, minimumStakeForQuorum, strategyAndWeightingMultipliers
         );
+
+        _checkPauserInitializations();
 
         //write output
         _writeOutput(churner, ejector, aggregator, unpauseMultisig);
@@ -410,11 +416,6 @@ contract Deployer is Script, Utils, Test {
         require(
             registryCoordinator.ejector() == address(serviceManager), "registryCoordinator.ejector() != serviceManager"
         );
-        require(
-            registryCoordinator.pauserRegistry() == avsPauserReg,
-            "registryCoordinator: pauser registry not set correctly"
-        );
-        require(registryCoordinator.paused() == 0, "registryCoordinator: init paused status set incorrectly");
 
         for (uint8 i = 0; i < operatorSetParams.length; ++i) {
             require(
@@ -450,6 +451,19 @@ contract Deployer is Script, Utils, Test {
                 && operatorSetParams.length == minimumStakeForQuorum.length,
             "operatorSetParams, strategyAndWeightingMultipliers, and minimumStakeForQuorum must be the same length"
         );
+    }
+
+    function _checkPauserInitializations() internal view {
+        require(registryCoordinator.pauserRegistry() == avsPauserReg,"registryCoordinator: pauser registry not set correctly");
+        require(taskManager.pauserRegistry() == avsPauserReg, "taskManager: pauser registry not set correctly");
+
+        require(avsPauserReg.isPauser(avsOwner), "pauserRegistry: avsOwner is not pauser");
+        require(avsPauserReg.unpauser() == avsOwner, "pauserRegistry: unpauser not set correctly");
+
+        // PAUSED_REGISTER_OPERATOR = 0; 2**0 = 1
+        require(registryCoordinator.paused() == 1, "registryCoordinator: init paused status set incorrectly");
+        require(taskManager.paused() == 0, "taskManager: init paused status set incorrectly");
+        require(rolldown.paused() == false, "rolldown: init paused status set incorrectly");
     }
 
     function _writeOutput(address churner, address ejector, address aggregator, address multisig) internal {

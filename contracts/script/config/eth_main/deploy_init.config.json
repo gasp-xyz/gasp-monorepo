@@ -74,16 +74,19 @@
 
   "operatorSetParams": [
     {
-      "0_maxOperatorCount": 1000,
+      "0_maxOperatorCount": 10,
       "1_kickBIPsOfOperatorStake": 11000,
       "2_kickBIPsOfTotalStake": 50
     }
   ],
 
   "taskManagerParams": {
-    "taskResponseWindowBlocks": 10000
+    "taskResponseWindowBlocks": 1000
   },
   "registryParams": {
     "recurrentRegistrationLimit": 0
+  },
+  "registryCoordinator": {
+    "paused": 1
   }
 }
