@@ -176,10 +176,16 @@ impl Syncer {
                 // if latest_completed_op_task_created_block == 0, then we are looking for the
                 // first task
                 if *latest_completed_op_task_created_block == 0 {
-                    if call.task.task_created_block != call.task.last_completed_op_task_created_block || call.task.task_num != call.task.last_completed_op_task_num {
+                    if call.task.task_created_block
+                        != call.task.last_completed_op_task_created_block
+                        || call.task.task_num != call.task.last_completed_op_task_num
+                    {
                         return Err(eyre!(
                             "missing expected first op task response {:?} {:?} {:?} {:?}",
-                            call.task.task_created_block, call.task.last_completed_op_task_created_block, call.task.task_num, call.task.last_completed_op_task_num
+                            call.task.task_created_block,
+                            call.task.last_completed_op_task_created_block,
+                            call.task.task_num,
+                            call.task.last_completed_op_task_num
                         ));
                     }
                 } else {
@@ -200,8 +206,7 @@ impl Syncer {
 
                     // At this point *latest_completed_op_task_created_block == call.task.last_completed_op_task_created_block
 
-                    if *latest_completed_op_task_number != call.task.last_completed_op_task_num
-                    {
+                    if *latest_completed_op_task_number != call.task.last_completed_op_task_num {
                         return Err(eyre!(
                             "missing expected task response {:?}, {:?}",
                             *latest_completed_op_task_number,
@@ -209,7 +214,7 @@ impl Syncer {
                         ));
                     }
                 }
-                
+
                 let update_txn = self.clone().gasp_service_contract.process_eigen_op_update(
                     call.task.clone(),
                     call.task_response,
@@ -291,7 +296,11 @@ impl Syncer {
 
                 if let Some(n) = *last_processed_rd_task_number {
                     if n >= call.task.task_num {
-                        return Err(eyre!("out of order or duplicate rdTaskCompleted events {:?}, {:?}", n, call.task.task_num));
+                        return Err(eyre!(
+                            "out of order or duplicate rdTaskCompleted events {:?}, {:?}",
+                            n,
+                            call.task.task_num
+                        ));
                     }
                 }
 
