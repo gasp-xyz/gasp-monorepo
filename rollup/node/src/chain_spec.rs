@@ -673,11 +673,9 @@ fn rollup_genesis(
 		foundation_members: rollup_runtime::FoundationMembersConfig {
 			members: BoundedVec::truncate_from(
 				[
-					// TODO AccountId20
-					// Change the following
-					hex_literal::hex!["c8d02dfbff5ce2fda651c7dd7719bc5b17b9c104"],
-					hex_literal::hex!["c4690c56c36cec7ed5f6ed5d5eebace0c317073a"],
-					hex_literal::hex!["fc741134c82b81b7ab7efbf334b0c90ff8dbf22c"],
+					hex_literal::hex!["9cA8aFB1326c99EC23B8D4e16C0162Bb206D83b8"],
+					hex_literal::hex!["8960911c51EaD00db4cCA88FAF395672458da676"],
+					hex_literal::hex!["35dbD8Bd2c5617541bd9D9D8e065adf92275b83E"],
 				]
 				.iter()
 				.map(|acc| sp_runtime::AccountId20::from(*acc))
