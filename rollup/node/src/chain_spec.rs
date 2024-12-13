@@ -586,7 +586,18 @@ fn rollup_genesis(
 			swap_value_threshold: Some(50u128 * currency::DOLLARS),
 			whitelisted_tokens: Default::default(),
 		},
-		council: Default::default(),
+		council: rollup_runtime::CouncilConfig {
+			phantom: Default::default(),
+			members: vec![
+				hex_literal::hex!("35dbD8Bd2c5617541bd9D9D8e065adf92275b83E").into(),
+				hex_literal::hex!("7368bff2fBB4C7B05f854c370eeDD6809186917B").into(),
+				hex_literal::hex!("9cA8aFB1326c99EC23B8D4e16C0162Bb206D83b8").into(),
+				hex_literal::hex!("8b5368B4BBa80475c9DFb70543F6090A7e986F39").into(),
+				hex_literal::hex!("aF3cA574A4903c5ddC7378Ac60d786a2664CbD91").into(),
+				hex_literal::hex!("584728a637303e753906a4F05CD8Ced10D80eB5e").into(),
+				hex_literal::hex!("8960911c51EaD00db4cCA88FAF395672458da676").into(),
+			],
+		},
 		transaction_payment: Default::default(),
 		sudo: rollup_runtime::SudoConfig {
 			// Assign network admin rights.
