@@ -999,15 +999,15 @@ pub mod config {
 			pub const SequencerIssuanceVaultId: PalletId = PalletId(*b"py/seqiv");
 			pub SequencerIssuanceVault: AccountId = SequencerIssuanceVaultId::get().into_account_truncating();
 
-			pub const TotalCrowdloanAllocation: Balance = 330_000_000 * DOLLARS;
-			pub const IssuanceCap: Balance = 4_000_000_000 * DOLLARS;
-			pub const LinearIssuanceBlocks: u32 = 13_140_000u32; // 5 years
-			pub const LiquidityMiningSplit: Perbill = Perbill::from_parts(555555556);
-			pub const StakingSplit: Perbill = Perbill::from_parts(344444444);
-			pub const SequencerSplit: Perbill = Perbill::from_parts(100000000);
+			pub const TotalCrowdloanAllocation: Balance = 0 * DOLLARS;
+			pub const IssuanceCap: Balance = 20_400_000 * DOLLARS;
+			pub const LinearIssuanceBlocks: u32 = 10_512_000u32; // 5 years
+			pub const LiquidityMiningSplit: Perbill = Perbill::from_parts(647058823);
+			pub const StakingSplit: Perbill = Perbill::from_parts(235294118);
+			pub const SequencerSplit: Perbill = Perbill::from_parts(117647059);
 			pub const ImmediateTGEReleasePercent: Percent = Percent::from_percent(20);
-			pub const TGEReleasePeriod: u32 = 5_256_000u32; // 2 years
-			pub const TGEReleaseBegin: u32 = 100_800u32; // Two weeks into chain start
+			pub const TGEReleasePeriod: u32 = 0u32; // 2 years
+			pub const TGEReleaseBegin: u32 = 0u32; // Two weeks into chain start
 		}
 	}
 
