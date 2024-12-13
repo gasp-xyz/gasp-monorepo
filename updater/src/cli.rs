@@ -38,6 +38,9 @@ pub struct CliArgs {
     #[serde(skip)]
     pub ecdsa_key_password: Option<String>,
 
+    #[arg(long, env, default_value_t = 4000)]
+    pub filter_limit: u64,
+
     #[arg(long, env, default_value_t = false)]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub testnet: bool,
