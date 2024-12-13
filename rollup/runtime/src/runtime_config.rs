@@ -1002,9 +1002,9 @@ pub mod config {
 			pub const TotalCrowdloanAllocation: Balance = 0 * DOLLARS;
 			pub const IssuanceCap: Balance = 20_400_000 * DOLLARS;
 			pub const LinearIssuanceBlocks: u32 = 10_512_000u32; // 5 years
-			pub const LiquidityMiningSplit: Perbill = Perbill::from_parts(647058823);
-			pub const StakingSplit: Perbill = Perbill::from_parts(235294118);
-			pub const SequencerSplit: Perbill = Perbill::from_parts(117647059);
+			pub const LiquidityMiningSplit: Perbill = Perbill::from_parts(647050000); // 13'199'820
+			pub const StakingSplit: Perbill = Perbill::from_parts(235300000); // 4'800'120
+			pub const SequencerSplit: Perbill = Perbill::from_parts(117650000); // 2'400'060
 			pub const ImmediateTGEReleasePercent: Percent = Percent::from_percent(20);
 			pub const TGEReleasePeriod: u32 = 0u32; // 2 years
 			pub const TGEReleaseBegin: u32 = 0u32; // Two weeks into chain start
