@@ -99,6 +99,7 @@ impl Syncer {
         latest_completed_op_task_created_block: &mut u32,
         latest_completed_op_task_number: &mut u32,
         latest_completed_rd_task_number: &mut u32,
+        last_processed_rd_task_number: &mut Option<u32>,
     ) -> eyre::Result<()> {
         match event {
             FinalizerTaskManagerEvents::OpTaskCompletedFilter(_event) => {
@@ -377,7 +378,7 @@ impl Syncer {
             return Err(eyre!("invalid latest_completed_op_task_created_block"));
         }
 
-        let mut target_block_number: u64 = source_block_number.saturating_sub(1u64);
+        let target_block_number: u64 = source_block_number.saturating_sub(1u64);
         let mut from_block: u64 = latest_completed_op_task_created_block.into();
 
         if target_block_number >= from_block {
