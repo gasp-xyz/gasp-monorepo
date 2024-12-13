@@ -62,7 +62,7 @@ pub mod tokens {
 		pub const RxTokenId: TokenId = RX_TOKEN_ID;
 		pub const EthTokenId: TokenId = ETH_TOKEN_ID;
 		pub ArbitrageBotAddr: AccountId = sp_runtime::AccountId20::from(
-			hex_literal::hex!["fc741134c82b81b7ab7efbf334b0c90ff8dbf22c"]
+			hex_literal::hex!["0286Ffa54213778E064179E9B6F083ecb584E862"]
 		);
 	}
 }
@@ -1331,9 +1331,9 @@ pub mod config {
 		impl Convert<::pallet_rolldown::messages::Chain, Balance> for WithdrawFee {
 			fn convert(chain: ::pallet_rolldown::messages::Chain) -> Balance {
 				match chain {
-					::pallet_rolldown::messages::Chain::Ethereum => 50 * currency::DOLLARS,
-					::pallet_rolldown::messages::Chain::Arbitrum => 50 * currency::DOLLARS,
-					::pallet_rolldown::messages::Chain::Base => 50 * currency::DOLLARS,
+					::pallet_rolldown::messages::Chain::Ethereum => 5 * currency::DOLLARS,
+					::pallet_rolldown::messages::Chain::Arbitrum => 5 * currency::DOLLARS,
+					::pallet_rolldown::messages::Chain::Base => 5 * currency::DOLLARS,
 				}
 			}
 		}
