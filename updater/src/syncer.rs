@@ -1010,7 +1010,10 @@ impl Syncer {
                 debug!("{:?}", call.task.clone());
                 (call.task.task_num, call.task.task_created_block)
             } else {
-                (latest_completed_rd_task_number, latest_completed_rd_task_created_block)
+                (
+                    latest_completed_rd_task_number,
+                    latest_completed_rd_task_created_block,
+                )
             };
 
         Ok((
@@ -1064,7 +1067,6 @@ impl Syncer {
                 *expected_batch_id += 1;
                 *last_log = Some(log);
             }
-
         }
         Ok(())
     }
