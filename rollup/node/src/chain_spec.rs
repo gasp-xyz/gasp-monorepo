@@ -243,8 +243,8 @@ pub fn rollup_local_config(
 }
 
 pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
-	let (gasp_token_address, eth_chain_id) = ([0u8; 20], 1u64);
-	let mut chain_genesis_salt_arr: [u8; 32] =
+	let (_gasp_token_address, eth_chain_id) = ([0u8; 20], 1u64);
+	let chain_genesis_salt_arr: [u8; 32] =
 		hex_literal::hex!("0011001100110011001100110011001100110011001100110011001100110011");
 
 	let collator01 = hex_literal::hex!("b9fcA08B9cA327a1dE90FDB4d51aa5ae6Ffe512a");
@@ -368,7 +368,7 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 							// Id of MGA token,
 							0u32,
 							// How much mangata they stake
-							1__000_000u128 * currency::DOLLARS,
+							2__000_000u128 * currency::DOLLARS,
 						),
 						(
 							// Who gets to stake initially
@@ -376,7 +376,23 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 							// Id of MGA token,
 							0u32,
 							// How much mangata they stake
-							1__000_000u128 * currency::DOLLARS,
+							2__000_000u128 * currency::DOLLARS,
+						),
+						(
+							// Who gets to stake initially
+							collator03.into(),
+							// Id of MGA token,
+							0u32,
+							// How much mangata they stake
+							2__000_000u128 * currency::DOLLARS,
+						),
+						(
+							// Who gets to stake initially
+							collator04.into(),
+							// Id of MGA token,
+							0u32,
+							// How much mangata they stake
+							2__000_000u128 * currency::DOLLARS,
 						),
 					],
 					vec![
@@ -606,7 +622,7 @@ fn rollup_genesis(
 					.map(|seq| {
 						(
 							seq,
-							pallet_rolldown::messages::Chain::Ethereum,
+							pallet_rolldown::messages::Chain::Arbitrum,
 							100u128 * currency::DOLLARS,
 						)
 					})
@@ -614,11 +630,7 @@ fn rollup_genesis(
 				base_initial_sequencers
 					.into_iter()
 					.map(|seq| {
-						(
-							seq,
-							pallet_rolldown::messages::Chain::Ethereum,
-							100u128 * currency::DOLLARS,
-						)
+						(seq, pallet_rolldown::messages::Chain::Base, 100u128 * currency::DOLLARS)
 					})
 					.collect::<Vec<_>>(),
 			]
