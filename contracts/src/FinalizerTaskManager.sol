@@ -372,6 +372,7 @@ contract FinalizerTaskManager is
         newTask.quorumNumbers = quorumNumbers;
         // This is to help the aggregator function as it currently is while 
         // being compatible with past op state verficiation
+        // And also to avoid an if condition in the respondToOpTask function
         if (lastCompletedOpTaskCreatedBlock == 0) {
             newTask.lastCompletedOpTaskNum = latestOpTaskNumMem;
             newTask.lastCompletedOpTaskCreatedBlock = uint32(block.number);

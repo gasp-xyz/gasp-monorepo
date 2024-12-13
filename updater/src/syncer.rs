@@ -173,35 +173,43 @@ impl Syncer {
                     ));
                 }
 
-                if *latest_completed_op_task_created_block != 0
-                    && *latest_completed_op_task_created_block
+                // if latest_completed_op_task_created_block == 0, then we are looking for the
+                // first task
+                if *latest_completed_op_task_created_block == 0 {
+                    if call.task.task_created_block != call.task.last_completed_op_task_created_block || call.task.task_num != call.task.last_completed_op_task_num {
+                        return Err(eyre!(
+                            "missing expected first op task response {:?} {:?} {:?} {:?}",
+                            call.task.task_created_block, call.task.last_completed_op_task_created_block, call.task.task_num, call.task.last_completed_op_task_num
+                        ));
+                    }
+                } else {
+                    if *latest_completed_op_task_created_block
                         < call.task.last_completed_op_task_created_block
-                {
-                    return Err(eyre!(
-                        "missing expected task response {:?}",
-                        *latest_completed_op_task_created_block
-                    ));
+                    {
+                        return Err(eyre!(
+                            "missing expected task response {:?}",
+                            *latest_completed_op_task_created_block
+                        ));
+                    }
+
+                    if *latest_completed_op_task_created_block
+                        > call.task.last_completed_op_task_created_block
+                    {
+                        return Ok(());
+                    }
+
+                    // At this point *latest_completed_op_task_created_block == call.task.last_completed_op_task_created_block
+
+                    if *latest_completed_op_task_number != call.task.last_completed_op_task_num
+                    {
+                        return Err(eyre!(
+                            "missing expected task response {:?}, {:?}",
+                            *latest_completed_op_task_number,
+                            *latest_completed_op_task_created_block
+                        ));
+                    }
                 }
-
-                if *latest_completed_op_task_created_block
-                    > call.task.last_completed_op_task_created_block
-                {
-                    return Ok(());
-                }
-
-                // At this point either *latest_completed_op_task_created_block == 0
-                // or *latest_completed_op_task_created_block == call.task.last_completed_op_task_created_block
-
-                if *latest_completed_op_task_created_block != 0
-                    && *latest_completed_op_task_number != call.task.last_completed_op_task_num
-                {
-                    return Err(eyre!(
-                        "missing expected task response {:?}, {:?}",
-                        *latest_completed_op_task_number,
-                        *latest_completed_op_task_created_block
-                    ));
-                }
-
+                
                 let update_txn = self.clone().gasp_service_contract.process_eigen_op_update(
                     call.task.clone(),
                     call.task_response,
@@ -271,10 +279,20 @@ impl Syncer {
                     return Err(eyre!("task_hash mismatch {:?}", task_hash));
                 }
 
+                // We don't really know which rdTask number to expect here
+                // It can always happen that the updater just restarted and acccepted
+                // an out of order rdTask (avoiding the below check), but when it tries to push this out of order
+                // rdTask to the alt-l1 it will fail due to the chain_rd_batch_nonce
                 if *latest_completed_rd_task_number != 0
                     && *latest_completed_rd_task_number >= call.task.task_num
                 {
                     return Ok(());
+                }
+
+                if let Some(n) = *last_processed_rd_task_number {
+                    if n >= call.task.task_num {
+                        return Err(eyre!("out of order or duplicate rdTaskCompleted events {:?}, {:?}", n, call.task.task_num));
+                    }
                 }
 
                 if *latest_completed_op_task_created_block
@@ -309,6 +327,7 @@ impl Syncer {
 
                 info!("sucessfully synced rd task - {:?}", call.task.clone());
                 *latest_completed_rd_task_number = call.task.task_num;
+                *last_processed_rd_task_number = Some(call.task.task_num);
             }
             _ => return Err(eyre!("Got unexpected stream event")),
         }
@@ -337,6 +356,11 @@ impl Syncer {
         if latest_completed_op_task_created_block.is_zero() && !cfg.push_first_init {
             return Err(eyre!("target uninit and push_first_init set to false"));
         }
+
+        // TODO
+        // To avoid this we should also link new rdTasks with the last completed ones (atleast the ones on the same chain)
+        // But requires more info to be stored in either the alt-l1s or eth-l1s
+        let mut last_processed_rd_task_number: Option<u32> = None;
 
         let source_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
 
@@ -379,6 +403,7 @@ impl Syncer {
                             &mut latest_completed_op_task_created_block,
                             &mut latest_completed_op_task_number,
                             &mut latest_completed_rd_task_number,
+                            &mut last_processed_rd_task_number,
                         )
                         .await?;
                 }
@@ -411,7 +436,7 @@ impl Syncer {
             select! {
                 Some(stream_event) = stream.next() => match stream_event {
                     Ok((stream_event, log)) => {
-                        self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number).await?;
+                        self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number, &mut last_processed_rd_task_number).await?;
                     }
                     Err(e) => error!("EthWs subscription error {:?}", e),
                 },
