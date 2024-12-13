@@ -65,6 +65,34 @@ collator:
       - --rpc-max-connections=5000
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-c
+  collator03:
+    enabled: true
+    # Identity ID: 12D3KooWMG7Benq1sMjRzgf1wATin9t61Rt88LuE1a5exx5WcPm9
+    customNodeKey: ref+sops://secrets.enc.yaml#/rollupProdCollator03CustomNodeKey
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    accountKeys:
+      - type: aura
+        scheme: sr25519
+        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-03-session-key-seed
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=5000
+    nodeSelector:
+      topology.kubernetes.io/zone: europe-west1-b
+  collator04:
+    enabled: true
+    # Identity ID: 12D3KooWDq43eHqWDhW4J1gZpDuQDxUCKirD3sQvyjp9m5udxiEN
+    customNodeKey: ref+sops://secrets.enc.yaml#/rollupProdCollator04CustomNodeKey
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    accountKeys:
+      - type: aura
+        scheme: sr25519
+        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-04-session-key-seed
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=5000
+    nodeSelector:
+      topology.kubernetes.io/zone: europe-west1-c
   rpc01:
     bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:

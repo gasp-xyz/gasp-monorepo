@@ -64,6 +64,68 @@ releases:
         bootnodeAddr: {{ .Values.collator.collator02.bootnodeAddr }}
         extraArgs: {{ .Values.collator.collator02.extraArgs | toYaml | nindent 10 }}
         accountKeys: {{ .Values | getOrNil "collator.collator02.accountKeys" | toYaml | nindent 10 }}
+
+  - name: collator-03
+    installed: {{  .Values | getOrNil "collators.collator03.enabled" | toYaml  }}
+    chart: mangata-node/node
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    values:
+      - image:
+          repository: {{ .Values.collator.image.repository | quote }}
+          tag: {{ .Values.collator.image.tag | quote }}
+        environment: 'rollup-{{ .Values.environmentName }}'
+        chain: {{ .Values | getOrNil "collator.chain" }}
+        disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
+        customChainspecUrl: {{ .Values | get "collator.customChainspecUrl" "" }}
+        domainZone: gasp.xyz
+        command: '/app/node'
+        isParachain: false
+        isCollator: false
+        role: collator
+        remoteCluster: {{ .Values.remoteCluster }}
+        wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
+        enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
+        storageClass: {{ .Values.collator.storageClass | quote }}
+        storageSize: {{ .Values.collator.storageSize | quote }}
+        resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
+        tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
+        # collator-02 specific configs
+        nodeSelector: {{ .Values | getOrNil "collator.collator03.nodeSelector" | toYaml | nindent 10 }}
+        customNodeKey: {{ .Values.collator.collator03.customNodeKey }}
+        bootnodeAddr: {{ .Values.collator.collator03.bootnodeAddr }}
+        extraArgs: {{ .Values.collator.collator03.extraArgs | toYaml | nindent 10 }}
+        accountKeys: {{ .Values | getOrNil "collator.collator03.accountKeys" | toYaml | nindent 10 }}
+
+  - name: collator-04
+    installed: {{  .Values | getOrNil "collators.collator04.enabled" | toYaml }}
+    chart: mangata-node/node
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    values:
+      - image:
+          repository: {{ .Values.collator.image.repository | quote }}
+          tag: {{ .Values.collator.image.tag | quote }}
+        environment: 'rollup-{{ .Values.environmentName }}'
+        chain: {{ .Values | getOrNil "collator.chain" }}
+        disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
+        customChainspecUrl: {{ .Values | get "collator.customChainspecUrl" "" }}
+        domainZone: gasp.xyz
+        command: '/app/node'
+        isParachain: false
+        isCollator: false
+        role: collator
+        remoteCluster: {{ .Values.remoteCluster }}
+        wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
+        enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
+        storageClass: {{ .Values.collator.storageClass | quote }}
+        storageSize: {{ .Values.collator.storageSize | quote }}
+        resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
+        tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
+        # collator-02 specific configs
+        nodeSelector: {{ .Values | getOrNil "collator.collator04.nodeSelector" | toYaml | nindent 10 }}
+        customNodeKey: {{ .Values.collator.collator04.customNodeKey }}
+        bootnodeAddr: {{ .Values.collator.collator04.bootnodeAddr }}
+        extraArgs: {{ .Values.collator.collator04.extraArgs | toYaml | nindent 10 }}
+        accountKeys: {{ .Values | getOrNil "collator.collator04.accountKeys" | toYaml | nindent 10 }}
   
   - name: rpc-01
     installed: {{ .Values.collatorRpcNodesEnabled }}
@@ -159,7 +221,7 @@ releases:
           - --rpc-max-connections=20000
 
   - name: rpc-shared-dns-record
-    installed: {{ .Values | getOrNil "collatorRpcNodesEnableSharedDnsRecord" }}
+    installed: {{ .Values | getOrNil "collatorRpcNodesEnableSharedDnsRecord" | toYaml }}
     namespace: 'rollup-{{ .Values.environmentName }}'
     chart: ../../../helm-charts/shared-dns-record
     values:
