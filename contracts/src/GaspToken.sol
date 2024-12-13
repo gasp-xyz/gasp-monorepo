@@ -12,9 +12,9 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     string private constant _NAME = "GASP";
     string private constant _SYMBOL = "GASP";
 
-    mapping(address => bool) public whitelist;
-    address public uniswapPool;
-    bool public allowTransfers;
+    mapping(address => bool) public override whitelist;
+    address public override uniswapPool;
+    bool public override allowTransfers;
 
     modifier isWhitelisted(address[2] memory addresses, bytes4 selector) {
         if (!allowTransfers) {

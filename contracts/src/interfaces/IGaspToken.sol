@@ -37,4 +37,10 @@ interface IGaspToken is IERC20 {
     function increaseAllowance(address spender, uint256 addedAmount) external returns (bool);
 
     function decreaseAllowance(address spender, uint256 subtractedAmount) external returns (bool);
+
+    function whitelist(address account) external view returns (bool enabled);
+
+    function uniswapPool() external view returns (address);
+
+    function allowTransfers() external view returns (bool);
 }
