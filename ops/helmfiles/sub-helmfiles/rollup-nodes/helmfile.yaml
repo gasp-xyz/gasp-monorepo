@@ -91,9 +91,9 @@ releases:
         tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
         # collator-02 specific configs
         nodeSelector: {{ .Values | getOrNil "collator.collator03.nodeSelector" | toYaml | nindent 10 }}
-        customNodeKey: {{ .Values.collator.collator03.customNodeKey }}
-        bootnodeAddr: {{ .Values.collator.collator03.bootnodeAddr }}
-        extraArgs: {{ .Values.collator.collator03.extraArgs | toYaml | nindent 10 }}
+        customNodeKey: {{ .Values | getOrNil "collator.collator03.customNodeKey" }}
+        bootnodeAddr: {{ .Values | getOrNil "collator.collator03.bootnodeAddr" }}
+        extraArgs: {{ .Values | getOrNil "collator.collator03.extraArgs" | toYaml | nindent 10 }}
         accountKeys: {{ .Values | getOrNil "collator.collator03.accountKeys" | toYaml | nindent 10 }}
 
   - name: collator-04
@@ -122,9 +122,9 @@ releases:
         tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
         # collator-02 specific configs
         nodeSelector: {{ .Values | getOrNil "collator.collator04.nodeSelector" | toYaml | nindent 10 }}
-        customNodeKey: {{ .Values.collator.collator04.customNodeKey }}
-        bootnodeAddr: {{ .Values.collator.collator04.bootnodeAddr }}
-        extraArgs: {{ .Values.collator.collator04.extraArgs | toYaml | nindent 10 }}
+        customNodeKey: {{ .Values | getOrNil "collator.collator04.customNodeKey" }}
+        bootnodeAddr: {{ .Values | getOrNil "collator.collator04.bootnodeAddr" }}
+        extraArgs: {{ .Values | getOrNil "collator.collator04.extraArgs" | toYaml | nindent 10 }}
         accountKeys: {{ .Values | getOrNil "collator.collator04.accountKeys" | toYaml | nindent 10 }}
   
   - name: rpc-01
