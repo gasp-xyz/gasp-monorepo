@@ -4,9 +4,9 @@ use crate::cli::CliArgs;
 use bindings::{
     finalizer_task_manager::{
         FinalizerTaskManager, FinalizerTaskManagerCalls, FinalizerTaskManagerEvents,
-        NewOpTaskCreatedFilter, Operator as TMOperator, OperatorStateInfo, OperatorsAdded,
-        OperatorsQuorumCountUpdate, OperatorsStakeUpdate, QuorumsAdded, QuorumsApkUpdate,
-        QuorumsStakeUpdate, RdTaskCompletedFilter, OpTaskCompletedFilter
+        NewOpTaskCreatedFilter, OpTaskCompletedFilter, Operator as TMOperator, OperatorStateInfo,
+        OperatorsAdded, OperatorsQuorumCountUpdate, OperatorsStakeUpdate, QuorumsAdded,
+        QuorumsApkUpdate, QuorumsStakeUpdate, RdTaskCompletedFilter,
     },
     gasp_multi_rollup_service::{GaspMultiRollupService, Range},
     shared_types::{OpTask, OpTaskResponse},
@@ -192,8 +192,14 @@ impl Syncer {
                 // At this point either *latest_completed_op_task_created_block == 0
                 // or *latest_completed_op_task_created_block == call.task.last_completed_op_task_created_block
 
-                if *latest_completed_op_task_created_block != 0 && *latest_completed_op_task_number != call.task.last_completed_op_task_num {
-                    return Err(eyre!("missing expected task response {:?}, {:?}", *latest_completed_op_task_number, *latest_completed_op_task_created_block));
+                if *latest_completed_op_task_created_block != 0
+                    && *latest_completed_op_task_number != call.task.last_completed_op_task_num
+                {
+                    return Err(eyre!(
+                        "missing expected task response {:?}, {:?}",
+                        *latest_completed_op_task_number,
+                        *latest_completed_op_task_created_block
+                    ));
                 }
 
                 let update_txn = self.clone().gasp_service_contract.process_eigen_op_update(
@@ -364,10 +370,16 @@ impl Syncer {
                     )
                     .query_with_meta()
                     .await?;
-                
+
                 for (event, log) in events {
                     self.clone()
-                        .handle_sync_event(event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number)
+                        .handle_sync_event(
+                            event,
+                            log,
+                            &mut latest_completed_op_task_created_block,
+                            &mut latest_completed_op_task_number,
+                            &mut latest_completed_rd_task_number,
+                        )
                         .await?;
                 }
 
