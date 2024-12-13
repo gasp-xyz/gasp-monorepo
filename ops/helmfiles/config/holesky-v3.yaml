@@ -15,6 +15,7 @@ evmNode:
 #####################
 collatorsEnabled: true
 collatorRpcNodesEnabled: true
+collatorRpcNodesEnableSharedDnsRecord: true
 collator:
   resources:
     requests:
@@ -65,6 +66,18 @@ collator:
     nodeSelector:
       production: "true"
       topology.kubernetes.io/zone: europe-west1-c
+  rpc01:
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
+    nodeSelector:
+      topology.kubernetes.io/zone: europe-west1-b
+  rpc02:
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
+    nodeSelector:
+      topology.kubernetes.io/zone: europe-west1-c
+  rpc03:
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
+    nodeSelector:
+      topology.kubernetes.io/zone: europe-west1-b
 
 ######################
 # aggregator configs #

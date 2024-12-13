@@ -1,7 +1,6 @@
 bases: ['environments.yaml']
 ---
 helmDefaults:
-  kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
   wait: false
   # diffArgs:
   #   - "--suppress" 
