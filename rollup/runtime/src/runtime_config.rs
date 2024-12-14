@@ -1006,8 +1006,10 @@ pub mod config {
 			pub const StakingSplit: Perbill = Perbill::from_parts(235300000); // 4'800'120
 			pub const SequencerSplit: Perbill = Perbill::from_parts(117650000); // 2'400'060
 			pub const ImmediateTGEReleasePercent: Percent = Percent::from_percent(20);
-			pub const TGEReleasePeriod: u32 = 0u32; // 2 years
-			pub const TGEReleaseBegin: u32 = 0u32; // Two weeks into chain start
+			// Just some safe values to avoid zero diision etc
+			// TGE happens on L1 either way
+			pub const TGEReleasePeriod: u32 = 100u32; // 2 years
+			pub const TGEReleaseBegin: u32 = 10u32; // Two weeks into chain start
 		}
 	}
 
