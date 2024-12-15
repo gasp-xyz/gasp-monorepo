@@ -4,8 +4,6 @@ pragma solidity 0.8.13;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IGaspToken is IERC20 {
-    event UniswapPoolSet(address indexed uniswapPool_);
-
     event AllowTransfersSet(bool allowTransfers_);
 
     event AddedToWhitelist(address indexed account);
@@ -13,8 +11,6 @@ interface IGaspToken is IERC20 {
     event RemovedFromWhitelist(address indexed account);
 
     error ZeroL1Council();
-
-    error ZeroUniswapPool();
 
     error ZeroWhitelistAccount();
 
@@ -26,8 +22,6 @@ interface IGaspToken is IERC20 {
 
     error OperationForbidden(bytes32 selector);
 
-    function setUniswapPool(address uniswapPool_) external;
-
     function setAllowTransfers(bool allowTransfers_) external;
 
     function addToWhitelist(address account) external;
@@ -35,8 +29,6 @@ interface IGaspToken is IERC20 {
     function removeFromWhitelist(address account) external;
 
     function whitelist(address account) external view returns (bool enabled);
-
-    function uniswapPool() external view returns (address);
 
     function allowTransfers() external view returns (bool);
 }

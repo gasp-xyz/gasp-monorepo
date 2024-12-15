@@ -13,12 +13,11 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     string private constant _SYMBOL = "GASP";
 
     mapping(address => bool) public override whitelist;
-    address public override uniswapPool;
     bool public override allowTransfers;
 
     modifier isWhitelisted(address[2] memory addresses, bytes4 selector) {
         if (!allowTransfers) {
-            if (!whitelist[addresses[0]] && !whitelist[addresses[1]] || addresses[1] == uniswapPool) {
+            if (!whitelist[addresses[0]] && !whitelist[addresses[1]]) {
                 revert OperationForbidden(selector);
             }
         }
@@ -34,16 +33,6 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         _mint(l1Council_, _TOTAL_SUPPLY);
 
         whitelist[l1Council_] = true;
-    }
-
-    function setUniswapPool(address uniswapPool_) external override onlyOwner {
-        if (uniswapPool_ == address(0)) {
-            revert ZeroUniswapPool();
-        }
-
-        uniswapPool = uniswapPool_;
-        whitelist[uniswapPool_] = true;
-        emit UniswapPoolSet(uniswapPool_);
     }
 
     function setAllowTransfers(bool allowTransfers_) external override onlyOwner {
