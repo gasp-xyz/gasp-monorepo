@@ -17,24 +17,22 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     bool public override allowTransfers;
 
     modifier isWhitelisted(address sender, address recipient, bytes4 selector) {
-        if (!allowTransfers) {
-            if (!senderWhitelist[sender] && !recipientWhitelist[recipient]) {
-                revert OperationForbidden(selector);
-            }
+        if (!allowTransfers && !senderWhitelist[sender] && !recipientWhitelist[recipient]) {
+            revert OperationForbidden(selector);
         }
         _;
     }
 
-    constructor(address l1Council_) Ownable() ERC20(_NAME, _SYMBOL) {
-        if (l1Council_ == address(0)) {
+    constructor(address l1Council) Ownable() ERC20(_NAME, _SYMBOL) {
+        if (l1Council == address(0)) {
             revert ZeroL1Council();
         }
 
-        _transferOwnership(l1Council_);
-        _mint(l1Council_, _TOTAL_SUPPLY);
+        _transferOwnership(l1Council);
+        _mint(l1Council, _TOTAL_SUPPLY);
 
-        senderWhitelist[l1Council_] = true;
-        recipientWhitelist[l1Council_] = true;
+        senderWhitelist[l1Council] = true;
+        recipientWhitelist[l1Council] = true;
     }
 
     function setAllowTransfers(bool allowTransfers_) external override onlyOwner {
