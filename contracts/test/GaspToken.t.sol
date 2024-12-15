@@ -285,81 +285,6 @@ contract RemoveFromWhitelist is GaspTokenTest {
     }
 }
 
-contract ApproveToken is GaspTokenTest {
-    function test_EmitApproval_IfAccountWhitelisted() external {
-        vm.startPrank(accounts.l1Council);
-
-        gaspToken.addToWhitelist(accounts.sender);
-
-        vm.expectEmit();
-        emit Approval(accounts.l1Council, accounts.sender, amount);
-        gaspToken.approve(accounts.sender, amount);
-
-        vm.stopPrank();
-    }
-
-    function test_EmitApproval_IfIsRolldown() external {
-        vm.prank(accounts.l1Council);
-        gaspToken.transfer(accounts.sender, amount);
-
-        vm.prank(accounts.sender);
-        vm.expectEmit();
-        emit Approval(accounts.sender, accounts.rolldown, amount);
-        gaspToken.approve(accounts.rolldown, amount);
-    }
-
-    function test_EmitApproval_IfTransfersAllowed() external {
-        vm.prank(accounts.l1Council);
-        gaspToken.setAllowTransfers(true);
-
-        vm.prank(accounts.sender);
-        vm.expectEmit();
-        emit Approval(accounts.sender, accounts.recipient, amount);
-        gaspToken.approve(accounts.recipient, amount);
-    }
-
-    function test_GetAllowance() external {
-        vm.prank(accounts.l1Council);
-        gaspToken.approve(accounts.sender, amount);
-        assertEq(gaspToken.allowance(accounts.l1Council, accounts.sender), amount);
-    }
-
-    function test_RevertIf_OperationForbidden_IfAccountNotWhitelisted() external {
-        vm.prank(accounts.sender);
-        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.approve.selector));
-        gaspToken.approve(accounts.recipient, amount);
-    }
-
-    function test_RevertIf_OperationForbidden_IfIsUniswapPool() external {
-        vm.startPrank(accounts.l1Council);
-
-        gaspToken.setUniswapPool(accounts.uniswapPool);
-
-        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IERC20.approve.selector));
-        gaspToken.approve(accounts.uniswapPool, amount);
-
-        vm.stopPrank();
-    }
-
-    function test_RevertIf_ApproveFromZeroAddress() external {
-        vm.prank(accounts.l1Council);
-        gaspToken.setAllowTransfers(true);
-
-        vm.prank(address(0));
-        vm.expectRevert("ERC20: approve from the zero address");
-        gaspToken.approve(accounts.rolldown, amount);
-    }
-
-    function test_RevertIf_ApproveToZeroAddress() external {
-        vm.prank(accounts.l1Council);
-        gaspToken.setAllowTransfers(true);
-
-        vm.prank(accounts.sender);
-        vm.expectRevert("ERC20: approve to the zero address");
-        gaspToken.approve(address(0), amount);
-    }
-}
-
 contract TransferToken is GaspTokenTest {
     function test_EmitTransfer_IfAccountWhitelisted() external {
         vm.startPrank(accounts.l1Council);
@@ -572,33 +497,35 @@ contract TransferTokenFrom is GaspTokenTest {
     }
 }
 
-contract IncreaseAllowance is GaspTokenTest {
-    function test_EmitApproval_IfAccountWhitelisted() external {
-        vm.startPrank(accounts.l1Council);
-
-        gaspToken.addToWhitelist(accounts.sender);
-
-        vm.expectEmit();
-        emit Approval(accounts.l1Council, accounts.sender, amount);
-        gaspToken.increaseAllowance(accounts.sender, amount);
-
-        vm.stopPrank();
-    }
-
-    function test_EmitApproval_IfIsRolldown() external {
-        vm.prank(accounts.l1Council);
-        gaspToken.transfer(accounts.sender, amount);
-
+contract ApproveToken is GaspTokenTest {
+    function test_EmitApproval() external {
         vm.prank(accounts.sender);
         vm.expectEmit();
-        emit Approval(accounts.sender, accounts.rolldown, amount);
-        gaspToken.increaseAllowance(accounts.rolldown, amount);
+        emit Approval(accounts.sender, accounts.recipient, amount);
+        gaspToken.approve(accounts.recipient, amount);
     }
 
-    function test_EmitApproval_IfTransfersAllowed() external {
+    function test_GetAllowance() external {
         vm.prank(accounts.l1Council);
-        gaspToken.setAllowTransfers(true);
+        gaspToken.approve(accounts.sender, amount);
+        assertEq(gaspToken.allowance(accounts.l1Council, accounts.sender), amount);
+    }
 
+    function test_RevertIf_ApproveFromZeroAddress() external {
+        vm.prank(address(0));
+        vm.expectRevert("ERC20: approve from the zero address");
+        gaspToken.approve(accounts.rolldown, amount);
+    }
+
+    function test_RevertIf_ApproveToZeroAddress() external {
+        vm.prank(accounts.sender);
+        vm.expectRevert("ERC20: approve to the zero address");
+        gaspToken.approve(address(0), amount);
+    }
+}
+
+contract IncreaseAllowance is GaspTokenTest {
+    function test_EmitApproval() external {
         vm.prank(accounts.sender);
         vm.expectEmit();
         emit Approval(accounts.sender, accounts.recipient, amount);
@@ -611,36 +538,13 @@ contract IncreaseAllowance is GaspTokenTest {
         assertEq(gaspToken.allowance(accounts.l1Council, accounts.sender), amount);
     }
 
-    function test_RevertIf_OperationForbidden_IfAccountNotWhitelisted() external {
-        vm.prank(accounts.sender);
-        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IGaspToken.increaseAllowance.selector));
-        gaspToken.increaseAllowance(accounts.recipient, amount);
-    }
-
-    function test_RevertIf_OperationForbidden_IfIsUniswapPool() external {
-        vm.startPrank(accounts.l1Council);
-
-        gaspToken.setUniswapPool(accounts.uniswapPool);
-
-        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IGaspToken.increaseAllowance.selector));
-        gaspToken.increaseAllowance(accounts.uniswapPool, amount);
-
-        vm.stopPrank();
-    }
-
     function test_RevertIf_ApproveFromZeroAddress() external {
-        vm.prank(accounts.l1Council);
-        gaspToken.setAllowTransfers(true);
-
         vm.prank(address(0));
         vm.expectRevert("ERC20: approve from the zero address");
         gaspToken.increaseAllowance(accounts.rolldown, amount);
     }
 
     function test_RevertIf_ApproveToZeroAddress() external {
-        vm.prank(accounts.l1Council);
-        gaspToken.setAllowTransfers(true);
-
         vm.prank(accounts.sender);
         vm.expectRevert("ERC20: approve to the zero address");
         gaspToken.increaseAllowance(address(0), amount);
@@ -648,39 +552,7 @@ contract IncreaseAllowance is GaspTokenTest {
 }
 
 contract DecreaseAllowance is GaspTokenTest {
-    function test_EmitApproval_IfAccountWhitelisted() external {
-        vm.startPrank(accounts.l1Council);
-
-        gaspToken.addToWhitelist(accounts.sender);
-
-        gaspToken.increaseAllowance(accounts.sender, amount);
-
-        vm.expectEmit();
-        emit Approval(accounts.l1Council, accounts.sender, 0);
-        gaspToken.decreaseAllowance(accounts.sender, amount);
-
-        vm.stopPrank();
-    }
-
-    function test_EmitApproval_IfIsRolldown() external {
-        vm.prank(accounts.l1Council);
-        gaspToken.transfer(accounts.sender, amount);
-
-        vm.startPrank(accounts.sender);
-
-        gaspToken.increaseAllowance(accounts.rolldown, amount);
-
-        vm.expectEmit();
-        emit Approval(accounts.sender, accounts.rolldown, 0);
-        gaspToken.decreaseAllowance(accounts.rolldown, amount);
-
-        vm.stopPrank();
-    }
-
-    function test_EmitApproval_IfTransfersAllowed() external {
-        vm.prank(accounts.l1Council);
-        gaspToken.setAllowTransfers(true);
-
+    function test_EmitApproval() external {
         vm.startPrank(accounts.sender);
 
         gaspToken.increaseAllowance(accounts.recipient, amount);
@@ -703,27 +575,7 @@ contract DecreaseAllowance is GaspTokenTest {
         vm.stopPrank();
     }
 
-    function test_RevertIf_OperationForbidden_IfAccountNotWhitelisted() external {
-        vm.prank(accounts.sender);
-        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IGaspToken.decreaseAllowance.selector));
-        gaspToken.decreaseAllowance(accounts.recipient, amount);
-    }
-
-    function test_RevertIf_OperationForbidden_IfIsUniswapPool() external {
-        vm.startPrank(accounts.l1Council);
-
-        gaspToken.setUniswapPool(accounts.uniswapPool);
-
-        vm.expectRevert(abi.encodeWithSelector(OperationForbidden.selector, IGaspToken.decreaseAllowance.selector));
-        gaspToken.decreaseAllowance(accounts.uniswapPool, amount);
-
-        vm.stopPrank();
-    }
-
     function test_RevertIf_DecreasedAllowanceBelowZero() external {
-        vm.prank(accounts.l1Council);
-        gaspToken.setAllowTransfers(true);
-
         vm.prank(accounts.sender);
         vm.expectRevert("ERC20: decreased allowance below zero");
         gaspToken.decreaseAllowance(accounts.rolldown, 1);

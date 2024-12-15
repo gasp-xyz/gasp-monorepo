@@ -79,15 +79,6 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         emit RemovedFromWhitelist(account);
     }
 
-    function approve(address spender, uint256 amount)
-        public
-        override(ERC20, IERC20)
-        isWhitelisted([_msgSender(), spender], IERC20.approve.selector)
-        returns (bool)
-    {
-        return super.approve(spender, amount);
-    }
-
     function transfer(address recipient, uint256 amount)
         public
         override(ERC20, IERC20)
@@ -104,23 +95,5 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         returns (bool)
     {
         return super.transferFrom(owner, recipient, amount);
-    }
-
-    function increaseAllowance(address spender, uint256 addedAmount)
-        public
-        override(ERC20, IGaspToken)
-        isWhitelisted([_msgSender(), spender], IGaspToken.increaseAllowance.selector)
-        returns (bool)
-    {
-        return super.increaseAllowance(spender, addedAmount);
-    }
-
-    function decreaseAllowance(address spender, uint256 subtractedAmount)
-        public
-        override(ERC20, IGaspToken)
-        isWhitelisted([_msgSender(), spender], IGaspToken.decreaseAllowance.selector)
-        returns (bool)
-    {
-        return super.decreaseAllowance(spender, subtractedAmount);
     }
 }
