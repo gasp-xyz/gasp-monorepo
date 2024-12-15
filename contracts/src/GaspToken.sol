@@ -12,12 +12,13 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     string private constant _NAME = "GASP";
     string private constant _SYMBOL = "GASP";
 
-    mapping(address => bool) public override whitelist;
+    mapping(address => bool) public override senderWhitelist;
+    mapping(address => bool) public override recipientWhitelist;
     bool public override allowTransfers;
 
-    modifier isWhitelisted(address[2] memory addresses, bytes4 selector) {
+    modifier isWhitelisted(address sender, address recipient, bytes4 selector) {
         if (!allowTransfers) {
-            if (!whitelist[addresses[0]] && !whitelist[addresses[1]]) {
+            if (!senderWhitelist[sender] && !recipientWhitelist[recipient]) {
                 revert OperationForbidden(selector);
             }
         }
@@ -32,7 +33,8 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         _transferOwnership(l1Council_);
         _mint(l1Council_, _TOTAL_SUPPLY);
 
-        whitelist[l1Council_] = true;
+        senderWhitelist[l1Council_] = true;
+        recipientWhitelist[l1Council_] = true;
     }
 
     function setAllowTransfers(bool allowTransfers_) external override onlyOwner {
@@ -44,34 +46,34 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         emit AllowTransfersSet(allowTransfers_);
     }
 
-    function addToWhitelist(address account) external override onlyOwner {
+    function addToSenderWhitelist(address account) external override onlyOwner {
         if (account == address(0)) {
             revert ZeroWhitelistAccount();
         }
-        if (whitelist[account]) {
+        if (senderWhitelist[account]) {
             revert AccountAlreadyWhitelisted(account);
         }
 
-        whitelist[account] = true;
-        emit AddedToWhitelist(account);
+        senderWhitelist[account] = true;
+        emit AddedToSenderWhitelist(account);
     }
 
-    function removeFromWhitelist(address account) external override onlyOwner {
+    function removeFromSenderWhitelist(address account) external override onlyOwner {
         if (account == address(0)) {
             revert ZeroWhitelistAccount();
         }
-        if (!whitelist[account]) {
+        if (!senderWhitelist[account]) {
             revert AccountNotWhitelisted(account);
         }
 
-        delete whitelist[account];
-        emit RemovedFromWhitelist(account);
+        delete senderWhitelist[account];
+        emit RemovedFromSenderWhitelist(account);
     }
 
     function transfer(address recipient, uint256 amount)
         public
         override(ERC20, IERC20)
-        isWhitelisted([_msgSender(), recipient], IERC20.transfer.selector)
+        isWhitelisted(_msgSender(), recipient, IERC20.transfer.selector)
         returns (bool)
     {
         return super.transfer(recipient, amount);
@@ -80,7 +82,7 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     function transferFrom(address owner, address recipient, uint256 amount)
         public
         override(ERC20, IERC20)
-        isWhitelisted([_msgSender(), recipient], IERC20.transferFrom.selector)
+        isWhitelisted(_msgSender(), recipient, IERC20.transferFrom.selector)
         returns (bool)
     {
         return super.transferFrom(owner, recipient, amount);
