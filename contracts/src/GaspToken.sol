@@ -106,7 +106,7 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
     function transferFrom(address owner, address recipient, uint256 amount)
         public
         override(ERC20, IERC20)
-        isWhitelisted(_msgSender(), recipient, IERC20.transferFrom.selector)
+        isWhitelisted(owner, recipient, IERC20.transferFrom.selector)
         returns (bool)
     {
         return super.transferFrom(owner, recipient, amount);
