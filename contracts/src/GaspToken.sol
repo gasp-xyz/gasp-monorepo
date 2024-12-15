@@ -48,7 +48,7 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
 
     function addToSenderWhitelist(address account) external override onlyOwner {
         if (account == address(0)) {
-            revert ZeroWhitelistAccount();
+            revert ZeroWhitelistedAccount();
         }
         if (senderWhitelist[account]) {
             revert AccountAlreadyWhitelisted(account);
@@ -58,9 +58,21 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
         emit AddedToSenderWhitelist(account);
     }
 
+    function addToRecipientWhitelist(address account) external override onlyOwner {
+        if (account == address(0)) {
+            revert ZeroWhitelistedAccount();
+        }
+        if (recipientWhitelist[account]) {
+            revert AccountAlreadyWhitelisted(account);
+        }
+
+        recipientWhitelist[account] = true;
+        emit AddedToRecipientWhitelist(account);
+    }
+
     function removeFromSenderWhitelist(address account) external override onlyOwner {
         if (account == address(0)) {
-            revert ZeroWhitelistAccount();
+            revert ZeroWhitelistedAccount();
         }
         if (!senderWhitelist[account]) {
             revert AccountNotWhitelisted(account);
@@ -68,6 +80,18 @@ contract GaspToken is Context, Ownable, ERC20, IGaspToken {
 
         delete senderWhitelist[account];
         emit RemovedFromSenderWhitelist(account);
+    }
+
+    function removeFromRecipientWhitelist(address account) external override onlyOwner {
+        if (account == address(0)) {
+            revert ZeroWhitelistedAccount();
+        }
+        if (!recipientWhitelist[account]) {
+            revert AccountNotWhitelisted(account);
+        }
+
+        delete recipientWhitelist[account];
+        emit RemovedFromRecipientWhitelist(account);
     }
 
     function transfer(address recipient, uint256 amount)

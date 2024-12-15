@@ -8,11 +8,15 @@ interface IGaspToken is IERC20 {
 
     event AddedToSenderWhitelist(address indexed account);
 
+    event AddedToRecipientWhitelist(address indexed account);
+
     event RemovedFromSenderWhitelist(address indexed account);
+
+    event RemovedFromRecipientWhitelist(address indexed account);
 
     error ZeroL1Council();
 
-    error ZeroWhitelistAccount();
+    error ZeroWhitelistedAccount();
 
     error TransfersAlreadyAllowed();
 
@@ -26,7 +30,11 @@ interface IGaspToken is IERC20 {
 
     function addToSenderWhitelist(address account) external;
 
+    function addToRecipientWhitelist(address account) external;
+
     function removeFromSenderWhitelist(address account) external;
+
+    function removeFromRecipientWhitelist(address account) external;
 
     function senderWhitelist(address account) external view returns (bool enabled);
 
