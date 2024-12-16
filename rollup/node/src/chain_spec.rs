@@ -223,6 +223,7 @@ pub fn rollup_local_config(
 				base,
 				eth_chain_id,
 				decode_url.clone(),
+				vec![],
 			)
 		},
 		// Bootnodes
@@ -310,15 +311,34 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 				hex_literal::hex!("a7196AF761942A10126165B2c727eFCD46c254e0").into(),
 			];
 
+			let council_members = vec![
+				hex_literal::hex!("35dbD8Bd2c5617541bd9D9D8e065adf92275b83E").into(),
+				hex_literal::hex!("7368bff2fBB4C7B05f854c370eeDD6809186917B").into(),
+				hex_literal::hex!("9cA8aFB1326c99EC23B8D4e16C0162Bb206D83b8").into(),
+				hex_literal::hex!("8b5368B4BBa80475c9DFb70543F6090A7e986F39").into(),
+				hex_literal::hex!("aF3cA574A4903c5ddC7378Ac60d786a2664CbD91").into(),
+				hex_literal::hex!("584728a637303e753906a4F05CD8Ced10D80eB5e").into(),
+				hex_literal::hex!("8960911c51EaD00db4cCA88FAF395672458da676").into(),
+			];
+
 			let sequencers_endownment =
 				[eth_sequencers.clone(), arb_sequencers.clone(), base_sequencers.clone()]
 					.iter()
 					.flatten()
 					.cloned()
-					.map(|account_id| (0u32, 100u128 * currency::DOLLARS, account_id))
+					.map(|account_id| (RX_TOKEN_ID, 100u128 * currency::DOLLARS, account_id))
 					.collect::<Vec<_>>();
 
-			let tokens_endowment = sequencers_endownment;
+			let mut tokens_endowment = sequencers_endownment;
+			tokens_endowment.push((RX_TOKEN_ID, 988_100_u128 * currency::DOLLARS, sudo.into()));
+
+			tokens_endowment.append(
+				&mut council_members
+					.clone()
+					.into_iter()
+					.map(|addr| (RX_TOKEN_ID, 1000_u128 * currency::DOLLARS, addr))
+					.collect::<Vec<_>>(),
+			);
 
 			rollup_genesis(
 				// chain genesis salt
@@ -368,7 +388,7 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 							// Id of MGA token,
 							0u32,
 							// How much mangata they stake
-							2__000_000u128 * currency::DOLLARS,
+							1__001_000u128 * currency::DOLLARS,
 						),
 						(
 							// Who gets to stake initially
@@ -376,7 +396,7 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 							// Id of MGA token,
 							0u32,
 							// How much mangata they stake
-							2__000_000u128 * currency::DOLLARS,
+							1__001_000u128 * currency::DOLLARS,
 						),
 						(
 							// Who gets to stake initially
@@ -384,7 +404,7 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 							// Id of MGA token,
 							0u32,
 							// How much mangata they stake
-							2__000_000u128 * currency::DOLLARS,
+							1__001_000u128 * currency::DOLLARS,
 						),
 						(
 							// Who gets to stake initially
@@ -392,7 +412,7 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 							// Id of MGA token,
 							0u32,
 							// How much mangata they stake
-							2__000_000u128 * currency::DOLLARS,
+							1__001_000u128 * currency::DOLLARS,
 						),
 					],
 					vec![
@@ -439,6 +459,7 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 				base_sequencers,
 				eth_chain_id,
 				decode_url.clone(),
+				council_members,
 			)
 		},
 		// Bootnodes
@@ -474,6 +495,7 @@ fn rollup_genesis(
 	base_initial_sequencers: Vec<AccountId>,
 	chain_id: u64,
 	decode_url: String,
+	council_members: Vec<AccountId>,
 ) -> rollup_runtime::RuntimeGenesisConfig {
 	let initial_sequencers_stake = 10_000_000_u128;
 
@@ -588,15 +610,7 @@ fn rollup_genesis(
 		},
 		council: rollup_runtime::CouncilConfig {
 			phantom: Default::default(),
-			members: vec![
-				hex_literal::hex!("35dbD8Bd2c5617541bd9D9D8e065adf92275b83E").into(),
-				hex_literal::hex!("7368bff2fBB4C7B05f854c370eeDD6809186917B").into(),
-				hex_literal::hex!("9cA8aFB1326c99EC23B8D4e16C0162Bb206D83b8").into(),
-				hex_literal::hex!("8b5368B4BBa80475c9DFb70543F6090A7e986F39").into(),
-				hex_literal::hex!("aF3cA574A4903c5ddC7378Ac60d786a2664CbD91").into(),
-				hex_literal::hex!("584728a637303e753906a4F05CD8Ced10D80eB5e").into(),
-				hex_literal::hex!("8960911c51EaD00db4cCA88FAF395672458da676").into(),
-			],
+			members: council_members,
 		},
 		transaction_payment: Default::default(),
 		sudo: rollup_runtime::SudoConfig {
