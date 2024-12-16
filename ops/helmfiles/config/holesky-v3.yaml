@@ -225,7 +225,6 @@ ferryDepositEnvSecretsEth:
 
 ferryDepositEnvArb:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-holesky-v3.gasp.xyz
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaWssUrl
   MANGATA_CONTRACT_ADDRESS: "0x8E92222f10Ee71236AC93de68b386c2A3b950151"
   L1_CHAIN: "Arbitrum"
   TOKENS_TO_TRACK: "[]"
@@ -233,6 +232,7 @@ ferryDepositEnvArb:
   BLOCK_DELAY: 0
   LOG: silly
 ferryDepositEnvSecretsArb:
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaWssUrl
   MNEMONIC: ref+sops://secrets.enc.yaml#/arbitrumSepoliaFerryDepositPrivateKey
 
 ferryDepositEnvBase:
