@@ -125,23 +125,23 @@ collator:
 ######################
 # aggregator configs #
 ######################
-aggregatorEnabled: false
+aggregatorEnabled: true
 # Override the image tag provided on deployment from IMAGE_TAG env variable
 # aggregatorImageTag: 5d6f2a4db68e0601f14b3ced43773488efdda164
 
 aggregatorEnvSecrets:
-  ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetAggregatorEcdsaKeyJson
-  ECDSA_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetAggregatorEcdsaKeyPassword
-  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
-  ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
+  ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-aggregator-key
+  ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-aggregator-password
+  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetHttpsUrl
+  ETH_WS_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
 aggregatorEnv:
   SUBSTRATE_RPC_URL: ws://collator-01:9944
-  CHAIN_ID: "17000"
+  CHAIN_ID: "1"
   AVS_BLOCK_VALIDATION_PERIOD: "100"
   AVS_DEBOUNCE_RPC: "20"
   AVS_DEPLOYMENT_BLOCK: "1233400"
   AVS_KICK_PERIOD: "25"
-  AVS_REGISTRY_COORDINATOR_ADDR: "0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1"
+  AVS_REGISTRY_COORDINATOR_ADDR: "0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1"
   AVS_RPC_URL: http://avs-aggregator:8090
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_TASK_EXPIRATION: "300"
@@ -184,13 +184,14 @@ gaspAvsEnv:
   LOG_LEVEL: "info"
   RUST_LOG: avs=debug,ether=info
   # rollup-node configs
+  SUBSTRATE_RPC_URL: wss://rpc-01-ws-rollup-prod.gasp.xyz
   ROLLUP_NODE_CHAIN: /app/mainnet-chainspec.json
   ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
 
 ###########################
 # updater configs #
 ###########################
-updaterEnabled: false
+updaterEnabled: true
 updaterEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-password
