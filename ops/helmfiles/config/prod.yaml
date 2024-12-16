@@ -27,7 +27,7 @@ collator:
   image:
     repository: mangatasolutions/rollup-node
     # Ref: https://github.com/gasp-xyz/mangata-node/tree/3722076d06f7c1ff7c727a799260c5df2a5eb62f
-    tag: 3722076d06f7c1ff7c727a799260c5df2a5eb62f
+    tag: f26183b4e1055ff700c0b7b4483616473508ddb9
   disableChainspecGeneration: true
   customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/f9604551934c498a6a814d84f2cd6c01803d24d7/rollup-dev-env-chainspecs/alpha-launch-f26183b-raw.json
   enableServiceMonitorCollectors: true
