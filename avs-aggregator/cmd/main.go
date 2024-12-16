@@ -28,7 +28,7 @@ func main() {
 
 	app.Action = aggregatorMain
 	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintf(os.Stderr, "Application failed with error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "ALERT::ERROR Application failed with error: %v\n", err)
 		os.Exit(1)
 	}
 }
