@@ -62,6 +62,7 @@ releases:
         environment: {{ .Values.environmentName }}
         envSecrets: {{ .Values.gaspAvsEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.gaspAvsEnv | toYaml | nindent 10 }}
+        data: {{ .Values | getOrNil "gaspAvsData" | toYaml | nindent 10 }}
         resources:
           requests:
             cpu: 1

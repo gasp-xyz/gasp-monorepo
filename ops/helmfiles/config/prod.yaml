@@ -166,6 +166,9 @@ gaspAvsEnvSecrets:
   BLS_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-01-bls-password
   ETH_RPC_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetHttpsUrl
   ETH_WS_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
+gaspAvsData:
+  storageClass: node-data-volume-retain
+  storageSize: 150Gi
 gaspAvsEnv:
   CHAIN_ID: "1"
   AVS_BLOCK_VALIDATION_PERIOD: "100"
