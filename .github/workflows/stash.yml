@@ -10,7 +10,7 @@ on:
         options:
           - frontend
           - holesky
-          - mainnet
+          - prod
   pull_request:
   push:
     branches:
@@ -108,17 +108,17 @@ jobs:
           sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
           gcloud app deploy app.tmp.yaml --quiet
 
-  deploy-mainnet:
-    name: Deploy `stash` to `mainnet` environment
-    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'mainnet') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
+  deploy-prod:
+    name: Deploy `stash` to `prod` environment
+    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
     runs-on: ubuntu-latest
     needs: build
     defaults:
       run:
         working-directory: stash
-    environment: stash-mainnet
+    environment: stash-prod
     env:
-      ENVIRONMENT: mainnet
+      ENVIRONMENT: prod
     steps:
       - uses: actions/checkout@v4
       - uses: google-github-actions/auth@v2
