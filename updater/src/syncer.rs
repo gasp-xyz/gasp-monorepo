@@ -113,14 +113,28 @@ impl Syncer {
                     .await?
                     .ok_or_else(|| eyre!("missing expected txn {:?}", txn_hash))?;
                 debug!("{:?}", txn);
-                let call = match FinalizerTaskManagerCalls::decode(txn.input)?{
+                let call = match FinalizerTaskManagerCalls::decode(txn.input)? {
                     FinalizerTaskManagerCalls::RespondToOpTask(c) => c,
-                    FinalizerTaskManagerCalls::ForceRespondToOpTask(_) => {
-                        return Err(eyre!("The call that resulted in the OpTaskCompleted event was a ForceRespondToOpTask call. This cannot be synced without a admin reinit"))
+                    FinalizerTaskManagerCalls::ForceRespondToOpTask(call) => {
+                        // If we have come across the completion event of the exact task that we are syncing from
+                        // ie the last task that was completed on the alt-l1, then we can skip thise task here
+                        // This happens following a reinit on eth which is followed by a reinit on the alt-l1
+                        if call.task.clone().task_created_block
+                            == *latest_completed_op_task_created_block
+                        {
+                            // if here the task num doesn't match there is a problem
+                            if call.task.clone().task_num != *latest_completed_op_task_number {
+                                return Err(eyre!(
+                                    "task_num mismatch {:?} {:?}",
+                                    call.task.clone().task_num,
+                                    *latest_completed_op_task_number
+                                ));
+                            }
+                            return Ok(());
+                        }
+                        return Err(eyre!("The call that resulted in the OpTaskCompleted event was a ForceRespondToOpTask call. This cannot be synced without a admin reinit"));
                     }
-                    _ => {
-                        return Err(eyre!("wrong call decoded"))
-                    }
+                    _ => return Err(eyre!("wrong call decoded")),
                 };
                 debug!("{:?}", call);
                 debug!("{:?}", call.task.clone());
