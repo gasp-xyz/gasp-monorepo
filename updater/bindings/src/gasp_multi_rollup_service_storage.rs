@@ -114,6 +114,22 @@ pub mod gasp_multi_rollup_service_storage {
                     },],
                 ),
                 (
+                    ::std::borrow::ToOwned::to_owned("latestCompletedRdTaskCreatedBlock"),
+                    ::std::vec![::ethers::core::abi::ethabi::Function {
+                        name: ::std::borrow::ToOwned::to_owned("latestCompletedRdTaskCreatedBlock",),
+                        inputs: ::std::vec![],
+                        outputs: ::std::vec![::ethers::core::abi::ethabi::Param {
+                            name: ::std::string::String::new(),
+                            kind: ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                            internal_type: ::core::option::Option::Some(
+                                ::std::borrow::ToOwned::to_owned("uint32"),
+                            ),
+                        },],
+                        constant: ::core::option::Option::None,
+                        state_mutability: ::ethers::core::abi::ethabi::StateMutability::View,
+                    },],
+                ),
+                (
                     ::std::borrow::ToOwned::to_owned("latestCompletedRdTaskNumber"),
                     ::std::vec![::ethers::core::abi::ethabi::Function {
                         name: ::std::borrow::ToOwned::to_owned("latestCompletedRdTaskNumber",),
@@ -473,6 +489,14 @@ pub mod gasp_multi_rollup_service_storage {
         ) -> ::ethers::contract::builders::ContractCall<M, u32> {
             self.0
                 .method_hash([226, 167, 203, 102], ())
+                .expect("method not found (this should never happen)")
+        }
+        ///Calls the contract's `latestCompletedRdTaskCreatedBlock` (0x0bf16410) function
+        pub fn latest_completed_rd_task_created_block(
+            &self,
+        ) -> ::ethers::contract::builders::ContractCall<M, u32> {
+            self.0
+                .method_hash([11, 241, 100, 16], ())
                 .expect("method not found (this should never happen)")
         }
         ///Calls the contract's `latestCompletedRdTaskNumber` (0xd03a07b2) function
@@ -861,6 +885,24 @@ pub mod gasp_multi_rollup_service_storage {
         abi = "latestCompletedOpTaskNumber()"
     )]
     pub struct LatestCompletedOpTaskNumberCall;
+    ///Container type for all input parameters for the `latestCompletedRdTaskCreatedBlock` function with signature `latestCompletedRdTaskCreatedBlock()` and selector `0x0bf16410`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    #[ethcall(
+        name = "latestCompletedRdTaskCreatedBlock",
+        abi = "latestCompletedRdTaskCreatedBlock()"
+    )]
+    pub struct LatestCompletedRdTaskCreatedBlockCall;
     ///Container type for all input parameters for the `latestCompletedRdTaskNumber` function with signature `latestCompletedRdTaskNumber()` and selector `0xd03a07b2`
     #[derive(
         Clone,
@@ -1038,6 +1080,7 @@ pub mod gasp_multi_rollup_service_storage {
         LastOpUpdateBlockTimestamp(LastOpUpdateBlockTimestampCall),
         LatestCompletedOpTaskCreatedBlock(LatestCompletedOpTaskCreatedBlockCall),
         LatestCompletedOpTaskNumber(LatestCompletedOpTaskNumberCall),
+        LatestCompletedRdTaskCreatedBlock(LatestCompletedRdTaskCreatedBlockCall),
         LatestCompletedRdTaskNumber(LatestCompletedRdTaskNumberCall),
         OperatorAndQuorumToStakes(OperatorAndQuorumToStakesCall),
         OperatorIdQuorumCount(OperatorIdQuorumCountCall),
@@ -1083,6 +1126,13 @@ pub mod gasp_multi_rollup_service_storage {
                 <LatestCompletedOpTaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(data)
             {
                 return Ok(Self::LatestCompletedOpTaskNumber(decoded));
+            }
+            if let Ok(decoded) =
+                <LatestCompletedRdTaskCreatedBlockCall as ::ethers::core::abi::AbiDecode>::decode(
+                    data,
+                )
+            {
+                return Ok(Self::LatestCompletedRdTaskCreatedBlock(decoded));
             }
             if let Ok(decoded) =
                 <LatestCompletedRdTaskNumberCall as ::ethers::core::abi::AbiDecode>::decode(data)
@@ -1143,6 +1193,9 @@ pub mod gasp_multi_rollup_service_storage {
                 Self::LatestCompletedOpTaskNumber(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
+                Self::LatestCompletedRdTaskCreatedBlock(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
                 Self::LatestCompletedRdTaskNumber(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -1175,6 +1228,9 @@ pub mod gasp_multi_rollup_service_storage {
                     ::core::fmt::Display::fmt(element, f)
                 }
                 Self::LatestCompletedOpTaskNumber(element) => ::core::fmt::Display::fmt(element, f),
+                Self::LatestCompletedRdTaskCreatedBlock(element) => {
+                    ::core::fmt::Display::fmt(element, f)
+                }
                 Self::LatestCompletedRdTaskNumber(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorAndQuorumToStakes(element) => ::core::fmt::Display::fmt(element, f),
                 Self::OperatorIdQuorumCount(element) => ::core::fmt::Display::fmt(element, f),
@@ -1218,6 +1274,13 @@ pub mod gasp_multi_rollup_service_storage {
     impl ::core::convert::From<LatestCompletedOpTaskNumberCall> for GaspMultiRollupServiceStorageCalls {
         fn from(value: LatestCompletedOpTaskNumberCall) -> Self {
             Self::LatestCompletedOpTaskNumber(value)
+        }
+    }
+    impl ::core::convert::From<LatestCompletedRdTaskCreatedBlockCall>
+        for GaspMultiRollupServiceStorageCalls
+    {
+        fn from(value: LatestCompletedRdTaskCreatedBlockCall) -> Self {
+            Self::LatestCompletedRdTaskCreatedBlock(value)
         }
     }
     impl ::core::convert::From<LatestCompletedRdTaskNumberCall> for GaspMultiRollupServiceStorageCalls {
@@ -1354,6 +1417,20 @@ pub mod gasp_multi_rollup_service_storage {
         Hash,
     )]
     pub struct LatestCompletedOpTaskNumberReturn(pub u32);
+    ///Container type for all return fields from the `latestCompletedRdTaskCreatedBlock` function with signature `latestCompletedRdTaskCreatedBlock()` and selector `0x0bf16410`
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
+        Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+    )]
+    pub struct LatestCompletedRdTaskCreatedBlockReturn(pub u32);
     ///Container type for all return fields from the `latestCompletedRdTaskNumber` function with signature `latestCompletedRdTaskNumber()` and selector `0xd03a07b2`
     #[derive(
         Clone,

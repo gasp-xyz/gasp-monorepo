@@ -1,0 +1,18 @@
+{
+  "addresses": {
+    "avsPauseReg": "0x40019F9b7Ad27C019da556f956aa24039fC5dA26",
+    "avsProxyAdmin": "0x0e0BED8DF7185cE8B5286C08d934A298091f3793",
+    "gmrs": "0x6B6F92184772bCEd3d9D6d0352D453917E4880c1",
+    "gmrsImplementation": "0xcFCF895fB7548bbaD9b55AC3344852fFf1BBBcf2",
+    "rolldown": "0x308e483afDD225D6cb7bF4d44B8e4a03DFD9c0De",
+    "rolldownImplementation": "0xfb83Bbd093ad15F6388ef7D1696778eb265027cd"
+  },
+  "chainInfo": {
+    "chainId": 8453,
+    "deploymentBlock": 23744486
+  },
+  "permissions": {
+    "avsOwner": "0xFc8151F19e338C509D1F5B8c981249324014b6B7",
+    "avsUpdater": "0x74AFD71912532AFeB74B752dA70fF939D9Be7BB8"
+  }
+}

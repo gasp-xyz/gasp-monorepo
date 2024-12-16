@@ -34,6 +34,7 @@ contract GaspMultiRollupServiceTest is Test, IGaspMultiRollupServicePrimitives {
             IFinalizerTaskManager.OpTask ({
         taskNum :1,
         taskCreatedBlock:30,
+        lastCompletedOpTaskNum:0,
         lastCompletedOpTaskCreatedBlock:0 ,
         quorumNumbers: qbytes,
         quorumThresholdPercentage: 66,

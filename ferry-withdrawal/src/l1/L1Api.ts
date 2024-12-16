@@ -17,8 +17,12 @@ import {
 	anvil,
 	holesky,
 	arbitrumSepolia,
+	baseSepolia,
 	localhost,
 	type Chain,
+	arbitrum,
+	base,
+	mainnet,
 } from "viem/chains";
 import { isEqual } from "../utils.js";
 import { estimateMaxPriorityFeePerGas } from "viem/actions";
@@ -63,8 +67,12 @@ function cancelToViemFormat(cancel: Cancel): unknown[] {
 const CONFIG_TO_CHAIN = new Map<string, Chain>([
 	["anvil-arbitrum", anvil],
 	["anvil-ethereum", anvil],
-	["holesky", holesky],
+	["arbitrum", arbitrum],
 	["arbitrum-sepolia", arbitrumSepolia],
+	["base", base],
+	["base-sepolia", baseSepolia],
+	["ethereum", mainnet],
+	["holesky", holesky],
 	["reth-arbitrum", localhost],
 	["reth-ethereum", localhost],
 ]);

@@ -78,6 +78,11 @@ contract FinalizerTaskManager is
 
     bool public allowNonRootInit;
 
+    uint32 public lastCompletedRdTaskNum;
+    uint32 public lastCompletedRdTaskCreatedBlock;
+
+    uint32 public lastCompletedOpTaskCompletedBlock;
+    uint32 public lastCompletedRdTaskCompletedBlock;
 
     /* MODIFIERS */
     modifier onlyAggregator() {
@@ -260,7 +265,8 @@ contract FinalizerTaskManager is
             taskCreatedBlock: uint32(block.number),
             lastCompletedOpTaskQuorumThresholdPercentage: lastCompletedOpTaskQuorumThresholdPercentage,
             lastCompletedOpTaskQuorumNumbers: lastCompletedOpTaskQuorumNumbers,
-            lastCompletedOpTaskCreatedBlock: lastCompletedOpTaskCreatedBlock
+            lastCompletedOpTaskCreatedBlock: lastCompletedOpTaskCreatedBlock,
+            lastCompletedOpTaskNum: lastCompletedOpTaskNum
         });
 
         // store hash of task onchain, emit event, and increase taskNum
@@ -305,6 +311,10 @@ contract FinalizerTaskManager is
             rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
         }
         chainRdBatchNonce[taskResponse.chainId] = taskResponse.batchId + 1;
+
+        lastCompletedRdTaskNum = task.taskNum;
+        lastCompletedRdTaskCreatedBlock = task.taskCreatedBlock;
+        lastCompletedRdTaskCompletedBlock = uint32(block.number);
 
         // emitting completed event
         emit RdTaskCompleted(taskResponse.referenceTaskIndex, taskResponse);
@@ -356,17 +366,20 @@ contract FinalizerTaskManager is
 
         // create a new task struct
         OpTask memory newTask;
-        newTask.taskNum = latestOpTaskNum;
+        newTask.taskNum = latestOpTaskNumMem;
         newTask.taskCreatedBlock = uint32(block.number);
         newTask.quorumThresholdPercentage = quorumThresholdPercentage;
         newTask.quorumNumbers = quorumNumbers;
         // This is to help the aggregator function as it currently is while 
         // being compatible with past op state verficiation
+        // And also to avoid an if condition in the respondToOpTask function
         if (lastCompletedOpTaskCreatedBlock == 0) {
+            newTask.lastCompletedOpTaskNum = latestOpTaskNumMem;
             newTask.lastCompletedOpTaskCreatedBlock = uint32(block.number);
             newTask.lastCompletedOpTaskQuorumNumbers = quorumNumbers;
             newTask.lastCompletedOpTaskQuorumThresholdPercentage = quorumThresholdPercentage;
         } else {
+            newTask.lastCompletedOpTaskNum = lastCompletedOpTaskNum;
             newTask.lastCompletedOpTaskCreatedBlock = lastCompletedOpTaskCreatedBlock;
             newTask.lastCompletedOpTaskQuorumNumbers = lastCompletedOpTaskQuorumNumbers;
             newTask.lastCompletedOpTaskQuorumThresholdPercentage = lastCompletedOpTaskQuorumThresholdPercentage;
@@ -437,6 +450,7 @@ contract FinalizerTaskManager is
         lastCompletedOpTaskQuorumNumbers = task.quorumNumbers;
         lastCompletedOpTaskQuorumThresholdPercentage = task.quorumThresholdPercentage;
         lastCompletedOpTaskNum = task.taskNum;
+        lastCompletedOpTaskCompletedBlock = uint32(block.number);
     }
 
     function _processTaskMetadata(TaskType taskType, uint32 taskIndex, bytes32 taskHash, TaskStatus taskStatus) internal{

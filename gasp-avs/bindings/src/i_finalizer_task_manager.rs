@@ -69,6 +69,7 @@ pub mod i_finalizer_task_manager {
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Bytes,
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Bytes,
@@ -103,6 +104,7 @@ pub mod i_finalizer_task_manager {
                                 kind: ::ethers::core::abi::ethabi::ParamType::Tuple(::std::vec![
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Uint(8usize),
+                                    ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
                                     ::ethers::core::abi::ethabi::ParamType::Uint(32usize),
@@ -574,7 +576,7 @@ pub mod i_finalizer_task_manager {
     )]
     #[ethevent(
         name = "NewOpTaskCreated",
-        abi = "NewOpTaskCreated(uint32,(uint32,uint32,uint32,bytes,uint32,bytes,uint32))"
+        abi = "NewOpTaskCreated(uint32,(uint32,uint32,uint32,uint32,bytes,uint32,bytes,uint32))"
     )]
     pub struct NewOpTaskCreatedFilter {
         #[ethevent(indexed)]
@@ -609,7 +611,7 @@ pub mod i_finalizer_task_manager {
     )]
     #[ethevent(
         name = "NewRdTaskCreated",
-        abi = "NewRdTaskCreated(uint32,(uint32,uint8,uint32,uint32,uint32,bytes,uint32))"
+        abi = "NewRdTaskCreated(uint32,(uint32,uint8,uint32,uint32,uint32,uint32,bytes,uint32))"
     )]
     pub struct NewRdTaskCreatedFilter {
         #[ethevent(indexed)]

@@ -12,7 +12,11 @@ async fn main() -> Result<()> {
 
     color_eyre::install()?;
 
-    gasp_avs::start().await?;
+    let res = gasp_avs::start().await;
+    if res.is_err() {
+        tracing::error!("ALERT:ERROR gasp-avs failed with {:?}", res);
+    }
+    res?;
 
     Ok(())
 }
