@@ -51,6 +51,7 @@ collator:
         scheme: ed25519
         seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-01-grandpa-key-seed
     extraArgs:
+      - --validator
       - --pruning=archive
       - --rpc-max-connections=5000
     nodeSelector:
@@ -67,6 +68,7 @@ collator:
         scheme: ed25519
         seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-02-grandpa-key-seed
     extraArgs:
+      - --validator
       - --pruning=archive
       - --rpc-max-connections=5000
     nodeSelector:
@@ -84,6 +86,7 @@ collator:
         scheme: ed25519
         seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-03-grandpa-key-seed
     extraArgs:
+      - --validator
       - --pruning=archive
       - --rpc-max-connections=5000
     nodeSelector:
@@ -101,6 +104,7 @@ collator:
         scheme: ed25519
         seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-04-grandpa-key-seed
     extraArgs:
+      - --validator
       - --pruning=archive
       - --rpc-max-connections=5000
     nodeSelector:
