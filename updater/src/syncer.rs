@@ -19,6 +19,7 @@ use ethers::{
     types::{Bytes, Filter},
 };
 
+use crate::ALERT_WARNING;
 use ethers::abi::AbiEncode;
 use eyre::{eyre, OptionExt};
 use sp_core::H256;
@@ -26,7 +27,7 @@ use sp_runtime::traits::{Hash, Keccak256, Zero};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::select;
-use tracing::{debug, error, info, instrument};
+use tracing::{debug, error, info, instrument, warn};
 
 // TODO
 // In addition to reinit we could also have a function in the syncer that would cherry pick the task and its response
@@ -233,7 +234,11 @@ impl Syncer {
                     .status
                 {
                     Some(status) if status.is_zero() => {
-                        return Err(eyre!("update_txn failed {:?}", update_txn_receipt))
+                        warn!(
+                            "{ALERT_WARNING} op_state update_txn failed {:?}",
+                            update_txn_receipt
+                        );
+                        return Err(eyre!("update_txn failed {:?}", update_txn_receipt));
                     }
                     _ => {}
                 }
@@ -330,7 +335,11 @@ impl Syncer {
                     .status
                 {
                     Some(status) if status.is_zero() => {
-                        return Err(eyre!("update_txn failed {:?}", update_txn_receipt))
+                        warn!(
+                            "{ALERT_WARNING} rd_task update_txn failed {:?}",
+                            update_txn_receipt
+                        );
+                        return Err(eyre!("update_txn failed {:?}", update_txn_receipt));
                     }
                     _ => {}
                 }
@@ -406,7 +415,8 @@ impl Syncer {
                     .await?;
 
                 for (event, log) in events {
-                    self.clone()
+                    let res = self
+                        .clone()
                         .handle_sync_event(
                             event,
                             log,
@@ -415,7 +425,11 @@ impl Syncer {
                             &mut latest_completed_rd_task_number,
                             &mut last_processed_rd_task_number,
                         )
-                        .await?;
+                        .await;
+                    if res.is_err() {
+                        warn!("{ALERT_WARNING} handle_sync_event failed {:?}", res);
+                    }
+                    res?;
                 }
 
                 if to_block == target_block_number {
@@ -446,7 +460,11 @@ impl Syncer {
             select! {
                 Some(stream_event) = stream.next() => match stream_event {
                     Ok((stream_event, log)) => {
-                        self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number, &mut last_processed_rd_task_number).await?;
+                        let res = self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number, &mut last_processed_rd_task_number).await;
+                        if res.is_err() {
+                            warn!("{ALERT_WARNING} loop.handle_sync_event failed {:?}", res);
+                        }
+                        res?;
                     }
                     Err(e) => error!("EthWs subscription error {:?}", e),
                 },

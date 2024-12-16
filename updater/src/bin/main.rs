@@ -12,7 +12,11 @@ async fn main() -> Result<()> {
 
     color_eyre::install()?;
 
-    updater::start().await?;
+    let res = updater::start().await;
+    if res.is_err() {
+        tracing::error!("ALERT::ERROR syncer failed with {:?}", res);
+    }
+    res?;
 
     Ok(())
 }
