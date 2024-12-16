@@ -153,7 +153,7 @@ releases:
         tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
         # rpc-01 specific configs
         nodeSelector: {{ .Values | getOrNil "collator.rpc01.nodeSelector" | toYaml | nindent 10 }}
-        bootnodeAddr: {{ .Values | getOrNil "rpc01.bootnodeAddr" }}
+        bootnodeAddr: {{ .Values | getOrNil "collator.rpc01.bootnodeAddr" }}
         extraArgs:
           - --pruning=archive
           - --rpc-max-connections=20000
@@ -184,7 +184,7 @@ releases:
         tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
         # rpc-02 specific configs
         nodeSelector: {{ .Values | getOrNil "collator.rpc02.nodeSelector" | toYaml | nindent 10 }}
-        bootnodeAddr: {{ .Values | getOrNil "rpc02.bootnodeAddr" }}
+        bootnodeAddr: {{ .Values | getOrNil "collator.rpc02.bootnodeAddr" }}
         extraArgs:
           - --pruning=archive
           - --rpc-max-connections=20000
@@ -215,7 +215,7 @@ releases:
         tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
         # rpc-03 specific configs
         nodeSelector: {{ .Values | getOrNil "collator.rpc03.nodeSelector" | toYaml | nindent 10 }}
-        bootnodeAddr: {{ .Values | getOrNil "rpc03.bootnodeAddr" }}
+        bootnodeAddr: {{ .Values | getOrNil "collator.rpc03.bootnodeAddr" }}
         extraArgs:
           - --pruning=archive
           - --rpc-max-connections=20000
