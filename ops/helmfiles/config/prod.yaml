@@ -29,7 +29,7 @@ collator:
     # Ref: https://github.com/gasp-xyz/mangata-node/tree/3722076d06f7c1ff7c727a799260c5df2a5eb62f
     tag: 3722076d06f7c1ff7c727a799260c5df2a5eb62f
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/485165d5cac39607183994e9122404387dcdd49d/rollup-holesky-v3-3722076-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/cbbe428a32da2333636a9076393f52cb63a30146/alpha-launch-cd252cc-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 150Gi
@@ -46,7 +46,10 @@ collator:
     accountKeys:
       - type: aura
         scheme: sr25519
-        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-01-session-key-seed
+        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-01-aura-key-seed
+      - type: gran
+        scheme: ed25519
+        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-01-grandpa-key-seed
     extraArgs:
       - --pruning=archive
       - --rpc-max-connections=5000
@@ -59,7 +62,10 @@ collator:
     accountKeys:
       - type: aura
         scheme: sr25519
-        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-02-session-key-seed
+        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-02-aura-key-seed
+      - type: gran
+        scheme: ed25519
+        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-02-grandpa-key-seed
     extraArgs:
       - --pruning=archive
       - --rpc-max-connections=5000
@@ -73,7 +79,10 @@ collator:
     accountKeys:
       - type: aura
         scheme: sr25519
-        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-03-session-key-seed
+        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-03-aura-key-seed
+      - type: gran
+        scheme: ed25519
+        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-03-grandpa-key-seed
     extraArgs:
       - --pruning=archive
       - --rpc-max-connections=5000
@@ -87,7 +96,10 @@ collator:
     accountKeys:
       - type: aura
         scheme: sr25519
-        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-04-session-key-seed
+        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-04-aura-key-seed
+      - type: gran
+        scheme: ed25519
+        seed: ref+gcpsecrets://direct-pixel-353917/rollup-prod-collator-04-grandpa-key-seed
     extraArgs:
       - --pruning=archive
       - --rpc-max-connections=5000
@@ -178,7 +190,7 @@ updaterEnvSecrets:
   SOURCE_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   SOURCE_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
   TARGET_RPC_URL: ref+sops://secrets.enc.yaml#/sepoliaArbitrumHttpsUrl
-  TARGET_WS_URL:  ref+sops://secrets.enc.yaml#/sepoliaArbitrumWssUrl
+  TARGET_WS_URL: ref+sops://secrets.enc.yaml#/sepoliaArbitrumWssUrl
 updaterEnv:
   SOURCE_CHAIN_ID: 17000
   TARGET_CHAIN_ID: 421614
@@ -193,7 +205,7 @@ updaterEnvSecretsBase:
   SOURCE_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   SOURCE_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
   TARGET_RPC_URL: ref+sops://secrets.enc.yaml#/sepoliaArbitrumHttpsUrl
-  TARGET_WS_URL:  ref+sops://secrets.enc.yaml#/sepoliaArbitrumWssUrl
+  TARGET_WS_URL: ref+sops://secrets.enc.yaml#/sepoliaArbitrumWssUrl
 updaterEnvBase:
   SOURCE_CHAIN_ID: 17000
   TARGET_CHAIN_ID: 421614
@@ -227,7 +239,7 @@ sequencerEnvEth2:
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   LIMIT: "100"
   WATCHDOG: 30
-sequencerEnvSecretsEth2: 
+sequencerEnvSecretsEth2:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   ETH_PRIV_KEY: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
   MNEMONIC: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
@@ -238,7 +250,7 @@ sequencerEnvEth3:
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   LIMIT: "100"
   WATCHDOG: 30
-sequencerEnvSecretsEth3: 
+sequencerEnvSecretsEth3:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   ETH_PRIV_KEY: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
   MNEMONIC: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
@@ -260,7 +272,7 @@ sequencerEnvArb2:
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   LIMIT: "100"
   WATCHDOG: 30
-sequencerEnvSecretsArb2: 
+sequencerEnvSecretsArb2:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   ETH_PRIV_KEY: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
   MNEMONIC: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
@@ -271,7 +283,7 @@ sequencerEnvArb3:
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   LIMIT: "100"
   WATCHDOG: 30
-sequencerEnvSecretsArb3: 
+sequencerEnvSecretsArb3:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   ETH_PRIV_KEY: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
   MNEMONIC: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
@@ -293,7 +305,7 @@ sequencerEnvBase2:
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   LIMIT: "100"
   WATCHDOG: 30
-sequencerEnvSecretsBase2: 
+sequencerEnvSecretsBase2:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   ETH_PRIV_KEY: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
   MNEMONIC: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
@@ -304,11 +316,10 @@ sequencerEnvBase3:
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   LIMIT: "100"
   WATCHDOG: 30
-sequencerEnvSecretsBase3: 
+sequencerEnvSecretsBase3:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
   ETH_PRIV_KEY: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
   MNEMONIC: "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b"
-
 
 #########################
 # ferry-deposit configs #
@@ -320,7 +331,7 @@ ferryDepositEnvEth:
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   L1_CHAIN: "Ethereum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   BLOCK_DELAY: 0
   LOG: silly
 ferryDepositEnvSecretsEth:
@@ -332,7 +343,7 @@ ferryDepositEnvArb:
   MANGATA_CONTRACT_ADDRESS: 0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   L1_CHAIN: "Arbitrum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   BLOCK_DELAY: 0
   LOG: silly
 ferryDepositEnvSecretsArb:
@@ -343,7 +354,7 @@ ferryDepositEnvBase:
   MANGATA_CONTRACT_ADDRESS: 0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   L1_CHAIN: "Base"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   BLOCK_DELAY: 0
   LOG: silly
 ferryDepositEnvSecretsBase:
@@ -360,7 +371,7 @@ ferryWithdrawalEnvEth:
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   L1_CHAIN: "Ethereum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 ferryWithdrawalEnvSecretsEth:
@@ -373,7 +384,7 @@ ferryWithdrawalEnvArb:
   MANGATA_CONTRACT_ADDRESS: 0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   L1_CHAIN: "Arbitrum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 ferryWithdrawalEnvSecretsArb:
@@ -385,7 +396,7 @@ ferryWithdrawalEnvBase:
   MANGATA_CONTRACT_ADDRESS: 0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   L1_CHAIN: "Arbitrum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 ferryWithdrawalEnvSecretsBase:
@@ -402,7 +413,7 @@ closerEnvEth:
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   L1_CHAIN: "Ethereum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsEth:
@@ -415,7 +426,7 @@ closerEnvArb:
   MANGATA_CONTRACT_ADDRESS: 0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   L1_CHAIN: "Arbitrum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsArb:
@@ -428,7 +439,7 @@ closerEnvBase:
   MANGATA_CONTRACT_ADDRESS: 0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   L1_CHAIN: "Base"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsBase:
