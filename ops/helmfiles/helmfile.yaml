@@ -1,7 +1,6 @@
 bases: ['environments.yaml']
 ---
 helmDefaults:
-  kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
   wait: false
   # diffArgs:
   #   - "--suppress" 
@@ -122,6 +121,41 @@ releases:
           limits:
             cpu: 1
             memory: 1Gi
+  - name: sequencer-eth-2
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedEth2" | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvEth2" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth2"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-eth-3
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedEth3" | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvEth3" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth3"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+
   - name: sequencer-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.sequencerEnabled .Values.enableArbitrumServices }}
@@ -139,6 +173,41 @@ releases:
           limits:
             cpu: 1
             memory: 1Gi
+  - name: sequencer-arb-2
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedArb2" | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvArb2" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb2"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-arb-3
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedArb3" | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvArb3" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb3"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+            
   - name: sequencer-base
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.sequencerEnabled .Values.enableBaseServices }}
@@ -149,6 +218,40 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvBase | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-base-2
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedBase2" | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvBase2" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase2"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-base-3
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedBase3" | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvBase3" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase3"| expandSecretRefs | toYaml | nindent 10 }}
         resources:
           requests:
             cpu: 100m
