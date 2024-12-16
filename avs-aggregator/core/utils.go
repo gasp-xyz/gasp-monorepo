@@ -24,7 +24,7 @@ func AbiEncodeOpTaskResponse(h *taskmanager.IFinalizerTaskManagerOpTaskResponse)
 	return bytes, nil
 }
 
-// GetTaskResponseDigest returns the hash of the TaskResponse, which is what operators sign over
+// GetOpTaskResponseDigest returns the hash of the TaskResponse, which is what operators sign over
 func GetOpTaskResponseDigest(h *taskmanager.IFinalizerTaskManagerOpTaskResponse) ([32]byte, error) {
 
 	encodeTaskResponseByte, err := AbiEncodeOpTaskResponse(h)
@@ -56,7 +56,7 @@ func AbiEncodeRdTaskResponse(h *taskmanager.IFinalizerTaskManagerRdTaskResponse)
 	return bytes, nil
 }
 
-// GetTaskResponseDigest returns the hash of the TaskResponse, which is what operators sign over
+// GetRdTaskResponseDigest returns the hash of the TaskResponse, which is what operators sign over
 func GetRdTaskResponseDigest(h *taskmanager.IFinalizerTaskManagerRdTaskResponse) ([32]byte, error) {
 
 	encodeTaskResponseByte, err := AbiEncodeRdTaskResponse(h)
