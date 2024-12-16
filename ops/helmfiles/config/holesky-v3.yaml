@@ -252,7 +252,7 @@ ferryDepositEnvSecretsBase:
 ############################
 ferryWithdrawalEnabled: true
 ferryWithdrawalEnvEth:
-  MANGATA_NODE_URL: wss://collator-01-ws-rollup-holesky-v3.gasp.xyz
+  MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
   MANGATA_CONTRACT_ADDRESS: "0xCACb3e67CA70Af311744681B6E51B880da24a78a"
   L1_CHAIN: "holesky"
