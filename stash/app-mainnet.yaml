@@ -6,7 +6,7 @@ includes:
   - app-import-handlers.yaml
 
 env_variables:
-  MANGATA_NODE_URL: 'wss://rollup-mainnet-rpc.gasp.xyz'
+  MANGATA_NODE_URL: 'wss://rollup-prod-rpc.gasp.xyz'
   OLD_MANGATA_NODE_URL: 'wss://kusama-archive.mangata.online'
   REDIS_HOST: '10.152.79.4'
   REDIS_PORT: 6379
