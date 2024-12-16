@@ -621,7 +621,12 @@ impl Syncer {
             .chain_rd_batch_nonce()
             .block(alt_block_number)
             .await?;
-
+        let latest_completed_op_task_number = self
+            .gasp_service_contract
+            .latest_completed_op_task_number()
+            .block(alt_block_number)
+            .await?;
+            
         // TODO!!
         // Get the latest block from source chain and query the following three with it!
         let eth_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
@@ -639,6 +644,10 @@ impl Syncer {
             .last_completed_op_task_created_block()
             .block(eth_block_number)
             .await?;
+
+        if block_num.is_zero() {
+            return Err(eyre!("no completed op tasks for reinit {:?}", block_num));
+        }
 
         // Unfortunately latestTaskNum and LastCompletedTaskNum both start at 0
         // So if lastCompletedTaskNum is 0 then check if it was infact completed
@@ -678,10 +687,17 @@ impl Syncer {
             }
         };
 
+        last_task.last_completed_op_task_num = latest_completed_op_task_number;
         last_task.last_completed_op_task_created_block = latest_completed_op_task_created_block;
         last_task.last_completed_op_task_quorum_numbers = latest_completed_op_task_quorum_numbers;
         last_task.last_completed_op_task_quorum_threshold_percentage =
             latest_completed_op_task_quorum_threshold_percentage;
+
+        let rd_tasks_from: u64 = if latest_completed_op_task_created_block == 0{
+            block_num.into()
+        } else {
+            latest_completed_op_task_created_block.into()
+        };
 
         let (
             merkle_roots,
@@ -696,7 +712,7 @@ impl Syncer {
                 latest_completed_rd_task_number,
                 latest_completed_rd_task_created_block,
                 eth_block_number,
-                u64::from(latest_completed_op_task_created_block),
+                rd_tasks_from,
             )
             .await?;
 
@@ -766,7 +782,7 @@ impl Syncer {
             .task_manager
             .latest_op_task_num()
             .block(source_block_number)
-            .await?;
+            .await?.checked_sub(1u32).ok_or_eyre("latest_op_task_num underflow - no op task created")?;
 
         let task_status = self
             .clone()
@@ -1429,6 +1445,15 @@ impl Syncer {
         };
 
         info!("operator_state_info: {:?}", operator_state_info);
+        let operators_state_info_hash = Keccak256::hash(
+            vec![0u8; 31]
+                .into_iter()
+                .chain(vec![32u8])
+                .chain(operator_state_info.clone().encode().into_iter())
+                .collect::<Vec<_>>()
+                .as_ref(),
+        );
+        debug!("{:?}", operators_state_info_hash);
         Ok(operator_state_info)
     }
 
