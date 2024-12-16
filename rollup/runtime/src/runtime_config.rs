@@ -62,7 +62,7 @@ pub mod tokens {
 		pub const RxTokenId: TokenId = RX_TOKEN_ID;
 		pub const EthTokenId: TokenId = ETH_TOKEN_ID;
 		pub ArbitrageBotAddr: AccountId = sp_runtime::AccountId20::from(
-			hex_literal::hex!["fc741134c82b81b7ab7efbf334b0c90ff8dbf22c"]
+			hex_literal::hex!["0286Ffa54213778E064179E9B6F083ecb584E862"]
 		);
 	}
 }
@@ -980,7 +980,7 @@ pub mod config {
 				1 * currency::DOLLARS
 			} else {
 				// ACTUAL
-				1_500_000 * currency::DOLLARS
+				1_000_000 * currency::DOLLARS
 			};
 			/// Minimum stake required to be reserved to be a delegator
 			pub const MinDelegatorStk: u128 = 1 * currency::CENTS;
@@ -999,15 +999,17 @@ pub mod config {
 			pub const SequencerIssuanceVaultId: PalletId = PalletId(*b"py/seqiv");
 			pub SequencerIssuanceVault: AccountId = SequencerIssuanceVaultId::get().into_account_truncating();
 
-			pub const TotalCrowdloanAllocation: Balance = 330_000_000 * DOLLARS;
-			pub const IssuanceCap: Balance = 4_000_000_000 * DOLLARS;
-			pub const LinearIssuanceBlocks: u32 = 13_140_000u32; // 5 years
-			pub const LiquidityMiningSplit: Perbill = Perbill::from_parts(555555556);
-			pub const StakingSplit: Perbill = Perbill::from_parts(344444444);
-			pub const SequencerSplit: Perbill = Perbill::from_parts(100000000);
-			pub const ImmediateTGEReleasePercent: Percent = Percent::from_percent(20);
-			pub const TGEReleasePeriod: u32 = 5_256_000u32; // 2 years
-			pub const TGEReleaseBegin: u32 = 100_800u32; // Two weeks into chain start
+			pub const TotalCrowdloanAllocation: Balance = 0 * DOLLARS;
+			pub const IssuanceCap: Balance = 25_400_000 * DOLLARS;
+			pub const LinearIssuanceBlocks: u32 = 10_512_000u32; // 5 years
+			pub const LiquidityMiningSplit: Perbill = Perbill::from_parts(647050000); // 13'199'820
+			pub const StakingSplit: Perbill = Perbill::from_parts(235300000); // 4'800'120
+			pub const SequencerSplit: Perbill = Perbill::from_parts(117650000); // 2'400'060
+			pub const ImmediateTGEReleasePercent: Percent = Percent::from_percent(100);
+			// Just some safe values to avoid zero diision etc
+			// TGE happens on L1 either way
+			pub const TGEReleasePeriod: u32 = 100u32; // 2 years
+			pub const TGEReleaseBegin: u32 = 10u32; // Two weeks into chain start
 		}
 	}
 
@@ -1323,17 +1325,17 @@ pub mod config {
 
 		#[cfg(not(feature = "fast-runtime"))]
 		parameter_types! {
-			pub const MerkleRootAutomaticBatchPeriod: u128 = 1200;
-			pub const MerkleRootAutomaticBatchSize: u128 = 1024;
+			pub const MerkleRootAutomaticBatchPeriod: u128 = 600;
+			pub const MerkleRootAutomaticBatchSize: u128 = 500;
 		}
 
 		pub struct WithdrawFee;
 		impl Convert<::pallet_rolldown::messages::Chain, Balance> for WithdrawFee {
 			fn convert(chain: ::pallet_rolldown::messages::Chain) -> Balance {
 				match chain {
-					::pallet_rolldown::messages::Chain::Ethereum => 50 * currency::DOLLARS,
-					::pallet_rolldown::messages::Chain::Arbitrum => 50 * currency::DOLLARS,
-					::pallet_rolldown::messages::Chain::Base => 50 * currency::DOLLARS,
+					::pallet_rolldown::messages::Chain::Ethereum => 5 * currency::DOLLARS,
+					::pallet_rolldown::messages::Chain::Arbitrum => 5 * currency::DOLLARS,
+					::pallet_rolldown::messages::Chain::Base => 5 * currency::DOLLARS,
 				}
 			}
 		}

@@ -1,9 +1,10 @@
 use crate::command::{EvmChain, InitialSequencersSet};
+use frame_benchmarking::benchmarking::current_time;
 use rand::{thread_rng, Rng};
 use rollup_runtime::{
-	config::orml_asset_registry::AssetMetadataOf, tokens::RX_TOKEN_ID, AccountId, AuraConfig,
-	CustomMetadata, GrandpaConfig, L1Asset, RuntimeGenesisConfig, Signature, SudoConfig,
-	SystemConfig, XcmMetadata, WASM_BINARY,
+	config::orml_asset_registry::AssetMetadataOf, currency, tokens::RX_TOKEN_ID, AccountId,
+	AuraConfig, CustomMetadata, GrandpaConfig, L1Asset, RuntimeGenesisConfig, Signature,
+	SudoConfig, SystemConfig, XcmMetadata, WASM_BINARY,
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -138,7 +139,7 @@ pub fn rollup_local_config(
 			.iter()
 			.flatten()
 			.cloned()
-			.map(|account_id| (0u32, 300_000_000__000_000_000_000_000_000u128, account_id))
+			.map(|account_id| (0u32, 100u128 * currency::DOLLARS, account_id))
 			.collect::<Vec<_>>();
 
 			rollup_genesis(
@@ -222,6 +223,243 @@ pub fn rollup_local_config(
 				base,
 				eth_chain_id,
 				decode_url.clone(),
+				vec![],
+			)
+		},
+		// Bootnodes
+		Vec::new(),
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// ForkId
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		None,
+		// code
+		rollup_runtime::WASM_BINARY.expect("WASM binary was not build, please build it!"),
+	)
+}
+
+pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
+	let (_gasp_token_address, eth_chain_id) = ([0u8; 20], 1u64);
+	let chain_genesis_salt_arr: [u8; 32] =
+		hex_literal::hex!("0011001100110011001100110011001100110011001100110011001100110011");
+
+	let collator01 = hex_literal::hex!("b9fcA08B9cA327a1dE90FDB4d51aa5ae6Ffe512a");
+	let collator01_sr25519 =
+		hex_literal::hex!("b6bcce45d0431d7cf3b23cf270e60fab48290cc2e129a62bcac04f6eab20e61f");
+	let collator01_ed25519 =
+		hex_literal::hex!("efc45e2afccbe0f53cab042438aebb6bcfc78585625c2a1b5517f3b258dd1cf8");
+
+	let collator02 = hex_literal::hex!("1f4E3f24d1ad7fE108c6eB3BA6F83ebe8cF0eD20");
+	let collator02_sr25519 =
+		hex_literal::hex!("860a476d36782b7e2854ab4e93287e67618a835741b84bd7cad0740a83275f3c");
+	let collator02_ed25519 =
+		hex_literal::hex!("2227445cd1b97943e1ba5c3cf3a94cadabd4494ff4394667be13ff755bae1abe");
+
+	let collator03 = hex_literal::hex!("7F7c7b782fBdAd01Fe33ca8FC647c867ee29deD2");
+	let collator03_sr25519 =
+		hex_literal::hex!("4899a218a591b9345b92de354b4d251eabd205bc64c787386fdccfe1f2147625");
+	let collator03_ed25519 =
+		hex_literal::hex!("d59387884193c920e0cef94770d74cc2cef0d534b1ebf5a5d1eb5033fb58746a");
+
+	let collator04 = hex_literal::hex!("4691A9BB90e20a7708182fD881fb723f9845460E");
+	let collator04_sr25519 =
+		hex_literal::hex!("b0c2a16a1acecd3e05a243d9bf8881f5d64a70b40864701dba01cfd1ee53c85a");
+	let collator04_ed25519 =
+		hex_literal::hex!("172165647a152929e2bb0af97f55ea0c0deaa087479be8eab7448c2dc8cd0dfe");
+
+	let sudo = hex_literal::hex!("E73e1Bb7B07f6bf447ED71252A5ad08C7ebE5bE5");
+
+	// Give your base currency a unit name and decimal places
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "GASP".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42u32.into());
+	properties.insert("isEthereum".into(), true.into());
+	// This is quite useless here :/
+	properties.insert(
+		"chainGenesisSalt".into(),
+		array_bytes::bytes2hex("0x", chain_genesis_salt_arr).into(),
+	);
+
+	let decode_url = decode_url.expect("polkadot url is provided");
+	// todo builder
+	ChainSpec::from_genesis(
+		// Name
+		"Mainnet",
+		// ID
+		"mainnet",
+		ChainType::Live,
+		move || {
+			let eth_sequencers: Vec<AccountId> = vec![
+				hex_literal::hex!("dFD7f828689FbF00995BAA40d2DE93Eb400Cf60b").into(),
+				hex_literal::hex!("88bbb08aF77987D86E9559491fE7cC5910D68f2D").into(),
+				hex_literal::hex!("8d3CD208aa5592CF510eB24D8a2376bbF840bb63").into(),
+			];
+			let arb_sequencers: Vec<AccountId> = vec![
+				hex_literal::hex!("b67CB37E9d114731B5624B6E919c007f4ddEa582").into(),
+				hex_literal::hex!("71403bFc37f031b60BD7a5B9597115708E391410").into(),
+				hex_literal::hex!("25CeF43c3F52db02ae52D951936b390C4B6A998F").into(),
+			];
+			let base_sequencers: Vec<AccountId> = vec![
+				hex_literal::hex!("A395bBE2de17B488a578b972D96EE38933eE3c85").into(),
+				hex_literal::hex!("6f52f2D60AdFC152ac561287b754A56A7933F1ae").into(),
+				hex_literal::hex!("a7196AF761942A10126165B2c727eFCD46c254e0").into(),
+			];
+
+			let council_members = vec![
+				hex_literal::hex!("35dbD8Bd2c5617541bd9D9D8e065adf92275b83E").into(),
+				hex_literal::hex!("7368bff2fBB4C7B05f854c370eeDD6809186917B").into(),
+				hex_literal::hex!("9cA8aFB1326c99EC23B8D4e16C0162Bb206D83b8").into(),
+				hex_literal::hex!("8b5368B4BBa80475c9DFb70543F6090A7e986F39").into(),
+				hex_literal::hex!("aF3cA574A4903c5ddC7378Ac60d786a2664CbD91").into(),
+				hex_literal::hex!("584728a637303e753906a4F05CD8Ced10D80eB5e").into(),
+				hex_literal::hex!("8960911c51EaD00db4cCA88FAF395672458da676").into(),
+			];
+
+			let sequencers_endownment =
+				[eth_sequencers.clone(), arb_sequencers.clone(), base_sequencers.clone()]
+					.iter()
+					.flatten()
+					.cloned()
+					.map(|account_id| (RX_TOKEN_ID, 100u128 * currency::DOLLARS, account_id))
+					.collect::<Vec<_>>();
+
+			let mut tokens_endowment = sequencers_endownment;
+			tokens_endowment.push((RX_TOKEN_ID, 988_100_u128 * currency::DOLLARS, sudo.into()));
+
+			tokens_endowment.append(
+				&mut council_members
+					.clone()
+					.into_iter()
+					.map(|addr| (RX_TOKEN_ID, 1000_u128 * currency::DOLLARS, addr))
+					.collect::<Vec<_>>(),
+			);
+
+			rollup_genesis(
+				// chain genesis salt
+				H256::from(chain_genesis_salt_arr),
+				// initial collators.
+				vec![
+					(
+						collator01.into(),
+						(
+							AuraId::from_slice(collator01_sr25519.as_slice()).unwrap(),
+							GrandpaId::from_slice(collator01_ed25519.as_slice()).unwrap(),
+						),
+					),
+					(
+						collator02.into(),
+						(
+							AuraId::from_slice(collator02_sr25519.as_slice()).unwrap(),
+							GrandpaId::from_slice(collator02_ed25519.as_slice()).unwrap(),
+						),
+					),
+					(
+						collator03.into(),
+						(
+							AuraId::from_slice(collator03_sr25519.as_slice()).unwrap(),
+							GrandpaId::from_slice(collator03_ed25519.as_slice()).unwrap(),
+						),
+					),
+					(
+						collator04.into(),
+						(
+							AuraId::from_slice(collator04_sr25519.as_slice()).unwrap(),
+							GrandpaId::from_slice(collator04_ed25519.as_slice()).unwrap(),
+						),
+					),
+				],
+				// Sudo account
+				sudo.into(),
+				// Tokens endowment
+				tokens_endowment,
+				// Config for Staking
+				// Make sure it works with initial-authorities as staking uses both
+				(
+					vec![
+						(
+							// Who gets to stake initially
+							collator01.into(),
+							// Id of MGA token,
+							0u32,
+							// How much mangata they stake
+							1__001_000u128 * currency::DOLLARS,
+						),
+						(
+							// Who gets to stake initially
+							collator02.into(),
+							// Id of MGA token,
+							0u32,
+							// How much mangata they stake
+							1__001_000u128 * currency::DOLLARS,
+						),
+						(
+							// Who gets to stake initially
+							collator03.into(),
+							// Id of MGA token,
+							0u32,
+							// How much mangata they stake
+							1__001_000u128 * currency::DOLLARS,
+						),
+						(
+							// Who gets to stake initially
+							collator04.into(),
+							// Id of MGA token,
+							0u32,
+							// How much mangata they stake
+							1__001_000u128 * currency::DOLLARS,
+						),
+					],
+					vec![
+						// Who gets to stake initially
+						// Id of MGA token,
+						// How much mangata they pool
+						// Id of the dummy token,
+						// How many dummy tokens they pool,
+						// Id of the liquidity token that is generated
+						// How many liquidity tokens they stake,
+					],
+				),
+				vec![
+					(
+						RX_TOKEN_ID,
+						AssetMetadataOf {
+							decimals: 18,
+							name: BoundedVec::truncate_from(b"Gasp".to_vec()),
+							symbol: BoundedVec::truncate_from(b"GASP".to_vec()),
+							additional: Default::default(),
+							existential_deposit: Default::default(),
+						},
+						Some(L1Asset::Ethereum(hex_literal::hex!(
+							"0000000000000000000000000000000000000000"
+						))),
+					),
+					(
+						1,
+						AssetMetadataOf {
+							decimals: 18,
+							name: BoundedVec::truncate_from(b"Gasp Ethereum".to_vec()),
+							symbol: BoundedVec::truncate_from(b"GETH".to_vec()),
+							additional: Default::default(),
+							existential_deposit: Default::default(),
+						},
+						Some(L1Asset::Ethereum(
+							array_bytes::hex2array("0x0000000000000000000000000000000000000001")
+								.unwrap(),
+						)),
+					),
+				],
+				eth_sequencers,
+				arb_sequencers,
+				base_sequencers,
+				eth_chain_id,
+				decode_url.clone(),
+				council_members,
 			)
 		},
 		// Bootnodes
@@ -257,6 +495,7 @@ fn rollup_genesis(
 	base_initial_sequencers: Vec<AccountId>,
 	chain_id: u64,
 	decode_url: String,
+	council_members: Vec<AccountId>,
 ) -> rollup_runtime::RuntimeGenesisConfig {
 	let initial_sequencers_stake = 10_000_000_u128;
 
@@ -365,11 +604,14 @@ fn rollup_genesis(
 		},
 		fee_lock: rollup_runtime::FeeLockConfig {
 			period_length: Some(10),
-			fee_lock_amount: Some(50__000_000_000_000_000_000u128),
-			swap_value_threshold: Some(1000__000_000_000_000_000_000u128),
+			fee_lock_amount: Some(50u128 * currency::DOLLARS),
+			swap_value_threshold: Some(50u128 * currency::DOLLARS),
 			whitelisted_tokens: Default::default(),
 		},
-		council: Default::default(),
+		council: rollup_runtime::CouncilConfig {
+			phantom: Default::default(),
+			members: council_members,
+		},
 		transaction_payment: Default::default(),
 		sudo: rollup_runtime::SudoConfig {
 			// Assign network admin rights.
@@ -387,20 +629,34 @@ fn rollup_genesis(
 		},
 		vesting: Default::default(),
 		sequencer_staking: rollup_runtime::SequencerStakingConfig {
-			minimal_stake_amount: 1_000_000_u128,
-			slash_fine_amount: 100_000_u128,
+			minimal_stake_amount: 100u128 * currency::DOLLARS,
+			slash_fine_amount: 1u128 * currency::DOLLARS,
 			sequencers_stake: [
 				eth_initial_sequencers
 					.into_iter()
-					.map(|seq| (seq, pallet_rolldown::messages::Chain::Ethereum, 10_000_000_u128))
+					.map(|seq| {
+						(
+							seq,
+							pallet_rolldown::messages::Chain::Ethereum,
+							100u128 * currency::DOLLARS,
+						)
+					})
 					.collect::<Vec<_>>(),
 				arb_initial_sequencers
 					.into_iter()
-					.map(|seq| (seq, pallet_rolldown::messages::Chain::Arbitrum, 10_000_000_u128))
+					.map(|seq| {
+						(
+							seq,
+							pallet_rolldown::messages::Chain::Arbitrum,
+							100u128 * currency::DOLLARS,
+						)
+					})
 					.collect::<Vec<_>>(),
 				base_initial_sequencers
 					.into_iter()
-					.map(|seq| (seq, pallet_rolldown::messages::Chain::Base, 10_000_000_u128))
+					.map(|seq| {
+						(seq, pallet_rolldown::messages::Chain::Base, 100u128 * currency::DOLLARS)
+					})
 					.collect::<Vec<_>>(),
 			]
 			.iter()
@@ -412,9 +668,9 @@ fn rollup_genesis(
 		rolldown: rollup_runtime::RolldownConfig {
 			_phantom: Default::default(),
 			dispute_periods: [
-				(pallet_rolldown::messages::Chain::Ethereum, 300u128),
-				(pallet_rolldown::messages::Chain::Arbitrum, 600u128),
-				(pallet_rolldown::messages::Chain::Base, 600u128),
+				(pallet_rolldown::messages::Chain::Ethereum, 200u128),
+				(pallet_rolldown::messages::Chain::Arbitrum, 200u128),
+				(pallet_rolldown::messages::Chain::Base, 200u128),
 			]
 			.iter()
 			.cloned()
@@ -442,11 +698,9 @@ fn rollup_genesis(
 		foundation_members: rollup_runtime::FoundationMembersConfig {
 			members: BoundedVec::truncate_from(
 				[
-					// TODO AccountId20
-					// Change the following
-					hex_literal::hex!["c8d02dfbff5ce2fda651c7dd7719bc5b17b9c104"],
-					hex_literal::hex!["c4690c56c36cec7ed5f6ed5d5eebace0c317073a"],
-					hex_literal::hex!["fc741134c82b81b7ab7efbf334b0c90ff8dbf22c"],
+					hex_literal::hex!["9cA8aFB1326c99EC23B8D4e16C0162Bb206D83b8"],
+					hex_literal::hex!["8960911c51EaD00db4cCA88FAF395672458da676"],
+					hex_literal::hex!["35dbD8Bd2c5617541bd9D9D8e065adf92275b83E"],
 				]
 				.iter()
 				.map(|acc| sp_runtime::AccountId20::from(*acc))
