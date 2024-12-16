@@ -382,8 +382,7 @@ ferryWithdrawalEnvEth:
   LOG: silly
 ferryWithdrawalEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
-  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-deposit-eth
-  MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-deposit-eth
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-private-key
 
 ferryWithdrawalEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -395,8 +394,7 @@ ferryWithdrawalEnvArb:
   LOG: silly
 ferryWithdrawalEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumMainnetWssUrl
-  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-deposit-arb
-  MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-deposit-arb
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-private-key
 
 ferryWithdrawalEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -408,23 +406,22 @@ ferryWithdrawalEnvBase:
   LOG: silly
 ferryWithdrawalEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseMainnetWssUrl
-  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-deposit-base
-  MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-deposit-base
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-private-key
 
 ########################
 # ferry-closer configs #
 ########################
-closerEnabled: false
+closerEnabled: true
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x93de6a193A839218BCA00c8D478256Ac78281cE3"
   L1_CHAIN: "Ethereum"
-  TOKENS_TO_TRACK: "[]"
+  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000, 1, 1"]]'
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsEth:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-private-key
 
@@ -432,7 +429,7 @@ closerEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: 0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   L1_CHAIN: "Arbitrum"
-  TOKENS_TO_TRACK: "[]"
+  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000, 1, 1"]]'
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
@@ -445,7 +442,7 @@ closerEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: 0x998AaF69F731009d4E2d470E974766F1EB8f5142"
   L1_CHAIN: "Base"
-  TOKENS_TO_TRACK: "[]"
+  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000, 1, 1"]]'
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
