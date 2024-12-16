@@ -155,7 +155,7 @@ aggregatorEnv:
 #####################
 # gaspAvs configs #
 #####################
-gaspAvsEnabled: true
+gaspAvsEnabled: false
 # Override the image tag provided on deployment from IMAGE_TAG env variable
 # gaspAvsImageTag: ba3aaf237234092ad21bf0a4c5ff0f08523ba6f0
 
