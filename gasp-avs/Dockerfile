@@ -52,6 +52,8 @@ ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec
 ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/7358269f21bf921b541f07db5ab80badb03288b7/rollup-dev-env-chainspecs/rollup-frontend-456a53b-raw.json /app/frontend-chainspec.json
 ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json /app/holesky-chainspec.json
 ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/485165d5cac39607183994e9122404387dcdd49d/rollup-holesky-v3-3722076-raw.json /app/holesky-v3-chainspec.json
+ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/f9604551934c498a6a814d84f2cd6c01803d24d7/rollup-dev-env-chainspecs/alpha-launch-f26183b-raw.json /app/mainnet-chainspec.json
+
 
 COPY --chown=appuser:appuser --from=builder /app/main /app/gasp-avs
 COPY --chown=appuser:appuser --from=rollup-node-image /app/node /app/rollup-node
