@@ -29,7 +29,7 @@ collator:
     # Ref: https://github.com/gasp-xyz/mangata-node/tree/3722076d06f7c1ff7c727a799260c5df2a5eb62f
     tag: 3722076d06f7c1ff7c727a799260c5df2a5eb62f
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/cbbe428a32da2333636a9076393f52cb63a30146/alpha-launch-cd252cc-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/cbbe428a32da2333636a9076393f52cb63a30146/rollup-dev-env-chainspecs/alpha-launch-cd252cc-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 150Gi
