@@ -1,44 +1,82 @@
 name: rollup
 
-include:
-  - path: ./contracts/compose.anvil-stubs.yml # anvil stubs
-  # - path: ./contracts/compose.reth-stubs.yml # reth stubs
-
-  - path: ./avs-aggregator/compose.yml
-  - path: ./gasp-avs/compose.yml
-  # - path: ./rollup-sequencer/compose.yml
-  - path: ./sequencer/compose.yml
-  - path: ./contracts/compose.yml
-  - path: ./updater/compose.yml
-  - path: ./ferry-deposit/compose.yml
-  - path: ./ferry-withdrawal/compose.yml
+# include:
+#   - path: ./contracts/compose.anvil-stubs.yml # anvil stubs
+#   # - path: ./contracts/compose.reth-stubs.yml # reth stubs
+#
+#   - path: ./avs-aggregator/compose.yml
+#   - path: ./gasp-avs/compose.yml
+#   # - path: ./rollup-sequencer/compose.yml
+#   - path: ./sequencer/compose.yml
+#   - path: ./contracts/compose.yml
+#   - path: ./updater/compose.yml
+#   - path: ./ferry-deposit/compose.yml
+#   - path: ./ferry-withdrawal/compose.yml
 
 services:
-  node-alice:
+  collator01:
     image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION}
-    pull_policy: always
     command:
-      - --alith
-      - --chain=rollup-local-seq
-      - --base-path=/data
+      - --chain=ethereum-mainnet
+      - --validator
       - --rpc-cors=all
       - --unsafe-rpc-external
+      - --rpc-methods=unsafe
       - --node-key=0000000000000000000000000000000000000000000000000000000000000001
       - --pruning=archive
+      - --base-path=/data
+      - -linfo,grandpa=trace,runtime=debug
     ports:
       - 9944:9944
       - 30333:30333
 
-  node-bob:
+  collator02:
     image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION}
-    pull_policy: always
     command:
-      - --baltathar
-      - --chain=rollup-local-seq
-      - --base-path=/data
+      - --chain=ethereum-mainnet
+      - --validator
       - --rpc-cors=all
       - --unsafe-rpc-external
-      - --bootnodes=/dns/node-alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+      - --rpc-methods=unsafe
+      - --bootnodes=/dns/collator01/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+      - --node-key=0000000000000000000000000000000000000000000000000000000000000002
       - --pruning=archive
+      - --base-path=/data
+      - -linfo,runtime::grandpa=debug
+    ports:
+      - 9945:9944
+      - 30334:30333
+
+  collator03:
+    image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION}
+    command:
+      - --chain=ethereum-mainnet
+      - --validator
+      - --rpc-cors=all
+      - --unsafe-rpc-external
+      - --rpc-methods=unsafe
+      - --bootnodes=/dns/collator01/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+      - --node-key=0000000000000000000000000000000000000000000000000000000000000003
+      - --pruning=archive
+      - --base-path=/data
+      - -linfo,runtime::grandpa=debug
     ports:
       - 9946:9944
+      - 30335:30333
+
+  collator04:
+    image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION}
+    command:
+      - --chain=ethereum-mainnet
+      - --validator
+      - --rpc-cors=all
+      - --unsafe-rpc-external
+      - --rpc-methods=unsafe
+      - --bootnodes=/dns/collator01/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+      - --node-key=0000000000000000000000000000000000000000000000000000000000000004
+      - --pruning=archive
+      - --base-path=/data
+      - -linfo,runtime::grandpa=debug
+    ports:
+      - 9947:9944
+      - 30336:30333
