@@ -2,6 +2,7 @@ bases: ['environments.yaml']
 ---
 helmDefaults:
   wait: false
+  kubeContext: '{{ .Values.kubeContext }}'
   # diffArgs:
   #   - "--suppress" 
   #   - "Job"

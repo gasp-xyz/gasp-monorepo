@@ -2,6 +2,9 @@ repositories:
   - name: mangata-node
     url: git+https://github.com/gasp-xyz/helm-charts@charts?ref=node-v2.3.0
 
+helmDefaults:
+  kubeContext: '{{ .Values.kubeContext }}'
+
 releases:
   - name: collator-01
     installed: {{ .Values.collatorsEnabled }}
