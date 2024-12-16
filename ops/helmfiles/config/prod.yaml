@@ -322,7 +322,7 @@ sequencerEnvBase3:
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsBase3:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-base-3
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-base-3
 
