@@ -626,7 +626,7 @@ impl Syncer {
             .latest_completed_op_task_number()
             .block(alt_block_number)
             .await?;
-            
+
         // TODO!!
         // Get the latest block from source chain and query the following three with it!
         let eth_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
@@ -693,7 +693,7 @@ impl Syncer {
         last_task.last_completed_op_task_quorum_threshold_percentage =
             latest_completed_op_task_quorum_threshold_percentage;
 
-        let rd_tasks_from: u64 = if latest_completed_op_task_created_block == 0{
+        let rd_tasks_from: u64 = if latest_completed_op_task_created_block == 0 {
             block_num.into()
         } else {
             latest_completed_op_task_created_block.into()
@@ -782,7 +782,9 @@ impl Syncer {
             .task_manager
             .latest_op_task_num()
             .block(source_block_number)
-            .await?.checked_sub(1u32).ok_or_eyre("latest_op_task_num underflow - no op task created")?;
+            .await?
+            .checked_sub(1u32)
+            .ok_or_eyre("latest_op_task_num underflow - no op task created")?;
 
         let task_status = self
             .clone()
