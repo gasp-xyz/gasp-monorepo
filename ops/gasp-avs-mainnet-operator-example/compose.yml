@@ -1,0 +1,27 @@
+services:
+  gasp-avs:
+    image: gaspxyz/gasp-avs:4aad4a9c917ed04965be1c39f5b5dfc495e27f2d
+    restart: unless-stopped
+    environment:
+        CHAIN_ID: "1"
+        AVS_BLOCK_VALIDATION_PERIOD: "100"
+        AVS_DEBOUNCE_RPC: "20"
+        AVS_DEPLOYMENT_BLOCK: "21394442"
+        AVS_KICK_PERIOD: "25"
+        AVS_REGISTRY_COORDINATOR_ADDR: "0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1"
+        AVS_RPC_URL: https://avs-aggregator-prod.gasp.xyz
+        AVS_TASK_EXPIRATION: "300"
+        AVS_UPDATE_STAKE_PERIOD: "150"
+        LOG_LEVEL: "info"
+        RUST_LOG: avs=debug,ether=trace
+        ETH_RPC_URL: https://ethereum-rpc.publicnode.com
+        ETH_WS_URL: wss://ethereum-rpc.publicnode.com
+        ECDSA_EPHEMERAL_KEY: true
+        BLS_EPHEMERAL_KEY: true
+        GASP_AVS_PROCESS_ENABLED: false
+        # rollup-node configs
+        ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+        ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/f9604551934c498a6a814d84f2cd6c01803d24d7/rollup-dev-env-chainspecs/alpha-launch-f26183b-raw.json
+    volumes:
+      - ./data:/data
+  

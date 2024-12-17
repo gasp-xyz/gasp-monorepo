@@ -1,4 +1,7 @@
-environments: 
+environments:
+  default:
+    values: 
+      - environmentName: default
   fungible:
     kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
     values:

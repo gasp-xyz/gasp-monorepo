@@ -38,38 +38,31 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
 FROM debian:stable-slim
 
 WORKDIR /app
+VOLUME /data
 
 RUN apt-get update && \
-    apt-get install -y supervisor wait-for-it ca-certificates && \
+    apt-get install -y curl wget supervisor wait-for-it ca-certificates && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /var/log/rollup-node /data && \
     useradd -m -s /bin/bash appuser && \
     chown -R appuser:appuser /app /var/log/rollup-node /data
 
-# Add pre-generated chainspecs from `chainspec` repo
-ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json /app/fungible-chainspec.json
-ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json /app/dev-chainspec.json
-ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/7358269f21bf921b541f07db5ab80badb03288b7/rollup-dev-env-chainspecs/rollup-frontend-456a53b-raw.json /app/frontend-chainspec.json
-ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/rollup-holesky-3a07824d8b8a6ad027424629b814a5edb61654cf-raw.json /app/holesky-chainspec.json
-ADD --chown=appuser:appuser https://raw.githubusercontent.com/gasp-xyz/chainspec/485165d5cac39607183994e9122404387dcdd49d/rollup-holesky-v3-3722076-raw.json /app/holesky-v3-chainspec.json
-
 COPY --chown=appuser:appuser --from=builder /app/main /app/gasp-avs
 COPY --chown=appuser:appuser --from=rollup-node-image /app/node /app/rollup-node
+COPY --chown=appuser:appuser ./entrypoint.sh /app/entrypoint.sh
 
 # rollup-node default env vars for connecting to rollup-holesky testnet
-ENV ROLLUP_NODE_CHAIN=/app/holesky-chainspec.json \
-		ROLLUP_NODE_BOOTNODE=/dns/collator-01-p2p-rollup-holesky.gasp.xyz/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK \
-		ROLLUP_NODE_BASE_PATH=/data \
+ENV ROLLUP_NODE_PROCESS_ENABLED=true \
+		ROLLUP_NODE_CHAIN=/data/chainspec.json \
 		RUST_LOG=info,substrate=warn
+		# [required] ROLLUP_NODE_BOOTNODE - bootnode address for the rollup-node to connect to
+		# [optional] ROLLUP_NODE_CUSTOM_CHAINSPEC_URL - custom chainspec url to use for the rollup-node
+		# [optional] ROLLUP_NODE_FORCE_DOWNLOAD_CHAINSPEC - force download chainspec from the ROLLUP_NODE_CUSTOM_CHAINSPEC_URL
 
-# gasp-avs default env vars for connecting to rollup-holesky testnet
-ENV SUBSTRATE_RPC_URL='ws://127.0.0.1:9944' \
-		ETH_RPC_URL='https://ethereum-holesky-rpc.publicnode.com' \
-		ETH_WS_URL='wss://ethereum-holesky-rpc.publicnode.com' \
-		CHAIN_ID='17000' \
-    AVS_REGISTRY_COORDINATOR_ADDR='0xfd6A45621DDfeBF94C082e60E0De92aA305a97a1' \
-    AVS_RPC_URL='https://avs-aggregator-holesky.gasp.xyz/' \
-    OPT_IN_AT_STARTUP='true'
+# gasp-avs process default configurations
+ENV GASP_AVS_PROCESS_ENABLED=true \
+		# SUBSTRATE_RPC_URL is used for connecting to embedded in container rollup-node instance
+		SUBSTRATE_RPC_URL='ws://127.0.0.1:9944'
 
 COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	[supervisord]
@@ -79,6 +72,7 @@ COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	# Reference: https://github.com/Supervisor/supervisor/issues/712#issuecomment-396553685 
 	[program:gasp-avs]
 	command = bash -c "wait-for-it ${SUBSTRATE_RPC_URL#*//} -t 300 -- /app/gasp-avs; kill -s SIGINT `cat supervisord.pid`"
+	autostart = %(ENV_GASP_AVS_PROCESS_ENABLED)s
 	stopasgroup = true
 	autorestart = false
 	stdout_logfile = /dev/stdout
@@ -89,20 +83,16 @@ COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	priority = 20
 
 	[program:rollup-node]
-	command = bash -c "/app/rollup-node --chain=%(ENV_ROLLUP_NODE_CHAIN)s --bootnodes=%(ENV_ROLLUP_NODE_BOOTNODE)s --base-path=%(ENV_ROLLUP_NODE_BASE_PATH)s --pruning=archive || kill -s SIGINT `cat supervisord.pid`"
+	command = bash -c "/app/rollup-node --chain=%(ENV_ROLLUP_NODE_CHAIN)s --bootnodes=%(ENV_ROLLUP_NODE_BOOTNODE)s --base-path=/data --pruning=archive || kill -s SIGINT `cat supervisord.pid`"
+	autostart = %(ENV_ROLLUP_NODE_PROCESS_ENABLED)s
 	stopasgroup = true
 	autorestart = false
 	stdout_logfile = /dev/stdout
 	stdout_logfile_maxbytes = 0
 	stderr_logfile = /dev/stderr
 	stderr_logfile_maxbytes = 0
-	# stdout_logfile = /var/log/rollup-node/combined.log
-	# stdout_logfile_maxbytes = 50MB
-	# stdout_logfile_backups = 1
-	# redirect_stderr = true
 	priority = 10
 EOF
 
 USER appuser
-
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/app/entrypoint.sh"]
