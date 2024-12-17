@@ -107,8 +107,8 @@ gaspAvsEnv:
   BLS_EPHEMERAL_KEY: "true"
   TESTNET: "true"
   # rollup-node configs
-  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/7358269f21bf921b541f07db5ab80badb03288b7/rollup-dev-env-chainspecs/rollup-frontend-456a53b-raw.json
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWJCggfzsr6LAdXSdfgFLxsMtgCq9qSq79vqYtdG2oT8Za
+  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/7358269f21bf921b541f07db5ab80badb03288b7/rollup-dev-env-chainspecs/rollup-frontend-456a53b-raw.json
 
 ###########################
 # updater configs #

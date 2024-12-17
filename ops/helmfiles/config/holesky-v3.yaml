@@ -142,8 +142,8 @@ gaspAvsEnv:
   RUST_LOG: avs=debug,ether=trace
   TESTNET: "false"
   # rollup-node configs
-  ROLLUP_NODE_CHAIN: /app/holesky-v3-chainspec.json
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
+  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/485165d5cac39607183994e9122404387dcdd49d/rollup-holesky-v3-3722076-raw.json
 
 ###########################
 # updater configs #
