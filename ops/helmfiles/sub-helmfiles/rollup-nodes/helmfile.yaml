@@ -1,3 +1,8 @@
+environments: 
+  fungible:
+    values:
+     - environmentName: {{ env "ENVIRONMENT" }}
+---
 repositories:
   - name: mangata-node
     url: git+https://github.com/gasp-xyz/helm-charts@charts?ref=node-v2.3.0
