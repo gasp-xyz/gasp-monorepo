@@ -381,9 +381,9 @@ class L1Api implements L1Interface {
 			transport: this.transport,
 		});
 
-		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
-			this.client,
-		);
+		// const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
+		// 	this.client,
+		// );
 		const ferryRequest = await this.client.simulateContract({
 			account: acc,
 			address: MANGATA_CONTRACT_ADDRESS,
@@ -394,8 +394,8 @@ class L1Api implements L1Interface {
 				u8aToHex(merkleRoot),
 				proof.map((p) => u8aToHex(p)),
 			],
-			maxFeePerGas: maxFeeInWei,
-			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
+			// maxFeePerGas: maxFeeInWei,
+			// maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
 		});
 
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
@@ -420,9 +420,9 @@ class L1Api implements L1Interface {
 			transport: this.transport,
 		});
 
-		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
-			this.client,
-		);
+		// const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
+		// 	this.client,
+		// );
 		const ferryRequest = await this.client.simulateContract({
 			account: acc,
 			address: MANGATA_CONTRACT_ADDRESS,
@@ -433,8 +433,8 @@ class L1Api implements L1Interface {
 				u8aToHex(merkleRoot),
 				proof.map((p) => u8aToHex(p)),
 			],
-			maxFeePerGas: maxFeeInWei,
-			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
+			// maxFeePerGas: maxFeeInWei,
+			// maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
 		});
 
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
