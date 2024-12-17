@@ -52,14 +52,17 @@ COPY --chown=appuser:appuser --from=rollup-node-image /app/node /app/rollup-node
 COPY --chown=appuser:appuser ./entrypoint.sh /app/entrypoint.sh
 
 # rollup-node default env vars for connecting to rollup-holesky testnet
-ENV ROLLUP_NODE_CHAIN=/data/chainspec.json \
+ENV ROLLUP_NODE_PROCESS_ENABLED=true
+		ROLLUP_NODE_CHAIN=/data/chainspec.json \
 		RUST_LOG=info,substrate=warn
 		# [required] ROLLUP_NODE_BOOTNODE - bootnode address for the rollup-node to connect to
 		# [optional] ROLLUP_NODE_CUSTOM_CHAINSPEC_URL - custom chainspec url to use for the rollup-node
 		# [optional] ROLLUP_NODE_FORCE_DOWNLOAD_CHAINSPEC - force download chainspec from the ROLLUP_NODE_CUSTOM_CHAINSPEC_URL
 
-# gasp-avs default configuration for connecting to embedded in container rollup-node instance
-ENV SUBSTRATE_RPC_URL='ws://127.0.0.1:9944'
+# gasp-avs process default configurations
+ENV GASP_AVS_PROCESS_ENABLED=true \
+		# SUBSTRATE_RPC_URL is used for connecting to embedded in container rollup-node instance
+		SUBSTRATE_RPC_URL='ws://127.0.0.1:9944'
 
 COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	[supervisord]
@@ -69,6 +72,7 @@ COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	# Reference: https://github.com/Supervisor/supervisor/issues/712#issuecomment-396553685 
 	[program:gasp-avs]
 	command = bash -c "wait-for-it ${SUBSTRATE_RPC_URL#*//} -t 300 -- /app/gasp-avs; kill -s SIGINT `cat supervisord.pid`"
+	autostart = %(ENV_GASP_AVS_PROCESS_ENABLED)s
 	stopasgroup = true
 	autorestart = false
 	stdout_logfile = /dev/stdout
@@ -80,6 +84,7 @@ COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 
 	[program:rollup-node]
 	command = bash -c "/app/rollup-node --chain=%(ENV_ROLLUP_NODE_CHAIN)s --bootnodes=%(ENV_ROLLUP_NODE_BOOTNODE)s --base-path=/data --pruning=archive || kill -s SIGINT `cat supervisord.pid`"
+	autostart = %(ENV_ROLLUP_NODE_PROCESS_ENABLED)s
 	stopasgroup = true
 	autorestart = false
 	stdout_logfile = /dev/stdout
