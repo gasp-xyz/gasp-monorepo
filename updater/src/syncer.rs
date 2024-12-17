@@ -57,6 +57,7 @@ pub struct Syncer {
     gasp_service_contract: GaspMultiRollupService<TargetClient>,
     root_gasp_service_contract: Option<GaspMultiRollupService<TargetClient>>,
     filter_limit: u64,
+    sync_skips_first_op_task_completed_event: bool,
 }
 impl Syncer {
     #[instrument(name = "create_syncer", skip_all)]
@@ -89,9 +90,11 @@ impl Syncer {
             gasp_service_contract,
             root_gasp_service_contract,
             filter_limit: cfg.filter_limit,
+            sync_skips_first_op_task_completed_event: cfg.sync_skips_first_op_task_completed_event,
         }))
     }
 
+    #[allow(clippy::too_many_arguments)]
     #[instrument(skip_all, err)]
     pub async fn handle_sync_event(
         self: Arc<Self>,
@@ -101,9 +104,14 @@ impl Syncer {
         latest_completed_op_task_number: &mut u32,
         latest_completed_rd_task_number: &mut u32,
         last_processed_rd_task_number: &mut Option<u32>,
+        sync_skip_op_task_completed_event: &mut bool,
     ) -> eyre::Result<()> {
         match event {
             FinalizerTaskManagerEvents::OpTaskCompletedFilter(_event) => {
+                if *sync_skip_op_task_completed_event {
+                    *sync_skip_op_task_completed_event = false;
+                    return Ok(());
+                }
                 let txn_hash = log.transaction_hash;
                 let txn = self
                     .clone()
@@ -376,6 +384,8 @@ impl Syncer {
             return Err(eyre!("target uninit and push_first_init set to false"));
         }
 
+        let mut sync_skip_op_task_completed_event = self.sync_skips_first_op_task_completed_event;
+
         // TODO
         // To avoid this we should also link new rdTasks with the last completed ones (atleast the ones on the same chain)
         // But requires more info to be stored in either the alt-l1s or eth-l1s
@@ -424,6 +434,7 @@ impl Syncer {
                             &mut latest_completed_op_task_number,
                             &mut latest_completed_rd_task_number,
                             &mut last_processed_rd_task_number,
+                            &mut sync_skip_op_task_completed_event,
                         )
                         .await;
                     if res.is_err() {
@@ -460,7 +471,7 @@ impl Syncer {
             select! {
                 Some(stream_event) = stream.next() => match stream_event {
                     Ok((stream_event, log)) => {
-                        let res = self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number, &mut last_processed_rd_task_number).await;
+                        let res = self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number, &mut last_processed_rd_task_number, &mut sync_skip_op_task_completed_event).await;
                         if res.is_err() {
                             warn!("{ALERT_WARNING} loop.handle_sync_event failed {:?}", res);
                         }
