@@ -1,3 +1,4 @@
+use crate::chainio::decode::CallDecoder;
 use crate::chainio::{avs::AvsContracts, build_clients, SourceClient, TargetClient};
 use crate::cli::CliArgs;
 
@@ -13,7 +14,6 @@ use bindings::{
 };
 use ethers::providers::{Middleware, SubscriptionStream};
 use ethers::{
-    abi::AbiDecode,
     contract::{stream, EthEvent, EthLogDecode, LogMeta},
     providers::StreamExt,
     types::{Bytes, Filter},
@@ -57,6 +57,7 @@ pub struct Syncer {
     gasp_service_contract: GaspMultiRollupService<TargetClient>,
     root_gasp_service_contract: Option<GaspMultiRollupService<TargetClient>>,
     filter_limit: u64,
+    decoder: CallDecoder,
     sync_skips_first_op_task_completed_event: bool,
 }
 impl Syncer {
@@ -80,6 +81,7 @@ impl Syncer {
             None
         };
         let target_chain_index = cfg.target_chain_index;
+        let decoder = CallDecoder::new(avs_contracts.task_manager.address());
 
         Ok(Arc::new(Self {
             source_client,
@@ -90,6 +92,7 @@ impl Syncer {
             gasp_service_contract,
             root_gasp_service_contract,
             filter_limit: cfg.filter_limit,
+            decoder,
             sync_skips_first_op_task_completed_event: cfg.sync_skips_first_op_task_completed_event,
         }))
     }
@@ -128,7 +131,7 @@ impl Syncer {
                     .await?
                     .ok_or_else(|| eyre!("missing expected txn {:?}", txn_hash))?;
                 debug!("{:?}", txn);
-                let call = match FinalizerTaskManagerCalls::decode(txn.input)? {
+                let call = match self.decoder.parse_call_data(txn.input)? {
                     FinalizerTaskManagerCalls::RespondToOpTask(c) => c,
                     FinalizerTaskManagerCalls::ForceRespondToOpTask(call) => {
                         // If we have come across the completion event of the exact task that we are syncing from
@@ -286,7 +289,7 @@ impl Syncer {
                     .await?
                     .ok_or_else(|| eyre!("missing expected txn {:?}", txn_hash))?;
                 debug!("{:?}", txn);
-                let call = match FinalizerTaskManagerCalls::decode(txn.input)? {
+                let call = match self.decoder.parse_call_data(txn.input)? {
                     FinalizerTaskManagerCalls::RespondToRdTask(c) => c,
                     _ => return Err(eyre!("wrong call decoded")),
                 };
@@ -1070,7 +1073,7 @@ impl Syncer {
                     .await?
                     .ok_or_else(|| eyre!("missing expected txn {:?}", txn_hash))?;
                 debug!("{:?}", txn);
-                let call = match FinalizerTaskManagerCalls::decode(txn.input)? {
+                let call = match self.decoder.parse_call_data(txn.input)? {
                     FinalizerTaskManagerCalls::RespondToRdTask(c) => c,
                     _ => return Err(eyre!("wrong call decoded")),
                 };
