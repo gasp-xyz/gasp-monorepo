@@ -93,6 +93,7 @@ aggregatorEnv:
 gaspAvsEnabled: true
 gaspAvsData:
   storageClass: node-data-volume-retain
+  mountPath: /data
   storageSize: 100Gi
 gaspAvsEnvSecrets: {}
 gaspAvsEnv:

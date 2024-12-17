@@ -152,6 +152,7 @@ gaspAvsEnvSecrets:
   ETH_WS_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
 gaspAvsData:
   storageClass: node-data-volume-retain
+  mountPath: /data
   storageSize: 150Gi
 gaspAvsEnv:
   CHAIN_ID: "17000"

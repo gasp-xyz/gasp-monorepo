@@ -116,6 +116,7 @@ gaspAvsImageTag: ba3aaf237234092ad21bf0a4c5ff0f08523ba6f0
 
 gaspAvsData:
   storageClass: node-data-volume-retain
+  mountPath: /data
   storageSize: 150Gi
 gaspAvsEnvSecrets:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetFinalizerEcdsaKeyJson

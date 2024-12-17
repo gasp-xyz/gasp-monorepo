@@ -80,6 +80,10 @@ aggregatorEnv:
 #####################
 gaspAvsEnabled: true
 gaspAvsEnvSecrets: {}
+gaspAvsData:
+  storageClass: standard-rwo
+  mountPath: /data
+  storageSize: 10Gi
 gaspAvsEnv:
   CHAIN_ID: "1337"
   RUST_LOG: info,substrate=warn

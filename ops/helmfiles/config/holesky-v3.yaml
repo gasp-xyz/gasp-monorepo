@@ -118,6 +118,7 @@ gaspAvsEnabled: true
 
 gaspAvsData:
   storageClass: node-data-volume-retain
+  mountPath: /data
   storageSize: 150Gi
 gaspAvsEnvSecrets:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetFinalizerEcdsaKeyJson
