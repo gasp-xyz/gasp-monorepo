@@ -58,6 +58,7 @@ pub struct Syncer {
     root_gasp_service_contract: Option<GaspMultiRollupService<TargetClient>>,
     filter_limit: u64,
     decoder: CallDecoder,
+    sync_skips_first_op_task_completed_event: bool,
 }
 impl Syncer {
     #[instrument(name = "create_syncer", skip_all)]
@@ -92,9 +93,11 @@ impl Syncer {
             root_gasp_service_contract,
             filter_limit: cfg.filter_limit,
             decoder,
+            sync_skips_first_op_task_completed_event: cfg.sync_skips_first_op_task_completed_event,
         }))
     }
 
+    #[allow(clippy::too_many_arguments)]
     #[instrument(skip_all, err)]
     pub async fn handle_sync_event(
         self: Arc<Self>,
@@ -104,9 +107,21 @@ impl Syncer {
         latest_completed_op_task_number: &mut u32,
         latest_completed_rd_task_number: &mut u32,
         last_processed_rd_task_number: &mut Option<u32>,
+        sync_skip_op_task_completed_event: &mut bool,
     ) -> eyre::Result<()> {
         match event {
             FinalizerTaskManagerEvents::OpTaskCompletedFilter(_event) => {
+                if *sync_skip_op_task_completed_event {
+                    if _event.task_response.reference_task_index != *latest_completed_op_task_number
+                    {
+                        return Err(eyre!(
+                            "missing expected op task response {:?}",
+                            *latest_completed_op_task_number
+                        ));
+                    }
+                    *sync_skip_op_task_completed_event = false;
+                    return Ok(());
+                }
                 let txn_hash = log.transaction_hash;
                 let txn = self
                     .clone()
@@ -118,12 +133,26 @@ impl Syncer {
                 debug!("{:?}", txn);
                 let call = match self.decoder.parse_call_data(txn.input)?{
                     FinalizerTaskManagerCalls::RespondToOpTask(c) => c,
-                    FinalizerTaskManagerCalls::ForceRespondToOpTask(_) => {
-                        return Err(eyre!("The call that resulted in the OpTaskCompleted event was a ForceRespondToOpTask call. This cannot be synced without a admin reinit"))
+                    FinalizerTaskManagerCalls::ForceRespondToOpTask(call) => {
+                        // If we have come across the completion event of the exact task that we are syncing from
+                        // ie the last task that was completed on the alt-l1, then we can skip thise task here
+                        // This happens following a reinit on eth which is followed by a reinit on the alt-l1
+                        if call.task.clone().task_created_block
+                            == *latest_completed_op_task_created_block
+                        {
+                            // if here the task num doesn't match there is a problem
+                            if call.task.clone().task_num != *latest_completed_op_task_number {
+                                return Err(eyre!(
+                                    "task_num mismatch {:?} {:?}",
+                                    call.task.clone().task_num,
+                                    *latest_completed_op_task_number
+                                ));
+                            }
+                            return Ok(());
+                        }
+                        return Err(eyre!("The call that resulted in the OpTaskCompleted event was a ForceRespondToOpTask call. This cannot be synced without a admin reinit"));
                     }
-                    _ => {
-                        return Err(eyre!("wrong call decoded"))
-                    }
+                    _ => return Err(eyre!("wrong call decoded")),
                 };
                 debug!("{:?}", call);
                 debug!("{:?}", call.task.clone());
@@ -379,6 +408,8 @@ impl Syncer {
             return Err(eyre!("target uninit and push_first_init set to false"));
         }
 
+        let mut sync_skip_op_task_completed_event = self.sync_skips_first_op_task_completed_event;
+
         // TODO
         // To avoid this we should also link new rdTasks with the last completed ones (atleast the ones on the same chain)
         // But requires more info to be stored in either the alt-l1s or eth-l1s
@@ -427,6 +458,7 @@ impl Syncer {
                             &mut latest_completed_op_task_number,
                             &mut latest_completed_rd_task_number,
                             &mut last_processed_rd_task_number,
+                            &mut sync_skip_op_task_completed_event,
                         )
                         .await;
                     if res.is_err() {
@@ -463,7 +495,7 @@ impl Syncer {
             select! {
                 Some(stream_event) = stream.next() => match stream_event {
                     Ok((stream_event, log)) => {
-                        let res = self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number, &mut last_processed_rd_task_number).await;
+                        let res = self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number, &mut last_processed_rd_task_number, &mut sync_skip_op_task_completed_event).await;
                         if res.is_err() {
                             warn!("{ALERT_WARNING} loop.handle_sync_event failed {:?}", res);
                         }
@@ -624,6 +656,11 @@ impl Syncer {
             .chain_rd_batch_nonce()
             .block(alt_block_number)
             .await?;
+        let latest_completed_op_task_number = self
+            .gasp_service_contract
+            .latest_completed_op_task_number()
+            .block(alt_block_number)
+            .await?;
 
         // TODO!!
         // Get the latest block from source chain and query the following three with it!
@@ -642,6 +679,10 @@ impl Syncer {
             .last_completed_op_task_created_block()
             .block(eth_block_number)
             .await?;
+
+        if block_num.is_zero() {
+            return Err(eyre!("no completed op tasks for reinit {:?}", block_num));
+        }
 
         // Unfortunately latestTaskNum and LastCompletedTaskNum both start at 0
         // So if lastCompletedTaskNum is 0 then check if it was infact completed
@@ -681,10 +722,17 @@ impl Syncer {
             }
         };
 
+        last_task.last_completed_op_task_num = latest_completed_op_task_number;
         last_task.last_completed_op_task_created_block = latest_completed_op_task_created_block;
         last_task.last_completed_op_task_quorum_numbers = latest_completed_op_task_quorum_numbers;
         last_task.last_completed_op_task_quorum_threshold_percentage =
             latest_completed_op_task_quorum_threshold_percentage;
+
+        let rd_tasks_from: u64 = if latest_completed_op_task_created_block == 0 {
+            block_num.into()
+        } else {
+            latest_completed_op_task_created_block.into()
+        };
 
         let (
             merkle_roots,
@@ -699,7 +747,7 @@ impl Syncer {
                 latest_completed_rd_task_number,
                 latest_completed_rd_task_created_block,
                 eth_block_number,
-                u64::from(latest_completed_op_task_created_block),
+                rd_tasks_from,
             )
             .await?;
 
@@ -769,7 +817,9 @@ impl Syncer {
             .task_manager
             .latest_op_task_num()
             .block(source_block_number)
-            .await?;
+            .await?
+            .checked_sub(1u32)
+            .ok_or_eyre("latest_op_task_num underflow - no op task created")?;
 
         let task_status = self
             .clone()
@@ -1432,6 +1482,15 @@ impl Syncer {
         };
 
         info!("operator_state_info: {:?}", operator_state_info);
+        let operators_state_info_hash = Keccak256::hash(
+            vec![0u8; 31]
+                .into_iter()
+                .chain(vec![32u8])
+                .chain(operator_state_info.clone().encode().into_iter())
+                .collect::<Vec<_>>()
+                .as_ref(),
+        );
+        debug!("{:?}", operators_state_info_hash);
         Ok(operator_state_info)
     }
 
