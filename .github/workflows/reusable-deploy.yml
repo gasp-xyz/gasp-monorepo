@@ -92,10 +92,8 @@ jobs:
           # https://dev.to/derlin/helmfile-difference-between-sync-and-apply-helm-3-28o1
           export HELM_DIFF_THREE_WAY_MERGE=true
           
-          helm repo update && helmfile repos
-          # helmfile apply -e ${{ inputs.env }}
-      # Debug the deployment
-      - uses: mxschmitt/action-tmate@v3
+          helm repo update && helmfile repos -e ${{ inputs.env }}
+          helmfile apply -e ${{ inputs.env }}
       
       - name: Update the GitHub Deployment status
         uses: bobheadxi/deployments@v1.5.0
