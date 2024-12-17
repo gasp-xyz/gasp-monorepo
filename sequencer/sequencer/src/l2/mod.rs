@@ -30,9 +30,13 @@ pub mod types {
     pub use gasp::api::runtime_types::pallet_rolldown::messages::{
         CancelResolution, Chain, Deposit, Origin, RequestId,
     };
+    pub use gasp::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata;
+    pub use gasp::api::runtime_types::sp_runtime::account::AccountId20;
+    pub type PendingUpdateMetadata = UpdateMetadata<AccountId20>;
 }
 
-pub type PendingUpdateWithKeys = (u128, types::L1Update, H256);
+pub type EndDisputePeriod = u128;
+pub type PendingUpdateWithKeys = (EndDisputePeriod, types::Chain, types::PendingUpdateMetadata);
 pub type HeaderStream = Pin<Box<dyn Stream<Item = Result<(u32, H256), L2Error>> + Send + 'static>>;
 
 #[derive(Debug)]
@@ -512,18 +516,7 @@ impl L2Interface for Gasp {
             .await?
             .map(|result| async {
                 let storage_kv = result?;
-                let update_hash = storage_kv.value.update_hash;
-                let storage_entry = gasp::api::storage()
-                    .rolldown()
-                    .pending_sequencer_update_content(update_hash);
-
-                let update = self
-                    .client
-                    .storage()
-                    .at(at)
-                    .fetch(&storage_entry)
-                    .await?
-                    .ok_or(L2Error::UnknownPendingUpdate(update_hash))?;
+                let update_metadata = storage_kv.value;
 
                 let keys = <(
                     StaticStorageKey<gasp_types::pending_sequencer_updates::Param0>,
@@ -533,7 +526,11 @@ impl L2Interface for Gasp {
                     &mut hashers.iter(),
                     metadata.types(),
                 )?;
-                Ok::<_, L2Error>((keys.0.decoded()?, update, update_hash))
+                let end_dispute_period = keys.0.decoded()?;
+                let chain = keys.1.decoded()?;
+                let update_hash = hex_encode(update_metadata.update_hash);
+                tracing::debug!("update found chain:{chain:?} end_dispute_period:{end_dispute_period} hash:{update_hash} metadata:{metadata:?}");
+                Ok::<_, L2Error>((keys.0.decoded()?, chain, update_metadata))
             })
             .collect::<Vec<_>>()
             .await;
@@ -900,5 +897,32 @@ mod test {
         let active_sequencers = gasp.get_active_sequencers(ETHEREUM, at).await.unwrap();
 
         assert!(!active_sequencers.is_empty());
+    }
+
+    const MAINNET: &str = "wss://rpc-01-ws-rollup-prod.gasp.xyz";
+    #[serial]
+    #[ignore]
+    #[tokio::test]
+    async fn mainnet() {
+        use tracing::level_filters::LevelFilter;
+        let filter = tracing_subscriber::EnvFilter::builder()
+            .with_default_directive(LevelFilter::DEBUG.into())
+            .from_env_lossy()
+            .add_directive("sequencer=trace".parse().expect("proper directive"));
+        tracing_subscriber::fmt()
+            .with_env_filter(filter)
+            .with_ansi(false)
+            .init();
+
+        let gasp = Gasp::new(MAINNET, ALITH_PKEY)
+            .await
+            .expect("can connect to gasp");
+
+        let at = hex!("7f3548d88689161e815af9d06367aff33496129f467fd90c16030facabd4f5cf");
+
+        tracing::info!("UPDATES AT {}", hex_encode(at));
+        for (id, chain, metadata) in gasp.get_pending_updates(at.into()).await.unwrap() {
+            tracing::info!("{id} {chain:?} {0:?}", metadata.update_hash);
+        }
     }
 }
