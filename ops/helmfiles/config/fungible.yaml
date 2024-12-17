@@ -2,7 +2,7 @@ remoteCluster: true
 
 blockscoutEnabled: false
 enableArbitrumServices: true
-enableBaseServices: true
+enableBaseServices: false
 
 ####################
 # evm-node configs #
