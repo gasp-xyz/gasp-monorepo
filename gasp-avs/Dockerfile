@@ -52,7 +52,7 @@ COPY --chown=appuser:appuser --from=rollup-node-image /app/node /app/rollup-node
 COPY --chown=appuser:appuser ./entrypoint.sh /app/entrypoint.sh
 
 # rollup-node default env vars for connecting to rollup-holesky testnet
-ENV ROLLUP_NODE_PROCESS_ENABLED=true
+ENV ROLLUP_NODE_PROCESS_ENABLED=true \
 		ROLLUP_NODE_CHAIN=/data/chainspec.json \
 		RUST_LOG=info,substrate=warn
 		# [required] ROLLUP_NODE_BOOTNODE - bootnode address for the rollup-node to connect to
