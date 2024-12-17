@@ -181,11 +181,11 @@ gaspAvsEnv:
   AVS_TASK_EXPIRATION: "300"
   AVS_UPDATE_STAKE_PERIOD: "150"
   LOG_LEVEL: "info"
-  RUST_LOG: gasp-avs=debug,ether=info
+  RUST_LOG: gasp_avs=debug,ether=info
+  OPT_IN_AT_STARTUP: "false"
   # rollup-node configs
-  SUBSTRATE_RPC_URL: wss://collator-01-ws-rollup-prod.gasp.xyz:443
   ROLLUP_NODE_CHAIN: /app/mainnet-chainspec.json
-  ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+  ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
 
 ###########################
 # updater configs #
