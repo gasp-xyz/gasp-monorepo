@@ -3,7 +3,7 @@ use ethers::{
     abi::{Abi, AbiDecode, Token},
     types::{Address, Bytes},
 };
-use eyre::{eyre, Ok};
+use eyre::eyre;
 use serde_json::from_str;
 
 #[derive(Debug)]
@@ -22,16 +22,17 @@ impl CallDecoder {
     }
 
     pub fn parse_call_data(&self, call_data: Bytes) -> eyre::Result<FinalizerTaskManagerCalls> {
-        if let Some(call) = FinalizerTaskManagerCalls::decode(call_data.clone()).ok() {
+        if let Ok(call) = FinalizerTaskManagerCalls::decode(call_data.clone()) {
             return Ok(call);
         }
 
         let fun = self.abi.function("execTransaction").unwrap();
-        if let Some(call) = fun.decode_input(&call_data).ok() {
+        if let Ok(call) = fun.decode_input(&call_data) {
             match call.as_slice() {
+                // might have a batch here also, make sure we don't use it at safe.wallet for now
                 // Function: execTransaction(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,bytes signatures)
                 [Token::Address(addr), _, Token::Bytes(bytes), _, _, _, _, _, _, _] => {
-                    if let Some(call) = FinalizerTaskManagerCalls::decode(bytes.clone()).ok() {
+                    if let Ok(call) = FinalizerTaskManagerCalls::decode(bytes.clone()) {
                         if *addr == self.taskman_addr {
                             return Ok(call);
                         }
