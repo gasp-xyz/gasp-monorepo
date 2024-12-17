@@ -1,8 +1,3 @@
-environments: 
-  fungible:
-    values:
-     - environmentName: {{ env "ENVIRONMENT" }}
----
 repositories:
   - name: ethereum-helm-charts
     url: https://ethpandaops.github.io/ethereum-helm-charts

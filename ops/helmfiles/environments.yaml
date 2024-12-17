@@ -1,8 +1,8 @@
-environments: 
+environments:
   fungible:
     kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
     values:
-     - environmentName: {{ env "ENVIRONMENT" }}
+     - environmentName: '{{ env "ENVIRONMENT" }}'
      - config/fungible.yaml
   dev:
     kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
