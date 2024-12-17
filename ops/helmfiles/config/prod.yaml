@@ -207,6 +207,7 @@ updaterEnv:
   GASP_SERVICE_ADDR: 0x150FE8DBB943c372F3e8C31d9c89f1E6A13cBBFd
   TESTNET: "false"
   PUSH_FIRST_INIT: "false"
+  SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
 
 updaterEnvSecretsBase:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-key
@@ -224,6 +225,7 @@ updaterEnvBase:
   GASP_SERVICE_ADDR: 0x308e483afDD225D6cb7bF4d44B8e4a03DFD9c0De
   TESTNET: "false"
   PUSH_FIRST_INIT: "false"
+  SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
 
 ############################
 # sequencer configs #
