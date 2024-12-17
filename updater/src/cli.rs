@@ -45,11 +45,11 @@ pub struct CliArgs {
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub testnet: bool,
 
-    #[arg(long, env, default_value_t = false)]
+    #[arg(long, env, default_value_t = false, conflicts_with_all = &["sync_skips_first_op_task_completed_event"])]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub push_first_init: bool,
 
-    #[arg(long, env, default_value_t = false)]
+    #[arg(long, env, default_value_t = false, conflicts_with_all = &["push_first_init"])]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub sync_skips_first_op_task_completed_event: bool,
 
