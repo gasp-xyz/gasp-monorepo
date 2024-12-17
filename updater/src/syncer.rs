@@ -131,7 +131,7 @@ impl Syncer {
                     .await?
                     .ok_or_else(|| eyre!("missing expected txn {:?}", txn_hash))?;
                 debug!("{:?}", txn);
-                let call = match self.decoder.parse_call_data(txn.input)?{
+                let call = match self.decoder.parse_call_data(txn.input)? {
                     FinalizerTaskManagerCalls::RespondToOpTask(c) => c,
                     FinalizerTaskManagerCalls::ForceRespondToOpTask(call) => {
                         // If we have come across the completion event of the exact task that we are syncing from
