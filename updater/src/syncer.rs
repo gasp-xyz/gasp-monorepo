@@ -109,6 +109,13 @@ impl Syncer {
         match event {
             FinalizerTaskManagerEvents::OpTaskCompletedFilter(_event) => {
                 if *sync_skip_op_task_completed_event {
+                    if _event.task_response.reference_task_index != *latest_completed_op_task_number
+                    {
+                        return Err(eyre!(
+                            "missing expected op task response {:?}",
+                            *latest_completed_op_task_number
+                        ));
+                    }
                     *sync_skip_op_task_completed_event = false;
                     return Ok(());
                 }
