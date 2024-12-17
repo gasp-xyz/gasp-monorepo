@@ -93,7 +93,9 @@ jobs:
           export HELM_DIFF_THREE_WAY_MERGE=true
           
           helm repo update && helmfile repos
-          helmfile apply -e ${{ inputs.env }}
+          # helmfile apply -e ${{ inputs.env }}
+      # Debug the deployment
+      - uses: mxschmitt/action-tmate@v3
       
       - name: Update the GitHub Deployment status
         uses: bobheadxi/deployments@v1.5.0
