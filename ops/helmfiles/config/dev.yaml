@@ -90,9 +90,10 @@ aggregatorEnv:
 # gaspAvs configs #
 #####################
 gaspAvsEnabled: true
-gaspAvsStorageClass: node-data-volume-retain
-gaspAvsStorageSize: 50Gi
 gaspAvsEnvSecrets: {}
+gaspAvsData:
+  storageClass: node-data-volume-retain
+  storageSize: 50Gi
 gaspAvsEnv:
   # rpc
   ETH_RPC_URL: http://evm-node-eth:8545

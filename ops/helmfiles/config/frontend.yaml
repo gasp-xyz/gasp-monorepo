@@ -91,8 +91,9 @@ aggregatorEnv:
 # gaspAvs configs #
 #####################
 gaspAvsEnabled: true
-gaspAvsStorageClass: node-data-volume-retain
-gaspAvsStorageSize: 100Gi
+gaspAvsData:
+  storageClass: node-data-volume-retain
+  storageSize: 100Gi
 gaspAvsEnvSecrets: {}
 gaspAvsEnv:
   CHAIN_ID: "1337"
