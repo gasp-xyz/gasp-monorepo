@@ -185,13 +185,12 @@ gaspAvsEnv:
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_TASK_EXPIRATION: "300"
   AVS_UPDATE_STAKE_PERIOD: "150"
-  OPT_IN_AT_STARTUP: "true"
   LOG_LEVEL: "info"
-  RUST_LOG: avs=debug,ether=info
+  RUST_LOG: gasp_avs=debug,ether=info
+  OPT_IN_AT_STARTUP: "false"
   # rollup-node configs
-  SUBSTRATE_RPC_URL: wss://rpc-01-ws-rollup-prod.gasp.xyz
   ROLLUP_NODE_CHAIN: /app/mainnet-chainspec.json
-  ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+  ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
 
 ###########################
 # updater configs #
@@ -212,7 +211,9 @@ updaterEnv:
   AVS_REGISTRY_COORDINATOR_ADDR: 0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1
   GASP_SERVICE_ADDR: 0x150FE8DBB943c372F3e8C31d9c89f1E6A13cBBFd
   TESTNET: "false"
-  PUSH_FIRST_INIT: "false"
+  RUST_LOG: debug
+  # PUSH_FIRST_INIT: "false"
+  SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
 
 updaterEnvSecretsBase:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-key
@@ -220,16 +221,18 @@ updaterEnvSecretsBase:
   ROOT_ECDSA_KEY_JSON: '{"address":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266","crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"26e1ebd941909ddb0ebaec8235470c8d"},"ciphertext":"adca2a84713f50c3918235e109a9b4b28ff6c8ea77b87e8aca20dc48a3a93389","kdf":"scrypt","kdfparams":{"dklen":32,"n":8192,"p":1,"r":8,"salt":"b5581b95b5c7f1449cc341db8567d4c92e4fe21bc34052dbe60bd3e2060a74a0"},"mac":"3643a9e1c0381e30ca0e250999810ecb4b213bc93bd19ad673b93870c77f55ec"},"id":"d39afde8-e06c-46d4-a7ed-1af9bb3f55a5","version":3}'
   SOURCE_RPC_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetHttpsUrl
   SOURCE_WS_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
-  TARGET_RPC_URL: ref+sops://secrets.enc.yaml#/baseMainnetWssUrl
+  TARGET_RPC_URL: ref+sops://secrets.enc.yaml#/baseMainnetHttpsUrl
   TARGET_WS_URL: ref+sops://secrets.enc.yaml#/baseMainnetWssUrl
 updaterEnvBase:
   SOURCE_CHAIN_ID: 1
   TARGET_CHAIN_ID: 8453
   TARGET_CHAIN_INDEX: 2
   AVS_REGISTRY_COORDINATOR_ADDR: 0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1
-  GASP_SERVICE_ADDR: 0x308e483afDD225D6cb7bF4d44B8e4a03DFD9c0De
+  GASP_SERVICE_ADDR: 0x6B6F92184772bCEd3d9D6d0352D453917E4880c1
   TESTNET: "false"
-  PUSH_FIRST_INIT: "false"
+  RUST_LOG: debug
+  # PUSH_FIRST_INIT: "false"
+  SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
 
 ############################
 # sequencer configs #
