@@ -16,6 +16,7 @@ evmNode:
 collatorsEnabled: true
 collatorRpcNodesEnabled: true
 collatorRpcNodesEnableSharedDnsRecord: true
+collatorRpcArchiveNodesEnabled: true
 collator:
   resources:
     requests:
@@ -118,6 +119,10 @@ collator:
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-c
   rpc03:
+    bootnodeAddr: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    nodeSelector:
+      topology.kubernetes.io/zone: europe-west1-b
+  rpcArchive01:
     bootnodeAddr: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
