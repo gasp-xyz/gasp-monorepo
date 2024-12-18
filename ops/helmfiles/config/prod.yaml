@@ -123,7 +123,7 @@ collator:
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
   rpcArchive01:
-    bootnodeAddr: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    bootnodeAddr: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
 
