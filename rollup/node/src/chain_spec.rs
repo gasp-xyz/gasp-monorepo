@@ -139,7 +139,7 @@ pub fn rollup_local_config(
 			.iter()
 			.flatten()
 			.cloned()
-			.map(|account_id| (0u32, 100u128 * currency::DOLLARS, account_id))
+			.map(|account_id| (0u32, 300_000_000__000_000_000_000_000_000u128, account_id))
 			.collect::<Vec<_>>();
 
 			rollup_genesis(
