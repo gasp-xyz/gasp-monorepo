@@ -1,6 +1,7 @@
 import {Keyring} from "@polkadot/api";
 import {DockerUtils} from "./DockerUtils";
 import {Mangata, signTx} from "gasp-sdk";
+import {BN} from "@polkadot/util";
 
 export async function getRpcPendingUpdateHash(_api : any, _blockHash: string) {
     throw new Error("Not implemented");
@@ -17,6 +18,18 @@ export async function createAWithdrawWithManualBatch(chain = "Ethereum", num = 1
         const gaspToken = await api.query.assetRegistry.idToL1Asset(0);
         token = JSON.parse(JSON.stringify(gaspToken));
     }
+    await signTx(
+        api,
+        api.tx.sudo.sudo(
+            api.tx.tokens.mint(
+                0,
+                alice.address,
+                //nothign special, just a huge a mount of tokens
+                new BN("2439047194056672794566024390471024302")
+            )
+        ),
+        alice
+    )
     //@ts-ignore
     const gaspAddr = token.ethereum;
     const tx = api.tx.utility.batchAll(
