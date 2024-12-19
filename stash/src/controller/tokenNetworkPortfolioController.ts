@@ -2,7 +2,11 @@ import { Request, Response } from 'express'
 import * as errorHandler from '../error/Handler.js'
 import MangataClient from '../connector/MangataNode.js'
 import { BN } from '@polkadot/util'
-import { priceDiscovery } from '../service/PriceDiscoveryService.js'
+import {
+  priceDiscovery,
+  getAsset,
+  priceHistory,
+} from '../service/PriceDiscoveryService.js'
 import { Decimal } from 'decimal.js'
 import { fromBN } from 'gasp-sdk'
 import logger from '../util/Logger.js'
@@ -26,23 +30,48 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
         const freeBalance = freeTokens.sub(frozenTokens)
         const tokenId = storageKey.args[1].toString()
         let tokenBalanceInUsd: string
+        let tokenInfo: any
+        let balanceInUsdCalculated: any
+
         try {
           tokenBalanceInUsd = (await priceDiscovery(tokenId)).current_price[
             'usd'
           ]
         } catch (error) {
-          logger.error('Error fetching token balance in USD:', error)
-          tokenBalanceInUsd = '0'
+          logger.error(
+            'Error fetching token balance in USD, fallback option price-history:',
+            error
+          )
+          try {
+            // only: no price-discovery for token and then only for tokens that are not pools and not LP tokens, price-history will fail for pools/LP tokens
+            const priceHistoryData = await priceHistory(tokenId, 1, 0) // 1 day in history max, interval 0 to not aggreagate results
+            tokenBalanceInUsd =
+              priceHistoryData.prices.length > 0
+                ? priceHistoryData.prices[
+                    priceHistoryData.prices.length - 1
+                  ][1].toString()
+                : '0' //to get the newest price
+            tokenInfo = getAsset(tokenId, false) //we need token decimals for fromBN
+          } catch (error) {
+            logger.error(
+              `Error fetching token info and balanceInUSD for tokenId ${tokenId}, it might be a pool or a LP token:`,
+              error
+            )
+            tokenBalanceInUsd = '0' //no price-discovery + its pool/LP token
+          }
         }
 
         new Decimal(freeBalance.toString()).mul(new Decimal(tokenBalanceInUsd))
+        if (tokenInfo && tokenInfo.decimals) {
+          //we pass decimals to fromBN if its a token
+          balanceInUsdCalculated = new Decimal(fromBN(freeBalance, tokenInfo.decimals)).mul(new Decimal(tokenBalanceInUsd)).toFixed(2).toString()
+        } else {
+          balanceInUsdCalculated = new Decimal(fromBN(freeBalance)).mul(new Decimal(tokenBalanceInUsd)) //pool/LP token no decimals
+        }
         return {
           tokenId,
           balance: freeBalance.toString(),
-          balanceInUsd: new Decimal(fromBN(freeBalance))
-            .mul(new Decimal(tokenBalanceInUsd))
-            .toFixed(2)
-            .toString(),
+          balanceInUsd: balanceInUsdCalculated,
         }
       }
     )
