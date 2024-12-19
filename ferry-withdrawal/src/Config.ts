@@ -16,6 +16,10 @@ const SUPPORTED_CHAINS = new Map<string, string>([
 	["anvil-arbitrum", "arbitrum"],
 	["anvil-ethereum", "ethereum"],
 	["holesky", "ethereum"],
+	["ethereum", "ethereum"],
+	["base-sepolia", "base"],
+	["base", "base"],
+	["arbitrum", "arbitrum"],
 	["arbitrum-sepolia", "arbitrum"],
 	["reth-arbitrum", "arbitrum"],
 	["reth-ethereum", "ethereum"],
@@ -26,13 +30,11 @@ const cliConfigSchemat = z.object({
 	ETH_CHAIN_URL: z.string(),
 	MANGATA_NODE_URL: z.string(),
 	PRIVATE_KEY: z.string(),
-	L1_CHAIN: z
-		.string()
-		.refine((chain) => SUPPORTED_CHAINS.has(chain), {
-			message: `env::L1_CHAIN needs to be one of ${Array.from(
-				SUPPORTED_CHAINS.keys(),
-			)}`,
-		}),
+	L1_CHAIN: z.string().refine((chain) => SUPPORTED_CHAINS.has(chain), {
+		message: `env::L1_CHAIN needs to be one of ${Array.from(
+			SUPPORTED_CHAINS.keys(),
+		)}`,
+	}),
 	TOKENS_TO_TRACK: z
 		.string()
 		.transform((elem) =>

@@ -2,6 +2,7 @@ remoteCluster: true
 
 blockscoutEnabled: false
 enableArbitrumServices: true
+enableBaseServices: false
 
 ####################
 # evm-node configs #
@@ -79,6 +80,10 @@ aggregatorEnv:
 #####################
 gaspAvsEnabled: true
 gaspAvsEnvSecrets: {}
+gaspAvsData:
+  storageClass: standard-rwo
+  mountPath: /data
+  storageSize: 10Gi
 gaspAvsEnv:
   CHAIN_ID: "1337"
   RUST_LOG: info,substrate=warn
@@ -92,7 +97,7 @@ gaspAvsEnv:
   TESTNET: "true"
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-  ROLLUP_NODE_CHAIN: /app/fungible-chainspec.json
+  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json
 
 ###########################
 # updater configs #
@@ -102,6 +107,23 @@ updaterEnvSecrets:
   ECDSA_KEY_JSON: '{"address":"a0ee7a142d267c1f36714e4a8f75612f20a79720","crypto":{"cipher":"aes-128-ctr","ciphertext":"b0f6f8e3ba33f0b382b080de6661d827181de480f1a4f94bc20d66cb3d585907","cipherparams":{"iv":"4e3f9a8ca6ef8d1cd408e8aaae3c22d2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"c8f9f8cc03913e09cee7e1fd68732fac327576203ab277d740270f1dea82ee7e"},"mac":"353d65850b20d5fdb90ca2385c52e5b57662cb1d906fd58143f20a7720723cf6"},"id":"d3036cc7-d068-4f2f-9667-60aaca660e61","version":3}'
   ROOT_ECDSA_KEY_JSON: '{"address":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266","crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"26e1ebd941909ddb0ebaec8235470c8d"},"ciphertext":"adca2a84713f50c3918235e109a9b4b28ff6c8ea77b87e8aca20dc48a3a93389","kdf":"scrypt","kdfparams":{"dklen":32,"n":8192,"p":1,"r":8,"salt":"b5581b95b5c7f1449cc341db8567d4c92e4fe21bc34052dbe60bd3e2060a74a0"},"mac":"3643a9e1c0381e30ca0e250999810ecb4b213bc93bd19ad673b93870c77f55ec"},"id":"d39afde8-e06c-46d4-a7ed-1af9bb3f55a5","version":3}'
 updaterEnv:
+  SOURCE_RPC_URL: http://evm-node-eth:8545
+  SOURCE_WS_URL: ws://evm-node-eth:8546
+  TARGET_RPC_URL: http://evm-node-arb:8545
+  TARGET_WS_URL: ws://evm-node-arb:8546
+  SOURCE_CHAIN_ID: 1337
+  TARGET_CHAIN_ID: 1337
+  TARGET_CHAIN_INDEX: 1
+  AVS_REGISTRY_COORDINATOR_ADDR: 0xf5059a5D33d5853360D16C683c16e67980206f36
+  GASP_SERVICE_ADDR: 0x610178dA211FEF7D417bC0e6FeD39F05609AD788
+  TESTNET: "true"
+  PUSH_FIRST_INIT: "true"
+  RUST_LOG: "debug"
+  RUST_BACKTRACE: 1
+updaterEnvSecretsBase:
+  ECDSA_KEY_JSON: '{"address":"a0ee7a142d267c1f36714e4a8f75612f20a79720","crypto":{"cipher":"aes-128-ctr","ciphertext":"b0f6f8e3ba33f0b382b080de6661d827181de480f1a4f94bc20d66cb3d585907","cipherparams":{"iv":"4e3f9a8ca6ef8d1cd408e8aaae3c22d2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"c8f9f8cc03913e09cee7e1fd68732fac327576203ab277d740270f1dea82ee7e"},"mac":"353d65850b20d5fdb90ca2385c52e5b57662cb1d906fd58143f20a7720723cf6"},"id":"d3036cc7-d068-4f2f-9667-60aaca660e61","version":3}'
+  ROOT_ECDSA_KEY_JSON: '{"address":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266","crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"26e1ebd941909ddb0ebaec8235470c8d"},"ciphertext":"adca2a84713f50c3918235e109a9b4b28ff6c8ea77b87e8aca20dc48a3a93389","kdf":"scrypt","kdfparams":{"dklen":32,"n":8192,"p":1,"r":8,"salt":"b5581b95b5c7f1449cc341db8567d4c92e4fe21bc34052dbe60bd3e2060a74a0"},"mac":"3643a9e1c0381e30ca0e250999810ecb4b213bc93bd19ad673b93870c77f55ec"},"id":"d39afde8-e06c-46d4-a7ed-1af9bb3f55a5","version":3}'
+updaterEnvBase:
   SOURCE_RPC_URL: http://evm-node-eth:8545
   SOURCE_WS_URL: ws://evm-node-eth:8546
   TARGET_RPC_URL: http://evm-node-arb:8545
@@ -147,6 +169,19 @@ sequencerEnvSecretsArb:
   PRIVATE_KEY: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
   MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
 
+sequencerEnvBase:
+  CHAIN: "reth"
+  L1_CHAIN: "Base"
+  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
+  TX_COST: '1000000000000000000000'
+  ETH_CHAIN_URL: ws://evm-node-base:8546
+  LIMIT: 10000
+  WATCHDOG: 30
+sequencerEnvSecretsBase:
+  ETH_PRIV_KEY: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+  MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+
 #########################
 # ferry-deposit configs #
 #########################
@@ -173,6 +208,18 @@ ferryDepositEnvArb:
   BLOCK_DELAY: 0
   LOG: silly
 ferryDepositEnvSecretsArb:
+  MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
+
+ferryDepositEnvBase:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-base:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Base"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  BLOCK_DELAY: 0
+  LOG: silly
+ferryDepositEnvSecretsBase:
   MNEMONIC: "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b"
 
 ############################
@@ -203,6 +250,18 @@ ferryWithdrawalEnvArb:
 ferryWithdrawalEnvSecretsArb:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
 
+ferryWithdrawalEnvBase:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-base:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Base"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  LOOK_BACK_HOURS: 1
+  LOG: silly
+ferryWithdrawalEnvSecretsBase:
+  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+
 ########################
 # ferry-closer configs #
 ########################
@@ -228,4 +287,15 @@ closerEnvArb:
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsArb:
+  PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+closerEnvBase:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  ETH_CHAIN_URL: ws://evm-node-base:8546
+  MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
+  L1_CHAIN: "Base"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: '1000000000000000000000'
+  LOOK_BACK_HOURS: 1
+  LOG: silly
+closerEnvSecretsBase:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"

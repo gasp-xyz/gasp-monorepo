@@ -683,44 +683,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
-name = "gasp-avs"
-version = "0.1.0"
-dependencies = [
- "aes",
- "ark-bn254",
- "ark-ec",
- "ark-ff 0.4.2",
- "array-bytes",
- "bindings",
- "clap",
- "color-eyre",
- "ctr",
- "eth-keystore",
- "ethers",
- "eyre",
- "hex",
- "log",
- "num-bigint",
- "parity-scale-codec",
- "rand 0.8.5",
- "reqwest",
- "reqwest-middleware",
- "reqwest-retry",
- "sc-rpc-api",
- "scrypt",
- "serde",
- "serde_json",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "substrate-rpc-client",
- "tokio",
- "tracing",
- "tracing-error",
- "tracing-subscriber 0.3.18",
-]
-
-[[package]]
 name = "backtrace"
 version = "0.3.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2693,6 +2655,44 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
 dependencies = [
  "byteorder",
+]
+
+[[package]]
+name = "gasp-avs"
+version = "0.1.0"
+dependencies = [
+ "aes",
+ "ark-bn254",
+ "ark-ec",
+ "ark-ff 0.4.2",
+ "array-bytes",
+ "bindings",
+ "clap",
+ "color-eyre",
+ "ctr",
+ "eth-keystore",
+ "ethers",
+ "eyre",
+ "hex",
+ "log",
+ "num-bigint",
+ "parity-scale-codec",
+ "rand 0.8.5",
+ "reqwest",
+ "reqwest-middleware",
+ "reqwest-retry",
+ "sc-rpc-api",
+ "scrypt",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "substrate-rpc-client",
+ "tokio",
+ "tracing",
+ "tracing-error",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]

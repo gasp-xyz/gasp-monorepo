@@ -49,12 +49,12 @@ contract GaspMultiRollupService is
         updater = _updater;
     }
 
-    function setRolldown(IRolldown _rolldown) external whenNotPaused onlyOwner {
+    function setRolldown(IRolldown _rolldown) external onlyOwner {
       rolldown = _rolldown;
       emit RolldownTargetUpdated(address(_rolldown));
     }
 
-    function processEigenReinit(IFinalizerTaskManager.OpTask calldata task, OperatorStateInfo calldata operatorStateInfo, bytes32[] calldata merkleRoots, IRolldown.Range[] calldata ranges, uint32 lastBatchId) public onlyOwner{
+    function processEigenReinit(IFinalizerTaskManager.OpTask calldata task, OperatorStateInfo calldata operatorStateInfo, bytes32[] calldata merkleRoots, IRolldown.Range[] calldata ranges, uint32 _chainRdBatchNonce, uint32 _latestCompletedRdTaskNumber, uint32 _latestCompletedRdTaskCreatedBlock) public onlyOwner{
 
         require(merkleRoots.length == ranges.length, "rdUpdate info length mismatch");
 
@@ -70,15 +70,16 @@ contract GaspMultiRollupService is
         for (uint256 i = 0; i < merkleRoots.length; i++) {
             rolldown.update_l1_from_l2(merkleRoots[i], ranges[i]);
         }
-        if (merkleRoots.length != 0){
-            chainRdBatchNonce = lastBatchId + 1;
-        }
+        chainRdBatchNonce = _chainRdBatchNonce;
+
+        latestCompletedRdTaskNumber = _latestCompletedRdTaskNumber;
+        latestCompletedRdTaskCreatedBlock = _latestCompletedRdTaskCreatedBlock;
 
         emit EigenReinitProcessed(task.taskNum, task.taskCreatedBlock);
         
     }
 
-    function processEigenOpUpdate(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public {
+    function processEigenOpUpdate(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public whenNotPaused onlyUpdater {
 
         uint32 latestCompletedOpTaskCreatedBlockCached = latestCompletedOpTaskCreatedBlock;
         if (!(latestCompletedOpTaskCreatedBlockCached == 0) || allowNonRootInit) {
@@ -125,7 +126,7 @@ contract GaspMultiRollupService is
         
     }
 
-    function processEigenRdUpdate(IFinalizerTaskManager.RdTask calldata task, IFinalizerTaskManager.RdTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature) public onlyUpdater {
+    function processEigenRdUpdate(IFinalizerTaskManager.RdTask calldata task, IFinalizerTaskManager.RdTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature) public whenNotPaused onlyUpdater {
 
         require(taskResponse.batchId == chainRdBatchNonce, "chainRdBatchNonce mismatch"); 
 
@@ -159,6 +160,7 @@ contract GaspMultiRollupService is
         rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
         chainRdBatchNonce = taskResponse.batchId + 1;
         latestCompletedRdTaskNumber = task.taskNum;
+        latestCompletedRdTaskCreatedBlock = task.taskCreatedBlock;
 
         emit EigenRdUpdateProcessed(task.taskNum, task.taskCreatedBlock);
         

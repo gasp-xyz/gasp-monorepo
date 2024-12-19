@@ -64,7 +64,7 @@ contract RolldownGasUsage is Script {
 
         vm.stopBroadcast();
 
-        rolldown = Rolldown(address(proxy));
+        rolldown = Rolldown(payable(address(proxy)));
 
         vm.broadcast(users.depositor);
         rolldown.depositNative{value: _amount}();

@@ -1,7 +1,6 @@
 bases: ['environments.yaml']
 ---
 helmDefaults:
-  kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
   wait: false
   # diffArgs:
   #   - "--suppress" 
@@ -62,13 +61,14 @@ releases:
         environment: {{ .Values.environmentName }}
         envSecrets: {{ .Values.gaspAvsEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.gaspAvsEnv | toYaml | nindent 10 }}
+        data: {{ .Values | getOrNil "gaspAvsData" | toYaml | nindent 10 }}
         resources:
           requests:
             cpu: 1
-            memory: 1Gi
+            memory: 4Gi
           limits:
             cpu: 2
-            memory: 4Gi
+            memory: 12Gi
 
   - name: updater
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -80,6 +80,23 @@ releases:
           tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.updaterEnv | toYaml | nindent 10 }}
         envSecrets: {{ .Values.updaterEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: updater-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.updaterEnabled .Values.enableBaseServices }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/updater
+          tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.updaterEnvBase | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.updaterEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
         resources:
           requests:
             cpu: 100m
@@ -105,6 +122,40 @@ releases:
           limits:
             cpu: 1
             memory: 1Gi
+  - name: sequencer-eth-2
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedEth2" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvEth2" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth2"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-eth-3
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedEth3" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvEth3" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth3"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
 
   - name: sequencer-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
@@ -116,6 +167,92 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-arb-2
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedArb2" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvArb2" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb2"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-arb-3
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedArb3" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvArb3" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb3"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+            
+  - name: sequencer-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled .Values.enableBaseServices }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.sequencerEnvBase | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.sequencerEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-base-2
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedBase2" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvBase2" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase2"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-base-3
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedBase3" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvBase3" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase3"| expandSecretRefs | toYaml | nindent 10 }}
         resources:
           requests:
             cpu: 100m
@@ -143,7 +280,7 @@ releases:
             memory: 1Gi
   - name: ferry-deposit-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.ferryDepositEnabled }}
+    installed: {{ and .Values.ferryDepositEnabled .Values.enableArbitrumServices | toYaml   }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -151,6 +288,23 @@ releases:
           tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryDepositEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryDepositEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: ferry-deposit-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.ferryDepositEnabled .Values.enableBaseServices | toYaml   }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-deposit
+          tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryDepositEnvBase | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryDepositEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
         resources:
           requests:
             cpu: 100m
@@ -178,7 +332,7 @@ releases:
             memory: 1Gi
   - name: ferry-withdrawal-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.ferryWithdrawalEnabled }}
+    installed: {{ and .Values.ferryWithdrawalEnabled .Values.enableArbitrumServices | toYaml  }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -186,6 +340,23 @@ releases:
           tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryWithdrawalEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryWithdrawalEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: ferry-withdrawal-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.ferryWithdrawalEnabled .Values.enableBaseServices | toYaml }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-withdrawal
+          tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryWithdrawalEnvBase | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryWithdrawalEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
         resources:
           requests:
             cpu: 100m
@@ -215,7 +386,7 @@ releases:
             memory: 1Gi
   - name: closer-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.closerEnabled }}
+    installed: {{ and .Values.closerEnabled .Values.enableArbitrumServices | toYaml }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -225,6 +396,25 @@ releases:
           args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: closer-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.closerEnabled .Values.enableBaseServices | toYaml }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-withdrawal
+          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
+        env: {{ .Values.closerEnvBase | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.closerEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
         resources:
           requests:
             cpu: 100m
@@ -250,7 +440,6 @@ releases:
         verifierUrl: 'http://blockscout-eth-blockscout-stack-blockscout-svc:80/api'
         # If customChainspecUrlEth is not set, the node will use the default chainspec instead
         customGenesisUrl: {{ .Values | get "evmNode.customGenesisUrlEth" "" }}
-  
   - name: evm-node-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.evmNode.enabled .Values.enableArbitrumServices | toYaml }}
@@ -268,3 +457,18 @@ releases:
         verifierUrl: 'http://blockscout-arb-blockscout-stack-blockscout-svc:80/api'
         # If customChainspecUrlArb is not set, the node will use the default chainspec instead
         customGenesisUrl: {{ .Values | get "evmNode.customGenesisUrlArb" "" }}
+  - name: evm-node-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.evmNode.enabled .Values.enableBaseServices | toYaml }}
+    chart: ../helm-charts/evm-node
+    values:
+      - image:
+          repository: gaspxyz/gasp-contracts
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+        remoteCluster: {{ .Values.remoteCluster }}
+        environment: {{ .Values.environmentName }}
+        nameOverride: 'evm-node-base'
+        envSelector: base-stub
+        enablePersistence: true
+        verifierEnabled: {{ .Values | get "blockscoutEnabled" false }}
+        verifierUrl: 'http://blockscout-base-blockscout-stack-blockscout-svc:80/api'

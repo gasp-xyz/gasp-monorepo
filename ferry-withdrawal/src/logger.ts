@@ -1,6 +1,10 @@
 import { createLogger, format, transports } from "winston";
 import { LOG } from "./Config.js";
 
+const ALERT_ERROR = "ALERT::ERROR";
+const ALERT_WARNING = "ALERT::WARNING";
+const ALERT_INFO = "ALERT::INFO";
+
 const myFormat = format.printf(({ level, message, label, timestamp }) => {
 	return `${timestamp} ${level}: ${message}`;
 });
@@ -11,4 +15,4 @@ const logger = createLogger({
 	transports: [new transports.Console()],
 });
 
-export { logger };
+export { logger, ALERT_ERROR, ALERT_WARNING, ALERT_INFO };

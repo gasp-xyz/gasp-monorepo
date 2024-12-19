@@ -78,6 +78,8 @@ contract Rolldown is
         chain = chainId;
     }
 
+    receive() external payable {}
+
     function pause() external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _pause();
     }

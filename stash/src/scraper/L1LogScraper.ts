@@ -46,7 +46,12 @@ export const watchDepositAcceptedIntoQueue = async (
         fromBlock,
         toBlock,
       })
+
       for (const log of logs) {
+        logger.info({
+          message: 'Processing deposit log:',
+          log: log,
+        })
         const { transactionHash, blockNumber } = log
         const existingTransaction = await depositRepository
           .search()
@@ -120,6 +125,10 @@ export const watchWithdrawalClosed = async (
       })
       const combinedEvents = [...eventsFerried, ...eventsNotFerried]
       for (const event of combinedEvents) {
+        logger.info({
+          message: 'Processing withdrawal event:',
+          event: event,
+        })
         const {
           blockNumber,
           eventName,

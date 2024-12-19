@@ -20,7 +20,7 @@ import { Ferry } from "./Ferry.js";
 import { L1Api } from "./l1/L1Api.js";
 import { L2Api, getL1ChainType } from "./l2/L2Api.js";
 import { getApi, isSuccess, print } from "./utils.js";
-import { logger } from "./logger.js";
+import { ALERT_WARNING, logger } from "./logger.js";
 
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
@@ -78,7 +78,6 @@ async function main() {
 			logger.info(`Found ${profitable.length} proffitable deposits`);
 			if (profitable.length > 0) {
 				const depositToFerry = profitable[0];
-				logger.info(`Ferrying deposit ${util.inspect(depositToFerry)}`);
 				if (!(await ferry.hasFundsToCoverTxFee())) {
 					throw new Error(`Not enough funds to cover tx fee`);
 				}
@@ -103,7 +102,7 @@ async function main() {
 					);
 				} else {
 					print(
-						`Failed to ferry deposit ${depositToFerry.requestId} to ${depositToFerry.depositRecipient}`,
+						`${ALERT_WARNING} Failed to ferry deposit ${depositToFerry.requestId} to ${depositToFerry.depositRecipient}`,
 					);
 				}
 			}

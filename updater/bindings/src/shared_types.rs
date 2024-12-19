@@ -32,23 +32,6 @@ pub struct G2Point {
     pub x: [::ethers::core::types::U256; 2],
     pub y: [::ethers::core::types::U256; 2],
 }
-///`OperatorSet(address,uint32)`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-)]
-pub struct OperatorSet {
-    pub avs: ::ethers::core::types::Address,
-    pub operator_set_id: u32,
-}
 ///`ApkUpdate(bytes24,uint32,uint32)`
 #[derive(
     Clone,
@@ -183,7 +166,7 @@ pub struct Withdrawal {
     pub strategies: ::std::vec::Vec<::ethers::core::types::Address>,
     pub shares: ::std::vec::Vec<::ethers::core::types::U256>,
 }
-///`OpTask(uint32,uint32,uint32,bytes,uint32,bytes,uint32)`
+///`OpTask(uint32,uint32,uint32,uint32,bytes,uint32,bytes,uint32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -199,6 +182,7 @@ pub struct Withdrawal {
 pub struct OpTask {
     pub task_num: u32,
     pub task_created_block: u32,
+    pub last_completed_op_task_num: u32,
     pub last_completed_op_task_created_block: u32,
     pub quorum_numbers: ::ethers::core::types::Bytes,
     pub quorum_threshold_percentage: u32,
@@ -223,7 +207,7 @@ pub struct OpTaskResponse {
     pub reference_task_hash: [u8; 32],
     pub operators_state_info_hash: [u8; 32],
 }
-///`RdTask(uint32,uint8,uint32,uint32,uint32,bytes,uint32)`
+///`RdTask(uint32,uint8,uint32,uint32,uint32,uint32,bytes,uint32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -241,6 +225,7 @@ pub struct RdTask {
     pub chain_id: u8,
     pub batch_id: u32,
     pub task_created_block: u32,
+    pub last_completed_op_task_num: u32,
     pub last_completed_op_task_created_block: u32,
     pub last_completed_op_task_quorum_numbers: ::ethers::core::types::Bytes,
     pub last_completed_op_task_quorum_threshold_percentage: u32,

@@ -17,8 +17,12 @@ import {
 	anvil,
 	holesky,
 	arbitrumSepolia,
+	baseSepolia,
 	localhost,
 	type Chain,
+	arbitrum,
+	base,
+	mainnet,
 } from "viem/chains";
 import { isEqual } from "../utils.js";
 import { estimateMaxPriorityFeePerGas } from "viem/actions";
@@ -63,8 +67,12 @@ function cancelToViemFormat(cancel: Cancel): unknown[] {
 const CONFIG_TO_CHAIN = new Map<string, Chain>([
 	["anvil-arbitrum", anvil],
 	["anvil-ethereum", anvil],
-	["holesky", holesky],
+	["arbitrum", arbitrum],
 	["arbitrum-sepolia", arbitrumSepolia],
+	["base", base],
+	["base-sepolia", baseSepolia],
+	["ethereum", mainnet],
+	["holesky", holesky],
 	["reth-arbitrum", localhost],
 	["reth-ethereum", localhost],
 ]);
@@ -307,7 +315,7 @@ class L1Api implements L1Interface {
 		});
 
 		const native_addr = await this.getNativeTokenAddress();
-		if (withdrawal.tokenAddress != native_addr) {
+		if (u8aToHex(withdrawal.tokenAddress) !== u8aToHex(native_addr)) {
 			// TODO: submit as a batch
 			const approveRequest = await this.client.simulateContract({
 				account: acc,
@@ -329,6 +337,12 @@ class L1Api implements L1Interface {
 			});
 			const approvetxHash = await wc.writeContract(approveRequest.request);
 			await this.client.waitForTransactionReceipt({ hash: approvetxHash });
+			const status = await this.client.waitForTransactionReceipt({
+				hash: approvetxHash,
+			});
+			if (status.status !== "success") {
+				return false;
+			}
 		}
 
 		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
