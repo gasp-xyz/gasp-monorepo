@@ -125,7 +125,7 @@ releases:
             memory: 1Gi
   - name: sequencer-eth-2
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedEth2" | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedEth2" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -142,7 +142,7 @@ releases:
             memory: 1Gi
   - name: sequencer-eth-3
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedEth3" | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedEth3" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -177,7 +177,7 @@ releases:
             memory: 1Gi
   - name: sequencer-arb-2
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedArb2" | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedArb2" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -194,7 +194,7 @@ releases:
             memory: 1Gi
   - name: sequencer-arb-3
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedArb3" | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedArb3" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -229,7 +229,7 @@ releases:
             memory: 1Gi
   - name: sequencer-base-2
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedBase2" | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedBase2" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -246,7 +246,7 @@ releases:
             memory: 1Gi
   - name: sequencer-base-3
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | getOrNil "sequencerEnalbedBase3" | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedBase3" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:

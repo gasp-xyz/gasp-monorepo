@@ -69,7 +69,7 @@ releases:
         accountKeys: {{ .Values | getOrNil "collator.collator02.accountKeys" | toYaml | nindent 10 }}
 
   - name: collator-03
-    installed: {{  .Values | getOrNil "collators.collator03.enabled" | toYaml  }}
+    installed: {{ .Values | get "collator.collator03.enabled" false | toYaml  }}
     chart: mangata-node/node
     namespace: 'rollup-{{ .Values.environmentName }}'
     values:
@@ -100,7 +100,7 @@ releases:
         accountKeys: {{ .Values | getOrNil "collator.collator03.accountKeys" | toYaml | nindent 10 }}
 
   - name: collator-04
-    installed: {{  .Values | getOrNil "collators.collator04.enabled" | toYaml }}
+    installed: {{ .Values | get "collator.collator04.enabled" false | toYaml  }}
     chart: mangata-node/node
     namespace: 'rollup-{{ .Values.environmentName }}'
     values:

@@ -1,4 +1,7 @@
-environments: 
+environments:
+  default:
+    values: 
+      - environmentName: default
   fungible:
     values:
      - environmentName: {{ env "ENVIRONMENT" }}

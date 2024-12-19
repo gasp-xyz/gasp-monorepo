@@ -173,6 +173,7 @@ gaspAvsEnvSecrets:
   ETH_WS_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
 gaspAvsData:
   storageClass: node-data-volume-retain
+  mountPath: /data
   storageSize: 150Gi
 gaspAvsEnv:
   CHAIN_ID: "1"
@@ -189,8 +190,9 @@ gaspAvsEnv:
   RUST_LOG: gasp_avs=debug,ether=info
   OPT_IN_AT_STARTUP: "false"
   # rollup-node configs
-  ROLLUP_NODE_CHAIN: /app/mainnet-chainspec.json
+  ROLLUP_NODE_CHAIN: /app/holesky-v3-chainspec.json
   ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/f9604551934c498a6a814d84f2cd6c01803d24d7/rollup-dev-env-chainspecs/alpha-launch-f26183b-raw.json
 
 ###########################
 # updater configs #
