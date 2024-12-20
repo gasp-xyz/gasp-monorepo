@@ -152,10 +152,9 @@ aggregatorEnv:
   AVS_TASK_EXPIRATION: "300"
   AVS_UPDATE_STAKE_PERIOD: "150"
   OPT_IN_AT_STARTUP: "true"
-  LOG_LEVEL: "info"
-  RUST_LOG: avs=debug
   AGG_IDLE_START: true
   AGG_RUN_TRIGGER_API_KEY: "secrettoken"
+  ENVIRONMEMT: "production"
 
 #####################
 # gaspAvs configs #
