@@ -894,8 +894,13 @@ func (osu *OpStateUpdater) processOpDelegationStateChange(operator common.Addres
 		return nil
 	}
 
+	// TODO
+	// We should probably improve this to check that the operator was atleast registered at the previous block or this one before processing it
+	// To avoid refreshing state for stale ops
+	// But I hesitate to commit to overdoing this for now, it might have blind spots
+
 	osu.logger.Debugf("Processing processOpDelegationStateChange for operator: %v, operatorId: %v, blockNumber: %v\n", operator, operatorId, blockNumber)
-	
+
 	if _, ok := osu.currentOpState[operatorId]; ok {
 		opStateUpdate, err := osu.ethRpc.AvsReader.GetTypedOperatorsStakesForQuorumAtBlock(context.Background(), osu.ethRpc.AvsReader.AvsServiceBindings.RegistryCoordinatorAddress, types.TRACKED_QUORUM_NUMBERS, []common.Address{operator}, blockNumber)
 		if err != nil {
