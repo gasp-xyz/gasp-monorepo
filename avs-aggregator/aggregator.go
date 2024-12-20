@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
@@ -135,7 +136,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		ethRpc.Clients.AvsRegistryChainSubscriber,
 		ethRpc.Clients.AvsRegistryChainReader,
 		nil,
-		oprsinfoserv.Opts{},
+		oprsinfoserv.Opts{StartBlock: big.NewInt(int64(c.AvsDeploymentBlock))},
 		logger,
 	)
 	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, operatorPubkeysService, logger)
