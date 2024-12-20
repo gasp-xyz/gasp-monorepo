@@ -131,7 +131,7 @@ collator:
 # aggregator configs #
 ######################
 aggregatorEnabled: true
-aggregatorImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
+aggregatorImageTag: 0072b5a4df388795dda0babd6747ba112d0754bc
 # Override the image tag provided on deployment from IMAGE_TAG env variable
 # aggregatorImageTag: 5d6f2a4db68e0601f14b3ced43773488efdda164
 
