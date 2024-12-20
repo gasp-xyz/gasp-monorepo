@@ -4,7 +4,6 @@ import MangataClient from '../connector/MangataNode.js'
 import { BN } from '@polkadot/util'
 import {
   priceDiscovery,
-  getAsset,
   priceHistory,
 } from '../service/PriceDiscoveryService.js'
 import { Decimal } from 'decimal.js'

@@ -95,7 +95,7 @@ const refresh = async () => {
   }
 }
 
-export const getAsset = (id: string, isPool: boolean) => {
+const getAsset = (id: string, isPool: boolean) => {
   isPool ? poolSchema.validateSync(id) : assetSchema.validateSync(id)
   return assetInfo.get(id)
 }
