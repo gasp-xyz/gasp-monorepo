@@ -171,4 +171,11 @@ var (
 		Usage:    "Password to decrypt ecdsa private key",
 		EnvVar:   "ECDSA_KEY_PASSWORD",
 	}
+
+	EnableTraceLogs = cli.BoolFlag{
+		Name:     "enable-trace-logs",
+		Usage:    "Enable trace logs",
+		Required: false,
+		EnvVar:   "ENABLE_TRACE_LOGS",
+	}
 )

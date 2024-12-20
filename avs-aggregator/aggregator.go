@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
@@ -84,6 +85,8 @@ type Aggregator struct {
 
 	kicker         *Kicker
 	opStateUpdater *OpStateUpdater
+
+	enableTraceLogs bool
 }
 
 const waitForReceipt = bool(true)
@@ -133,7 +136,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		ethRpc.Clients.AvsRegistryChainSubscriber,
 		ethRpc.Clients.AvsRegistryChainReader,
 		nil,
-		oprsinfoserv.Opts{},
+		oprsinfoserv.Opts{StartBlock: big.NewInt(int64(c.AvsDeploymentBlock))},
 		logger,
 	)
 	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, operatorPubkeysService, logger)
@@ -155,7 +158,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		}
 	}
 
-	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, c.MinOpUpdateInterval, c.ReinitOpStateAtInit, c.CheckTriggerOpStateUpdate, c.CheckTriggerOpStateUpdateWindow)
+	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, c.MinOpUpdateInterval, c.ReinitOpStateAtInit, c.CheckTriggerOpStateUpdate, c.CheckTriggerOpStateUpdateWindow, c.EnableTraceLogs)
 	if err != nil {
 		logger.Error("Cannot create operator stakes updateer", "err", err)
 		return nil, err
@@ -176,7 +179,8 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		opStateUpdater:          opStateUpdater,
 		expiration:              uint32(c.Expiration),
 		startIdle:			   	 c.AggIdleStart,
-		apiKey:			   	     c.AggRunTriggerApiKey,		
+		apiKey:			   	     c.AggRunTriggerApiKey,	
+		enableTraceLogs:		 c.EnableTraceLogs,	
 	}, nil
 }
 
