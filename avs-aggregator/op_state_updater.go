@@ -49,9 +49,10 @@ type OpStateUpdater struct {
 	reinitOpStateAtInit				bool
 	checkTriggerOpStateUpdate		bool
 	checkTriggerOpStateUpdateWindow	bool
+	enableTraceLogs					bool
 }
 
-func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, minOpUpdateInterval int, reinitOpStateAtInit bool, checkTriggerOpStateUpdate bool, checkTriggerOpStateUpdateWindow bool) (*OpStateUpdater, error) {
+func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, minOpUpdateInterval int, reinitOpStateAtInit bool, checkTriggerOpStateUpdate bool, checkTriggerOpStateUpdateWindow bool, enableTraceLogs bool) (*OpStateUpdater, error) {
 	return &OpStateUpdater{
 		logger:                        logger,
 		ethRpc:                        ethRpc,
@@ -75,6 +76,7 @@ func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, minOpUpdat
 		reinitOpStateAtInit:				reinitOpStateAtInit,
 		checkTriggerOpStateUpdate:		checkTriggerOpStateUpdate,
 		checkTriggerOpStateUpdateWindow:	checkTriggerOpStateUpdateWindow,
+		enableTraceLogs: 				enableTraceLogs,
 	}, nil
 }
 
@@ -534,6 +536,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				switch {
 				case vLog.Address == delegationManagerContractAddress && vLog.Topics[0] == getEventID(delegationManagerAbi, "OperatorSharesIncreased"):
 					{
+						if osu.enableTraceLogs { osu.logger.Debugf("Event %s from contract %s\n", "OperatorSharesIncreased", vLog.Address.Hex()) }
 						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractDelegationManagerOperatorSharesIncreased, err := osu.ethRpc.AvsReader.AvsServiceBindings.DelegationManager.ContractDelegationManagerFilterer.ParseOperatorSharesIncreased(vLog)
@@ -553,6 +556,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					}
 				case vLog.Address == delegationManagerContractAddress && vLog.Topics[0] == getEventID(delegationManagerAbi, "OperatorSharesDecreased"):
 					{
+						if osu.enableTraceLogs { osu.logger.Debugf("Event %s from contract %s\n", "OperatorSharesDecreased", vLog.Address.Hex()) }
 						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractDelegationManagerOperatorSharesDecreased, err := osu.ethRpc.AvsReader.AvsServiceBindings.DelegationManager.ContractDelegationManagerFilterer.ParseOperatorSharesDecreased(vLog)
