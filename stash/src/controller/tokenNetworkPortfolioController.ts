@@ -68,13 +68,13 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
                 ? priceHistoryData.prices[
                     priceHistoryData.prices.length - 1
                   ][1].toString()
-                : '0.00' //if there is
+                : '0.00' //if there is no price-history data fallback to 0.00
           } catch (error) {
             logger.error(
               `Error fetching token info and balanceInUSD for tokenId ${tokenId}, it might be a pool or a LP token:`,
               error
             )
-            tokenBalanceInUsd = '0' //no price-discovery + its pool/LP token
+            tokenBalanceInUsd = '0.00' //no price-discovery + its pool/LP token
           }
         }
 
