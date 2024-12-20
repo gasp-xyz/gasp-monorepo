@@ -90,7 +90,7 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
         } else {
           balanceInUsdCalculated = new Decimal(0.0) //no value
         }
-        console.log(
+        logger.info(
           'FINAL: freeBalance:',
           freeBalance.toString(),
           'tokenBalanceInUsd:',
