@@ -534,7 +534,6 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				switch {
 				case vLog.Address == delegationManagerContractAddress && vLog.Topics[0] == getEventID(delegationManagerAbi, "OperatorSharesIncreased"):
 					{
-						osu.logger.Debugf("Event %s from contract %s\n", "OperatorSharesIncreased", vLog.Address.Hex())
 						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractDelegationManagerOperatorSharesIncreased, err := osu.ethRpc.AvsReader.AvsServiceBindings.DelegationManager.ContractDelegationManagerFilterer.ParseOperatorSharesIncreased(vLog)
@@ -554,7 +553,6 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					}
 				case vLog.Address == delegationManagerContractAddress && vLog.Topics[0] == getEventID(delegationManagerAbi, "OperatorSharesDecreased"):
 					{
-						osu.logger.Debugf("Event %s from contract %s\n", "OperatorSharesDecreased", vLog.Address.Hex())
 						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractDelegationManagerOperatorSharesDecreased, err := osu.ethRpc.AvsReader.AvsServiceBindings.DelegationManager.ContractDelegationManagerFilterer.ParseOperatorSharesDecreased(vLog)
@@ -895,6 +893,9 @@ func (osu *OpStateUpdater) processOpDelegationStateChange(operator common.Addres
 		// So we should just continue...
 		return nil
 	}
+
+	osu.logger.Debugf("Processing processOpDelegationStateChange for operator: %v, operatorId: %v, blockNumber: %v\n", operator, operatorId, blockNumber)
+	
 	if _, ok := osu.currentOpState[operatorId]; ok {
 		opStateUpdate, err := osu.ethRpc.AvsReader.GetTypedOperatorsStakesForQuorumAtBlock(context.Background(), osu.ethRpc.AvsReader.AvsServiceBindings.RegistryCoordinatorAddress, types.TRACKED_QUORUM_NUMBERS, []common.Address{operator}, blockNumber)
 		if err != nil {
