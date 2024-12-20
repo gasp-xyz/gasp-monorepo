@@ -34,9 +34,27 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
         let balanceInUsdCalculated: any
 
         try {
+          const assetsInfo = await MangataClient.query.getAssetsInfo()
+          tokenInfo = Object.values(assetsInfo).find(
+            (item) => item.id === tokenId
+          )
+        } catch (error) {
+          logger.error(
+            `Error fetching token info for tokenId ${tokenId}:`,
+            error
+          )
+          tokenInfo = null
+        }
+
+        try {
           tokenBalanceInUsd = (await priceDiscovery(tokenId)).current_price[
             'usd'
           ]
+          if (tokenBalanceInUsd === '0') {
+            throw new Error(
+              `Token balance in USD is zero for tokenId ${tokenId}`
+            )
+          }
         } catch (error) {
           logger.error(
             'Error fetching token balance in USD, fallback option price-history:',
@@ -50,8 +68,7 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
                 ? priceHistoryData.prices[
                     priceHistoryData.prices.length - 1
                   ][1].toString()
-                : '0' //to get the newest price
-            tokenInfo = getAsset(tokenId, false) //we need token decimals for fromBN
+                : '0.00' //if there is
           } catch (error) {
             logger.error(
               `Error fetching token info and balanceInUSD for tokenId ${tokenId}, it might be a pool or a LP token:`,
@@ -64,10 +81,27 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
         new Decimal(freeBalance.toString()).mul(new Decimal(tokenBalanceInUsd))
         if (tokenInfo && tokenInfo.decimals) {
           //we pass decimals to fromBN if its a token
-          balanceInUsdCalculated = new Decimal(fromBN(freeBalance, tokenInfo.decimals)).mul(new Decimal(tokenBalanceInUsd)).toFixed(2).toString()
+          balanceInUsdCalculated = new Decimal(
+            fromBN(freeBalance, tokenInfo.decimals ?? 18)
+          )
+            .mul(new Decimal(tokenBalanceInUsd))
+            .toFixed(2)
+            .toString()
         } else {
-          balanceInUsdCalculated = new Decimal(fromBN(freeBalance)).mul(new Decimal(tokenBalanceInUsd)) //pool/LP token no decimals
+          balanceInUsdCalculated = new Decimal(0.0) //no value
         }
+        console.log(
+          'FINAL: freeBalance:',
+          freeBalance.toString(),
+          'tokenBalanceInUsd:',
+          tokenBalanceInUsd,
+          'tokenInfo.decimals:',
+          tokenInfo?.decimals,
+          'tokenId:',
+          tokenId,
+          'balanceInUsdCalculated:',
+          balanceInUsdCalculated
+        )
         return {
           tokenId,
           balance: freeBalance.toString(),
