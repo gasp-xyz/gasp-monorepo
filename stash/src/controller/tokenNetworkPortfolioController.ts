@@ -61,7 +61,13 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
           )
           try {
             // only: no price-discovery for token and then only for tokens that are not pools and not LP tokens, price-history will fail for pools/LP tokens
-            const priceHistoryData = await priceHistory(tokenId, 1, 0) // 1 day in history max, interval 0 to not aggreagate results
+            let priceHistoryData = await priceHistory(tokenId, 1, 'hour')
+            if (priceHistoryData.prices.length === 0) {
+              console.log(
+                `priceHistoryData.prices.length === 0 for tokenId ${tokenId}`
+              )
+              priceHistoryData = await priceHistory(tokenId) // call priceHistory without days and interval if no data
+            } // 1 day in history max, interval 0 to not aggreagate results
             tokenBalanceInUsd =
               priceHistoryData.prices.length > 0
                 ? priceHistoryData.prices[
