@@ -18,13 +18,12 @@ use sp_core::U256;
 
 use crate::cli::CliArgs;
 
-use super::{map_revert, Client};
+use super::{map_revert, Client, SignerClient};
 
 pub struct ElContracts {
     delegation: DelegationManager<Client>,
     avs_directory: AVSDirectory<Client>,
     service_manager_address: Address,
-    client: Arc<Client>,
 }
 
 impl Debug for ElContracts {
@@ -52,7 +51,6 @@ impl ElContracts {
             delegation,
             avs_directory,
             service_manager_address: service_addr,
-            client,
         })
     }
 
@@ -62,15 +60,14 @@ impl ElContracts {
 
     pub async fn register_as_operator_with_el(
         &self,
-        operator_address: Address,
+        client: Arc<SignerClient>,
     ) -> eyre::Result<TransactionReceipt> {
+        let delegation = DelegationManager::new(self.delegation.address(), client.clone());
         let op_details = OperatorDetails {
-            deprecated_earnings_receiver: operator_address,
+            deprecated_earnings_receiver: client.address(),
             ..Default::default()
         };
-        let tx = self
-            .delegation
-            .register_as_operator(op_details, String::new());
+        let tx = delegation.register_as_operator(op_details, String::new());
 
         let pending = tx.send().await.map_err(map_revert)?;
         let receipt = pending.await?;
@@ -84,13 +81,13 @@ impl ElContracts {
 
     pub async fn get_delegation_signature_params(
         &self,
+        client: &Arc<SignerClient>,
     ) -> eyre::Result<SignatureWithSaltAndExpiry> {
         let salt = &mut [0_u8; 32];
         rand::thread_rng().fill_bytes(salt);
 
-        let at = self.client.get_block_number().await?;
-        let block = self
-            .client
+        let at = client.get_block_number().await?;
+        let block = client
             .get_block(at)
             .await?
             .ok_or_eyre("block should be found for known number")?;
@@ -100,15 +97,14 @@ impl ElContracts {
         let digest = self
             .avs_directory
             .calculate_operator_avs_registration_digest_hash(
-                self.client.address(),
+                client.address(),
                 self.service_manager_address,
                 *salt,
                 expiry,
             )
             .await?;
 
-        let sig: [u8; 65] = self
-            .client
+        let sig: [u8; 65] = client
             .signer()
             .sign_hash(sp_core::H256::from(digest))?
             .into();
