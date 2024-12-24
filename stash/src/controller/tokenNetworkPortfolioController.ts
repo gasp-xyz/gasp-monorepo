@@ -72,7 +72,7 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
           ','
         ).map((id) => id.trim())
         if (tokenIdsToHardcode.includes(tokenId)) {
-          balanceInUsdCalculated = freeBalance.toString()
+          balanceInUsdCalculated = new Decimal(freeBalance.toString())
         } else {
           new Decimal(freeBalance.toString()).mul(
             new Decimal(tokenBalanceInUsd)
