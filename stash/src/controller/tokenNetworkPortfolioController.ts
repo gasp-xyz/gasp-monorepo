@@ -68,26 +68,16 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
         }
 
         new Decimal(freeBalance.toString()).mul(new Decimal(tokenBalanceInUsd))
-        const tokenIdsToHardcode = process.env.TOKENS_TO_HARDCODE.split(
-          ','
-        ).map((id) => id.trim())
-        if (tokenIdsToHardcode.includes(tokenId)) {
-          balanceInUsdCalculated = new Decimal(freeBalance.toString())
-        } else {
-          new Decimal(freeBalance.toString()).mul(
-            new Decimal(tokenBalanceInUsd)
+        if (tokenInfo && tokenInfo.decimals) {
+          //we pass decimals to fromBN if its a token
+          balanceInUsdCalculated = new Decimal(
+            fromBN(freeBalance, tokenInfo.decimals ?? 18)
           )
-          if (tokenInfo && tokenInfo.decimals) {
-            // we pass decimals to fromBN if it's a token
-            balanceInUsdCalculated = new Decimal(
-              fromBN(freeBalance, tokenInfo.decimals ?? 18)
-            )
-              .mul(new Decimal(tokenBalanceInUsd))
-              .toFixed(2)
-              .toString()
-          } else {
-            balanceInUsdCalculated = new Decimal(0.0) // no value
-          }
+            .mul(new Decimal(tokenBalanceInUsd))
+            .toFixed(2)
+            .toString()
+        } else {
+          balanceInUsdCalculated = new Decimal(0.0) //no value
         }
         logger.info(
           'FINAL: freeBalance:',
