@@ -1,6 +1,6 @@
 import { describe, beforeAll, expect, it, vi, beforeEach } from "vitest";
 import { L2Interface } from "../src/l2/L2Interface.js";
-import { hexToU8a } from "@polkadot/util";
+import { hexToU8a, u8aToHex } from "@polkadot/util";
 import { L1Interface } from "../src/l1/L1Interface.js";
 import { Ferry } from "../src/Ferry.js";
 import 'dotenv/config'
@@ -277,6 +277,45 @@ describe('Closer Service', () => {
           amount: 99n,
           ferryTip: 99n,
           hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+        };
+
+    l2Mock.getRequests = vi.fn().mockResolvedValue([closeableWithdrawal, ignoredWithdrawal]), 
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, 1000n);
+
+    await closer.findRequestToClose();
+
+    expect(await closer.getNextRequestToClose()).toStrictEqual(closeableWithdrawal);
+    expect(await closer.getNextRequestToClose()).toBeNull();
+  });
+
+  it('considers txs reported by stash (initiated by frontend)', async () => {
+    const TOKENS_TO_CLOSE: [Uint8Array, bigint, bigint][] = [
+    ];
+    l1Mock.isClosed = vi.fn().mockResolvedValue(false);
+    l1Mock.isFerried = vi.fn().mockResolvedValue(false);
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(500n);
+    const closableWtihdrawalHash = hexToU8a("0x1111111111111111111111111111111111111111111111111111111111111111", 32);
+    const ignoredWtihdrawalHash = hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32);
+
+    stashMock.shouldBeClosed = vi.fn().mockImplementation((hash) => 
+      u8aToHex(closableWtihdrawalHash) === u8aToHex(hash) ? true : false
+    )
+
+    const closeableWithdrawal = {
+          requestId: 1n,
+          withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+          tokenAddress: ENABLED_TOKEN,
+          amount: 100n,
+          ferryTip: 100n,
+          hash: closableWtihdrawalHash,
+        };
+    const ignoredWithdrawal = {
+          requestId: 2n,
+          withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+          tokenAddress: ENABLED_TOKEN,
+          amount: 99n,
+          ferryTip: 99n,
+          hash: ignoredWtihdrawalHash,
         };
 
     l2Mock.getRequests = vi.fn().mockResolvedValue([closeableWithdrawal, ignoredWithdrawal]), 

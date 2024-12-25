@@ -87,16 +87,10 @@ class CloserService {
 								);
 							}) !== undefined;
 
-						// TODO: introduce proper env variable
-						const shouldCloseAll =
-							this.tokensToClose.find((elem) => {
-								return isEqual(elem[0], new Uint8Array(20));
-							}) !== undefined;
-
             const wasInitiatedByFrontend = await this.stash.shouldBeClosed(request.hash);
 
 						return (
-							(shouldCloseAll || shouldBeClosed || wasInitiatedByFrontend ) &&
+							(shouldBeClosed || wasInitiatedByFrontend ) &&
 							!(await this.l1.isClosed(request.hash))
 						);
 					} else {
