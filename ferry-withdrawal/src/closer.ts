@@ -8,6 +8,7 @@ import "gasp-types";
 import { Withdrawal, isWithdrawal, toString } from "./Withdrawal.js";
 import { Cancel, isCancel, toString as cancelToString } from "./Cancel.js";
 import { L1Api } from "./l1/L1Api.js";
+import { StashApi } from "./stash/StashApi.js";
 import { L2Api, getApi } from "./l2/L2Api.js";
 import { logger } from "./logger.js";
 import {
@@ -18,6 +19,7 @@ import {
 	PRIVATE_KEY,
 	TOKENS_TO_TRACK,
 	TX_COST,
+  STASH_URL,
 	DELAY,
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
@@ -28,6 +30,7 @@ async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
 	const l2 = new L2Api(api);
 	const l1 = new L1Api(ETH_CHAIN_URL);
+	const stash = new StashApi(STASH_URL);
 
 	logger.info(`Closer Serivce`);
 
@@ -55,6 +58,7 @@ async function main() {
 	const closerService = new CloserService(
 		l1,
 		l2,
+    stash,
 		TOKENS_TO_TRACK,
 		TX_COST,
 		BATCH_SIZE,

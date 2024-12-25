@@ -5,6 +5,7 @@ import { L1Interface } from "../src/l1/L1Interface.js";
 import { Ferry } from "../src/Ferry.js";
 import 'dotenv/config'
 import { CloserService } from "../src/CloserService.js";
+import { StashInterface } from "../src/stash/StashInterface.js";
 
 const ALITH = "0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac";
 const NATIVE_TOKEN = hexToU8a("0x0000000000000000000000000000000000000001", 160);
@@ -18,6 +19,7 @@ const TOKENS_TO_CLOSE: [Uint8Array, bigint, bigint][] = [
 let closer: CloserService;
 let l1Mock: L1Interface;
 let l2Mock: L2Interface;
+let stashMock: StashInterface;
 
 describe('Closer Service', () => {
 
@@ -46,7 +48,12 @@ describe('Closer Service', () => {
       getNativeTokenAddress: vi.fn().mockImplementation(() => { throw new Error("Unexpected mock called") }),
     };
 
-    closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, 0n);
+    stashMock = {
+      shouldBeClosed: vi.fn().mockResolvedValue(false),
+    };
+
+
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, 0n);
   });
 
   it('should fetch all withdrawalas at once from small range', async () => {
@@ -65,7 +72,7 @@ describe('Closer Service', () => {
     l2Mock.getRequests = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
 
     const batchSize = 1000n;
-    closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, batchSize);
 
     await closer.findRequestToClose();
 
@@ -81,7 +88,7 @@ describe('Closer Service', () => {
     l2Mock.getRequests = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
 
     const batchSize = 1000n;
-    closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, batchSize);
 
     await closer.findRequestToClose();
 
@@ -98,7 +105,7 @@ describe('Closer Service', () => {
     l2Mock.getRequests = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
 
     const batchSize = 1000n;
-    closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, batchSize);
     await closer.findRequestToClose();
 
     expect(l2Mock.getRequests).toHaveBeenCalledTimes(3);
@@ -116,7 +123,7 @@ describe('Closer Service', () => {
       .mockResolvedValueOnce(1n);
 
     l2Mock.getRequests = vi.fn().mockImplementation(async (arg1, arg2) => { return []; })
-    closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, 1000n);
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, 1000n);
     await closer.findRequestToClose();
     expect(l2Mock.getRequests).toHaveBeenCalledTimes(0);
 
@@ -141,7 +148,7 @@ describe('Closer Service', () => {
     l1Mock.isFerried = vi.fn().mockResolvedValue(false);
 
     const batchSize = 1000n;
-    closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, batchSize);
     await closer.findRequestToClose();
     await closer.findRequestToClose();
     await closer.findRequestToClose();
@@ -166,7 +173,7 @@ describe('Closer Service', () => {
     l1Mock.isFerried = vi.fn().mockResolvedValue(false);
 
     const batchSize = 1000n;
-    closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, batchSize);
     await closer.findRequestToClose();
     await closer.findRequestToClose();
     await closer.findRequestToClose();
@@ -192,7 +199,7 @@ describe('Closer Service', () => {
     l1Mock.isFerried = vi.fn().mockResolvedValue(false);
 
     const batchSize = 1000n;
-    closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, batchSize);
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, batchSize);
     await closer.findRequestToClose();
     expect(l2Mock.getRequests).toHaveBeenCalledTimes(1);
     expect(l2Mock.getRequests).toHaveBeenCalledWith(1n, 500n);
@@ -237,7 +244,7 @@ describe('Closer Service', () => {
         };
 
     l2Mock.getRequests = vi.fn().mockResolvedValue([closeableWithdrawal, ignoredWithdrawal]), 
-    closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, 1000n);
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, 1000n);
 
     await closer.findRequestToClose();
 
@@ -273,7 +280,7 @@ describe('Closer Service', () => {
         };
 
     l2Mock.getRequests = vi.fn().mockResolvedValue([closeableWithdrawal, ignoredWithdrawal]), 
-    closer = new CloserService(l1Mock, l2Mock, TOKENS_TO_CLOSE, 1000n);
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, 1000n);
 
     await closer.findRequestToClose();
 

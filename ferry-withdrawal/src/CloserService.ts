@@ -7,6 +7,7 @@ import { ALERT_WARNING, logger } from "./logger.js";
 import { Withdrawal, toString, isWithdrawal } from "./Withdrawal.js";
 import { Cancel, isCancel, toString as cancelToString } from "./Cancel.js";
 import { closeSync } from "fs";
+import { StashInterface } from "./stash/StashInterface.js";
 
 async function asyncFilter(arr: (Withdrawal | Cancel)[], predicate: any) {
 	const results = await Promise.all(arr.map(predicate));
@@ -20,6 +21,7 @@ class CloserService {
 	l2: L2Interface;
 	tokensToClose: [Uint8Array, bigint, bigint][];
 	minBalance: bigint;
+  stash: StashInterface;
 	lastCheckedWithrdawal: bigint;
 	closableRequests: (Withdrawal | Cancel)[];
 	batchSize: bigint;
@@ -27,12 +29,14 @@ class CloserService {
 	constructor(
 		l1: L1Interface,
 		l2: L2Interface,
+    stash: StashInterface,
 		tokensToClose: [Uint8Array, bigint, bigint][],
 		minBalance: bigint,
 		batchSize: bigint = 1000n,
 	) {
 		this.l1 = l1;
 		this.l2 = l2;
+    this.stash = stash
 		this.tokensToClose = tokensToClose;
 		this.minBalance = minBalance;
 		this.lastCheckedWithrdawal = 0n;
@@ -89,8 +93,10 @@ class CloserService {
 								return isEqual(elem[0], new Uint8Array(20));
 							}) !== undefined;
 
+            const wasInitiatedByFrontend = await this.stash.shouldBeClosed(request.hash);
+
 						return (
-							(shouldCloseAll || shouldBeClosed) &&
+							(shouldCloseAll || shouldBeClosed || wasInitiatedByFrontend ) &&
 							!(await this.l1.isClosed(request.hash))
 						);
 					} else {
