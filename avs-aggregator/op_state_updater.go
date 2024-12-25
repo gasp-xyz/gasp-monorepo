@@ -49,9 +49,10 @@ type OpStateUpdater struct {
 	reinitOpStateAtInit				bool
 	checkTriggerOpStateUpdate		bool
 	checkTriggerOpStateUpdateWindow	bool
+	enableTraceLogs					bool
 }
 
-func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, minOpUpdateInterval int, reinitOpStateAtInit bool, checkTriggerOpStateUpdate bool, checkTriggerOpStateUpdateWindow bool) (*OpStateUpdater, error) {
+func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, minOpUpdateInterval int, reinitOpStateAtInit bool, checkTriggerOpStateUpdate bool, checkTriggerOpStateUpdateWindow bool, enableTraceLogs bool) (*OpStateUpdater, error) {
 	return &OpStateUpdater{
 		logger:                        logger,
 		ethRpc:                        ethRpc,
@@ -75,6 +76,7 @@ func NewOpStateUpdater(logger logging.Logger, ethRpc *chainio.EthRpc, minOpUpdat
 		reinitOpStateAtInit:				reinitOpStateAtInit,
 		checkTriggerOpStateUpdate:		checkTriggerOpStateUpdate,
 		checkTriggerOpStateUpdateWindow:	checkTriggerOpStateUpdateWindow,
+		enableTraceLogs: 				enableTraceLogs,
 	}, nil
 }
 
@@ -534,7 +536,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				switch {
 				case vLog.Address == delegationManagerContractAddress && vLog.Topics[0] == getEventID(delegationManagerAbi, "OperatorSharesIncreased"):
 					{
-						osu.logger.Debugf("Event %s from contract %s\n", "OperatorSharesIncreased", vLog.Address.Hex())
+						if osu.enableTraceLogs { osu.logger.Debugf("Event %s from contract %s\n", "OperatorSharesIncreased", vLog.Address.Hex()) }
 						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractDelegationManagerOperatorSharesIncreased, err := osu.ethRpc.AvsReader.AvsServiceBindings.DelegationManager.ContractDelegationManagerFilterer.ParseOperatorSharesIncreased(vLog)
@@ -554,7 +556,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					}
 				case vLog.Address == delegationManagerContractAddress && vLog.Topics[0] == getEventID(delegationManagerAbi, "OperatorSharesDecreased"):
 					{
-						osu.logger.Debugf("Event %s from contract %s\n", "OperatorSharesDecreased", vLog.Address.Hex())
+						if osu.enableTraceLogs { osu.logger.Debugf("Event %s from contract %s\n", "OperatorSharesDecreased", vLog.Address.Hex()) }
 						osu.atBlock = uint32(vLog.BlockNumber)
 						// Process the log here based on event signature and ABI
 						ContractDelegationManagerOperatorSharesDecreased, err := osu.ethRpc.AvsReader.AvsServiceBindings.DelegationManager.ContractDelegationManagerFilterer.ParseOperatorSharesDecreased(vLog)
@@ -895,6 +897,14 @@ func (osu *OpStateUpdater) processOpDelegationStateChange(operator common.Addres
 		// So we should just continue...
 		return nil
 	}
+
+	// TODO
+	// We should probably improve this to check that the operator was atleast registered at the previous block or this one before processing it
+	// To avoid refreshing state for stale ops
+	// But I hesitate to commit to overdoing this for now, it might have blind spots
+
+	osu.logger.Debugf("Processing processOpDelegationStateChange for operator: %v, operatorId: %v, blockNumber: %v\n", operator, operatorId, blockNumber)
+
 	if _, ok := osu.currentOpState[operatorId]; ok {
 		opStateUpdate, err := osu.ethRpc.AvsReader.GetTypedOperatorsStakesForQuorumAtBlock(context.Background(), osu.ethRpc.AvsReader.AvsServiceBindings.RegistryCoordinatorAddress, types.TRACKED_QUORUM_NUMBERS, []common.Address{operator}, blockNumber)
 		if err != nil {
