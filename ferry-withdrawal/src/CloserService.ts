@@ -21,7 +21,7 @@ class CloserService {
 	l2: L2Interface;
 	tokensToClose: [Uint8Array, bigint, bigint][];
 	minBalance: bigint;
-  stash: StashInterface;
+	stash: StashInterface;
 	lastCheckedWithrdawal: bigint;
 	closableRequests: (Withdrawal | Cancel)[];
 	batchSize: bigint;
@@ -29,14 +29,14 @@ class CloserService {
 	constructor(
 		l1: L1Interface,
 		l2: L2Interface,
-    stash: StashInterface,
+		stash: StashInterface,
 		tokensToClose: [Uint8Array, bigint, bigint][],
 		minBalance: bigint,
 		batchSize: bigint = 1000n,
 	) {
 		this.l1 = l1;
 		this.l2 = l2;
-    this.stash = stash
+		this.stash = stash;
 		this.tokensToClose = tokensToClose;
 		this.minBalance = minBalance;
 		this.lastCheckedWithrdawal = 0n;
@@ -87,10 +87,12 @@ class CloserService {
 								);
 							}) !== undefined;
 
-            const wasInitiatedByFrontend = await this.stash.shouldBeClosed(request.hash);
+						const wasInitiatedByFrontend = await this.stash.shouldBeClosed(
+							request.hash,
+						);
 
 						return (
-							(shouldBeClosed || wasInitiatedByFrontend ) &&
+							(shouldBeClosed || wasInitiatedByFrontend) &&
 							!(await this.l1.isClosed(request.hash))
 						);
 					} else {

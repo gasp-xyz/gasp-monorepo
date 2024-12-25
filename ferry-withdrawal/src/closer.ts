@@ -19,7 +19,7 @@ import {
 	PRIVATE_KEY,
 	TOKENS_TO_TRACK,
 	TX_COST,
-  STASH_URL,
+	STASH_URL,
 	DELAY,
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
@@ -58,7 +58,7 @@ async function main() {
 	const closerService = new CloserService(
 		l1,
 		l2,
-    stash,
+		stash,
 		TOKENS_TO_TRACK,
 		TX_COST,
 		BATCH_SIZE,
