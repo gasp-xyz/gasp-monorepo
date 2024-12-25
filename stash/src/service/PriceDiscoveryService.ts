@@ -181,9 +181,20 @@ export const priceHistory = async (
   const current = moment.utc()
   const to = current.valueOf()
   const from = days === 'max' ? 0 : current.subtract(days, 'days').valueOf()
+  const tokenIdsToHardcode = process.env.TOKENS_TO_HARDCODE.split(',').map(
+    (id) => id.trim()
+  )
   const prices = (
     await priceStore.get(asset.id, from, to, matchInterval(intervalAdjusted))
-  ).map(([t, a]) => [t, a.mul(exponent)] as TimestampedAmount)
+  ).map(
+    ([t, a]) =>
+      [
+        t,
+        tokenIdsToHardcode.includes(asset.id)
+          ? new Decimal(1.0).toFixed(2)
+          : a.mul(exponent),
+      ] as TimestampedAmount
+  )
 
   return { prices }
 }

@@ -44,37 +44,27 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
           )
           tokenInfo = null
         }
-
         try {
-          tokenBalanceInUsd = (await priceDiscovery(tokenId)).current_price[
-            'usd'
-          ]
-          if (tokenBalanceInUsd === '0') {
-            throw new Error(
-              `Token balance in USD is zero for tokenId ${tokenId}`
+          // query price history directly to align with Frontend app
+          let priceHistoryData = await priceHistory(tokenId, 1, 'hour')
+          if (priceHistoryData.prices.length === 0) {
+            console.log(
+              `priceHistoryData.prices.length === 0 for tokenId ${tokenId}`
             )
-          }
+            priceHistoryData = await priceHistory(tokenId) // call priceHistory without days and interval if no data
+          } // 1 day in history max, interval 0 to not aggreagate results
+          tokenBalanceInUsd =
+            priceHistoryData.prices.length > 0
+              ? priceHistoryData.prices[
+                  priceHistoryData.prices.length - 1
+                ][1].toString()
+              : '0.00' //if there is no price-history data fallback to 0.00
         } catch (error) {
           logger.error(
-            'Error fetching token balance in USD, fallback option price-history:',
+            `Error fetching token info and balanceInUSD for tokenId ${tokenId}, it might be a pool or a LP token:`,
             error
           )
-          try {
-            // only: no price-discovery for token and then only for tokens that are not pools and not LP tokens, price-history will fail for pools/LP tokens
-            const priceHistoryData = await priceHistory(tokenId, 1, 0) // 1 day in history max, interval 0 to not aggreagate results
-            tokenBalanceInUsd =
-              priceHistoryData.prices.length > 0
-                ? priceHistoryData.prices[
-                    priceHistoryData.prices.length - 1
-                  ][1].toString()
-                : '0.00' //if there is no price-history data fallback to 0.00
-          } catch (error) {
-            logger.error(
-              `Error fetching token info and balanceInUSD for tokenId ${tokenId}, it might be a pool or a LP token:`,
-              error
-            )
-            tokenBalanceInUsd = '0.00' //no price-discovery + its pool/LP token
-          }
+          tokenBalanceInUsd = '0.00' //no price-discovery + its pool/LP token
         }
 
         new Decimal(freeBalance.toString()).mul(new Decimal(tokenBalanceInUsd))
