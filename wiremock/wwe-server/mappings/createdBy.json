@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/tracing2/createdBy/type/withdrawal/tx/([^/]+)"
+  },
+  "response": {
+    "status": 200,
+    "body": "{ \"createdBy\": \"other\"}",
+    "transformers": [
+      "response-template"
+    ],
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

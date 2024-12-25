@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/tracing/createdBy/type/withdrawal/tx/0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  "response": {
+    "status": 200,
+    "body": "{ \"createdBy\": \"frontend\"}",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
