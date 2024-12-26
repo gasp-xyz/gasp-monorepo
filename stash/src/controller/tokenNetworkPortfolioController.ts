@@ -2,13 +2,10 @@ import { Request, Response } from 'express'
 import * as errorHandler from '../error/Handler.js'
 import MangataClient from '../connector/MangataNode.js'
 import { BN } from '@polkadot/util'
-import {
-  priceDiscovery,
-  priceHistory,
-} from '../service/PriceDiscoveryService.js'
 import { Decimal } from 'decimal.js'
 import { fromBN } from 'gasp-sdk'
 import logger from '../util/Logger.js'
+import { getTokenPrice } from '../service/TokenPriceService.js'
 
 export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
   try {
@@ -45,26 +42,13 @@ export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
           tokenInfo = null
         }
         try {
-          // query price history directly to align with Frontend app
-          let priceHistoryData = await priceHistory(tokenId, 1, 'hour')
-          if (priceHistoryData.prices.length === 0) {
-            console.log(
-              `priceHistoryData.prices.length === 0 for tokenId ${tokenId}`
-            )
-            priceHistoryData = await priceHistory(tokenId) // call priceHistory without days and interval if no data
-          } // 1 day in history max, interval 0 to not aggreagate results
-          tokenBalanceInUsd =
-            priceHistoryData.prices.length > 0
-              ? priceHistoryData.prices[
-                  priceHistoryData.prices.length - 1
-                ][1].toString()
-              : '0.00' //if there is no price-history data fallback to 0.00
+          tokenBalanceInUsd = (await getTokenPrice(tokenId)).toString()
         } catch (error) {
           logger.error(
             `Error fetching token info and balanceInUSD for tokenId ${tokenId}, it might be a pool or a LP token:`,
             error
           )
-          tokenBalanceInUsd = '0.00' //no price-discovery + its pool/LP token
+          tokenBalanceInUsd = '0.00' //no price, default to 0
         }
 
         new Decimal(freeBalance.toString()).mul(new Decimal(tokenBalanceInUsd))

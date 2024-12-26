@@ -1136,6 +1136,57 @@
         }
       }
     },
+    "/price/token/{tokenId}": {
+      "get": {
+        "tags": [
+          "Token Prices"
+        ],
+        "summary": "Get the price of a specific token.",
+        "description": "Retrieve the price of a token by providing its ID. Price is returned in USD.",
+        "parameters": [
+          {
+            "name": "tokenId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the token to retrieve the price for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "tokenId": "exampleTokenId",
+                  "price": 123.45
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Token price not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Token price not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "An error occurred while retrieving the token price"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/account/{wallet}/dashboard": {
       "get": {
         "tags": [
