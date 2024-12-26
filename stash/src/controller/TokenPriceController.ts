@@ -52,8 +52,8 @@ export const getTokenPrices = async (
   try {
     const tokenId = req.params.tokenId
     const price = await tokenPriceService.getTokenPrice(tokenId)
-    if (price !== null) {
-      res.json({ tokenId, price })
+    if (price !== null && price !== undefined) {
+      res.json({ tokenId: tokenId, price: price })
     } else {
       res.status(404).json({ message: 'Token price not found' })
     }
