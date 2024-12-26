@@ -109,6 +109,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		"mangata-finalizer",
 		"0.0.0.0:8888",
 		logger,
+		c.AggSSFetchTimeout,
 	)
 	if err != nil {
 		logger.Error("Failed to create EthRpc clients", "err", err)

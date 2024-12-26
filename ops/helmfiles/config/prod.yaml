@@ -156,6 +156,7 @@ aggregatorEnv:
   AGG_IDLE_START: true
   AGG_RUN_TRIGGER_API_KEY: "secrettoken"
   ENVIRONMEMT: "production"
+  AGG_SS_FETCH_TIMEOUT: "100"
 
 #####################
 # gaspAvs configs #
