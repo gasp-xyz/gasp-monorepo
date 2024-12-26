@@ -131,6 +131,7 @@ collator:
 # aggregator configs #
 ######################
 aggregatorEnabled: true
+aggregatorImageTag: 0072b5a4df388795dda0babd6747ba112d0754bc
 # Override the image tag provided on deployment from IMAGE_TAG env variable
 # aggregatorImageTag: 5d6f2a4db68e0601f14b3ced43773488efdda164
 
@@ -155,11 +156,13 @@ aggregatorEnv:
   AGG_IDLE_START: true
   AGG_RUN_TRIGGER_API_KEY: "secrettoken"
   ENVIRONMEMT: "production"
+  AGG_SS_FETCH_TIMEOUT: "100"
 
 #####################
 # gaspAvs configs #
 #####################
 gaspAvsEnabled: true
+gaspAvsImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 # Override the image tag provided on deployment from IMAGE_TAG env variable
 # gaspAvsImageTag: ba3aaf237234092ad21bf0a4c5ff0f08523ba6f0
 
@@ -189,7 +192,6 @@ gaspAvsEnv:
   RUST_LOG: gasp_avs=debug,ether=info
   OPT_IN_AT_STARTUP: "false"
   # rollup-node configs
-  ROLLUP_NODE_CHAIN: /app/holesky-v3-chainspec.json
   ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
   ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/f9604551934c498a6a814d84f2cd6c01803d24d7/rollup-dev-env-chainspecs/alpha-launch-f26183b-raw.json
 
@@ -197,6 +199,7 @@ gaspAvsEnv:
 # updater configs #
 ###########################
 updaterEnabled: true
+updaterImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 updaterEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-password
@@ -239,8 +242,7 @@ updaterEnvBase:
 # sequencer configs #
 ############################
 sequencerEnabled: true
-# Override the image tag provided on deployment from IMAGE_TAG env variable
-# sequencerImageTag: b4eac04bc26af897711c74a4309d5c659178d75f
+sequencerImageTag: e82c4b3d9539b81f1cbe48066aed73ba5463fc10
 
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
@@ -345,6 +347,7 @@ sequencerEnvSecretsBase3:
 # ferry-deposit configs #
 #########################
 ferryDepositEnabled: true
+ferryDepositImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 ferryDepositEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
@@ -385,6 +388,7 @@ ferryDepositEnvSecretsBase:
 # ferry-withdrawal configs #
 ############################
 ferryWithdrawalEnabled: true
+ferryWithdrawalImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 ferryWithdrawalEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
@@ -425,6 +429,7 @@ ferryWithdrawalEnvSecretsBase:
 # ferry-closer configs #
 ########################
 closerEnabled: true
+closerImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"

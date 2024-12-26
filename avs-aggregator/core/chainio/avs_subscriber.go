@@ -1,6 +1,7 @@
 package chainio
 
 import (
+	"time"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -23,7 +24,7 @@ type AvsSubscriber struct {
 	logger              sdklogging.Logger
 }
 
-func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient *ethclient.Client, logger sdklogging.Logger) (*AvsSubscriber, error) {
+func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient *ethclient.Client, logger sdklogging.Logger, aggSSFetchTimeout int) (*AvsSubscriber, error) {
 	avsContractBindings, err := NewAvsServiceBindings(registryAddr, ethclient, logger)
 	if err != nil {
 		logger.Errorf("Failed to create contract bindings", "err", err)
@@ -31,6 +32,7 @@ func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient *ethclient.Clie
 	}
 	streamSubscriber := StreamReader{
 		Backend: ethclient,
+		FetchTimeout: time.Duration(aggSSFetchTimeout) * time.Second,
 	}
 	return &AvsSubscriber{
 		AvsContractBindings: avsContractBindings,
