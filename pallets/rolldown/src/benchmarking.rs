@@ -164,7 +164,7 @@ mod benchmarks {
 			STAKE_AMOUNT.try_into().ok().expect("u128 should fit into Balance type"),
 			sequencer_alias,
 			pallet_sequencer_staking::StakeAction::StakeOnly,
-			sequencer.clone()
+			sequencer.clone(),
 		)?;
 
 		if should_be_active {
