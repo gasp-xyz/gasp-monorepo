@@ -54,5 +54,9 @@ const runPeriodically = async () => {
   isRefreshing = false
 }
 
-setInterval(runPeriodically, 300000)
+setInterval(
+  runPeriodically,
+  Number(process.env.MINUTES_FOR_TOKEN_REFRESH) * 60 * 1000
+)
+
 export default server

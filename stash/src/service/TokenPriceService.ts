@@ -134,7 +134,12 @@ async function refreshPrices() {
   const tokens = await tokenPricesRepository.search().return.all()
 
   for (const token of tokens) {
-    if (new Date(token.timestamp) > new Date(Date.now() - 5 * 60 * 1000)) {
+    if (
+      new Date(token.timestamp) >
+      new Date(
+        Date.now() - Number(process.env.MINUTES_FOR_TOKEN_REFRESH) * 60 * 1000
+      )
+    ) {
       logger.info('Token price is fresh, skipping', token.tokenId)
       continue
     }
