@@ -9,6 +9,7 @@ import * as networkService from './service/NetworkService.js'
 import * as volumeService from './processing/TVLProcessorService.js'
 import * as tradesService from './processing/TradeVolumeProcessorService.js'
 import * as poolRatesService from './processing/PoolRatesProcessorService.js'
+import * as tokenPriceService from './service/TokenPriceService.js'
 import logger from './util/Logger.js'
 import { BLOCK_TIME } from './scraper/BlockScraper.js'
 
@@ -41,5 +42,21 @@ const server = app.listen(app.get('port'), async () => {
     await tradesService.initService()
   }
 })
+
+let isRefreshing = false
+
+const runPeriodically = async () => {
+  if (isRefreshing) {
+    return
+  }
+  isRefreshing = true
+  await tokenPriceService.refreshTokenPrice()
+  isRefreshing = false
+}
+
+setInterval(
+  runPeriodically,
+  Number(process.env.MINUTES_FOR_TOKEN_REFRESH) * 60 * 1000
+)
 
 export default server
