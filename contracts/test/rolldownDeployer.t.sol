@@ -14,20 +14,20 @@ import {Utilities, MyERC20} from "./utils/Utilities.sol";
 contract RolldownDeployerTest is Test {
     using stdStorage for StdStorage;
 
-    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
-    bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
+    bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
+    bytes32 internal constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
 
-    RolldownDeployer public rolldownDeployer;
-    Utilities public utils;
-    address payable[] public users;
-    address public owner;
-    address public upgrader;
-    address public updaterAccount;
-    MyERC20 public token;
-    address payable public NATIVE_TOKEN_ADDRESS;
-    ProxyAdmin public rolldownProxyAdmin;
-    Rolldown public rolldown;
-    Rolldown public rolldownImplementation;
+    RolldownDeployer internal rolldownDeployer;
+    Utilities internal utils;
+    address payable[] internal users;
+    address internal owner;
+    address internal upgrader;
+    address internal updaterAccount;
+    MyERC20 internal token;
+    address payable internal NATIVE_TOKEN_ADDRESS;
+    ProxyAdmin internal rolldownProxyAdmin;
+    Rolldown internal rolldown;
+    Rolldown internal rolldownImplementation;
 
     function setUp() public {
         utils = new Utilities();
@@ -43,8 +43,9 @@ contract RolldownDeployerTest is Test {
         rolldownProxyAdmin = new ProxyAdmin();
 
         EmptyContract emptyContract = new EmptyContract();
-        rolldown =
-            Rolldown(payable(address(new TransparentUpgradeableProxy(address(emptyContract), address(rolldownProxyAdmin), ""))));
+        rolldown = Rolldown(
+            payable(address(new TransparentUpgradeableProxy(address(emptyContract), address(rolldownProxyAdmin), "")))
+        );
 
         vm.stopBroadcast();
     }
