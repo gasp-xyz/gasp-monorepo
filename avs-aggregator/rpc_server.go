@@ -33,6 +33,34 @@ var (
 
 func (agg *Aggregator) startServer(ctx context.Context, apiKey string, runTrigger chan struct{} ) error {
 	http.HandleFunc("/", agg.handler)
+	http.HandleFunc("/isAwaitingRunTrigger", func(w http.ResponseWriter, r *http.Request) {
+
+		var isAwaitingRunTrigger bool
+
+		// If this is run in parallel then there will be a race condition between this /isAwaitingRunTrigger and /run
+		// We don't want to receive the trigger here
+		// But this rpc is not executed parallely so we should never have that
+		// But still we check for it
+		select {
+		case _, ok := <-runTrigger: // if it doesn't block on receive then the channel is closed
+			// if we receive an ok == true here we have a problem, this should never happen
+			if ok {
+				panic("received run trigger in isAwaitingRunTrigger check")
+			}
+			isAwaitingRunTrigger = false
+		default: // if it blocks on receive rather than accept then the channel is still open
+			isAwaitingRunTrigger = true
+		}
+
+		// Respond with JSON named data
+		response := map[string]interface{}{
+			"isAwaitingRunTrigger": isAwaitingRunTrigger,
+			"status":  "OK",
+		}
+	
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response) // Encode and send JSON response
+	})
 	http.HandleFunc("/run", func(w http.ResponseWriter, r *http.Request) {
 		// Parse query parameters
 		key := r.URL.Query().Get("SECRET_API_KEY")
@@ -52,6 +80,7 @@ func (agg *Aggregator) startServer(ctx context.Context, apiKey string, runTrigge
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response) // Encode and send JSON response
 		runTrigger <- struct{}{}
+		close(runTrigger)
 	})
 	err := http.ListenAndServe(agg.serverIpPortAddr, nil)
 	if err != nil {
