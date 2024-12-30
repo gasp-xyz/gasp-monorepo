@@ -5,7 +5,8 @@ import { u128, u32 } from '@polkadot/types-codec'
 import { signatureVerify } from '@polkadot/util-crypto'
 import { ApiPromise } from '@polkadot/api'
 
-const AIRDROP_WEIGHT = 0.5
+const AIRDROP_WEIGHT_SCALE_FACTOR = new BN(10000000)
+const AIRDROP_WEIGHT = new BN(34466)
 
 export const getEligibilityAtBlockN = async (
   _api: ApiPromise,
@@ -25,7 +26,9 @@ export const getEligibilityAtBlockN = async (
   )
 
   const mgxBalance = balances.get(process.env.MGX_TOKEN_ID) ?? BN_ZERO
-  const mgxWeight = mgxBalance.muln(AIRDROP_WEIGHT * 10).divn(10)
+  const mgxWeight = mgxBalance
+    .mul(AIRDROP_WEIGHT)
+    .div(AIRDROP_WEIGHT_SCALE_FACTOR)
   const lpMgxHoldings = lpAssets.map((lpId) => {
     return calculateTokenHoldings(
       poolMetadata.get(lpId),
@@ -38,7 +41,9 @@ export const getEligibilityAtBlockN = async (
     (acc, weight) => acc.add(weight),
     BN_ZERO
   )
-  const lpWeight = lpMgxHoldingsSum.muln(AIRDROP_WEIGHT * 10).divn(10)
+  const lpWeight = lpMgxHoldingsSum
+    .mul(AIRDROP_WEIGHT)
+    .div(AIRDROP_WEIGHT_SCALE_FACTOR)
 
   return {
     weight: mgxWeight.add(lpWeight),

@@ -64,24 +64,28 @@ async function main() {
 
 	const unwatch = await api.derive.chain.subscribeFinalizedHeads(
 		async (header: HeaderExtended) => {
-			inProgress = true;
-			logger.info(`#${header.number} updating withdrawals to close`);
-			await closerService.findRequestToClose(DELAY);
-			const req = await closerService.getNextRequestToClose();
-			if (req) {
-				if (isWithdrawal(req)) {
-					logger.info(`#${header.number} Closing withdrawal ${toString(req)}`);
-					await closerService.closeWithdrawal(req, hexToU8a(PRIVATE_KEY));
-				} else if (isCancel(req)) {
-					logger.info(
-						`#${header.number} Closing withdrawal ${cancelToString(req)}`,
-					);
-					await closerService.closeCancel(req, hexToU8a(PRIVATE_KEY));
+			if (!inProgress) {
+				inProgress = true;
+				logger.info(`#${header.number} updating withdrawals to close`);
+				await closerService.findRequestToClose(DELAY);
+				const req = await closerService.getNextRequestToClose();
+				if (req) {
+					if (isWithdrawal(req)) {
+						logger.info(
+							`#${header.number} Closing withdrawal ${toString(req)}`,
+						);
+						await closerService.closeWithdrawal(req, hexToU8a(PRIVATE_KEY));
+					} else if (isCancel(req)) {
+						logger.info(
+							`#${header.number} Closing withdrawal ${cancelToString(req)}`,
+						);
+						await closerService.closeCancel(req, hexToU8a(PRIVATE_KEY));
+					}
+				} else {
+					logger.debug(`#${header.number} nothing to close`);
 				}
-			} else {
-				logger.debug(`#${header.number} nothing to close`);
+				inProgress = false;
 			}
-			inProgress = false;
 		},
 	);
 }
