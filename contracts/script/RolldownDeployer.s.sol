@@ -8,7 +8,7 @@ import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Test} from "forge-std/Test.sol";
-import {Gasp} from "../src/GaspToken.sol";
+import {GaspTestToken} from "../src/GaspTestToken.sol";
 import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
 import {Utils} from "./utils/Utils.sol";
@@ -23,7 +23,7 @@ contract RolldownDeployer is Script, Utils, Test {
 
     string public deployConfigPath;
     ProxyAdmin public rolldownProxyAdmin;
-    Gasp public erc20Mock;
+    GaspTestToken public erc20Mock;
     Rolldown public rolldown;
     Rolldown public rolldownImplementation;
     address public owner;
@@ -98,7 +98,7 @@ contract RolldownDeployer is Script, Utils, Test {
         vm.startBroadcast();
 
         rolldownProxyAdmin = new ProxyAdmin();
-        erc20Mock = new Gasp();
+        erc20Mock = new GaspTestToken();
 
         EmptyContract emptyContract = new EmptyContract();
         rolldown =
