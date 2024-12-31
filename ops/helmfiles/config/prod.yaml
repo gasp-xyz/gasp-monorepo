@@ -131,7 +131,7 @@ collator:
 # aggregator configs #
 ######################
 aggregatorEnabled: true
-aggregatorImageTag: e196ea8fbba7e2ae759d2fc4f908fbc74c5b56ad
+aggregatorImageTag: 38e5b2ed33a4d372ed5934220ab034f2e329df0a
 # Override the image tag provided on deployment from IMAGE_TAG env variable
 # aggregatorImageTag: 5d6f2a4db68e0601f14b3ced43773488efdda164
 
@@ -215,7 +215,7 @@ updaterEnv:
   AVS_REGISTRY_COORDINATOR_ADDR: 0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1
   GASP_SERVICE_ADDR: 0x150FE8DBB943c372F3e8C31d9c89f1E6A13cBBFd
   TESTNET: "false"
-  RUST_LOG: debug
+  RUST_LOG: info
   # PUSH_FIRST_INIT: "false"
   SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
 
@@ -234,7 +234,7 @@ updaterEnvBase:
   AVS_REGISTRY_COORDINATOR_ADDR: 0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1
   GASP_SERVICE_ADDR: 0x6B6F92184772bCEd3d9D6d0352D453917E4880c1
   TESTNET: "false"
-  RUST_LOG: debug
+  RUST_LOG: info
   # PUSH_FIRST_INIT: "false"
   SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
 
