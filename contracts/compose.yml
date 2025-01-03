@@ -5,7 +5,7 @@ services:
     platform: linux/amd64
     depends_on:
       eth-stub:
-          condition: service_healthy
+        condition: service_healthy
     command:
       - script
       - script/MultiStage.s.sol

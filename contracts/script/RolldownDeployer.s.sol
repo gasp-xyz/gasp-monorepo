@@ -48,7 +48,7 @@ contract RolldownDeployer is Script, Utils, Test {
         } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
             evm = "arbitrum_";
         } else if (chain == IRolldownPrimitives.ChainId.Base) {
-            evm = "base_"; 
+            evm = "base_";
         } else {
             revert("Unsupported chain");
         }
@@ -101,8 +101,9 @@ contract RolldownDeployer is Script, Utils, Test {
         erc20Mock = new GaspTestToken();
 
         EmptyContract emptyContract = new EmptyContract();
-        rolldown =
-            Rolldown(payable(address(new TransparentUpgradeableProxy(address(emptyContract), address(rolldownProxyAdmin), ""))));
+        rolldown = Rolldown(
+            payable(address(new TransparentUpgradeableProxy(address(emptyContract), address(rolldownProxyAdmin), "")))
+        );
         rolldownImplementation = new Rolldown();
 
         rolldownProxyAdmin.upgradeAndCall(
