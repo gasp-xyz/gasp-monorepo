@@ -83,6 +83,14 @@ impl Syncer {
         let target_chain_index = cfg.target_chain_index;
         let decoder = CallDecoder::new(avs_contracts.task_manager.address());
 
+        let gmrs_chain_id = gasp_service_contract
+            .chain_id()
+            .await?;
+        
+        if gmrs_chain_id != target_chain_index {
+            return Err(eyre!("target_chain_index and gmrs_chain_id mismatch"));
+        }
+
         Ok(Arc::new(Self {
             source_client,
             target_client,
@@ -403,9 +411,18 @@ impl Syncer {
             .latest_completed_rd_task_number()
             .block(alt_block_number)
             .await?;
+        let allow_gmrs_non_root_init = self
+            .gasp_service_contract
+            .allow_non_root_init()
+            .block(alt_block_number)
+            .await?;
 
-        if latest_completed_op_task_created_block.is_zero() && !cfg.push_first_init {
-            return Err(eyre!("target uninit and push_first_init set to false"));
+        match (latest_completed_op_task_created_block.is_zero(), cfg.push_first_init, allow_gmrs_non_root_init) {
+            (true, false, _) => {return Err(eyre!("target uninit and push_first_init set to false"));},
+            (_, true, false) => {
+                return Err(eyre!("target uninit and push_first_init set to true, but allow_non_root_init on gmrs is false"));
+            },
+            _ => {},
         }
 
         let mut sync_skip_op_task_completed_event = self.sync_skips_first_op_task_completed_event;
@@ -416,13 +433,28 @@ impl Syncer {
         let mut last_processed_rd_task_number: Option<u32> = None;
 
         let source_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
+        let last_completed_op_task_created_block = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .last_completed_op_task_created_block()
+            .block(source_block_number)
+            .await?;
+        
+        if last_completed_op_task_created_block.is_zero() {
+            return Err(eyre!("source eth uninit"));
+        }
 
-        if source_block_number < latest_completed_op_task_created_block.into() {
+        if source_block_number < latest_completed_op_task_created_block.into() || last_completed_op_task_created_block < latest_completed_op_task_created_block {
             return Err(eyre!("invalid latest_completed_op_task_created_block"));
         }
 
         let target_block_number: u64 = source_block_number.saturating_sub(1u64);
-        let mut from_block: u64 = latest_completed_op_task_created_block.into();
+        let mut from_block: u64 = if latest_completed_op_task_created_block.is_zero() {
+                cfg.source_avs_deployment_block.into()
+            } else {
+                latest_completed_op_task_created_block.into()
+            };
 
         if target_block_number >= from_block {
             let mut to_block = from_block
@@ -501,7 +533,7 @@ impl Syncer {
                         }
                         res?;
                     }
-                    Err(e) => error!("EthWs subscription error {:?}", e),
+                    Err(e) => return Err(eyre!("EthWs subscription error {:?}", e)),
                 },
                 block = blocks.next() => {
                     if block.is_none() {
@@ -751,11 +783,20 @@ impl Syncer {
             )
             .await?;
 
-        let operators_state_info = self
-            .clone()
-            .get_operators_state_info(last_task.clone())
-            .await?;
+        if last_task.last_completed_op_task_created_block > last_task.task_created_block {
+            return Err(eyre!("alt-l1 has later op task than eth-l1"));
+        }
 
+        // If we are reiniting the alt-l1 and the alt-l1 is caught up to the eth-l1 wrt OpTasks then
+        // we don't need the entire opState, we can just have nil opStateInfo
+        let operators_state_info: OperatorStateInfo = if last_task.last_completed_op_task_created_block == last_task.task_created_block {
+            Default::default()
+        } else {
+            self
+                .clone()
+                .get_operators_state_info(last_task.clone())
+                .await?
+        };
         Ok((
             last_task.clone(),
             operators_state_info.clone(),
