@@ -16,7 +16,7 @@ use reqwest_retry::{
 use serde::{ser::SerializeStruct, Serialize};
 use sp_core::Bytes;
 use sp_runtime::traits::{Hash, Keccak256};
-use tracing::instrument;
+use tracing::{debug, instrument};
 
 type Bytes32 = [u8; 32];
 
@@ -104,7 +104,7 @@ impl Rpc {
         keypair: &BlsKeypair,
     ) -> eyre::Result<Response> {
         let req = create_response(op_task_response, rd_task_response, keypair)?;
-        println!("req: {:?}", req);
+        debug!("req: {:?}", req);
         let json: String = serde_json::to_string(&req)?;
 
         Ok(self.client.post(&self.avs_url).body(json).send().await?)
