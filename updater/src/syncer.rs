@@ -474,7 +474,7 @@ impl Syncer {
 
         let target_block_number: u64 = source_block_number.saturating_sub(1u64);
         let mut from_block: u64 = if latest_completed_op_task_created_block.is_zero() {
-            cfg.source_avs_deployment_block.into()
+            cfg.source_avs_deployment_block
         } else {
             latest_completed_op_task_created_block.into()
         };
