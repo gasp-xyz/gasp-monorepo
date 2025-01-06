@@ -12,12 +12,15 @@ use bindings::{
     gasp_multi_rollup_service::{GaspMultiRollupService, Range},
     shared_types::{OpTask, OpTaskResponse},
 };
-use ethers::providers::{Middleware, SubscriptionStream};
+use ethers::providers::{Middleware, SubscriptionStream, Provider, JsonRpcClient, PendingTransaction};
 use ethers::{
-    contract::{stream, EthEvent, EthLogDecode, LogMeta},
+    contract::{stream, EthEvent, EthLogDecode, LogMeta, builders::ContractCall},
     providers::StreamExt,
     types::{Bytes, Filter},
 };
+use ethers::core::types::U256;
+use ethers::core::abi::Detokenize;
+use ethers::types::transaction::eip2718::TypedTransaction;
 
 use crate::ALERT_WARNING;
 use ethers::abi::AbiEncode;
@@ -257,14 +260,14 @@ impl Syncer {
                     }
                 }
 
-                let update_txn = self.clone().gasp_service_contract.process_eigen_op_update(
+                let mut update_txn = self.clone().gasp_service_contract.process_eigen_op_update(
                     call.task.clone(),
                     call.task_response,
                     call.non_signer_stakes_and_signature,
                     operators_state_info,
                 );
                 debug!("{:?}", update_txn);
-                let update_txn_pending = update_txn.send().await;
+                let update_txn_pending = self.clone().send_with_gas_price_estimate(&mut update_txn, self.clone().target_client.provider()).await;
                 debug!("{:?}", update_txn_pending);
                 let update_txn_receipt = update_txn_pending?.await?;
                 debug!("{:?}", update_txn_receipt);
@@ -359,13 +362,13 @@ impl Syncer {
                     ));
                 }
 
-                let update_txn = self.clone().gasp_service_contract.process_eigen_rd_update(
+                let mut update_txn = self.clone().gasp_service_contract.process_eigen_rd_update(
                     call.task.clone(),
                     call.task_response,
                     call.non_signer_stakes_and_signature,
                 );
                 debug!("{:?}", update_txn);
-                let update_txn_pending = update_txn.send().await;
+                let update_txn_pending = self.clone().send_with_gas_price_estimate(&mut update_txn, self.clone().target_client.provider()).await;
                 debug!("{:?}", update_txn_pending);
                 let update_txn_receipt = update_txn_pending?.await?;
                 debug!("{:?}", update_txn_receipt);
@@ -609,7 +612,7 @@ impl Syncer {
                 latest_completed_rd_task_created_block_update
             )
         );
-        let reinit_txn = self
+        let mut reinit_txn = self
             .clone()
             .root_gasp_service_contract
             .clone()
@@ -624,7 +627,7 @@ impl Syncer {
                 latest_completed_rd_task_created_block_update,
             );
         debug!("{:?}", reinit_txn);
-        let reinit_txn_pending = reinit_txn.send().await;
+        let reinit_txn_pending = self.clone().send_with_gas_price_estimate(&mut reinit_txn, self.clone().root_target_client.as_ref().expect("should work in reinit").provider()).await;
         debug!("{:?}", reinit_txn_pending);
         let reinit_txn_receipt = reinit_txn_pending?.await?;
         debug!("{:?}", reinit_txn_receipt);
@@ -958,9 +961,9 @@ impl Syncer {
         // TODO
         // Put the quorum_threshold_percentage and quorum_numbers into constants properly somewhere
         // Maybe put default values in the TaskManager contract itself
-        let force_task_txn = task_manager.force_create_new_op_task(66u32, vec![0u8].into());
+        let mut force_task_txn = task_manager.force_create_new_op_task(66u32, vec![0u8].into());
         debug!("{:?}", force_task_txn);
-        let force_task_txn_pending = force_task_txn.send().await;
+        let force_task_txn_pending = self.clone().send_with_gas_price_estimate(&mut force_task_txn, root_target_client.provider()).await;
         debug!("{:?}", force_task_txn_pending);
         let force_task_txn_receipt = force_task_txn_pending?.await?;
         debug!("{:?}", force_task_txn_receipt);
@@ -1015,7 +1018,7 @@ impl Syncer {
 
         // Respond to the opTask via forceRespondToOpTask
 
-        let force_respond_txn = task_manager.force_respond_to_op_task(
+        let mut force_respond_txn = task_manager.force_respond_to_op_task(
             task.clone(),
             OpTaskResponse {
                 reference_task_index: new_op_task_created_event.task_index,
@@ -1024,7 +1027,7 @@ impl Syncer {
             },
         );
         debug!("{:?}", force_respond_txn);
-        let force_respond_txn_pending = force_respond_txn.send().await;
+        let force_respond_txn_pending = self.clone().send_with_gas_price_estimate(&mut force_respond_txn, root_target_client.provider()).await;
         debug!("{:?}", force_respond_txn_pending);
         let force_respond_txn_receipt = force_respond_txn_pending?.await?;
         debug!("{:?}", force_respond_txn_receipt);
@@ -1181,6 +1184,35 @@ impl Syncer {
             }
         }
         Ok(())
+    }
+
+    #[instrument(skip_all)]
+    pub(crate) async fn send_with_gas_price_estimate<'a, M,D,P>(self: Arc<Self>, call: &'a mut ContractCall<M, D>, provider: &Provider<P>) -> eyre::Result<PendingTransaction<'a, M::Provider>>
+    where M: Middleware, D: Detokenize, P: JsonRpcClient {
+        let (max_fee_in_wei, max_priority_fee_per_gas_in_wei) = self.clone().estimate_gas_in_wei(provider).await?;
+        match call.tx{
+            TypedTransaction::Eip1559(ref mut eip1559tx) => {eip1559tx.max_fee_per_gas = Some(max_fee_in_wei.into()); eip1559tx.max_priority_fee_per_gas = Some(max_priority_fee_per_gas_in_wei.into())},
+            _ => {return Err(eyre!("Not an Eip1559txn"))}
+        };
+        call.send().await.map_err(|e| eyre!("send_with_gas_price failed with error: {}", e.to_string()))
+    }
+
+    #[instrument(skip(self))]
+    async fn estimate_gas_in_wei<P>(self: Arc<Self>, provider: &Provider<P>) -> eyre::Result<(u128, u128)>
+    where P: JsonRpcClient {
+        // https://www.blocknative.com/blog/eip-1559-fees
+        // We do not want client to estimate we would like to make our own estimate
+        // based on this equation: Max Fee = (2 * Base Fee) + Max Priority Fee
+
+        // Max Fee = maxFeePerGas (client)
+        // Max Priority Fee = maxPriorityFeePerGas (client)
+
+        let base_fee_in_wei = provider.get_gas_price().await?.as_u128();
+        let max_priority_fee_per_gas_in_wei = provider.request::<(), U256>("eth_maxPriorityFeePerGas", ()).await?.as_u128();
+        let max_fee_in_wei = base_fee_in_wei
+            .saturating_mul(2)
+            .saturating_add(max_priority_fee_per_gas_in_wei);
+        Ok((max_fee_in_wei, max_priority_fee_per_gas_in_wei))
     }
 
     pub(crate) async fn get_operators_state_info(
