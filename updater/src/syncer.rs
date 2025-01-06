@@ -462,10 +462,6 @@ impl Syncer {
             .block(source_block_number)
             .await?;
 
-        if last_completed_op_task_created_block.is_zero() {
-            return Err(eyre!("source eth uninit"));
-        }
-
         if source_block_number < latest_completed_op_task_created_block.into()
             || last_completed_op_task_created_block < latest_completed_op_task_created_block
         {
