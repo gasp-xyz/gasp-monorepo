@@ -148,3 +148,4 @@ See the integration tests [README](tests/integration/README.md) for more details
 
 1. Ensure you have Docker Compose installed
 2. Run `docker compose up -d` command from the root of the repository
+
