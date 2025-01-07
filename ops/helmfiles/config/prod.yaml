@@ -218,6 +218,7 @@ updaterEnv:
   RUST_LOG: info
   # PUSH_FIRST_INIT: "false"
   SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
+  SOURCE_AVS_DEPLOYMENT_BLOCK: 21394442
 
 updaterEnvSecretsBase:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-key
@@ -237,6 +238,7 @@ updaterEnvBase:
   RUST_LOG: info
   # PUSH_FIRST_INIT: "false"
   SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
+  SOURCE_AVS_DEPLOYMENT_BLOCK: 21394442
 
 ############################
 # sequencer configs #
