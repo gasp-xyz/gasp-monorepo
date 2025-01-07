@@ -2191,6 +2191,31 @@ pub mod api {
                         ],
                     )
                 }
+                pub fn calculate_sell_price_with_impact(
+                    &self,
+                    pool_id: types::calculate_sell_price_with_impact::PoolId,
+                    sell_asset_id: types::calculate_sell_price_with_impact::SellAssetId,
+                    sell_amount: types::calculate_sell_price_with_impact::SellAmount,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::CalculateSellPriceWithImpact,
+                    types::calculate_sell_price_with_impact::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "MarketRuntimeApi",
+                        "calculate_sell_price_with_impact",
+                        types::CalculateSellPriceWithImpact {
+                            pool_id,
+                            sell_asset_id,
+                            sell_amount,
+                        },
+                        [
+                            161u8, 87u8, 192u8, 129u8, 111u8, 134u8, 130u8, 58u8, 107u8, 243u8,
+                            33u8, 54u8, 20u8, 126u8, 107u8, 81u8, 69u8, 206u8, 16u8, 19u8, 94u8,
+                            253u8, 183u8, 240u8, 98u8, 216u8, 53u8, 18u8, 206u8, 109u8, 244u8,
+                            221u8,
+                        ],
+                    )
+                }
                 pub fn calculate_buy_price(
                     &self,
                     pool_id: types::calculate_buy_price::PoolId,
@@ -2212,6 +2237,31 @@ pub mod api {
                             209u8, 76u8, 202u8, 28u8, 8u8, 194u8, 66u8, 61u8, 206u8, 248u8, 211u8,
                             118u8, 172u8, 212u8, 251u8, 0u8, 201u8, 148u8, 24u8, 226u8, 75u8, 84u8,
                             179u8, 169u8, 136u8, 115u8, 193u8, 199u8, 115u8, 136u8, 23u8, 61u8,
+                        ],
+                    )
+                }
+                pub fn calculate_buy_price_with_impact(
+                    &self,
+                    pool_id: types::calculate_buy_price_with_impact::PoolId,
+                    buy_asset_id: types::calculate_buy_price_with_impact::BuyAssetId,
+                    buy_amount: types::calculate_buy_price_with_impact::BuyAmount,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::CalculateBuyPriceWithImpact,
+                    types::calculate_buy_price_with_impact::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "MarketRuntimeApi",
+                        "calculate_buy_price_with_impact",
+                        types::CalculateBuyPriceWithImpact {
+                            pool_id,
+                            buy_asset_id,
+                            buy_amount,
+                        },
+                        [
+                            236u8, 22u8, 208u8, 198u8, 26u8, 49u8, 233u8, 235u8, 90u8, 156u8, 23u8,
+                            192u8, 104u8, 148u8, 87u8, 82u8, 112u8, 94u8, 59u8, 115u8, 239u8,
+                            221u8, 191u8, 112u8, 246u8, 162u8, 73u8, 41u8, 56u8, 83u8, 180u8,
+                            175u8,
                         ],
                     )
                 }
@@ -2371,6 +2421,42 @@ pub mod api {
                     pub sell_asset_id: calculate_sell_price::SellAssetId,
                     pub sell_amount: calculate_sell_price::SellAmount,
                 }
+                pub mod calculate_sell_price_with_impact {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type SellAssetId = ::core::primitive::u32;
+                    pub type SellAmount = ::core::primitive::u128;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::core::option::Option<(
+                            ::core::primitive::u128,
+                            ::core::primitive::u128,
+                        )>;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct CalculateSellPriceWithImpact {
+                    pub pool_id: calculate_sell_price_with_impact::PoolId,
+                    pub sell_asset_id: calculate_sell_price_with_impact::SellAssetId,
+                    pub sell_amount: calculate_sell_price_with_impact::SellAmount,
+                }
                 pub mod calculate_buy_price {
                     use super::runtime_types;
                     pub type PoolId = ::core::primitive::u32;
@@ -2403,6 +2489,42 @@ pub mod api {
                     pub pool_id: calculate_buy_price::PoolId,
                     pub buy_asset_id: calculate_buy_price::BuyAssetId,
                     pub buy_amount: calculate_buy_price::BuyAmount,
+                }
+                pub mod calculate_buy_price_with_impact {
+                    use super::runtime_types;
+                    pub type PoolId = ::core::primitive::u32;
+                    pub type BuyAssetId = ::core::primitive::u32;
+                    pub type BuyAmount = ::core::primitive::u128;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::core::option::Option<(
+                            ::core::primitive::u128,
+                            ::core::primitive::u128,
+                        )>;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct CalculateBuyPriceWithImpact {
+                    pub pool_id: calculate_buy_price_with_impact::PoolId,
+                    pub buy_asset_id: calculate_buy_price_with_impact::BuyAssetId,
+                    pub buy_amount: calculate_buy_price_with_impact::BuyAmount,
                 }
                 pub mod get_burn_amount {
                     use super::runtime_types;
@@ -4027,9 +4149,9 @@ pub mod api {
                         "query_call_info",
                         types::QueryCallInfo { call, len },
                         [
-                            162u8, 146u8, 0u8, 99u8, 217u8, 251u8, 252u8, 6u8, 64u8, 246u8, 127u8,
-                            223u8, 122u8, 64u8, 179u8, 249u8, 79u8, 4u8, 198u8, 2u8, 16u8, 146u8,
-                            58u8, 193u8, 77u8, 92u8, 247u8, 12u8, 246u8, 249u8, 11u8, 152u8,
+                            203u8, 101u8, 153u8, 178u8, 91u8, 80u8, 9u8, 179u8, 12u8, 118u8, 208u8,
+                            199u8, 90u8, 255u8, 233u8, 223u8, 52u8, 135u8, 10u8, 105u8, 84u8,
+                            106u8, 121u8, 79u8, 4u8, 52u8, 97u8, 137u8, 214u8, 73u8, 196u8, 116u8,
                         ],
                     )
                 }
@@ -4047,9 +4169,9 @@ pub mod api {
                         "query_call_fee_details",
                         types::QueryCallFeeDetails { call, len },
                         [
-                            108u8, 85u8, 86u8, 2u8, 112u8, 65u8, 42u8, 151u8, 23u8, 137u8, 82u8,
-                            35u8, 125u8, 55u8, 23u8, 14u8, 123u8, 151u8, 223u8, 164u8, 165u8, 56u8,
-                            207u8, 233u8, 231u8, 84u8, 94u8, 94u8, 119u8, 86u8, 89u8, 145u8,
+                            79u8, 4u8, 217u8, 106u8, 91u8, 54u8, 14u8, 88u8, 114u8, 109u8, 18u8,
+                            12u8, 105u8, 152u8, 147u8, 238u8, 172u8, 57u8, 198u8, 6u8, 110u8,
+                            102u8, 20u8, 40u8, 2u8, 223u8, 44u8, 145u8, 197u8, 225u8, 234u8, 28u8,
                         ],
                     )
                 }
@@ -4484,9 +4606,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                3u8, 184u8, 5u8, 196u8, 128u8, 146u8, 229u8, 62u8, 57u8, 141u8, 240u8, 143u8, 72u8,
-                104u8, 224u8, 192u8, 137u8, 248u8, 164u8, 51u8, 201u8, 113u8, 60u8, 71u8, 65u8,
-                11u8, 165u8, 163u8, 16u8, 7u8, 72u8, 155u8,
+                188u8, 222u8, 187u8, 186u8, 91u8, 39u8, 236u8, 207u8, 86u8, 227u8, 241u8, 224u8,
+                18u8, 188u8, 16u8, 87u8, 181u8, 251u8, 74u8, 42u8, 135u8, 230u8, 101u8, 55u8,
+                247u8, 197u8, 57u8, 154u8, 4u8, 98u8, 207u8, 172u8,
             ]
     }
     pub mod system {
@@ -5487,6 +5609,10 @@ pub mod api {
                     pub type AuthorizedUpgrade =
                         runtime_types::frame_system::CodeUpgradeAuthorization;
                 }
+                pub mod chain_genesis_salt {
+                    use super::runtime_types;
+                    pub type ChainGenesisSalt = ::subxt::ext::subxt_core::utils::H256;
+                }
             }
             pub struct StorageApi;
             impl StorageApi {
@@ -5912,9 +6038,10 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            182u8, 137u8, 180u8, 159u8, 114u8, 234u8, 1u8, 35u8, 17u8, 143u8, 48u8,
-                            1u8, 181u8, 69u8, 223u8, 35u8, 189u8, 16u8, 202u8, 143u8, 168u8, 187u8,
-                            110u8, 141u8, 149u8, 128u8, 159u8, 160u8, 95u8, 120u8, 95u8, 56u8,
+                            99u8, 63u8, 11u8, 141u8, 168u8, 244u8, 178u8, 236u8, 159u8, 235u8,
+                            53u8, 193u8, 148u8, 166u8, 177u8, 68u8, 75u8, 232u8, 183u8, 241u8,
+                            155u8, 160u8, 197u8, 55u8, 214u8, 183u8, 199u8, 132u8, 79u8, 65u8,
+                            236u8, 207u8,
                         ],
                     )
                 }
@@ -6109,6 +6236,27 @@ pub mod api {
                             165u8, 97u8, 27u8, 138u8, 2u8, 28u8, 55u8, 92u8, 96u8, 96u8, 168u8,
                             169u8, 55u8, 178u8, 44u8, 127u8, 58u8, 140u8, 206u8, 178u8, 1u8, 37u8,
                             214u8, 213u8, 251u8, 123u8, 5u8, 111u8, 90u8, 148u8, 217u8, 135u8,
+                        ],
+                    )
+                }
+                #[doc = " Should always be set!"]
+                pub fn chain_genesis_salt(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+                    (),
+                    types::chain_genesis_salt::ChainGenesisSalt,
+                    ::subxt::ext::subxt_core::utils::Yes,
+                    ::subxt::ext::subxt_core::utils::Yes,
+                    (),
+                > {
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+                        "System",
+                        "ChainGenesisSalt",
+                        (),
+                        [
+                            147u8, 109u8, 217u8, 218u8, 128u8, 217u8, 112u8, 144u8, 5u8, 187u8,
+                            3u8, 140u8, 189u8, 3u8, 200u8, 13u8, 39u8, 188u8, 45u8, 100u8, 227u8,
+                            70u8, 211u8, 12u8, 85u8, 167u8, 239u8, 88u8, 227u8, 90u8, 236u8, 2u8,
                         ],
                     )
                 }
@@ -6716,9 +6864,10 @@ pub mod api {
                         "batch",
                         types::Batch { calls },
                         [
-                            123u8, 121u8, 43u8, 243u8, 134u8, 131u8, 248u8, 178u8, 184u8, 109u8,
-                            4u8, 31u8, 172u8, 165u8, 46u8, 99u8, 205u8, 150u8, 245u8, 42u8, 146u8,
-                            182u8, 10u8, 17u8, 234u8, 15u8, 201u8, 123u8, 64u8, 115u8, 91u8, 249u8,
+                            60u8, 71u8, 114u8, 157u8, 40u8, 117u8, 192u8, 161u8, 124u8, 123u8,
+                            68u8, 244u8, 133u8, 17u8, 186u8, 215u8, 7u8, 180u8, 185u8, 213u8,
+                            124u8, 103u8, 224u8, 145u8, 147u8, 86u8, 77u8, 43u8, 25u8, 76u8, 177u8,
+                            233u8,
                         ],
                     )
                 }
@@ -6749,10 +6898,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            253u8, 129u8, 133u8, 22u8, 165u8, 22u8, 9u8, 196u8, 16u8, 205u8, 228u8,
-                            91u8, 80u8, 210u8, 38u8, 117u8, 163u8, 223u8, 255u8, 108u8, 159u8,
-                            55u8, 137u8, 218u8, 98u8, 131u8, 103u8, 179u8, 117u8, 110u8, 24u8,
-                            101u8,
+                            8u8, 68u8, 165u8, 227u8, 15u8, 208u8, 115u8, 220u8, 14u8, 195u8, 41u8,
+                            218u8, 212u8, 181u8, 141u8, 162u8, 192u8, 20u8, 181u8, 164u8, 101u8,
+                            1u8, 5u8, 241u8, 19u8, 54u8, 187u8, 219u8, 121u8, 51u8, 192u8, 42u8,
                         ],
                     )
                 }
@@ -6779,10 +6927,9 @@ pub mod api {
                         "batch_all",
                         types::BatchAll { calls },
                         [
-                            162u8, 171u8, 9u8, 200u8, 236u8, 209u8, 141u8, 116u8, 141u8, 71u8,
-                            231u8, 199u8, 20u8, 213u8, 252u8, 7u8, 218u8, 172u8, 121u8, 242u8,
-                            255u8, 164u8, 198u8, 219u8, 141u8, 142u8, 222u8, 205u8, 31u8, 114u8,
-                            56u8, 81u8,
+                            100u8, 76u8, 94u8, 230u8, 121u8, 0u8, 104u8, 6u8, 168u8, 156u8, 31u8,
+                            30u8, 230u8, 35u8, 57u8, 191u8, 105u8, 74u8, 204u8, 83u8, 202u8, 119u8,
+                            174u8, 117u8, 216u8, 58u8, 155u8, 197u8, 140u8, 110u8, 187u8, 204u8,
                         ],
                     )
                 }
@@ -6806,10 +6953,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            30u8, 222u8, 75u8, 32u8, 184u8, 161u8, 138u8, 205u8, 27u8, 128u8,
-                            104u8, 156u8, 131u8, 231u8, 88u8, 13u8, 253u8, 15u8, 79u8, 205u8,
-                            100u8, 217u8, 34u8, 132u8, 226u8, 220u8, 124u8, 78u8, 117u8, 50u8,
-                            183u8, 113u8,
+                            221u8, 118u8, 104u8, 159u8, 248u8, 54u8, 96u8, 239u8, 6u8, 255u8,
+                            119u8, 15u8, 113u8, 31u8, 194u8, 241u8, 1u8, 217u8, 22u8, 144u8, 207u8,
+                            61u8, 50u8, 233u8, 12u8, 95u8, 201u8, 209u8, 183u8, 93u8, 47u8, 190u8,
                         ],
                     )
                 }
@@ -6836,10 +6982,10 @@ pub mod api {
                         "force_batch",
                         types::ForceBatch { calls },
                         [
-                            207u8, 90u8, 205u8, 193u8, 119u8, 220u8, 188u8, 240u8, 151u8, 214u8,
-                            159u8, 250u8, 107u8, 9u8, 170u8, 41u8, 98u8, 190u8, 217u8, 199u8, 64u8,
-                            214u8, 237u8, 111u8, 47u8, 172u8, 64u8, 195u8, 121u8, 32u8, 154u8,
-                            86u8,
+                            239u8, 99u8, 214u8, 58u8, 175u8, 35u8, 67u8, 251u8, 13u8, 161u8, 120u8,
+                            74u8, 251u8, 75u8, 147u8, 25u8, 119u8, 184u8, 68u8, 130u8, 251u8,
+                            195u8, 175u8, 108u8, 165u8, 26u8, 253u8, 138u8, 210u8, 120u8, 41u8,
+                            21u8,
                         ],
                     )
                 }
@@ -6863,10 +7009,9 @@ pub mod api {
                             weight,
                         },
                         [
-                            53u8, 185u8, 171u8, 115u8, 240u8, 25u8, 51u8, 103u8, 131u8, 226u8,
-                            65u8, 216u8, 140u8, 189u8, 192u8, 158u8, 22u8, 94u8, 244u8, 219u8,
-                            255u8, 73u8, 74u8, 147u8, 150u8, 79u8, 122u8, 180u8, 184u8, 23u8, 26u8,
-                            22u8,
+                            29u8, 252u8, 92u8, 2u8, 183u8, 179u8, 125u8, 179u8, 5u8, 123u8, 122u8,
+                            231u8, 24u8, 73u8, 13u8, 180u8, 3u8, 109u8, 3u8, 204u8, 103u8, 65u8,
+                            136u8, 218u8, 3u8, 71u8, 11u8, 134u8, 149u8, 231u8, 182u8, 2u8,
                         ],
                     )
                 }
@@ -7517,9 +7662,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            41u8, 67u8, 156u8, 102u8, 107u8, 191u8, 210u8, 171u8, 73u8, 66u8, 63u8,
-                            27u8, 61u8, 85u8, 249u8, 241u8, 31u8, 52u8, 207u8, 113u8, 134u8, 139u8,
-                            65u8, 53u8, 95u8, 11u8, 63u8, 175u8, 181u8, 119u8, 107u8, 174u8,
+                            220u8, 5u8, 0u8, 15u8, 108u8, 251u8, 254u8, 15u8, 74u8, 195u8, 87u8,
+                            135u8, 109u8, 109u8, 108u8, 124u8, 170u8, 121u8, 82u8, 10u8, 55u8,
+                            193u8, 252u8, 70u8, 5u8, 241u8, 54u8, 41u8, 195u8, 60u8, 214u8, 48u8,
                         ],
                     )
                 }
@@ -7807,9 +7952,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            173u8, 83u8, 53u8, 37u8, 13u8, 27u8, 228u8, 171u8, 122u8, 252u8, 204u8,
-                            13u8, 211u8, 156u8, 212u8, 63u8, 153u8, 83u8, 58u8, 92u8, 172u8, 127u8,
-                            219u8, 224u8, 41u8, 89u8, 140u8, 79u8, 79u8, 90u8, 219u8, 11u8,
+                            252u8, 239u8, 3u8, 131u8, 225u8, 105u8, 140u8, 252u8, 242u8, 196u8,
+                            7u8, 241u8, 181u8, 35u8, 102u8, 191u8, 41u8, 1u8, 14u8, 185u8, 75u8,
+                            232u8, 177u8, 11u8, 21u8, 143u8, 175u8, 30u8, 253u8, 8u8, 114u8, 121u8,
                         ],
                     )
                 }
@@ -14062,14 +14207,14 @@ pub mod api {
                 #[doc = "- schedule_end - id of the last rewarded seession. Rewards will be distributedd equally between sessions in range (now .."]
                 #[doc = "schedule_end). Distribution starts from the *next* session till `schedule_end`."]
                 pub struct RewardPool {
-                    pub pool: reward_pool::Pool,
+                    pub pool_id: reward_pool::PoolId,
                     pub token_id: reward_pool::TokenId,
                     pub amount: reward_pool::Amount,
                     pub schedule_end: reward_pool::ScheduleEnd,
                 }
                 pub mod reward_pool {
                     use super::runtime_types;
-                    pub type Pool = (::core::primitive::u32, ::core::primitive::u32);
+                    pub type PoolId = ::core::primitive::u32;
                     pub type TokenId = ::core::primitive::u32;
                     pub type Amount = ::core::primitive::u128;
                     pub type ScheduleEnd = ::core::primitive::u32;
@@ -14400,7 +14545,7 @@ pub mod api {
                 #[doc = "schedule_end). Distribution starts from the *next* session till `schedule_end`."]
                 pub fn reward_pool(
                     &self,
-                    pool: types::reward_pool::Pool,
+                    pool_id: types::reward_pool::PoolId,
                     token_id: types::reward_pool::TokenId,
                     amount: types::reward_pool::Amount,
                     schedule_end: types::reward_pool::ScheduleEnd,
@@ -14410,16 +14555,16 @@ pub mod api {
                         "ProofOfStake",
                         "reward_pool",
                         types::RewardPool {
-                            pool,
+                            pool_id,
                             token_id,
                             amount,
                             schedule_end,
                         },
                         [
-                            116u8, 86u8, 184u8, 59u8, 239u8, 115u8, 231u8, 209u8, 89u8, 150u8,
-                            54u8, 19u8, 145u8, 182u8, 166u8, 232u8, 0u8, 72u8, 178u8, 85u8, 197u8,
-                            119u8, 35u8, 165u8, 195u8, 140u8, 101u8, 254u8, 94u8, 148u8, 34u8,
-                            57u8,
+                            57u8, 252u8, 201u8, 246u8, 246u8, 78u8, 178u8, 246u8, 251u8, 147u8,
+                            212u8, 193u8, 144u8, 247u8, 77u8, 146u8, 169u8, 34u8, 192u8, 205u8,
+                            184u8, 7u8, 154u8, 51u8, 72u8, 245u8, 245u8, 23u8, 162u8, 165u8, 221u8,
+                            130u8,
                         ],
                     )
                 }
@@ -18679,9 +18824,9 @@ pub mod api {
                         "IssuanceConfigStore",
                         (),
                         [
-                            92u8, 167u8, 221u8, 37u8, 254u8, 158u8, 126u8, 88u8, 205u8, 0u8, 3u8,
-                            17u8, 146u8, 40u8, 80u8, 232u8, 51u8, 177u8, 140u8, 216u8, 249u8,
-                            220u8, 195u8, 59u8, 19u8, 227u8, 105u8, 5u8, 13u8, 63u8, 198u8, 76u8,
+                            163u8, 120u8, 34u8, 59u8, 162u8, 76u8, 217u8, 14u8, 188u8, 201u8, 54u8,
+                            63u8, 56u8, 50u8, 81u8, 130u8, 18u8, 27u8, 119u8, 192u8, 158u8, 212u8,
+                            183u8, 77u8, 214u8, 33u8, 253u8, 46u8, 69u8, 112u8, 19u8, 166u8,
                         ],
                     )
                 }
@@ -18897,14 +19042,14 @@ pub mod api {
                     )
                 }
                 #[doc = " The maximum amount of Mangata tokens"]
-                pub fn issuance_cap(
+                pub fn linear_issuance_amount(
                     &self,
                 ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     ::core::primitive::u128,
                 > {
                     ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Issuance",
-                        "IssuanceCap",
+                        "LinearIssuanceAmount",
                         [
                             84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
                             27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
@@ -21013,6 +21158,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 #[doc = "Creates a liquidity pool and an associated new `lp_token` asset"]
+                #[doc = "For a StableSwap pool, the \"stable\" rate is computed from the ratio of input amounts, max rate is 1e18:1"]
                 pub struct CreatePool {
                     pub kind: create_pool::Kind,
                     pub first_asset_id: create_pool::FirstAssetId,
@@ -21240,13 +21386,14 @@ pub mod api {
                 #[doc = "Executes a multiswap asset in a series of swap asset atomic swaps."]
                 #[doc = ""]
                 #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
+                #[doc = "For a single atomic swap, both `asset_amount_in` and `min_amount_out` are considered to allow free execution without locks."]
                 #[doc = ""]
                 #[doc = "# Args:"]
                 #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
                 #[doc = "- `asset_id_in`: The id of the asset sold"]
                 #[doc = "- `asset_amount_in`: The amount of the asset sold"]
                 #[doc = "- `asset_id_out`: The id of the asset received"]
-                #[doc = "- `min_amount_out` - The minimum amount of requested asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
+                #[doc = "- `min_amount_out` - The minimum amount of requested asset that must be bought in order to not fail on slippage, use RPC calls to calc expected value"]
                 pub struct MultiswapAsset {
                     pub swap_pool_list: multiswap_asset::SwapPoolList,
                     pub asset_id_in: multiswap_asset::AssetIdIn,
@@ -21285,7 +21432,18 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                #[doc = "Buy variant of the multiswap, a precise output amount should be provided instead."]
+                #[doc = "Executes a multiswap asset in a series of swap asset atomic swaps."]
+                #[doc = "The precise output amount is provided instead."]
+                #[doc = ""]
+                #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
+                #[doc = "For a single atomic swap, both `asset_amount_out` and `max_amount_in` are considered to allow free execution without locks."]
+                #[doc = ""]
+                #[doc = "# Args:"]
+                #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
+                #[doc = "- `asset_id_out`: The id of the asset received"]
+                #[doc = "- `asset_amount_out`: The amount of the asset received"]
+                #[doc = "- `asset_id_in`: The id of the asset sold"]
+                #[doc = "- `max_amount_in` - The maximum amount of sold asset in order to not fail on slippage, use RPC calls to calc expected value"]
                 pub struct MultiswapAssetBuy {
                     pub swap_pool_list: multiswap_asset_buy::SwapPoolList,
                     pub asset_id_out: multiswap_asset_buy::AssetIdOut,
@@ -21310,6 +21468,7 @@ pub mod api {
             pub struct TransactionApi;
             impl TransactionApi {
                 #[doc = "Creates a liquidity pool and an associated new `lp_token` asset"]
+                #[doc = "For a StableSwap pool, the \"stable\" rate is computed from the ratio of input amounts, max rate is 1e18:1"]
                 pub fn create_pool(
                     &self,
                     kind: types::create_pool::Kind,
@@ -21475,13 +21634,14 @@ pub mod api {
                 #[doc = "Executes a multiswap asset in a series of swap asset atomic swaps."]
                 #[doc = ""]
                 #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
+                #[doc = "For a single atomic swap, both `asset_amount_in` and `min_amount_out` are considered to allow free execution without locks."]
                 #[doc = ""]
                 #[doc = "# Args:"]
                 #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
                 #[doc = "- `asset_id_in`: The id of the asset sold"]
                 #[doc = "- `asset_amount_in`: The amount of the asset sold"]
                 #[doc = "- `asset_id_out`: The id of the asset received"]
-                #[doc = "- `min_amount_out` - The minimum amount of requested asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
+                #[doc = "- `min_amount_out` - The minimum amount of requested asset that must be bought in order to not fail on slippage, use RPC calls to calc expected value"]
                 pub fn multiswap_asset(
                     &self,
                     swap_pool_list: types::multiswap_asset::SwapPoolList,
@@ -21508,7 +21668,18 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = "Buy variant of the multiswap, a precise output amount should be provided instead."]
+                #[doc = "Executes a multiswap asset in a series of swap asset atomic swaps."]
+                #[doc = "The precise output amount is provided instead."]
+                #[doc = ""]
+                #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
+                #[doc = "For a single atomic swap, both `asset_amount_out` and `max_amount_in` are considered to allow free execution without locks."]
+                #[doc = ""]
+                #[doc = "# Args:"]
+                #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
+                #[doc = "- `asset_id_out`: The id of the asset received"]
+                #[doc = "- `asset_amount_out`: The amount of the asset received"]
+                #[doc = "- `asset_id_in`: The id of the asset sold"]
+                #[doc = "- `max_amount_in` - The maximum amount of sold asset in order to not fail on slippage, use RPC calls to calc expected value"]
                 pub fn multiswap_asset_buy(
                     &self,
                     swap_pool_list: types::multiswap_asset_buy::SwapPoolList,
@@ -25373,6 +25544,7 @@ pub mod api {
                     pub stake_amount: provide_sequencer_stake::StakeAmount,
                     pub alias_account: provide_sequencer_stake::AliasAccount,
                     pub stake_action: provide_sequencer_stake::StakeAction,
+                    pub sender: provide_sequencer_stake::Sender,
                 }
                 pub mod provide_sequencer_stake {
                     use super::runtime_types;
@@ -25381,6 +25553,7 @@ pub mod api {
                     pub type AliasAccount =
                         ::core::option::Option<runtime_types::sp_runtime::account::AccountId20>;
                     pub type StakeAction = runtime_types::pallet_sequencer_staking::StakeAction;
+                    pub type Sender = runtime_types::sp_runtime::account::AccountId20;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ProvideSequencerStake {
                     const PALLET: &'static str = "SequencerStaking";
@@ -25435,10 +25608,12 @@ pub mod api {
                 )]
                 pub struct RejoinActiveSequencers {
                     pub chain: rejoin_active_sequencers::Chain,
+                    pub sender: rejoin_active_sequencers::Sender,
                 }
                 pub mod rejoin_active_sequencers {
                     use super::runtime_types;
                     pub type Chain = runtime_types::pallet_rolldown::messages::Chain;
+                    pub type Sender = runtime_types::sp_runtime::account::AccountId20;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for RejoinActiveSequencers {
                     const PALLET: &'static str = "SequencerStaking";
@@ -25604,6 +25779,7 @@ pub mod api {
                     stake_amount: types::provide_sequencer_stake::StakeAmount,
                     alias_account: types::provide_sequencer_stake::AliasAccount,
                     stake_action: types::provide_sequencer_stake::StakeAction,
+                    sender: types::provide_sequencer_stake::Sender,
                 ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::ProvideSequencerStake,
                 > {
@@ -25615,12 +25791,12 @@ pub mod api {
                             stake_amount,
                             alias_account,
                             stake_action,
+                            sender,
                         },
                         [
-                            5u8, 143u8, 20u8, 170u8, 220u8, 112u8, 63u8, 1u8, 44u8, 200u8, 123u8,
-                            155u8, 233u8, 144u8, 158u8, 237u8, 240u8, 160u8, 28u8, 36u8, 192u8,
-                            117u8, 86u8, 250u8, 65u8, 102u8, 255u8, 104u8, 135u8, 87u8, 90u8,
-                            134u8,
+                            252u8, 21u8, 36u8, 124u8, 193u8, 23u8, 63u8, 62u8, 69u8, 175u8, 222u8,
+                            32u8, 10u8, 182u8, 16u8, 248u8, 50u8, 205u8, 124u8, 26u8, 21u8, 160u8,
+                            127u8, 26u8, 85u8, 47u8, 219u8, 60u8, 56u8, 233u8, 198u8, 153u8,
                         ],
                     )
                 }
@@ -25645,17 +25821,18 @@ pub mod api {
                 pub fn rejoin_active_sequencers(
                     &self,
                     chain: types::rejoin_active_sequencers::Chain,
+                    sender: types::rejoin_active_sequencers::Sender,
                 ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::RejoinActiveSequencers,
                 > {
                     ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "SequencerStaking",
                         "rejoin_active_sequencers",
-                        types::RejoinActiveSequencers { chain },
+                        types::RejoinActiveSequencers { chain, sender },
                         [
-                            128u8, 33u8, 48u8, 164u8, 249u8, 189u8, 80u8, 109u8, 71u8, 5u8, 146u8,
-                            95u8, 236u8, 247u8, 224u8, 230u8, 103u8, 3u8, 36u8, 114u8, 80u8, 14u8,
-                            222u8, 192u8, 204u8, 106u8, 35u8, 170u8, 130u8, 246u8, 200u8, 127u8,
+                            192u8, 201u8, 148u8, 25u8, 21u8, 35u8, 56u8, 149u8, 133u8, 235u8,
+                            201u8, 19u8, 93u8, 33u8, 201u8, 48u8, 79u8, 47u8, 67u8, 128u8, 52u8,
+                            210u8, 255u8, 25u8, 209u8, 209u8, 16u8, 57u8, 136u8, 235u8, 76u8, 87u8,
                         ],
                     )
                 }
@@ -30127,9 +30304,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            99u8, 101u8, 137u8, 192u8, 152u8, 17u8, 108u8, 91u8, 35u8, 67u8, 175u8,
-                            171u8, 63u8, 214u8, 14u8, 6u8, 244u8, 211u8, 246u8, 232u8, 52u8, 251u8,
-                            84u8, 21u8, 240u8, 24u8, 198u8, 157u8, 59u8, 80u8, 82u8, 249u8,
+                            146u8, 198u8, 9u8, 232u8, 235u8, 46u8, 216u8, 184u8, 4u8, 80u8, 122u8,
+                            41u8, 234u8, 18u8, 133u8, 233u8, 20u8, 228u8, 90u8, 46u8, 236u8, 101u8,
+                            199u8, 221u8, 136u8, 208u8, 176u8, 157u8, 24u8, 176u8, 174u8, 212u8,
                         ],
                     )
                 }
@@ -30152,9 +30329,10 @@ pub mod api {
                             weight,
                         },
                         [
-                            2u8, 35u8, 198u8, 217u8, 126u8, 191u8, 78u8, 239u8, 13u8, 78u8, 73u8,
-                            9u8, 218u8, 139u8, 47u8, 193u8, 110u8, 182u8, 91u8, 176u8, 90u8, 13u8,
-                            240u8, 101u8, 96u8, 223u8, 250u8, 207u8, 62u8, 129u8, 64u8, 139u8,
+                            235u8, 159u8, 73u8, 54u8, 255u8, 24u8, 225u8, 138u8, 35u8, 70u8, 245u8,
+                            12u8, 136u8, 226u8, 9u8, 137u8, 149u8, 164u8, 234u8, 96u8, 220u8,
+                            215u8, 245u8, 90u8, 133u8, 124u8, 104u8, 47u8, 94u8, 72u8, 159u8,
+                            130u8,
                         ],
                     )
                 }
@@ -30194,10 +30372,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            3u8, 104u8, 231u8, 24u8, 198u8, 7u8, 80u8, 136u8, 233u8, 129u8, 81u8,
-                            244u8, 188u8, 248u8, 15u8, 170u8, 241u8, 41u8, 109u8, 66u8, 128u8,
-                            168u8, 227u8, 196u8, 75u8, 51u8, 113u8, 158u8, 164u8, 126u8, 57u8,
-                            187u8,
+                            53u8, 238u8, 77u8, 229u8, 228u8, 77u8, 242u8, 148u8, 189u8, 132u8,
+                            16u8, 54u8, 233u8, 230u8, 185u8, 234u8, 105u8, 119u8, 201u8, 73u8,
+                            28u8, 219u8, 225u8, 136u8, 64u8, 245u8, 58u8, 170u8, 141u8, 64u8,
+                            244u8, 65u8,
                         ],
                     )
                 }
@@ -30519,9 +30697,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            99u8, 101u8, 137u8, 192u8, 152u8, 17u8, 108u8, 91u8, 35u8, 67u8, 175u8,
-                            171u8, 63u8, 214u8, 14u8, 6u8, 244u8, 211u8, 246u8, 232u8, 52u8, 251u8,
-                            84u8, 21u8, 240u8, 24u8, 198u8, 157u8, 59u8, 80u8, 82u8, 249u8,
+                            146u8, 198u8, 9u8, 232u8, 235u8, 46u8, 216u8, 184u8, 4u8, 80u8, 122u8,
+                            41u8, 234u8, 18u8, 133u8, 233u8, 20u8, 228u8, 90u8, 46u8, 236u8, 101u8,
+                            199u8, 221u8, 136u8, 208u8, 176u8, 157u8, 24u8, 176u8, 174u8, 212u8,
                         ],
                     )
                 }
@@ -30547,9 +30725,10 @@ pub mod api {
                             weight,
                         },
                         [
-                            2u8, 35u8, 198u8, 217u8, 126u8, 191u8, 78u8, 239u8, 13u8, 78u8, 73u8,
-                            9u8, 218u8, 139u8, 47u8, 193u8, 110u8, 182u8, 91u8, 176u8, 90u8, 13u8,
-                            240u8, 101u8, 96u8, 223u8, 250u8, 207u8, 62u8, 129u8, 64u8, 139u8,
+                            235u8, 159u8, 73u8, 54u8, 255u8, 24u8, 225u8, 138u8, 35u8, 70u8, 245u8,
+                            12u8, 136u8, 226u8, 9u8, 137u8, 149u8, 164u8, 234u8, 96u8, 220u8,
+                            215u8, 245u8, 90u8, 133u8, 124u8, 104u8, 47u8, 94u8, 72u8, 159u8,
+                            130u8,
                         ],
                     )
                 }
@@ -30576,10 +30755,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            3u8, 104u8, 231u8, 24u8, 198u8, 7u8, 80u8, 136u8, 233u8, 129u8, 81u8,
-                            244u8, 188u8, 248u8, 15u8, 170u8, 241u8, 41u8, 109u8, 66u8, 128u8,
-                            168u8, 227u8, 196u8, 75u8, 51u8, 113u8, 158u8, 164u8, 126u8, 57u8,
-                            187u8,
+                            53u8, 238u8, 77u8, 229u8, 228u8, 77u8, 242u8, 148u8, 189u8, 132u8,
+                            16u8, 54u8, 233u8, 230u8, 185u8, 234u8, 105u8, 119u8, 201u8, 73u8,
+                            28u8, 219u8, 225u8, 136u8, 64u8, 245u8, 58u8, 170u8, 141u8, 64u8,
+                            244u8, 65u8,
                         ],
                     )
                 }
@@ -31019,10 +31198,9 @@ pub mod api {
                             length_bound,
                         },
                         [
-                            224u8, 142u8, 253u8, 73u8, 125u8, 193u8, 158u8, 216u8, 254u8, 246u8,
-                            221u8, 22u8, 21u8, 131u8, 21u8, 67u8, 156u8, 167u8, 143u8, 156u8,
-                            202u8, 197u8, 20u8, 114u8, 94u8, 223u8, 73u8, 180u8, 19u8, 163u8,
-                            201u8, 159u8,
+                            13u8, 96u8, 96u8, 12u8, 215u8, 187u8, 66u8, 231u8, 238u8, 243u8, 106u8,
+                            190u8, 109u8, 148u8, 210u8, 162u8, 119u8, 240u8, 221u8, 136u8, 63u8,
+                            121u8, 75u8, 78u8, 2u8, 216u8, 56u8, 80u8, 231u8, 235u8, 137u8, 202u8,
                         ],
                     )
                 }
@@ -31056,10 +31234,10 @@ pub mod api {
                             length_bound,
                         },
                         [
-                            218u8, 238u8, 255u8, 157u8, 242u8, 204u8, 152u8, 71u8, 160u8, 177u8,
-                            40u8, 69u8, 50u8, 7u8, 84u8, 26u8, 146u8, 246u8, 2u8, 132u8, 188u8,
-                            132u8, 100u8, 86u8, 223u8, 253u8, 137u8, 152u8, 139u8, 94u8, 27u8,
-                            240u8,
+                            235u8, 227u8, 246u8, 186u8, 60u8, 188u8, 230u8, 242u8, 211u8, 97u8,
+                            46u8, 60u8, 204u8, 139u8, 53u8, 192u8, 68u8, 56u8, 243u8, 18u8, 194u8,
+                            197u8, 125u8, 27u8, 46u8, 71u8, 135u8, 107u8, 34u8, 164u8, 184u8,
+                            218u8,
                         ],
                     )
                 }
@@ -31521,9 +31699,10 @@ pub mod api {
                         "ProposalOf",
                         (),
                         [
-                            179u8, 89u8, 162u8, 72u8, 2u8, 108u8, 192u8, 139u8, 118u8, 20u8, 4u8,
-                            174u8, 244u8, 216u8, 76u8, 46u8, 131u8, 107u8, 185u8, 138u8, 208u8,
-                            2u8, 76u8, 128u8, 8u8, 199u8, 94u8, 233u8, 133u8, 128u8, 3u8, 241u8,
+                            135u8, 185u8, 48u8, 219u8, 166u8, 148u8, 246u8, 59u8, 221u8, 167u8,
+                            225u8, 216u8, 209u8, 224u8, 134u8, 173u8, 35u8, 237u8, 140u8, 227u8,
+                            49u8, 237u8, 67u8, 173u8, 24u8, 73u8, 83u8, 235u8, 154u8, 103u8, 228u8,
+                            149u8,
                         ],
                     )
                 }
@@ -31547,9 +31726,10 @@ pub mod api {
                             _0.borrow(),
                         ),
                         [
-                            179u8, 89u8, 162u8, 72u8, 2u8, 108u8, 192u8, 139u8, 118u8, 20u8, 4u8,
-                            174u8, 244u8, 216u8, 76u8, 46u8, 131u8, 107u8, 185u8, 138u8, 208u8,
-                            2u8, 76u8, 128u8, 8u8, 199u8, 94u8, 233u8, 133u8, 128u8, 3u8, 241u8,
+                            135u8, 185u8, 48u8, 219u8, 166u8, 148u8, 246u8, 59u8, 221u8, 167u8,
+                            225u8, 216u8, 209u8, 224u8, 134u8, 173u8, 35u8, 237u8, 140u8, 227u8,
+                            49u8, 237u8, 67u8, 173u8, 24u8, 73u8, 83u8, 235u8, 154u8, 103u8, 228u8,
+                            149u8,
                         ],
                     )
                 }
@@ -36160,6 +36340,8 @@ pub mod api {
                     TokenIdNotExists,
                     #[codec(index = 8)]
                     TooManyReserves,
+                    #[codec(index = 9)]
+                    NontransferableToken,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -38644,7 +38826,7 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub struct IssuanceInfo<_0> {
-                pub cap: _0,
+                pub linear_issuance_amount: _0,
                 pub issuance_at_init: _0,
                 pub linear_issuance_blocks: ::core::primitive::u32,
                 pub liquidity_mining_split: runtime_types::sp_arithmetic::per_things::Perbill,
@@ -38833,6 +39015,7 @@ pub mod api {
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Creates a liquidity pool and an associated new `lp_token` asset"]
+                    #[doc = "For a StableSwap pool, the \"stable\" rate is computed from the ratio of input amounts, max rate is 1e18:1"]
                     create_pool {
                         kind: runtime_types::pallet_market::PoolKind,
                         first_asset_id: ::core::primitive::u32,
@@ -38893,13 +39076,14 @@ pub mod api {
                     #[doc = "Executes a multiswap asset in a series of swap asset atomic swaps."]
                     #[doc = ""]
                     #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
+                    #[doc = "For a single atomic swap, both `asset_amount_in` and `min_amount_out` are considered to allow free execution without locks."]
                     #[doc = ""]
                     #[doc = "# Args:"]
                     #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
                     #[doc = "- `asset_id_in`: The id of the asset sold"]
                     #[doc = "- `asset_amount_in`: The amount of the asset sold"]
                     #[doc = "- `asset_id_out`: The id of the asset received"]
-                    #[doc = "- `min_amount_out` - The minimum amount of requested asset that must be bought in order to not fail on slippage. Slippage failures still charge exchange commission."]
+                    #[doc = "- `min_amount_out` - The minimum amount of requested asset that must be bought in order to not fail on slippage, use RPC calls to calc expected value"]
                     multiswap_asset {
                         swap_pool_list:
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>,
@@ -38909,7 +39093,18 @@ pub mod api {
                         min_amount_out: ::core::primitive::u128,
                     },
                     #[codec(index = 7)]
-                    #[doc = "Buy variant of the multiswap, a precise output amount should be provided instead."]
+                    #[doc = "Executes a multiswap asset in a series of swap asset atomic swaps."]
+                    #[doc = "The precise output amount is provided instead."]
+                    #[doc = ""]
+                    #[doc = "Multiswaps must fee lock instead of paying transaction fees."]
+                    #[doc = "For a single atomic swap, both `asset_amount_out` and `max_amount_in` are considered to allow free execution without locks."]
+                    #[doc = ""]
+                    #[doc = "# Args:"]
+                    #[doc = "- `swap_token_list` - This list of tokens is the route of the atomic swaps, starting with the asset sold and ends with the asset finally bought"]
+                    #[doc = "- `asset_id_out`: The id of the asset received"]
+                    #[doc = "- `asset_amount_out`: The amount of the asset received"]
+                    #[doc = "- `asset_id_in`: The id of the asset sold"]
+                    #[doc = "- `max_amount_in` - The maximum amount of sold asset in order to not fail on slippage, use RPC calls to calc expected value"]
                     multiswap_asset_buy {
                         swap_pool_list:
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>,
@@ -38975,6 +39170,9 @@ pub mod api {
                     #[codec(index = 11)]
                     #[doc = "Input asset id is not connected with output asset id for given pools"]
                     MultiSwapPathInvalid,
+                    #[codec(index = 12)]
+                    #[doc = "Asset cannot be used to create or modify a pool"]
+                    NontransferableToken,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -39620,7 +39818,7 @@ pub mod api {
                     #[doc = "- schedule_end - id of the last rewarded seession. Rewards will be distributedd equally between sessions in range (now .."]
                     #[doc = "schedule_end). Distribution starts from the *next* session till `schedule_end`."]
                     reward_pool {
-                        pool: (::core::primitive::u32, ::core::primitive::u32),
+                        pool_id: ::core::primitive::u32,
                         token_id: ::core::primitive::u32,
                         amount: ::core::primitive::u128,
                         schedule_end: ::core::primitive::u32,
@@ -39757,6 +39955,9 @@ pub mod api {
                     NoThirdPartyPartyRewardsToClaim,
                     #[codec(index = 18)]
                     SoloTokenPromotionForbiddenError,
+                    #[codec(index = 19)]
+                    #[doc = "Asset cannot be used for rewards"]
+                    NontransferableToken,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -40569,57 +40770,63 @@ pub mod api {
                     #[codec(index = 7)]
                     NotEnoughAssetsForFee,
                     #[codec(index = 8)]
-                    BalanceOverflow,
+                    NotEnoughAssetsForFerryTip,
                     #[codec(index = 9)]
-                    L1AssetCreationFailed,
+                    BalanceOverflow,
                     #[codec(index = 10)]
-                    MathOverflow,
+                    L1AssetCreationFailed,
                     #[codec(index = 11)]
-                    TooManyRequests,
+                    MathOverflow,
                     #[codec(index = 12)]
-                    InvalidUpdate,
+                    TooManyRequests,
                     #[codec(index = 13)]
-                    L1AssetNotFound,
+                    InvalidUpdate,
                     #[codec(index = 14)]
-                    WrongRequestId,
+                    L1AssetNotFound,
                     #[codec(index = 15)]
-                    OnlySelectedSequencerisAllowedToUpdate,
+                    WrongRequestId,
                     #[codec(index = 16)]
-                    SequencerLastUpdateStillInDisputePeriod,
+                    OnlySelectedSequencerisAllowedToUpdate,
                     #[codec(index = 17)]
-                    SequencerAwaitingCancelResolution,
+                    SequencerLastUpdateStillInDisputePeriod,
                     #[codec(index = 18)]
-                    MultipleUpdatesInSingleBlock,
+                    SequencerAwaitingCancelResolution,
                     #[codec(index = 19)]
-                    BlockedByMaintenanceMode,
+                    MultipleUpdatesInSingleBlock,
                     #[codec(index = 20)]
-                    UnsupportedAsset,
+                    BlockedByMaintenanceMode,
                     #[codec(index = 21)]
-                    InvalidRange,
+                    UnsupportedAsset,
                     #[codec(index = 22)]
-                    NonExistingRequestId,
+                    InvalidRange,
                     #[codec(index = 23)]
-                    UnknownAliasAccount,
+                    NonExistingRequestId,
                     #[codec(index = 24)]
-                    FailedDepositDoesNotExist,
+                    UnknownAliasAccount,
                     #[codec(index = 25)]
-                    EmptyBatch,
+                    FailedDepositDoesNotExist,
                     #[codec(index = 26)]
-                    TokenDoesNotExist,
+                    EmptyBatch,
                     #[codec(index = 27)]
-                    NotEligibleForRefund,
+                    TokenDoesNotExist,
                     #[codec(index = 28)]
-                    FerryHashMismatch,
+                    NotEligibleForRefund,
                     #[codec(index = 29)]
-                    MintError,
+                    FerryHashMismatch,
                     #[codec(index = 30)]
-                    AssetRegistrationProblem,
+                    MintError,
                     #[codec(index = 31)]
-                    UpdateHashMishmatch,
+                    AssetRegistrationProblem,
                     #[codec(index = 32)]
-                    AlreadyExecuted,
+                    UpdateHashMishmatch,
                     #[codec(index = 33)]
+                    AlreadyExecuted,
+                    #[codec(index = 34)]
                     UninitializedChainId,
+                    #[codec(index = 35)]
+                    NontransferableToken,
+                    #[codec(index = 36)]
+                    AlreadyFerried,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -40873,6 +41080,7 @@ pub mod api {
                         alias_account:
                             ::core::option::Option<runtime_types::sp_runtime::account::AccountId20>,
                         stake_action: runtime_types::pallet_sequencer_staking::StakeAction,
+                        sender: runtime_types::sp_runtime::account::AccountId20,
                     },
                     #[codec(index = 1)]
                     leave_active_sequencers {
@@ -40881,6 +41089,7 @@ pub mod api {
                     #[codec(index = 2)]
                     rejoin_active_sequencers {
                         chain: runtime_types::pallet_rolldown::messages::Chain,
+                        sender: runtime_types::sp_runtime::account::AccountId20,
                     },
                     #[codec(index = 3)]
                     unstake {
@@ -41210,48 +41419,51 @@ pub mod api {
                     #[doc = "Amplification coefficient lower then 1 or too large"]
                     AmpCoeffOutOfRange,
                     #[codec(index = 1)]
+                    #[doc = "Initial pool rate multipliers are too large"]
+                    InitialPoolRateOutOfRange,
+                    #[codec(index = 2)]
                     #[doc = "Too many assets for pool creation"]
                     TooManyAssets,
-                    #[codec(index = 2)]
+                    #[codec(index = 3)]
                     #[doc = "Pool already exists"]
                     PoolAlreadyExists,
-                    #[codec(index = 3)]
+                    #[codec(index = 4)]
                     #[doc = "Asset does not exist"]
                     AssetDoesNotExist,
-                    #[codec(index = 4)]
+                    #[codec(index = 5)]
                     #[doc = "Asset ids cannot be the same"]
                     SameAsset,
-                    #[codec(index = 5)]
+                    #[codec(index = 6)]
                     #[doc = "No such pool exists"]
                     NoSuchPool,
-                    #[codec(index = 6)]
+                    #[codec(index = 7)]
                     #[doc = "Provided arguments do not match in length"]
                     ArgumentsLengthMismatch,
-                    #[codec(index = 7)]
+                    #[codec(index = 8)]
                     #[doc = "Pool is broken, remove liquidity"]
                     PoolInvariantBroken,
-                    #[codec(index = 8)]
+                    #[codec(index = 9)]
                     #[doc = "Initial liquidity provision needs all assets"]
                     InitialLiquidityZeroAmount,
-                    #[codec(index = 9)]
+                    #[codec(index = 10)]
                     #[doc = "Asset does not exist in pool."]
                     NoSuchAssetInPool,
-                    #[codec(index = 10)]
+                    #[codec(index = 11)]
                     #[doc = "Unexpected failure"]
                     UnexpectedFailure,
-                    #[codec(index = 11)]
+                    #[codec(index = 12)]
                     #[doc = "Insufficient output amount does not meet min requirements"]
                     InsufficientOutputAmount,
-                    #[codec(index = 12)]
+                    #[codec(index = 13)]
                     #[doc = "Insufficient input amount"]
                     InsufficientInputAmount,
-                    #[codec(index = 13)]
+                    #[codec(index = 14)]
                     #[doc = "Excesive output amount does not meet max requirements"]
                     ExcesiveOutputAmount,
-                    #[codec(index = 14)]
+                    #[codec(index = 15)]
                     #[doc = "Math overflow"]
                     MathOverflow,
-                    #[codec(index = 15)]
+                    #[codec(index = 16)]
                     #[doc = "Liquidity token creation failed"]
                     LiquidityTokenCreationFailed,
                 }
