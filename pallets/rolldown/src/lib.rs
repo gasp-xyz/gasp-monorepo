@@ -1291,7 +1291,7 @@ impl<T: Config> Pallet<T> {
 						requests
 					}
 				} else {
-					PendingSequencerUpdateContent::<T>::remove(hash);
+					UpdatesExecutionQueue::<T>::remove(UpdatesExecutionQueueNextId::<T>::get());
 					Default::default()
 				}
 			},
