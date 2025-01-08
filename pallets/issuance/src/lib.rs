@@ -252,8 +252,8 @@ pub mod pallet {
 						&tge_info.who.clone(),
 						tge_info.amount,
 					);
-					if !tge_info.amount.is_zero() && imb.peek().is_zero() {
-						Pallet::<T>::deposit_event(Event::TGEInstanceFailed(tge_info));
+					if !tge_info.amount.clone().is_zero() && imb.peek().is_zero() {
+						Pallet::<T>::deposit_event(Event::TGEInstanceFailed(tge_info.clone()));
 					} else {
 						TGETotal::<T>::mutate(|v| *v = v.saturating_add(tge_info.amount));
 						Pallet::<T>::deposit_event(Event::TGEInstanceSucceeded(tge_info));
