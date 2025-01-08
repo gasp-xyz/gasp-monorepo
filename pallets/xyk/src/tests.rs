@@ -2664,3 +2664,19 @@ fn valuate_token_paired_with_mgx() {
 		);
 	});
 }
+
+#[test]
+#[serial]
+fn test_mat() {
+	new_test_ext().execute_with(|| {
+		System::set_block_number(1);
+
+		let input_reserve=24634145044277462;
+		let output_reserve=60431880;
+		let sell_amount=1000000;
+
+		let result = XykStorage::calculate_sell_price(input_reserve, output_reserve,sell_amount).unwrap();
+		println!("REESULT {result:?}");
+		assert!(false);
+	});
+}

@@ -361,7 +361,7 @@ impl<T: Config> Pallet<T> {
 			total_crowdloan_allocation: T::TotalCrowdloanAllocation::get(),
 		};
 
-		Pallet::<T>::build_issuance_config(issuance_config.clone())?;
+		Pallet::<T>::build_issuance_config(issuance_config.clone()).unwrap();
 
 		Pallet::<T>::deposit_event(Event::IssuanceConfigInitialized(issuance_config));
 
@@ -369,6 +369,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	pub fn build_issuance_config(issuance_config: IssuanceInfo<BalanceOf<T>>) -> DispatchResult {
+		log::info!("hello world");
 		ensure!(
 			issuance_config
 				.liquidity_mining_split
@@ -379,6 +380,10 @@ impl<T: Config> Pallet<T> {
 				Perbill::from_percent(100),
 			Error::<T>::IssuanceConfigInvalid
 		);
+		log::info!("hello world 2");
+		log::info!("issuance at init: {}", issuance_config.issuance_at_init.into());
+		log::info!("total crowdloan allocation: {}", issuance_config.total_crowdloan_allocation.into());
+		log::info!("cap {}", issuance_config.cap.into());
 		ensure!(
 			issuance_config.cap >=
 				issuance_config
@@ -387,14 +392,20 @@ impl<T: Config> Pallet<T> {
 					.ok_or(Error::<T>::IssuanceConfigInvalid)?,
 			Error::<T>::IssuanceConfigInvalid
 		);
+
+		log::info!("hello world 3");
 		ensure!(
 			issuance_config.linear_issuance_blocks != u32::zero(),
 			Error::<T>::IssuanceConfigInvalid
 		);
+
+		log::info!("hello world 4");
 		ensure!(
 			issuance_config.linear_issuance_blocks > T::BlocksPerRound::get(),
 			Error::<T>::IssuanceConfigInvalid
 		);
+
+		log::info!("hello world 5");
 		ensure!(T::BlocksPerRound::get() != u32::zero(), Error::<T>::IssuanceConfigInvalid);
 		IssuanceConfigStore::<T>::put(issuance_config);
 		Ok(())
