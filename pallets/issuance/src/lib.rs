@@ -28,7 +28,7 @@ mod benchmarking;
 #[derive(Encode, Decode, Clone, Default, RuntimeDebug, PartialEq, Eq, TypeInfo)]
 pub struct IssuanceInfo<Balance> {
 	// Max number of MGA to target
-	pub cap: Balance,
+	pub linear_issuance_amount: Balance,
 	// MGA created at token generation event
 	// We aasume that there is only one tge
 	pub issuance_at_init: Balance,
@@ -134,7 +134,7 @@ pub mod pallet {
 		type ImmediateTGEReleasePercent: Get<Percent>;
 		#[pallet::constant]
 		/// The maximum amount of Mangata tokens
-		type IssuanceCap: Get<BalanceOf<Self>>;
+		type LinearIssuanceAmount: Get<BalanceOf<Self>>;
 		#[pallet::constant]
 		/// The number of blocks the issuance is linear
 		type LinearIssuanceBlocks: Get<u32>;
@@ -313,7 +313,10 @@ impl<T: Config> ComputeIssuance for Pallet<T> {
 
 	fn compute_issuance(n: u32) {
 		let _ = Pallet::<T>::calculate_and_store_round_issuance(n);
-		let _ = Pallet::<T>::clear_round_issuance_history(n);
+		// So that we have easy access to the complete issuance record
+		// TODO?
+		// Maybe enable this and clean?
+		// let _ = Pallet::<T>::clear_round_issuance_history(n);
 	}
 }
 
@@ -352,7 +355,7 @@ impl<T: Config> Pallet<T> {
 		ensure!(IsTGEFinalized::<T>::get(), Error::<T>::TGENotFinalized);
 
 		let issuance_config: IssuanceInfo<BalanceOf<T>> = IssuanceInfo {
-			cap: T::IssuanceCap::get(),
+			linear_issuance_amount: T::LinearIssuanceAmount::get(),
 			issuance_at_init: T::Tokens::total_issuance(T::NativeCurrencyId::get().into()),
 			linear_issuance_blocks: T::LinearIssuanceBlocks::get(),
 			liquidity_mining_split: T::LiquidityMiningSplit::get(),
@@ -361,7 +364,7 @@ impl<T: Config> Pallet<T> {
 			total_crowdloan_allocation: T::TotalCrowdloanAllocation::get(),
 		};
 
-		Pallet::<T>::build_issuance_config(issuance_config.clone()).unwrap();
+		Pallet::<T>::build_issuance_config(issuance_config.clone())?;
 
 		Pallet::<T>::deposit_event(Event::IssuanceConfigInitialized(issuance_config));
 
@@ -380,85 +383,36 @@ impl<T: Config> Pallet<T> {
 				Perbill::from_percent(100),
 			Error::<T>::IssuanceConfigInvalid
 		);
-		log::info!("hello world 2");
-		log::info!("issuance at init: {}", issuance_config.issuance_at_init.into());
-		log::info!("total crowdloan allocation: {}", issuance_config.total_crowdloan_allocation.into());
-		log::info!("cap {}", issuance_config.cap.into());
-		ensure!(
-			issuance_config.cap >=
-				issuance_config
-					.issuance_at_init
-					.checked_add(&issuance_config.total_crowdloan_allocation)
-					.ok_or(Error::<T>::IssuanceConfigInvalid)?,
-			Error::<T>::IssuanceConfigInvalid
-		);
-
-		log::info!("hello world 3");
 		ensure!(
 			issuance_config.linear_issuance_blocks != u32::zero(),
 			Error::<T>::IssuanceConfigInvalid
 		);
-
-		log::info!("hello world 4");
 		ensure!(
 			issuance_config.linear_issuance_blocks > T::BlocksPerRound::get(),
 			Error::<T>::IssuanceConfigInvalid
 		);
-
-		log::info!("hello world 5");
 		ensure!(T::BlocksPerRound::get() != u32::zero(), Error::<T>::IssuanceConfigInvalid);
 		IssuanceConfigStore::<T>::put(issuance_config);
 		Ok(())
 	}
 
 	pub fn calculate_and_store_round_issuance(current_round: u32) -> DispatchResult {
-		let issuance_config =
-			IssuanceConfigStore::<T>::get().ok_or(Error::<T>::IssuanceConfigNotInitialized)?;
-		let to_be_issued: BalanceOf<T> = issuance_config
-			.cap
-			.checked_sub(&issuance_config.issuance_at_init)
-			.ok_or(Error::<T>::MathError)?
-			.checked_sub(&issuance_config.total_crowdloan_allocation)
-			.ok_or(Error::<T>::MathError)?;
-		let linear_issuance_sessions: u32 = issuance_config
-			.linear_issuance_blocks
+		let _ = IssuanceConfigStore::<T>::get().ok_or(Error::<T>::IssuanceConfigNotInitialized)?;
+		// Get everything from config and ignore the storage config data
+		let to_be_issued: BalanceOf<T> = T::LinearIssuanceAmount::get();
+		let linear_issuance_sessions: u32 = T::LinearIssuanceBlocks::get()
 			.checked_div(T::BlocksPerRound::get())
 			.ok_or(Error::<T>::MathError)?;
 		let linear_issuance_per_session = to_be_issued
 			.checked_div(&linear_issuance_sessions.into())
 			.ok_or(Error::<T>::MathError)?;
 
-		let current_round_issuance: BalanceOf<T>;
-		// We do not want issuance to overshoot
-		// Sessions begin from 0 and linear_issuance_sessions is the total number of linear sessions including 0
-		// So we stop before that
-		if current_round < linear_issuance_sessions {
-			current_round_issuance = linear_issuance_per_session;
-		} else {
-			let current_mga_total_issuance: BalanceOf<T> =
-				T::Tokens::total_issuance(T::NativeCurrencyId::get().into());
-			if issuance_config.cap > current_mga_total_issuance {
-				// TODO
-				// Here we assume that the crowdloan ends before linear issuance period ends
-				// We could get the amount that the crowdloan rewards still need to mint and account for that
-				// But that largely depends on on how the next crowdloan will be implemented
-				// Not very useful for the first crowdloan, as we know that it will end before linear issuance period ends and we check for this
-				current_round_issuance = linear_issuance_per_session.min(
-					issuance_config
-						.cap
-						.checked_sub(&current_mga_total_issuance)
-						.ok_or(Error::<T>::MathError)?,
-				)
-			} else {
-				current_round_issuance = Zero::zero();
-			}
-		}
+		let current_round_issuance: BalanceOf<T> = linear_issuance_per_session;
 
-		let liquidity_mining_issuance =
-			issuance_config.liquidity_mining_split * current_round_issuance;
+		let liquidity_mining_issuance = T::LiquidityMiningSplit::get() * current_round_issuance;
 
-		let staking_issuance = issuance_config.staking_split * current_round_issuance;
-		let sequencers_issuance = issuance_config.sequencers_split * current_round_issuance;
+		let staking_issuance = T::StakingSplit::get() * current_round_issuance;
+		let sequencers_issuance = T::SequencersSplit::get() * current_round_issuance;
 
 		T::LiquidityMiningApi::distribute_rewards(liquidity_mining_issuance);
 

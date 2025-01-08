@@ -167,8 +167,8 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	//   `spec_version`, and `authoring_version` are the same between Wasm and native.
 	// This value is set to 100 to notify Polkadot-JS App (https://polkadot.js.org/apps) to use
 	//   the compatible custom types.
-	spec_version: 101,
-	impl_version: 1,
+	spec_version: 102,
+	impl_version: 2,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
 	state_version: 1,
@@ -635,7 +635,7 @@ impl pallet_issuance::Config for Runtime {
 	type StakingIssuanceVault = cfg::pallet_issuance::StakingIssuanceVault;
 	type SequencersIssuanceVault = cfg::pallet_issuance::SequencerIssuanceVault;
 	type TotalCrowdloanAllocation = cfg::pallet_issuance::TotalCrowdloanAllocation;
-	type IssuanceCap = cfg::pallet_issuance::IssuanceCap;
+	type LinearIssuanceAmount = cfg::pallet_issuance::LinearIssuanceAmount;
 	type LinearIssuanceBlocks = cfg::pallet_issuance::LinearIssuanceBlocks;
 	type LiquidityMiningSplit = cfg::pallet_issuance::LiquidityMiningSplit;
 	type StakingSplit = cfg::pallet_issuance::StakingSplit;
