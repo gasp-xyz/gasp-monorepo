@@ -148,7 +148,7 @@ contract Utils is Script {
         vm.writeJson(outputJson, outputFilePath);
     }
 
-    function evmPrefixedPath(IRolldownPrimitives.ChainId chain, string memory path) public view returns (string memory) {
+    function evmPrefixedPath(IRolldownPrimitives.ChainId chain, string memory path) public pure returns (string memory) {
       string memory evm;
 
       if (chain == IRolldownPrimitives.ChainId.Ethereum) {
