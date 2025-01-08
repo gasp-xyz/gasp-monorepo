@@ -14,6 +14,7 @@ services:
     environment:
       MANGATA_NODE_URL: ${ETH_FERRY_WITHDRAWAL_MANGATA_NODE_URL}
       ETH_CHAIN_URL: ${ETH_FERRY_WITHDRAWAL_ETH_CHAIN_URL}
+      STASH_URL: http://stash-mock:8080
       MANGATA_CONTRACT_ADDRESS: ${ETH_FERRY_WITHDRAWAL_MANGATA_CONTRACT_ADDRESS}
       PRIVATE_KEY: ${ETH_FERRY_WITHDRAWAL_PRIVATE_KEY}
       TOKENS_TO_TRACK: ${ETH_FERRY_WITHDRAWAL_TOKENS_TO_TRACK}
@@ -34,9 +35,12 @@ services:
         condition: service_started
       node-bob:
         condition: service_started
+      stash-mock:
+        condition: service_started
     environment:
       MANGATA_NODE_URL: ${ETH_CLOSER_MANGATA_NODE_URL}
       ETH_CHAIN_URL: ${ETH_CLOSER_ETH_CHAIN_URL}
+      STASH_URL: http://stash-mock:8080
       MANGATA_CONTRACT_ADDRESS: ${ETH_CLOSER_MANGATA_CONTRACT_ADDRESS}
       PRIVATE_KEY: ${ETH_CLOSER_PRIVATE_KEY}
       TOKENS_TO_TRACK: ${ETH_CLOSER_TOKENS_TO_TRACK}
@@ -44,3 +48,10 @@ services:
       TX_COST: ${ETH_CLOSER_TX_COST}
       LOG: ${ETH_CLOSER_LOG}
       DELAY: ${ETH_CLOSER_DELAY}
+
+  stash-mock:
+    image: wiremock/wiremock
+    ports:
+      - 80:8080
+    volumes:
+      - ./stash-mock:/home/wiremock/mappings/
