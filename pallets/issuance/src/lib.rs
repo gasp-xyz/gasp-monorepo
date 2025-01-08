@@ -252,9 +252,13 @@ pub mod pallet {
 						&tge_info.who.clone(),
 						tge_info.amount,
 					);
-					TGETotal::<T>::mutate(|v| *v = v.saturating_add(tge_info.amount));
-					Pallet::<T>::deposit_event(Event::TGEInstanceSucceeded(tge_info));
-					continue;
+					if !tge_info.amount.is_zero() && imb.peek().is_zero() {
+						Pallet::<T>::deposit_event(Event::TGEInstanceFailed(tge_info));
+					}else{
+						TGETotal::<T>::mutate(|v| *v = v.saturating_add(tge_info.amount));
+						Pallet::<T>::deposit_event(Event::TGEInstanceSucceeded(tge_info));
+						continue;
+					}
 				}
 
 				let locked: BalanceOf<T> = (lock_percent * tge_info.amount).max(One::one());
