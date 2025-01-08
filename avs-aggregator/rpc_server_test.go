@@ -1,81 +1,39 @@
 package aggregator
 
+package aggregator
+
 import (
 	"context"
+	"encoding/hex"
+	"errors"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/mock/gomock"
-
-	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
-	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
-	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/MangataTaskManager"
-	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core"
-	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
-
-	gsrpc_types "github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"github.com/stretchr/testify/mock"
 )
 
-func TestProcessSignedTaskResponse(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
+type MockLogger struct{}
 
-	var TASK_INDEX = uint32(0)
-	var CREATED_BLOCK_NUMBER = uint32(100)
-	var BLOCK_TO_VERIFY = gsrpc_types.BlockNumber(3)
+func (m *MockLogger) Info(msg string, keysAndValues ...interface{}) {}
+func (m *MockLogger) Error(msg string, keysAndValues ...interface{}) {}
 
-	MOCK_OPERATOR_BLS_PRIVATE_KEY, err := bls.NewPrivateKey(MOCK_OPERATOR_BLS_PRIVATE_KEY_STRING)
-	assert.Nil(t, err)
-	MOCK_OPERATOR_KEYPAIR := bls.NewKeyPair(MOCK_OPERATOR_BLS_PRIVATE_KEY)
-	MOCK_OPERATOR_G1PUBKEY := MOCK_OPERATOR_KEYPAIR.GetPubKeyG1()
-	MOCK_OPERATOR_G2PUBKEY := MOCK_OPERATOR_KEYPAIR.GetPubKeyG2()
-
-	operatorPubkeyDict := map[bls.OperatorId]types.OperatorInfo{
-		MOCK_OPERATOR_ID: {
-			OperatorPubkeys: sdktypes.OperatorPubkeys{
-				G1Pubkey: MOCK_OPERATOR_G1PUBKEY,
-				G2Pubkey: MOCK_OPERATOR_G2PUBKEY,
-			},
-			OperatorAddr: common.Address{},
-		},
-	}
-	aggregator, _, mockBlsAggServ, err := createMockAggregator(mockCtrl, operatorPubkeyDict)
-	assert.Nil(t, err)
-
-	signedTaskResponse, err := createMockSignedTaskResponse(MockTask{
-		TaskNum:            TASK_INDEX,
-		CreatedBlockNumber: CREATED_BLOCK_NUMBER,
-		BlockNumber:        uint32(BLOCK_TO_VERIFY),
-	}, *MOCK_OPERATOR_KEYPAIR)
-	assert.Nil(t, err)
-	signedTaskResponseDigest, err := core.GetTaskResponseDigest(&signedTaskResponse.TaskResponse)
-	assert.Nil(t, err)
-
-	// TODO(samlaf): is this the right way to test writing to external service?
-	// or is there some wisdom to "don't mock 3rd party code"?
-	// see https://hynek.me/articles/what-to-mock-in-5-mins/
-	mockBlsAggServ.EXPECT().ProcessNewSignature(context.Background(), TASK_INDEX, signedTaskResponseDigest,
-		&signedTaskResponse.BlsSignature, signedTaskResponse.OperatorId)
-	err = aggregator.ProcessSignedTaskResponse(signedTaskResponse, nil)
-	assert.Nil(t, err)
+type MockBlsAggregationService struct {
+	mock.Mock
 }
 
-// mocks an operator signing on a task response
-func createMockSignedTaskResponse(mockTask MockTask, keypair bls.KeyPair) (*SignedTaskResponse, error) {
-	taskResponse := &taskmanager.IMangataTaskManagerTaskResponse{
-		ReferenceTaskIndex: mockTask.TaskNum,
-		BlockHash:          [32]byte{},
+func (m *MockBlsAggregationService) ProcessNewSignature(ctx context.Context, taskId types.TaskId, digest sdktypes.TaskResponseDigest, signature *BlsSignature, operatorId [32]byte) error {
+	args := m.Called(ctx, taskId, digest, signature, operatorId)
+	return args.Error(0)
+}
+
+func TestProcessSignedTaskResponse(t *testing.T) {
+	mockLogger := &MockLogger{}
+	mockBlsAggregationService := &MockBlsAggregationService{}
+
+	agg := &Aggregator{
+		logger:                  mockLogger,
+		blsAggregationService:   mockBlsAggregationService,
+		taskResponses:           make(map[types.TaskId]map[sdktypes.TaskResponseDigest]interface{}),
+		taskResponsesMu:         &sync.Mutex{},
 	}
-	taskResponseHash, err := core.GetTaskResponseDigest(taskResponse)
-	if err != nil {
-		return nil, err
-	}
-	blsSignature := keypair.SignMessage(taskResponseHash)
-	signedTaskResponse := &SignedTaskResponse{
-		TaskResponse: *taskResponse,
-		BlsSignature: *blsSignature,
-		OperatorId:   MOCK_OPERATOR_ID,
-	}
-	return signedTaskResponse, nil
 }

@@ -9,10 +9,10 @@
 package mocks
 
 import (
-	context "context"
-	reflect "reflect"
+	// context "context"
+	// reflect "reflect"
 
-	contractMangataTaskManager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/MangataTaskManager"
+	// contractMangataTaskManager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -39,17 +39,17 @@ func (m *MockAvsReaderer) EXPECT() *MockAvsReadererMockRecorder {
 	return m.recorder
 }
 
-// CheckSignatures mocks base method.
-func (m *MockAvsReaderer) CheckSignatures(arg0 context.Context, arg1 [32]byte, arg2 []byte, arg3 uint32, arg4 contractMangataTaskManager.IBLSSignatureCheckerNonSignerStakesAndSignature) (contractMangataTaskManager.IBLSSignatureCheckerQuorumStakeTotals, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckSignatures", arg0, arg1, arg2, arg3, arg4)
-	ret0, _ := ret[0].(contractMangataTaskManager.IBLSSignatureCheckerQuorumStakeTotals)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
+// // CheckSignatures mocks base method.
+// func (m *MockAvsReaderer) CheckSignatures(arg0 context.Context, arg1 [32]byte, arg2 []byte, arg3 uint32, arg4 contractMangataTaskManager.IBLSSignatureCheckerNonSignerStakesAndSignature) (contractMangataTaskManager.IBLSSignatureCheckerQuorumStakeTotals, error) {
+// 	m.ctrl.T.Helper()
+// 	ret := m.ctrl.Call(m, "CheckSignatures", arg0, arg1, arg2, arg3, arg4)
+// 	ret0, _ := ret[0].(contractMangataTaskManager.IBLSSignatureCheckerQuorumStakeTotals)
+// 	ret1, _ := ret[1].(error)
+// 	return ret0, ret1
+// }
 
-// CheckSignatures indicates an expected call of CheckSignatures.
-func (mr *MockAvsReadererMockRecorder) CheckSignatures(arg0, arg1, arg2, arg3, arg4 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckSignatures", reflect.TypeOf((*MockAvsReaderer)(nil).CheckSignatures), arg0, arg1, arg2, arg3, arg4)
-}
+// // CheckSignatures indicates an expected call of CheckSignatures.
+// func (mr *MockAvsReadererMockRecorder) CheckSignatures(arg0, arg1, arg2, arg3, arg4 any) *gomock.Call {
+// 	mr.mock.ctrl.T.Helper()
+// 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckSignatures", reflect.TypeOf((*MockAvsReaderer)(nil).CheckSignatures), arg0, arg1, arg2, arg3, arg4)
+// }
