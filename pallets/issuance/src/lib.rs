@@ -254,7 +254,7 @@ pub mod pallet {
 					);
 					if !tge_info.amount.is_zero() && imb.peek().is_zero() {
 						Pallet::<T>::deposit_event(Event::TGEInstanceFailed(tge_info));
-					}else{
+					} else {
 						TGETotal::<T>::mutate(|v| *v = v.saturating_add(tge_info.amount));
 						Pallet::<T>::deposit_event(Event::TGEInstanceSucceeded(tge_info));
 						continue;
