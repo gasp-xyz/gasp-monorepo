@@ -19,7 +19,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12.x
+          python-version: "3.12.x"
           check-latest: true
           cache: pip
 
@@ -39,31 +39,35 @@ jobs:
           pip install -U setuptools
           pip install -r requirements.txt
 
-      - name: Build contracts
-        run: |
-          forge --version
-          forge build --sizes
-        id: build
+      - name: Compile contracts
+        run: bun run compile
+        id: compile
 
-      - name: Format contracts
-        if: false
+      - name: Get sizes of contracts
+        run: bun run size
+        id: size
+
+      - name: Check format of contracts and files
         run: bun run format
         id: format
 
       - name: Lint contracts
-        if: false
         run: bun run lint
         id: lint
 
       - name: Run unit tests
-        run: forge test -vvv --fail-fast
+        run: bun run test
         id: test
 
-      - name: Analyze contracts with static analyzer
+      - name: Make static analysis of contracts
         if: false
         run: bun run analyze:ci
         id: analyze
 
-      - name: Create gas snapshot
-        run: NO_COLOR=1 forge snapshot >> $GITHUB_STEP_SUMMARY
-        id: snapshot
+      - name: Create gas report
+        run: bun run gas
+        id: gas
+
+      - name: Create coverage report
+        run: bun run cover
+        id: cover
