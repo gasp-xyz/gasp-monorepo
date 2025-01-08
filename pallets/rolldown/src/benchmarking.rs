@@ -159,11 +159,12 @@ mod benchmarks {
 		let (l1_aset_chain, l1_asset_address) =
 			get_chain_and_address_for_asset_id::<T>(TOKEN_ID.into())?;
 		pallet_sequencer_staking::Pallet::<T>::provide_sequencer_stake(
-			RawOrigin::Signed(sequencer.clone()).into(),
+			(RawOrigin::Root).into(),
 			l1_aset_chain.into(),
 			STAKE_AMOUNT.try_into().ok().expect("u128 should fit into Balance type"),
 			sequencer_alias,
 			pallet_sequencer_staking::StakeAction::StakeOnly,
+			sequencer.clone(),
 		)?;
 
 		if should_be_active {

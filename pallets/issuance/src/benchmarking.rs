@@ -91,9 +91,14 @@ benchmarks! {
 				.checked_sub(&T::ImmediateTGEReleasePercent::get()).unwrap();
 
 		for tge_info in tge_infos{
-			assert_eq!(T::VestingProvider::vesting_balance(&tge_info.who, T::NativeCurrencyId::get()).unwrap(), lock_percent * tge_info.amount);
-			assert_eq!(T::Tokens::free_balance(T::NativeCurrencyId::get(), &tge_info.who), tge_info.amount);
-			assert_eq!(<T::Tokens as MultiTokenCurrencyExtended<T::AccountId>>::locked_balance(T::NativeCurrencyId::get(), &tge_info.who), lock_percent * tge_info.amount);
+
+			if lock_percent.is_zero(){
+				assert_eq!(T::Tokens::free_balance(T::NativeCurrencyId::get(), &tge_info.who), tge_info.amount);
+			}else{
+				assert_eq!(T::VestingProvider::vesting_balance(&tge_info.who, T::NativeCurrencyId::get()).unwrap(), lock_percent * tge_info.amount);
+				assert_eq!(T::Tokens::free_balance(T::NativeCurrencyId::get(), &tge_info.who), tge_info.amount);
+				assert_eq!(<T::Tokens as MultiTokenCurrencyExtended<T::AccountId>>::locked_balance(T::NativeCurrencyId::get(), &tge_info.who), lock_percent * tge_info.amount);
+			}
 		}
 
 	}

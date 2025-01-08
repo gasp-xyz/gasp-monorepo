@@ -43,11 +43,12 @@ fn test_provide_sequencer_stake_works_and_activates() {
 		assert_eq!(SequencerStake::<Test>::get(&(CHARLIE, consts::DEFAULT_CHAIN_ID)), 0);
 		assert!(!SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			None,
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
 		));
 		assert_eq!(
 			SequencerStake::<Test>::get(&(CHARLIE, consts::DEFAULT_CHAIN_ID)),
@@ -76,11 +77,12 @@ fn test_provide_sequencer_stake_works_and_does_not_activate_due_to_insufficient_
 
 		assert_err!(
 			SequencerStaking::provide_sequencer_stake(
-				RuntimeOrigin::signed(CHARLIE),
+				RuntimeOrigin::root(),
 				consts::DEFAULT_CHAIN_ID,
 				MINIMUM_STAKE - 1,
 				None,
-				StakeAction::StakeAndJoinActiveSet
+				StakeAction::StakeAndJoinActiveSet,
+				CHARLIE
 			),
 			Error::<Test>::NotEnoughSequencerStake
 		);
@@ -108,11 +110,12 @@ fn test_provide_sequencer_stake_works_and_does_not_activate_due_to_max_seq_bound
 		assert!(!SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
 		assert_err!(
 			SequencerStaking::provide_sequencer_stake(
-				RuntimeOrigin::signed(CHARLIE),
+				RuntimeOrigin::root(),
 				consts::DEFAULT_CHAIN_ID,
 				MINIMUM_STAKE,
 				None,
-				StakeAction::StakeAndJoinActiveSet
+				StakeAction::StakeAndJoinActiveSet,
+				CHARLIE
 			),
 			Error::<Test>::MaxSequencersLimitReached
 		);
@@ -156,23 +159,26 @@ fn test_rejoin_active_sequencer_works() {
 
 		assert_err!(
 			SequencerStaking::rejoin_active_sequencers(
-				RuntimeOrigin::signed(ALICE),
-				consts::DEFAULT_CHAIN_ID
+				RuntimeOrigin::root(),
+				consts::DEFAULT_CHAIN_ID,
+				ALICE
 			),
 			Error::<Test>::SequencerAlreadyInActiveSet
 		);
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE - 1,
 			None,
-			StakeAction::StakeOnly
+			StakeAction::StakeOnly,
+			CHARLIE
 		));
 		assert_err!(
 			SequencerStaking::rejoin_active_sequencers(
-				RuntimeOrigin::signed(CHARLIE),
-				consts::DEFAULT_CHAIN_ID
+				RuntimeOrigin::root(),
+				consts::DEFAULT_CHAIN_ID,
+				CHARLIE
 			),
 			Error::<Test>::NotEnoughSequencerStake
 		);
@@ -183,11 +189,12 @@ fn test_rejoin_active_sequencer_works() {
 		.unwrap();
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			1,
 			None,
-			StakeAction::StakeOnly
+			StakeAction::StakeOnly,
+			CHARLIE
 		));
 
 		SequencerStaking::set_active_sequencers(
@@ -199,8 +206,9 @@ fn test_rejoin_active_sequencer_works() {
 		new_sequencer_active_mock.expect().times(1).return_const(());
 		assert!(!SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
 		assert_ok!(SequencerStaking::rejoin_active_sequencers(
-			RuntimeOrigin::signed(CHARLIE),
-			consts::DEFAULT_CHAIN_ID
+			RuntimeOrigin::root(),
+			consts::DEFAULT_CHAIN_ID,
+			CHARLIE
 		));
 		assert!(SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
 	});
@@ -220,28 +228,31 @@ fn test_can_not_join_set_if_full() {
 		for seq in 0u64..seq_limit {
 			Tokens::mint(RuntimeOrigin::root(), NATIVE_TOKEN_ID, seq, MINIMUM_STAKE).unwrap();
 			assert_ok!(SequencerStaking::provide_sequencer_stake(
-				RuntimeOrigin::signed(seq),
+				RuntimeOrigin::root(),
 				consts::DEFAULT_CHAIN_ID,
 				MINIMUM_STAKE,
 				None,
-				StakeAction::StakeAndJoinActiveSet
+				StakeAction::StakeAndJoinActiveSet,
+				seq
 			));
 			assert!(SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &seq));
 		}
 
 		Tokens::mint(RuntimeOrigin::root(), NATIVE_TOKEN_ID, seq_limit, MINIMUM_STAKE).unwrap();
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(seq_limit),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			None,
-			StakeAction::StakeOnly
+			StakeAction::StakeOnly,
+			seq_limit
 		));
 		assert!(!SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &seq_limit));
 		assert_err!(
 			SequencerStaking::rejoin_active_sequencers(
-				RuntimeOrigin::signed(seq_limit),
-				consts::DEFAULT_CHAIN_ID
+				RuntimeOrigin::root(),
+				consts::DEFAULT_CHAIN_ID,
+				seq_limit
 			),
 			Error::<Test>::MaxSequencersLimitReached
 		);
@@ -258,23 +269,26 @@ fn test_provide_stake_fails_on_sequencers_limit_reached() {
 
 		assert_err!(
 			SequencerStaking::rejoin_active_sequencers(
-				RuntimeOrigin::signed(ALICE),
-				consts::DEFAULT_CHAIN_ID
+				RuntimeOrigin::root(),
+				consts::DEFAULT_CHAIN_ID,
+				ALICE
 			),
 			Error::<Test>::SequencerAlreadyInActiveSet
 		);
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE - 1,
 			None,
-			StakeAction::StakeOnly
+			StakeAction::StakeOnly,
+			CHARLIE
 		));
 		assert_err!(
 			SequencerStaking::rejoin_active_sequencers(
-				RuntimeOrigin::signed(CHARLIE),
-				consts::DEFAULT_CHAIN_ID
+				RuntimeOrigin::root(),
+				consts::DEFAULT_CHAIN_ID,
+				CHARLIE
 			),
 			Error::<Test>::NotEnoughSequencerStake
 		);
@@ -286,21 +300,23 @@ fn test_provide_stake_fails_on_sequencers_limit_reached() {
 
 		assert_err!(
 			SequencerStaking::provide_sequencer_stake(
-				RuntimeOrigin::signed(CHARLIE),
+				RuntimeOrigin::root(),
 				consts::DEFAULT_CHAIN_ID,
 				1,
 				None,
-				StakeAction::StakeAndJoinActiveSet
+				StakeAction::StakeAndJoinActiveSet,
+				CHARLIE
 			),
 			Error::<Test>::MaxSequencersLimitReached
 		);
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			1,
 			None,
-			StakeAction::StakeOnly
+			StakeAction::StakeOnly,
+			CHARLIE
 		));
 
 		SequencerStaking::set_active_sequencers(
@@ -312,8 +328,9 @@ fn test_provide_stake_fails_on_sequencers_limit_reached() {
 		new_sequencer_active_mock.expect().times(1).return_const(());
 		assert!(!SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
 		assert_ok!(SequencerStaking::rejoin_active_sequencers(
-			RuntimeOrigin::signed(CHARLIE),
-			consts::DEFAULT_CHAIN_ID
+			RuntimeOrigin::root(),
+			consts::DEFAULT_CHAIN_ID,
+			CHARLIE
 		));
 		assert!(SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
 	});
@@ -365,11 +382,12 @@ fn test_set_sequencer_configuration() {
 		new_sequencer_active_mock.expect().times(1).return_const(());
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE + 1,
 			None,
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
 		));
 
 		let handle_sequencer_deactivations_mock =
@@ -458,11 +476,12 @@ fn test_slash_sequencer_when_stake_less_than_repatriated_amount() {
 
 		let amount = 10;
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			amount,
 			None,
-			StakeAction::StakeOnly
+			StakeAction::StakeOnly,
+			CHARLIE
 		));
 
 		assert_eq!(TokensOf::<Test>::total_balance(&CHARLIE), TOKENS_ENDOWED);
@@ -490,11 +509,12 @@ fn test_slash_sequencer_when_stake_less_than_repatriated_amount() {
 
 		let amount = 10;
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(DAVE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			amount,
 			None,
-			StakeAction::StakeOnly
+			StakeAction::StakeOnly,
+			DAVE
 		));
 
 		let total_issuance_0 = TokensOf::<Test>::total_issuance();
@@ -520,11 +540,12 @@ fn test_slash_sequencer_when_stake_less_than_stake_but_greater_than_repatriated_
 
 		let amount = 50;
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			amount,
 			None,
-			StakeAction::StakeOnly
+			StakeAction::StakeOnly,
+			CHARLIE
 		));
 
 		assert_eq!(TokensOf::<Test>::total_balance(&CHARLIE), TOKENS_ENDOWED);
@@ -552,11 +573,12 @@ fn test_slash_sequencer_when_stake_less_than_stake_but_greater_than_repatriated_
 
 		let amount = 50;
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(DAVE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			amount,
 			None,
-			StakeAction::StakeOnly
+			StakeAction::StakeOnly,
+			DAVE
 		));
 
 		let total_issuance_0 = TokensOf::<Test>::total_issuance();
@@ -761,11 +783,12 @@ fn test_provide_sequencer_stake_sets_updater_account_to_same_address_as_sequence
 		SequencerStaking::set_active_sequencers(Vec::new()).unwrap();
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			None,
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
 		));
 
 		forward_to_block::<Test>(100);
@@ -797,11 +820,12 @@ fn test_sequencer_can_set_alias_address() {
 		new_sequencer_active_mock.expect().times(1).return_const(());
 		SequencerStaking::set_active_sequencers(Vec::new()).unwrap();
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			Some(EVE),
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
 		));
 
 		assert!(
@@ -825,11 +849,12 @@ fn test_sequencer_can_update_alias_address() {
 		new_sequencer_active_mock.expect().times(1).return_const(());
 		SequencerStaking::set_active_sequencers(Vec::new()).unwrap();
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			None,
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
 		));
 
 		SequencerStaking::set_updater_account_for_sequencer(
@@ -853,30 +878,33 @@ fn test_sequencer_can_not_set_another_sequencer_address_as_alias() {
 		SequencerStaking::set_active_sequencers(Vec::new()).unwrap();
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(ALICE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			None,
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			ALICE
 		));
 
 		assert_err!(
 			SequencerStaking::provide_sequencer_stake(
-				RuntimeOrigin::signed(CHARLIE),
+				RuntimeOrigin::root(),
 				consts::DEFAULT_CHAIN_ID,
 				MINIMUM_STAKE,
 				Some(ALICE),
-				StakeAction::StakeAndJoinActiveSet
+				StakeAction::StakeAndJoinActiveSet,
+				CHARLIE
 			),
 			Error::<Test>::AliasAccountIsActiveSequencer
 		);
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			None,
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
 		));
 
 		assert_err!(
@@ -902,30 +930,33 @@ fn test_sequencer_can_not_set_use_already_used_alias() {
 		SequencerStaking::set_active_sequencers(Vec::new()).unwrap();
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(ALICE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			Some(EVE),
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			ALICE
 		));
 
 		assert_err!(
 			SequencerStaking::provide_sequencer_stake(
-				RuntimeOrigin::signed(CHARLIE),
+				RuntimeOrigin::root(),
 				consts::DEFAULT_CHAIN_ID,
 				MINIMUM_STAKE,
 				Some(EVE),
-				StakeAction::StakeAndJoinActiveSet
+				StakeAction::StakeAndJoinActiveSet,
+				CHARLIE
 			),
 			Error::<Test>::AddressInUse
 		);
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			None,
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
 		));
 
 		assert_err!(
@@ -952,20 +983,22 @@ fn test_sequencer_cannot_join_if_its_account_is_used_as_sequencer_alias() {
 		SequencerStaking::set_active_sequencers(Vec::new()).unwrap();
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			Some(consts::ALICE),
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
 		));
 
 		assert_err!(
 			SequencerStaking::provide_sequencer_stake(
-				RuntimeOrigin::signed(ALICE),
+				RuntimeOrigin::root(),
 				consts::DEFAULT_CHAIN_ID,
 				MINIMUM_STAKE,
 				None,
-				StakeAction::StakeAndJoinActiveSet
+				StakeAction::StakeAndJoinActiveSet,
+				ALICE
 			),
 			Error::<Test>::SequencerAccountIsActiveSequencerAlias
 		);
@@ -988,19 +1021,21 @@ fn test_sequencer_can_remove_alias_so_another_sequencer_can_use_it_afterwards() 
 		SequencerStaking::set_active_sequencers(Vec::new()).unwrap();
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(ALICE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			Some(EVE),
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			ALICE
 		));
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			None,
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
 		));
 
 		assert_err!(
@@ -1096,11 +1131,12 @@ fn pallet_max_sequencers_limit_is_considered_separately_for_each_set() {
 			for seq in 0u64..seq_limit {
 				Tokens::mint(RuntimeOrigin::root(), NATIVE_TOKEN_ID, seq, MINIMUM_STAKE).unwrap();
 				assert_ok!(SequencerStaking::provide_sequencer_stake(
-					RuntimeOrigin::signed(seq),
+					RuntimeOrigin::root(),
 					FIRST_CHAIN_ID,
 					MINIMUM_STAKE,
 					None,
-					StakeAction::StakeAndJoinActiveSet
+					StakeAction::StakeAndJoinActiveSet,
+					seq
 				));
 				assert!(SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &seq));
 			}
@@ -1108,11 +1144,12 @@ fn pallet_max_sequencers_limit_is_considered_separately_for_each_set() {
 			Tokens::mint(RuntimeOrigin::root(), NATIVE_TOKEN_ID, seq_limit, MINIMUM_STAKE).unwrap();
 			assert_err!(
 				SequencerStaking::provide_sequencer_stake(
-					RuntimeOrigin::signed(seq_limit),
+					RuntimeOrigin::root(),
 					FIRST_CHAIN_ID,
 					MINIMUM_STAKE,
 					None,
-					StakeAction::StakeAndJoinActiveSet
+					StakeAction::StakeAndJoinActiveSet,
+					seq_limit
 				),
 				Error::<Test>::MaxSequencersLimitReached
 			);
@@ -1122,11 +1159,12 @@ fn pallet_max_sequencers_limit_is_considered_separately_for_each_set() {
 			for seq in 0u64..seq_limit {
 				Tokens::mint(RuntimeOrigin::root(), NATIVE_TOKEN_ID, seq, MINIMUM_STAKE).unwrap();
 				assert_ok!(SequencerStaking::provide_sequencer_stake(
-					RuntimeOrigin::signed(seq),
+					RuntimeOrigin::root(),
 					SECOND_CHAIN_ID,
 					MINIMUM_STAKE,
 					None,
-					StakeAction::StakeAndJoinActiveSet
+					StakeAction::StakeAndJoinActiveSet,
+					seq
 				));
 				assert!(SequencerStaking::is_active_sequencer(SECOND_CHAIN_ID, &seq));
 			}
@@ -1134,11 +1172,12 @@ fn pallet_max_sequencers_limit_is_considered_separately_for_each_set() {
 			Tokens::mint(RuntimeOrigin::root(), NATIVE_TOKEN_ID, seq_limit, MINIMUM_STAKE).unwrap();
 			assert_err!(
 				SequencerStaking::provide_sequencer_stake(
-					RuntimeOrigin::signed(seq_limit),
+					RuntimeOrigin::root(),
 					SECOND_CHAIN_ID,
 					MINIMUM_STAKE,
 					None,
-					StakeAction::StakeAndJoinActiveSet
+					StakeAction::StakeAndJoinActiveSet,
+					seq_limit
 				),
 				Error::<Test>::MaxSequencersLimitReached
 			);
@@ -1158,11 +1197,12 @@ fn test_sequencer_alias_cleanup() {
 
 		assert!(!SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			Some(EVE),
-			StakeAction::StakeAndJoinActiveSet
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
 		));
 
 		assert!(SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));
@@ -1170,11 +1210,12 @@ fn test_sequencer_alias_cleanup() {
 		assert_eq!(AliasAccountInUse::<Test>::get(EVE), Some(()));
 
 		assert_ok!(SequencerStaking::provide_sequencer_stake(
-			RuntimeOrigin::signed(CHARLIE),
+			RuntimeOrigin::root(),
 			consts::DEFAULT_CHAIN_ID,
 			MINIMUM_STAKE,
 			Some(DAVE),
-			StakeAction::StakeOnly
+			StakeAction::StakeOnly,
+			CHARLIE
 		));
 
 		assert!(SequencerStaking::is_active_sequencer(consts::DEFAULT_CHAIN_ID, &CHARLIE));

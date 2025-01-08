@@ -1,3 +1,5 @@
+use rollup_runtime::tokens::NontransferableTokens;
+
 use crate::setup::*;
 
 const ASSET_ID_1: TokenId = NATIVE_ASSET_ID + 1;
@@ -186,14 +188,17 @@ fn test_market_should_block() {
 			),
 			pallet_market::Error::<Runtime>::NontransferableToken
 		);
-		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset(
-			RuntimeOrigin::signed(AccountId::from(ARB)),
-			vec![POOL_ID],
-			NATIVE_ASSET_ID,
-			UNIT,
-			ASSET_ID_1,
-			0,
-		));
+		assert_err!(
+			pallet_market::Pallet::<Runtime>::multiswap_asset(
+				RuntimeOrigin::signed(AccountId::from(ARB)),
+				vec![POOL_ID],
+				NATIVE_ASSET_ID,
+				UNIT,
+				ASSET_ID_1,
+				0,
+			),
+			pallet_market::Error::<Runtime>::NontransferableToken
+		);
 		assert_err!(
 			pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
 				RuntimeOrigin::signed(bob),
@@ -216,13 +221,16 @@ fn test_market_should_block() {
 			),
 			pallet_market::Error::<Runtime>::NontransferableToken
 		);
-		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
-			RuntimeOrigin::signed(AccountId::from(ARB)),
-			vec![POOL_ID],
-			ASSET_ID_1,
-			UNIT,
-			NATIVE_ASSET_ID,
-			amount,
-		));
+		assert_err!(
+			pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
+				RuntimeOrigin::signed(AccountId::from(ARB)),
+				vec![POOL_ID],
+				ASSET_ID_1,
+				UNIT,
+				NATIVE_ASSET_ID,
+				amount,
+			),
+			pallet_market::Error::<Runtime>::NontransferableToken
+		);
 	});
 }
