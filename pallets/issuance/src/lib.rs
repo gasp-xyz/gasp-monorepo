@@ -246,6 +246,17 @@ pub mod pallet {
 				.ok_or(Error::<T>::MathError)?;
 
 			for tge_info in tge_infos {
+				if lock_percent.is_zero() {
+					let imb = T::Tokens::deposit_creating(
+						T::NativeCurrencyId::get().into(),
+						&tge_info.who.clone(),
+						tge_info.amount,
+					);
+					TGETotal::<T>::mutate(|v| *v = v.saturating_add(tge_info.amount));
+					Pallet::<T>::deposit_event(Event::TGEInstanceSucceeded(tge_info));
+					continue;
+				}
+
 				let locked: BalanceOf<T> = (lock_percent * tge_info.amount).max(One::one());
 				let per_block: BalanceOf<T> =
 					(locked / T::TGEReleasePeriod::get().into()).max(One::one());
@@ -372,7 +383,6 @@ impl<T: Config> Pallet<T> {
 	}
 
 	pub fn build_issuance_config(issuance_config: IssuanceInfo<BalanceOf<T>>) -> DispatchResult {
-		log::info!("hello world");
 		ensure!(
 			issuance_config
 				.liquidity_mining_split
