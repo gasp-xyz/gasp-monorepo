@@ -9,12 +9,12 @@
 package mocks
 
 import (
-	context "context"
-	big "math/big"
-	reflect "reflect"
+	// context "context"
+	// big "math/big"
+	// reflect "reflect"
 
-	types "github.com/ethereum/go-ethereum/core/types"
-	contractMangataTaskManager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/MangataTaskManager"
+	// types "github.com/ethereum/go-ethereum/core/types"
+	// contractMangataTaskManager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -41,48 +41,48 @@ func (m *MockAvsWriterer) EXPECT() *MockAvsWritererMockRecorder {
 	return m.recorder
 }
 
-// RaiseChallenge mocks base method.
-func (m *MockAvsWriterer) RaiseChallenge(arg0 context.Context, arg1 contractMangataTaskManager.IMangataTaskManagerTask, arg2 contractMangataTaskManager.IMangataTaskManagerTaskResponse, arg3 contractMangataTaskManager.IMangataTaskManagerTaskResponseMetadata, arg4 []contractMangataTaskManager.BN254G1Point) (*types.Receipt, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RaiseChallenge", arg0, arg1, arg2, arg3, arg4)
-	ret0, _ := ret[0].(*types.Receipt)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
+// // RaiseChallenge mocks base method.
+// func (m *MockAvsWriterer) RaiseChallenge(arg0 context.Context, arg1 contractMangataTaskManager.IMangataTaskManagerTask, arg2 contractMangataTaskManager.IMangataTaskManagerTaskResponse, arg3 contractMangataTaskManager.IMangataTaskManagerTaskResponseMetadata, arg4 []contractMangataTaskManager.BN254G1Point) (*types.Receipt, error) {
+// 	m.ctrl.T.Helper()
+// 	ret := m.ctrl.Call(m, "RaiseChallenge", arg0, arg1, arg2, arg3, arg4)
+// 	ret0, _ := ret[0].(*types.Receipt)
+// 	ret1, _ := ret[1].(error)
+// 	return ret0, ret1
+// }
 
-// RaiseChallenge indicates an expected call of RaiseChallenge.
-func (mr *MockAvsWritererMockRecorder) RaiseChallenge(arg0, arg1, arg2, arg3, arg4 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RaiseChallenge", reflect.TypeOf((*MockAvsWriterer)(nil).RaiseChallenge), arg0, arg1, arg2, arg3, arg4)
-}
+// // RaiseChallenge indicates an expected call of RaiseChallenge.
+// func (mr *MockAvsWritererMockRecorder) RaiseChallenge(arg0, arg1, arg2, arg3, arg4 any) *gomock.Call {
+// 	mr.mock.ctrl.T.Helper()
+// 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RaiseChallenge", reflect.TypeOf((*MockAvsWriterer)(nil).RaiseChallenge), arg0, arg1, arg2, arg3, arg4)
+// }
 
-// SendAggregatedResponse mocks base method.
-func (m *MockAvsWriterer) SendAggregatedResponse(arg0 context.Context, arg1 contractMangataTaskManager.IMangataTaskManagerTask, arg2 contractMangataTaskManager.IMangataTaskManagerTaskResponse, arg3 contractMangataTaskManager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendAggregatedResponse", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].(*types.Receipt)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
+// // SendAggregatedResponse mocks base method.
+// func (m *MockAvsWriterer) SendAggregatedResponse(arg0 context.Context, arg1 contractMangataTaskManager.IMangataTaskManagerTask, arg2 contractMangataTaskManager.IMangataTaskManagerTaskResponse, arg3 contractMangataTaskManager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error) {
+// 	m.ctrl.T.Helper()
+// 	ret := m.ctrl.Call(m, "SendAggregatedResponse", arg0, arg1, arg2, arg3)
+// 	ret0, _ := ret[0].(*types.Receipt)
+// 	ret1, _ := ret[1].(error)
+// 	return ret0, ret1
+// }
 
-// SendAggregatedResponse indicates an expected call of SendAggregatedResponse.
-func (mr *MockAvsWritererMockRecorder) SendAggregatedResponse(arg0, arg1, arg2, arg3 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendAggregatedResponse", reflect.TypeOf((*MockAvsWriterer)(nil).SendAggregatedResponse), arg0, arg1, arg2, arg3)
-}
+// // SendAggregatedResponse indicates an expected call of SendAggregatedResponse.
+// func (mr *MockAvsWritererMockRecorder) SendAggregatedResponse(arg0, arg1, arg2, arg3 any) *gomock.Call {
+// 	mr.mock.ctrl.T.Helper()
+// 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendAggregatedResponse", reflect.TypeOf((*MockAvsWriterer)(nil).SendAggregatedResponse), arg0, arg1, arg2, arg3)
+// }
 
-// SendNewTaskVerifyBlock mocks base method.
-func (m *MockAvsWriterer) SendNewTaskVerifyBlock(arg0 context.Context, arg1 *big.Int, arg2 uint32, arg3 []byte) (contractMangataTaskManager.IMangataTaskManagerTask, uint32, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendNewTaskVerifyBlock", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].(contractMangataTaskManager.IMangataTaskManagerTask)
-	ret1, _ := ret[1].(uint32)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
-}
+// // SendNewTaskVerifyBlock mocks base method.
+// func (m *MockAvsWriterer) SendNewTaskVerifyBlock(arg0 context.Context, arg1 *big.Int, arg2 uint32, arg3 []byte) (contractMangataTaskManager.IMangataTaskManagerTask, uint32, error) {
+// 	m.ctrl.T.Helper()
+// 	ret := m.ctrl.Call(m, "SendNewTaskVerifyBlock", arg0, arg1, arg2, arg3)
+// 	ret0, _ := ret[0].(contractMangataTaskManager.IMangataTaskManagerTask)
+// 	ret1, _ := ret[1].(uint32)
+// 	ret2, _ := ret[2].(error)
+// 	return ret0, ret1, ret2
+// }
 
-// SendNewTaskVerifyBlock indicates an expected call of SendNewTaskVerifyBlock.
-func (mr *MockAvsWritererMockRecorder) SendNewTaskVerifyBlock(arg0, arg1, arg2, arg3 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendNewTaskVerifyBlock", reflect.TypeOf((*MockAvsWriterer)(nil).SendNewTaskVerifyBlock), arg0, arg1, arg2, arg3)
-}
+// // SendNewTaskVerifyBlock indicates an expected call of SendNewTaskVerifyBlock.
+// func (mr *MockAvsWritererMockRecorder) SendNewTaskVerifyBlock(arg0, arg1, arg2, arg3 any) *gomock.Call {
+// 	mr.mock.ctrl.T.Helper()
+// 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendNewTaskVerifyBlock", reflect.TypeOf((*MockAvsWriterer)(nil).SendNewTaskVerifyBlock), arg0, arg1, arg2, arg3)
+// }
