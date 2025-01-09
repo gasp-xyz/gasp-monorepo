@@ -19,7 +19,6 @@ export const execute = async (trx: ChainableCommander) => {
       .map((c) => _.chunk(c.args, 3))
       .flat()
     logger.error(`error at ${ops[result.indexOf(err)]} with ${err}`)
-    throw Error()
   }
   return result.length
 }

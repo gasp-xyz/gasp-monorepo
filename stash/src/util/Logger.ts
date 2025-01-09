@@ -1,17 +1,28 @@
-import { createLogger, format, transports } from 'winston'
+import winston from 'winston'
 import { LoggingWinston } from '@google-cloud/logging-winston'
 
-const logger = createLogger({
-  format: format.combine(format.splat(), format.simple()),
+const loggingWinston = new LoggingWinston({
+  // https://github.com/googleapis/nodejs-logging-winston?tab=readme-ov-file#error-handling-with-a-default-callback
+  defaultCallback: (err) => {
+    if (err) {
+      console.log('Error occured: ' + err)
+    }
+  },
+  projectId: process.env.GCP_PROJECT_ID || 'direct-pixel-353917',
+  // Needed to fix missing logs in GAE environment
+  // Ref: https://github.com/googleapis/nodejs-logging-winston?tab=readme-ov-file#alternative-way-to-ingest-logs-in-google-cloud-managed-environments
+  redirectToStdout: true,
+})
+const logger = winston.createLogger({
+  format: winston.format.combine(
+    winston.format.splat(),
+    winston.format.simple()
+  ),
+  level: 'debug',
   transports: [
     process.env.GAE_APPLICATION
-      ? new LoggingWinston({
-          level: 'debug',
-        })
-      : new transports.Console({
-          level: 'debug',
-        }),
-    new transports.File({ filename: 'debug.log', level: 'debug' }),
+      ? loggingWinston
+      : new winston.transports.Console(),
   ],
 })
 

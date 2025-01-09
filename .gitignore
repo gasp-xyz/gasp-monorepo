@@ -8,11 +8,14 @@
 *.so
 *.dylib
 *.idea
+metadata.scale
 
 .DS_Store
 
 # Test binary, built with `go test -c`
 *.test
+!ferry-withdrawal/env.test
+!ferry-deposit/env.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
@@ -86,6 +89,10 @@ out
 !broadcast
 **/broadcast/*
 **/broadcast/*/31337/
+
+!contracts/script/input/1337/ethereum_rolldown_output.json
+!contracts/script/input/1337/arbitrum_rolldown_output.json
+!contracts/script/input/1337/base_rolldown_output.json
 
 /ops/blockscout-docker-compose/services/blockscout-db-data
 /ops/blockscout-docker-compose/services/stats-db-data

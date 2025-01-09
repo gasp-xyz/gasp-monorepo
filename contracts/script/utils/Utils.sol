@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity =0.8.12;
+pragma solidity =0.8.13;
 
 import "@eigenlayer-middleware/src/interfaces/IRegistryCoordinator.sol";
 import "@eigenlayer/contracts/strategies/StrategyBase.sol";
-import "../../src/ERC20Mock.sol";
-
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";
-import {IRolldownPrimitives} from "../../src/Rolldown.sol";
+import "../../src/ERC20Mock.sol";
+import {IRolldownPrimitives} from "../../src/IRolldownPrimitives.sol";
 
 contract Utils is Script {
     // Note that this fct will only work for the ERC20Mock that has a public mint function
@@ -87,6 +86,14 @@ contract Utils is Script {
         return string.concat(outputdir, chaindir, file);
     }
 
+    // Forge scripts best practice: https://book.getfoundry.sh/tutorials/best-practices#scripts
+    function outputExists(
+        string memory outputFileName
+    ) internal returns (bool) {
+        string memory output = calculateOutputPath(outputFileName);
+        console.log(output);
+        return vm.exists(calculateOutputPath(outputFileName));
+    }
 
     // Forge scripts best practice: https://book.getfoundry.sh/tutorials/best-practices#scripts
     function inputExists(
@@ -148,6 +155,8 @@ contract Utils is Script {
         evm = "ethereum_";
       } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
         evm = "arbitrum_"; 
+      } else if (chain == IRolldownPrimitives.ChainId.Base) {
+        evm = "base_"; 
       } else {
         revert("Unsupported chain");
       }

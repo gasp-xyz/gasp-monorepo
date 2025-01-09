@@ -1,14 +1,19 @@
 import { type PublicClientConfig, createPublicClient, http } from 'viem'
 import RolldownContract from '../Rolldown.json' assert { type: 'json' }
-import { transactionRepository } from '../repository/TransactionRepository.js'
+import {
+  depositRepository,
+  withdrawalRepository,
+} from '../repository/TransactionRepository.js'
 import process from 'node:process'
 import { ApiPromise } from '@polkadot/api'
 import { timeseries } from '../connector/RedisConnector.js'
 import { setTimeout } from 'timers/promises'
 import logger from '../util/Logger.js'
 
-export const L1_CONFIRMED_STATUS = 'L1_CONFIRMED'
-export const L1_INITIATED_STATUS = 'L1_INITIATED'
+export const DEPOSIT_SUBMITTED_TO_L2 = 'SubmittedToL2'
+export const DEPOSIT_PENDING_ON_L1 = 'PendingOnL1'
+export const WITHDRAWAL_BATCHED_FOR_L1 = 'BatchedForL1'
+export const PROCESSED_STATUS = 'Processed'
 
 const keepProcessing = true
 
@@ -16,7 +21,8 @@ export const watchDepositAcceptedIntoQueue = async (
   api: any,
   chainUrl: string,
   chain: any,
-  chainName: string
+  chainName: string,
+  contractAddress: string
 ) => {
   const publicClient = getPublicClient({
     transport: http(chainUrl),
@@ -31,35 +37,40 @@ export const watchDepositAcceptedIntoQueue = async (
         fromBlock = toBlock
       }
       logger.info({
-        message: `chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
+        message: `Deposit: chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
       })
       const logs = await publicClient.getContractEvents({
-        address: `0x${process.env.CONTRACT_ADDRESS}` as `0x${string}`,
+        address: `0x${contractAddress}` as `0x${string}`,
         abi: RolldownContract.abi,
         eventName: 'DepositAcceptedIntoQueue',
         fromBlock,
         toBlock,
       })
+
       for (const log of logs) {
+        logger.info({
+          message: 'Processing deposit log:',
+          log: log,
+        })
         const { transactionHash, blockNumber } = log
-        const existingTransaction = await transactionRepository
+        const existingTransaction = await depositRepository
           .search()
           .where('txHash')
           .equals(transactionHash)
           .and('type')
           .equals('deposit')
           .and('status')
-          .equals(L1_INITIATED_STATUS)
+          .equals(DEPOSIT_PENDING_ON_L1)
           .returnFirst()
 
         if (existingTransaction) {
-          existingTransaction.status = L1_CONFIRMED_STATUS
+          existingTransaction.status = DEPOSIT_SUBMITTED_TO_L2
           existingTransaction.requestId = Number((log as any).args.requestId)
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
-          await transactionRepository.save(existingTransaction)
+          await depositRepository.save(existingTransaction)
           logger.info({
-            message: 'Transaction status updated:',
+            message: 'Deposit status updated:',
             transaction: existingTransaction,
           })
         }
@@ -69,6 +80,95 @@ export const watchDepositAcceptedIntoQueue = async (
     } catch (error) {
       logger.error({
         message: 'Error in watchDepositAcceptedIntoQueue loop:',
+        error: error,
+      })
+    }
+    await setTimeout(5000)
+  }
+}
+
+export const watchWithdrawalClosed = async (
+  api: any,
+  chainUrl: string,
+  chain: any,
+  chainName: string,
+  contractAddress: string
+) => {
+  const publicClient = getPublicClient({
+    transport: http(chainUrl),
+    chain: chain,
+  })
+
+  while (keepProcessing) {
+    try {
+      const toBlock = await publicClient.getBlockNumber()
+      let fromBlock = await getLastProcessedBlock(chainName, 'withdrawal')
+      if (fromBlock === 0n) {
+        fromBlock = toBlock
+      }
+      logger.info({
+        message: ` Withdrawal: chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
+      })
+      const eventsFerried = await publicClient.getContractEvents({
+        address: `0x${contractAddress}` as `0x${string}`,
+        abi: RolldownContract.abi,
+        eventName: 'FerriedWithdrawalClosed',
+        fromBlock,
+        toBlock,
+      })
+      const eventsNotFerried = await publicClient.getContractEvents({
+        address: `0x${contractAddress}` as `0x${string}`,
+        abi: RolldownContract.abi,
+        eventName: 'WithdrawalClosed',
+        fromBlock,
+        toBlock,
+      })
+      const combinedEvents = [...eventsFerried, ...eventsNotFerried]
+      for (const event of combinedEvents) {
+        logger.info({
+          message: 'Processing withdrawal event:',
+          event: event,
+        })
+        const {
+          blockNumber,
+          eventName,
+          args: { requestId, withdrawalHash },
+        } = event as any
+        const existingTransaction = await withdrawalRepository
+          .search()
+          .where('requestId')
+          .equals(requestId)
+          .and('txHash')
+          .equals(withdrawalHash)
+          .and('type')
+          .equals('withdrawal')
+          .and('status')
+          .equals(WITHDRAWAL_BATCHED_FOR_L1)
+          .and('chain')
+          .equals(chainName)
+          .returnFirst()
+        logger.info(
+          'Existing withdrawal found to be updated:',
+          existingTransaction
+        )
+        if (existingTransaction) {
+          existingTransaction.status = PROCESSED_STATUS
+          existingTransaction.closedBy =
+            eventName === 'FerriedWithdrawalClosed' ? 'ferry' : 'regular'
+          const timestamp = new Date().toISOString()
+          existingTransaction.updated = Date.parse(timestamp)
+          await withdrawalRepository.save(existingTransaction)
+          logger.info({
+            message: 'Withdrawal status updated:',
+            transaction: existingTransaction,
+          })
+        }
+        await saveLastProcessedBlock(chainName, blockNumber, 'withdrawal')
+      }
+      await saveLastProcessedBlock(chainName, toBlock, 'withdrawal') //even if in the range of fromBlock and toBlock we didn't find any event, we save the last block
+    } catch (error) {
+      logger.error({
+        message: 'Error in withdrawal closure loop:',
         error: error,
       })
     }
@@ -86,7 +186,7 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
         l1Chain,
         'deposit'
       )
-      const transactionsToProcess = await transactionRepository
+      const transactionsToProcess = await depositRepository
         .search()
         .where('chain')
         .equals(l1Chain)
@@ -96,13 +196,16 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
         .gte(lastSavedProcessedRequestId)
         .and('requestId')
         .lte(lastProcessedRequestId)
+        .and('status')
+        .not.equals('Processed') //we want to skip ferried, already processed
         .return.all()
 
       for (const transaction of transactionsToProcess) {
-        transaction.status = 'PROCESSED'
+        transaction.status = 'Processed'
         const timestamp = new Date().toISOString()
         transaction.updated = Date.parse(timestamp)
-        await transactionRepository.save(transaction)
+        transaction.closedBy = 'regular'
+        await depositRepository.save(transaction)
       }
       await saveLastProcessedRequestId(
         //even if we don't have any transaction to process, we save the last processed request id
@@ -127,12 +230,12 @@ const saveLastProcessedRequestId = async (
   type: string
 ) => {
   await timeseries.client.hset(
-    `tx:${type}:${l1Chain}`,
+    `transactions_scanned:${type}:${l1Chain}`,
     'lastRequestId',
     lastProcessedRequestId.toString()
   )
   logger.info(
-    `Last processed requestId ${lastProcessedRequestId} for chain ${l1Chain} saved`
+    `${type} : Last processed requestId ${lastProcessedRequestId} chain ${l1Chain} saved`
   )
 }
 
@@ -141,7 +244,7 @@ const getLastProcessedRequestId = async (
   type: string
 ): Promise<number | null> => {
   const result = await timeseries.client.hget(
-    `tx:${type}:${l1Chain}`,
+    `transactions_scanned:${type}:${l1Chain}`,
     'lastRequestId'
   )
   return result ? Number(result) : 0
@@ -153,12 +256,12 @@ const saveLastProcessedBlock = async (
   type: string
 ) => {
   await timeseries.client.hset(
-    `tx:${type}:${l1Chain}`,
+    `transactions_scanned:${type}:${l1Chain}`,
     'lastBlock',
     lastProcessedBlock.toString()
   )
   logger.info(
-    `Last processed block ${lastProcessedBlock} saved for chain ${l1Chain}`
+    `${type} : Last processed block ${lastProcessedBlock} saved for chain ${l1Chain}`
   )
 }
 
@@ -167,7 +270,7 @@ const getLastProcessedBlock = async (
   type: string
 ): Promise<bigint | null> => {
   const result = await timeseries.client.hget(
-    `tx:${type}:${l1Chain}`,
+    `transactions_scanned:${type}:${l1Chain}`,
     'lastBlock'
   )
   return result ? BigInt(result) : 0n

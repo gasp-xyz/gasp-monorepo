@@ -16,14 +16,14 @@ function create_binding {
 
     rm -f $binding_dir/${contract}/binding.go
     abigen --bin=data/tmp.bin --abi=data/tmp.abi --pkg=contract${contract} --out=$binding_dir/${contract}/binding.go
-    rm -rf ../data/tmp.abi ../data/tmp.bin
+    rm -rf data/tmp.abi data/tmp.bin
 }
 
 rm -rf bindings/*
 forge clean
 forge build
 
-avs_service_contracts="FinalizerServiceManager FinalizerTaskManager GaspMultiRollupService BLSSignatureChecker DelegationManager StakeRegistry OperatorStateRetrieverExtended"
+avs_service_contracts="FinalizerServiceManager FinalizerTaskManager GaspMultiRollupService BLSSignatureChecker DelegationManager StakeRegistry IndexRegistry OperatorStateRetrieverExtended"
 for contract in $avs_service_contracts; do
     create_binding . $contract ../avs-aggregator/bindings
 done

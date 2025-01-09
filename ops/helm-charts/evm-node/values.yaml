@@ -3,20 +3,23 @@
 # Declare variables to be passed into your templates.
 environment: local
 domainZone: gasp.xyz
-nameOverride: ''
-privateKey: '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+nameOverride: ""
+privateKey: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 remoteCluster: false
 ingressClassName: nginx
-customGenesisUrl: ''
+customGenesisUrl: ""
 
 envSelector: ethereum-stub
 verifierEnabled: false
 verifierName: blockscout
-verifierUrl: 'http://blockscout-eth-blockscout-stack-blockscout-svc:80/api'
+verifierUrl: "http://blockscout-eth-blockscout-stack-blockscout-svc:80/api"
+
+# ttlSecondsAfterFinished is the time to keep the job before deleting it in seconds after the job finishes
+ttlSecondsAfterFinished: ''
 
 dataMountPath: /data
 
-evmNodeImage: 'ghcr.io/paradigmxyz/reth:v1.0.0'
+evmNodeImage: "ghcr.io/paradigmxyz/reth:v1.0.7"
 command: []
 args:
   - node
@@ -31,14 +34,15 @@ args:
   - --ws.port=8546
   - --ws.api=all
   - --ws.origins=*
+  - --dev.block-time=1s
 enableAutoMine: true
 
 enablePersistence: false
 storageClass: standard
 storageSize: 5Gi
 
-image: 
-  repository: mangatasolutions/anvil
+image:
+  repository: gaspxyz/gasp-contracts
   tag: be439052d9ed89109c4dd02b387cdf7cbbcc6870
 
 resources:

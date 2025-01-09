@@ -3,10 +3,12 @@ import * as store from '../repository/ChainRepository.js'
 import * as blocks from '../scraper/BlockScraper.js'
 import * as pools from '../scraper/PoolsScraper.js'
 import * as staking from '../scraper/StakingScraper.js'
+import * as withdrawals from '../scraper/WithdrawalScraper.js'
+import * as deposits from '../scraper/DepositScraper.js'
+import * as swaps from '../scraper/SwapScraper.js'
 import logger from '../util/Logger.js'
 
 export const initService = async () => {
-  console.log('init service called')
   const api = await MangataClient.api()
 
   const latestBlock = (await store.getLatest()).block
@@ -14,9 +16,12 @@ export const initService = async () => {
   await blocks.withBlocks(api, latestBlock, async (block) => {
     try {
       await blocks.processEvents(block)
+      await withdrawals.processWithdrawalEvents(api, block)
+      await deposits.processFerriedDepositEvents(api, block)
       await pools.fetchPools(block)
       await staking.processStaking(api, block)
       await staking.processLiquidStaking(api, block)
+      await swaps.processSwapEvents(api, block)
       await store.saveLatest({
         timestamp: block.timestamp,
         block: block.number,

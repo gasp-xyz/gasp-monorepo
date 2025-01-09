@@ -1,0 +1,28 @@
+{
+  "name": "gasp-contracts",
+  "version": "1.0.0",
+  "description": "Gasp smart contracts for an EVM compatible virtual machine",
+  "scripts": {
+    "format": "bun prettier --check '**/*.{json,md,yml}' && forge fmt --check interfaces/IGaspToken.sol src/{GaspToken.sol,IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
+    "format:fix": "bun prettier --check '**/*.{json,md,yml}' && forge fmt interfaces/IGaspToken.sol {src/GaspToken.sol,src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/rolldownDeployer.t}.sol",
+    "lint": "bun solhint {script,src,test}/**/{GaspToken,IGaspToken,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
+    "lint:fix": "bun solhint --fix {script,src,test}/**/{GaspToken,IGaspToken,IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
+    "cover": "forge coverage --report lcov && genhtml lcov.info -o coverage && open coverage/index.html",
+    "analyze": "slitherin . --separated",
+    "analyze:ci": "slitherin --separated . --skip-clean --ignore-compile"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gasp-xyz/gasp-monorepo/contracts"
+  },
+  "license": "BUSL-1.1",
+  "private": true,
+  "maintainers": [
+    "mateuszaaa <mateusz.cz.nowakowski@gmail.com>",
+    "Serge <2901744+evercoinx@users.noreply.github.com>"
+  ],
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "solhint": "^5.0.3"
+  }
+}

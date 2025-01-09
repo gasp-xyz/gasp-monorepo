@@ -48,6 +48,8 @@ interface IFinalizerTaskManager {
         RdTaskResponse taskResponse);
 
     event RolldownTargetUpdated(address rolldownAddress);
+    event AggregatorUpdated(address aggregatorAddress);
+    event GeneratorUpdated(address generatorAddress);
 
     // DATA STRUCTURES
     enum TaskStatus
@@ -71,6 +73,8 @@ interface IFinalizerTaskManager {
         uint32 taskNum;
         // used for expiration checks
         uint32 taskCreatedBlock;
+        // The last completed task used as reference block for operator state on other L1s
+        uint32 lastCompletedOpTaskNum;
         // The last completed task used as reference block for operator state on other L1s
         uint32 lastCompletedOpTaskCreatedBlock;
         // task submitter decides on the criteria for a task to be completed
@@ -103,6 +107,8 @@ interface IFinalizerTaskManager {
         uint32 batchId;
         // used for expiration checks
         uint32 taskCreatedBlock;
+        // The last completed task used as reference block for operator state on other L1s
+        uint32 lastCompletedOpTaskNum;
         // The last completed task used as reference block for operator state on other L1s
         uint32 lastCompletedOpTaskCreatedBlock;
         // We require these to validate the old state correctly

@@ -1,19 +1,20 @@
 package chainio
 
 import (
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
-	"github.com/Layr-Labs/eigensdk-go/logging"
 	regcoord "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RegistryCoordinator"
+	"github.com/Layr-Labs/eigensdk-go/logging"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
-	servicemanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerServiceManager"
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
-	blsSignatureChecker "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
-	delegationManager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/DelegationManager"
-	stakeRegistry "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/StakeRegistry"
-	operatorStateRetrieverExtended "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/OperatorStateRetrieverExtended"
+	blsSignatureChecker "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
+	delegationManager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/DelegationManager"
+	servicemanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerServiceManager"
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	indexRegistry "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/IndexRegistry"
+	operatorStateRetrieverExtended "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/OperatorStateRetrieverExtended"
+	stakeRegistry "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/StakeRegistry"
 )
 
 type AvsServiceBindings struct {
@@ -22,6 +23,7 @@ type AvsServiceBindings struct {
 	ServiceManager         *servicemanager.ContractFinalizerServiceManager
 	BlsSignatureChecker         *blsSignatureChecker.ContractBLSSignatureChecker
 	StakeRegistry 			*stakeRegistry.ContractStakeRegistry
+	IndexRegistry          *indexRegistry.ContractIndexRegistry 
 	DelegationManager      *delegationManager.ContractDelegationManager
 	OperatorStateRetrieverExtended *operatorStateRetrieverExtended.ContractOperatorStateRetrieverExtended
 	OperatorStateRetriever common.Address
@@ -29,12 +31,12 @@ type AvsServiceBindings struct {
 	TaskManagerAddress common.Address
 	StakeRegistryAddress common.Address 
 	RegistryCoordinatorAddress common.Address
-	ethClient              eth.Client
+	EthClient              *ethclient.Client
 	logger                 logging.Logger
 }
 
-func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth.Client, logger logging.Logger) (*AvsServiceBindings, error) {
-	contractRegistryCoordinator, err := regcoord.NewContractRegistryCoordinator(registryCoordinatorAddr, ethclient)
+func NewAvsServiceBindings(registryCoordinatorAddr common.Address, EthClient *ethclient.Client, logger logging.Logger) (*AvsServiceBindings, error) {
+	contractRegistryCoordinator, err := regcoord.NewContractRegistryCoordinator(registryCoordinatorAddr, EthClient)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +46,7 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		logger.Error("Failed to fetch ServiceManager address", "err", err)
 		return nil, err
 	}
-	contractServiceManager, err := servicemanager.NewContractFinalizerServiceManager(serviceManagerAddr, ethclient)
+	contractServiceManager, err := servicemanager.NewContractFinalizerServiceManager(serviceManagerAddr, EthClient)
 	if err != nil {
 		logger.Error("Failed to fetch IServiceManager contract", "err", err)
 		return nil, err
@@ -55,7 +57,7 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		logger.Error("Failed to fetch TaskManager address", "err", err)
 		return nil, err
 	}
-	contractTaskManager, err := taskmanager.NewContractFinalizerTaskManager(taskManagerAddr, ethclient)
+	contractTaskManager, err := taskmanager.NewContractFinalizerTaskManager(taskManagerAddr, EthClient)
 	if err != nil {
 		logger.Error("Failed to fetch IIncredibleSquaringTaskManager contract", "err", err)
 		return nil, err
@@ -67,7 +69,7 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		logger.Error("Failed to fetch TaskManager address", "err", err)
 		return nil, err
 	}
-	contractBlsSignatureChecker, err := blsSignatureChecker.NewContractBLSSignatureChecker(blsSignatureCheckerAddr, ethclient)
+	contractBlsSignatureChecker, err := blsSignatureChecker.NewContractBLSSignatureChecker(blsSignatureCheckerAddr, EthClient)
 	if err != nil {
 		logger.Error("Failed to fetch TaskManager contract", "err", err)
 		return nil, err
@@ -79,9 +81,20 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		logger.Error("Failed to fetch StakeRegistry address", "err", err)
 		return nil, err
 	}
-	contractStakeRegistry, err := stakeRegistry.NewContractStakeRegistry(stakeRegistryAddr, ethclient)
+	contractStakeRegistry, err := stakeRegistry.NewContractStakeRegistry(stakeRegistryAddr, EthClient)
 	if err != nil {
 		logger.Error("Failed to fetch StakeRegistry contract", "err", err)
+		return nil, err
+	}
+	
+	indexRegistryAddr, err := contractRegistryCoordinator.IndexRegistry(&bind.CallOpts{})
+	if err != nil {
+		logger.Error("Failed to fetch IndexRegistry address", "err", err)
+		return nil, err
+	}
+	contractIndexRegistry, err := indexRegistry.NewContractIndexRegistry(indexRegistryAddr, EthClient)
+	if err != nil {
+		logger.Error("Failed to fetch IndexRegistry contract", "err", err)
 		return nil, err
 	}
 
@@ -90,7 +103,7 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		logger.Error("Failed to fetch DelegationManager address", "err", err)
 		return nil, err
 	}
-	contractDelegationManager, err := delegationManager.NewContractDelegationManager(delegationManagerAddr, ethclient)
+	contractDelegationManager, err := delegationManager.NewContractDelegationManager(delegationManagerAddr, EthClient)
 	if err != nil {
 		logger.Error("Failed to fetch DelegationManager contract", "err", err)
 		return nil, err
@@ -101,7 +114,7 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		logger.Error("Failed to fetch OperatorStateRetrieverExtended address", "err", err)
 		return nil, err
 	}
-	contractOperatorStateRetrieverExtended, err := operatorStateRetrieverExtended.NewContractOperatorStateRetrieverExtended(operatorStateRetrieverExtendedAddr, ethclient)
+	contractOperatorStateRetrieverExtended, err := operatorStateRetrieverExtended.NewContractOperatorStateRetrieverExtended(operatorStateRetrieverExtendedAddr, EthClient)
 	if err != nil {
 		logger.Error("Failed to fetch OperatorStateRetrieverExtended contract", "err", err)
 		return nil, err
@@ -113,6 +126,7 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		TaskManager:            contractTaskManager,
 		BlsSignatureChecker:            contractBlsSignatureChecker,
 		StakeRegistry:            contractStakeRegistry,
+		IndexRegistry:            contractIndexRegistry,
 		DelegationManager:            contractDelegationManager,
 		OperatorStateRetrieverExtended: contractOperatorStateRetrieverExtended,
 		OperatorStateRetriever: taskManagerAddr,
@@ -120,7 +134,7 @@ func NewAvsServiceBindings(registryCoordinatorAddr common.Address, ethclient eth
 		TaskManagerAddress: taskManagerAddr,
 		StakeRegistryAddress: stakeRegistryAddr,
 		RegistryCoordinatorAddress: registryCoordinatorAddr,
-		ethClient:              ethclient,
+		EthClient:              EthClient,
 		logger:                 logger,
 	}, nil
 }

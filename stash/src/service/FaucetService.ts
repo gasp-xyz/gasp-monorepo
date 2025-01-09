@@ -8,7 +8,7 @@ import {
   http,
   publicActions,
 } from 'viem'
-import { holesky } from 'viem/chains'
+import { CONFIG_TO_CHAIN } from '../util/ConfigToChain.js'
 import { privateKeyToAccount } from 'viem/accounts'
 import Gasp from '../Gasp.json' assert { type: 'json' }
 import { ForbiddenException } from '../error/Exception.js'
@@ -33,7 +33,6 @@ export const verifyCaptcha = async (captchaToken: string): Promise<void> => {
     sitekey: process.env.CAPTCHA_SITEKEY,
     response: captchaToken,
   }
-  console.log('token: ' + captchaToken)
   const response = await axios.post(VERIFY_URL, payload, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -81,8 +80,8 @@ const send = async (
 ) => {
   // Create a new wallet client
   const client = createWalletClient({
-    chain: holesky,
-    transport: http(process.env.HOLESKY_ADDRESS),
+    chain: CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-ethereum'),
+    transport: http(process.env.RPC_ADDRESS),
   }).extend(publicActions)
   const account = privateKeyToAccount(
     `0x${process.env.ORIGIN_ACCOUNT_PRIVATE_KEY}`
@@ -102,8 +101,8 @@ const send = async (
 
 const simulateTransaction = async (transaction: SimulateTransactionRequest) => {
   const publicClient = createPublicClient({
-    chain: holesky,
-    transport: http(process.env.HOLESKY_ADDRESS),
+    chain: CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-ethereum'),
+    transport: http(process.env.RPC_ADDRESS),
   })
   const baseFeeInWei = await publicClient.getGasPrice()
   const maxPriorityFeePerGasInWei =
@@ -113,7 +112,7 @@ const simulateTransaction = async (transaction: SimulateTransactionRequest) => {
 
   const { request } = await transaction.client.simulateContract({
     account: transaction.account,
-    chain: holesky,
+    chain: CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-ethereum'),
     abi: Gasp.abi,
     address: transaction.tokenToSendAddress,
     args: [transaction.toAddress, transaction.amount],

@@ -179,7 +179,7 @@
         }
       }
     },
-    "/token/{symbol}/stats": {
+    "/token/{id}/stats": {
       "get": {
         "tags": [
           "Token List"
@@ -188,7 +188,7 @@
         "description": "This endpoint retrieves detail information about token listed on Mangata with its stats",
         "parameters": [
           {
-            "name": "symbol",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -348,7 +348,7 @@
         }
       }
     },
-    "/price-discovery/{currencySymbol}/": {
+    "/price-discovery/{currencyId}/": {
       "get": {
         "tags": [
           "Price Discovery"
@@ -357,7 +357,7 @@
         "description": "The price will be returned in all tokens including USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
             "type": "string",
@@ -388,7 +388,7 @@
         }
       }
     },
-    "/price-history/pair/{baseCurrencySymbol}/{targetCurrencySymbol}": {
+    "/price-history/pair/{baseCurrencyId}/{targetCurrencyId}": {
       "get": {
         "tags": [
           "Price History Pair"
@@ -397,17 +397,17 @@
         "description": "The price of base asset will be returned in in the target asset.",
         "parameters": [
           {
-            "name": "baseCurrencySymbol",
+            "name": "baseCurrencyId",
             "in": "path",
             "required": true,
-            "type": "string",
+            "type": "integer",
             "description": "which token to get as a base"
           },
           {
-            "name": "targetCurrencySymbol",
+            "name": "targetCurrencyId",
             "in": "path",
             "required": true,
-            "type": "string",
+            "type": "integer",
             "description": "which token to get as target"
           },
           {
@@ -445,7 +445,7 @@
         }
       }
     },
-    "/price-history/{currencySymbol}/": {
+    "/price-history/{currencyId}/": {
       "get": {
         "tags": [
           "Price History"
@@ -454,7 +454,7 @@
         "description": "The price will be returned in USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
             "type": "string",
@@ -495,7 +495,7 @@
         }
       }
     },
-    "/volume-history/pools/{currencySymbol}/": {
+    "/volume-history/pools/{currencyId}/": {
       "get": {
         "tags": [
           "Volume History"
@@ -504,7 +504,7 @@
         "description": "The price will be returned in USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
             "type": "string",
@@ -545,7 +545,7 @@
         }
       }
     },
-    "/volume-history/{currencySymbol}/": {
+    "/volume-history/{currencyId}/": {
       "get": {
         "tags": [
           "Volume History"
@@ -554,7 +554,7 @@
         "description": "The price will be returned in USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
             "type": "string",
@@ -595,7 +595,7 @@
         }
       }
     },
-    "/tvl-history/pools/{currencySymbol}/": {
+    "/tvl-history/pools/{currencyId}/": {
       "get": {
         "tags": [
           "TVL History"
@@ -604,7 +604,7 @@
         "description": "The price will be returned in USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
             "type": "string",
@@ -645,7 +645,7 @@
         }
       }
     },
-    "/tvl-history/{currencySymbol}/": {
+    "/tvl-history/{currencyId}/": {
       "get": {
         "tags": [
           "TVL History"
@@ -654,10 +654,10 @@
         "description": "The price will be returned in USD.",
         "parameters": [
           {
-            "name": "currencySymbol",
+            "name": "currencyId",
             "in": "path",
             "required": true,
-            "type": "string",
+            "type": "integer",
             "description": "which token or pool to get"
           },
           {
@@ -969,14 +969,25 @@
         }
       }
     },
-    "/tracing/tx/{txHashOrEntityId}": {
+    "/tracing/type/{type}/tx/{txHashOrEntityId}": {
       "get": {
         "tags": [
           "Tracing"
         ],
         "summary": "Get transaction status by txHash or entityId.",
-        "description": "Get the status of a transaction by providing the transaction hash or entity ID.",
+        "description": "Get the status of a transaction by providing the transaction hash or entity ID and type of the transaction.",
         "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Type of the transaction",
+            "enum": [
+              "deposit",
+              "withdrawal"
+            ]
+          },
           {
             "name": "txHashOrEntityId",
             "in": "path",
@@ -998,14 +1009,25 @@
         }
       }
     },
-    "/tracing/tx/listByAddress/{address}": {
+    "/tracing/type/{type}/tx/listByAddress/{address}": {
       "get": {
         "tags": [
           "Tracing"
         ],
         "summary": "Get all transactions by address.",
-        "description": "Get all transactions associated with a specific address.",
+        "description": "Get all transactions by providing a specific address and type of a transaction.",
         "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Type of the transaction",
+            "enum": [
+              "deposit",
+              "withdrawal"
+            ]
+          },
           {
             "name": "address",
             "in": "path",
@@ -1027,14 +1049,25 @@
         }
       }
     },
-    "/tracing/tx/listByAddress/{address}/{status}": {
+    "/tracing/type/{type}/tx/listByAddress/{address}/{status}": {
       "get": {
         "tags": [
           "Tracing"
         ],
         "summary": "Get all transactions by address and status.",
-        "description": "Get all transactions associated with a specific address and status.",
+        "description": "Retrieve all transactions for a specific address and status by providing the address, status, and transaction type.",
         "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Type of the transaction",
+            "enum": [
+              "deposit",
+              "withdrawal"
+            ]
+          },
           {
             "name": "address",
             "in": "path",
@@ -1063,14 +1096,25 @@
         }
       }
     },
-    "/tracing/tx/findByEntityId/{entityId}": {
+    "/tracing/type/{type}/tx/findByEntityId/{entityId}": {
       "get": {
         "tags": [
           "Tracing"
         ],
         "summary": "Get a transaction by entityId.",
-        "description": "Get a specific transaction by providing the entity ID.",
+        "description": "Get a specific transaction by providing the entity ID and type of a transaction.",
         "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Type of the transaction",
+            "enum": [
+              "deposit",
+              "withdrawal"
+            ]
+          },
           {
             "name": "entityId",
             "in": "path",
@@ -1085,6 +1129,190 @@
           },
           "404": {
             "description": "Transaction not found for this entityId"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/price/token/{tokenId}": {
+      "get": {
+        "tags": [
+          "Token Prices"
+        ],
+        "summary": "Get the price of a specific token.",
+        "description": "Retrieve the price of a token by providing its ID. Price is returned in USD.",
+        "parameters": [
+          {
+            "name": "tokenId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the token to retrieve the price for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "tokenId": "exampleTokenId",
+                  "price": 123.45
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Token price not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Token price not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "An error occurred while retrieving the token price"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/{wallet}/dashboard": {
+      "get": {
+        "tags": [
+          "Trading"
+        ],
+        "summary": "Get dashboard data.",
+        "description": "Retrieve the dashboard data.",
+        "parameters": [
+          {
+            "name": "wallet",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Wallet to get dashboard data for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with dashboard data"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/mgx-airdrop/eligibility/{address}": {
+      "get": {
+        "tags": [
+          "mgx-airdrop"
+        ],
+        "summary": "Check eligibility for MGX airdrop",
+        "description": "Verifies if the provided address is eligible for the airdrop based on snapshots.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "MangataX address"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mangataXAddress": {
+                  "type": "string",
+                  "example": "5Gxkb...PDnnR"
+                },
+                "isEligible": {
+                  "type": "boolean",
+                  "example": true
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/mgx-airdrop/link-address": {
+      "post": {
+        "tags": [
+          "mgx-airdrop"
+        ],
+        "summary": "Link Ethereum address to MangataX address",
+        "description": "Links the provided Ethereum address to the provided MangataX address.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "JSON object containing the Ethereum and MangataX addresses to be linked",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ethereumAddress": {
+                  "type": "string",
+                  "example": "0x..."
+                },
+                "mangataXAddress": {
+                  "type": "string",
+                  "example": "5Gxkb...PDnnR"
+                }
+              }
+            }
+          },
+          {
+            "name": "x-signature",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ethereumAddress": {
+                  "type": "string",
+                  "example": "0x..."
+                },
+                "mangataXAddress": {
+                  "type": "string",
+                  "example": "5Gxkb...PDnnR"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
           },
           "500": {
             "description": "Internal Server Error"

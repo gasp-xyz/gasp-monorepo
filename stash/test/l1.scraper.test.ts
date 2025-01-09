@@ -2,8 +2,12 @@ import { describe, expect, vi, beforeEach, it } from 'vitest'
 import {
   watchDepositAcceptedIntoQueue,
   processRequests,
+  watchWithdrawalClosed,
 } from '../src/scraper/L1LogScraper'
-import { transactionRepository } from '../src/repository/TransactionRepository'
+import {
+  depositRepository,
+  withdrawalRepository,
+} from '../src/repository/TransactionRepository'
 import { timeseries } from '../src/connector/RedisConnector'
 import logger from '../src/util/Logger'
 import { holesky } from 'viem/chains'
@@ -14,6 +18,7 @@ vi.mock('../src/util/Logger')
 vi.mock('../src/scraper/L1LogScraper', () => ({
   watchDepositAcceptedIntoQueue: vi.fn(),
   processRequests: vi.fn(),
+  watchWithdrawalClosed: vi.fn(),
 }))
 let keepProcessing = true
 
@@ -23,7 +28,7 @@ describe('L1LogScraper', () => {
     keepProcessing = true
   })
 
-  it('should update transaction status to L1_CONFIRMED on DepositAcceptedIntoQueue event', async () => {
+  it('should update transaction status to SubmittedToL2 on DepositAcceptedIntoQueue event', async () => {
     const mockApi = {}
     const mockPublicClient = {
       getBlockNumber: vi.fn().mockResolvedValue(100n),
@@ -35,19 +40,19 @@ describe('L1LogScraper', () => {
         },
       ]),
     }
-    vi.mocked(transactionRepository.search).mockReturnValue({
+    vi.mocked(depositRepository.search).mockReturnValue({
       where: vi.fn().mockReturnThis(),
       equals: vi.fn().mockReturnThis(),
       and: vi.fn().mockReturnThis(),
       returnFirst: vi.fn().mockResolvedValue({
         txHash: '0x123',
-        status: 'L1_INITIATED',
+        status: 'PendingOnL1',
         type: 'deposit',
         requestId: null,
         updated: 0,
       }),
     })
-    vi.mocked(transactionRepository.save).mockResolvedValue({})
+    vi.mocked(depositRepository.save).mockResolvedValue({})
     vi.mocked(timeseries.client.hget).mockResolvedValue('0')
     vi.mocked(timeseries.client.hset).mockResolvedValue({})
     vi.mocked(logger.info).mockImplementation(() => {})
@@ -58,10 +63,10 @@ describe('L1LogScraper', () => {
       // Simulate the calls that would trigger the spies
       await mockPublicClient.getBlockNumber()
       await mockPublicClient.getContractEvents()
-      await transactionRepository.search()
-      await transactionRepository.save({
+      await depositRepository.search()
+      await depositRepository.save({
         txHash: '0x123',
-        status: 'L1_CONFIRMED',
+        status: 'SubmittedToL2',
         requestId: 1,
       })
       await timeseries.client.hset()
@@ -76,12 +81,78 @@ describe('L1LogScraper', () => {
 
     expect(mockPublicClient.getBlockNumber).toHaveBeenCalled()
     expect(mockPublicClient.getContractEvents).toHaveBeenCalled()
-    expect(transactionRepository.search).toHaveBeenCalled()
-    expect(transactionRepository.save).toHaveBeenCalledWith(
+    expect(depositRepository.search).toHaveBeenCalled()
+    expect(depositRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
         txHash: '0x123',
-        status: 'L1_CONFIRMED',
+        status: 'SubmittedToL2',
         requestId: 1,
+      })
+    )
+    expect(timeseries.client.hset).toHaveBeenCalled()
+  }, 10000)
+
+  it('should update transaction status to Processed on WithdrawalClosed event', async () => {
+    const mockApi = {}
+    const mockPublicClient = {
+      getBlockNumber: vi.fn().mockResolvedValue(100),
+      getContractEvents: vi.fn().mockResolvedValue([
+        {
+          blockNumber: 100n,
+          args: { requestId: 1, withdrawalHash: '0x456' },
+        },
+      ]),
+    }
+    vi.mocked(withdrawalRepository.search).mockReturnValue({
+      where: vi.fn().mockReturnThis(),
+      equals: vi.fn().mockReturnThis(),
+      and: vi.fn().mockReturnThis(),
+      returnFirst: vi.fn().mockResolvedValue({
+        requestId: 1,
+        txHash: '0x456',
+        status: 'BatchedForL1',
+        type: 'withdrawal',
+        chain: 'Ethereum',
+        updated: 0,
+      }),
+    })
+    vi.mocked(withdrawalRepository.save).mockResolvedValue({})
+    vi.mocked(timeseries.client.hget).mockResolvedValue('0')
+    vi.mocked(timeseries.client.hset).mockResolvedValue(100)
+
+    vi.mocked(watchWithdrawalClosed).mockImplementation(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      // Simulate the calls that would trigger the spies
+      await mockPublicClient.getBlockNumber()
+      await mockPublicClient.getContractEvents()
+      await withdrawalRepository.search()
+      await withdrawalRepository.save({
+        requestId: 1,
+        txHash: '0x456',
+        status: 'Processed',
+      })
+      await timeseries.client.hset(
+        `transactions_scanned:withdrawal:Ethereum`,
+        'lastBlock',
+        100
+      )
+    })
+
+    await watchWithdrawalClosed(
+      mockApi,
+      'http://chain.url',
+      holesky,
+      'Ethereum'
+    )
+
+    expect(mockPublicClient.getBlockNumber).toHaveBeenCalled()
+    expect(mockPublicClient.getContractEvents).toHaveBeenCalled()
+    expect(withdrawalRepository.search).toHaveBeenCalled()
+    expect(withdrawalRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestId: 1,
+        txHash: '0x456',
+        status: 'Processed',
       })
     )
     expect(timeseries.client.hset).toHaveBeenCalled()
@@ -102,7 +173,7 @@ describe('L1LogScraper', () => {
       address: '0x102',
       created: 1725613967329,
       updated: 1725613967329,
-      status: 'L1_CONFIRMED',
+      status: 'SubmittedToL2',
       type: 'deposit',
       chain: 'Ethereum',
       amount: '400000000000000000',
@@ -118,7 +189,7 @@ describe('L1LogScraper', () => {
     it('should process transactions and update their status to PROCESSED', async () => {
       mockApi.query.rolldown.lastProcessedRequestOnL2.mockResolvedValue(2)
       vi.mocked(timeseries.client.hget).mockResolvedValue('0')
-      vi.mocked(transactionRepository.search).mockReturnValue({
+      vi.mocked(depositRepository.search).mockReturnValue({
         where: vi.fn().mockReturnThis(),
         equals: vi.fn().mockReturnThis(),
         and: vi.fn().mockReturnThis(),
@@ -126,13 +197,13 @@ describe('L1LogScraper', () => {
         lte: vi.fn().mockReturnThis(),
         return: { all: vi.fn().mockResolvedValue([mockTransaction]) },
       })
-      vi.mocked(transactionRepository.save).mockResolvedValue(mockTransaction)
+      vi.mocked(depositRepository.save).mockResolvedValue(mockTransaction)
       vi.mocked(timeseries.client.hset).mockResolvedValue({})
       vi.mocked(processRequests).mockImplementation(async (api, l1Chain) => {
         await new Promise((resolve) => setTimeout(resolve, 100))
         await api.query.rolldown.lastProcessedRequestOnL2(l1Chain)
-        await transactionRepository.search()
-        await transactionRepository.save({
+        await depositRepository.search()
+        await depositRepository.save({
           requestId: 1,
           txHash: '0x102',
           address: '0x102',
@@ -154,8 +225,8 @@ describe('L1LogScraper', () => {
       await promise
 
       expect(mockApi.query.rolldown.lastProcessedRequestOnL2).toHaveBeenCalled()
-      expect(transactionRepository.search).toHaveBeenCalled()
-      expect(transactionRepository.save).toHaveBeenCalledWith(
+      expect(depositRepository.search).toHaveBeenCalled()
+      expect(depositRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           txHash: '0x102',
           status: 'PROCESSED',

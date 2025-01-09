@@ -1,0 +1,18 @@
+# !/usr/bin/env just --justfile
+export IMAGE_TAG := `echo ${IMAGE_TAG:-83174d468dca9d6e7fe13d798fb8a373d8fb0f42}`
+
+lint:
+  export ENVIRONMENT=lint
+  helmfile lint -e fungible
+
+diff-prod:
+  export IMAGE_TAG=83174d468dca9d6e7fe13d798fb8a373d8fb0f42 
+  helmfile diff -e prod
+
+sync-all-prod:
+  export IMAGE_TAG=83174d468dca9d6e7fe13d798fb8a373d8fb0f42 
+  helmfile sync -e prod
+
+sequencer-redeploy-prod:
+  export IMAGE_TAG=e82c4b3d9539b81f1cbe48066aed73ba5463fc10
+  helmfile apply -e prod -lname=sequencer-base -lname=sequencer-base-2 -lname=sequencer-base-3 -lname=sequencer-arb -lname=sequencer-arb-2 -lname=sequencer-arb-3 -lname=sequencer-eth -lname=sequencer-eth-2 -lname=sequencer-eth-3

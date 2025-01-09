@@ -27,6 +27,16 @@ import {
 	MANGATA_CONTRACT_ADDRESS,
 } from "../common/constants.js";
 
+async function asyncFilter(
+	arr: [u128, PalletRolldownMessagesL1Update, H256][],
+	predicate: any,
+) {
+	const results = await Promise.all(arr.map(predicate));
+	return arr.filter((v: any, index: any) => {
+		return results[index];
+	});
+}
+
 function getL1ChainType(api: ApiPromise): PalletRolldownMessagesChain {
 	return api.createType("PalletRolldownMessagesChain", L1_CHAIN);
 }
@@ -84,7 +94,7 @@ async function initReadContractWithRetry(
 ) {
 	while (true) {
 		const latestBlockNumber = await publicClient.getBlockNumber();
-		const delayedBlockNumber = latestBlockNumber - BigInt(BLOCK_NUMBER_DELAY);
+		const delayedBlockNumber = latestBlockNumber - minBigInt(latestBlockNumber, BigInt(BLOCK_NUMBER_DELAY));
 		const code = await publicClient.getCode({
 			address: MANGATA_CONTRACT_ADDRESS,
 			blockNumber: delayedBlockNumber,
@@ -132,14 +142,21 @@ async function getL1ReadHash(
 ) {
 	const rangeStart = getMinRequestId(update);
 	const rangeEnd = getMaxRequestId(update);
-	const contractData = await publicClient.readContract({
-		address: MANGATA_CONTRACT_ADDRESS,
-		abi: ABI,
-		functionName: "getPendingRequests",
-		args: [rangeStart, rangeEnd],
-	});
-	const encodedData = getEncodedData("getPendingRequests", contractData);
-	return keccak256(encodedData);
+
+	try {
+		const contractData = await publicClient.readContract({
+			address: MANGATA_CONTRACT_ADDRESS,
+			abi: ABI,
+			functionName: "getPendingRequests",
+			args: [rangeStart, rangeEnd],
+			blockTag: "latest",
+		});
+		const encodedData = getEncodedData("getPendingRequests", contractData);
+		return keccak256(encodedData);
+	} catch (e) {
+		console.error(`Error while reading contract: ${e}`);
+		return null;
+	}
 }
 
 async function processPendingRequestsEvents(
@@ -166,26 +183,28 @@ async function processPendingRequestsEvents(
 			return [key.args[0], update, hash];
 		});
 
-	const maliciousUpdates = filtered.find(
+	const maliciousUpdates = await asyncFilter(
+		filtered,
 		async ([_, update, hash]: [u128, PalletRolldownMessagesL1Update, H256]) => {
-			return hash.toString() === (await getL1ReadHash(publicClient, update));
+			const l1ReadHash = await getL1ReadHash(publicClient, update);
+			return l1ReadHash === null || l1ReadHash.toString() !== hash.toString();
 		},
 	);
 
-	if (maliciousUpdates === undefined) {
+	if (maliciousUpdates.length === 0) {
 		return;
+	} else {
+		const [endDisputePeriod, _update, _hash] = maliciousUpdates[0];
+		const cancel = api.tx.rolldown.cancelRequestsFromL1(
+			this_chain,
+			endDisputePeriod,
+		);
+
+		print(
+			`submitting cancel L1Read for chain: ${this_chain} disputePeriodEnd: ${endDisputePeriod}`,
+		);
+		await signTx(api, cancel, collator);
 	}
-
-	const [endDisputePeriod, _update, _hash] = maliciousUpdates;
-	const cancel = api.tx.rolldown.cancelRequestsFromL1(
-		this_chain,
-		endDisputePeriod,
-	);
-
-	print(
-		`submitting cancel L1Read for chain: ${this_chain} disputePeriodEnd: ${endDisputePeriod}`,
-	);
-	await signTx(api, cancel, collator);
 }
 
 async function getSelectedSequencerWithRights(
@@ -306,18 +325,20 @@ async function getUpdateForL2(
 		blockNumber,
 	})) as bigint;
 
-	const rangeStart = BigInt(lastProcessed.toString()) + 1n;
+	const latestRequestId = counter - 1n;
 
-	let rangeEnd = rangeStart + BigInt(LIMIT);
-	if (rangeEnd > counter - 1n) {
-		rangeEnd = counter - 1n;
-	}
+	const rangeStart = minBigInt(
+		latestRequestId,
+		BigInt(lastProcessed.toString()) + 1n,
+	);
+	const rangeEnd = minBigInt(latestRequestId, rangeStart + BigInt(LIMIT));
 
 	return await publicClient.readContract({
 		address: MANGATA_CONTRACT_ADDRESS,
 		abi: ABI,
 		functionName: "getPendingRequests",
 		args: [rangeStart, rangeEnd],
+    blockNumber
 	});
 }
 

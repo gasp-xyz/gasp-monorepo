@@ -2,24 +2,25 @@ package chainio
 
 import (
 	"context"
+	"errors"
 	"math/big"
 	"strings"
-	"errors"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	logging "github.com/Layr-Labs/eigensdk-go/logging"
+	"github.com/Layr-Labs/eigensdk-go/utils"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
-	// blsSignatureChecker "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	// blsSignatureChecker "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
 	// opstateretriever "github.com/Layr-Labs/eigensdk-go/contracts/bindings/OperatorStateRetriever"
 
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
 )
 
 type AvsReaderer interface {
@@ -41,7 +42,7 @@ var _ AvsReaderer = (*AvsReader)(nil)
 
 func NewAvsReaderFromConfig(
 	registry common.Address,
-	ethClient eth.Client,
+	ethClient *ethclient.Client,
 	logger logging.Logger,
 ) (*AvsReader, error) {
 	avsServiceBindings, err := NewAvsServiceBindings(registry, ethClient, logger)
@@ -189,7 +190,7 @@ func (r *AvsReader) LastCompletedOpTaskCreatedBlockAtBlock(
 func (r *AvsReader) GetRdTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error) {
 	events := []taskmanager.ContractFinalizerTaskManagerRdTaskResponded{}
 
-	currentBlock, err := r.AvsServiceBindings.ethClient.BlockNumber(ctx)
+	currentBlock, err := r.AvsServiceBindings.EthClient.BlockNumber(ctx)
 	if err != nil {
 		r.logger.Error("Cannot get current block number", "err", err)
 		return nil, err
@@ -216,7 +217,7 @@ func (r *AvsReader) GetNonSigningOperatorPubKeys(event taskmanager.ContractFinal
 	// get the nonSignerStakesAndSignature
 	txHash := event.Raw.TxHash
 	// r.logger.Debug("txHash", "txHash", txHash)
-	tx, _, err := r.AvsServiceBindings.ethClient.TransactionByHash(context.Background(), txHash)
+	tx, _, err := r.AvsServiceBindings.EthClient.TransactionByHash(context.Background(), txHash)
 	_ = tx
 	if err != nil {
 		r.logger.Error("Error getting transaction by hash",
@@ -318,7 +319,7 @@ func (r *AvsReader) GetTypedOperatorsStakesForQuorumAtBlock(ctx context.Context,
 	operatorsAvsState := make(map[sdktypes.OperatorId]types.OperatorAvsState)
 	operatorsStakesInQuorums, err := r.AvsServiceBindings.OperatorStateRetrieverExtended.GetOperatorsStakesForQuorum(&bind.CallOpts{Context: ctx, BlockNumber: big.NewInt(int64(blockNumber))}, registryCoordinatorAddr, quorumNumbers.UnderlyingType(), operatorAddr)
 	if err != nil {
-		return nil, sdktypes.WrapError(errors.New("Failed to get operator state"), err)
+		return nil, utils.WrapError(errors.New("Failed to get operator state"), err)
 	}
 	numquorums := len(quorumNumbers)
 	if len(operatorsStakesInQuorums) != numquorums {
@@ -350,7 +351,7 @@ func (r *AvsReader) GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoo
 	// Get operator state for each quorum by querying BLSOperatorStateRetriever (this call is why this service implementation is called ChainCaller)
 	operatorsStakesInQuorums, err := r.AvsServiceBindings.OperatorStateRetrieverExtended.GetOperatorState(&bind.CallOpts{Context: ctx}, registryCoordinatorAddr, quorumNumbers.UnderlyingType(), blockNumber)
 	if err != nil {
-		return nil, sdktypes.WrapError(errors.New("Failed to get operator state"), err)
+		return nil, utils.WrapError(errors.New("Failed to get operator state"), err)
 	}
 	numquorums := len(quorumNumbers)
 	if len(operatorsStakesInQuorums) != numquorums {
@@ -374,4 +375,21 @@ func (r *AvsReader) GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoo
 	}
 
 	return operatorsAvsState, nil
+}
+
+func (r *AvsReader) GetOperatorIdList(
+	opts *bind.CallOpts,
+	quorum sdktypes.QuorumNum,
+	blockNumber uint32,
+) ([]sdktypes.OperatorId, error) {
+	ids, err := r.AvsServiceBindings.IndexRegistry.GetOperatorListAtBlockNumber(opts, quorum.UnderlyingType(), blockNumber)
+	if err != nil {
+		r.logger.Error("Cannot get operator list", "err", err)
+		return nil, err
+	}
+	operatorIds := make([]sdktypes.OperatorId, 0)
+	for _, id := range ids {
+		operatorIds = append(operatorIds, id)
+	}
+	return operatorIds, nil
 }

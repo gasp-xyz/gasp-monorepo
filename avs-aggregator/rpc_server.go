@@ -4,16 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"encoding/hex"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
-	"github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
+	blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
 	"github.com/Layr-Labs/eigensdk-go/types"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 )
@@ -29,8 +31,57 @@ var (
 	CallToGetCheckSignaturesIndicesFailed500 = errors.New("500. Failed to get check signatures indices")
 )
 
-func (agg *Aggregator) startServer(ctx context.Context) error {
+func (agg *Aggregator) startServer(ctx context.Context, apiKey string, runTrigger chan struct{} ) error {
 	http.HandleFunc("/", agg.handler)
+	http.HandleFunc("/isAwaitingRunTrigger", func(w http.ResponseWriter, r *http.Request) {
+
+		var isAwaitingRunTrigger bool
+
+		// If this is run in parallel then there will be a race condition between this /isAwaitingRunTrigger and /run
+		// We don't want to receive the trigger here
+		// But this rpc is not executed parallely so we should never have that
+		// But still we check for it
+		select {
+		case _, ok := <-runTrigger: // if it doesn't block on receive then the channel is closed
+			// if we receive an ok == true here we have a problem, this should never happen
+			if ok {
+				panic("received run trigger in isAwaitingRunTrigger check")
+			}
+			isAwaitingRunTrigger = false
+		default: // if it blocks on receive rather than accept then the channel is still open
+			isAwaitingRunTrigger = true
+		}
+
+		// Respond with JSON named data
+		response := map[string]interface{}{
+			"isAwaitingRunTrigger": isAwaitingRunTrigger,
+			"status":  "OK",
+		}
+	
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response) // Encode and send JSON response
+	})
+	http.HandleFunc("/run", func(w http.ResponseWriter, r *http.Request) {
+		// Parse query parameters
+		key := r.URL.Query().Get("SECRET_API_KEY")
+	
+		if key != apiKey {
+			agg.logger.Error("Api key no match", "Received", key)
+			http.Error(w, "Api key no match", http.StatusBadRequest)
+			return
+		}
+	
+		// Respond with JSON named data
+		response := map[string]string{
+			"message": fmt.Sprintf("Triggered run on agg"),
+			"status":  "OK",
+		}
+	
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response) // Encode and send JSON response
+		runTrigger <- struct{}{}
+		close(runTrigger)
+	})
 	err := http.ListenAndServe(agg.serverIpPortAddr, nil)
 	if err != nil {
 		agg.logger.Fatal("ListenAndServe", "err", err)

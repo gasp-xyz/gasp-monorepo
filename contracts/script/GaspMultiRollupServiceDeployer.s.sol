@@ -1,21 +1,17 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
 import "@eigenlayer/test/mocks/EmptyContract.sol";
-
-
-import {Utils} from "./utils/Utils.sol";
-
 import "forge-std/Test.sol";
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";
 import "forge-std/console.sol";
 import {GaspMultiRollupService} from "../src/GaspMultiRollupService.sol";
 import {IGaspMultiRollupServicePrimitives} from "../src/IGaspMultiRollupServicePrimitives.sol";
-import {IRolldownPrimitives} from "../src/Rolldown.sol";
+import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
+import {Utils} from "./utils/Utils.sol";
 
 contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
@@ -33,6 +29,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
     address public owner;
     address public upgrader;
     address public updaterAccount;
+    bool public allowNonRootInit;
 
     function evmPrefixedPath(IRolldownPrimitives.ChainId chain) public view returns (string memory) {
       string memory evm;
@@ -40,7 +37,9 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
       if (chain == IRolldownPrimitives.ChainId.Ethereum) {
         evm = "ethereum_";
       } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
-        evm = "arbitrum_"; 
+        evm = "arbitrum_";
+      } else if (chain == IRolldownPrimitives.ChainId.Base) {
+        evm = "base_"; 
       } else {
         revert("Unsupported chain");
       }
@@ -81,11 +80,12 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
       return proxyAdmin.code.length > 0;
     }
 
-    function initialDeployment(IRolldownPrimitives.ChainId chain, bool allowNonRootInit) public {
+    function initialDeployment(IRolldownPrimitives.ChainId chain) public {
       string memory configData = readConfig(_CONFIG_PATH);
       owner = stdJson.readAddress(configData, ".permissions.owner");
       upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
       updaterAccount = stdJson.readAddress(configData, ".permissions.gmrsUpdater");
+      allowNonRootInit = stdJson.readBool(configData, ".allow_non_root_gmrs_init");
 
 
       vm.startBroadcast();
@@ -126,13 +126,13 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
         _writeOutput(chain);
     }
 
-    function run(IRolldownPrimitives.ChainId chain, bool allowNonRootInit) external {
+    function run(IRolldownPrimitives.ChainId chain) external {
       if (isProxyDeployed(chain)){
         console.log("Upgrading proxy");
         upgrade(chain);
       }else{
         console.log("Initial deployment");
-        initialDeployment(chain, allowNonRootInit);
+        initialDeployment(chain);
       }
     }
 

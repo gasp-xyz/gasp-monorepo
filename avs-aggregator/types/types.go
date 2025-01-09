@@ -2,9 +2,9 @@ package types
 
 import (
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
-	"github.com/ethereum/go-ethereum/common"
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	gsrpctypes "github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"github.com/ethereum/go-ethereum/common"
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 )
 
 // TODO: Hardcoded for now
@@ -76,3 +76,10 @@ type SubstrateL2RequestsBatchLastRange struct {
 }
 
 type SubstrateL2RequestsBatchLast = []SubstrateL2RequestsBatchLastItem
+
+type SubstrateL2RequestsBatch struct {
+	BlockNumber gsrpctypes.U32
+	BatchRange SubstrateL2RequestsBatchLastRange
+	OperatorAddr common.Address
+}
+

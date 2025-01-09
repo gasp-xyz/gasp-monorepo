@@ -15,6 +15,9 @@ import * as networkController from './controller/networkController.js'
 import * as tokenNetworkPortfolioController from './controller/tokenNetworkPortfolioController.js'
 import * as faucetController from './controller/FaucetController.js'
 import * as tracingController from './controller/TracingController.js'
+import * as tradingController from './controller/TradingController.js'
+import * as airdropController from './controller/mgxAirdropController.js'
+import * as tokenPriceController from './controller/TokenPriceController.js'
 
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
@@ -37,7 +40,7 @@ app.get('/', async (req: Request, res: Response): Promise<void> => {
 app.get('/token/order-buckets', tokenController.listTokenOrderBuckets)
 // Token list
 app.get('/token/list/stats', tokenListController.tokenList)
-app.get('/token/:symbol/stats', tokenListController.tokenDetails)
+app.get('/token/:id/stats', tokenListController.tokenDetails)
 
 // XCM
 app.get('/xcm/channels', xcmController.channels)
@@ -61,28 +64,22 @@ app.get(
 )
 
 // Price Discovery API
-app.get('/price-discovery/:currencySymbol/', priceDiscoveryController.getPrice)
+app.get('/price-discovery/:currencyId/', priceDiscoveryController.getPrice)
 app.get(
-  '/price-history/pair/:baseCurrencySymbol/:targetCurrencySymbol',
+  '/price-history/pair/:baseCurrencyId/:targetCurrencyId',
   priceDiscoveryController.getHistoryPair
 )
-app.get('/price-history/:currencySymbol/', priceDiscoveryController.getHistory)
+app.get('/price-history/:currencyId/', priceDiscoveryController.getHistory)
 app.get(
-  '/volume-history/pools/:currencySymbol/',
+  '/volume-history/pools/:currencyId/',
   priceDiscoveryController.getTradesPool
 )
+app.get('/volume-history/:currencyId/', priceDiscoveryController.getTradesAsset)
 app.get(
-  '/volume-history/:currencySymbol/',
-  priceDiscoveryController.getTradesAsset
-)
-app.get(
-  '/tvl-history/pools/:currencySymbol/',
+  '/tvl-history/pools/:currencyId/',
   priceDiscoveryController.getVolumePool
 )
-app.get(
-  '/tvl-history/:currencySymbol/',
-  priceDiscoveryController.getVolumeAsset
-)
+app.get('/tvl-history/:currencyId/', priceDiscoveryController.getVolumeAsset)
 
 // CoinGecko listing endpoints
 app.get('/coingecko/pairs', coingeckoController.pairs)
@@ -105,25 +102,35 @@ app.get(
 app.post('/tracing/tx/start', tracingController.startTracing)
 
 app.get(
-  '/tracing/tx/:txHashOrEntityId',
+  '/tracing/type/:type/tx/:txHashOrEntityId',
   tracingController.getTransactionStatusByTxHashOrEntityId
 )
 
 app.get(
-  '/tracing/tx/listByAddress/:address',
+  '/tracing/type/:type/tx/listByAddress/:address',
   tracingController.getAllTransactionsByAddress
 )
 
 app.get(
-  '/tracing/tx/listByAddress/:address/:status',
+  '/tracing/type/:type/tx/listByAddress/:address/:status',
   tracingController.getAllTransactionsByAddressAndStatus
 )
 
 app.get(
-  '/tracing/tx/findByEntityId/:entityId',
+  '/tracing/type/:type/tx/findByEntityId/:entityId',
 
   tracingController.getATransactionByEntityId
 )
+
+//Token prices endpoint
+app.get('/price/token/:tokenId', tokenPriceController.getTokenPrices)
+
+// Dashboard endpoint
+app.get('/account/:wallet/dashboard', tradingController.getData)
+
+// Airdrop endpoints
+app.get('/mgx-airdrop/eligibility/:address', airdropController.checkEligibility)
+app.post('/mgx-airdrop/link-address', airdropController.linkAddress)
 
 // Coinmarketcap listing endpoints
 app.get('/coinmarketcap/v1/summary', coinmarketcapController.summary)

@@ -8,7 +8,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/config"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core/config"
 	"github.com/urfave/cli"
 )
 
@@ -25,6 +25,7 @@ type Config struct {
 	Expiration        int
 	UpdatePeriod      int
 	DebounceRpc       int
+	EnableKicker      bool
 
 	AvsRegistryCoordinatorAddr common.Address
 	AvsDeploymentBlock         uint64
@@ -34,6 +35,17 @@ type Config struct {
 
 	KickPeriod int
 	MinOpUpdateInterval int
+
+	ReinitOpStateAtInit bool
+	CheckTriggerOpStateUpdate bool
+	CheckTriggerOpStateUpdateWindow bool
+
+	AggIdleStart bool
+	AggRunTriggerApiKey string
+
+	EnableTraceLogs bool
+	
+	AggSSFetchTimeout int
 }
 
 // NewConfig parses the Config from the provided flags or environment variables and
@@ -89,6 +101,7 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		MinOpUpdateInterval:            ctx.GlobalInt(config.AvsMinOpUpdateInterval.Name),
 		UpdatePeriod:               ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
 		DebounceRpc:                ctx.GlobalInt(config.AvsDebounceRpcFlag.Name),
+		EnableKicker:                ctx.GlobalBool(config.AvsEnableKickerFlag.Name),
 		EthRpcUrl:                  ctx.GlobalString(config.EthRpcFlag.Name),
 		EthWsUrl:                   ctx.GlobalString(config.EthWsFlag.Name),
 		ChainId:                    chainId,
@@ -97,6 +110,13 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		AvsDeploymentBlock:         uint64(ctx.GlobalInt(config.AvsDeploymentBlockFlag.Name)),
 		SignerFn:                   signer,
 		Address:                    address,
+		ReinitOpStateAtInit:  ctx.GlobalBool(config.AggOsuReinitOpStateAtInit.Name),
+		CheckTriggerOpStateUpdate:  ctx.GlobalBool(config.AggOsuCheckTriggerOpStateUpdate.Name),
+		CheckTriggerOpStateUpdateWindow:  ctx.GlobalBool(config.AggOsuCheckTriggerOpStateUpdateWindow.Name),
+		AggIdleStart: ctx.GlobalBool(config.AggIdleStart.Name),
+		AggRunTriggerApiKey: ctx.GlobalString(config.AggRunTriggerApiKey.Name),
+		EnableTraceLogs: ctx.GlobalBool(config.EnableTraceLogs.Name),
+		AggSSFetchTimeout: ctx.GlobalInt(config.AggSSFetchTimeout.Name),
 	}, nil
 }
 
@@ -119,4 +139,12 @@ var Flags = []cli.Flag{
 	config.AvsUpdateStakePeriodFlag,
 	config.AvsTaskExpirationFlag,
 	config.AvsDebounceRpcFlag,
+	config.AvsEnableKickerFlag,
+	config.AggOsuReinitOpStateAtInit,
+	config.AggOsuCheckTriggerOpStateUpdate,
+	config.AggOsuCheckTriggerOpStateUpdateWindow,
+	config.AggIdleStart,
+	config.AggRunTriggerApiKey,
+	config.EnableTraceLogs,
+	config.AggSSFetchTimeout,
 }

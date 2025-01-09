@@ -1,51 +1,436 @@
-environments: 
-  default:
-    values:
-     - environmentName: local
-     - config/default.yaml
-  fungible:
-    values:
-     - environmentName: {{ env "ENVIRONMENT" }}
-     - config/fungible.yaml
-  dev:
-    values:
-      - environmentName: dev
-      - config/dev.yaml
-  frontend:
-    values:
-      - environmentName: frontend
-      - config/frontend.yaml
-  holesky:
-    values:
-    - environmentName: holesky
-    - config/holesky.yaml
+bases: ['environments.yaml']
 ---
-repositories:
-  - name: ethereum-helm-charts
-    url: https://ethpandaops.github.io/ethereum-helm-charts
-  - name: blockscout
-    url: https://blockscout.github.io/helm-charts
-  - name: mangata-node
-    url: git+https://github.com/mangata-finance/helm-charts@charts?ref=node-v2.3.0
-    
 helmDefaults:
-  kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
   wait: false
-  diffArgs:
-    - "--suppress" 
-    - "Job"
-  # TODO: To remove after updating Helm charts
-    - "--suppress-output-line-regex"
-    - "(application|component|heritage|service|isP2P|isRpc):.+"
+  kubeContext: '{{ .Values.kubeContext }}'
+  # diffArgs:
+  #   - "--suppress" 
+  #   - "Job"
+  # # TODO: To remove after updating Helm charts
+  #   - "--suppress-output-line-regex"
+  #   - "(application|component|heritage|service|isP2P|isRpc):.+"
+  
+helmfiles:
+  - path: sub-helmfiles/blockscout/helmfile.yaml
+    values:
+      - {{ toYaml .Values | nindent 8 }}
+  - path: sub-helmfiles/rollup-nodes/helmfile.yaml
+    values:
+      - {{ toYaml .Values | nindent 8 }}
 
 releases:
+  - name: avs-aggregator
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.aggregatorEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/avs-aggregator
+          tag: {{ .Values | get "aggregatorImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        env: {{ .Values.aggregatorEnv | toYaml | nindent 10 }}
+        service:
+          enabled: true
+          port: 8090
+          targetPort: 8090
+        ingress:
+          enabled: true
+          annotations: { kubernetes.io/tls-acme: 'true' }
+          hosts:
+            - host: avs-aggregator-{{ .Values.environmentName }}.gasp.xyz
+              paths: ["/"]
+          tls:
+            - hosts: ["avs-aggregator-{{ .Values.environmentName }}.gasp.xyz"]
+              secretName: avs-aggregator-tls
+        podReplacementPolicy: Failed
+        resources:
+          requests:
+            cpu: 1
+            memory: 1Gi
+          limits:
+            cpu: 2
+            memory: 4Gi
+
+  - name: gasp-avs
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.gaspAvsEnabled }}
+    chart: ../helm-charts/gasp-avs
+    values:
+      - image:
+          repository: gaspxyz/gasp-avs
+          tag: '{{ printf "%s%s" (.Values | get "gaspAvsImageTag" (requiredEnv "IMAGE_TAG")) (eq (env "GASP_AVS_FAST_RUNTIME") "true" | ternary "-fast" "") }}'
+        environment: {{ .Values.environmentName }}
+        envSecrets: {{ .Values.gaspAvsEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        env: {{ .Values.gaspAvsEnv | toYaml | nindent 10 }}
+        data: {{ .Values | getOrNil "gaspAvsData" | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 1
+            memory: 4Gi
+          limits:
+            cpu: 2
+            memory: 12Gi
+
+  - name: updater
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.updaterEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/updater
+          tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.updaterEnv | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.updaterEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: updater-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.updaterEnabled .Values.enableBaseServices }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/updater
+          tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.updaterEnvBase | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.updaterEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  
+  - name: sequencer-eth
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.sequencerEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.sequencerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-eth-2
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedEth2" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvEth2" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth2"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-eth-3
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedEth3" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvEth3" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth3"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+
+  - name: sequencer-arb
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled .Values.enableArbitrumServices }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.sequencerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-arb-2
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedArb2" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvArb2" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb2"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-arb-3
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedArb3" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvArb3" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb3"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+            
+  - name: sequencer-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled .Values.enableBaseServices }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.sequencerEnvBase | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.sequencerEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-base-2
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedBase2" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvBase2" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase2"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: sequencer-base-3
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedBase3" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/sequencer
+          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values | getOrNil "sequencerEnvBase3" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase3"| expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  
+  - name: ferry-deposit-eth
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.ferryDepositEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-deposit
+          tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryDepositEnvEth | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryDepositEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: ferry-deposit-arb
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.ferryDepositEnabled .Values.enableArbitrumServices | toYaml   }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-deposit
+          tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryDepositEnvArb | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryDepositEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: ferry-deposit-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.ferryDepositEnabled .Values.enableBaseServices | toYaml   }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-deposit
+          tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryDepositEnvBase | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryDepositEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+
+  - name: ferry-withdrawal-eth
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.ferryWithdrawalEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-withdrawal
+          tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryWithdrawalEnvEth | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryWithdrawalEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: ferry-withdrawal-arb
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.ferryWithdrawalEnabled .Values.enableArbitrumServices | toYaml  }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-withdrawal
+          tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryWithdrawalEnvArb | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryWithdrawalEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: ferry-withdrawal-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.ferryWithdrawalEnabled .Values.enableBaseServices | toYaml }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-withdrawal
+          tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+        env: {{ .Values.ferryWithdrawalEnvBase | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.ferryWithdrawalEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+
+  - name: closer-eth
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ .Values.closerEnabled }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-withdrawal
+          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
+        env: {{ .Values.closerEnvEth | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.closerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: closer-arb
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.closerEnabled .Values.enableArbitrumServices | toYaml }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-withdrawal
+          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
+        env: {{ .Values.closerEnvArb | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.closerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: closer-base
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.closerEnabled .Values.enableBaseServices | toYaml }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/ferry-withdrawal
+          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
+        env: {{ .Values.closerEnvBase | toYaml | nindent 10 }}
+        envSecrets: {{ .Values.closerEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+
   - name: evm-node-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.evmNode.enabled }}
     chart: ../helm-charts/evm-node
     values:
       - image:
-          repository: mangatasolutions/anvil
+          repository: gaspxyz/gasp-contracts
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
@@ -56,14 +441,13 @@ releases:
         verifierUrl: 'http://blockscout-eth-blockscout-stack-blockscout-svc:80/api'
         # If customChainspecUrlEth is not set, the node will use the default chainspec instead
         customGenesisUrl: {{ .Values | get "evmNode.customGenesisUrlEth" "" }}
-  
   - name: evm-node-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.evmNode.enabled .Values.enableArbitrumServices | toYaml }}
     chart: ../helm-charts/evm-node
     values:
       - image:
-          repository: mangatasolutions/anvil
+          repository: gaspxyz/gasp-contracts
           tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
@@ -74,475 +458,18 @@ releases:
         verifierUrl: 'http://blockscout-arb-blockscout-stack-blockscout-svc:80/api'
         # If customChainspecUrlArb is not set, the node will use the default chainspec instead
         customGenesisUrl: {{ .Values | get "evmNode.customGenesisUrlArb" "" }}
-
-  - name: avs-aggregator
+  - name: evm-node-base
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.aggregatorEnabled }}
-    chart: ../helm-charts/rollup-node
+    installed: {{ and .Values.evmNode.enabled .Values.enableBaseServices | toYaml }}
+    chart: ../helm-charts/evm-node
     values:
       - image:
-          repository: mangatasolutions/avs-aggregator
-          tag: {{ .Values | get "aggregatorImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
+          repository: gaspxyz/gasp-contracts
+          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
-        envSecrets: {{ .Values.aggregatorEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.aggregatorEnv | toYaml | nindent 10 }}
-
-  - name: avs-finalizer
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.finalizerEnabled }}
-    chart: ../helm-charts/rollup-node
-    values:
-      - image:
-          repository: mangatasolutions/avs-finalizer
-          tag: {{ .Values | get "finalizerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: {{ .Values.environmentName }}
-        remoteCluster: {{ .Values.remoteCluster }}
-        rpcPort: 9010
-        enableServiceMonitorCollectors: {{ .Values.finalizerEnableServiceMonitorCollectors }}
-        prometheus:
-          enabled: true
-        envSecrets: {{ .Values.finalizerEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values.finalizerEnv | toYaml | nindent 10 }}
-
-  - name: rollup-updater-eth
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.updaterEnabled }}
-    chart: ../helm-charts/rollup-updater
-    values:
-      - image:
-          repository: mangatasolutions/rollup-updater
-          tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
-        walletPrivateKey: {{ .Values.updaterMnemonicEth | fetchSecretValue | quote }}
-        ethChainUrl: {{ .Values.updaterChainUrlEth | fetchSecretValue | quote }}
-        env: {{ .Values.updaterEnvEth | toYaml | nindent 10 }}
-  
-  - name: rollup-updater-arb
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.updaterEnabled .Values.enableArbitrumServices }}
-    chart: ../helm-charts/rollup-updater
-    values:
-      - image:
-          repository: mangatasolutions/rollup-updater
-          tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
-        walletPrivateKey: {{ .Values.updaterMnemonicArb | fetchSecretValue | quote }}
-        ethChainUrl: {{ .Values.updaterChainUrlArb | fetchSecretValue | quote }}
-        env: {{ .Values.updaterEnvArb | toYaml | nindent 10 }}
-  
-  - name: rollup-sequencer-eth
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.sequencerEnabled }}
-    chart: ../helm-charts/rollup-sequencer
-    values:
-      - image:
-          repository: mangatasolutions/rollup-sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
-        mnemonic: {{ .Values.firstSequencerMnemonicEth | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerChainUrlEth | fetchSecretValue | quote }}
-        env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
-
-  - name: rollup-sequencer-arb
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled .Values.enableArbitrumServices }}
-    chart: ../helm-charts/rollup-sequencer
-    values:
-      - image:
-          repository: mangatasolutions/rollup-sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
-        mnemonic: {{ .Values.firstSequencerMnemonicArb | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerChainUrlArb | fetchSecretValue | quote }}
-        env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
-  
-  - name: rollup-sequencer-eth-2
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.secondSequencerEnabled }}
-    chart: ../helm-charts/rollup-sequencer
-    values:
-      - image:
-          repository: mangatasolutions/rollup-sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
-        mnemonic: {{ .Values.secondSequencerMnemonicEth | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerChainUrlEth | fetchSecretValue | quote }}
-        env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
-  
-  - name: rollup-sequencer-arb-2
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.secondSequencerEnabled .Values.enableArbitrumServices }}
-    chart: ../helm-charts/rollup-sequencer
-    values:
-      - image:
-          repository: mangatasolutions/rollup-sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        environment: {{ .Values.environmentName }}
-        mnemonic: {{ .Values.secondSequencerMnemonicArb | fetchSecretValue | quote }}
-        ethChainUrl:  {{ .Values.sequencerChainUrlArb | fetchSecretValue | quote }}
-        env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
-
-  - name: blockscout-eth
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ .Values.blockscoutEnabled }}
-    chart: blockscout/blockscout-stack
-    dependencies:
-      - chart: oci://registry-1.docker.io/bitnamicharts/postgresql
-        version: '12.x.x'
-      - chart: ethereum-helm-charts/smart-contract-verifier-http
-        version: '0.1.2'
-    values:
-      - smart-contract-verifier-http:
-          enabled: true
-        postgresql:
-          enabled: true
-          image:
-            registry: docker.io
-            repository: bitnami/postgresql
-            tag: 15.3.0-debian-11-r7
-          pullPolicy: IfNotPresent
-          auth:
-            enablePostgresUser: true
-            postgresPassword: postgres
-            username: postgres
-            password: postgres
-          primary:
-            extendedConfiguration: |
-              max_connections = 1024
-          persistence:
-            enabled: true
-            size: 8Gi
-        config:
-          network:
-            id: 1337
-            name: 'Ether'
-            shortname: 'Ether'
-          testnet: true
-          account:
-            enabled: false
-          prometheus:
-            enabled: false
-        blockscout:
-          image:
-            tag: 6.7.1.commit.1015bfd0
-          env:
-            DATABASE_URL: 'postgresql://postgres:postgres@blockscout-eth-postgresql:5432/blockscout?ssl=false'
-            SECRET_KEY_BASE: RMgI4C1HSkxsEjdhtGMfwAHfyT6CKWXOgzCboJflfSm4jeAlic52io05KB6mqzc5
-            ETHEREUM_JSONRPC_VARIANT: 'geth'
-            ETHEREUM_JSONRPC_HTTP_URL: http://evm-node-eth:8545
-            ETHEREUM_JSONRPC_WS_URL: ws://evm-node-eth:8546
-            ETHEREUM_JSONRPC_TRACE_URL: http://evm-node-eth:8545
-            MICROSERVICE_SC_VERIFIER_ENABLED: true
-            MICROSERVICE_SC_VERIFIER_URL: 'http://blockscout-eth-smart-contract-verifier-http:8050'
-            MICROSERVICE_SC_VERIFIER_TYPE: sc_verifier
-          ingress:
-            enabled: true
-            hostname: blockscout.rollup-{{ .Values.environmentName }}-eth.gasp.xyz
-            annotations:
-              kubernetes.io/ingress.class: nginx
-              kubernetes.io/tls-acme: 'true'
-            className: nginx
-            tls:
-              enabled: true
-        frontend:
-          enabled: true
-          replicaCount: 1
-          image:
-            tag: v1.32.0-alpha.2
-          ingress:
-            enabled: true
-            hostname: blockscout.rollup-{{ .Values.environmentName }}-eth.gasp.xyz
-            annotations:
-              kubernetes.io/ingress.class: nginx
-              kubernetes.io/tls-acme: 'true'
-            className: nginx
-            tls:
-              enabled: true
-          env:
-            NEXT_PUBLIC_API_PROTOCOL: https
-            NEXT_PUBLIC_API_BASE_PATH: '/'
-            NEXT_PUBLIC_APP_PROTOCOL: https
-            NEXT_PUBLIC_HOMEPAGE_CHARTS: "[\"daily_txs\"]"
-            NEXT_PUBLIC_VISUALIZE_API_HOST: https://visualizer.services.blockscout.com/
-            NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL: wss
-            NEXT_PUBLIC_API_SPEC_URL: https://raw.githubusercontent.com/blockscout/blockscout-api-v2-swagger/main/swagger.yaml
-            NEXT_PUBLIC_AD_TEXT_PROVIDER: 'none'
-            NEXT_PUBLIC_AD_BANNER_PROVIDER: 'none'
-        stats:
-          enabled: true
-          env:
-            STATS__SERVER__HTTP__ENABLED: true
-            STATS__SERVER__HTTP__ADDR: '0.0.0.0:8050'
-            STATS__DB_URL: 'postgresql://postgres:postgres@blockscout-eth-postgresql:5432/blockscout-stats?ssl=false'
-            STATS__BLOCKSCOUT_DB_URL: 'postgresql://postgres:postgres@blockscout-eth-postgresql:5432/blockscout?ssl=false'
-            STATS__CREATE_DATABASE: true
-            STATS__RUN_MIGRATIONS: true
-          ingress:
-            enabled: true
-            hostname: stats.blockscout.rollup-{{ .Values.environmentName }}-eth.gasp.xyz
-            annotations:
-              kubernetes.io/ingress.class: nginx
-              kubernetes.io/tls-acme: 'true'
-            className: nginx
-            tls:
-              enabled: true
-  
-  - name: blockscout-arb
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.blockscoutEnabled .Values.enableArbitrumServices }}
-    chart: blockscout/blockscout-stack
-    dependencies:
-      - chart: oci://registry-1.docker.io/bitnamicharts/postgresql
-        version: '12.x.x'
-      - chart: ethereum-helm-charts/smart-contract-verifier-http
-        version: '0.1.2'
-    values:
-      - smart-contract-verifier-http:
-          enabled: true
-        postgresql:
-          enabled: true
-          image:
-            registry: docker.io
-            repository: bitnami/postgresql
-            tag: 15.3.0-debian-11-r7
-          pullPolicy: IfNotPresent
-          auth:
-            enablePostgresUser: true
-            postgresPassword: postgres
-            username: postgres
-            password: postgres
-          primary:
-            extendedConfiguration: |
-              max_connections = 1024
-          persistence:
-            enabled: true
-            size: 8Gi
-        config:
-          network:
-            id: 1337
-            name: 'Arbitrum'
-            shortname: 'Arb'
-          testnet: true
-          account:
-            enabled: false
-          prometheus:
-            enabled: false
-        blockscout:
-          image:
-            tag: 6.7.1.commit.1015bfd0
-          env:
-            DATABASE_URL: 'postgresql://postgres:postgres@blockscout-arb-postgresql:5432/blockscout?ssl=false'
-            SECRET_KEY_BASE: RMgI4C1HSkxsEjdhtGMfwAHfyT6CKWXOgzCboJflfSm4jeAlic52io05KB6mqzc5
-            ETHEREUM_JSONRPC_VARIANT: 'geth'
-            ETHEREUM_JSONRPC_HTTP_URL: http://evm-node-arb:8545
-            ETHEREUM_JSONRPC_WS_URL: ws://evm-node-arb:8546
-            ETHEREUM_JSONRPC_TRACE_URL: http://evm-node-arb:8545
-            MICROSERVICE_SC_VERIFIER_ENABLED: true
-            MICROSERVICE_SC_VERIFIER_URL: 'http://blockscout-arb-smart-contract-verifier-http:8050'
-            MICROSERVICE_SC_VERIFIER_TYPE: sc_verifier
-          ingress:
-            enabled: true
-            hostname: blockscout.rollup-{{ .Values.environmentName }}-arb.gasp.xyz
-            annotations:
-              kubernetes.io/ingress.class: nginx
-              kubernetes.io/tls-acme: 'true'
-            className: nginx
-            tls:
-              enabled: true
-        frontend:
-          enabled: true
-          replicaCount: 1
-          image:
-            tag: v1.32.0-alpha.2
-          ingress:
-            enabled: true
-            hostname: blockscout.rollup-{{ .Values.environmentName }}-arb.gasp.xyz
-            annotations:
-              kubernetes.io/ingress.class: nginx
-              kubernetes.io/tls-acme: 'true'
-            className: nginx
-            tls:
-              enabled: true
-          env:
-            NEXT_PUBLIC_API_PROTOCOL: https
-            NEXT_PUBLIC_API_BASE_PATH: '/'
-            NEXT_PUBLIC_APP_PROTOCOL: https
-            NEXT_PUBLIC_HOMEPAGE_CHARTS: "[\"daily_txs\"]"
-            NEXT_PUBLIC_VISUALIZE_API_HOST: https://visualizer.services.blockscout.com/
-            NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL: wss
-            NEXT_PUBLIC_API_SPEC_URL: https://raw.githubusercontent.com/blockscout/blockscout-api-v2-swagger/main/swagger.yaml
-            NEXT_PUBLIC_AD_TEXT_PROVIDER: 'none'
-            NEXT_PUBLIC_AD_BANNER_PROVIDER: 'none'
-        stats:
-          enabled: true
-          env:
-            STATS__SERVER__HTTP__ENABLED: true
-            STATS__SERVER__HTTP__ADDR: '0.0.0.0:8050'
-            STATS__DB_URL: 'postgresql://postgres:postgres@blockscout-arb-postgresql:5432/blockscout-stats?ssl=false'
-            STATS__BLOCKSCOUT_DB_URL: 'postgresql://postgres:postgres@blockscout-arb-postgresql:5432/blockscout?ssl=false'
-            STATS__CREATE_DATABASE: true
-            STATS__RUN_MIGRATIONS: true
-          ingress:
-            enabled: true
-            hostname: stats.blockscout.rollup-{{ .Values.environmentName }}-arb.gasp.xyz
-            annotations:
-              kubernetes.io/ingress.class: nginx
-              kubernetes.io/tls-acme: 'true'
-            className: nginx
-            tls:
-              enabled: true
-
-  - name: collator-01
-    installed: {{ .Values.collatorsEnabled }}
-    needs: [collator-02]
-    chart: mangata-node/node
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    values:
-      - image:
-          repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
-        environment: 'rollup-{{ .Values.environmentName }}'
-        chain: {{ .Values | getOrNil "collator.chain" }}
-        disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
-        customChainspecUrl: {{ .Values | get "collator.customChainspecUrl" "" }}
-        domainZone: gasp.xyz
-        command: '/app/node'
-        isParachain: false
-        isCollator: false
-        role: collator
-        remoteCluster: {{ .Values.remoteCluster }}
-        wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
-        enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
-        storageClass: {{ .Values.collator.storageClass | quote }}
-        storageSize: {{ .Values.collator.storageSize | quote }}
-        resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
-        tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
-        # collator-01 specific configs
-        nodeSelector: {{ .Values | getOrNil "collator.collator01.nodeSelector" | toYaml | nindent 10 }}
-        customNodeKey: {{ .Values.collator.collator01.customNodeKey }}
-        bootnodeAddr: {{ .Values.collator.collator01.bootnodeAddr }}
-        extraArgs: {{ .Values.collator.collator01.extraArgs | toYaml | nindent 10 }}
-  
-  - name: collator-02
-    installed: {{ .Values.collatorsEnabled }}
-    chart: mangata-node/node
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    values:
-      - image:
-          repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
-        environment: 'rollup-{{ .Values.environmentName }}'
-        chain: {{ .Values | getOrNil "collator.chain" }}
-        disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
-        customChainspecUrl: {{ .Values | get "collator.customChainspecUrl" "" }}
-        domainZone: gasp.xyz
-        command: '/app/node'
-        isParachain: false
-        isCollator: false
-        role: collator
-        remoteCluster: {{ .Values.remoteCluster }}
-        wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
-        enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
-        storageClass: {{ .Values.collator.storageClass | quote }}
-        storageSize: {{ .Values.collator.storageSize | quote }}
-        resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
-        tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
-        # collator-02 specific configs
-        nodeSelector: {{ .Values | getOrNil "collator.collator02.nodeSelector" | toYaml | nindent 10 }}
-        customNodeKey: {{ .Values.collator.collator02.customNodeKey }}
-        bootnodeAddr: {{ .Values.collator.collator02.bootnodeAddr }}
-        extraArgs: {{ .Values.collator.collator02.extraArgs | toYaml | nindent 10 }}
-  
-  - name: rpc-01
-    installed: {{ .Values.collatorRpcNodesEnabled }}
-    chart: mangata-node/node
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    values:
-      - image:
-          repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
-        environment: 'rollup-{{ .Values.environmentName }}'
-        chain: {{ .Values | getOrNil "collator.chain" }}
-        disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
-        customChainspecUrl: {{ .Values | get "collator.customChainspecUrl" "" }}
-        domainZone: gasp.xyz
-        command: '/app/node'
-        isParachain: false
-        isCollator: false
-        role: rpc
-        remoteCluster: {{ .Values.remoteCluster }}
-        wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
-        enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
-        storageClass: {{ .Values.collator.storageClass | quote }}
-        storageSize: {{ .Values.collator.storageSize | quote }}
-        resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
-        tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
-        # rpc-01 specific configs
-        bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
-        extraArgs:
-          - --pruning=archive
-          - --rpc-max-connections=5000
-        nodeSelector:
-          production: "true"
-          topology.kubernetes.io/zone: europe-west1-b
-
-  - name: rpc-02
-    installed: {{ .Values.collatorRpcNodesEnabled }}
-    chart: mangata-node/node
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    values:
-      - image:
-          repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
-        environment: 'rollup-{{ .Values.environmentName }}'
-        chain: {{ .Values | getOrNil "collator.chain" }}
-        disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
-        customChainspecUrl: {{ .Values | get "collator.customChainspecUrl" "" }}
-        domainZone: gasp.xyz
-        command: '/app/node'
-        isParachain: false
-        isCollator: false
-        role: rpc
-        remoteCluster: {{ .Values.remoteCluster }}
-        wsHealthExporter: {{ .Values.collator.wsHealthExporter | toYaml | nindent 10 }}
-        enableServiceMonitorCollectors: {{ .Values.collator.enableServiceMonitorCollectors }}
-        storageClass: {{ .Values.collator.storageClass | quote }}
-        storageSize: {{ .Values.collator.storageSize | quote }}
-        resources: {{ .Values | getOrNil "collator.resources" | toYaml | nindent 10 }}
-        tolerations: {{ .Values | getOrNil "collator.tolerations" | toYaml | nindent 10 }}
-        # rpc-01 specific configs
-        bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWQVtLSDM8ZuaExjLygBKBjA43gKUZH3wiooxs7Qp7iEQK
-        extraArgs:
-          - --pruning=archive
-          - --rpc-max-connections=5000
-        nodeSelector:
-          production: "true"
-          topology.kubernetes.io/zone: europe-west1-c
-
-  - name: rpc-shared-dns-record
-    installed: {{ eq .Values.environmentName "holesky" }}
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    chart: ../helm-charts/shared-dns-record
-    values:
-      - url: 'rollup-{{ .Values.environmentName }}-rpc.gasp.xyz'
-        serviceSelector:
-          role: rpc
-
-  - name: rpc-shared-dns-record-testnet
-    installed: {{ eq .Values.environmentName "holesky" }}
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    chart: ../helm-charts/shared-dns-record
-    values:
-      - url: 'rollup-testnet-rpc.gasp.xyz'
-        serviceSelector:
-          role: rpc
-
-  - name: rpc-shared-dns-record-legacy
-    installed: {{ eq .Values.environmentName "holesky" }}
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    chart: ../helm-charts/shared-dns-record
-    values:
-      - url: 'rollup-testnet-rpc.mangata.online'
-        serviceSelector:
-          role: rpc
+        nameOverride: 'evm-node-base'
+        envSelector: base-stub
+        enablePersistence: true
+        verifierEnabled: {{ .Values | get "blockscoutEnabled" false }}
+        verifierUrl: 'http://blockscout-base-blockscout-stack-blockscout-svc:80/api'

@@ -1,18 +1,18 @@
 package chainio
 
 import (
+	"time"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/event"
 
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
-	stakeRegistry "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/StakeRegistry"
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
+	stakeRegistry "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/StakeRegistry"
 )
-
 
 // Subscribers use a ws connection instead of http connection like Readers
 // kind of stupid that the geth client doesn't have a unified interface for both...
@@ -24,7 +24,7 @@ type AvsSubscriber struct {
 	logger              sdklogging.Logger
 }
 
-func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient eth.Client, logger sdklogging.Logger) (*AvsSubscriber, error) {
+func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient *ethclient.Client, logger sdklogging.Logger, aggSSFetchTimeout int) (*AvsSubscriber, error) {
 	avsContractBindings, err := NewAvsServiceBindings(registryAddr, ethclient, logger)
 	if err != nil {
 		logger.Errorf("Failed to create contract bindings", "err", err)
@@ -32,6 +32,7 @@ func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient eth.Client, log
 	}
 	streamSubscriber := StreamReader{
 		Backend: ethclient,
+		FetchTimeout: time.Duration(aggSSFetchTimeout) * time.Second,
 	}
 	return &AvsSubscriber{
 		AvsContractBindings: avsContractBindings,

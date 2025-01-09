@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core/chainio"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
 )
 
 type Kicker struct {
@@ -48,7 +48,7 @@ func (k *Kicker) CheckStateAndKick() error {
 	k.logger.Debug("Got last events", "eventsCount", len(events))
 	// get non signers present in every trx
 	hash := make(map[sdktypes.OperatorId]*int)
-	nonSigningOperatorIds := make([]sdktypes.OperatorId, 0)
+	nonSigningOperatorIds := make(map[sdktypes.OperatorId]bool)
 	logIds := make([]string, 0)
 	for _, ev := range events {
 		keys, err := k.ethRpc.AvsReader.GetNonSigningOperatorPubKeys(ev)
@@ -60,7 +60,7 @@ func (k *Kicker) CheckStateAndKick() error {
 			id := key.GetOperatorID()
 			if counter := hash[id]; counter != nil {
 				if *counter++; *counter >= len(events) {
-					nonSigningOperatorIds = append(nonSigningOperatorIds, id)
+					nonSigningOperatorIds[id] = true
 					logIds = append(logIds, hexutil.Encode(id[:]))
 				}
 			} else {
@@ -79,14 +79,16 @@ func (k *Kicker) CheckStateAndKick() error {
 	// fetch addresses and eject
 	quorums := make([][]uint8, 0)
 	addresses := make([]common.Address, 0)
-	for i, key := range nonSigningOperatorIds {
-		address, err := k.ethRpc.Clients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, key)
-		if err != nil {
-			k.logger.Error("Cannot get operator address", "operatorId", logIds[i], "err", err)
-			return err
+	for key, isNonSigner := range nonSigningOperatorIds {
+		if isNonSigner{
+			address, err := k.ethRpc.Clients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, key)
+			if err != nil {
+				k.logger.Error("Cannot get operator address", "operatorId", hexutil.Encode(key[:]), "err", err)
+				return err
+			}
+			addresses = append(addresses, address)
+			quorums = append(quorums, types.QUORUM_NUMBERS.UnderlyingType())
 		}
-		addresses = append(addresses, address)
-		quorums = append(quorums, types.QUORUM_NUMBERS.UnderlyingType())
 	}
 
 	k.logger.Info("Ejecting Operators", "address", addresses, "id", logIds)

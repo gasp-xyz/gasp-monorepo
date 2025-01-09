@@ -1,5 +1,8 @@
 import logger from '../util/Logger.js'
-import { transactionRepository } from '../repository/TransactionRepository.js'
+import {
+  depositRepository,
+  withdrawalRepository,
+} from '../repository/TransactionRepository.js'
 
 interface TraceTransactionRequest {
   txHash: string
@@ -19,9 +22,9 @@ export const startTracingTransaction = async (
   const timestamp = new Date().toISOString()
   let status: string
   if (type === 'deposit') {
-    status = 'L1_INITIATED'
+    status = 'PendingOnL1'
   } else if (type === 'withdrawal') {
-    status = 'L2_INITIATED'
+    status = 'PendingOnL2'
   } else {
     status = 'UNKNOWN'
   }
@@ -38,10 +41,11 @@ export const startTracingTransaction = async (
     amount,
     asset_chainId,
     asset_address,
+    closedBy: null,
   }
 
   try {
-    const existingTransactions = await transactionRepository
+    const existingTransactions = await depositRepository
       .search()
       .where('address')
       .equals(address)
@@ -55,7 +59,7 @@ export const startTracingTransaction = async (
       )
       return existingTransactions[0]
     } else {
-      const transaction = await transactionRepository.save(transactionData)
+      const transaction = await depositRepository.save(transactionData)
       logger.info(
         `Transaction tracing started for address: ${address} and txHash: ${txHash}`
       )
@@ -79,26 +83,28 @@ export const startTracingTransaction = async (
 }
 
 export const getTransactionsByAddress = async (
-  address: string
+  address: string,
+  type: string
 ): Promise<object[]> => {
-  return await transactionRepository
-    .search()
-    .where('address')
-    .equals(address)
-    .return.all()
+  const repository =
+    type === 'deposit' ? depositRepository : withdrawalRepository
+  return await repository.search().where('address').equals(address).return.all()
 }
 
 export const getStatusByTxHashOrEntityId = async (
-  identifier: string
+  identifier: string,
+  type: string
 ): Promise<string | null> => {
-  const transactions = await transactionRepository
+  const repository =
+    type === 'deposit' ? depositRepository : withdrawalRepository
+  const transactions = await repository
     .search()
     .where('txHash')
     .equals(identifier)
     .return.all()
 
   if (transactions.length === 0) {
-    const transaction = await transactionRepository.fetch(identifier)
+    const transaction = await repository.fetch(identifier)
     if (transaction) {
       return transaction.status
     }
@@ -111,9 +117,12 @@ export const getStatusByTxHashOrEntityId = async (
 }
 
 export const getTransactionByEntityId = async (
-  entityId: string
+  entityId: string,
+  type: string
 ): Promise<object | null> => {
-  const transactionsByEntityId = await transactionRepository.fetch(entityId)
+  const repository =
+    type === 'deposit' ? depositRepository : withdrawalRepository
+  const transactionsByEntityId = await repository.fetch(entityId)
   if (transactionsByEntityId && 'txHash' in transactionsByEntityId) {
     return transactionsByEntityId
   }
@@ -121,9 +130,12 @@ export const getTransactionByEntityId = async (
 }
 
 export const getTransactionByTxHash = async (
-  txHash: string
+  txHash: string,
+  type: string
 ): Promise<object | null> => {
-  const transactionsByTxHash = await transactionRepository
+  const repository =
+    type === 'deposit' ? depositRepository : withdrawalRepository
+  const transactionsByTxHash = await repository
     .search()
     .where('txHash')
     .equals(txHash)
@@ -137,9 +149,12 @@ export const getTransactionByTxHash = async (
 
 export async function findTransactionsByAddressAndStatus(
   address: string,
-  status: string
+  status: string,
+  type: string
 ) {
-  const transactions = await transactionRepository
+  const repository =
+    type === 'deposit' ? depositRepository : withdrawalRepository
+  const transactions = await repository
     .search()
     .where('address')
     .equals(address)

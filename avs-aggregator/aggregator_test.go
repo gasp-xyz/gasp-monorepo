@@ -17,10 +17,10 @@ import (
 	blsaggservmock "github.com/Layr-Labs/eigensdk-go/services/mocks/blsagg"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 
-	taskmanager "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/bindings/MangataTaskManager"
-	chainiomocks "github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/core/chainio/mocks"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/mocks"
-	"github.com/mangata-finance/eigen-layer-monorepo/avs-aggregator/types"
+	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/MangataTaskManager"
+	chainiomocks "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core/chainio/mocks"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/mocks"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
 )
 
 var MOCK_OPERATOR_ID = [32]byte{207, 73, 226, 221, 104, 100, 123, 41, 192, 3, 9, 119, 90, 83, 233, 159, 231, 151, 245, 96, 150, 48, 144, 27, 102, 253, 39, 101, 1, 26, 135, 173}

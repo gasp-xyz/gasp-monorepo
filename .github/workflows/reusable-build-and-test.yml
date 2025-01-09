@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   foundry-tests:
-    name: Build foundry deployer Docker image with smart contracts code
+    name: Run Foundry tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,7 +59,7 @@ jobs:
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/anvil:${{ inputs.version }} -f contracts/Dockerfile contracts
+          docker buildx build --push --platform linux/amd64 -t gaspxyz/gasp-contracts:${{ inputs.version }} -f contracts/Dockerfile contracts
 
   build-avs-aggregator-image:
     name: Build avs-aggregator Docker image
@@ -71,33 +71,65 @@ jobs:
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/avs-aggregator:${{ inputs.version }} -f avs-aggregator/Dockerfile .
-  build-avs-finalizer-image:
-    name: Build avs-finalizer Docker image
+          docker buildx build --push --platform linux/amd64,linux/arm64 -t gaspxyz/avs-aggregator:${{ inputs.version }} -f avs-aggregator/Dockerfile .
+
+  build-gasp-avs-image:
+    name: Build gasp-avs Docker image
     uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
       version: ${{ inputs.version }}
-  build-rollup-updater-image:
-    name: Build rollup-updater Docker image
+      service_folder: gasp-avs
+      docker_image_repository: gaspxyz/gasp-avs
+
+  build-gasp-avs-image-with-fast-runtime:
+    name: Build gasp-avs Docker image with fast runtime
+    uses: ./.github/workflows/reusable-rust-build.yml
+    secrets: inherit
+    with:
+      version: ${{ inputs.version }}
+      service_folder: gasp-avs
+      docker_image_repository: gaspxyz/gasp-avs
+      gasp_avs_fast_runtime: true
+
+  build-updater-image:
+    name: Build updater Docker image
+    uses: ./.github/workflows/reusable-rust-build.yml
+    secrets: inherit
+    with:
+      version: ${{ inputs.version }}
+      service_folder: updater
+      docker_image_repository: gaspxyz/updater
+
+  build-sequencer-image:
+    name: Build sequencer Docker image
+    uses: ./.github/workflows/reusable-rust-build.yml
+    secrets: inherit
+    with:
+      version: ${{ inputs.version }}
+      service_folder: sequencer
+      docker_image_repository: gaspxyz/sequencer
+      cargo_tests_filters: "l1::test::test_can_connect sequencer::test::test_find_malicious_update_ignores_updates_from_other_chains sequencer::test::test_find_malicious_update_ignores_valid_updates sequencer::test::test_find_malicious_update_with_invalid_range_works sequencer::test::test_find_malicious_update_works sequencer::test::test_find_pending_cancels_ignores_closed_cancels sequencer::test::test_find_pending_cancels_to_close sequencer::test::test_find_pending_cancels_to_close2 sequencer::test::test_find_pending_cancels_to_close_when_there_is_no_merkle_root_provided_to_l1 sequencer::test::test_get_pending_update_when_there_are_no_requests sequencer::test::test_get_pending_update_when_there_are_requests sequencer::test::test_get_pending_update_when_there_are_too_many_requests_for_single_update"
+
+  build-ferry-withdrawal-image:
+    name: Build ferry-withdrawal Docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-updater:${{ inputs.version }} ./rollup-updater
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-updater:${{ inputs.version }} ./rollup-updater
-  build-rollup-sequencer-image:
-    name: Build rollup-sequencer Docker image
+          docker buildx build --push --platform linux/amd64 -t gaspxyz/ferry-withdrawal:${{ inputs.version }} ./ferry-withdrawal
+
+  build-ferry-deposit-image:
+    name: Build ferry-deposit Docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
           docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
           docker buildx create --use
-          # docker buildx build --push --platform linux/amd64,linux/arm64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
-          docker buildx build --push --platform linux/amd64 -t mangatasolutions/rollup-sequencer:${{ inputs.version }} ./rollup-sequencer
+          docker buildx build --push --platform linux/amd64 -t gaspxyz/ferry-deposit:${{ inputs.version }} ./ferry-deposit
 
   helmfile-lint:
     name: Lint and validate Helmfile configuration
@@ -111,12 +143,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup helmfile
-        uses: mamezou-tech/setup-helmfile@v1.3.0
+        uses: mamezou-tech/setup-helmfile@v2.0.0
         with:
-          helmfile-version: v0.166.0
-          helm-version: v3.15.2
+          helmfile-version: v0.169.1
+          helm-version: v3.16.2
           install-kubectl: no
-          additional-helm-plugins: https://github.com/jkroepke/helm-secrets --version v4.1.1,https://github.com/aslafy-z/helm-git --version 0.14.0
+          additional-helm-plugins: https://github.com/jkroepke/helm-secrets --version v4.1.1,https://github.com/aslafy-z/helm-git --version 1.3.0
       - name: Install kubeconform
         run: curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.6/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
 

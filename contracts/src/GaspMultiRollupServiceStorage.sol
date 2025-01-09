@@ -32,12 +32,13 @@ abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
     mapping(uint8 => BN254.G1Point) public qourumApk;
     mapping(bytes32 => uint8) public operatorIdQuorumCount;
 
-    // mapping(bytes32 => address) public OperatorIdToOperator;
+    // Placing it here to be able to upgrade the testnetv3
+    uint32 public latestCompletedRdTaskCreatedBlock;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[50] private __gap;
+    uint256[49] private __gap;
 }

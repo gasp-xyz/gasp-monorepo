@@ -86,6 +86,32 @@ var (
 		Value:    5,
 		EnvVar:   "AVS_DEBOUNCE_RPC",
 	}
+	AvsEnableKickerFlag = cli.BoolTFlag{
+		Name:     "avs-enable-kicker",
+		Usage:    "Enable kicker",
+		Required: false,
+		EnvVar:   "AVS_ENABLE_KICKER",
+	}
+
+	AggRunTriggerApiKey = cli.StringFlag{
+		Name:     "agg-run-trigger-api-key",
+		Usage:    "The api key that is required to trigger the /run endpoint",
+		Required: false,
+		EnvVar:   "AGG_RUN_TRIGGER_API_KEY",
+	}
+	AggIdleStart = cli.BoolFlag{
+		Name:     "agg-idle-start",
+		Usage:    "BoolFlag defaults to false. If this flag is set to true then the aggregator will start in idle mode and wait for /run endpoint to be triggered before continuing",
+		Required: false,
+		EnvVar:   "AGG_IDLE_START",
+	}
+	AggSSFetchTimeout = cli.IntFlag{
+		Name:     "agg-ss-fetch-timeout",
+		Usage:    "This flag sets the timeout for the stream subs to fetch history",
+		Required: false,
+		Value:    20,
+		EnvVar:   "AGG_SS_FETCH_TIMEOUT",
+	}
 
 	// Aggregator OpStateUpdaterFlags
 	AvsMinOpUpdateInterval = cli.IntFlag{
@@ -94,6 +120,24 @@ var (
 		Required: false,
 		Value:    60,
 		EnvVar:   "AVS_MIN_OP_UPDATE_INTERVAL",
+	}
+	AggOsuReinitOpStateAtInit = cli.BoolFlag{
+		Name:     "agg-osu-reinit-op-state-at-init",
+		Usage:    "flag to perform reinit of op state at startup",
+		Required: false,
+		EnvVar:   "AGG_OSU_REINIT_OP",
+	}
+	AggOsuCheckTriggerOpStateUpdate = cli.BoolTFlag{
+		Name:     "agg-osu-check-trigger-op-state-update",
+		Usage:    "Enable the check that op state trigger doesn't happen twice right after an opTask was completed",
+		Required: false,
+		EnvVar:   "AGG_OSU_CHECK_UPDATE_TRIGGER",
+	}
+	AggOsuCheckTriggerOpStateUpdateWindow = cli.BoolTFlag{
+		Name:     "agg-osu-check-trigger-op-state-update-window",
+		Usage:    "Enable the check that op state trigger doesn't happen twice in the AvsMinOpUpdateInterval",
+		Required: false,
+		EnvVar:   "AGG_OSU_CHECK_UPDATE_TRIGGER_WINDOW",
 	}
 
 	// Deployment
@@ -133,5 +177,12 @@ var (
 		Value:    "",
 		Usage:    "Password to decrypt ecdsa private key",
 		EnvVar:   "ECDSA_KEY_PASSWORD",
+	}
+
+	EnableTraceLogs = cli.BoolFlag{
+		Name:     "enable-trace-logs",
+		Usage:    "Enable trace logs",
+		Required: false,
+		EnvVar:   "ENABLE_TRACE_LOGS",
 	}
 )

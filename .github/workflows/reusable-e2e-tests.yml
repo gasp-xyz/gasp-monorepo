@@ -36,11 +36,11 @@ env:
   CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
   DEFAULT_E2E_REPO_BRANCH: eth-rollup-develop
   AVS_AGGREGATOR_VERSION: ${{ inputs.globalVersion }}
-  AVS_FINALIZER_VERSION: ${{ inputs.globalVersion }}
-  GASP_SYNCER_VERSION: ${{ inputs.globalVersion }}
+  UPDATER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_UPDATER_VERSION: ${{ inputs.globalVersion }}
-  MANGATA_NODE_VERSION: ${{ inputs.substrateNodeVersion }}
+  GASP_AVS_VERSION: ${{ inputs.globalVersion }}-fast
+  ROLLUP_NODE_VERSION: ${{ inputs.substrateNodeVersion }}
 
 jobs:
   run-e2e-tests:
@@ -99,9 +99,12 @@ jobs:
       - name: Get aggregator logs
         if: success() || failure()
         run: docker logs rollup-avs-aggregator-1
-      - name: Get finalizer logs
+      - name: Get gasp-avs logs
         if: success() || failure()
-        run: docker logs rollup-avs-finalizer-1
+        run: docker logs rollup-gasp-avs-1
+      - name: Get updater-arb logs
+        if: success() || failure()
+        run: docker logs rollup-updater-arb-1
       - name: Get node logs
         if: success() || failure()
         run: docker logs rollup-node-alice-1
@@ -118,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test: [ "test-opt-out", "test-corrupted" ]
+        test: ["test-opt-out", "test-corrupted"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -133,27 +136,96 @@ jobs:
         working-directory: contracts
         run: forge build
 
-      - name: FINALIZER tests - install deps
-        working-directory: avs-finalizer/tests/
+      - name: gasp-avs tests - install deps
+        working-directory: gasp-avs/tests/
         run: yarn install
 
       - name: wait 4 minutes for agg to warm up
         run: sleep 240s
 
-      - name: FINALIZER tests - run tests
-        working-directory: avs-finalizer/tests/
+      - name: gasp-avs tests - run tests
+        working-directory: gasp-avs/tests/
         run: yarn ${{ matrix.test }}
 
       - name: Get avs-aggregator logs
         if: success() || failure()
         run: docker logs rollup-avs-aggregator-1
 
-      - name: Get avs-finalizer logs
+      - name: Get gasp-avs logs
         if: success() || failure()
-        run: docker logs rollup-avs-finalizer-1
+        run: docker logs rollup-gasp-avs-1
 
       - name: Get anvil logs
         if: success() || failure()
         run: docker logs rollup-eth-stub-1
 
       - run: docker ps
+
+  ferry-withdrawal-test:
+    name: Ferry withdrawal tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ferry-withdrawal
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Build
+        working-directory: .
+        run: docker compose up --wait ferry-withdrawal-eth
+
+      - name: Test L1 interface
+        run: npm run test-l1
+
+      - name: Test L2 interface
+        run: npm run test-l2
+
+      - name: Test ferry
+        run: npm run test-ferry
+
+      - name: Test closer service
+        run: npm run test-closer
+
+  ferry-deposit-test:
+    name: Ferry deposit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ferry-deposit
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Build
+        working-directory: .
+        run: docker compose up --wait ferry-deposit-eth
+
+      - name: Test L1 interface
+        run: npm run test-l1
+
+      - name: Test L2 interface
+        run: npm run test-l2
+
+      - name: Test ferry
+        run: npm run test-ferry

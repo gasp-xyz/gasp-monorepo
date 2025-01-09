@@ -1,0 +1,12 @@
+{
+  "chainInfo": {
+    "chainId": 84532
+  },
+  "allow_non_root_gmrs_init": true,
+  "permissions": {
+    "owner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "upgrader": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "rolldownUpdater": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "gmrsUpdater": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337"
+  }
+}

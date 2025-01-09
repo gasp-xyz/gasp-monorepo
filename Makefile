@@ -60,15 +60,30 @@ bindings-go: ## generates contract bindings
 	cd contracts && ./generate-go-bindings.sh
 
 bindings-rs: ## generates rust bindings
-	forge bind --bindings-path ./avs-finalizer/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX}
-	cd ./avs-finalizer && cargo fmt
-	cd ./gasp-syncer && cargo fmt
-	cp -rf ./avs-finalizer/bindings ./gasp-syncer/
+	forge bind --bindings-path ./gasp-avs/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX}
+	cd ./gasp-avs && cargo fmt
+	cd ./updater && cargo fmt
+	cp -rf ./gasp-avs/bindings ./updater/
+
+bindings-rs-alloy: ## generates rust alloy bindings
+	forge bind --alloy --bindings-path ./sequencer/bindings --root ./contracts --crate-name bindings --overwrite  --select 'Rolldown$$' --select 'RolldownPrimitives$$'
+	cd ./sequencer/bindings && cargo fmt
 
 bindings-json: ## generate JS bindings
-	cd ./contracts && forge build && cp out/FinalizerTaskManager.sol/FinalizerTaskManager.json ../rollup-updater/src/FinalizerTaskManager.json && cp out/Rolldown.sol/Rolldown.json ../rollup-updater/src/Rolldown.json && cp out/Rolldown.sol/Rolldown.json ../rollup-sequencer/src/Rolldown.json
+	forge build --root ./contracts 
+	cp contracts/out/Rolldown.sol/Rolldown.json ./ferry-deposit//src/Rolldown.json
+	cp contracts/out/Rolldown.sol/Rolldown.json ./ferry-withdrawal/src/Rolldown.json
 
-bindings: bindings-go bindings-rs bindings-json ## generate all bindings
+bindings-gasp:
+	rm -rf metadata.scale || true
+	rm -rf sequencer/sequencer/src/l2/gasp/gasp_bindings.rs || true
+	subxt metadata -f bytes -o metadata.scale --url http://127.0.0.1:9944
+	echo "#[allow(non_snake_case)]" >> sequencer/sequencer/src/l2/gasp/gasp_bindings.rs
+	subxt codegen --attribute "#[allow(non_snake_case)]" --derive Clone --derive PartialEq --file metadata.scale | rustfmt --edition=2018 --emit=stdout >> sequencer/sequencer/src/l2/gasp/gasp_bindings.rs
+	rm -rf metadata.scale
+
+
+bindings: bindings-go bindings-rs bindings-json bindings-rs-alloy## generate all bindings
 
 -----------------------------: ## 
 # We pipe all zapper logs through https://github.com/maoueh/zap-pretty so make sure to install it
@@ -80,15 +95,15 @@ start-avs-aggregator: ##
 		--ecdsa-key-file tests/keys/aggregator.ecdsa.key.json \
 		2>&1 | zap-pretty
 
-start-avs-finalizer: ## 
-	RUST_LOG=avs_finalizer=debug cargo run --manifest-path=avs-finalizer/Cargo.toml -- \
+start-gasp-avs: ## 
+	RUST_LOG=gasp_avs=debug cargo run --manifest-path=gasp-avs/Cargo.toml -- \
 		--ecdsa-ephemeral-key \
 		--bls-ephemeral-key \
 		--testnet \
 		--stake 50
 
-start-avs-finalizer-testkeys: ## 
-	RUST_LOG=avs_finalizer=debug cargo run --manifest-path=avs-finalizer/Cargo.toml -- \
+start-gasp-avs-testkeys: ## 
+	RUST_LOG=gasp_avs=debug cargo run --manifest-path=gasp-avs/Cargo.toml -- \
 		--ecdsa-key-file tests/keys/test.ecdsa.key.json \
 		--bls-key-file tests/keys/test.bls.key.json \
 		--opt-in-at-startup

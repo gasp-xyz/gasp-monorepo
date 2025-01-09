@@ -16,8 +16,9 @@ anvil --dump-state anvil-state.json &
 ############################################
 cd "$parent_path" && cd ../../contracts
 #
-ENV_SELECTOR=ethereum-stub forge script script/MultiStage.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -v
-ENV_SELECTOR=arbitrum-stub forge script script/MultiStage.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -v
+# ENV_SELECTOR=ethereum-stub forge script script/MultiStage.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -vvvvvvv
+# ENV_SELECTOR=arbitrum-stub forge script script/MultiStage.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -vvvvvvv
+ENV_SELECTOR=base-stub forge script script/MultiStage.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -vvvvvvv
 
 # kill anvil to save its state
 pkill anvil

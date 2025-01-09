@@ -1,12 +1,14 @@
 package chainio
 
 import (
+	"fmt"
+
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients"
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 type EthRpc struct {
@@ -25,10 +27,11 @@ func NewEthRpc(
 	avsName string,
 	metricsIpPort string,
 	logger sdklogging.Logger,
+	aggSSFetchTimeout int,
 ) (*EthRpc, error) {
 
 	// tmp to get OperatorStateRetriever address
-	client, err := eth.NewClient(ethHttpUrl)
+	client, err := ethclient.Dial(ethHttpUrl)
 	if err != nil {
 		logger.Error("Failed to create Eth Http client", "err", err)
 		return nil, err
@@ -53,19 +56,30 @@ func NewEthRpc(
 		return nil, err
 	}
 
-	avsReader, err := NewAvsReaderFromConfig(registryAddr, clients.EthHttpClient, logger)
+	httpethclient, ok := (clients.EthHttpClient).(*ethclient.Client)
+	if !ok {
+		logger.Error("EthHttpClient assertion failed")
+		return nil, fmt.Errorf("EthHttpClient assertion failed")
+	}
+	wsethclient, ok := (clients.EthWsClient).(*ethclient.Client)
+	if !ok {
+		logger.Error("EthHttpClient assertion failed")
+		return nil, fmt.Errorf("EthHttpClient assertion failed")
+	}
+
+	avsReader, err := NewAvsReaderFromConfig(registryAddr, httpethclient, logger)
 	if err != nil {
 		logger.Error("Cannot create AvsReader", "err", err)
 		return nil, err
 	}
 
-	avsWriter, err := NewAvsWriter(clients.TxMgr, registryAddr, clients.EthHttpClient, logger)
+	avsWriter, err := NewAvsWriter(clients.TxManager, registryAddr, httpethclient, logger)
 	if err != nil {
 		logger.Error("Cannot create AvsWriter", "err", err)
 		return nil, err
 	}
 
-	avsSubscriber, err := NewAvsSubscriber(registryAddr, clients.EthWsClient, logger)
+	avsSubscriber, err := NewAvsSubscriber(registryAddr, wsethclient, logger, aggSSFetchTimeout)
 	if err != nil {
 		logger.Error("Cannot create AvsSubscriber", "err", err)
 		return nil, err
