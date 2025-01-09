@@ -74,7 +74,7 @@ impl Syncer {
         let gasp_service_contract =
             GaspMultiRollupService::new(cfg.gasp_service_addr, target_client.clone());
         let maybe_arc_root_target_client = maybe_root_target_client.map(Arc::new);
-        let root_gasp_service_contract = if cfg.reinit || cfg.only_reinit || cfg.reinit_eth {
+        let root_gasp_service_contract = if cfg.reinit || cfg.only_reinit || cfg.only_reinit_eth {
             let root_target_client = maybe_arc_root_target_client
                 .clone()
                 .expect("should work here");
@@ -90,7 +90,10 @@ impl Syncer {
 
         // TODO: maybe set this as an implicit cli arg that is set on build
         // Also same for the root above
-        if !(cfg.only_reinit_eth || cfg.reinit_eth_only_print_op_task_creation || cfg.reinit_eth_only_print_op_task_response){
+        if !(cfg.only_reinit_eth
+            || cfg.reinit_eth_only_print_op_task_creation
+            || cfg.reinit_eth_only_print_op_task_response)
+        {
             let gmrs_chain_id = gasp_service_contract.chain_id().await?;
 
             if gmrs_chain_id != target_chain_index {
