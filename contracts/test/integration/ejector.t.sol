@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 // ::: How to run:::
 //cd contracts ;  pkill anvil ;  clear ; cd ../ ; make start-anvil-and-deploy  ; cd contracts ;   forge test  -vvv --fork-url=http://localhost:8545 --match-contract 'Integration'
-pragma solidity =0.8.12;
+pragma solidity =0.8.13;
 
 import { FinalizerServiceManager } from "../../src/FinalizerServiceManager.sol";
 import {BitmapUtils} from "@eigenlayer-middleware/src/libraries/BitmapUtils.sol";
@@ -24,7 +24,7 @@ contract IntegrationEjectorAdminRuleTest is Test {
          vm.startBroadcast(tu);
          fsm.setEjector(tu);
          vm.stopBroadcast();
-         
+
          address ejectorAddr2 = fsm.ejector();
          emit log_address(ejectorAddr2);
          assert(ejectorAddr != ejectorAddr2);
@@ -42,7 +42,7 @@ contract IntegrationEjectorAdminRuleTest is Test {
          vm.expectRevert("Ownable: caller is not the owner");
          fsm.setEjector(tu);
          vm.stopBroadcast();
-         
+
          address ejectorAddr2 = fsm.ejector();
          emit log_address(ejectorAddr2);
          assert(ejectorAddr == ejectorAddr2);
@@ -56,12 +56,12 @@ contract IntegrationEjectorAdminRuleTest is Test {
          address[] memory operators = new address[](2);
             operators[0] = address(0x1);
             operators[1] = address(0x2);
-   
+
          bytes[] memory quorumNumbers = new bytes[](2) ;
          quorumNumbers[0] = BitmapUtils.bitmapToBytesArray(0);
          quorumNumbers[1] = BitmapUtils.bitmapToBytesArray(1);
-         console.log("quorumNumbers"); 
-         
+         console.log("quorumNumbers");
+
          vm.startBroadcast(ejectorAddr);
          vm.expectRevert("RegistryCoordinator._deregisterOperator: operator is not registered");
          fsm.ejectOperators(operators, quorumNumbers);
@@ -77,12 +77,12 @@ contract IntegrationEjectorAdminRuleTest is Test {
          address[] memory operators = new address[](2);
             operators[0] = address(0x1);
             operators[1] = address(0x2);
-   
+
          bytes[] memory quorumNumbers = new bytes[](2) ;
          quorumNumbers[0] = BitmapUtils.bitmapToBytesArray(0);
          quorumNumbers[1] = BitmapUtils.bitmapToBytesArray(1);
-         console.log("quorumNumbers"); 
-         
+         console.log("quorumNumbers");
+
          vm.startBroadcast(deployer);
          vm.expectRevert("RegistryCoordinator._deregisterOperator: operator is not registered");
          fsm.ejectOperators(operators, quorumNumbers);
