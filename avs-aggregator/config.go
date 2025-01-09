@@ -42,6 +42,10 @@ type Config struct {
 
 	AggIdleStart bool
 	AggRunTriggerApiKey string
+
+	EnableTraceLogs bool
+	
+	AggSSFetchTimeout int
 }
 
 // NewConfig parses the Config from the provided flags or environment variables and
@@ -111,6 +115,8 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 		CheckTriggerOpStateUpdateWindow:  ctx.GlobalBool(config.AggOsuCheckTriggerOpStateUpdateWindow.Name),
 		AggIdleStart: ctx.GlobalBool(config.AggIdleStart.Name),
 		AggRunTriggerApiKey: ctx.GlobalString(config.AggRunTriggerApiKey.Name),
+		EnableTraceLogs: ctx.GlobalBool(config.EnableTraceLogs.Name),
+		AggSSFetchTimeout: ctx.GlobalInt(config.AggSSFetchTimeout.Name),
 	}, nil
 }
 
@@ -139,4 +145,6 @@ var Flags = []cli.Flag{
 	config.AggOsuCheckTriggerOpStateUpdateWindow,
 	config.AggIdleStart,
 	config.AggRunTriggerApiKey,
+	config.EnableTraceLogs,
+	config.AggSSFetchTimeout,
 }

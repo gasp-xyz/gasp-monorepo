@@ -27,6 +27,7 @@ func NewEthRpc(
 	avsName string,
 	metricsIpPort string,
 	logger sdklogging.Logger,
+	aggSSFetchTimeout int,
 ) (*EthRpc, error) {
 
 	// tmp to get OperatorStateRetriever address
@@ -78,7 +79,7 @@ func NewEthRpc(
 		return nil, err
 	}
 
-	avsSubscriber, err := NewAvsSubscriber(registryAddr, wsethclient, logger)
+	avsSubscriber, err := NewAvsSubscriber(registryAddr, wsethclient, logger, aggSSFetchTimeout)
 	if err != nil {
 		logger.Error("Cannot create AvsSubscriber", "err", err)
 		return nil, err

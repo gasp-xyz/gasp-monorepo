@@ -148,10 +148,10 @@ impl Operator {
                                 Err(e) => error!("{} - {}", e, r.text().await?),
                                 Ok(_) => info!("Task finished successfuly and sent to AVS service"),
                             },
-                            Err(e) => error!("{}", e),
+                            Err(e) => error!("send_task_response failed with error: {:?}", e),
                         }
                     }
-                    Err(e) => tracing::error!("EthWs subscription error {:?}", e),
+                    Err(e) => return Err(eyre!("EthWs subscription error {:?}", e)),
                 },
                 block = blocks.next() => {
                     if block.is_none() {

@@ -1,3 +1,4 @@
+use crate::chainio::decode::CallDecoder;
 use crate::chainio::{avs::AvsContracts, build_clients, SourceClient, TargetClient};
 use crate::cli::CliArgs;
 
@@ -11,14 +12,19 @@ use bindings::{
     gasp_multi_rollup_service::{GaspMultiRollupService, Range},
     shared_types::{OpTask, OpTaskResponse},
 };
-use ethers::providers::{Middleware, SubscriptionStream};
+use ethers::core::abi::Detokenize;
+use ethers::core::types::U256;
+use ethers::providers::{
+    JsonRpcClient, Middleware, PendingTransaction, Provider, SubscriptionStream,
+};
+use ethers::types::transaction::eip2718::TypedTransaction;
 use ethers::{
-    abi::AbiDecode,
-    contract::{stream, EthEvent, EthLogDecode, LogMeta},
+    contract::{builders::ContractCall, stream, EthEvent, EthLogDecode, LogMeta},
     providers::StreamExt,
     types::{Bytes, Filter},
 };
 
+use crate::ALERT_WARNING;
 use ethers::abi::AbiEncode;
 use eyre::{eyre, OptionExt};
 use sp_core::H256;
@@ -26,7 +32,7 @@ use sp_runtime::traits::{Hash, Keccak256, Zero};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::select;
-use tracing::{debug, error, info, instrument};
+use tracing::{debug, error, info, instrument, warn};
 
 // TODO
 // In addition to reinit we could also have a function in the syncer that would cherry pick the task and its response
@@ -56,6 +62,8 @@ pub struct Syncer {
     gasp_service_contract: GaspMultiRollupService<TargetClient>,
     root_gasp_service_contract: Option<GaspMultiRollupService<TargetClient>>,
     filter_limit: u64,
+    decoder: CallDecoder,
+    sync_skips_first_op_task_completed_event: bool,
 }
 impl Syncer {
     #[instrument(name = "create_syncer", skip_all)]
@@ -78,6 +86,13 @@ impl Syncer {
             None
         };
         let target_chain_index = cfg.target_chain_index;
+        let decoder = CallDecoder::new(avs_contracts.task_manager.address());
+
+        let gmrs_chain_id = gasp_service_contract.chain_id().await?;
+
+        if gmrs_chain_id != target_chain_index {
+            return Err(eyre!("target_chain_index and gmrs_chain_id mismatch"));
+        }
 
         Ok(Arc::new(Self {
             source_client,
@@ -88,9 +103,12 @@ impl Syncer {
             gasp_service_contract,
             root_gasp_service_contract,
             filter_limit: cfg.filter_limit,
+            decoder,
+            sync_skips_first_op_task_completed_event: cfg.sync_skips_first_op_task_completed_event,
         }))
     }
 
+    #[allow(clippy::too_many_arguments)]
     #[instrument(skip_all, err)]
     pub async fn handle_sync_event(
         self: Arc<Self>,
@@ -100,9 +118,21 @@ impl Syncer {
         latest_completed_op_task_number: &mut u32,
         latest_completed_rd_task_number: &mut u32,
         last_processed_rd_task_number: &mut Option<u32>,
+        sync_skip_op_task_completed_event: &mut bool,
     ) -> eyre::Result<()> {
         match event {
             FinalizerTaskManagerEvents::OpTaskCompletedFilter(_event) => {
+                if *sync_skip_op_task_completed_event {
+                    if _event.task_response.reference_task_index != *latest_completed_op_task_number
+                    {
+                        return Err(eyre!(
+                            "missing expected op task response {:?}",
+                            *latest_completed_op_task_number
+                        ));
+                    }
+                    *sync_skip_op_task_completed_event = false;
+                    return Ok(());
+                }
                 let txn_hash = log.transaction_hash;
                 let txn = self
                     .clone()
@@ -112,14 +142,28 @@ impl Syncer {
                     .await?
                     .ok_or_else(|| eyre!("missing expected txn {:?}", txn_hash))?;
                 debug!("{:?}", txn);
-                let call = match FinalizerTaskManagerCalls::decode(txn.input)?{
+                let call = match self.decoder.parse_call_data(txn.input)? {
                     FinalizerTaskManagerCalls::RespondToOpTask(c) => c,
-                    FinalizerTaskManagerCalls::ForceRespondToOpTask(_) => {
-                        return Err(eyre!("The call that resulted in the OpTaskCompleted event was a ForceRespondToOpTask call. This cannot be synced without a admin reinit"))
+                    FinalizerTaskManagerCalls::ForceRespondToOpTask(call) => {
+                        // If we have come across the completion event of the exact task that we are syncing from
+                        // ie the last task that was completed on the alt-l1, then we can skip thise task here
+                        // This happens following a reinit on eth which is followed by a reinit on the alt-l1
+                        if call.task.clone().task_created_block
+                            == *latest_completed_op_task_created_block
+                        {
+                            // if here the task num doesn't match there is a problem
+                            if call.task.clone().task_num != *latest_completed_op_task_number {
+                                return Err(eyre!(
+                                    "task_num mismatch {:?} {:?}",
+                                    call.task.clone().task_num,
+                                    *latest_completed_op_task_number
+                                ));
+                            }
+                            return Ok(());
+                        }
+                        return Err(eyre!("The call that resulted in the OpTaskCompleted event was a ForceRespondToOpTask call. This cannot be synced without a admin reinit"));
                     }
-                    _ => {
-                        return Err(eyre!("wrong call decoded"))
-                    }
+                    _ => return Err(eyre!("wrong call decoded")),
                 };
                 debug!("{:?}", call);
                 debug!("{:?}", call.task.clone());
@@ -216,14 +260,20 @@ impl Syncer {
                     }
                 }
 
-                let update_txn = self.clone().gasp_service_contract.process_eigen_op_update(
+                let mut update_txn = self.clone().gasp_service_contract.process_eigen_op_update(
                     call.task.clone(),
                     call.task_response,
                     call.non_signer_stakes_and_signature,
                     operators_state_info,
                 );
                 debug!("{:?}", update_txn);
-                let update_txn_pending = update_txn.send().await;
+                let update_txn_pending = self
+                    .clone()
+                    .send_with_gas_price_estimate(
+                        &mut update_txn,
+                        self.clone().target_client.provider(),
+                    )
+                    .await;
                 debug!("{:?}", update_txn_pending);
                 let update_txn_receipt = update_txn_pending?.await?;
                 debug!("{:?}", update_txn_receipt);
@@ -233,7 +283,11 @@ impl Syncer {
                     .status
                 {
                     Some(status) if status.is_zero() => {
-                        return Err(eyre!("update_txn failed {:?}", update_txn_receipt))
+                        warn!(
+                            "{ALERT_WARNING} op_state update_txn failed {:?}",
+                            update_txn_receipt
+                        );
+                        return Err(eyre!("update_txn failed {:?}", update_txn_receipt));
                     }
                     _ => {}
                 }
@@ -252,7 +306,7 @@ impl Syncer {
                     .await?
                     .ok_or_else(|| eyre!("missing expected txn {:?}", txn_hash))?;
                 debug!("{:?}", txn);
-                let call = match FinalizerTaskManagerCalls::decode(txn.input)? {
+                let call = match self.decoder.parse_call_data(txn.input)? {
                     FinalizerTaskManagerCalls::RespondToRdTask(c) => c,
                     _ => return Err(eyre!("wrong call decoded")),
                 };
@@ -314,13 +368,19 @@ impl Syncer {
                     ));
                 }
 
-                let update_txn = self.clone().gasp_service_contract.process_eigen_rd_update(
+                let mut update_txn = self.clone().gasp_service_contract.process_eigen_rd_update(
                     call.task.clone(),
                     call.task_response,
                     call.non_signer_stakes_and_signature,
                 );
                 debug!("{:?}", update_txn);
-                let update_txn_pending = update_txn.send().await;
+                let update_txn_pending = self
+                    .clone()
+                    .send_with_gas_price_estimate(
+                        &mut update_txn,
+                        self.clone().target_client.provider(),
+                    )
+                    .await;
                 debug!("{:?}", update_txn_pending);
                 let update_txn_receipt = update_txn_pending?.await?;
                 debug!("{:?}", update_txn_receipt);
@@ -330,7 +390,11 @@ impl Syncer {
                     .status
                 {
                     Some(status) if status.is_zero() => {
-                        return Err(eyre!("update_txn failed {:?}", update_txn_receipt))
+                        warn!(
+                            "{ALERT_WARNING} rd_task update_txn failed {:?}",
+                            update_txn_receipt
+                        );
+                        return Err(eyre!("update_txn failed {:?}", update_txn_receipt));
                     }
                     _ => {}
                 }
@@ -362,10 +426,27 @@ impl Syncer {
             .latest_completed_rd_task_number()
             .block(alt_block_number)
             .await?;
+        let allow_gmrs_non_root_init = self
+            .gasp_service_contract
+            .allow_non_root_init()
+            .block(alt_block_number)
+            .await?;
 
-        if latest_completed_op_task_created_block.is_zero() && !cfg.push_first_init {
-            return Err(eyre!("target uninit and push_first_init set to false"));
+        match (
+            latest_completed_op_task_created_block.is_zero(),
+            cfg.push_first_init,
+            allow_gmrs_non_root_init,
+        ) {
+            (true, false, _) => {
+                return Err(eyre!("target uninit and push_first_init set to false"));
+            }
+            (_, true, false) => {
+                return Err(eyre!("target uninit and push_first_init set to true, but allow_non_root_init on gmrs is false"));
+            }
+            _ => {}
         }
+
+        let mut sync_skip_op_task_completed_event = self.sync_skips_first_op_task_completed_event;
 
         // TODO
         // To avoid this we should also link new rdTasks with the last completed ones (atleast the ones on the same chain)
@@ -373,13 +454,26 @@ impl Syncer {
         let mut last_processed_rd_task_number: Option<u32> = None;
 
         let source_block_number: u64 = self.source_client.get_block_number().await?.as_u64();
+        let last_completed_op_task_created_block = self
+            .clone()
+            .avs_contracts
+            .task_manager
+            .last_completed_op_task_created_block()
+            .block(source_block_number)
+            .await?;
 
-        if source_block_number < latest_completed_op_task_created_block.into() {
+        if source_block_number < latest_completed_op_task_created_block.into()
+            || last_completed_op_task_created_block < latest_completed_op_task_created_block
+        {
             return Err(eyre!("invalid latest_completed_op_task_created_block"));
         }
 
         let target_block_number: u64 = source_block_number.saturating_sub(1u64);
-        let mut from_block: u64 = latest_completed_op_task_created_block.into();
+        let mut from_block: u64 = if latest_completed_op_task_created_block.is_zero() {
+            cfg.source_avs_deployment_block
+        } else {
+            latest_completed_op_task_created_block.into()
+        };
 
         if target_block_number >= from_block {
             let mut to_block = from_block
@@ -406,7 +500,8 @@ impl Syncer {
                     .await?;
 
                 for (event, log) in events {
-                    self.clone()
+                    let res = self
+                        .clone()
                         .handle_sync_event(
                             event,
                             log,
@@ -414,8 +509,13 @@ impl Syncer {
                             &mut latest_completed_op_task_number,
                             &mut latest_completed_rd_task_number,
                             &mut last_processed_rd_task_number,
+                            &mut sync_skip_op_task_completed_event,
                         )
-                        .await?;
+                        .await;
+                    if res.is_err() {
+                        warn!("{ALERT_WARNING} handle_sync_event failed {:?}", res);
+                    }
+                    res?;
                 }
 
                 if to_block == target_block_number {
@@ -446,9 +546,13 @@ impl Syncer {
             select! {
                 Some(stream_event) = stream.next() => match stream_event {
                     Ok((stream_event, log)) => {
-                        self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number, &mut last_processed_rd_task_number).await?;
+                        let res = self.clone().handle_sync_event(stream_event, log, &mut latest_completed_op_task_created_block, &mut latest_completed_op_task_number, &mut latest_completed_rd_task_number, &mut last_processed_rd_task_number, &mut sync_skip_op_task_completed_event).await;
+                        if res.is_err() {
+                            warn!("{ALERT_WARNING} loop.handle_sync_event failed {:?}", res);
+                        }
+                        res?;
                     }
-                    Err(e) => error!("EthWs subscription error {:?}", e),
+                    Err(e) => return Err(eyre!("EthWs subscription error {:?}", e)),
                 },
                 block = blocks.next() => {
                     if block.is_none() {
@@ -524,7 +628,7 @@ impl Syncer {
                 latest_completed_rd_task_created_block_update
             )
         );
-        let reinit_txn = self
+        let mut reinit_txn = self
             .clone()
             .root_gasp_service_contract
             .clone()
@@ -539,7 +643,17 @@ impl Syncer {
                 latest_completed_rd_task_created_block_update,
             );
         debug!("{:?}", reinit_txn);
-        let reinit_txn_pending = reinit_txn.send().await;
+        let reinit_txn_pending = self
+            .clone()
+            .send_with_gas_price_estimate(
+                &mut reinit_txn,
+                self.clone()
+                    .root_target_client
+                    .as_ref()
+                    .expect("should work in reinit")
+                    .provider(),
+            )
+            .await;
         debug!("{:?}", reinit_txn_pending);
         let reinit_txn_receipt = reinit_txn_pending?.await?;
         debug!("{:?}", reinit_txn_receipt);
@@ -603,6 +717,11 @@ impl Syncer {
             .chain_rd_batch_nonce()
             .block(alt_block_number)
             .await?;
+        let latest_completed_op_task_number = self
+            .gasp_service_contract
+            .latest_completed_op_task_number()
+            .block(alt_block_number)
+            .await?;
 
         // TODO!!
         // Get the latest block from source chain and query the following three with it!
@@ -621,6 +740,10 @@ impl Syncer {
             .last_completed_op_task_created_block()
             .block(eth_block_number)
             .await?;
+
+        if block_num.is_zero() {
+            return Err(eyre!("no completed op tasks for reinit {:?}", block_num));
+        }
 
         // Unfortunately latestTaskNum and LastCompletedTaskNum both start at 0
         // So if lastCompletedTaskNum is 0 then check if it was infact completed
@@ -660,10 +783,17 @@ impl Syncer {
             }
         };
 
+        last_task.last_completed_op_task_num = latest_completed_op_task_number;
         last_task.last_completed_op_task_created_block = latest_completed_op_task_created_block;
         last_task.last_completed_op_task_quorum_numbers = latest_completed_op_task_quorum_numbers;
         last_task.last_completed_op_task_quorum_threshold_percentage =
             latest_completed_op_task_quorum_threshold_percentage;
+
+        let rd_tasks_from: u64 = if latest_completed_op_task_created_block == 0 {
+            block_num.into()
+        } else {
+            latest_completed_op_task_created_block.into()
+        };
 
         let (
             merkle_roots,
@@ -678,15 +808,24 @@ impl Syncer {
                 latest_completed_rd_task_number,
                 latest_completed_rd_task_created_block,
                 eth_block_number,
-                u64::from(latest_completed_op_task_created_block),
+                rd_tasks_from,
             )
             .await?;
 
-        let operators_state_info = self
-            .clone()
-            .get_operators_state_info(last_task.clone())
-            .await?;
+        if last_task.last_completed_op_task_created_block > last_task.task_created_block {
+            return Err(eyre!("alt-l1 has later op task than eth-l1"));
+        }
 
+        // If we are reiniting the alt-l1 and the alt-l1 is caught up to the eth-l1 wrt OpTasks then
+        // we don't need the entire opState, we can just have nil opStateInfo
+        let operators_state_info: OperatorStateInfo =
+            if last_task.last_completed_op_task_created_block == last_task.task_created_block {
+                Default::default()
+            } else {
+                self.clone()
+                    .get_operators_state_info(last_task.clone())
+                    .await?
+            };
         Ok((
             last_task.clone(),
             operators_state_info.clone(),
@@ -748,7 +887,9 @@ impl Syncer {
             .task_manager
             .latest_op_task_num()
             .block(source_block_number)
-            .await?;
+            .await?
+            .checked_sub(1u32)
+            .ok_or_eyre("latest_op_task_num underflow - no op task created")?;
 
         let task_status = self
             .clone()
@@ -846,9 +987,12 @@ impl Syncer {
         // TODO
         // Put the quorum_threshold_percentage and quorum_numbers into constants properly somewhere
         // Maybe put default values in the TaskManager contract itself
-        let force_task_txn = task_manager.force_create_new_op_task(66u32, vec![0u8].into());
+        let mut force_task_txn = task_manager.force_create_new_op_task(66u32, vec![0u8].into());
         debug!("{:?}", force_task_txn);
-        let force_task_txn_pending = force_task_txn.send().await;
+        let force_task_txn_pending = self
+            .clone()
+            .send_with_gas_price_estimate(&mut force_task_txn, root_target_client.provider())
+            .await;
         debug!("{:?}", force_task_txn_pending);
         let force_task_txn_receipt = force_task_txn_pending?.await?;
         debug!("{:?}", force_task_txn_receipt);
@@ -903,7 +1047,7 @@ impl Syncer {
 
         // Respond to the opTask via forceRespondToOpTask
 
-        let force_respond_txn = task_manager.force_respond_to_op_task(
+        let mut force_respond_txn = task_manager.force_respond_to_op_task(
             task.clone(),
             OpTaskResponse {
                 reference_task_index: new_op_task_created_event.task_index,
@@ -912,7 +1056,10 @@ impl Syncer {
             },
         );
         debug!("{:?}", force_respond_txn);
-        let force_respond_txn_pending = force_respond_txn.send().await;
+        let force_respond_txn_pending = self
+            .clone()
+            .send_with_gas_price_estimate(&mut force_respond_txn, root_target_client.provider())
+            .await;
         debug!("{:?}", force_respond_txn_pending);
         let force_respond_txn_receipt = force_respond_txn_pending?.await?;
         debug!("{:?}", force_respond_txn_receipt);
@@ -1002,7 +1149,7 @@ impl Syncer {
                     .await?
                     .ok_or_else(|| eyre!("missing expected txn {:?}", txn_hash))?;
                 debug!("{:?}", txn);
-                let call = match FinalizerTaskManagerCalls::decode(txn.input)? {
+                let call = match self.decoder.parse_call_data(txn.input)? {
                     FinalizerTaskManagerCalls::RespondToRdTask(c) => c,
                     _ => return Err(eyre!("wrong call decoded")),
                 };
@@ -1069,6 +1216,57 @@ impl Syncer {
             }
         }
         Ok(())
+    }
+
+    #[instrument(skip_all)]
+    pub(crate) async fn send_with_gas_price_estimate<'a, M, D, P>(
+        self: Arc<Self>,
+        call: &'a mut ContractCall<M, D>,
+        provider: &Provider<P>,
+    ) -> eyre::Result<PendingTransaction<'a, M::Provider>>
+    where
+        M: Middleware,
+        D: Detokenize,
+        P: JsonRpcClient,
+    {
+        let (max_fee_in_wei, max_priority_fee_per_gas_in_wei) =
+            self.clone().estimate_gas_in_wei(provider).await?;
+        match call.tx {
+            TypedTransaction::Eip1559(ref mut eip1559tx) => {
+                eip1559tx.max_fee_per_gas = Some(max_fee_in_wei.into());
+                eip1559tx.max_priority_fee_per_gas = Some(max_priority_fee_per_gas_in_wei.into())
+            }
+            _ => return Err(eyre!("Not an Eip1559txn")),
+        };
+        call.send()
+            .await
+            .map_err(|e| eyre!("send_with_gas_price failed with error: {}", e.to_string()))
+    }
+
+    #[instrument(skip(self))]
+    async fn estimate_gas_in_wei<P>(
+        self: Arc<Self>,
+        provider: &Provider<P>,
+    ) -> eyre::Result<(u128, u128)>
+    where
+        P: JsonRpcClient,
+    {
+        // https://www.blocknative.com/blog/eip-1559-fees
+        // We do not want client to estimate we would like to make our own estimate
+        // based on this equation: Max Fee = (2 * Base Fee) + Max Priority Fee
+
+        // Max Fee = maxFeePerGas (client)
+        // Max Priority Fee = maxPriorityFeePerGas (client)
+
+        let base_fee_in_wei = provider.get_gas_price().await?.as_u128();
+        let max_priority_fee_per_gas_in_wei = provider
+            .request::<(), U256>("eth_maxPriorityFeePerGas", ())
+            .await?
+            .as_u128();
+        let max_fee_in_wei = base_fee_in_wei
+            .saturating_mul(2)
+            .saturating_add(max_priority_fee_per_gas_in_wei);
+        Ok((max_fee_in_wei, max_priority_fee_per_gas_in_wei))
     }
 
     pub(crate) async fn get_operators_state_info(
@@ -1411,6 +1609,15 @@ impl Syncer {
         };
 
         info!("operator_state_info: {:?}", operator_state_info);
+        let operators_state_info_hash = Keccak256::hash(
+            vec![0u8; 31]
+                .into_iter()
+                .chain(vec![32u8])
+                .chain(operator_state_info.clone().encode().into_iter())
+                .collect::<Vec<_>>()
+                .as_ref(),
+        );
+        debug!("{:?}", operators_state_info_hash);
         Ok(operator_state_info)
     }
 

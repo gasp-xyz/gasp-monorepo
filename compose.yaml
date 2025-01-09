@@ -3,10 +3,8 @@ name: rollup
 include:
   - path: ./contracts/compose.anvil-stubs.yml # anvil stubs
   # - path: ./contracts/compose.reth-stubs.yml # reth stubs
-
   - path: ./avs-aggregator/compose.yml
   - path: ./gasp-avs/compose.yml
-  # - path: ./rollup-sequencer/compose.yml
   - path: ./sequencer/compose.yml
   - path: ./contracts/compose.yml
   - path: ./updater/compose.yml

@@ -218,43 +218,12 @@ where
         let updates = self.l2.get_pending_updates(at).await?;
         let mut updates = updates
             .into_iter()
-            .map(|(update_id, update, update_hash)| -> PendingUpdate {
-                let min_deposit_id = update
-                    .pendingDeposits
-                    .iter()
-                    .map(|elem| elem.requestId.id)
-                    .min()
-                    .unwrap_or(u128::MAX);
-
-                let max_deposit_id = update
-                    .pendingDeposits
-                    .iter()
-                    .map(|elem| elem.requestId.id)
-                    .max()
-                    .unwrap_or(0u128);
-
-                let min_cancel_id = update
-                    .pendingCancelResolutions
-                    .iter()
-                    .map(|elem| elem.requestId.id)
-                    .min()
-                    .unwrap_or(u128::MAX);
-
-                let max_cancel_id = update
-                    .pendingCancelResolutions
-                    .iter()
-                    .map(|elem| elem.requestId.id)
-                    .max()
-                    .unwrap_or(0u128);
-
+            .map(|(update_id, chain, metadata)| -> PendingUpdate {
                 PendingUpdate {
                     update_id,
-                    chain: update.chain,
-                    range: (
-                        std::cmp::min(min_deposit_id, min_cancel_id),
-                        std::cmp::max(max_deposit_id, max_cancel_id),
-                    ),
-                    hash: update_hash,
+                    chain,
+                    range: (metadata.min_id, metadata.max_id),
+                    hash: metadata.update_hash,
                 }
             })
             .filter(|update| update.chain == self.chain)
@@ -548,6 +517,7 @@ pub(crate) mod test {
         l2types::bindings::runtime_types::primitive_types::U256::decode(&mut &data[..]).unwrap()
     }
 
+    #[allow(dead_code)]
     impl UpdateBuilder {
         pub fn new() -> Self {
             Self(vec![])
@@ -602,10 +572,15 @@ pub(crate) mod test {
         let update_hash = H256::zero();
         let correct_hash = update_hash;
 
-        let update = UpdateBuilder::new()
-            .with_dummy_deposit(1u128)
-            .build(ETHEREUM);
-        let pending: PendingUpdateWithKeys = (1u128, update, update_hash);
+        let metadata = l2types::PendingUpdateMetadata {
+            min_id: 1u128,
+            max_id: 1u128,
+            update_size: 1u128,
+            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
+            update_hash: update_hash.clone(),
+        };
+
+        let pending: PendingUpdateWithKeys = (1u128, ETHEREUM, metadata);
 
         let mut l1mock = MockL1::new();
         l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
@@ -633,10 +608,15 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_find_malicious_update_ignores_updates_from_other_chains() {
         let update_hash = H256::zero();
-        let update = UpdateBuilder::new()
-            .with_dummy_deposit(1u128)
-            .build(ARBITRUM);
-        let pending: PendingUpdateWithKeys = (1u128, update, update_hash);
+
+        let metadata = l2types::PendingUpdateMetadata {
+            min_id: 1u128,
+            max_id: 1u128,
+            update_size: 1u128,
+            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
+            update_hash: update_hash.clone(),
+        };
+        let pending: PendingUpdateWithKeys = (1u128, ARBITRUM, metadata);
 
         let mut l1mock = MockL1::new();
         l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
@@ -664,10 +644,14 @@ pub(crate) mod test {
         ));
         let correct_hash = H256::zero();
 
-        let update = UpdateBuilder::new()
-            .with_dummy_deposit(1u128)
-            .build(ETHEREUM);
-        let pending: PendingUpdateWithKeys = (1u128, update, update_hash);
+        let metadata = l2types::PendingUpdateMetadata {
+            min_id: 1u128,
+            max_id: 1u128,
+            update_size: 1u128,
+            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
+            update_hash: update_hash.clone(),
+        };
+        let pending: PendingUpdateWithKeys = (1u128, ETHEREUM, metadata);
 
         let mut l1mock = MockL1::new();
         l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
@@ -937,10 +921,15 @@ pub(crate) mod test {
         let update_hash = H256::from(hex!(
             "1111111111111111111111111111111111111111111111111111111111111111"
         ));
-        let update = UpdateBuilder::new()
-            .with_dummy_deposit(1u128)
-            .build(ETHEREUM);
-        let pending: PendingUpdateWithKeys = (33u128, update, update_hash);
+
+        let metadata = l2types::PendingUpdateMetadata {
+            min_id: 1u128,
+            max_id: 1u128,
+            update_size: 1u128,
+            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
+            update_hash: update_hash.clone(),
+        };
+        let pending: PendingUpdateWithKeys = (33u128, ETHEREUM, metadata);
 
         let mut l1mock = MockL1::new();
         l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
@@ -970,10 +959,15 @@ pub(crate) mod test {
         let dispute_period = 10u128;
         let update_executed_at = 33u128;
         let update_hash = H256::zero();
-        let update = UpdateBuilder::new()
-            .with_dummy_deposit(1u128)
-            .build(ETHEREUM);
-        let pending: PendingUpdateWithKeys = (update_executed_at, update, update_hash.clone());
+
+        let metadata = l2types::PendingUpdateMetadata {
+            min_id: 1u128,
+            max_id: 1u128,
+            update_size: 1u128,
+            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
+            update_hash: update_hash.clone(),
+        };
+        let pending: PendingUpdateWithKeys = (update_executed_at, ETHEREUM, metadata);
 
         let mut l1mock = MockL1::new();
         l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
@@ -1013,16 +1007,18 @@ pub(crate) mod test {
         let latest_update_executed_at = 33u128;
         let old_update_executed_at = 23u128;
         let update_hash = H256::zero();
-        let update = UpdateBuilder::new()
-            .with_dummy_deposit(1u128)
-            .build(ETHEREUM);
-        let latest_pending: PendingUpdateWithKeys = (
-            latest_update_executed_at,
-            update.clone(),
-            update_hash.clone(),
-        );
-        let old_pending: PendingUpdateWithKeys =
-            (old_update_executed_at, update, update_hash.clone());
+
+        let metadata = l2types::PendingUpdateMetadata {
+            min_id: 1u128,
+            max_id: 1u128,
+            update_size: 1u128,
+            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
+            update_hash: update_hash.clone(),
+        };
+        let latest_pending: PendingUpdateWithKeys =
+            (latest_update_executed_at, ETHEREUM, metadata.clone());
+
+        let old_pending: PendingUpdateWithKeys = (old_update_executed_at, ETHEREUM, metadata);
 
         let mut l1mock = MockL1::new();
         l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
@@ -1068,22 +1064,25 @@ pub(crate) mod test {
             "2222222222222222222222222222222222222222222222222222222222222222"
         ));
 
-        let valid_update = UpdateBuilder::new()
-            .with_dummy_deposit(1u128)
-            .build(ETHEREUM);
+        let metadata = l2types::PendingUpdateMetadata {
+            min_id: 1u128,
+            max_id: 1u128,
+            update_size: 1u128,
+            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
+            update_hash: update_hash.clone(),
+        };
         let valid_pending: PendingUpdateWithKeys =
-            (valid_update_executed_at, valid_update, update_hash.clone());
+            (valid_update_executed_at, ETHEREUM, metadata.clone());
 
-        let invalid_update = UpdateBuilder::new()
-            .with_dummy_deposit(1u128)
-            .with_dummy_deposit(2u128)
-            .with_dummy_deposit(3u128)
-            .build(ETHEREUM);
-        let invalid_pending: PendingUpdateWithKeys = (
-            invalid_update_executed_at,
-            invalid_update,
-            update_hash.clone(),
-        );
+        let metadata = l2types::PendingUpdateMetadata {
+            min_id: 1u128,
+            max_id: 3u128,
+            update_size: 3u128,
+            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
+            update_hash: update_hash.clone(),
+        };
+        let invalid_pending: PendingUpdateWithKeys =
+            (invalid_update_executed_at, ETHEREUM, metadata.clone());
 
         let mut l1mock = MockL1::new();
         l1mock.expect_account_address().return_const(DUMMY_ADDRESS);

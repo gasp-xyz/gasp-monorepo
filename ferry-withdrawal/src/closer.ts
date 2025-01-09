@@ -8,6 +8,7 @@ import "gasp-types";
 import { Withdrawal, isWithdrawal, toString } from "./Withdrawal.js";
 import { Cancel, isCancel, toString as cancelToString } from "./Cancel.js";
 import { L1Api } from "./l1/L1Api.js";
+import { StashApi } from "./stash/StashApi.js";
 import { L2Api, getApi } from "./l2/L2Api.js";
 import { logger } from "./logger.js";
 import {
@@ -18,6 +19,7 @@ import {
 	PRIVATE_KEY,
 	TOKENS_TO_TRACK,
 	TX_COST,
+	STASH_URL,
 	DELAY,
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
@@ -28,6 +30,7 @@ async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
 	const l2 = new L2Api(api);
 	const l1 = new L1Api(ETH_CHAIN_URL);
+	const stash = new StashApi(STASH_URL);
 
 	logger.info(`Closer Serivce`);
 
@@ -55,6 +58,7 @@ async function main() {
 	const closerService = new CloserService(
 		l1,
 		l2,
+		stash,
 		TOKENS_TO_TRACK,
 		TX_COST,
 		BATCH_SIZE,
@@ -64,24 +68,28 @@ async function main() {
 
 	const unwatch = await api.derive.chain.subscribeFinalizedHeads(
 		async (header: HeaderExtended) => {
-			inProgress = true;
-			logger.info(`#${header.number} updating withdrawals to close`);
-			await closerService.findRequestToClose(DELAY);
-			const req = await closerService.getNextRequestToClose();
-			if (req) {
-				if (isWithdrawal(req)) {
-					logger.info(`#${header.number} Closing withdrawal ${toString(req)}`);
-					await closerService.closeWithdrawal(req, hexToU8a(PRIVATE_KEY));
-				} else if (isCancel(req)) {
-					logger.info(
-						`#${header.number} Closing withdrawal ${cancelToString(req)}`,
-					);
-					await closerService.closeCancel(req, hexToU8a(PRIVATE_KEY));
+			if (!inProgress) {
+				inProgress = true;
+				logger.info(`#${header.number} updating withdrawals to close`);
+				await closerService.findRequestToClose(DELAY);
+				const req = await closerService.getNextRequestToClose();
+				if (req) {
+					if (isWithdrawal(req)) {
+						logger.info(
+							`#${header.number} Closing withdrawal ${toString(req)}`,
+						);
+						await closerService.closeWithdrawal(req, hexToU8a(PRIVATE_KEY));
+					} else if (isCancel(req)) {
+						logger.info(
+							`#${header.number} Closing withdrawal ${cancelToString(req)}`,
+						);
+						await closerService.closeCancel(req, hexToU8a(PRIVATE_KEY));
+					}
+				} else {
+					logger.debug(`#${header.number} nothing to close`);
 				}
-			} else {
-				logger.debug(`#${header.number} nothing to close`);
+				inProgress = false;
 			}
-			inProgress = false;
 		},
 	);
 }

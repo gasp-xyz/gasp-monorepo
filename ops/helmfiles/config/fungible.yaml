@@ -2,7 +2,7 @@ remoteCluster: true
 
 blockscoutEnabled: false
 enableArbitrumServices: true
-enableBaseServices: true
+enableBaseServices: false
 
 ####################
 # evm-node configs #
@@ -80,6 +80,10 @@ aggregatorEnv:
 #####################
 gaspAvsEnabled: true
 gaspAvsEnvSecrets: {}
+gaspAvsData:
+  storageClass: standard-rwo
+  mountPath: /data
+  storageSize: 10Gi
 gaspAvsEnv:
   CHAIN_ID: "1337"
   RUST_LOG: info,substrate=warn
@@ -93,7 +97,7 @@ gaspAvsEnv:
   TESTNET: "true"
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWAfm5cK7DuUa2zh9SrSoHr2fsXXYbLALWXs5ob9mTDKHJ
-  ROLLUP_NODE_CHAIN: /app/fungible-chainspec.json
+  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-fungible-26de25a-raw.json
 
 ###########################
 # updater configs #

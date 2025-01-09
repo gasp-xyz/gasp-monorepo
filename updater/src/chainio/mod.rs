@@ -8,6 +8,7 @@ use tracing::{info, instrument};
 use crate::cli::CliArgs;
 
 pub mod avs;
+pub mod decode;
 
 type MW = Provider<Http>;
 pub type SourceClient = MW;

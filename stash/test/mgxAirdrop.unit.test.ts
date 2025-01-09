@@ -25,7 +25,7 @@ describe('MGX Airdrop', () => {
     const { weight, blockMgxLpHoldings, blockMgxHoldings } =
       await getEligibilityAtBlockN(api, '123', 'address')
 
-    expect(weight.toString()).toEqual(toBN('1.5').toString())
+    expect(weight.toString()).toEqual(toBN('0.010339800000000000').toString())
     expect(blockMgxHoldings.toString()).toEqual(toBN('3').toString())
     expect(blockMgxLpHoldings.toString()).toEqual(toBN('0').toString())
   })
@@ -53,7 +53,7 @@ describe('MGX Airdrop', () => {
     const { weight, blockMgxHoldings, blockMgxLpHoldings } =
       await getEligibilityAtBlockN(api, '123', 'address')
 
-    expect(weight.toString()).toEqual(toBN('1').toString())
+    expect(weight.toString()).toEqual(toBN('0.006893200000000000').toString())
     expect(blockMgxHoldings.toString()).toEqual(toBN('0').toString())
     expect(blockMgxLpHoldings.toString()).toEqual(toBN('2').toString())
   })
@@ -93,7 +93,7 @@ describe('MGX Airdrop', () => {
     const { weight, blockMgxHoldings, blockMgxLpHoldings } =
       await getEligibilityAtBlockN(api, '123', 'address')
 
-    expect(weight.toString()).toEqual(toBN('3.5').toString())
+    expect(weight.toString()).toEqual(toBN('0.024126200000000000').toString())
     expect(blockMgxHoldings.toString()).toEqual(toBN('3').toString())
     expect(blockMgxLpHoldings.toString()).toEqual(toBN('4').toString())
   })
