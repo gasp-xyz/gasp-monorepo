@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // ::: How to run:::
-//cd contracts ;  pkill anvil ;  clear ; cd ../ ; make start-anvil-and-deploy  ; cd contracts ;   forge test  -vvv --fork-url=http://localhost:8545 --match-contract 'Integration'
+//cd contracts ;  pkill anvil ;  clear ; cd ../ ; make deploy-all-contracts-via-multistage-and-resume  ; cd contracts ;   forge test  -vvv --fork-url=http://localhost:8545 --match-contract 'Integration'
 pragma solidity =0.8.13;
 
 import { FinalizerServiceManager } from "../../src/FinalizerServiceManager.sol";
