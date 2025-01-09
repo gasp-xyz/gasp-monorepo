@@ -33,7 +33,7 @@ jobs:
 
       - name: Run forge tests - Integration folder
         run: |
-          make start-anvil-and-deploy
+          make deploy-all-contracts-via-multistage-and-resume
           cd contracts
           forge test  -vvv --fork-url=http://localhost:8545 --match-contract 'Integration'
       
