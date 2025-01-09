@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use alloy::sol_types::SolValue;
+use alloy::transports::http::reqwest::redirect::Action;
 use futures::StreamExt;
 use hex::encode as hex_encode;
 use primitive_types::H256;
@@ -22,6 +23,13 @@ pub struct Sequencer<L1, L2> {
     l1_account_address: [u8; 20],
     l2_account_address: [u8; 20],
     tx_cost: Option<u128>,
+}
+
+#[derive(Debug)]
+pub enum ActionStatus{
+    Performed,
+    Skipped,
+    NothingToDo
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -77,48 +85,34 @@ where
         }
     }
 
-    pub async fn run(&self, sender: Sender<()>) -> Result<(), Error> {
-        let mut stream = self.l2.finalized_header_stream().await?;
-        loop {
-            sender.send(()).await.expect("send error");
-            let (number, block_hash) = stream.next().await.expect("infinite stream")?;
-            let at = block_hash;
-
-            tracing::info!("#{} : block hash {}", number, hex_encode(block_hash));
-
-            if !self.is_active_sequencer().await? {
-                tracing::error!(
-                    "{} is not a sequencer for {:?}",
-                    hex_encode(self.l2_account_address),
-                    self.chain
-                );
-                return Err(Error::NotASequencer);
-            }
-
-            if let Some(update) = self.find_malicious_update(at).await? {
-                tracing::warn!("{ALERT_ERROR} Found malicious update: {}", update);
-                if self.has_cancel_rights_available().await? {
-                    self.cancel_update(update)
-                        .await
-                        .inspect(|result| {
-                            if *result {
-                                tracing::warn!(
-                                    "{ALERT_ERROR} cancel malicious update has succeded"
-                                );
-                            } else {
-                                tracing::error!("{ALERT_ERROR} cancel malicious update has failed");
-                            }
-                        })
-                        .inspect_err(|_| {
+    pub async fn cancel_malicious_update_if_any(&self, at: H256) -> Result<ActionStatus, Error> {
+        if let Some(update) = self.find_malicious_update(at).await? {
+            tracing::warn!("{ALERT_ERROR} Found malicious update: {}", update);
+            if self.has_cancel_rights_available().await? {
+                self.cancel_update(update)
+                    .await
+                    .inspect(|result| {
+                        if *result {
+                            tracing::warn!(
+                            "{ALERT_ERROR} cancel malicious update has succeded"
+                        );
+                        } else {
                             tracing::error!("{ALERT_ERROR} cancel malicious update has failed");
-                        })?;
-                    stream = Self::consume_stream_with_timeout(stream).await;
-                    continue;
-                } else {
-                    tracing::error!("{ALERT_ERROR} there are no cancel rights available to cancel malicous update");
-                }
+                        }
+                    })
+                    .inspect_err(|_| {
+                        tracing::error!("{ALERT_ERROR} cancel malicious update has failed");
+                    })?;
+                    Ok(ActionStatus::Performed)
+            } else {
+                tracing::error!("{ALERT_ERROR} there are no cancel rights available to cancel malicous update");
+                Ok(ActionStatus::Skipped)
             }
+        }
+        Ok(ActionStatus::NothingToDo)
+    }
 
+    pub async fn send_sequencer_update(&self, block_number: u128, at: H256) -> Result<ActionStatus, Error> {
             if self.has_read_rights_available().await? && self.is_selected_sequencer().await? {
                 let dispute_period = self.l2.get_dispute_period(self.chain.clone(), at).await?;
                 let sequencers_count = self
@@ -139,7 +133,7 @@ where
                         true
                     }
                     (Some(latest), _)
-                        if (number as u128).saturating_sub(latest)
+                        if block_number.saturating_sub(latest)
                             > (dispute_period / sequencers_count) =>
                     {
                         tracing::info!("previous update was long enough ago, proceeding...");
@@ -163,36 +157,74 @@ where
                             return Err(Error::UpdateSubmissionFailure);
                         } else {
                             tracing::info!("{ALERT_INFO} update submission succeded");
-                            stream = Self::consume_stream_with_timeout(stream).await;
+                            Ok(ActionStatus::Performed)
                         }
                     }
                 }
+                Ok(ActionStatus::Skipped)
+            }
+    }
+
+    pub async fn retrieve_cancel_rights(&self, at: H256) -> Result<ActionStatus, Error> {
+        let balance = self.get_my_balance().await?;
+        match (
+            self.tx_cost,
+            self.find_closable_cancel_resolutions(at).await?.first(),
+        ) {
+            (Some(tx_cost), Some(closable)) if balance > tx_cost => {
+                tracing::info!("Found pending cancel ready to close : {}", closable);
+                self.close_cancel(*closable, at).await?;
+                Ok(ActionStatus::Performed)
+            }
+            (Some(tx_cost), Some(closable)) => {
+                tracing::error!("Found pending cancel ready to close : {}, but not enought funds available({}) vs required({})", closable, balance, tx_cost);
+                return Err(Error::NotEnoughtBalance);
+            }
+            (None, Some(closable)) => {
+                tracing::warn!(
+                    "Found pending cancel ready to close : {}, but tx closing is disabled",
+                    closable
+                );
+                Ok(ActionStatus::Skipped)
+            }
+            _ => {
+                Ok(ActionStatus::Skipped)
+            }
+        }
+    }
+
+    pub async fn run(&self, sender: Sender<()>) -> Result<(), Error> {
+        let mut stream = self.l2.finalized_header_stream().await?;
+        loop {
+            sender.send(()).await.expect("send error");
+            let (number, block_hash) = stream.next().await.expect("infinite stream")?;
+            let at = block_hash;
+
+            tracing::info!("#{} : block hash {}", number, hex_encode(block_hash));
+
+            if !self.is_active_sequencer().await? {
+                tracing::error!(
+                    "{} is not a sequencer for {:?}",
+                    hex_encode(self.l2_account_address),
+                    self.chain
+                );
+                return Err(Error::NotASequencer);
             }
 
-            let balance = self.get_my_balance().await?;
-            match (
-                self.tx_cost,
-                self.find_closable_cancel_resolutions(at).await?.first(),
-            ) {
-                (Some(tx_cost), Some(closable)) if balance > tx_cost => {
-                    tracing::info!("Found pending cancel ready to close : {}", closable);
-                    self.close_cancel(*closable, at).await?;
+            match ( self.cancel_malicious_update_if_any(at).await?,
+                self.send_sequencer_update(number,at).await?,
+                self.retrieve_cancel_rights(at).await?){
+                (ActionStatus::Performed, _, _) |
+                (_, ActionStatus::Performed, _) |
+                (_, _, ActionStatus::Performed) 
+                => {
+                    // ignore blocks produced while action was beeing performed
                     stream = Self::consume_stream_with_timeout(stream).await;
                     continue;
-                }
-                (Some(tx_cost), Some(closable)) => {
-                    tracing::error!("Found pending cancel ready to close : {}, but not enought funds available({}) vs required({})", closable, balance, tx_cost);
-                    return Err(Error::NotEnoughtBalance);
-                }
-                (None, Some(closable)) => {
-                    tracing::warn!(
-                        "Found pending cancel ready to close : {}, but tx closing is disabled",
-                        closable
-                    );
-                    continue;
-                }
+                },
                 _ => {}
             }
+
         }
     }
 
