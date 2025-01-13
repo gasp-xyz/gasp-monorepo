@@ -199,7 +199,7 @@ gaspAvsEnv:
 # updater configs #
 ###########################
 updaterEnabled: true
-updaterImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
+updaterImageTag: 45539a735c399b1d6b235edb5bb8f09d8bb5fcc2
 updaterEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-password
@@ -218,7 +218,7 @@ updaterEnv:
   RUST_LOG: info
   # PUSH_FIRST_INIT: "false"
   SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
-  SOURCE_AVS_DEPLOYMENT_BLOCK: 21394442
+  SOURCE_AVS_DEPLOYMENT_BLOCK: '21394442'
 
 updaterEnvSecretsBase:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-key
@@ -238,7 +238,7 @@ updaterEnvBase:
   RUST_LOG: info
   # PUSH_FIRST_INIT: "false"
   SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
-  SOURCE_AVS_DEPLOYMENT_BLOCK: 21394442
+  SOURCE_AVS_DEPLOYMENT_BLOCK: '21394442'
 
 ############################
 # sequencer configs #
