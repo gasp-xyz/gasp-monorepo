@@ -14,8 +14,8 @@
     "cover": "forge coverage --force --no-match-coverage '(script|test)'",
     "cover:lcov": "forge coverage --force --no-match-coverage '(script|test)' --report lcov && genhtml lcov.info -o coverage --ignore-errors inconsistent && open coverage/src/index.html",
     "clean": "forge clean && rm -rf coverage .gas-snapshot lcov.info",
-    "analyze": "slitherin . --separated",
-    "analyze:ci": "slitherin --separated . --skip-clean --ignore-compile"
+    "analyze": "slitherin .",
+    "analyze:ci": "slitherin . --skip-clean --ignore-compile"
   },
   "repository": {
     "type": "git",
