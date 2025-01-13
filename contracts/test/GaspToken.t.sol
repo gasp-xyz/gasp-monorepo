@@ -85,8 +85,8 @@ contract GaspTokenTest is Test {
     error ZeroRolldown();
     error ZeroWhitelistedAccount();
     error TransfersAlreadyAllowed();
-    error AccountAlreadyWhitelisted(address addr);
-    error AccountNotWhitelisted(address addr);
+    error AccountAlreadyWhitelisted(address account);
+    error AccountNotWhitelisted(address account);
     error OperationForbidden(bytes32 selector);
 
     uint8 internal constant DECIMALS = 18;
@@ -111,19 +111,18 @@ contract GaspTokenTest is Test {
             recipient: makeAddr("recipient")
         });
 
-        deal(payable(accounts.deployer), 100 ether);
-        deal(payable(accounts.l1Council), 100 ether);
-        deal(payable(accounts.swapper), 100 ether);
-        deal(payable(accounts.depositor), 100 ether);
-        deal(payable(accounts.sender), 100 ether);
-        deal(payable(accounts.recipient), 100 ether);
-
         vm.startPrank(accounts.deployer);
 
         usdtToken = new USDTTokenMock(TOTAL_SUPPLY);
         gaspToken = new GaspToken(accounts.l1Council);
         uniswapPool = new UniswapPoolMock(address(usdtToken), address(gaspToken));
         rolldown = new RolldownMock(address(gaspToken));
+
+        vm.label(address(this), "GaspTokenTest");
+        vm.label(address(usdtToken), "USDTToken");
+        vm.label(address(gaspToken), "GaspToken");
+        vm.label(address(uniswapPool), "UniswapPool");
+        vm.label(address(rolldown), "Rolldown");
 
         usdtToken.transfer(accounts.l1Council, TOTAL_SUPPLY / 2);
 

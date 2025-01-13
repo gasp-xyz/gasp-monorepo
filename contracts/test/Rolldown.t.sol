@@ -32,6 +32,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
 
     event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
     event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
+    event Paused(address account);
+    event Unpaused(address account);
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     function setUp() public virtual {
@@ -45,13 +47,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
             recipient: makeAddr("recipient")
         });
 
-        deal(payable(users.admin), 100 ether);
-        deal(payable(users.grantee), 100 ether);
-        deal(payable(users.updater), 100 ether);
         deal(payable(users.depositor), 100 ether);
         deal(payable(users.withdrawerA), 100 ether);
-        deal(payable(users.withdrawerB), 100 ether);
-        deal(payable(users.recipient), 100 ether);
 
         token = new MyERC20();
 
@@ -63,6 +60,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
             abi.encodeCall(Rolldown.initialize, (users.admin, ChainId.Ethereum, users.updater))
         );
         rolldown = Rolldown(payable(address(proxy)));
+
+        vm.label(address(this), "RolldownTest");
+        vm.label(address(token), "ERC20Token");
+        vm.label(address(proxy), "Rolldown");
 
         updaterRole = rolldown.UPDATER_ROLE();
         nativeTokenAddress = rolldown.NATIVE_TOKEN_ADDRESS();
@@ -91,6 +92,10 @@ contract Deploy is RolldownTest {
 
     function test_HasUpdaterRole() public view {
         assertTrue(rolldown.hasRole(updaterRole, users.updater));
+    }
+
+    function test_IsPaused() public view {
+        assertFalse(rolldown.paused());
     }
 
     function test_GetCounter() public view {
@@ -124,7 +129,7 @@ contract Deploy is RolldownTest {
         assertEq(l1Update.pendingCancelResolutions.length, 0);
     }
 
-    function test_RevertIf_InvalidInitialization() public {
+    function test_RevertIf_AlreadyInitialized() public {
         vm.expectRevert("Initializable: contract is already initialized");
         rolldown.initialize(users.admin, ChainId.Ethereum, users.updater);
     }
@@ -242,6 +247,66 @@ contract RenounceRole is RolldownTest {
         rolldown.renounceRole(defaultAdminRole, users.grantee);
 
         vm.stopPrank();
+    }
+}
+
+contract Pause is RolldownTest {
+    function test_EmitPaused() public {
+        vm.prank(users.admin);
+        vm.expectEmit();
+        emit Paused(users.admin);
+        rolldown.pause();
+    }
+
+    function test_GetPaused() public {
+        vm.prank(users.admin);
+        rolldown.pause();
+
+        assertTrue(rolldown.paused());
+    }
+
+    function test_RevertIf_Paused() public {
+        vm.startPrank(users.admin);
+        rolldown.pause();
+
+        vm.expectRevert("Pausable: paused");
+        rolldown.pause();
+
+        vm.stopPrank();
+    }
+}
+
+contract Unpause is RolldownTest {
+    function test_EmitUnpaused() public {
+        vm.startPrank(users.admin);
+
+        rolldown.pause();
+
+        vm.expectEmit();
+        emit Unpaused(users.admin);
+        rolldown.unpause();
+
+        vm.stopPrank();
+    }
+
+    function test_GetPaused() public {
+        vm.startPrank(users.admin);
+
+        rolldown.pause();
+
+        vm.expectEmit();
+        emit Unpaused(users.admin);
+        rolldown.unpause();
+
+        vm.stopPrank();
+
+        assertFalse(rolldown.paused());
+    }
+
+    function test_RevertIf_NotPaused() public {
+        vm.prank(users.admin);
+        vm.expectRevert("Pausable: not paused");
+        rolldown.unpause();
     }
 }
 
@@ -458,6 +523,21 @@ contract DepositERC20 is RolldownTest {
         vm.expectEmit();
         emit DepositAcceptedIntoQueue(requestId, users.depositor, address(token), amount, ferryTip);
         rolldown.deposit_erc20(address(token), amount);
+
+        vm.stopPrank();
+    }
+
+    function test_EmitDepositAcceptedIntoQueue_BackwardCompatibility2() public {
+        token.mint(users.depositor);
+
+        vm.startPrank(users.depositor);
+
+        token.approve(address(rolldown), amount);
+        uint256 requestId = rolldown.counter();
+
+        vm.expectEmit();
+        emit DepositAcceptedIntoQueue(requestId, users.depositor, address(token), amount, ferryTip);
+        rolldown.deposit(address(token), amount);
 
         vm.stopPrank();
     }
@@ -1063,6 +1143,34 @@ contract UpdateL1FromL2 is RolldownTest {
         vm.prank(users.updater);
         rolldown.updateL1FromL2(merkleRoot, range);
         assertEq(rolldown.lastProcessedUpdate_origin_l2(), range.end);
+    }
+
+    function test_FindL2Batch() public {
+        vm.prank(users.updater);
+        rolldown.updateL1FromL2(merkleRoot, range);
+
+        uint256 requestId = rolldown.lastProcessedUpdate_origin_l2();
+
+        bytes32 l2Batch = rolldown.findL2Batch(requestId);
+        assertEq(l2Batch, merkleRoot);
+    }
+
+    function test_RevertIf_ZeroRootCount() public {
+        vm.prank(users.updater);
+
+        uint256 requestId = rolldown.lastProcessedUpdate_origin_l2();
+
+        vm.expectRevert(ZeroRootCount.selector);
+        rolldown.findL2Batch(requestId);
+    }
+
+    function test_RevertIf_InvalidRequestId() public {
+        vm.prank(users.updater);
+        rolldown.updateL1FromL2(merkleRoot, range);
+
+        uint256 requestId = rolldown.lastProcessedUpdate_origin_l2() + 1;
+        vm.expectRevert(abi.encodeWithSelector(InvalidRequestId.selector, requestId));
+        rolldown.findL2Batch(requestId);
     }
 
     function test_RevertIf_Paused() public {
