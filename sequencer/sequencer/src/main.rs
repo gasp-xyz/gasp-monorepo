@@ -4,6 +4,7 @@ use tracing::level_filters::LevelFilter;
 
 mod sequencer;
 mod watchdog;
+mod metrics;
 use tokio::time::Duration;
 use watchdog::Watchdog;
 
@@ -95,6 +96,11 @@ async fn run(config: Config) -> Result<(), Error> {
     let watchdog = tokio::spawn(async move {
         tracing::info!("Starting watchdog");
         watchdog.run().await;
+    });
+
+
+    let _metrics = tokio::spawn(async move {
+        metrics::serve_metrics(9898).await;
     });
 
     let update_size_limit = config.update_size_limit;
