@@ -129,7 +129,7 @@ async fn run(config: Config) -> Result<(), Error> {
         .map_err(Into::<sequencer::Error>::into)?;
     tracing::info!("Connected to {}", config.l1_uri);
 
-    let lru = CachedL1Interface::new(rolldown, std::num::NonZeroUsize::new(1000).unwrap());
+    let lru = CachedL1Interface::new(rolldown, std::num::NonZeroUsize::new(100).unwrap());
 
     let seq = Sequencer::new(lru, gasp, chain, update_size_limit, config.tx_cost);
     let sequencer_service = tokio::spawn(async move { seq.run(tx).await });
