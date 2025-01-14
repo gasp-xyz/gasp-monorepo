@@ -974,8 +974,8 @@
         "tags": [
           "Tracing"
         ],
-        "summary": "Get transaction status by txHash or entityId.",
-        "description": "Get the status of a transaction by providing the transaction hash or entity ID and type of the transaction.",
+        "summary": "Get a transaction by entityId or transaction hash.",
+        "description": "Get a specific transaction by providing the entity ID or transaction hash and type of a transaction.",
         "parameters": [
           {
             "name": "type",
@@ -998,10 +998,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with transaction status"
+            "description": "Successful response with transaction details"
           },
           "404": {
-            "description": "Transaction not found"
+            "description": "Transaction not found for this entityId or transaction hash"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1089,46 +1089,6 @@
           },
           "404": {
             "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/tracing/type/{type}/tx/findByEntityId/{entityId}": {
-      "get": {
-        "tags": [
-          "Tracing"
-        ],
-        "summary": "Get a transaction by entityId.",
-        "description": "Get a specific transaction by providing the entity ID and type of a transaction.",
-        "parameters": [
-          {
-            "name": "type",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Type of the transaction",
-            "enum": [
-              "deposit",
-              "withdrawal"
-            ]
-          },
-          {
-            "name": "entityId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Entity ID of the transaction"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response with transaction details"
-          },
-          "404": {
-            "description": "Transaction not found for this entityId"
           },
           "500": {
             "description": "Internal Server Error"
