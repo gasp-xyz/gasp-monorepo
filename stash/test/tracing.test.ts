@@ -2,9 +2,7 @@ import { describe, expect, vi, beforeEach, it } from 'vitest'
 import {
   startTracingTransaction,
   getTransactionsByAddress,
-  getStatusByTxHashOrEntityId,
-  getTransactionByEntityId,
-  getTransactionByTxHash,
+  getByTxHashOrEntityId,
   findTransactionsByAddressAndStatus,
 } from '../src/service/TracingService'
 import { depositRepository } from '../src/repository/TransactionRepository'
@@ -61,46 +59,37 @@ describe('TracingService', () => {
       return: { all: vi.fn().mockResolvedValue([mockTransaction]) },
     })
 
-    const result = await getTransactionsByAddress('0x102')
+    const result = await getTransactionsByAddress('0x102', 'deposit')
 
     expect(depositRepository.search).toHaveBeenCalled()
     expect(result).toEqual([mockTransaction])
   })
 
-  it('getStatusByTxHashOrEntityId should return status for a given txHash', async () => {
+  it('getTransactionByTxHashOrEntityId should return a transaction for a given txHash', async () => {
     depositRepository.search.mockReturnValue({
       where: vi.fn().mockReturnThis(),
       equals: vi.fn().mockReturnThis(),
       return: { all: vi.fn().mockResolvedValue([mockTransaction]) },
     })
 
-    const result = await getStatusByTxHashOrEntityId('0x102')
+    const result = await getByTxHashOrEntityId('0x102', 'deposit')
 
     expect(depositRepository.search).toHaveBeenCalled()
-    expect(result).toBe('PendingOnL1')
-  })
-
-  it('getTransactionByEntityId should return transaction for a given entityId', async () => {
-    depositRepository.fetch.mockResolvedValue(mockTransaction)
-
-    const result = await getTransactionByEntityId('entityId')
-
-    expect(depositRepository.fetch).toHaveBeenCalledWith('entityId')
-    expect(result).toEqual(mockTransaction)
-  })
-
-  it('getTransactionByTxHash should return transaction for a given txHash', async () => {
-    depositRepository.search.mockReturnValue({
-      where: vi.fn().mockReturnThis(),
-      equals: vi.fn().mockReturnThis(),
-      return: { all: vi.fn().mockResolvedValue([mockTransaction]) },
+    expect(result).toEqual({
+      txHash: '0x102',
+      address: '0x102',
+      created: 1725613967329,
+      updated: 1725613967329,
+      status: 'PendingOnL1',
+      type: 'deposit',
+      chain: 'Ethereum',
+      amount: '400000000000000000',
+      asset_chainId: '0x106',
+      asset_address: '0x107',
+      requestId: null,
     })
-
-    const result = await getTransactionByTxHash('0x102')
-
-    expect(depositRepository.search).toHaveBeenCalled()
-    expect(result).toEqual(mockTransaction)
   })
+
 
   it('findTransactionsByAddressAndStatus should return transactions for a given address and status', async () => {
     depositRepository.search.mockReturnValue({
@@ -112,7 +101,8 @@ describe('TracingService', () => {
 
     const result = await findTransactionsByAddressAndStatus(
       '0x102',
-      'PendingOnL1'
+      'PendingOnL1' ,
+        'deposit'
     )
 
     expect(depositRepository.search).toHaveBeenCalled()
