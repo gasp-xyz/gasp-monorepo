@@ -14,6 +14,16 @@ const ALERT_ERROR: &str = "ALERT::ERROR";
 const ALERT_WARNING: &str = "ALERT::WARNING";
 const ALERT_INFO: &str = "ALERT::INFO";
 
+use prometheus::{opts, register_counter_vec, CounterVec};
+
+lazy_static::lazy_static! {
+    static ref SEQUENCER_ACTION: CounterVec = register_counter_vec!(
+        opts!("action", "number of sequencer actions"),
+        &["type"]
+    )
+    .unwrap();
+}
+
 pub struct Sequencer<L1, L2> {
     l1: L1,
     l2: L2,
@@ -88,6 +98,9 @@ where
         if let Some(update) = self.find_malicious_update(at).await? {
             tracing::warn!("{ALERT_ERROR} Found malicious update: {}", update);
             if self.has_cancel_rights_available().await? {
+                SEQUENCER_ACTION
+                    .with_label_values(&["cancel_malicious_update"])
+                    .inc();
                 self.cancel_update(update)
                     .await
                     .inspect(|result| {
@@ -175,6 +188,9 @@ where
 
         if let Some((update_hash, update)) = self.get_pending_update(at).await? {
             tracing::info!("Found update to submit: {:?}", update);
+            SEQUENCER_ACTION
+                .with_label_values(&["sequencer_update"])
+                .inc();
             let result = self.l2.update_l1_from_l2(update, update_hash).await?;
             if !result {
                 tracing::error!("{ALERT_WARNING} update submission failed");
@@ -196,6 +212,7 @@ where
         ) {
             (Some(tx_cost), Some(closable)) if balance > tx_cost => {
                 tracing::info!("Found pending cancel ready to close : {}", closable);
+                SEQUENCER_ACTION.with_label_values(&["close_cancel"]).inc();
                 self.close_cancel(*closable, at).await?;
                 Ok(ActionStatus::Performed)
             }
