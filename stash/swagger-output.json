@@ -975,7 +975,7 @@
           "Tracing"
         ],
         "summary": "Get a transaction by entityId or transaction hash.",
-        "description": "Get a specific transaction by providing the entity ID or transaction hash and type of a transaction.",
+        "description": "Get a transaction by providing the entity ID or transaction hash and type of a transaction.",
         "parameters": [
           {
             "name": "type",
