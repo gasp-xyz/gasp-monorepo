@@ -17,6 +17,8 @@ services:
       MANGATA_NODE_URL: ${ETH_SEQUENCER_MANGATA_NODE_URL}
       MNEMONIC: ${ETH_SEQUENCER_MNEMONIC}
       TX_COST: ${ETH_SEQUENCER_TX_COST}
+    ports:
+      - 9898:9898
 
   sequencer-arb:
     build: .
