@@ -1,29 +1,26 @@
-use super::{L1Interface, L1Error, types};
+use super::{types, L1Error, L1Interface};
 use lazy_static::lazy_static;
 
 use alloy::network::{Ethereum, EthereumWallet};
 use alloy::providers::fillers::{
     BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller, WalletFiller,
 };
-use primitive_types::H256;
-use sha3::{Digest, Keccak256};
+use alloy::providers::{Identity, Provider, ProviderBuilder, RootProvider};
 use alloy::signers::local::PrivateKeySigner;
 use alloy::sol_types::SolValue;
 use alloy::transports::BoxTransport;
-use alloy::providers::{
-    Identity, Provider, ProviderBuilder, RootProvider,
-};
 use hex::encode as hex_encode;
+use primitive_types::H256;
+use sha3::{Digest, Keccak256};
 
 use prometheus::{opts, register_counter_vec, CounterVec};
 
 lazy_static! {
-
     static ref ETH_CALL_COUNTER: CounterVec = register_counter_vec!(
         opts!("eth_call", "Number of HTTP requests made."),
         &["method"]
-    ).unwrap();
-
+    )
+    .unwrap();
 }
 
 pub type RolldownInstanceType = bindings::rolldown::Rolldown::RolldownInstance<
@@ -90,8 +87,13 @@ impl RolldownContract {
         Ok(call.call().await?._0.0)
     }
 
-    async fn get_request_range_from_merkle_root(&self, merkle_root: [u8; 32]) -> Result<(u128, u128), L1Error> {
-        ETH_CALL_COUNTER.with_label_values(&["merkleRootRange"]).inc();
+    async fn get_request_range_from_merkle_root(
+        &self,
+        merkle_root: [u8; 32],
+    ) -> Result<(u128, u128), L1Error> {
+        ETH_CALL_COUNTER
+            .with_label_values(&["merkleRootRange"])
+            .inc();
         let call = self.contract_handle.merkleRootRange(merkle_root.into());
         let range = call.call().await?;
 
@@ -100,29 +102,33 @@ impl RolldownContract {
         Ok((range_start, range_end))
     }
 
-    async fn get_next_request_id(&self) ->  Result<u128, L1Error> {
+    async fn get_next_request_id(&self) -> Result<u128, L1Error> {
         ETH_CALL_COUNTER.with_label_values(&["counter"]).inc();
         let call = self.contract_handle.counter();
         let result = call.call().await?;
         result._0.try_into().map_err(|_| L1Error::OverflowError)
     }
 
-    async fn get_amount_of_merkle_roots(&self) ->  Result<u128, L1Error> {
-        ETH_CALL_COUNTER.with_label_values(&["getMerkleRootsLength"]).inc();
+    async fn get_amount_of_merkle_roots(&self) -> Result<u128, L1Error> {
+        ETH_CALL_COUNTER
+            .with_label_values(&["getMerkleRootsLength"])
+            .inc();
         let call = self.contract_handle.getMerkleRootsLength();
         let result = call.call().await?;
         result._0.try_into().map_err(|_| L1Error::OverflowError)
     }
 
-    async fn get_merkle_root_by_id(&self, merkle_root_id: u128) -> Result<[u8; 32], L1Error>{
+    async fn get_merkle_root_by_id(&self, merkle_root_id: u128) -> Result<[u8; 32], L1Error> {
         ETH_CALL_COUNTER.with_label_values(&["roots"]).inc();
         let merkle_root_id = alloy::primitives::U256::from(merkle_root_id);
         let latest_root = self.contract_handle.roots(merkle_root_id).call().await?._0;
         Ok(latest_root.0)
     }
 
-    async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error>{
-        ETH_CALL_COUNTER.with_label_values(&["getPendingRequests"]).inc();
+    async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error> {
+        ETH_CALL_COUNTER
+            .with_label_values(&["getPendingRequests"])
+            .inc();
         let range_start = alloy::primitives::U256::from(start);
         let range_end = alloy::primitives::U256::from(end);
         let call = self
@@ -131,8 +137,10 @@ impl RolldownContract {
         Ok(call.call().await?._0)
     }
 
-    async fn is_request_closed(&self, request_hash: H256) -> Result<bool, L1Error>{
-        ETH_CALL_COUNTER.with_label_values(&["processedL2Requests"]).inc();
+    async fn is_request_closed(&self, request_hash: H256) -> Result<bool, L1Error> {
+        ETH_CALL_COUNTER
+            .with_label_values(&["processedL2Requests"])
+            .inc();
         let request_hash = request_hash.0.into();
         let request_status = self
             .contract_handle
@@ -146,13 +154,12 @@ impl RolldownContract {
         Ok(is_closed)
     }
 
-    async fn get_native_account_balance(&self, address: [u8; 20]) -> Result<u128, L1Error>{
+    async fn get_native_account_balance(&self, address: [u8; 20]) -> Result<u128, L1Error> {
         ETH_CALL_COUNTER.with_label_values(&["balance"]).inc();
         let provider = self.contract_handle.provider();
         let result = provider.get_balance(address.into()).await?;
         result.try_into().map_err(|_| L1Error::OverflowError)
     }
-
 }
 
 impl L1Interface for RolldownContract {
@@ -162,8 +169,7 @@ impl L1Interface for RolldownContract {
 
     #[tracing::instrument(skip(self))]
     async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error> {
-
-        let merkle_root= self.find_l2_batch(request_id).await?;
+        let merkle_root = self.find_l2_batch(request_id).await?;
         let range = self.get_request_range_from_merkle_root(merkle_root).await?;
 
         Ok((merkle_root, range))
@@ -182,15 +188,14 @@ impl L1Interface for RolldownContract {
 
     #[tracing::instrument(skip(self))]
     async fn get_latest_finalized_request_id(&self) -> Result<Option<u128>, L1Error> {
-
         let length = self.get_amount_of_merkle_roots().await?;
 
         tracing::trace!("there are {} merkle roots on the contract", length);
         if let Some(id) = length.checked_sub(1) {
-
-            let latest_root  = self.get_merkle_root_by_id(id).await?;
+            let latest_root = self.get_merkle_root_by_id(id).await?;
             tracing::trace!("latest merkle root {}", hex_encode(latest_root));
-            let (_, latest_request_id) = self.get_request_range_from_merkle_root(latest_root).await?;
+            let (_, latest_request_id) =
+                self.get_request_range_from_merkle_root(latest_root).await?;
 
             tracing::trace!(
                 "latest request in root {}: {}",

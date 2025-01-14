@@ -1,11 +1,11 @@
 use alloy::providers::PendingTransactionError;
 use primitive_types::H256;
 
-mod rolldown_contract;
 mod lru;
+mod rolldown_contract;
 
-pub use rolldown_contract::RolldownContract;
 pub use lru::CachedL1Interface;
+pub use rolldown_contract::RolldownContract;
 
 pub mod types {
     pub use bindings::rolldown::IRolldownPrimitives::Cancel;
@@ -43,9 +43,6 @@ pub trait L1Interface {
         proof: Vec<H256>,
     ) -> Result<H256, L1Error>;
 }
-
-
-
 
 // #[cfg(test)]
 // mod test {

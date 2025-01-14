@@ -2,15 +2,15 @@ use envconfig::Envconfig;
 use hex::FromHex;
 use tracing::level_filters::LevelFilter;
 
+mod metrics;
 mod sequencer;
 mod watchdog;
-mod metrics;
 use tokio::time::Duration;
 use watchdog::Watchdog;
 
 use sequencer::Sequencer;
 mod l1;
-use l1::{RolldownContract, CachedL1Interface};
+use l1::{CachedL1Interface, RolldownContract};
 
 mod l2;
 use l2::Gasp;
@@ -97,7 +97,6 @@ async fn run(config: Config) -> Result<(), Error> {
         tracing::info!("Starting watchdog");
         watchdog.run().await;
     });
-
 
     let _metrics = tokio::spawn(async move {
         metrics::serve_metrics(9898).await;
