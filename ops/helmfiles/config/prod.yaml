@@ -131,14 +131,15 @@ collator:
 # aggregator configs #
 ######################
 aggregatorEnabled: true
+aggregatorImageTag: 38e5b2ed33a4d372ed5934220ab034f2e329df0a
 # Override the image tag provided on deployment from IMAGE_TAG env variable
 # aggregatorImageTag: 5d6f2a4db68e0601f14b3ced43773488efdda164
 
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-aggregator-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-aggregator-password
-  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetHttpsUrl
-  ETH_WS_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
+  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/aggregatorEthereumMainnetHttpsUrl
+  ETH_WS_URL: ref+sops://secrets.enc.yaml#/aggregatorEthereumMainnetWssUrl
 aggregatorEnv:
   SUBSTRATE_RPC_URL: ws://collator-01:9944
   CHAIN_ID: "1"
@@ -155,11 +156,13 @@ aggregatorEnv:
   AGG_IDLE_START: true
   AGG_RUN_TRIGGER_API_KEY: "secrettoken"
   ENVIRONMEMT: "production"
+  AGG_SS_FETCH_TIMEOUT: "100"
 
 #####################
 # gaspAvs configs #
 #####################
 gaspAvsEnabled: true
+gaspAvsImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 # Override the image tag provided on deployment from IMAGE_TAG env variable
 # gaspAvsImageTag: ba3aaf237234092ad21bf0a4c5ff0f08523ba6f0
 
@@ -168,8 +171,8 @@ gaspAvsEnvSecrets:
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-01-ecdsa-password
   BLS_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-01-bls-key
   BLS_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-01-bls-password
-  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetHttpsUrl
-  ETH_WS_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
+  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/gaspAvsEthereumMainnetHttpsUrl
+  ETH_WS_URL: ref+sops://secrets.enc.yaml#/gaspAvsEthereumMainnetWssUrl
 gaspAvsData:
   storageClass: node-data-volume-retain
   mountPath: /data
@@ -189,7 +192,6 @@ gaspAvsEnv:
   RUST_LOG: gasp_avs=debug,ether=info
   OPT_IN_AT_STARTUP: "false"
   # rollup-node configs
-  ROLLUP_NODE_CHAIN: /app/holesky-v3-chainspec.json
   ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
   ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/f9604551934c498a6a814d84f2cd6c01803d24d7/rollup-dev-env-chainspecs/alpha-launch-f26183b-raw.json
 
@@ -197,14 +199,15 @@ gaspAvsEnv:
 # updater configs #
 ###########################
 updaterEnabled: true
+updaterImageTag: 45539a735c399b1d6b235edb5bb8f09d8bb5fcc2
 updaterEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-password
   ROOT_ECDSA_KEY_JSON: '{"address":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266","crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"26e1ebd941909ddb0ebaec8235470c8d"},"ciphertext":"adca2a84713f50c3918235e109a9b4b28ff6c8ea77b87e8aca20dc48a3a93389","kdf":"scrypt","kdfparams":{"dklen":32,"n":8192,"p":1,"r":8,"salt":"b5581b95b5c7f1449cc341db8567d4c92e4fe21bc34052dbe60bd3e2060a74a0"},"mac":"3643a9e1c0381e30ca0e250999810ecb4b213bc93bd19ad673b93870c77f55ec"},"id":"d39afde8-e06c-46d4-a7ed-1af9bb3f55a5","version":3}'
-  SOURCE_RPC_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetHttpsUrl
-  SOURCE_WS_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
-  TARGET_RPC_URL: ref+sops://secrets.enc.yaml#/arbitrumMainnetHttpsUrl
-  TARGET_WS_URL: ref+sops://secrets.enc.yaml#/arbitrumMainnetWssUrl
+  SOURCE_RPC_URL: ref+sops://secrets.enc.yaml#/updaterEthereumMainnetHttpsUrl
+  SOURCE_WS_URL: ref+sops://secrets.enc.yaml#/updaterEthereumMainnetWssUrl
+  TARGET_RPC_URL: ref+sops://secrets.enc.yaml#/updaterArbitrumMainnetHttpsUrl
+  TARGET_WS_URL: ref+sops://secrets.enc.yaml#/updaterArbitrumMainnetWssUrl
 updaterEnv:
   SOURCE_CHAIN_ID: 1
   TARGET_CHAIN_ID: 42161
@@ -212,18 +215,19 @@ updaterEnv:
   AVS_REGISTRY_COORDINATOR_ADDR: 0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1
   GASP_SERVICE_ADDR: 0x150FE8DBB943c372F3e8C31d9c89f1E6A13cBBFd
   TESTNET: "false"
-  RUST_LOG: debug
+  RUST_LOG: info
   # PUSH_FIRST_INIT: "false"
   SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
+  SOURCE_AVS_DEPLOYMENT_BLOCK: '21394442'
 
 updaterEnvSecretsBase:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-password
   ROOT_ECDSA_KEY_JSON: '{"address":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266","crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"26e1ebd941909ddb0ebaec8235470c8d"},"ciphertext":"adca2a84713f50c3918235e109a9b4b28ff6c8ea77b87e8aca20dc48a3a93389","kdf":"scrypt","kdfparams":{"dklen":32,"n":8192,"p":1,"r":8,"salt":"b5581b95b5c7f1449cc341db8567d4c92e4fe21bc34052dbe60bd3e2060a74a0"},"mac":"3643a9e1c0381e30ca0e250999810ecb4b213bc93bd19ad673b93870c77f55ec"},"id":"d39afde8-e06c-46d4-a7ed-1af9bb3f55a5","version":3}'
-  SOURCE_RPC_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetHttpsUrl
-  SOURCE_WS_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
-  TARGET_RPC_URL: ref+sops://secrets.enc.yaml#/baseMainnetHttpsUrl
-  TARGET_WS_URL: ref+sops://secrets.enc.yaml#/baseMainnetWssUrl
+  SOURCE_RPC_URL: ref+sops://secrets.enc.yaml#/updaterEthereumMainnetHttpsUrl
+  SOURCE_WS_URL: ref+sops://secrets.enc.yaml#/updaterEthereumMainnetWssUrl
+  TARGET_RPC_URL: ref+sops://secrets.enc.yaml#/udpaterBaseMainnetHttpsUrl
+  TARGET_WS_URL: ref+sops://secrets.enc.yaml#/updaterBaseMainnetWssUrl
 updaterEnvBase:
   SOURCE_CHAIN_ID: 1
   TARGET_CHAIN_ID: 8453
@@ -231,16 +235,16 @@ updaterEnvBase:
   AVS_REGISTRY_COORDINATOR_ADDR: 0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1
   GASP_SERVICE_ADDR: 0x6B6F92184772bCEd3d9D6d0352D453917E4880c1
   TESTNET: "false"
-  RUST_LOG: debug
+  RUST_LOG: info
   # PUSH_FIRST_INIT: "false"
   SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
+  SOURCE_AVS_DEPLOYMENT_BLOCK: '21394442'
 
 ############################
 # sequencer configs #
 ############################
 sequencerEnabled: true
-# Override the image tag provided on deployment from IMAGE_TAG env variable
-# sequencerImageTag: b4eac04bc26af897711c74a4309d5c659178d75f
+sequencerImageTag: e82c4b3d9539b81f1cbe48066aed73ba5463fc10
 
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
@@ -249,7 +253,7 @@ sequencerEnvEth:
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsEth:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerEthereumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-eth-1
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-eth-1
 sequencerEnalbedEth2: true
@@ -260,7 +264,7 @@ sequencerEnvEth2:
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsEth2:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerEthereumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-eth-2
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-eth-2
 sequencerEnalbedEth3: true
@@ -271,7 +275,7 @@ sequencerEnvEth3:
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsEth3:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerEthereumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-eth-3
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-eth-3
 
@@ -282,7 +286,7 @@ sequencerEnvArb:
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsArb:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerArbitrumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-arb-1
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-arb-1
 sequencerEnalbedArb2: true
@@ -293,7 +297,7 @@ sequencerEnvArb2:
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsArb2:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerArbitrumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-arb-2
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-arb-2
 sequencerEnalbedArb3: true
@@ -304,7 +308,7 @@ sequencerEnvArb3:
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsArb3:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerArbitrumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-arb-3
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-arb-3
 
@@ -315,7 +319,7 @@ sequencerEnvBase:
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsBase:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerBaseMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-base-1
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-base-1
 sequencerEnalbedBase2: true
@@ -326,7 +330,7 @@ sequencerEnvBase2:
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsBase2:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerBaseMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-base-2
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-base-2
 sequencerEnalbedBase3: true
@@ -337,7 +341,7 @@ sequencerEnvBase3:
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsBase3:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerBaseMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-base-3
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-base-3
 
@@ -345,6 +349,7 @@ sequencerEnvSecretsBase3:
 # ferry-deposit configs #
 #########################
 ferryDepositEnabled: true
+ferryDepositImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 ferryDepositEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
@@ -354,7 +359,7 @@ ferryDepositEnvEth:
   BLOCK_DELAY: 15
   LOG: silly
 ferryDepositEnvSecretsEth:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ferryEthereumMainnetWssUrl
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-deposit-eth
 
 ferryDepositEnvArb:
@@ -366,7 +371,7 @@ ferryDepositEnvArb:
   BLOCK_DELAY: 15
   LOG: silly
 ferryDepositEnvSecretsArb:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ferryArbitrumMainnetWssUrl
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-deposit-arb
 
 ferryDepositEnvBase:
@@ -378,13 +383,14 @@ ferryDepositEnvBase:
   BLOCK_DELAY: 15
   LOG: silly
 ferryDepositEnvSecretsBase:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ferryBaseMainnetWssUrl
   MNEMONIC: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-deposit-base
 
 ############################
 # ferry-withdrawal configs #
 ############################
 ferryWithdrawalEnabled: true
+ferryWithdrawalImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 ferryWithdrawalEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
@@ -394,7 +400,7 @@ ferryWithdrawalEnvEth:
   LOOK_BACK_HOURS: 6
   LOG: silly
 ferryWithdrawalEnvSecretsEth:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ferryEthereumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-withdrawal-private-key
 
 ferryWithdrawalEnvArb:
@@ -406,7 +412,7 @@ ferryWithdrawalEnvArb:
   LOOK_BACK_HOURS: 6
   LOG: silly
 ferryWithdrawalEnvSecretsArb:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ferryArbitrumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-withdrawal-private-key
 
 ferryWithdrawalEnvBase:
@@ -418,13 +424,14 @@ ferryWithdrawalEnvBase:
   LOOK_BACK_HOURS: 6
   LOG: silly
 ferryWithdrawalEnvSecretsBase:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ferryBaseMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-ferry-withdrawal-private-key
 
 ########################
 # ferry-closer configs #
 ########################
 closerEnabled: true
+closerImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
@@ -434,7 +441,7 @@ closerEnvEth:
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsEth:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/ethereumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-private-key
 
@@ -447,7 +454,7 @@ closerEnvArb:
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsArb:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerArbitrumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-private-key
 
@@ -460,6 +467,6 @@ closerEnvBase:
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsBase:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseMainnetWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerBaseMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-private-key

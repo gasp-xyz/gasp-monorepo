@@ -29,6 +29,9 @@ pub struct CliArgs {
     #[arg(long, env)]
     pub target_chain_id: u64,
 
+    #[arg(long, env, default_value_t = 0)]
+    pub source_avs_deployment_block: u64,
+
     #[arg(long, env)]
     pub target_chain_index: u8,
 

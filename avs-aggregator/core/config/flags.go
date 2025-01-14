@@ -105,6 +105,13 @@ var (
 		Required: false,
 		EnvVar:   "AGG_IDLE_START",
 	}
+	AggSSFetchTimeout = cli.IntFlag{
+		Name:     "agg-ss-fetch-timeout",
+		Usage:    "This flag sets the timeout for the stream subs to fetch history",
+		Required: false,
+		Value:    20,
+		EnvVar:   "AGG_SS_FETCH_TIMEOUT",
+	}
 
 	// Aggregator OpStateUpdaterFlags
 	AvsMinOpUpdateInterval = cli.IntFlag{

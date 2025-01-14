@@ -503,7 +503,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				break // Successfully subscribed, exit loop
 			}
 
-			osu.logger.Error("Failed to get new head from substrate, retrying...", "err", err, "attempt", attempt+1)
+			osu.logger.Error("Failed to StreamQueryWithHistory, retrying...", "err", err, "attempt", attempt+1)
 			select {
 			case <-ctx.Done():
 				osu.errorC <- ctx.Err()
@@ -513,7 +513,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 			}
 		}
 		if err != nil {
-			osu.errorC <- fmt.Errorf("failed to subscribe to new heads from substrate after %d attempts: %w", maxRetries, err)
+			osu.errorC <- fmt.Errorf("Failed to StreamQueryWithHistory after %d attempts: %w", maxRetries, err)
 			return
 		}
 		defer sub.Unsubscribe()
@@ -527,7 +527,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 				osu.errorC <- ctx.Err()
 				return
 			case err := <-sub.Err():
-				osu.logger.Error("watchForTriggersLoop subscription error: %v - retrying atBlock %v", err, osu.atBlock)
+				osu.logger.Errorf("watchForTriggersLoop subscription error: %v - retrying atBlock %v", err, osu.atBlock)
 				// We do this so because the subscription will start from  atBlock+1
 				osu.atBlock = osu.atBlock - 1
 				break watchForTriggersLoop

@@ -94,7 +94,7 @@ pub(crate) async fn ephemeral_testnet(
         cfg.eth_rpc_url.clone(),
         cfg.avs_registry_coordinator_addr,
         stake.unwrap_or(100),
-        operator.clone().client.signer().clone(),
+        operator.signer(),
         cfg.chain_id,
     )
     .await?;

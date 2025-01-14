@@ -3,7 +3,7 @@ import { Block, Event } from './BlockScraper'
 import _ from 'lodash'
 import { swapRepository } from '../repository/TransactionRepository.js'
 import logger from '../util/Logger.js'
-import * as priceDiscoveryService from '../service/PriceDiscoveryService.js'
+import { getTokenPrice } from '../service/TokenPriceService.js'
 
 export const processSwapEvents = async (api: ApiPromise, block: Block) => {
   const events = _.chain(block.events)
@@ -92,8 +92,7 @@ export async function calculateVolume(
   volume: string
 ): Promise<number | string> {
   try {
-    const response = await priceDiscoveryService.priceDiscovery(tokenId)
-    const currentPrice = response.current_price['usd']
+    const currentPrice = (await getTokenPrice(tokenId)).toString()
     const volumeString = volume.toString().replace(/,/g, '')
     const volumeBigInt = BigInt(volumeString)
     return (

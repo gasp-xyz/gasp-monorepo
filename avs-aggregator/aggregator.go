@@ -109,6 +109,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		"mangata-finalizer",
 		"0.0.0.0:8888",
 		logger,
+		c.AggSSFetchTimeout,
 	)
 	if err != nil {
 		logger.Error("Failed to create EthRpc clients", "err", err)
@@ -698,14 +699,14 @@ func (agg *Aggregator) startNewOpTask() (taskmanager.IFinalizerTaskManagerOpTask
 // with the information of operators opted into quorum 0 at the block of task creation.
 func (agg *Aggregator) maybeSendNewRdTask(blockNumber uint32) error {
 
-	if agg.asyncOpStateUpdaterError != nil {
-		agg.logger.Error("asyncOpStateUpdater has crashed with the following error - but aggregator is still processing rdTasks", "err", agg.asyncOpStateUpdaterError)
-	}
-
 	isRduTask := blockNumber%agg.blockPeriod == 0
 
 	if !isRduTask {
 		return nil
+	}
+
+	if agg.asyncOpStateUpdaterError != nil {
+		agg.logger.Error("asyncOpStateUpdater has crashed with the following error - but aggregator is still processing rdTasks", "err", agg.asyncOpStateUpdaterError)
 	}
 
 	// Why this check?
