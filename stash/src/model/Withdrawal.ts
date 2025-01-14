@@ -16,6 +16,7 @@ const withdrawalSchema = new Schema(
     asset_address: { type: 'string' },
     proof: { type: 'string' },
     calldata: { type: 'string' },
+    createdBy: { type: 'string' },
     closedBy: { type: 'string' },
   },
   {
