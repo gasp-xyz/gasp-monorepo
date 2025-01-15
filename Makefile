@@ -30,6 +30,9 @@ AVS_UPDATE_STAKE_PERIOD=10
 
 ___CONTRACTS___: ## 
 
+deploy-all-contracts-via-multistage-and-resume: ## Deploy evth with anvil running
+	./tests/integration/deploy-all-contracts-via-multistage-and-resume.sh
+
 deploy-eigenlayer-contracts-to-anvil-and-save-state: ## Deploy eigenlayer
 	./tests/integration/deploy-eigenlayer-save-anvil-state.sh
 
