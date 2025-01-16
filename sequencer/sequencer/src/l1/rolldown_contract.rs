@@ -125,7 +125,7 @@ impl RolldownContract {
         Ok(latest_root.0)
     }
 
-    async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error> {
+    async fn get_update_impl(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error> {
         ETH_CALL_COUNTER
             .with_label_values(&["getPendingRequests"])
             .inc();
@@ -225,7 +225,7 @@ impl L1Interface for RolldownContract {
                 return Err(L1Error::InvalidRange);
             }
 
-            let update = self.get_update(start, end).await?;
+            let update = self.get_update_impl(start, end).await?;
 
             tracing::debug!(
                 "deposits: {} cancel_resolutions: {}",
