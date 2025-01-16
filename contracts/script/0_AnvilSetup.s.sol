@@ -2,15 +2,12 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-
 import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
 import "@eigenlayer/contracts/core/StrategyManager.sol";
 import "@eigenlayer/contracts/core/DelegationManager.sol";
 import {StrategyBaseTVLLimits} from "@eigenlayer/contracts/strategies/StrategyBaseTVLLimits.sol";
-
-import "../src/ERC20Mock.sol";
+import {ERC20Mock} from "../test/mocks/ERC20Mock.sol";
 import {Utils} from "./utils/Utils.sol";
-
 import "forge-std/Test.sol";
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";

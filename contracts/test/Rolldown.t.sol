@@ -4,11 +4,8 @@ pragma solidity 0.8.13;
 import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Test} from "forge-std/Test.sol";
-import {console} from "forge-std/console.sol";
-import {IRolldown} from "../src/IRolldown.sol";
 import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
 import {MyERC20} from "./utils/Utilities.sol";
@@ -25,16 +22,18 @@ contract RolldownTest is Test, IRolldownPrimitives {
         address recipient;
     }
 
-    Users public users;
-    MyERC20 public token;
-    Rolldown public rolldown;
-    bytes32 public defaultAdminRole = 0x00;
-    bytes32 public updaterRole;
-    address public nativeTokenAddress;
-    address public closed;
+    Users internal users;
+    MyERC20 internal token;
+    Rolldown internal rolldown;
+    bytes32 internal defaultAdminRole = 0x00;
+    bytes32 internal updaterRole;
+    address internal nativeTokenAddress;
+    address internal closed;
 
     event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
     event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
+    event Paused(address account);
+    event Unpaused(address account);
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     function setUp() public virtual {
@@ -48,13 +47,8 @@ contract RolldownTest is Test, IRolldownPrimitives {
             recipient: makeAddr("recipient")
         });
 
-        deal(payable(users.admin), 100 ether);
-        deal(payable(users.grantee), 100 ether);
-        deal(payable(users.updater), 100 ether);
         deal(payable(users.depositor), 100 ether);
         deal(payable(users.withdrawerA), 100 ether);
-        deal(payable(users.withdrawerB), 100 ether);
-        deal(payable(users.recipient), 100 ether);
 
         token = new MyERC20();
 
@@ -66,6 +60,10 @@ contract RolldownTest is Test, IRolldownPrimitives {
             abi.encodeCall(Rolldown.initialize, (users.admin, ChainId.Ethereum, users.updater))
         );
         rolldown = Rolldown(payable(address(proxy)));
+
+        vm.label(address(this), "RolldownTest");
+        vm.label(address(token), "ERC20Token");
+        vm.label(address(proxy), "Rolldown");
 
         updaterRole = rolldown.UPDATER_ROLE();
         nativeTokenAddress = rolldown.NATIVE_TOKEN_ADDRESS();
@@ -88,51 +86,55 @@ contract RolldownTest is Test, IRolldownPrimitives {
 }
 
 contract Deploy is RolldownTest {
-    function test_HasDefaultAdminRole() external view {
+    function test_HasDefaultAdminRole() public view {
         assertTrue(rolldown.hasRole(defaultAdminRole, users.admin));
     }
 
-    function test_HasUpdaterRole() external view {
+    function test_HasUpdaterRole() public view {
         assertTrue(rolldown.hasRole(updaterRole, users.updater));
     }
 
-    function test_GetCounter() external view {
+    function test_IsPaused() public view {
+        assertFalse(rolldown.paused());
+    }
+
+    function test_GetCounter() public view {
         assertEq(rolldown.counter(), 1);
     }
 
-    function test_GetLastProcessedUpdateOriginL1() external view {
+    function test_GetLastProcessedUpdateOriginL1() public view {
         assertEq(rolldown.lastProcessedUpdate_origin_l1(), 0);
     }
 
-    function test_GetLastProcessedUpdateOriginL2() external view {
+    function test_GetLastProcessedUpdateOriginL2() public view {
         assertEq(rolldown.lastProcessedUpdate_origin_l2(), 0);
     }
 
-    function test_GetChainId() external view {
+    function test_GetChainId() public view {
         assertEq(uint256(rolldown.chain()), uint256(ChainId.Ethereum));
     }
 
-    function test_GetUpdaterAccount() external view {
+    function test_GetUpdaterAccount() public view {
         assertEq(rolldown.updaterAccount(), users.updater);
     }
 
-    function test_GetRootsLength() external view {
+    function test_GetRootsLength() public view {
         assertEq(rolldown.getMerkleRootsLength(), 0);
     }
 
-    function test_GetPendingRequests() external view {
+    function test_GetPendingRequests() public view {
         L1Update memory l1Update = rolldown.getPendingRequests(0, 0);
         assertEq(uint256(l1Update.chain), uint256(ChainId.Ethereum));
         assertEq(l1Update.pendingDeposits.length, 0);
         assertEq(l1Update.pendingCancelResolutions.length, 0);
     }
 
-    function test_RevertIf_InvalidInitialization() external {
+    function test_RevertIf_AlreadyInitialized() public {
         vm.expectRevert("Initializable: contract is already initialized");
         rolldown.initialize(users.admin, ChainId.Ethereum, users.updater);
     }
 
-    function test_RevertIf_ZeroAdmin() external {
+    function test_RevertIf_ZeroAdmin() public {
         Rolldown implementation = new Rolldown();
         ProxyAdmin proxyAdmin = new ProxyAdmin();
 
@@ -144,7 +146,7 @@ contract Deploy is RolldownTest {
         );
     }
 
-    function test_RevertIf_ZeroUpdater() external {
+    function test_RevertIf_ZeroUpdater() public {
         Rolldown implementation = new Rolldown();
         ProxyAdmin proxyAdmin = new ProxyAdmin();
 
@@ -156,27 +158,27 @@ contract Deploy is RolldownTest {
         );
     }
 
-    function test_RevertIf_InvalidRequestRange() external {
+    function test_RevertIf_InvalidRequestRange() public {
         vm.expectRevert(abi.encodeWithSelector(InvalidRequestRange.selector, 0, 1));
         rolldown.getPendingRequests(0, 1);
     }
 }
 
 contract GrantRole is RolldownTest {
-    function test_EmitRoleGranted() external {
+    function test_EmitRoleGranted() public {
         vm.prank(users.admin);
         vm.expectEmit();
         emit RoleGranted(defaultAdminRole, users.updater, users.admin);
         rolldown.grantRole(defaultAdminRole, users.updater);
     }
 
-    function test_HasDefaultAdminRole() external {
+    function test_HasDefaultAdminRole() public {
         vm.prank(users.admin);
         rolldown.grantRole(defaultAdminRole, users.grantee);
         assertTrue(rolldown.hasRole(defaultAdminRole, users.grantee));
     }
 
-    function test_RevertIf_UnauthorizedAccount() external {
+    function test_RevertIf_UnauthorizedAccount() public {
         vm.prank(users.grantee);
         vm.expectRevert(accessControlMessage(users.grantee));
         rolldown.grantRole(defaultAdminRole, users.grantee);
@@ -184,7 +186,7 @@ contract GrantRole is RolldownTest {
 }
 
 contract RevokeRole is RolldownTest {
-    function test_EmitRoleRevoked() external {
+    function test_EmitRoleRevoked() public {
         vm.startPrank(users.admin);
 
         rolldown.grantRole(defaultAdminRole, users.grantee);
@@ -196,7 +198,7 @@ contract RevokeRole is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_HasNotDefaultAdminRole() external {
+    function test_HasNotDefaultAdminRole() public {
         vm.startPrank(users.admin);
 
         rolldown.grantRole(defaultAdminRole, users.grantee);
@@ -206,7 +208,7 @@ contract RevokeRole is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_RevertIf_UnauthorizedAccount() external {
+    function test_RevertIf_UnauthorizedAccount() public {
         vm.prank(users.admin);
         rolldown.grantRole(defaultAdminRole, users.grantee);
 
@@ -217,7 +219,7 @@ contract RevokeRole is RolldownTest {
 }
 
 contract RenounceRole is RolldownTest {
-    function test_EmitRoleRevoked() external {
+    function test_EmitRoleRevoked() public {
         vm.prank(users.admin);
         rolldown.grantRole(defaultAdminRole, users.grantee);
 
@@ -227,7 +229,7 @@ contract RenounceRole is RolldownTest {
         rolldown.renounceRole(defaultAdminRole, users.grantee);
     }
 
-    function test_HasNotDefaultAdminRole() external {
+    function test_HasNotDefaultAdminRole() public {
         vm.prank(users.admin);
         rolldown.grantRole(defaultAdminRole, users.grantee);
 
@@ -236,7 +238,7 @@ contract RenounceRole is RolldownTest {
         assertFalse(rolldown.hasRole(defaultAdminRole, users.grantee));
     }
 
-    function test_RevertIf_BadConfirmation() external {
+    function test_RevertIf_BadConfirmation() public {
         vm.startPrank(users.admin);
 
         rolldown.grantRole(defaultAdminRole, users.grantee);
@@ -248,35 +250,95 @@ contract RenounceRole is RolldownTest {
     }
 }
 
+contract Pause is RolldownTest {
+    function test_EmitPaused() public {
+        vm.prank(users.admin);
+        vm.expectEmit();
+        emit Paused(users.admin);
+        rolldown.pause();
+    }
+
+    function test_GetPaused() public {
+        vm.prank(users.admin);
+        rolldown.pause();
+
+        assertTrue(rolldown.paused());
+    }
+
+    function test_RevertIf_Paused() public {
+        vm.startPrank(users.admin);
+        rolldown.pause();
+
+        vm.expectRevert("Pausable: paused");
+        rolldown.pause();
+
+        vm.stopPrank();
+    }
+}
+
+contract Unpause is RolldownTest {
+    function test_EmitUnpaused() public {
+        vm.startPrank(users.admin);
+
+        rolldown.pause();
+
+        vm.expectEmit();
+        emit Unpaused(users.admin);
+        rolldown.unpause();
+
+        vm.stopPrank();
+    }
+
+    function test_GetPaused() public {
+        vm.startPrank(users.admin);
+
+        rolldown.pause();
+
+        vm.expectEmit();
+        emit Unpaused(users.admin);
+        rolldown.unpause();
+
+        vm.stopPrank();
+
+        assertFalse(rolldown.paused());
+    }
+
+    function test_RevertIf_NotPaused() public {
+        vm.prank(users.admin);
+        vm.expectRevert("Pausable: not paused");
+        rolldown.unpause();
+    }
+}
+
 contract SetUpdater is RolldownTest {
     address public newUpdater = makeAddr("newUpdater");
 
-    function test_EmitNewUpdaterSet() external {
+    function test_EmitNewUpdaterSet() public {
         vm.prank(users.admin);
         vm.expectEmit();
         emit NewUpdaterSet(newUpdater);
         rolldown.setUpdater(newUpdater);
     }
 
-    function test_GetNewUpdater() external {
+    function test_GetNewUpdater() public {
         vm.prank(users.admin);
         rolldown.setUpdater(newUpdater);
         assertEq(rolldown.updaterAccount(), newUpdater);
     }
 
-    function test_HasUpdaterRole() external {
+    function test_HasUpdaterRole() public {
         vm.prank(users.admin);
         rolldown.setUpdater(newUpdater);
         assertTrue(rolldown.hasRole(updaterRole, newUpdater));
     }
 
-    function test_RevertIf_UnauthorizedAccount() external {
+    function test_RevertIf_UnauthorizedAccount() public {
         vm.prank(users.depositor);
         vm.expectRevert(accessControlMessage(users.depositor));
         rolldown.setUpdater(newUpdater);
     }
 
-    function test_RevertIf_ZeroUpdater() external {
+    function test_RevertIf_ZeroUpdater() public {
         vm.prank(users.admin);
         vm.expectRevert(ZeroUpdater.selector);
         rolldown.setUpdater(address(0));
@@ -287,7 +349,7 @@ contract DepositNative is RolldownTest {
     uint256 public amount = 1 ether;
     uint256 public ferryTip = 0;
 
-    function test_EmitDepositAcceptedIntoQueue() external {
+    function test_EmitDepositAcceptedIntoQueue() public {
         uint256 requestId = rolldown.counter();
 
         vm.prank(users.depositor);
@@ -296,7 +358,7 @@ contract DepositNative is RolldownTest {
         rolldown.depositNative{value: amount}();
     }
 
-    function test_EmitDepositAcceptedIntoQueue_BackwardCompatibility() external {
+    function test_EmitDepositAcceptedIntoQueue_BackwardCompatibility() public {
         uint256 requestId = rolldown.counter();
 
         vm.prank(users.depositor);
@@ -305,7 +367,7 @@ contract DepositNative is RolldownTest {
         rolldown.deposit_native{value: amount}();
     }
 
-    function test_ChangeBalances() external {
+    function test_ChangeBalances() public {
         uint256 initialDepositorBalance = users.depositor.balance;
         uint256 initialRolldownBalance = address(rolldown).balance;
 
@@ -319,7 +381,7 @@ contract DepositNative is RolldownTest {
         assertEq(currentRolldownBalance - initialRolldownBalance, amount);
     }
 
-    function test_GetUpdateForL2() external {
+    function test_GetUpdateForL2() public {
         uint256 requestId = rolldown.counter();
 
         vm.prank(users.depositor);
@@ -337,7 +399,7 @@ contract DepositNative is RolldownTest {
         assertEq(pendingDeposit.ferryTip, ferryTip);
     }
 
-    function test_RevertIf_Paused() external {
+    function test_RevertIf_Paused() public {
         vm.prank(users.admin);
         rolldown.pause();
 
@@ -346,7 +408,7 @@ contract DepositNative is RolldownTest {
         rolldown.depositNative{value: amount}();
     }
 
-    function test_RevertIf_ZeroAmount() external {
+    function test_RevertIf_ZeroAmount() public {
         vm.prank(users.depositor);
         vm.expectRevert(ZeroAmount.selector);
         rolldown.depositNative{value: 0}();
@@ -357,7 +419,7 @@ contract DepositNativeWithFerryTip is RolldownTest {
     uint256 public amount = 1 ether;
     uint256 public ferryTip = amount / 100;
 
-    function test_EmitDepositAcceptedIntoQueue() external {
+    function test_EmitDepositAcceptedIntoQueue() public {
         uint256 requestId = rolldown.counter();
 
         vm.prank(users.depositor);
@@ -366,7 +428,7 @@ contract DepositNativeWithFerryTip is RolldownTest {
         rolldown.depositNative{value: amount}(ferryTip);
     }
 
-    function test_EmitDepositAcceptedIntoQueue_BackwardCompatibility() external {
+    function test_EmitDepositAcceptedIntoQueue_BackwardCompatibility() public {
         uint256 requestId = rolldown.counter();
 
         vm.prank(users.depositor);
@@ -375,7 +437,7 @@ contract DepositNativeWithFerryTip is RolldownTest {
         rolldown.deposit_native{value: amount}(ferryTip);
     }
 
-    function test_ChangeBalances() external {
+    function test_ChangeBalances() public {
         uint256 initialDepositorBalance = users.depositor.balance;
         uint256 initialRolldownBalance = address(rolldown).balance;
 
@@ -389,7 +451,7 @@ contract DepositNativeWithFerryTip is RolldownTest {
         assertEq(currentRolldownBalance - initialRolldownBalance, amount);
     }
 
-    function test_GetUpdateForL2() external {
+    function test_GetUpdateForL2() public {
         uint256 requestId = rolldown.counter();
 
         vm.prank(users.depositor);
@@ -407,7 +469,7 @@ contract DepositNativeWithFerryTip is RolldownTest {
         assertEq(pendingDeposit.ferryTip, ferryTip);
     }
 
-    function test_RevertIf_Paused() external {
+    function test_RevertIf_Paused() public {
         vm.prank(users.admin);
         rolldown.pause();
 
@@ -416,13 +478,13 @@ contract DepositNativeWithFerryTip is RolldownTest {
         rolldown.depositNative{value: amount}(ferryTip);
     }
 
-    function test_RevertIf_ZeroAmount() external {
+    function test_RevertIf_ZeroAmount() public {
         vm.prank(users.depositor);
         vm.expectRevert(ZeroAmount.selector);
         rolldown.depositNative{value: 0}(ferryTip);
     }
 
-    function test_RevertIf_FerryTipExceedsAmount() external {
+    function test_RevertIf_FerryTipExceedsAmount() public {
         ferryTip = amount + 1;
 
         vm.prank(users.depositor);
@@ -435,7 +497,7 @@ contract DepositERC20 is RolldownTest {
     uint256 public amount = 1 ether;
     uint256 public ferryTip = 0;
 
-    function test_EmitDepositAcceptedIntoQueue() external {
+    function test_EmitDepositAcceptedIntoQueue() public {
         token.mint(users.depositor);
 
         vm.startPrank(users.depositor);
@@ -450,7 +512,7 @@ contract DepositERC20 is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_EmitDepositAcceptedIntoQueue_BackwardCompatibility() external {
+    function test_EmitDepositAcceptedIntoQueue_BackwardCompatibility() public {
         token.mint(users.depositor);
 
         vm.startPrank(users.depositor);
@@ -465,7 +527,22 @@ contract DepositERC20 is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_ChangeBalances() external {
+    function test_EmitDepositAcceptedIntoQueue_BackwardCompatibility2() public {
+        token.mint(users.depositor);
+
+        vm.startPrank(users.depositor);
+
+        token.approve(address(rolldown), amount);
+        uint256 requestId = rolldown.counter();
+
+        vm.expectEmit();
+        emit DepositAcceptedIntoQueue(requestId, users.depositor, address(token), amount, ferryTip);
+        rolldown.deposit(address(token), amount);
+
+        vm.stopPrank();
+    }
+
+    function test_ChangeBalances() public {
         token.mint(users.depositor);
 
         uint256 initialDepositorBalance = token.balanceOf(users.depositor);
@@ -485,7 +562,7 @@ contract DepositERC20 is RolldownTest {
         assertEq(currentRolldownBalance - initialRolldownBalance, amount);
     }
 
-    function test_GetUpdateForL2() external {
+    function test_GetUpdateForL2() public {
         token.mint(users.depositor);
 
         vm.startPrank(users.depositor);
@@ -508,7 +585,7 @@ contract DepositERC20 is RolldownTest {
         assertEq(pendingDeposit.ferryTip, ferryTip);
     }
 
-    function test_RevertIf_Paused() external {
+    function test_RevertIf_Paused() public {
         vm.prank(users.admin);
         rolldown.pause();
 
@@ -517,19 +594,19 @@ contract DepositERC20 is RolldownTest {
         rolldown.depositERC20(address(token), amount);
     }
 
-    function test_RevertIf_ZeroAmount() external {
+    function test_RevertIf_ZeroAmount() public {
         vm.prank(users.depositor);
         vm.expectRevert(ZeroAmount.selector);
         rolldown.depositERC20(address(token), 0);
     }
 
-    function test_RevertIf_ZeroToken() external {
+    function test_RevertIf_ZeroToken() public {
         vm.prank(users.depositor);
         vm.expectRevert(ZeroToken.selector);
         rolldown.depositERC20(address(0), amount);
     }
 
-    function test_RevertIf_InsufficientAllowance() external {
+    function test_RevertIf_InsufficientAllowance() public {
         token.mint(users.depositor);
 
         vm.startPrank(users.depositor);
@@ -547,7 +624,7 @@ contract DepositERC20WithFerryTip is RolldownTest {
     uint256 public amount = 1 ether;
     uint256 public ferryTip = amount / 100;
 
-    function test_EmitDepositAcceptedIntoQueue() external {
+    function test_EmitDepositAcceptedIntoQueue() public {
         token.mint(users.depositor);
 
         vm.startPrank(users.depositor);
@@ -562,7 +639,7 @@ contract DepositERC20WithFerryTip is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_EmitDepositAcceptedIntoQueue_BackwardCompatibility() external {
+    function test_EmitDepositAcceptedIntoQueue_BackwardCompatibility() public {
         token.mint(users.depositor);
 
         vm.startPrank(users.depositor);
@@ -577,7 +654,7 @@ contract DepositERC20WithFerryTip is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_ChangeBalances() external {
+    function test_ChangeBalances() public {
         token.mint(users.depositor);
 
         uint256 initialDepositorBalance = token.balanceOf(users.depositor);
@@ -597,7 +674,7 @@ contract DepositERC20WithFerryTip is RolldownTest {
         assertEq(currentRolldownBalance - initialRolldownBalance, amount);
     }
 
-    function test_GetUpdateForL2() external {
+    function test_GetUpdateForL2() public {
         token.mint(users.depositor);
 
         vm.startPrank(users.depositor);
@@ -620,7 +697,7 @@ contract DepositERC20WithFerryTip is RolldownTest {
         assertEq(pendingDeposit.ferryTip, ferryTip);
     }
 
-    function test_RevertIf_Paused() external {
+    function test_RevertIf_Paused() public {
         vm.prank(users.admin);
         rolldown.pause();
 
@@ -629,19 +706,19 @@ contract DepositERC20WithFerryTip is RolldownTest {
         rolldown.depositERC20(address(token), amount, ferryTip);
     }
 
-    function test_RevertIf_ZeroAmount() external {
+    function test_RevertIf_ZeroAmount() public {
         vm.prank(users.depositor);
         vm.expectRevert(ZeroAmount.selector);
         rolldown.depositERC20(address(token), 0, ferryTip);
     }
 
-    function test_RevertIf_ZeroToken() external {
+    function test_RevertIf_ZeroToken() public {
         vm.prank(users.depositor);
         vm.expectRevert(ZeroToken.selector);
         rolldown.depositERC20(address(0), amount, ferryTip);
     }
 
-    function test_RevertIf_FerryTipExceedsAmount() external {
+    function test_RevertIf_FerryTipExceedsAmount() public {
         ferryTip = amount + 1;
 
         vm.prank(users.depositor);
@@ -649,7 +726,7 @@ contract DepositERC20WithFerryTip is RolldownTest {
         rolldown.depositERC20(address(token), amount, ferryTip);
     }
 
-    function test_RevertIf_InsufficientAllowance() external {
+    function test_RevertIf_InsufficientAllowance() public {
         token.mint(users.depositor);
 
         vm.startPrank(users.depositor);
@@ -668,7 +745,7 @@ contract FerryWithdrawal is RolldownTest {
     uint256 public ferryTip = amount / 100;
     uint256 public ferriedAmount = amount - ferryTip;
 
-    function test_EmitWithdrawalFerried_Native_WithoutFerryTip() external {
+    function test_EmitWithdrawalFerried_Native_WithoutFerryTip() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, 0);
         bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
@@ -679,7 +756,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: amount}(withdrawal);
     }
 
-    function test_EmitWithdrawalFerried_Native_WithoutFerryTip_BackwardCompatibility() external {
+    function test_EmitWithdrawalFerried_Native_WithoutFerryTip_BackwardCompatibility() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, 0);
         bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
@@ -690,7 +767,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferry_withdrawal{value: amount}(withdrawal);
     }
 
-    function test_EmitWithdrawalFerried_Native_WithFerryTip() external {
+    function test_EmitWithdrawalFerried_Native_WithFerryTip() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, ferryTip);
         bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
@@ -703,7 +780,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
     }
 
-    function test_EmitWithdrawalFerried_ERC20_WithoutFerryTip() external {
+    function test_EmitWithdrawalFerried_ERC20_WithoutFerryTip() public {
         token.mint(users.withdrawerA);
 
         Withdrawal memory withdrawal =
@@ -721,7 +798,7 @@ contract FerryWithdrawal is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_EmitWithdrawalFerried_ERC20_WithoutFerryTip_BackwardCompatibility() external {
+    function test_EmitWithdrawalFerried_ERC20_WithoutFerryTip_BackwardCompatibility() public {
         token.mint(users.withdrawerA);
 
         Withdrawal memory withdrawal =
@@ -739,7 +816,7 @@ contract FerryWithdrawal is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_EmitWithdrawalFerried_ERC20_WithFerryTip() external {
+    function test_EmitWithdrawalFerried_ERC20_WithFerryTip() public {
         token.mint(users.withdrawerA);
 
         Withdrawal memory withdrawal =
@@ -759,7 +836,7 @@ contract FerryWithdrawal is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_ChangeBalances_Native_WithoutFerryTip() external {
+    function test_ChangeBalances_Native_WithoutFerryTip() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, 0);
 
@@ -776,7 +853,7 @@ contract FerryWithdrawal is RolldownTest {
         assertEq(currentRecipientBalance, initialRecipientBalance + amount);
     }
 
-    function test_ChangeBalances_Native_WithFerryTip() external {
+    function test_ChangeBalances_Native_WithFerryTip() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, ferryTip);
 
@@ -793,7 +870,7 @@ contract FerryWithdrawal is RolldownTest {
         assertEq(currentRecipientBalance, initialRecipientBalance + ferriedAmount);
     }
 
-    function test_ChangeBalances_ERC20_WithoutFerryTip() external {
+    function test_ChangeBalances_ERC20_WithoutFerryTip() public {
         token.mint(users.withdrawerA);
 
         Withdrawal memory withdrawal =
@@ -816,7 +893,7 @@ contract FerryWithdrawal is RolldownTest {
         assertEq(currentRecipientBalance, initialRecipientBalance + amount);
     }
 
-    function test_ChangeBalances_ERC20_WithFerryTip() external {
+    function test_ChangeBalances_ERC20_WithFerryTip() public {
         token.mint(users.withdrawerA);
 
         Withdrawal memory withdrawal =
@@ -839,7 +916,7 @@ contract FerryWithdrawal is RolldownTest {
         assertEq(currentRecipientBalance, initialRecipientBalance + ferriedAmount);
     }
 
-    function test_GetProcessedL2Requests_Native() external {
+    function test_GetProcessedL2Requests_Native() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, ferryTip);
         bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
@@ -849,7 +926,7 @@ contract FerryWithdrawal is RolldownTest {
         assertEq(rolldown.processedL2Requests(withdrawalHash), users.withdrawerA);
     }
 
-    function test_GetProcessedL2Requests_ERC20() external {
+    function test_GetProcessedL2Requests_ERC20() public {
         token.mint(users.withdrawerA);
 
         Withdrawal memory withdrawal =
@@ -865,7 +942,7 @@ contract FerryWithdrawal is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_RevertIf_Paused() external {
+    function test_RevertIf_Paused() public {
         vm.prank(users.admin);
         rolldown.pause();
 
@@ -877,7 +954,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
     }
 
-    function test_RevertIf_ZeroAmount_Native() external {
+    function test_RevertIf_ZeroAmount_Native() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, 0, ferryTip);
 
@@ -886,7 +963,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: 0}(withdrawal);
     }
 
-    function test_RevertIf_ZeroFerriedAmount_ERC20() external {
+    function test_RevertIf_ZeroFerriedAmount_ERC20() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, address(token), 0, ferryTip);
 
@@ -895,7 +972,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal(withdrawal);
     }
 
-    function test_RevertIf_FerryTipExceedsAmount_Native() external {
+    function test_RevertIf_FerryTipExceedsAmount_Native() public {
         ferryTip = amount + 1;
 
         Withdrawal memory withdrawal =
@@ -906,7 +983,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
     }
 
-    function test_RevertIf_FerryTipExceedsAmount_ERC20() external {
+    function test_RevertIf_FerryTipExceedsAmount_ERC20() public {
         ferryTip = amount + 1;
 
         Withdrawal memory withdrawal =
@@ -917,7 +994,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal(withdrawal);
     }
 
-    function test_RevertIf_ZeroRecipient() external {
+    function test_RevertIf_ZeroRecipient() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), address(0), nativeTokenAddress, amount, ferryTip);
 
@@ -926,7 +1003,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
     }
 
-    function test_RevertIf_InsufficientFerriedAmount_Native() external {
+    function test_RevertIf_InsufficientFerriedAmount_Native() public {
         ferriedAmount -= 1;
 
         Withdrawal memory withdrawal =
@@ -937,7 +1014,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
     }
 
-    function test_RevertIf_ZeroFerriedAmount_Native() external {
+    function test_RevertIf_ZeroFerriedAmount_Native() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, ferryTip);
 
@@ -946,7 +1023,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: 0}(withdrawal);
     }
 
-    function test_RevertIf_WithdrawalAlreadyFerried() external {
+    function test_RevertIf_WithdrawalAlreadyFerried() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, ferryTip);
         bytes32 withdrawalHash = rolldown.hashWithdrawal(withdrawal);
@@ -961,7 +1038,7 @@ contract FerryWithdrawal is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_RevertIf_CallToNonContract() external {
+    function test_RevertIf_CallToNonContract() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, address(0), amount, ferryTip);
 
@@ -970,7 +1047,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
     }
 
-    function test_RevertIf_LowLevelCallFailed() external {
+    function test_RevertIf_LowLevelCallFailed() public {
         Withdrawal memory withdrawal =
             Withdrawal(createRequestId(Origin.L2), users.recipient, address(new EmptyContract()), amount, ferryTip);
 
@@ -979,7 +1056,7 @@ contract FerryWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: ferriedAmount}(withdrawal);
     }
 
-    function test_RevertIf_InsufficientAllowance() external {
+    function test_RevertIf_InsufficientAllowance() public {
         token.mint(users.withdrawerA);
 
         ferriedAmount -= 1;
@@ -1027,33 +1104,33 @@ contract UpdateL1FromL2 is RolldownTest {
         merkleRoot = keccak256(abi.encodePacked(withdrawalHashA, withdrawalHashB));
     }
 
-    function test_EmitL2UpdateAccepted() external {
+    function test_EmitL2UpdateAccepted() public {
         vm.prank(users.updater);
         vm.expectEmit();
         emit L2UpdateAccepted(merkleRoot, range);
         rolldown.updateL1FromL2(merkleRoot, range);
     }
 
-    function test_EmitL2UpdateAccepted_BackwardCompatibility() external {
+    function test_EmitL2UpdateAccepted_BackwardCompatibility() public {
         vm.prank(users.updater);
         vm.expectEmit();
         emit L2UpdateAccepted(merkleRoot, range);
         rolldown.update_l1_from_l2(merkleRoot, range);
     }
 
-    function test_GetRoots() external {
+    function test_GetRoots() public {
         vm.prank(users.updater);
         rolldown.updateL1FromL2(merkleRoot, range);
         assertEq(rolldown.roots(0), merkleRoot);
     }
 
-    function test_GetRootsLength() external {
+    function test_GetRootsLength() public {
         vm.prank(users.updater);
         rolldown.updateL1FromL2(merkleRoot, range);
         assertEq(rolldown.getMerkleRootsLength(), 1);
     }
 
-    function test_GetMerkeRootRange() external {
+    function test_GetMerkeRootRange() public {
         vm.prank(users.updater);
         rolldown.updateL1FromL2(merkleRoot, range);
 
@@ -1062,13 +1139,41 @@ contract UpdateL1FromL2 is RolldownTest {
         assertEq(endRange, range.end);
     }
 
-    function test_GetLastProcessedUpdateOriginL2() external {
+    function test_GetLastProcessedUpdateOriginL2() public {
         vm.prank(users.updater);
         rolldown.updateL1FromL2(merkleRoot, range);
         assertEq(rolldown.lastProcessedUpdate_origin_l2(), range.end);
     }
 
-    function test_RevertIf_Paused() external {
+    function test_FindL2Batch() public {
+        vm.prank(users.updater);
+        rolldown.updateL1FromL2(merkleRoot, range);
+
+        uint256 requestId = rolldown.lastProcessedUpdate_origin_l2();
+
+        bytes32 l2Batch = rolldown.findL2Batch(requestId);
+        assertEq(l2Batch, merkleRoot);
+    }
+
+    function test_RevertIf_ZeroRootCount() public {
+        vm.prank(users.updater);
+
+        uint256 requestId = rolldown.lastProcessedUpdate_origin_l2();
+
+        vm.expectRevert(ZeroRootCount.selector);
+        rolldown.findL2Batch(requestId);
+    }
+
+    function test_RevertIf_InvalidRequestId() public {
+        vm.prank(users.updater);
+        rolldown.updateL1FromL2(merkleRoot, range);
+
+        uint256 requestId = rolldown.lastProcessedUpdate_origin_l2() + 1;
+        vm.expectRevert(abi.encodeWithSelector(InvalidRequestId.selector, requestId));
+        rolldown.findL2Batch(requestId);
+    }
+
+    function test_RevertIf_Paused() public {
         vm.prank(users.admin);
         rolldown.pause();
 
@@ -1079,7 +1184,7 @@ contract UpdateL1FromL2 is RolldownTest {
         rolldown.updateL1FromL2(bytes32(""), range);
     }
 
-    function test_RevertIf_ZeroUpdateRange() external {
+    function test_RevertIf_ZeroUpdateRange() public {
         range = Range(0, 1);
 
         vm.prank(users.updater);
@@ -1087,7 +1192,7 @@ contract UpdateL1FromL2 is RolldownTest {
         rolldown.updateL1FromL2(bytes32(""), range);
     }
 
-    function test_RevertIf_InvalidRangeStart() external {
+    function test_RevertIf_InvalidRangeStart() public {
         range = Range(1, 0);
 
         vm.prank(users.updater);
@@ -1095,7 +1200,7 @@ contract UpdateL1FromL2 is RolldownTest {
         rolldown.updateL1FromL2(bytes32(""), range);
     }
 
-    function test_RevertIf_PreviousUpdateMissed() external {
+    function test_RevertIf_PreviousUpdateMissed() public {
         range = Range(2, 3);
         uint256 lastProcessedUpdate = rolldown.lastProcessedUpdate_origin_l2();
 
@@ -1104,7 +1209,7 @@ contract UpdateL1FromL2 is RolldownTest {
         rolldown.updateL1FromL2(merkleRoot, range);
     }
 
-    function test_RevertIf_UpdateAlreadyApplied() external {
+    function test_RevertIf_UpdateAlreadyApplied() public {
         vm.startPrank(users.updater);
 
         rolldown.updateL1FromL2(merkleRoot, range);
@@ -1153,7 +1258,7 @@ contract CloseWithdrawal is RolldownTest {
         rolldown.updateL1FromL2(merkleRoot, range);
     }
 
-    function test_EmitNativeTokensWithdrawnAndWithdrawalClosed() external {
+    function test_EmitNativeTokensWithdrawnAndWithdrawalClosed() public {
         bytes32[] memory merkleProof = new bytes32[](1);
         merkleProof[0] = withdrawalHashB;
 
@@ -1164,7 +1269,7 @@ contract CloseWithdrawal is RolldownTest {
         rolldown.closeWithdrawal(withdrawalA, merkleRoot, merkleProof);
     }
 
-    function test_EmitNativeTokensWithdrawnAndWithdrawalClosed_BackwardCompatibility() external {
+    function test_EmitNativeTokensWithdrawnAndWithdrawalClosed_BackwardCompatibility() public {
         bytes32[] memory merkleProof = new bytes32[](1);
         merkleProof[0] = withdrawalHashB;
 
@@ -1175,7 +1280,7 @@ contract CloseWithdrawal is RolldownTest {
         rolldown.close_withdrawal(withdrawalA, merkleRoot, merkleProof);
     }
 
-    function test_GetProcessedL2Request() external {
+    function test_GetProcessedL2Request() public {
         bytes32[] memory merkleProof = new bytes32[](1);
         merkleProof[0] = withdrawalHashB;
 
@@ -1186,7 +1291,7 @@ contract CloseWithdrawal is RolldownTest {
         assertNotEq(rolldown.processedL2Requests(withdrawalHashB), closed);
     }
 
-    function test_RevertIf_Paused() external {
+    function test_RevertIf_Paused() public {
         vm.prank(users.admin);
         rolldown.pause();
 
@@ -1198,7 +1303,7 @@ contract CloseWithdrawal is RolldownTest {
         rolldown.closeWithdrawal(withdrawalB, merkleRoot, merkleProof);
     }
 
-    function test_RevertIf_L2RequestAlreadyProcessed() external {
+    function test_RevertIf_L2RequestAlreadyProcessed() public {
         bytes32[] memory merkleProof = new bytes32[](1);
         merkleProof[0] = withdrawalHashB;
 
@@ -1212,7 +1317,7 @@ contract CloseWithdrawal is RolldownTest {
         vm.stopPrank();
     }
 
-    function test_RevertIf_UnexpectedMerkleRoot() external {
+    function test_RevertIf_UnexpectedMerkleRoot() public {
         merkleRoot = keccak256(abi.encodePacked(withdrawalHashB, withdrawalHashA));
         bytes32[] memory merkleProof = new bytes32[](1);
         merkleProof[0] = withdrawalHashB;
@@ -1222,10 +1327,11 @@ contract CloseWithdrawal is RolldownTest {
         rolldown.closeWithdrawal(withdrawalA, merkleRoot, merkleProof);
     }
 
-    function test_RevertIf_RequestOutOfRange() external {
+    function test_RevertIf_RequestOutOfRange() public {
         token.mint(users.withdrawerB);
 
-        Withdrawal memory withdrawalC = Withdrawal(RequestId(Origin.L2, 3), users.recipient, nativeTokenAddress, amount, 0);
+        Withdrawal memory withdrawalC =
+            Withdrawal(RequestId(Origin.L2, 3), users.recipient, nativeTokenAddress, amount, 0);
         bytes32 withdrawalHashC = rolldown.hashWithdrawal(withdrawalC);
         Withdrawal memory withdrawalD = Withdrawal(RequestId(Origin.L2, 4), users.recipient, address(token), amount, 0);
 
@@ -1252,10 +1358,11 @@ contract CloseWithdrawal is RolldownTest {
         rolldown.closeWithdrawal(withdrawalD, merkleRoot, merkleProof);
     }
 
-    function test_RevertIf_RequestRangeTooLarge() external {
+    function test_RevertIf_RequestRangeTooLarge() public {
         token.mint(users.withdrawerB);
 
-        Withdrawal memory withdrawalC = Withdrawal(RequestId(Origin.L2, 3), users.recipient, nativeTokenAddress, amount, 0);
+        Withdrawal memory withdrawalC =
+            Withdrawal(RequestId(Origin.L2, 3), users.recipient, nativeTokenAddress, amount, 0);
         bytes32 withdrawalHashC = rolldown.hashWithdrawal(withdrawalC);
         Withdrawal memory withdrawalD = Withdrawal(RequestId(Origin.L2, 4), users.recipient, address(token), amount, 0);
 
@@ -1282,7 +1389,7 @@ contract CloseWithdrawal is RolldownTest {
         rolldown.closeWithdrawal(withdrawalD, merkleRoot, merkleProof);
     }
 
-    function test_RevertIf_InvalidRequestProof() external {
+    function test_RevertIf_InvalidRequestProof() public {
         bytes32[] memory merkleProof = new bytes32[](1);
         merkleProof[0] = withdrawalHashA;
 
