@@ -32,7 +32,7 @@ pub(crate) async fn build_eth_client(
 ) -> eyre::Result<(Address, Arc<Client>, Option<Arc<SignerClient>>)> {
     let provider: Provider<Http> = Client::try_from(cfg.eth_rpc_url.clone())?;
     match &cfg.ecdsa_key.ecdsa_address {
-        Some(address) => Ok((Address::from_str(&address)?, Arc::new(provider), None)),
+        Some(address) => Ok((Address::from_str(address)?, Arc::new(provider), None)),
         _ => {
             info!("Eth Wallet decryting...");
             let wallet = cfg.get_ecdsa_keystore()?.into_wallet()?;
