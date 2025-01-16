@@ -98,7 +98,7 @@ async fn run(config: Config) -> Result<(), Error> {
     });
 
     let _metrics = tokio::spawn(async move {
-        metrics::serve_metrics(9898).await;
+        metrics::serve_metrics(80).await;
     });
 
     let update_size_limit = config.update_size_limit;
