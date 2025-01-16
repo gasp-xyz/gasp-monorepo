@@ -3,6 +3,8 @@ name: main branch workflow
 on:
   push:
     branches: [main, feat/add-main-branch-ci-pipeline-MGX-834]
+    paths-ignore:
+      - 'gasp-node/*'
 
 permissions:
   contents: write
