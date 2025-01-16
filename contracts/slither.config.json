@@ -1,6 +1,7 @@
 {
-    "compile_force_framework": "foundry",
-    "detectors_to_exclude": "pragma,solidity-version,timestamp",
-    "filter_paths": "(lib/|test/|script/)",
-    "include_paths": "src/Rolldown.sol"
+  "compile_force_framework": "foundry",
+  "detectors_to_exclude": "naming-convention,pragma,solc-version,timestamp",
+  "filter_paths": "(lib/|test/|script/)",
+  "include_paths": "(GaspToken.sol|Rolldown.sol)",
+  "fail_on": "low"
 }

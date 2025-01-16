@@ -1,15 +1,13 @@
-name: test
+name: CI
 
-on: workflow_dispatch
+on:
+  push:
 
 env:
   FOUNDRY_PROFILE: ci
 
 jobs:
   check:
-    strategy:
-      fail-fast: true
-
     name: Foundry project
     runs-on: ubuntu-latest
     steps:
@@ -17,55 +15,59 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-        
+
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12.x
+          python-version: "3.12.x"
           check-latest: true
           cache: pip
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly
+          version: "1.9.5"
           cache: true
 
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      
+
       - name: Install Python dependencies
         run: |
           pip install -U setuptools
           pip install -r requirements.txt
 
-      - name: Build code
-        run: |
-          forge --version
-          forge build --sizes
-        id: build
-      
-      - name: Check file and code format
-        if: false
+      - name: Compile contracts
+        run: bun run compile
+        id: compile
+
+      - name: Get sizes of contracts
+        run: bun run size
+        id: size
+
+      - name: Check format of contracts and files
         run: bun run format
         id: format
-      
-      - name: Lint code
-        if: false
+
+      - name: Lint contracts
         run: bun run lint
         id: lint
 
-      - name: Test code
-        run: forge test -vvv
+      - name: Run unit tests
+        run: bun run test
         id: test
-      
-      - name: Analyze code with static analyzer
+
+      - name: Make static analysis of contracts
         if: false
         run: bun run analyze:ci
         id: analyze
-      
-      - name: Create gas usage snapshot
-        run: forge snapshot
-        id: snapshot
+
+      - name: Create gas report
+        run: bun run gas
+        id: gas
+
+      - name: Create coverage report
+        run: bun run cover
+        id: cover
