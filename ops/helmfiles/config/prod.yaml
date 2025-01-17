@@ -244,7 +244,7 @@ updaterEnvBase:
 # sequencer configs #
 ############################
 sequencerEnabled: true
-sequencerImageTag: e82c4b3d9539b81f1cbe48066aed73ba5463fc10
+sequencerImageTag: c6cdea833576a31f8343d5ef43babe33cec06819
 
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
@@ -461,7 +461,7 @@ closerEnvArb:
   TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
-  LOG: silly
+  LOG: info
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerArbitrumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -474,7 +474,7 @@ closerEnvBase:
   TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
-  LOG: silly
+  LOG: info
 closerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerBaseMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
