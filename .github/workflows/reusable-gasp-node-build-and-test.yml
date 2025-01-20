@@ -74,7 +74,7 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
+      # - uses: google-github-actions/setup-gcloud@v2
 
       - name: Download cargo build cache
         if: inputs.cache-enabled
@@ -219,7 +219,7 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
+      # - uses: google-github-actions/setup-gcloud@v2
 
       - name: Download cargo build cache
         if: inputs.cache-enabled
@@ -364,7 +364,7 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
+      # - uses: google-github-actions/setup-gcloud@v2
   
       - name: Download cargo build cache
         if: inputs.cache-enabled
@@ -501,7 +501,7 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
+      # - uses: google-github-actions/setup-gcloud@v2
 
       - name: Download cargo build cache
         if: inputs.cache-enabled
@@ -569,7 +569,7 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
+      # - uses: google-github-actions/setup-gcloud@v2
 
       - name: Download cargo build cache
         if: inputs.cache-enabled
@@ -643,7 +643,7 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
+      # - uses: google-github-actions/setup-gcloud@v2
 
       - name: Download cargo build cache
         if: inputs.cache-enabled
@@ -723,7 +723,7 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
+      # - uses: google-github-actions/setup-gcloud@v2
 
       - name: Download cargo build cache
         if: inputs.cache-enabled
@@ -799,7 +799,7 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
+      # - uses: google-github-actions/setup-gcloud@v2
 
       - name: Download cargo build cache
         if: inputs.cache-enabled
