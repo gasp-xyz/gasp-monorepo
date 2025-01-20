@@ -42,6 +42,12 @@ jobs:
   
       - name: Run unit tests
         run: bun run test
+
+      - name: Create gas report
+        run: bun run gas
+        
+      - name: Create coverage report
+        run: bun run cover
       
       - name: Make static analysis of contracts
         uses: crytic/slither-action@v0.4.0
@@ -54,15 +60,32 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ steps.slither.outputs.sarif }}
-          
-      # - name: Make static analysis of contracts
-      #   run: bun run analyze:ci
-  
-      - name: Create gas report
-        run: bun run gas
-  
-      - name: Create coverage report
-        run: bun run cover
+
+  build-and-test-stash:
+    name: '[stash] Build and run tests'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: stash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+          cache-dependency-path: "./stash/yarn.lock"
+
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: mdgreenwald/mozilla-sops-action@v1.6.0
+
+      - run: yarn install --immutable
+      - run: sops exec-env frontend.enc.env 'yarn run build'
+      - run: sops exec-env frontend.enc.env 'yarn run test:unit'
 
   build-foundry-deployer-image:
     name: '[contracts] Build foundry deployer Docker image with smart contracts code'
