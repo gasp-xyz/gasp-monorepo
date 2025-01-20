@@ -67,7 +67,7 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
       - run: curl -LJO https://github.com/reproducible-containers/buildkit-cache-dance/archive/refs/tags/v3.1.2.tar.gz && tar xvf buildkit-cache-dance-3.1.2.tar.gz
-      - run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
 
       - uses: google-github-actions/auth@v2
         id: auth
@@ -153,7 +153,7 @@ jobs:
           merge-multiple: true
   
       - uses: docker/setup-buildx-action@v3
-      - run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
   
       - name: Docker meta
         id: meta
@@ -211,7 +211,7 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
       - run: curl -LJO https://github.com/reproducible-containers/buildkit-cache-dance/archive/refs/tags/v3.1.2.tar.gz && tar xvf buildkit-cache-dance-3.1.2.tar.gz
-      - run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
 
       - uses: google-github-actions/auth@v2
         id: auth
@@ -298,7 +298,7 @@ jobs:
           merge-multiple: true
   
       - uses: docker/setup-buildx-action@v3
-      - run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
   
       - name: Docker meta
         id: meta
@@ -355,7 +355,7 @@ jobs:
   
       - uses: docker/setup-buildx-action@v3
       - run: curl -LJO https://github.com/reproducible-containers/buildkit-cache-dance/archive/refs/tags/v3.1.2.tar.gz && tar xvf buildkit-cache-dance-3.1.2.tar.gz
-      - run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
   
       - uses: google-github-actions/auth@v2
         id: auth
@@ -442,7 +442,7 @@ jobs:
           merge-multiple: true
   
       - uses: docker/setup-buildx-action@v3
-      - run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
   
       - name: Docker meta
         id: meta
