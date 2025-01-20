@@ -44,8 +44,6 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
       - uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: "1.9.5"
           
       - uses: actions/setup-python@v5
         with:
