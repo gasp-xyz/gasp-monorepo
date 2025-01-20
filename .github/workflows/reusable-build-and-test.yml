@@ -31,6 +31,45 @@ jobs:
         working-directory: contracts
         run: forge test
 
+  contracts-tests:
+    name: '[contracts] Run tests'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: oven-sh/setup-bun@v2
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: "1.9.5"
+          
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: 'contracts/.python-version'
+          cache: pip
+      - run:  pip install -r requirements.txt
+  
+      - run: bun run compile
+      - run: bun run size
+      - run: bun run format
+      - run: bun run lint
+  
+      - name: Run unit tests
+        run: bun run test
+  
+      - name: Make static analysis of contracts
+        run: bun run analyze:ci
+  
+      - name: Create gas report
+        run: bun run gas
+  
+      - name: Create coverage report
+        run: bun run cover
+
   build-foundry-deployer-image:
     name: '[contracts] Build foundry deployer Docker image with smart contracts code'
     runs-on: ubuntu-latest
