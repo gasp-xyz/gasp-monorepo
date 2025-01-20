@@ -42,7 +42,19 @@ jobs:
   
       - name: Run unit tests
         run: bun run test
-  
+      
+      - name: Make static analysis of contracts
+        uses: crytic/slither-action@v0.4.0
+        id: slither
+        with:
+          target: contracts
+          sarif: results.sarif
+          fail-on: none
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.slither.outputs.sarif }}
+          
       # - name: Make static analysis of contracts
       #   run: bun run analyze:ci
   
