@@ -101,7 +101,7 @@ jobs:
         with:
           platforms: linux/${{ matrix.platform.name }}
           labels: ${{ steps.meta.outputs.labels }}
-          context: "{{defaultContext}}:gasp-node"
+          context: ./gasp-node
           outputs: type=image,name=${{ env.NODE_DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
@@ -248,7 +248,7 @@ jobs:
           build-args: "ENABLE_FAST_RUNTIME=true"
           platforms: linux/${{ matrix.platform.name }}
           labels: ${{ steps.meta.outputs.labels }}
-          context: "{{defaultContext}}:gasp-node"
+          context: ./gasp-node
           outputs: type=image,name=${{ env.NODE_DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
@@ -394,7 +394,7 @@ jobs:
           build-args: "ENABLE_UNLOCKED_RUNTIME=true"
           platforms: linux/${{ matrix.platform.name }}
           labels: ${{ steps.meta.outputs.labels }}
-          context: "{{defaultContext}}:gasp-node"
+          context: ./gasp-node
           outputs: type=image,name=${{ env.NODE_DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
   
       - name: Export digest
