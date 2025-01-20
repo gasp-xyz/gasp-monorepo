@@ -14,6 +14,16 @@ const ALERT_ERROR: &str = "ALERT::ERROR";
 const ALERT_WARNING: &str = "ALERT::WARNING";
 const ALERT_INFO: &str = "ALERT::INFO";
 
+use prometheus::{opts, register_counter_vec, CounterVec};
+
+lazy_static::lazy_static! {
+    static ref SEQUENCER_ACTION: CounterVec = register_counter_vec!(
+        opts!("action", "number of sequencer actions"),
+        &["type"]
+    )
+    .unwrap();
+}
+
 pub struct Sequencer<L1, L2> {
     l1: L1,
     l2: L2,
@@ -22,6 +32,13 @@ pub struct Sequencer<L1, L2> {
     l1_account_address: [u8; 20],
     l2_account_address: [u8; 20],
     tx_cost: Option<u128>,
+}
+
+#[derive(Debug)]
+pub enum ActionStatus {
+    Performed,
+    Skipped,
+    NothingToDo,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -77,6 +94,143 @@ where
         }
     }
 
+    pub async fn cancel_malicious_update_if_any(&self, at: H256) -> Result<ActionStatus, Error> {
+        if let Some(update) = self.find_malicious_update(at).await? {
+            tracing::warn!("{ALERT_ERROR} Found malicious update: {}", update);
+            if self.has_cancel_rights_available().await? {
+                SEQUENCER_ACTION
+                    .with_label_values(&["cancel_malicious_update"])
+                    .inc();
+                self.cancel_update(update)
+                    .await
+                    .inspect(|result| {
+                        if *result {
+                            tracing::warn!("{ALERT_ERROR} cancel malicious update has succeded");
+                        } else {
+                            tracing::error!("{ALERT_ERROR} cancel malicious update has failed");
+                        }
+                    })
+                    .inspect_err(|_| {
+                        tracing::error!("{ALERT_ERROR} cancel malicious update has failed");
+                    })?;
+                return Ok(ActionStatus::Performed);
+            } else {
+                tracing::error!(
+                    "{ALERT_ERROR} there are no cancel rights available to cancel malicous update"
+                );
+                return Ok(ActionStatus::Skipped);
+            }
+        }
+        Ok(ActionStatus::NothingToDo)
+    }
+
+    pub async fn should_send_update_already(
+        &self,
+        now: u128,
+        sequencers_count: usize,
+        dispute_period_length: u128,
+        last_update: Option<u128>,
+    ) -> Result<bool, L1Error> {
+        let sequencers_count: u128 = sequencers_count as u128;
+        match (last_update, sequencers_count) {
+            (None, _) => {
+                tracing::info!("there are no pending updates, proceeding...");
+                Ok(true)
+            }
+            (Some(_), ..=1) => {
+                tracing::info!("there is just one sequencer, proceeding...");
+                Ok(true)
+            }
+            (Some(latest), _)
+                if now.saturating_sub(latest) > (dispute_period_length / sequencers_count) =>
+            {
+                tracing::info!("previous update was long enough ago, proceeding...");
+                Ok(true)
+            }
+            _ => {
+                tracing::info!("previous pending update found, no need to provide update yet");
+                Ok(false)
+            }
+        }
+    }
+
+    pub async fn send_sequencer_update(
+        &self,
+        block_number: u32,
+        at: H256,
+    ) -> Result<ActionStatus, Error> {
+        let has_read_rights = self.has_read_rights_available().await?;
+        let is_selected_sequencer = self.is_selected_sequencer().await?;
+        if !has_read_rights || !is_selected_sequencer {
+            return Ok(ActionStatus::Skipped);
+        }
+
+        let dispute_period = self.l2.get_dispute_period(self.chain.clone(), at).await?;
+        let sequencers_count = self
+            .l2
+            .get_active_sequencers(self.chain.clone(), at)
+            .await?
+            .len();
+        let latest_update_block_time = self.find_latest_correct_update_block_submission(at).await?;
+
+        let should_send_update = self
+            .should_send_update_already(
+                block_number.into(),
+                sequencers_count,
+                dispute_period,
+                latest_update_block_time,
+            )
+            .await?;
+
+        if !should_send_update {
+            return Ok(ActionStatus::Skipped);
+        }
+
+        if let Some((update_hash, update)) = self.get_pending_update(at).await? {
+            tracing::info!("Found update to submit: {:?}", update);
+            SEQUENCER_ACTION
+                .with_label_values(&["sequencer_update"])
+                .inc();
+            let result = self.l2.update_l1_from_l2(update, update_hash).await?;
+            if !result {
+                tracing::error!("{ALERT_WARNING} update submission failed");
+                Err(Error::UpdateSubmissionFailure)
+            } else {
+                tracing::info!("{ALERT_INFO} update submission succeded");
+                Ok(ActionStatus::Performed)
+            }
+        } else {
+            Ok(ActionStatus::Skipped)
+        }
+    }
+
+    pub async fn retrieve_cancel_rights(&self, at: H256) -> Result<ActionStatus, Error> {
+        let balance = self.get_my_balance().await?;
+        match (
+            self.tx_cost,
+            self.find_closable_cancel_resolutions(at).await?.first(),
+        ) {
+            (Some(tx_cost), Some(closable)) if balance > tx_cost => {
+                tracing::info!("Found pending cancel ready to close : {}", closable);
+                SEQUENCER_ACTION.with_label_values(&["close_cancel"]).inc();
+                self.close_cancel(*closable, at).await?;
+                Ok(ActionStatus::Performed)
+            }
+            (Some(tx_cost), Some(closable)) => {
+                tracing::error!("Found pending cancel ready to close : {}, but not enought funds available({}) vs required({})", closable, balance, tx_cost);
+                Err(Error::NotEnoughtBalance)
+            }
+            (None, Some(closable)) => {
+                tracing::warn!(
+                    "Found pending cancel ready to close : {}, but tx closing is disabled",
+                    closable
+                );
+                Ok(ActionStatus::Skipped)
+            }
+            _ => Ok(ActionStatus::Skipped),
+        }
+    }
+
     pub async fn run(&self, sender: Sender<()>) -> Result<(), Error> {
         let mut stream = self.l2.finalized_header_stream().await?;
         loop {
@@ -95,100 +249,16 @@ where
                 return Err(Error::NotASequencer);
             }
 
-            if let Some(update) = self.find_malicious_update(at).await? {
-                tracing::warn!("{ALERT_ERROR} Found malicious update: {}", update);
-                if self.has_cancel_rights_available().await? {
-                    self.cancel_update(update)
-                        .await
-                        .inspect(|result| {
-                            if *result {
-                                tracing::warn!(
-                                    "{ALERT_ERROR} cancel malicious update has succeded"
-                                );
-                            } else {
-                                tracing::error!("{ALERT_ERROR} cancel malicious update has failed");
-                            }
-                        })
-                        .inspect_err(|_| {
-                            tracing::error!("{ALERT_ERROR} cancel malicious update has failed");
-                        })?;
-                    stream = Self::consume_stream_with_timeout(stream).await;
-                    continue;
-                } else {
-                    tracing::error!("{ALERT_ERROR} there are no cancel rights available to cancel malicous update");
-                }
-            }
-
-            if self.has_read_rights_available().await? && self.is_selected_sequencer().await? {
-                let dispute_period = self.l2.get_dispute_period(self.chain.clone(), at).await?;
-                let sequencers_count = self
-                    .l2
-                    .get_active_sequencers(self.chain.clone(), at)
-                    .await?
-                    .len() as u128;
-                let should_send_update = match (
-                    self.find_latest_correct_update_block_submission(at).await?,
-                    sequencers_count,
-                ) {
-                    (None, _) => {
-                        tracing::info!("there are no pending updates, proceeding...");
-                        true
-                    }
-                    (Some(_), ..=1) => {
-                        tracing::info!("there is just one sequencer, proceeding...");
-                        true
-                    }
-                    (Some(latest), _)
-                        if (number as u128).saturating_sub(latest)
-                            > (dispute_period / sequencers_count) =>
-                    {
-                        tracing::info!("previous update was long enough ago, proceeding...");
-                        true
-                    }
-                    _ => {
-                        tracing::info!(
-                            "previous pending update found, no need to provide update yet"
-                        );
-                        false
-                    }
-                };
-
-                if should_send_update {
-                    if let Some((update_hash, update)) = self.get_pending_update(block_hash).await?
-                    {
-                        tracing::info!("Found update to submit: {:?}", update);
-                        let result = self.l2.update_l1_from_l2(update, update_hash).await?;
-                        if !result {
-                            tracing::error!("{ALERT_WARNING} update submission failed");
-                            return Err(Error::UpdateSubmissionFailure);
-                        } else {
-                            tracing::info!("{ALERT_INFO} update submission succeded");
-                            stream = Self::consume_stream_with_timeout(stream).await;
-                        }
-                    }
-                }
-            }
-
-            let balance = self.get_my_balance().await?;
             match (
-                self.tx_cost,
-                self.find_closable_cancel_resolutions(at).await?.first(),
+                self.cancel_malicious_update_if_any(at).await?,
+                self.send_sequencer_update(number, at).await?,
+                self.retrieve_cancel_rights(at).await?,
             ) {
-                (Some(tx_cost), Some(closable)) if balance > tx_cost => {
-                    tracing::info!("Found pending cancel ready to close : {}", closable);
-                    self.close_cancel(*closable, at).await?;
+                (ActionStatus::Performed, _, _)
+                | (_, ActionStatus::Performed, _)
+                | (_, _, ActionStatus::Performed) => {
+                    // ignore blocks produced while action was beeing performed
                     stream = Self::consume_stream_with_timeout(stream).await;
-                    continue;
-                }
-                (Some(tx_cost), Some(closable)) => {
-                    tracing::error!("Found pending cancel ready to close : {}, but not enought funds available({}) vs required({})", closable, balance, tx_cost);
-                    return Err(Error::NotEnoughtBalance);
-                }
-                (None, Some(closable)) => {
-                    tracing::warn!(
-                        "Found pending cancel ready to close : {}, but tx closing is disabled",
-                        closable
-                    );
                     continue;
                 }
                 _ => {}
