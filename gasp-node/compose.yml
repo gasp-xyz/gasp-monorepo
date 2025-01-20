@@ -1,14 +1,14 @@
-# To get `mangatasolutions/rollup-node:local` image run next command from the root of the directory:
-# docker build -t mangatasolutions/rollup-node:local .
+# To get `gaspxyz/rollup-node:local` image run next command from the root of the directory:
+# docker build -t gaspxyz/rollup-node:local .
 #
 # Note: You can also skip the step and let the docker-compose to build the image for you,
 # but for some reason it keeps loosing cache, so next rebuilds would take longer, than they should.
-name: mangata-node
+name: gasp-node
 
 services:
   node-alice:
     build: .
-    image: ${NODE_IMAGE:-mangatasolutions/rollup-node:local}
+    image: ${NODE_IMAGE:-gaspxyz/rollup-node:local}
     command:
       - --alith
       - --chain=rollup-local-seq
@@ -25,7 +25,7 @@ services:
 
   node-bob:
     build: .
-    image: ${NODE_IMAGE:-mangatasolutions/rollup-node:local}
+    image: ${NODE_IMAGE:-gaspxyz/rollup-node:local}
     command:
       - --baltathar
       - --chain=rollup-local-seq

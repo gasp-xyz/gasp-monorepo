@@ -2,8 +2,6 @@ name: Pull Request
 on:
   pull_request:
     types: [labeled, opened, synchronize, unlabeled, closed]
-    paths-ignore:
-      - 'gasp-node/*'
 
 permissions:
   contents: write
@@ -24,32 +22,35 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
+      GIT_BRANCH: ${{ steps.set_vars.outputs.GIT_BRANCH }}
+      GIT_BRANCH_UNFORMATTED: ${{ steps.branch-name.outputs.current_branch }}
     steps:
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v8
       - name: Set global version
         id: set_vars
         run: |
           echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
-          echo "IMAGE TAG=${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "GIT_BRANCH=${{ steps.branch-name.outputs.current_branch }}" | sed "s@/@-@g" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
   
   build-and-test:
     needs: [init]
-    name: Build
+    name: Build 
     uses: ./.github/workflows/reusable-build-and-test.yml
     secrets: inherit
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-  
-  deploy-fungible:
-    name: Deploy fungible environment
-    if: |
-      (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == ':rocket: deploy_fungible') ||
-      (github.event_name == 'pull_request' && github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, ':rocket: deploy_fungible'))
-    needs: [init, build-and-test]
-    uses: ./.github/workflows/reusable-deploy.yml
+
+  build-and-test-gasp-node:
+    needs: [init]
+    name: Build gasp-node
+    uses: ./.github/workflows/reusable-gasp-node-build-and-test.yml
     secrets: inherit
     with:
-      env: fungible
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+      branch: ${{ needs.init.outputs.GIT_BRANCH }}
   
   run-e2e-test:
     name: Run e2e tests
@@ -62,6 +63,39 @@ jobs:
       checks: write
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
+  
+  gasp-node-generate-types:
+    name: Generate types
+    needs: [init, build-and-test-gasp-node]
+    uses: ./.github/workflows/reusable-gasp-node-generate-types.yml
+    secrets: inherit
+    with:
+      branch: ${{ needs.init.outputs.GIT_BRANCH_UNFORMATTED }}
+      globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
+
+  run-e2e-test-gasp-node:
+    name: Run e2e tests gasp-node
+    needs: [init, build-and-test-gasp-node, gasp-node-generate-types]
+    uses: ./.github/workflows/reusable-gasp-node-e2e-tests.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+    with:
+      globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
+
+  deploy-fungible:
+    name: Deploy fungible environment
+    if: |
+      (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == ':rocket: deploy_fungible') ||
+      (github.event_name == 'pull_request' && github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, ':rocket: deploy_fungible'))
+    needs: [init, build-and-test, build-and-test-gasp-node]
+    uses: ./.github/workflows/reusable-deploy.yml
+    secrets: inherit
+    with:
+      env: fungible
+      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
 
   clean-up-fungible:
     name: Delete fungible environment
@@ -76,7 +110,7 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Set up GKE credentials
-        uses: google-github-actions/get-gke-credentials@v0.8.2
+        uses: google-github-actions/get-gke-credentials@v2.3.0
         with:
           cluster_name: mangata-dev-alpha
           location: europe-west1
@@ -86,7 +120,7 @@ jobs:
       
       - name: Delete GitHub Deployment environment
         if: always()
-        uses: bobheadxi/deployments@v1.4.0
+        uses: bobheadxi/deployments@v1.5.0
         with:
           step: deactivate-env
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-name: Reusable e2e tests workflow
+name: '[gasp-node] Reusable e2e tests workflow'
 
 on:
   workflow_dispatch:
@@ -9,17 +9,17 @@ on:
         required: false
         default: "main"
       nodeDockerImage:
-        description: "Name of the parachain docker reference"
+        description: "gasp-node Docker image reference"
         type: string
         required: false
-        default: "mangatasolutions/rollup-node:eth-rollup-develop"
+        default: "gaspxyz/rollup-node:main"
       skipBuild:
         description: "Skip build phase"
         type: string
         required: false
         default: 'false'
       globalVersion:
-        description: "Set Mangata node version."
+        description: "Set gasp-node version."
         type: string
         required: true
       mangataTypesVersion:
@@ -35,17 +35,17 @@ on:
         required: false
         default: "main"
       nodeDockerImage:
-        description: "Name of the parachain docker reference"
+        description: "gasp-node Docker image reference"
         type: string
         required: false
-        default: "mangatasolutions/rollup-node:eth-rollup-develop"
+        default: "gaspxyz/rollup-node:main"
       skipBuild:
         description: "Skip build phase"
         type: string
         required: false
         default: 'false'
       globalVersion:
-        description: "Set Mangata node version."
+        description: "Set gasp-node version."
         type: string
         required: true
 
@@ -161,11 +161,11 @@ jobs:
             fast: true
             unlocked: false
 
-
-
-
     runs-on: [e2e-gke]
     timeout-minutes: 180
+    defaults:
+      run:
+        working-directory: gasp-node
     env:
       API_URL: "ws://127.0.0.1:9946"
       TEST_PALLET_ADDRESS: ${{ secrets.E2E_TEST_PALLET_ADDRESS }}
@@ -173,9 +173,8 @@ jobs:
       E2E_XYK_PALLET_ADDRESS: ${{ secrets.E2E_XYK_PALLET_ADDRESS }}
       E2E_TREASURY_BURN_PALLET_ADDRESS: ${{ secrets.E2E_TREASURY_BURN_PALLET_ADDRESS }}
       TEST_SUDO_NAME: "//Alice"
-      MANGATA_NODE_VERSION: ${{ inputs.globalVersion }}
       E2EBRANCHNAME: "main"
-      NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImage || format('mangatasolutions/rollup-node:{0}', inputs.globalVersion) }}
+      NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImage || format('gaspxyz/rollup-node:{0}', inputs.globalVersion) }}
     steps:
       - uses: actions/checkout@v4
       - name: Adapt if fast runtime
@@ -186,23 +185,23 @@ jobs:
         run: echo "NODE_DOCKER_IMAGE=${{ env.NODE_DOCKER_IMAGE }}-unlocked" >> $GITHUB_ENV
 
 
-      - name: Download node Docker image
+      - name: Download gasp-node Docker image
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-build') && inputs.skipBuild != 'true' }}
         run: docker pull ${{ env.NODE_DOCKER_IMAGE }}
 
       - name: E2E- Get branch name
         id: branch-name
-        uses: tj-actions/branch-names@v7.0.5
+        uses: tj-actions/branch-names@v8
 
       - name: Current branch name for generating types
         run: |
-          echo "MANGATA_TYPES_VERSION=${{ steps.branch-name.outputs.current_branch }}" | sed -E 's@[/\.]@-@g; s@_@-@g' >> $GITHUB_ENV
+          echo "GASP_TYPES_VERSION=${{ steps.branch-name.outputs.current_branch }}" | sed -E 's@[/\.]@-@g; s@_@-@g' >> $GITHUB_ENV
 
       - name: E2E- Calculate if run e2e feature branch or main.
         run: |
           echo DEFAULT: E2E test will run with: $E2EBRANCHNAME
           echo "Running on: ${{ steps.branch-name.outputs.current_branch }}"
-          if [ -n "$(git ls-remote --heads https://github.com/mangata-finance/mangata-e2e.git ${{ steps.branch-name.outputs.current_branch }} --force --quiet)" ]; then echo "E2EBRANCHNAME=${{ steps.branch-name.outputs.current_branch }}" >> $GITHUB_ENV; echo "MATCH - OK" ; elif [ -n "$(git ls-remote --heads https://github.com/mangata-finance/mangata-e2e.git ${{ github.base_ref }} --force --quiet)" ]; then echo "E2EBRANCHNAME=${{ github.base_ref }}" >> $GITHUB_ENV; echo "MATCH - OK" ;  fi
+          if [ -n "$(git ls-remote --heads https://github.com/gasp-xyz/gasp-e2e.git ${{ steps.branch-name.outputs.current_branch }} --force --quiet)" ]; then echo "E2EBRANCHNAME=${{ steps.branch-name.outputs.current_branch }}" >> $GITHUB_ENV; echo "MATCH - OK" ; elif [ -n "$(git ls-remote --heads https://github.com/gasp-xyz/gasp-e2e.git ${{ github.base_ref }} --force --quiet)" ]; then echo "E2EBRANCHNAME=${{ github.base_ref }}" >> $GITHUB_ENV; echo "MATCH - OK" ;  fi
 
       - name: Decide if main - branch or parameter
         # if we have something in e2eBranch - override E2EBranchName, else -> E2EBRANCHNAME , that
@@ -212,7 +211,7 @@ jobs:
       - name: Checkout tests
         uses: actions/checkout@v4
         with:
-          repository: mangata-finance/mangata-e2e
+          repository: gasp-xyz/gasp-e2e
           ref: "${{ env.E2EBRANCHNAME }}"
           path: e2eTests
 
@@ -229,7 +228,7 @@ jobs:
           if [[ -n "${{ github.event.inputs.mangataTypesVersion }}" ]]; then
             yarn add @mangata-finance/types@${{ github.event.inputs.mangataTypesVersion }}
           else
-            yarn add @mangata-finance/types@${{ env.MANGATA_TYPES_VERSION }}
+            yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
           fi
 
       - name: Run the Node
@@ -252,9 +251,8 @@ jobs:
         env:
           NODE_OPTIONS: --max_old_space_size=12288
 
-
       - name: Test Report
-        uses: dorny/test-reporter@v1.7.0
+        uses: dorny/test-reporter@v1.9.1
         continue-on-error: true
         if: success() || failure() # run this step even if previous step failed
         with:
@@ -274,51 +272,6 @@ jobs:
               --instance https://mangata-finance.testmo.net \
               --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
               --results e2eTests/reports/*.xml
-
-      - name: collect_docker_logs
-        if: failure()
-        uses: jwalton/gh-docker-logs@v2.2.1
-        with:
-          dest: "./logs"
-
-      - name: Prepare backup snapshots on workflow failure
-        if: failure()
-        env:
-          OUTPUT_DIR: ./
-        run: |
-          # Set MATRIX_COMMAND_PATH to be used as a directory name to store specifc test run snapshots
-          echo "MATRIX_COMMAND_PATH=$(echo ${{ matrix.command }} | sed 's/[^a-zA-Z0-9]/-/g')" >> $GITHUB_ENV
-
-          # Archive logs
-          tar cvzf ${OUTPUT_DIR}/logs.tgz ./logs
-
-          # Generate image snapshots
-          docker commit  $(docker ps | grep mangata-node-node-alice-1 | awk '{print $1}') mangata_test_run/mangata_alice_1
-          docker save  --output=${OUTPUT_DIR}/mangata_alice_1.tar mangata_test_run/mangata_alice_1
-          docker commit  $(docker ps | grep mangata-node-node-bob-1 | awk '{print $1}') mangata_test_run/mangata_bob_1
-          docker save  --output=${OUTPUT_DIR}/mangata_bob_1.tar mangata_test_run/mangata_bob_1
-
-          # Generate volume snapshots
-          docker run -v  data-alith:/volume --rm --log-driver none loomchild/volume-backup backup > ${OUTPUT_DIR}/mangata_alice_1_volume.tar.bz2
-          docker run -v  data-baltathar:/volume --rm --log-driver none loomchild/volume-backup backup > ${OUTPUT_DIR}/mangata_bob_1_volume.tar.bz2
-
-      - uses: google-github-actions/auth@v1
-        if: failure()
-        with:
-          workload_identity_provider: '${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}'
-          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}'
-
-      - name: Upload node storage data to GCP bucket
-        if: failure()
-        uses: google-github-actions/upload-cloud-storage@v1.0.3
-        with:
-          process_gcloudignore: false
-          destination: mangata-node-ci-cache/${{ github.sha }}/${{ env.MATRIX_COMMAND_PATH }}
-
-      - name: Add GCP bucket URL link for stored node data on job failure
-        if: failure()
-        run: echo '[GCP Bucket link](https://console.cloud.google.com/storage/browser/mangata-node-ci-cache/${{ github.sha }}/${{ env.MATRIX_COMMAND_PATH }})' >> $GITHUB_STEP_SUMMARY
-
 
   test-complete:
     needs: [setup-report, e2e-test-matrix]
@@ -350,4 +303,4 @@ jobs:
           SLACK_TITLE: 'bnb e2e test execution - NOOK'
           SLACK_COLOR: "#ff0011"
           SLACK_MESSAGE: 'Test failures [ ${{ env.E2EBRANCHNAME }} - ${{ env.NODE_DOCKER_IMAGE }} ] testmo report: https://mangata-finance.testmo.net/automation/runs/view/${{needs.setup-report.outputs.testmo-run-id}}'
-          GITHUB_REF: 'https://mangata-finance.github.io/mangata-node/${{ github.run_number }}'
+          GITHUB_REF: 'https://gasp-xyz.github.io/gasp-monorepo/${{ github.run_number }}'

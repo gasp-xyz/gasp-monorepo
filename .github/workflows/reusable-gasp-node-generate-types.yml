@@ -1,4 +1,4 @@
-name: Reusable generate types workflow
+name: '[gasp-node] Reusable generate types workflow'
 
 on:
   workflow_dispatch:
@@ -7,13 +7,13 @@ on:
         description: "Branch to create in gasp-dev-kit"
         type: string
         required: true
-      parachainDocker:
-        description: "Name of the parachain docker reference"
+      nodeDockerImage:
+        description: "Name of the gasp-node docker reference"
         type: string
         required: false
-        default: "mangatasolutions/rollup-node:develop"
+        default: "gaspxyz/rollup-node:main"
       globalVersion:
-        description: "Set Mangata node version."
+        description: "Set gasp-node version."
         type: string
         required: true
   workflow_call:
@@ -22,13 +22,13 @@ on:
         description: "Branch to create in gasp-dev-kit"
         type: string
         required: true
-      parachainDocker:
-        description: "Name of the parachain docker reference"
+      nodeDockerImage:
+        description: "Name of the gasp-node docker reference"
         type: string
         required: false
-        default: "mangatasolutions/rollup-node:latest"
+        default: "gaspxyz/rollup-node:main"
       globalVersion:
-        description: "Set Mangata node version."
+        description: "Set gasp-node version."
         type: string
         required: true
 
@@ -39,11 +39,10 @@ permissions:
   checks: write
 
 jobs:
-  generate-mangata-types:
+  generate-gasp-node-types:
     runs-on: ubuntu-latest
     env:
-      MANGATA_NODE_VERSION: ${{ inputs.globalVersion }}
-      PARACHAIN_DOCKER_IMAGE: ${{ inputs.parachainDocker || format('mangatasolutions/rollup-node:{0}', inputs.globalVersion) }}
+      NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImage || format('gaspxyz/rollup-node:{0}', inputs.globalVersion) }}
       BRANCH: ${{ inputs.branch }}
     steps:
       - uses: actions/checkout@v4
@@ -51,7 +50,7 @@ jobs:
       - name: Create branch ${{ env.BRANCH }} in gasp-dev-kit
         uses: GuillaumeFalourd/create-other-repo-branch-action@v1.5
         with:
-          repository_owner: mangata-finance
+          repository_owner: gasp-xyz
           repository_name: gasp-dev-kit
           new_branch_name: ${{ env.BRANCH }}
           new_branch_ref: eth-rollup-develop
@@ -63,6 +62,6 @@ jobs:
         with:
           ref: ${{ env.BRANCH }}
           workflow: pr-automation-types-rollup-solochain.yml
-          repo: mangata-finance/gasp-dev-kit
+          repo: gasp-xyz/gasp-dev-kit
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-          inputs: '{"parachainDocker": "${{ env.PARACHAIN_DOCKER_IMAGE }}", "branch": "${{ env.BRANCH }}"}'
+          inputs: '{"parachainDocker": "${{ env.NODE_DOCKER_IMAGE }}", "branch": "${{ env.BRANCH }}"}'

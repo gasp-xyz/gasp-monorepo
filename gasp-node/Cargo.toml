@@ -1,7 +1,7 @@
 [workspace.package]
-authors = ["Mangata Team"]
+authors = ["Gasp Team"]
 edition = "2018"
-repository = "https://github.com/gasp-xyz/mangata-node.git"
+repository = "https://github.com/gasp-xyz/gasp-monorepo.git"
 homepage = "https://gasp.xyz"
 
 [profile.dev]
