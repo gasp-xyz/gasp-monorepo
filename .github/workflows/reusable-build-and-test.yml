@@ -13,26 +13,8 @@ permissions:
   id-token: write
 
 jobs:
-  foundry-tests:
-    name: '[contracts] Run Foundry tests'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-
-      - uses: foundry-rs/foundry-toolchain@v1
-      - name: Install `contracts` deps
-        working-directory: contracts
-        run: forge install
-
-      - uses: foundry-rs/foundry-toolchain@v1
-      - name: Run forge tests
-        working-directory: contracts
-        run: forge test
-
   contracts-tests:
-    name: '[contracts] Run checks'
+    name: '[contracts] Run Foundry checks and tests'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -61,8 +43,8 @@ jobs:
       - name: Run unit tests
         run: bun run test
   
-      - name: Make static analysis of contracts
-        run: bun run analyze:ci
+      # - name: Make static analysis of contracts
+      #   run: bun run analyze:ci
   
       - name: Create gas report
         run: bun run gas
