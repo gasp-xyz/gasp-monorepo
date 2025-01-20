@@ -52,7 +52,7 @@ jobs:
             runner: compile-gke-arm
     runs-on: ${{ matrix.platform.runner }}
     env:
-      JOB_CACHE_PREFIX: docker-buildx-cache-${{ matrix.platform.name }}-${{ inputs.cache-version }}
+      JOB_CACHE_PREFIX: gasp-node-buildx-cache-${{ matrix.platform.name }}-${{ inputs.cache-version }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
     steps:
       - uses: actions/checkout@v4
@@ -101,6 +101,7 @@ jobs:
         with:
           platforms: linux/${{ matrix.platform.name }}
           labels: ${{ steps.meta.outputs.labels }}
+          context: ./gasp-node
           outputs: type=image,name=${{ env.NODE_DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
@@ -246,6 +247,7 @@ jobs:
           build-args: "ENABLE_FAST_RUNTIME=true"
           platforms: linux/${{ matrix.platform.name }}
           labels: ${{ steps.meta.outputs.labels }}
+          context: ./gasp-node
           outputs: type=image,name=${{ env.NODE_DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
@@ -390,6 +392,7 @@ jobs:
           build-args: "ENABLE_UNLOCKED_RUNTIME=true"
           platforms: linux/${{ matrix.platform.name }}
           labels: ${{ steps.meta.outputs.labels }}
+          context: ./gasp-node
           outputs: type=image,name=${{ env.NODE_DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
   
       - name: Export digest
