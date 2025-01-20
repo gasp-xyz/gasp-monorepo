@@ -65,6 +65,9 @@ pub struct EcdsaKey {
     #[arg(long, env)]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub ecdsa_ephemeral_key: bool,
+    #[arg(long, env)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ecdsa_address: Option<String>,
 }
 
 #[derive(Args, Serialize, Debug)]

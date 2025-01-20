@@ -9,7 +9,7 @@ name = "sequencer"
 [dependencies]
 subxt = "0.38.0"
 subxt-signer = "0.38.0"
-tokio = { version = "1.41", features = ["macros", "time", "rt-multi-thread"] }
+tokio = { version = "1.41", features = ["macros", "time", "rt-multi-thread", "net"] }
 parity-scale-codec = { version = "3.6.1",  features = ["bit-vec", "derive"] }
 scale-info = { version = "2.10.0", features = ["bit-vec", "derive", "serde"] }
 serde = { version = "1.0.197" ,features = ["alloc", "derive"]}
@@ -26,6 +26,10 @@ tracing-log = "0.2.0"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 tracing-tree = "0.4.0"
 envconfig = "0.11.0"
+lru = "0.12.5"
+prometheus = "0.13.4"
+lazy_static = "1.4.0"
+warp = "0.3.7"
 
 bindings = { workspace = true }
 

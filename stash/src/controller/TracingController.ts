@@ -1,8 +1,7 @@
 import { Request, Response } from 'express'
 import {
   findTransactionsByAddressAndStatus,
-  getStatusByTxHashOrEntityId,
-  getTransactionByEntityId,
+  getByTxHashOrEntityId,
   getTransactionsByAddress,
   startTracingTransaction,
 } from '../service/TracingService.js'
@@ -10,7 +9,6 @@ import {
   getAllTransactionsByAddressAndStatusSchema,
   getAllTransactionsByAddressSchema,
   getStatusByTxHashOrEntityIdSchema,
-  getTransactionByEntityIdSchema,
   startTracingSchema,
 } from '../schema/TracingSchema.js'
 import * as errorHandler from '../error/Handler.js'
@@ -71,14 +69,14 @@ export const startTracing = async (req: Request, res: Response) => {
   }
 }
 
-export const getTransactionStatusByTxHashOrEntityId = async (
+export const getTransactionByTxHashOrEntityId = async (
   req: Request,
   res: Response
 ) => {
   /*
    #swagger.tags = ['Tracing']
-   #swagger.summary = 'Get transaction status by txHash or entityId.'
-   #swagger.description = "Get the status of a transaction by providing the transaction hash or entity ID and type of the transaction."
+   #swagger.summary = 'Get a transaction by entityId or transaction hash.'
+   #swagger.description = "Get a transaction by providing the entity ID  or transaction hash and type of a transaction."
    #swagger.parameters['txHashOrEntityId'] = {
      in: 'path',
      description: 'Transaction hash or entity ID',
@@ -93,10 +91,10 @@ export const getTransactionStatusByTxHashOrEntityId = async (
     enum: ['deposit', 'withdrawal']
 }
    #swagger.responses[200] = {
-      description: 'Successful response with transaction status'
+      description: 'Successful response with transaction details'
    }
    #swagger.responses[404] = {
-      description: 'Transaction not found'
+      description: 'Transaction not found for this entityId or transaction hash'
    }
    #swagger.responses[500] = {
       description: 'Internal Server Error'
@@ -108,11 +106,16 @@ export const getTransactionStatusByTxHashOrEntityId = async (
       txHashOrEntityId,
       type,
     })
-    const status = await getStatusByTxHashOrEntityId(txHashOrEntityId, type)
-    if (status) {
-      res.status(200).send({ status })
+    const transaction = await getByTxHashOrEntityId(
+      txHashOrEntityId,
+      type
+    )
+    if (transaction && Object.keys(transaction).length > 0) {
+      res.status(200).send({ transaction })
     } else {
-      res.status(404).send({ error: 'Transaction not found' })
+      res.status(404).send({
+        error: 'Transaction not found for this entityId or transaction hash',
+      })
     }
   } catch (e) {
     await errorHandler.handle(res, e)
@@ -214,51 +217,6 @@ export const getAllTransactionsByAddressAndStatus = async (
       res.status(200).send({ transactions })
     } else {
       res.status(404).send({ error: 'No transactions found for this address' })
-    }
-  } catch (e) {
-    await errorHandler.handle(res, e)
-  }
-}
-
-export const getATransactionByEntityId = async (
-  req: Request,
-  res: Response
-) => {
-  /*
-   #swagger.tags = ['Tracing']
-   #swagger.summary = 'Get a transaction by entityId.'
-   #swagger.description = "Get a specific transaction by providing the entity ID and type of a transaction."
-   #swagger.parameters['entityId'] = {
-     in: 'path',
-     description: 'Entity ID of the transaction',
-     required: true,
-     type: 'string'
-   }
-   #swagger.parameters['type'] = {
-    in: 'path',
-    description: 'Type of the transaction',
-    required: true,
-    type: 'string',
-    enum: ['deposit', 'withdrawal']
-}
-   #swagger.responses[200] = {
-      description: 'Successful response with transaction details'
-   }
-   #swagger.responses[404] = {
-      description: 'Transaction not found for this entityId'
-   }
-   #swagger.responses[500] = {
-      description: 'Internal Server Error'
-   }
-  */
-  try {
-    const { entityId, type } = req.params
-    getTransactionByEntityIdSchema.validateSync({ entityId, type })
-    const transaction = await getTransactionByEntityId(entityId, type)
-    if (transaction) {
-      res.status(200).send({ transaction })
-    } else {
-      res.status(404).send({ error: 'Transaction not found for this entityId' })
     }
   } catch (e) {
     await errorHandler.handle(res, e)

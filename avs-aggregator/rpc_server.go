@@ -139,6 +139,13 @@ type SignedTaskResponse struct {
 func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskResponse, reply *bool) error {
 	agg.logger.Info("Received signed task response", "response", signedTaskResponse, "operatorId", signedTaskResponse.OperatorId.LogValue())
 
+	if len(signedTaskResponse.OpTaskResponse) < 2 ||
+		len(signedTaskResponse.RdTaskResponse) < 2 ||
+		signedTaskResponse.BlsSignature.G1Point == nil {
+		agg.logger.Error("Invalid task response")
+		return BadTaskResponseError500
+	}
+	
 	op_task_response_bytes, err := hex.DecodeString(signedTaskResponse.OpTaskResponse[2:])
 	if err != nil {
 		agg.logger.Error("Failed to get op_task_response_bytes", "err", err)
