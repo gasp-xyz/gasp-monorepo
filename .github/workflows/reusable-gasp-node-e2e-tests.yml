@@ -50,9 +50,8 @@ on:
         required: true
 
 permissions:
-  contents: write
-  id-token: write
-  deployments: write
+  contents: read
+  actions: read
   checks: write
 
 jobs:
