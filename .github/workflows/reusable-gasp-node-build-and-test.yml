@@ -42,7 +42,7 @@ defaults:
 jobs:
   # Reference implementation source: https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
   build-node-image:
-    name: Build Docker image
+    name: '[gasp-node] Build Docker image'
     strategy:
       matrix:
         platform:
@@ -141,7 +141,7 @@ jobs:
             echo "Upload completed in $SECONDS seconds"
   
   create-docker-image-manifest-and-export-wasms:
-    name: Generate multiplatform Docker image manifest
+    name: '[gasp-node] Generate multiplatform Docker image manifest'
     needs: [build-node-image]
     runs-on: ubuntu-latest
     steps:
@@ -186,7 +186,7 @@ jobs:
           path: ./rollup_runtime-${{ inputs.version }}.compact.compressed.wasm
     
   build-node-image-with-fast-runtime:
-    name: Build fast runtime Docker image
+    name: '[gasp-node] Build fast runtime Docker image'
     strategy:
       matrix:
         platform:
@@ -286,7 +286,7 @@ jobs:
             echo "Upload completed in $SECONDS seconds"
 
   create-fast-docker-image-manifest-and-export-wasms:
-    name: Generate multiplatform Docker image manifest for fast runtime image
+    name: '[gasp-node] Generate multiplatform Docker image manifest for fast runtime image'
     needs: [build-node-image-with-fast-runtime]
     runs-on: ubuntu-latest
     steps:
@@ -330,7 +330,7 @@ jobs:
           path: ./rollup_runtime-${{ inputs.version }}-fast.compact.compressed.wasm
   
   build-node-image-with-unlocked-runtime:
-    name: Build unlocked runtime Docker image
+    name: '[gasp-node] Build unlocked runtime Docker image'
     strategy:
       matrix:
         platform:
@@ -430,7 +430,7 @@ jobs:
             echo "Upload completed in $SECONDS seconds"
 
   create-unlocked-runtime-docker-image-manifest-and-export-wasms:
-    name: Generate multiplatform Docker image manifest for unlocked runtime image
+    name: '[gasp-node] Generate multiplatform Docker image manifest for unlocked runtime image'
     needs: [build-node-image-with-unlocked-runtime]
     runs-on: ubuntu-latest
     steps:
@@ -474,7 +474,7 @@ jobs:
           path: ./rollup_runtime-${{ inputs.version }}-unlocked.compact.compressed.wasm            
 
   rustfmt-check:
-    name: Formatting check
+    name: '[gasp-node] Formatting check'
     runs-on: ubuntu-latest
     container:
       image: ${{ inputs.builder_image }}
@@ -484,7 +484,7 @@ jobs:
         run: cargo fmt --all -- --check
 
   clippy-check:
-    name: Clippy check
+    name: '[gasp-node] Clippy check'
     runs-on: ubuntu-latest
     container:
       image: ${{ inputs.builder_image }}
@@ -552,7 +552,7 @@ jobs:
             echo "Upload completed in $SECONDS seconds"
 
   unit-test:
-    name: Unit tests
+    name: '[gasp-node] Unit tests'
     runs-on: [compile-gke]
     container:
       image: ${{ inputs.builder_image }}
@@ -625,7 +625,7 @@ jobs:
         run: chown -R 1100:1100 $GITHUB_WORKSPACE
 
   coverage-report:
-    name: Coverage report
+    name: '[gasp-node] Coverage report'
     runs-on: [compile-gke]
     container:
       image: ${{ inputs.builder_image }}
@@ -706,7 +706,7 @@ jobs:
         run: chown -R 1100:1100 $GITHUB_WORKSPACE
 
   run-benchmarks-tests:
-    name: Run benchmark tests
+    name: '[gasp-node] Run benchmark tests'
     runs-on: ubuntu-latest
     container:
       image: ${{ inputs.builder_image }}
@@ -779,7 +779,7 @@ jobs:
             echo "Upload completed in $SECONDS seconds"
 
   run-benchmarks:
-    name: Run runtime benchmarks
+    name: '[gasp-node] Run runtime benchmarks'
     # `performance` self-hosted runners have 8 cores and 16GB of RAM
     runs-on: [performance-gke]
     container:
