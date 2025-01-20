@@ -1,4 +1,4 @@
-name: stash service workflow
+name: '[stash] Deploy `stash` to Google App Engine'
 on:
   workflow_dispatch:
     inputs:
@@ -11,7 +11,6 @@ on:
           - frontend
           - holesky
           - prod
-  pull_request:
   push:
     branches:
       - main
@@ -54,7 +53,6 @@ jobs:
     name: Deploy `stash` to `frontend` environment
     if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'frontend')
     runs-on: ubuntu-latest
-    needs: build
     environment: stash-frontend
     defaults:
       run:
