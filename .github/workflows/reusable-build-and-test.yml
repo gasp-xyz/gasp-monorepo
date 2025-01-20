@@ -32,7 +32,7 @@ jobs:
         run: forge test
 
   contracts-tests:
-    name: '[contracts] Run tests'
+    name: '[contracts] Run checks'
     runs-on: ubuntu-latest
     defaults:
       run:
