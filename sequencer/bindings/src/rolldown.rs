@@ -16551,9 +16551,9 @@ pub mod Rolldown {
     /// Instantiation and getters/setters.
     #[automatically_derived]
     impl<
-            T: alloy_contract::private::Transport + ::core::clone::Clone,
-            P: alloy_contract::private::Provider<T, N>,
-            N: alloy_contract::private::Network,
+            T: alloy::contract::private::Transport + ::core::clone::Clone,
+            P: alloy::contract::private::Provider<T, N>,
+            N: alloy::contract::private::Network,
         > RolldownInstance<T, P, N>
     {
         /**Creates a new wrapper around an on-chain [`Rolldown`](self) contract instance.
