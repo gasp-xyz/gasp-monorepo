@@ -37,7 +37,7 @@ jobs:
 
   build-and-test:
     needs: [init]
-    name: Build
+    name: Build AVS services
     uses: ./.github/workflows/reusable-build-and-test.yml
     secrets: inherit
     with:
