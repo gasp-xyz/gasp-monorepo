@@ -1,3 +1,0 @@
-enableServiceMonitorCollectors: true
-enablePodMonitorCollectors: true
-storageSize: 40Gi
