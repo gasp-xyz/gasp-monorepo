@@ -32,6 +32,16 @@ on:
         required: false
         type: boolean
         default: false
+      gasp_node_fast_runtime:
+        description: Use `rollup-node` with fast runtime when building `gasp-node` image
+        required: false
+        type: boolean
+        default: false
+      gasp_node_unlocked_runtime:
+        description: Use `rollup-node` with unlocked runtime when building `gasp-node` image
+        required: false
+        type: boolean
+        default: false
       cargo_tests_enabled:
         description: Run cargo test
         required: false
@@ -49,6 +59,7 @@ on:
 
 env:
   SKIP_WASM_BUILD: 1
+  IMAGE_PREFIX: ${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}
 
 jobs:
   rustfmt-check:
@@ -100,7 +111,7 @@ jobs:
           fi
 
   docker-image-build:
-    name: "[${{ inputs.service_folder }}] [${{ matrix.platform.name }}] image${{ inputs.gasp_avs_fast_runtime && ' with fast runtime' || '' }}"
+    name: "[${{ inputs.service_folder }}] [${{ matrix.platform.name }}] image${{ inputs.gasp_node_fast_runtime && ' with fast runtime' || inputs.gasp_avs_fast_runtime && ' with fast runtime' || inputs.gasp_node_unlocked_runtime && ' with unlocked runtime' || '' }}"
     strategy:
       matrix:
         platform:
@@ -110,11 +121,11 @@ jobs:
             runner: compile-gke-arm
     runs-on: ${{ matrix.platform.runner }}
     env:
-      JOB_CACHE_PREFIX: ${{ inputs.service_folder }}-${{ matrix.platform.name }}${{ inputs.gasp_avs_fast_runtime && 'fast' || 'regular' }}-${{ inputs.cache-version }}
+      JOB_CACHE_PREFIX: ${{ inputs.service_folder }}-${{ matrix.platform.name }}${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}-${{ inputs.cache-version }}
       SERVICE_FOLDER: ${{ inputs.service_folder }}
       DOCKER_IMAGE_REPOSITORY: ${{ inputs.docker_image_repository }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
-      IMAGE_TAG: ${{ inputs.version }}${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
+      IMAGE_TAG: ${{ inputs.version }}${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}
     steps:
       - uses: actions/checkout@v4
     
@@ -165,7 +176,10 @@ jobs:
           platforms: linux/${{ matrix.platform.name }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
-          build-args: ROLLUP_NODE_VERSION=eth-rollup-develop${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
+          build-args: |
+            ROLLUP_NODE_VERSION=eth-rollup-develop${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
+            ${{ inputs.gasp_node_fast_runtime && 'ENABLE_FAST_RUNTIME=true' || '' }}
+            ${{ inputs.gasp_node_unlocked_runtime && 'ENABLE_UNLOCKED_RUNTIME=true' || '' }}
       
       - name: Export digest
         run: |
@@ -176,7 +190,7 @@ jobs:
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.service_folder }}-${{ inputs.gasp_avs_fast_runtime && 'fast' || 'regular' }}-linux-${{ matrix.platform.name }}
+          name: ${{ inputs.service_folder }}-${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}-linux-${{ matrix.platform.name }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -210,13 +224,13 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       DOCKER_IMAGE_REPOSITORY: ${{ inputs.docker_image_repository }}
-      IMAGE_TAG: ${{ inputs.version }}${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
+      IMAGE_TAG: ${{ inputs.version }}${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
           path: /tmp/digests
-          pattern: ${{ inputs.service_folder }}-${{ inputs.gasp_avs_fast_runtime && 'fast' || 'regular' }}-*
+          pattern: ${{ inputs.service_folder }}-${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}-*
           merge-multiple: true
       
       - uses: docker/setup-buildx-action@v3
