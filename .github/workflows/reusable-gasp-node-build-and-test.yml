@@ -30,6 +30,8 @@ on:
 
 permissions:
   contents: read
+  actions: read
+  checks: write
   id-token: write
 
 env:
@@ -890,3 +892,15 @@ jobs:
       - name: Fix permissions on self-hosted runner
         if: always()
         run: chown -R 1100:1100 $GITHUB_WORKSPACE
+
+  run-e2e-test-gasp-node:
+    name: '[gasp-node] Run e2e tests'
+    needs: [create-docker-image-manifest-and-export-wasms, create-fast-docker-image-manifest-and-export-wasms, create-unlocked-runtime-docker-image-manifest-and-export-wasms]
+    uses: ./.github/workflows/reusable-gasp-node-e2e-tests.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+    with:
+      globalVersion: ${{ inputs.version }}
