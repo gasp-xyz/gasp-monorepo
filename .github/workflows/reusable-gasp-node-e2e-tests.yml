@@ -233,6 +233,7 @@ jobs:
           fi
 
       - name: Run the Node
+        working-directory: gasp-node
         env:
           NODE_IMAGE: ${{ env.NODE_DOCKER_IMAGE }}
         run: |
