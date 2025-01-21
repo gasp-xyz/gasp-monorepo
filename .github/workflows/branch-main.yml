@@ -48,6 +48,11 @@ jobs:
     name: Build gasp-node
     uses: ./.github/workflows/reusable-gasp-node-build-and-test.yml
     secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+      id-token: write
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
       branch: ${{ needs.init.outputs.GIT_BRANCH }}
