@@ -45,15 +45,14 @@ where
     N: Network,
 {
     pub fn from_provider(address: [u8; 20], provider: P) -> Self {
-        provider.wallet().default_signer_address();
+        let account = provider.wallet().default_signer_address();
 
         Self {
             contract_handle: bindings::rolldown::Rolldown::RolldownInstance::new(
                 address.into(),
                 provider,
             ),
-            // account_address: account.into(),
-            account_address: [0u8; 20],
+            account_address: account.into(),
         }
     }
 
