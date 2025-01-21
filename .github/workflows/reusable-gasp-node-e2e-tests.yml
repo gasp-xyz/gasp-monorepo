@@ -7,7 +7,7 @@ on:
         description: "Name of the e2e target branch"
         type: string
         required: false
-        default: "main"
+        default: "eth-rollup-develop"
       nodeDockerImage:
         description: "gasp-node Docker image reference"
         type: string
@@ -34,7 +34,7 @@ on:
         description: "Name of the e2e target branch"
         type: string
         required: false
-        default: "main"
+        default: "eth-rollup-develop"
       nodeDockerImage:
         description: "gasp-node Docker image reference"
         type: string
@@ -174,7 +174,7 @@ jobs:
       E2E_XYK_PALLET_ADDRESS: ${{ secrets.E2E_XYK_PALLET_ADDRESS }}
       E2E_TREASURY_BURN_PALLET_ADDRESS: ${{ secrets.E2E_TREASURY_BURN_PALLET_ADDRESS }}
       TEST_SUDO_NAME: "//Alice"
-      E2EBRANCHNAME: "main"
+      E2EBRANCHNAME: "eth-rollup-develop"
       NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImage != '' && inputs.nodeDockerImage || format('gaspxyz/rollup-node:{0}', inputs.globalVersion) }}
     steps:
       - uses: actions/checkout@v4
