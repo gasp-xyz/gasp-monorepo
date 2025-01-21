@@ -173,11 +173,6 @@ jobs:
         working-directory: gasp-node
     env:
       API_URL: "ws://127.0.0.1:9946"
-      TEST_PALLET_ADDRESS: ${{ secrets.E2E_TEST_PALLET_ADDRESS }}
-      E2E_TREASURY_PALLET_ADDRESS: ${{ secrets.E2E_TREASURY_PALLET_ADDRESS }}
-      E2E_XYK_PALLET_ADDRESS: ${{ secrets.E2E_XYK_PALLET_ADDRESS }}
-      E2E_TREASURY_BURN_PALLET_ADDRESS: ${{ secrets.E2E_TREASURY_BURN_PALLET_ADDRESS }}
-      TEST_SUDO_NAME: "//Alice"
       # TODO: change to default: "eth-rollup-develop" before merging
       # E2EBRANCHNAME: "eth-rollup-develop"
       E2EBRANCHNAME: "feature/merge-node"
