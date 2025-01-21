@@ -25,7 +25,7 @@ permissions:
 jobs:
   build:
     name: Build Project
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: stash
@@ -52,7 +52,7 @@ jobs:
   deploy-frontend:
     name: Deploy `stash` to `frontend` environment
     if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'frontend')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: "stash-${{ github.event.inputs.environment}}"
     defaults:
       run:
@@ -80,7 +80,7 @@ jobs:
   deploy-holesky:
     name: Deploy `stash` to `holesky` environment
     if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'holesky') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     defaults:
       run:
@@ -109,7 +109,7 @@ jobs:
   deploy-prod:
     name: Deploy `stash` to `prod` environment
     if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     defaults:
       run:

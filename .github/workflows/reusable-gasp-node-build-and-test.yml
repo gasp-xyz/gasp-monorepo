@@ -144,7 +144,7 @@ jobs:
   create-docker-image-manifest-and-export-wasms:
     name: '[gasp-node] Generate multiplatform Docker image manifest'
     needs: [build-node-image]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Download digests
@@ -291,7 +291,7 @@ jobs:
   create-fast-docker-image-manifest-and-export-wasms:
     name: '[gasp-node] Generate multiplatform Docker image manifest for fast runtime image'
     needs: [build-node-image-with-fast-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Download digests
@@ -437,7 +437,7 @@ jobs:
   create-unlocked-runtime-docker-image-manifest-and-export-wasms:
     name: '[gasp-node] Generate multiplatform Docker image manifest for unlocked runtime image'
     needs: [build-node-image-with-unlocked-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Download digests
@@ -481,7 +481,7 @@ jobs:
 
   rustfmt-check:
     name: '[gasp-node] Formatting check'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: ${{ inputs.builder_image }}
     steps:
@@ -491,7 +491,7 @@ jobs:
 
   clippy-check:
     name: '[gasp-node] Clippy check'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: ${{ inputs.builder_image }}
     env:
@@ -713,7 +713,7 @@ jobs:
 
   run-benchmarks-tests:
     name: '[gasp-node] Run benchmark tests'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: ${{ inputs.builder_image }}
     env:

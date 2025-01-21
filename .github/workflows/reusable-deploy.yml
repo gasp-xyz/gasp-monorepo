@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       ENV_REF: ${{ inputs.env == 'fungible' && format('pr-{0}', github.event.number) || inputs.env }}
     steps:

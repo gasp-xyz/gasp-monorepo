@@ -53,7 +53,7 @@ env:
 jobs:
   rustfmt-check:
     name: "[${{ inputs.service_folder }}] Formatting check"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
@@ -67,7 +67,7 @@ jobs:
   clippy-check:
     name: "[${{ inputs.service_folder }}] Clippy check"
     if: inputs.cargo_clippy_check_enabled
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
@@ -82,7 +82,7 @@ jobs:
   cargo-test:
     name: "[${{ inputs.service_folder }}] Run cargo tests"
     if: inputs.cargo_tests_enabled
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
@@ -207,7 +207,7 @@ jobs:
   multiplatform-docker-image-compiation-and-push:
     name: "[${{ inputs.service_folder }}] Generate multiplatform Docker image manifest"
     needs: [docker-image-build]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       DOCKER_IMAGE_REPOSITORY: ${{ inputs.docker_image_repository }}
       IMAGE_TAG: ${{ inputs.version }}${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}

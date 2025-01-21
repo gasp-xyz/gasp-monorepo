@@ -56,7 +56,7 @@ permissions:
 
 jobs:
   setup-report:
-    runs-on: [ubuntu-latest]
+    runs-on: [ubuntu-24.04]
     outputs:
       testmo-run-id: ${{ steps.setTestRun.outputs.testmo-run-id }}
     steps:
@@ -275,7 +275,7 @@ jobs:
   test-complete:
     needs: [setup-report, e2e-test-matrix]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Install testmo
         run: npm install --no-save @testmo/testmo-cli
@@ -293,7 +293,7 @@ jobs:
   slack-notify-nook:
     needs: [e2e-test-matrix]
     if: failure()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Slack Notification - Error
         uses: bryannice/gitactions-slack-notification@2.0.0

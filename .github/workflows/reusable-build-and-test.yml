@@ -16,7 +16,7 @@ permissions:
 jobs:
   contracts-tests:
     name: '[contracts] Run Foundry checks and tests'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: contracts
@@ -52,7 +52,7 @@ jobs:
   
   contracts-static-analysis:
     name: '[contracts] Run static analysis with `slither`'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       security-events: write
     steps:
@@ -75,7 +75,7 @@ jobs:
 
   build-and-test-stash:
     name: '[stash] Build and run tests'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: stash
@@ -101,7 +101,7 @@ jobs:
 
   build-foundry-deployer-image:
     name: '[contracts] Build foundry deployer Docker image with smart contracts code'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -119,7 +119,7 @@ jobs:
 
   build-avs-aggregator-image:
     name: '[avs-aggregator] Build avs-aggregator Docker image'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -169,7 +169,7 @@ jobs:
 
   build-ferry-withdrawal-image:
     name: '[ferry-withdrawal] Build ferry-withdrawal Docker image'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: |
@@ -179,7 +179,7 @@ jobs:
 
   build-ferry-deposit-image:
     name: '[ferry-deposit] Build ferry-deposit Docker image'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: |
@@ -189,7 +189,7 @@ jobs:
 
   helmfile-lint:
     name: '[ops] Lint and validate Helmfile configuration'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ops/helmfiles
