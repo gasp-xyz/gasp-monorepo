@@ -2,7 +2,7 @@ name: main branch workflow
 
 on:
   push:
-    branches: [main, feature/merge-node]
+    branches: [main]
 
 permissions:
   contents: write
@@ -85,11 +85,11 @@ jobs:
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
 
-  # deploy-dev:
-  #   name: Deploy `dev` environment
-  #   needs: [init, build-and-test, build-and-test-gasp-node]
-  #   uses: ./.github/workflows/reusable-deploy.yml
-  #   secrets: inherit
-  #   with:
-  #     env: dev
-  #     version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+  deploy-dev:
+    name: Deploy `dev` environment
+    needs: [init, build-and-test, build-and-test-gasp-node]
+    uses: ./.github/workflows/reusable-deploy.yml
+    secrets: inherit
+    with:
+      env: dev
+      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
