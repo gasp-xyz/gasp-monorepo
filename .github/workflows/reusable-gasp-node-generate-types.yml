@@ -58,10 +58,10 @@ jobs:
           access_token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - name: Invoke workflow in gasp-dev-kit repo with inputs
-        uses: jonas-schievink/workflow-proxy@v1
+        uses: the-actions-org/workflow-dispatch@v4
         with:
           ref: ${{ env.BRANCH }}
           workflow: pr-automation-types-rollup-solochain.yml
           repo: gasp-xyz/gasp-dev-kit
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-          inputs: '{"parachainDocker": "${{ env.NODE_DOCKER_IMAGE }}", "branch": "${{ env.BRANCH }}"}'
+          inputs: '{"parachainDocker": "${{ env.NODE_DOCKER_IMAGE }}", "branch": "${{ env.BRANCH }}", "nodeRepository": "gasp-xyz/gasp-monorepo", "nodeCodebaseWorkingDirectory": "mangata-repo/gasp-node"}'
