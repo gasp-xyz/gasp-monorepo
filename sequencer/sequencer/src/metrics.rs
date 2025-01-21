@@ -24,8 +24,8 @@ where
     loop {
         let account = provider.wallet().default_signer_address();
         if let Ok(balance) = provider.get_balance(account).await {
-            let balance_to_decimals = u128::pow(10, 18).try_into().expect("balance fits in U256");
-            let decimals: f64 = balance.wrapping_div(balance_to_decimals).into();
+            let balance_f64: f64 = balance.into();
+            let decimals: f64 = balance_f64 / 1_000_000_000_000_000_000_f64;
             tracing::trace!("sequencer account balance {}", decimals);
             BALANCE.set(decimals);
         } else {
