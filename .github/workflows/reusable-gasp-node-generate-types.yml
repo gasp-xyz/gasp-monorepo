@@ -11,7 +11,8 @@ on:
         description: "Name of the gasp-node docker reference"
         type: string
         required: false
-        default: "gaspxyz/rollup-node:main"
+        # default: "gaspxyz/rollup-node:main"
+        default: ''
       globalVersion:
         description: "Set gasp-node version."
         type: string
@@ -26,7 +27,8 @@ on:
         description: "Name of the gasp-node docker reference"
         type: string
         required: false
-        default: "gaspxyz/rollup-node:main"
+        # default: "gaspxyz/rollup-node:main"
+        default: ''
       globalVersion:
         description: "Set gasp-node version."
         type: string
@@ -42,7 +44,7 @@ jobs:
   generate-gasp-node-types:
     runs-on: ubuntu-24.04
     env:
-      NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImage || format('gaspxyz/rollup-node:{0}', inputs.globalVersion) }}
+      NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImage != '' && inputs.nodeDockerImage || format('gaspxyz/rollup-node:{0}', inputs.globalVersion) }}
       BRANCH: ${{ inputs.branch }}
     steps:
       - uses: actions/checkout@v4
