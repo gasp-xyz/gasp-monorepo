@@ -7,9 +7,7 @@ on:
         description: "Name of the e2e target branch"
         type: string
         required: false
-        # TODO: change to default: "eth-rollup-develop" before merging
-        # default: "eth-rollup-develop"
-        default: "feature/merge-node"
+        default: "eth-rollup-develop"
       nodeDockerImage:
         description: "gasp-node Docker image reference"
         type: string
@@ -36,9 +34,7 @@ on:
         description: "Name of the e2e target branch"
         type: string
         required: false
-        # TODO: change to default: "eth-rollup-develop" before merging
-        # default: "eth-rollup-develop"
-        default: "feature/merge-node"
+        default: "eth-rollup-develop"
       nodeDockerImage:
         description: "gasp-node Docker image reference"
         type: string
@@ -173,9 +169,7 @@ jobs:
         working-directory: gasp-node
     env:
       API_URL: "ws://127.0.0.1:9946"
-      # TODO: change to default: "eth-rollup-develop" before merging
-      # E2EBRANCHNAME: "eth-rollup-develop"
-      E2EBRANCHNAME: "feature/merge-node"
+      E2EBRANCHNAME: "eth-rollup-develop"
       NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImage != '' && inputs.nodeDockerImage || format('gaspxyz/rollup-node:{0}', inputs.globalVersion) }}
       NODE_DOCKER_COMPOSE_NETWORK: gasp-node_default
     steps:
