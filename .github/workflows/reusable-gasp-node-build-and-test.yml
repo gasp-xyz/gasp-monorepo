@@ -185,7 +185,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: wasm-${{ inputs.version }}
-          path: ./rollup_runtime-${{ inputs.version }}.compact.compressed.wasm
+          path: ./gasp-node/rollup_runtime-${{ inputs.version }}.compact.compressed.wasm
     
   build-node-image-with-fast-runtime:
     name: '[gasp-node] Build fast runtime Docker image'
@@ -328,10 +328,10 @@ jobs:
           container_id_fast=$(docker create ${{ env.NODE_DOCKER_IMAGE_REPOSITORY }}:${{ inputs.version }}-fast) && \
             docker cp $container_id_fast:/app/rollup_runtime.compact.compressed.wasm ./rollup_runtime-${{ inputs.version }}-fast.compact.compressed.wasm && \
             docker rm $container_id_fast
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wasm-fast-${{ inputs.version }}
-          path: ./rollup_runtime-${{ inputs.version }}-fast.compact.compressed.wasm
+          path: ./gasp-node/rollup_runtime-${{ inputs.version }}-fast.compact.compressed.wasm
   
   build-node-image-with-unlocked-runtime:
     name: '[gasp-node] Build unlocked runtime Docker image'
@@ -474,10 +474,10 @@ jobs:
           container_id_unlocked=$(docker create ${{ env.NODE_DOCKER_IMAGE_REPOSITORY }}:${{ inputs.version }}-unlocked) && \
             docker cp $container_id_unlocked:/app/rollup_runtime.compact.compressed.wasm ./rollup_runtime-${{ inputs.version }}-unlocked.compact.compressed.wasm && \
             docker rm $container_id_unlocked
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wasm-unlocked-${{ inputs.version }}
-          path: ./rollup_runtime-${{ inputs.version }}-unlocked.compact.compressed.wasm            
+          path: ./gasp-node/rollup_runtime-${{ inputs.version }}-unlocked.compact.compressed.wasm            
 
   rustfmt-check:
     name: '[gasp-node] Formatting check'
@@ -864,7 +864,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: benchmarks
-          path: ./benchmarks
+          path: ./gasp-node/benchmarks
 
       - name: Upload cargo build cache
         if: inputs.cache-enabled && steps.cache.outputs.cache_found == 'false'
