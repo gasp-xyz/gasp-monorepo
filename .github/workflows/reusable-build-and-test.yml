@@ -11,6 +11,7 @@ on:
 permissions:
   contents: read
   id-token: write
+  security-events: write
 
 jobs:
   contracts-tests:
@@ -48,7 +49,17 @@ jobs:
         
       - name: Create coverage report
         run: bun run cover
-      
+  
+  contracts-static-analysis:
+    name: '[contracts] Run static analysis with `slither`'
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+  
       - name: Make static analysis of contracts
         uses: crytic/slither-action@v0.4.0
         id: slither
@@ -56,6 +67,7 @@ jobs:
           target: contracts
           sarif: results.sarif
           fail-on: none
+      
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
         with:
