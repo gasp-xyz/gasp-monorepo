@@ -12,7 +12,8 @@ on:
         description: "gasp-node Docker image reference"
         type: string
         required: false
-        default: "gaspxyz/rollup-node:main"
+        # default: "gaspxyz/rollup-node:main"
+        default: ''
       skipBuild:
         description: "Skip build phase"
         type: string
@@ -38,7 +39,8 @@ on:
         description: "gasp-node Docker image reference"
         type: string
         required: false
-        default: "gaspxyz/rollup-node:main"
+        # default: "gaspxyz/rollup-node:main"
+        default: ''
       skipBuild:
         description: "Skip build phase"
         type: string
@@ -173,7 +175,7 @@ jobs:
       E2E_TREASURY_BURN_PALLET_ADDRESS: ${{ secrets.E2E_TREASURY_BURN_PALLET_ADDRESS }}
       TEST_SUDO_NAME: "//Alice"
       E2EBRANCHNAME: "main"
-      NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImage || format('gaspxyz/rollup-node:{0}', inputs.globalVersion) }}
+      NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImage != '' && inputs.nodeDockerImage || format('gaspxyz/rollup-node:{0}', inputs.globalVersion) }}
     steps:
       - uses: actions/checkout@v4
       - name: Adapt if fast runtime
