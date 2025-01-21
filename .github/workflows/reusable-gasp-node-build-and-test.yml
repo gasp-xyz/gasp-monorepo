@@ -558,7 +558,6 @@ jobs:
             echo "Upload completed in $SECONDS seconds"
 
   unit-test:
-    if: false
     name: '[gasp-node] Unit tests'
     runs-on: [compile-gke]
     container:
@@ -632,7 +631,6 @@ jobs:
         run: chown -R 1100:1100 $GITHUB_WORKSPACE
 
   coverage-report:
-    if: false
     name: '[gasp-node] Coverage report'
     runs-on: [compile-gke]
     container:
