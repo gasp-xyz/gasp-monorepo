@@ -26,9 +26,6 @@ jobs:
       GIT_BRANCH: ${{ steps.set_vars.outputs.GIT_BRANCH }}
       GIT_BRANCH_UNFORMATTED: ${{ steps.branch-name.outputs.current_branch }}
     steps:
-      - uses: mxschmitt/action-tmate@v3
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v8
