@@ -1,17 +1,11 @@
-use crate::l2::types::bindings::runtime_types::sp_runtime::account;
-use crate::l2::types::bindings::tokens::calls::types::create;
-
 use super::{types, L1Error, L1Interface};
 use lazy_static::lazy_static;
 
-use alloy::network::{Ethereum, EthereumWallet, Network, NetworkWallet};
-use alloy::providers::fillers::{
-    BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller, WalletFiller,
-};
-use alloy::providers::{Identity, Provider, ProviderBuilder, RootProvider, WalletProvider};
+use alloy::network::{EthereumWallet, Network, NetworkWallet};
+use alloy::providers::{Provider, ProviderBuilder, WalletProvider};
 use alloy::signers::local::PrivateKeySigner;
 use alloy::sol_types::SolValue;
-use alloy::transports::{BoxTransport, Transport};
+use alloy::transports::Transport;
 use hex::encode as hex_encode;
 use primitive_types::H256;
 use sha3::{Digest, Keccak256};
@@ -26,82 +20,23 @@ lazy_static! {
     .unwrap();
 }
 
-pub type RolldownInstanceType = bindings::rolldown::Rolldown::RolldownInstance<
-    BoxTransport,
-    FillProvider<
-        JoinFill<
-            JoinFill<
-                Identity,
-                JoinFill<GasFiller, JoinFill<BlobGasFiller, JoinFill<NonceFiller, ChainIdFiller>>>,
-            >,
-            WalletFiller<EthereumWallet>,
-        >,
-        RootProvider<BoxTransport>,
-        BoxTransport,
-        Ethereum,
-    >,
->;
-
 pub struct RolldownContract<T, P, N> {
     contract_handle: bindings::rolldown::Rolldown::RolldownInstance<T, P, N>,
     account_address: [u8; 20],
 }
 
-// pub struct Foo<T,P,N> {
-//     contract_handle: bindings::rolldown::Rolldown::RolldownInstance<T,P,N>,
-// }
-//
-// impl<T, P, N> Foo<T, P, N> where
-//     T: Transport + Clone,
-//     P: Provider<T,N>,
-//     N: Network,
-// {
-//     pub fn from_provider(provider: P) -> Self {
-//         use bindings::rolldown::Rolldown::RolldownInstance;
-//         let rolldown = bindings::rolldown::Rolldown::RolldownInstance::new(
-//             [0u8; 20].into(),
-//                 provider,
-//         );
-//
-//
-//         Self {
-//             contract_handle: rolldown,
-//         }
-//     }
-//
-// }
-
-pub async fn create_provider() -> impl Provider + WalletProvider + Clone{
-    let signer: PrivateKeySigner = hex::encode([0u8; 32]).parse().expect("valid private key");
+pub async fn create_provider(
+    uri: &str,
+    private_key: [u8; 32],
+) -> Result<impl Provider + WalletProvider + Clone, L1Error> {
+    let signer: PrivateKeySigner = hex::encode(private_key).parse().expect("valid private key");
     let wallet = EthereumWallet::new(signer);
-
-    ProviderBuilder::new()
+    Ok(ProviderBuilder::new()
         .with_recommended_fillers()
         .wallet(wallet)
-        .on_builtin("123123")
-        .await.expect("provider created")
+        .on_builtin(uri)
+        .await?)
 }
-
-
-// impl<T, P, N> RolldownContract<T, P, N>
-// where
-//     T: Transport + Clone,
-//     P: Provider<T, N> + WalletProvider<N>,
-//     N: Network,
-// {
-//     fn foo() -> Self{
-//         let p = create_provider();
-//         Self {
-//             contract_handle: bindings::rolldown::Rolldown::RolldownInstance::new(
-//                 [0u8; 20].into(),
-//                 p,
-//             ),
-//             // account_address: account.into(),
-//             account_address: [0u8; 20],
-//         }
-//
-//     }
-// }
 
 impl<T, P, N> RolldownContract<T, P, N>
 where
@@ -122,36 +57,6 @@ where
         }
     }
 
-    pub async fn new(uri: &str, address: [u8; 20], private_key: [u8; 32]) -> Result<Self, L1Error> {
-
-        todo!()
-        // let p = create_provider().await;
-        // Self::from_provider(address, p)
-        // todo!()
-        // // todo!()
-        // let signer: PrivateKeySigner = hex::encode(private_key).parse().expect("valid private key");
-        // let wallet = EthereumWallet::new(signer);
-        // //
-        // let provider = ProviderBuilder::new()
-        //     .with_recommended_fillers()
-        //     .wallet(wallet)
-        //     .on_builtin(uri)
-        //     .await?;
-        //
-        // Ok(Self::from_provider(address, provider))
-        // // let account = provider.wallet().default_signer().address();
-        // // tracing::debug!("L1 account : {}", hex_encode(account));
-        // //
-        // // Ok(Self {
-        // //     contract_handle: bindings::rolldown::Rolldown::RolldownInstance::new(
-        // //         address.into(),
-        // //         provider,
-        // //     ),
-        // //     account_address: account.into(),
-        // // })
-    }
-
-    #[cfg(test)]
     #[tracing::instrument(skip(self))]
     pub async fn deposit(&self, amount: u128, ferry_tip: u128) -> Result<(), L1Error> {
         let call = self

@@ -19,7 +19,8 @@ library IRolldownPrimitives {
     non_camel_case_types,
     non_snake_case,
     clippy::pub_underscore_fields,
-    clippy::style
+    clippy::style,
+    clippy::empty_structs_with_brackets
 )]
 pub mod IRolldownPrimitives {
     use super::*;
@@ -4483,7 +4484,8 @@ interface Rolldown {
     non_camel_case_types,
     non_snake_case,
     clippy::pub_underscore_fields,
-    clippy::style
+    clippy::style,
+    clippy::empty_structs_with_brackets
 )]
 pub mod Rolldown {
     use super::*;
@@ -14534,7 +14536,7 @@ pub mod Rolldown {
             Self::SELECTORS.binary_search(&selector).is_ok()
         }
         #[inline]
-        #[allow(unsafe_code, non_snake_case)]
+        #[allow(non_snake_case)]
         fn abi_decode_raw(
             selector: [u8; 4],
             data: &[u8],
@@ -15155,7 +15157,7 @@ pub mod Rolldown {
                     selector,
                 ));
             };
-            (unsafe { DECODE_SHIMS.get_unchecked(idx) })(data, validate)
+            DECODE_SHIMS[idx](data, validate)
         }
         #[inline]
         fn abi_encoded_size(&self) -> usize {
@@ -15700,7 +15702,7 @@ pub mod Rolldown {
             Self::SELECTORS.binary_search(&selector).is_ok()
         }
         #[inline]
-        #[allow(unsafe_code, non_snake_case)]
+        #[allow(non_snake_case)]
         fn abi_decode_raw(
             selector: [u8; 4],
             data: &[u8],
@@ -15954,7 +15956,7 @@ pub mod Rolldown {
                     selector,
                 ));
             };
-            (unsafe { DECODE_SHIMS.get_unchecked(idx) })(data, validate)
+            DECODE_SHIMS[idx](data, validate)
         }
         #[inline]
         fn abi_encoded_size(&self) -> usize {
@@ -16551,9 +16553,9 @@ pub mod Rolldown {
     /// Instantiation and getters/setters.
     #[automatically_derived]
     impl<
-            T: alloy::contract::private::Transport + ::core::clone::Clone,
-            P: alloy::contract::private::Provider<T, N>,
-            N: alloy::contract::private::Network,
+            T: alloy_contract::private::Transport + ::core::clone::Clone,
+            P: alloy_contract::private::Provider<T, N>,
+            N: alloy_contract::private::Network,
         > RolldownInstance<T, P, N>
     {
         /**Creates a new wrapper around an on-chain [`Rolldown`](self) contract instance.

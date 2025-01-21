@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use envconfig::Envconfig;
 use hex::FromHex;
 use tracing::level_filters::LevelFilter;
@@ -12,7 +10,7 @@ use watchdog::Watchdog;
 
 use sequencer::Sequencer;
 mod l1;
-use l1::{CachedL1Interface, L1Interface, RolldownContract};
+use l1::{CachedL1Interface, RolldownContract};
 
 mod l2;
 use l2::Gasp;
@@ -52,6 +50,8 @@ pub enum Error {
     #[error("Sequencer error")]
     SequencerError(#[from] sequencer::Error),
     #[error("L1 error")]
+    L1Error(#[from] l1::L1Error),
+    #[error("Deserialization error")]
     DeserializationError(#[from] hex::FromHexError),
     #[error("Unsupported chain `{0}`")]
     UnsupportedChain(String),
@@ -125,28 +125,21 @@ async fn run(config: Config) -> Result<(), Error> {
         .map_err(Into::<sequencer::Error>::into)?;
     tracing::info!("Connected to {}", config.l2_uri);
 
-    let provider = l1::create_provider().await;
-    RolldownContract::from_provider([0u8;20], provider);
+    let provider = l1::create_provider(config.l1_uri.as_str(), eth_secret_key).await?;
+    tracing::info!("Connected to {}", config.l1_uri);
 
+    let rolldown = RolldownContract::from_provider(rolldown_contract_address, provider.clone());
 
-    todo!()
-    // let rolldown = RolldownContract::<_,_,_>::new(&config.l1_uri, rolldown_contract_address, eth_secret_key)
-    //     .await
-    //     .map_err(Into::<sequencer::Error>::into)?;
-    // tracing::info!("Connected to {}", config.l1_uri);
-    //
-    // let account = rolldown.account_address();
-    //
-    // let _balance_tracker = tokio::spawn(async move {
-    //     metrics::report_account_balance(config.l1_uri, account).await;
-    // });
-    //
-    // let lru = CachedL1Interface::new(rolldown, std::num::NonZeroUsize::new(100).unwrap());
-    // let seq = Sequencer::new(lru, gasp, chain, update_size_limit, config.tx_cost);
-    // let sequencer_service = tokio::spawn(async move { seq.run(tx).await });
-    //
-    // watchdog
-    //     .await
-    //     .map_err(|_| Error::WatchdogExpired(duration))?;
-    // Ok(sequencer_service.await.expect("joined")?)
+    let _balance_tracker = tokio::spawn(async move {
+        metrics::report_account_balance(provider).await;
+    });
+
+    let lru = CachedL1Interface::new(rolldown, std::num::NonZeroUsize::new(100).unwrap());
+    let seq = Sequencer::new(lru, gasp, chain, update_size_limit, config.tx_cost);
+    let sequencer_service = tokio::spawn(async move { seq.run(tx).await });
+
+    watchdog
+        .await
+        .map_err(|_| Error::WatchdogExpired(duration))?;
+    Ok(sequencer_service.await.expect("joined")?)
 }

@@ -1,5 +1,9 @@
-use alloy::providers::{Provider, ProviderBuilder};
-use prometheus::{labels, opts, register_gauge, Encoder, Gauge, TextEncoder};
+use alloy::{
+    network::{Network, NetworkWallet},
+    providers::{Provider, WalletProvider},
+    transports::Transport,
+};
+use prometheus::{opts, register_gauge, Encoder, Gauge, TextEncoder};
 use warp::Filter;
 
 //TODO: collect all metrics to single module
@@ -11,17 +15,23 @@ lazy_static::lazy_static! {
     .unwrap();
 }
 
-pub async fn report_account_balance(uri: String, address:[u8; 20] ) {
+pub async fn report_account_balance<T, P, N>(provider: P)
+where
+    T: Transport + Clone,
+    P: Provider<T, N> + WalletProvider<N>,
+    N: Network,
+{
     loop {
-        let provider = ProviderBuilder::new()
-            .with_recommended_fillers()
-            .on_builtin(uri.as_ref())
-        .await.unwrap();
-        let balance = provider.get_balance(address.into()).await.unwrap();
-        let division = 1_000_000_000__000_000_000u128.try_into().expect("fits into U256");
-        let result: f64 = balance.wrapping_div(division).try_into().expect("can be divided");
-        BALANCE.set(result / 1_000_000_f64);
-        tokio::time::sleep(tokio::time::Duration::from_secs(3600)).await;
+        let account = provider.wallet().default_signer_address();
+        if let Ok(balance) = provider.get_balance(account).await {
+            let balance_to_decimals = u128::pow(10, 18).try_into().expect("balance fits in U256");
+            let decimals: f64 = balance.wrapping_div(balance_to_decimals).into();
+            tracing::trace!("sequencer account balance {}", decimals);
+            BALANCE.set(decimals);
+        } else {
+            tracing::warn!("could not fetch sequencer account balance");
+        }
+        tokio::time::sleep(tokio::time::Duration::from_secs(300)).await;
     }
 }
 
