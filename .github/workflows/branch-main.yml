@@ -77,7 +77,9 @@ jobs:
     uses: ./.github/workflows/reusable-gasp-node-generate-types.yml
     secrets: inherit
     with:
-      branch: ${{ needs.init.outputs.GIT_BRANCH_UNFORMATTED }}
+      # TODO: To be fixed when `eth-rollup-develop` branch in gasp-dev-kit is merged to `main`
+      # branch: ${{ needs.init.outputs.GIT_BRANCH_UNFORMATTED }}
+      branch: eth-rollup-develop
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
 
   run-e2e-test:
