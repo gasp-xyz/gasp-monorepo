@@ -18,7 +18,7 @@ concurrency:
 jobs:
   init:
     name: Set global version
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
     steps:
