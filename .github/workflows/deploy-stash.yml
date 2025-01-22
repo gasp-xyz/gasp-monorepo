@@ -53,7 +53,7 @@ jobs:
     name: Deploy `stash` to `frontend` environment
     if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'frontend')
     runs-on: ubuntu-24.04
-    environment: "stash-${{ github.event.inputs.environment}}"
+    environment: "stash-frontend"
     defaults:
       run:
         working-directory: stash
@@ -85,7 +85,7 @@ jobs:
     defaults:
       run:
         working-directory: stash
-    environment: "stash-${{ github.event.inputs.environment}}"
+    environment: "stash-holesky"
     env:
       ENVIRONMENT: holesky
     steps:
@@ -114,7 +114,7 @@ jobs:
     defaults:
       run:
         working-directory: stash
-    environment: "stash-${{ github.event.inputs.environment}}"
+    environment: "stash-prod"
     env:
       ENVIRONMENT: prod
     steps:
