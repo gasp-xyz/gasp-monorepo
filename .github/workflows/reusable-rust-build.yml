@@ -32,16 +32,6 @@ on:
         required: false
         type: boolean
         default: false
-      gasp_node_fast_runtime:
-        description: Use `rollup-node` with fast runtime when building `gasp-node` image
-        required: false
-        type: boolean
-        default: false
-      gasp_node_unlocked_runtime:
-        description: Use `rollup-node` with unlocked runtime when building `gasp-node` image
-        required: false
-        type: boolean
-        default: false
       cargo_tests_enabled:
         description: Run cargo test
         required: false
@@ -59,12 +49,11 @@ on:
 
 env:
   SKIP_WASM_BUILD: 1
-  IMAGE_PREFIX: ${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}
 
 jobs:
   rustfmt-check:
     name: "[${{ inputs.service_folder }}] Formatting check"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
@@ -78,7 +67,7 @@ jobs:
   clippy-check:
     name: "[${{ inputs.service_folder }}] Clippy check"
     if: inputs.cargo_clippy_check_enabled
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
@@ -93,7 +82,7 @@ jobs:
   cargo-test:
     name: "[${{ inputs.service_folder }}] Run cargo tests"
     if: inputs.cargo_tests_enabled
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
@@ -111,7 +100,7 @@ jobs:
           fi
 
   docker-image-build:
-    name: "[${{ inputs.service_folder }}] [${{ matrix.platform.name }}] image${{ inputs.gasp_node_fast_runtime && ' with fast runtime' || inputs.gasp_avs_fast_runtime && ' with fast runtime' || inputs.gasp_node_unlocked_runtime && ' with unlocked runtime' || '' }}"
+    name: "[${{ inputs.service_folder }}] [${{ matrix.platform.name }}] image${{ inputs.gasp_avs_fast_runtime && ' with fast runtime' || '' }}"
     strategy:
       matrix:
         platform:
@@ -121,11 +110,11 @@ jobs:
             runner: compile-gke-arm
     runs-on: ${{ matrix.platform.runner }}
     env:
-      JOB_CACHE_PREFIX: ${{ inputs.service_folder }}-${{ matrix.platform.name }}${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}-${{ inputs.cache-version }}
+      JOB_CACHE_PREFIX: ${{ inputs.service_folder }}-${{ matrix.platform.name }}${{ inputs.gasp_avs_fast_runtime && 'fast' || 'regular' }}-${{ inputs.cache-version }}
       SERVICE_FOLDER: ${{ inputs.service_folder }}
       DOCKER_IMAGE_REPOSITORY: ${{ inputs.docker_image_repository }}
       CACHE_ARCHIVE_NAME: cache_archive.tar.zst
-      IMAGE_TAG: ${{ inputs.version }}${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}
+      IMAGE_TAG: ${{ inputs.version }}${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
     steps:
       - uses: actions/checkout@v4
     
@@ -176,10 +165,7 @@ jobs:
           platforms: linux/${{ matrix.platform.name }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
-          build-args: |
-            ROLLUP_NODE_VERSION=eth-rollup-develop${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
-            ${{ inputs.gasp_node_fast_runtime && 'ENABLE_FAST_RUNTIME=true' || '' }}
-            ${{ inputs.gasp_node_unlocked_runtime && 'ENABLE_UNLOCKED_RUNTIME=true' || '' }}
+          build-args: ROLLUP_NODE_VERSION=eth-rollup-develop${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
       
       - name: Export digest
         run: |
@@ -190,7 +176,7 @@ jobs:
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.service_folder }}-${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}-linux-${{ matrix.platform.name }}
+          name: ${{ inputs.service_folder }}-${{ inputs.gasp_avs_fast_runtime && 'fast' || 'regular' }}-linux-${{ matrix.platform.name }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -221,16 +207,16 @@ jobs:
   multiplatform-docker-image-compiation-and-push:
     name: "[${{ inputs.service_folder }}] Generate multiplatform Docker image manifest"
     needs: [docker-image-build]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       DOCKER_IMAGE_REPOSITORY: ${{ inputs.docker_image_repository }}
-      IMAGE_TAG: ${{ inputs.version }}${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}
+      IMAGE_TAG: ${{ inputs.version }}${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
           path: /tmp/digests
-          pattern: ${{ inputs.service_folder }}-${{ inputs.gasp_node_fast_runtime && '-fast' || inputs.gasp_avs_fast_runtime && '-fast' || inputs.gasp_node_unlocked_runtime && '-unlocked' || '' }}-*
+          pattern: ${{ inputs.service_folder }}-${{ inputs.gasp_avs_fast_runtime && 'fast' || 'regular' }}-*
           merge-multiple: true
       
       - uses: docker/setup-buildx-action@v3
