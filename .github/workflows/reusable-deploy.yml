@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       ENV_REF: ${{ inputs.env == 'fungible' && format('pr-{0}', github.event.number) || inputs.env }}
     steps:
@@ -75,11 +75,11 @@ jobs:
         working-directory: ops/helmfiles
         run: |
           # Install kubeconform
-          curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.6/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
+          curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
 
           export ENVIRONMENT=ci && export IMAGE_TAG=${{ inputs.version }}
           helmfile lint -e fungible
-          helmfile template -e fungible | kubeconform -kubernetes-version 1.28.0 -skip ServiceMonitor -strict
+          helmfile template -e fungible | kubeconform -kubernetes-version 1.30.0 -skip ServiceMonitor -strict
       
       - name: Deploy services
         working-directory: ops/helmfiles
