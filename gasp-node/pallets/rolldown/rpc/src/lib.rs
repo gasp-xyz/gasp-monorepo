@@ -92,7 +92,7 @@ impl<C, Block, L1Update, Chain> RolldownApiServer<<Block as BlockT>::Hash, L1Upd
 where
 	Block: BlockT,
 	L1Update: Decode,
-	Chain: Encode,
+	Chain: Encode + Decode,
 	C: Send + Sync + 'static,
 	C: ProvideRuntimeApi<Block>,
 	C: HeaderBackend<Block>,
