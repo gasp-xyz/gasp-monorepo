@@ -2,13 +2,14 @@ name: main branch workflow
 
 on:
   push:
-    branches: [main, feat/add-main-branch-ci-pipeline-MGX-834]
+    branches: [main]
 
 permissions:
   contents: write
   id-token: write
   deployments: write
   checks: write
+  security-events: write
 
 # The following concurrency group queus in-progress jobs
 concurrency:
@@ -18,25 +19,96 @@ concurrency:
 jobs:
   init:
     name: Set global version
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
+      GIT_BRANCH: ${{ steps.set_vars.outputs.GIT_BRANCH }}
+      GIT_BRANCH_UNFORMATTED: ${{ steps.branch-name.outputs.current_branch }}
     steps:
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v8
       - name: Set global version
         id: set_vars
-        run: echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
+        run: |
+          echo "GLOBAL_VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "GIT_BRANCH=${{ steps.branch-name.outputs.current_branch }}" | sed "s@/@-@g" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
 
   build-and-test:
     needs: [init]
-    name: Build
+    name: Build AVS services
     uses: ./.github/workflows/reusable-build-and-test.yml
     secrets: inherit
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+  
+  build-and-test-gasp-node:
+    needs: [init]
+    name: Build gasp-node
+    uses: ./.github/workflows/reusable-gasp-node-build-and-test.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+      id-token: write
+    with:
+      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+      branch: ${{ needs.init.outputs.GIT_BRANCH }}
+
+  gasp-node-unit-tests-and-coverage:
+    name: '[gasp-node] Run unit tests and coverage'
+    needs: [init]
+    uses: ./.github/workflows/reusable-gasp-node-unit-tests-and-coverage.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+      id-token: write
+    with:
+      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+      branch: ${{ needs.init.outputs.GIT_BRANCH }}
+
+  gasp-node-generate-types:
+    name: '[gasp-node] Generate types'
+    needs: [init, build-and-test-gasp-node]
+    uses: ./.github/workflows/reusable-gasp-node-generate-types.yml
+    secrets: inherit
+    with:
+      # TODO: To be fixed when `eth-rollup-develop` branch in gasp-dev-kit is merged to `main`
+      # branch: ${{ needs.init.outputs.GIT_BRANCH_UNFORMATTED }}
+      branch: eth-rollup-develop
+      globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
+
+  run-e2e-test:
+    name: Run e2e tests
+    needs: [init, build-and-test]
+    uses: ./.github/workflows/reusable-e2e-tests.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+    with:
+      globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
+  
+  run-e2e-test-gasp-node:
+    name: '[gasp-node] Run e2e tests'
+    needs: [init, build-and-test-gasp-node, gasp-node-generate-types]
+    uses: ./.github/workflows/reusable-gasp-node-e2e-tests.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+    with:
+      globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
 
   deploy-dev:
     name: Deploy `dev` environment
-    needs: [init, build-and-test]
+    needs: [init, build-and-test, build-and-test-gasp-node, gasp-node-unit-tests-and-coverage]
     uses: ./.github/workflows/reusable-deploy.yml
     secrets: inherit
     with:
