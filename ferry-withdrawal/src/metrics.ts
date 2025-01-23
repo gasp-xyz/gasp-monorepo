@@ -11,10 +11,11 @@ function sleep(timeInMilliseconds: number): Promise<void> {
 }
 
 export const account_balance_metric = new Gauge({
-	name: "Account balance",
+	name: "account_balance",
 	help: "Account native balance",
 	labelNames: ["balance"],
 });
+register.registerMetric(account_balance_metric);
 
 export async function serveMetrics() {
 	const app: Express = express();
@@ -28,11 +29,11 @@ export async function serveMetrics() {
 export async function reportBalance(account: Uint8Array, l1: L1Interface) {
 	while (true) {
 		let getNativeTokenAddress = await l1.getNativeTokenAddress();
-		let nativeBalance = await l1.getBalance(account, getNativeTokenAddress);
+		let nativeBalance = await l1.getBalance(getNativeTokenAddress, account);
 		if (nativeBalance !== null) {
-			account_balance_metric.set(Number(nativeBalance));
+			account_balance_metric.set(Number(nativeBalance) / 1000000000000000000.0);
 		} else {
-			logger.warning(`${ALERT_WARNING} Failed to fetch account balance`);
+			logger.info(`${ALERT_WARNING} Failed to fetch account balance`);
 		}
 		await sleep(DELAY_5M);
 	}
