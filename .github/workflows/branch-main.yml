@@ -106,11 +106,12 @@ jobs:
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
 
-  deploy-dev:
-    name: Deploy `dev` environment
-    needs: [init, build-and-test, build-and-test-gasp-node, gasp-node-unit-tests-and-coverage]
-    uses: ./.github/workflows/reusable-deploy.yml
-    secrets: inherit
-    with:
-      env: dev
-      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+  # TODO: To be reviewed and reenabled when smart contracts automated deployment is fixed
+  # deploy-dev:
+  #   name: Deploy `dev` environment
+  #   needs: [init, build-and-test, build-and-test-gasp-node, gasp-node-unit-tests-and-coverage]
+  #   uses: ./.github/workflows/reusable-deploy.yml
+  #   secrets: inherit
+  #   with:
+  #     env: dev
+  #     version: ${{ needs.init.outputs.GLOBAL_VERSION }}
