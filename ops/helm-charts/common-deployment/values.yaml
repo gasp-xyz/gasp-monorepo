@@ -123,9 +123,10 @@ serviceMonitor:
   enabled: false
   # `port` parameter should be the name of the service port this endpoint refers to
   # by default it is called `default-service`
-  # port: default-service
-  # interval: 30s
-  # path: /metrics
+  port: default-service
+  interval: 30s
+  path: /metrics
+  # honorLabels: true
   # annotations:
   #   custom: annotation
   # scrapeTimeout: 10s
