@@ -1878,6 +1878,12 @@ impl<T: Config> Pallet<T> {
 
 		Ok(().into())
 	}
+
+	pub fn get_all_chains() -> Vec<ChainIdOf<T>> {
+		let keys1: BTreeSet<_> = LastProcessedRequestOnL2::<T>::iter_keys().collect();
+		let keys2: BTreeSet<_> = L2OriginRequestId::<T>::get().keys().cloned().collect();
+		keys1.union(&keys2).cloned().collect()
+	}
 }
 
 impl<T: Config> RolldownProviderTrait<ChainIdOf<T>, AccountIdOf<T>> for Pallet<T> {
