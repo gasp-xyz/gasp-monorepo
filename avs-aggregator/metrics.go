@@ -12,7 +12,7 @@ import (
 )
 
 var balance = promauto.NewGauge(prometheus.GaugeOpts{
-	Name: "account balance",
+	Name: "account_balance",
 	Help: "balance of aggregator account",
 })
 
