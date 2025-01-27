@@ -2,6 +2,8 @@
 
 pub mod eth_abi;
 
+use core::fmt::Display;
+
 use self::eth_abi::to_eth_u256;
 use crate::L2Request;
 use alloy_sol_types::SolValue;
@@ -103,6 +105,16 @@ pub enum Chain {
 	Ethereum,
 	Arbitrum,
 	Base,
+}
+
+impl AsRef<str> for Chain {
+	fn as_ref(&self) -> &'static str {
+		match self {
+			Chain::Ethereum => "Ethereum",
+			Chain::Arbitrum => "Arbitrum",
+			Chain::Base => "Base",
+		}
+	}
 }
 
 #[repr(u8)]

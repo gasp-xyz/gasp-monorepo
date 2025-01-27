@@ -6,8 +6,9 @@ use sp_std::vec::Vec;
 sp_api::decl_runtime_apis! {
 	pub trait RolldownRuntimeApi<L1Update, Chain> where
 		L1Update: Decode,
-		Chain: Encode
+		Chain: Encode + Decode,
 	{
+		fn get_all_chains() -> Vec<Chain>;
 		fn get_abi_encoded_l2_request(chain: Chain, requestId: u128) -> Vec<u8>;
 		fn get_native_sequencer_update(hex_payload: Vec<u8>) -> Option<L1Update>;
 		fn verify_sequencer_update(chain: Chain, hash: H256, request_id: u128) -> Option<bool>;
