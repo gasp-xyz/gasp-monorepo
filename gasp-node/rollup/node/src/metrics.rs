@@ -87,15 +87,19 @@ where
 
 	fn collect(&self, mut set: impl FnMut(&[&str], Self::N)) {
 		let at = self.0.info().best_hash;
-		set(
-			&["Ethereum"],
-			self.0
-				.runtime_api()
-				.get_last_processed_request_on_l2(at, pallet_rolldown::messages::Chain::Ethereum)
-				.unwrap_or(None)
-				.unwrap_or_default()
-				.saturated_into::<u64>(),
-		);
+		let chains = self.0.runtime_api().get_all_chains(at).unwrap_or_default();
+
+		for c in chains {
+			set(
+				&[c.as_ref()],
+				self.0
+					.runtime_api()
+					.get_last_processed_request_on_l2(at, c)
+					.unwrap_or(None)
+					.unwrap_or_default()
+					.saturated_into::<u64>(),
+			);
+		}
 	}
 }
 
@@ -151,15 +155,19 @@ where
 
 	fn collect(&self, mut set: impl FnMut(&[&str], Self::N)) {
 		let at = self.0.info().best_hash;
-		set(
-			&["Ethereum"],
-			self.0
-				.runtime_api()
-				.get_number_of_pending_requests(at, pallet_rolldown::messages::Chain::Ethereum)
-				.unwrap_or(None)
-				.unwrap_or_default()
-				.saturated_into::<u64>(),
-		);
+		let chains = self.0.runtime_api().get_all_chains(at).unwrap_or_default();
+
+		for c in chains {
+			set(
+				&[c.as_ref()],
+				self.0
+					.runtime_api()
+					.get_number_of_pending_requests(at, c)
+					.unwrap_or(None)
+					.unwrap_or_default()
+					.saturated_into::<u64>(),
+			);
+		}
 	}
 }
 
