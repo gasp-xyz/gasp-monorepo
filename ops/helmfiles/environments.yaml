@@ -22,11 +22,6 @@ environments:
       - environmentName: staging
         kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
       - config/staging.yaml
-  holesky:
-    values:
-    - environmentName: holesky
-      kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
-    - config/holesky.yaml
   holesky-v3:
     values:
     - environmentName: holesky-v3

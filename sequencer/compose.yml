@@ -18,6 +18,7 @@ services:
       MNEMONIC: ${ETH_SEQUENCER_MNEMONIC}
       TX_COST: ${ETH_SEQUENCER_TX_COST}
       RUST_LOG: debug,sequencer=trace
+    ports: ['9898:80']
 
   sequencer-arb:
     build: .
