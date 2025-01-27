@@ -116,6 +116,8 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -133,6 +135,8 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvEth2" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth2"| expandSecretRefs | toYaml | nindent 10 }}
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -150,6 +154,8 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvEth3" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth3"| expandSecretRefs | toYaml | nindent 10 }}
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -168,6 +174,8 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -185,6 +193,8 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvArb2" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb2"| expandSecretRefs | toYaml | nindent 10 }}
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -202,6 +212,8 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvArb3" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb3"| expandSecretRefs | toYaml | nindent 10 }}
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -220,6 +232,8 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvBase | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -237,6 +251,8 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvBase2" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase2"| expandSecretRefs | toYaml | nindent 10 }}
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -254,6 +270,8 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvBase3" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase3"| expandSecretRefs | toYaml | nindent 10 }}
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
