@@ -5,6 +5,7 @@ mod lru;
 mod rolldown_contract;
 
 pub use lru::CachedL1Interface;
+pub use rolldown_contract::create_provider;
 pub use rolldown_contract::RolldownContract;
 
 pub mod types {
@@ -58,17 +59,15 @@ mod test {
     #[serial]
     #[tokio::test]
     async fn test_can_connect() {
-        RolldownContract::new(URI, ROLLDOWN_ADDRESS, ALICE_PKEY)
-            .await
-            .unwrap();
+        let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
+        RolldownContract::from_provider(ROLLDOWN_ADDRESS, provider);
     }
 
     #[serial]
     #[tokio::test]
     async fn test_can_latest_request_id() {
-        let rolldown = RolldownContract::new(URI, ROLLDOWN_ADDRESS, ALICE_PKEY)
-            .await
-            .unwrap();
+        let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
+        let rolldown = RolldownContract::from_provider(ROLLDOWN_ADDRESS, provider);
         rolldown.deposit(1000, 10).await.unwrap();
         rolldown
             .get_latest_reqeust_id()
@@ -79,9 +78,8 @@ mod test {
     #[serial]
     #[tokio::test]
     async fn test_can_fetch_balance() {
-        let rolldown = RolldownContract::new(URI, ROLLDOWN_ADDRESS, ALICE_PKEY)
-            .await
-            .unwrap();
+        let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
+        let rolldown = RolldownContract::from_provider(ROLLDOWN_ADDRESS, provider);
 
         let balance = rolldown
             .get_native_balance(hex!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266"))

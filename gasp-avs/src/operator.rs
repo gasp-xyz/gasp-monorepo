@@ -702,6 +702,10 @@ impl Operator {
         self.signer.as_ref().unwrap().signer().clone()
     }
 
+    pub(crate) fn client(&self) -> Arc<Client> {
+        self.client.clone()
+    }
+
     #[instrument(skip_all)]
     pub(crate) async fn get_status(&self) -> eyre::Result<OperatorStatus> {
         let el_status = self

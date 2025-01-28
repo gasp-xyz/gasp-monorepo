@@ -66,6 +66,7 @@ bindings-rs: ## generates rust bindings
 	cp -rf ./gasp-avs/bindings ./updater/
 
 bindings-rs-alloy: ## generates rust alloy bindings
+	forge --version | grep "forge 0.3.0"
 	forge bind --alloy --bindings-path ./sequencer/bindings --root ./contracts --crate-name bindings --overwrite  --select 'Rolldown$$' --select 'RolldownPrimitives$$'
 	cd ./sequencer/bindings && cargo fmt
 

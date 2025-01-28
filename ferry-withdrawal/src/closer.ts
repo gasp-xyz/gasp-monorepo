@@ -23,6 +23,7 @@ import {
 	DELAY,
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
+import { reportBalance, serveMetrics } from "./metrics.js";
 
 const BATCH_SIZE = 1000n;
 
@@ -39,6 +40,8 @@ async function main() {
 	}
 
 	const acc: PrivateKeyAccount = privateKeyToAccount(PRIVATE_KEY as any);
+	serveMetrics();
+	reportBalance(hexToU8a(acc.address), l1);
 
 	logger.info(`Account      : ${acc.address}`);
 	logger.info(`L1           : ${ETH_CHAIN_URL}`);

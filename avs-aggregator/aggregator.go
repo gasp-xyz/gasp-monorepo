@@ -206,6 +206,7 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 	sendNewOpTaskC := make(chan types.SendNewOpTaskType)
 	asyncOpStateUpdaterErrorC := make(chan error)
 	go agg.opStateUpdater.startAsyncOpStateUpdater(ctx, sendNewOpTaskC, asyncOpStateUpdaterErrorC)
+  recordMetrics(agg.logger, agg.ethRpc)
 
 	var sub *gsrpcrpcchain.NewHeadsSubscription
 	const maxRetries = 5
@@ -577,7 +578,6 @@ func (agg *Aggregator) createOpTask() (taskmanager.IFinalizerTaskManagerOpTask, 
 	}
 
 	agg.logger.Info("ALERT:INFO Aggregator sending new OpTask")
-	// Send new opTask to the task manager contract
 	newTask, taskIndex, err := agg.ethRpc.AvsWriter.SendNewOpTask(context.Background(), types.QUORUM_THRESHOLD_NUMERATOR, types.QUORUM_NUMBERS)
 	if err != nil {
 		agg.logger.Error("Aggregator failed to send block number to verify", "err", err)

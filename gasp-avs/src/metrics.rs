@@ -1,12 +1,10 @@
-use alloy::{
-    network::{Network, NetworkWallet},
-    providers::{Provider, WalletProvider},
-    transports::Transport,
-};
+use std::sync::Arc;
+
+use ethers::{providers::Middleware, types::NameOrAddress};
 use prometheus::{opts, register_gauge, Encoder, Gauge, TextEncoder};
+use sp_runtime::SaturatedConversion;
 use warp::Filter;
 
-//TODO: collect all metrics to single module
 lazy_static::lazy_static! {
     static ref BALANCE: Gauge = register_gauge!(opts!(
         "account_balance",
@@ -15,16 +13,16 @@ lazy_static::lazy_static! {
     .unwrap();
 }
 
-pub async fn report_account_balance<T, P, N>(provider: P)
-where
-    T: Transport + Clone,
-    P: Provider<T, N> + WalletProvider<N>,
-    N: Network,
-{
+pub async fn report_account_balance(
+    account: ethers::types::Address,
+    client: Arc<crate::chainio::Client>,
+) {
     loop {
-        let account = provider.wallet().default_signer_address();
-        if let Ok(balance) = provider.get_balance(account).await {
-            let balance_f64: f64 = balance.into();
+        if let Ok(balance) = client
+            .get_balance(NameOrAddress::Address(account), None)
+            .await
+        {
+            let balance_f64: f64 = balance.saturated_into::<u128>() as f64;
             let decimals: f64 = balance_f64 / 1_000_000_000_000_000_000_f64;
             tracing::trace!("sequencer account balance {}", decimals);
             BALANCE.set(decimals);

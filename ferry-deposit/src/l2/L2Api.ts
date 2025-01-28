@@ -76,7 +76,7 @@ class L2Api implements L2Interface {
 			.asEthereum.toU8a();
 	}
 
-	async getBalances(address: Uint8Array): Promise<[Uint8Array, bigint][]> {
+	async getBalance(address: Uint8Array): Promise<[Uint8Array, bigint][]> {
 		const assetMapping =
 			await this.api.query.assetRegistry.idToL1Asset.entries();
 		const chain = getL1ChainType(this.api);

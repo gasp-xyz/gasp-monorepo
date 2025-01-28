@@ -1,5 +1,6 @@
 use chainio::setup_deposits;
 use cli::CliArgs;
+use ethers::signers::Signer;
 use eyre::{eyre, Ok};
 use operator::Operator;
 use std::sync::Arc;
@@ -8,6 +9,7 @@ use tracing::{info, instrument, warn};
 mod chainio;
 mod cli;
 mod crypto;
+mod metrics;
 mod operator;
 mod rpc;
 
@@ -18,6 +20,16 @@ pub async fn start() -> eyre::Result<()> {
         serde_json::to_string_pretty(&cli)?
     );
     let operator = Operator::from_cli(&cli).await?;
+    let address = operator.signer().address();
+    let client = operator.client();
+
+    let _http_server = tokio::spawn(async move {
+        metrics::serve_metrics(80).await;
+    });
+
+    let _monitor_balance = tokio::spawn(async move {
+        metrics::report_account_balance(address, client).await;
+    });
 
     if let Some(cmd) = &cli.command {
         info!("Operator created with command '{:?}'", cmd);

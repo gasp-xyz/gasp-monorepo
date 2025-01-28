@@ -27,7 +27,7 @@ describe('Ferry Service', () => {
     };
 
     l2Mock = {
-        getBalances: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
+        getBalance: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         getLastProcessedRequestId: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         isExecuted: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
         isFerried: vi.fn().mockImplementation(() => {throw new Error("Unexpcted mock called")}),
@@ -119,7 +119,7 @@ describe('Ferry Service', () => {
   });
 
   it('rates deposits based on fee', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 1000n]]);
+    l2Mock.getBalance = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 1000n]]);
 
     const depositWithFee: Deposit = {
       requestId: 1n,
@@ -146,7 +146,7 @@ describe('Ferry Service', () => {
   });
 
   it('rates deposits based on fee & amount', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 1000n]]);
+    l2Mock.getBalance = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 1000n]]);
 
     const depositWithFeeAndLeastTranferValue: Deposit = {
       requestId: 1n,
@@ -183,7 +183,7 @@ describe('Ferry Service', () => {
   });
 
   it('filters out deposits that can not afford', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
+    l2Mock.getBalance = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
 
 
     const depositWithTooMuchAmount: Deposit = {
@@ -211,7 +211,7 @@ describe('Ferry Service', () => {
   });
 
   it('accepts the deposits that can be afforded XXX', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
+    l2Mock.getBalance = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
 
 
     const depositWithTooMuchAmount: Deposit = {
@@ -249,7 +249,7 @@ describe('Ferry Service', () => {
   });
 
   it('accepts the deposits that can be afforded', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
+    l2Mock.getBalance = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
 
 
     const depositWithTooMuchAmount: Deposit = {
@@ -287,7 +287,7 @@ describe('Ferry Service', () => {
   });
 
   it('ignores invalid deposits', async () => {
-    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
+    l2Mock.getBalance = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10n]]);
 
     const invalidDeposit: Deposit = {
       requestId: 1n,
@@ -309,7 +309,7 @@ describe('Ferry Service', () => {
     const txCost = 100n;
     ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, txCost, [[DUMMY_TOKEN, 0n, 1n], [NATIVE_TOKEN, 0n, 1n]]);
 
-    l2Mock.getBalances = vi.fn().mockResolvedValue([
+    l2Mock.getBalance = vi.fn().mockResolvedValue([
       [NATIVE_TOKEN, 200n],
       [DUMMY_TOKEN, 10n]
     ]);
@@ -353,7 +353,7 @@ describe('Ferry Service', () => {
 
   it('highest reward:input ratio deposits are preffered', async () => {
 
-    l2Mock.getBalances = vi.fn().mockResolvedValue( [[DUMMY_TOKEN, 10000n]]);
+    l2Mock.getBalance = vi.fn().mockResolvedValue( [[DUMMY_TOKEN, 10000n]]);
 
     const depositBetter: Deposit = {
       requestId: 1n,
@@ -383,7 +383,7 @@ describe('Ferry Service', () => {
 
     const tokensToTrack:[Uint8Array, bigint, bigint][] = [[DUMMY_TOKEN, 100n, 1n]];
     ferry = new Ferry(hexToU8a(ALITH), l1Mock, l2Mock, 0n, tokensToTrack);
-    l2Mock.getBalances = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10000n]]);
+    l2Mock.getBalance = vi.fn().mockResolvedValue([[DUMMY_TOKEN, 10000n]]);
 
     const depositBelowProfitThreshold: Deposit = {
       requestId: 1n,
