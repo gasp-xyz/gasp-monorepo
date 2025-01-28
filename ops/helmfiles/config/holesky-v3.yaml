@@ -4,9 +4,10 @@ blockscoutEnabled: false
 enableArbitrumServices: true
 enableBaseServices: true
 
-####################
-# evm-node configs #
-####################
+##################################
+# contracts && evm-node configs #
+##################################
+# contractsImageTag:''
 evmNode:
   enabled: false
 

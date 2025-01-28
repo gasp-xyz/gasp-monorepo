@@ -467,7 +467,7 @@ releases:
     values:
       - image:
           repository: gaspxyz/gasp-contracts
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "contractsImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
         nameOverride: 'evm-node-eth'
@@ -484,7 +484,7 @@ releases:
     values:
       - image:
           repository: gaspxyz/gasp-contracts
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "contractsImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
         nameOverride: 'evm-node-arb'
@@ -501,7 +501,7 @@ releases:
     values:
       - image:
           repository: gaspxyz/gasp-contracts
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "contractsImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
         nameOverride: 'evm-node-base'
