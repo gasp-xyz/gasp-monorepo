@@ -64,7 +64,7 @@ collator:
 # aggregator configs #
 ######################
 aggregatorEnabled: true
-aggregatorImageTag: 0000000000000000000000000000000000000000
+aggregatorImageTag: d02398b33667e86dc98266ac554fde1cb8771f0d
 # tests/keys/aggregator.ecdsa.key.json
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: '{"address":"a0ee7a142d267c1f36714e4a8f75612f20a79720","crypto":{"cipher":"aes-128-ctr","ciphertext":"b0f6f8e3ba33f0b382b080de6661d827181de480f1a4f94bc20d66cb3d585907","cipherparams":{"iv":"4e3f9a8ca6ef8d1cd408e8aaae3c22d2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"c8f9f8cc03913e09cee7e1fd68732fac327576203ab277d740270f1dea82ee7e"},"mac":"353d65850b20d5fdb90ca2385c52e5b57662cb1d906fd58143f20a7720723cf6"},"id":"d3036cc7-d068-4f2f-9667-60aaca660e61","version":3}'
@@ -92,7 +92,7 @@ aggregatorEnv:
 # gaspAvs configs #
 #####################
 gaspAvsEnabled: true
-gaspAvsImageTag: 0000000000000000000000000000000000000000
+gaspAvsImageTag: d02398b33667e86dc98266ac554fde1cb8771f0d
 gaspAvsData:
   storageClass: node-data-volume-retain
   mountPath: /data
@@ -117,7 +117,7 @@ gaspAvsEnv:
 # updater configs #
 ###########################
 updaterEnabled: true
-updaterImageTag: 0000000000000000000000000000000000000000
+updaterImageTag: d02398b33667e86dc98266ac554fde1cb8771f0d
 updaterEnvSecrets:
   ECDSA_KEY_JSON: '{"address":"a0ee7a142d267c1f36714e4a8f75612f20a79720","crypto":{"cipher":"aes-128-ctr","ciphertext":"b0f6f8e3ba33f0b382b080de6661d827181de480f1a4f94bc20d66cb3d585907","cipherparams":{"iv":"4e3f9a8ca6ef8d1cd408e8aaae3c22d2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"c8f9f8cc03913e09cee7e1fd68732fac327576203ab277d740270f1dea82ee7e"},"mac":"353d65850b20d5fdb90ca2385c52e5b57662cb1d906fd58143f20a7720723cf6"},"id":"d3036cc7-d068-4f2f-9667-60aaca660e61","version":3}'
   ROOT_ECDSA_KEY_JSON: '{"address":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266","crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"26e1ebd941909ddb0ebaec8235470c8d"},"ciphertext":"adca2a84713f50c3918235e109a9b4b28ff6c8ea77b87e8aca20dc48a3a93389","kdf":"scrypt","kdfparams":{"dklen":32,"n":8192,"p":1,"r":8,"salt":"b5581b95b5c7f1449cc341db8567d4c92e4fe21bc34052dbe60bd3e2060a74a0"},"mac":"3643a9e1c0381e30ca0e250999810ecb4b213bc93bd19ad673b93870c77f55ec"},"id":"d39afde8-e06c-46d4-a7ed-1af9bb3f55a5","version":3}'
@@ -157,7 +157,7 @@ updaterEnvBase:
 # sequencer configs #
 ############################
 sequencerEnabled: true
-sequencerImageTag: 0000000000000000000000000000000000000000
+sequencerImageTag: d02398b33667e86dc98266ac554fde1cb8771f0d
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -200,7 +200,7 @@ sequencerEnvSecretsBase:
 # ferry-deposit configs #
 #########################
 ferryDepositEnabled: true
-ferryDepositImageTag: 0000000000000000000000000000000000000000
+ferryDepositImageTag: d02398b33667e86dc98266ac554fde1cb8771f0d
 ferryDepositEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-eth:8546
@@ -241,7 +241,7 @@ ferryDepositEnvSecretsBase:
 # ferry-withdrawal configs #
 ############################
 ferryWithdrawalEnabled: true
-ferryWithdrawalImageTag: 0000000000000000000000000000000000000000
+ferryWithdrawalImageTag: d02398b33667e86dc98266ac554fde1cb8771f0d
 ferryWithdrawalEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-eth:8546
@@ -282,7 +282,7 @@ ferryWithdrawalEnvSecretsBase:
 # ferry-closer configs #
 ########################
 closerEnabled: true
-closerImageTag: 0000000000000000000000000000000000000000
+closerImageTag: d02398b33667e86dc98266ac554fde1cb8771f0d
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-eth:8546
