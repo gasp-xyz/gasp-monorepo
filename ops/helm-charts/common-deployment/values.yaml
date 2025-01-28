@@ -112,10 +112,39 @@ service:
   type: ClusterIP
   port: 80
   targetPort: 80
+  # `name` sets the name of the default port
   name: default-service
   # allocateLoadBalancerNodePorts: false
   # externalTrafficPolicy: Local
   additionalPorts: []
+
+# ServiceMonitor definitions to configure Prometheus metrics collection
+serviceMonitor:
+  enabled: false
+  # `port` parameter should be the name of the service port this endpoint refers to
+  # by default it is called `default-service`
+  port: default-service
+  interval: 30s
+  path: /metrics
+  # honorLabels: true
+  # annotations:
+  #   custom: annotation
+  # scrapeTimeout: 10s
+  # relabelings: []
+  # metricRelabelings: []
+  # namespaceSelector:
+  #   matchNames:
+  #     - monitoring
+  # targetLabels: []
+  # jobLabel: ""
+  # sampleLimit: 0
+# Example usage:
+# serviceMonitor:
+#   enabled: true
+#   port: default-service
+#   interval: 30s
+#   path: /metrics
+
 
 # Additional container ports to open
 # This can allow scraping by prometheus, or exposure to other services

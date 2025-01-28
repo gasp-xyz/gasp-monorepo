@@ -61,8 +61,7 @@ pub enum Error {
 pub async fn main() {
     let filter = tracing_subscriber::EnvFilter::builder()
         .with_default_directive(LevelFilter::INFO.into())
-        .from_env_lossy()
-        .add_directive("sequencer=trace".parse().expect("proper directive"));
+        .from_env_lossy();
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
     let mut config = Config::init_from_env().unwrap();
@@ -99,7 +98,7 @@ async fn run(config: Config) -> Result<(), Error> {
     });
 
     let _metrics = tokio::spawn(async move {
-        metrics::serve_metrics(9898).await;
+        metrics::serve_metrics(80).await;
     });
 
     let update_size_limit = config.update_size_limit;

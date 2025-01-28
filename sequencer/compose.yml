@@ -17,8 +17,8 @@ services:
       MANGATA_NODE_URL: ${ETH_SEQUENCER_MANGATA_NODE_URL}
       MNEMONIC: ${ETH_SEQUENCER_MNEMONIC}
       TX_COST: ${ETH_SEQUENCER_TX_COST}
-    ports:
-      - 9898:9898
+      RUST_LOG: debug,sequencer=trace
+    ports: ['9898:80']
 
   sequencer-arb:
     build: .
@@ -38,6 +38,7 @@ services:
       MANGATA_NODE_URL: ${ARB_SEQUENCER_MANGATA_NODE_URL}
       MNEMONIC: ${ARB_SEQUENCER_MNEMONIC}
       TX_COST: ${ARB_SEQUENCER_TX_COST}
+      RUST_LOG: debug,sequencer=trace
 
   sequencer-base:
     build: .
@@ -57,3 +58,4 @@ services:
       MANGATA_NODE_URL: ${BASE_SEQUENCER_MANGATA_NODE_URL}
       MNEMONIC: ${BASE_SEQUENCER_MNEMONIC}
       TX_COST: ${BASE_SEQUENCER_TX_COST}
+      RUST_LOG: debug,sequencer=trace

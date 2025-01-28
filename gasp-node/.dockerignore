@@ -1,0 +1,37 @@
+.git
+.github
+target
+devops
+launch
+scripts
+workflows
+Makefile
+Tiltfile
+**/*.txt
+**/*.md
+./docker-cargo
+Dockerfile
+compose.yml
+.gitignore
+.dockerignore
+
+tmp
+benchmarks
+chains
+**/chains/
+./target/*
+./docker-cargo/*
+node_modules
+
+!target/release/rollup-node
+!docker-cargo/release/rollup-node
+
+# dotfiles in the repo root
+/.*
+
+# buildkit-cache-dance ignores
+buildkit-cache-dance-*
+scratch
+usr-local-cargo-registry
+usr-local-cargo-git
+app-target

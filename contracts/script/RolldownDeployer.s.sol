@@ -8,9 +8,9 @@ import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Test} from "forge-std/Test.sol";
-import {GaspTestToken} from "../src/GaspTestToken.sol";
 import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
+import {GaspTestToken} from "../test/mocks/GaspTestToken.sol";
 import {Utils} from "./utils/Utils.sol";
 
 contract RolldownDeployer is Script, Utils, Test {
@@ -48,7 +48,7 @@ contract RolldownDeployer is Script, Utils, Test {
         } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
             evm = "arbitrum_";
         } else if (chain == IRolldownPrimitives.ChainId.Base) {
-            evm = "base_"; 
+            evm = "base_";
         } else {
             revert("Unsupported chain");
         }
@@ -101,8 +101,9 @@ contract RolldownDeployer is Script, Utils, Test {
         erc20Mock = new GaspTestToken();
 
         EmptyContract emptyContract = new EmptyContract();
-        rolldown =
-            Rolldown(payable(address(new TransparentUpgradeableProxy(address(emptyContract), address(rolldownProxyAdmin), ""))));
+        rolldown = Rolldown(
+            payable(address(new TransparentUpgradeableProxy(address(emptyContract), address(rolldownProxyAdmin), "")))
+        );
         rolldownImplementation = new Rolldown();
 
         rolldownProxyAdmin.upgradeAndCall(

@@ -194,10 +194,10 @@ where
             let result = self.l2.update_l1_from_l2(update, update_hash).await?;
             if !result {
                 tracing::error!("{ALERT_WARNING} update submission failed");
-                return Err(Error::UpdateSubmissionFailure);
+                Err(Error::UpdateSubmissionFailure)
             } else {
                 tracing::info!("{ALERT_INFO} update submission succeded");
-                return Ok(ActionStatus::Performed);
+                Ok(ActionStatus::Performed)
             }
         } else {
             Ok(ActionStatus::Skipped)
@@ -218,7 +218,6 @@ where
             }
             (Some(tx_cost), Some(closable)) => {
                 tracing::error!("Found pending cancel ready to close : {}, but not enought funds available({}) vs required({})", closable, balance, tx_cost);
-                return Err(Error::NotEnoughtBalance);
             }
             (None, Some(closable)) => {
                 tracing::warn!(
