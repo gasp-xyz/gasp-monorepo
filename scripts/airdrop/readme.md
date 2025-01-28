@@ -7,21 +7,56 @@ This script is used to send airdrops to multiple addresses from a JSON file usin
 1. Ensure you have Python 3.12 installed. You can download it from the [official Python website](https://www.python.org/downloads/).
 
 2. Create a virtual environment:
-    ```sh
-    python3.12 -m venv venv
-    ```
+
+   ```sh
+   python3.12 -m venv venv
+   ```
 
 3. Activate the virtual environment:
-    - On Windows:
-        ```sh
-        venv\Scripts\activate
-        ```
-    - On macOS and Linux:
-        ```sh
-        source venv/bin/activate
-        ```
+
+   - On Windows:
+     ```sh
+     venv\Scripts\activate
+     ```
+   - On macOS and Linux:
+     ```sh
+     source venv/bin/activate
+     ```
 
 4. Install the required dependencies:
+
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+### Using Virtualenv with Specific Python Version
+
+If you already have Python installed and want to ensure you are using Python 3.12, you can create a virtual environment with the specific Python version using `virtualenv`.
+
+1.  Install `virtualenv` if you haven't already:
+
+    ```sh
+    pip install virtualenv
+    ```
+
+2.  Create a virtual environment with the specific Python version:
+
+    ```sh
+    virtualenv --python="/usr/bin/python3.12" "/path/to/new/virtualenv/"
+    ```
+
+3.  Activate the virtual environment:
+
+    - On Windows:
+      ```sh
+      /path/to/new/virtualenv/Scripts/activate
+      ```
+    - On macOS and Linux:
+      ```sh
+      source /path/to/new/virtualenv/bin/activate
+      ```
+
+4.  Install the required dependencies:
     ```sh
     pip install -r requirements.txt
     ```
