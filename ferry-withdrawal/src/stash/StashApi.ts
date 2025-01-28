@@ -13,8 +13,10 @@ enum Origin {
 	Other = "other",
 }
 
-const responseSchema = z.object({
+export const stashResponseSchema = z.object({
+	transaction: z.object({
 	createdBy: z.enum([Origin.Frontend, Origin.Other]),
+}),
 });
 
 export class StashApi implements StashInterface {
@@ -26,14 +28,14 @@ export class StashApi implements StashInterface {
 
 	async shouldBeClosed(txHash: Uint8Array): Promise<boolean> {
 		try {
-			const uri = `${this.uri}/tracing/createdBy/type/withdrawal/tx/${u8aToHex(
-				txHash,
-			)}`;
+			const uri = `${this.uri}/tracing/type/withdrawal/tx/${u8aToHex(txHash)}`;
 			logger.silly(`Making stash querry : ${uri}`);
 			const rawResponse = await axios.get(uri, { timeout: 5000 });
-			const response = responseSchema.parse(rawResponse.data); // This will throw an error if validation fails
-			logger.silly(`Withdrawal origin: ${response.createdBy}`);
-			return Promise.resolve(response.createdBy === Origin.Frontend);
+			const response = stashResponseSchema.parse(rawResponse.data); // This will throw an error if validation fails
+			logger.silly(`Withdrawal origin: ${response.transaction.createdBy}`);
+			return Promise.resolve(
+				response.transaction.createdBy === Origin.Frontend,
+			);
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				logger.error("Axios Error:", error.message);
