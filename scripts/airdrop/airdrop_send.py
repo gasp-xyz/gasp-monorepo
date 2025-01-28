@@ -46,7 +46,7 @@ print(f"Sender address: {address}")
 
 
 with open(args.json, "r") as f:
-    airdrop = json.load(f)
+    airdrop = json.load(f, parse_float=Decimal)
 
 timestamp = int(time.time())
 out_file = f"out/aidrop_distribution_{timestamp}.json"
@@ -99,7 +99,7 @@ def get_nonce(substrate, at=None):
 
 def check_transfers(substrate, to_nonce, batch, at=None):
     nonce = get_nonce(substrate, at)
-    print(f"nonce: {nonce}")
+    print(f"check transfers from nonce: {nonce} to: {to_nonce}")
     filtered = []
 
     if nonce == 0:
@@ -147,12 +147,13 @@ def check_transfers(substrate, to_nonce, batch, at=None):
                     continue
 
                 filtered.append(meta)
-                print(f"nonce: {nonce}")
+                print(f"block: {block['header']['number']}, nonce: {nonce}, trx count: {len(filtered)}")
 
         at = block["header"]["parentHash"]
 
         # pprint(filtered)
 
+    print(f"Found {len(filtered)} transfers, checking against airdrop list")
     for idx, entry in enumerate(batch):
         for meta in filtered:
             amount = entry["amount"] * 10**18
