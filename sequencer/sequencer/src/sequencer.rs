@@ -218,6 +218,7 @@ where
             }
             (Some(tx_cost), Some(closable)) => {
                 tracing::error!("Found pending cancel ready to close : {}, but not enought funds available({}) vs required({})", closable, balance, tx_cost);
+                Err(Error::NotEnoughtBalance)
             }
             (None, Some(closable)) => {
                 tracing::warn!(
