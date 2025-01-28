@@ -1,6 +1,6 @@
 remoteCluster: true
 
-blockscoutEnabled: true
+blockscoutEnabled: false
 enableArbitrumServices: true
 enableBaseServices: false
 
