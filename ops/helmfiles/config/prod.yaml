@@ -4,9 +4,9 @@ blockscoutEnabled: false
 enableArbitrumServices: true
 enableBaseServices: true
 
-####################
-# evm-node configs #
-####################
+##################################
+# contracts && evm-node configs #
+##################################
 evmNode:
   enabled: false
 
