@@ -93,6 +93,7 @@ jobs:
       checks: write
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
+      e2eBranch: eth-rollup-develop
   
   run-e2e-test-gasp-node:
     name: '[gasp-node] Run e2e tests'
