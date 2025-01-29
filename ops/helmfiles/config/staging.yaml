@@ -5,7 +5,7 @@ enableBaseServices: false
 ##################################
 # contracts && evm-node configs #
 ##################################
-# contractsImageTag: d02398b33667e86dc98266ac554fde1cb8771f0d
+contractsImageTag: d02398b33667e86dc98266ac554fde1cb8771f0d
 evmNode:
   enabled: true
 #####################
