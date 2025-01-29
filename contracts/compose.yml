@@ -20,6 +20,8 @@ services:
       #- --verifier-url
       #- http://host.docker.internal/api
       - -v
+    volumes:
+      - ./script/:/app/sctipt
     environment:
       ENV_SELECTOR: ethereum-stub
   arbitrum-contracts-deployment:
