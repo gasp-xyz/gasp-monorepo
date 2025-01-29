@@ -17,8 +17,15 @@ parser.add_argument(
 parser.add_argument(
     "--block",
     type=int,
-    help="The block number to reverse search from for executed transfers",
+    help="The block number to reverse search from for executed transfers, transfer search goes from block N down to block where nonce is 0. Default is the latest block",
     required=False,
+)
+parser.add_argument(
+    "--nonce",
+    type=int,
+    help="The nonce for the initial check to end at, default is 0 and will check all transactions from the given address",
+    required=False,
+    default=0,
 )
 parser.add_argument(
     "--json", type=str, help="The input file for distribution", required=True
@@ -66,7 +73,7 @@ def send_airdrop_batch(substrate, batch):
 
     for entry in batch:
         recipient = entry["address"]
-        amount = entry["amount"] * 10**18
+        amount = Decimal(entry["amount"]) * 10**18
 
         call = substrate.compose_call(
             call_module="Tokens",
@@ -147,7 +154,9 @@ def check_transfers(substrate, to_nonce, batch, at=None):
                     continue
 
                 filtered.append(meta)
-                print(f"block: {block['header']['number']}, nonce: {nonce}, trx count: {len(filtered)}")
+                print(
+                    f"block: {block['header']['number']}, nonce: {nonce}, trx count: {len(filtered)}"
+                )
 
         at = block["header"]["parentHash"]
 
@@ -156,7 +165,7 @@ def check_transfers(substrate, to_nonce, batch, at=None):
     print(f"Found {len(filtered)} transfers, checking against airdrop list")
     for idx, entry in enumerate(batch):
         for meta in filtered:
-            amount = entry["amount"] * 10**18
+            amount = Decimal(entry["amount"]) * 10**18
             if entry["address"] == meta["to"] and amount == meta["amount"]:
                 print(f"Found existing trx for {meta['to']} & {meta['amount']}")
                 try:
@@ -168,13 +177,17 @@ def check_transfers(substrate, to_nonce, batch, at=None):
     with open(out_file, "w") as out:
         json.dump(airdrop, out, default=str, indent=2)
 
+    if len(airdrop) == 0:
+        print("All airdrop entries processed, exiting")
+        sys.exit()
+
 
 with SubstrateInterface(url=args.url) as substrate:
     total = len(airdrop)
     # total = 20
 
     at = get_block_hash(substrate, args.block)
-    check_transfers(substrate, 0, airdrop[0:total], at)
+    check_transfers(substrate, args.nonce, airdrop[0:total], at)
 
     if args.check:
         sys.exit()

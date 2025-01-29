@@ -71,20 +71,29 @@ python airdrop_send.py --private-key <PRIVATE_KEY> --json <JSON_FILE> [--block <
 
 ### Arguments
 
-- `--private-key`: The private key that will distribute the funds. (Required)
+- `--private-key`: The private key that will distribute the funds. No quotes or 0x prefix. (Required)
 - `--json`: The input file for distribution. (Required)
-- `--block`: The block number to reverse search from for executed transfers. (Optional)
+- `--block`: The block number to reverse search from for executed transfers, transfer search goes from block N down to block where nonce is 0. Default is latest block. (Optional)
+- `--nonce`: The nonce for the initial check to end at, default is 0. Use if address has previous trx we want to ignore when checking for transfers. (Optional)
 - `--url`: The URL of the Substrate node. Default is `ws://127.0.0.1:9944`. (Optional)
 - `--check`: Check only, do not send transactions. (Optional)
 
 ### Example
 
 ```sh
-python airdrop_send.py --private-key YourPrivateKeyWithout0xPrefix --json airdrop_list.json --block 123456 --url ws://127.0.0.1:9944 --check
+python airdrop_send.py --private-key YourPrivateKeyWithout0xPrefix --json airdrop_list.json --nonce 10 --block 123456 --url ws://127.0.0.1:9944 --check
 ```
 
-This command will check the airdrop list, without sending any transactions, against the blockchain starting from block 123456 until the provided address's nonce is 0.
+This command will check the airdrop list, without sending any transactions, against the blockchain, starting from block 123456 down to the block where the provided address's nonce is 10.
+The block is helpful in case of `--check` flag, where the search starts from some block in history. Eg. if the current block is 500, and we know airdrop happend at blocks below 100, we can pass `--block 100` and the search will go down from 100 instead of 500.
+The nonce is helpful in case there are previous trx from the given address we want to ignore. Eg. some trx happend at block 100, the nonce was 5. Now we start the script at block 5000, we should pass `--nonce 5` to ignore the unrelated trx. Otherwise the script will search ALL the blocks with trxs from the address.
 It is recommended to use archive node when checking, if the trxs happened some time ago.
+
+```sh
+python airdrop_send.py --private 8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b  --json out/airdrop_distribution.json
+```
+
+This command will check ALL transactions of 'Bob' from latest block, and send the remaining transfers until done. In case of failure or interruption the output will contain the remaining entries. The output json can be used to resume the airdrop.
 
 ## Result
 
