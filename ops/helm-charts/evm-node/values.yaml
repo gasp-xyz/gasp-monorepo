@@ -15,7 +15,7 @@ verifierName: blockscout
 verifierUrl: "http://blockscout-eth-blockscout-stack-blockscout-svc:80/api"
 
 # ttlSecondsAfterFinished is the time to keep the job before deleting it in seconds after the job finishes
-ttlSecondsAfterFinished: ''
+ttlSecondsAfterFinished: ""
 
 dataMountPath: /data
 
@@ -34,7 +34,7 @@ args:
   - --ws.port=8546
   - --ws.api=all
   - --ws.origins=*
-  - --dev.block-time=1s
+  # - --dev.block-time=1s
 enableAutoMine: true
 
 enablePersistence: false

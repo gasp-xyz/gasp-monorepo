@@ -23,6 +23,7 @@ const SUPPORTED_CHAINS = new Map<string, string>([
 	["arbitrum-sepolia", "arbitrum"],
 	["reth-arbitrum", "arbitrum"],
 	["reth-ethereum", "ethereum"],
+	["reth-base", "base"],
 ]);
 
 const cliConfigSchemat = z.object({

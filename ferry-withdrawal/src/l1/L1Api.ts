@@ -75,6 +75,7 @@ const CONFIG_TO_CHAIN = new Map<string, Chain>([
 	["holesky", holesky],
 	["reth-arbitrum", localhost],
 	["reth-ethereum", localhost],
+	["reth-base", localhost],
 ]);
 
 class L1Api implements L1Interface {
