@@ -18,3 +18,49 @@ sync-all-prod $IMAGE_TAG="83174d468dca9d6e7fe13d798fb8a373d8fb0f42" :
 
 sequencer-redeploy-prod $IMAGE_TAG="e82c4b3d9539b81f1cbe48066aed73ba5463fc10":
   helmfile apply -e prod -lname=sequencer-base -lname=sequencer-base-2 -lname=sequencer-base-3 -lname=sequencer-arb -lname=sequencer-arb-2 -lname=sequencer-arb-3 -lname=sequencer-eth -lname=sequencer-eth-2 -lname=sequencer-eth-3
+
+update-config-staging : 
+  just update-config "31337" "./config/staging.yaml"
+
+update-config CHAINID CONFIG_FILE:
+  #!/usr/bin/env bash
+  export AVS_REGISTRY_COORDINATOR=$(jq .addresses.rewardsCoordinator ../../contracts/script/output/{{CHAINID}}/avs_deployment_output.json | tr -d "\"")
+
+  export ROLLDOWN_ETHEREUM=$(jq .addresses.rolldown ../../contracts/script/output/{{CHAINID}}/ethereum_rolldown_output.json | tr -d "\"")
+  export ROLLDOWN_ARBITRUM=$(jq .addresses.rolldown ../../contracts/script/output/{{CHAINID}}/arbitrum_rolldown_output.json | tr -d "\"")
+  export ROLLDOWN_BASE=$(jq .addresses.rolldown ../../contracts/script/output/{{CHAINID}}/base_rolldown_output.json | tr -d "\"")
+
+  export GASP_SERVICE_ADDRESS_ARB=$(jq .addresses.gmrs ../../contracts/script/output/{{CHAINID}}/arbitrum_gmrs_output.json | tr -d "\"")
+  export GASP_SERVICE_ADDRESS_BASE=$(jq .addresses.gmrs ../../contracts/script/output/{{CHAINID}}/base_gmrs_output.json | tr -d "\"")
+
+  # Aggregator
+  yq -i '.aggregatorEnv.AVS_REGISTRY_COORDINATOR_ADDR = strenv(AVS_REGISTRY_COORDINATOR)' {{CONFIG_FILE}}
+
+  ## Avs
+  yq -i '.gaspAvsEnv.AVS_REGISTRY_COORDINATOR_ADDR = strenv(AVS_REGISTRY_COORDINATOR)' {{CONFIG_FILE}}
+
+  # Updaters
+  yq -i '.updaterEnv.AVS_REGISTRY_COORDINATOR_ADDR = strenv(AVS_REGISTRY_COORDINATOR)' {{CONFIG_FILE}}
+  yq -i '.updaterEnv.GASP_SERVICE_ADDR = strenv(GASP_SERVICE_ADDRESS_ARB)' {{CONFIG_FILE}}
+  yq -i '.updaterEnvBase.AVS_REGISTRY_COORDINATOR_ADDR = strenv(AVS_REGISTRY_COORDINATOR)' {{CONFIG_FILE}}
+  yq -i '.updaterEnvBase.GASP_SERVICE_ADDR = strenv(GASP_SERVICE_ADDRESS_BASE)' {{CONFIG_FILE}}
+
+  # Sequencers
+  yq -i '.sequencerEnvEth.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ETHEREUM)' {{CONFIG_FILE}}
+  yq -i '.sequencerEnvArb.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ARBITRUM)' {{CONFIG_FILE}}
+  yq -i '.sequencerEnvBase.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_BASE)' {{CONFIG_FILE}}
+
+  # Ferry deposit
+  yq -i '.ferryDepositEnvEth.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ETHEREUM)' {{CONFIG_FILE}}
+  yq -i '.ferryDepositEnvArb.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ARBITRUM)' {{CONFIG_FILE}}
+  yq -i '.ferryDepositEnvBase.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_BASE)' {{CONFIG_FILE}}
+
+  # Ferry deposit
+  yq -i '.ferryWithdrawalEnvEth.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ETHEREUM)' {{CONFIG_FILE}}
+  yq -i '.ferryWithdrawalEnvArb.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ARBITRUM)' {{CONFIG_FILE}}
+  yq -i '.ferryWithdrawalEnvBase.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_BASE)' {{CONFIG_FILE}}
+
+  # closer
+  yq -i '.closerEnvEth.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ETHEREUM)' {{CONFIG_FILE}}
+  yq -i '.closerEnvArb.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ARBITRUM)' {{CONFIG_FILE}}
+  yq -i '.closerEnvBase.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_BASE)' {{CONFIG_FILE}}
