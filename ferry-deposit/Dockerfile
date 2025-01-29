@@ -8,7 +8,7 @@ RUN npm ci
 COPY . .
 RUN npm run build && npm prune --production
 
-FROM node:18.19-slim
+FROM node:18.20.4-slim
 
 # Add Tini, according to: https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#handling-kernel-signals
 RUN apt-get update && apt-get install -y tini && rm -rf /var/lib/apt/lists/*
