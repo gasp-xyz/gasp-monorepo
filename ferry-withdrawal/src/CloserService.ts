@@ -87,12 +87,8 @@ class CloserService {
 								);
 							}) !== undefined;
 
-						const wasInitiatedByFrontend = await this.stash.shouldBeClosed(
-							request.hash,
-						);
-
 						return (
-							(shouldBeClosed || wasInitiatedByFrontend) &&
+							(shouldBeClosed || await this.stash.shouldBeClosed(request.hash)) &&
 							!(await this.l1.isClosed(request.hash))
 						);
 					} else {
