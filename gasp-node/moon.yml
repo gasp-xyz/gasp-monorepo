@@ -1,0 +1,20 @@
+type: application
+language: rust
+toolchain:
+  rust:
+    version: nightly-2024-01-20
+
+env:
+  CARGO_TERM_COLOR: 'always'
+
+fileGroups:
+  sources:
+    - 'pallets/**/*'
+    - 'rollup/**/*'
+    - 'rpc/**/*'
+    - 'Cargo.toml'
+
+tasks:
+  build:
+    command: cargo build --release
+    inputs: ['@globs(sources)']

@@ -1,0 +1,21 @@
+language: go
+type: application
+
+fileGroups:
+  sources:
+    - 'bindings/**/*'
+    - 'cmd/**/*'
+    - 'core/**/*'
+    - 'mocks/**/*'
+    - 'types/**/*'
+    - '*.go'
+    - 'go.mod'
+    - '/go.mod'
+    - '/avs-eigensdk-go/**/*.go'
+    - '/avs-eigensdk-go/**/go.mod'
+
+tasks:
+  build:
+    command: 'go build -o build/avs-aggregator cmd/main.go'
+    inputs: ['@globs(sources)']
+    outputs: ['build']

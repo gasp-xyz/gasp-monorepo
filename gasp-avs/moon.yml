@@ -1,0 +1,19 @@
+type: application
+language: rust
+toolchain:
+  rust:
+    version: 1.78.0
+
+env:
+  CARGO_TERM_COLOR: 'always'
+
+fileGroups:
+  sources:
+    - 'src/**/*'
+    - 'bindings/**/*'
+    - 'Cargo.toml'
+
+tasks:
+  build:
+    command: cargo build --release
+    inputs: ['@globs(sources)']

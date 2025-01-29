@@ -2,11 +2,13 @@ FROM node:18.20.4 AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json /app/
-RUN npm ci
+RUN corepack enable && corepack prepare yarn@4.6.0 --activate
+
+COPY package.json yarn.lock .yarnrc.yml /app/
+RUN yarn install --immutable
 
 COPY . .
-RUN npm run build && npm prune --production
+RUN yarn run build && yarn workspaces focus --production
 
 FROM node:18.20.4-slim
 
@@ -18,7 +20,7 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json yarn.lock ./
 COPY --from=build /app/build /app/build
 COPY --from=build /app/node_modules /app/node_modules
 

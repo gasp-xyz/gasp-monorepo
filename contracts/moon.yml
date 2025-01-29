@@ -1,0 +1,20 @@
+language: solidity
+type: application
+
+fileGroups:
+  sources:
+    - 'lib/eigenlayer-middleware/**/*.sol'
+    - 'lib/eigenlayer-middleware/package.json'
+    - 'lib/forge-std/**/*.sol'
+    - 'lib/forge-std/package.json'
+    - 'src/**/*'
+    - 'test/**/*'
+    - package.json
+    - foundry.toml
+    - remappings.txt
+
+tasks:
+  build:
+   command: 'forge build'
+   inputs: ['@globs(sources)']
+   outputs: ['out', 'cache']
