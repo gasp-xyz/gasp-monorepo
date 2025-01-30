@@ -175,27 +175,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - run: npm ci
-
-      - name: Build
-        run: npm run build
+          cache: yarn
+      
+      - run: yarn install --immutable
+      - run: yarn run build
 
       - name: Build
         working-directory: .
         run: docker compose up --wait ferry-withdrawal-eth
 
       - name: Test L1 interface
-        run: npm run test-l1
+        run: yarn run test-l1
 
       - name: Test L2 interface
-        run: npm run test-l2
+        run: yarn run test-l2
 
       - name: Test ferry
-        run: npm run test-ferry
+        run: yarn run test-ferry
 
       - name: Test closer service
-        run: npm run test-closer
+        run: yarn run test-closer
 
   ferry-deposit-test:
     name: Ferry deposit tests
@@ -211,21 +210,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: yarn
 
-      - run: npm ci
-
-      - name: Build
-        run: npm run build
+      - run: yarn install --immutable
+      - run: yarn run build
 
       - name: Build
         working-directory: .
         run: docker compose up --wait ferry-deposit-eth
 
       - name: Test L1 interface
-        run: npm run test-l1
+        run: yarn run test-l1
 
       - name: Test L2 interface
-        run: npm run test-l2
+        run: yarn run test-l2
 
       - name: Test ferry
-        run: npm run test-ferry
+        run: yarn run test-ferry
