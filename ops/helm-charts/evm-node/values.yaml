@@ -34,7 +34,7 @@ args:
   - --ws.port=8546
   - --ws.api=all
   - --ws.origins=*
-  # - --dev.block-time=1s
+  - --dev.block-time=1s
 enableAutoMine: true
 
 enablePersistence: false
