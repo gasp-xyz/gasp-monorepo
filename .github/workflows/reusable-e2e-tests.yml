@@ -174,8 +174,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '18'
           cache: yarn
+          cache-dependency-path: "./ferry-withdrawal/yarn.lock"
       
       - run: yarn install --immutable
       - run: yarn run build
@@ -209,8 +210,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '18'
           cache: yarn
+          cache-dependency-path: "./ferry-deposit/yarn.lock"
 
       - run: yarn install --immutable
       - run: yarn run build
