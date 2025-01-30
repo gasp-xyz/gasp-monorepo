@@ -15,8 +15,8 @@ enum Origin {
 
 export const stashResponseSchema = z.object({
 	transaction: z.object({
-	createdBy: z.enum([Origin.Frontend, Origin.Other]),
-}),
+		createdBy: z.enum([Origin.Frontend, Origin.Other]),
+	}),
 });
 
 export class StashApi implements StashInterface {
