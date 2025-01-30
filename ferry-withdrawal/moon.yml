@@ -16,3 +16,6 @@ tasks:
     command: 'yarn build'
     inputs: ['@globs(sources)']
     outputs: ['build']
+  build-image-local:
+    command: 'docker buildx build -t gaspxyz/ferry-withdrawal:local -t gaspxyz/ferry-withdrawal:local-closer -f Dockerfile .'
+    inputs: ['@globs(sources)', 'Dockerfile']

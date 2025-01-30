@@ -18,3 +18,6 @@ tasks:
   build:
     command: cargo build --release
     inputs: ['@globs(sources)']
+  build-image-local:
+    script: 'docker buildx build -t gaspxyz/sequencer:local -t gaspxyz/rollup-node:localarb -t gaspxyz/rollup-node:localbase .'
+    inputs: ['@globs(sources)', 'Dockerfile']

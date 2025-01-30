@@ -18,4 +18,7 @@ tasks:
   build:
     command: 'go build -o build/avs-aggregator cmd/main.go'
     inputs: ['@globs(sources)']
-    outputs: ['build']
+    outputs: ['build/avs-aggregator']
+  build-image-local:
+    command: 'docker buildx build -t gaspxyz/avs-aggregator:local -f Dockerfile ../'
+    inputs: ['@globs(sources)', 'Dockerfile']
