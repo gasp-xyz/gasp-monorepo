@@ -177,7 +177,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.DOCKER_IMAGE_REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
           build-args: |
-            ROLLUP_NODE_VERSION=eth-rollup-develop${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
+            ROLLUP_NODE_VERSION=main${{ inputs.gasp_avs_fast_runtime && '-fast' || '' }}
             ${{ inputs.gasp_node_fast_runtime && 'ENABLE_FAST_RUNTIME=true' || '' }}
             ${{ inputs.gasp_node_unlocked_runtime && 'ENABLE_UNLOCKED_RUNTIME=true' || '' }}
       

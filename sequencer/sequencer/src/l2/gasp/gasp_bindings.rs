@@ -214,6 +214,23 @@ pub mod api {
             use super::runtime_types;
             pub struct RolldownRuntimeApi;
             impl RolldownRuntimeApi {
+                pub fn get_all_chains(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::GetAllChains,
+                    types::get_all_chains::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "RolldownRuntimeApi",
+                        "get_all_chains",
+                        types::GetAllChains {},
+                        [
+                            84u8, 120u8, 127u8, 56u8, 126u8, 234u8, 9u8, 162u8, 175u8, 24u8, 53u8,
+                            1u8, 63u8, 174u8, 136u8, 142u8, 89u8, 75u8, 245u8, 22u8, 222u8, 160u8,
+                            166u8, 2u8, 206u8, 111u8, 239u8, 84u8, 41u8, 161u8, 197u8, 61u8,
+                        ],
+                    )
+                }
                 pub fn get_abi_encoded_l2_request(
                     &self,
                     chain: types::get_abi_encoded_l2_request::Chain,
@@ -425,6 +442,34 @@ pub mod api {
             }
             pub mod types {
                 use super::runtime_types;
+                pub mod get_all_chains {
+                    use super::runtime_types;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
+                            runtime_types::pallet_rolldown::messages::Chain,
+                        >;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Clone,
+                    Debug,
+                    PartialEq,
+                )]
+                #[allow(non_snake_case)]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct GetAllChains {}
                 pub mod get_abi_encoded_l2_request {
                     use super::runtime_types;
                     pub type Chain = runtime_types::pallet_rolldown::messages::Chain;
@@ -4613,9 +4658,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                14u8, 37u8, 198u8, 145u8, 144u8, 60u8, 251u8, 215u8, 199u8, 65u8, 200u8, 191u8,
-                214u8, 223u8, 144u8, 179u8, 212u8, 43u8, 132u8, 234u8, 235u8, 205u8, 203u8, 85u8,
-                109u8, 183u8, 135u8, 57u8, 63u8, 94u8, 14u8, 115u8,
+                235u8, 60u8, 193u8, 146u8, 84u8, 133u8, 139u8, 232u8, 126u8, 188u8, 102u8, 253u8,
+                117u8, 224u8, 110u8, 65u8, 78u8, 255u8, 230u8, 181u8, 143u8, 84u8, 38u8, 86u8, 8u8,
+                176u8, 206u8, 96u8, 130u8, 149u8, 47u8, 12u8,
             ]
     }
     pub mod system {

@@ -13,7 +13,7 @@ include:
 
 services:
   node-alice:
-    image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION}
+    image: gaspxyz/rollup-node:${ROLLUP_NODE_VERSION}
     pull_policy: always
     command:
       - --alith
@@ -28,7 +28,7 @@ services:
       - 30333:30333
 
   node-bob:
-    image: mangatasolutions/rollup-node:${ROLLUP_NODE_VERSION}
+    image: gaspxyz/rollup-node:${ROLLUP_NODE_VERSION}
     pull_policy: always
     command:
       - --baltathar
