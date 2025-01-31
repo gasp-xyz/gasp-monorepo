@@ -35,7 +35,7 @@ env_variables:
 manual_scaling:
   instances: 1
 
-instance_class: B2
+instance_class: B8
 
 vpc_access_connector:
   name: 'projects/direct-pixel-353917/locations/europe-west6/connectors/redis-app-engine'
