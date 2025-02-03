@@ -1,7 +1,7 @@
 services:
   node-alice:
     build: .
-    image: ${NODE_IMAGE:-gaspxyz/rollup-node:local}
+    image: gaspxyz/rollup-node:${ROLLUP_NODE_VERSION:-local}
     command:
       - --alith
       - --chain=rollup-local-seq
@@ -17,7 +17,7 @@ services:
 
   node-bob:
     build: .
-    image: ${NODE_IMAGE:-gaspxyz/rollup-node:local}
+    image: gaspxyz/rollup-node:${ROLLUP_NODE_VERSION:-local}
     command:
       - --baltathar
       - --chain=rollup-local-seq
