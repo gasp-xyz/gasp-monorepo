@@ -17,5 +17,5 @@ tasks:
     inputs: ['@globs(sources)']
     outputs: ['build']
   build-image-local:
-    command: 'docker buildx build -t gaspxyz/ferry-withdrawal:local -t gaspxyz/ferry-withdrawal:local-closer -f Dockerfile .'
+    command: 'docker buildx build -t gaspxyz/ferry-withdrawal:local -t gaspxyz/ferry-withdrawal:localcloser -f Dockerfile .'
     inputs: ['@globs(sources)', 'Dockerfile']
