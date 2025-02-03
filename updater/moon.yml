@@ -18,5 +18,5 @@ tasks:
     command: cargo build --release
     inputs: ['@globs(sources)']
   build-image-local:
-    script: 'docker buildx build -t gaspxyz/updater:local .'
+    script: 'docker buildx build -t gaspxyz/updater:local -t gaspxyz/updater:localbase .'
     inputs: ['@globs(sources)', 'Dockerfile']
