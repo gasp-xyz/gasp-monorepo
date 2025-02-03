@@ -18,6 +18,7 @@ tasks:
   build:
     command: cargo build --release
     inputs: ['@globs(sources)']
+    outputs: ['target/release/sequencer']
   build-image-local:
     script: 'docker buildx build -t gaspxyz/sequencer:local -t gaspxyz/sequencer:localarb -t gaspxyz/sequencer:localbase .'
     inputs: ['@globs(sources)', 'Dockerfile']

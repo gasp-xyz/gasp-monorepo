@@ -17,6 +17,7 @@ tasks:
   build:
     command: cargo build --release
     inputs: ['@globs(sources)']
+    outputs: ['target/release/main']
   build-image-local:
     command: 'docker buildx build --build-arg ROLLUP_NODE_VERSION=local -t gaspxyz/gasp-avs:local .'
     options:
