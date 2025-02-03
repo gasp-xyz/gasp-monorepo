@@ -231,9 +231,9 @@ jobs:
       - name: Run the Node
         working-directory: gasp-node
         env:
-          NODE_IMAGE: ${{ env.NODE_DOCKER_IMAGE }}
+          ROLLUP_NODE_VERSION: ${{ env.NODE_DOCKER_IMAGE }}
         run: |
-          echo "Starting nodes with image: ${NODE_IMAGE}"
+          echo "Starting nodes with image: ${ROLLUP_NODE_VERSION}"
           docker-compose up -d
           docker ps
 
