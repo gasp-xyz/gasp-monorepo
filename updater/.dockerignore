@@ -6,3 +6,6 @@ Dockerfile*
 !**/target/**/main
 ops/**/data
 .env
+
+.moon/cache
+moon.yml
