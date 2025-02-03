@@ -20,5 +20,6 @@ tasks:
     outputs: ["out"]
   build-image-local:
     command:
-      "docker buildx build --platform linux/amd64 -t gaspxyz/gasp-contracts:local -t gaspxyz/gasp-contracts:local-arb -t gaspxyz/gasp-contracts:local-base -f Dockerfile ."
+      "docker buildx build --platform linux/amd64 -t gaspxyz/gasp-contracts:local -t
+      gaspxyz/gasp-contracts:local-arb -t gaspxyz/gasp-contracts:local-base -f Dockerfile ."
     inputs: ["@globs(sources)", "Dockerfile"]
