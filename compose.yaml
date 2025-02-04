@@ -6,6 +6,7 @@ include:
   - path: ./avs-aggregator/compose.yml
   - path: ./gasp-avs/compose.yml
   - path: ./gasp-node/compose.yml
+  # - path: ./gasp-node/compose.persistent.yml # uncomment to use persistent gasp-node storage volumes
   - path: ./sequencer/compose.yml
   - path: ./contracts/compose.yml
   - path: ./updater/compose.yml
