@@ -281,7 +281,7 @@ pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
 		"Holesky-testnet",
 		// ID
 		"holesky",
-		ChainType::Live,
+		ChainType::Local,
 		move || {
 			let eth_sequencers: Vec<AccountId> =
 				vec![hex_literal::hex!("3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0").into()];
