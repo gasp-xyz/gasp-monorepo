@@ -1121,12 +1121,6 @@ func (osu *OpStateUpdater) UpdateStateForEntireQuorums(quorumNums sdktypes.Quoru
 func (osu *OpStateUpdater) UpdateStateForOperatorIds(operatorIds []sdktypes.OperatorId) error {
 	osu.logger.Info("Running Operator Stake Update check")
 
-	// currentBlock, err := osu.ethRpc.Clients.EthHttpClient.BlockNumber(context.Background())
-	// if err != nil {
-	// 	osu.logger.Error("Cannot get current block number", "err", err)
-	// 	return err
-	// }
-
 	if len(operatorIds) == 0{
 		osu.logger.Info("UpdateStateForOperatorIds skipped", "operatorIds len", len(operatorIds))
 		return nil
