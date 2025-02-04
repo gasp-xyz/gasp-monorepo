@@ -243,6 +243,183 @@ pub fn rollup_local_config(
 	)
 }
 
+pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
+	let eth_chain_id = 17000u64;
+	let chain_genesis_salt_arr: [u8; 32] =
+		hex_literal::hex!("0022002200220022002200220022002200220022002200220022002200220022");
+
+	let collator01 = hex_literal::hex!("65Cd3e834B975038F462D64696dfBA275B35ADF4");
+	let collator01_sr25519 =
+		hex_literal::hex!("240970b59630cc9f2f02fe84de116e0ddc6c52a17e8702c8b7625330612b076f");
+	let collator01_ed25519 =
+		hex_literal::hex!("af9b01d518e34fbc25514bb37734cd2a8e77059523a9f6c8c8e81c131405b9aa");
+
+	let collator02 = hex_literal::hex!("2Bb0c51238a267ca0Ee6e895D8DbfBE9b351cCA4");
+	let collator02_sr25519 =
+		hex_literal::hex!("d05fad2d6fc4cb2b2f66008a377b0c0a72313606e9d90e0818e55074b97e2b54");
+	let collator02_ed25519 =
+		hex_literal::hex!("31f0c35e2305ee7ccfcdb71b5a55f80191f40cc86350f5ff31cdb38712e23857");
+
+	let sudo = hex_literal::hex!("E5C44a37d87BF55295E39CE1fbD0177A390d4376");
+
+	// Give your base currency a unit name and decimal places
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "GASP".into());
+	properties.insert("tokenDecimals".into(), 18u32.into());
+	properties.insert("ss58Format".into(), 42u32.into());
+	properties.insert("isEthereum".into(), true.into());
+	// This is quite useless here :/
+	properties.insert(
+		"chainGenesisSalt".into(),
+		array_bytes::bytes2hex("0x", chain_genesis_salt_arr).into(),
+	);
+
+	let decode_url = decode_url.expect("polkadot url is provided");
+	// todo builder
+	ChainSpec::from_genesis(
+		// Name
+		"Holesky-testnet",
+		// ID
+		"holesky",
+		ChainType::Live,
+		move || {
+			let eth_sequencers: Vec<AccountId> =
+				vec![hex_literal::hex!("3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0").into()];
+			let arb_sequencers: Vec<AccountId> =
+				vec![hex_literal::hex!("798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc").into()];
+			let base_sequencers: Vec<AccountId> =
+				vec![hex_literal::hex!("773539d4Ac0e786233D90A233654ccEE26a613D9").into()];
+
+			let council_members = vec![];
+
+			let sequencers_endownment =
+				[eth_sequencers.clone(), arb_sequencers.clone(), base_sequencers.clone()]
+					.iter()
+					.flatten()
+					.cloned()
+					.map(|account_id| (RX_TOKEN_ID, 100u128 * currency::DOLLARS, account_id))
+					.collect::<Vec<_>>();
+
+			let mut tokens_endowment = sequencers_endownment;
+			tokens_endowment.push((RX_TOKEN_ID, 988_100_u128 * currency::DOLLARS, sudo.into()));
+
+			tokens_endowment.append(
+				&mut council_members
+					.clone()
+					.into_iter()
+					.map(|addr| (RX_TOKEN_ID, 1000_u128 * currency::DOLLARS, addr))
+					.collect::<Vec<_>>(),
+			);
+
+			rollup_genesis(
+				// chain genesis salt
+				H256::from(chain_genesis_salt_arr),
+				// initial collators.
+				vec![
+					(
+						collator01.into(),
+						(
+							AuraId::from_slice(collator01_sr25519.as_slice()).unwrap(),
+							GrandpaId::from_slice(collator01_ed25519.as_slice()).unwrap(),
+						),
+					),
+					(
+						collator02.into(),
+						(
+							AuraId::from_slice(collator02_sr25519.as_slice()).unwrap(),
+							GrandpaId::from_slice(collator02_ed25519.as_slice()).unwrap(),
+						),
+					),
+				],
+				// Sudo account
+				sudo.into(),
+				// Tokens endowment
+				tokens_endowment,
+				// Config for Staking
+				// Make sure it works with initial-authorities as staking uses both
+				(
+					vec![
+						(
+							// Who gets to stake initially
+							collator01.into(),
+							// Id of MGA token,
+							0u32,
+							// How much mangata they stake
+							1__001_000u128 * currency::DOLLARS,
+						),
+						(
+							// Who gets to stake initially
+							collator02.into(),
+							// Id of MGA token,
+							0u32,
+							// How much mangata they stake
+							1__001_000u128 * currency::DOLLARS,
+						),
+					],
+					vec![
+						// Who gets to stake initially
+						// Id of MGA token,
+						// How much mangata they pool
+						// Id of the dummy token,
+						// How many dummy tokens they pool,
+						// Id of the liquidity token that is generated
+						// How many liquidity tokens they stake,
+					],
+				),
+				vec![
+					(
+						RX_TOKEN_ID,
+						AssetMetadataOf {
+							decimals: 18,
+							name: BoundedVec::truncate_from(b"Gasp".to_vec()),
+							symbol: BoundedVec::truncate_from(b"GASP".to_vec()),
+							additional: Default::default(),
+							existential_deposit: Default::default(),
+						},
+						Some(L1Asset::Ethereum(hex_literal::hex!(
+							"5620cDb94BaAaD10c20483bd8705DA711b2Bc0a3"
+						))),
+					),
+					(
+						1,
+						AssetMetadataOf {
+							decimals: 18,
+							name: BoundedVec::truncate_from(b"Native Ethereum".to_vec()),
+							symbol: BoundedVec::truncate_from(b"ETH".to_vec()),
+							additional: Default::default(),
+							existential_deposit: Default::default(),
+						},
+						Some(L1Asset::Ethereum(
+							array_bytes::hex2array("0x0000000000000000000000000000000000000001")
+								.unwrap(),
+						)),
+					),
+				],
+				eth_sequencers,
+				arb_sequencers,
+				base_sequencers,
+				eth_chain_id,
+				decode_url.clone(),
+				council_members,
+			)
+		},
+		// Bootnodes
+		Vec::new(),
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// ForkId
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		None,
+		// code
+		rollup_runtime::WASM_BINARY.expect("WASM binary was not build, please build it!"),
+	)
+}
+
 pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 	let (_gasp_token_address, eth_chain_id) = ([0u8; 20], 1u64);
 	let chain_genesis_salt_arr: [u8; 32] =
