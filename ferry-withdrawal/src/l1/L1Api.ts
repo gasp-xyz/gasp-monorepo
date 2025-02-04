@@ -316,7 +316,9 @@ class L1Api implements L1Interface {
 		});
 
 		const native_addr = await this.getNativeTokenAddress();
-		if (u8aToHex(withdrawal.tokenAddress) !== u8aToHex(native_addr)) {
+		const isNativeToken =
+			u8aToHex(withdrawal.tokenAddress) === u8aToHex(native_addr);
+		if (!isNativeToken) {
 			// TODO: submit as a batch
 			const approveRequest = await this.client.simulateContract({
 				account: acc,
@@ -357,7 +359,7 @@ class L1Api implements L1Interface {
 			args: [withdrawalToViemFormat(withdrawal)],
 			maxFeePerGas: maxFeeInWei,
 			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
-			value: withdrawal.amount - withdrawal.ferryTip,
+			value: isNativeToken ? withdrawal.amount - withdrawal.ferryTip : 0n,
 		});
 
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
