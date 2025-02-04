@@ -17,6 +17,7 @@ import * as faucetController from './controller/FaucetController.js'
 import * as tracingController from './controller/TracingController.js'
 import * as tradingController from './controller/TradingController.js'
 import * as airdropController from './controller/mgxAirdropController.js'
+import * as tokenPriceController from './controller/TokenPriceController.js'
 
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
@@ -102,7 +103,7 @@ app.post('/tracing/tx/start', tracingController.startTracing)
 
 app.get(
   '/tracing/type/:type/tx/:txHashOrEntityId',
-  tracingController.getTransactionStatusByTxHashOrEntityId
+  tracingController.getTransactionByTxHashOrEntityId
 )
 
 app.get(
@@ -115,11 +116,8 @@ app.get(
   tracingController.getAllTransactionsByAddressAndStatus
 )
 
-app.get(
-  '/tracing/type/:type/tx/findByEntityId/:entityId',
-
-  tracingController.getATransactionByEntityId
-)
+//Token prices endpoint
+app.get('/price/token/:tokenId', tokenPriceController.getTokenPrices)
 
 // Dashboard endpoint
 app.get('/account/:wallet/dashboard', tradingController.getData)

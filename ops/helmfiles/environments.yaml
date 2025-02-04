@@ -3,32 +3,32 @@ environments:
     values: 
       - environmentName: default
   fungible:
-    kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
     values:
      - environmentName: {{ env "ENVIRONMENT" }}
+       kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
      - config/fungible.yaml
   dev:
-    kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
     values:
       - environmentName: dev
+        kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
       - config/dev.yaml
   frontend:
-    kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
     values:
       - environmentName: frontend
+        kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
       - config/frontend.yaml
-  holesky:
-    kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
+  staging:
     values:
-    - environmentName: holesky
-    - config/holesky.yaml
+      - environmentName: staging
+        kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
+      - config/staging.yaml
   holesky-v3:
-    kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
     values:
     - environmentName: holesky-v3
+      kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
     - config/holesky-v3.yaml
   prod:
-    kubeContext: gke_direct-pixel-353917_europe-west1_gasp-prod
     values:
       - environmentName: prod
+        kubeContext: gke_direct-pixel-353917_europe-west1_gasp-prod
       - config/prod.yaml

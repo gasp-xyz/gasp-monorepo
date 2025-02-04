@@ -105,6 +105,13 @@ var (
 		Required: false,
 		EnvVar:   "AGG_IDLE_START",
 	}
+	AggSSFetchTimeout = cli.IntFlag{
+		Name:     "agg-ss-fetch-timeout",
+		Usage:    "This flag sets the timeout for the stream subs to fetch history",
+		Required: false,
+		Value:    20,
+		EnvVar:   "AGG_SS_FETCH_TIMEOUT",
+	}
 
 	// Aggregator OpStateUpdaterFlags
 	AvsMinOpUpdateInterval = cli.IntFlag{
@@ -170,5 +177,12 @@ var (
 		Value:    "",
 		Usage:    "Password to decrypt ecdsa private key",
 		EnvVar:   "ECDSA_KEY_PASSWORD",
+	}
+
+	EnableTraceLogs = cli.BoolFlag{
+		Name:     "enable-trace-logs",
+		Usage:    "Enable trace logs",
+		Required: false,
+		EnvVar:   "ENABLE_TRACE_LOGS",
 	}
 )

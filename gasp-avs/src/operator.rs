@@ -1,3 +1,4 @@
+use crate::chainio::SignerClient;
 use crate::chainio::{avs::AvsContracts, build_eth_client, eigen::ElContracts, Client};
 use crate::cli::CliArgs;
 use crate::crypto::bn254::{BlsKeypair, OperatorId};
@@ -13,6 +14,7 @@ use bindings::{
     shared_types::{G1Point, G2Point, OpTask, OpTaskResponse, RdTask, RdTaskResponse},
 };
 use ethers::providers::{Middleware, PendingTransaction, SubscriptionStream};
+use ethers::signers::LocalWallet;
 use ethers::{
     contract::{stream, LogMeta},
     providers::StreamExt,
@@ -53,7 +55,9 @@ pub struct OperatorStatus {
 
 #[derive(Debug)]
 pub struct Operator {
-    pub client: Arc<Client>,
+    signer: Option<Arc<SignerClient>>,
+    client: Arc<Client>,
+    address: Address,
     avs_contracts: AvsContracts,
     el_contracts: ElContracts,
     bls_keypair: BlsKeypair,
@@ -63,7 +67,7 @@ pub struct Operator {
 impl Operator {
     #[instrument(name = "create_operator", skip_all)]
     pub async fn from_cli(cfg: &CliArgs) -> eyre::Result<Arc<Self>> {
-        let client = Arc::new(build_eth_client(cfg).await?);
+        let (address, client, signer) = build_eth_client(cfg).await?;
         let avs_contracts = AvsContracts::build(cfg, client.clone()).await?;
         let el_contracts = ElContracts::build(cfg, client.clone()).await?;
 
@@ -77,10 +81,12 @@ impl Operator {
         let rpc = Rpc::build(cfg);
 
         Ok(Arc::new(Self {
+            signer,
+            client,
+            address,
             avs_contracts,
             el_contracts,
             substrate_client_uri: cfg.substrate_rpc_url.to_owned(),
-            client,
             bls_keypair: bls_key,
             rpc,
         }))
@@ -142,10 +148,10 @@ impl Operator {
                                 Err(e) => error!("{} - {}", e, r.text().await?),
                                 Ok(_) => info!("Task finished successfuly and sent to AVS service"),
                             },
-                            Err(e) => error!("{}", e),
+                            Err(e) => error!("send_task_response failed with error: {:?}", e),
                         }
                     }
-                    Err(e) => tracing::error!("EthWs subscription error {:?}", e),
+                    Err(e) => return Err(eyre!("EthWs subscription error {:?}", e)),
                 },
                 block = blocks.next() => {
                     if block.is_none() {
@@ -692,17 +698,25 @@ impl Operator {
         self.bls_keypair.operator_id()
     }
 
+    pub(crate) fn signer(&self) -> LocalWallet {
+        self.signer.as_ref().unwrap().signer().clone()
+    }
+
+    pub(crate) fn client(&self) -> Arc<Client> {
+        self.client.clone()
+    }
+
     #[instrument(skip_all)]
     pub(crate) async fn get_status(&self) -> eyre::Result<OperatorStatus> {
         let el_status = self
             .el_contracts
-            .is_operator_registered(self.client.address())
+            .is_operator_registered(self.address)
             .await?;
 
-        let id = self.avs_contracts.operator_id().await?;
+        let id = self.avs_contracts.operator_id(self.address).await?;
 
         Ok(OperatorStatus {
-            eth_address: self.client.address(),
+            eth_address: self.address,
             registered_with_eigen: el_status,
             bls_key_registered: id.is_some(),
             bls_g1: EthConvert::to_g1(self.bls_keypair.public).unwrap_or_default(),
@@ -714,19 +728,21 @@ impl Operator {
 
     #[instrument(skip_all)]
     pub(crate) async fn register(&self) -> eyre::Result<()> {
+        let client = self
+            .signer
+            .clone()
+            .ok_or(eyre!("missing signer ecdsa key"))?;
+
         let status = self
             .el_contracts
-            .is_operator_registered(self.client.address())
+            .is_operator_registered(self.address)
             .await?;
 
         if !status {
-            info!(
-                "Registering Operator {:x} with EigenLayer",
-                self.client.address()
-            );
+            info!("Registering Operator {:x} with EigenLayer", self.address);
 
             self.el_contracts
-                .register_as_operator_with_el(self.client.address())
+                .register_as_operator_with_el(client)
                 .await?;
 
             info!("Sucessfully registered with EigenLayer")
@@ -739,17 +755,30 @@ impl Operator {
 
     #[instrument(skip_all)]
     pub(crate) async fn opt_in_avs(&self) -> eyre::Result<()> {
-        if self.avs_contracts.operator_id().await?.is_some() {
+        let client = self
+            .signer
+            .clone()
+            .ok_or(eyre!("missing signer ecdsa key"))?;
+
+        if self
+            .avs_contracts
+            .operator_id(self.address)
+            .await?
+            .is_some()
+        {
             info!("Operator already opt-in AVS");
         } else {
-            info!("Registering Operator {:x} with AVS", self.client.address());
-            let sig_params = self.el_contracts.get_delegation_signature_params().await?;
+            info!("Registering Operator {:x} with AVS", self.address);
+            let sig_params = self
+                .el_contracts
+                .get_delegation_signature_params(&client)
+                .await?;
             self.avs_contracts
-                .register_with_avs(&self.bls_keypair, sig_params)
+                .register_with_avs(&self.bls_keypair, sig_params, client)
                 .await?;
             let id = self
                 .avs_contracts
-                .operator_id()
+                .operator_id(self.address)
                 .await?
                 .expect("should have operator id after success register trx");
             info!("Sucessfully registered with AVS with id {:x}", id);
@@ -759,8 +788,18 @@ impl Operator {
 
     #[instrument(skip_all)]
     pub(crate) async fn opt_out_avs(&self) -> eyre::Result<()> {
-        if self.avs_contracts.operator_id().await?.is_some() {
-            self.avs_contracts.deregister_with_avs().await?;
+        let client = self
+            .signer
+            .clone()
+            .ok_or(eyre!("missing signer ecdsa key"))?;
+
+        if self
+            .avs_contracts
+            .operator_id(self.address)
+            .await?
+            .is_some()
+        {
+            self.avs_contracts.deregister_with_avs(client).await?;
             info!("Operator opted out with AVS sucessfully");
         } else {
             info!("Operator not opt in with AVS");

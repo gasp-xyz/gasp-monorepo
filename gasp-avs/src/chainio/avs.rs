@@ -23,7 +23,7 @@ use crate::{
     crypto::{bn254::BlsKeypair, EthConvert},
 };
 
-use super::{map_revert, Client};
+use super::{map_revert, Client, SignerClient};
 
 pub struct AvsContracts {
     pub service_manager: FinalizerServiceManager<Client>,
@@ -33,7 +33,6 @@ pub struct AvsContracts {
     pub registry: RegistryCoordinator<Client>,
     pub stake_registry: StakeRegistry<Client>,
     pub bls_apk_registry: BLSApkRegistry<Client>,
-    pub client: Arc<Client>,
     pub ws_client: Arc<Provider<Ws>>,
 }
 
@@ -77,7 +76,6 @@ impl AvsContracts {
             registry,
             stake_registry,
             bls_apk_registry,
-            client,
             ws_client,
         })
     }
@@ -92,8 +90,8 @@ impl AvsContracts {
             ]))
     }
 
-    pub async fn operator_id(&self) -> eyre::Result<Option<H256>> {
-        let status: OperatorInfo = self.registry.get_operator(self.client.address()).await?;
+    pub async fn operator_id(&self, address: Address) -> eyre::Result<Option<H256>> {
+        let status: OperatorInfo = self.registry.get_operator(address).await?;
         let id: H256 = status.operator_id.into();
         if id.is_zero() || status.status != 1_u8 {
             Ok(None)
@@ -106,10 +104,11 @@ impl AvsContracts {
         &self,
         keypair: &BlsKeypair,
         sig_params: SignatureWithSaltAndExpiry,
+        client: Arc<SignerClient>,
     ) -> eyre::Result<TransactionReceipt> {
-        let message = self
-            .registry
-            .pubkey_registration_message_hash(self.client.address())
+        let registry = RegistryCoordinator::new(self.registry.address(), client.clone());
+        let message = registry
+            .pubkey_registration_message_hash(client.address())
             .await?;
         let signed_hash = keypair.sign_hashed(EthConvert::from_g1(message))?;
         let (sig, g1, g2) = (
@@ -118,7 +117,7 @@ impl AvsContracts {
             EthConvert::to_g2(keypair.public_g2()).ok_or_eyre("cannot convert G2 public")?,
         );
 
-        let trx = self.registry.register_operator(
+        let trx = registry.register_operator(
             AvsContracts::QUORUM.into(),
             String::new(),
             PubkeyRegistrationParams {
@@ -141,14 +140,16 @@ impl AvsContracts {
         receipt.ok_or_eyre("register_with_avs trx failed")
     }
 
-    pub async fn deregister_with_avs(&self) -> eyre::Result<TransactionReceipt> {
-        let trx = self
-            .registry
-            .deregister_operator(AvsContracts::QUORUM.into());
+    pub async fn deregister_with_avs(
+        &self,
+        client: Arc<SignerClient>,
+    ) -> eyre::Result<TransactionReceipt> {
+        let registry = RegistryCoordinator::new(self.registry.address(), client.clone());
+        let trx = registry.deregister_operator(AvsContracts::QUORUM.into());
 
         let pending = trx.send().await.map_err(map_revert)?;
         let receipt = pending.await?;
 
-        receipt.ok_or_eyre("register_with_avs trx failed")
+        receipt.ok_or_eyre("deregister_with_avs trx failed")
     }
 }

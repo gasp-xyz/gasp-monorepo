@@ -5,7 +5,7 @@ services:
     platform: linux/amd64
     depends_on:
       eth-stub:
-          condition: service_healthy
+        condition: service_healthy
     command:
       - script
       - script/MultiStage.s.sol
@@ -20,6 +20,9 @@ services:
       #- --verifier-url
       #- http://host.docker.internal/api
       - -v
+    volumes:
+      - ./script/output/31337/:/app/script/output/31337
+      - ./script/output/1337/:/app/script/output/1337
     environment:
       ENV_SELECTOR: ethereum-stub
   arbitrum-contracts-deployment:
@@ -37,6 +40,9 @@ services:
       - --private-key
       - "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       - --broadcast
+    volumes:
+      - ./script/output/31337/:/app/script/output/31337
+      - ./script/output/1337/:/app/script/output/1337
     environment:
       ENV_SELECTOR: arbitrum-stub
   base-contracts-deployment:
@@ -50,9 +56,12 @@ services:
       - script
       - script/MultiStage.s.sol
       - --rpc-url
-      - ${BASE_RPC_URL:-http://base-stub:8546}
+      - ${BASE_RPC_URL:-http://base-stub:8547}
       - --private-key
       - "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       - --broadcast
+    volumes:
+      - ./script/output/31337/:/app/script/output/31337
+      - ./script/output/1337/:/app/script/output/1337
     environment:
       ENV_SELECTOR: base-stub

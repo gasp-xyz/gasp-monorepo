@@ -2,6 +2,7 @@ import { Client } from 'redis-om'
 import { depositSchema } from '../model/Deposit.js'
 import { withdrawalSchema } from '../model/Withdrawal.js'
 import { swapSchema } from '../model/Swap.js'
+import { tokenPricesSchema } from '../model/TokenPrice.js'
 import { getTimeseriesUrl } from '../connector/RedisConnector.js'
 import logger from '../util/Logger.js'
 
@@ -11,6 +12,7 @@ await client.open(getTimeseriesUrl())
 const depositRepository = client.fetchRepository(depositSchema)
 const withdrawalRepository = client.fetchRepository(withdrawalSchema)
 const swapRepository = client.fetchRepository(swapSchema)
+const tokenPricesRepository = client.fetchRepository(tokenPricesSchema)
 
 try {
   await depositRepository.createIndex()
@@ -45,5 +47,21 @@ try {
     message: 'Swap index already exists, skipping creation.',
   })
 }
+try {
+  await tokenPricesRepository.createIndex()
+} catch (error) {
+  if (!error.message.includes('Token prices index already exists')) {
+    throw error
+  }
+  logger.log({
+    level: 'info',
+    message: 'Token prices index already exists, skipping creation.',
+  })
+}
 
-export { depositRepository, withdrawalRepository, swapRepository }
+export {
+  depositRepository,
+  withdrawalRepository,
+  swapRepository,
+  tokenPricesRepository,
+}

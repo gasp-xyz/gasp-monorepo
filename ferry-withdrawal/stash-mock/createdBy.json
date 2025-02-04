@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/tracing/type/withdrawal/tx/.+"  // Match any hash in the URL
+
+  },
+  "response": {
+    "status": 200,
+    "body": "{\"transaction\": {\"createdBy\": \"frontend\"}}",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

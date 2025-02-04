@@ -15,6 +15,11 @@ interface Network {
   chainId: string
 }
 
+export enum CreatedBy {
+  Frontend = 'frontend',
+  Other = 'other',
+}
+
 export const processWithdrawalEvents = async (
   api: ApiPromise,
   block: Block
@@ -28,14 +33,48 @@ export const processWithdrawalEvents = async (
     for (const eventGroup of events) {
       for (const event of eventGroup) {
         if (event.method === 'WithdrawalRequestCreated') {
-          const withdrawalData = await startTracingWithdrawal(api, event.data)
-          logger.info('Tracing started for withdrawal', withdrawalData)
+          const existingWithdrawal = await withdrawalRepository
+            .search()
+            .where('txHash')
+            .equals((event.data as any).hash_)
+            .and('type')
+            .equals('withdrawal')
+            .returnFirst()
+
+          if (existingWithdrawal) {
+            await updateWithdrawal(api, existingWithdrawal, event.data)
+          } else {
+            const withdrawalData = await startTracingWithdrawal(api, event.data)
+            logger.info('Tracing started for withdrawal', withdrawalData)
+          }
         } else if (event.method === 'TxBatchCreated') {
           await updateWithdrawalsWhenBatchCreated(api, event.data)
         }
       }
     }
   }
+}
+
+export const updateWithdrawal = async (
+  api: ApiPromise,
+  existingWithdrawal: any,
+  eventData: any
+) => {
+  existingWithdrawal.requestId = Number(eventData.requestId.id)
+  existingWithdrawal.updated = Date.parse(new Date().toISOString())
+  existingWithdrawal.status = WITHDRAWAL_PENDING_ON_L2
+  existingWithdrawal.proof = ''
+  const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
+    eventData.chain,
+    eventData.requestId.id
+  )
+  existingWithdrawal.calldata = calldata.toHex()
+  existingWithdrawal.closedBy = null
+  await withdrawalRepository.save(existingWithdrawal)
+  logger.info(
+    'Existing withdrawal updated with event WithdrawalRequestCreated',
+    existingWithdrawal
+  )
 }
 
 export const startTracingWithdrawal = async (
@@ -66,6 +105,7 @@ export const startTracingWithdrawal = async (
     asset_address: eventData.tokenAddress,
     proof: '',
     calldata: calldata.toHex(),
+    createdBy: CreatedBy.Other,
     closedBy: null,
   }
   return withdrawalRepository.save(withdrawalData)

@@ -75,6 +75,7 @@ const CONFIG_TO_CHAIN = new Map<string, Chain>([
 	["holesky", holesky],
 	["reth-arbitrum", localhost],
 	["reth-ethereum", localhost],
+	["reth-base", localhost],
 ]);
 
 class L1Api implements L1Interface {
@@ -315,7 +316,9 @@ class L1Api implements L1Interface {
 		});
 
 		const native_addr = await this.getNativeTokenAddress();
-		if (u8aToHex(withdrawal.tokenAddress) !== u8aToHex(native_addr)) {
+		const isNativeToken =
+			u8aToHex(withdrawal.tokenAddress) === u8aToHex(native_addr);
+		if (!isNativeToken) {
 			// TODO: submit as a batch
 			const approveRequest = await this.client.simulateContract({
 				account: acc,
@@ -356,7 +359,7 @@ class L1Api implements L1Interface {
 			args: [withdrawalToViemFormat(withdrawal)],
 			maxFeePerGas: maxFeeInWei,
 			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
-			value: withdrawal.amount - withdrawal.ferryTip,
+			value: isNativeToken ? withdrawal.amount - withdrawal.ferryTip : 0n,
 		});
 
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
@@ -381,9 +384,9 @@ class L1Api implements L1Interface {
 			transport: this.transport,
 		});
 
-		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
-			this.client,
-		);
+		// const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
+		// 	this.client,
+		// );
 		const ferryRequest = await this.client.simulateContract({
 			account: acc,
 			address: MANGATA_CONTRACT_ADDRESS,
@@ -394,8 +397,8 @@ class L1Api implements L1Interface {
 				u8aToHex(merkleRoot),
 				proof.map((p) => u8aToHex(p)),
 			],
-			maxFeePerGas: maxFeeInWei,
-			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
+			// maxFeePerGas: maxFeeInWei,
+			// maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
 		});
 
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
@@ -420,9 +423,9 @@ class L1Api implements L1Interface {
 			transport: this.transport,
 		});
 
-		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
-			this.client,
-		);
+		// const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
+		// 	this.client,
+		// );
 		const ferryRequest = await this.client.simulateContract({
 			account: acc,
 			address: MANGATA_CONTRACT_ADDRESS,
@@ -433,8 +436,8 @@ class L1Api implements L1Interface {
 				u8aToHex(merkleRoot),
 				proof.map((p) => u8aToHex(p)),
 			],
-			maxFeePerGas: maxFeeInWei,
-			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
+			// maxFeePerGas: maxFeeInWei,
+			// maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
 		});
 
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);

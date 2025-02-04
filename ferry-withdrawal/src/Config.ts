@@ -23,11 +23,13 @@ const SUPPORTED_CHAINS = new Map<string, string>([
 	["arbitrum-sepolia", "arbitrum"],
 	["reth-arbitrum", "arbitrum"],
 	["reth-ethereum", "ethereum"],
+	["reth-base", "base"],
 ]);
 
 const cliConfigSchemat = z.object({
 	MANGATA_CONTRACT_ADDRESS: z.string(),
 	ETH_CHAIN_URL: z.string(),
+	STASH_URL: z.string(),
 	MANGATA_NODE_URL: z.string(),
 	PRIVATE_KEY: z.string(),
 	L1_CHAIN: z.string().refine((chain) => SUPPORTED_CHAINS.has(chain), {
@@ -53,6 +55,7 @@ function createCliConfig() {
 		MANGATA_CONTRACT_ADDRESS: process.env.MANGATA_CONTRACT_ADDRESS!,
 		ETH_CHAIN_URL: process.env.ETH_CHAIN_URL!,
 		MANGATA_NODE_URL: process.env.MANGATA_NODE_URL!,
+		STASH_URL: process.env.STASH_URL!,
 		PRIVATE_KEY: process.env.PRIVATE_KEY!,
 		L1_CHAIN: process.env.L1_CHAIN!,
 		TOKENS_TO_TRACK: process.env.TOKENS_TO_TRACK!,
@@ -70,6 +73,7 @@ const configuration = createCliConfig();
 export const MANGATA_CONTRACT_ADDRESS =
 	configuration.MANGATA_CONTRACT_ADDRESS as `0x${string}`;
 export const ETH_CHAIN_URL = configuration.ETH_CHAIN_URL;
+export const STASH_URL = configuration.STASH_URL;
 export const MANGATA_NODE_URL = configuration.MANGATA_NODE_URL;
 export const PRIVATE_KEY = configuration.PRIVATE_KEY;
 export const L1_CHAIN = configuration.L1_CHAIN;

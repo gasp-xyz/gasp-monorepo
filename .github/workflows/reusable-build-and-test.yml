@@ -11,29 +11,97 @@ on:
 permissions:
   contents: read
   id-token: write
+  security-events: write
 
 jobs:
-  foundry-tests:
-    name: Run Foundry tests
-    runs-on: ubuntu-latest
+  contracts-tests:
+    name: '[contracts] Run Foundry checks and tests'
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: contracts
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
-
+          submodules: recursive
+      
       - uses: foundry-rs/foundry-toolchain@v1
-      - name: Install `contracts` deps
-        working-directory: contracts
-        run: forge install
+          
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: 'contracts/.python-version'
+          cache: pip
+      - run:  pip install -r requirements.txt
+  
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
 
-      - uses: foundry-rs/foundry-toolchain@v1
-      - name: Run forge tests
-        working-directory: contracts
-        run: forge test
+      - run: bun run compile
+      - run: bun run size
+      - run: bun run format
+      - run: bun run lint
+  
+      - name: Run unit tests
+        run: bun run test
+
+      - name: Create gas report
+        run: bun run gas
+        
+      - name: Create coverage report
+        run: bun run cover
+  
+  contracts-static-analysis:
+    name: '[contracts] Run static analysis with `slither`'
+    runs-on: ubuntu-24.04
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+  
+      - name: Make static analysis of contracts
+        uses: crytic/slither-action@v0.4.0
+        id: slither
+        with:
+          target: contracts
+          sarif: results.sarif
+          fail-on: none
+      
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.slither.outputs.sarif }}
+
+  build-and-test-stash:
+    name: '[stash] Build and run tests'
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: stash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+          cache-dependency-path: "./stash/yarn.lock"
+
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: mdgreenwald/mozilla-sops-action@v1.6.0
+
+      - run: yarn install --immutable
+      - run: sops exec-env frontend.enc.env 'yarn run build'
+      - run: sops exec-env frontend.enc.env 'yarn run test:unit'
 
   build-foundry-deployer-image:
-    name: Build foundry deployer Docker image with smart contracts code
-    runs-on: ubuntu-latest
+    name: '[contracts] Build foundry deployer Docker image with smart contracts code'
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,8 +118,8 @@ jobs:
           docker buildx build --push --platform linux/amd64 -t gaspxyz/gasp-contracts:${{ inputs.version }} -f contracts/Dockerfile contracts
 
   build-avs-aggregator-image:
-    name: Build avs-aggregator Docker image
-    runs-on: ubuntu-latest
+    name: '[avs-aggregator] Build avs-aggregator Docker image'
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,7 +130,7 @@ jobs:
           docker buildx build --push --platform linux/amd64,linux/arm64 -t gaspxyz/avs-aggregator:${{ inputs.version }} -f avs-aggregator/Dockerfile .
 
   build-gasp-avs-image:
-    name: Build gasp-avs Docker image
+    name: '[gasp-avs] Build gasp-avs Docker image'
     uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
@@ -71,7 +139,7 @@ jobs:
       docker_image_repository: gaspxyz/gasp-avs
 
   build-gasp-avs-image-with-fast-runtime:
-    name: Build gasp-avs Docker image with fast runtime
+    name: '[gasp-avs] Build gasp-avs Docker image with fast runtime'
     uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
@@ -81,7 +149,7 @@ jobs:
       gasp_avs_fast_runtime: true
 
   build-updater-image:
-    name: Build updater Docker image
+    name: '[updater] Build updater Docker image'
     uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
@@ -90,7 +158,7 @@ jobs:
       docker_image_repository: gaspxyz/updater
 
   build-sequencer-image:
-    name: Build sequencer Docker image
+    name: '[sequencer] Build sequencer Docker image'
     uses: ./.github/workflows/reusable-rust-build.yml
     secrets: inherit
     with:
@@ -100,8 +168,8 @@ jobs:
       cargo_tests_filters: "l1::test::test_can_connect sequencer::test::test_find_malicious_update_ignores_updates_from_other_chains sequencer::test::test_find_malicious_update_ignores_valid_updates sequencer::test::test_find_malicious_update_with_invalid_range_works sequencer::test::test_find_malicious_update_works sequencer::test::test_find_pending_cancels_ignores_closed_cancels sequencer::test::test_find_pending_cancels_to_close sequencer::test::test_find_pending_cancels_to_close2 sequencer::test::test_find_pending_cancels_to_close_when_there_is_no_merkle_root_provided_to_l1 sequencer::test::test_get_pending_update_when_there_are_no_requests sequencer::test::test_get_pending_update_when_there_are_requests sequencer::test::test_get_pending_update_when_there_are_too_many_requests_for_single_update"
 
   build-ferry-withdrawal-image:
-    name: Build ferry-withdrawal Docker image
-    runs-on: ubuntu-latest
+    name: '[ferry-withdrawal] Build ferry-withdrawal Docker image'
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: |
@@ -110,8 +178,8 @@ jobs:
           docker buildx build --push --platform linux/amd64 -t gaspxyz/ferry-withdrawal:${{ inputs.version }} ./ferry-withdrawal
 
   build-ferry-deposit-image:
-    name: Build ferry-deposit Docker image
-    runs-on: ubuntu-latest
+    name: '[ferry-deposit] Build ferry-deposit Docker image'
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: |
@@ -120,8 +188,8 @@ jobs:
           docker buildx build --push --platform linux/amd64 -t gaspxyz/ferry-deposit:${{ inputs.version }} ./ferry-deposit
 
   helmfile-lint:
-    name: Lint and validate Helmfile configuration
-    runs-on: ubuntu-latest
+    name: '[ops] Lint and validate Helmfile configuration'
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ops/helmfiles
@@ -138,7 +206,7 @@ jobs:
           install-kubectl: no
           additional-helm-plugins: https://github.com/jkroepke/helm-secrets --version v4.1.1,https://github.com/aslafy-z/helm-git --version 1.3.0
       - name: Install kubeconform
-        run: curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.6/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
+        run: curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar xzv && sudo mv kubeconform /usr/local/bin/
 
       - run: helmfile lint -e fungible
-      - run: helmfile template -e fungible | kubeconform -kubernetes-version 1.28.0 -skip ServiceMonitor -strict
+      - run: helmfile template -e fungible | kubeconform -kubernetes-version 1.30.0 -skip ServiceMonitor -strict

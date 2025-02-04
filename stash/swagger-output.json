@@ -974,8 +974,8 @@
         "tags": [
           "Tracing"
         ],
-        "summary": "Get transaction status by txHash or entityId.",
-        "description": "Get the status of a transaction by providing the transaction hash or entity ID and type of the transaction.",
+        "summary": "Get a transaction by entityId or transaction hash.",
+        "description": "Get a transaction by providing the entity ID or transaction hash and type of a transaction.",
         "parameters": [
           {
             "name": "type",
@@ -998,10 +998,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with transaction status"
+            "description": "Successful response with transaction details"
           },
           "404": {
-            "description": "Transaction not found"
+            "description": "Transaction not found for this entityId or transaction hash"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1096,42 +1096,53 @@
         }
       }
     },
-    "/tracing/type/{type}/tx/findByEntityId/{entityId}": {
+    "/price/token/{tokenId}": {
       "get": {
         "tags": [
-          "Tracing"
+          "Token Prices"
         ],
-        "summary": "Get a transaction by entityId.",
-        "description": "Get a specific transaction by providing the entity ID and type of a transaction.",
+        "summary": "Get the price of a specific token.",
+        "description": "Retrieve the price of a token by providing its ID. Price is returned in USD.",
         "parameters": [
           {
-            "name": "type",
+            "name": "tokenId",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Type of the transaction",
-            "enum": [
-              "deposit",
-              "withdrawal"
-            ]
-          },
-          {
-            "name": "entityId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Entity ID of the transaction"
+            "description": "ID of the token to retrieve the price for"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with transaction details"
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "example": {
+                  "tokenId": "exampleTokenId",
+                  "price": 123.45
+                }
+              }
+            }
           },
           "404": {
-            "description": "Transaction not found for this entityId"
+            "description": "Token price not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Token price not found"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "An error occurred while retrieving the token price"
+                }
+              }
+            }
           }
         }
       }

@@ -8,7 +8,7 @@ on:
       substrateNodeVersion:
         type: string
         required: false
-        default: "eth-rollup-develop-fast"
+        default: "main-fast"
       globalVersion:
         type: string
         required: false
@@ -21,7 +21,7 @@ on:
       substrateNodeVersion:
         type: string
         required: false
-        default: "eth-rollup-develop-fast"
+        default: "main-fast"
       globalVersion:
         type: string
         required: false
@@ -44,7 +44,7 @@ env:
 
 jobs:
   run-e2e-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -102,6 +102,9 @@ jobs:
       - name: Get gasp-avs logs
         if: success() || failure()
         run: docker logs rollup-gasp-avs-1
+      - name: Get updater-arb logs
+        if: success() || failure()
+        run: docker logs rollup-updater-arb-1
       - name: Get node logs
         if: success() || failure()
         run: docker logs rollup-node-alice-1
@@ -115,7 +118,7 @@ jobs:
           reporter: jest-junit
 
   run-avs-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         test: ["test-opt-out", "test-corrupted"]
@@ -160,7 +163,7 @@ jobs:
 
   ferry-withdrawal-test:
     name: Ferry withdrawal tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ferry-withdrawal
@@ -196,7 +199,7 @@ jobs:
 
   ferry-deposit-test:
     name: Ferry deposit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ferry-deposit

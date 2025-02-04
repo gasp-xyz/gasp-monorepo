@@ -11,7 +11,7 @@ permissions:
 jobs:
   init:
     name: Set global version
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
     steps:
@@ -29,7 +29,7 @@ jobs:
   
   deploy-rollup-holesky:
     needs: [init, build-and-test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: jkroepke/setup-vals@v1.1.3

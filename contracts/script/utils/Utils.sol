@@ -5,7 +5,7 @@ import "@eigenlayer-middleware/src/interfaces/IRegistryCoordinator.sol";
 import "@eigenlayer/contracts/strategies/StrategyBase.sol";
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";
-import "../../src/ERC20Mock.sol";
+import {ERC20Mock} from "../../test/mocks/ERC20Mock.sol";
 import {IRolldownPrimitives} from "../../src/IRolldownPrimitives.sol";
 
 contract Utils is Script {
@@ -148,7 +148,7 @@ contract Utils is Script {
         vm.writeJson(outputJson, outputFilePath);
     }
 
-    function evmPrefixedPath(IRolldownPrimitives.ChainId chain, string memory path) public view returns (string memory) {
+    function evmPrefixedPath(IRolldownPrimitives.ChainId chain, string memory path) public pure returns (string memory) {
       string memory evm;
 
       if (chain == IRolldownPrimitives.ChainId.Ethereum) {
