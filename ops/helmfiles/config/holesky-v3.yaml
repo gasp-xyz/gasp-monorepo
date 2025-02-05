@@ -1,16 +1,13 @@
 remoteCluster: true
-
 blockscoutEnabled: false
 enableArbitrumServices: true
 enableBaseServices: true
-
 ##################################
 # contracts && evm-node configs #
 ##################################
 # contractsImageTag:''
 evmNode:
   enabled: false
-
 #####################
 # collator configs #
 #####################
@@ -79,7 +76,6 @@ collator:
     bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
-
 ######################
 # aggregator configs #
 ######################
@@ -99,7 +95,7 @@ aggregatorEnv:
   AVS_DEBOUNCE_RPC: "20"
   AVS_DEPLOYMENT_BLOCK: "2884411"
   AVS_KICK_PERIOD: "25"
-  AVS_REGISTRY_COORDINATOR_ADDR: "0xb4dd45a08BFA6fBC19F7cD624cdfef87CE95e7AC"
+  AVS_REGISTRY_COORDINATOR_ADDR: "0xef5Ea04287c2BCd0A984563B055f39e650dF0e28"
   AVS_RPC_URL: http://avs-aggregator:8090
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_TASK_EXPIRATION: "300"
@@ -109,7 +105,6 @@ aggregatorEnv:
   RUST_LOG: avs=debug
   AGG_IDLE_START: true
   AGG_RUN_TRIGGER_API_KEY: "secrettoken"
-
 #####################
 # gaspAvs configs #
 #####################
@@ -134,7 +129,7 @@ gaspAvsEnv:
   AVS_DEBOUNCE_RPC: "20"
   AVS_DEPLOYMENT_BLOCK: "2884411"
   AVS_KICK_PERIOD: "25"
-  AVS_REGISTRY_COORDINATOR_ADDR: "0xb4dd45a08BFA6fBC19F7cD624cdfef87CE95e7AC"
+  AVS_REGISTRY_COORDINATOR_ADDR: "0xef5Ea04287c2BCd0A984563B055f39e650dF0e28"
   AVS_RPC_URL: http://avs-aggregator:8090
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_TASK_EXPIRATION: "300"
@@ -146,7 +141,6 @@ gaspAvsEnv:
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
   ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/485165d5cac39607183994e9122404387dcdd49d/rollup-holesky-v3-3722076-raw.json
-
 ###########################
 # updater configs #
 ###########################
@@ -162,12 +156,11 @@ updaterEnv:
   SOURCE_CHAIN_ID: 17000
   TARGET_CHAIN_ID: 421614
   TARGET_CHAIN_INDEX: 1
-  AVS_REGISTRY_COORDINATOR_ADDR: 0xb4dd45a08BFA6fBC19F7cD624cdfef87CE95e7AC
-  GASP_SERVICE_ADDR: 0x483e6cba9C16De670888A50076367b16CC7f1bd7
+  AVS_REGISTRY_COORDINATOR_ADDR: 0xef5Ea04287c2BCd0A984563B055f39e650dF0e28
+  GASP_SERVICE_ADDR: 0x710E31ce9950483f47c80EA2655143dbA5bA3374
   TESTNET: "false"
   PUSH_FIRST_INIT: "false"
   REINIT: "false"
-
 updaterEnvSecretsBase:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/baseSepoliaUpdaterEcdsaKeyJson
   ROOT_ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/baseSepoliaUpdaterRootEcdsaKeyJson
@@ -179,12 +172,11 @@ updaterEnvBase:
   SOURCE_CHAIN_ID: 17000
   TARGET_CHAIN_ID: 84532
   TARGET_CHAIN_INDEX: 2
-  AVS_REGISTRY_COORDINATOR_ADDR: 0xb4dd45a08BFA6fBC19F7cD624cdfef87CE95e7AC
-  GASP_SERVICE_ADDR: 0x839De8D21F4762D791efbC0bA70C1Af0c442Ef98
+  AVS_REGISTRY_COORDINATOR_ADDR: 0xef5Ea04287c2BCd0A984563B055f39e650dF0e28
+  GASP_SERVICE_ADDR: 0x80A15DbBE2f2b6E2A28aEbbE9cB0a038DC0be64e
   TESTNET: "false"
   PUSH_FIRST_INIT: "false"
   REINIT: "false"
-
 ############################
 # sequencer configs #
 ############################
@@ -195,36 +187,33 @@ sequencerEnabled: true
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: ws://collator-01:9944
-  MANGATA_CONTRACT_ADDRESS: "0xCACb3e67CA70Af311744681B6E51B880da24a78a"
+  MANGATA_CONTRACT_ADDRESS: "0x34B38Fd98aBE38B52258253fb4E1D0F5EFF26343"
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/holeskySequencerPrivateKey
   MNEMONIC: ref+sops://secrets.enc.yaml#/holeskySequencerPrivateKey
-
 sequencerEnvArb:
   L1_CHAIN: "Arbitrum"
   MANGATA_NODE_URL: ws://collator-01:9944
-  MANGATA_CONTRACT_ADDRESS: "0x8E92222f10Ee71236AC93de68b386c2A3b950151"
+  MANGATA_CONTRACT_ADDRESS: "0x18Ef4858e5581d20c2145ea0dFEA7F4d81A957A5"
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/arbitrumSepoliaSequencerPrivateKey
   MNEMONIC: ref+sops://secrets.enc.yaml#/arbitrumSepoliaSequencerPrivateKey
-
 sequencerEnvBase:
   L1_CHAIN: "Base"
   MANGATA_NODE_URL: ws://collator-01:9944
-  MANGATA_CONTRACT_ADDRESS: "0x72fB284429F4088aD38E7Bc229A218FEefe62a3E"
+  MANGATA_CONTRACT_ADDRESS: "0x2215C253202504a42723B46fe72D1Bb61B3b1918"
   LIMIT: "100"
   WATCHDOG: 30
 sequencerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseSepoliaWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/baseSepoliaSequencerPrivateKey
   MNEMONIC: ref+sops://secrets.enc.yaml#/baseSepoliaSequencerPrivateKey
-
 #########################
 # ferry-deposit configs #
 #########################
@@ -232,7 +221,7 @@ ferryDepositEnabled: true
 ferryDepositEnvEth:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-holesky-v3.gasp.xyz
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
-  MANGATA_CONTRACT_ADDRESS: "0xCACb3e67CA70Af311744681B6E51B880da24a78a"
+  MANGATA_CONTRACT_ADDRESS: "0x34B38Fd98aBE38B52258253fb4E1D0F5EFF26343"
   L1_CHAIN: "Ethereum"
   TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
@@ -240,10 +229,9 @@ ferryDepositEnvEth:
   LOG: silly
 ferryDepositEnvSecretsEth:
   MNEMONIC: ref+sops://secrets.enc.yaml#/holeskyFerryDepositPrivateKey
-
 ferryDepositEnvArb:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-holesky-v3.gasp.xyz
-  MANGATA_CONTRACT_ADDRESS: "0x8E92222f10Ee71236AC93de68b386c2A3b950151"
+  MANGATA_CONTRACT_ADDRESS: "0x18Ef4858e5581d20c2145ea0dFEA7F4d81A957A5"
   L1_CHAIN: "Arbitrum"
   TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
@@ -252,10 +240,9 @@ ferryDepositEnvArb:
 ferryDepositEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaWssUrl
   MNEMONIC: ref+sops://secrets.enc.yaml#/arbitrumSepoliaFerryDepositPrivateKey
-
 ferryDepositEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
-  MANGATA_CONTRACT_ADDRESS: "0x72fB284429F4088aD38E7Bc229A218FEefe62a3E"
+  MANGATA_CONTRACT_ADDRESS: "0x2215C253202504a42723B46fe72D1Bb61B3b1918"
   L1_CHAIN: "Base"
   TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
@@ -264,7 +251,6 @@ ferryDepositEnvBase:
 ferryDepositEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseSepoliaWssUrl
   MNEMONIC: ref+sops://secrets.enc.yaml#/baseSepoliaFerryDepositPrivateKey
-
 ############################
 # ferry-withdrawal configs #
 ############################
@@ -272,7 +258,7 @@ ferryWithdrawalEnabled: true
 ferryWithdrawalEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
-  MANGATA_CONTRACT_ADDRESS: "0xCACb3e67CA70Af311744681B6E51B880da24a78a"
+  MANGATA_CONTRACT_ADDRESS: "0x34B38Fd98aBE38B52258253fb4E1D0F5EFF26343"
   L1_CHAIN: "holesky"
   TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
@@ -280,11 +266,10 @@ ferryWithdrawalEnvEth:
   LOG: silly
 ferryWithdrawalEnvSecretsEth:
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/holeskyFerryWithdrawalPrivateKey
-
 ferryWithdrawalEnvArb:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-holesky-v3.gasp.xyz
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaWssUrl
-  MANGATA_CONTRACT_ADDRESS: 0x8E92222f10Ee71236AC93de68b386c2A3b950151
+  MANGATA_CONTRACT_ADDRESS: 0x18Ef4858e5581d20c2145ea0dFEA7F4d81A957A5
   L1_CHAIN: "arbitrum-sepolia"
   TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
@@ -292,10 +277,9 @@ ferryWithdrawalEnvArb:
   LOG: silly
 ferryWithdrawalEnvSecretsArb:
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/arbitrumSepoliaFerryWithdrawalPrivateKey
-
 ferryWithdrawalEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
-  MANGATA_CONTRACT_ADDRESS: "0x72fB284429F4088aD38E7Bc229A218FEefe62a3E"
+  MANGATA_CONTRACT_ADDRESS: "0x2215C253202504a42723B46fe72D1Bb61B3b1918"
   L1_CHAIN: "base-sepolia"
   TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
@@ -304,14 +288,13 @@ ferryWithdrawalEnvBase:
 ferryWithdrawalEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseSepoliaWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/baseSepoliaFerryWithdrawalPrivateKey
-
 ########################
 # ferry-closer configs #
 ########################
 closerEnabled: true
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
-  MANGATA_CONTRACT_ADDRESS: "0xCACb3e67CA70Af311744681B6E51B880da24a78a"
+  MANGATA_CONTRACT_ADDRESS: "0x34B38Fd98aBE38B52258253fb4E1D0F5EFF26343"
   L1_CHAIN: "holesky"
   TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
   TX_COST: "1000000000000000000000"
@@ -320,10 +303,9 @@ closerEnvEth:
 closerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/holeskyCloserPrivateKey
-
 closerEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
-  MANGATA_CONTRACT_ADDRESS: "0x8E92222f10Ee71236AC93de68b386c2A3b950151"
+  MANGATA_CONTRACT_ADDRESS: "0x18Ef4858e5581d20c2145ea0dFEA7F4d81A957A5"
   L1_CHAIN: "arbitrum-sepolia"
   TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
   TX_COST: "1000000000000000000000"
@@ -332,10 +314,9 @@ closerEnvArb:
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/arbitrumSepoliaCloserPrivateKey
-
 closerEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
-  MANGATA_CONTRACT_ADDRESS: "0x72fB284429F4088aD38E7Bc229A218FEefe62a3E"
+  MANGATA_CONTRACT_ADDRESS: "0x2215C253202504a42723B46fe72D1Bb61B3b1918"
   L1_CHAIN: "base-sepolia"
   TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
   TX_COST: "1000000000000000000000"
