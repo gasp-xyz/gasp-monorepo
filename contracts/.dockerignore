@@ -30,3 +30,6 @@ tmp
 
 node_modules
 docs
+
+.moon/cache
+moon.yml

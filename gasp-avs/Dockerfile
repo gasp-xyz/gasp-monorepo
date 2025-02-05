@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG ROLLUP_NODE_VERSION
+ARG ROLLUP_NODE_VERSION=local
 FROM gaspxyz/rollup-node:${ROLLUP_NODE_VERSION} AS rollup-node-image
 
 FROM rust:1.78 AS builder

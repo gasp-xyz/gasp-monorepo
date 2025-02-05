@@ -7,12 +7,6 @@ on:
         description: "Branch to create in gasp-dev-kit"
         type: string
         required: true
-      nodeDockerImage:
-        description: "Name of the gasp-node docker reference"
-        type: string
-        required: false
-        # default: "gaspxyz/rollup-node:main"
-        default: ''
       globalVersion:
         description: "Set gasp-node version."
         type: string
@@ -23,12 +17,6 @@ on:
         description: "Branch to create in gasp-dev-kit"
         type: string
         required: true
-      nodeDockerImage:
-        description: "Name of the gasp-node docker reference"
-        type: string
-        required: false
-        # default: "gaspxyz/rollup-node:main"
-        default: ''
       globalVersion:
         description: "Set gasp-node version."
         type: string
@@ -59,10 +47,10 @@ jobs:
       - name: Invoke workflow in gasp-dev-kit repo with inputs
         uses: the-actions-org/workflow-dispatch@v4
         env:
-          NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImage != '' && inputs.nodeDockerImage || format('gaspxyz/rollup-node:{0}', inputs.globalVersion) }}
+          NODE_DOCKER_IMAGE_VERSION: ${{ inputs.globalVersion }}
         with:
           ref: ${{ inputs.branch }}
           workflow: pr-automation-types-rollup-solochain.yml
           repo: gasp-xyz/gasp-dev-kit
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-          inputs: '{"parachainDocker": "${{ env.NODE_DOCKER_IMAGE }}", "branch": "${{ inputs.branch }}", "nodeRepository": "gasp-xyz/gasp-monorepo", "nodeRepositoryRevision": "${{ inputs.globalVersion }}", "nodeCodebaseWorkingDirectory": "mangata-repo/gasp-node"}'
+          inputs: '{"nodeDockerImageTag": "${{ env.NODE_DOCKER_IMAGE_VERSION }}", "branch": "${{ inputs.branch }}", "nodeRepository": "gasp-xyz/gasp-monorepo", "nodeRepositoryRevision": "${{ inputs.globalVersion }}", "nodeCodebaseWorkingDirectory": "mangata-repo/gasp-node"}'
