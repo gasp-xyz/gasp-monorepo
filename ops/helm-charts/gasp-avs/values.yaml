@@ -65,3 +65,97 @@ extraContainers: []
 
 # -- Additional init containers to run in the pod
 extraInitContainers: []
+
+# Service definitions
+service:
+  enabled: false
+  annotations: {cloud.google.com/neg: '{"ingress":true}'}
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+  # `name` sets the name of the default port
+  name: default-service
+  # allocateLoadBalancerNodePorts: false
+  # externalTrafficPolicy: Local
+  additionalPorts: []
+
+# ServiceMonitor definitions to configure Prometheus metrics collection
+serviceMonitor:
+  enabled: false
+  # `port` parameter should be the name of the service port this endpoint refers to
+  # by default it is called `default-service`
+  port: default-service
+  interval: 30s
+  path: /metrics
+  # honorLabels: true
+  # annotations:
+  #   custom: annotation
+  # scrapeTimeout: 10s
+  # relabelings: []
+  # metricRelabelings: []
+  # namespaceSelector:
+  #   matchNames:
+  #     - monitoring
+  # targetLabels: []
+  # jobLabel: ""
+  # sampleLimit: 0
+# Example usage:
+# serviceMonitor:
+#   enabled: true
+#   port: default-service
+#   interval: 30s
+#   path: /metrics
+
+
+# Additional container ports to open
+# This can allow scraping by prometheus, or exposure to other services
+additionalPorts: []
+  # - containerPort: 8001
+  #   name: http-admin
+  #   protocol: TCP
+
+# livenessProbes are used to determine when to restart a container
+livenessProbe:
+  enabled: false
+  # For the liveness probe we'll wait a full 2 minutes, just incase this service takes a while to start-up
+  initialDelaySeconds: 120
+  periodSeconds: 10
+  timeoutSeconds: 9
+  successThreshold: 1
+  failureThreshold: 3
+
+  # Specify either httpGet, tcpSocket or exec
+  # httpGet uses scheme, path and port (below)
+  # tcpSocket uses port (below)
+  # exec uses command (below)
+  probeType: httpGet
+
+  # parameters for probes
+  scheme: HTTP
+  path: /alive
+  port: default-service
+  command:
+    - ls -la /
+
+
+# readinessProbes are used to determine when a container is ready to start accepting traffic
+readinessProbe:
+  enabled: false
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 4
+  successThreshold: 2
+  failureThreshold: 2
+
+  # Specify either httpGet, tcpSocket or exec
+  # httpGet uses scheme, path and port (below)
+  # tcpSocket uses port (below)
+  # exec uses command (below)
+  probeType: httpGet
+
+  # parameters for probes
+  scheme: HTTP
+  path: /ready
+  port: default-service
+  command:
+    - ls -la /
