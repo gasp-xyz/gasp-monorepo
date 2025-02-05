@@ -99,10 +99,10 @@ aggregatorEnv:
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_TASK_EXPIRATION: "300"
   AVS_UPDATE_STAKE_PERIOD: "150"
-  OPT_IN_AT_STARTUP: "false"
+  OPT_IN_AT_STARTUP: "true"
   LOG_LEVEL: "info"
   RUST_LOG: avs=debug
-  AGG_IDLE_START: true
+  AGG_IDLE_START: false
   AGG_RUN_TRIGGER_API_KEY: "secrettoken"
 #####################
 # gaspAvs configs #
@@ -158,7 +158,7 @@ updaterEnv:
   AVS_REGISTRY_COORDINATOR_ADDR: 0xef5Ea04287c2BCd0A984563B055f39e650dF0e28
   GASP_SERVICE_ADDR: 0x710E31ce9950483f47c80EA2655143dbA5bA3374
   TESTNET: "false"
-  PUSH_FIRST_INIT: "false"
+  PUSH_FIRST_INIT: "true"
   REINIT: "false"
 updaterEnvSecretsBase:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/baseSepoliaUpdaterEcdsaKeyJson
@@ -174,7 +174,7 @@ updaterEnvBase:
   AVS_REGISTRY_COORDINATOR_ADDR: 0xef5Ea04287c2BCd0A984563B055f39e650dF0e28
   GASP_SERVICE_ADDR: 0x80A15DbBE2f2b6E2A28aEbbE9cB0a038DC0be64e
   TESTNET: "false"
-  PUSH_FIRST_INIT: "false"
+  PUSH_FIRST_INIT: "true"
   REINIT: "false"
 ############################
 # sequencer configs #
