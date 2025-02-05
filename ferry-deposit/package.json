@@ -1,7 +1,7 @@
 {
-  "name": "rollup-sequencer",
+  "name": "ferry-deposit",
   "version": "1.0.0",
-  "description": "Rollup Sequencer",
+  "description": "ferry-deposit",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -18,6 +18,7 @@
   "license": "ISC",
   "devDependencies": {
     "@biomejs/biome": "1.6.4",
+    "@types/express": "^5.0.0",
     "@types/json-bigint": "^1.0.4",
     "@types/node": "20.10.3",
     "rimraf": "5.0.5",
@@ -28,12 +29,15 @@
     "@polkadot/api": "^11.1.1",
     "@types/immutable": "^3.8.6",
     "dotenv": "^16.3.1",
+    "express": "^4.21.2",
     "gasp-sdk": "0.0.2-eth-rollup-develop.67",
     "gasp-types": "0.0.2-eth-rollup-develop.67",
     "immutable": "^4.3.7",
     "json-bigint": "^1.0.0",
+    "prom-client": "^15.1.3",
     "viem": "^2.17.4",
     "winston": "^3.15.0",
     "zod": "^3.22.5"
-  }
+  },
+  "packageManager": "yarn@4.6.0"
 }

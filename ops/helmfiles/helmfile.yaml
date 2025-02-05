@@ -42,6 +42,8 @@ releases:
           tls:
             - hosts: ["avs-aggregator-{{ .Values.environmentName }}.gasp.xyz"]
               secretName: avs-aggregator-tls
+        serviceMonitor:
+          enabled: true
         podReplacementPolicy: Failed
         resources:
           requests:
@@ -63,6 +65,10 @@ releases:
         envSecrets: {{ .Values.gaspAvsEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.gaspAvsEnv | toYaml | nindent 10 }}
         data: {{ .Values | getOrNil "gaspAvsData" | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 1
@@ -81,6 +87,10 @@ releases:
           tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.updaterEnv | toYaml | nindent 10 }}
         envSecrets: {{ .Values.updaterEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -98,6 +108,10 @@ releases:
           tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.updaterEnvBase | toYaml | nindent 10 }}
         envSecrets: {{ .Values.updaterEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -116,6 +130,10 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -133,6 +151,10 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvEth2" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth2"| expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -150,6 +172,10 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvEth3" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth3"| expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -168,6 +194,10 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -185,6 +215,10 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvArb2" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb2"| expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -202,6 +236,10 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvArb3" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb3"| expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -220,6 +258,10 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.sequencerEnvBase | toYaml | nindent 10 }}
         envSecrets: {{ .Values.sequencerEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -237,6 +279,10 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvBase2" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase2"| expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -254,6 +300,10 @@ releases:
           tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values | getOrNil "sequencerEnvBase3" | toYaml | nindent 10 }}
         envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase3"| expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -272,6 +322,10 @@ releases:
           tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryDepositEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryDepositEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -289,6 +343,10 @@ releases:
           tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryDepositEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryDepositEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -306,6 +364,10 @@ releases:
           tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryDepositEnvBase | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryDepositEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -324,6 +386,10 @@ releases:
           tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryWithdrawalEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryWithdrawalEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -341,6 +407,10 @@ releases:
           tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryWithdrawalEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryWithdrawalEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -378,6 +448,10 @@ releases:
           args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -397,6 +471,10 @@ releases:
           args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -416,6 +494,10 @@ releases:
           args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvBase | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -431,7 +513,7 @@ releases:
     values:
       - image:
           repository: gaspxyz/gasp-contracts
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "contractsImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
         nameOverride: 'evm-node-eth'
@@ -448,7 +530,7 @@ releases:
     values:
       - image:
           repository: gaspxyz/gasp-contracts
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "contractsImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
         nameOverride: 'evm-node-arb'
@@ -465,7 +547,7 @@ releases:
     values:
       - image:
           repository: gaspxyz/gasp-contracts
-          tag: {{ requiredEnv "IMAGE_TAG" | quote }}
+          tag: {{ .Values | get "contractsImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         remoteCluster: {{ .Values.remoteCluster }}
         environment: {{ .Values.environmentName }}
         nameOverride: 'evm-node-base'

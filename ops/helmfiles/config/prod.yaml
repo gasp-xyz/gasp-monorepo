@@ -4,9 +4,9 @@ blockscoutEnabled: false
 enableArbitrumServices: true
 enableBaseServices: true
 
-####################
-# evm-node configs #
-####################
+##################################
+# contracts && evm-node configs #
+##################################
 evmNode:
   enabled: false
 
@@ -43,7 +43,7 @@ collator:
   collator01:
     # Identity ID: 12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     customNodeKey: ref+sops://secrets.enc.yaml#/rollupProdCollator01CustomNodeKey
-    bootnodeAddr: /dns4/collator-02-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWFGDFJken9CfwP1WRQ9MDANskcfZCeAVHTpE6utdhHM6Y
+    bootnodeAddr: /dns4/collator-02-p2p/tcp/30333/p2p/12D3KooWFGDFJken9CfwP1WRQ9MDANskcfZCeAVHTpE6utdhHM6Y
     accountKeys:
       - type: aura
         scheme: sr25519
@@ -60,7 +60,7 @@ collator:
   collator02:
     # Identity ID: 12D3KooWFGDFJken9CfwP1WRQ9MDANskcfZCeAVHTpE6utdhHM6Y
     customNodeKey: ref+sops://secrets.enc.yaml#/rollupProdCollator02CustomNodeKey
-    bootnodeAddr: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     accountKeys:
       - type: aura
         scheme: sr25519
@@ -78,7 +78,7 @@ collator:
     enabled: true
     # Identity ID: 12D3KooWMG7Benq1sMjRzgf1wATin9t61Rt88LuE1a5exx5WcPm9
     customNodeKey: ref+sops://secrets.enc.yaml#/rollupProdCollator03CustomNodeKey
-    bootnodeAddr: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     accountKeys:
       - type: aura
         scheme: sr25519
@@ -96,7 +96,7 @@ collator:
     enabled: true
     # Identity ID: 12D3KooWDq43eHqWDhW4J1gZpDuQDxUCKirD3sQvyjp9m5udxiEN
     customNodeKey: ref+sops://secrets.enc.yaml#/rollupProdCollator04CustomNodeKey
-    bootnodeAddr: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     accountKeys:
       - type: aura
         scheme: sr25519
@@ -111,19 +111,19 @@ collator:
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-c
   rpc01:
-    bootnodeAddr: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
   rpc02:
-    bootnodeAddr: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-c
   rpc03:
-    bootnodeAddr: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/ws/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
   rpcArchive01:
-    bootnodeAddr: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
 
@@ -189,7 +189,7 @@ gaspAvsEnv:
   AVS_TASK_EXPIRATION: "300"
   AVS_UPDATE_STAKE_PERIOD: "150"
   LOG_LEVEL: "info"
-  RUST_LOG: gasp_avs=debug,ether=info
+  RUST_LOG: gasp_avs=info,ether=info
   OPT_IN_AT_STARTUP: "false"
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
@@ -218,7 +218,7 @@ updaterEnv:
   RUST_LOG: info
   # PUSH_FIRST_INIT: "false"
   SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
-  SOURCE_AVS_DEPLOYMENT_BLOCK: '21394442'
+  SOURCE_AVS_DEPLOYMENT_BLOCK: "21394442"
 
 updaterEnvSecretsBase:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-key
@@ -238,13 +238,13 @@ updaterEnvBase:
   RUST_LOG: info
   # PUSH_FIRST_INIT: "false"
   SYNC_SKIPS_FIRST_OP_TASK_COMPLETED_EVENT: "false"
-  SOURCE_AVS_DEPLOYMENT_BLOCK: '21394442'
+  SOURCE_AVS_DEPLOYMENT_BLOCK: "21394442"
 
 ############################
 # sequencer configs #
 ############################
 sequencerEnabled: true
-sequencerImageTag: e82c4b3d9539b81f1cbe48066aed73ba5463fc10
+sequencerImageTag: c6cdea833576a31f8343d5ef43babe33cec06819
 
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
@@ -252,6 +252,7 @@ sequencerEnvEth:
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
   LIMIT: "5000"
   WATCHDOG: 300
+  RUST_LOG: "info"
 sequencerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerEthereumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-eth-1
@@ -263,6 +264,7 @@ sequencerEnvEth2:
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
   LIMIT: "5000"
   WATCHDOG: 300
+  RUST_LOG: "info"
 sequencerEnvSecretsEth2:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerEthereumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-eth-2
@@ -274,6 +276,7 @@ sequencerEnvEth3:
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
   LIMIT: "5000"
   WATCHDOG: 300
+  RUST_LOG: "info"
 sequencerEnvSecretsEth3:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerEthereumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-eth-3
@@ -285,6 +288,7 @@ sequencerEnvArb:
   MANGATA_CONTRACT_ADDRESS: "0x3aDdEb54ddd43Eb40235eC32DfA7928F28A44bb5"
   LIMIT: "5000"
   WATCHDOG: 300
+  RUST_LOG: "info"
 sequencerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerArbitrumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-arb-1
@@ -296,6 +300,7 @@ sequencerEnvArb2:
   MANGATA_CONTRACT_ADDRESS: "0x3aDdEb54ddd43Eb40235eC32DfA7928F28A44bb5"
   LIMIT: "5000"
   WATCHDOG: 300
+  RUST_LOG: "info"
 sequencerEnvSecretsArb2:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerArbitrumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-arb-2
@@ -307,6 +312,7 @@ sequencerEnvArb3:
   MANGATA_CONTRACT_ADDRESS: "0x3aDdEb54ddd43Eb40235eC32DfA7928F28A44bb5"
   LIMIT: "5000"
   WATCHDOG: 300
+  RUST_LOG: "info"
 sequencerEnvSecretsArb3:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerArbitrumMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-arb-3
@@ -318,6 +324,7 @@ sequencerEnvBase:
   MANGATA_CONTRACT_ADDRESS: "0x308e483afDD225D6cb7bF4d44B8e4a03DFD9c0De"
   LIMIT: "5000"
   WATCHDOG: 300
+  RUST_LOG: "info"
 sequencerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerBaseMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-base-1
@@ -329,6 +336,7 @@ sequencerEnvBase2:
   MANGATA_CONTRACT_ADDRESS: "0x308e483afDD225D6cb7bF4d44B8e4a03DFD9c0De"
   LIMIT: "5000"
   WATCHDOG: 300
+  RUST_LOG: "info"
 sequencerEnvSecretsBase2:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerBaseMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-base-2
@@ -340,6 +348,7 @@ sequencerEnvBase3:
   MANGATA_CONTRACT_ADDRESS: "0x308e483afDD225D6cb7bF4d44B8e4a03DFD9c0De"
   LIMIT: "5000"
   WATCHDOG: 300
+  RUST_LOG: "info"
 sequencerEnvSecretsBase3:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/sequencerBaseMainnetWssUrl
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-sequencer-base-3
@@ -439,7 +448,7 @@ closerEnvEth:
   TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
-  LOG: silly
+  LOG: info
 closerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -452,7 +461,7 @@ closerEnvArb:
   TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
-  LOG: silly
+  LOG: info
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerArbitrumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -465,7 +474,7 @@ closerEnvBase:
   TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
-  LOG: silly
+  LOG: info
 closerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerBaseMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C

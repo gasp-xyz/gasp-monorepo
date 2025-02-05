@@ -1,7 +1,7 @@
 {
-  "name": "rollup-sequencer",
+  "name": "ferry-withdrawal",
   "version": "1.0.0",
-  "description": "Rollup Sequencer",
+  "description": "ferry-withdrawal",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "closer-service": "node build/src/closer.js",
     "test": "vitest --dir tests",
     "test-ferry": "vitest --dir tests ferry",
-    "test-closer": "vitest --dir tests closer",
+    "test-closer": "vitest --dir tests closer stash",
     "test-l1": "vitest --dir tests l1",
     "test-l2": "vitest --dir tests l2"
   },
@@ -20,6 +20,7 @@
   "license": "ISC",
   "devDependencies": {
     "@biomejs/biome": "1.6.4",
+    "@types/express": "^5.0.0",
     "@types/json-bigint": "^1.0.4",
     "@types/node": "20.10.3",
     "rimraf": "5.0.5",
@@ -31,12 +32,15 @@
     "@types/immutable": "^3.8.6",
     "axios": "^1.7.9",
     "dotenv": "^16.4.5",
+    "express": "^4.21.2",
     "gasp-sdk": "0.0.2-eth-rollup-develop.67",
     "gasp-types": "0.0.2-eth-rollup-develop.67",
     "immutable": "^4.3.7",
     "json-bigint": "^1.0.0",
+    "prom-client": "^15.1.3",
     "viem": "^2.17.4",
     "winston": "^3.15.0",
     "zod": "^3.22.5"
-  }
+  },
+  "packageManager": "yarn@4.6.0"
 }

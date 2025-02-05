@@ -27,3 +27,9 @@ out
 
 # Ignore temporary files
 tmp
+
+node_modules
+docs
+
+.moon/cache
+moon.yml

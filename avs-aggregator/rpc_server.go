@@ -2,14 +2,15 @@ package aggregator
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 
-	"encoding/hex"
-
 	"github.com/ethereum/go-ethereum/accounts/abi"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core"
@@ -24,17 +25,17 @@ var (
 	TaskNotFoundError400                     = errors.New("400. Task not found")
 	OperatorNotPartOfTaskQuorum400           = errors.New("400. Operator not part of quorum")
 	OperatorNotRegistered400                 = errors.New("400. Operator not registered in AVS")
-	BadTaskResponseError500       = errors.New("500. Bad Task Response")
+	BadTaskResponseError500                  = errors.New("500. Bad Task Response")
 	TaskResponseDigestNotFoundError500       = errors.New("500. Failed to get task response digest")
 	UnknownErrorWhileVerifyingSignature400   = errors.New("400. Failed to verify signature")
 	SignatureVerificationFailed400           = errors.New("400. Signature verification failed")
 	CallToGetCheckSignaturesIndicesFailed500 = errors.New("500. Failed to get check signatures indices")
 )
 
-func (agg *Aggregator) startServer(ctx context.Context, apiKey string, runTrigger chan struct{} ) error {
+func (agg *Aggregator) startServer(ctx context.Context, apiKey string, runTrigger chan struct{}) error {
 	http.HandleFunc("/", agg.handler)
+	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/isAwaitingRunTrigger", func(w http.ResponseWriter, r *http.Request) {
-
 		var isAwaitingRunTrigger bool
 
 		// If this is run in parallel then there will be a race condition between this /isAwaitingRunTrigger and /run
@@ -55,28 +56,28 @@ func (agg *Aggregator) startServer(ctx context.Context, apiKey string, runTrigge
 		// Respond with JSON named data
 		response := map[string]interface{}{
 			"isAwaitingRunTrigger": isAwaitingRunTrigger,
-			"status":  "OK",
+			"status":               "OK",
 		}
-	
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response) // Encode and send JSON response
 	})
 	http.HandleFunc("/run", func(w http.ResponseWriter, r *http.Request) {
 		// Parse query parameters
 		key := r.URL.Query().Get("SECRET_API_KEY")
-	
+
 		if key != apiKey {
 			agg.logger.Error("Api key no match", "Received", key)
 			http.Error(w, "Api key no match", http.StatusBadRequest)
 			return
 		}
-	
+
 		// Respond with JSON named data
 		response := map[string]string{
 			"message": fmt.Sprintf("Triggered run on agg"),
 			"status":  "OK",
 		}
-	
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response) // Encode and send JSON response
 		runTrigger <- struct{}{}
@@ -129,8 +130,8 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 type SignedTaskResponse struct {
 	OpTaskResponse string
 	RdTaskResponse string
-	BlsSignature bls.Signature
-	OperatorId   types.OperatorId
+	BlsSignature   bls.Signature
+	OperatorId     types.OperatorId
 }
 
 // rpc endpoint which is called by operator
@@ -138,6 +139,13 @@ type SignedTaskResponse struct {
 // rpc framework forces a reply type to exist, so we put bool as a placeholder
 func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskResponse, reply *bool) error {
 	agg.logger.Info("Received signed task response", "response", signedTaskResponse, "operatorId", signedTaskResponse.OperatorId.LogValue())
+
+	if len(signedTaskResponse.OpTaskResponse) < 2 ||
+		len(signedTaskResponse.RdTaskResponse) < 2 ||
+		signedTaskResponse.BlsSignature.G1Point == nil {
+		agg.logger.Error("Invalid task response")
+		return BadTaskResponseError500
+	}
 
 	op_task_response_bytes, err := hex.DecodeString(signedTaskResponse.OpTaskResponse[2:])
 	if err != nil {
@@ -151,12 +159,12 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 		return BadTaskResponseError500
 	}
 
-	if len(op_task_response_bytes) !=0 && len(rd_task_response_bytes) !=0 {
+	if len(op_task_response_bytes) != 0 && len(rd_task_response_bytes) != 0 {
 		agg.logger.Error("Both op and rd task response are popoulated")
 		return BadTaskResponseError500
 	}
 
-	if len(op_task_response_bytes) ==0 && len(rd_task_response_bytes) ==0 {
+	if len(op_task_response_bytes) == 0 && len(rd_task_response_bytes) == 0 {
 		agg.logger.Error("Neither op nor rd task response are popoulated")
 		return BadTaskResponseError500
 	}
@@ -170,9 +178,9 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 
 	parsedAbi, err := taskmanager.ContractFinalizerTaskManagerMetaData.GetAbi()
 
-	if len(op_task_response_bytes) !=0 {
+	if len(op_task_response_bytes) != 0 {
 		var taskResponse taskmanager.IFinalizerTaskManagerOpTaskResponse
-	
+
 		// TODO replace with dummy function?
 		inputParameters := parsedAbi.Methods["respondToOpTask"].Inputs
 		args := inputParameters[1:2]
@@ -187,13 +195,13 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 			agg.logger.Error("Failed to get task response cx", "cx", cx)
 			return TaskResponseDigestNotFoundError500
 		}
-	
+
 		taskResponse = cx
-	
+
 		taskId = types.TaskId{
-			TaskType: types.TaskType(0),
+			TaskType:  types.TaskType(0),
 			TaskIndex: types.TaskIndex(taskResponse.ReferenceTaskIndex),
-			}
+		}
 		taskResponseDigest, err = core.GetOpTaskResponseDigest(&taskResponse)
 		if err != nil {
 			agg.logger.Error("Failed to get task response digest", "err", err)
@@ -203,9 +211,9 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 
 	}
 
-	if len(rd_task_response_bytes) !=0 {
+	if len(rd_task_response_bytes) != 0 {
 		var taskResponse taskmanager.IFinalizerTaskManagerRdTaskResponse
-	
+
 		// TODO replace with dummy function?
 		inputParameters := parsedAbi.Methods["respondToRdTask"].Inputs
 		args := inputParameters[1:2]
@@ -220,13 +228,13 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 			agg.logger.Error("Failed to get task response cx", "cx", cx)
 			return TaskResponseDigestNotFoundError500
 		}
-	
+
 		taskResponse = cx
-	
+
 		taskId = types.TaskId{
-			TaskType: types.TaskType(1),
+			TaskType:  types.TaskType(1),
 			TaskIndex: types.TaskIndex(taskResponse.ReferenceTaskIndex),
-			}
+		}
 		taskResponseDigest, err = core.GetRdTaskResponseDigest(&taskResponse)
 		if err != nil {
 			agg.logger.Error("Failed to get task response digest", "err", err)

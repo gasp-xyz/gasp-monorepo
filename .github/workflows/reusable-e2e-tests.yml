@@ -8,7 +8,7 @@ on:
       substrateNodeVersion:
         type: string
         required: false
-        default: "eth-rollup-develop-fast"
+        default: "main-fast"
       globalVersion:
         type: string
         required: false
@@ -21,7 +21,7 @@ on:
       substrateNodeVersion:
         type: string
         required: false
-        default: "eth-rollup-develop-fast"
+        default: "main-fast"
       globalVersion:
         type: string
         required: false
@@ -38,13 +38,15 @@ env:
   AVS_AGGREGATOR_VERSION: ${{ inputs.globalVersion }}
   UPDATER_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
-  ROLLUP_UPDATER_VERSION: ${{ inputs.globalVersion }}
   GASP_AVS_VERSION: ${{ inputs.globalVersion }}-fast
+  GASP_CONTRACTS_VERSION: ${{ inputs.globalVersion }}
+  FERRY_DEPOSIT_VERSION: ${{ inputs.globalVersion }}
+  FERRY_WITHDRAWAL_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_NODE_VERSION: ${{ inputs.substrateNodeVersion }}
 
 jobs:
   run-e2e-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -118,7 +120,7 @@ jobs:
           reporter: jest-junit
 
   run-avs-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         test: ["test-opt-out", "test-corrupted"]
@@ -163,7 +165,7 @@ jobs:
 
   ferry-withdrawal-test:
     name: Ferry withdrawal tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ferry-withdrawal
@@ -172,34 +174,35 @@ jobs:
         with:
           submodules: recursive
 
+      - run: corepack enable && corepack prepare yarn@4.6.0 --activate
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
-
-      - run: npm ci
-
-      - name: Build
-        run: npm run build
+          node-version: '18'
+          cache: yarn
+          cache-dependency-path: "./ferry-withdrawal/yarn.lock"
+      
+      - run: yarn install --immutable
+      - run: yarn run build
 
       - name: Build
         working-directory: .
         run: docker compose up --wait ferry-withdrawal-eth
 
       - name: Test L1 interface
-        run: npm run test-l1
+        run: yarn run test-l1
 
       - name: Test L2 interface
-        run: npm run test-l2
+        run: yarn run test-l2
 
       - name: Test ferry
-        run: npm run test-ferry
+        run: yarn run test-ferry
 
       - name: Test closer service
-        run: npm run test-closer
+        run: yarn run test-closer
 
   ferry-deposit-test:
     name: Ferry deposit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ferry-deposit
@@ -207,25 +210,26 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-
+      
+      - run: corepack enable && corepack prepare yarn@4.6.0 --activate
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '18'
+          cache: yarn
+          cache-dependency-path: "./ferry-deposit/yarn.lock"
 
-      - run: npm ci
-
-      - name: Build
-        run: npm run build
+      - run: yarn install --immutable
+      - run: yarn run build
 
       - name: Build
         working-directory: .
         run: docker compose up --wait ferry-deposit-eth
 
       - name: Test L1 interface
-        run: npm run test-l1
+        run: yarn run test-l1
 
       - name: Test L2 interface
-        run: npm run test-l2
+        run: yarn run test-l2
 
       - name: Test ferry
-        run: npm run test-ferry
+        run: yarn run test-ferry

@@ -1,0 +1,26 @@
+type: application
+language: rust
+toolchain:
+  rust:
+    version: 1.78.0
+
+env:
+  CARGO_TERM_COLOR: 'always'
+
+fileGroups:
+  sources:
+    - 'src/**/*'
+    - 'bindings/**/*'
+    - 'Cargo.toml'
+
+tasks:
+  build:
+    command: cargo build --release
+    inputs: ['@globs(sources)']
+    outputs: ['target/release/main']
+  build-image-local:
+    command: 'docker buildx build --build-arg ROLLUP_NODE_VERSION=local -t gaspxyz/gasp-avs:local .'
+    options:
+      envFile: '/.env'
+    deps: ['gasp-node:build-image-local']
+    inputs: ['@globs(sources)', 'Dockerfile']

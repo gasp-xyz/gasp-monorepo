@@ -34,7 +34,7 @@ class Ferry {
 	}
 
 	async hasFundsToCoverTxFee() {
-		const balances = await this.l2.getBalances(this.me);
+		const balances = await this.l2.getBalance(this.me);
 		const tokenAddressToBalance = new Map<string, bigint>(
 			Array.from(balances, ([k, v]) => [u8aToHex(k), v]),
 		);
@@ -89,7 +89,7 @@ class Ferry {
 
 	async rateDeposits(deposits: Deposit[]): Promise<Deposit[]> {
 		const nativeTokenAddress = await this.l2.getNativeTokenAddress();
-		const balances = await this.l2.getBalances(this.me);
+		const balances = await this.l2.getBalance(this.me);
 
 		balances.forEach(([tokenAddress, balance]) => {
 			logger.silly(`\tBalance ${u8aToHex(tokenAddress)} : ${balance}`);

@@ -2,6 +2,7 @@ use envconfig::Envconfig;
 use hex::FromHex;
 use tracing::level_filters::LevelFilter;
 
+mod metrics;
 mod sequencer;
 mod watchdog;
 use tokio::time::Duration;
@@ -9,7 +10,7 @@ use watchdog::Watchdog;
 
 use sequencer::Sequencer;
 mod l1;
-use l1::RolldownContract;
+use l1::{CachedL1Interface, RolldownContract};
 
 mod l2;
 use l2::Gasp;
@@ -49,6 +50,8 @@ pub enum Error {
     #[error("Sequencer error")]
     SequencerError(#[from] sequencer::Error),
     #[error("L1 error")]
+    L1Error(#[from] l1::L1Error),
+    #[error("Deserialization error")]
     DeserializationError(#[from] hex::FromHexError),
     #[error("Unsupported chain `{0}`")]
     UnsupportedChain(String),
@@ -60,8 +63,7 @@ pub enum Error {
 pub async fn main() {
     let filter = tracing_subscriber::EnvFilter::builder()
         .with_default_directive(LevelFilter::INFO.into())
-        .from_env_lossy()
-        .add_directive("sequencer=trace".parse().expect("proper directive"));
+        .from_env_lossy();
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
     let mut config = Config::init_from_env().unwrap();
@@ -97,6 +99,10 @@ async fn run(config: Config) -> Result<(), Error> {
         watchdog.run().await;
     });
 
+    let _metrics = tokio::spawn(async move {
+        metrics::serve_metrics(80).await;
+    });
+
     let update_size_limit = config.update_size_limit;
     assert!(
         update_size_limit > 0,
@@ -119,12 +125,17 @@ async fn run(config: Config) -> Result<(), Error> {
         .map_err(Into::<sequencer::Error>::into)?;
     tracing::info!("Connected to {}", config.l2_uri);
 
-    let rolldown = RolldownContract::new(&config.l1_uri, rolldown_contract_address, eth_secret_key)
-        .await
-        .map_err(Into::<sequencer::Error>::into)?;
+    let provider = l1::create_provider(config.l1_uri.as_str(), eth_secret_key).await?;
     tracing::info!("Connected to {}", config.l1_uri);
 
-    let seq = Sequencer::new(rolldown, gasp, chain, update_size_limit, config.tx_cost);
+    let rolldown = RolldownContract::from_provider(rolldown_contract_address, provider.clone());
+
+    let _balance_tracker = tokio::spawn(async move {
+        metrics::report_account_balance(provider).await;
+    });
+
+    let lru = CachedL1Interface::new(rolldown, std::num::NonZeroUsize::new(100).unwrap());
+    let seq = Sequencer::new(lru, gasp, chain, update_size_limit, config.tx_cost);
     let sequencer_service = tokio::spawn(async move { seq.run(tx).await });
 
     watchdog
