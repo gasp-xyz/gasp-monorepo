@@ -67,10 +67,13 @@ export const processDataForDashboard = async (
         decimals !== null
           ? await calculateVolume(tokenId, decimals, eventVolume)
           : 0
+
       existingRecord.totalVolume = existingRecord.totalVolume + newVolume
       await swapRepository.save(existingRecord)
+      logger.info('Existing record updated with data:', existingRecord)
     } else {
       //we got the trade for new account
+      logger.info('No records found, creating a new one for a swap')
       const { decimals } = await decimalsFromTokenId(api, tokenId)
       const volume =
         decimals !== null
@@ -84,6 +87,7 @@ export const processDataForDashboard = async (
         totalTrades: 1,
       }
       await swapRepository.save(newRecord)
+      logger.info('New record saved with data:', newRecord)
     }
   }
 }
@@ -92,8 +96,10 @@ export const processDataForVolumeHistory = async (
   api: ApiPromise,
   event: Event
 ) => {
+  logger.info('Entered processDataForVolumeHistory')
   // Implementation for processing data for volume history
   for (const swap of (event.data as any).swaps) {
+    logger.info('Swap data:', swap)
     const { assetIn, assetOut, amountIn, amountOut, poolId } = swap
     //update pool volume
     const poolVolumeKey = `trades:pool:${poolId}`
@@ -111,7 +117,9 @@ export const processDataForVolumeHistory = async (
     )) as [string, string]
     const poolVolumeValue =
       poolVolumeValueRaw !== undefined ? parseFloat(poolVolumeValueRaw) : 0
-    logger.info(`Fetched pool volume for ${poolId}: ${poolVolumeValue}`)
+    logger.info(
+      `Fetched pool volume for ${poolId}, latest value from the database is : ${poolVolumeValue}`
+    )
     const { decimals: decimalsIn } = await decimalsFromTokenId(api, assetIn)
     const volumeInUSD =
       decimalsIn !== null
@@ -122,10 +130,22 @@ export const processDataForVolumeHistory = async (
       decimalsOut !== null
         ? await calculateVolume(assetOut, decimalsOut, amountOut)
         : 0
+
     const newPoolVolume =
-      poolVolumeValue + Number(volumeInUSD) + Number(volumeOutUSD)
+      volumeInUSD === 0 || volumeOutUSD === 0
+        ? poolVolumeValue
+        : poolVolumeValue + Number(volumeInUSD) + Number(volumeOutUSD)
     timeseries.client.call('TS.ADD', poolVolumeKey, '*', newPoolVolume)
-    logger.info(`Updated pool volume for ${poolId}: ${newPoolVolume}`)
+    logger.info(
+      `Formula for poolId ${poolId} new volume is =  ${poolVolumeValue} + ${Number(
+        volumeInUSD
+      )} + ${Number(
+        volumeOutUSD
+      )} but if the price of one token is 0 pool volume stays unchanged`
+    )
+    logger.info(
+      `Updated pool volume for ${poolId}, new value in the database is : ${newPoolVolume}`
+    )
     //update pool ALL volume
     const ALLpoolVolumeKey = `trades:pool:ALL`
     await checkKey(ALLpoolVolumeKey, ['pool', 'ALL'])
@@ -138,8 +158,19 @@ export const processDataForVolumeHistory = async (
         ? parseFloat(ALLpoolVolumeValueRaw)
         : 0
     const ALLnewPoolVolume =
-      ALLpoolVolumeValue + (volumeInUSD as number) + (volumeOutUSD as number)
+      volumeInUSD === 0 || volumeOutUSD === 0
+        ? ALLpoolVolumeValue
+        : ALLpoolVolumeValue +
+          (volumeInUSD as number) +
+          (volumeOutUSD as number)
     timeseries.client.call('TS.ADD', ALLpoolVolumeKey, '*', ALLnewPoolVolume)
+    logger.info(
+      `Formula for ALL pools new volume is =  ${ALLpoolVolumeValue} + ${Number(
+        volumeInUSD
+      )} + ${Number(
+        volumeOutUSD
+      )} but if the price of one token is 0 ALL pool volume stays unchanged`
+    )
     logger.info(`Updated pool volume for ALL: ${ALLnewPoolVolume}`)
     //update assets volume
     const assetInVolumeKey = `trades:asset:${assetIn}`
@@ -153,12 +184,17 @@ export const processDataForVolumeHistory = async (
         ? parseFloat(assetInVolumeValueRaw)
         : 0
     logger.info(
-      `Fetched volume for asset with id ${assetIn}: ${assetInVolumeValue}`
+      `Fetched volume for asset with id ${assetIn}, value from the database is: ${assetInVolumeValue}`
     )
     const newAssetInVolume = assetInVolumeValue + (volumeInUSD as number)
     timeseries.client.call('TS.ADD', assetInVolumeKey, '*', newAssetInVolume)
     logger.info(
-      `Updated volume for asset with id ${assetIn}: ${newAssetInVolume}`
+      `Formula for assetId ${assetIn} new volume is =  ${assetInVolumeValue} + ${Number(
+        volumeInUSD
+      )}`
+    )
+    logger.info(
+      `Updated volume for asset with id ${assetIn}, new value in the database is: ${newAssetInVolume}`
     )
 
     const assetOutVolumeKey = `trades:asset:${assetOut}`
@@ -172,12 +208,18 @@ export const processDataForVolumeHistory = async (
         ? parseFloat(assetOutVolumeValueRaw)
         : 0
     logger.info(
-      `Fetched volume for asset with id ${assetOut}: ${assetOutVolumeValue}`
+      `Fetched volume for asset with id ${assetOut}, value from the database is: ${assetOutVolumeValue}`
     )
     const newAssetOutVolume = assetOutVolumeValue + (volumeOutUSD as number)
     timeseries.client.call('TS.ADD', assetOutVolumeKey, '*', newAssetOutVolume)
     logger.info(
-      `Updated volume for asset with id ${assetOut}: ${newAssetOutVolume}`
+      `Formula for assetId ${assetOut} new volume is =  ${assetOutVolumeValue} + ${Number(
+        volumeOutUSD
+      )}`
+    )
+
+    logger.info(
+      `Updated volume for asset with id ${assetOut}, new value in the database is: ${newAssetOutVolume}`
     )
   }
 }
@@ -202,8 +244,10 @@ export const processDataForTVLHistory = async (
   api: ApiPromise,
   event: Event
 ) => {
+  logger.info('Entered processDataForTVLHistory')
   // Implementation for processing data for TVL history
   for (const swap of (event.data as any).swaps) {
+    logger.info('Swap data:', swap)
     const { assetIn, assetOut, amountIn, amountOut, poolId } = swap
     //update pool TVL
     const poolTVLKey = `volumes:pool:${poolId}`
@@ -221,7 +265,9 @@ export const processDataForTVLHistory = async (
     )) as [string, string]
     const poolTVLValue =
       poolTVLValueRaw !== undefined ? parseFloat(poolTVLValueRaw) : 0
-    logger.info(`Fetched pool TVL for ${poolId}: ${poolTVLValue}`)
+    logger.info(
+      `Fetched pool TVL for ${poolId}, value in the database is: ${poolTVLValue}`
+    )
     const { decimals: decimalsIn } = await decimalsFromTokenId(api, assetIn)
     const volumeInUSD =
       decimalsIn !== null
@@ -233,9 +279,18 @@ export const processDataForTVLHistory = async (
         ? await calculateVolume(assetOut, decimalsOut, amountOut)
         : 0
     const newPoolTVL =
-      poolTVLValue + (volumeInUSD as number) - (volumeOutUSD as number)
+      volumeInUSD === 0 || volumeOutUSD === 0
+        ? poolTVLValue
+        : poolTVLValue + (volumeInUSD as number) - (volumeOutUSD as number)
     timeseries.client.call('TS.ADD', poolTVLKey, '*', newPoolTVL)
-    logger.info(`Updated pool TVL for ${poolId}: ${newPoolTVL}`)
+    logger.info(
+      `Formula for poolId ${poolId} new TVL is =  ${poolTVLValue} + ${Number(
+        volumeInUSD
+      )} - ${Number(volumeOutUSD)}`
+    )
+    logger.info(
+      `Updated pool TVL for ${poolId}, new value in the database is: ${newPoolTVL} but if the price of one token is 0 pool TVL stays unchanged`
+    )
     //update pool ALL TVL
     const ALLpoolTVLKey = `volumes:pool:ALL`
     await checkKey(ALLpoolTVLKey, ['pool', 'ALL'])
@@ -245,10 +300,22 @@ export const processDataForTVLHistory = async (
     )) as [string, string]
     const ALLpoolTVLValue =
       ALLpoolTVLValueRaw !== undefined ? parseFloat(ALLpoolTVLValueRaw) : 0
+    logger.info(
+      `Fetched pool TVL ALL pools, value in the database is: ${ALLpoolTVLValue}`
+    )
     const ALLnewPoolTVL =
-      ALLpoolTVLValue + (volumeInUSD as number) - (volumeOutUSD as number)
+      volumeInUSD === 0 || volumeOutUSD === 0
+        ? ALLpoolTVLValue
+        : ALLpoolTVLValue + (volumeInUSD as number) - (volumeOutUSD as number)
     timeseries.client.call('TS.ADD', ALLpoolTVLKey, '*', ALLnewPoolTVL)
-    logger.info(`Updated pool TVL for ALL: ${ALLnewPoolTVL}`)
+    logger.info(
+      `Formula for ALL pools new TVL is =  ${ALLpoolTVLValue} + ${Number(
+        volumeInUSD
+      )} - ${Number(volumeOutUSD)}`
+    )
+    logger.info(
+      `Updated pool TVL for ALL, new value in the database is: ${ALLnewPoolTVL} but if the price of one token is 0 ALL pool TVL stays unchanged`
+    )
     //update assets TVL
     const assetInTVLKey = `volumes:asset:${assetIn}`
     await checkKey(assetInTVLKey, ['asset', assetIn])
@@ -258,10 +325,19 @@ export const processDataForTVLHistory = async (
     )) as [string, string]
     const assetInTVLValue =
       assetInTVLValueRaw !== undefined ? parseFloat(assetInTVLValueRaw) : 0
-    logger.info(`Fetched TVL for asset with id ${assetIn}: ${assetInTVLValue}`)
+    logger.info(
+      `Fetched TVL for asset with id ${assetIn}, value in the database is: ${assetInTVLValue}`
+    )
     const newAssetInTVL = assetInTVLValue + (volumeInUSD as number)
     timeseries.client.call('TS.ADD', assetInTVLKey, '*', newAssetInTVL)
-    logger.info(`Updated TVL for asset with id ${assetIn}: ${newAssetInTVL}`)
+    logger.info(
+      `Formula for assetId ${assetIn} new TVL is =  ${assetInTVLValue} + ${Number(
+        volumeInUSD
+      )}`
+    )
+    logger.info(
+      `Updated TVL for asset with id ${assetIn}, new value in the database is: ${newAssetInTVL}`
+    )
     const assetOutTVLKey = `volumes:asset:${assetOut}`
     await checkKey(assetOutTVLKey, ['asset', assetOut])
     const [, assetOutTVLValueRaw] = (await timeseries.client.call(
@@ -271,11 +347,18 @@ export const processDataForTVLHistory = async (
     const assetOutTVLValue =
       assetOutTVLValueRaw !== undefined ? parseFloat(assetOutTVLValueRaw) : 0
     logger.info(
-      `Fetched TVL for asset with id ${assetOut}: ${assetOutTVLValue}`
+      `Fetched TVL for asset with id ${assetOut}, value in the database is : ${assetOutTVLValue}`
     )
     const newAssetOutTVL = assetOutTVLValue - (volumeOutUSD as number)
     timeseries.client.call('TS.ADD', assetOutTVLKey, '*', newAssetOutTVL)
-    logger.info(`Updated TVL for asset with id ${assetOut}: ${newAssetOutTVL}`)
+    logger.info(
+      `Formula for assetId ${assetOut} new TVL is =  ${assetOutTVLValue} - ${Number(
+        volumeOutUSD
+      )}`
+    )
+    logger.info(
+      `Updated TVL for asset with id ${assetOut}, new value in the database is: ${newAssetOutTVL}`
+    )
   }
 }
 
