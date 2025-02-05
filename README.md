@@ -12,16 +12,34 @@ Monorepo consists of:
 6. ** Gasp AVS - (Eigen Operator - AVS):** Collection of decentralized AVS operators that handle tasks. In our case, the task will be “Merkle root verification” and “operator list change”. Operators will sign the results and provide it to the aggregator. The **operator** will also finalise the block by re-executing it.
 7. **Eigen ETH Contracts:** Smart contracts (approx. 15) that handle the storage Merkle Roots and actual Operator Lists with coresponding BLS aggregated keys and stakes.
 
-## Dependencies
+## Pre-requisites
 
-You will need [foundry](https://book.getfoundry.sh/getting-started/installation) to run local testnet. You will need Rust toolchain to build gasp-avs binary. And [golang toolchain](https://go.dev/doc/install) with [zap-pretty](https://github.com/maoueh/zap-pretty) to run the aggregator.
-```
+1. You will need [foundry](https://book.getfoundry.sh/getting-started/installation) to run local testnet.
+
+```bash
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
+```
 
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+2. You will need Rust toolchain
 
+```bash
+url --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+3. You will need [golang toolchain](https://go.dev/doc/install) with [zap-pretty](https://github.com/maoueh/zap-pretty)
+
+```bash
 go install github.com/maoueh/zap-pretty@latest
+```
+
+4. You will need [docker-compose](https://docs.docker.com/compose/install/)
+
+5. You will need [proto](https://moonrepo.dev/docs/proto/install) and [moon](https://moonrepo.dev/docs/install) to build Docker image if you want to run spin up local environment via Docker Compose.
+
+```bash
+bash <(curl -fsSL https://moonrepo.dev/install/proto.sh)
+proto install moon
 ```
 
 ## Running via make
@@ -64,34 +82,30 @@ make start-gasp-avs
 git submodule update --init --recursive
 ```
 
-### Run
+### Start local environment
 
 In the root folder run:
 
 > [!IMPORTANT]
-> `--wait` and `--build` parameters here are essential
+> Running `moon :build-image-local` is essential before running `docker compose up -d --wait`
 > [!WARNING]
 > For MacOS users with M1/M2 series processors parameter `Use Rosetta for x86_64/amd64 emulation on Apple Silicon` should be turned OFF in your Docker Desktop configurations
 
 ```bash
-docker compose up --build --wait 
+# build docker images
+moon :build-image-local
+# start local environment
+docker compose up -d
 ```
 
 ### How to modify particular services
 
-For every service other than:
+Modify source code, then run next commands:
 
-- `mangata-node`
-- `gasp-avs`
-
-just modify source code, tear down current docker-compose setup and run it again
-
-#### gasp-avs
-
-Steps:
-
-- Modify `gasp-avs` sources
-- rebuild `gasp-avs` locally
+```bash
+moon :build-image-local
+docker compose up -d
+```
 
 ### Tear down
 

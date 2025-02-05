@@ -1,0 +1,23 @@
+type: application
+language: rust
+toolchain:
+  rust:
+    version: '1.82.0'
+
+env:
+  CARGO_TERM_COLOR: 'always'
+
+fileGroups:
+  sources:
+    - 'bindings/**/*'
+    - 'src/**/*'
+    - 'Cargo.toml'
+
+tasks:
+  build:
+    command: cargo build --release
+    inputs: ['@globs(sources)']
+    outputs: ['target/release/main']
+  build-image-local:
+    script: 'docker buildx build -t gaspxyz/updater:local -t gaspxyz/updater:localbase .'
+    inputs: ['@globs(sources)', 'Dockerfile']
