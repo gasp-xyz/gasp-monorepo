@@ -43,37 +43,51 @@ collator:
       effect: NoSchedule
   # Node specific collator configs
   collator01:
-    # Identity ID: 12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
-    customNodeKey: "4d81aa10b9f5fa5c76180154785928a64193daeca6eaccb5cc04543a1e19f9a3"
-    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWJoxByKqazmCWaUY3tZsMgiSmoXmHBpJXCYanEakDEXcU
+    # Identity ID: 12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
+    customNodeKey: "a7633d78f1d366ab788efc12af026ca43f1cf5e2865334f9bdf5b5d1b9a2c417"
+    bootnodeAddr: /dns/collator-02-p2p/tcp/30333/p2p/12D3KooWCeV5mfZ9qig6c23vngjxQKyq1GJHBFN3DJNMkYqG2cbT
+    accountKeys:
+      - type: aura
+        scheme: sr25519
+        seed: ref+sops://secrets.enc.yaml#/holeskyCollator01AuraKey
+      - type: gran
+        scheme: ed25519
+        seed: ref+sops://secrets.enc.yaml#/holeskyCollator01GrandpaKey
     extraArgs:
-      - --alith
+      - --validator
       - --pruning=archive
-      - --rpc-max-connections=10000
+      - --rpc-max-connections=5000
     nodeSelector:
       production: "true"
       topology.kubernetes.io/zone: europe-west1-b
   collator02:
-    # Identity ID: 12D3KooWJoxByKqazmCWaUY3tZsMgiSmoXmHBpJXCYanEakDEXcU
-    customNodeKey: "236380c88fb7a9736635794834d342f0547d4785800c46bf27dc5371126e5f27"
-    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
+    # Identity ID: 12D3KooWCeV5mfZ9qig6c23vngjxQKyq1GJHBFN3DJNMkYqG2cbT
+    customNodeKey: "a7633d78f1d366ab788efc12af026ca43f1cf5e2865334f9bdf5b5d1b9a2c417"
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
+    accountKeys:
+      - type: aura
+        scheme: sr25519
+        seed: ref+sops://secrets.enc.yaml#/holeskyCollator02AuraKey
+      - type: gran
+        scheme: ed25519
+        seed: ref+sops://secrets.enc.yaml#/holeskyCollator02GrandpaKey
     extraArgs:
-      - --baltathar
+      - --validator
       - --pruning=archive
-      - --rpc-max-connections=10000
+      - --rpc-max-connections=5000
     nodeSelector:
       production: "true"
       topology.kubernetes.io/zone: europe-west1-c
   rpc01:
-    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
   rpc02:
-    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-c
   rpc03:
-    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
+    bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
 ######################
@@ -137,7 +151,7 @@ gaspAvsEnv:
   RUST_LOG: avs=debug,ether=trace
   TESTNET: "false"
   # rollup-node configs
-  ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWCcFLgTyzpSiiHp3x6dTX4wiwMUM7VBZ6JPJDWCuSAWc5
+  ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
   ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/0ca81854f8debf49be4a2847fee1004b8bda956f/rollup-dev-env-chainspecs/holesky-ac29298-raw.json
 ###########################
 # updater configs #
