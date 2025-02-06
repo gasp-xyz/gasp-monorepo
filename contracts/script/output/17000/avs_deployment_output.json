@@ -1,23 +1,23 @@
 {
   "addresses": {
-    "avsPauseReg": "0xb28C5859AD0c808Be0461b97E6cf6Fd774FE4B90",
-    "avsProxyAdmin": "0xF29Da2396581bF48E284f45AF481A6E64a0cF8d3",
-    "blsApkRegistry": "0xa4Aa4c1f1A1126BF092a0070cDa56aD89728dAcA",
-    "blsApkRegistryImplementation": "0x172149A56a70c8Bb0abBd86d8bbed28586F388d9",
-    "indexRegistry": "0x35D818BE38912c2e87888F7df569625CbbBc9c7E",
-    "indexRegistryImplementation": "0x03654BF8bC98df4650FA860735e29AD46461C300",
-    "registryCoordinator": "0xb4dd45a08BFA6fBC19F7cD624cdfef87CE95e7AC",
-    "registryCoordinatorImplementation": "0x881D3260863afFFE787298051954255a11111971",
-    "serviceManager": "0x553B462c24c4D736c838dE2dF7513688642DF289",
-    "serviceManagerImplementation": "0xCc87dA931f419Fe296dcE881e2CfbdC42173E4E3",
-    "stakeRegistry": "0x6903237aB08bcE2C9c42D8a2e9A59330337e886d",
-    "stakeRegistryImplementation": "0x83D9C5264E63a9Fdd82e3c00d9029d9E9044e886",
-    "taksManagerImplementation": "0x8Ed3E6a7E04c02db7FBf1EB4359D3a2D816F3Bed",
-    "taskManager": "0x93fa8fD0839384526E0E3E991aEb4019cFa346a6"
+    "avsPauseReg": "0xFaBAf46Ef77a6B93320D8f7F63D1d3e44a2219a8",
+    "avsProxyAdmin": "0x9e35Fe3007c0c19d1b194412e8F5fDe3e56fA89A",
+    "blsApkRegistry": "0x4A4720f93d8aaA990702Ed758dd6215dfE7F9EA2",
+    "blsApkRegistryImplementation": "0x08C454bC5E0f253F5CdC53Bf3BEB557B01aDe144",
+    "indexRegistry": "0x84D531593105D8F8EA17E6AA2E944b51653A6202",
+    "indexRegistryImplementation": "0xba290f48d385Ff4806e4386f5bB55bf4D48ead19",
+    "registryCoordinator": "0xef5Ea04287c2BCd0A984563B055f39e650dF0e28",
+    "registryCoordinatorImplementation": "0x368088AE961CB01047C9c3C6C12bb85f666902b5",
+    "serviceManager": "0xF527F9138d03B4cbe03728aBCc0430a14a81ef7f",
+    "serviceManagerImplementation": "0x6e9a4082f62F9cB3d8cBf283e4fa632996c7c7d6",
+    "stakeRegistry": "0xA3d864C9827ffdD00cCabF4cfc0f70c035B58295",
+    "stakeRegistryImplementation": "0x7cc3d47B107a4f6D5720fc56980663107a0a4De3",
+    "taksManagerImplementation": "0xa59645C6f1877272c7f9D38ff9BE6E2Ff8c35fAb",
+    "taskManager": "0x2117542bae8e4084173eFD734783eA275ad232Ad"
   },
   "chainInfo": {
     "chainId": 17000,
-    "deploymentBlock": 2884405
+    "deploymentBlock": 3284417
   },
   "permissions": {
     "aggregator": "0xd082D8fF9491b5066Db6e1E03efB19daaF50de02",
