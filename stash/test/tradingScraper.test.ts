@@ -58,7 +58,7 @@ describe('processSwapEvents', () => {
     }
   })
 
-  it('should process swap events and update existing record', async () => {
+  it('should process swap events for dashboard and update existing record', async () => {
     const mockRecord = {
       account: '0xaccount',
       lastTradeTimestamp: new Date().getTime(),
@@ -93,7 +93,7 @@ describe('processSwapEvents', () => {
     })
   })
 
-  it('should process swap events and create new record', async () => {
+  it('should process swap events for dashboard and create new record', async () => {
     vi.spyOn(swapRepository, 'search').mockReturnValue({
       where: vi.fn().mockReturnThis(),
       equals: vi.fn().mockReturnThis(),
@@ -121,7 +121,7 @@ describe('processSwapEvents', () => {
     })
   })
 
-  it('should log an error if processing fails', async () => {
+  it('should log an error if processing  of dashboard event fails', async () => {
     const error = new Error('Test error')
     vi.spyOn(swapRepository, 'search').mockReturnValue({
       where: vi.fn().mockReturnThis(),
@@ -140,7 +140,7 @@ describe('calculateVolume', () => {
     expect(result).toBe(10000)
   })
 
-  it('should return null if price discovery fails', async () => {
+  it('should return null if getting token price fails', async () => {
     const error = new Error('Test error')
     vi.spyOn(tokenPriceService, 'getTokenPrice').mockRejectedValue(error)
 
