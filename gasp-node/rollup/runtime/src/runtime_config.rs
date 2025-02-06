@@ -1020,7 +1020,7 @@ pub mod config {
 				500_000 * currency::DOLLARS
 			};
 			/// Minimum stake required to be reserved to be a delegator
-			pub const MinDelegatorStk: u128 = 1 * currency::CENTS;
+			pub const MinDelegatorStk: u128 = 500 * currency::DOLLARS;
 		}
 	}
 
