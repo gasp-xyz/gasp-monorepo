@@ -231,6 +231,7 @@ sequencerEnvSecretsBase:
 # ferry-deposit configs #
 #########################
 ferryDepositEnabled: false
+ferryDepositImageTag: ac2929832becb387683bb6ab0ebc8f7050b284dd
 ferryDepositEnvEth:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-holesky-v3.gasp.xyz
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
@@ -268,6 +269,7 @@ ferryDepositEnvSecretsBase:
 # ferry-withdrawal configs #
 ############################
 ferryWithdrawalEnabled: false
+ferryWithdrawalImageTag: ac2929832becb387683bb6ab0ebc8f7050b284dd
 ferryWithdrawalEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
