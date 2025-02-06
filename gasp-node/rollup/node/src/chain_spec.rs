@@ -297,11 +297,11 @@ pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
 					.iter()
 					.flatten()
 					.cloned()
-					.map(|account_id| (RX_TOKEN_ID, 100u128 * currency::DOLLARS, account_id))
+					.map(|account_id| (RX_TOKEN_ID, 1_000_100u128 * currency::DOLLARS, account_id))
 					.collect::<Vec<_>>();
 
 			let mut tokens_endowment = sequencers_endownment;
-			tokens_endowment.push((RX_TOKEN_ID, 988_100_u128 * currency::DOLLARS, sudo.into()));
+			tokens_endowment.push((RX_TOKEN_ID, 4_997_700u128 * currency::DOLLARS, sudo.into()));
 
 			tokens_endowment.append(
 				&mut council_members
