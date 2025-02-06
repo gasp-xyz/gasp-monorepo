@@ -382,11 +382,11 @@ benchmarks! {
 				None,
 				col_del_count,
 			)?;
-			assert_ok!(T::Currency::transfer(created_liquidity_token, &account("funding", 0u32, 0u32), &delegator, (100*DOLLAR).to_balance::<T>(), ExistenceRequirement::AllowDeath));
+			assert_ok!(T::Currency::transfer(created_liquidity_token, &account("funding", 0u32, 0u32), &delegator, (1000*DOLLAR).to_balance::<T>(), ExistenceRequirement::AllowDeath));
 			assert_ok!(Pallet::<T>::delegate(
 				RawOrigin::Signed(delegator.clone()).into(),
 				second_candidate.clone(),
-				(100*DOLLAR).to_balance::<T>(),
+				(1000*DOLLAR).to_balance::<T>(),
 				None,
 				col_del_count,
 				1u32
@@ -756,13 +756,13 @@ benchmarks! {
 			collators.push(collator.clone());
 		}
 
-		let (caller, _, _) = create_funded_user::<T>("caller", USER_SEED, created_liquidity_token, Some((100 * DOLLAR * (collators.len() as u128 + 1u128) + 1u128).to_balance::<T>()));
+		let (caller, _, _) = create_funded_user::<T>("caller", USER_SEED, created_liquidity_token, Some((1000 * DOLLAR * (collators.len() as u128 + 1u128) + 1u128).to_balance::<T>()));
 		// Delegation count
 		let mut del_del_count = 0u32;
 		// Nominate MaxDelegationsPerDelegators collator candidates
 		for col in collators.clone() {
 			Pallet::<T>::delegate(
-				RawOrigin::Signed(caller.clone()).into(), col, (100 * DOLLAR).to_balance::<T>(), None, 0u32, del_del_count
+				RawOrigin::Signed(caller.clone()).into(), col, (1000 * DOLLAR).to_balance::<T>(), None, 0u32, del_del_count
 			)?;
 			del_del_count += 1u32;
 		}
@@ -789,7 +789,7 @@ benchmarks! {
 			)?;
 			col_del_count += 1u32;
 		}
-	}: _(RawOrigin::Signed(caller.clone()), collator, (100*DOLLAR + 1u128).to_balance::<T>(), None, col_del_count, del_del_count)
+	}: _(RawOrigin::Signed(caller.clone()), collator, (1000*DOLLAR + 1u128).to_balance::<T>(), None, col_del_count, del_del_count)
 	verify {
 		assert!(Pallet::<T>::is_delegator(&caller));
 	}
@@ -818,7 +818,7 @@ benchmarks! {
 		Pallet::<T>::delegate(RawOrigin::Signed(
 			caller.clone()).into(),
 			collator.clone(),
-			(100*DOLLAR).to_balance::<T>(),
+			(1000*DOLLAR).to_balance::<T>(),
 			None,
 			0u32,
 			0u32
@@ -857,7 +857,7 @@ benchmarks! {
 			collators.push(collator.clone());
 		}
 		// Fund the delegator
-		let (caller, _, _) = create_funded_user::<T>("caller", USER_SEED, created_liquidity_token, Some((100 * DOLLAR * (collators.len() as u128)).to_balance::<T>()));
+		let (caller, _, _) = create_funded_user::<T>("caller", USER_SEED, created_liquidity_token, Some((1000 * DOLLAR * (collators.len() as u128)).to_balance::<T>()));
 		// Delegation count
 		let mut delegation_count = 0u32;
 		let author = collators[0].clone();
@@ -866,7 +866,7 @@ benchmarks! {
 			Pallet::<T>::delegate(
 				RawOrigin::Signed(caller.clone()).into(),
 				col,
-				(100*DOLLAR).to_balance::<T>(),
+				(1000*DOLLAR).to_balance::<T>(),
 				None,
 				0u32,
 				delegation_count
@@ -1769,7 +1769,7 @@ benchmarks! {
 		let delegators_count = z*y;
 		let delegators: Vec<_> = (0u32..delegators_count)
 		.map(|i|
-			create_funded_user::<T>("delegator", USER_SEED-i, created_liquidity_token, Some((100*DOLLAR).to_balance::<T>()))
+			create_funded_user::<T>("delegator", USER_SEED-i, created_liquidity_token, Some((1000*DOLLAR).to_balance::<T>()))
 		).map(|(account, _token_id, _amount)| account)
 		.collect();
 		assert_eq!(delegators.len(), (z*y) as usize);
@@ -1782,7 +1782,7 @@ benchmarks! {
 				Pallet::<T>::delegate(RawOrigin::Signed(
 					delegator.clone()).into(),
 					candidate.clone().into(),
-					(100*DOLLAR).to_balance::<T>(),
+					(1000*DOLLAR).to_balance::<T>(),
 					None,
 					count as u32,
 					0u32,
@@ -1874,7 +1874,7 @@ benchmarks! {
 
 		for (i, candidate_bond) in candidate_pool_state.into_iter().enumerate() {
 			if candidate_bond.liquidity_token == created_liquidity_token {
-				assert_eq!(candidate_bond.amount.into(), (1+(z as u128)*100)*DOLLAR);
+				assert_eq!(candidate_bond.amount.into(), (1+(z as u128)*1000)*DOLLAR);
 			}
 		}
 

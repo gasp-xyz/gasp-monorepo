@@ -1980,7 +1980,10 @@ pub mod pallet {
 
 		#[pallet::call_index(2)]
 		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
-		#[pallet::weight(<T as Config>::WeightInfo::join_candidates(*candidate_count, *liquidity_token_count).saturating_add(T::DbWeight::get().reads_writes(3, 3)))]
+		#[pallet::weight(
+			<T as Config>::WeightInfo::join_candidates(*candidate_count, *liquidity_token_count)
+			.saturating_add(T::DbWeight::get().reads_writes(3, 3))
+		)]
 		/// Join the set of collator candidates
 		pub fn join_candidates(
 			origin: OriginFor<T>,
