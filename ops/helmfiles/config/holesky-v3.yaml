@@ -27,7 +27,7 @@ collator:
     # Ref: https://github.com/gasp-xyz/mangata-node/tree/3722076d06f7c1ff7c727a799260c5df2a5eb62f
     tag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/0ca81854f8debf49be4a2847fee1004b8bda956f/rollup-dev-env-chainspecs/holesky-ac29298-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/5b0100d05c4744f31af56105bce3151f8cbc2d15/rollup-dev-env-chainspecs/holesky-62fa181-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 150Gi
@@ -152,7 +152,7 @@ gaspAvsEnv:
   TESTNET: "false"
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
-  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/0ca81854f8debf49be4a2847fee1004b8bda956f/rollup-dev-env-chainspecs/holesky-ac29298-raw.json
+  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/5b0100d05c4744f31af56105bce3151f8cbc2d15/rollup-dev-env-chainspecs/holesky-62fa181-raw.json
 ###########################
 # updater configs #
 ###########################
