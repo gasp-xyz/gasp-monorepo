@@ -1,0 +1,14 @@
+{
+  "bootstrap-sha": "38261a7c26349f0f3973b2f634df9276100d8185",
+  "separate-pull-requests": true,
+  "packages": {
+    "avs-aggregator": { "release-type": "go" },
+    "contracts": { "release-type": "node" },
+    "ferry-deposit": { "release-type": "node" },
+    "ferry-withdrawal": { "release-type": "node" },
+    "gasp-avs": { "release-type": "rust" },
+    "gasp-node": { "release-type": "rust" },
+    "sequencer": { "release-type": "rust" },
+    "updater": { "release-type": "rust" }
+  }
+}
