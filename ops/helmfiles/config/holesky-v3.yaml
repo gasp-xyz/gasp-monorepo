@@ -25,7 +25,7 @@ collator:
   image:
     repository: gaspxyz/rollup-node
     # Ref: https://github.com/gasp-xyz/mangata-node/tree/3722076d06f7c1ff7c727a799260c5df2a5eb62f
-    tag: ac2929832becb387683bb6ab0ebc8f7050b284dd
+    tag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
   disableChainspecGeneration: true
   customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/485165d5cac39607183994e9122404387dcdd49d/rollup-holesky-v3-3722076-raw.json
   enableServiceMonitorCollectors: true
@@ -94,7 +94,7 @@ collator:
 # aggregator configs #
 ######################
 aggregatorEnabled: true
-aggregatorImageTag: ac2929832becb387683bb6ab0ebc8f7050b284dd
+aggregatorImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
 
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetAggregatorEcdsaKeyJson
@@ -122,7 +122,7 @@ aggregatorEnv:
 # gaspAvs configs #
 #####################
 gaspAvsEnabled: true
-gaspAvsImageTag: ac2929832becb387683bb6ab0ebc8f7050b284dd
+gaspAvsImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
 
 gaspAvsData:
   storageClass: node-data-volume-retain
@@ -157,7 +157,7 @@ gaspAvsEnv:
 # updater configs #
 ###########################
 updaterEnabled: true
-updaterImageTag: ac2929832becb387683bb6ab0ebc8f7050b284dd
+updaterImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
 updaterEnvSecrets:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/arbitrumSepoliaUpdaterEcdsaKeyJson
   ROOT_ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/arbitrumSepoliaUpdaterRootEcdsaKeyJson
@@ -195,7 +195,7 @@ updaterEnvBase:
 ############################
 sequencerEnabled: true
 # Override the image tag provided on deployment from IMAGE_TAG env variable
-sequencerImageTag: ac2929832becb387683bb6ab0ebc8f7050b284dd
+sequencerImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
 
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
@@ -231,7 +231,7 @@ sequencerEnvSecretsBase:
 # ferry-deposit configs #
 #########################
 ferryDepositEnabled: false
-ferryDepositImageTag: ac2929832becb387683bb6ab0ebc8f7050b284dd
+ferryDepositImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
 ferryDepositEnvEth:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-holesky-v3.gasp.xyz
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
@@ -269,7 +269,7 @@ ferryDepositEnvSecretsBase:
 # ferry-withdrawal configs #
 ############################
 ferryWithdrawalEnabled: false
-ferryWithdrawalImageTag: ac2929832becb387683bb6ab0ebc8f7050b284dd
+ferryWithdrawalImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
 ferryWithdrawalEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
@@ -307,7 +307,7 @@ ferryWithdrawalEnvSecretsBase:
 # closer configs #
 ########################
 closerEnabled: true
-closerImageTag: ac2929832becb387683bb6ab0ebc8f7050b284dd
+closerImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x34B38Fd98aBE38B52258253fb4E1D0F5EFF26343"
