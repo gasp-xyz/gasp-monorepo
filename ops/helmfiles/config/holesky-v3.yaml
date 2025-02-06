@@ -27,7 +27,7 @@ collator:
     # Ref: https://github.com/gasp-xyz/mangata-node/tree/3722076d06f7c1ff7c727a799260c5df2a5eb62f
     tag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/485165d5cac39607183994e9122404387dcdd49d/rollup-holesky-v3-3722076-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/0ca81854f8debf49be4a2847fee1004b8bda956f/rollup-dev-env-chainspecs/holesky-ac29298-raw.json
   enableServiceMonitorCollectors: true
   storageClass: node-data-volume-retain
   storageSize: 150Gi
@@ -62,7 +62,7 @@ collator:
       topology.kubernetes.io/zone: europe-west1-b
   collator02:
     # Identity ID: 12D3KooWCeV5mfZ9qig6c23vngjxQKyq1GJHBFN3DJNMkYqG2cbT
-    customNodeKey: "a7633d78f1d366ab788efc12af026ca43f1cf5e2865334f9bdf5b5d1b9a2c417"
+    customNodeKey: "dc81e44431fcebce274e2d3e33137f54a229edc595ba2bd37aee480b1da6d005"
     bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
     accountKeys:
       - type: aura
