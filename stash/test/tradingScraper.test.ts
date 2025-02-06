@@ -1,9 +1,14 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { processSwapEvents, calculateVolume, decimalsFromTokenId } from '../src/scraper/SwapScraper'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import {
+  calculateVolume,
+  decimalsFromTokenId,
+  processDataForDashboard
+} from '../src/scraper/SwapScraper'
 import {swapRepository} from '../src/repository/TransactionRepository'
 import logger from '../src/util/Logger'
 import * as priceDiscoveryService from '../src/service/PriceDiscoveryService'
 import { ApiPromise } from '@polkadot/api'
+import * as tokenPriceService from '../src/service/TokenPriceService'
 
 vi.mock('../src/repository/TransactionRepository')
 vi.mock('../src/util/Logger')
@@ -15,7 +20,18 @@ describe('processSwapEvents', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockApi = {} as ApiPromise
+    mockApi = {
+      query: {
+        assetRegistry: {
+          metadata: {
+            entries: vi.fn().mockResolvedValue([
+              [{ args: ['0'] }, { unwrap: () => ({ decimals: { toPrimitive: () => 18 } }) }],
+              [{ args: ['1'] }, { unwrap: () => ({ decimals: { toPrimitive: () => 18 } }) }],
+            ]),
+          },
+        },
+      },
+    } as unknown as ApiPromise
     mockBlock = {
       events: [
         [
@@ -29,10 +45,10 @@ describe('processSwapEvents', () => {
                 {
                   pool_id: 6,
                   kind: 'Xyk',
-                  asset_in: 0,
-                  asset_out: 1,
-                  amount_in: '40648650414565365',
-                  amount_out: '20181563007698743',
+                  assetIn: 0,
+                  assetOut: 1,
+                  amountIn: '40648650414565365',
+                  amountOut: '20181563007698743',
                 },
               ],
             },
@@ -66,7 +82,7 @@ describe('processSwapEvents', () => {
       totalTrades: expect.any(Number),
     }
     vi.spyOn(swapRepository, 'save').mockResolvedValue(mockSwapData)
-    await processSwapEvents(mockApi, mockBlock)
+    await processDataForDashboard(mockApi, mockBlock.events[0][1])
 
     expect.objectContaining({
       account: '0xaccount',
@@ -94,7 +110,7 @@ describe('processSwapEvents', () => {
       totalTrades: expect.any(Number),
     }
     vi.spyOn(swapRepository, 'save').mockResolvedValue(mockSwapData)
-    await processSwapEvents(mockApi, mockBlock)
+    await processDataForDashboard(mockApi, mockBlock.events[0][1])
 
     expect.objectContaining({
       account: '0xaccount',
@@ -112,27 +128,21 @@ describe('processSwapEvents', () => {
       equals: vi.fn().mockReturnThis(),
       returnFirst: vi.fn().mockRejectedValue(error),
     } as any)
-
-    await processSwapEvents(mockApi, mockBlock)
-
-    expect(logger.error).toHaveBeenCalledWith('Error processing swap event:', error)
-  })
+    await expect(processDataForDashboard(mockApi, mockBlock.events[0][1])).rejects.toThrow('Test error')  })
 })
 
 describe('calculateVolume', () => {
   it('should calculate volume correctly', async () => {
-    vi.spyOn(priceDiscoveryService, 'priceDiscovery').mockResolvedValue({
-      current_price: { usd: '1' },
-    })
+    vi.spyOn(tokenPriceService, 'getTokenPrice').mockResolvedValue(1)
 
-    const result = await calculateVolume('tokenId1', 18, '10000000000000000000000')
+    const result = await calculateVolume('1', 18, '10000000000000000000000')
 
     expect(result).toBe(10000)
   })
 
   it('should return null if price discovery fails', async () => {
     const error = new Error('Test error')
-    vi.spyOn(priceDiscoveryService, 'priceDiscovery').mockRejectedValue(error)
+    vi.spyOn(tokenPriceService, 'getTokenPrice').mockRejectedValue(error)
 
     const result = await calculateVolume('1', 18, '10000000000000000000000')
 
