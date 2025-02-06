@@ -1,7 +1,7 @@
 services:
   sequencer-eth:
     build: .
-    image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-localeth}
+    image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully
