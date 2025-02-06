@@ -1669,7 +1669,7 @@ benchmarks! {
 		assert_eq!(pallet_session::Pallet::<T>::current_index() as u32, 0u32);
 	}
 
-	// NOTE: given large size of CollatorState, RW takes double amount - 50us and 200us, this need be accounted in resulting bench result
+	// NOTE: given large size of CollatorState, RW takes 4X amount - 100us and 400us, this need be accounted in resulting bench result
 	active_session_change {
 
 		// liquidity tokens
