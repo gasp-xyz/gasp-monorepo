@@ -42,6 +42,8 @@ releases:
           tls:
             - hosts: ["avs-aggregator-{{ .Values.environmentName }}.gasp.xyz"]
               secretName: avs-aggregator-tls
+        serviceMonitor:
+          enabled: true
         podReplacementPolicy: Failed
         resources:
           requests:
@@ -63,6 +65,10 @@ releases:
         envSecrets: {{ .Values.gaspAvsEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
         env: {{ .Values.gaspAvsEnv | toYaml | nindent 10 }}
         data: {{ .Values | getOrNil "gaspAvsData" | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 1
@@ -81,6 +87,10 @@ releases:
           tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.updaterEnv | toYaml | nindent 10 }}
         envSecrets: {{ .Values.updaterEnvSecrets | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -98,6 +108,10 @@ releases:
           tag: {{ .Values | get "updaterImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.updaterEnvBase | toYaml | nindent 10 }}
         envSecrets: {{ .Values.updaterEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -308,6 +322,10 @@ releases:
           tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryDepositEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryDepositEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -325,6 +343,10 @@ releases:
           tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryDepositEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryDepositEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -342,6 +364,10 @@ releases:
           tag: {{ .Values | get "ferryDepositImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryDepositEnvBase | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryDepositEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -360,6 +386,10 @@ releases:
           tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryWithdrawalEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryWithdrawalEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -377,6 +407,10 @@ releases:
           tag: {{ .Values | get "ferryWithdrawalImageTag" (requiredEnv "IMAGE_TAG") | quote }}
         env: {{ .Values.ferryWithdrawalEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.ferryWithdrawalEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -414,6 +448,10 @@ releases:
           args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvEth | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsEth | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -433,6 +471,10 @@ releases:
           args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvArb | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsArb | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m
@@ -452,6 +494,10 @@ releases:
           args: ["node", "build/src/closer.js"]
         env: {{ .Values.closerEnvBase | toYaml | nindent 10 }}
         envSecrets: {{ .Values.closerEnvSecretsBase | expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
         resources:
           requests:
             cpu: 100m

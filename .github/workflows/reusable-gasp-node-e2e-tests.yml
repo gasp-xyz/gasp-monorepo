@@ -8,11 +8,11 @@ on:
         type: string
         required: false
         default: "eth-rollup-develop"
-      nodeDockerImage:
+      nodeDockerImageTag:
         description: "gasp-node Docker image reference"
         type: string
         required: false
-        # default: "gaspxyz/rollup-node:main"
+        # default: "main"
         default: ''
       skipBuild:
         description: "Skip build phase"
@@ -35,11 +35,11 @@ on:
         type: string
         required: false
         default: "eth-rollup-develop"
-      nodeDockerImage:
+      nodeDockerImageTag:
         description: "gasp-node Docker image reference"
         type: string
         required: false
-        # default: "gaspxyz/rollup-node:main"
+        # default: "main"
         default: ''
       skipBuild:
         description: "Skip build phase"
@@ -170,7 +170,7 @@ jobs:
     env:
       API_URL: "ws://127.0.0.1:9946"
       E2EBRANCHNAME: "eth-rollup-develop"
-      NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImage != '' && inputs.nodeDockerImage || format('gaspxyz/rollup-node:{0}', inputs.globalVersion) }}
+      NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImageTag != '' && inputs.nodeDockerImageTag || inputs.globalVersion }}
       NODE_DOCKER_COMPOSE_NETWORK: gasp-node_default
     steps:
       - uses: actions/checkout@v4
@@ -178,13 +178,13 @@ jobs:
         if:  ${{  !contains(env.NODE_DOCKER_IMAGE, 'fast') && matrix.fast == true }}
         run: echo "NODE_DOCKER_IMAGE=${{ env.NODE_DOCKER_IMAGE }}-fast" >> $GITHUB_ENV
       - name: Adapt if unlocked
-        if:  ${{  !contains(env.NODE_DOCKER_IMAGE, 'fast') && matrix.unlocked == true }}
+        if:  ${{  !contains(env.NODE_DOCKER_IMAGE, 'unlocked') && matrix.unlocked == true }}
         run: echo "NODE_DOCKER_IMAGE=${{ env.NODE_DOCKER_IMAGE }}-unlocked" >> $GITHUB_ENV
 
 
       - name: Download gasp-node Docker image
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-build') && inputs.skipBuild != 'true' }}
-        run: docker pull ${{ env.NODE_DOCKER_IMAGE }}
+        run: docker pull gaspxyz/rollup-node:${{ env.NODE_DOCKER_IMAGE }}
 
       - name: E2E- Get branch name
         id: branch-name
@@ -231,9 +231,9 @@ jobs:
       - name: Run the Node
         working-directory: gasp-node
         env:
-          NODE_IMAGE: ${{ env.NODE_DOCKER_IMAGE }}
+          ROLLUP_NODE_VERSION: ${{ env.NODE_DOCKER_IMAGE }}
         run: |
-          echo "Starting nodes with image: ${NODE_IMAGE}"
+          echo "Starting nodes with image: ${ROLLUP_NODE_VERSION}"
           docker-compose up -d
           docker ps
 
@@ -300,5 +300,5 @@ jobs:
           SLACK_INCOMING_WEBHOOK: ${{ secrets.BNB_E2E_NOTIFICATION_WEBHOOK }}
           SLACK_TITLE: 'bnb e2e test execution - NOOK'
           SLACK_COLOR: "#ff0011"
-          SLACK_MESSAGE: 'Test failures [ ${{ env.E2EBRANCHNAME }} - ${{ env.NODE_DOCKER_IMAGE }} ] testmo report: https://mangata-finance.testmo.net/automation/runs/view/${{needs.setup-report.outputs.testmo-run-id}}'
+          SLACK_MESSAGE: 'Test failures [ ${{ env.E2EBRANCHNAME }} - gaspxyz/rollup-node:${{ env.NODE_DOCKER_IMAGE }} ] testmo report: https://mangata-finance.testmo.net/automation/runs/view/${{needs.setup-report.outputs.testmo-run-id}}'
           GITHUB_REF: 'https://gasp-xyz.github.io/gasp-monorepo/${{ github.run_number }}'

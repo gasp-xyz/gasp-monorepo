@@ -1,0 +1,25 @@
+language: solidity
+type: application
+
+fileGroups:
+  sources:
+    - "lib/eigenlayer-middleware/**/*.sol"
+    - "lib/eigenlayer-middleware/package.json"
+    - "lib/forge-std/**/*.sol"
+    - "lib/forge-std/package.json"
+    - "src/**/*"
+    - "test/**/*"
+    - package.json
+    - foundry.toml
+    - remappings.txt
+
+tasks:
+  build:
+    command: "forge build"
+    inputs: ["@globs(sources)"]
+    outputs: ["out"]
+  build-image-local:
+    command:
+      "docker buildx build --platform linux/amd64 -t gaspxyz/gasp-contracts:local -t
+      gaspxyz/gasp-contracts:localarb -t gaspxyz/gasp-contracts:localbase -f Dockerfile ."
+    inputs: ["@globs(sources)", "Dockerfile"]

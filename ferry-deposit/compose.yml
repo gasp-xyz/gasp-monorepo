@@ -1,7 +1,7 @@
 services:
   ferry-deposit-eth:
     build: .
-    image: gaspxyz/ferry-deposit:local
+    image: gaspxyz/ferry-deposit:${FERRY_DEPOSIT_VERSION:-local}
     restart: unless-stopped
     depends_on:
       eth-contracts-deployment:

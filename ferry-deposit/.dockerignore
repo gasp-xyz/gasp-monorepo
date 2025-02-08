@@ -12,3 +12,6 @@ skaffold.yml
 README.md
 docker-compose*
 .gitignore
+
+.moon/cache
+moon.yml
