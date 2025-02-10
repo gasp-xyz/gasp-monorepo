@@ -88,7 +88,8 @@ class CloserService {
 							}) !== undefined;
 
 						return (
-							(shouldBeClosed || await this.stash.shouldBeClosed(request.hash)) &&
+							(shouldBeClosed ||
+								(await this.stash.shouldBeClosed(request.hash))) &&
 							!(await this.l1.isClosed(request.hash))
 						);
 					} else {
