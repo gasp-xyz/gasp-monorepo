@@ -1,0 +1,27 @@
+type: application
+language: rust
+toolchain:
+  rust:
+    version: nightly-2024-01-20
+    
+
+env:
+  CARGO_TERM_COLOR: 'always'
+
+fileGroups:
+  sources:
+    - 'pallets/**/*'
+    - 'rollup/**/*'
+    - 'rpc/**/*'
+    - 'Cargo.toml'
+
+tasks:
+  build:
+    command: cargo build --release
+    inputs: ['@globs(sources)']
+    outputs:
+      - 'target/release/rollup-node'
+      - 'target/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+  build-image-local:
+    script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t gaspxyz/rollup-node:local .'
+    inputs: ['@globs(sources)', 'Dockerfile']

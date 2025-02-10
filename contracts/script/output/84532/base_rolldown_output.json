@@ -1,13 +1,13 @@
 {
   "addresses": {
-    "gaspErc20Mock": "0x3287D5077e05e0b0bcF7103C8340a5d6cc992fF1",
-    "rolldown": "0x72fB284429F4088aD38E7Bc229A218FEefe62a3E",
-    "rolldownImplementation": "0x65011Bd4a9A4b48804880Eff3e066664Db81Fb66",
-    "rolldownProxyAdmin": "0x0029Cbe11dc3Dd1e12328ad94E0054f1a5f8a7E0"
+    "gaspErc20Mock": "0x01eAA0Bd70b197a8e4334A30FD4ebfdBce3a714a",
+    "rolldown": "0x2215C253202504a42723B46fe72D1Bb61B3b1918",
+    "rolldownImplementation": "0xDDA60516631454fDb863E0ef825D73eb30F0ce5A",
+    "rolldownProxyAdmin": "0xa7174215400D88395ecafAaEE11F3A902B59aa81"
   },
   "chainInfo": {
     "chainId": 84532,
-    "deploymentBlock": 18867892
+    "deploymentBlock": 21489182
   },
   "permissions": {
     "rolldownOwner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",

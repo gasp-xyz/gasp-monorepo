@@ -35,3 +35,6 @@ scratch
 usr-local-cargo-registry
 usr-local-cargo-git
 app-target
+
+.moon/cache
+moon.yml
