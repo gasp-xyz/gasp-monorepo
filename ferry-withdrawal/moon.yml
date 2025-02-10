@@ -1,0 +1,21 @@
+language: typescript
+type: application
+
+toolchain:
+  node:
+    version: 18.20.4
+
+fileGroups:
+  sources:
+    - 'src/**/*'
+    - 'package.json'
+    - 'tsconfig.json'
+
+tasks:
+  build:
+    command: 'yarn build'
+    inputs: ['@globs(sources)']
+    outputs: ['build']
+  build-image-local:
+    command: 'docker buildx build -t gaspxyz/ferry-withdrawal:local -t gaspxyz/ferry-withdrawal:localcloser -f Dockerfile .'
+    inputs: ['@globs(sources)', 'Dockerfile']

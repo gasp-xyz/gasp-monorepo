@@ -1,17 +1,17 @@
 {
   "addresses": {
-    "gaspErc20Mock": "0x3287D5077e05e0b0bcF7103C8340a5d6cc992fF1",
-    "gmrs": "0x839De8D21F4762D791efbC0bA70C1Af0c442Ef98",
-    "gmrsImplementation": "0x2afcB3AefC7A20C0Af5De928033B5eBCb0122248",
-    "gmrsPauseReg": "0xbEda179754b802bd5cF4850047331b4b4FAd9F59",
-    "gmrsProxyAdmin": "0x85EB7E3F9ca593660488B289d52BEE432Fc3aE95",
-    "rolldown": "0x72fB284429F4088aD38E7Bc229A218FEefe62a3E",
-    "rolldownImplementation": "0x65011Bd4a9A4b48804880Eff3e066664Db81Fb66",
-    "rolldownProxyAdmin": "0x0029Cbe11dc3Dd1e12328ad94E0054f1a5f8a7E0"
+    "gaspErc20Mock": "0x01eAA0Bd70b197a8e4334A30FD4ebfdBce3a714a",
+    "gmrs": "0x80A15DbBE2f2b6E2A28aEbbE9cB0a038DC0be64e",
+    "gmrsImplementation": "0x4f81e5f1982fBF8f6413BD6A0949E9256B1fbb34",
+    "gmrsPauseReg": "0x671dFd2B6ad53EdFa79A006bf4eE09B0bC6f9d0e",
+    "gmrsProxyAdmin": "0x092876Ca7c9235057DE96f4586251F8B0c40263c",
+    "rolldown": "0x2215C253202504a42723B46fe72D1Bb61B3b1918",
+    "rolldownImplementation": "0xDDA60516631454fDb863E0ef825D73eb30F0ce5A",
+    "rolldownProxyAdmin": "0xa7174215400D88395ecafAaEE11F3A902B59aa81"
   },
   "chainInfo": {
     "chainId": 84532,
-    "deploymentBlock": 18867892
+    "deploymentBlock": 21489182
   },
   "permissions": {
     "gmrsOwner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",

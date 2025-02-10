@@ -1979,7 +1979,11 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(2)]
-		#[pallet::weight(<T as Config>::WeightInfo::join_candidates(*candidate_count, *liquidity_token_count))]
+		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
+		#[pallet::weight(
+			<T as Config>::WeightInfo::join_candidates(*candidate_count, *liquidity_token_count)
+			.saturating_add(T::DbWeight::get().reads_writes(3, 3))
+		)]
 		/// Join the set of collator candidates
 		pub fn join_candidates(
 			origin: OriginFor<T>,
@@ -2043,7 +2047,8 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(3)]
-		#[pallet::weight(<T as Config>::WeightInfo::schedule_leave_candidates(*candidate_count))]
+		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
+		#[pallet::weight(<T as Config>::WeightInfo::schedule_leave_candidates(*candidate_count).saturating_add(T::DbWeight::get().reads_writes(3, 3)))]
 		/// Request to leave the set of candidates. If successful, the account is immediately
 		/// removed from the candidate pool to prevent selection as a collator.
 		pub fn schedule_leave_candidates(
@@ -2067,7 +2072,8 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(4)]
-		#[pallet::weight(<T as Config>::WeightInfo::execute_leave_candidates(*candidate_delegation_count))]
+		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
+		#[pallet::weight(<T as Config>::WeightInfo::execute_leave_candidates(*candidate_delegation_count).saturating_add(T::DbWeight::get().reads_writes(3, 3)))]
 		/// Execute leave candidates request
 		pub fn execute_leave_candidates(
 			origin: OriginFor<T>,
@@ -2146,7 +2152,8 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(5)]
-		#[pallet::weight(<T as Config>::WeightInfo::cancel_leave_candidates(*candidate_count))]
+		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
+		#[pallet::weight(<T as Config>::WeightInfo::cancel_leave_candidates(*candidate_count).saturating_add(T::DbWeight::get().reads_writes(3, 3)))]
 		/// Cancel open request to leave candidates
 		/// - only callable by collator account
 		/// - result upon successful call is the candidate is active in the candidate pool
@@ -2183,7 +2190,8 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(6)]
-		#[pallet::weight(<T as Config>::WeightInfo::go_offline())]
+		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
+		#[pallet::weight(<T as Config>::WeightInfo::go_offline().saturating_add(T::DbWeight::get().reads_writes(3, 3)))]
 		/// Temporarily leave the set of collator candidates without unbonding
 		pub fn go_offline(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let collator = ensure_signed(origin)?;
@@ -2200,7 +2208,8 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(7)]
-		#[pallet::weight(<T as Config>::WeightInfo::go_online())]
+		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
+		#[pallet::weight(<T as Config>::WeightInfo::go_online().saturating_add(T::DbWeight::get().reads_writes(3, 3)))]
 		/// Rejoin the set of collator candidates if previously had called `go_offline`
 		pub fn go_online(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let collator = ensure_signed(origin)?;
@@ -2229,7 +2238,8 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(8)]
-		#[pallet::weight(<T as Config>::WeightInfo::schedule_candidate_bond_more())]
+		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
+		#[pallet::weight(<T as Config>::WeightInfo::schedule_candidate_bond_more().saturating_add(T::DbWeight::get().reads_writes(3, 3)))]
 		/// Request by collator candidate to increase self bond by `more`
 		pub fn schedule_candidate_bond_more(
 			origin: OriginFor<T>,
@@ -2245,7 +2255,8 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(9)]
-		#[pallet::weight(<T as Config>::WeightInfo::schedule_candidate_bond_less())]
+		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
+		#[pallet::weight(<T as Config>::WeightInfo::schedule_candidate_bond_less().saturating_add(T::DbWeight::get().reads_writes(3, 3)))]
 		/// Request by collator candidate to decrease self bond by `less`
 		pub fn schedule_candidate_bond_less(
 			origin: OriginFor<T>,
@@ -2260,7 +2271,8 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(10)]
-		#[pallet::weight(<T as Config>::WeightInfo::execute_candidate_bond_more())]
+		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
+		#[pallet::weight(<T as Config>::WeightInfo::execute_candidate_bond_more().saturating_add(T::DbWeight::get().reads_writes(3, 3)))]
 		/// Execute pending request to adjust the collator candidate self bond
 		pub fn execute_candidate_bond_request(
 			origin: OriginFor<T>,
@@ -2276,7 +2288,8 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(11)]
-		#[pallet::weight(<T as Config>::WeightInfo::cancel_candidate_bond_more())]
+		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
+		#[pallet::weight(<T as Config>::WeightInfo::cancel_candidate_bond_more().saturating_add(T::DbWeight::get().reads_writes(3, 3)))]
 		/// Cancel pending request to adjust the collator candidate self bond
 		pub fn cancel_candidate_bond_request(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let collator = ensure_signed(origin)?;
@@ -2288,12 +2301,8 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(12)]
-		#[pallet::weight(
-			<T as Config>::WeightInfo::delegate(
-				*candidate_delegation_count,
-				*delegation_count,
-			)
-		)]
+		// Storage: `ParachainStaking::CandidateState` (r:1 w:1), extra RW cost of large data
+		#[pallet::weight(<T as Config>::WeightInfo::delegate(*candidate_delegation_count, *delegation_count).saturating_add(T::DbWeight::get().reads_writes(3, 3)))]
 		/// If caller is not a delegator and not a collator, then join the set of delegators
 		/// If caller is a delegator, then makes delegation to change their delegation state
 		pub fn delegate(
@@ -2396,7 +2405,11 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(14)]
-		#[pallet::weight(<T as Config>::WeightInfo::execute_leave_delegators(*delegation_count))]
+		// Storage: `ParachainStaking::CandidateState` (r:97 w:97), extra RW cost of large data
+		#[pallet::weight(
+			<T as Config>::WeightInfo::execute_leave_delegators(*delegation_count)
+			.saturating_add(T::DbWeight::get().reads(3).saturating_mul(T::MaxCollatorCandidates::get() as u64))
+		)]
 		/// Execute the right to exit the set of delegators and revoke all ongoing delegations.
 		pub fn execute_leave_delegators(
 			origin: OriginFor<T>,
@@ -2599,7 +2612,11 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(23)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(20, 20))]
+		// Storage: `ParachainStaking::CandidateState` (r:99 w:0) extra R cost of large data
+		#[pallet::weight(
+			<T as Config>::WeightInfo::aggregator_update_metadata()
+			.saturating_add(T::DbWeight::get().reads(3).saturating_mul(T::MaxCollatorCandidates::get() as u64))
+		)]
 		#[transactional]
 		/// Modifies aggregator metadata by extending or reducing list of approved candidates
 		/// Account may only become aggregator only if its not collator or delegator at the moment
@@ -2656,7 +2673,8 @@ pub mod pallet {
 		}
 
 		#[pallet::call_index(24)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(20, 20))]
+		// Storage: `ParachainStaking::CandidateState` (r:1, w:0), extra R cost of large data
+		#[pallet::weight(<T as Config>::WeightInfo::update_candidate_aggregator().saturating_add(T::DbWeight::get().reads(3)))]
 		/// Assigns/replaces the candidate that given collator wants to aggregate under
 		#[transactional]
 		pub fn update_candidate_aggregator(

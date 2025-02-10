@@ -103,3 +103,15 @@ out
 .continueignore
 
 .decrypted*
+
+# moon
+.moon/cache
+.moon/docker
+
+# ignore yarn
+.pnp.*
+**/.yarn/*
+!**/.yarn/patches
+!**/.yarn/plugins
+!**/.yarn/releases
+!**/.yarn/versions

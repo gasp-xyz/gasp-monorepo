@@ -8,3 +8,5 @@ Dockerfile*
 ops/**/data
 **/out
 .env
+.moon/cache
+moon.yml

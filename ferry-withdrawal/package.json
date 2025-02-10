@@ -1,7 +1,7 @@
 {
-  "name": "rollup-sequencer",
+  "name": "ferry-withdrawal",
   "version": "1.0.0",
-  "description": "Rollup Sequencer",
+  "description": "ferry-withdrawal",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -41,5 +41,6 @@
     "viem": "^2.17.4",
     "winston": "^3.15.0",
     "zod": "^3.22.5"
-  }
+  },
+  "packageManager": "yarn@4.6.0"
 }
