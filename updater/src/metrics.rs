@@ -1,5 +1,5 @@
 use ethers::providers::{JsonRpcClient, Middleware, Provider};
-use ethers::types::{NameOrAddress, U256};
+use ethers::types::NameOrAddress;
 use prometheus::{opts, register_gauge, Encoder, Gauge, TextEncoder};
 use sp_runtime::SaturatedConversion;
 use warp::Filter;
