@@ -339,9 +339,9 @@ class L1Api implements L1Interface {
 				args: [MANGATA_CONTRACT_ADDRESS, withdrawal.amount],
 			});
 			const approvetxHash = await wc.writeContract(approveRequest.request);
-			await this.client.waitForTransactionReceipt({ hash: approvetxHash });
 			const status = await this.client.waitForTransactionReceipt({
 				hash: approvetxHash,
+				timeout: 300_000,
 			});
 			if (status.status !== "success") {
 				return false;
@@ -365,6 +365,7 @@ class L1Api implements L1Interface {
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
 		const status = await this.client.waitForTransactionReceipt({
 			hash: ferrytxHash,
+			timeout: 300_000,
 		});
 		return status.status === "success";
 	}
@@ -387,6 +388,7 @@ class L1Api implements L1Interface {
 		// const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
 		// 	this.client,
 		// );
+
 		const ferryRequest = await this.client.simulateContract({
 			account: acc,
 			address: MANGATA_CONTRACT_ADDRESS,
@@ -404,6 +406,7 @@ class L1Api implements L1Interface {
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
 		const status = await this.client.waitForTransactionReceipt({
 			hash: ferrytxHash,
+			timeout: 300_000,
 		});
 		return status.status === "success";
 	}
@@ -443,6 +446,7 @@ class L1Api implements L1Interface {
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
 		const status = await this.client.waitForTransactionReceipt({
 			hash: ferrytxHash,
+			timeout: 300_000,
 		});
 		return status.status === "success";
 	}
