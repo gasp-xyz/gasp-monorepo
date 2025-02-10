@@ -1,6 +1,6 @@
 [package]
 name = "rollup-node"
-version = "1.0.0"
+version = "1.0.4"
 description = "Mangata rollup node"
 authors = ["Mangata Team"]
 edition.workspace = true
