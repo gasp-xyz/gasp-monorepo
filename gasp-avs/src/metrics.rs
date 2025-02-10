@@ -8,7 +8,7 @@ use warp::Filter;
 lazy_static::lazy_static! {
     static ref BALANCE: Gauge = register_gauge!(opts!(
         "account_balance",
-        "Balance of the sequencer account",
+        "Balance of the gasp-avs account",
     ))
     .unwrap();
 }
@@ -24,10 +24,10 @@ pub async fn report_account_balance(
         {
             let balance_f64: f64 = balance.saturated_into::<u128>() as f64;
             let decimals: f64 = balance_f64 / 1_000_000_000_000_000_000_f64;
-            tracing::trace!("sequencer account balance {}", decimals);
+            tracing::trace!("gasp-avs account balance {}", decimals);
             BALANCE.set(decimals);
         } else {
-            tracing::warn!("could not fetch sequencer account balance");
+            tracing::warn!("could not fetch gasp-avs account balance");
         }
         tokio::time::sleep(tokio::time::Duration::from_secs(300)).await;
     }
