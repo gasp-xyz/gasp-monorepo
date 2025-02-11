@@ -17,6 +17,7 @@ use ethers::core::types::U256;
 use ethers::providers::{
     JsonRpcClient, Middleware, PendingTransaction, Provider, SubscriptionStream,
 };
+use ethers::signers::Signer;
 use ethers::types::transaction::eip2718::TypedTransaction;
 use ethers::{
     contract::{builders::ContractCall, stream, EthEvent, EthLogDecode, LogMeta},
@@ -69,7 +70,19 @@ impl Syncer {
     #[instrument(name = "create_syncer", skip_all)]
     pub async fn from_cli(cfg: &CliArgs) -> eyre::Result<Arc<Self>> {
         let (source_client, target_client, maybe_root_target_client) = build_clients(cfg).await?;
+
+        let address = target_client.signer().address();
+        let provider = target_client.provider().clone();
+        let _report_handle = tokio::spawn(async move {
+            crate::metrics::report_account_balance(provider, address.0).await;
+        });
+
+        let _serve_metrics_handle = tokio::spawn(async move {
+            crate::metrics::serve_metrics(80).await;
+        });
+
         let (source_client, target_client) = (Arc::new(source_client), Arc::new(target_client));
+
         let avs_contracts = AvsContracts::build(cfg, source_client.clone()).await?;
         let gasp_service_contract =
             GaspMultiRollupService::new(cfg.gasp_service_addr, target_client.clone());
