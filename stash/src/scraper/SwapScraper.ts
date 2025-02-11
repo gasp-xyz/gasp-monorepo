@@ -45,50 +45,54 @@ export const processDataForDashboard = async (
   logger.info('event asset swapped received: ', event)
   const account = (event.data as any).who
   for (const swap of (event.data as any).swaps) {
-    const tokenId = swap.assetOut
-    const eventVolume = swap.amountOut
-    const existingRecord = await swapRepository
+try {
+  const tokenId = swap.assetOut
+  const eventVolume = swap.amountOut
+  const existingRecord = await swapRepository
       .search()
       .where('account')
       .equals(account)
       .returnFirst()
-    if (existingRecord) {
-      logger.info('existing record found: ', existingRecord)
-      const currentDate = new Date()
-      const lastTradeDate = new Date(existingRecord.lastTradeTimestamp)
-      existingRecord.daysActive =
+  if (existingRecord) {
+    logger.info('existing record found: ', existingRecord)
+    const currentDate = new Date()
+    const lastTradeDate = new Date(existingRecord.lastTradeTimestamp)
+    existingRecord.daysActive =
         currentDate.toDateString() === lastTradeDate.toDateString()
-          ? existingRecord.daysActive
-          : existingRecord.daysActive + 1
-      existingRecord.lastTradeTimestamp = currentDate
-      existingRecord.totalTrades += 1
-      const { decimals } = await decimalsFromTokenId(api, tokenId)
-      const newVolume =
+            ? existingRecord.daysActive
+            : existingRecord.daysActive + 1
+    existingRecord.lastTradeTimestamp = currentDate
+    existingRecord.totalTrades += 1
+    const {decimals} = await decimalsFromTokenId(api, tokenId)
+    const newVolume =
         decimals !== null
-          ? await calculateVolume(tokenId, decimals, eventVolume)
-          : 0
+            ? await calculateVolume(tokenId, decimals, eventVolume)
+            : 0
 
-      existingRecord.totalVolume = existingRecord.totalVolume + newVolume
-      await swapRepository.save(existingRecord)
-      logger.info('Existing record updated with data:', existingRecord)
-    } else {
-      //we got the trade for new account
-      logger.info('No records found, creating a new one for a swap')
-      const { decimals } = await decimalsFromTokenId(api, tokenId)
-      const volume =
+    existingRecord.totalVolume = existingRecord.totalVolume + newVolume
+    await swapRepository.save(existingRecord)
+    logger.info('Existing record updated with data:', existingRecord)
+  } else {
+    //we got the trade for new account
+    logger.info('No records found, creating a new one for a swap')
+    const {decimals} = await decimalsFromTokenId(api, tokenId)
+    const volume =
         decimals !== null
-          ? await calculateVolume(tokenId, decimals, eventVolume)
-          : 0
-      const newRecord = {
-        account: account,
-        lastTradeTimestamp: new Date(),
-        daysActive: 1,
-        totalVolume: volume,
-        totalTrades: 1,
-      }
-      await swapRepository.save(newRecord)
-      logger.info('New record saved with data:', newRecord)
+            ? await calculateVolume(tokenId, decimals, eventVolume)
+            : 0
+    const newRecord = {
+      account: account,
+      lastTradeTimestamp: new Date(),
+      daysActive: 1,
+      totalVolume: volume,
+      totalTrades: 1,
     }
+    await swapRepository.save(newRecord)
+    logger.info('New record saved with data:', newRecord)
+  }
+}catch (e) {
+    logger.error('Error processing data for a specific swap for dashboard:', e)
+  }
   }
 }
 
@@ -99,6 +103,7 @@ export const processDataForVolumeHistory = async (
   logger.info('Entered processDataForVolumeHistory')
   // Implementation for processing data for volume history
   for (const swap of (event.data as any).swaps) {
+    try{
     logger.info('Swap data:', swap)
     const { assetIn, assetOut, amountIn, amountOut, poolId } = swap
     //update pool volume
@@ -221,6 +226,9 @@ export const processDataForVolumeHistory = async (
     logger.info(
       `Updated volume for asset with id ${assetOut}, new value in the database is: ${newAssetOutVolume}`
     )
+  }catch (e) {
+    logger.error('Error processing data for a specific swap for volume history:', e)
+  }
   }
 }
 
@@ -247,6 +255,7 @@ export const processDataForTVLHistory = async (
   logger.info('Entered processDataForTVLHistory')
   // Implementation for processing data for TVL history
   for (const swap of (event.data as any).swaps) {
+    try{
     logger.info('Swap data:', swap)
     const { assetIn, assetOut, amountIn, amountOut, poolId } = swap
     //update pool TVL
@@ -359,6 +368,9 @@ export const processDataForTVLHistory = async (
     logger.info(
       `Updated TVL for asset with id ${assetOut}, new value in the database is: ${newAssetOutTVL}`
     )
+  }catch (e) {
+    logger.error('Error processing data for a specific swap for TVL history:', e)
+  }
   }
 }
 

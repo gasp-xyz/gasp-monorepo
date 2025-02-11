@@ -5,41 +5,24 @@ import {
   processDataForDashboard,
   processDataForVolumeHistory,
   processDataForTVLHistory,
+    checkKey
 } from '../src/scraper/SwapScraper'
 import {swapRepository} from '../src/repository/TransactionRepository'
 import logger from '../src/util/Logger'
 import { ApiPromise } from '@polkadot/api'
 import * as tokenPriceService from '../src/service/TokenPriceService'
-import { timeseries } from '../src/connector/RedisConnector'
-import { GenericContainer, Wait } from 'testcontainers'
+import {redis, timeseries} from '../src/connector/RedisConnector'
 
 
 vi.mock('../src/repository/TransactionRepository')
 vi.mock('../src/util/Logger')
 vi.mock('../src/service/PriceDiscoveryService')
 
-describe('processSwapEvents', () => {
+describe('process dashboard events', () => {
   let mockApi: ApiPromise
   let mockBlock: any
   let mockEvent: any
   let mockSwapData: any
-  // let timeseriesContainer
-  //
-  // beforeAll(() => {
-  //   vi.clearAllMocks()
-  //   timeseriesContainer = await new GenericContainer('redis/redis-stack:latest')
-  //       .withExposedPorts({ container: 6379, host: 6381 })
-  //       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
-  //       .start()
-  //
-  //   process.env.REDIS_HOST = 'localhost'
-  //   process.env.REDIS_PORT = '6380'
-  //   process.env.REDIS_PASS = ''
-  //
-  //   process.env.TIMESERIES_HOST = timeseriesContainer.getHost()
-  //   process.env.TIMESERIES_PORT = '6381'
-  //   process.env.TIMESERIES_PASS = ''
-  // })
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -147,49 +130,100 @@ describe('processSwapEvents', () => {
     })
   })
 
-  it('should log an error if processing  of dashboard event fails', async () => {
+  it('should log an error if processing  of specific swap dashboard event fails', async () => {
     const error = new Error('Test error')
     vi.spyOn(swapRepository, 'search').mockReturnValue({
       where: vi.fn().mockReturnThis(),
       equals: vi.fn().mockReturnThis(),
       returnFirst: vi.fn().mockRejectedValue(error),
     } as any)
-    await expect(processDataForDashboard(mockApi, mockBlock.events[0][1])).rejects.toThrow('Test error')  })
-
-  it('should process volume history when timeseries.client.call returns 0', async () => {
-    vi.spyOn(timeseries.client, 'call').mockResolvedValue(['', '0'])
-    await processDataForVolumeHistory(mockApi, mockEvent)
-
-    expect(timeseries.client.call).toHaveBeenCalledWith('TS.GET', 'trades:pool:6')
-    expect(timeseries.client.call).toHaveBeenCalledWith('TS.ADD', 'trades:pool:6', '*', expect.any(Number))
-    expect(timeseries.client.call).toHaveBeenCalledWith('TS.GET', 'trades:pool:ALL')
-    expect(timeseries.client.call).toHaveBeenCalledWith('TS.ADD', 'trades:pool:ALL', '*', expect.any(Number))
-    expect(timeseries.client.call).toHaveBeenCalledWith('TS.GET', 'trades:asset:0')
-    expect(timeseries.client.call).toHaveBeenCalledWith('TS.ADD', 'trades:asset:0', '*', expect.any(Number))
-    expect(timeseries.client.call).toHaveBeenCalledWith('TS.GET', 'trades:asset:1')
-    expect(timeseries.client.call).toHaveBeenCalledWith('TS.ADD', 'trades:asset:1', '*', expect.any(Number))
-    console.log(logger.info.mock.calls)
-  })
-
-  it('should process volume history when there is already an existing key with value', async () => {
-    // fill pools, assets and pool:ALL
-  })
-
-  it('should handle errors during volume history processing', async () => {
-    // Add test implementation here
-  })
-  it('should process TVL history when there is no existing key', async () => {
-    // fill pools, assets and pool:ALL
-  })
-
-  it('should process TVL history when there is already an existing key with value', async () => {
-    // fill pools, assets and pool:ALL
-  })
-
-  it('should handle errors during TVL history processing', async () => {
-    // Add test implementation here
+    await processDataForDashboard(mockApi, mockBlock.events[0][1])
+    expect(logger.error).toHaveBeenNthCalledWith(1, 'Error processing data for a specific swap for dashboard:', error);
   })
 })
+
+describe('volume history events', () => {
+  let mockApi: ApiPromise
+  let mockEvent: any
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockApi = {
+      query: {
+        assetRegistry: {
+          metadata: {
+            entries: vi.fn().mockResolvedValue([
+              [{ args: ['0'] }, { unwrap: () => ({ decimals: { toPrimitive: () => 18 } }) }],
+              [{ args: ['1'] }, { unwrap: () => ({ decimals: { toPrimitive: () => 18 } }) }],
+            ]),
+          },
+        },
+      },
+    } as unknown as ApiPromise
+    mockEvent = {
+      data: {
+        who: '0x0404040404040404040404040404040404040404',
+        swaps: [
+          {
+            poolId: 6,
+            assetIn: 0,
+            assetOut: 1,
+            amountIn: '40648650414565365',
+            amountOut: '20181563007698743',
+          },
+        ],
+      },
+    }
+  })
+  it('should process volume history when price of the token is 0', async () => {
+    vi.spyOn(tokenPriceService, 'getTokenPrice').mockResolvedValue(0)
+    await processDataForVolumeHistory(mockApi, mockEvent)
+    expect(logger.info).toHaveBeenNthCalledWith(1, 'Entered processDataForVolumeHistory');
+    expect(logger.info).toHaveBeenNthCalledWith(2, 'Swap data:', expect.any(Object));
+    const poolId = 6;
+    const key = `trades:pool:${poolId}`;
+    const [timestamp, value] = await timeseries.client.call('TS.GET', key) as [string, string];
+    console.log(`Timestamp: ${timestamp}, Value: ${value}`);
+    expect(logger.info).toHaveBeenNthCalledWith(3, `Fetched pool volume for 6, latest value from the database is : ${value}`); //todo: replace everywhere with value from db
+    expect(logger.info).toHaveBeenNthCalledWith(4, 'Formula for poolId 6 new volume is =  133.70512668894136 + 0 + 0 but if the price of one token is 0 pool volume stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(5, 'Updated pool volume for 6, new value in the database is : 133.70512668894136');
+    expect(logger.info).toHaveBeenNthCalledWith(6, 'Formula for ALL pools new volume is =  3.0801617002600388 + 0 + 0 but if the price of one token is 0 ALL pool volume stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(7, 'Updated pool volume for ALL: 3.0801617002600388');
+    expect(logger.info).toHaveBeenNthCalledWith(8, 'Fetched volume for asset with id 0, value from the database is: 3.0847888679184536');
+    expect(logger.info).toHaveBeenNthCalledWith(9, 'Formula for assetId 0 new volume is =  3.0847888679184536 + 0');
+    expect(logger.info).toHaveBeenNthCalledWith(10, 'Updated volume for asset with id 0, new value in the database is: 3.0847888679184536');
+    expect(logger.info).toHaveBeenNthCalledWith(11, 'Fetched volume for asset with id 1, value from the database is: 3.075534532601624');
+    expect(logger.info).toHaveBeenNthCalledWith(12, 'Formula for assetId 1 new volume is =  3.075534532601624 + 0');
+    expect(logger.info).toHaveBeenNthCalledWith(13, 'Updated volume for asset with id 1, new value in the database is: 3.075534532601624');
+  })
+
+  it('should process volume history when there are prices for tokens', async () => {
+    vi.spyOn(tokenPriceService, 'getTokenPrice').mockResolvedValue(1.22)
+    await processDataForVolumeHistory(mockApi, mockEvent)
+    expect(logger.info).toHaveBeenNthCalledWith(1, 'Entered processDataForVolumeHistory');
+    expect(logger.info).toHaveBeenNthCalledWith(2, 'Swap data:', expect.any(Object));
+    expect(logger.info).toHaveBeenNthCalledWith(3, 'Fetched pool volume for 6, latest value from the database is : 133.70512668894136');
+    expect(logger.info).toHaveBeenNthCalledWith(4, 'Formula for poolId 6 new volume is =  133.70512668894136 + 0.04959135350576975 + 0.024621506869392466 but if the price of one token is 0 pool volume stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(5, 'Updated pool volume for 6, new value in the database is : 133.77933954931652');
+    expect(logger.info).toHaveBeenNthCalledWith(6, 'Formula for ALL pools new volume is =  3.0801617002600388 + 0.04959135350576975 + 0.024621506869392466 but if the price of one token is 0 ALL pool volume stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(7, 'Updated pool volume for ALL: 3.154374560635201');
+    expect(logger.info).toHaveBeenNthCalledWith(8, 'Fetched volume for asset with id 0, value from the database is: 3.0847888679184536');
+    expect(logger.info).toHaveBeenNthCalledWith(9, 'Formula for assetId 0 new volume is =  3.0847888679184536 + 0.04959135350576975');
+    expect(logger.info).toHaveBeenNthCalledWith(10, 'Updated volume for asset with id 0, new value in the database is: 3.1343802214242236');
+    expect(logger.info).toHaveBeenNthCalledWith(11, 'Fetched volume for asset with id 1, value from the database is: 3.075534532601624');
+    expect(logger.info).toHaveBeenNthCalledWith(12, 'Formula for assetId 1 new volume is =  3.075534532601624 + 0.024621506869392466');
+    expect(logger.info).toHaveBeenNthCalledWith(13, 'Updated volume for asset with id 1, new value in the database is: 3.1001560394710164');
+  })
+
+  it('should handle errors if a specific swap in  volume history processing fails', async () => {
+    const error = new Error('Timeseries error')
+    vi.spyOn(timeseries.client, 'call').mockRejectedValue(new Error('Timeseries error'))
+    await processDataForVolumeHistory(mockApi, mockEvent)
+    expect(logger.error).toHaveBeenNthCalledWith(1, 'Error processing data for a specific swap for volume history:', error);
+  })
+})
+
+
 
 describe('calculateVolume', () => {
   it('should calculate volume correctly', async () => {
@@ -241,5 +275,33 @@ describe('decimalsFromTokenId', () => {
     const result = await decimalsFromTokenId(mockApi, 'invalidTokenId')
 
     expect(result).toBeNull()
+  })
+})
+
+describe('checkKey', () => {
+  it('should create a new key if it does not exist', async () => {
+    const callSpy = vi.spyOn(timeseries.client, 'call').mockResolvedValue('OK')
+
+    await checkKey('testKey', ['label1', 'label2'])
+
+    expect(callSpy).toHaveBeenCalledWith(
+        'TS.CREATE',
+        'testKey',
+        'RETENTION',
+        '0',
+        'DUPLICATE_POLICY',
+        'SUM',
+        'LABELS',
+        'label1',
+        'label2'
+    )
+  })
+
+  it('should not create a new key if it already exists', async () => {
+    const callSpy = vi.spyOn(timeseries.client, 'call')
+
+    await checkKey('testKey', ['label1', 'label2'])
+
+    expect(callSpy).not.toHaveBeenCalledWith('TS.CREATE')
   })
 })
