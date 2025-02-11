@@ -21,7 +21,6 @@ vi.mock('../src/service/PriceDiscoveryService')
 describe('process dashboard events', () => {
   let mockApi: ApiPromise
   let mockBlock: any
-  let mockEvent: any
   let mockSwapData: any
 
   beforeEach(() => {
@@ -61,20 +60,6 @@ describe('process dashboard events', () => {
           },
         ],
       ],
-    }
-    mockEvent = {
-      data: {
-        who: '0x0404040404040404040404040404040404040404',
-        swaps: [
-          {
-            poolId: 6,
-            assetIn: 0,
-            assetOut: 1,
-            amountIn: '40648650414565365',
-            amountOut: '20181563007698743',
-          },
-        ],
-      },
     }
     mockSwapData = {
       account: '0xaccount',
@@ -266,11 +251,11 @@ describe('TVL history events', () => {
     const [timestamp, value] = await timeseries.client.call('TS.GET', key) as [string, string];
     console.log(`Timestamp: ${timestamp}, Value: ${value}`);
     expect(logger.info).toHaveBeenNthCalledWith(3, 'Fetched pool TVL for 6, value in the database is: 11018.218716490845');
-    expect(logger.info).toHaveBeenNthCalledWith(4, 'Formula for poolId 6 new TVL is =  11018.218716490845 + 0 - 0');
-    expect(logger.info).toHaveBeenNthCalledWith(5, 'Updated pool TVL for 6, new value in the database is: 11018.218716490845 but if the price of one token is 0 pool TVL stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(4, 'Formula for poolId 6 new TVL is =  11018.218716490845 + 0 - 0 but if the price of one token is 0 pool TVL stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(5, 'Updated pool TVL for 6, new value in the database is: 11018.218716490845');
     expect(logger.info).toHaveBeenNthCalledWith(6, 'Fetched pool TVL ALL pools, value in the database is: 632439770.9843899');
-    expect(logger.info).toHaveBeenNthCalledWith(7, 'Formula for ALL pools new TVL is =  632439770.9843899 + 0 - 0');
-    expect(logger.info).toHaveBeenNthCalledWith(8, 'Updated pool TVL for ALL, new value in the database is: 632439770.9843899 but if the price of one token is 0 ALL pool TVL stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(7, 'Formula for ALL pools new TVL is =  632439770.9843899 + 0 - 0 but if the price of one token is 0 ALL pool TVL stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(8, 'Updated pool TVL for ALL, new value in the database is: 632439770.9843899');
     expect(logger.info).toHaveBeenNthCalledWith(9, 'Fetched TVL for asset with id 0, value in the database is: 316215799.41475797');
     expect(logger.info).toHaveBeenNthCalledWith(10, 'Formula for assetId 0 new TVL is =  316215799.41475797 + 0');
     expect(logger.info).toHaveBeenNthCalledWith(11, 'Updated TVL for asset with id 0, new value in the database is: 316215799.41475797');
@@ -285,11 +270,11 @@ describe('TVL history events', () => {
     expect(logger.info).toHaveBeenNthCalledWith(1, 'Entered processDataForTVLHistory');
     expect(logger.info).toHaveBeenNthCalledWith(2, 'Swap data:', expect.any(Object));
     expect(logger.info).toHaveBeenNthCalledWith(3, 'Fetched pool TVL for 6, value in the database is: 11018.218716490845');
-    expect(logger.info).toHaveBeenNthCalledWith(4, 'Formula for poolId 6 new TVL is =  11018.218716490845 + 0.04959135350576975 - 0.024621506869392466');
-    expect(logger.info).toHaveBeenNthCalledWith(5, 'Updated pool TVL for 6, new value in the database is: 11018.24368633748 but if the price of one token is 0 pool TVL stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(4, 'Formula for poolId 6 new TVL is =  11018.218716490845 + 0.04959135350576975 - 0.024621506869392466 but if the price of one token is 0 pool TVL stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(5, 'Updated pool TVL for 6, new value in the database is: 11018.24368633748');
     expect(logger.info).toHaveBeenNthCalledWith(6, 'Fetched pool TVL ALL pools, value in the database is: 632439770.9843899');
-    expect(logger.info).toHaveBeenNthCalledWith(7, 'Formula for ALL pools new TVL is =  632439770.9843899 + 0.04959135350576975 - 0.024621506869392466');
-    expect(logger.info).toHaveBeenNthCalledWith(8, 'Updated pool TVL for ALL, new value in the database is: 632439771.0093597 but if the price of one token is 0 ALL pool TVL stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(7, 'Formula for ALL pools new TVL is =  632439770.9843899 + 0.04959135350576975 - 0.024621506869392466 but if the price of one token is 0 ALL pool TVL stays unchanged');
+    expect(logger.info).toHaveBeenNthCalledWith(8, 'Updated pool TVL for ALL, new value in the database is: 632439771.0093597');
     expect(logger.info).toHaveBeenNthCalledWith(9, 'Fetched TVL for asset with id 0, value in the database is: 316215799.41475797');
     expect(logger.info).toHaveBeenNthCalledWith(10, 'Formula for assetId 0 new TVL is =  316215799.41475797 + 0.04959135350576975');
     expect(logger.info).toHaveBeenNthCalledWith(11, 'Updated TVL for asset with id 0, new value in the database is: 316215799.4643493');

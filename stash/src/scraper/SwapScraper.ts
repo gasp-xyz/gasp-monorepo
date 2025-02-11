@@ -295,10 +295,10 @@ export const processDataForTVLHistory = async (
     logger.info(
       `Formula for poolId ${poolId} new TVL is =  ${poolTVLValue} + ${Number(
         volumeInUSD
-      )} - ${Number(volumeOutUSD)}`
+      )} - ${Number(volumeOutUSD)} but if the price of one token is 0 pool TVL stays unchanged`
     )
     logger.info(
-      `Updated pool TVL for ${poolId}, new value in the database is: ${newPoolTVL} but if the price of one token is 0 pool TVL stays unchanged`
+      `Updated pool TVL for ${poolId}, new value in the database is: ${newPoolTVL}`
     )
     //update pool ALL TVL
     const ALLpoolTVLKey = `volumes:pool:ALL`
@@ -320,10 +320,10 @@ export const processDataForTVLHistory = async (
     logger.info(
       `Formula for ALL pools new TVL is =  ${ALLpoolTVLValue} + ${Number(
         volumeInUSD
-      )} - ${Number(volumeOutUSD)}`
+      )} - ${Number(volumeOutUSD)} but if the price of one token is 0 ALL pool TVL stays unchanged`
     )
     logger.info(
-      `Updated pool TVL for ALL, new value in the database is: ${ALLnewPoolTVL} but if the price of one token is 0 ALL pool TVL stays unchanged`
+      `Updated pool TVL for ALL, new value in the database is: ${ALLnewPoolTVL}`
     )
     //update assets TVL
     const assetInTVLKey = `volumes:asset:${assetIn}`
