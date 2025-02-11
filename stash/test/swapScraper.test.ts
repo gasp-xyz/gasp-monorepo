@@ -214,6 +214,8 @@ describe('TVL history events', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.resetAllMocks();
+    vi.restoreAllMocks();
     mockApi = {
       query: {
         assetRegistry: {
@@ -242,14 +244,12 @@ describe('TVL history events', () => {
     }
   })
   it('should process TVL history when price of the token is 0', async () => {
-    vi.spyOn(tokenPriceService, 'getTokenPrice').mockResolvedValue(0)
+    vi.spyOn(tokenPriceService, 'getTokenPrice').mockResolvedValueOnce(0)
+    vi.spyOn(logger, 'info').mockImplementation(() => {})
+    vi.spyOn(logger, 'error').mockImplementation(() => {})
     await processDataForTVLHistory(mockApi, mockEvent)
     expect(logger.info).toHaveBeenNthCalledWith(1, 'Entered processDataForTVLHistory');
     expect(logger.info).toHaveBeenNthCalledWith(2, 'Swap data:', expect.any(Object));
-    const poolId = 6;
-    const key = `volumes:pool:${poolId}`;
-    const [timestamp, value] = await timeseries.client.call('TS.GET', key) as [string, string];
-    console.log(`Timestamp: ${timestamp}, Value: ${value}`);
     expect(logger.info).toHaveBeenNthCalledWith(3, 'Fetched pool TVL for 6, value in the database is: 11018.218716490845');
     expect(logger.info).toHaveBeenNthCalledWith(4, 'Formula for poolId 6 new TVL is =  11018.218716490845 + 0 - 0 but if the price of one token is 0 pool TVL stays unchanged');
     expect(logger.info).toHaveBeenNthCalledWith(5, 'Updated pool TVL for 6, new value in the database is: 11018.218716490845');
@@ -266,6 +266,8 @@ describe('TVL history events', () => {
 
   it('should process TVL history when there are prices for tokens', async () => {
     vi.spyOn(tokenPriceService, 'getTokenPrice').mockResolvedValue(1.22)
+    vi.spyOn(logger, 'info').mockImplementation(() => {})
+    vi.spyOn(logger, 'error').mockImplementation(() => {})
     await processDataForTVLHistory(mockApi, mockEvent)
     expect(logger.info).toHaveBeenNthCalledWith(1, 'Entered processDataForTVLHistory');
     expect(logger.info).toHaveBeenNthCalledWith(2, 'Swap data:', expect.any(Object));
@@ -284,6 +286,8 @@ describe('TVL history events', () => {
   })
 
   it('should handle errors if a specific swap in  TVL history processing fails', async () => {
+    vi.spyOn(logger, 'error').mockImplementation(() => {})
+    vi.spyOn(logger, 'info').mockImplementation(() => {})
     const error = new Error('Timeseries error')
     vi.spyOn(timeseries.client, 'call').mockRejectedValue(new Error('Timeseries error'))
     await processDataForTVLHistory(mockApi, mockEvent)
