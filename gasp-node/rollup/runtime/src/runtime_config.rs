@@ -1002,11 +1002,11 @@ pub mod config {
 			/// Maximum collator candidates allowed
 			pub const MaxCollatorCandidates: u32 = 100;
 			/// Maximum delegators allowed per candidate
-			pub const MaxTotalDelegatorsPerCandidate: u32 = 30;
+			pub const MaxTotalDelegatorsPerCandidate: u32 = 750;
 			/// Maximum delegators counted per candidate
-			pub const MaxDelegatorsPerCandidate: u32 = 30;
+			pub const MaxDelegatorsPerCandidate: u32 = 750;
 			/// Maximum delegations per delegator
-			pub const MaxDelegationsPerDelegator: u32 = 30;
+			pub const MaxDelegationsPerDelegator: u32 = 750;
 			/// Default fixed percent a collator takes off the top of due rewards
 			pub const DefaultCollatorCommission: Perbill = Perbill::from_percent(20);
 			/// Minimum stake required to become a collator
@@ -1020,7 +1020,7 @@ pub mod config {
 				500_000 * currency::DOLLARS
 			};
 			/// Minimum stake required to be reserved to be a delegator
-			pub const MinDelegatorStk: u128 = 1 * currency::CENTS;
+			pub const MinDelegatorStk: u128 = 500 * currency::DOLLARS;
 		}
 	}
 

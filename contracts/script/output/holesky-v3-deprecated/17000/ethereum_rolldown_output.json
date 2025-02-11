@@ -1,0 +1,37 @@
+{
+  "addresses": {
+    "avsPauseReg": "0xb28C5859AD0c808Be0461b97E6cf6Fd774FE4B90",
+    "avsProxyAdmin": "0xF29Da2396581bF48E284f45AF481A6E64a0cF8d3",
+    "blsApkRegistry": "0xa4Aa4c1f1A1126BF092a0070cDa56aD89728dAcA",
+    "blsApkRegistryImplementation": "0x172149A56a70c8Bb0abBd86d8bbed28586F388d9",
+    "gaspErc20Mock": "0xF987186EB3514684aA1465D177a1596B03a1FCd7",
+    "indexRegistry": "0x35D818BE38912c2e87888F7df569625CbbBc9c7E",
+    "indexRegistryImplementation": "0x03654BF8bC98df4650FA860735e29AD46461C300",
+    "registryCoordinator": "0xb4dd45a08BFA6fBC19F7cD624cdfef87CE95e7AC",
+    "registryCoordinatorImplementation": "0x881D3260863afFFE787298051954255a11111971",
+    "rolldown": "0xCACb3e67CA70Af311744681B6E51B880da24a78a",
+    "rolldownImplementation": "0x35208B444e26a3998a93B267b792e3FfE7e5534d",
+    "rolldownProxyAdmin": "0xD3D923AdC2F06896B623a99107033bF21F9d50eF",
+    "serviceManager": "0x553B462c24c4D736c838dE2dF7513688642DF289",
+    "serviceManagerImplementation": "0xCc87dA931f419Fe296dcE881e2CfbdC42173E4E3",
+    "stakeRegistry": "0x6903237aB08bcE2C9c42D8a2e9A59330337e886d",
+    "stakeRegistryImplementation": "0x83D9C5264E63a9Fdd82e3c00d9029d9E9044e886",
+    "taksManagerImplementation": "0x8Ed3E6a7E04c02db7FBf1EB4359D3a2D816F3Bed",
+    "taskManager": "0x93fa8fD0839384526E0E3E991aEb4019cFa346a6"
+  },
+  "chainInfo": {
+    "chainId": 17000,
+    "deploymentBlock": 2884405
+  },
+  "permissions": {
+    "aggregator": "0xd082D8fF9491b5066Db6e1E03efB19daaF50de02",
+    "avsChurner": "0x0000000000000000000000000000000000000000",
+    "avsEjector": "0xd082D8fF9491b5066Db6e1E03efB19daaF50de02",
+    "avsMultisig": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "avsOwner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "avsUpgrader": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "rolldownOwner": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "rolldownUpdater": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337",
+    "rolldownUpgrader": "0xeACEe31DC9a639ACc345f78F4D00979ff0683337"
+  }
+}
