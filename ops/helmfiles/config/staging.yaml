@@ -97,7 +97,9 @@ gaspAvsData:
   storageClass: node-data-volume-retain
   mountPath: /data
   storageSize: 100Gi
-gaspAvsEnvSecrets: {}
+gaspAvsEnvSecrets:
+  ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/preregisteredGaspAvsEcdsaKeyJson
+  BLS_KEY_JSON: ref+sops://secrets.enc.yaml#/preregisteredGaspAvsBlsKeyJson
 gaspAvsEnv:
   CHAIN_ID: "1337"
   RUST_LOG: info,substrate=warn
@@ -105,8 +107,6 @@ gaspAvsEnv:
   ETH_WS_URL: ws://evm-node-eth:8546
   SUBSTRATE_RPC_URL: ws://collator-01:9944
   AVS_REGISTRY_COORDINATOR_ADDR: 0xf5059a5D33d5853360D16C683c16e67980206f36
-  ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/preregisteredGaspAvsEcdsaKeyJson
-  BLS_KEY_JSON: ref+sops://secrets.enc.yaml#/preregisteredGaspAvsBlsKeyJson
   AVS_RPC_URL: http://avs-aggregator:8090
   TESTNET: "true"
   # rollup-node configs
