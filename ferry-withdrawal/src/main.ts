@@ -108,7 +108,7 @@ async function main() {
 							hexToU8a(PRIVATE_KEY),
 						);
 						if (!status) {
-							logger.warning(
+							logger.warn(
 								`${ALERT_WARNING} Failed to close withdrawal ${toString(
 									withdrawal,
 								)}`,
@@ -126,7 +126,7 @@ async function main() {
 						logger.info(`Ferrying withdrawal ${toString(withdrawal)}`);
 						const status = await l1.ferry(rated[0], hexToU8a(PRIVATE_KEY));
 						if (!status) {
-							logger.warning(
+							logger.warn(
 								`${ALERT_WARNING} Failed to ferry withdrawal ${toString(
 									withdrawal,
 								)}`,
