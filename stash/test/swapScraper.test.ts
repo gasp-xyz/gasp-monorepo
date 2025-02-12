@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   calculateVolume,
   decimalsFromTokenId,
@@ -11,7 +11,7 @@ import {swapRepository} from '../src/repository/TransactionRepository'
 import logger from '../src/util/Logger'
 import { ApiPromise } from '@polkadot/api'
 import * as tokenPriceService from '../src/service/TokenPriceService'
-import {redis, timeseries} from '../src/connector/RedisConnector'
+import { timeseries} from '../src/connector/RedisConnector'
 
 
 vi.mock('../src/repository/TransactionRepository')
