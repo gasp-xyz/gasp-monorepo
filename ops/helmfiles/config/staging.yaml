@@ -105,9 +105,9 @@ gaspAvsEnv:
   ETH_WS_URL: ws://evm-node-eth:8546
   SUBSTRATE_RPC_URL: ws://collator-01:9944
   AVS_REGISTRY_COORDINATOR_ADDR: 0xf5059a5D33d5853360D16C683c16e67980206f36
+  ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/preregisteredGaspAvsEcdsaKeyJson
+  BLS_KEY_JSON: ref+sops://secrets.enc.yaml#/preregisteredGaspAvsBlsKeyJson
   AVS_RPC_URL: http://avs-aggregator:8090
-  ECDSA_EPHEMERAL_KEY: "true"
-  BLS_EPHEMERAL_KEY: "true"
   TESTNET: "true"
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWEPyq7mzPhc4DPdcm8pHvxLeQ1iuDNzhHkRUFRXBKaUa8
