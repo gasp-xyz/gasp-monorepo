@@ -29,7 +29,7 @@
   ],
   "devDependencies": {
     "forge-std": "github:foundry-rs/forge-std#v1.9.5",
-    "prettier": "^3.4.2",
-    "solhint": "^5.0.4"
+    "prettier": "^3.5.0",
+    "solhint": "^5.0.5"
   }
 }
