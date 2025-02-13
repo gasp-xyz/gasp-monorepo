@@ -84,7 +84,7 @@ export const startTracingWithdrawal = async (
   const timestamp = new Date().toISOString()
   const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
     eventData.chain,
-    eventData.requestId.id
+    eventData.requestId.id.replace(/,/g, '')
   )
   const affirmedNetworks = await redis.client.get(NETWORK_LIST_KEY)
   const networks = affirmedNetworks ? JSON.parse(affirmedNetworks) : []
