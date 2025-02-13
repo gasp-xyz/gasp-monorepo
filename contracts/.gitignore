@@ -10,6 +10,7 @@ out/
 *.env
 *.log
 .DS_Store
+.gas-snapshot
 .pnp.*
 .solcx-lock-*
 coverage.json
