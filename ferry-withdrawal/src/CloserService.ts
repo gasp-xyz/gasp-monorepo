@@ -157,7 +157,7 @@ class CloserService {
 				privateKey,
 			);
 			if (!status) {
-				logger.warning(
+				logger.warn(
 					`${ALERT_WARNING} Failed to close withdrawal ${toString(withdrawal)}`,
 				);
 			}
@@ -176,7 +176,7 @@ class CloserService {
 			);
 			const status = await this.l1.closeCancel(cancel, root, proof, privateKey);
 			if (!status) {
-				logger.warning(
+				logger.warn(
 					`${ALERT_WARNING} Failed to close cancel ${cancelToString(cancel)}`,
 				);
 			}
