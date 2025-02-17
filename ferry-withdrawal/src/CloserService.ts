@@ -87,7 +87,7 @@ class CloserService {
 								);
 							}) !== undefined;
 
-						const isClosedAlready = !(await this.l1.isClosed(request.hash));
+						const isClosedAlready = (await this.l1.isClosed(request.hash));
 
 						return (
 							!isClosedAlready &&
