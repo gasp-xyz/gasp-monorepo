@@ -38,18 +38,7 @@ export class StashApi implements StashInterface {
 			);
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
-				logger.error("Axios Error:", error.message);
-				if (error.response) {
-					logger.error("Response Data:", error.response.data);
-					logger.error("Response Status:", error.response.status);
-				} else if (error.request) {
-					logger.error(
-						"Request was made but no response received:",
-						error.request,
-					);
-				} else {
-					logger.error("Unexpected error:", error.message);
-				}
+				logger.error("Axios Error:", error.toJSON());
 			} else if (error instanceof ZodError) {
 				console.error("Validation Failed:", error.errors);
 			} else {
