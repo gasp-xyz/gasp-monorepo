@@ -5,7 +5,11 @@ services:
     ports:
       - 8545:8545
     entrypoint: anvil
-    command: --host 0.0.0.0 --balance 1000000000000000000 --chain-id ${CHAIN_ID:-31337} --port 8545
+    command: >
+      --host 0.0.0.0
+      --balance 1000000000000000000
+      --chain-id 31337
+      --port 8545
     healthcheck:
       test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
       interval: 2s
@@ -16,13 +20,15 @@ services:
     image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
     platform: linux/amd64
     ports:
-      - 8546:8546
+      - 8545:8546
     entrypoint: anvil
-    command:
-      --host 0.0.0.0 --disable-block-gas-limit  --balance 1000000000000000000 --chain-id
-      ${CHAIN_ID:-31337} --port 8546
+    command: >
+      --host 0.0.0.0
+      --balance 1000000000000000000
+      --chain-id 31338
+      --port 8545
     healthcheck:
-      test: ["CMD", "nc", "-vz", "127.0.0.1", "8546"]
+      test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
       interval: 2s
       timeout: 10s
       retries: 3
@@ -31,13 +37,15 @@ services:
     image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
     platform: linux/amd64
     ports:
-      - 8746:8546
+      - 8745:8546
     entrypoint: anvil
-    command:
-      --host 0.0.0.0 --disable-block-gas-limit  --balance 1000000000000000000 --chain-id
-      ${CHAIN_ID:-31337} --port 8547
+    command: >
+      --host 0.0.0.0
+      --balance 1000000000000000000
+      --chain-id 31339
+      --port 8545
     healthcheck:
-      test: ["CMD", "nc", "-vz", "127.0.0.1", "8547"]
+      test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
       interval: 2s
       timeout: 10s
       retries: 3
