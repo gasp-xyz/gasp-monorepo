@@ -9,14 +9,14 @@ import { u8aToHex } from "@polkadot/util";
 // createdBy: frontend/other (other is default)
 
 enum Origin {
-	Frontend = "frontend",
-	Other = "other",
+  Frontend = "frontend",
+  Other = "other",
 }
 
 export const stashResponseSchema = z.object({
-	transaction: z.object({
-		createdBy: z.enum([Origin.Frontend, Origin.Other]),
-	}),
+  transaction: z.object({
+    createdBy: z.enum([Origin.Frontend, Origin.Other]),
+  }),
 });
 
 export class StashApi implements StashInterface {
@@ -38,18 +38,18 @@ export class StashApi implements StashInterface {
 			);
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
-				logger.error("Axios Error:", error.message);
-				if (error.response) {
-					logger.error("Response Data:", error.response.data);
-					logger.error("Response Status:", error.response.status);
-				} else if (error.request) {
-					logger.error(
-						"Request was made but no response received:",
-						error.request,
-					);
-				} else {
-					logger.error("Unexpected error:", error.message);
-				}
+				logger.error("Axios Error:", error.toJSON());
+				// if (error.response) {
+				// 	logger.error("Response Data:", error.response.data);
+				// 	logger.error("Response Status:", error.response.status);
+				// } else if (error.request) {
+				// 	logger.error(
+				// 		"Request was made but no response received:",
+				// 		error.request,
+				// 	);
+				// } else {
+				// 	logger.error("Unexpected error:", error.message);
+				// }
 			} else if (error instanceof ZodError) {
 				console.error("Validation Failed:", error.errors);
 			} else {
