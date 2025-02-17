@@ -147,20 +147,4 @@ contract Utils is Script {
         );
         vm.writeJson(outputJson, outputFilePath);
     }
-
-    function evmPrefixedPath(IRolldownPrimitives.ChainId chain, string memory path) public pure returns (string memory) {
-      string memory evm;
-
-      if (chain == IRolldownPrimitives.ChainId.Ethereum) {
-        evm = "ethereum_";
-      } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
-        evm = "arbitrum_"; 
-      } else if (chain == IRolldownPrimitives.ChainId.Base) {
-        evm = "base_"; 
-      } else {
-        revert("Unsupported chain");
-      }
-
-      return string.concat(evm, path);
-    }
 }

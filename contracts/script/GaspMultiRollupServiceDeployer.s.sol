@@ -31,24 +31,9 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
     address public updaterAccount;
     bool public allowNonRootInit;
 
-    function evmPrefixedPath(IRolldownPrimitives.ChainId chain) public view returns (string memory) {
-      string memory evm;
-
-      if (chain == IRolldownPrimitives.ChainId.Ethereum) {
-        evm = "ethereum_";
-      } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
-        evm = "arbitrum_";
-      } else if (chain == IRolldownPrimitives.ChainId.Base) {
-        evm = "base_"; 
-      } else {
-        revert("Unsupported chain");
-      }
-
-      return string.concat(evm, _OUTPUT_PATH);
-    }
 
     function upgrade(IRolldownPrimitives.ChainId chain) public {
-      string memory configData = readInput(evmPrefixedPath(chain));
+      string memory configData = readInput(chain);
       upgrader = stdJson.readAddress(configData, ".permissions.gmrsUpgrader");
       address proxyAdmin = stdJson.readAddress(configData, ".addresses.gmrsProxyAdmin");
       address gmrsAddress = stdJson.readAddress(configData, ".addresses.gmrs");
@@ -72,10 +57,10 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
     }
 
     function isProxyDeployed(IRolldownPrimitives.ChainId chain) public returns (bool){
-      if (!inputExists(evmPrefixedPath(chain))){
+      if (!inputExists(chain)){
         return false;
       }
-      string memory configData = readInput(evmPrefixedPath(chain));
+      string memory configData = readInput(chain);
       address proxyAdmin = stdJson.readAddress(configData, ".addresses.gmrsProxyAdmin");
       return proxyAdmin.code.length > 0;
     }
@@ -158,7 +143,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
         vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
         string memory finalJson = vm.serializeString(parent_object, permissions, permissions_output);
         console.logString(finalJson);
-        writeOutput(finalJson, evmPrefixedPath(chain));
+        writeOutput(finalJson, chain);
     }
 
 
@@ -169,7 +154,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
             "gmrs: implementation set incorrectly"
         );
     }
-    
+
     function _verifyInitalizations(
     ) internal view {
         require(gmrs.owner() == owner, "gmrs.owner() != owner");
