@@ -317,10 +317,10 @@ closerEnvEth:
   LOOK_BACK_HOURS: 1
   LOG: silly
   BATCH_SIZE: 50
-  STASH_URL: https://gasp-stash-holesky-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/holeskyCloserPrivateKey
+  STASH_URL: ref+sops://secrets.enc.yaml#/holeskyV3StashUrl
 closerEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x18Ef4858e5581d20c2145ea0dFEA7F4d81A957A5"
@@ -330,10 +330,10 @@ closerEnvArb:
   LOOK_BACK_HOURS: 1
   LOG: silly
   BATCH_SIZE: 50
-  STASH_URL: https://gasp-stash-holesky-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/arbitrumSepoliaCloserPrivateKey
+  STASH_URL: ref+sops://secrets.enc.yaml#/holeskyV3StashUrl
 closerEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x2215C253202504a42723B46fe72D1Bb61B3b1918"
@@ -343,7 +343,7 @@ closerEnvBase:
   LOOK_BACK_HOURS: 1
   LOG: silly
   BATCH_SIZE: 50
-  STASH_URL: https://gasp-stash-holesky-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseSepoliaWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/baseSepoliaCloserPrivateKey
+  STASH_URL: ref+sops://secrets.enc.yaml#/holeskyV3StashUrl

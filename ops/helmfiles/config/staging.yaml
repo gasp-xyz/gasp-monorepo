@@ -285,9 +285,9 @@ closerEnvEth:
   LOOK_BACK_HOURS: 1
   LOG: silly
   BATCH_SIZE: 50
-  STASH_URL: https://gasp-stash-staging-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsEth:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  STASH_URL: ref+sops://secrets.enc.yaml#/stagingStashUrl
 closerEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-arb:8546
@@ -298,9 +298,9 @@ closerEnvArb:
   LOOK_BACK_HOURS: 1
   LOG: silly
   BATCH_SIZE: 50
-  STASH_URL: https://gasp-stash-staging-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsArb:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  STASH_URL: ref+sops://secrets.enc.yaml#/stagingStashUrl
 closerEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-base:8546
@@ -311,6 +311,6 @@ closerEnvBase:
   LOOK_BACK_HOURS: 1
   LOG: silly
   BATCH_SIZE: 50
-  STASH_URL: https://gasp-stash-staging-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsBase:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  STASH_URL: ref+sops://secrets.enc.yaml#/stagingStashUrl

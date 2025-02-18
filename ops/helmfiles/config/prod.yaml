@@ -440,7 +440,7 @@ ferryWithdrawalEnvSecretsBase:
 # ferry-closer configs #
 ########################
 closerEnabled: true
-closerImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
+closerImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
@@ -449,10 +449,12 @@ closerEnvEth:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
+  BATCH_SIZE: 50
 closerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-private-key
+  STASH_URL: ref+sops://secrets.enc.yaml#/prodStashUrl
 
 closerEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -462,10 +464,12 @@ closerEnvArb:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
+  BATCH_SIZE: 50
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerArbitrumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-private-key
+  STASH_URL: ref+sops://secrets.enc.yaml#/prodStashUrl
 
 closerEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -475,7 +479,9 @@ closerEnvBase:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
+  BATCH_SIZE: 50
 closerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerBaseMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
   PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-private-key
+  STASH_URL: ref+sops://secrets.enc.yaml#/prodStashUrl
