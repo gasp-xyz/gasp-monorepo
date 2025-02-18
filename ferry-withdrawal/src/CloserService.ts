@@ -87,10 +87,12 @@ class CloserService {
 								);
 							}) !== undefined;
 
+						const isClosedAlready = (await this.l1.isClosed(request.hash));
+
 						return (
+							!isClosedAlready &&
 							(shouldBeClosed ||
-								(await this.stash.shouldBeClosed(request.hash))) &&
-							!(await this.l1.isClosed(request.hash))
+								(await this.stash.shouldBeClosed(request.hash)))
 						);
 					} else {
 						logger.error(`ignoring unkonwn request`);
