@@ -21,11 +21,10 @@ import {
 	TX_COST,
 	STASH_URL,
 	DELAY,
+	BATCH_SIZE,
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
 import { reportBalance, serveMetrics } from "./metrics.js";
-
-const BATCH_SIZE = 1000n;
 
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);

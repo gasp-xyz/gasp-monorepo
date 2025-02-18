@@ -48,6 +48,7 @@ const cliConfigSchemat = z.object({
 	LOOK_BACK_HOURS: z.number().default(24),
 	LOG: z.string().default("info"),
 	DELAY: z.bigint().default(0n),
+	BATCH_SIZE: z.bigint().default(500n),
 });
 
 function createCliConfig() {
@@ -65,6 +66,9 @@ function createCliConfig() {
 			: undefined,
 		LOG: process.env.LOG,
 		DELAY: process.env.DELAY ? BigInt(process.env.DELAY) : undefined,
+		BATCH_SIZE: process.env.BATCH_SIZE
+			? BigInt(process.env.BATCH_SIZE)
+			: undefined,
 	});
 }
 
@@ -84,3 +88,4 @@ export const LOOK_BACK_HOURS = configuration.LOOK_BACK_HOURS;
 export const LOG = configuration.LOG;
 export const ABI = rolldownAbi.abi;
 export const DELAY = configuration.DELAY;
+export const BATCH_SIZE = configuration.BATCH_SIZE;
