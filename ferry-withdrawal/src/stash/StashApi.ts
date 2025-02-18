@@ -40,7 +40,7 @@ export class StashApi implements StashInterface {
 			if (axios.isAxiosError(error)) {
 				logger.error("Axios Error:", error.toJSON());
 			} else if (error instanceof ZodError) {
-				console.error("Validation Failed:", error.errors);
+				logger.warn("ALERT::WARN Stash response validation failed: ", error);
 			} else {
 				logger.error("Unexpected Error:", error);
 			}
