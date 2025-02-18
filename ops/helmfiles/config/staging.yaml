@@ -274,7 +274,7 @@ ferryWithdrawalEnvSecretsBase:
 # ferry-closer configs #
 ########################
 closerEnabled: true
-closerImageTag: a98a7610b7502704f5cc57fcbc2e611a94abf757
+closerImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-eth:8546
@@ -284,7 +284,8 @@ closerEnvEth:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  STASH_URL: http://127.0.0.1
+  BATCH_SIZE: 50
+  STASH_URL: https://gasp-stash-staging-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsEth:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
 closerEnvArb:
@@ -296,7 +297,8 @@ closerEnvArb:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  STASH_URL: http://127.0.0.1
+  BATCH_SIZE: 50
+  STASH_URL: https://gasp-stash-staging-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsArb:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
 closerEnvBase:
@@ -308,6 +310,7 @@ closerEnvBase:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  STASH_URL: http://127.0.0.1
+  BATCH_SIZE: 50
+  STASH_URL: https://gasp-stash-staging-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsBase:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"

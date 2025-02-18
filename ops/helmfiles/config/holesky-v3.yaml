@@ -307,7 +307,7 @@ ferryWithdrawalEnvSecretsBase:
 # closer configs #
 ########################
 closerEnabled: true
-closerImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
+closerImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x34B38Fd98aBE38B52258253fb4E1D0F5EFF26343"
@@ -316,7 +316,8 @@ closerEnvEth:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  STASH_URL: http://127.0.0.1
+  BATCH_SIZE: 50
+  STASH_URL: https://gasp-stash-holesky-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/holeskyCloserPrivateKey
@@ -328,7 +329,8 @@ closerEnvArb:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  STASH_URL: http://127.0.0.1
+  BATCH_SIZE: 50
+  STASH_URL: https://gasp-stash-holesky-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/arbitrumSepoliaCloserPrivateKey
@@ -340,7 +342,8 @@ closerEnvBase:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  STASH_URL: http://127.0.0.1
+  BATCH_SIZE: 50
+  STASH_URL: https://gasp-stash-holesky-dot-direct-pixel-353917.oa.r.appspot.com/
 closerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseSepoliaWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/baseSepoliaCloserPrivateKey
