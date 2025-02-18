@@ -121,9 +121,9 @@ aggregatorEnv:
 #####################
 # gaspAvs configs #
 #####################
-gaspAvsEnabled: true
 gaspAvsImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
 
+gaspAvsEnabled: true
 gaspAvsData:
   storageClass: node-data-volume-retain
   mountPath: /data
@@ -153,6 +153,39 @@ gaspAvsEnv:
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
   ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/5b0100d05c4744f31af56105bce3151f8cbc2d15/rollup-dev-env-chainspecs/holesky-62fa181-raw.json
+
+gaspAvsEnabled2: false
+gaspAvsData2:
+  storageClass: node-data-volume-retain
+  mountPath: /data
+  storageSize: 150Gi
+# TODO: Should be updated with the correct secrets
+# gaspAvsEnvSecrets2:
+#   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetFinalizerEcdsaKeyJson
+#   ECDSA_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetFinalizerEcdsaKeyPassword
+#   BLS_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetFinalizerBlsKeyJson
+#   BLS_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetFinalizerBlsKeyPassword
+#   ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
+#   ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
+gaspAvsEnv2:
+  CHAIN_ID: "17000"
+  AVS_BLOCK_VALIDATION_PERIOD: "100"
+  AVS_DEBOUNCE_RPC: "20"
+  AVS_DEPLOYMENT_BLOCK: "2884411"
+  AVS_KICK_PERIOD: "25"
+  AVS_REGISTRY_COORDINATOR_ADDR: "0xef5Ea04287c2BCd0A984563B055f39e650dF0e28"
+  AVS_RPC_URL: http://avs-aggregator:8090
+  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
+  AVS_TASK_EXPIRATION: "300"
+  AVS_UPDATE_STAKE_PERIOD: "150"
+  OPT_IN_AT_STARTUP: "true"
+  LOG_LEVEL: "info"
+  RUST_LOG: avs=debug,ether=trace
+  TESTNET: "false"
+  # rollup-node configs
+  ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
+  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/5b0100d05c4744f31af56105bce3151f8cbc2d15/rollup-dev-env-chainspecs/holesky-62fa181-raw.json
+
 ###########################
 # updater configs #
 ###########################
