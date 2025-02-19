@@ -20,7 +20,7 @@ services:
     image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
     platform: linux/amd64
     ports:
-      - 8545:8546
+      - 8546:8545
     entrypoint: anvil
     command: >
       --host 0.0.0.0
@@ -37,7 +37,7 @@ services:
     image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
     platform: linux/amd64
     ports:
-      - 8745:8546
+      - 8547:8545
     entrypoint: anvil
     command: >
       --host 0.0.0.0
