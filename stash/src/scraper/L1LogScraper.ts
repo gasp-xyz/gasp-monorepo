@@ -66,7 +66,7 @@ export const watchDepositAcceptedIntoQueue = async (
         if (existingTransaction) {
           existingTransaction.status = DEPOSIT_SUBMITTED_TO_L2
           existingTransaction.requestId = Number(
-            (log as any).args.requestId.replace(/,/g, '')
+              String((log as any).args.requestId).replace(/,/g, '')
           )
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
@@ -139,7 +139,7 @@ export const watchWithdrawalClosed = async (
         const existingTransaction = await withdrawalRepository
           .search()
           .where('requestId')
-          .equals(requestId.replace(/,/g, ''))
+          .equals(Number(requestId.toString().replace(/,/g, '')))
           .and('txHash')
           .equals(withdrawalHash)
           .and('type')
