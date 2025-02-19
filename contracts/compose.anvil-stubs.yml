@@ -6,10 +6,7 @@ services:
       - 8545:8545
     entrypoint: anvil
     command: >
-      --host 0.0.0.0
-      --balance 1000000000000000000
-      --chain-id 31337
-      --port 8545
+      --host 0.0.0.0 --balance 1000000000000000000 --chain-id 31337 --port 8545
     healthcheck:
       test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
       interval: 2s
@@ -23,10 +20,7 @@ services:
       - 8546:8545
     entrypoint: anvil
     command: >
-      --host 0.0.0.0
-      --balance 1000000000000000000
-      --chain-id 31338
-      --port 8545
+      --host 0.0.0.0 --balance 1000000000000000000 --chain-id 31338 --port 8545
     healthcheck:
       test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
       interval: 2s
@@ -40,10 +34,7 @@ services:
       - 8547:8545
     entrypoint: anvil
     command: >
-      --host 0.0.0.0
-      --balance 1000000000000000000
-      --chain-id 31339
-      --port 8545
+      --host 0.0.0.0 --balance 1000000000000000000 --chain-id 31339 --port 8545
     healthcheck:
       test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
       interval: 2s
