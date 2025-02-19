@@ -65,7 +65,9 @@ export const watchDepositAcceptedIntoQueue = async (
 
         if (existingTransaction) {
           existingTransaction.status = DEPOSIT_SUBMITTED_TO_L2
-          existingTransaction.requestId = Number((log as any).args.requestId)
+          existingTransaction.requestId = Number(
+            (log as any).args.requestId.replace(/,/g, '')
+          )
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
           await depositRepository.save(existingTransaction)
@@ -137,7 +139,7 @@ export const watchWithdrawalClosed = async (
         const existingTransaction = await withdrawalRepository
           .search()
           .where('requestId')
-          .equals(requestId)
+          .equals(requestId.replace(/,/g, ''))
           .and('txHash')
           .equals(withdrawalHash)
           .and('type')
@@ -180,7 +182,9 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
   while (keepProcessing) {
     try {
       const lastProcessedRequestId = Number.parseInt(
-        (await api.query.rolldown.lastProcessedRequestOnL2(l1Chain)).toString()
+        (await api.query.rolldown.lastProcessedRequestOnL2(l1Chain))
+          .toString()
+          .replace(/,/g, '')
       )
       const lastSavedProcessedRequestId = await getLastProcessedRequestId(
         l1Chain,
