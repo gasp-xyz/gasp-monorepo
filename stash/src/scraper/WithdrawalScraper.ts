@@ -118,9 +118,9 @@ export const updateWithdrawalsWhenBatchCreated = async (
   eventData: any
 ): Promise<void> => {
   const updateTimestamp = new Date().toISOString()
-  const firstElement = Number(eventData.range[0])
+  const firstElement = Number(eventData.range[0].replace(/,/g, ''))
   const lastElement = Number(
-    eventData.range[eventData.range.length.replace(/,/g, '') - 1]
+    eventData.range[eventData.range.length - 1].replace(/,/g, '')
   )
   const existingWithdrawal = await withdrawalRepository
     .search()
