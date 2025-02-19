@@ -1,0 +1,9 @@
+FROM golang:1.21-alpine
+ARG TARGETOS 
+ARG TARGETARCH
+
+WORKDIR /app
+
+COPY ./build/avs-aggregator-${TARGETOS}-${TARGETARCH} /avs-aggregator
+
+ENTRYPOINT ["/avs-aggregator"]
