@@ -87,10 +87,12 @@ class CloserService {
 								);
 							}) !== undefined;
 
+						const isClosedAlready = (await this.l1.isClosed(request.hash));
+
 						return (
+							!isClosedAlready &&
 							(shouldBeClosed ||
-								(await this.stash.shouldBeClosed(request.hash))) &&
-							!(await this.l1.isClosed(request.hash))
+								(await this.stash.shouldBeClosed(request.hash)))
 						);
 					} else {
 						logger.error(`ignoring unkonwn request`);
@@ -157,7 +159,7 @@ class CloserService {
 				privateKey,
 			);
 			if (!status) {
-				logger.warning(
+				logger.warn(
 					`${ALERT_WARNING} Failed to close withdrawal ${toString(withdrawal)}`,
 				);
 			}
@@ -176,7 +178,7 @@ class CloserService {
 			);
 			const status = await this.l1.closeCancel(cancel, root, proof, privateKey);
 			if (!status) {
-				logger.warning(
+				logger.warn(
 					`${ALERT_WARNING} Failed to close cancel ${cancelToString(cancel)}`,
 				);
 			}
