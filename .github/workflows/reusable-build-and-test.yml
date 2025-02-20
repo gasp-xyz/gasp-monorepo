@@ -17,9 +17,8 @@ jobs:
   contracts-tests:
     name: '[contracts] Run Foundry checks and tests'
     runs-on: ubuntu-24.04
-    defaults:
-      run:
-        working-directory: contracts
+    permissions:
+      security-events: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,7 +31,8 @@ jobs:
         with:
           python-version-file: 'contracts/.python-version'
           cache: pip
-      - run:  pip install -r requirements.txt
+      - run: pip install -r requirements.txt
+        working-directory: contracts
   
       - uses: moonrepo/setup-toolchain@v0
         with:
@@ -47,17 +47,7 @@ jobs:
       
       - uses: appthrust/moon-ci-retrospect@v1
         if: success() || failure()
-  
-  contracts-static-analysis:
-    name: '[contracts] Run static analysis with `slither`'
-    runs-on: ubuntu-24.04
-    permissions:
-      security-events: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-  
+
       - name: Make static analysis of contracts
         uses: crytic/slither-action@v0.4.0
         id: slither
