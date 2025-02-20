@@ -16,6 +16,21 @@ tasks:
     command: 'yarn build'
     inputs: ['@globs(sources)']
     outputs: ['build']
+  
   build-image-local:
-    command: 'docker buildx build -t gaspxyz/ferry-withdrawal:local -t gaspxyz/ferry-withdrawal:localcloser -f Dockerfile .'
+    command: 'docker buildx build -t gaspxyz/ferry-withdrawal:local -t gaspxyz/ferry-withdrawal:local -f Dockerfile .'
     inputs: ['@globs(sources)', 'Dockerfile']
+
+  build-image-ci:
+    command: >
+      docker buildx build
+      --push
+      --tag gaspxyz/ferry-withdrawal:${IMAGE_TAG:-ci}
+      --cache-to type=registry,ref=gaspxyz/ferry-withdrawal:cache,mode=max
+      --cache-from type=registry,ref=gaspxyz/ferry-withdrawal:cache
+      .
+    inputs: ['@globs(sources)', 'Dockerfile', '.dockerignore']
+  
+  # lint:
+  #   command: 'yarn lint'
+  #   inputs: ['@globs(sources)', '@globs(tests)', 'biome.json']

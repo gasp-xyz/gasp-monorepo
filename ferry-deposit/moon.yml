@@ -35,7 +35,7 @@ tasks:
       --cache-to type=registry,ref=gaspxyz/ferry-deposit:cache,mode=max
       --cache-from type=registry,ref=gaspxyz/ferry-deposit:cache
       .
-    inputs: ['@globs(sources)', 'Dockerfile.ci', 'Dockerfile.ci.dockerignore']
+    inputs: ['@globs(sources)', 'Dockerfile', '.dockerignore']
 
   # lint:
   #   command: 'yarn lint'
