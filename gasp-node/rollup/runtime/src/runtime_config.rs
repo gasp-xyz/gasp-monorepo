@@ -48,16 +48,6 @@ pub mod tokens {
 	pub const RX_TOKEN_ID: TokenId = 0;
 	pub const ETH_TOKEN_ID: TokenId = 1;
 
-	#[cfg(any(feature = "unlocked", feature = "runtime-benchmarks"))]
-	pub type NontransferableTokens = Nothing;
-	#[cfg(not(any(feature = "unlocked", feature = "runtime-benchmarks")))]
-	pub type NontransferableTokens = Equals<ConstU32<RX_TOKEN_ID>>;
-
-	#[cfg(any(feature = "unlocked", feature = "runtime-benchmarks"))]
-	pub type ArbitrageBot = Nothing;
-	#[cfg(not(any(feature = "unlocked", feature = "runtime-benchmarks")))]
-	pub type ArbitrageBot = Equals<ArbitrageBotAddr>;
-
 	parameter_types! {
 		pub const RxTokenId: TokenId = RX_TOKEN_ID;
 		pub const EthTokenId: TokenId = ETH_TOKEN_ID;
