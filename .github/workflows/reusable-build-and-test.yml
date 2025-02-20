@@ -125,13 +125,6 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
-      
-      - uses: google-github-actions/auth@v2
-        id: auth
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
 
       - uses: 'moonrepo/setup-toolchain@v0'
       - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
@@ -151,7 +144,13 @@ jobs:
       
       - uses: moonrepo/setup-rust@v1
       - uses: 'moonrepo/setup-toolchain@v0'
-
+      
+      # - uses: google-github-actions/auth@v2
+      #   id: auth
+      #   with:
+      #     workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      #     service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      # - uses: google-github-actions/setup-gcloud@v2
       # - name: Install sccache-cache
       #   uses: mozilla-actions/sccache-action@v0.0.5
       # - name: Set Rust caching env vars
