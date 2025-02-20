@@ -3,3 +3,9 @@ node:
 
 rust:
   syncToolchainConfig: true
+  targets:
+    - wasm32-unknown-unknown
+  components:
+    - rustfmt
+    - clippy
+    - std
