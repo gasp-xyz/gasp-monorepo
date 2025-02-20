@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   contracts-build-and-test:
-    name: '[contracts] Run Foundry checks and tests'
+    name: '[contracts] Build and test'
     runs-on: ubuntu-24.04
     permissions:
       security-events: write
@@ -66,7 +66,7 @@ jobs:
           sarif_file: ${{ steps.slither.outputs.sarif }}
 
   build-and-test-stash:
-    name: '[stash] Build and run tests'
+    name: '[stash] Build and test'
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -92,7 +92,7 @@ jobs:
       - run: sops exec-env frontend.enc.env 'yarn run test:unit'
 
   build-and-check-services:
-    name: '[avs] Build and check all services [except contracts]'
+    name: '[AVS] Build and test'
     # runs-on: compile-gke
     runs-on: gasp-monorepo-large-32core
     steps:
@@ -147,7 +147,7 @@ jobs:
           access-token: ${{ secrets.BOT_USER_GITHUB_TOKEN }}
 
   helmfile-lint:
-    name: '[ops] Lint and validate Helmfile configuration'
+    name: '[Helmfile] Lint and validate Helmfile configuration'
     runs-on: ubuntu-24.04
     defaults:
       run:
