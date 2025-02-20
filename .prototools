@@ -1,4 +1,5 @@
 moon = "1.32.5"
+proto = "0.46.1"
 
 [plugins]
 sops = "https://raw.githubusercontent.com/stk0vrfl0w/proto-toml-plugins/main/plugins/sops.toml"
