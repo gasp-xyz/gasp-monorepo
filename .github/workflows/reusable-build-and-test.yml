@@ -167,6 +167,13 @@ jobs:
       - run: moon ci :rustfmt-ci :clippy-ci :cargo-test-ci :build-image-ci
         env:
           IMAGE_TAG: ${{ inputs.version }}
+      
+      - uses: appthrust/moon-ci-retrospect@v1
+        if: success() || failure()
+      - uses: moonrepo/run-report-action@v1
+        if: success() || failure()
+        with:
+          access-token: ${{ secrets.BOT_USER_GITHUB_TOKEN }}
 
   # build-gasp-avs-image:
   #   name: '[gasp-avs] Build gasp-avs Docker image'
