@@ -153,7 +153,7 @@ jobs:
       - uses: 'moonrepo/setup-toolchain@v0'
 
       - name: Install sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.7
+        uses: mozilla-actions/sccache-action@v0.0.5
       - name: Set Rust caching env vars
         run: |
           echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
