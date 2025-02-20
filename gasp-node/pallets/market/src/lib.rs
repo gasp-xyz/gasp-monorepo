@@ -287,11 +287,10 @@ pub mod pallet {
 
 			// check assets id, or the foundation has a veto
 			ensure!(
-					(!T::NontransferableTokens::contains(&first_asset_id) &&
+				(!T::NontransferableTokens::contains(&first_asset_id) &&
 					!T::NontransferableTokens::contains(&second_asset_id)) ||
 					T::FoundationAccountsProvider::get().contains(&sender) ||
-					T::ArbitrageBot::contains(&sender)
-				,
+					T::ArbitrageBot::contains(&sender),
 				Error::<T>::NontransferableToken
 			);
 

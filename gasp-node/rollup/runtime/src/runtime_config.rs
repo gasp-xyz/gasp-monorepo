@@ -62,7 +62,7 @@ pub mod tokens {
 		pub const RxTokenId: TokenId = RX_TOKEN_ID;
 		pub const EthTokenId: TokenId = ETH_TOKEN_ID;
 		pub ArbitrageBotAddr: AccountId = sp_runtime::AccountId20::from(
-			hex_literal::hex!["0xFf64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB"]
+			hex_literal::hex!["Ff64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB"]
 		);
 	}
 }
