@@ -29,49 +29,26 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile']
   
   build-image-ci:
-    # command: 'docker buildx build -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --load ../'
     script: |
-      docker buildx build -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --load ../
-      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target/fast-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load ../
-      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target/unlocked-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load ../
+      docker buildx build -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --load --push ../
+      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target/fast-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load --push ../
+      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target/unlocked-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load --push ../
     deps: ['build', 'gasp-node:build-image-ci']
-
-  rustfmt:
-    command: cargo fmt --all -- --check
-    inputs: ['@globs(sources)']
     options:
-      runInCI: false
+      cache: false
 
-  rustfmt-ci:
+  format:
     command: cargo fmt --all -- --check
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', 'tests/**/*']
 
-  clippy:
+  lint:
     command: cargo clippy
-    inputs: ['@globs(sources)']
-    options:
-      runInCI: false
-    env:
-      RUSTC_WRAPPER: sccache
-
-  clippy-ci:
-    command: cargo clippy
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', 'tests/**/*']
     env:
       SCCACHE_GCS_KEY_PREFIX: gasp-avs
-    #   RUSTC_WRAPPER: sccache
-    #   SCCACHE_GCS_BUCKET: mangata-node-ci-cache
 
-  cargo-test:
+  test:
     command: cargo test
-    inputs: ['@globs(sources)']
-    options:
-      runInCI: false
-    env:
-      RUSTC_WRAPPER: sccache
-
-  cargo-test-ci:
-    command: cargo test
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', 'tests/**/*']
     env:
       SCCACHE_GCS_KEY_PREFIX: gasp-avs

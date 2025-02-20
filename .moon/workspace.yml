@@ -23,9 +23,9 @@ vcs:
 
 runner:
   archivableTargets:
-    - ':rustfmt-ci'
-    - ':clippy-ci'
-    - ':cargo-test-ci'
+    - ':format'
+    - ':lint'
+    - ':test'
 
 unstable_remote:
   api: 'grpc'

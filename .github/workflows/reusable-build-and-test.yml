@@ -164,7 +164,7 @@ jobs:
       
       - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
       - run: docker buildx create --use
-      - run: moon ci :rustfmt-ci :clippy-ci :cargo-test-ci :build-image-ci
+      - run: moon ci :format :lint :test :build-image-ci
         env:
           IMAGE_TAG: ${{ inputs.version }}
       

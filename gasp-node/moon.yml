@@ -52,46 +52,25 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile']
 
   build-image-ci:
-    # command: 'docker buildx build -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load .'
     script: |
-      docker buildx build -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load .
-      docker buildx build --build-arg TARGET_DIR=target/fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load .
-      docker buildx build --build-arg TARGET_DIR=target/unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load .
+      docker buildx build -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load --push .
+      docker buildx build --build-arg TARGET_DIR=target/fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load --push .
+      docker buildx build --build-arg TARGET_DIR=target/unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load --push .
     deps: ['build', 'build-fast-runtime', 'build-unlocked-runtime']
-  
-  rustfmt:
-    command: cargo fmt --all -- --check
-    inputs: ['@globs(sources)']
     options:
-      runInCI: false
+      cache: false
 
-  rustfmt-ci:
+  format:
     command: cargo fmt --all -- --check
     inputs: ['@globs(sources)']
 
-  clippy:
-    command: cargo clippy
-    inputs: ['@globs(sources)']
-    options:
-      runInCI: false
-    env:
-      RUSTC_WRAPPER: sccache
-
-  clippy-ci:
+  lint:
     command: cargo clippy -p pallet-xyk
     inputs: ['@globs(sources)']
     env:
       SCCACHE_GCS_KEY_PREFIX: gasp-node
 
-  cargo-test:
-    command: cargo test
-    inputs: ['@globs(sources)']
-    options:
-      runInCI: false
-    env:
-      RUSTC_WRAPPER: sccache
-
-  cargo-test-ci:
+  test:
     command: cargo test
     inputs: ['@globs(sources)']
     env:
