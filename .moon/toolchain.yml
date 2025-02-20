@@ -1,2 +1,5 @@
 node:
   packageManager: yarn
+
+rust:
+  syncToolchainConfig: true

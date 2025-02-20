@@ -3,8 +3,6 @@ language: rust
 toolchain:
   rust:
     version: nightly-2024-01-20
-    
-
 env:
   CARGO_TERM_COLOR: 'always'
 
