@@ -30,6 +30,8 @@ tasks:
       --cache-from type=registry,ref=gaspxyz/ferry-withdrawal:cache
       .
     inputs: ['@globs(sources)', 'Dockerfile', '.dockerignore']
+    options:
+      cache: false
   
   # lint:
   #   command: 'yarn lint'

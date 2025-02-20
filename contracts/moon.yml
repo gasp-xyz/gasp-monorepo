@@ -1,6 +1,10 @@
 language: solidity
 type: application
 
+toolchain:
+  bun:
+    version: 1.2.2
+
 fileGroups:
   sources:
     - "lib/eigenlayer-middleware/**/*.sol"
@@ -18,8 +22,50 @@ tasks:
     command: "forge build"
     inputs: ["@globs(sources)"]
     outputs: ["out"]
+  
   build-image-local:
-    command:
-      "docker buildx build --platform linux/amd64 -t gaspxyz/gasp-contracts:local -t
-      gaspxyz/gasp-contracts:localarb -t gaspxyz/gasp-contracts:localbase -f Dockerfile ."
+    command: >
+      docker buildx build
+      --platform linux/amd64
+      --tag gaspxyz/gasp-contracts:local
+      --tag gaspxyz/gasp-contracts:localarb
+      --tag gaspxyz/gasp-contracts:localbase
+      .
     inputs: ["@globs(sources)", "Dockerfile"]
+
+  contracts-build-image-ci:
+    command: >
+      docker buildx build
+      --push
+      --platform linux/amd64
+      --tag gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
+      --cache-to type=registry,ref=gaspxyz/gasp-contracts:cache,mode=max
+      --cache-from type=registry,ref=gaspxyz/gasp-contracts:cache
+      .
+    inputs: ["@globs(sources)", "Dockerfile"]
+    options:
+      cache: false
+
+  contracts-format:
+    command: bun run format
+    inputs: ["@globs(sources)"]
+
+  contracts-lint:
+    command: bun run lint
+    inputs: ["@globs(sources)"]
+
+  contracts-test:
+    command: bun run test
+    inputs: ["@globs(sources)"]
+
+  contracts-size:
+    command: bun run size
+    inputs: ["@globs(sources)"]
+
+  contracts-gas:
+    command: bun run gas
+    inputs: ["@globs(sources)"]
+
+  contracts-coverage:
+    command: bun run cover
+    inputs: ["@globs(sources)"]

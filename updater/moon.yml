@@ -14,6 +14,12 @@ fileGroups:
     - 'Cargo.toml'
 
 tasks:
+  prepare-toolchain:
+    command: rustup show
+    options:
+      runInCI: false
+      cache: false
+
   build:
     command: cargo build --release
     inputs: ['@globs(sources)']
@@ -26,7 +32,7 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile']
 
   build-image-ci:
-    command: 'docker buildx build -t gaspxyz/updater:${IMAGE_TAG:-ci} -f Dockerfile.ci --load --push .'
+    command: 'docker buildx build -t gaspxyz/updater:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .'
     deps: ['build']
     options:
       cache: false

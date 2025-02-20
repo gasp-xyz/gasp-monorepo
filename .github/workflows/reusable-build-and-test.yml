@@ -33,22 +33,23 @@ jobs:
           cache: pip
       - run:  pip install -r requirements.txt
   
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install
-
-      - run: bun run compile
-      - run: bun run size
-      - run: bun run format
-      - run: bun run lint
-  
-      - name: Run unit tests
-        run: bun run test
-
-      - name: Create gas report
-        run: bun run gas
+      - uses: moonrepo/setup-toolchain@v0
+        with:
+          auto-install: true
+          proto-version: 0.46.1
         
-      - name: Create coverage report
-        run: bun run cover
+      - run: |
+          moon ci \
+            :contracts-format \
+            :contracts-lint \
+            :contracts-test \
+            :contracts-build-image-ci \
+            :contracts-size \
+            :contracts-gas \
+            :contracts-coverage
+      
+      - uses: appthrust/moon-ci-retrospect@v1
+        if: success() || failure()
   
   contracts-static-analysis:
     name: '[contracts] Run static analysis with `slither`'
@@ -99,44 +100,44 @@ jobs:
       - run: sops exec-env frontend.enc.env 'yarn run build'
       - run: sops exec-env frontend.enc.env 'yarn run test:unit'
 
-  build-foundry-deployer-image:
-    name: '[contracts] Build foundry deployer Docker image with smart contracts code'
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
+  # build-foundry-deployer-image:
+  #   name: '[contracts] Build foundry deployer Docker image with smart contracts code'
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: true
 
-      - uses: foundry-rs/foundry-toolchain@v1
-      - name: Install `contracts` deps
-        working-directory: contracts
-        run: forge install
+  #     - uses: foundry-rs/foundry-toolchain@v1
+  #     - name: Install `contracts` deps
+  #       working-directory: contracts
+  #       run: forge install
 
-      - run: |
-          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
-          docker buildx create --use
-          docker buildx build --push --platform linux/amd64 -t gaspxyz/gasp-contracts:${{ inputs.version }} -f contracts/Dockerfile contracts
+  #     - run: |
+  #         docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+  #         docker buildx create --use
+  #         docker buildx build --push --platform linux/amd64 -t gaspxyz/gasp-contracts:${{ inputs.version }} -f contracts/Dockerfile contracts
 
-  build-avs-aggregator-image:
-    name: '[avs-aggregator] Build avs-aggregator Docker image'
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-          fetch-depth: 0
+  # build-avs-aggregator-image:
+  #   name: '[avs-aggregator] Build avs-aggregator Docker image'
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: true
+  #         fetch-depth: 0
 
-      - uses: 'moonrepo/setup-toolchain@v0'
-        with:
-          auto-install: true
-      - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
-      - run: docker buildx create --use
-      - run: moon avs-aggregator:build-image-ci-not-rust
-        env:
-          IMAGE_TAG: ${{ inputs.version }}
+  #     - uses: 'moonrepo/setup-toolchain@v0'
+  #       with:
+  #         auto-install: true
+  #     - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+  #     - run: docker buildx create --use
+  #     - run: moon avs-aggregator:build-image-ci-not-rust
+  #       env:
+  #         IMAGE_TAG: ${{ inputs.version }}
 
-  build-rust-services:
-    name: '[rust-services] Build rust services Docker images'
+  build-and-check-services:
+    name: '[avs] Build and check all services [except contracts]'
     # runs-on: compile-gke
     runs-on: gasp-monorepo-large-32core
     steps:
@@ -147,12 +148,17 @@ jobs:
       
       - uses: moonrepo/setup-rust@v1
         with:
-          cache: false
+          channel: 1.82.0
+          targets: wasm32-unknown-unknown
+          components: rustfmt,clippy,rust-src
+          cache: true
 
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
           proto-version: 0.46.1
+      - name: Setup Rust toolchains for all services
+        run: moon :setup-toolchain
       
       - uses: arduino/setup-protoc@v3
       
@@ -223,25 +229,25 @@ jobs:
   #     docker_image_repository: gaspxyz/sequencer
   #     cargo_tests_filters: "l1::test::test_can_connect sequencer::test::test_find_malicious_update_ignores_updates_from_other_chains sequencer::test::test_find_malicious_update_ignores_valid_updates sequencer::test::test_find_malicious_update_with_invalid_range_works sequencer::test::test_find_malicious_update_works sequencer::test::test_find_pending_cancels_ignores_closed_cancels sequencer::test::test_find_pending_cancels_to_close sequencer::test::test_find_pending_cancels_to_close2 sequencer::test::test_find_pending_cancels_to_close_when_there_is_no_merkle_root_provided_to_l1 sequencer::test::test_get_pending_update_when_there_are_no_requests sequencer::test::test_get_pending_update_when_there_are_requests sequencer::test::test_get_pending_update_when_there_are_too_many_requests_for_single_update"
 
-  build-ferry-withdrawal-image:
-    name: '[ferry-withdrawal] Build ferry-withdrawal Docker image'
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - run: |
-          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
-          docker buildx create --use
-          docker buildx build --push --platform linux/amd64 -t gaspxyz/ferry-withdrawal:${{ inputs.version }} ./ferry-withdrawal
+  # build-ferry-withdrawal-image:
+  #   name: '[ferry-withdrawal] Build ferry-withdrawal Docker image'
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - run: |
+  #         docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+  #         docker buildx create --use
+  #         docker buildx build --push --platform linux/amd64 -t gaspxyz/ferry-withdrawal:${{ inputs.version }} ./ferry-withdrawal
 
-  build-ferry-deposit-image:
-    name: '[ferry-deposit] Build ferry-deposit Docker image'
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - run: |
-          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
-          docker buildx create --use
-          docker buildx build --push --platform linux/amd64 -t gaspxyz/ferry-deposit:${{ inputs.version }} ./ferry-deposit
+  # build-ferry-deposit-image:
+  #   name: '[ferry-deposit] Build ferry-deposit Docker image'
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - run: |
+  #         docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+  #         docker buildx create --use
+  #         docker buildx build --push --platform linux/amd64 -t gaspxyz/ferry-deposit:${{ inputs.version }} ./ferry-deposit
 
   helmfile-lint:
     name: '[ops] Lint and validate Helmfile configuration'

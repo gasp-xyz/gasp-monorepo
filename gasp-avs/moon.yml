@@ -14,6 +14,12 @@ fileGroups:
     - 'Cargo.toml'
 
 tasks:
+  prepare-toolchain:
+    command: rustup show
+    options:
+      runInCI: false
+      cache: false
+
   build:
     command: cargo build --release
     inputs: ['@globs(sources)']
@@ -30,9 +36,9 @@ tasks:
   
   build-image-ci:
     script: |
-      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-standard-runtime/release/rollup-node-t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --load --push ../
-      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-fast-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load --push ../
-      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-unlocked-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load --push ../
+      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-standard-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --push ../
+      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-fast-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push ../
+      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-unlocked-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push ../
     deps: ['build', 'gasp-node:build-image-ci']
     options:
       cache: false

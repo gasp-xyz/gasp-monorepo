@@ -14,6 +14,12 @@ fileGroups:
     - 'Cargo.toml'
 
 tasks:
+  prepare-toolchain:
+    command: rustup show
+    options:
+      runInCI: false
+      cache: false
+
   build:
     command: cargo build --release
     inputs: ['@globs(sources)']
@@ -60,14 +66,14 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile']
 
   build-image-ci:
-    script: |
-      docker buildx build --build-arg TARGET_DIR=target/standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load .
-      docker buildx build --build-arg TARGET_DIR=target/fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load .
-      docker buildx build --build-arg TARGET_DIR=target/unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load .    
     # script: |
-    #   docker buildx build --build-arg TARGET_DIR=target/standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load --push .
-    #   docker buildx build --build-arg TARGET_DIR=target/unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load --push .
-    #   docker buildx build --build-arg TARGET_DIR=target/fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load --push .
+    #   docker buildx build --build-arg TARGET_DIR=target/standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load .
+    #   docker buildx build --build-arg TARGET_DIR=target/fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load .
+    #   docker buildx build --build-arg TARGET_DIR=target/unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load .    
+    script: |
+      docker buildx build --build-arg TARGET_DIR=target/standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .
+      docker buildx build --build-arg TARGET_DIR=target/unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push .
+      docker buildx build --build-arg TARGET_DIR=target/fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push .
     deps: ['build-standard-runtime', 'build-fast-runtime', 'build-unlocked-runtime']
     options:
       cache: false
