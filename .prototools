@@ -1,8 +1,7 @@
 moon = "1.32.5"
-sccache = "0.9.1"
 
 [plugins]
-sccache = "https://raw.githubusercontent.com/appthrust/proto-toml-plugins/main/sccache/plugin.toml"
+sops = "https://raw.githubusercontent.com/stk0vrfl0w/proto-toml-plugins/main/plugins/sops.toml"
 
 [settings]
 auto-install = true

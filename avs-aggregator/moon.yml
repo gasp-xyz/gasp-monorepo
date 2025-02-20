@@ -15,6 +15,10 @@ fileGroups:
     - '/avs-eigensdk-go/**/go.mod'
 
 tasks:
+  # format:
+  #   command: 'go fmt ./...'
+  #   inputs: ['@globs(sources)']
+
   build:
     command: 'go build -o build/avs-aggregator cmd/main.go'
     inputs: ['@globs(sources)']

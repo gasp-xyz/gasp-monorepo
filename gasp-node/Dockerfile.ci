@@ -1,5 +1,5 @@
 FROM debian:buster AS runner
-ARG TARGET_DIR=target/release
+ARG TARGET_DIR=target/standard-runtime/release
 
 WORKDIR /app
 
