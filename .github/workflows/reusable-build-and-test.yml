@@ -146,9 +146,11 @@ jobs:
           fetch-depth: 0
       
       - uses: moonrepo/setup-toolchain@v0
-      - uses: moonrepo/setup-rust@v1
         with:
-          cache: false
+          auto-install: true
+      # - uses: moonrepo/setup-rust@v1
+      #   with:
+      #     cache: false
       - uses: arduino/setup-protoc@v3
       
       - uses: google-github-actions/auth@v2
