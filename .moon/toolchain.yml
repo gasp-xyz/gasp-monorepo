@@ -4,10 +4,4 @@ node:
     version: 4.6.0
 
 rust:
-  syncToolchainConfig: true
-  targets:
-    - wasm32-unknown-unknown
-  components:
-    - rustfmt
-    - clippy
-    - rust-src
+  syncToolchainConfig: false
