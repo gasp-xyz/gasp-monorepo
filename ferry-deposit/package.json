@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "build": "rimraf ./build && npx tsc",
-    "lint": "npx @biomejs/biome check --apply src/common src/config src/utils src/viem src/index.ts",
+    "lint": "npx @biomejs/biome check src",
     "run": "node build/src/main.js",
     "test": "vitest --dir tests",
     "test-ferry": "vitest --dir tests ferry",

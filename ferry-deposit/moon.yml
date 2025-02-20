@@ -10,12 +10,23 @@ fileGroups:
     - 'src/**/*'
     - 'package.json'
     - 'tsconfig.json'
+    - '.env'
+    - '.env.template'
+  tests:
+    - 'tests/**/*'
+    - 'vitest.config.ts'
+    - 'env.test'
 
 tasks:
   build:
     command: 'yarn build'
     inputs: ['@globs(sources)']
     outputs: ['build']
+  
   build-image-local:
     command: 'docker buildx build -t gaspxyz/ferry-deposit:local -f Dockerfile .'
     inputs: ['@globs(sources)', 'Dockerfile']
+
+  # lint:
+  #   command: 'yarn lint'
+  #   inputs: ['@globs(sources)', '@globs(tests)', 'biome.json']
