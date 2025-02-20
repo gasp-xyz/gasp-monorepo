@@ -289,7 +289,8 @@ pub mod pallet {
 			ensure!(
 				(!T::NontransferableTokens::contains(&first_asset_id) &&
 					!T::NontransferableTokens::contains(&second_asset_id)) ||
-					T::FoundationAccountsProvider::get().contains(&sender),
+					T::FoundationAccountsProvider::get().contains(&sender) ||
+					T::ArbitrageBot::contains(&sender),
 				Error::<T>::NontransferableToken
 			);
 
@@ -366,11 +367,6 @@ pub mod pallet {
 
 			let pool_info = Self::get_pool_info(pool_id)?;
 			// check assets id, foundation has no veto
-			ensure!(
-				!T::NontransferableTokens::contains(&pool_info.pool.0) &&
-					!T::NontransferableTokens::contains(&pool_info.pool.1),
-				Error::<T>::NontransferableToken
-			);
 			Self::check_assets_allowed(pool_info.pool)?;
 
 			let (lp_amount, other_asset_amount) = Self::do_mint_liquidity(
