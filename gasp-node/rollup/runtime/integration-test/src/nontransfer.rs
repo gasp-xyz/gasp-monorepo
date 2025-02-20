@@ -1,17 +1,19 @@
-use rollup_runtime::tokens::NontransferableTokens;
-
 use crate::setup::*;
 
 const ASSET_ID_1: TokenId = NATIVE_ASSET_ID + 1;
-const POOL_ID: TokenId = ASSET_ID_1 + 1;
+const ASSET_ID_2: TokenId = NATIVE_ASSET_ID + 2;
+const POOL_ID: TokenId = ASSET_ID_2 + 1;
 const ARB: [u8; 20] = hex_literal::hex!["fc741134c82b81b7ab7efbf334b0c90ff8dbf22c"];
 
 fn test_env() -> TestExternalities {
 	ExtBuilder {
 		balances: vec![
-			(AccountId::from(ALICE), NATIVE_ASSET_ID, 100 * UNIT),
+			(AccountId::from(ALICE), NATIVE_ASSET_ID, 500 * UNIT),
+			(AccountId::from(BOB), NATIVE_ASSET_ID, 100 * UNIT),
 			(AccountId::from(ARB), NATIVE_ASSET_ID, 100 * UNIT),
-			(AccountId::from(ALICE), ASSET_ID_1, 100 * UNIT),
+			(AccountId::from(ALICE), ASSET_ID_1, 500 * UNIT),
+			(AccountId::from(ALICE), ASSET_ID_2, 500 * UNIT),
+			(AccountId::from(BOB), ASSET_ID_1, 100 * UNIT),
 		],
 		..ExtBuilder::default()
 	}
@@ -130,7 +132,7 @@ fn test_tokens_calls_should_work_for_allow_listed() {
 }
 
 #[test]
-fn test_market_should_block() {
+fn test_market_should_not_block() {
 	let mut ext = test_env();
 	ext.execute_with(|| {
 		let foundation = AccountId::from(ALICE);
@@ -138,46 +140,37 @@ fn test_market_should_block() {
 		let amount = 100 * UNIT;
 
 		// user cannot create pool, foundation can
-		assert_err!(
-			pallet_market::Pallet::<Runtime>::create_pool(
-				RuntimeOrigin::signed(bob),
-				pallet_market::PoolKind::Xyk,
-				NATIVE_ASSET_ID,
-				amount,
-				ASSET_ID_1,
-				amount,
-			),
-			pallet_market::Error::<Runtime>::NontransferableToken
-		);
 		assert_ok!(pallet_market::Pallet::<Runtime>::create_pool(
-			RuntimeOrigin::signed(foundation),
+			RuntimeOrigin::signed(bob),
 			pallet_market::PoolKind::Xyk,
 			NATIVE_ASSET_ID,
 			amount,
 			ASSET_ID_1,
 			amount,
+		),);
+		assert_ok!(pallet_market::Pallet::<Runtime>::create_pool(
+			RuntimeOrigin::signed(foundation),
+			pallet_market::PoolKind::Xyk,
+			NATIVE_ASSET_ID,
+			amount,
+			ASSET_ID_2,
+			amount,
 		));
 
 		// none can mint
-		// assert_err!(
-		// 	pallet_market::Pallet::<Runtime>::mint_liquidity(
-		// 		RuntimeOrigin::signed(foundation),
-		// 		POOL_ID,
-		// 		NATIVE_ASSET_ID,
-		// 		amount,
-		// 		amount,
-		// 	),
-		// 	pallet_market::Error::<Runtime>::NontransferableToken
-		// );
-		assert_err!(
-			pallet_market::Pallet::<Runtime>::mint_liquidity_fixed_amounts(
-				RuntimeOrigin::signed(foundation),
-				POOL_ID,
-				(amount, amount),
-				amount,
-			),
-			pallet_market::Error::<Runtime>::NontransferableToken
-		);
+		assert_ok!(pallet_market::Pallet::<Runtime>::mint_liquidity(
+			RuntimeOrigin::signed(foundation),
+			POOL_ID,
+			NATIVE_ASSET_ID,
+			amount,
+			2 * amount,
+		),);
+		assert_ok!(pallet_market::Pallet::<Runtime>::mint_liquidity_fixed_amounts(
+			RuntimeOrigin::signed(foundation),
+			POOL_ID,
+			(amount, 0u128),
+			1u128,
+		),);
 		assert_err!(
 			pallet_market::Pallet::<Runtime>::mint_liquidity_using_vesting_native_tokens(
 				RuntimeOrigin::signed(foundation),
@@ -185,7 +178,7 @@ fn test_market_should_block() {
 				amount,
 				amount,
 			),
-			pallet_market::Error::<Runtime>::NontransferableToken
+			pallet_market::Error::<Runtime>::NotAPromotedPool
 		);
 		assert_err!(
 			pallet_market::Pallet::<Runtime>::mint_liquidity_using_vesting_native_tokens_by_vesting_index(
@@ -195,20 +188,17 @@ fn test_market_should_block() {
                 None,
                 amount,
 			),
-			pallet_market::Error::<Runtime>::NontransferableToken
+			pallet_market::Error::<Runtime>::NotAPromotedPool
 		);
 
 		// user cannot burn, foundation can
-		assert_err!(
-			pallet_market::Pallet::<Runtime>::burn_liquidity(
-				RuntimeOrigin::signed(bob),
-				POOL_ID,
-				amount,
-				amount,
-				amount,
-			),
-			pallet_market::Error::<Runtime>::NontransferableToken
-		);
+		assert_ok!(pallet_market::Pallet::<Runtime>::burn_liquidity(
+			RuntimeOrigin::signed(bob),
+			POOL_ID,
+			amount,
+			1u128,
+			1u128,
+		),);
 		assert_ok!(pallet_market::Pallet::<Runtime>::burn_liquidity(
 			RuntimeOrigin::signed(foundation),
 			POOL_ID,
@@ -218,71 +208,53 @@ fn test_market_should_block() {
 		));
 
 		// user & foundation cannot sell, ARB bot can
-		assert_err!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset(
-				RuntimeOrigin::signed(bob),
-				vec![POOL_ID],
-				NATIVE_ASSET_ID,
-				UNIT,
-				ASSET_ID_1,
-				0,
-			),
-			pallet_market::Error::<Runtime>::NontransferableToken
-		);
-		assert_err!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset(
-				RuntimeOrigin::signed(foundation),
-				vec![POOL_ID],
-				NATIVE_ASSET_ID,
-				UNIT,
-				ASSET_ID_1,
-				0,
-			),
-			pallet_market::Error::<Runtime>::NontransferableToken
-		);
-		assert_err!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset(
-				RuntimeOrigin::signed(AccountId::from(ARB)),
-				vec![POOL_ID],
-				NATIVE_ASSET_ID,
-				UNIT,
-				ASSET_ID_1,
-				0,
-			),
-			pallet_market::Error::<Runtime>::NontransferableToken
-		);
-		assert_err!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
-				RuntimeOrigin::signed(bob),
-				vec![POOL_ID],
-				ASSET_ID_1,
-				UNIT,
-				NATIVE_ASSET_ID,
-				amount,
-			),
-			pallet_market::Error::<Runtime>::NontransferableToken
-		);
-		assert_err!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
-				RuntimeOrigin::signed(foundation),
-				vec![POOL_ID],
-				ASSET_ID_1,
-				UNIT,
-				NATIVE_ASSET_ID,
-				amount,
-			),
-			pallet_market::Error::<Runtime>::NontransferableToken
-		);
-		assert_err!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
-				RuntimeOrigin::signed(AccountId::from(ARB)),
-				vec![POOL_ID],
-				ASSET_ID_1,
-				UNIT,
-				NATIVE_ASSET_ID,
-				amount,
-			),
-			pallet_market::Error::<Runtime>::NontransferableToken
-		);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset(
+			RuntimeOrigin::signed(bob),
+			vec![POOL_ID],
+			NATIVE_ASSET_ID,
+			UNIT,
+			ASSET_ID_1,
+			0,
+		),);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset(
+			RuntimeOrigin::signed(foundation),
+			vec![POOL_ID],
+			NATIVE_ASSET_ID,
+			UNIT,
+			ASSET_ID_1,
+			0,
+		),);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset(
+			RuntimeOrigin::signed(AccountId::from(ARB)),
+			vec![POOL_ID],
+			NATIVE_ASSET_ID,
+			UNIT,
+			ASSET_ID_1,
+			0,
+		),);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
+			RuntimeOrigin::signed(bob),
+			vec![POOL_ID],
+			ASSET_ID_1,
+			UNIT,
+			NATIVE_ASSET_ID,
+			amount,
+		),);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
+			RuntimeOrigin::signed(foundation),
+			vec![POOL_ID],
+			ASSET_ID_1,
+			UNIT,
+			NATIVE_ASSET_ID,
+			amount,
+		),);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
+			RuntimeOrigin::signed(AccountId::from(ARB)),
+			vec![POOL_ID],
+			ASSET_ID_1,
+			UNIT,
+			NATIVE_ASSET_ID,
+			amount,
+		),);
 	});
 }
