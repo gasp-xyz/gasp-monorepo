@@ -1,0 +1,9 @@
+FROM debian:buster AS runner
+ARG TARGET_DIR=target/release
+
+WORKDIR /app
+
+COPY ${TARGET_DIR}/rollup-node /app/node
+COPY ${TARGET_DIR}/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm /app/rollup_runtime.compact.compressed.wasm
+
+ENTRYPOINT ["/app/node"]

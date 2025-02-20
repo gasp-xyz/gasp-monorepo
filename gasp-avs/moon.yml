@@ -18,9 +18,60 @@ tasks:
     command: cargo build --release
     inputs: ['@globs(sources)']
     outputs: ['target/release/main']
+    env:
+      SCCACHE_GCS_KEY_PREFIX: gasp-avs-release
+  
   build-image-local:
     command: 'docker buildx build --build-arg ROLLUP_NODE_VERSION=local -t gaspxyz/gasp-avs:local .'
     options:
       envFile: '/.env'
     deps: ['gasp-node:build-image-local']
     inputs: ['@globs(sources)', 'Dockerfile']
+  
+  build-image-ci:
+    # command: 'docker buildx build -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --load ../'
+    script: |
+      docker buildx build -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --load ../
+      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target/fast-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load ../
+      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target/unlocked-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load ../
+    deps: ['build', 'gasp-node:build-image-ci']
+
+  rustfmt:
+    command: cargo fmt --all -- --check
+    inputs: ['@globs(sources)']
+    options:
+      runInCI: false
+
+  rustfmt-ci:
+    command: cargo fmt --all -- --check
+    inputs: ['@globs(sources)']
+
+  clippy:
+    command: cargo clippy
+    inputs: ['@globs(sources)']
+    options:
+      runInCI: false
+    env:
+      RUSTC_WRAPPER: sccache
+
+  clippy-ci:
+    command: cargo clippy
+    inputs: ['@globs(sources)']
+    env:
+      SCCACHE_GCS_KEY_PREFIX: gasp-avs
+    #   RUSTC_WRAPPER: sccache
+    #   SCCACHE_GCS_BUCKET: mangata-node-ci-cache
+
+  cargo-test:
+    command: cargo test
+    inputs: ['@globs(sources)']
+    options:
+      runInCI: false
+    env:
+      RUSTC_WRAPPER: sccache
+
+  cargo-test-ci:
+    command: cargo test
+    inputs: ['@globs(sources)']
+    env:
+      SCCACHE_GCS_KEY_PREFIX: gasp-avs

@@ -19,9 +19,82 @@ tasks:
   build:
     command: cargo build --release
     inputs: ['@globs(sources)']
+    options:
+      outputStyle: 'stream'
     outputs:
       - 'target/release/rollup-node'
       - 'target/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+    env:
+      SCCACHE_GCS_KEY_PREFIX: gasp-node-release
+  
+  build-fast-runtime:
+    extends: build
+    args: '--no-default-features --features=fast-runtime --target-dir target/fast-runtime'
+    options:
+      outputStyle: 'stream'
+    outputs:
+      - 'target/fast-runtime/release/rollup-node'
+      - 'target/fast-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+    env:
+      SCCACHE_GCS_KEY_PREFIX: gasp-node-release
+
+  build-unlocked-runtime:
+    extends: build
+    args: '--no-default-features --features=unlocked --target-dir target/unlocked-runtime'
+    options:
+      outputStyle: 'stream'
+    outputs:
+      - 'target/unlocked-runtime/release/rollup-node'
+      - 'target/unlocked-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+    env:
+      SCCACHE_GCS_KEY_PREFIX: gasp-node-release
+
   build-image-local:
     script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t gaspxyz/rollup-node:local .'
     inputs: ['@globs(sources)', 'Dockerfile']
+
+  build-image-ci:
+    # command: 'docker buildx build -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load .'
+    script: |
+      docker buildx build -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load .
+      docker buildx build --build-arg TARGET_DIR=target/fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load .
+      docker buildx build --build-arg TARGET_DIR=target/unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load .
+    deps: ['build', 'build-fast-runtime', 'build-unlocked-runtime']
+  
+  rustfmt:
+    command: cargo fmt --all -- --check
+    inputs: ['@globs(sources)']
+    options:
+      runInCI: false
+
+  rustfmt-ci:
+    command: cargo fmt --all -- --check
+    inputs: ['@globs(sources)']
+
+  clippy:
+    command: cargo clippy
+    inputs: ['@globs(sources)']
+    options:
+      runInCI: false
+    env:
+      RUSTC_WRAPPER: sccache
+
+  clippy-ci:
+    command: cargo clippy -p pallet-xyk
+    inputs: ['@globs(sources)']
+    env:
+      SCCACHE_GCS_KEY_PREFIX: gasp-node
+
+  cargo-test:
+    command: cargo test
+    inputs: ['@globs(sources)']
+    options:
+      runInCI: false
+    env:
+      RUSTC_WRAPPER: sccache
+
+  cargo-test-ci:
+    command: cargo test
+    inputs: ['@globs(sources)']
+    env:
+      SCCACHE_GCS_KEY_PREFIX: gasp-node

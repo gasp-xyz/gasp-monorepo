@@ -3,7 +3,7 @@
 .vscode
 Dockerfile*
 **/target
-!**/target/**/main
+!**/release/main
 ops/**/data
 .env
 

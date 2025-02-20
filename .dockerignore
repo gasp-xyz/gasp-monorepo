@@ -4,6 +4,7 @@
 Dockerfile*
 **/target
 !**/target/release/main
+!**/release/rollup-node
 ./contracts/script/output/**/*
 ops/**/data
 **/out

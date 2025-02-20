@@ -3,6 +3,7 @@
 .vscode
 Dockerfile*
 target
+!**/release/sequencer
 .env
 
 .moon/cache

@@ -29,6 +29,6 @@ tasks:
     inputs: ['@globs(sources)']
     outputs: ['build/avs-aggregator-linux-amd64']
   
-  build-image-ci:
+  build-image-ci-not-rust:
     command: 'docker buildx build --platform linux/amd64 -t gaspxyz/avs-aggregator:${IMAGE_TAG} -f Dockerfile.ci . --load'
     deps: ['build-ci']

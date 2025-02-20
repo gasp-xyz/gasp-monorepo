@@ -1,0 +1,7 @@
+FROM debian:stable-slim
+
+WORKDIR /app
+
+COPY target/release/main /app/updater
+
+CMD ["/app/updater"]

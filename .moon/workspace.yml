@@ -21,6 +21,12 @@ vcs:
   # and must include the remote prefix (before /).
   defaultBranch: 'main'
 
+runner:
+  archivableTargets:
+    - ':rustfmt-ci'
+    - ':clippy-ci'
+    - ':cargo-test-ci'
+
 unstable_remote:
   api: 'grpc'
   host: 'grpc://bazel-remote-cache.gasp.xyz:80'

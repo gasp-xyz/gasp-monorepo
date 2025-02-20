@@ -18,6 +18,52 @@ tasks:
     command: cargo build --release
     inputs: ['@globs(sources)']
     outputs: ['target/release/main']
+    env:
+      SCCACHE_GCS_KEY_PREFIX: updater-release
+  
   build-image-local:
     script: 'docker buildx build -t gaspxyz/updater:local -t gaspxyz/updater:localbase .'
     inputs: ['@globs(sources)', 'Dockerfile']
+
+  build-image-ci:
+    command: 'docker buildx build -t gaspxyz/updater:${IMAGE_TAG:-ci} -f Dockerfile.ci --load .'
+    deps: ['build']
+
+  rustfmt:
+    command: cargo fmt --all -- --check
+    inputs: ['@globs(sources)']
+    options:
+      runInCI: false
+
+  rustfmt-ci:
+    command: cargo fmt --all -- --check
+    inputs: ['@globs(sources)']
+
+  clippy:
+    command: cargo clippy
+    inputs: ['@globs(sources)']
+    options:
+      runInCI: false
+    env:
+      RUSTC_WRAPPER: sccache
+
+  clippy-ci:
+    command: cargo clippy
+    inputs: ['@globs(sources)']
+    env:
+      SCCACHE_GCS_KEY_PREFIX: updater
+
+
+  cargo-test:
+    command: cargo test
+    inputs: ['@globs(sources)']
+    options:
+      runInCI: false
+    env:
+      RUSTC_WRAPPER: sccache
+
+  cargo-test-ci:
+    command: cargo test
+    inputs: ['@globs(sources)']
+    env:
+      SCCACHE_GCS_KEY_PREFIX: updater
