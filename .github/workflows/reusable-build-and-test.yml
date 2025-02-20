@@ -135,7 +135,8 @@ jobs:
 
   build-rust-services:
     name: '[rust-services] Build rust services Docker images'
-    runs-on: gasp-monorepo-large-32core
+    runs-on: compile-gke
+    # runs-on: gasp-monorepo-large-32core
     steps:
       - uses: actions/checkout@v4
         with:
@@ -146,21 +147,21 @@ jobs:
       - uses: moonrepo/setup-toolchain@v0
       - uses: arduino/setup-protoc@v3
       
-      # - uses: google-github-actions/auth@v2
-      #   id: auth
-      #   with:
-      #     workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-      #     service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      # - uses: google-github-actions/setup-gcloud@v2
-      # - name: Install sccache-cache
-      #   uses: mozilla-actions/sccache-action@v0.0.5
-      # - name: Set Rust caching env vars
-      #   run: |
-      #     echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
-      #     echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
-      #     echo "SCCACHE_GCS_KEY_PREFIX=gasp-monorepo" >> $GITHUB_ENV
-      #     echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-      #     echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Install sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.5
+      - name: Set Rust caching env vars
+        run: |
+          echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_KEY_PREFIX=gasp-monorepo" >> $GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+          echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
       
       - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
       - run: docker buildx create --use
