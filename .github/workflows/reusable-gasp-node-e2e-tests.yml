@@ -164,7 +164,7 @@ jobs:
           - command: "yarn test-nonTransToken"
             fast: false
             unlocked: false
-          - command: "test-issuanceConfig"
+          - command: "yarn test-issuanceConfig"
             fast: true
             unlocked: false
           - command: "yarn test-sudoRemoval"
