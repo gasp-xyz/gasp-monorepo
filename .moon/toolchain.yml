@@ -2,7 +2,6 @@ node:
   packageManager: yarn
   yarn:
     version: 4.6.0
-
 rust:
   syncToolchainConfig: false
   version: 1.82.0
