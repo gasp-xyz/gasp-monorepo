@@ -3,6 +3,8 @@ type: application
 
 toolchain:
   default: bun
+  bun:
+    version: 1.2.2
 
 fileGroups:
   sources:
@@ -73,7 +75,8 @@ tasks:
     command: bun install
     inputs: ["@globs(sources)"]
     options:
-      internal: true
+      runInCI: false
+      cache: false
 
   contracts-check:
-    deps: ['bun-install', 'contracts-format', 'contracts-lint', 'contracts-test', 'contracts-size', 'contracts-gas', 'contracts-coverage']
+    deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-size', 'contracts-gas', 'contracts-coverage']

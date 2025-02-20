@@ -42,6 +42,7 @@ jobs:
       - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
       - run: docker buildx create --use
         
+      - run: moon contracts:bun-install
       - run: moon ci :contracts-check :contracts-build-image-ci
       
       - uses: appthrust/moon-ci-retrospect@v1
