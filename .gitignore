@@ -43,6 +43,7 @@ gha-creds-*.json
 
 # rust build target
 **/target
+**/target-*
 .cargo
 
 # IDE - VSCode

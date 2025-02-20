@@ -1,6 +1,5 @@
 .git
 .github
-target
 devops
 launch
 scripts
@@ -23,6 +22,8 @@ chains
 ./docker-cargo/*
 node_modules
 
+target
+target-*
 !**/release/rollup-node
 !**/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm
 !docker-cargo/release/rollup-node
