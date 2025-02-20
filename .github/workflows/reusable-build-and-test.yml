@@ -135,8 +135,8 @@ jobs:
 
   build-rust-services:
     name: '[rust-services] Build rust services Docker images'
-    runs-on: compile-gke
-    # runs-on: gasp-monorepo-large-32core
+    # runs-on: compile-gke
+    runs-on: gasp-monorepo-large-32core
     steps:
       - uses: actions/checkout@v4
         with:
