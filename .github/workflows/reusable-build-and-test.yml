@@ -143,8 +143,8 @@ jobs:
           submodules: true
           fetch-depth: 0
       
-      - uses: moonrepo/setup-rust@v1
       - uses: moonrepo/setup-toolchain@v0
+      - uses: moonrepo/setup-rust@v1
         with:
           cache: false
       - uses: arduino/setup-protoc@v3
