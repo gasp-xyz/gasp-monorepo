@@ -127,6 +127,8 @@ jobs:
           fetch-depth: 0
 
       - uses: 'moonrepo/setup-toolchain@v0'
+        with:
+          auto-install: true
       - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
       - run: docker buildx create --use
       - run: moon avs-aggregator:build-image-ci-not-rust
