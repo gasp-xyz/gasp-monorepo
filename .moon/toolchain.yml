@@ -8,4 +8,3 @@ rust:
   components:
     - rustfmt
     - clippy
-    - std
