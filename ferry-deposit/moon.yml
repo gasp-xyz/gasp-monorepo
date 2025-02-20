@@ -19,13 +19,23 @@ fileGroups:
 
 tasks:
   build:
-    command: 'yarn build'
+    command: yarn build
     inputs: ['@globs(sources)']
     outputs: ['build']
   
   build-image-local:
-    command: 'docker buildx build -t gaspxyz/ferry-deposit:local -f Dockerfile .'
-    inputs: ['@globs(sources)', 'Dockerfile']
+    command: docker buildx build -t gaspxyz/ferry-deposit:local -f Dockerfile .
+    inputs: ['@globs(sources)', 'Dockerfile', '.dockerignore']
+
+  build-image-ci:
+    command: >
+      docker buildx build
+      --push
+      --tag gaspxyz/ferry-deposit:${IMAGE_TAG:-ci}
+      --cache-to type=registry,ref=gaspxyz/ferry-deposit:cache,mode=max
+      --cache-from type=registry,ref=gaspxyz/ferry-deposit:cache
+      .
+    inputs: ['@globs(sources)', 'Dockerfile.ci', 'Dockerfile.ci.dockerignore']
 
   # lint:
   #   command: 'yarn lint'
