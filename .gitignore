@@ -77,8 +77,6 @@ Thumbs.db
 # custom
 ops/**/data
 
-*.gas-snapshot
-
 # foundry related ignore
 # reference: https://github.com/PaulRBerg/foundry-template/blob/main/.gitignore
 cache
@@ -91,6 +89,7 @@ out
 **/broadcast/*/31337/
 **/broadcast/*/31338/
 **/broadcast/*/31339/
+.gas-snapshot
 
 /ops/blockscout-docker-compose/services/blockscout-db-data
 /ops/blockscout-docker-compose/services/stats-db-data
