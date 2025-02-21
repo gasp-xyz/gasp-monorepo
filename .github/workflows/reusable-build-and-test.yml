@@ -101,12 +101,12 @@ jobs:
           submodules: true
           fetch-depth: 0
       
-      - uses: moonrepo/setup-rust@v1
-        with:
-          channel: 1.82.0
-          targets: wasm32-unknown-unknown
-          components: rustfmt,clippy,rust-src
-          cache: true
+      # - uses: moonrepo/setup-rust@v1
+      #   with:
+      #     channel: 1.82.0
+      #     targets: wasm32-unknown-unknown
+      #     components: rustfmt,clippy,rust-src
+      #     cache: true
 
       - uses: moonrepo/setup-toolchain@v0
         with:
@@ -115,6 +115,7 @@ jobs:
       - name: Setup Rust toolchains for all services
         run: moon :prepare-toolchain
       
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pkg-config libssl-dev
       - uses: arduino/setup-protoc@v3
       - uses: mlugg/setup-zig@v1
       - run: pip install cargo-zigbuild
@@ -163,7 +164,7 @@ jobs:
           targets: wasm32-unknown-unknown
           components: rust-src
           bins: cargo-tarpaulin@0.26.1
-          cache: true
+          cache: false
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
