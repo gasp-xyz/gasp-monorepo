@@ -112,8 +112,8 @@ jobs:
         with:
           auto-install: true
           proto-version: 0.46.1
-      - name: Setup Rust toolchains for all services
-        run: moon :prepare-toolchain
+      # - name: Setup Rust toolchains for all services
+      #   run: moon :prepare-toolchain
       
       - uses: actions/setup-python@v5
         with:
