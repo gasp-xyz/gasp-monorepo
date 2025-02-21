@@ -130,7 +130,7 @@ jobs:
           auto-install: true
           cache: false
           proto-version: 0.46.1
-
+      - run: sudo apt-get update && sudo apt-get install -y wget
       - uses: rui314/setup-mold@v1
         with:
           make-default: true
