@@ -1,6 +1,10 @@
 services:
   node-alice:
-    build: .
+    build:
+      context: .
+      args:
+        ENABLE_FAST_RUNTIME: true
+        ENABLE_UNLOCKED_RUNTIME: true
     image: gaspxyz/rollup-node:${ROLLUP_NODE_VERSION:-local}
     command:
       - --alith
@@ -16,7 +20,11 @@ services:
       - 30333:30333
 
   node-bob:
-    build: .
+    build:
+      context: .
+      args:
+        ENABLE_FAST_RUNTIME: true
+        ENABLE_UNLOCKED_RUNTIME: true
     image: gaspxyz/rollup-node:${ROLLUP_NODE_VERSION:-local}
     command:
       - --baltathar
