@@ -93,8 +93,8 @@ jobs:
 
   build-and-check-services:
     name: '[AVS] Build and test'
-    # runs-on: compile-gke
-    runs-on: gasp-monorepo-large-32core
+    runs-on: compile-gke
+    # runs-on: gasp-monorepo-large-32core
     steps:
       - uses: actions/checkout@v4
         with:
@@ -115,9 +115,6 @@ jobs:
       - name: Setup Rust toolchains for all services
         run: moon :prepare-toolchain
       
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pkg-config libssl-dev
-      - uses: arduino/setup-protoc@v3
-      - uses: mlugg/setup-zig@v1
       - run: pip install cargo-zigbuild
       
       - uses: google-github-actions/auth@v2
@@ -157,7 +154,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: arduino/setup-protoc@v3
       - uses: moonrepo/setup-rust@v1
         with:
           channel: nightly-2024-01-20
@@ -200,7 +196,6 @@ jobs:
         with:
           fetch-depth: 0
   
-      - uses: arduino/setup-protoc@v3
       - uses: moonrepo/setup-rust@v1
         with:
           channel: nightly-2024-01-20
