@@ -115,6 +115,9 @@ jobs:
       - name: Setup Rust toolchains for all services
         run: moon :prepare-toolchain
       
+      - uses: actions/setup-python@v5
+        with:
+          cache: pip
       - run: pip install cargo-zigbuild
       
       - uses: google-github-actions/auth@v2
