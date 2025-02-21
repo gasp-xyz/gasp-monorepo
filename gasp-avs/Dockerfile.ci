@@ -14,7 +14,7 @@ RUN apt-get update && \
 ARG ROLLUP_NODE_BINARY_PATH=gasp-node/target/release/rollup-node
 COPY --chown=appuser:appuser ${ROLLUP_NODE_BINARY_PATH} /app/rollup-node
 
-COPY --chown=appuser:appuser gasp-avs/target/release/main /app/gasp-avs
+COPY --chown=appuser:appuser gasp-avs/target/x86_64-unknown-linux-gnu/release/main /app/gasp-avs
 COPY --chown=appuser:appuser gasp-avs/entrypoint.sh /app/entrypoint.sh
 
 # rollup-node default env vars for connecting to rollup-holesky testnet

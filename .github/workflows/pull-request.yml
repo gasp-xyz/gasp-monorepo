@@ -43,34 +43,6 @@ jobs:
     secrets: inherit
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-
-  # build-and-test-gasp-node:
-  #   needs: [init]
-  #   name: '[gasp-node] Build'
-  #   uses: ./.github/workflows/reusable-gasp-node-build-and-test.yml
-  #   secrets: inherit
-  #   permissions:
-  #     contents: read
-  #     actions: read
-  #     checks: write
-  #     id-token: write
-  #   with:
-  #     version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-  #     branch: ${{ needs.init.outputs.GIT_BRANCH }}
-
-  # gasp-node-unit-tests-and-coverage:
-  #   name: '[gasp-node] Run unit tests and coverage'
-  #   needs: [init]
-  #   uses: ./.github/workflows/reusable-gasp-node-unit-tests-and-coverage.yml
-  #   secrets: inherit
-  #   permissions:
-  #     contents: read
-  #     actions: read
-  #     checks: write
-  #     id-token: write
-  #   with:
-  #     version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-  #     branch: ${{ needs.init.outputs.GIT_BRANCH }}
   
   gasp-node-generate-types:
     name: '[gasp-node] Generate types'

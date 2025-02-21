@@ -6,6 +6,7 @@ toolchain:
 
 env:
   CARGO_TERM_COLOR: 'always'
+  SCCACHE_GCS_KEY_PREFIX: sequencer
 
 fileGroups:
   sources:
@@ -22,9 +23,9 @@ tasks:
       cache: false
 
   build:
-    command: cargo build --release
+    command: cargo zigbuild --release --target x86_64-unknown-linux-gnu
     inputs: ['@globs(sources)']
-    outputs: ['target/release/sequencer']
+    outputs: ['target/x86_64-unknown-linux-gnu/release/sequencer']
     env:
       SCCACHE_GCS_KEY_PREFIX: sequencer-release
   
@@ -33,7 +34,7 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile']
 
   build-image-ci:
-    command: 'docker buildx build -t gaspxyz/sequencer:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .'
+    command: 'docker buildx build --platform linux/amd64 -t gaspxyz/sequencer:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .'
     deps: ['build']
     options:
       cache: false
@@ -45,11 +46,7 @@ tasks:
   lint:
     command: cargo clippy
     inputs: ['@globs(sources)']
-    env:
-      SCCACHE_GCS_KEY_PREFIX: sequencer
 
   test:
     command: cargo test -- l1::test::test_can_connect sequencer::test::test_find_malicious_update_ignores_updates_from_other_chains sequencer::test::test_find_malicious_update_ignores_valid_updates sequencer::test::test_find_malicious_update_with_invalid_range_works sequencer::test::test_find_malicious_update_works sequencer::test::test_find_pending_cancels_ignores_closed_cancels sequencer::test::test_find_pending_cancels_to_close sequencer::test::test_find_pending_cancels_to_close2 sequencer::test::test_find_pending_cancels_to_close_when_there_is_no_merkle_root_provided_to_l1 sequencer::test::test_get_pending_update_when_there_are_no_requests sequencer::test::test_get_pending_update_when_there_are_requests sequencer::test::test_get_pending_update_when_there_are_too_many_requests_for_single_update
     inputs: ['@globs(sources)']
-    env:
-      SCCACHE_GCS_KEY_PREFIX: sequencer

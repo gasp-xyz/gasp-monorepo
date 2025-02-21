@@ -3,8 +3,10 @@ language: rust
 toolchain:
   rust:
     version: nightly-2024-01-20
+
 env:
   CARGO_TERM_COLOR: 'always'
+  SCCACHE_GCS_KEY_PREFIX: gasp-node
 
 fileGroups:
   sources:
@@ -30,40 +32,45 @@ tasks:
       - 'target/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
     env:
       SCCACHE_GCS_KEY_PREFIX: gasp-node-release
+
+  build-image-local:
+    script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t gaspxyz/rollup-node:local .'
+    inputs: ['@globs(sources)', 'Dockerfile']
+
+  build-ci:
+    command: cargo zigbuild --release --target x86_64-unknown-linux-gnu
+    options:
+      internal: true
   
   build-standard-runtime:
-    extends: build
+    extends: build-ci
     args: '--target-dir target-standard-runtime'
     options:
       outputStyle: stream
       mergeOutputs: replace
     outputs:
-      - 'target-standard-runtime/release/rollup-node'
-      - 'target-standard-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+      - 'target-standard-runtime/x86_64-unknown-linux-gnu/release/rollup-node'
+      - 'target-standard-runtime/x86_64-unknown-linux-gnu/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
 
   build-fast-runtime:
-    extends: build
+    extends: build-ci
     args: '--no-default-features --features=fast-runtime --target-dir target-fast-runtime'
     options:
       outputStyle: stream
       mergeOutputs: replace
     outputs:
-      - 'target-fast-runtime/release/rollup-node'
-      - 'target-fast-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+      - 'target-fast-runtime/x86_64-unknown-linux-gnu/release/rollup-node'
+      - 'target-fast-runtime/x86_64-unknown-linux-gnu/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
 
   build-unlocked-runtime:
-    extends: build
+    extends: build-ci
     args: '--no-default-features --features=unlocked --target-dir target-unlocked-runtime'
     options:
       outputStyle: stream
       mergeOutputs: replace
     outputs:
-      - 'target-unlocked-runtime/release/rollup-node'
-      - 'target-unlocked-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
-
-  build-image-local:
-    script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t gaspxyz/rollup-node:local .'
-    inputs: ['@globs(sources)', 'Dockerfile']
+      - 'target-unlocked-runtime/x86_64-unknown-linux-gnu/release/rollup-node'
+      - 'target-unlocked-runtime/x86_64-unknown-linux-gnu/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
 
   build-image-ci:
     # script: |
@@ -71,9 +78,9 @@ tasks:
     #   docker buildx build --build-arg TARGET_DIR=target-fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load .
     #   docker buildx build --build-arg TARGET_DIR=target-unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load .    
     script: |
-      docker buildx build --build-arg TARGET_DIR=target-standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .
-      docker buildx build --build-arg TARGET_DIR=target-unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push .
-      docker buildx build --build-arg TARGET_DIR=target-fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push .
+      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-standard-runtime/x86_64-unknown-linux-gnu/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .
+      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-unlocked-runtime/x86_64-unknown-linux-gnu/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push .
+      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-fast-runtime/x86_64-unknown-linux-gnu/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push .
     deps: ['build-standard-runtime', 'build-fast-runtime', 'build-unlocked-runtime']
     options:
       cache: false
@@ -85,11 +92,54 @@ tasks:
   lint:
     command: cargo clippy -p pallet-xyk
     inputs: ['@globs(sources)']
-    env:
-      SCCACHE_GCS_KEY_PREFIX: gasp-node
 
   test:
     command: cargo test
     inputs: ['@globs(sources)']
+
+  coverage:
+    command: >
+      cargo tarpaulin
+      --timeout 120 --workspace --out Xml
+      -e rollup-runtime-integration-test rollup-node rollup-runtime
+      --exclude-files **/mock.rs **/weights.rs **/weights/* target-*-runtime
+      --target-dir target-coverage
+    inputs: ['@globs(sources)']
+    outputs: ['cobertura.xml']
+
+  benchmark-tests:
+    script: |
+      cargo test --release -j8 --features=runtime-benchmarks -p pallet-xyk -p pallet-issuance -p pallet-multipurpose-liquidity -p pallet-fee-lock
+      cargo test --release -j8 --features=runtime-benchmarks -p pallet-bootstrap -p pallet-market
+      # NOTE: MGX-742
+      cargo test --release -j8 --features=runtime-benchmarks -p pallet-proof-of-stake
+    inputs: ['@globs(sources)']
+
+  build-runtime-benchmarks:
+    command: cargo build --release --no-default-features --features=runtime-benchmarks --target-dir target-runtime-benchmarks
+    inputs: ['@globs(sources)']
+    options:
+      internal: true
+
+  run-runtime-benchmarks:
+    script: |
+      mkdir -p ./benchmarks 
+      target-runtime-benchmarks/release/rollup-node benchmark pallet \
+        -l=info,runtime::collective=warn,xyk=warn \
+        --chain rollup-local \
+        --wasm-execution compiled \
+        --pallet '*' \
+        --extrinsic '*' \
+        --steps ${STEPS} \
+        --repeat ${REPEATS} \
+        --template ./templates/module-weight-template.hbs \
+        --output ./benchmarks/
+
+      target-runtime-benchmarks/release/rollup-node benchmark overhead --chain rollup-local -lblock_builder=debug --max-ext-per-block 50000 --base-path .
+      cp block_weights.rs extrinsic_weights.rs ./benchmarks
+    inputs: ['@globs(sources)']
+    outputs: ['benchmarks']
+    deps: ['build-runtime-benchmarks']
     env:
-      SCCACHE_GCS_KEY_PREFIX: gasp-node
+      STEPS: '2'
+      REPEATS: '1'

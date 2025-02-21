@@ -5,7 +5,8 @@ toolchain:
     version: 1.78.0
 
 env:
-  CARGO_TERM_COLOR: 'always'
+  CARGO_TERM_COLOR: always
+  SCCACHE_GCS_KEY_PREFIX: gasp-avs
 
 fileGroups:
   sources:
@@ -24,9 +25,7 @@ tasks:
     command: cargo build --release
     inputs: ['@globs(sources)']
     outputs: ['target/release/main']
-    env:
-      SCCACHE_GCS_KEY_PREFIX: gasp-avs-release
-  
+
   build-image-local:
     command: 'docker buildx build --build-arg ROLLUP_NODE_VERSION=local -t gaspxyz/gasp-avs:local .'
     options:
@@ -34,12 +33,19 @@ tasks:
     deps: ['gasp-node:build-image-local']
     inputs: ['@globs(sources)', 'Dockerfile']
   
+  build-ci:
+    command: cargo zigbuild --release --target x86_64-unknown-linux-gnu
+    inputs: ['@globs(sources)']
+    outputs: ['target/x86_64-unknown-linux-gnu/release/main']
+    env:
+      SCCACHE_GCS_KEY_PREFIX: gasp-avs-release
+  
   build-image-ci:
     script: |
-      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-standard-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --push ../
-      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-fast-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push ../
-      docker buildx build --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-unlocked-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push ../
-    deps: ['build', 'gasp-node:build-image-ci']
+      docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-standard-runtime/x86_64-unknown-linux-gnu/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --push ../
+      docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-fast-runtime/x86_64-unknown-linux-gnu/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push ../
+      docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-unlocked-runtime/x86_64-unknown-linux-gnu/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push ../
+    deps: ['build-ci', 'gasp-node:build-image-ci']
     options:
       cache: false
 
@@ -50,11 +56,7 @@ tasks:
   lint:
     command: cargo clippy
     inputs: ['@globs(sources)', 'tests/**/*']
-    env:
-      SCCACHE_GCS_KEY_PREFIX: gasp-avs
 
   test:
     command: cargo test
     inputs: ['@globs(sources)', 'tests/**/*']
-    env:
-      SCCACHE_GCS_KEY_PREFIX: gasp-avs

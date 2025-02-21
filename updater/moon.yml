@@ -6,6 +6,7 @@ toolchain:
 
 env:
   CARGO_TERM_COLOR: 'always'
+  SCCACHE_GCS_KEY_PREFIX: updater
 
 fileGroups:
   sources:
@@ -21,9 +22,9 @@ tasks:
       cache: false
 
   build:
-    command: cargo build --release
+    command: cargo zigbuild --release --target x86_64-unknown-linux-gnu
     inputs: ['@globs(sources)']
-    outputs: ['target/release/main']
+    outputs: ['target/x86_64-unknown-linux-gnu/release/main']
     env:
       SCCACHE_GCS_KEY_PREFIX: updater-release
   
@@ -32,7 +33,7 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile']
 
   build-image-ci:
-    command: 'docker buildx build -t gaspxyz/updater:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .'
+    command: 'docker buildx build --platform linux/amd64 -t gaspxyz/updater:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .'
     deps: ['build']
     options:
       cache: false
@@ -44,11 +45,7 @@ tasks:
   lint:
     command: cargo clippy
     inputs: ['@globs(sources)']
-    env:
-      SCCACHE_GCS_KEY_PREFIX: updater
 
   test:
     command: cargo test
     inputs: ['@globs(sources)']
-    env:
-      SCCACHE_GCS_KEY_PREFIX: updater
