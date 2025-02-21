@@ -151,7 +151,7 @@ jobs:
 
   gasp-node-coverage-report:
     name: '[gasp-node] Coverage report'
-    runs-on: ubuntu-24.04
+    runs-on: compile-gke
     steps:
       - uses: actions/checkout@v4
         with:
