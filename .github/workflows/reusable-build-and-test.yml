@@ -124,12 +124,17 @@ jobs:
           components: rustfmt,clippy,rust-src
           cache: false
           bins: cargo-zigbuild
+      
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
           cache: false
           proto-version: 0.46.1
-          
+
+      - uses: rui314/setup-mold@v1
+        with:
+          make-default: true
+
       # - name: Setup Rust toolchains for all services
       #   run: | 
       #     moon gasp-avs:prepare-toolchain
