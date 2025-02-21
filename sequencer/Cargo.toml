@@ -26,6 +26,4 @@ codegen-units = 1
 
 [workspace.dependencies]
 bindings = { path = "./bindings" }
-
-[dependencies]
 openssl = { version = "0.10", features = ["vendored"] }
