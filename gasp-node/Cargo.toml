@@ -25,6 +25,9 @@ members = [
 	'rollup/runtime/integration-test',
 ]
 
+[dependencies]
+openssl = { version = "0.10", features = ["vendored"] }
+
 [workspace.dependencies]
 alloy-primitives = { version = "0.5.0", default-features = false }
 alloy-sol-types = { version = "0.5.0", default-features = false }

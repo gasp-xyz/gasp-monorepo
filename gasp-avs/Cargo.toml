@@ -15,6 +15,7 @@ opt-level = 0
 opt-level = 3
 
 [dependencies]
+openssl = { version = "0.10", features = ["vendored"] }
 bindings = { path = "./bindings" }
 
 aes = "0.8.0"
