@@ -113,7 +113,7 @@ jobs:
           auto-install: true
           proto-version: 0.46.1
       - name: Setup Rust toolchains for all services
-        run: moon :setup-toolchain
+        run: moon :prepare-toolchain
       
       - uses: arduino/setup-protoc@v3
       - uses: mlugg/setup-zig@v1
