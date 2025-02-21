@@ -93,7 +93,7 @@ jobs:
 
   build-and-check-services:
     name: '[AVS] Build and test'
-    runs-on: compile-gke
+    runs-on: beast-gke
     # runs-on: gasp-monorepo-large-32core
     steps:
       - uses: actions/checkout@v4
