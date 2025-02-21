@@ -101,39 +101,40 @@ jobs:
           submodules: true
           fetch-depth: 0
       
-      # - uses: moonrepo/setup-rust@v1
-      #   with:
-      #     channel: 1.82.0
-      #     targets: wasm32-unknown-unknown
-      #     components: rustfmt,clippy,rust-src
-      #     cache: true
-      #     bins: cargo-zigbuild
+      - uses: moonrepo/setup-rust@v1
+        with:
+          channel: 1.82.0
+          targets: wasm32-unknown-unknown
+          components: rustfmt,clippy,rust-src
+          cache: false
+          bins: cargo-zigbuild
 
-      # - uses: moonrepo/setup-rust@v1
-      #   with:
-      #     channel: nightly-2024-01-20
-      #     targets: wasm32-unknown-unknown
-      #     components: rustfmt,clippy,rust-src
-      #     cache: true
-      #     bins: cargo-zigbuild
+      - uses: moonrepo/setup-rust@v1
+        with:
+          channel: nightly-2024-01-20
+          targets: wasm32-unknown-unknown
+          components: rustfmt,clippy,rust-src
+          cache: false
+          bins: cargo-zigbuild
 
-      # - uses: moonrepo/setup-rust@v1
-      #   with:
-      #     channel: 1.78.0
-      #     targets: wasm32-unknown-unknown
-      #     components: rustfmt,clippy,rust-src
-      #     cache: true
-      #     bins: cargo-zigbuild
+      - uses: moonrepo/setup-rust@v1
+        with:
+          channel: 1.78.0
+          targets: wasm32-unknown-unknown
+          components: rustfmt,clippy,rust-src
+          cache: false
+          bins: cargo-zigbuild
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
           cache: false
           proto-version: 0.46.1
-      - name: Setup Rust toolchains for all services
-        run: | 
-          moon gasp-avs:prepare-toolchain
-          moon gasp-node:prepare-toolchain
-          moon sequencer:prepare-toolchain
+          
+      # - name: Setup Rust toolchains for all services
+      #   run: | 
+      #     moon gasp-avs:prepare-toolchain
+      #     moon gasp-node:prepare-toolchain
+      #     moon sequencer:prepare-toolchain
       
       # - uses: google-github-actions/auth@v2
       #   id: auth
