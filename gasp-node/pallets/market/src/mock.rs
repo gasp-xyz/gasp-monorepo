@@ -238,7 +238,7 @@ mod mocks {
 		}
 	}
 
-	mockall::mock!{
+	mockall::mock! {
 
 
 		pub FeeLock {}
@@ -402,11 +402,7 @@ mod mocks {
 	pub struct MockFeeLock;
 
 	impl FeeLockTriggerTrait<AccountId, Balance, TokenId> for MockFeeLock {
-
-		fn is_swap_tokens_lockless(
-			token_id: TokenId,
-			token_amount: Balance
-		) -> bool {
+		fn is_swap_tokens_lockless(token_id: TokenId, token_amount: Balance) -> bool {
 			false
 		}
 

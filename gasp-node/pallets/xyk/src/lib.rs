@@ -1638,22 +1638,22 @@ impl<T: Config> Pallet<T> {
 			)?;
 
 			let treasury_amount_in_mangata: BalanceOf<T> =
-			match treasury_amount.saturating_add(burn_amount).is_zero() {
-				true => {settle_amount_in_mangata}
-				false => {
-					settle_amount_in_mangata
+				match treasury_amount.saturating_add(burn_amount).is_zero() {
+					true => settle_amount_in_mangata,
+					false => settle_amount_in_mangata
 						.into()
 						.checked_mul(treasury_amount.into())
 						.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?
 						.checked_div(
 							treasury_amount
 								.checked_add(&burn_amount)
-								.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?.into(),
+								.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?
+								.into(),
 						)
 						.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?
 						.try_into()
-						.map_err(|_| DispatchError::from(Error::<T>::MathOverflow))?}
-			};
+						.map_err(|_| DispatchError::from(Error::<T>::MathOverflow))?,
+				};
 
 			let burn_amount_in_mangata: BalanceOf<T> = settle_amount_in_mangata
 				.into()
@@ -3535,12 +3535,7 @@ impl<T: Config> XykFunctionsTrait<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> f
 		asset_id: CurrencyIdOf<T>,
 		fee: BalanceOf<T>,
 	) -> Result<(), DispatchError> {
-		Self::settle_pool_fees(
-			who,
-			pool_id,
-			asset_id,
-			fee
-		)
+		Self::settle_pool_fees(who, pool_id, asset_id, fee)
 	}
 }
 

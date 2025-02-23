@@ -381,11 +381,7 @@ impl<T: Config> Pallet<T> {
 }
 
 impl<T: Config> FeeLockTriggerTrait<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> for Pallet<T> {
-
-	fn is_swap_tokens_lockless(
-		token_id: CurrencyIdOf<T>,
-		token_amount: BalanceOf<T>
-	) -> bool {
+	fn is_swap_tokens_lockless(token_id: CurrencyIdOf<T>, token_amount: BalanceOf<T>) -> bool {
 		if let Some(fee_lock_metadata) = Self::get_fee_lock_metadata() {
 			if fee_lock_metadata.is_whitelisted(token_id) {
 				if let Some(v) = Self::get_swap_valuation_for_token(token_id, token_amount) {
@@ -437,8 +433,7 @@ impl<T: Config> FeeLockTriggerTrait<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>>
 				.last_fee_lock_block
 				.saturating_add(fee_lock_metadata.period_length)
 		{
-				Ok(fee_lock_metadata.fee_lock_amount)
-
+			Ok(fee_lock_metadata.fee_lock_amount)
 		} else {
 			// We must either reserve more or unreserve
 			match (fee_lock_metadata.fee_lock_amount, account_fee_lock_data.total_fee_lock_amount) {

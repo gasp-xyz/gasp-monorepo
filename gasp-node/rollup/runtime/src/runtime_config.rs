@@ -520,7 +520,8 @@ pub mod config {
 					// Last two args are ignored by orml_tokens
 					WithdrawReasons::all(),
 					Default::default(),
-				).map_err(|_| {
+				)
+				.map_err(|_| {
 					TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
 				})?;
 				Ok(())
@@ -586,11 +587,15 @@ pub mod config {
 								InvalidTransaction::SwapPrevalidation.into(),
 							)
 						);
-						let first_pool_info = Market::get_pool_info(swap_pool_list[0]).map_err(|_| TransactionValidityError::Invalid(
-							InvalidTransaction::SwapPrevalidation.into(),
-						))?;
+						let first_pool_info =
+							Market::get_pool_info(swap_pool_list[0]).map_err(|_| {
+								TransactionValidityError::Invalid(
+									InvalidTransaction::SwapPrevalidation.into(),
+								)
+							})?;
 						ensure!(
-							first_pool_info.pool.0 == asset_id_in || first_pool_info.pool.1 == asset_id_in,
+							first_pool_info.pool.0 == asset_id_in ||
+								first_pool_info.pool.1 == asset_id_in,
 							TransactionValidityError::Invalid(
 								InvalidTransaction::SwapPrevalidation.into(),
 							)
@@ -623,12 +628,7 @@ pub mod config {
 						})?;
 						Ok(None)
 					},
-					(
-						CallType::Swap {
-							..
-						},
-						Some(fee_lock_metadata),
-					) => Ok(None),
+					(CallType::Swap { .. }, Some(fee_lock_metadata)) => Ok(None),
 					// TODO - very low priority
 					// Ideally there should be another arm here for swap but no fee_lock_metadata
 					// So that Gasp and Eth swap inputs both can be checked as total to avoid
