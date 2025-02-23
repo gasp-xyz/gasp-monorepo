@@ -64,6 +64,7 @@ parameter_types! {
 	pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
 	pub const BnbTreasurySubAccDerive: [u8; 4] = *b"bnbt";
 	pub TreasuryAccount: AccountId = TreasuryPalletId::get().into_account_truncating();
+	pub BnbAccount: AccountId = TreasuryPalletId::get().into_sub_account_truncating(BnbTreasurySubAccDerive::get());
 	pub const MaxLocks: u32 = 50;
 	pub const NativeCurrencyId: u32 = 0_u32;
 }
@@ -236,6 +237,38 @@ mod mocks {
 			fn compute_issuance(n: u32);
 		}
 	}
+
+	mockall::mock!{
+
+
+		pub FeeLock {}
+
+		impl FeeLockTriggerTrait<AccountId, Balance, TokenId> for FeeLock {
+
+			fn is_swap_tokens_lockless(
+				token_id: TokenId,
+				token_amount: Balance
+			) -> bool;
+
+			fn is_fee_lock_init() -> bool;
+
+			fn is_whitelisted(token_id: TokenId) -> bool;
+
+			fn get_swap_valuation_for_token(
+				valuating_token_id: TokenId,
+				valuating_token_amount: Balance,
+			) -> Option<Balance>;
+
+			// This function is not expected to fail unless fee_lock_metadata is uninit
+			fn get_fee_lock_amount(who: &AccountId) -> Result<Balance, DispatchError>;
+
+			fn process_fee_lock(who: &AccountId) -> DispatchResult;
+
+			fn can_unlock_fee(who: &AccountId) -> DispatchResult;
+
+			fn unlock_fee(who: &AccountId) -> DispatchResult;
+		}
+	}
 }
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -365,6 +398,50 @@ mod mocks {
 		}
 		fn compute_issuance(_: u32) {}
 	}
+
+	pub struct MockFeeLock;
+
+	impl FeeLockTriggerTrait<AccountId, Balance, TokenId> for MockFeeLock {
+
+		fn is_swap_tokens_lockless(
+			token_id: TokenId,
+			token_amount: Balance
+		) -> bool {
+			false
+		}
+
+		fn is_fee_lock_init() -> bool {
+			true
+		}
+
+		fn is_whitelisted(token_id: TokenId) -> bool {
+			true
+		}
+
+		fn get_swap_valuation_for_token(
+			valuating_token_id: TokenId,
+			valuating_token_amount: Balance,
+		) -> Option<Balance> {
+			None
+		}
+
+		// This function is not expected to fail unless fee_lock_metadata is uninit
+		fn get_fee_lock_amount(who: AccountId) -> Result<Balance, DispatchError> {
+			Ok((Default::default()))
+		}
+
+		fn process_fee_lock(who: AccountId) -> DispatchResult {
+			Ok(())
+		}
+
+		fn can_unlock_fee(who: AccountId) -> DispatchResult {
+			Ok(())
+		}
+
+		fn unlock_fee(who: AccountId) -> DispatchResult {
+			Ok(())
+		}
+	}
 }
 
 impl pallet_xyk::XykBenchmarkingConfig for Test {}
@@ -409,6 +486,16 @@ impl market::Config for Test {
 	type NontransferableTokens = Nothing;
 	type FoundationAccountsProvider = GetDefault;
 	type ArbitrageBot = Nothing;
+
+	type PoolFeePercentage = ConstU128<20>;
+	type TreasuryFeePercentage = ConstU128<5>;
+	type BuyAndBurnFeePercentage = ConstU128<5>;
+	type FeeDenominator = ConstU128<10_000>;
+
+	type TreasuryAccountId = TreasuryAccount;
+	type BnbAccountId = BnbAccount;
+
+	type FeeLock = mocks::MockFeeLock;
 }
 
 impl<T: Config> Pallet<T>

@@ -344,9 +344,9 @@ impl pallet_stable_swap::Config for Runtime {
 	type CurrencyId = TokenId;
 	type TreasuryPalletId = cfg::TreasuryPalletIdOf<Runtime>;
 	type BnbTreasurySubAccDerive = cfg::pallet_xyk::BnbTreasurySubAccDerive;
-	type MarketTotalFee = fees::MarketTotalFee;
-	type MarketTreasuryFeePart = fees::MarketTreasuryFeePart;
-	type MarketBnBFeePart = fees::MarketBnBFeePart;
+	type MarketTotalFee = fees::SSwapTotalFee;
+	type MarketTreasuryFeePart = fees::SSwapTreasuryFeePart;
+	type MarketBnBFeePart = fees::SSwapBnBFeePart;
 	type MaxApmCoeff = ConstU128<1_000_000>;
 	type DefaultApmCoeff = ConstU128<1_000>;
 	type MaxAssetsInPool = ConstU32<2>;
@@ -430,13 +430,7 @@ impl Into<CallType> for RuntimeCall {
 				asset_id_out,
 				min_amount_out,
 			}) => {
-				// we need the exact out value to consider high value swap for the bought asset too
-				let asset_amount_out = if swap_pool_list.len() == 1 {
-					Market::calculate_sell_price(swap_pool_list[0], asset_id_in, asset_amount_in)
-						.unwrap_or(min_amount_out)
-				} else {
-					min_amount_out
-				};
+				let asset_amount_out = min_amount_out;
 				CallType::Swap {
 					swap_pool_list,
 					asset_id_in,
@@ -452,13 +446,7 @@ impl Into<CallType> for RuntimeCall {
 				asset_id_in,
 				max_amount_in,
 			}) => {
-				// we need the exact in value to consider high value swap for the sold asset too
-				let asset_amount_in = if swap_pool_list.len() == 1 {
-					Market::calculate_buy_price(swap_pool_list[0], asset_id_out, asset_amount_out)
-						.unwrap_or(max_amount_in)
-				} else {
-					max_amount_in
-				};
+				let asset_amount_in = max_amount_in;
 				CallType::Swap {
 					swap_pool_list,
 					asset_id_in,
@@ -869,6 +857,15 @@ impl pallet_market::Config for Runtime {
 	type NontransferableTokens = tokens::NontransferableTokens;
 	type FoundationAccountsProvider = cfg::pallet_membership::FoundationAccountsProvider;
 	type ArbitrageBot = tokens::ArbitrageBot;
+
+	type PoolFeePercentage = fees::MarketPoolFeePercentage;
+	type TreasuryFeePercentage = fees::MarketTreasuryFeePercentage;
+	type BuyAndBurnFeePercentage = fees::MarketBuyAndBurnFeePercentage;
+	type FeeDenominator = fees::MarketFeeDenominator;
+
+	type TreasuryAccountId = cfg::TreasuryAccountIdOf<Runtime>;
+	type BnbAccountId = cfg::BnbAccountIdOf<Runtime>;
+	type FeeLock = FeeLock;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
@@ -1275,74 +1272,24 @@ impl_runtime_apis! {
 				).unwrap_or_default()
 		}
 
+		// TODO
+		// We do not need these rpc functions remove them later
+		// once we are sure that we don't need them
 		fn is_sell_asset_lock_free(
 			path: Vec<TokenId>,
 			input_amount: Balance,
 			) -> Option<bool>{
-			match (path.len(), pallet_fee_lock::FeeLockMetadata::<Runtime>::get()) {
-				(length, _) if length < 2 => {
-					None
-				}
-				(2, Some(feelock)) => {
-					let input = path.get(0)?;
-					let output = path.get(1)?;
-					let output_amount = Xyk::calculate_sell_price_id(*input, *output, input_amount).ok()?;
-					Some(
-					FeeHelpers::<
-								Runtime,
-								orml_tokens::MultiTokenCurrencyAdapter<Runtime>,
-								FeeLock,
-								>::is_high_value_swap(&feelock, *input, input_amount)
-									||
-					FeeHelpers::<
-								Runtime,
-								orml_tokens::MultiTokenCurrencyAdapter<Runtime>,
-								FeeLock,
-								>::is_high_value_swap(&feelock, *output, output_amount)
-								)
-				}
-				(_,  None) => {
-					Some(false)
-				}
-				(_,  Some(_)) => {
-					Some(true)
-				}
-			}
+			None
 		}
 
+		// TODO
+		// We do not need these rpc functions remove them later
+		// once we are sure that we don't need them
 		fn is_buy_asset_lock_free(
 			path: Vec<TokenId>,
 			input_amount: Balance,
 			) -> Option<bool>{
-			match (path.len(), pallet_fee_lock::FeeLockMetadata::<Runtime>::get()) {
-				(length, _) if length < 2 => {
-					None
-				}
-				(2, Some(feelock)) => {
-					let input = path.get(0)?;
-					let output = path.get(1)?;
-					let output_amount = Xyk::calculate_buy_price_id(*input, *output, input_amount).ok()?;
-					Some(
-					FeeHelpers::<
-								Runtime,
-								orml_tokens::MultiTokenCurrencyAdapter<Runtime>,
-								FeeLock,
-								>::is_high_value_swap(&feelock, *input, input_amount)
-									||
-					FeeHelpers::<
-								Runtime,
-								orml_tokens::MultiTokenCurrencyAdapter<Runtime>,
-								FeeLock,
-								>::is_high_value_swap(&feelock, *output, output_amount)
-								)
-				}
-				(_, None) => {
-					Some(false)
-				}
-				(_, Some(_)) => {
-					Some(true)
-				}
-			}
+			None
 		}
 
 		fn get_tradeable_tokens() -> Vec<RpcAssetMetadata<TokenId>> {

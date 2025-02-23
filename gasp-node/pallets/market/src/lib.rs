@@ -14,7 +14,8 @@ use frame_support::{
 			currency::{MultiTokenCurrency, MultiTokenVestingLocks},
 			Balance, CurrencyId,
 		},
-		Contains,
+		Contains, 
+		ExistenceRequirement, Get, WithdrawReasons,
 	},
 };
 use frame_system::pallet_prelude::*;
@@ -22,16 +23,18 @@ use mangata_support::{
 	pools::{ComputeBalances, Inspect, Mutate, PoolPair, SwapResult, TreasuryBurn, Valuate},
 	traits::{
 		AssetRegistryProviderTrait, GetMaintenanceStatusTrait, ProofOfStakeRewardsApi,
-		Valuate as ValuateXyk, XykFunctionsTrait,
+		Valuate as ValuateXyk, XykFunctionsTrait, FeeLockTriggerTrait,
 	},
+	utils::ConvertError
 };
 use mangata_types::multipurpose_liquidity::ActivateKind;
 
 #[cfg(feature = "runtime-benchmarks")]
 use mangata_support::traits::ComputeIssuance;
 
-use sp_runtime::traits::{MaybeDisplay, MaybeFromStr, Saturating, Zero};
-use sp_std::{convert::TryInto, fmt::Debug, vec, vec::Vec};
+use sp_arithmetic::{helpers_128bit::multiply_by_rational_with_rounding, per_things::Rounding};
+use sp_runtime::{traits::{MaybeDisplay, MaybeFromStr, Saturating, Zero, CheckedSub, MaybeConvert}, ModuleError};
+use sp_std::{convert::{TryInto, TryFrom}, fmt::Debug, vec, vec::Vec};
 
 use orml_tokens::MultiTokenCurrencyExtended;
 use orml_traits::asset_registry::Inspect as AssetRegistryInspect;
@@ -114,7 +117,7 @@ pub mod pallet {
 		>;
 
 		/// The `Currency::Balance` type of the currency.
-		type Balance: Balance;
+		type Balance: Balance + Into<u128> + TryFrom<u128>;
 
 		/// Identifier for the assets.
 		type CurrencyId: CurrencyId;
@@ -167,6 +170,17 @@ pub mod pallet {
 		/// A special account used for nontransferable tokens to allow 'selling' to balance pools
 		type ArbitrageBot: Contains<Self::AccountId>;
 
+
+		type PoolFeePercentage: Get<u128>;
+		type TreasuryFeePercentage: Get<u128>;
+		type BuyAndBurnFeePercentage: Get<u128>;
+		type FeeDenominator: Get<u128>;
+
+		type TreasuryAccountId: Get<Self::AccountId>;
+		type BnbAccountId: Get<Self::AccountId>;
+
+		type FeeLock: FeeLockTriggerTrait<Self::AccountId, Self::Balance, Self::CurrencyId>;
+
 		#[cfg(feature = "runtime-benchmarks")]
 		type ComputeIssuance: ComputeIssuance;
 	}
@@ -199,6 +213,16 @@ pub mod pallet {
 		MultiSwapPathInvalid,
 		/// Asset cannot be used to create or modify a pool
 		NontransferableToken,
+		/// Math Overflow
+		MathOverflow{id: u8},
+		/// Unexpected failure
+		UnexpectedFailure{id: u8},
+		/// Swap prevalidation
+		SwapPrevalidation,
+		/// Not enough assets for fees,
+		NotEnoughAssetsForFees,
+		/// Not enough assets for fee lock
+		NotEnoughAssetsForFeeLock,
 	}
 
 	// Pallet's events.
@@ -256,6 +280,17 @@ pub mod pallet {
 			/// The new total supply of the associated LP token.
 			total_supply: T::Balance,
 		},
+
+		/// Swap failed with error
+		SwapFailed{
+			error: ModuleError
+		},
+
+		/// Swap fees falback failed
+		SwapFeesFallbackFailed{
+			id: u32,
+			error: ModuleError
+		}
 	}
 
 	#[pallet::hooks]
@@ -714,7 +749,34 @@ pub mod pallet {
 			asset_id_out: T::CurrencyId,
 			min_amount_out: T::Balance,
 		) -> DispatchResultWithPostInfo {
+			let function_error_id = 0u8;
+
 			let sender = ensure_signed(origin)?;
+
+			// At this point pre dispatch has already checked that
+			// The user has asset_amount_in and that swap_pool_list.len() in not zero
+			// and that the first swap_pool_list element pool has asset_id_in as one of its two assets
+			// We do it here again anyway to ensure that this function is standalone
+			// TODO
+			// We should move this to a pre_validation function
+			ensure!(
+				!swap_pool_list.len().is_zero(),
+				Error::<T>::SwapPrevalidation
+			);
+			let first_pool_info = Self::get_pool_info(swap_pool_list[0]).map_err(|_| Error::<T>::SwapPrevalidation)?;
+			ensure!(
+				first_pool_info.pool.0 == asset_id_in || first_pool_info.pool.1 == asset_id_in,
+				Error::<T>::SwapPrevalidation
+			);
+			let fee_pool_id = swap_pool_list[0];
+			T::Currency::ensure_can_withdraw(
+				asset_id_in,
+				&sender,
+				asset_amount_in,
+				// Last two args are ignored by orml_tokens
+				WithdrawReasons::all(),
+				Default::default(),
+			)?;
 
 			// ensure maintenance mode
 			ensure!(
@@ -722,16 +784,112 @@ pub mod pallet {
 				Error::<T>::TradingBlockedByMaintenanceMode
 			);
 
-			let (pools, path) = Self::get_valid_path(&swap_pool_list, asset_id_in, asset_id_out)?;
+			let (mut pools, mut path): (Vec<PoolInfoOf<T>>, Vec<AssetPairOf<T>>) = (vec![], vec![]);
+			let mut amount_in: T::Balance = Zero::zero();
+			let mut is_lockless: Option<bool> = None;
+			let mut id = asset_id_in;
+			let mut amount_out = amount_in;
+			let mut fees: Option<T::Balance> = None;
 
-			let swaps =
-				Self::do_swaps(&sender, pools, path.clone(), asset_amount_in, min_amount_out)?;
+			let swap_result: Result<(), DispatchError> = frame_support::storage::with_storage_layer(|| -> Result<(), DispatchError> {
+				fees = Some(Self::calc_fees_pre(asset_amount_in)?);
 
-			Self::deposit_event(Event::AssetsSwapped { who: sender.clone(), swaps });
+				amount_in = asset_amount_in.checked_sub(&fees.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?).ok_or(Error::<T>::MathOverflow{id: function_error_id})?;
+				(pools, path) = Self::get_valid_path(&swap_pool_list, asset_id_in, asset_id_out)?;
+			
+				is_lockless = if swap_pool_list.len() > 1 {
+					match T::FeeLock::is_whitelisted(id) {
+						true => T::FeeLock::is_swap_tokens_lockless(id, amount_in).then_some(true),
+						false => Some(false),
+					}
+				} else {
+					T::FeeLock::is_swap_tokens_lockless(id, amount_in).then_some(true)
+				};
+	
+				// calc output amounts for fee lock detemination
+				for (pool, swap) in pools.iter().zip(path.iter()) {
+					amount_out = Self::calculate_sell_price(pool.pool_id, id, amount_out)
+						.ok_or(Error::<T>::ExcesiveInputAmount)?;
+					id = if id == swap.0 { swap.1 } else { swap.0 };
+	
+					// Check does the swap output (token and amount)
+					// qualify for lockless. Input already checked
+					is_lockless = match is_lockless{
+						Some(b) => {Some(b)},
+						None => {
+							T::FeeLock::is_swap_tokens_lockless(id, amount_out).then_some(true)
+						},
+					};
+				}
 
-			// total swaps inc
+				// We counldn't find a reason to make it lockless so it will be fee_lock
+				if is_lockless.is_none() {
+					is_lockless = Some(false)
+				};
+			
+				ensure!(amount_out >= min_amount_out, Error::<T>::InsufficientOutputAmount);
 
-			Ok(Pays::No.into())
+				let swaps =
+					Self::do_swaps(&sender, pools, path.clone(), amount_in, min_amount_out)?;
+
+				Self::deposit_event(Event::AssetsSwapped { who: sender.clone(), swaps });
+
+				let (_pool_fees, trsy_amt, burn_amt) = Self::charge_fees(&sender, fee_pool_id, asset_id_in, fees.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?)?;
+				T::Xyk::settle_treasury_and_burn(asset_id_in, burn_amt, trsy_amt)?;
+				// TODO - now
+				// do_fee_lock should check that fee_lock_metadata is available (init)
+				// also check get_fee_lock_amount
+				Self::do_fee_lock(&sender, is_lockless.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?)?;
+
+				Ok(())
+
+			});
+			
+			
+			match swap_result {
+				Err(e) => {
+					Self::deposit_event(Event::SwapFailed { error: ConvertError::maybe_convert(e).ok_or(Error::<T>::UnexpectedFailure{id: function_error_id})? });
+
+					let r = frame_support::storage::with_storage_layer(|| -> Result<(), DispatchError> {
+						// Just reassign fees here incase it is none
+						fees = Some(Self::calc_fees_pre(asset_amount_in)?);
+						let (_pool_fees, trsy_amt, burn_amt) = Self::charge_fees(&sender, fee_pool_id, asset_id_in, fees.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?)?;
+						T::Xyk::settle_treasury_and_burn(asset_id_in, burn_amt, trsy_amt)?;
+						Ok(())
+					});
+					// We handle r here so that we can hard fail the txn if there is a non-module error
+					// BadOrigin errors caused by faulty code is possible and ideally we'd handle that with having
+					// DispatchError inside the event but, unbounded variants in such as Other might cause breaking bloat 
+					match r {
+						Ok(()) => {},
+						Err(e) => {Self::deposit_event(Event::SwapFeesFallbackFailed { id: 2u32, error: ConvertError::maybe_convert(e).ok_or(Error::<T>::UnexpectedFailure{id: function_error_id})? })}
+					}
+
+					let r = frame_support::storage::with_storage_layer(|| -> Result<(), DispatchError> {
+
+						// Till the point we checked we counldn't find a reason to make it lockless so it will be fee_lock
+						if is_lockless.is_none() {
+							is_lockless = Some(false)
+						};
+
+						// TODO - now
+						// do_fee_lock should check that fee_lock_metadata is available (init)
+						// also check get_fee_lock_amount
+						Self::do_fee_lock(&sender, is_lockless.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?)?;
+						Ok(())
+					});
+					// We handle r here so that we can hard fail the txn if there is a non-module error
+					// BadOrigin errors caused by faulty code is possible and ideally we'd handle that with having
+					// DispatchError inside the event but, unbounded variants in such as Other might cause breaking bloat 
+					match r {
+						Ok(()) => {},
+						Err(e) => {Self::deposit_event(Event::SwapFeesFallbackFailed { id: 2u32, error: ConvertError::maybe_convert(e).ok_or(Error::<T>::UnexpectedFailure{id: function_error_id})? })}
+					}
+				},
+				Ok(()) => {},
+			}
+
+			Ok(().into())
 		}
 
 		/// Executes a multiswap asset in a series of swap asset atomic swaps.
@@ -763,7 +921,34 @@ pub mod pallet {
 			asset_id_in: T::CurrencyId,
 			max_amount_in: T::Balance,
 		) -> DispatchResultWithPostInfo {
+			let function_error_id = 1u8;
+
 			let sender = ensure_signed(origin)?;
+
+			// At this point pre dispatch has already checked that
+			// The user has max_amount_in and that swap_pool_list.len() in not zero
+			// and that the first swap_pool_list element pool has asset_id_in as one of its two assets
+			// We do it here again anyway to ensure that this function is standalone
+			// TODO
+			// We should move this to a pre_validation function
+			ensure!(
+				!swap_pool_list.len().is_zero(),
+				Error::<T>::SwapPrevalidation
+			);
+			let first_pool_info = Self::get_pool_info(swap_pool_list[0]).map_err(|_| Error::<T>::SwapPrevalidation)?;
+			ensure!(
+				first_pool_info.pool.0 == asset_id_in || first_pool_info.pool.1 == asset_id_in,
+				Error::<T>::SwapPrevalidation
+			);
+			let fee_pool_id = swap_pool_list[0];
+			T::Currency::ensure_can_withdraw(
+				asset_id_in,
+				&sender,
+				max_amount_in,
+				// Last two args are ignored by orml_tokens
+				WithdrawReasons::all(),
+				Default::default(),
+			)?;
 
 			// ensure maintenance mode
 			ensure!(
@@ -771,29 +956,325 @@ pub mod pallet {
 				Error::<T>::TradingBlockedByMaintenanceMode
 			);
 
-			let (pools, path) = Self::get_valid_path(&swap_pool_list, asset_id_in, asset_id_out)?;
-			// calc input amount
+			let (mut pools, mut path): (Vec<PoolInfoOf<T>>, Vec<AssetPairOf<T>>) = (vec![], vec![]);
+			let mut is_lockless: Option<bool> = None;
 			let mut id = asset_id_out;
 			let mut amount_in = asset_amount_out;
-			for (pool, swap) in pools.iter().rev().zip(path.iter().rev()) {
-				amount_in = Self::calculate_buy_price(pool.pool_id, id, amount_in)
-					.ok_or(Error::<T>::ExcesiveInputAmount)?;
-				id = if id == swap.0 { swap.1 } else { swap.0 };
+			let mut fees: Option<T::Balance> = None;
+
+			let swap_result: Result<(), DispatchError> = frame_support::storage::with_storage_layer(|| -> Result<(), DispatchError> {
+				(pools, path) = Self::get_valid_path(&swap_pool_list, asset_id_in, asset_id_out)?;
+
+				is_lockless = if swap_pool_list.len() > 1 {
+					match T::FeeLock::is_whitelisted(id) {
+						true => T::FeeLock::is_swap_tokens_lockless(id, amount_in).then_some(true),
+						false => Some(false),
+					}
+				} else {
+					T::FeeLock::is_swap_tokens_lockless(id, amount_in).then_some(true)
+				};
+
+				for (pool, swap) in pools.iter().rev().zip(path.iter().rev()) {
+					amount_in = Self::calculate_buy_price(pool.pool_id, id, amount_in)
+						.ok_or(Error::<T>::ExcesiveInputAmount)?;
+					id = if id == swap.0 { swap.1 } else { swap.0 };
+
+					// Check does the swap input (token and amount)
+					// qualify for lockless. output already checked
+					is_lockless = match is_lockless{
+						Some(b) => {Some(b)},
+						None => {
+							T::FeeLock::is_swap_tokens_lockless(id, amount_in).then_some(true)
+						},
+					};
+				}
+
+				// We counldn't find a reason to make it lockless so it will be fee_lock
+				if is_lockless.is_none() {
+					is_lockless = Some(false)
+				};
+
+				// Since pre_dispatch checks the availability of the input tokens
+				// We can be sure here that fees are available too (atleast max_amount_in)
+				// (subject to the further below <= max_amount in check)
+				// In the limiting case this calc_fees_post(amount_in) should be the same as calc_fees_pre(max_amount_in)
+				fees = Some(Self::calc_fees_post(amount_in)?);
+				ensure!(amount_in.saturating_add(fees.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?) <= max_amount_in, Error::<T>::ExcesiveInputAmount);
+				let swaps = Self::do_swaps(&sender, pools, path.clone(), amount_in, asset_amount_out)?;
+
+				Self::deposit_event(Event::AssetsSwapped { who: sender.clone(), swaps });
+
+				let (_pool_fees, trsy_amt, burn_amt) = Self::charge_fees(&sender, fee_pool_id, asset_id_in, fees.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?)?;
+				T::Xyk::settle_treasury_and_burn(asset_id_in, burn_amt, trsy_amt)?;
+				// TODO - now
+				// do_fee_lock should check that fee_lock_metadata is available (init)
+				// also check get_fee_lock_amount
+				Self::do_fee_lock(&sender, is_lockless.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?)?;
+
+				Ok(())
+
+			});
+
+			match swap_result {
+				Err(e) => {
+					Self::deposit_event(Event::SwapFailed { error: ConvertError::maybe_convert(e).ok_or(Error::<T>::UnexpectedFailure{id: function_error_id})? });
+
+					let r = frame_support::storage::with_storage_layer(|| -> Result<(), DispatchError> {
+						let f_v = Self::calc_fees_pre(max_amount_in)?;
+						match fees {
+							Some(f) => {
+								// if fees is some then we have the final "amount_in"
+								// and the calc_fees_post based on it
+								// but also never wanna charge more than calc_fees_post with max_amount_in
+								if f > f_v {
+									fees = Some(f_v);
+								}
+							},
+							None => {
+								// fees is none, so either we don't have the final "amount_in"
+								// or something went wrong with the calc_fees_post with amount_in
+								// so we just use the max_amount_in
+								fees = Some(f_v);
+							}
+						}
+						let (_pool_fees, trsy_amt, burn_amt) = Self::charge_fees(&sender, fee_pool_id, asset_id_in, fees.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?)?;
+						T::Xyk::settle_treasury_and_burn(asset_id_in, burn_amt, trsy_amt)?;
+						Ok(())
+					});
+					// We handle r here so that we can hard fail the txn if there is a non-module error
+					// BadOrigin errors caused by faulty code is possible and ideally we'd handle that with having
+					// DispatchError inside the event but, unbounded variants in such as Other might cause breaking bloat 
+					match r {
+						Ok(()) => {},
+						Err(e) => {Self::deposit_event(Event::SwapFeesFallbackFailed { id: 1u32, error: ConvertError::maybe_convert(e).ok_or(Error::<T>::UnexpectedFailure{id: function_error_id})? })}
+					}
+					let r = frame_support::storage::with_storage_layer(|| -> Result<(), DispatchError> {
+
+						// Till the point we checked we counldn't find a reason to make it lockless so it will be fee_lock
+						if is_lockless.is_none() {
+							is_lockless = Some(false)
+						};
+
+						// TODO - now
+						// do_fee_lock should check that fee_lock_metadata is available (init)
+						// also check get_fee_lock_amount
+						Self::do_fee_lock(&sender, is_lockless.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?)?;
+						Ok(())
+					});
+					// We handle r here so that we can hard fail the txn if there is a non-module error
+					// BadOrigin errors caused by faulty code is possible and ideally we'd handle that with having
+					// DispatchError inside the event but, unbounded variants in such as Other might cause breaking bloat 
+					match r {
+						Ok(()) => {},
+						Err(e) => {Self::deposit_event(Event::SwapFeesFallbackFailed { id: 2u32, error: ConvertError::maybe_convert(e).ok_or(Error::<T>::UnexpectedFailure{id: function_error_id})? })}
+					}
+				},
+				Ok(()) => {},
 			}
 
-			ensure!(amount_in <= max_amount_in, Error::<T>::ExcesiveInputAmount);
-
-			let swaps = Self::do_swaps(&sender, pools, path.clone(), amount_in, asset_amount_out)?;
-
-			Self::deposit_event(Event::AssetsSwapped { who: sender.clone(), swaps });
-
-			// total swaps inc
-
-			Ok(Pays::No.into())
+			Ok(().into())
 		}
 	}
 
 	impl<T: Config> Pallet<T> {
+		pub fn calc_fees_pre(amount: T::Balance) -> Result<T::Balance, DispatchError> {
+			let function_error_id = 2u8;
+			let total_fee_perc = T::PoolFeePercentage::get()
+				.checked_add(T::TreasuryFeePercentage::get())
+				.ok_or(Error::<T>::MathOverflow{id: function_error_id})?
+				.checked_add(T::BuyAndBurnFeePercentage::get())
+				.ok_or(Error::<T>::MathOverflow{id: function_error_id})?;
+			let fee_denominator = T::FeeDenominator::get();
+	
+			let total_fees: T::Balance = multiply_by_rational_with_rounding(
+				amount.into(),
+				total_fee_perc,
+				fee_denominator,
+				Rounding::Down,
+			)
+			.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?
+			.try_into()
+			.map_err(|_| Error::<T>::MathOverflow{id: function_error_id})?;
+
+			Ok(total_fees)
+		}
+
+		pub fn calc_fees_post(amount: T::Balance) -> Result<T::Balance, DispatchError> {
+			let function_error_id = 3u8;
+			let total_fee_perc = T::PoolFeePercentage::get()
+				.checked_add(T::TreasuryFeePercentage::get())
+				.ok_or(Error::<T>::MathOverflow{id: function_error_id})?
+				.checked_add(T::BuyAndBurnFeePercentage::get())
+				.ok_or(Error::<T>::MathOverflow{id: function_error_id})?;
+			let fee_denominator = T::FeeDenominator::get();
+	
+			let total_fees: T::Balance = multiply_by_rational_with_rounding(
+				amount.into(),
+				total_fee_perc,
+				fee_denominator.checked_sub(total_fee_perc).ok_or(Error::<T>::MathOverflow{id: function_error_id})?,
+				Rounding::Down,
+			)
+			.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?
+			.try_into()
+			.map_err(|_| Error::<T>::MathOverflow{id: function_error_id})?;
+
+			Ok(total_fees)
+		}
+
+		fn charge_fees(
+			account: &T::AccountId,
+			pool_id: PoolIdOf<T>,
+			asset_id: T::CurrencyId,
+			amount: T::Balance,
+		) -> Result<(T::Balance, T::Balance, T::Balance), DispatchError> {
+			let function_error_id = 4u8;
+			let pool = Self::get_pool_info(pool_id)?;
+			// It is immportant that "asset_id" be in fact a part of the "pool"
+			// This should be checked in the swap extrinsics pre_dispatch and also
+			// in the pre_validation within the extrinsic itself
+			// But since we want this function to be standalone we also do it here
+			ensure!(
+				pool.pool.0 == asset_id || pool.pool.1 == asset_id,
+				Error::<T>::UnexpectedFailure{ id: function_error_id}
+			);
+
+			let total_fee_perc = T::PoolFeePercentage::get()
+				.checked_add(T::TreasuryFeePercentage::get())
+				.ok_or(Error::<T>::MathOverflow{id: function_error_id})?
+				.checked_add(T::BuyAndBurnFeePercentage::get())
+				.ok_or(Error::<T>::MathOverflow{id: function_error_id})?;
+			
+			if total_fee_perc.is_zero() || amount.is_zero(){
+				return Ok((Default::default(), Default::default(), Default::default()));
+			}
+	
+			let mut pool_fee_amount: T::Balance = multiply_by_rational_with_rounding(
+				amount.into(),
+				T::PoolFeePercentage::get(),
+				total_fee_perc,
+				Rounding::Down,
+			)
+			.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?
+			.try_into()
+			.map_err(|_| Error::<T>::MathOverflow{id: function_error_id})?;
+	
+			let mut treasury_amount: T::Balance = multiply_by_rational_with_rounding(
+				amount.into(),
+				T::TreasuryFeePercentage::get(),
+				total_fee_perc,
+				Rounding::Down,
+			)
+			.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?
+			.try_into()
+			.map_err(|_| Error::<T>::MathOverflow{id: function_error_id})?;
+
+			let mut buy_and_burn_amount: T::Balance = multiply_by_rational_with_rounding(
+				amount.into(),
+				T::BuyAndBurnFeePercentage::get(),
+				total_fee_perc,
+				Rounding::Down,
+			)
+			.ok_or(Error::<T>::UnexpectedFailure{ id: function_error_id})?
+			.try_into()
+			.map_err(|_| Error::<T>::MathOverflow{id: function_error_id})?;
+
+			pool_fee_amount = pool_fee_amount.min(amount);
+			treasury_amount = treasury_amount.min(amount.saturating_sub(pool_fee_amount));
+			buy_and_burn_amount = amount.saturating_sub(pool_fee_amount).saturating_sub(treasury_amount);
+
+			// Ensure user has enough tokens
+			T::Currency::ensure_can_withdraw(
+				asset_id.into(),
+				account,
+				amount,
+				WithdrawReasons::all(),
+				Default::default(),
+			)
+			.or(Err(Error::<T>::NotEnoughAssetsForFees))?;
+
+			T::Currency::transfer(
+				asset_id,
+				account,
+				&T::TreasuryAccountId::get(),
+				treasury_amount,
+				ExistenceRequirement::AllowDeath,
+			)?;
+
+			T::Currency::transfer(
+				asset_id,
+				account,
+				&T::BnbAccountId::get(),
+				buy_and_burn_amount,
+				ExistenceRequirement::AllowDeath,
+			)?;
+			
+			match pool.kind {
+				PoolKind::StableSwap => {
+					T::StableSwap::settle_pool_fees(
+						&account.clone().into(),
+						pool.pool_id,
+						asset_id,
+						pool_fee_amount,
+					)?;
+				},
+				PoolKind::Xyk => {
+					T::Xyk::settle_pool_fees(
+						&account.clone().into(),
+						pool.pool_id,
+						asset_id,
+						pool_fee_amount,
+					)?;
+				},
+			}
+
+			Ok((pool_fee_amount,
+			treasury_amount,
+			buy_and_burn_amount))
+		}
+
+		pub fn do_fee_lock(who: &T::AccountId, is_lockless: bool) -> DispatchResult {
+			
+			let function_error_id = 5u8;
+
+			// if the fee_lock_metadata has not been init
+			// we should just return Ok(()) here
+			// since we are already charging normal fee
+			// when fee_lock_metadata is uninit
+			// Also, it would be incorrect to fail all
+			// swaps when fee_lock_metadata is uninit
+			if !T::FeeLock::is_fee_lock_init(){
+				return Ok(());
+			}
+
+			// This should only fail if the fee_lock_metadata is uninit
+			let fee_lock_amount = match T::FeeLock::get_fee_lock_amount(who){
+				Ok(v) => v,
+				Err(_) => return Ok(())
+			};
+
+			T::Currency::ensure_can_withdraw(
+				T::NativeCurrencyId::get().into(),
+				who,
+				fee_lock_amount,
+				WithdrawReasons::all(),
+				Default::default(),
+			)
+			.or(Err(Error::<T>::NotEnoughAssetsForFeeLock))?;
+
+			match is_lockless {
+				// If unlock_fee fails do not return the error
+				// unlock_fee fails if it cannot unlock fee successfully
+				// for any reason (no fee locked, can't unlock yet, etc...)
+				true => {let _ = T::FeeLock::unlock_fee(who);},
+				// Process fee_lock shouldn't fail at this point but if it
+				// does then return the error failing the swap
+				false => {T::FeeLock::process_fee_lock(who)?;},
+			}
+
+			Ok(())
+
+		}
+
 		// impl for runtime apis, rather do the composition here with traits then in runtime with pallets
 		pub fn calculate_sell_price(
 			pool_id: T::CurrencyId,

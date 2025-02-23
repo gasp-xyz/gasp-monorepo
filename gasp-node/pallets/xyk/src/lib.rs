@@ -1597,6 +1597,10 @@ impl<T: Config> Pallet<T> {
 		burn_amount: BalanceOf<T>,
 		treasury_amount: BalanceOf<T>,
 	) -> DispatchResult {
+		if burn_amount.is_zero() && treasury_amount.is_zero() {
+			return Ok(())
+		}
+
 		let vault = Self::account_id();
 		let native_token_id: CurrencyIdOf<T> = Self::native_token_id();
 		let treasury_account: T::AccountId = Self::treasury_account_id();
@@ -1633,18 +1637,23 @@ impl<T: Config> Pallet<T> {
 					.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?,
 			)?;
 
-			let treasury_amount_in_mangata: BalanceOf<T> = settle_amount_in_mangata
-				.into()
-				.checked_mul(T::TreasuryFeePercentage::get())
-				.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?
-				.checked_div(
-					T::TreasuryFeePercentage::get()
-						.checked_add(T::BuyAndBurnFeePercentage::get())
-						.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?,
-				)
-				.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?
-				.try_into()
-				.map_err(|_| DispatchError::from(Error::<T>::MathOverflow))?;
+			let treasury_amount_in_mangata: BalanceOf<T> =
+			match treasury_amount.saturating_add(burn_amount).is_zero() {
+				true => {settle_amount_in_mangata}
+				false => {
+					settle_amount_in_mangata
+						.into()
+						.checked_mul(treasury_amount.into())
+						.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?
+						.checked_div(
+							treasury_amount
+								.checked_add(&burn_amount)
+								.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?.into(),
+						)
+						.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?
+						.try_into()
+						.map_err(|_| DispatchError::from(Error::<T>::MathOverflow))?}
+			};
 
 			let burn_amount_in_mangata: BalanceOf<T> = settle_amount_in_mangata
 				.into()
@@ -1786,8 +1795,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -1798,8 +1805,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -1810,8 +1815,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -1909,8 +1912,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -1921,8 +1922,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -1933,8 +1932,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -2017,8 +2014,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -2029,8 +2024,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -2041,8 +2034,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -2154,8 +2145,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -2166,8 +2155,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -2178,8 +2165,6 @@ impl<T: Config> PreValidateSwaps<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> fo
 			Rounding::Down,
 		)
 		.ok_or(Error::<T>::UnexpectedFailure)?
-		.checked_add(1)
-		.ok_or(Error::<T>::MathOverflow)?
 		.try_into()
 		.map_err(|_| Error::<T>::MathOverflow)?;
 
@@ -3542,6 +3527,20 @@ impl<T: Config> XykFunctionsTrait<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> f
 
 	fn is_liquidity_token(liquidity_asset_id: CurrencyIdOf<T>) -> bool {
 		LiquidityPools::<T>::get(liquidity_asset_id).is_some()
+	}
+
+	fn settle_pool_fees(
+		who: &T::AccountId,
+		pool_id: CurrencyIdOf<T>,
+		asset_id: CurrencyIdOf<T>,
+		fee: BalanceOf<T>,
+	) -> Result<(), DispatchError> {
+		Self::settle_pool_fees(
+			who,
+			pool_id,
+			asset_id,
+			fee
+		)
 	}
 }
 

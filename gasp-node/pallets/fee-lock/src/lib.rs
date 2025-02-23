@@ -381,6 +381,26 @@ impl<T: Config> Pallet<T> {
 }
 
 impl<T: Config> FeeLockTriggerTrait<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> for Pallet<T> {
+
+	fn is_swap_tokens_lockless(
+		token_id: CurrencyIdOf<T>,
+		token_amount: BalanceOf<T>
+	) -> bool {
+		if let Some(fee_lock_metadata) = Self::get_fee_lock_metadata() {
+			if fee_lock_metadata.is_whitelisted(token_id) {
+				if let Some(v) = Self::get_swap_valuation_for_token(token_id, token_amount) {
+					return v >= fee_lock_metadata.swap_value_threshold
+				}
+			}
+		}
+		// Default return false
+		false
+	}
+
+	fn is_fee_lock_init() -> bool {
+		Self::get_fee_lock_metadata().is_some()
+	}
+
 	fn is_whitelisted(token_id: CurrencyIdOf<T>) -> bool {
 		if let Some(fee_lock_metadata) = Self::get_fee_lock_metadata() {
 			fee_lock_metadata.is_whitelisted(token_id)
@@ -400,6 +420,32 @@ impl<T: Config> FeeLockTriggerTrait<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>>
 			T::ValuateForNative::find_valuation_for(valuating_token_id, valuating_token_amount)
 				.ok()?;
 		Some(value)
+	}
+
+	// This function is not expected to fail unless fee_lock_metadata is uninit
+	fn get_fee_lock_amount(who: &T::AccountId) -> Result<BalanceOf<T>, DispatchError> {
+		let fee_lock_metadata =
+			Self::get_fee_lock_metadata().ok_or(Error::<T>::FeeLocksNotInitialized)?;
+		let mut account_fee_lock_data = Self::get_account_fee_lock_data(who);
+		let now = <frame_system::Pallet<T>>::block_number();
+
+		// This is cause now >= last_fee_lock_block
+		ensure!(now >= account_fee_lock_data.last_fee_lock_block, Error::<T>::UnexpectedFailure);
+
+		if now <
+			account_fee_lock_data
+				.last_fee_lock_block
+				.saturating_add(fee_lock_metadata.period_length)
+		{
+				Ok(fee_lock_metadata.fee_lock_amount)
+
+		} else {
+			// We must either reserve more or unreserve
+			match (fee_lock_metadata.fee_lock_amount, account_fee_lock_data.total_fee_lock_amount) {
+				(x, y) if x > y => Ok(x.saturating_sub(y)),
+				_ => Ok(Default::default()),
+			}
+		}
 	}
 
 	fn process_fee_lock(who: &T::AccountId) -> DispatchResult {
