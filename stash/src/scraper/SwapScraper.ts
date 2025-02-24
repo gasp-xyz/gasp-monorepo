@@ -419,7 +419,11 @@ export async function calculateVolume(
   volume: string
 ): Promise<number | string> {
   try {
-    const currentPrice = (await getTokenPrice(tokenId)).toString()
+    const price = await getTokenPrice(tokenId)
+    if (price === null) {
+      throw new Error(`Token price for token id ${tokenId} is null`)
+    }
+    const currentPrice = price.toString()
     const volumeString = volume.toString().replace(/,/g, '')
     const volumeBigInt = BigInt(volumeString)
     return (
