@@ -7633,7 +7633,7 @@ dependencies = [
 
 [[package]]
 name = "rollup-node"
-version = "1.0.4"
+version = "1.0.5"
 dependencies = [
  "array-bytes 6.2.3",
  "clap",
