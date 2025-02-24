@@ -94,7 +94,7 @@ collator:
 # aggregator configs #
 ######################
 aggregatorEnabled: true
-aggregatorImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
+aggregatorImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetAggregatorEcdsaKeyJson
@@ -157,7 +157,7 @@ gaspAvsEnv:
 # updater configs #
 ###########################
 updaterEnabled: true
-updaterImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
+updaterImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 updaterEnvSecrets:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/arbitrumSepoliaUpdaterEcdsaKeyJson
   ROOT_ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/arbitrumSepoliaUpdaterRootEcdsaKeyJson
@@ -195,7 +195,7 @@ updaterEnvBase:
 ############################
 sequencerEnabled: true
 # Override the image tag provided on deployment from IMAGE_TAG env variable
-sequencerImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
+sequencerImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
@@ -231,7 +231,7 @@ sequencerEnvSecretsBase:
 # ferry-deposit configs #
 #########################
 ferryDepositEnabled: false
-ferryDepositImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
+ferryDepositImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 ferryDepositEnvEth:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-holesky-v3.gasp.xyz
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
@@ -269,7 +269,7 @@ ferryDepositEnvSecretsBase:
 # ferry-withdrawal configs #
 ############################
 ferryWithdrawalEnabled: false
-ferryWithdrawalImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
+ferryWithdrawalImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 ferryWithdrawalEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
