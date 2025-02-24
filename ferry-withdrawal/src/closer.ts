@@ -77,9 +77,6 @@ async function main() {
 				const req = await closerService.getNextRequestToClose();
 				if (req) {
 					if (isWithdrawal(req)) {
-						logger.info(
-							`#${header.number} Closing withdrawal ${toString(req)}`,
-						);
 						await closerService.closeWithdrawal(req, hexToU8a(PRIVATE_KEY));
 					} else if (isCancel(req)) {
 						logger.info(
