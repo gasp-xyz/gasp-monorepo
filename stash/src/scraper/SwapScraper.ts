@@ -420,7 +420,7 @@ export async function calculateVolume(
 ): Promise<number | string> {
   try {
     const price = await getTokenPrice(tokenId)
-    if (price === null) {
+    if (price == null) {
       throw new Error(`Token price for token id ${tokenId} is null`)
     }
     const currentPrice = price.toString()
