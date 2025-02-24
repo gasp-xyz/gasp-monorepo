@@ -69,7 +69,6 @@ describe('APi tests: token stats', () => {
     const sdk = MangataClient
     const api = await sdk.api()
     const pools = await api.query.xyk.liquidityPools.entries()
-    console.log('Pools:', pools)
     const allstats = (await supertest(app).get('/token/list/stats')).body
     pools.forEach((pool) => {
       const firstTokenId = pool[1].toHuman()[0]
