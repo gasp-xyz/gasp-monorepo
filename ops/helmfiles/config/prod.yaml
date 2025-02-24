@@ -357,7 +357,7 @@ sequencerEnvSecretsBase3:
 #########################
 # ferry-deposit configs #
 #########################
-ferryDepositEnabled: true
+ferryDepositEnabled: false
 ferryDepositImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 ferryDepositEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -398,7 +398,7 @@ ferryDepositEnvSecretsBase:
 ############################
 # ferry-withdrawal configs #
 ############################
-ferryWithdrawalEnabled: true
+ferryWithdrawalEnabled: false
 ferryWithdrawalImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 ferryWithdrawalEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
