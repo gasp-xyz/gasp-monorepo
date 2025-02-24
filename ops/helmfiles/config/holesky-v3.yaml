@@ -272,7 +272,6 @@ ferryWithdrawalEnabled: true
 ferryWithdrawalImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 ferryWithdrawalEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
   MANGATA_CONTRACT_ADDRESS: "0x34B38Fd98aBE38B52258253fb4E1D0F5EFF26343"
   L1_CHAIN: "holesky"
   TOKENS_TO_TRACK: "[]"
@@ -280,10 +279,11 @@ ferryWithdrawalEnvEth:
   LOOK_BACK_HOURS: 1
   LOG: silly
 ferryWithdrawalEnvSecretsEth:
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/holeskyFerryWithdrawalPrivateKey
+  STASH_URL: ref+sops://secrets.enc.yaml#/holeskyV3StashUrl
 ferryWithdrawalEnvArb:
   MANGATA_NODE_URL: wss://collator-01-ws-rollup-holesky-v3.gasp.xyz
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaWssUrl
   MANGATA_CONTRACT_ADDRESS: 0x18Ef4858e5581d20c2145ea0dFEA7F4d81A957A5
   L1_CHAIN: "arbitrum-sepolia"
   TOKENS_TO_TRACK: "[]"
@@ -291,7 +291,9 @@ ferryWithdrawalEnvArb:
   LOOK_BACK_HOURS: 1
   LOG: silly
 ferryWithdrawalEnvSecretsArb:
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/arbitrumSepoliaFerryWithdrawalPrivateKey
+  STASH_URL: ref+sops://secrets.enc.yaml#/holeskyV3StashUrl
 ferryWithdrawalEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x2215C253202504a42723B46fe72D1Bb61B3b1918"
@@ -303,6 +305,7 @@ ferryWithdrawalEnvBase:
 ferryWithdrawalEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/baseSepoliaWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/baseSepoliaFerryWithdrawalPrivateKey
+  STASH_URL: ref+sops://secrets.enc.yaml#/holeskyV3StashUrl
 ########################
 # closer configs #
 ########################
