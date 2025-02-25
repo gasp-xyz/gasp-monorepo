@@ -340,7 +340,7 @@ class L1Api implements L1Interface {
 			u8aToHex(withdrawal.tokenAddress) === u8aToHex(native_addr);
 		if (!isNativeToken) {
 			// TODO: submit as a batch
-			const approveRequest = await this.client.simulateContract({
+			let req = {
 				account: acc,
 				address: u8aToHex(withdrawal.tokenAddress),
 				abi: [
@@ -359,11 +359,11 @@ class L1Api implements L1Interface {
 				args: [MANGATA_CONTRACT_ADDRESS, withdrawal.amount],
 				maxFeePerGas: maxFeeInWei,
 				maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
-			});
-			approveRequest.request.gas =
-				((await this.client.estimateContractGas(approveRequest.request)) *
-					12n) /
-				10n;
+			};
+
+			let gas = await this.client.estimateContractGas(req);
+			(req as any).gas = (gas * 12n) / 10n;
+			const approveRequest = await this.client.simulateContract(req);
 			const approvetxHash = await wc.writeContract(approveRequest.request);
 			const status = await this.client.waitForTransactionReceipt({
 				hash: approvetxHash,
@@ -374,7 +374,7 @@ class L1Api implements L1Interface {
 			}
 		}
 
-		let ferryRequest = await this.client.simulateContract({
+		let req = {
 			account: acc,
 			address: MANGATA_CONTRACT_ADDRESS,
 			abi: ABI,
@@ -383,11 +383,10 @@ class L1Api implements L1Interface {
 			maxFeePerGas: maxFeeInWei,
 			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
 			value: isNativeToken ? withdrawal.amount - withdrawal.ferryTip : 0n,
-		});
-
-		ferryRequest.request.gas =
-			((await this.client.estimateContractGas(ferryRequest.request)) * 12n) /
-			10n;
+		};
+		let gas = await this.client.estimateContractGas(req);
+		(req as any).gas = (gas * 12n) / 10n;
+		const ferryRequest = await this.client.simulateContract(req);
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
 		const status = await this.client.waitForTransactionReceipt({
 			hash: ferrytxHash,
@@ -415,7 +414,7 @@ class L1Api implements L1Interface {
 			this.client,
 		);
 
-		let closeWithdrawalRequest = await this.client.simulateContract({
+		let req = {
 			account: acc,
 			address: MANGATA_CONTRACT_ADDRESS,
 			abi: ABI,
@@ -427,12 +426,11 @@ class L1Api implements L1Interface {
 			],
 			maxFeePerGas: maxFeeInWei,
 			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
-		});
-		closeWithdrawalRequest.request.gas =
-			((await this.client.estimateContractGas(closeWithdrawalRequest.request)) *
-				12n) /
-			10n;
+		};
 
+		let gas = await this.client.estimateContractGas(req);
+		(req as any).gas = (gas * 12n) / 10n;
+		const closeWithdrawalRequest = await this.client.simulateContract(req);
 		const closeWithdrawalHash = await wc.writeContract(
 			closeWithdrawalRequest.request,
 		);
@@ -461,7 +459,7 @@ class L1Api implements L1Interface {
 		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
 			this.client,
 		);
-		let closeCancelRequest = await this.client.simulateContract({
+		let req = {
 			account: acc,
 			address: MANGATA_CONTRACT_ADDRESS,
 			abi: ABI,
@@ -473,12 +471,11 @@ class L1Api implements L1Interface {
 			],
 			maxFeePerGas: maxFeeInWei,
 			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
-		});
+		};
 
-		closeCancelRequest.request.gas =
-			((await this.client.estimateContractGas(closeCancelRequest.request)) *
-				12n) /
-			10n;
+		let gas = await this.client.estimateContractGas(req);
+		(req as any).gas = (gas * 12n) / 10n;
+		const closeCancelRequest = await this.client.simulateContract(req);
 		const closeCancelTxHash = await wc.writeContract(
 			closeCancelRequest.request,
 		);
