@@ -30,7 +30,7 @@ export class StashApi implements StashInterface {
 		try {
 			const uri = `${this.uri}/tracing/type/withdrawal/tx/${u8aToHex(txHash)}`;
 			logger.silly(`Making stash querry : ${uri}`);
-			const rawResponse = await axios.get(uri, { timeout: 5000 });
+			const rawResponse = await axios.get(uri, { timeout: 15000 });
 			const response = stashResponseSchema.parse(rawResponse.data); // This will throw an error if validation fails
 			logger.silly(`Withdrawal origin: ${response.transaction.createdBy}`);
 			return Promise.resolve(
