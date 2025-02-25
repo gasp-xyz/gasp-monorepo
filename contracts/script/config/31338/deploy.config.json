@@ -1,0 +1,45 @@
+{
+  "chainInfo": {
+    "chainId": 31338
+  },
+
+  "permissions": {
+    "owner": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+    "upgrader": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+    "rolldownUpdater": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+    "gmrsUpdater": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
+    "churner": "0x0000000000000000000000000000000000000000",
+    "ejector": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
+    "aggregator": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
+    "operator": "0x860B6912C2d0337ef05bbC89b0C2CB6CbAEAB4A5"
+  },
+
+  "allow_non_root_tm_init": true,
+  "allow_non_root_gmrs_init": true,
+
+  "minimumStakes": [1],
+
+  "strategyWeights": [
+    [
+      {
+        "0_strategy": "0xc5a5C42992dECbae36851359345FE25997F5C42d",
+        "1_multiplier": 1000000000000000000
+      }
+    ]
+  ],
+
+  "operatorSetParams": [
+    {
+      "0_maxOperatorCount": 30,
+      "1_kickBIPsOfOperatorStake": 11000,
+      "2_kickBIPsOfTotalStake": 50
+    }
+  ],
+
+  "taskManagerParams": {
+    "taskResponseWindowBlocks": 1000
+  },
+  "registryParams": {
+    "recurrentRegistrationLimit": 10
+  }
+}
