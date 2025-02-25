@@ -33,4 +33,3 @@ services:
       AGG_RUN_TRIGGER_API_KEY: ""
     ports:
       - "8090:8090"
-  

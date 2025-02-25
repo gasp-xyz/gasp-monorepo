@@ -6,6 +6,7 @@ import {
 	UnauthorizedProviderError,
 	createPublicClient,
 	createWalletClient,
+	defineChain,
 } from "viem";
 import { type PublicClient } from "viem";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
@@ -64,6 +65,21 @@ function cancelToViemFormat(cancel: Cancel): unknown[] {
 	];
 }
 
+function rethChain(chainId: number): Chain {
+	return defineChain({
+		id: chainId,
+		name: `Reth-${chainId}`,
+		nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+		rpcUrls: {
+			default: {
+				http: [],
+			},
+		},
+		contracts: {},
+		testnet: true,
+	});
+}
+
 const CONFIG_TO_CHAIN = new Map<string, Chain>([
 	["anvil-arbitrum", anvil],
 	["anvil-ethereum", anvil],
@@ -73,9 +89,9 @@ const CONFIG_TO_CHAIN = new Map<string, Chain>([
 	["base-sepolia", baseSepolia],
 	["ethereum", mainnet],
 	["holesky", holesky],
-	["reth-arbitrum", localhost],
-	["reth-ethereum", localhost],
-	["reth-base", localhost],
+	["reth-arbitrum", rethChain(31338)],
+	["reth-ethereum", rethChain(31337)],
+	["reth-base", rethChain(31339)],
 ]);
 
 class L1Api implements L1Interface {
