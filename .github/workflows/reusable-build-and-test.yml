@@ -96,7 +96,7 @@ jobs:
     runs-on: compile-gke
     # runs-on: gasp-monorepo-large-32core
     container:
-      image: gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20
+      image: gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20-slim
       env:
         DOCKER_HOST: "unix:///run/docker/docker.sock"
       volumes:
@@ -201,7 +201,7 @@ jobs:
         with:
           auto-install: true
           cache: false
-          
+
       - uses: google-github-actions/auth@v2
         id: auth
         with:
@@ -245,6 +245,7 @@ jobs:
         with:
           auto-install: true
           cache: false
+
       - uses: google-github-actions/auth@v2
         id: auth
         with:
