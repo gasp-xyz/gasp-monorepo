@@ -74,7 +74,7 @@ tasks:
       - 'target-unlocked-runtime/release/rollup-node'
       - 'target-unlocked-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
 
-  build-image-ci:
+  build-gasp-node-image-ci:
     # script: |
     #   docker buildx build --build-arg TARGET_DIR=target-standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load .
     #   docker buildx build --build-arg TARGET_DIR=target-fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load .
@@ -88,15 +88,15 @@ tasks:
       cache: false
       outputStyle: stream
 
-  format:
+  format-gasp-node:
     command: cargo fmt --all -- --check
     inputs: ['@globs(sources)']
 
-  lint:
+  lint-gasp-node:
     command: cargo clippy -p pallet-xyk
     inputs: ['@globs(sources)']
 
-  test:
+  test-gasp-node:
     command: cargo test
     inputs: ['@globs(sources)']
 

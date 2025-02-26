@@ -42,7 +42,7 @@ tasks:
     env:
       SCCACHE_GCS_KEY_PREFIX: gasp-avs-release
   
-  build-image-ci:
+  build-gasp-avs-image-ci:
     script: |
       docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-standard-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --push ../
       docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-fast-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push ../
@@ -52,14 +52,14 @@ tasks:
       cache: false
       runDepsInParallel: false
 
-  format:
+  format-gasp-avs:
     command: cargo fmt --all -- --check
     inputs: ['@globs(sources)', 'tests/**/*']
 
-  lint:
+  lint-gasp-avs:
     command: cargo clippy
     inputs: ['@globs(sources)', 'tests/**/*']
 
-  test:
+  test-gasp-avs:
     command: cargo test
     inputs: ['@globs(sources)', 'tests/**/*']
