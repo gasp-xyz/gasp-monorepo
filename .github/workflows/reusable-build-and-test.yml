@@ -93,7 +93,7 @@ jobs:
 
   build-and-check-services:
     name: '[AVS] Build and test'
-    runs-on: compile-gke
+    runs-on: beast-gke
     # runs-on: gasp-monorepo-large-32core
     container:
       image: gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20-slim
@@ -182,7 +182,7 @@ jobs:
 
   gasp-node-coverage-report:
     name: '[gasp-node] Coverage report'
-    runs-on: compile-gke
+    runs-on: beast-gke
     steps:
       - uses: actions/checkout@v4
         with:
