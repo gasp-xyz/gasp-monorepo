@@ -161,9 +161,9 @@ jobs:
       - uses: moonrepo/setup-toolchain@v0
         with:
           cache: true
-          auto-install: true
+          auto-install: false
 
-      - name: Setup Rust toolchains for all services
+      - name: Setup toolchains for services
         run: moon ci :prepare-toolchain --concurrency 1
       
       - uses: google-github-actions/auth@v2

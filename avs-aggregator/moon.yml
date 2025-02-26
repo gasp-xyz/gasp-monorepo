@@ -15,6 +15,11 @@ fileGroups:
     - '/avs-eigensdk-go/**/go.mod'
 
 tasks:
+  prepare-toolchain:
+    command: go version
+    options:
+      cache: false
+
   # format:
   #   command: 'go fmt ./...'
   #   inputs: ['@globs(sources)']
