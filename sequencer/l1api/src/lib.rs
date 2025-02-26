@@ -5,6 +5,8 @@ use hex::encode as hex_encode;
 mod lru;
 mod utils;
 mod rolldown_contract;
+#[cfg(test)]
+mod test;
 
 pub use lru::CachedL1Interface;
 pub use rolldown_contract::RolldownContract;
