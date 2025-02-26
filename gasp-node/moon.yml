@@ -74,7 +74,7 @@ tasks:
       - 'target-unlocked-runtime/release/rollup-node'
       - 'target-unlocked-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
 
-  build-gasp-node-image-ci:
+  build-image-ci-gasp-node:
     # script: |
     #   docker buildx build --build-arg TARGET_DIR=target-standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load .
     #   docker buildx build --build-arg TARGET_DIR=target-fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load .
@@ -112,7 +112,7 @@ tasks:
     options:
       outputStyle: stream
   
-  benchmark-tests:
+  benchmark-tests-gasp-node:
     script: |
       cargo test --release -j8 --features=runtime-benchmarks -p pallet-xyk -p pallet-issuance -p pallet-multipurpose-liquidity -p pallet-fee-lock
       cargo test --release -j8 --features=runtime-benchmarks -p pallet-bootstrap -p pallet-market
@@ -122,14 +122,14 @@ tasks:
     options:
       outputStyle: stream
 
-  build-runtime-benchmarks:
+  build-runtime-benchmarks-gasp-node:
     command: cargo build --release --no-default-features --features=runtime-benchmarks --target-dir target-runtime-benchmarks
     inputs: ['@globs(sources)']
     options:
       internal: true
       outputStyle: stream
 
-  run-runtime-benchmarks:
+  run-runtime-benchmarks-gasp-node:
     script: |
       mkdir -p ./benchmarks 
       target-runtime-benchmarks/release/rollup-node benchmark pallet \
@@ -147,7 +147,7 @@ tasks:
       cp block_weights.rs extrinsic_weights.rs ./benchmarks
     inputs: ['@globs(sources)']
     outputs: ['benchmarks']
-    deps: ['build-runtime-benchmarks']
+    deps: ['build-runtime-benchmarks-gasp-node']
     env:
       STEPS: '2'
       REPEATS: '1'

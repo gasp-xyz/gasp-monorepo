@@ -42,12 +42,12 @@ tasks:
     env:
       SCCACHE_GCS_KEY_PREFIX: gasp-avs-release
   
-  build-gasp-avs-image-ci:
+  build-image-ci-gasp-avs:
     script: |
       docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-standard-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --push ../
       docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-fast-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push ../
       docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-unlocked-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push ../
-    deps: ['build-ci', 'gasp-node:build-image-ci']
+    deps: ['build-ci', 'gasp-node:build-image-ci-gasp-node']
     options:
       cache: false
       runDepsInParallel: false
