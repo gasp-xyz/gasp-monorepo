@@ -1,4 +1,4 @@
-FROM debian:buster AS runner
+FROM debian:bookworm AS runner
 ARG TARGET_DIR=target/standard-runtime/release
 
 WORKDIR /app
