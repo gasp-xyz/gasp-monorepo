@@ -1040,13 +1040,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "230c5f1ca6a325a32553f8640d31ac9b49f2411e901e427570154868b46da4f7"
 
 [[package]]
-name = "bindings"
-version = "0.1.0"
-dependencies = [
- "alloy",
-]
-
-[[package]]
 name = "bip39"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1338,6 +1331,13 @@ name = "constant_time_eq"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c74b8349d32d297c9134b8c88677813a227df8f779daa29bfc29c183fe3dca6"
+
+[[package]]
+name = "contract-bindings"
+version = "0.1.0"
+dependencies = [
+ "alloy",
+]
 
 [[package]]
 name = "convert_case"
@@ -2598,6 +2598,38 @@ checksum = "3e1b8590eb6148af2ea2d75f38e7d29f5ca970d5a4df456b3ef19b8b415d0264"
 dependencies = [
  "primitive-types 0.13.1",
  "tiny-keccak",
+]
+
+[[package]]
+name = "l1api"
+version = "0.1.0"
+dependencies = [
+ "alloy",
+ "contract-bindings",
+ "envconfig",
+ "futures",
+ "hex",
+ "hex-literal",
+ "lazy_static",
+ "lru",
+ "mockall",
+ "parity-scale-codec",
+ "primitive-types 0.13.1",
+ "prometheus",
+ "scale-info",
+ "secp256k1 0.28.2",
+ "serde",
+ "serial_test",
+ "sha3",
+ "subxt",
+ "subxt-signer",
+ "thiserror 2.0.3",
+ "tokio",
+ "tracing",
+ "tracing-log",
+ "tracing-subscriber",
+ "tracing-tree",
+ "warp",
 ]
 
 [[package]]
@@ -4113,7 +4145,7 @@ name = "sequencer"
 version = "0.1.0"
 dependencies = [
  "alloy",
- "bindings",
+ "contract-bindings",
  "envconfig",
  "futures",
  "hex",

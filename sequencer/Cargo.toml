@@ -7,7 +7,7 @@ repository = "https://github.com/gasp-xyz/gasp-monorepo.git"
 resolver = "2"
 members = [
 	'sequencer',
-	'bindings',
+	'bindings/contracts', "l1api",
 ]
 
 [profile.dev]
@@ -25,4 +25,5 @@ codegen-units = 1
 
 
 [workspace.dependencies]
-bindings = { path = "./bindings" }
+contract-bindings = { path = "./bindings/contracts/" }
+l1api = { path = "./l1api/" }
