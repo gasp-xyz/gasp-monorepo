@@ -26,6 +26,13 @@ runner:
     - ':format'
     - ':lint'
     - ':test'
+    - ':format-gasp-avs'
+    - ':lint-gasp-avs'
+    - ':test-gasp-avs'
+    - ':format-gasp-node'
+    - ':lint-gasp-node'
+    - ':test-gasp-node'
+    - ':benchmark-tests-gasp-node'
 
 unstable_remote:
   api: 'grpc'
