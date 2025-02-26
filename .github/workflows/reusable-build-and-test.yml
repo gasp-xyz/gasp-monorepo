@@ -140,13 +140,14 @@ jobs:
         with:
           cache: true
           auto-install: true
-          proto-version: 0.46.1
+          proto-version: 0.47.1
 
-      # - name: Setup Rust toolchains for all services
-      #   run: | 
-      #     moon gasp-avs:prepare-toolchain
-      #     moon gasp-node:prepare-toolchain
-      #     moon sequencer:prepare-toolchain
+      - name: Setup Rust toolchains for all services
+        run: | 
+          moon gasp-avs:prepare-toolchain
+          moon gasp-node:prepare-toolchain
+          moon sequencer:prepare-toolchain
+          moon updater:prepare-toolchain
       
       - uses: google-github-actions/auth@v2
         id: auth

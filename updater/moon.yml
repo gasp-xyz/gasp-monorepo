@@ -17,6 +17,12 @@ fileGroups:
     - 'Cargo.toml'
 
 tasks:
+  prepare-toolchain:
+    command: rustup show
+    options:
+      runInCI: false
+      cache: false
+
   build:
     command: cargo build --release
     inputs: ['@globs(sources)']
