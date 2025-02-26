@@ -27,9 +27,9 @@ impl<L1> L1Interface for CachedL1Interface<L1>
 where
     L1: L1Interface,
 {
-    fn account_address(&self) -> [u8; 20] {
-        self.l1.account_address()
-    }
+    // fn account_address(&self) -> [u8; 20] {
+    //     self.l1.account_address()
+    // }
 
     async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error> {
         self.l1.get_merkle_root(request_id).await
@@ -63,9 +63,9 @@ where
         }
     }
 
-    async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error> {
-        self.l1.estimate_gas_in_wei().await
-    }
+    // async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error> {
+    //     self.l1.estimate_gas_in_wei().await
+    // }
 
     async fn close_cancel(
         &self,
@@ -118,8 +118,9 @@ where
         }
     }
 
-    #[tracing::instrument(skip(self))]
-    async fn get_native_balance(&self, address: [u8; 20]) -> Result<u128, L1Error> {
-        self.l1.get_native_balance(address).await
-    }
+    //TODO: fix
+    // #[tracing::instrument(skip(self))]
+    // async fn get_native_balance(&self, address: [u8; 20]) -> Result<u128, L1Error> {
+    //     self.l1.get_native_balance(address).await
+    // }
 }
