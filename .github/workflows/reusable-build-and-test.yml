@@ -190,7 +190,9 @@ jobs:
           targets: wasm32-unknown-unknown
           components: rust-src
           bins: cargo-tarpaulin@0.26.1
-          cache: false
+          cache: true
+          target-dirs: 'gasp-node/target'
+      
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
@@ -232,6 +234,8 @@ jobs:
           targets: wasm32-unknown-unknown
           components: rust-src
           cache: true
+          target-dirs: 'gasp-node/target'
+
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
