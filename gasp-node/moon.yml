@@ -99,7 +99,7 @@ tasks:
     command: cargo test
     inputs: ['@globs(sources)']
 
-  coverage:
+  coverage-gasp-node:
     command: >
       cargo tarpaulin
       --timeout 120 --workspace --out Xml
