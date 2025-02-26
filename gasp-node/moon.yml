@@ -40,7 +40,7 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile']
 
   build-ci:
-    command: cargo build --release --target x86_64-unknown-linux-gnu
+    command: cargo build --release
     options:
       internal: true
   
@@ -51,8 +51,8 @@ tasks:
       outputStyle: stream
       mergeOutputs: replace
     outputs:
-      - 'target-standard-runtime/x86_64-unknown-linux-gnu/release/rollup-node'
-      - 'target-standard-runtime/x86_64-unknown-linux-gnu/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+      - 'target-standard-runtime/release/rollup-node'
+      - 'target-standard-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
 
   build-fast-runtime:
     extends: build-ci
@@ -61,8 +61,8 @@ tasks:
       outputStyle: stream
       mergeOutputs: replace
     outputs:
-      - 'target-fast-runtime/x86_64-unknown-linux-gnu/release/rollup-node'
-      - 'target-fast-runtime/x86_64-unknown-linux-gnu/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+      - 'target-fast-runtime/release/rollup-node'
+      - 'target-fast-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
 
   build-unlocked-runtime:
     extends: build-ci
@@ -71,8 +71,8 @@ tasks:
       outputStyle: stream
       mergeOutputs: replace
     outputs:
-      - 'target-unlocked-runtime/x86_64-unknown-linux-gnu/release/rollup-node'
-      - 'target-unlocked-runtime/x86_64-unknown-linux-gnu/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+      - 'target-unlocked-runtime/release/rollup-node'
+      - 'target-unlocked-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
 
   build-image-ci:
     # script: |
@@ -80,9 +80,9 @@ tasks:
     #   docker buildx build --build-arg TARGET_DIR=target-fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load .
     #   docker buildx build --build-arg TARGET_DIR=target-unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load .    
     script: |
-      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-standard-runtime/x86_64-unknown-linux-gnu/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .
-      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-unlocked-runtime/x86_64-unknown-linux-gnu/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push .
-      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-fast-runtime/x86_64-unknown-linux-gnu/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push .
+      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .
+      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push .
+      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push .
     deps: ['build-standard-runtime', 'build-fast-runtime', 'build-unlocked-runtime', 'format', 'lint', 'test']
     options:
       cache: false

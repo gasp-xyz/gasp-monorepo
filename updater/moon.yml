@@ -18,9 +18,9 @@ fileGroups:
 
 tasks:
   build:
-    command: cargo build --release --target x86_64-unknown-linux-gnu
+    command: cargo build --release
     inputs: ['@globs(sources)']
-    outputs: ['target/x86_64-unknown-linux-gnu/release/main']
+    outputs: ['target/release/main']
     env:
       SCCACHE_GCS_KEY_PREFIX: updater-release
   

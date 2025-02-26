@@ -2,6 +2,6 @@ FROM debian:stable-slim
 
 WORKDIR /app
 
-COPY target/x86_64-unknown-linux-gnu/release/main /app/updater
+COPY target/release/main /app/updater
 
 CMD ["/app/updater"]
