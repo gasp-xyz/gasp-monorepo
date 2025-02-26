@@ -25,7 +25,7 @@ tasks:
       cache: false
 
   build:
-    command: cargo zigbuild --release --target x86_64-unknown-linux-gnu
+    command: cargo build --release --target x86_64-unknown-linux-gnu
     inputs: ['@globs(sources)']
     outputs: ['target/x86_64-unknown-linux-gnu/release/sequencer']
     env:
@@ -37,7 +37,7 @@ tasks:
 
   build-image-ci:
     command: 'docker buildx build --platform linux/amd64 -t gaspxyz/sequencer:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .'
-    deps: ['build']
+    deps: ['build', 'format', 'lint', 'test']
     options:
       cache: false
 
