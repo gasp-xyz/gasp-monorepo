@@ -10,6 +10,9 @@ enableBaseServices: false
 # contractsImageTag:''
 evmNode:
   enabled: true
+  customGenesisUrlEth: https://github.com/gasp-xyz/chainspec/blob/master/reth/31337.json
+  customGenesisUrlArb: https://github.com/gasp-xyz/chainspec/blob/master/reth/31338.json
+  customGenesisUrlBase: https://github.com/gasp-xyz/chainspec/blob/master/reth/31339.json
 
 #####################
 # collator configs #
@@ -25,10 +28,9 @@ collator:
       cpu: 2
       memory: 6Gi
   image:
-    repository: mangatasolutions/rollup-node
-    tag: eth-rollup-develop
-  disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json
+    repository: gaspxyz/rollup-node
+  # disableChainspecGeneration: true
+  # customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/0c05b37addc49e807a7802604e9648691bfe2a9a/rollup-dev-env-chainspecs/rollup-dev-4d76522-chainspec-raw.json
   storageClass: standard
   storageSize: 20Gi
   enableServiceMonitorCollectors: true
@@ -156,7 +158,7 @@ sequencerEnvEth:
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   ETH_CHAIN_URL: ws://evm-node-eth:8546
   LIMIT: 10000
   WATCHDOG: 30
@@ -169,7 +171,7 @@ sequencerEnvArb:
   L1_CHAIN: "Arbitrum"
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   ETH_CHAIN_URL: ws://evm-node-arb:8546
   LIMIT: 10000
   WATCHDOG: 30
@@ -182,7 +184,7 @@ sequencerEnvBase:
   L1_CHAIN: "Base"
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   ETH_CHAIN_URL: ws://evm-node-base:8546
   LIMIT: 10000
   WATCHDOG: 30
@@ -200,7 +202,7 @@ ferryDepositEnvEth:
   MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
   L1_CHAIN: "Ethereum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   BLOCK_DELAY: 0
   LOG: silly
 ferryDepositEnvSecretsEth:
@@ -212,7 +214,7 @@ ferryDepositEnvArb:
   MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
   L1_CHAIN: "Arbitrum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   BLOCK_DELAY: 0
   LOG: silly
 ferryDepositEnvSecretsArb:
@@ -224,7 +226,7 @@ ferryDepositEnvBase:
   MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
   L1_CHAIN: "Base"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   BLOCK_DELAY: 0
   LOG: silly
 ferryDepositEnvSecretsBase:
@@ -240,7 +242,7 @@ ferryWithdrawalEnvEth:
   MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
   L1_CHAIN: "Ethereum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 ferryWithdrawalEnvSecretsEth:
@@ -252,7 +254,7 @@ ferryWithdrawalEnvArb:
   MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
   L1_CHAIN: "Arbitrum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 ferryWithdrawalEnvSecretsArb:
@@ -264,7 +266,7 @@ ferryWithdrawalEnvBase:
   MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
   L1_CHAIN: "Base"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 ferryWithdrawalEnvSecretsBase:
@@ -280,7 +282,7 @@ closerEnvEth:
   MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
   L1_CHAIN: "Ethereum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsEth:
@@ -291,7 +293,7 @@ closerEnvArb:
   MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
   L1_CHAIN: "Arbitrum"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsArb:
@@ -302,7 +304,7 @@ closerEnvBase:
   MANGATA_CONTRACT_ADDRESS: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc"
   L1_CHAIN: "Base"
   TOKENS_TO_TRACK: "[]"
-  TX_COST: '1000000000000000000000'
+  TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
 closerEnvSecretsBase:

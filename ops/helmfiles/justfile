@@ -24,6 +24,11 @@ update-config-staging:
   just update-config-arb "1337" "./config/staging.yaml"
   just update-config-base "1337" "./config/staging.yaml"
 
+update-config-dev: 
+  just update-config-eth "31337" "./config/dev.yaml"
+  just update-config-arb "31338" "./config/dev.yaml"
+  just update-config-base "31339" "./config/dev.yaml"
+
 update-config-holesky: 
   just update-config-eth "17000" "./config/holesky-v3.yaml"
   just update-config-arb "421614" "./config/holesky-v3.yaml"
