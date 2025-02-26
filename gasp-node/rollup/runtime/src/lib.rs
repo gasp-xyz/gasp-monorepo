@@ -836,6 +836,8 @@ impl pallet_metamask_signature::Config for Runtime {
 	type UrlStringLimit = frame_support::traits::ConstU32<1024>;
 }
 
+impl pallet_market::MarketBenchmarkingConfig for Runtime {}
+
 impl pallet_market::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = orml_tokens::MultiTokenCurrencyAdapter<Runtime>;
