@@ -1,4 +1,4 @@
-FROM mangatasolutions/node-builder:multi-1.77-nightly-2024-01-20 AS builder
+FROM gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20 AS builder
 
 WORKDIR /app
 

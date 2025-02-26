@@ -93,47 +93,49 @@ jobs:
 
   build-and-check-services:
     name: '[AVS] Build and test'
-    runs-on: beast-gke
+    runs-on: compile-gke
     # runs-on: gasp-monorepo-large-32core
+    container:
+      image: gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20
+      env:
+        DOCKER_HOST: "unix:///run/docker/docker.sock"
+      volumes:
+        - /run/docker:/run/docker
+    strategy: 
+      matrix:
+        include:
+          - rust-channel: '1.82.0'
+            selector-query: 'language=rust && tag=rust-channel-1.82.0'
+            # builder-image: 'rust:1.82.0'
+          - rust-channel: '1.78.0'
+            selector-query: 'language=rust && tag=rust-channel-1.78.0'
+            # builder-image: 'rust:1.78.0'
+          - rust-channel: 'none'
+            selector-query: 'language!=rust'
+            # builder-image: 'rust:1.82.0'
+
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
       
-      - uses: moonrepo/setup-rust@v1
-        with:
-          channel: 1.82.0
-          targets: wasm32-unknown-unknown
-          components: rustfmt,clippy,rust-src
-          cache: false
-          bins: cargo-zigbuild
-
-      - uses: moonrepo/setup-rust@v1
-        with:
-          channel: nightly-2024-01-20
-          targets: wasm32-unknown-unknown
-          components: rustfmt,clippy,rust-src
-          cache: false
-          bins: cargo-zigbuild
-
-      - uses: moonrepo/setup-rust@v1
-        with:
-          channel: 1.78.0
-          targets: wasm32-unknown-unknown
-          components: rustfmt,clippy,rust-src
-          cache: false
-          bins: cargo-zigbuild
+      # - uses: moonrepo/setup-rust@v1
+      #   if: matrix.rust-channel != 'none'
+      #   with:
+      #     channel: ${{ matrix.rust-channel }}
+      #     targets: wasm32-unknown-unknown
+      #     components: rustfmt,clippy,rust-src
+      #     cache: true
+      #     bins: cargo-zigbuild
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
           cache: false
           proto-version: 0.46.1
-      - run: sudo apt-get update && sudo apt-get install -y wget
-      - uses: rui314/setup-mold@v1
-        with:
-          make-default: true
 
       # - name: Setup Rust toolchains for all services
       #   run: | 
@@ -141,25 +143,28 @@ jobs:
       #     moon gasp-node:prepare-toolchain
       #     moon sequencer:prepare-toolchain
       
-      # - uses: google-github-actions/auth@v2
-      #   id: auth
-      #   with:
-      #     workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-      #     service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      # - uses: google-github-actions/setup-gcloud@v2
-      # - name: Install sccache-cache
-      #   uses: mozilla-actions/sccache-action@v0.0.5
-      # - name: Set Rust caching env vars
-      #   run: |
-      #     echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
-      #     echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
-      #     echo "SCCACHE_GCS_KEY_PREFIX=gasp-monorepo" >> $GITHUB_ENV
-      #     echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-      #     echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
+      - uses: google-github-actions/auth@v2
+        if: matrix.rust-channel != 'none'
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+        if: matrix.rust-channel != 'none'
+      - uses: mozilla-actions/sccache-action@v0.0.5
+        if: matrix.rust-channel != 'none'
+      - name: Set Rust caching env vars
+        if: matrix.rust-channel != 'none'
+        run: |
+          echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_KEY_PREFIX=gasp-monorepo-${{ matrix.rust-channel }}" >> $GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+          echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
       
       - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
       - run: docker buildx create --use
-      - run: moon ci :format :lint :test :build-image-ci
+      - run: moon ci :format :lint :test :build-image-ci --query '${{ matrix.selector-query }}'
         env:
           IMAGE_TAG: ${{ inputs.version }}
       
@@ -169,6 +174,7 @@ jobs:
         if: success() || failure()
         with:
           access-token: ${{ secrets.BOT_USER_GITHUB_TOKEN }}
+          matrix: ${{ toJSON(matrix) }}
 
   gasp-node-coverage-report:
     name: '[gasp-node] Coverage report'

@@ -3,6 +3,8 @@ language: rust
 toolchain:
   rust:
     version: 1.78.0
+tags:
+  - 'rust-channel-1.78.0'
 
 env:
   CARGO_TERM_COLOR: always
@@ -48,6 +50,7 @@ tasks:
     deps: ['build-ci', 'gasp-node:build-image-ci']
     options:
       cache: false
+      runDepsInParallel: false
 
   format:
     command: cargo fmt --all -- --check
