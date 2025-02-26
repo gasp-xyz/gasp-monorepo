@@ -30,7 +30,7 @@ tasks:
 
   build-image-ci:
     command: 'docker buildx build --platform linux/amd64 -t gaspxyz/updater:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .'
-    deps: ['build', 'format', 'lint', 'test']
+    deps: ['build']
     options:
       cache: false
 

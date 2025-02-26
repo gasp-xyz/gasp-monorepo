@@ -41,7 +41,6 @@ tasks:
     outputs: ['target/release/main']
     env:
       SCCACHE_GCS_KEY_PREFIX: gasp-avs-release
-    deps: ['format', 'lint', 'test']
   
   build-image-ci:
     script: |

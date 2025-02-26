@@ -83,9 +83,10 @@ tasks:
       docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .
       docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push .
       docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push .
-    deps: ['build-standard-runtime', 'build-fast-runtime', 'build-unlocked-runtime', 'format', 'lint', 'test']
+    deps: ['build-standard-runtime', 'build-fast-runtime', 'build-unlocked-runtime']
     options:
       cache: false
+      outputStyle: stream
 
   format:
     command: cargo fmt --all -- --check
