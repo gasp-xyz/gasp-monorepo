@@ -1,5 +1,5 @@
-moon = "1.32.6"
-proto = "0.46.1"
+moon = "1.32.7"
+proto = "0.47.1"
 yarn = "4.6.0"
 
 [plugins]
