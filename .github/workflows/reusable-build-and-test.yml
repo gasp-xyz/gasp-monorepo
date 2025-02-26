@@ -137,7 +137,7 @@ jobs:
       
       - uses: moonrepo/setup-toolchain@v0
         with:
-          cache: true
+          cache: false
           auto-install: true
           # proto-version: 0.46.1
 
@@ -200,7 +200,8 @@ jobs:
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
-      
+          cache: false
+          
       - uses: google-github-actions/auth@v2
         id: auth
         with:
@@ -243,7 +244,7 @@ jobs:
       - uses: moonrepo/setup-toolchain@v0
         with:
           auto-install: true
-      
+          cache: false
       - uses: google-github-actions/auth@v2
         id: auth
         with:
