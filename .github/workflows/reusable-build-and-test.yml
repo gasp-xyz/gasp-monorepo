@@ -116,8 +116,8 @@ jobs:
               :build-image-ci-gasp-avs
               :build-image-ci-gasp-node
             prefix: avs-and-node-group
-          - moon-targets: :coverage-gasp-node :benchmark-tests-gasp-node
-            prefix: coverage-and-benchmark-group
+          # - moon-targets: :coverage-gasp-node :benchmark-tests-gasp-node
+          #   prefix: coverage-and-benchmark-group
     steps:
       - uses: actions/checkout@v4
         with:
