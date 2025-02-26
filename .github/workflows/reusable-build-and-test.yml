@@ -137,9 +137,8 @@ jobs:
       
       - uses: moonrepo/setup-toolchain@v0
         with:
-          auto-install: true
           cache: false
-          proto-version: 0.46.1
+          # proto-version: 0.46.1
 
       # - name: Setup Rust toolchains for all services
       #   run: | 
