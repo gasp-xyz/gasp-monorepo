@@ -96,7 +96,7 @@ jobs:
     runs-on: beast-gke
     # runs-on: gasp-monorepo-large-32core
     container:
-      image: gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20
+      image: europe-west1-docker.pkg.dev/direct-pixel-353917/docker-eu/gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20
       env:
         DOCKER_HOST: "unix:///run/docker/docker.sock"
       volumes:
