@@ -141,6 +141,34 @@ jobs:
           cache: false
           auto-install: true
           proto-version: 0.47.1
+      
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.82.0,1.78.0,nightly-2024-01-20
+          targets: wasm32-unknown-unknown
+          components: rustfmt,clippy,rust-src
+
+      - uses: moonrepo/setup-rust@v1
+        name: Setup 1.82.0 rust toolchain
+        with:
+          channel: 1.82.0
+          targets: wasm32-unknown-unknown
+          components: rustfmt,clippy,rust-src
+          cache: true
+      - uses: moonrepo/setup-rust@v1
+        name: Setup 1.82.0 rust toolchain
+        with:
+          channel: 1.78.0
+          targets: wasm32-unknown-unknown
+          components: rustfmt,clippy,rust-src
+          cache: true
+      - uses: moonrepo/setup-rust@v1
+        name: Setup 1.82.0 rust toolchain
+        with:
+          channel: nightly-2024-01-20
+          targets: wasm32-unknown-unknown
+          components: rustfmt,clippy,rust-src
+          cache: true
 
       - name: Setup Rust toolchains for all services
         run: moon ci :prepare-toolchain --concurrency 1
