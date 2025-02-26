@@ -105,14 +105,16 @@ jobs:
       matrix:
         include:
           - rust-channel: '1.82.0'
-            selector-query: 'language=rust && tag=rust-channel-1.82.0'
-            # builder-image: 'rust:1.82.0'
+            moon-targets: >-
+              sequencer:format sequencer:lint sequencer:test sequencer:build-image-ci
+              updater:format updater:lint updater:test updater:build-image-ci
+              avs-aggregator:build-image-ci
+              ferry-deposit:build-image-ci
+              ferry-withdrawal:build-image-ci
           - rust-channel: '1.78.0'
-            selector-query: 'language=rust && tag=rust-channel-1.78.0'
-            # builder-image: 'rust:1.78.0'
-          - rust-channel: 'none'
-            selector-query: 'language!=rust'
-            # builder-image: 'rust:1.82.0'
+            moon-targets: >-
+              gasp-node:format gasp-node:lint gasp-node:test gasp-node:build-image-ci
+              gasp-avs:format gasp-avs:lint gasp-avs:test gasp-avs:build-image-ci
 
     steps:
       - uses: actions/checkout@v4
@@ -164,7 +166,7 @@ jobs:
       
       - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
       - run: docker buildx create --use
-      - run: moon ci :format :lint :test :build-image-ci --query '${{ matrix.selector-query }}'
+      - run: moon ci ${{ matrix.moon-targets }}
         env:
           IMAGE_TAG: ${{ inputs.version }}
       
