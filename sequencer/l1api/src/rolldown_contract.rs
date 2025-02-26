@@ -12,7 +12,6 @@ use sha3::{Digest, Keccak256};
 
 use prometheus::{opts, register_counter_vec, CounterVec};
 
-
 lazy_static! {
     static ref ETH_CALL_COUNTER: CounterVec = register_counter_vec!(
         opts!("eth_call", "Number of HTTP requests made."),
@@ -21,49 +20,35 @@ lazy_static! {
     .unwrap();
 }
 
-
-pub struct RolldownContractBuilder {
-    pub uri: &'static str,
-    pub pkey: [u8; 32],
-    pub address: [u8; 20],
-}
-
-impl RolldownContractBuilder {
-    pub async fn build(
-        self,
-    ) -> Result<RolldownContract<impl WalletProvider + Provider>, L1Error> {
-        let signer: PrivateKeySigner = hex::encode(self.pkey).parse().expect("valid private key");
-        let wallet = EthereumWallet::new(signer);
-        let provider = ProviderBuilder::new()
-            .with_recommended_fillers()
-            .wallet(wallet)
-            .on_builtin(self.uri)
-            .await?;
-
-        Ok(RolldownContract {
-            contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance::new(
-                self.address.into(),
-                provider,
-            ),
-        })
-    }
-}
-
 pub struct RolldownContract<P> {
     contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance<BoxTransport, P>,
 }
 
 impl<P> RolldownContract<P>
 where
-    P: Provider
+    P: Provider,
 {
-    pub fn new(provider: P, address: [u8;20]) -> Self {
+
+    pub fn address(&self) -> [u8;20] {
+        self.contract_handle.address().clone().into()
+    }
+
+    pub fn new(provider: P, address: [u8; 20]) -> Self {
         RolldownContract {
             contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance::new(
                 address.into(),
                 provider,
             ),
         }
+    }
+
+    #[cfg(test)]
+    pub (crate) async fn deploy(provider: P) -> Result<Self, L1Error>{
+        Ok(RolldownContract {
+            contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance::deploy(
+                provider,
+            ).await?
+        })
     }
 
     #[tracing::instrument(skip(self))]
@@ -124,7 +109,11 @@ where
         Ok(latest_root.0)
     }
 
-    pub async fn get_update_impl(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error> {
+    pub async fn get_update_impl(
+        &self,
+        start: u128,
+        end: u128,
+    ) -> Result<types::L1Update, L1Error> {
         ETH_CALL_COUNTER
             .with_label_values(&["getPendingRequests"])
             .inc();
@@ -172,7 +161,8 @@ where
             .contract_handle
             .close_cancel(cancel, merkle_root.0.into(), proof);
 
-        let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) = crate::utils::estimate_gas_in_wei(self.contract_handle.provider()).await?;
+        let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) =
+            crate::utils::estimate_gas_in_wei(self.contract_handle.provider()).await?;
 
         match call.call().await {
             Ok(_) => {
@@ -193,6 +183,4 @@ where
             }
         }
     }
-
 }
-
