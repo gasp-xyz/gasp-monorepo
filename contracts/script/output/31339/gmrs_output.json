@@ -10,7 +10,7 @@
     "rolldownProxyAdmin": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
   },
   "chainInfo": {
-    "chainId": 1337,
+    "chainId": 31339,
     "deploymentBlock": 0
   },
   "permissions": {

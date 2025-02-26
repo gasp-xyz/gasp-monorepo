@@ -94,7 +94,7 @@ pub enum Commands {
 impl CliArgs {
     pub fn build() -> Self {
         let args = CliArgs::parse();
-        if ![Chain::AnvilHardhat as u64, Chain::Dev as u64].contains(&args.chain_id) {
+        if ![Chain::AnvilHardhat as u64, 31338, 31339, Chain::Dev as u64].contains(&args.chain_id) {
             let mut cmd = CliArgs::command();
             if args.testnet {
                 cmd.error(
