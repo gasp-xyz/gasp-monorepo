@@ -96,7 +96,7 @@ jobs:
     runs-on: beast-gke
     # runs-on: gasp-monorepo-large-32core
     container:
-      image: gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20
+      image: gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20-slim
       env:
         DOCKER_HOST: "unix:///run/docker/docker.sock"
       volumes:
@@ -141,12 +141,6 @@ jobs:
       #     cache: false
       #     auto-install: false
       #     proto-version: 0.47.1
-      
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.82.0,1.78.0,nightly-2024-01-20
-          targets: wasm32-unknown-unknown
-          components: rustfmt,clippy,rust-src
 
       - uses: moonrepo/setup-rust@v1
         name: Setup 1.82.0 rust toolchain
@@ -156,14 +150,14 @@ jobs:
           components: rustfmt,clippy,rust-src
           cache: true
       - uses: moonrepo/setup-rust@v1
-        name: Setup 1.82.0 rust toolchain
+        name: Setup 1.78.0 rust toolchain
         with:
           channel: 1.78.0
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
           cache: true
       - uses: moonrepo/setup-rust@v1
-        name: Setup 1.82.0 rust toolchain
+        name: Setup nightly-2024-01-20 rust toolchain
         with:
           channel: nightly-2024-01-20
           targets: wasm32-unknown-unknown
