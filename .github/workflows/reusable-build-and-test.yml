@@ -121,6 +121,8 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
+      # Fix to avoid git errors when running inside the container
+      - run: git config --global --add safe.directory $GITHUB_WORKSPACE
       
       # - uses: moonrepo/setup-rust@v1
       #   if: matrix.rust-channel != 'none'
