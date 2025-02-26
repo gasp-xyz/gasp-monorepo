@@ -104,20 +104,24 @@ jobs:
     strategy: 
       matrix:
         include:
-          - moon-targets: :format :lint :test :build-image-ci
-            prefix: main-group
-          - moon-targets: >-
+          - prefix: main-group
+            moon-targets: >-
+              :format 
+              :lint 
+              :test 
+              :build-image-ci 
               :format-gasp-avs
               :format-gasp-node
               :lint-gasp-avs
               :lint-gasp-node
               :test-gasp-avs
               :test-gasp-node
+          - prefix: avs-and-node-group
+            moon-targets: >-
               :build-image-ci-gasp-avs
               :build-image-ci-gasp-node
-            prefix: avs-and-node-group
-          # - moon-targets: :coverage-gasp-node :benchmark-tests-gasp-node
-          #   prefix: coverage-and-benchmark-group
+          - prefix: coverage-and-benchmark-group
+            moon-targets: :coverage-gasp-node :benchmark-tests-gasp-node
     steps:
       - uses: actions/checkout@v4
         with:
@@ -125,23 +129,6 @@ jobs:
           fetch-depth: 0
       # Fix to avoid git errors when running inside the container
       - run: git config --global --add safe.directory $GITHUB_WORKSPACE
-      
-      # - uses: moonrepo/setup-rust@v1
-      #   if: matrix.rust-channel != 'none'
-      #   with:
-      #     channel: ${{ matrix.rust-channel }}
-      #     targets: wasm32-unknown-unknown
-      #     components: rustfmt,clippy,rust-src
-      #     cache: true
-      #     bins: cargo-zigbuild
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # - uses: moonrepo/setup-toolchain@v0
-      #   with:
-      #     cache: false
-      #     auto-install: false
-      #     proto-version: 0.47.1
 
       - uses: moonrepo/setup-rust@v1
         name: Setup 1.82.0 rust toolchain
