@@ -136,11 +136,11 @@ jobs:
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - uses: moonrepo/setup-toolchain@v0
-        with:
-          cache: false
-          auto-install: true
-          proto-version: 0.47.1
+      # - uses: moonrepo/setup-toolchain@v0
+      #   with:
+      #     cache: false
+      #     auto-install: false
+      #     proto-version: 0.47.1
       
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -169,6 +169,12 @@ jobs:
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
           cache: true
+
+      - uses: moonrepo/setup-toolchain@v0
+        with:
+          cache: false
+          auto-install: false
+          proto-version: 0.47.1
 
       - name: Setup Rust toolchains for all services
         run: moon ci :prepare-toolchain --concurrency 1
