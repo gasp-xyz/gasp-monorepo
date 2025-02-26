@@ -5,7 +5,7 @@ use alloy::network::{EthereumWallet, Network, NetworkWallet};
 use alloy::providers::{Provider, ProviderBuilder, WalletProvider};
 use alloy::signers::local::PrivateKeySigner;
 use alloy::sol_types::SolValue;
-use alloy::transports::Transport;
+use alloy::transports::{BoxTransport, Transport};
 use hex::encode as hex_encode;
 use primitive_types::H256;
 use sha3::{Digest, Keccak256};
@@ -19,6 +19,63 @@ lazy_static! {
     )
     .unwrap();
 }
+
+pub struct Foo<P> {
+    handle: bindings::rolldown::Rolldown::RolldownInstance<BoxTransport, P>
+}
+
+pub struct FooBuilder{
+    pub uri: &'static str,
+    pub pkey: [u8; 32],
+    pub address: [u8; 20],
+}
+
+impl FooBuilder {
+    pub async fn build(self) -> Result<Foo<impl WalletProvider + Provider + Clone>, L1Error> {
+        let signer: PrivateKeySigner = hex::encode(self.pkey).parse().expect("valid private key");
+        let wallet = EthereumWallet::new(signer);
+        let provider = ProviderBuilder::new()
+            .with_recommended_fillers()
+            .wallet(wallet)
+            .on_builtin(self.uri)
+            .await?;
+        Ok(Foo { handle: bindings::rolldown::Rolldown::RolldownInstance::new( [0u8; 20].into(), provider,) })
+    }
+}
+
+// impl<P> Foo<P> {
+//     async fn from_provider(provider: P) -> Result<Self, L1Error> {
+//         Ok(Foo { handle:  })
+//     }
+// }
+
+
+impl<P> Foo<P>
+where
+    P: Provider + WalletProvider + Clone,
+{
+    #[tracing::instrument(skip(self))]
+    pub async fn deposit(&self, amount: u128, ferry_tip: u128) -> Result<(), L1Error> {
+
+        let call = 
+            self.handle
+            .deposit_native_1(alloy::primitives::U256::from(ferry_tip))
+            .value(alloy::primitives::U256::from(amount));
+
+        let hash = call.send().await?.watch().await?;
+        tracing::debug!("deposit hash: {}", hex_encode(hash));
+
+        Ok(())
+    }
+}
+
+
+pub struct RolldownContractBuilder{
+    pub uri: &'static str,
+    pub pkey: [u8; 32],
+    pub address: [u8; 20],
+}
+
 
 pub struct RolldownContract<T, P, N> {
     contract_handle: bindings::rolldown::Rolldown::RolldownInstance<T, P, N>,
@@ -37,6 +94,7 @@ pub async fn create_provider(
         .on_builtin(uri)
         .await?)
 }
+
 
 impl<T, P, N> RolldownContract<T, P, N>
 where
