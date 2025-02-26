@@ -212,7 +212,7 @@ jobs:
         run: |
           echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
           echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
-          echo "SCCACHE_GCS_KEY_PREFIX=gasp-monorepo" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_KEY_PREFIX=gasp-node-coverage" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
           echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
       
@@ -255,7 +255,7 @@ jobs:
         run: |
           echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
           echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
-          echo "SCCACHE_GCS_KEY_PREFIX=gasp-monorepo" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_KEY_PREFIX=gasp-node-runtime-benchmarks" >> $GITHUB_ENV
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
           echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
       
