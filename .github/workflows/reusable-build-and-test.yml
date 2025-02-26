@@ -120,8 +120,8 @@ jobs:
             moon-targets: >-
               :build-image-ci-gasp-avs
               :build-image-ci-gasp-node
-          - prefix: coverage-and-benchmark-group
-            moon-targets: :coverage-gasp-node :benchmark-tests-gasp-node
+          # - prefix: coverage-and-benchmark-group
+          #   moon-targets: :coverage-gasp-node :benchmark-tests-gasp-node
     steps:
       - uses: actions/checkout@v4
         with:
@@ -153,7 +153,7 @@ jobs:
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
           cache: true
-          bins: cargo-tarpaulin@0.26.1
+          # bins: cargo-tarpaulin@0.26.1
           target-dirs: 'gasp-node/target'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -196,50 +196,50 @@ jobs:
           access-token: ${{ secrets.BOT_USER_GITHUB_TOKEN }}
           matrix: ${{ toJSON(matrix) }}
 
-  # gasp-node-coverage-report:
-  #   name: '[gasp-node] Coverage report'
-  #   runs-on: beast-gke
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
+  gasp-node-coverage-report:
+    name: '[gasp-node] Coverage report'
+    runs-on: beast-gke
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-  #     - uses: moonrepo/setup-rust@v1
-  #       with:
-  #         channel: nightly-2024-01-20
-  #         targets: wasm32-unknown-unknown
-  #         components: rust-src
-  #         bins: cargo-tarpaulin@0.26.1
-  #         cache: true
-  #         target-dirs: 'gasp-node/target'
+      - uses: moonrepo/setup-rust@v1
+        with:
+          channel: nightly-2024-01-20
+          targets: wasm32-unknown-unknown
+          components: rust-src
+          bins: cargo-tarpaulin@0.26.1
+          cache: true
+          target-dirs: 'gasp-node/target'
       
-  #     - uses: moonrepo/setup-toolchain@v0
-  #       with:
-  #         auto-install: true
-  #         cache: false
+      - uses: moonrepo/setup-toolchain@v0
+        with:
+          auto-install: true
+          cache: false
 
-  #     - uses: google-github-actions/auth@v2
-  #       id: auth
-  #       with:
-  #         workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-  #         service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-  #     - uses: google-github-actions/setup-gcloud@v2
-  #     - uses: mozilla-actions/sccache-action@v0.0.5
-  #     - name: Set Rust caching env vars
-  #       run: |
-  #         echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
-  #         echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
-  #         echo "SCCACHE_GCS_KEY_PREFIX=gasp-node-coverage" >> $GITHUB_ENV
-  #         echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-  #         echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: mozilla-actions/sccache-action@v0.0.5
+      - name: Set Rust caching env vars
+        run: |
+          echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
+          echo "SCCACHE_GCS_KEY_PREFIX=gasp-node-coverage" >> $GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+          echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
       
-  #     - run: moon ci :coverage :benchmark-tests
+      - run: moon ci :coverage-gasp-node :benchmark-tests-gasp-node
 
-  #     - name: Upload to codecov.io
-  #       uses: codecov/codecov-action@v5
-  #       with:
-  #         token: ${{ secrets.ORG_CODECOV_TOKEN }}
-  #         fail_ci_if_error: false
+      - name: Upload to codecov.io
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.ORG_CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   gasp-node-runtime-benchmarks:
     name: '[gasp-node] Runtime benchmarks'
