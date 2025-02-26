@@ -111,6 +111,7 @@ tasks:
     outputs: ['cobertura.xml']
     options:
       outputStyle: stream
+  
   benchmark-tests:
     script: |
       cargo test --release -j8 --features=runtime-benchmarks -p pallet-xyk -p pallet-issuance -p pallet-multipurpose-liquidity -p pallet-fee-lock
