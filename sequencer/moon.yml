@@ -21,7 +21,6 @@ tasks:
   prepare-toolchain:
     command: rustup show
     options:
-      runInCI: false
       cache: false
 
   build:

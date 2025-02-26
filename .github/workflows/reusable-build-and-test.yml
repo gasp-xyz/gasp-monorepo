@@ -143,7 +143,7 @@ jobs:
           proto-version: 0.47.1
 
       - name: Setup Rust toolchains for all services
-        run: moon :prepare-toolchain --concurrency 1
+        run: moon ci :prepare-toolchain --concurrency 1
       
       - uses: google-github-actions/auth@v2
         id: auth
