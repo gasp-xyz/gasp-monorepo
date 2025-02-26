@@ -3,6 +3,7 @@ use primitive_types::H256;
 use hex::encode as hex_encode;
 
 mod lru;
+mod utils;
 mod rolldown_contract;
 
 pub use lru::CachedL1Interface;
@@ -185,8 +186,7 @@ where
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
         let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
-        let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) = todo!();
-        self.rolldown_contract.send_close_cancel_tx(cancel, merkle_root, proof, max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei).await
+        self.rolldown_contract.send_close_cancel_tx(cancel, merkle_root, proof).await
     }
 
     #[tracing::instrument(skip(self))]

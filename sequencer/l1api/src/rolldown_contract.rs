@@ -166,13 +166,14 @@ where
         cancel: types::Cancel,
         merkle_root: H256,
         proof: Vec<H256>,
-        max_fee_per_gas_in_wei: u128, 
-        max_priority_fee_per_gas_in_wei: u128,
     ) -> Result<H256, L1Error> {
         let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
         let call = self
             .contract_handle
             .close_cancel(cancel, merkle_root.0.into(), proof);
+
+        let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) = crate::utils::estimate_gas_in_wei(self.contract_handle.provider()).await?;
+
         match call.call().await {
             Ok(_) => {
                 tracing::trace!("status ok");
