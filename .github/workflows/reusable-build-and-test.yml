@@ -116,6 +116,7 @@ jobs:
               :lint-gasp-node
               :test-gasp-avs
               :test-gasp-node
+              :benchmark-tests-gasp-node
           - prefix: avs-and-node-group
             moon-targets: >-
               :build-image-ci-gasp-avs
@@ -233,7 +234,8 @@ jobs:
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
           echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
       
-      - run: moon ci :coverage-gasp-node :benchmark-tests-gasp-node
+      - run: moon ci :coverage-gasp-node
+      # - run: moon ci :coverage-gasp-node :benchmark-tests-gasp-node
 
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v5
