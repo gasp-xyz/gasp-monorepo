@@ -161,7 +161,7 @@ jobs:
       - uses: moonrepo/setup-toolchain@v0
         with:
           cache: true
-          auto-install: false
+          auto-install: true
 
       - name: Setup Rust toolchains for all services
         run: moon ci :prepare-toolchain --concurrency 1
