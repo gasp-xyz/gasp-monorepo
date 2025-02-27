@@ -110,6 +110,8 @@ jobs:
               :lint 
               :test 
               :build-image-ci 
+          - prefix: avs-and-node-group
+            moon-targets: >-
               :format-gasp-avs
               :format-gasp-node
               :lint-gasp-avs
@@ -117,8 +119,6 @@ jobs:
               :test-gasp-avs
               :test-gasp-node
               :benchmark-tests-gasp-node
-          - prefix: avs-and-node-group
-            moon-targets: >-
               :build-image-ci-gasp-avs
               :build-image-ci-gasp-node
           # - prefix: coverage-and-benchmark-group
@@ -137,7 +137,7 @@ jobs:
           channel: 1.82.0
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
-          cache: true
+          cache: ${{ (matrix.prefix == 'main-group') && true || false }}
           target-dirs: 'sequencer/target,updater/target'
       - uses: moonrepo/setup-rust@v1
         name: Setup 1.78.0 rust toolchain
@@ -145,7 +145,7 @@ jobs:
           channel: 1.78.0
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
-          cache: true
+          cache: ${{ (matrix.prefix == 'avs-and-node-group') && true || false }}
           target-dirs: 'gasp-avs/target'
       - uses: moonrepo/setup-rust@v1
         name: Setup nightly-2024-01-20 rust toolchain
