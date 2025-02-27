@@ -10,7 +10,7 @@ RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=bind,source=yarn.lock,target=yarn.lock \
     --mount=type=bind,source=.yarnrc.yml,target=.yarnrc.yml \
-    # --mount=type=cache,target=/usr/local/share/.cache,sharing=locked \
+    --mount=type=cache,target=/usr/local/share/.cache,sharing=locked \
     yarn install --immutable
 
 COPY . .
