@@ -36,8 +36,8 @@ jobs:
   
       - uses: moonrepo/setup-toolchain@v0
         with:
-          auto-install: true
-          proto-version: 0.46.1
+          auto-install: false
+          cache: false
       
       - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
       - run: docker buildx create --use
@@ -75,7 +75,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version-file: 'stash/.nvmrc'
           cache: 'yarn'
           cache-dependency-path: "./stash/yarn.lock"
 
