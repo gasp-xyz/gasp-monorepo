@@ -1636,7 +1636,6 @@ impl<T: Config> Pallet<T> {
 					.checked_add(&burn_amount)
 					.ok_or_else(|| DispatchError::from(Error::<T>::MathOverflow))?,
 			)?;
-
 			let treasury_amount_in_mangata: BalanceOf<T> =
 				match treasury_amount.saturating_add(burn_amount).is_zero() {
 					true => settle_amount_in_mangata,
@@ -1662,6 +1661,16 @@ impl<T: Config> Pallet<T> {
 				.try_into()
 				.map_err(|_| DispatchError::from(Error::<T>::MathOverflow))?;
 
+			log!(
+				info,
+				"settle_treasury_and_burn: {:?}, {:?}, {:?}, {:?}, {:?}, {:?}",
+				sold_asset_id,
+				burn_amount,
+				treasury_amount,
+				settle_amount_in_mangata,
+				treasury_amount_in_mangata,
+				burn_amount_in_mangata
+			);
 			// Apply changes in token pools, adding treasury and burn amounts of settling token, removing  treasury and burn amounts of mangata
 
 			// MAX: 2R 1W
