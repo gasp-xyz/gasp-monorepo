@@ -108,8 +108,6 @@ tasks:
       --target-dir target-coverage
     inputs: ['@globs(sources)']
     outputs: ['cobertura.xml']
-    options:
-      outputStyle: stream
   
   benchmark-tests-gasp-node:
     script: |
