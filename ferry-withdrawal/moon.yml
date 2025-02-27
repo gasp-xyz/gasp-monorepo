@@ -25,6 +25,7 @@ tasks:
     command: >
       docker buildx build
       --push
+      --no-cache
       --tag gaspxyz/ferry-withdrawal:${IMAGE_TAG:-ci}
       --cache-to type=registry,ref=gaspxyz/ferry-withdrawal:cache,mode=max
       --cache-from type=registry,ref=gaspxyz/ferry-withdrawal:cache
