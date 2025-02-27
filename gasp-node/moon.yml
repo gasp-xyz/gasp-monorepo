@@ -49,6 +49,7 @@ tasks:
     options:
       outputStyle: stream
       mergeOutputs: replace
+    inputs: ['@globs(sources)']
     outputs:
       - 'target-standard-runtime/release/rollup-node'
       - 'target-standard-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
@@ -59,6 +60,7 @@ tasks:
     options:
       outputStyle: stream
       mergeOutputs: replace
+    inputs: ['@globs(sources)']
     outputs:
       - 'target-fast-runtime/release/rollup-node'
       - 'target-fast-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
@@ -69,6 +71,7 @@ tasks:
     options:
       outputStyle: stream
       mergeOutputs: replace
+    inputs: ['@globs(sources)']
     outputs:
       - 'target-unlocked-runtime/release/rollup-node'
       - 'target-unlocked-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
