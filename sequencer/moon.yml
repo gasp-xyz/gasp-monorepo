@@ -31,7 +31,7 @@ tasks:
       SCCACHE_GCS_KEY_PREFIX: sequencer-release
   
   build-image-local:
-    script: 'docker buildx build -t gaspxyz/sequencer:local -t gaspxyz/sequencer:localarb -t gaspxyz/sequencer:localbase .'
+    script: 'docker buildx build -t gaspxyz/sequencer:local -t gaspxyz/sequencer:localarb -t gaspxyz/sequencer:localbase --load .'
     inputs: ['@globs(sources)', 'Dockerfile']
 
   build-image-ci:

@@ -24,7 +24,7 @@ tasks:
     outputs: ['build']
   
   build-image-local:
-    command: docker buildx build -t gaspxyz/ferry-deposit:local -f Dockerfile .
+    command: docker buildx build -t gaspxyz/ferry-deposit:local -f Dockerfile --load .
     inputs: ['@globs(sources)', 'Dockerfile', '.dockerignore']
 
   build-image-ci:

@@ -31,6 +31,7 @@ tasks:
       --tag gaspxyz/gasp-contracts:local
       --tag gaspxyz/gasp-contracts:localarb
       --tag gaspxyz/gasp-contracts:localbase
+      --load
       .
     inputs: ["@globs(sources)", "Dockerfile"]
 

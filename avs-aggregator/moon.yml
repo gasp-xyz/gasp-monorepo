@@ -34,7 +34,7 @@ tasks:
     outputs: ['build/avs-aggregator']
   
   build-image-local:
-    command: 'docker buildx build -t gaspxyz/avs-aggregator:local -f Dockerfile ../'
+    command: 'docker buildx build -t gaspxyz/avs-aggregator:local -f Dockerfile --load ../'
     inputs: ['@globs(sources)', 'Dockerfile']
 
   build-ci:

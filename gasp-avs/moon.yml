@@ -28,7 +28,7 @@ tasks:
     outputs: ['target/release/main']
 
   build-image-local:
-    command: 'docker buildx build --build-arg ROLLUP_NODE_VERSION=local -t gaspxyz/gasp-avs:local .'
+    command: 'docker buildx build --build-arg ROLLUP_NODE_VERSION=local -t gaspxyz/gasp-avs:local --load .'
     options:
       envFile: '/.env'
     deps: ['gasp-node:build-image-local']
