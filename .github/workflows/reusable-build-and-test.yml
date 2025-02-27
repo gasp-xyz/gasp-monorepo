@@ -153,7 +153,7 @@ jobs:
           channel: nightly-2024-01-20
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
-          cache: true
+          cache: ${{ (matrix.prefix == 'avs-and-node-group') && true || false }}
           # bins: cargo-tarpaulin@0.26.1
           target-dirs: 'gasp-node/target'
         env:
