@@ -1,0 +1,7 @@
+{
+  "name": "gasp-avs",
+  "private": true,
+  "scripts": {
+    "release": "run -T semantic-release"
+  }
+}

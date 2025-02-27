@@ -1,0 +1,7 @@
+{
+  "name": "updater",
+  "private": true,
+  "scripts": {
+    "release": "run -T semantic-release"
+  }
+}

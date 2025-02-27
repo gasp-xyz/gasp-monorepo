@@ -50,3 +50,9 @@ tasks:
   test:
     command: cargo test
     inputs: ['@globs(sources)']
+
+  release:
+    command: 'yarn run release'
+    options:
+      cache: false
+      runInCI: false

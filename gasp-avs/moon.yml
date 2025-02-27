@@ -62,3 +62,9 @@ tasks:
   test-gasp-avs:
     command: cargo test
     inputs: ['@globs(sources)', 'tests/**/*']
+
+  release:
+    command: 'yarn run release'
+    options:
+      cache: false
+      runInCI: false

@@ -1,0 +1,7 @@
+{
+  "name": "avs-aggregator",
+  "private": true,
+  "scripts": {
+    "release": "run -T semantic-release"
+  }
+}

@@ -42,3 +42,9 @@ tasks:
   # lint:
   #   command: 'yarn lint'
   #   inputs: ['@globs(sources)', '@globs(tests)', 'biome.json']
+
+  release:
+    command: 'yarn run release'
+    options:
+      cache: false
+      runInCI: false

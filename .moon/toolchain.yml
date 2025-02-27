@@ -2,3 +2,9 @@
 #   syncToolchainConfig: false
 #   version: 1.82.0
 #   targets: [ "wasm32-unknown-unknown" ]
+
+node:
+  version: 22.11.0
+  packageManager: yarn
+  yarn:
+    version: 4.6.0

@@ -13,7 +13,8 @@
     "test-ferry": "vitest --dir tests ferry",
     "test-closer": "vitest --dir tests closer stash",
     "test-l1": "vitest --dir tests l1",
-    "test-l2": "vitest --dir tests l2"
+    "test-l2": "vitest --dir tests l2",
+    "release": "run -T semantic-release"
   },
   "keywords": [],
   "author": "",

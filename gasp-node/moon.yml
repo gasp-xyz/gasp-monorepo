@@ -148,3 +148,9 @@ tasks:
     env:
       STEPS: '2'
       REPEATS: '1'
+
+  release:
+    command: 'yarn run release'
+    options:
+      cache: false
+      runInCI: false
