@@ -121,9 +121,9 @@ aggregatorEnv:
 #####################
 # gaspAvs configs #
 #####################
-gaspAvsEnabled: true
 gaspAvsImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
 
+gaspAvsEnabled: true
 gaspAvsData:
   storageClass: node-data-volume-retain
   mountPath: /data
@@ -153,6 +153,9 @@ gaspAvsEnv:
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
   ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/5b0100d05c4744f31af56105bce3151f8cbc2d15/rollup-dev-env-chainspecs/holesky-62fa181-raw.json
+
+gaspAvsEnabled2: false
+
 ###########################
 # updater configs #
 ###########################
