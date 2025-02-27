@@ -32,7 +32,7 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile', '.dockerignore']
     options:
       cache: false
-  
+
   # lint:
   #   command: 'yarn lint'
   #   inputs: ['@globs(sources)', '@globs(tests)', 'biome.json']

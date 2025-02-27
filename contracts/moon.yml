@@ -40,8 +40,6 @@ tasks:
       --push
       --platform linux/amd64
       --tag gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
-      --cache-to type=registry,ref=gaspxyz/gasp-contracts:cache,mode=max
-      --cache-from type=registry,ref=gaspxyz/gasp-contracts:cache
       .
     inputs: ["@globs(sources)", "Dockerfile"]
     options:
