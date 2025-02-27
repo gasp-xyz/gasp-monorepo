@@ -3,7 +3,6 @@
   "private": true,
   "workspaces": [
     "avs-aggregator",
-    "contracts",
     "ferry-deposit",
     "ferry-withdrawal",
     "gasp-avs",
