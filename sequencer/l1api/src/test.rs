@@ -2,18 +2,28 @@
 use super::*;
 use hex_literal::hex;
 use serial_test::serial;
+use crate::create_provider;
 
 const URI: &str = "http://localhost:8545";
 const ROLLDOWN_ADDRESS: [u8; 20] = hex!("1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f");
 const ALICE_PKEY: [u8; 32] =
 hex!("dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97");
 
+
 #[serial]
 #[tokio::test]
-async fn test_can_connect() {
-    // let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
-    // RolldownContract::from_provider(ROLLDOWN_ADDRESS, provider);
+async fn test_can_deploy() {
+    let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
+    RolldownContract::deploy(provider).await.unwrap();
 }
+
+#[serial]
+#[tokio::test]
+async fn test_can_deploy() {
+    let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
+    RolldownContract::deploy(provider).await.unwrap();
+}
+
 
 // #[serial]
 // #[tokio::test]

@@ -51,6 +51,7 @@ where
         })
     }
 
+    #[cfg(test)]
     #[tracing::instrument(skip(self))]
     pub async fn deposit(&self, amount: u128, ferry_tip: u128) -> Result<(), L1Error> {
         let call = self

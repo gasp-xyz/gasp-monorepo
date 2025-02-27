@@ -1,4 +1,4 @@
-use alloy::{network::EthereumWallet, providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider}, signers::local::PrivateKeySigner, sol_types::SolValue};
+use alloy::{network::EthereumWallet, providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider}, signers::local::PrivateKeySigner, sol_types::SolValue, transports::TransportError};
 use primitive_types::H256;
 use hex::encode as hex_encode;
 
@@ -57,18 +57,23 @@ pub struct L1Builder {
     pub rolldown_address: [u8; 20],
 }
 
+pub async fn create_provider(uri: &'static str, pkey: [u8; 32] ) -> Result<impl Provider + WalletProvider + Clone, TransportError>{
+        let signer: PrivateKeySigner = hex::encode(pkey).parse().expect("valid private key");
+        let wallet = EthereumWallet::new(signer);
+        Ok(ProviderBuilder::new()
+            .with_recommended_fillers()
+            .wallet(wallet)
+            .on_builtin(uri)
+            .await?
+        )
+}
+
 impl L1Builder {
     pub async fn build(
         self,
     ) -> Result<L1<impl WalletProvider + Provider + Clone>, L1Error> {
-        let signer: PrivateKeySigner = hex::encode(self.pkey).parse().expect("valid private key");
-        let wallet = EthereumWallet::new(signer);
-        let provider = ProviderBuilder::new()
-            .with_recommended_fillers()
-            .wallet(wallet)
-            .on_builtin(self.uri)
-            .await?;
-        let rolldown = RolldownContract::new(provider.clone(), self.rolldown_address);
+        let provider = create_provider(self.uri, self.pkey).await?;
+        let rolldown = RolldownContract::new(provider, self.rolldown_address);
         Ok(L1{
             rolldown_contract: rolldown,
         })
