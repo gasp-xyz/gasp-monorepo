@@ -48,8 +48,5 @@
     "winston": "^3.15.0",
     "zod": "^3.22.5"
   },
-  "engines": {
-    "node": "22.14.0"
-  },
   "packageManager": "yarn@4.6.0"
 }
