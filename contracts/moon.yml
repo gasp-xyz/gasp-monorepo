@@ -8,12 +8,11 @@ toolchain:
 
 fileGroups:
   sources:
-    - "lib/eigenlayer-middleware/**/*.sol"
-    - "lib/eigenlayer-middleware/package.json"
-    - "lib/forge-std/**/*.sol"
-    - "lib/forge-std/package.json"
+    - "lib/**/*"
     - "src/**/*"
     - "test/**/*"
+    - "script/**/*"
+    - "tools/**/*"
     - package.json
     - foundry.toml
     - remappings.txt
@@ -41,8 +40,6 @@ tasks:
       --push
       --platform linux/amd64
       --tag gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
-      --cache-to type=registry,ref=gaspxyz/gasp-contracts:cache,mode=max
-      --cache-from type=registry,ref=gaspxyz/gasp-contracts:cache
       .
     inputs: ["@globs(sources)", "Dockerfile"]
     options:
@@ -81,6 +78,14 @@ tasks:
 
   contracts-check:
     deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-size', 'contracts-gas', 'contracts-coverage']
+
+  contracts-check-addresses:
+    script: |
+      docker compose down
+      docker compose up --wait eth-contracts-deployment arbitrum-contracts-deployment base-contracts-deployment
+      git diff --exit-code contracts/script/output/
+    options:
+      runFromWorkspaceRoot: true
 
   release:
     command: bun run release

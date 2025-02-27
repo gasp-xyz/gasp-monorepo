@@ -5,3 +5,6 @@
 
 node:
   packageManager: yarn
+
+bun:
+  version: 1.2.2
