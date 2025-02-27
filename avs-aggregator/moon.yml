@@ -14,7 +14,9 @@ fileGroups:
     - 'types/**/*'
     - '*.go'
     - 'go.mod'
-    - '/go.mod'
+    - 'go.sum'
+    - '/go.work'
+    - '/go.work.sum'
     - '/avs-eigensdk-go/**/*.go'
     - '/avs-eigensdk-go/**/go.mod'
 
@@ -43,7 +45,7 @@ tasks:
     outputs: ['build/avs-aggregator-linux-amd64']
   
   build-image-ci:
-    command: 'docker buildx build --platform linux/amd64 -t gaspxyz/avs-aggregator:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .'
+    command: 'docker buildx build --no-cache --platform linux/amd64 -t gaspxyz/avs-aggregator:${IMAGE_TAG:-ci} -f Dockerfile.ci --push --load .'
     deps: ['build-ci']
     options:
       cache: false
