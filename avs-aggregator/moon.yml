@@ -40,12 +40,18 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile']
 
   build-ci:
-    script: GOOS=linux GOARCH=amd64 go build -o build/avs-aggregator-linux-amd64 cmd/main.go
+    command: docker buildx build --platform linux/amd64,linux/arm64 -t gaspxyz/avs-aggregator:${IMAGE_TAG:-ci} -f Dockerfile --output type=oci,dest=build/avs-aggregator-image.tar.zst,compression=zstd ../
     inputs: ['@globs(sources)']
-    outputs: ['build/avs-aggregator-linux-amd64']
+    outputs: ['build/avs-aggregator-image.tar.zst']
+    options:
+      outputStyle: stream
   
   build-image-ci:
-    command: 'docker buildx build --no-cache --platform linux/amd64 -t gaspxyz/avs-aggregator:${IMAGE_TAG:-ci} -f Dockerfile.ci --push --load .'
+    script: |
+      set -ex
+      docker load -i build/avs-aggregator-image.tar.zst && \
+        docker image tag gaspxyz/avs-aggregator:ci gaspxyz/avs-aggregator:${IMAGE_TAG:-ci} && \
+        docker push gaspxyz/avs-aggregator:${IMAGE_TAG:-ci}
     deps: ['build-ci']
     options:
       cache: false

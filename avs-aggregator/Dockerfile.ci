@@ -1,9 +1,0 @@
-FROM debian:stable-slim
-ARG TARGETOS 
-ARG TARGETARCH
-
-WORKDIR /app
-
-COPY ./build/avs-aggregator-${TARGETOS}-${TARGETARCH} /avs-aggregator
-
-ENTRYPOINT ["/avs-aggregator"]
