@@ -1,0 +1,3 @@
+FROM ghcr.io/paradigmxyz/reth:v1.0.7
+RUN mkdir /data/
+ADD reth-chainspecs /data/

@@ -13,7 +13,7 @@ releases:
     values:
       - image:
           repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
+          tag: {{ .Values | get "collator.image.tag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: 'rollup-{{ .Values.environmentName }}'
         chain: {{ .Values | getOrNil "collator.chain" }}
         disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
@@ -44,7 +44,7 @@ releases:
     values:
       - image:
           repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
+          tag: {{ .Values | get "collator.image.tag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: 'rollup-{{ .Values.environmentName }}'
         chain: {{ .Values | getOrNil "collator.chain" }}
         disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
@@ -75,7 +75,7 @@ releases:
     values:
       - image:
           repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
+          tag: {{ .Values | get "collator.image.tag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: 'rollup-{{ .Values.environmentName }}'
         chain: {{ .Values | getOrNil "collator.chain" }}
         disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
@@ -106,7 +106,7 @@ releases:
     values:
       - image:
           repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
+          tag: {{ .Values | get "collator.image.tag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: 'rollup-{{ .Values.environmentName }}'
         chain: {{ .Values | getOrNil "collator.chain" }}
         disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
@@ -137,7 +137,7 @@ releases:
     values:
       - image:
           repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
+          tag: {{ .Values | get "collator.image.tag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: 'rollup-{{ .Values.environmentName }}'
         chain: {{ .Values | getOrNil "collator.chain" }}
         disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
@@ -168,7 +168,7 @@ releases:
     values:
       - image:
           repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
+          tag: {{ .Values | get "collator.image.tag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: 'rollup-{{ .Values.environmentName }}'
         chain: {{ .Values | getOrNil "collator.chain" }}
         disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
@@ -199,7 +199,7 @@ releases:
     values:
       - image:
           repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
+          tag: {{ .Values | get "collator.image.tag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: 'rollup-{{ .Values.environmentName }}'
         chain: {{ .Values | getOrNil "collator.chain" }}
         disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
@@ -230,7 +230,7 @@ releases:
     values:
       - image:
           repository: {{ .Values.collator.image.repository | quote }}
-          tag: {{ .Values.collator.image.tag | quote }}
+          tag: {{ .Values | get "collator.image.tag" (requiredEnv "IMAGE_TAG") | quote }}
         environment: 'rollup-{{ .Values.environmentName }}'
         chain: {{ .Values | getOrNil "collator.chain" }}
         disableChainspecGeneration: {{ .Values | getOrNil "collator.disableChainspecGeneration" }}
