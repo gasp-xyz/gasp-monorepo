@@ -177,7 +177,7 @@ jobs:
       - run: corepack enable && corepack prepare yarn@4.6.0 --activate
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "18"
           cache: yarn
           cache-dependency-path: "./ferry-withdrawal/yarn.lock"
 
@@ -214,7 +214,7 @@ jobs:
       - run: corepack enable && corepack prepare yarn@4.6.0 --activate
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "18"
           cache: yarn
           cache-dependency-path: "./ferry-deposit/yarn.lock"
 
