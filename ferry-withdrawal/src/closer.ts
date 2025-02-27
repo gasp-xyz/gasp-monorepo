@@ -79,9 +79,6 @@ async function main() {
 					if (isWithdrawal(req)) {
 						await closerService.closeWithdrawal(req, hexToU8a(PRIVATE_KEY));
 					} else if (isCancel(req)) {
-						logger.info(
-							`#${header.number} Closing withdrawal ${cancelToString(req)}`,
-						);
 						await closerService.closeCancel(req, hexToU8a(PRIVATE_KEY));
 					}
 				} else {
