@@ -121,7 +121,7 @@ benchmarks! {
    verify {
 	   // verify only trading result as rest of the assertion is in unit test
 	   assert_eq!(<T as Config>::Currency::free_balance(non_native_asset_id1, &caller).into(), 750000000000000_u128);
-	   assert_eq!(<T as Config>::Currency::free_balance(non_native_asset_id2, &caller).into(), 933266599933266_u128);
+	   assert_eq!(<T as Config>::Currency::free_balance(non_native_asset_id2, &caller).into(), 933333333333333_u128);
 
    }
 
@@ -206,7 +206,7 @@ benchmarks! {
    verify {
 	   // verify only trading result as rest of the assertion is in unit test
 	   assert_eq!(<T as Config>::Currency::free_balance(non_native_asset_id1, &caller).into(), 833266599933266);
-	   assert_eq!(<T as Config>::Currency::free_balance(non_native_asset_id2, &caller).into(), 850000000000001);
+	   assert_eq!(<T as Config>::Currency::free_balance(non_native_asset_id2, &caller).into(), 850150000000001);
    }
 
    multiswap_buy_asset {
@@ -442,11 +442,11 @@ benchmarks! {
 
 		let post_asset_amount_1 = <T as Config>::Currency::free_balance(asset_id_1, &caller);
 		let post_asset_amount_2 = <T as Config>::Currency::free_balance(asset_id_2, &caller);
-		assert_eq!(post_asset_amount_1, 499_900_002.to_balance::<T>());
+		assert_eq!(post_asset_amount_1, 499_900_001.to_balance::<T>());
 		assert_eq!(post_asset_amount_2, 500_000_000.to_balance::<T>());
 
 		let post_pool_balance = Xyk::<T>::asset_pool((asset_id_1, asset_id_2));
-		assert_eq!(post_pool_balance.0, 500_099_946.to_balance::<T>());
+		assert_eq!(post_pool_balance.0, 500_099_999.to_balance::<T>());
 		assert_eq!(post_pool_balance.1, 500_000_000.to_balance::<T>());
 	}
 
