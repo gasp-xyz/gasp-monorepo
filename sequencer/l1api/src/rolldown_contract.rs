@@ -1,6 +1,8 @@
 use super::{types, L1Error, L1Interface};
+use alloy::contract::{CallBuilder, CallDecoder};
 use lazy_static::lazy_static;
 
+pub use alloy::network::primitives::ReceiptResponse;
 use alloy::network::{EthereumWallet, Network, NetworkWallet};
 use alloy::providers::{Provider, ProviderBuilder, WalletProvider};
 use alloy::signers::local::PrivateKeySigner;
@@ -20,13 +22,14 @@ lazy_static! {
     .unwrap();
 }
 
+#[derive(Clone)]
 pub struct RolldownContract<P> {
     contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance<BoxTransport, P>,
 }
 
 impl<P> RolldownContract<P>
 where
-    P: Provider,
+    P: Provider + WalletProvider,
 {
 
     pub fn address(&self) -> [u8;20] {
@@ -44,24 +47,29 @@ where
 
     #[cfg(test)]
     pub (crate) async fn deploy(provider: P) -> Result<Self, L1Error>{
-        Ok(RolldownContract {
-            contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance::deploy(
+        let sender = provider.wallet().default_signer_address();
+        let contract_handle = contract_bindings::rolldown::Rolldown::RolldownInstance::deploy(
                 provider,
-            ).await?
+        ).await?;
+
+
+        // let call = contract_handle.initialize(sender, 0, sender);
+        // self.
+
+        Ok(RolldownContract {
+            contract_handle
         })
     }
 
     #[cfg(test)]
     #[tracing::instrument(skip(self))]
-    pub async fn deposit(&self, amount: u128, ferry_tip: u128) -> Result<(), L1Error> {
+    pub (crate) async fn deposit_native(&self, amount: u128, ferry_tip: u128) -> Result<(), L1Error> {
         let call = self
             .contract_handle
             .deposit_native_1(alloy::primitives::U256::from(ferry_tip))
             .value(alloy::primitives::U256::from(amount));
 
-        let hash = call.send().await?.watch().await?;
-        tracing::debug!("deposit hash: {}", hex_encode(hash));
-
+        self.simulate_send_and_wait_for_result(call).await?;
         Ok(())
     }
 
@@ -143,12 +151,14 @@ where
         Ok(is_closed)
     }
 
-    async fn get_native_account_balance(&self, address: [u8; 20]) -> Result<u128, L1Error> {
-        ETH_CALL_COUNTER.with_label_values(&["balance"]).inc();
-        let provider = self.contract_handle.provider();
-        let result = provider.get_balance(address.into()).await?;
-        result.try_into().map_err(|_| L1Error::OverflowError)
-    }
+
+
+    // async fn get_native_account_balance(&self, address: [u8; 20]) -> Result<u128, L1Error> {
+    //     ETH_CALL_COUNTER.with_label_values(&["balance"]).inc();
+    //     let provider = self.contract_handle.provider();
+    //     let result = provider.get_balance(address.into()).await?;
+    //     result.try_into().map_err(|_| L1Error::OverflowError)
+    // }
 
     #[tracing::instrument(skip(self, cancel))]
     pub async fn send_close_cancel_tx(
@@ -161,22 +171,44 @@ where
         let call = self
             .contract_handle
             .close_cancel(cancel, merkle_root.0.into(), proof);
+        Ok(self.simulate_send_and_wait_for_result(call).await?)
+    }
+
+    pub async fn simulate_send_and_wait_for_result<T,Pr,D,N>(
+        &self,
+        call: CallBuilder<T,Pr,D,N>,
+    ) -> Result<H256, L1Error> 
+    where 
+        N: Network,
+        D: CallDecoder + Send + Sync + Unpin,
+        T: Transport + Clone,
+        Pr: Provider<T, N>
+    {
 
         let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) =
             crate::utils::estimate_gas_in_wei(self.contract_handle.provider()).await?;
+        let gas = call.estimate_gas().await?;
+
 
         match call.call().await {
-            Ok(_) => {
-                tracing::trace!("status ok");
-                Ok(call
+            Ok(_result) => {
+                let receipt = call
+                    .gas(gas * 12 / 10)
                     .max_fee_per_gas(max_fee_per_gas_in_wei)
                     .max_priority_fee_per_gas(max_priority_fee_per_gas_in_wei)
                     .send()
                     .await?
-                    .watch()
-                    .await?
-                    .0
-                    .into())
+                    .get_receipt()
+                    .await?;
+
+                let status = receipt.status();
+                let hash = receipt.transaction_hash().0;
+                tracing::trace!("execution status {status}");
+                if status {
+                    Ok(hash.into())
+                }else{
+                    Err(L1Error::TxReverted(hash.into()))
+                }
             }
             Err(err) => {
                 tracing::error!("status nok {:?}", err);

@@ -29,10 +29,14 @@ pub enum L1Error {
     TransportAlloy(#[from] alloy::transports::TransportError),
     #[error("transaction error")]
     TxSendError(#[from] PendingTransactionError),
+    #[error("Transaction execution failure `{0}`")]
+    TxReverted(H256),
 }
 
 pub trait L1Interface {
     // fn account_address(&self) -> [u8; 20];
+    // async fn deposit_native(&self, request_hash: H256) -> Result<bool, L1Error>;
+    // async fn deposit_erc20(&self, request_hash: H256) -> Result<bool, L1Error>;
     async fn is_closed(&self, request_hash: H256) -> Result<bool, L1Error>;
     async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error>;
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error>;
@@ -74,9 +78,7 @@ impl L1Builder {
     ) -> Result<L1<impl WalletProvider + Provider + Clone>, L1Error> {
         let provider = create_provider(self.uri, self.pkey).await?;
         let rolldown = RolldownContract::new(provider, self.rolldown_address);
-        Ok(L1{
-            rolldown_contract: rolldown,
-        })
+        Ok(L1::new(rolldown))
     }
 }
 
@@ -84,10 +86,26 @@ pub struct L1<P> {
     rolldown_contract: RolldownContract<P>
 }
 
+
+impl<P> L1<P> {
+    pub fn new(rolldown_contract: RolldownContract<P>) -> Self{
+        L1{
+            rolldown_contract
+        }
+    }
+}
+
 impl<P> L1Interface for L1<P>
 where
     P: Provider + WalletProvider
 {
+    // async fn deposit_native(&self, request_hash: H256) -> Result<bool, L1Error>{
+    //     todo!()
+    // }
+    //
+    // async fn deposit_erc20(&self, request_hash: H256) -> Result<bool, L1Error>{
+    //     todo!()
+    // }
     // fn account_address(&self) -> [u8; 20] {
     //     self.account_address
     // }
