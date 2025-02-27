@@ -5,10 +5,6 @@ on:
       e2eBranch:
         type: string
         required: false
-      substrateNodeVersion:
-        type: string
-        required: false
-        default: "main-fast"
       globalVersion:
         type: string
         required: false
@@ -18,10 +14,6 @@ on:
       e2eBranch:
         type: string
         required: false
-      substrateNodeVersion:
-        type: string
-        required: false
-        default: "main-fast"
       globalVersion:
         type: string
         required: false
@@ -42,7 +34,7 @@ env:
   GASP_CONTRACTS_VERSION: ${{ inputs.globalVersion }}
   FERRY_DEPOSIT_VERSION: ${{ inputs.globalVersion }}
   FERRY_WITHDRAWAL_VERSION: ${{ inputs.globalVersion }}
-  ROLLUP_NODE_VERSION: ${{ inputs.substrateNodeVersion }}
+  ROLLUP_NODE_VERSION: ${{ inputs.globalVersion }}-fast
 
 jobs:
   run-e2e-tests:
