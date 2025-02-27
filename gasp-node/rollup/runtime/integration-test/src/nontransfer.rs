@@ -2,9 +2,7 @@ use rollup_runtime::tokens::NontransferableTokens;
 
 use crate::setup::*;
 
-pub use mangata_support::{
-	utils::ConvertError
-};
+pub use mangata_support::utils::ConvertError;
 pub use sp_runtime::{traits::MaybeConvert, DispatchError};
 
 const ASSET_ID_1: TokenId = NATIVE_ASSET_ID + 1;
@@ -254,83 +252,89 @@ fn test_market_should_block() {
 		));
 
 		// user & foundation cannot sell, ARB bot can
-		assert_ok!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset(
-				RuntimeOrigin::signed(bob),
-				vec![POOL_ID],
-				NATIVE_ASSET_ID,
-				UNIT,
-				ASSET_ID_1,
-				0,
-			)
-		);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset(
+			RuntimeOrigin::signed(bob),
+			vec![POOL_ID],
+			NATIVE_ASSET_ID,
+			UNIT,
+			ASSET_ID_1,
+			0,
+		));
 		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(pallet_market::Error::<Runtime>::NontransferableToken)).unwrap()
+			error: ConvertError::maybe_convert(DispatchError::from(
+				pallet_market::Error::<Runtime>::NontransferableToken,
+			))
+			.unwrap(),
 		}));
-		assert_ok!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset(
-				RuntimeOrigin::signed(foundation),
-				vec![POOL_ID],
-				NATIVE_ASSET_ID,
-				UNIT,
-				ASSET_ID_1,
-				0,
-			)
-		);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset(
+			RuntimeOrigin::signed(foundation),
+			vec![POOL_ID],
+			NATIVE_ASSET_ID,
+			UNIT,
+			ASSET_ID_1,
+			0,
+		));
 		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(pallet_market::Error::<Runtime>::NontransferableToken)).unwrap()
+			error: ConvertError::maybe_convert(DispatchError::from(
+				pallet_market::Error::<Runtime>::NontransferableToken,
+			))
+			.unwrap(),
 		}));
-		assert_ok!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset(
-				RuntimeOrigin::signed(AccountId::from(ARB)),
-				vec![POOL_ID],
-				NATIVE_ASSET_ID,
-				UNIT,
-				ASSET_ID_1,
-				0,
-			)
-		);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset(
+			RuntimeOrigin::signed(AccountId::from(ARB)),
+			vec![POOL_ID],
+			NATIVE_ASSET_ID,
+			UNIT,
+			ASSET_ID_1,
+			0,
+		));
 		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(pallet_market::Error::<Runtime>::NontransferableToken)).unwrap()
+			error: ConvertError::maybe_convert(DispatchError::from(
+				pallet_market::Error::<Runtime>::NontransferableToken,
+			))
+			.unwrap(),
 		}));
-		assert_ok!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
-				RuntimeOrigin::signed(bob),
-				vec![POOL_ID],
-				ASSET_ID_1,
-				UNIT,
-				NATIVE_ASSET_ID,
-				UNIT * 2,
-			)
-		);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
+			RuntimeOrigin::signed(bob),
+			vec![POOL_ID],
+			ASSET_ID_1,
+			UNIT,
+			NATIVE_ASSET_ID,
+			UNIT * 2,
+		));
 		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(pallet_market::Error::<Runtime>::NontransferableToken)).unwrap()
+			error: ConvertError::maybe_convert(DispatchError::from(
+				pallet_market::Error::<Runtime>::NontransferableToken,
+			))
+			.unwrap(),
 		}));
-		assert_ok!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
-				RuntimeOrigin::signed(foundation),
-				vec![POOL_ID],
-				ASSET_ID_1,
-				UNIT,
-				NATIVE_ASSET_ID,
-				UNIT * 2,
-			)
-		);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
+			RuntimeOrigin::signed(foundation),
+			vec![POOL_ID],
+			ASSET_ID_1,
+			UNIT,
+			NATIVE_ASSET_ID,
+			UNIT * 2,
+		));
 		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(pallet_market::Error::<Runtime>::NontransferableToken)).unwrap()
+			error: ConvertError::maybe_convert(DispatchError::from(
+				pallet_market::Error::<Runtime>::NontransferableToken,
+			))
+			.unwrap(),
 		}));
-		assert_ok!(
-			pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
-				RuntimeOrigin::signed(AccountId::from(ARB)),
-				vec![POOL_ID],
-				ASSET_ID_1,
-				UNIT,
-				NATIVE_ASSET_ID,
-				UNIT * 2,
-			)
-		);
+		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
+			RuntimeOrigin::signed(AccountId::from(ARB)),
+			vec![POOL_ID],
+			ASSET_ID_1,
+			UNIT,
+			NATIVE_ASSET_ID,
+			UNIT * 2,
+		));
 		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(pallet_market::Error::<Runtime>::NontransferableToken)).unwrap()
+			error: ConvertError::maybe_convert(DispatchError::from(
+				pallet_market::Error::<Runtime>::NontransferableToken,
+			))
+			.unwrap(),
 		}));
 	});
 }

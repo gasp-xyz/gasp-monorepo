@@ -1,6 +1,7 @@
 use crate::setup::*;
 
 use frame_support::dispatch::{DispatchInfo, PostDispatchInfo};
+pub use frame_support::unsigned::TransactionValidityError;
 use pallet_market::PoolKind;
 use rollup_runtime::{
 	config::{
@@ -8,11 +9,7 @@ use rollup_runtime::{
 		BnbAccountIdOf, TreasuryAccountIdOf,
 	},
 	fees::FEE_PRECISION,
-	OnChargeTransactionHandler,
-};
-use rollup_runtime::FeeLockTriggerTrait;
-pub use frame_support::{
-	unsigned::TransactionValidityError
+	FeeLockTriggerTrait, OnChargeTransactionHandler,
 };
 use sp_runtime::transaction_validity::InvalidTransaction;
 
@@ -61,8 +58,14 @@ fn root() -> RuntimeOrigin {
 }
 
 fn init_fee_lock(amount: Balance) {
-	FeeLock::update_fee_lock_metadata(root(), Some(FEE_LOCK_PERIOD_LENGTH), Some(amount), Some(1), Some(vec![]))
-		.unwrap();
+	FeeLock::update_fee_lock_metadata(
+		root(),
+		Some(FEE_LOCK_PERIOD_LENGTH),
+		Some(amount),
+		Some(1),
+		Some(vec![]),
+	)
+	.unwrap();
 }
 
 pub(crate) fn events() -> Vec<RuntimeEvent> {
@@ -78,7 +81,6 @@ pub(crate) fn events() -> Vec<RuntimeEvent> {
 		.collect::<Vec<_>>()
 }
 
-
 #[test]
 fn unlock_fee_w_is_free() {
 	test_env().execute_with(|| {
@@ -92,8 +94,7 @@ fn unlock_fee_w_is_free() {
 
 		let liquidity_info = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
 			&who,
-			&RuntimeCall::FeeLock(pallet_fee_lock::Call::unlock_fee {
-			}),
+			&RuntimeCall::FeeLock(pallet_fee_lock::Call::unlock_fee {}),
 			&DispatchInfo::default(),
 			// fee here is imp or LiquidityInfo will be None
 			// even if fee_lock_metadata is None
@@ -103,7 +104,6 @@ fn unlock_fee_w_is_free() {
 		.unwrap();
 
 		assert!(liquidity_info.is_none());
-
 	})
 }
 
@@ -115,16 +115,17 @@ fn unlock_fee_not_w_is_blocked() {
 
 		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
 			&who,
-			&RuntimeCall::FeeLock(pallet_fee_lock::Call::unlock_fee {
-			}),
+			&RuntimeCall::FeeLock(pallet_fee_lock::Call::unlock_fee {}),
 			&DispatchInfo::default(),
 			// fee here is imp or LiquidityInfo will be None
 			// even if fee_lock_metadata is None
 			1000u32.into(),
 			Default::default(),
 		);
-		assert_eq!(res.err().unwrap(), TransactionValidityError::Invalid(InvalidTransaction::UnlockFee.into()));
-
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::UnlockFee.into())
+		);
 	})
 }
 
@@ -149,9 +150,9 @@ fn swap_on_uninit_fee_lock_metadata_is_charged() {
 			// even if fee_lock_metadata is None
 			1000u32.into(),
 			Default::default(),
-		).unwrap();
+		)
+		.unwrap();
 		assert!(liquidity_info.is_some());
-
 	})
 }
 
@@ -176,9 +177,9 @@ fn swap_w_is_liquidity_info_is_none() {
 			// even if fee_lock_metadata is None
 			1000u32.into(),
 			Default::default(),
-		).unwrap();
+		)
+		.unwrap();
 		assert!(liquidity_info.is_none());
-
 	})
 }
 
@@ -204,7 +205,10 @@ fn swap_gasless_is_pre_validated() {
 			1000u32.into(),
 			1000u32.into(),
 		);
-		assert_eq!(res.err().unwrap(), TransactionValidityError::Invalid(InvalidTransaction::TippingNotAllowedForSwaps.into()));
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::TippingNotAllowedForSwaps.into())
+		);
 
 		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
 			&who,
@@ -221,7 +225,10 @@ fn swap_gasless_is_pre_validated() {
 			1000u32.into(),
 			Default::default(),
 		);
-		assert_eq!(res.err().unwrap(), TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into()));
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
 
 		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
 			&who,
@@ -238,7 +245,10 @@ fn swap_gasless_is_pre_validated() {
 			1000u32.into(),
 			Default::default(),
 		);
-		assert_eq!(res.err().unwrap(), TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into()));
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
 
 		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
 			&who,
@@ -255,7 +265,10 @@ fn swap_gasless_is_pre_validated() {
 			1000u32.into(),
 			Default::default(),
 		);
-		assert_eq!(res.err().unwrap(), TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into()));
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
 
 		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
 			&who,
@@ -272,14 +285,17 @@ fn swap_gasless_is_pre_validated() {
 			1000u32.into(),
 			Default::default(),
 		);
-		assert_eq!(res.err().unwrap(), TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into()));
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
 
 		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
 			&who,
 			&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
 				swap_pool_list: vec![POOL_ID],
 				asset_id_in: ASSET_ID_1,
-				asset_amount_in: 1_000_000_000 *UNIT,
+				asset_amount_in: 1_000_000_000 * UNIT,
 				asset_id_out: ASSET_ID_2,
 				min_amount_out: UNIT,
 			}),
@@ -289,7 +305,10 @@ fn swap_gasless_is_pre_validated() {
 			1000u32.into(),
 			Default::default(),
 		);
-		assert_eq!(res.err().unwrap(), TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into()));
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
 
 		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
 			&who,
@@ -298,7 +317,7 @@ fn swap_gasless_is_pre_validated() {
 				asset_id_out: ASSET_ID_2,
 				asset_amount_out: UNIT,
 				asset_id_in: ASSET_ID_1,
-				max_amount_in: 1_000_000_000 *UNIT,
+				max_amount_in: 1_000_000_000 * UNIT,
 			}),
 			&DispatchInfo::default(),
 			// fee here is imp or LiquidityInfo will be None
@@ -306,6 +325,9 @@ fn swap_gasless_is_pre_validated() {
 			1000u32.into(),
 			Default::default(),
 		);
-		assert_eq!(res.err().unwrap(), TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into()));
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
 	})
 }

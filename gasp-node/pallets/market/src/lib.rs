@@ -123,12 +123,8 @@ pub mod pallet {
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
 
-
 	#[cfg(feature = "runtime-benchmarks")]
-	pub trait MarketBenchmarkingConfig:
-		pallet_fee_lock::Config
-	{
-	}
+	pub trait MarketBenchmarkingConfig: pallet_fee_lock::Config {}
 
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	pub trait MarketBenchmarkingConfig {}
@@ -492,14 +488,15 @@ pub mod pallet {
 						(pool_info.pool.1, amounts.1)
 					};
 
-					let (_, lp_amount) = <T as pallet::Config>::Xyk::provide_liquidity_with_conversion(
-						sender.clone(),
-						pool_info.pool.0,
-						pool_info.pool.1,
-						id,
-						amount,
-						true,
-					)?;
+					let (_, lp_amount) =
+						<T as pallet::Config>::Xyk::provide_liquidity_with_conversion(
+							sender.clone(),
+							pool_info.pool.0,
+							pool_info.pool.1,
+							id,
+							amount,
+							true,
+						)?;
 					ensure!(lp_amount > min_amount_lp_tokens, Error::<T>::InsufficientOutputAmount);
 					lp_amount
 				},
@@ -836,8 +833,8 @@ pub mod pallet {
 
 					is_lockless = match is_lockless {
 						Some(b) => Some(b),
-						None =>
-							T::FeeLock::is_swap_tokens_lockless(asset_id_in, amount_in).then_some(true),
+						None => T::FeeLock::is_swap_tokens_lockless(asset_id_in, amount_in)
+							.then_some(true),
 					};
 
 					// calc output amounts for fee lock detemination
@@ -873,7 +870,11 @@ pub mod pallet {
 						asset_id_in,
 						fees.ok_or(Error::<T>::UnexpectedFailure { id: function_error_id })?,
 					)?;
-					<T as pallet::Config>::Xyk::settle_treasury_and_burn(asset_id_in, burn_amt, trsy_amt)?;
+					<T as pallet::Config>::Xyk::settle_treasury_and_burn(
+						asset_id_in,
+						burn_amt,
+						trsy_amt,
+					)?;
 					// TODO - now
 					// do_fee_lock should check that fee_lock_metadata is available (init)
 					// also check get_fee_lock_amount
@@ -905,7 +906,11 @@ pub mod pallet {
 									id: function_error_id,
 								})?,
 							)?;
-							<T as pallet::Config>::Xyk::settle_treasury_and_burn(asset_id_in, burn_amt, trsy_amt)?;
+							<T as pallet::Config>::Xyk::settle_treasury_and_burn(
+								asset_id_in,
+								burn_amt,
+								trsy_amt,
+							)?;
 							Ok(())
 						},
 					);
@@ -1041,11 +1046,11 @@ pub mod pallet {
 
 					let mut id = asset_id_out;
 					let mut amount_in = asset_amount_out;
-					
+
 					is_lockless = match is_lockless {
 						Some(b) => Some(b),
-						None =>
-							T::FeeLock::is_swap_tokens_lockless(asset_id_out, asset_amount_out).then_some(true),
+						None => T::FeeLock::is_swap_tokens_lockless(asset_id_out, asset_amount_out)
+							.then_some(true),
 					};
 
 					for (pool, swap) in pools.iter().rev().zip(path.iter().rev()) {
@@ -1089,7 +1094,11 @@ pub mod pallet {
 						asset_id_in,
 						fees.ok_or(Error::<T>::UnexpectedFailure { id: function_error_id })?,
 					)?;
-					<T as pallet::Config>::Xyk::settle_treasury_and_burn(asset_id_in, burn_amt, trsy_amt)?;
+					<T as pallet::Config>::Xyk::settle_treasury_and_burn(
+						asset_id_in,
+						burn_amt,
+						trsy_amt,
+					)?;
 					// TODO - now
 					// do_fee_lock should check that fee_lock_metadata is available (init)
 					// also check get_fee_lock_amount
@@ -1136,7 +1145,11 @@ pub mod pallet {
 									id: function_error_id,
 								})?,
 							)?;
-							<T as pallet::Config>::Xyk::settle_treasury_and_burn(asset_id_in, burn_amt, trsy_amt)?;
+							<T as pallet::Config>::Xyk::settle_treasury_and_burn(
+								asset_id_in,
+								burn_amt,
+								trsy_amt,
+							)?;
 							Ok(())
 						},
 					);
@@ -1400,7 +1413,8 @@ pub mod pallet {
 			let pool_info = Self::get_pool_info(pool_id).ok()?;
 			let (_, other) = pool_info.same_and_other(sell_asset_id)?;
 			match pool_info.kind {
-				PoolKind::Xyk => <T as pallet::Config>::Xyk::get_dy(pool_id, sell_asset_id, other, sell_amount),
+				PoolKind::Xyk =>
+					<T as pallet::Config>::Xyk::get_dy(pool_id, sell_asset_id, other, sell_amount),
 				PoolKind::StableSwap =>
 					T::StableSwap::get_dy(pool_id, sell_asset_id, other, sell_amount),
 			}
@@ -1414,8 +1428,12 @@ pub mod pallet {
 			let pool_info = Self::get_pool_info(pool_id).ok()?;
 			let (_, other) = pool_info.same_and_other(sell_asset_id)?;
 			match pool_info.kind {
-				PoolKind::Xyk =>
-					<T as pallet::Config>::Xyk::get_dy_with_impact(pool_id, sell_asset_id, other, sell_amount),
+				PoolKind::Xyk => <T as pallet::Config>::Xyk::get_dy_with_impact(
+					pool_id,
+					sell_asset_id,
+					other,
+					sell_amount,
+				),
 				PoolKind::StableSwap =>
 					T::StableSwap::get_dy_with_impact(pool_id, sell_asset_id, other, sell_amount),
 			}
@@ -1429,7 +1447,8 @@ pub mod pallet {
 			let pool_info = Self::get_pool_info(pool_id).ok()?;
 			let (_, other) = pool_info.same_and_other(bought_asset_id)?;
 			match pool_info.kind {
-				PoolKind::Xyk => <T as pallet::Config>::Xyk::get_dx(pool_id, other, bought_asset_id, buy_amount),
+				PoolKind::Xyk =>
+					<T as pallet::Config>::Xyk::get_dx(pool_id, other, bought_asset_id, buy_amount),
 				PoolKind::StableSwap =>
 					T::StableSwap::get_dx(pool_id, other, bought_asset_id, buy_amount),
 			}
@@ -1443,8 +1462,12 @@ pub mod pallet {
 			let pool_info = Self::get_pool_info(pool_id).ok()?;
 			let (_, other) = pool_info.same_and_other(bought_asset_id)?;
 			match pool_info.kind {
-				PoolKind::Xyk =>
-					<T as pallet::Config>::Xyk::get_dx_with_impact(pool_id, other, bought_asset_id, buy_amount),
+				PoolKind::Xyk => <T as pallet::Config>::Xyk::get_dx_with_impact(
+					pool_id,
+					other,
+					bought_asset_id,
+					buy_amount,
+				),
 				PoolKind::StableSwap =>
 					T::StableSwap::get_dx_with_impact(pool_id, other, bought_asset_id, buy_amount),
 			}
@@ -1479,7 +1502,8 @@ pub mod pallet {
 			for id in pool_ids.into_iter() {
 				if let Some(info) = Self::get_pool_info(id).ok() {
 					let balances = match info.kind {
-						PoolKind::Xyk => <T as pallet::Config>::Xyk::get_pool_reserves(info.pool_id),
+						PoolKind::Xyk =>
+							<T as pallet::Config>::Xyk::get_pool_reserves(info.pool_id),
 						PoolKind::StableSwap => T::StableSwap::get_pool_reserves(info.pool_id),
 					};
 					pools.push((info, balances.unwrap_or_default()))
@@ -1495,7 +1519,9 @@ pub mod pallet {
 		) -> Option<T::Balance> {
 			let pool_info = Self::get_pool_info(pool_id).ok()?;
 			match pool_info.kind {
-				PoolKind::Xyk => <T as pallet::Config>::Xyk::get_expected_amount_for_mint(pool_id, asset_id, amount),
+				PoolKind::Xyk => <T as pallet::Config>::Xyk::get_expected_amount_for_mint(
+					pool_id, asset_id, amount,
+				),
 				PoolKind::StableSwap =>
 					T::StableSwap::get_expected_amount_for_mint(pool_id, asset_id, amount),
 			}
@@ -1584,14 +1610,15 @@ pub mod pallet {
 
 			let amounts = match pool_info.kind {
 				PoolKind::Xyk => {
-					let (_, lp_amount, second_asset_withdrawn) = <T as pallet::Config>::Xyk::mint_liquidity(
-						sender.clone(),
-						asset_with_amount,
-						asset_other,
-						amount,
-						max_amount,
-						activate,
-					)?;
+					let (_, lp_amount, second_asset_withdrawn) =
+						<T as pallet::Config>::Xyk::mint_liquidity(
+							sender.clone(),
+							asset_with_amount,
+							asset_other,
+							amount,
+							max_amount,
+							activate,
+						)?;
 					(lp_amount, second_asset_withdrawn)
 				},
 				PoolKind::StableSwap => {
@@ -1661,7 +1688,11 @@ pub mod pallet {
 								Zero::zero(),
 							)?;
 
-						<T as pallet::Config>::Xyk::settle_treasury_and_burn(swap.1, bnb_fee, treasury_fee)?;
+						<T as pallet::Config>::Xyk::settle_treasury_and_burn(
+							swap.1,
+							bnb_fee,
+							treasury_fee,
+						)?;
 
 						amount_out
 					},
