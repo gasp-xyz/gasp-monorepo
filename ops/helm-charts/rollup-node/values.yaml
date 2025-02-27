@@ -7,19 +7,18 @@ remoteCluster: false
 ingressClassName: nginx
 command: []
 args: []
-nodeNameOverride: ""
+nodeNameOverride: ''
 rpcPort: 8090
 
 ## Additional args to use
 env:
   LOG_LEVEL: "info"
 
-envSecrets:
-  {}
+envSecrets: {}
   # ECDSA_KEY_JSON: ''
   # ECDSA_KEY_PASSWORD: ''
 
-nameOverride: ""
+nameOverride: ''
 
 image:
   repository: gaspxyz/avs-aggregator
@@ -44,8 +43,7 @@ prometheus:
   enabled: false
   port: 9090
 
-resources:
-  {}
+resources: {}
   # requests:
   #   cpu: 200m
   #   memory: 1Gi
@@ -62,8 +60,7 @@ tolerations: []
 # -- Assign custom affinity rules
 affinity: {}
 
-podAnnotations:
-  {}
+podAnnotations: {}
   # 'fluentbit.io/parser': 'substrate'
 
 # -- Additional containers to run in the pod
@@ -71,4 +68,3 @@ extraContainers: []
 
 # -- Additional init containers to run in the pod
 extraInitContainers: []
-
