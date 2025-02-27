@@ -6,12 +6,16 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
+# # Use bind mounts for package.json and yarn.lock, and cache mounts for yarn install
+# RUN --mount=type=bind,source=package.json,target=package.json \
+#     --mount=type=bind,source=yarn.lock,target=yarn.lock \
+#     --mount=type=bind,source=.yarnrc.yml,target=.yarnrc.yml \
+#     --mount=type=cache,target=/usr/local/share/.cache,sharing=locked \
+#     yarn install --immutable
 # Use bind mounts for package.json and yarn.lock, and cache mounts for yarn install
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=yarn.lock,target=yarn.lock \
-    --mount=type=bind,source=.yarnrc.yml,target=.yarnrc.yml \
-    --mount=type=cache,target=/usr/local/share/.cache,sharing=locked \
-    yarn install --immutable
+
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
 
 COPY . .
 
