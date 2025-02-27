@@ -15,11 +15,13 @@
     "cover:lcov": "forge coverage --force --no-match-coverage '(script|test)' --report lcov && genhtml lcov.info -o coverage --ignore-errors inconsistent && open coverage/src/index.html",
     "clean": "forge clean && rm -rf coverage .gas-snapshot lcov.info",
     "analyze": "slitherin .",
-    "analyze:ci": "slitherin . --skip-clean --ignore-compile"
+    "analyze:ci": "slitherin . --skip-clean --ignore-compile",
+    "release": "semantic-release"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gasp-xyz/gasp-monorepo/contracts"
+    "url": "git+https://github.com/gasp-xyz/gasp-monorepo",
+    "directory": "contracts"
   },
   "license": "BUSL-1.1",
   "private": true,
@@ -28,8 +30,13 @@
     "Serge <2901744+evercoinx@users.noreply.github.com>"
   ],
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^7.0.3",
+    "@semantic-release/git": "^10.0.1",
     "forge-std": "github:foundry-rs/forge-std#v1.9.5",
     "prettier": "^3.5.1",
+    "semantic-release": "^24.2.3",
+    "semantic-release-monorepo": "^8.0.2",
     "solhint": "^5.0.5"
   }
 }

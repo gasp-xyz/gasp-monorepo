@@ -14,17 +14,22 @@
     "test-closer": "vitest --dir tests closer stash",
     "test-l1": "vitest --dir tests l1",
     "test-l2": "vitest --dir tests l2",
-    "release": "run -T semantic-release"
+    "release": "semantic-release"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@biomejs/biome": "1.6.4",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^7.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/express": "^5.0.0",
     "@types/json-bigint": "^1.0.4",
     "@types/node": "20.10.3",
     "rimraf": "5.0.5",
+    "semantic-release": "^24.2.3",
+    "semantic-release-monorepo": "^8.0.2",
     "typescript": "5.3.2",
     "vitest": "^2.0.3"
   },
