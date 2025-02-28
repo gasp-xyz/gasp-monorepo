@@ -113,3 +113,5 @@ out
 !**/.yarn/plugins
 !**/.yarn/releases
 !**/.yarn/versions
+
+*.tar.zst

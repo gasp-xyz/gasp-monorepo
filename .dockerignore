@@ -15,3 +15,7 @@ moon.yml
 **/target-*
 !**/release/main
 !**/release/rollup-node
+
+build
+**/build
+*.tar.zst

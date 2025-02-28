@@ -40,7 +40,11 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile']
 
   build-ci:
-    command: docker buildx build --platform linux/amd64,linux/arm64 -t gaspxyz/avs-aggregator:${IMAGE_TAG:-ci} -f Dockerfile --output type=oci,dest=build/avs-aggregator-image.tar.zst,compression=zstd ../
+    command: > 
+      docker buildx build --platform linux/amd64,linux/arm64 
+      -t gaspxyz/avs-aggregator:ci -f Dockerfile 
+      --output type=oci,dest=build/avs-aggregator-image.tar.zst,compression=zstd 
+      ../
     inputs: ['@globs(sources)']
     outputs: ['build/avs-aggregator-image.tar.zst']
     options:
@@ -48,7 +52,6 @@ tasks:
   
   build-image-ci:
     script: |
-      set -ex
       docker load -i build/avs-aggregator-image.tar.zst && \
         docker image tag gaspxyz/avs-aggregator:ci gaspxyz/avs-aggregator:${IMAGE_TAG:-ci} && \
         docker push gaspxyz/avs-aggregator:${IMAGE_TAG:-ci}

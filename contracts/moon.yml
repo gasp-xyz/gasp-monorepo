@@ -1,11 +1,6 @@
 language: solidity
 type: application
 
-toolchain:
-  default: bun
-  bun:
-    version: 1.2.2
-
 fileGroups:
   sources:
     - "lib/**/*"
@@ -34,47 +29,48 @@ tasks:
       .
     inputs: ["@globs(sources)", "Dockerfile"]
 
-  contracts-build-image-ci:
+  contracts-build-ci:
     command: >
-      docker buildx build
-      --push
-      --platform linux/amd64
-      --tag gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
-      .
+      docker buildx build --platform linux/amd64,linux/arm64 -t gaspxyz/gasp-contracts:ci
+      --output type=oci,dest=gasp-contracts-image.tar.zst,compression=zstd .
     inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['gasp-contracts-image.tar.zst']
+    options:
+      outputStyle: stream
+
+  contracts-build-image-ci:
+    script: |
+      docker load -i gasp-contracts-image.tar.zst && \
+        docker image tag gaspxyz/gasp-contracts:ci gaspxyz/gasp-contracts:${IMAGE_TAG:-ci} && \
+        docker push gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
+    deps: ['contracts-build-ci']
+    inputs: ['build/gasp-contracts-image.tar.zst']
     options:
       cache: false
 
   contracts-format:
-    command: bun run format
+    command: yarn run format
     inputs: ["@globs(sources)"]
 
   contracts-lint:
-    command: bun run lint
+    command: yarn run lint
     inputs: ["@globs(sources)"]
 
   contracts-test:
-    command: bun run test
+    command: yarn run test
     inputs: ["@globs(sources)"]
 
   contracts-size:
-    command: bun run size
+    command: yarn run size
     inputs: ["@globs(sources)"]
 
   contracts-gas:
-    command: bun run gas
+    command: yarn run gas
     inputs: ["@globs(sources)"]
 
   contracts-coverage:
-    command: bun run cover
+    command: yarn run cover
     inputs: ["@globs(sources)"]
-
-  bun-install:
-    command: bun install
-    inputs: ["@globs(sources)"]
-    options:
-      runInCI: false
-      cache: false
 
   contracts-check:
     deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-size', 'contracts-gas', 'contracts-coverage']
@@ -88,7 +84,7 @@ tasks:
       runFromWorkspaceRoot: true
 
   release:
-    command: bun run release
+    command: yarn run release
     inputs: ["@globs(sources)"]
     options:
       cache: false
