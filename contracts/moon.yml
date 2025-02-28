@@ -39,7 +39,7 @@ tasks:
 
   buildkit-build-and-push-image-digests:
     command: >
-      docker buildx build --platform linux/amd64,linux/arm64
+      docker buildx build --platform linux/amd64
       --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
       --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
       --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
