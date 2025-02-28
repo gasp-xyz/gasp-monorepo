@@ -34,11 +34,11 @@ runner:
     - ':test-gasp-node'
     - ':benchmark-tests-gasp-node'
 
-unstable_remote:
-  api: 'grpc'
-  host: 'grpc://bazel-remote-cache.gasp.xyz:80'
-  auth:
-    headers:
-        'X-Custom-Header': 'gasp'
-  cache:
-    compression: zstd
+# unstable_remote:
+#   api: 'grpc'
+#   host: 'grpc://bazel-remote-cache.gasp.xyz:80'
+#   auth:
+#     headers:
+#         'X-Custom-Header': 'gasp'
+#   cache:
+#     compression: zstd
