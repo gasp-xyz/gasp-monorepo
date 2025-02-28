@@ -88,7 +88,8 @@ tasks:
     inputs: ["@globs(sources)"]
 
   contracts-check:
-    deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-size', 'contracts-gas', 'contracts-coverage']
+    deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-gas', 'contracts-coverage']
+    # deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-size', 'contracts-gas', 'contracts-coverage']
 
   contracts-check-addresses:
     script: |

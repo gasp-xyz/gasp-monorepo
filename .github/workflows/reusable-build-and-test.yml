@@ -169,6 +169,7 @@ jobs:
           fetch-depth: 0
       # Fix to avoid git errors when running inside the container
       - run: git config --global --add safe.directory $GITHUB_WORKSPACE
+      - run: apt-get update && apt-get install -y jq
 
       - uses: google-github-actions/auth@v2
         id: auth
