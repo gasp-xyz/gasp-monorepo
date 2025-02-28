@@ -36,4 +36,5 @@ moon.yml
 
 cache
 build
+*.tar
 *.tar.zst

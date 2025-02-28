@@ -45,10 +45,13 @@ jobs:
       - run: docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
       - run: docker buildx create --use
         
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
         with:
-          bun-version: "1.2.2"
-      - run: cd contracts && bun install
+          node-version-file: 'contracts/.nvmrc'
+          cache: 'yarn'
+          cache-dependency-path: "./contracts/yarn.lock"
+
+      - run: cd contracts && yarn install --immutable
 
       - run: moon ci :contracts-check :contracts-build-image-ci
         env:

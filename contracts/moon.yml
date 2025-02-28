@@ -32,17 +32,19 @@ tasks:
   contracts-build-ci:
     command: >
       docker buildx build --platform linux/amd64,linux/arm64 -t gaspxyz/gasp-contracts:ci
-      --output type=oci,dest=gasp-contracts-image.tar.zst,compression=zstd .
+      --output type=oci,dest=gasp-contracts-image.tar .
     inputs: ["@globs(sources)", "Dockerfile"]
-    outputs: ['gasp-contracts-image.tar.zst']
+    outputs: ['gasp-contracts-image.tar']
     options:
       outputStyle: stream
 
   contracts-build-image-ci:
     script: |
-      docker load -i gasp-contracts-image.tar.zst && \
-        docker image tag gaspxyz/gasp-contracts:ci gaspxyz/gasp-contracts:${IMAGE_TAG:-ci} && \
-        docker push gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
+      set -ex
+      docker info
+      docker load -i gasp-contracts-image.tar
+      docker image tag gaspxyz/gasp-contracts:ci gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
+      docker push gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
     deps: ['contracts-build-ci']
     options:
       cache: false

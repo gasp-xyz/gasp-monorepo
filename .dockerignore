@@ -18,4 +18,5 @@ moon.yml
 
 build
 **/build
+*.tar
 *.tar.zst

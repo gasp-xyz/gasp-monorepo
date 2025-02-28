@@ -114,4 +114,5 @@ out
 !**/.yarn/releases
 !**/.yarn/versions
 
+*.tar
 *.tar.zst
