@@ -78,12 +78,12 @@ jobs:
           proto-version: 0.47.2
         
       # - run: corepack enable && corepack prepare yarn@4.6.0 --activate
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: 'contracts/.nvmrc'
-          cache: 'yarn'
-          cache-dependency-path: "./contracts/yarn.lock"
-      - run: cd contracts && yarn install --immutable
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version-file: 'contracts/.nvmrc'
+      #     cache: 'yarn'
+      #     cache-dependency-path: "./contracts/yarn.lock"
+      # - run: cd contracts && yarn install --immutable
 
       - run: moon ci :contracts-check :contracts-build-and-push-image-ci
         env:
