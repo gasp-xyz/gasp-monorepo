@@ -116,3 +116,5 @@ out
 
 *.tar
 *.tar.zst
+
+*-buildkit-metadata.json

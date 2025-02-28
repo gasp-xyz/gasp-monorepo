@@ -11,6 +11,10 @@ fileGroups:
     - package.json
     - foundry.toml
     - remappings.txt
+  
+env:
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gasp-xyz/gasp-contracts
+  DOCKERHUB_REPOSITORY: gaspxyz/gasp-contracts
 
 tasks:
   build:
@@ -29,23 +33,33 @@ tasks:
       .
     inputs: ["@globs(sources)", "Dockerfile"]
 
-  contracts-build-ci:
+  buildkit-build-and-push-image-digests:
     command: >
-      docker buildx build --platform linux/amd64,linux/arm64 -t gaspxyz/gasp-contracts:ci
-      --output type=docker,dest=gasp-contracts-image.tar .
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --metadata-file contracts-buildkit-metadata.json ./
     inputs: ["@globs(sources)", "Dockerfile"]
-    outputs: ['gasp-contracts-image.tar']
+    outputs: ['contracts-buildkit-metadata.json']
     options:
       outputStyle: stream
+      cache: true
+      internal: true
 
-  contracts-build-image-ci:
+  contracts-build-and-push-image-ci:
     script: |
       set -ex
-      docker info
-      docker load < gasp-contracts-image.tar
-      docker image tag gaspxyz/gasp-contracts:ci gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
-      docker push gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
-    deps: ['contracts-build-ci']
+      IMAGE_DIGEST=$(jq -r '."containerimage.digest"' contracts-buildkit-metadata.json)
+
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST}
+
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+    deps: ['buildkit-build-and-push-image-digests']
+    inputs: ['contracts-buildkit-metadata.json']
     options:
       cache: false
 
