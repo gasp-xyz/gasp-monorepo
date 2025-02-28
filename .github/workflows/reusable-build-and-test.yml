@@ -77,7 +77,7 @@ jobs:
           cache: false
           proto-version: 0.47.2
         
-      - run: corepack enable && corepack prepare yarn@4.6.0 --activate
+      # - run: corepack enable && corepack prepare yarn@4.6.0 --activate
       - uses: actions/setup-node@v4
         with:
           node-version-file: 'contracts/.nvmrc'
