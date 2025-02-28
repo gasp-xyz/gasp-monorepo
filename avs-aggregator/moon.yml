@@ -20,7 +20,7 @@ fileGroups:
     - '/avs-eigensdk-go/**/*.go'
     - '/avs-eigensdk-go/**/go.mod'
 env:
-  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gasp-xyz/gasp-avs-aggregator
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gasp-xyz/avs-aggregator
   DOCKERHUB_REPOSITORY: gaspxyz/avs-aggregator
 
 tasks:
