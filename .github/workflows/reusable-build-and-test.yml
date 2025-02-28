@@ -73,8 +73,9 @@ jobs:
   
       - uses: moonrepo/setup-toolchain@v0
         with:
-          auto-install: false
+          auto-install: true
           cache: false
+          proto-version: 0.47.2
         
       - run: corepack enable && corepack prepare yarn@4.6.0 --activate
       - uses: actions/setup-node@v4
