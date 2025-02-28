@@ -81,11 +81,15 @@ jobs:
       #     cache-dependency-path: "./contracts/yarn.lock"
       
 
-      - uses: moonrepo/setup-toolchain@v0
-        with:
-          auto-install: true
-          cache: false
-          proto-version: 0.47.2
+      - name: Install proto manually
+        run: |
+          curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
+          bash /tmp/proto_install.sh 0.47.2 --yes && rm /tmp/proto_install.sh
+      # - uses: moonrepo/setup-toolchain@v0
+      #   with:
+      #     auto-install: true
+      #     cache: false
+      #     proto-version: 0.47.2
       
       - run: proto diagnose
       - run: proto debug env
