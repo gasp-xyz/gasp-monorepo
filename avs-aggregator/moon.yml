@@ -19,6 +19,9 @@ fileGroups:
     - '/go.work.sum'
     - '/avs-eigensdk-go/**/*.go'
     - '/avs-eigensdk-go/**/go.mod'
+env:
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gasp-xyz/gasp-avs-aggregator
+  DOCKERHUB_REPOSITORY: gaspxyz/gasp-avs-aggregator
 
 tasks:
   prepare-toolchain:
@@ -39,23 +42,33 @@ tasks:
     command: 'docker buildx build -t gaspxyz/avs-aggregator:local -f Dockerfile --load ../'
     inputs: ['@globs(sources)', 'Dockerfile']
 
-  build-ci:
-    command: > 
-      docker buildx build --platform linux/amd64,linux/arm64 -t gaspxyz/avs-aggregator:ci
-      --output type=docker,dest=avs-aggregator-image.tar -f Dockerfile ../
-    inputs: ['@globs(sources)']
-    outputs: ['avs-aggregator-image.tar']
+  buildkit-build-and-push-image-digests:
+    command: >
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --metadata-file avs-aggregator-buildkit-metadata.json -f Dockerfile ../
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['avs-aggregator-buildkit-metadata.json']
     options:
       outputStyle: stream
+      cache: true
+      internal: true
   
   build-image-ci:
     script: |
       set -ex
-      docker info
-      docker load < avs-aggregator-image.tar
-      docker image tag gaspxyz/avs-aggregator:ci gaspxyz/avs-aggregator:${IMAGE_TAG:-ci}
-      docker push gaspxyz/avs-aggregator:${IMAGE_TAG:-ci}
-    deps: ['build-ci']
+      IMAGE_DIGEST=$(jq -r '."containerimage.digest"' avs-aggregator-buildkit-metadata.json)
+
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST}
+
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+    deps: ['buildkit-build-and-push-image-digests']
+    inputs: ['avs-aggregator-buildkit-metadata.json']
     options:
       cache: false
 
