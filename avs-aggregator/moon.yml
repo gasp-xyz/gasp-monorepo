@@ -52,7 +52,7 @@ tasks:
     script: |
       set -ex
       docker info
-      docker load -i avs-aggregator-image.tar
+      docker load < avs-aggregator-image.tar
       docker image tag gaspxyz/avs-aggregator:ci gaspxyz/avs-aggregator:${IMAGE_TAG:-ci}
       docker push gaspxyz/avs-aggregator:${IMAGE_TAG:-ci}
     deps: ['build-ci']

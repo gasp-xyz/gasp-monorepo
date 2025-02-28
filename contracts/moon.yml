@@ -42,7 +42,7 @@ tasks:
     script: |
       set -ex
       docker info
-      docker load -i gasp-contracts-image.tar
+      docker load < gasp-contracts-image.tar
       docker image tag gaspxyz/gasp-contracts:ci gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
       docker push gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
     deps: ['contracts-build-ci']
