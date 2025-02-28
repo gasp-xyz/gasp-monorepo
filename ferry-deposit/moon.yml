@@ -10,12 +10,47 @@ fileGroups:
     - 'src/**/*'
     - 'package.json'
     - 'tsconfig.json'
+    - '.env'
+    - '.env.template'
+  tests:
+    - 'tests/**/*'
+    - 'vitest.config.ts'
+    - 'env.test'
 
 tasks:
   build:
-    command: 'yarn build'
+    command: yarn build
     inputs: ['@globs(sources)']
     outputs: ['build']
+  
   build-image-local:
-    command: 'docker buildx build -t gaspxyz/ferry-deposit:local -f Dockerfile .'
-    inputs: ['@globs(sources)', 'Dockerfile']
+    command: docker buildx build -t gaspxyz/ferry-deposit:local -f Dockerfile --load .
+    inputs: ['@globs(sources)', 'Dockerfile', '.dockerignore']
+
+  build-image-ci:
+    # command: >
+    #   docker buildx build
+    #   --push
+    #   --no-cache
+    #   --tag gaspxyz/ferry-deposit:${IMAGE_TAG:-ci}
+    #   --cache-to type=registry,ref=gaspxyz/ferry-deposit:cache,mode=max
+    #   --cache-from type=registry,ref=gaspxyz/ferry-deposit:cache
+    #   .
+    command: >
+      docker buildx build
+      --push
+      --tag gaspxyz/ferry-deposit:${IMAGE_TAG:-ci}
+      .
+    inputs: ['@globs(sources)', 'Dockerfile', '.dockerignore']
+    options:
+      cache: false
+
+  # lint:
+  #   command: 'yarn lint'
+  #   inputs: ['@globs(sources)', '@globs(tests)', 'biome.json']
+
+  release:
+    command: 'yarn run release'
+    options:
+      cache: false
+      runInCI: false

@@ -1,25 +1,123 @@
 language: solidity
 type: application
 
+toolchain:
+  node:
+    version: '22.11.0'
+
 fileGroups:
   sources:
-    - "lib/eigenlayer-middleware/**/*.sol"
-    - "lib/eigenlayer-middleware/package.json"
-    - "lib/forge-std/**/*.sol"
-    - "lib/forge-std/package.json"
+    - "lib/**/*"
     - "src/**/*"
     - "test/**/*"
+    - "script/**/*"
+    - "tools/**/*"
     - package.json
     - foundry.toml
     - remappings.txt
+  
+env:
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gasp-xyz/gasp-contracts
+  DOCKERHUB_REPOSITORY: gaspxyz/gasp-contracts
 
 tasks:
   build:
     command: "forge build"
     inputs: ["@globs(sources)"]
     outputs: ["out"]
+  
   build-image-local:
-    command:
-      "docker buildx build --platform linux/amd64 -t gaspxyz/gasp-contracts:local -t
-      gaspxyz/gasp-contracts:localarb -t gaspxyz/gasp-contracts:localbase -f Dockerfile ."
+    command: >
+      docker buildx build
+      --platform linux/amd64
+      --tag gaspxyz/gasp-contracts:local
+      --tag gaspxyz/gasp-contracts:localarb
+      --tag gaspxyz/gasp-contracts:localbase
+      --load
+      .
     inputs: ["@globs(sources)", "Dockerfile"]
+
+  buildkit-build-and-push-image-digests:
+    command: >
+      docker buildx build --platform linux/amd64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --metadata-file contracts-buildkit-metadata.json ./
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['contracts-buildkit-metadata.json']
+    options:
+      outputStyle: stream
+      cache: true
+      internal: true
+
+  contracts-build-and-push-image-ci:
+    script: |
+      set -ex
+      IMAGE_DIGEST=$(jq -r '."containerimage.digest"' contracts-buildkit-metadata.json)
+
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST}
+
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+    deps: ['buildkit-build-and-push-image-digests']
+    inputs: ['contracts-buildkit-metadata.json']
+    options:
+      cache: false
+
+  contracts-format:
+    command: yarn run format
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-lint:
+    command: yarn run lint
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-test:
+    command: yarn run test
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-size:
+    command: yarn run size
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-gas:
+    command: yarn run gas
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-coverage:
+    command: yarn run cover
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-check:
+    deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-gas', 'contracts-coverage']
+    # deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-size', 'contracts-gas', 'contracts-coverage']
+
+  contracts-check-addresses:
+    script: |
+      docker compose down
+      docker compose up --wait eth-contracts-deployment arbitrum-contracts-deployment base-contracts-deployment
+      git diff --exit-code contracts/script/output/
+    options:
+      runFromWorkspaceRoot: true
+
+  release:
+    command: yarn run release
+    inputs: ["@globs(sources)"]
+    options:
+      cache: false
+      runInCI: false
