@@ -423,7 +423,7 @@ mod mocks {
 
 		// This function is not expected to fail unless fee_lock_metadata is uninit
 		fn get_fee_lock_amount(who: AccountId) -> Result<Balance, DispatchError> {
-			Ok((Default::default()))
+			Ok(Default::default())
 		}
 
 		fn process_fee_lock(who: AccountId) -> DispatchResult {
@@ -461,6 +461,8 @@ impl pallet_xyk::Config for Test {
 	type AssetMetadataMutation = mocks::MockAssetRegApi;
 	type FeeLockWeight = ();
 }
+
+impl market::MarketBenchmarkingConfig for Test {}
 
 impl market::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
