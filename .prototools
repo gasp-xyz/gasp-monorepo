@@ -4,8 +4,5 @@ yarn = "4.6.0"
 go = "1.21"
 node = "22.11.0"
 
-[plugins]
-sops = "https://raw.githubusercontent.com/stk0vrfl0w/proto-toml-plugins/main/plugins/sops.toml"
-
 [settings]
 auto-install = true

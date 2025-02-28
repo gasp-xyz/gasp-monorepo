@@ -1,6 +1,10 @@
 language: solidity
 type: application
 
+toolchain:
+  node:
+    version: '22.11.0'
+
 fileGroups:
   sources:
     - "lib/**/*"
