@@ -109,6 +109,9 @@ tasks:
 
   contracts-check-addresses:
     script: |
+      set -ex
+      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
+
       docker compose down
       docker compose up --wait eth-contracts-deployment arbitrum-contracts-deployment base-contracts-deployment
       git diff --exit-code contracts/script/output/

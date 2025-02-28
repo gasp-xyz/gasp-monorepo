@@ -226,18 +226,3 @@ jobs:
       - name: Test ferry
         run: yarn run test-ferry
 
-  contracts-addresses-tests:
-    name: Contract addresses tests
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Deploy contracts
-        working-directory: .
-        run: docker compose up --wait eth-contracts-deployment arbitrum-contracts-deployment base-contracts-deployment
-
-      - name: Verify contracts addresses didnt change
-        working-directory: .
-        run: git diff --exit-code contracts/script/output/
