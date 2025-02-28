@@ -96,7 +96,7 @@ jobs:
       - run: proto debug config
       - run: proto setup
       - run: proto install
-      - run: proto regen
+      - run: proto regen --bin
       - run: proto status
       # - run: moon setup
       # - run: cd contracts && yarn install --immutable
