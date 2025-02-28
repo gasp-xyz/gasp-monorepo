@@ -19,8 +19,8 @@ env:
 jobs:
   contracts-build-and-test:
     name: '[contracts] Build and test'
-    runs-on: compile-gke
-    # runs-on: ubuntu-24.04
+    # runs-on: compile-gke
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -72,19 +72,20 @@ jobs:
       - run: pip install -r requirements.txt
         working-directory: contracts
   
+        
+      - run: corepack enable && corepack prepare yarn@4.6.0 --activate
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: 'contracts/.nvmrc'
+          cache: 'yarn'
+          cache-dependency-path: "./contracts/yarn.lock"
+      - run: cd contracts && yarn install --immutable
+
       - uses: moonrepo/setup-toolchain@v0
         with:
-          auto-install: true
+          auto-install: false
           cache: false
           proto-version: 0.47.2
-        
-      # - run: corepack enable && corepack prepare yarn@4.6.0 --activate
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version-file: 'contracts/.nvmrc'
-      #     cache: 'yarn'
-      #     cache-dependency-path: "./contracts/yarn.lock"
-      # - run: cd contracts && yarn install --immutable
 
       - run: moon ci :contracts-check :contracts-build-and-push-image-ci
         env:

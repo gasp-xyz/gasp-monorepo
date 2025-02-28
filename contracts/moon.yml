@@ -66,26 +66,38 @@ tasks:
   contracts-format:
     command: yarn run format
     inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
 
   contracts-lint:
     command: yarn run lint
     inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
 
   contracts-test:
     command: yarn run test
     inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
 
   contracts-size:
     command: yarn run size
     inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
 
   contracts-gas:
     command: yarn run gas
     inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
 
   contracts-coverage:
     command: yarn run cover
     inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
 
   contracts-check:
     deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-gas', 'contracts-coverage']
