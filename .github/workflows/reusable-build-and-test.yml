@@ -95,7 +95,7 @@ jobs:
       - run: proto diagnose
       - run: proto debug env
       - run: proto debug config
-      - run: proto setup
+      - run: proto setup --yes
       - run: proto install
       - run: proto regen --bin
       - run: proto status
