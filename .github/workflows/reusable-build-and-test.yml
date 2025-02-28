@@ -19,8 +19,8 @@ env:
 jobs:
   contracts-build-and-test:
     name: '[contracts] Build and test'
-    # runs-on: compile-gke
-    runs-on: ubuntu-24.04
+    runs-on: compile-gke
+    # runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
