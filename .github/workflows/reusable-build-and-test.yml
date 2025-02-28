@@ -87,8 +87,15 @@ jobs:
           cache: false
           proto-version: 0.47.2
       
+      - run: proto diagnose
+      - run: proto debug env
+      - run: proto debug config
+      - run: proto setup
+      - run: proto install
+      - run: proto regen
+      - run: proto status
       # - run: moon setup
-      - run: cd contracts && yarn install --immutable
+      # - run: cd contracts && yarn install --immutable
       - run: moon ci :contracts-check :contracts-build-and-push-image-ci
         env:
           IMAGE_TAG: ${{ inputs.version }}
