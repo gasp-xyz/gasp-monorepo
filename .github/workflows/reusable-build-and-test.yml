@@ -19,8 +19,8 @@ env:
 jobs:
   contracts-build-and-test:
     name: '[contracts] Build and test'
-    runs-on: compile-gke
-    # runs-on: ubuntu-24.04
+    # runs-on: compile-gke
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -83,10 +83,11 @@ jobs:
 
       - uses: moonrepo/setup-toolchain@v0
         with:
-          auto-install: false
+          auto-install: true
           cache: false
           proto-version: 0.47.2
-
+      
+      - run: moon setup
       - run: moon ci :contracts-check :contracts-build-and-push-image-ci
         env:
           IMAGE_TAG: ${{ inputs.version }}
