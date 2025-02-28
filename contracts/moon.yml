@@ -44,7 +44,6 @@ tasks:
         docker image tag gaspxyz/gasp-contracts:ci gaspxyz/gasp-contracts:${IMAGE_TAG:-ci} && \
         docker push gaspxyz/gasp-contracts:${IMAGE_TAG:-ci}
     deps: ['contracts-build-ci']
-    inputs: ['build/gasp-contracts-image.tar.zst']
     options:
       cache: false
 
