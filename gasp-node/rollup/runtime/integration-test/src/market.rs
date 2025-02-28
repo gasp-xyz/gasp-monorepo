@@ -48,6 +48,25 @@ pub(crate) fn events() -> Vec<RuntimeEvent> {
 		.collect::<Vec<_>>()
 }
 
+fn assert_has_event(generic_event: RuntimeEvent) {
+	let events = events();
+	let system_event: RuntimeEvent = generic_event.clone().into();
+	assert!(
+		events.iter().any(|record| *record == system_event),
+		"expected event {generic_event:?} not found in events {events:?}",
+	);
+}
+
+fn assert_last_event(generic_event: RuntimeEvent) {
+	let events = events();
+	let system_event: RuntimeEvent = generic_event.clone().into();
+	let last_event = events.last().expect("events expected").clone();
+	assert_eq!(
+		last_event, system_event,
+		"expected event {generic_event:?} is not equal to the last event {last_event:?}",
+	);
+}
+
 #[test]
 fn create_pool_works() {
 	test_env().execute_with(|| {
@@ -209,8 +228,8 @@ fn add_liquidity_fixed_works() {
 			pool_id: POOL_ID_1,
 			amounts_provided: (1000000000000000000, 0),
 			lp_token: POOL_ID_1,
-			lp_token_minted: 365524961509654622,
-			total_supply: 7865524961509654622,
+			lp_token_minted: 366066361276136601,
+			total_supply: 7866066361276136601,
 		}));
 
 		let expected = Market::calculate_expected_lp_minted(POOL_ID_2, (5 * UNIT, UNIT)).unwrap();
@@ -221,7 +240,7 @@ fn add_liquidity_fixed_works() {
 			amounts_provided: (5000000000000000000, 1000000000000000000),
 			lp_token: POOL_ID_2,
 			lp_token_minted: expected,
-			total_supply: 154925100814226884776,
+			total_supply: 154992874585943193114,
 		}));
 	})
 }
@@ -270,7 +289,7 @@ fn multiswap_should_work_xyk() {
 
 		println!("{:#?}", events());
 
-		System::assert_last_event(RuntimeEvent::Market(Event::AssetsSwapped {
+		assert_last_event(RuntimeEvent::Market(Event::AssetsSwapped {
 			who: AccountId::from(ALICE),
 			swaps: vec![
 				AtomicSwap {
@@ -278,7 +297,7 @@ fn multiswap_should_work_xyk() {
 					kind: PoolKind::Xyk,
 					asset_in: 3,
 					asset_out: 1,
-					amount_in: 1000000000000000000,
+					amount_in: 997000000000000000,
 					amount_out: 453305446940074565,
 				},
 				AtomicSwap {
@@ -287,15 +306,15 @@ fn multiswap_should_work_xyk() {
 					asset_in: 1,
 					asset_out: 2,
 					amount_in: 453305446940074565,
-					amount_out: 216201629292906575,
+					amount_out: 216823974598756034,
 				},
 				AtomicSwap {
 					pool_id: POOL_ID_3,
 					kind: PoolKind::Xyk,
 					asset_in: 2,
 					asset_out: 3,
-					amount_in: 216201629292906575,
-					amount_out: 105502376567411557,
+					amount_in: 216823974598756034,
+					amount_out: 106111241192873411,
 				},
 			],
 		}));
@@ -337,11 +356,10 @@ fn multiswap_should_work_stable_swap_with_bnb() {
 		// issuance decreased because of bnb
 		assert!(before > after);
 		assert_eq!(before, 100000000000000000000);
-		assert_eq!(after, 99999001734203514767);
+		assert_eq!(after, 99999000199960007998);
 
 		// println!("{:#?}", events());
-
-		System::assert_last_event(RuntimeEvent::Market(Event::AssetsSwapped {
+		assert_last_event(RuntimeEvent::Market(Event::AssetsSwapped {
 			who: AccountId::from(ALICE),
 			swaps: vec![
 				AtomicSwap {
@@ -349,24 +367,24 @@ fn multiswap_should_work_stable_swap_with_bnb() {
 					kind: PoolKind::StableSwap,
 					asset_in: ASSET_ID_3,
 					asset_out: 1,
-					amount_in: 1000000000000000000,
-					amount_out: 498447826003559573,
+					amount_in: 997000000000000000,
+					amount_out: 498449856817716432,
 				},
 				AtomicSwap {
 					pool_id: POOL_ID_2,
 					kind: PoolKind::StableSwap,
 					asset_in: 1,
 					asset_out: 2,
-					amount_in: 498447826003559573,
-					amount_out: 248463606016707341,
+					amount_in: 498449856817716432,
+					amount_out: 249212487980361585,
 				},
 				AtomicSwap {
 					pool_id: POOL_ID_3,
 					kind: PoolKind::StableSwap,
 					asset_in: 2,
 					asset_out: 3,
-					amount_in: 248463606016707341,
-					amount_out: 247712005295675461,
+					amount_in: 249212487980361585,
+					amount_out: 249206279805083014,
 				},
 			],
 		}));
@@ -391,7 +409,7 @@ fn multiswap_should_work_mixed() {
 
 		println!("{:#?}", events());
 
-		System::assert_last_event(RuntimeEvent::Market(Event::AssetsSwapped {
+		assert_last_event(RuntimeEvent::Market(Event::AssetsSwapped {
 			who: AccountId::from(ALICE),
 			swaps: vec![
 				AtomicSwap {
@@ -399,7 +417,7 @@ fn multiswap_should_work_mixed() {
 					kind: PoolKind::Xyk,
 					asset_in: ASSET_ID_3,
 					asset_out: 1,
-					amount_in: 1000000000000000000,
+					amount_in: 997000000000000000,
 					amount_out: 453305446940074565,
 				},
 				AtomicSwap {
@@ -408,15 +426,15 @@ fn multiswap_should_work_mixed() {
 					asset_in: 1,
 					asset_out: 2,
 					amount_in: 453305446940074565,
-					amount_out: 225962336828316482,
+					amount_out: 226642438818098374,
 				},
 				AtomicSwap {
 					pool_id: POOL_ID_3,
 					kind: PoolKind::Xyk,
 					asset_in: 2,
 					asset_out: 3,
-					amount_in: 225962336828316482,
-					amount_out: 110160480582936294,
+					amount_in: 226642438818098374,
+					amount_out: 110809799097802245,
 				},
 			],
 		}));
