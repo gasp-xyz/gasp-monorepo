@@ -32,7 +32,7 @@ tasks:
   contracts-build-ci:
     command: >
       docker buildx build --platform linux/amd64,linux/arm64 -t gaspxyz/gasp-contracts:ci
-      --output type=oci,dest=gasp-contracts-image.tar .
+      --output type=image,dest=gasp-contracts-image.tar .
     inputs: ["@globs(sources)", "Dockerfile"]
     outputs: ['gasp-contracts-image.tar']
     options:
