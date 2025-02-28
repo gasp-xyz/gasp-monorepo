@@ -1,2 +1,7 @@
+# rust:
+#   syncToolchainConfig: false
+#   version: 1.82.0
+#   targets: [ "wasm32-unknown-unknown" ]
+
 node:
   packageManager: yarn

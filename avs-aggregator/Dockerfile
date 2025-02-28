@@ -18,4 +18,4 @@ FROM debian:stable-slim
 WORKDIR /app
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /avs-aggregator /avs-aggregator
-ENTRYPOINT [ "/avs-aggregator"]
+ENTRYPOINT ["/avs-aggregator"]

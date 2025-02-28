@@ -230,6 +230,7 @@ jobs:
         run: yarn install
 
       - name: Install @mangata-finance/types deps
+        working-directory: e2eTests
         run: |
           if [[ -n "${{ github.event.inputs.mangataTypesVersion }}" ]]; then
             yarn add @mangata-finance/types@${{ github.event.inputs.mangataTypesVersion }}

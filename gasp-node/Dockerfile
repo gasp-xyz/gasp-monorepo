@@ -1,4 +1,4 @@
-FROM mangatasolutions/node-builder:multi-1.77-nightly-2024-01-20 AS builder
+FROM gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20 AS builder
 
 WORKDIR /app
 
@@ -26,7 +26,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
 		&& cp target/release/rollup-node ./node \
 		&& cp target/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm ./rollup_runtime.compact.compressed.wasm
 
-FROM debian:buster AS runner
+FROM debian:bookworm AS runner
 
 WORKDIR /app
 
