@@ -50,7 +50,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
-          version: 0.21.1
+          version: v0.21.1
           driver: kubernetes
           driver-opts: |
             namespace=buildkit
