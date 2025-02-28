@@ -20,8 +20,10 @@ jobs:
   contracts-build-and-test:
     name: '[contracts] Build and test'
     runs-on: ubuntu-24.04
-    permissions:
-      security-events: write
+    # permissions:
+    #   contents: read
+    #   id-token: write
+    #   security-events: write
     steps:
       - uses: actions/checkout@v4
         with:
