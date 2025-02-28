@@ -1,8 +1,8 @@
 use super::{types, L1Error, L1Interface};
 use alloy::contract::{CallBuilder, CallDecoder};
 use lazy_static::lazy_static;
+use crate::utils::simulate_send_and_wait_for_result;
 
-pub use alloy::network::primitives::ReceiptResponse;
 use alloy::network::{EthereumWallet, Network, NetworkWallet};
 use alloy::providers::{Provider, ProviderBuilder, WalletProvider};
 use alloy::signers::local::PrivateKeySigner;
@@ -22,19 +22,94 @@ lazy_static! {
     .unwrap();
 }
 
+
 #[derive(Clone)]
-pub struct RolldownContract<P> {
-    contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance<BoxTransport, P>,
+pub struct RolldownContract<T,P,N> {
+    contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance<T, P, N>,
 }
 
-impl<P> RolldownContract<P>
+impl<T, P, N> RolldownContract<T, P, N>
 where
-    P: Provider + WalletProvider,
+    T: Transport + Clone,
+    P: Provider<T, N> + WalletProvider<N>,
+    N: Network,
+{
+
+    #[cfg(test)]
+    #[tracing::instrument(skip_all)]
+    pub (crate) async fn deploy(provider: P) -> Result<Self, L1Error>
+    {
+        let sender = provider.wallet().default_signer_address();
+        let contract_handle = contract_bindings::rolldown::Rolldown::RolldownInstance::<T,P,N>::deploy(
+                provider
+        ).await?;
+        tracing::info!("contract deployed");
+
+
+        let call = (&contract_handle).initialize(sender, 0, sender);
+        simulate_send_and_wait_for_result(contract_handle.provider(), call).await?;
+        tracing::info!("contract initialized");
+
+        Ok(RolldownContract {
+            contract_handle
+        })
+    }
+
+    #[cfg(test)]
+    #[tracing::instrument(skip_all)]
+    pub (crate) async fn deposit_native(&self, amount: u128, ferry_tip: u128) -> Result<(), L1Error> where 
+    {
+        let call = self
+            .contract_handle
+            .deposit_native_1(alloy::primitives::U256::from(ferry_tip))
+            .value(alloy::primitives::U256::from(amount));
+
+        simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?;
+        Ok(())
+    }
+
+    #[cfg(test)]
+    #[tracing::instrument(skip_all)]
+    pub (crate) async fn submit_merkle_root(&self, root: [u8; 32], range: (u128, u128)) -> Result<(), L1Error> where 
+    {
+        let range = contract_bindings::rolldown::IRolldownPrimitives::Range{
+            start: alloy::primitives::U256::from(range.0), 
+            end: alloy::primitives::U256::from(range.1),
+        };
+
+        let call = self
+            .contract_handle
+            .update_l1_from_l2(root.into(), range);
+
+        tracing::info!("hello world!!!!!!");
+        simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?;
+        Ok(())
+    }
+}
+
+
+impl<T, P, N> RolldownContract<T, P, N>
+where
+    T: Transport + Clone,
+    P: Provider<T, N> + Clone,
+    N: Network,
 {
 
     pub fn address(&self) -> [u8;20] {
         self.contract_handle.address().clone().into()
     }
+
+    pub async fn is_admin(&self, address: [u8; 20]) -> Result<bool, L1Error>{
+        let admin_role = self.contract_handle.DEFAULT_ADMIN_ROLE().call().await?._0;
+        Ok(self.contract_handle.hasRole(admin_role, address.into()).call().await?._0)
+    }
+
+    pub async fn is_updater(&self, address: [u8; 20]) -> Result<bool, L1Error>{
+        let updater_role = self.contract_handle.UPDATER_ROLE().call().await?._0;
+        Ok(self.contract_handle.hasRole(updater_role, address.into()).call().await?._0)
+    }
+
+
 
     pub fn new(provider: P, address: [u8; 20]) -> Self {
         RolldownContract {
@@ -45,33 +120,6 @@ where
         }
     }
 
-    #[cfg(test)]
-    pub (crate) async fn deploy(provider: P) -> Result<Self, L1Error>{
-        let sender = provider.wallet().default_signer_address();
-        let contract_handle = contract_bindings::rolldown::Rolldown::RolldownInstance::deploy(
-                provider,
-        ).await?;
-
-
-        // let call = contract_handle.initialize(sender, 0, sender);
-        // self.
-
-        Ok(RolldownContract {
-            contract_handle
-        })
-    }
-
-    #[cfg(test)]
-    #[tracing::instrument(skip(self))]
-    pub (crate) async fn deposit_native(&self, amount: u128, ferry_tip: u128) -> Result<(), L1Error> {
-        let call = self
-            .contract_handle
-            .deposit_native_1(alloy::primitives::U256::from(ferry_tip))
-            .value(alloy::primitives::U256::from(amount));
-
-        self.simulate_send_and_wait_for_result(call).await?;
-        Ok(())
-    }
 
     pub async fn find_l2_batch(&self, request_id: u128) -> Result<[u8; 32], L1Error> {
         ETH_CALL_COUNTER.with_label_values(&["find_l2_batch"]).inc();
@@ -171,49 +219,51 @@ where
         let call = self
             .contract_handle
             .close_cancel(cancel, merkle_root.0.into(), proof);
-        Ok(self.simulate_send_and_wait_for_result(call).await?)
+
+        todo!()
+        // Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
     }
 
-    pub async fn simulate_send_and_wait_for_result<T,Pr,D,N>(
-        &self,
-        call: CallBuilder<T,Pr,D,N>,
-    ) -> Result<H256, L1Error> 
-    where 
-        N: Network,
-        D: CallDecoder + Send + Sync + Unpin,
-        T: Transport + Clone,
-        Pr: Provider<T, N>
-    {
-
-        let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) =
-            crate::utils::estimate_gas_in_wei(self.contract_handle.provider()).await?;
-        let gas = call.estimate_gas().await?;
-
-
-        match call.call().await {
-            Ok(_result) => {
-                let receipt = call
-                    .gas(gas * 12 / 10)
-                    .max_fee_per_gas(max_fee_per_gas_in_wei)
-                    .max_priority_fee_per_gas(max_priority_fee_per_gas_in_wei)
-                    .send()
-                    .await?
-                    .get_receipt()
-                    .await?;
-
-                let status = receipt.status();
-                let hash = receipt.transaction_hash().0;
-                tracing::trace!("execution status {status}");
-                if status {
-                    Ok(hash.into())
-                }else{
-                    Err(L1Error::TxReverted(hash.into()))
-                }
-            }
-            Err(err) => {
-                tracing::error!("status nok {:?}", err);
-                Err(err.into())
-            }
-        }
-    }
+    // pub async fn simulate_send_and_wait_for_result<T,Pr,D,N>(
+    //     &self,
+    //     call: CallBuilder<T,Pr,D,N>,
+    // ) -> Result<H256, L1Error> 
+    // where 
+    //     N: Network,
+    //     D: CallDecoder + Send + Sync + Unpin,
+    //     T: Transport + Clone,
+    //     Pr: Provider<T, N>
+    // {
+    //
+    //     let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) =
+    //         crate::utils::estimate_gas_in_wei(self.contract_handle.provider()).await?;
+    //     let gas = call.estimate_gas().await?;
+    //
+    //
+    //     match call.call().await {
+    //         Ok(_result) => {
+    //             let receipt = call
+    //                 .gas(gas * 12 / 10)
+    //                 .max_fee_per_gas(max_fee_per_gas_in_wei)
+    //                 .max_priority_fee_per_gas(max_priority_fee_per_gas_in_wei)
+    //                 .send()
+    //                 .await?
+    //                 .get_receipt()
+    //                 .await?;
+    //
+    //             let status = receipt.status();
+    //             let hash = receipt.transaction_hash().0;
+    //             tracing::trace!("execution status {status}");
+    //             if status {
+    //                 Ok(hash.into())
+    //             }else{
+    //                 Err(L1Error::TxReverted(hash.into()))
+    //             }
+    //         }
+    //         Err(err) => {
+    //             tracing::error!("status nok {:?}", err);
+    //             Err(err.into())
+    //         }
+    //     }
+    // }
 }

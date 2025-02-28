@@ -1,4 +1,4 @@
-use alloy::{network::EthereumWallet, providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider}, signers::local::PrivateKeySigner, sol_types::SolValue, transports::TransportError};
+use alloy::{network::{EthereumWallet, Network}, providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider}, signers::local::PrivateKeySigner, sol_types::SolValue, transports::{Transport, TransportError}};
 use primitive_types::H256;
 use hex::encode as hex_encode;
 
@@ -73,31 +73,33 @@ pub async fn create_provider(uri: &'static str, pkey: [u8; 32] ) -> Result<impl 
 }
 
 impl L1Builder {
-    pub async fn build(
+    pub async fn build<T,P,N>(
         self,
-    ) -> Result<L1<impl WalletProvider + Provider + Clone>, L1Error> {
+    ) -> Result<impl L1Interface, L1Error> {
         let provider = create_provider(self.uri, self.pkey).await?;
         let rolldown = RolldownContract::new(provider, self.rolldown_address);
         Ok(L1::new(rolldown))
     }
 }
 
-pub struct L1<P> {
-    rolldown_contract: RolldownContract<P>
+pub struct L1<T,P,N> {
+    rolldown_contract: RolldownContract<T,P,N>
 }
 
 
-impl<P> L1<P> {
-    pub fn new(rolldown_contract: RolldownContract<P>) -> Self{
+impl<T,P,N> L1<T,P,N> {
+    pub fn new(rolldown_contract: RolldownContract<T,P,N>) -> Self{
         L1{
             rolldown_contract
         }
     }
 }
 
-impl<P> L1Interface for L1<P>
+impl<T, P, N> L1Interface for L1<T, P, N>
 where
-    P: Provider + WalletProvider
+    T: Transport + Clone,
+    P: Provider<T, N> + Clone,
+    N: Network,
 {
     // async fn deposit_native(&self, request_hash: H256) -> Result<bool, L1Error>{
     //     todo!()
