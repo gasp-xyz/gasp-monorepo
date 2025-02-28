@@ -87,7 +87,7 @@ jobs:
           cache: false
           proto-version: 0.47.2
       
-      - run: moon setup
+      # - run: moon setup
       - run: cd contracts && yarn install --immutable
       - run: moon ci :contracts-check :contracts-build-and-push-image-ci
         env:
