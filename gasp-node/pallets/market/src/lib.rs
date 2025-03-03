@@ -777,6 +777,12 @@ pub mod pallet {
 
 			let sender = ensure_signed(origin)?;
 
+			// ensure maintenance mode
+			ensure!(
+				!T::MaintenanceStatusProvider::is_maintenance(),
+				Error::<T>::TradingBlockedByMaintenanceMode
+			);
+
 			// At this point pre dispatch has already checked that
 			// The user has asset_amount_in and that swap_pool_list.len() in not zero
 			// and that the first swap_pool_list element pool has asset_id_in as one of its two assets
@@ -803,12 +809,6 @@ pub mod pallet {
 				WithdrawReasons::all(),
 				Default::default(),
 			)?;
-
-			// ensure maintenance mode
-			ensure!(
-				!T::MaintenanceStatusProvider::is_maintenance(),
-				Error::<T>::TradingBlockedByMaintenanceMode
-			);
 
 			let mut is_lockless: Option<bool> = None;
 			let mut fees: Option<T::Balance> = None;
@@ -1004,6 +1004,12 @@ pub mod pallet {
 
 			let sender = ensure_signed(origin)?;
 
+			// ensure maintenance mode
+			ensure!(
+				!T::MaintenanceStatusProvider::is_maintenance(),
+				Error::<T>::TradingBlockedByMaintenanceMode
+			);
+
 			// At this point pre dispatch has already checked that
 			// The user has max_amount_in and that swap_pool_list.len() in not zero
 			// and that the first swap_pool_list element pool has asset_id_in as one of its two assets
@@ -1030,12 +1036,6 @@ pub mod pallet {
 				WithdrawReasons::all(),
 				Default::default(),
 			)?;
-
-			// ensure maintenance mode
-			ensure!(
-				!T::MaintenanceStatusProvider::is_maintenance(),
-				Error::<T>::TradingBlockedByMaintenanceMode
-			);
 
 			let mut is_lockless: Option<bool> = None;
 			let mut fees: Option<T::Balance> = None;
