@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use std::num::NonZeroUsize;
 use std::sync::Mutex;
 
-use crate::RequestStatus;
+use crate::{L1Withdrawal, RequestStatus};
 
 use super::{types, L1Error, L1Interface};
 
@@ -84,12 +84,20 @@ where
 
     async fn close_withdrawal(
             &self,
-            withdrawal: types::Withdrawal,
+            withdrawal: L1Withdrawal,
             merkle_root: H256,
             proof: Vec<H256>,
         ) -> Result<H256, L1Error> {
         self.l1.close_withdrawal(withdrawal, merkle_root, proof).await
     }
+
+    async fn ferry_withdrawal(
+            &self,
+            withdrawal: L1Withdrawal,
+        ) -> Result<H256, L1Error> {
+        self.l1.ferry_withdrawal(withdrawal).await
+    }
+
 
 
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error> {

@@ -1,8 +1,9 @@
 use super::{types, L1Error, L1Interface};
 use alloy::contract::{CallBuilder, CallDecoder};
+use contract_bindings::irolldown::IRolldownPrimitives::Withdrawal;
 use lazy_static::lazy_static;
 use crate::utils::simulate_send_and_wait_for_result;
-use crate::RequestStatus;
+use crate::{L1Withdrawal, RequestStatus};
 
 use alloy::network::{EthereumWallet, Network, NetworkWallet};
 use alloy::providers::{Provider, ProviderBuilder, WalletProvider};
@@ -51,16 +52,41 @@ where
     }
 
     #[tracing::instrument(skip(self, withdrawal))]
+    pub async fn hash(
+        &self,
+        withdrawal: L1Withdrawal,
+    ) -> Result<H256, L1Error> {
+        let call = self
+            .contract_handle
+            .hashWithdrawal(withdrawal.into());
+        Ok(call.call().await?._0.0.into())
+    }
+
+
+    #[tracing::instrument(skip(self, withdrawal))]
+    pub async fn send_ferry_withdrawal(
+        &self,
+        withdrawal: L1Withdrawal,
+    ) -> Result<H256, L1Error> {
+        let call = self
+            .contract_handle
+            .ferryWithdrawal(withdrawal.into());
+        Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
+    }
+
+
+    #[tracing::instrument(skip(self, withdrawal))]
     pub async fn send_close_withdrawal_tx(
         &self,
-        withdrawal: types::Withdrawal,
+        withdrawal: L1Withdrawal,
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
         let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
+        let native_withdrawal: types::Withdrawal = withdrawal.into();
         let call = self
             .contract_handle
-            .closeWithdrawal(withdrawal, merkle_root.0.into(), proof);
+            .closeWithdrawal(native_withdrawal, merkle_root.0.into(), proof);
         Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
     }
 

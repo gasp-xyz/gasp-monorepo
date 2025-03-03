@@ -29,7 +29,6 @@ lru = "0.12.5"
 prometheus = "0.13.4"
 lazy_static = "1.4.0"
 warp = "0.3.7"
-
 contract-bindings = { workspace = true }
 
 

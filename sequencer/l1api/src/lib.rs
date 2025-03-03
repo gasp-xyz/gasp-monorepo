@@ -1,3 +1,5 @@
+use std::io::Read;
+
 use alloy::{
     network::{EthereumWallet, Network},
     providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider},
@@ -24,6 +26,8 @@ pub mod types {
     pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
     pub use contract_bindings::rolldown::IRolldownPrimitives::L1Update;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
+    pub use contract_bindings::rolldown::IRolldownPrimitives::RequestId;
+    pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -42,20 +46,68 @@ pub enum L1Error {
     TxReverted(H256),
 }
 
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum RequestStatus {
     Pending,
     Ferried([u8; 20]),
     Closed,
 }
 
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct L1Withdrawal {
+    pub request_id: u128,
+    pub recipient: [u8; 20],
+    pub token_address: [u8; 20],
+    pub amount: u128,
+    pub ferry_tip: u128,
+}
+
+			// L2Request::Cancel(cancel) => eth_abi::L2RequestType::Cancel
+			// 	.abi_encode()
+			// 	.iter()
+			// 	.chain(cancel.abi_encode().iter())
+			// 	.cloned()
+			// 	.collect(),
+
+impl L1Withdrawal{
+    pub fn hash(&self) -> H256{
+        let w: types::Withdrawal  = (*self).into();
+        let withdrawal_encoded = w.abi_encode();
+        tracing::info!("WITHDRAWAL ENCODED: {}", hex_encode(withdrawal_encoded.clone()));
+        tracing::info!("WITHDRAWAL ENCODED HASH: {}", hex_encode(Keccak256::digest(withdrawal_encoded.clone())));
+        let data = vec![0u8; 32].into_iter().chain(withdrawal_encoded);
+        let hash: [u8; 32] = Keccak256::digest(data.collect::<Vec<_>>()).into();
+        hash.into()
+    }
+
+}
+impl Into<types::Withdrawal> for L1Withdrawal {
+    fn into(self) -> types::Withdrawal {
+        types::Withdrawal {
+            requestId: types::RequestId{
+                origin: 1u8, // Origin::L2
+                id: self.request_id.try_into().unwrap(),
+            },
+            recipient: self.recipient.into(),
+            tokenAddress: self.token_address.into(),
+            amount: self.amount.try_into().unwrap(),
+            ferryTip: self.ferry_tip.try_into().unwrap(),
+        }
+    }
+}
+
 pub trait L1Interface {
+    async fn ferry_withdrawal(&self, withdrawal: L1Withdrawal) -> Result<H256, L1Error>;
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
     async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>;
     async fn get_status(&self, request_hash: H256) -> Result<RequestStatus, L1Error>;
     async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error>;
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error>;
     async fn get_latest_reqeust_id(&self) -> Result<Option<u128>, L1Error>;
-    async fn get_merkle_root(&self, request_id: u128) -> Result<Option<([u8; 32], (u128, u128))>, L1Error>;
+    async fn get_merkle_root(
+        &self,
+        request_id: u128,
+    ) -> Result<Option<([u8; 32], (u128, u128))>, L1Error>;
     async fn get_latest_finalized_request_id(&self) -> Result<Option<u128>, L1Error>;
 
     async fn close_cancel(
@@ -67,7 +119,7 @@ pub trait L1Interface {
 
     async fn close_withdrawal(
         &self,
-        withdrawal: types::Withdrawal,
+        withdrawal: L1Withdrawal,
         cerkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error>;
@@ -133,6 +185,10 @@ where
         result.try_into().map_err(|_| L1Error::OverflowError)
     }
 
+    async fn ferry_withdrawal(&self, withdrawal: L1Withdrawal) -> Result<H256, L1Error>{
+        self.rolldown_contract.send_ferry_withdrawal(withdrawal).await
+    }
+
     // async fn deposit_native(&self, request_hash: H256) -> Result<bool, L1Error>{
     //     todo!()
     // }
@@ -158,10 +214,10 @@ where
                     .await?;
                 Ok(Some((merkle_root, range)))
             }
-            Err(L1Error::Alloy(alloy::contract::Error::TransportError(alloy::transports::RpcError::ErrorResp(payload)))) if payload.code == 3 => {
-                Ok(None)
-            },
-            Err(e) => Err(e)
+            Err(L1Error::Alloy(alloy::contract::Error::TransportError(
+                alloy::transports::RpcError::ErrorResp(payload),
+            ))) if payload.code == 3 => Ok(None),
+            Err(e) => Err(e),
         }
     }
 
@@ -268,12 +324,12 @@ where
     #[tracing::instrument(skip(self, withdrawal))]
     async fn close_withdrawal(
         &self,
-        withdrawal: types::Withdrawal,
+        withdrawal: L1Withdrawal,
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
         self.rolldown_contract
-            .send_close_withdrawal_tx(withdrawal, merkle_root, proof)
+            .send_close_withdrawal_tx(withdrawal.into(), merkle_root, proof)
             .await
     }
 

@@ -79,7 +79,7 @@ where
 }
 
 #[cfg(test)]
-mod test_utils {
+pub mod test_utils {
     use super::*;
     use contract_bindings::gasptesttoken::GaspTestToken::GaspTestTokenInstance;
     use crate::erc20::Erc20Token;
@@ -96,10 +96,28 @@ mod test_utils {
         P: Provider<T, N> + WalletProvider<N> + Clone,
         N: Network,
     {
+
+    pub (crate) async fn deploy(provider: P) -> Result<Self, L1Error> {
+        let sender = provider.wallet().default_signer_address();
+        let contract_handle = GaspTestTokenInstance::<T,P,N>::deploy(
+                provider
+        ).await?;
+        tracing::info!("contract deployed");
+
+        Ok(DevToken {
+            contract_handle
+        })
+    }
+
     fn new(address: [u8; 20], provider: P) -> Self {
         DevToken {
             contract_handle: GaspTestTokenInstance::<T, P, N>::new(address.into(), provider),
         }
+    }
+
+    pub fn address(&self) -> [u8; 20] {
+        let addr = self.contract_handle.address().clone();
+        addr.0.into()
     }
 
     pub async fn mint(
