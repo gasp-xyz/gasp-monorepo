@@ -229,11 +229,17 @@ fn swap_gasless_is_pre_validated() {
 			res.err().unwrap(),
 			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
 		);
-		
+
 		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
 			&who,
 			&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
-				swap_pool_list: vec![POOL_ID; <Runtime as pallet_market::Config>::MaxSwapListLength::get().saturating_add(1).try_into().unwrap()],
+				swap_pool_list: vec![
+					POOL_ID;
+					<Runtime as pallet_market::Config>::MaxSwapListLength::get()
+						.saturating_add(1)
+						.try_into()
+						.unwrap()
+				],
 				asset_id_in: ASSET_ID_1,
 				asset_amount_in: UNIT,
 				asset_id_out: ASSET_ID_2,

@@ -788,7 +788,10 @@ pub mod pallet {
 			// TODO
 			// We should move this to a pre_validation function
 			ensure!(!swap_pool_list.len().is_zero(), Error::<T>::SwapPrevalidation);
-			ensure!(swap_pool_list.len() <= T::MaxSwapListLength::get() as usize, Error::<T>::SwapPrevalidation);
+			ensure!(
+				swap_pool_list.len() <= T::MaxSwapListLength::get() as usize,
+				Error::<T>::SwapPrevalidation
+			);
 			let first_pool_info = Self::get_pool_info(swap_pool_list[0])
 				.map_err(|_| Error::<T>::SwapPrevalidation)?;
 			ensure!(
@@ -1012,7 +1015,10 @@ pub mod pallet {
 			// TODO
 			// We should move this to a pre_validation function
 			ensure!(!swap_pool_list.len().is_zero(), Error::<T>::SwapPrevalidation);
-			ensure!(swap_pool_list.len() <= T::MaxSwapListLength::get() as usize, Error::<T>::SwapPrevalidation);
+			ensure!(
+				swap_pool_list.len() <= T::MaxSwapListLength::get() as usize,
+				Error::<T>::SwapPrevalidation
+			);
 			let first_pool_info = Self::get_pool_info(swap_pool_list[0])
 				.map_err(|_| Error::<T>::SwapPrevalidation)?;
 			ensure!(

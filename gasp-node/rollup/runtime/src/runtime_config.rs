@@ -588,7 +588,9 @@ pub mod config {
 							)
 						);
 						ensure!(
-							swap_pool_list.len() <= <Runtime as pallet_market::Config>::MaxSwapListLength::get() as usize,
+							swap_pool_list.len() <=
+								<Runtime as pallet_market::Config>::MaxSwapListLength::get()
+									as usize,
 							TransactionValidityError::Invalid(
 								InvalidTransaction::SwapPrevalidation.into(),
 							)
