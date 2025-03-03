@@ -21,11 +21,10 @@ import {
 	TX_COST,
 	STASH_URL,
 	DELAY,
+	BATCH_SIZE,
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
 import { reportBalance, serveMetrics } from "./metrics.js";
-
-const BATCH_SIZE = 1000n;
 
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
@@ -78,14 +77,8 @@ async function main() {
 				const req = await closerService.getNextRequestToClose();
 				if (req) {
 					if (isWithdrawal(req)) {
-						logger.info(
-							`#${header.number} Closing withdrawal ${toString(req)}`,
-						);
 						await closerService.closeWithdrawal(req, hexToU8a(PRIVATE_KEY));
 					} else if (isCancel(req)) {
-						logger.info(
-							`#${header.number} Closing withdrawal ${cancelToString(req)}`,
-						);
 						await closerService.closeCancel(req, hexToU8a(PRIVATE_KEY));
 					}
 				} else {

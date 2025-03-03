@@ -40,11 +40,11 @@ contract MultiStage is Script, Utils, Test {
       gaspMultiRollupServiceDeployer.run(chain);
 
       string memory _GMRS_OUTPUT_PATH = "gmrs_output";
-      string memory gmrsDeployedContracts = readOutput(evmPrefixedPath(chain, _GMRS_OUTPUT_PATH));
+      string memory gmrsDeployedContracts = readOutput(_GMRS_OUTPUT_PATH);
       gmrs = GaspMultiRollupService(stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs"));
 
       string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
-      string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(chain, _ROLLDOWN_OUTPUT_PATH));
+      string memory rolldownDeployedContracts = readOutput(_ROLLDOWN_OUTPUT_PATH);
       rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
 
       vm.startBroadcast(avsOwner);
@@ -63,13 +63,13 @@ contract MultiStage is Script, Utils, Test {
         // added some extra call here so nonce does inc
         new EmptyContract();
         vm.stopBroadcast();
-        
+
         Deployer_M2 eigenDeployer = new Deployer_M2();
         AnvilSetup anvilDeployer = new AnvilSetup();
         Deployer finalizerDeployer = new Deployer();
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
 
-        if (!rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Ethereum)) {
+        if (!rolldownDeployer.isProxyDeployed()) {
           console.log("################################################################################");
           console.log("Deploying eigen layer infra");
           console.log("################################################################################");
@@ -90,7 +90,7 @@ contract MultiStage is Script, Utils, Test {
           console.log("################################################################################");
           rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
         } else {
-          //TODO: 
+          //TODO:
           //redeploy finalizer contracts as well
 
           console.log("################################################################################");
@@ -109,7 +109,7 @@ contract MultiStage is Script, Utils, Test {
         taskManager = FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
 
         string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
-        string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Ethereum, _ROLLDOWN_OUTPUT_PATH));
+        string memory rolldownDeployedContracts = readOutput(_ROLLDOWN_OUTPUT_PATH);
         rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
 
         string memory _CONFIG_PATH = "deploy.config";
@@ -155,7 +155,7 @@ contract MultiStage is Script, Utils, Test {
         deploy_rolldown_and_gmrs(IRolldownPrimitives.ChainId.Arbitrum);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("ethereum-holesky"))){
-        
+
         console.log("################################################################################");
         console.log("Deploying finalizer contracts");
         console.log("################################################################################");
@@ -182,7 +182,7 @@ contract MultiStage is Script, Utils, Test {
         taskManager = FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
 
         string memory _ROLLDOWN_OUTPUT_PATH = "rolldown_output";
-        string memory rolldownDeployedContracts = readOutput(evmPrefixedPath(IRolldownPrimitives.ChainId.Ethereum, _ROLLDOWN_OUTPUT_PATH));
+        string memory rolldownDeployedContracts = readOutput(_ROLLDOWN_OUTPUT_PATH);
         rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
 
         string memory _CONFIG_PATH = "deploy.config";
@@ -202,7 +202,7 @@ contract MultiStage is Script, Utils, Test {
         console.log("################################################################################");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
         // We only want upgrade and not deploy from scratch
-        require(rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Ethereum), "Proxy not deployed");
+        require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed");
         rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("upgrade-rolldown-arbitrum-sepolia"))){
@@ -212,7 +212,7 @@ contract MultiStage is Script, Utils, Test {
         console.log("################################################################################");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
         // We only want upgrade and not deploy from scratch
-        require(rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Arbitrum), "Proxy not deployed");
+        require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed");
         rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
 
       }else if (keccak256(abi.encodePacked(variant)) == keccak256(abi.encodePacked("upgrade-rolldown-base-sepolia"))){
@@ -222,14 +222,10 @@ contract MultiStage is Script, Utils, Test {
         console.log("################################################################################");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
         // We only want upgrade and not deploy from scratch
-        require(rolldownDeployer.isProxyDeployed(IRolldownPrimitives.ChainId.Base), "Proxy not deployed");
+        require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed");
         rolldownDeployer.run(IRolldownPrimitives.ChainId.Base);
 
       }else{
- 
-        //TODO: ethereum-prod
-        //TODO: arbitrum-prod
-        //TODO: ...
         revert("Unsupported variant");
       }
     }

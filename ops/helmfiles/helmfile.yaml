@@ -555,3 +555,4 @@ releases:
         enablePersistence: true
         verifierEnabled: {{ .Values | get "blockscoutEnabled" false }}
         verifierUrl: 'http://blockscout-base-blockscout-stack-blockscout-svc:80/api'
+        customGenesisUrl: {{ .Values | get "evmNode.customGenesisUrlBase" "" }}

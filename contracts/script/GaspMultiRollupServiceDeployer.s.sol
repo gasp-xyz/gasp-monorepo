@@ -31,24 +31,9 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
     address public updaterAccount;
     bool public allowNonRootInit;
 
-    function evmPrefixedPath(IRolldownPrimitives.ChainId chain) public view returns (string memory) {
-      string memory evm;
 
-      if (chain == IRolldownPrimitives.ChainId.Ethereum) {
-        evm = "ethereum_";
-      } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
-        evm = "arbitrum_";
-      } else if (chain == IRolldownPrimitives.ChainId.Base) {
-        evm = "base_"; 
-      } else {
-        revert("Unsupported chain");
-      }
-
-      return string.concat(evm, _OUTPUT_PATH);
-    }
-
-    function upgrade(IRolldownPrimitives.ChainId chain) public {
-      string memory configData = readInput(evmPrefixedPath(chain));
+    function upgrade() public {
+      string memory configData = readInput(_OUTPUT_PATH);
       upgrader = stdJson.readAddress(configData, ".permissions.gmrsUpgrader");
       address proxyAdmin = stdJson.readAddress(configData, ".addresses.gmrsProxyAdmin");
       address gmrsAddress = stdJson.readAddress(configData, ".addresses.gmrs");
@@ -67,15 +52,15 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
 
       _verifyImplementations();
 
-      _writeOutput(chain);
+      _writeOutput();
 
     }
 
-    function isProxyDeployed(IRolldownPrimitives.ChainId chain) public returns (bool){
-      if (!inputExists(evmPrefixedPath(chain))){
+    function isProxyDeployed() public returns (bool){
+      if (!inputExists(_OUTPUT_PATH)){
         return false;
       }
-      string memory configData = readInput(evmPrefixedPath(chain));
+      string memory configData = readInput(_OUTPUT_PATH);
       address proxyAdmin = stdJson.readAddress(configData, ".addresses.gmrsProxyAdmin");
       return proxyAdmin.code.length > 0;
     }
@@ -123,20 +108,20 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
         _verifyImplementations();
         _verifyInitalizations();
 
-        _writeOutput(chain);
+        _writeOutput();
     }
 
     function run(IRolldownPrimitives.ChainId chain) external {
-      if (isProxyDeployed(chain)){
+      if (isProxyDeployed()){
         console.log("Upgrading proxy");
-        upgrade(chain);
+        upgrade();
       }else{
         console.log("Initial deployment");
         initialDeployment(chain);
       }
     }
 
-    function _writeOutput(IRolldownPrimitives.ChainId chain) internal {
+    function _writeOutput() internal {
         string memory parent_object = "parent object";
 
         string memory deployed_addresses = "addresses";
@@ -158,7 +143,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
         vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
         string memory finalJson = vm.serializeString(parent_object, permissions, permissions_output);
         console.logString(finalJson);
-        writeOutput(finalJson, evmPrefixedPath(chain));
+        writeOutput(finalJson, _OUTPUT_PATH);
     }
 
 
@@ -169,7 +154,7 @@ contract GaspMultiRollupServiceDeployer is Script, Utils, Test {
             "gmrs: implementation set incorrectly"
         );
     }
-    
+
     function _verifyInitalizations(
     ) internal view {
         require(gmrs.owner() == owner, "gmrs.owner() != owner");
