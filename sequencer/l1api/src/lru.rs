@@ -3,6 +3,8 @@ use std::cell::RefCell;
 use std::num::NonZeroUsize;
 use std::sync::Mutex;
 
+use crate::RequestStatus;
+
 use super::{types, L1Error, L1Interface};
 
 pub struct CachedL1Interface<L1> {
@@ -27,9 +29,9 @@ impl<L1> L1Interface for CachedL1Interface<L1>
 where
     L1: L1Interface,
 {
-    // fn account_address(&self) -> [u8; 20] {
-    //     self.l1.account_address()
-    // }
+    async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error> {
+        self.l1.native_balance(account).await
+    }
 
     async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error> {
         self.l1.get_merkle_root(request_id).await
@@ -76,6 +78,16 @@ where
         self.l1.close_cancel(cancel, merkle_root, proof).await
     }
 
+    async fn close_withdrawal(
+            &self,
+            withdrawal: types::Withdrawal,
+            merkle_root: H256,
+            proof: Vec<H256>,
+        ) -> Result<H256, L1Error> {
+        self.l1.close_withdrawal(withdrawal, merkle_root, proof).await
+    }
+
+
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error> {
         let cached = {
             let guard = self.update_hash_cache.lock().expect("poison");
@@ -97,7 +109,7 @@ where
     }
 
     #[tracing::instrument(skip(self))]
-    async fn is_closed(&self, request_hash: H256) -> Result<bool, L1Error> {
+    async fn get_status(&self, request_hash: H256) -> Result<crate::RequestStatus, L1Error> {
         let cached = {
             let guard = self.is_closed_cache.lock().expect("poison");
             let cached = guard.borrow_mut().get(&request_hash).cloned();
@@ -105,15 +117,14 @@ where
         };
 
         match cached {
-            Some(cached) => Ok(cached),
+            Some(cached) => Ok(RequestStatus::Closed),
             None => {
-                let is_closed = self.l1.is_closed(request_hash).await?;
-
-                if is_closed {
+                let status = self.l1.get_status(request_hash).await?;
+                if let RequestStatus::Closed = &status {
                     let guard = self.is_closed_cache.lock().expect("poison");
                     let _ = guard.borrow_mut().put(request_hash, true);
                 }
-                Ok(is_closed)
+                Ok(status)
             }
         }
     }

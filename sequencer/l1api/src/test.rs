@@ -40,9 +40,9 @@ async fn test_is_request_closed() {
 #[tokio::test]
 async fn test_get_latest_request_id() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
-    let rolldown = RolldownContract::deploy(provider).await.unwrap();
+    let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
 
-    let l1 = L1::new(rolldown.clone());
+    let l1 = L1::new(rolldown.clone(), provider);
     assert_eq!(l1.get_latest_reqeust_id().await.unwrap(), None);
 
     rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
@@ -57,8 +57,8 @@ async fn test_get_latest_request_id() {
 #[tokio::test]
 async fn test_get_update_and_update_hash() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
-    let rolldown = RolldownContract::deploy(provider).await.unwrap();
-    let l1 = L1::new(rolldown.clone());
+    let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
+    let l1 = L1::new(rolldown.clone(), provider);
     assert!(matches!(l1.get_update(1u128, 1u128).await, Err(L1Error::InvalidRange))); 
     assert!(matches!(l1.get_update_hash(1u128, 1u128).await, Err(L1Error::InvalidRange))); 
 
@@ -75,10 +75,8 @@ const DUMMY_MERKLE_RANGE: (u128, u128) = (1u128, 170u128);
 #[tokio::test]
 async fn test_get_merkle_root() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
-    let rolldown = RolldownContract::deploy(provider).await.unwrap();
-    let l1 = L1::new(rolldown.clone());
-
-    rolldown.submit_merkle_root(DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE).await.unwrap();
+    let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
+    let l1 = L1::new(rolldown.clone(), provider);
     assert_eq!((DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE), l1.get_merkle_root(DUMMY_MERKLE_RANGE.0).await.unwrap());
     assert_eq!((DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE), l1.get_merkle_root(DUMMY_MERKLE_RANGE.1).await.unwrap());
 }
@@ -89,8 +87,8 @@ async fn test_get_merkle_root() {
 #[tokio::test]
 async fn test_get_latest_finalized_request_id() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
-    let rolldown = RolldownContract::deploy(provider).await.unwrap();
-    let l1 = L1::new(rolldown.clone());
+    let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
+    let l1 = L1::new(rolldown.clone(), provider);
 
     assert_eq!(l1.get_latest_finalized_request_id().await.unwrap(), None);
 
