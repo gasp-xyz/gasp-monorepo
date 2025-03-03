@@ -29,11 +29,15 @@ impl<L1> L1Interface for CachedL1Interface<L1>
 where
     L1: L1Interface,
 {
+    async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error> {
+        self.l1.erc20_balance(token, account).await
+    }
+
     async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error> {
         self.l1.native_balance(account).await
     }
 
-    async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error> {
+    async fn get_merkle_root(&self, request_id: u128) -> Result<Option<([u8; 32], (u128, u128))>, L1Error> {
         self.l1.get_merkle_root(request_id).await
     }
 

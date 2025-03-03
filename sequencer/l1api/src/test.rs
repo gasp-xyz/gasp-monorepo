@@ -77,8 +77,12 @@ async fn test_get_merkle_root() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
     let l1 = L1::new(rolldown.clone(), provider);
-    assert_eq!((DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE), l1.get_merkle_root(DUMMY_MERKLE_RANGE.0).await.unwrap());
-    assert_eq!((DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE), l1.get_merkle_root(DUMMY_MERKLE_RANGE.1).await.unwrap());
+
+    l1.get_merkle_root(DUMMY_MERKLE_RANGE.0).await.unwrap();
+    assert!(matches!(l1.get_merkle_root(DUMMY_MERKLE_RANGE.0).await.unwrap(), None)); 
+    rolldown.submit_merkle_root(DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE).await.unwrap();
+    assert_eq!((DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE), l1.get_merkle_root(DUMMY_MERKLE_RANGE.0).await.unwrap().unwrap());
+    assert_eq!((DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE), l1.get_merkle_root(DUMMY_MERKLE_RANGE.1).await.unwrap().unwrap());
 }
 
 
@@ -86,6 +90,22 @@ async fn test_get_merkle_root() {
 #[traced_test]
 #[tokio::test]
 async fn test_get_latest_finalized_request_id() {
+    let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
+    let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
+    let l1 = L1::new(rolldown.clone(), provider);
+
+    assert_eq!(l1.get_latest_finalized_request_id().await.unwrap(), None);
+
+    rolldown.submit_merkle_root(DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE).await.unwrap();
+
+    assert_eq!(l1.get_latest_finalized_request_id().await.unwrap(), Some(DUMMY_MERKLE_RANGE.1));
+}
+
+
+#[serial]
+#[traced_test]
+#[tokio::test]
+async fn test_foo() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
     let l1 = L1::new(rolldown.clone(), provider);

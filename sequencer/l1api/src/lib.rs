@@ -1,11 +1,18 @@
-use alloy::{network::{EthereumWallet, Network}, providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider}, signers::local::PrivateKeySigner, sol_types::SolValue, transports::{Transport, TransportError}};
-use primitive_types::H256;
+use alloy::{
+    network::{EthereumWallet, Network},
+    providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider},
+    signers::local::PrivateKeySigner,
+    sol_types::SolValue,
+    transports::{Transport, TransportError},
+};
 use hex::encode as hex_encode;
+use primitive_types::H256;
 
-mod lru;
-mod utils;
-mod rolldown_contract;
 mod erc20;
+mod lru;
+mod rolldown_contract;
+mod utils;
+use erc20::Erc20Token;
 #[cfg(test)]
 mod test;
 
@@ -15,8 +22,8 @@ use sha3::{Digest, Keccak256};
 
 pub mod types {
     pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
-    pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
     pub use contract_bindings::rolldown::IRolldownPrimitives::L1Update;
+    pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -35,21 +42,20 @@ pub enum L1Error {
     TxReverted(H256),
 }
 
-pub enum RequestStatus{
+pub enum RequestStatus {
     Pending,
     Ferried([u8; 20]),
     Closed,
 }
 
 pub trait L1Interface {
-    // async fn balance_erc20(&self, token_address: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
-
+    async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
     async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>;
     async fn get_status(&self, request_hash: H256) -> Result<RequestStatus, L1Error>;
     async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error>;
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error>;
     async fn get_latest_reqeust_id(&self) -> Result<Option<u128>, L1Error>;
-    async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error>;
+    async fn get_merkle_root(&self, request_id: u128) -> Result<Option<([u8; 32], (u128, u128))>, L1Error>;
     async fn get_latest_finalized_request_id(&self) -> Result<Option<u128>, L1Error>;
 
     async fn close_cancel(
@@ -67,9 +73,8 @@ pub trait L1Interface {
     ) -> Result<H256, L1Error>;
 }
 
-    // async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error>;
-    // async fn get_native_balance(&self, address: [u8; 20]) -> Result<u128, L1Error>;
-
+// async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error>;
+// async fn get_native_balance(&self, address: [u8; 20]) -> Result<u128, L1Error>;
 
 pub struct L1Builder {
     pub uri: &'static str,
@@ -77,36 +82,35 @@ pub struct L1Builder {
     pub rolldown_address: [u8; 20],
 }
 
-pub async fn create_provider(uri: &'static str, pkey: [u8; 32] ) -> Result<impl Provider + WalletProvider + Clone, TransportError>{
-        let signer: PrivateKeySigner = hex::encode(pkey).parse().expect("valid private key");
-        let wallet = EthereumWallet::new(signer);
-        Ok(ProviderBuilder::new()
-            .with_recommended_fillers()
-            .wallet(wallet)
-            .on_builtin(uri)
-            .await?
-        )
+pub async fn create_provider(
+    uri: &'static str,
+    pkey: [u8; 32],
+) -> Result<impl Provider + WalletProvider + Clone, TransportError> {
+    let signer: PrivateKeySigner = hex::encode(pkey).parse().expect("valid private key");
+    let wallet = EthereumWallet::new(signer);
+    Ok(ProviderBuilder::new()
+        .with_recommended_fillers()
+        .wallet(wallet)
+        .on_builtin(uri)
+        .await?)
 }
 
 impl L1Builder {
-    pub async fn build<T,P,N>(
-        self,
-    ) -> Result<impl L1Interface, L1Error> {
+    pub async fn build<T, P, N>(self) -> Result<impl L1Interface, L1Error> {
         let provider = create_provider(self.uri, self.pkey).await?;
         let rolldown = RolldownContract::new(provider.clone(), self.rolldown_address);
         Ok(L1::new(rolldown, provider))
     }
 }
 
-pub struct L1<T,P,N> {
-    rolldown_contract: RolldownContract<T,P,N>,
+pub struct L1<T, P, N> {
+    rolldown_contract: RolldownContract<T, P, N>,
     provider: P,
 }
 
-
-impl<T,P,N> L1<T,P,N> {
-    pub fn new(rolldown_contract: RolldownContract<T,P,N>, provider: P) -> Self{
-        L1{
+impl<T, P, N> L1<T, P, N> {
+    pub fn new(rolldown_contract: RolldownContract<T, P, N>, provider: P) -> Self {
+        L1 {
             rolldown_contract,
             provider,
         }
@@ -119,8 +123,12 @@ where
     P: Provider<T, N> + Clone + WalletProvider<N>,
     N: Network,
 {
+    async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error> {
+        let token = Erc20Token::new(token, self.provider.clone());
+        token.balance_of(account).await
+    }
 
-    async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>{
+    async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error> {
         let result = self.provider.get_balance(account.into()).await?;
         result.try_into().map_err(|_| L1Error::OverflowError)
     }
@@ -137,10 +145,24 @@ where
     // }
 
     #[tracing::instrument(skip(self))]
-    async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error> {
-        let merkle_root = self.rolldown_contract.find_l2_batch(request_id).await?;
-        let range = self.rolldown_contract.get_request_range_from_merkle_root(merkle_root).await?;
-        Ok((merkle_root, range))
+    async fn get_merkle_root(
+        &self,
+        request_id: u128,
+    ) -> Result<Option<([u8; 32], (u128, u128))>, L1Error> {
+        match self.rolldown_contract.find_l2_batch(request_id).await {
+            Ok(merkle_root) => {
+                tracing::info!("merkle root found");
+                let range = self
+                    .rolldown_contract
+                    .get_request_range_from_merkle_root(merkle_root)
+                    .await?;
+                Ok(Some((merkle_root, range)))
+            }
+            Err(L1Error::Alloy(alloy::contract::Error::TransportError(alloy::transports::RpcError::ErrorResp(payload)))) if payload.code == 3 => {
+                Ok(None)
+            },
+            Err(e) => Err(e)
+        }
     }
 
     #[tracing::instrument(skip(self))]
@@ -162,8 +184,10 @@ where
         if let Some(id) = length.checked_sub(1) {
             let latest_root = self.rolldown_contract.get_merkle_root_by_id(id).await?;
             tracing::trace!("latest merkle root {}", hex_encode(latest_root));
-            let (_, latest_request_id) =
-                self.rolldown_contract.get_request_range_from_merkle_root(latest_root).await?;
+            let (_, latest_request_id) = self
+                .rolldown_contract
+                .get_request_range_from_merkle_root(latest_root)
+                .await?;
 
             tracing::trace!(
                 "latest request in root {}: {}",
@@ -236,7 +260,9 @@ where
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
-        self.rolldown_contract.send_close_cancel_tx(cancel, merkle_root, proof).await
+        self.rolldown_contract
+            .send_close_cancel_tx(cancel, merkle_root, proof)
+            .await
     }
 
     #[tracing::instrument(skip(self, withdrawal))]
@@ -245,10 +271,11 @@ where
         withdrawal: types::Withdrawal,
         merkle_root: H256,
         proof: Vec<H256>,
-    ) -> Result<H256, L1Error>{
-        self.rolldown_contract.send_close_withdrawal_tx(withdrawal, merkle_root, proof).await
+    ) -> Result<H256, L1Error> {
+        self.rolldown_contract
+            .send_close_withdrawal_tx(withdrawal, merkle_root, proof)
+            .await
     }
-
 
     #[tracing::instrument(skip(self))]
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error> {
@@ -259,7 +286,9 @@ where
 
     #[tracing::instrument(skip(self))]
     async fn get_status(&self, request_hash: H256) -> Result<RequestStatus, L1Error> {
-        self.rolldown_contract.get_request_status(request_hash).await
+        self.rolldown_contract
+            .get_request_status(request_hash)
+            .await
     }
 
     // #[tracing::instrument(skip(self))]
@@ -268,7 +297,7 @@ where
     // }
 }
 
-// impl<P> L1Interface for L1<P> where 
+// impl<P> L1Interface for L1<P> where
 // P: Provider{
 // }
 
