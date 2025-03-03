@@ -844,6 +844,7 @@ impl pallet_market::Config for Runtime {
 	type Balance = Balance;
 	type CurrencyId = TokenId;
 	type NativeCurrencyId = tokens::RxTokenId;
+	type MaxSwapListLength = cfg::pallet_market::MaxSwapListLength;
 	type Xyk = Xyk;
 	type StableSwap = StableSwap;
 	type Rewards = ProofOfStake;

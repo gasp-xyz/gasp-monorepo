@@ -34,6 +34,7 @@ construct_runtime!(
 		Vesting: pallet_vesting_mangata,
 		StableSwap: pallet_stable_swap,
 		Xyk: pallet_xyk,
+		FeeLock: pallet_fee_lock,
 		Market: market,
 	}
 );
@@ -462,6 +463,23 @@ impl pallet_xyk::Config for Test {
 	type FeeLockWeight = ();
 }
 
+parameter_types! {
+	pub const MaxCuratedTokens: u32 = 100;
+}
+
+impl mangata_support::pools::ValuateFor<NativeCurrencyId> for Market {}
+
+impl pallet_fee_lock::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+	type MaxCuratedTokens = MaxCuratedTokens;
+	type Tokens = MultiTokenCurrencyAdapter<Test>;
+	type ValuateForNative = Market;
+	type NativeTokenId = NativeCurrencyId;
+	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type Xyk = Xyk;
+}
+
 impl market::MarketBenchmarkingConfig for Test {}
 
 impl market::Config for Test {
@@ -470,6 +488,7 @@ impl market::Config for Test {
 	type Balance = Balance;
 	type CurrencyId = TokenId;
 	type NativeCurrencyId = NativeCurrencyId;
+	type MaxSwapListLength = ConstU32<10>;
 	type Xyk = Xyk;
 	type StableSwap = StableSwap;
 	type Rewards = mocks::MockRewardsApi;
@@ -527,6 +546,10 @@ where
 
 	pub fn mint_token(token_id: TokenId, who: &AccountId, amount: Balance) {
 		<T as Config>::Currency::mint(token_id, who, amount).expect("Token minting failed")
+	}
+
+	pub fn get_next_currency_id() -> TokenId {
+		<T as Config>::Currency::get_next_currency_id()
 	}
 }
 

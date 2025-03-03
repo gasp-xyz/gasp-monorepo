@@ -14,10 +14,10 @@ pub use rollup_imports::*;
 mod rollup_imports {
 	pub use rollup_runtime::{
 		consts::UNIT,
-		runtime_config::config::{
+		runtime_config::{config::{
 			orml_asset_registry::AssetMetadataOf, pallet_membership::FoundationAccountsProvider,
 			pallet_proxy::ProxyType,
-		},
+		}, tokens::RxTokenId},
 		AccountId, AssetRegistry, Balance, Bootstrap, CustomMetadata, DispatchClass, FeeLock,
 		FoundationMembers, Identity, Maintenance, OnChargeTransaction, Pays, ProofOfStake, Proxy,
 		Rolldown, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, StableSwap, System, TokenId,

@@ -587,6 +587,12 @@ pub mod config {
 								InvalidTransaction::SwapPrevalidation.into(),
 							)
 						);
+						ensure!(
+							swap_pool_list.len() <= <Runtime as pallet_market::Config>::MaxSwapListLength::get() as usize,
+							TransactionValidityError::Invalid(
+								InvalidTransaction::SwapPrevalidation.into(),
+							)
+						);
 						let first_pool_info =
 							Market::get_pool_info(swap_pool_list[0]).map_err(|_| {
 								TransactionValidityError::Invalid(
@@ -1266,5 +1272,16 @@ pub mod config {
 		// that impl the ValuateFor trait and delegates to Market for Valuate impl
 		// use such struct in pallet configs instead of Market
 		impl ValuateFor<tokens::RxTokenId> for Market {}
+
+		parameter_types! {
+
+			pub const MaxSwapListLength: u32 = if cfg!(feature = "runtime-benchmarks") {
+				// For benchmarking
+				1000
+			} else {
+				// ACTUAL
+				10
+			};
+		}
 	}
 }
