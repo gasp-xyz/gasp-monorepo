@@ -1,10 +1,9 @@
 [package]
-name = "sequencer"
+name = "l1api"
 version = "0.1.0"
-edition = "2021"
-
-[[bin]]
-name = "sequencer"
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
 
 [dependencies]
 subxt = "0.38.0"
@@ -38,6 +37,3 @@ contract-bindings = { workspace = true }
 mockall = "0.13.0"
 serial_test = "3.2.0"
 
-# [profile.dev]
-# incremental = true
-# lto = true

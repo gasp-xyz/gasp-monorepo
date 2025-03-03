@@ -1,5 +1,6 @@
 use alloy::providers::PendingTransactionError;
 use primitive_types::H256;
+use rolldown_contract::FooBuilder;
 
 mod lru;
 mod rolldown_contract;
@@ -86,5 +87,18 @@ mod test {
             .await
             .unwrap();
         assert!(balance > 0u128);
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_builder() {
+        let foo = FooBuilder {
+            uri: URI,
+            pkey: ALICE_PKEY,
+            address: ROLLDOWN_ADDRESS,
+        }.build().await.unwrap();
+
+        let d = foo.deposit(100u128, 1u128).await.unwrap();
+
     }
 }
