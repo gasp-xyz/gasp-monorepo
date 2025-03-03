@@ -50,6 +50,7 @@ jobs:
           version: v0.21.1
           cleanup: true
           driver: kubernetes
+          platforms: linux/amd64
           driver-opts: |
             namespace=buildkit
             nodeselector=github-actions-pool=true
@@ -62,17 +63,17 @@ jobs:
           buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
-          platforms: linux/amd64
           append: |
-            - platforms: linux/arm64
-              driver-opts: |
-                nodeselector=github-actions-pool-arm=true
-                "tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
-                replicas=1
-                requests.cpu=7
-                requests.memory=14Gi
-                limits.cpu=7
-                limits.memory=14Gi
+            - name: arm64
+              platforms: linux/arm64
+              driver-opts:
+                - nodeselector=github-actions-pool-arm=true
+                - "tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
+                - replicas=1
+                - requests.cpu=7
+                - requests.memory=14Gi
+                - limits.cpu=7
+                - limits.memory=14Gi
           
       
       - uses: foundry-rs/foundry-toolchain@v1
@@ -241,15 +242,16 @@ jobs:
               mirrors = ["mirror.gcr.io"]
           platforms: linux/amd64
           append: |
-            - platforms: linux/arm64
-              driver-opts: |
-                nodeselector=github-actions-pool-arm=true
-                "tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
-                replicas=2
-                requests.cpu=7
-                requests.memory=14Gi
-                limits.cpu=7
-                limits.memory=14Gi
+            - name: arm64-avs
+              platforms: linux/arm64
+              driver-opts:
+                - nodeselector=github-actions-pool-arm=true
+                - "tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
+                - replicas=1
+                - requests.cpu=7
+                - requests.memory=14Gi
+                - limits.cpu=7
+                - limits.memory=14Gi
 
       - uses: mozilla-actions/sccache-action@v0.0.5
       - name: Set Rust caching env vars
