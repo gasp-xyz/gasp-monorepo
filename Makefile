@@ -64,7 +64,7 @@ bindings-rs: ## generates rust bindings
 
 bindings-rs-alloy: ## generates rust alloy bindings
 	forge --version | grep "forge 0.3.0"
-	forge bind --alloy --bindings-path ./sequencer/bindings --root ./contracts --crate-name bindings --overwrite  --select 'Rolldown$$' --select 'RolldownPrimitives$$'
+	forge bind --alloy --bindings-path ./sequencer/bindings/contracts/ --root ./contracts --crate-name bindings --overwrite  --select 'Rolldown$$' --select 'RolldownPrimitives$$' --select 'IERC20$$' --select 'GaspTestToken$$'
 	cd ./sequencer/bindings && cargo fmt
 
 bindings-json: ## generate JS bindings
