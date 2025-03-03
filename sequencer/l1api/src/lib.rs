@@ -5,6 +5,7 @@ use hex::encode as hex_encode;
 mod lru;
 mod utils;
 mod rolldown_contract;
+mod erc20;
 #[cfg(test)]
 mod test;
 
@@ -14,6 +15,7 @@ use sha3::{Digest, Keccak256};
 
 pub mod types {
     pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
+    pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
     pub use contract_bindings::rolldown::IRolldownPrimitives::L1Update;
 }
 
@@ -33,20 +35,34 @@ pub enum L1Error {
     TxReverted(H256),
 }
 
+pub enum RequestStatus{
+    Pending,
+    Ferried([u8; 20]),
+    Closed,
+}
+
 pub trait L1Interface {
-    // fn account_address(&self) -> [u8; 20];
-    // async fn deposit_native(&self, request_hash: H256) -> Result<bool, L1Error>;
-    // async fn deposit_erc20(&self, request_hash: H256) -> Result<bool, L1Error>;
-    async fn is_closed(&self, request_hash: H256) -> Result<bool, L1Error>;
+    // async fn balance_erc20(&self, token_address: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
+
+    async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>;
+    async fn get_status(&self, request_hash: H256) -> Result<RequestStatus, L1Error>;
     async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error>;
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error>;
     async fn get_latest_reqeust_id(&self) -> Result<Option<u128>, L1Error>;
     async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error>;
     async fn get_latest_finalized_request_id(&self) -> Result<Option<u128>, L1Error>;
+
     async fn close_cancel(
         &self,
         cancel: types::Cancel,
         merkle_root: H256,
+        proof: Vec<H256>,
+    ) -> Result<H256, L1Error>;
+
+    async fn close_withdrawal(
+        &self,
+        withdrawal: types::Withdrawal,
+        cerkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error>;
 }
@@ -77,20 +93,22 @@ impl L1Builder {
         self,
     ) -> Result<impl L1Interface, L1Error> {
         let provider = create_provider(self.uri, self.pkey).await?;
-        let rolldown = RolldownContract::new(provider, self.rolldown_address);
-        Ok(L1::new(rolldown))
+        let rolldown = RolldownContract::new(provider.clone(), self.rolldown_address);
+        Ok(L1::new(rolldown, provider))
     }
 }
 
 pub struct L1<T,P,N> {
-    rolldown_contract: RolldownContract<T,P,N>
+    rolldown_contract: RolldownContract<T,P,N>,
+    provider: P,
 }
 
 
 impl<T,P,N> L1<T,P,N> {
-    pub fn new(rolldown_contract: RolldownContract<T,P,N>) -> Self{
+    pub fn new(rolldown_contract: RolldownContract<T,P,N>, provider: P) -> Self{
         L1{
-            rolldown_contract
+            rolldown_contract,
+            provider,
         }
     }
 }
@@ -98,9 +116,15 @@ impl<T,P,N> L1<T,P,N> {
 impl<T, P, N> L1Interface for L1<T, P, N>
 where
     T: Transport + Clone,
-    P: Provider<T, N> + Clone,
+    P: Provider<T, N> + Clone + WalletProvider<N>,
     N: Network,
 {
+
+    async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>{
+        let result = self.provider.get_balance(account.into()).await?;
+        result.try_into().map_err(|_| L1Error::OverflowError)
+    }
+
     // async fn deposit_native(&self, request_hash: H256) -> Result<bool, L1Error>{
     //     todo!()
     // }
@@ -212,9 +236,19 @@ where
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
-        let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
         self.rolldown_contract.send_close_cancel_tx(cancel, merkle_root, proof).await
     }
+
+    #[tracing::instrument(skip(self, withdrawal))]
+    async fn close_withdrawal(
+        &self,
+        withdrawal: types::Withdrawal,
+        merkle_root: H256,
+        proof: Vec<H256>,
+    ) -> Result<H256, L1Error>{
+        self.rolldown_contract.send_close_withdrawal_tx(withdrawal, merkle_root, proof).await
+    }
+
 
     #[tracing::instrument(skip(self))]
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error> {
@@ -224,10 +258,8 @@ where
     }
 
     #[tracing::instrument(skip(self))]
-    async fn is_closed(&self, request_hash: H256) -> Result<bool, L1Error> {
-        let is_closed = self.rolldown_contract.is_request_closed(request_hash).await?;
-        tracing::trace!(is_closed);
-        return Ok(is_closed);
+    async fn get_status(&self, request_hash: H256) -> Result<RequestStatus, L1Error> {
+        self.rolldown_contract.get_request_status(request_hash).await
     }
 
     // #[tracing::instrument(skip(self))]

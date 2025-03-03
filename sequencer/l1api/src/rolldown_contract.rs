@@ -2,6 +2,7 @@ use super::{types, L1Error, L1Interface};
 use alloy::contract::{CallBuilder, CallDecoder};
 use lazy_static::lazy_static;
 use crate::utils::simulate_send_and_wait_for_result;
+use crate::RequestStatus;
 
 use alloy::network::{EthereumWallet, Network, NetworkWallet};
 use alloy::providers::{Provider, ProviderBuilder, WalletProvider};
@@ -34,6 +35,35 @@ where
     P: Provider<T, N> + WalletProvider<N>,
     N: Network,
 {
+
+    #[tracing::instrument(skip(self, cancel))]
+    pub async fn send_close_cancel_tx(
+        &self,
+        cancel: types::Cancel,
+        merkle_root: H256,
+        proof: Vec<H256>,
+    ) -> Result<H256, L1Error> {
+        let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
+        let call = self
+            .contract_handle
+            .close_cancel(cancel, merkle_root.0.into(), proof);
+        Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
+    }
+
+    #[tracing::instrument(skip(self, withdrawal))]
+    pub async fn send_close_withdrawal_tx(
+        &self,
+        withdrawal: types::Withdrawal,
+        merkle_root: H256,
+        proof: Vec<H256>,
+    ) -> Result<H256, L1Error> {
+        let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
+        let call = self
+            .contract_handle
+            .closeWithdrawal(withdrawal, merkle_root.0.into(), proof);
+        Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
+    }
+
 
     #[cfg(test)]
     #[tracing::instrument(skip_all)]
@@ -110,7 +140,6 @@ where
     }
 
 
-
     pub fn new(provider: P, address: [u8; 20]) -> Self {
         RolldownContract {
             contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance::new(
@@ -182,6 +211,29 @@ where
         Ok(call.call().await?._0)
     }
 
+    pub async fn get_request_status(&self, request_hash: H256) -> Result<RequestStatus, L1Error> {
+        ETH_CALL_COUNTER
+            .with_label_values(&["processedL2Requests"])
+            .inc();
+        let request_hash = request_hash.0.into();
+        let request_status = self
+            .contract_handle
+            .processedL2Requests(request_hash)
+            .call()
+            .await
+            .map(|elem| elem._0)?;
+
+        let closed = self.contract_handle.CLOSED().call().await?._0;
+        if request_status == closed {
+            Ok(RequestStatus::Closed)
+        }else if request_status.0 == [0u8; 20]{
+            Ok(RequestStatus::Pending)
+        } else {
+            Ok(RequestStatus::Ferried(request_status.into()))
+        }
+    }
+
+
     pub async fn is_request_closed(&self, request_hash: H256) -> Result<bool, L1Error> {
         ETH_CALL_COUNTER
             .with_label_values(&["processedL2Requests"])
@@ -200,6 +252,23 @@ where
     }
 
 
+    pub async fn is_request_ferried(&self, request_hash: H256) -> Result<bool, L1Error> {
+        ETH_CALL_COUNTER
+            .with_label_values(&["processedL2Requests"])
+            .inc();
+        let request_hash = request_hash.0.into();
+        let request_status = self
+            .contract_handle
+            .processedL2Requests(request_hash)
+            .call()
+            .await
+            .map(|elem| elem._0)?;
+
+        let closed = self.contract_handle.CLOSED().call().await?._0;
+        let is_closed = request_status == closed;
+        Ok(is_closed)
+    }
+
 
     // async fn get_native_account_balance(&self, address: [u8; 20]) -> Result<u128, L1Error> {
     //     ETH_CALL_COUNTER.with_label_values(&["balance"]).inc();
@@ -208,21 +277,6 @@ where
     //     result.try_into().map_err(|_| L1Error::OverflowError)
     // }
 
-    #[tracing::instrument(skip(self, cancel))]
-    pub async fn send_close_cancel_tx(
-        &self,
-        cancel: types::Cancel,
-        merkle_root: H256,
-        proof: Vec<H256>,
-    ) -> Result<H256, L1Error> {
-        let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
-        let call = self
-            .contract_handle
-            .close_cancel(cancel, merkle_root.0.into(), proof);
-
-        todo!()
-        // Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
-    }
 
     // pub async fn simulate_send_and_wait_for_result<T,Pr,D,N>(
     //     &self,
