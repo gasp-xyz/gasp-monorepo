@@ -1,0 +1,56 @@
+# Default recipe
+default:
+    @just --list
+
+# Create symlink from gasp-node/e2eTests to gasp-e2e repo
+setup-e2eTests-link:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "Setting up e2e tests symlink..."
+    
+    if [ -L "e2eTests" ]; then
+        echo "Symlink already exists, removing first"
+        rm e2eTests
+    fi
+    
+    if [ -d "../../gasp-e2e" ]; then
+        ln -s ../../gasp-e2e e2eTests
+        echo "✅ E2E tests linked successfully"
+    else
+        echo "❌ Error: ../../gasp-e2e directory not found"
+        echo "Make sure the gasp-e2e repo is cloned at the same level as this repo"
+        exit 1
+    fi
+
+# Update e2eTests linked repo to latest eth-rollup-develop branch
+update-e2eTests-linked-repo:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "Updating e2e tests to latest eth-rollup-develop branch..."
+    
+    # Check if the e2e tests directory exists (either real dir or symlink)
+    if [ ! -e "e2eTests" ]; then
+        echo "⚠️ e2eTests not found. Creating symlink first..."
+        just setup-e2eTests-link
+    fi
+    
+    cd e2eTests
+    
+    # Checkout the branch and pull latest
+    echo "🔄 Checking out eth-rollup-develop branch..."
+    git checkout eth-rollup-develop
+    
+    echo "⬇️ Pulling latest changes..."
+    git pull origin eth-rollup-develop
+    
+    echo "✅ E2E tests updated successfully to latest eth-rollup-develop"
+
+start-env:
+  docker compose up -d
+
+stop-env:
+  docker compose down
+
+reset-env:
+  just stop-env
+  just start-env

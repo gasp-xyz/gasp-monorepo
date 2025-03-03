@@ -9,6 +9,9 @@ tags:
 env:
   CARGO_TERM_COLOR: always
   SCCACHE_GCS_KEY_PREFIX: gasp-avs
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/gasp-avs
+  DOCKERHUB_REPOSITORY: gaspxyz/gasp-avs
+  IMAGE_BUILD_ROLLUP_NODE_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/rollup-node
 
 fileGroups:
   sources:
@@ -33,23 +36,112 @@ tasks:
       envFile: '/.env'
     deps: ['gasp-node:build-image-local']
     inputs: ['@globs(sources)', 'Dockerfile']
-  
-  build-ci:
-    command: cargo build --release
-    inputs: ['@globs(sources)']
-    outputs: ['target/release/main']
-    env:
-      SCCACHE_GCS_KEY_PREFIX: gasp-avs-release
+
+  buildkit-build-and-push-image-digests-with-gasp-node-standard-runtime:
+    command: >
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY}
+      --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}
+      --metadata-file gasp-avs-with-gasp-node-standard-runtime-buildkit-metadata.json -f Dockerfile ./
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['gasp-avs-with-gasp-node-standard-runtime-buildkit-metadata.json']
+    options:
+      outputStyle: stream
+      cache: true
+      internal: true
+
+  buildkit-build-and-push-image-digests-with-gasp-node-fast-runtime:
+    command: >
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY}
+      --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
+      --metadata-file gasp-avs-with-gasp-node-fast-runtime-buildkit-metadata.json -f Dockerfile ./
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['gasp-avs-with-gasp-node-fast-runtime-buildkit-metadata.json']
+    options:
+      outputStyle: stream
+      cache: true
+      internal: true
+
+  buildkit-build-and-push-image-digests-with-gasp-node-unlocked-runtime:
+    command: >
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY}
+      --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-unlocked
+      --metadata-file gasp-avs-with-gasp-node-unlocked-runtime-buildkit-metadata.json -f Dockerfile ./
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['gasp-avs-with-gasp-node-unlocked-runtime-buildkit-metadata.json']
+    options:
+      outputStyle: stream
+      cache: true
+      internal: true
   
   build-image-ci-gasp-avs:
     script: |
-      docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-standard-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --push ../
-      docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-fast-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push ../
-      docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-unlocked-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push ../
-    deps: ['build-ci', 'gasp-node:build-image-ci-gasp-node']
+      set -ex
+      IMAGE_DIGEST_STANDARD_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-with-gasp-node-standard-runtime-buildkit-metadata.json)
+      IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-with-gasp-node-fast-runtime-buildkit-metadata.json)
+      IMAGE_DIGEST_UNLOCKED_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-with-gasp-node-unlocked-runtime-buildkit-metadata.json)
+
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_STANDARD_RUNTIME}
+
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_FAST_RUNTIME}
+
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast from existing digests"
+
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_UNLOCKED_RUNTIME}
+
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked from existing digests"
+
+    deps: 
+      - gasp-node:build-image-ci-gasp-node
+      - buildkit-build-and-push-image-digests-with-gasp-node-standard-runtime
+      - buildkit-build-and-push-image-digests-with-gasp-node-fast-runtime
+      - buildkit-build-and-push-image-digests-with-gasp-node-unlocked-runtime
+    inputs: 
+      - 'gasp-avs-with-gasp-node-standard-runtime-buildkit-metadata.json'
+      - 'gasp-avs-with-gasp-node-fast-runtime-buildkit-metadata.json'
+      - 'gasp-avs-with-gasp-node-unlocked-runtime-buildkit-metadata.json'
     options:
       cache: false
       runDepsInParallel: false
+  
+  # build-ci:
+  #   command: cargo build --release
+  #   inputs: ['@globs(sources)']
+  #   outputs: ['target/release/main']
+  #   env:
+  #     SCCACHE_GCS_KEY_PREFIX: gasp-avs-release
+  
+  # build-image-ci-gasp-avs:
+  #   script: |
+  #     docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-standard-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --push ../
+  #     docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-fast-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push ../
+  #     docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-unlocked-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push ../
+  #   deps: ['build-ci', 'gasp-node:build-image-ci-gasp-node']
+  #   options:
+  #     cache: false
+  #     runDepsInParallel: false
 
   format-gasp-avs:
     command: cargo fmt --all -- --check

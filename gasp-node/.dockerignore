@@ -43,3 +43,8 @@ moon.yml
 
 # Ignore generated credentials from google-github-actions/auth
 gha-creds-*.json
+
+# Ignore linked e2e tests directory
+e2eTests
+
+*-buildkit-metadata.json

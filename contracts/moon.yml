@@ -17,7 +17,7 @@ fileGroups:
     - remappings.txt
   
 env:
-  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gasp-xyz/gasp-contracts
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/gasp-contracts
   DOCKERHUB_REPOSITORY: gaspxyz/gasp-contracts
 
 tasks:

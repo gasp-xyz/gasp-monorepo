@@ -9,6 +9,8 @@ tags:
 env:
   CARGO_TERM_COLOR: 'always'
   SCCACHE_GCS_KEY_PREFIX: gasp-node
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/rollup-node
+  DOCKERHUB_REPOSITORY: gaspxyz/rollup-node
 
 fileGroups:
   sources:
@@ -38,57 +40,132 @@ tasks:
     script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t gaspxyz/rollup-node:local --load .'
     inputs: ['@globs(sources)', 'Dockerfile']
 
-  build-ci:
-    command: cargo build --release
+  # build-ci:
+  #   command: cargo build --release
+  #   options:
+  #     internal: true
+  
+  # build-standard-runtime:
+  #   extends: build-ci
+  #   args: '--target-dir target-standard-runtime'
+  #   options:
+  #     outputStyle: stream
+  #     mergeOutputs: replace
+  #   inputs: ['@globs(sources)']
+  #   outputs:
+  #     - 'target-standard-runtime/release/rollup-node'
+  #     - 'target-standard-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+
+  # build-fast-runtime:
+  #   extends: build-ci
+  #   args: '--no-default-features --features=fast-runtime --target-dir target-fast-runtime'
+  #   options:
+  #     outputStyle: stream
+  #     mergeOutputs: replace
+  #   inputs: ['@globs(sources)']
+  #   outputs:
+  #     - 'target-fast-runtime/release/rollup-node'
+  #     - 'target-fast-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+
+  # build-unlocked-runtime:
+  #   extends: build-ci
+  #   args: '--no-default-features --features=unlocked --target-dir target-unlocked-runtime'
+  #   options:
+  #     outputStyle: stream
+  #     mergeOutputs: replace
+  #   inputs: ['@globs(sources)']
+  #   outputs:
+  #     - 'target-unlocked-runtime/release/rollup-node'
+  #     - 'target-unlocked-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+
+  # build-image-ci-gasp-node:
+  #   # script: |
+  #   #   docker buildx build --build-arg TARGET_DIR=target-standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load .
+  #   #   docker buildx build --build-arg TARGET_DIR=target-fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load .
+  #   #   docker buildx build --build-arg TARGET_DIR=target-unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load .    
+  #   script: |
+  #     docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .
+  #     docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push .
+  #     docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push .
+  #   deps: ['build-standard-runtime', 'build-fast-runtime', 'build-unlocked-runtime']
+  #   options:
+  #     cache: false
+  #     outputStyle: stream
+
+  buildkit-build-and-push-image-digests-standard-runtime:
+    command: >
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --build-arg ENABLE_FAST_RUNTIME=false --build-arg ENABLE_UNLOCKED_RUNTIME=false
+      --metadata-file gasp-node-standard-runtime-buildkit-metadata.json -f Dockerfile ./
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['gasp-node-standard-runtime-buildkit-metadata.json']
     options:
+      outputStyle: stream
+      cache: true
+      internal: false
+    
+  buildkit-build-and-push-image-digests-fast-runtime:
+    command: >
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --build-arg ENABLE_FAST_RUNTIME=true --build-arg ENABLE_UNLOCKED_RUNTIME=false
+      --metadata-file gasp-node-fast-runtime-buildkit-metadata.json -f Dockerfile ./
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['gasp-node-fast-runtime-buildkit-metadata.json']
+    options:
+      outputStyle: stream
+      cache: true
+      internal: true
+
+  buildkit-build-and-push-image-digests-unlocked-runtime:
+    command: >
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-unlocked-runtime
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-unlocked-runtime,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --build-arg ENABLE_FAST_RUNTIME=false --build-arg ENABLE_UNLOCKED_RUNTIME=true
+      --metadata-file gasp-node-unlocked-runtime-buildkit-metadata.json -f Dockerfile ./
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['gasp-node-unlocked-runtime-buildkit-metadata.json']
+    options:
+      outputStyle: stream
+      cache: true
       internal: true
   
-  build-standard-runtime:
-    extends: build-ci
-    args: '--target-dir target-standard-runtime'
-    options:
-      outputStyle: stream
-      mergeOutputs: replace
-    inputs: ['@globs(sources)']
-    outputs:
-      - 'target-standard-runtime/release/rollup-node'
-      - 'target-standard-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
-
-  build-fast-runtime:
-    extends: build-ci
-    args: '--no-default-features --features=fast-runtime --target-dir target-fast-runtime'
-    options:
-      outputStyle: stream
-      mergeOutputs: replace
-    inputs: ['@globs(sources)']
-    outputs:
-      - 'target-fast-runtime/release/rollup-node'
-      - 'target-fast-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
-
-  build-unlocked-runtime:
-    extends: build-ci
-    args: '--no-default-features --features=unlocked --target-dir target-unlocked-runtime'
-    options:
-      outputStyle: stream
-      mergeOutputs: replace
-    inputs: ['@globs(sources)']
-    outputs:
-      - 'target-unlocked-runtime/release/rollup-node'
-      - 'target-unlocked-runtime/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
-
   build-image-ci-gasp-node:
-    # script: |
-    #   docker buildx build --build-arg TARGET_DIR=target-standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --load .
-    #   docker buildx build --build-arg TARGET_DIR=target-fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --load .
-    #   docker buildx build --build-arg TARGET_DIR=target-unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --load .    
     script: |
-      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-standard-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci} -f Dockerfile.ci --push .
-      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-unlocked-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push .
-      docker buildx build --platform linux/amd64 --build-arg TARGET_DIR=target-fast-runtime/release -t gaspxyz/rollup-node:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push .
-    deps: ['build-standard-runtime', 'build-fast-runtime', 'build-unlocked-runtime']
+      set -ex
+      IMAGE_DIGEST_STANDARD_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-standard-runtime-buildkit-metadata.json)
+      IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-fast-runtime-buildkit-metadata.json)
+      IMAGE_DIGEST_UNLOCKED_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-unlocked-runtime-buildkit-metadata.json)
+  
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_STANDARD_RUNTIME}
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_FAST_RUNTIME}
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast from existing digests"
+      
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_UNLOCKED_RUNTIME}
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked from existing digests"
+      
+    deps: ['buildkit-build-and-push-image-digests-standard-runtime', 'buildkit-build-and-push-image-digests-fast-runtime', 'buildkit-build-and-push-image-digests-unlocked-runtime']
+    inputs: ['gasp-node-standard-runtime-buildkit-metadata.json', 'gasp-node-fast-runtime-buildkit-metadata.json', 'gasp-node-unlocked-runtime-buildkit-metadata.json']
     options:
       cache: false
-      outputStyle: stream
 
   format-gasp-node:
     command: cargo fmt --all -- --check
@@ -157,3 +234,28 @@ tasks:
     options:
       cache: false
       runInCI: false
+
+  run-e2e-test-sudoRemoval:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      just reset-env && sleep 10
+      cd e2eTests && yarn install
+      yarn test-sudoRemoval || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['e2eTests/reports/*.xml']
+
+  run-e2e-test-bootstrap:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      just reset-env && sleep 10
+      cd e2eTests && yarn install
+      yarn test-bootstrap || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['e2eTests/reports/*.xml']
+    

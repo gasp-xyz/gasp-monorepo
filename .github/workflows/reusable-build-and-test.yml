@@ -54,15 +54,26 @@ jobs:
             namespace=buildkit
             nodeselector=github-actions-pool=true
             "tolerations=key=github-actions-pool,value=true;key=CriticalAddonsOnly,value=true"
-            qemu.install=true
             replicas=1
-            requests.cpu=8
-            requests.memory=16Gi
-            limits.cpu=8
-            limits.memory=16Gi
+            requests.cpu=7
+            requests.memory=14Gi
+            limits.cpu=7
+            limits.memory=14Gi
           buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
+          platforms: linux/amd64
+          append: |
+            - platforms: linux/arm64
+              driver-opts: |
+                nodeselector=github-actions-pool-arm=true
+                "tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
+                replicas=1
+                requests.cpu=7
+                requests.memory=14Gi
+                limits.cpu=7
+                limits.memory=14Gi
+          
       
       - uses: foundry-rs/foundry-toolchain@v1
       - uses: actions/setup-python@v5
@@ -86,19 +97,20 @@ jobs:
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
           bash /tmp/proto_install.sh 0.47.2 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
+          proto setup --yes
+      - run: proto diagnose
+      - run: proto debug env
+      - run: proto debug config
+      - run: proto install
+      - run: proto regen --bin
+      - run: proto status
+
       # - uses: moonrepo/setup-toolchain@v0
       #   with:
       #     auto-install: true
       #     cache: false
       #     proto-version: 0.47.2
       
-      - run: proto diagnose
-      - run: proto debug env
-      - run: proto debug config
-      - run: proto setup --yes
-      - run: proto install
-      - run: proto regen --bin
-      - run: proto status
       # - run: moon setup
       # - run: cd contracts && yarn install --immutable
       - run: moon ci :contracts-check :contracts-build-and-push-image-ci
@@ -153,14 +165,14 @@ jobs:
 
   build-and-check-services:
     name: '[AVS] Build and test'
-    runs-on: beast-gke
-    # runs-on: gasp-monorepo-large-32core
-    container:
-      image: gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20-slim
-      env:
-        DOCKER_HOST: "unix:///run/docker/docker.sock"
-      volumes:
-        - /run/docker:/run/docker
+    # runs-on: beast-gke
+    runs-on: gasp-monorepo-large-32core
+    # container:
+    #   image: gaspxyz/rust-builder:multi-1.77-nightly-2024-01-20-slim
+    #   env:
+    #     DOCKER_HOST: "unix:///run/docker/docker.sock"
+    #   volumes:
+    #     - /run/docker:/run/docker
     strategy: 
       matrix:
         include:
@@ -189,7 +201,7 @@ jobs:
           submodules: true
           fetch-depth: 0
       # Fix to avoid git errors when running inside the container
-      - run: git config --global --add safe.directory $GITHUB_WORKSPACE
+      # - run: git config --global --add safe.directory $GITHUB_WORKSPACE
       - run: apt-get update && apt-get install -y jq
 
       - uses: google-github-actions/auth@v2
@@ -219,15 +231,25 @@ jobs:
             namespace=buildkit
             nodeselector=github-actions-pool=true
             "tolerations=key=github-actions-pool,value=true;key=CriticalAddonsOnly,value=true"
-            qemu.install=true
-            replicas=1
-            requests.cpu=8
-            requests.memory=16Gi
-            limits.cpu=8
-            limits.memory=16Gi
+            replicas=2
+            requests.cpu=7
+            requests.memory=14Gi
+            limits.cpu=7
+            limits.memory=14Gi
           buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
+          platforms: linux/amd64
+          append: |
+            - platforms: linux/arm64
+              driver-opts: |
+                nodeselector=github-actions-pool-arm=true
+                "tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
+                replicas=2
+                requests.cpu=7
+                requests.memory=14Gi
+                limits.cpu=7
+                limits.memory=14Gi
 
       - uses: mozilla-actions/sccache-action@v0.0.5
       - name: Set Rust caching env vars
@@ -266,11 +288,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: moonrepo/setup-toolchain@v0
-        with:
-          auto-install: false
-          cache: false
-          proto-version: 0.47.2
+      - name: Install proto manually
+        run: |
+          curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
+          bash /tmp/proto_install.sh 0.47.2 --yes && rm /tmp/proto_install.sh
+          echo "$HOME/.proto/bin" >> $GITHUB_PATH
+          proto setup --yes
+      - run: proto diagnose
+      - run: proto debug env
+      - run: proto debug config
+      - run: proto install
+      - run: proto regen --bin
+      - run: proto status
+      # - uses: moonrepo/setup-toolchain@v0
+      #   with:
+      #     auto-install: false
+      #     cache: false
+      #     proto-version: 0.47.2
       # - name: Setup toolchains for services
       #   run: moon ci :prepare-toolchain --concurrency 1
       
