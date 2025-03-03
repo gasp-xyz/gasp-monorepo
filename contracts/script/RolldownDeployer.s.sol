@@ -31,44 +31,28 @@ contract RolldownDeployer is Script, Utils, Test {
     address public updaterAccount;
 
     function run(IRolldownPrimitives.ChainId chain) external {
-        if (isProxyDeployed(chain)) {
+        if (isProxyDeployed()) {
             console.log("Upgrading proxy");
-            upgrade(chain);
+            upgrade();
         } else {
             console.log("Initial deployment");
             initialDeployment(chain);
         }
     }
 
-    function evmPrefixedPath(IRolldownPrimitives.ChainId chain) public pure returns (string memory) {
-        string memory evm;
-
-        if (chain == IRolldownPrimitives.ChainId.Ethereum) {
-            evm = "ethereum_";
-        } else if (chain == IRolldownPrimitives.ChainId.Arbitrum) {
-            evm = "arbitrum_";
-        } else if (chain == IRolldownPrimitives.ChainId.Base) {
-            evm = "base_";
-        } else {
-            revert("Unsupported chain");
-        }
-
-        return string.concat(evm, _OUTPUT_PATH);
-    }
-
-    function isProxyDeployed(IRolldownPrimitives.ChainId chain) public returns (bool) {
-        if (!inputExists(evmPrefixedPath(chain))) {
+    function isProxyDeployed() public returns (bool) {
+        if (!inputExists(_OUTPUT_PATH)) {
             return false;
         }
 
-        string memory configData = readInput(evmPrefixedPath(chain));
+        string memory configData = readInput(_OUTPUT_PATH);
         address proxyAdmin = stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin");
 
         return proxyAdmin.code.length > 0;
     }
 
-    function upgrade(IRolldownPrimitives.ChainId chain) public {
-        string memory configData = readInput(evmPrefixedPath(chain));
+    function upgrade() public {
+        string memory configData = readInput(_OUTPUT_PATH);
         upgrader = stdJson.readAddress(configData, ".permissions.rolldownUpgrader");
         address proxyAdmin = stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin");
         address payable rolldownAddress = payable(stdJson.readAddress(configData, ".addresses.rolldown"));
@@ -86,7 +70,7 @@ contract RolldownDeployer is Script, Utils, Test {
         vm.stopBroadcast();
 
         _verifyImplementations();
-        _writeOutput(chain);
+        _writeOutput();
     }
 
     function initialDeployment(IRolldownPrimitives.ChainId chain) public {
@@ -116,10 +100,10 @@ contract RolldownDeployer is Script, Utils, Test {
 
         _verifyImplementations();
         _verifyInitalizations();
-        _writeOutput(chain);
+        _writeOutput();
     }
 
-    function _writeOutput(IRolldownPrimitives.ChainId chain) internal {
+    function _writeOutput() internal {
         string memory parentObject = "parent object";
 
         string memory deployedAddresses = "addresses";
@@ -143,7 +127,7 @@ contract RolldownDeployer is Script, Utils, Test {
 
         string memory finalJson = vm.serializeString(parentObject, permissions, permissionsOutput);
         console.logString(finalJson);
-        writeOutput(finalJson, evmPrefixedPath(chain));
+        writeOutput(finalJson, _OUTPUT_PATH);
     }
 
     function _verifyImplementations() internal view {

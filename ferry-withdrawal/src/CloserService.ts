@@ -86,11 +86,11 @@ class CloserService {
 									request.ferryTip >= elem[1]
 								);
 							}) !== undefined;
-
+						const isClosedAlready = await this.l1.isClosed(request.hash);
 						return (
+							!isClosedAlready &&
 							(shouldBeClosed ||
-								(await this.stash.shouldBeClosed(request.hash))) &&
-							!(await this.l1.isClosed(request.hash))
+								(await this.stash.shouldBeClosed(request.hash)))
 						);
 					} else {
 						logger.error(`ignoring unkonwn request`);
@@ -141,7 +141,13 @@ class CloserService {
 	): Promise<void> {
 		const isClosed = await this.l1.isClosed(withdrawal.hash);
 		const isFerried = await this.l1.isFerried(withdrawal.hash);
+		logger.debug(
+			`${u8aToHex(
+				withdrawal.hash,
+			)} isFerried:${isFerried} isClosed:${isClosed}`,
+		);
 		if (!isClosed && !isFerried) {
+			logger.info(`Closing withdrawal ${toString(withdrawal)}`);
 			const { range, root } = await this.l1.getMerkleRange(
 				withdrawal.requestId,
 			);
@@ -166,8 +172,8 @@ class CloserService {
 
 	async closeCancel(cancel: Cancel, privateKey: Uint8Array): Promise<void> {
 		const isClosed = await this.l1.isClosed(cancel.hash);
-		const isFerried = await this.l1.isFerried(cancel.hash);
-		if (!isClosed && !isFerried) {
+		if (!isClosed) {
+			logger.info(`Closing cancel resolution ${cancelToString(cancel)}`);
 			const { range, root } = await this.l1.getMerkleRange(cancel.requestId);
 			const proof = await this.l2.getMerkleProof(
 				range[0],

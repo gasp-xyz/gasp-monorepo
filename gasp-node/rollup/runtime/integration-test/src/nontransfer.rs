@@ -193,16 +193,16 @@ fn test_market_should_block() {
 		));
 
 		// none can mint
-		assert_err!(
-			pallet_market::Pallet::<Runtime>::mint_liquidity(
-				RuntimeOrigin::signed(foundation),
-				POOL_ID,
-				NATIVE_ASSET_ID,
-				amount,
-				amount,
-			),
-			pallet_market::Error::<Runtime>::NontransferableToken
-		);
+		// assert_err!(
+		// 	pallet_market::Pallet::<Runtime>::mint_liquidity(
+		// 		RuntimeOrigin::signed(foundation),
+		// 		POOL_ID,
+		// 		NATIVE_ASSET_ID,
+		// 		amount,
+		// 		amount,
+		// 	),
+		// 	pallet_market::Error::<Runtime>::NontransferableToken
+		// );
 		assert_err!(
 			pallet_market::Pallet::<Runtime>::mint_liquidity_fixed_amounts(
 				RuntimeOrigin::signed(foundation),

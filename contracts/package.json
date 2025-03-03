@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "GASP contracts for EVM",
   "scripts": {
-    "format": "bun prettier --check '**/*.{json,md,yml}' && forge fmt --check {src/interfaces/IGaspToken,src/GaspToken,src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/rolldownDeployer.t}.sol",
-    "format:fix": "bun prettier --write '**/*.{json,md,yml}' && forge fmt {src/interfaces/IGaspToken,src/GaspToken,src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/rolldownDeployer.t}.sol",
-    "lint": "bun solhint {script,src,test}/**/{GaspToken,IGaspToken,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
-    "lint:fix": "bun solhint --fix --noPrompt {script,src,test}/**/{GaspToken,IGaspToken,IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol && bun run format:fix",
+    "format": "bun prettier --check '**/*.{json,md,yml}' && forge fmt --check {src/interfaces/IGaspToken,src/GaspToken,src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/RolldownDeployer.t}.sol",
+    "format:fix": "bun prettier --write '**/*.{json,md,yml}' && forge fmt {src/interfaces/IGaspToken,src/GaspToken,src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/RolldownDeployer.t}.sol",
+    "lint": "bun solhint {script,src,test}/**/{GaspToken,IGaspToken,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,RolldownDeployer.t}.sol",
+    "lint:fix": "bun solhint --fix --noPrompt {script,src,test}/**/{GaspToken,IGaspToken,IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,RolldownDeployer.t}.sol && bun run format:fix",
     "compile": "forge compile",
     "size": "forge compile --sizes",
     "test": "forge test -vvv --fail-fast",
@@ -29,7 +29,7 @@
   ],
   "devDependencies": {
     "forge-std": "github:foundry-rs/forge-std#v1.9.5",
-    "prettier": "^3.4.2",
-    "solhint": "^5.0.4"
+    "prettier": "^3.5.1",
+    "solhint": "^5.0.5"
   }
 }
