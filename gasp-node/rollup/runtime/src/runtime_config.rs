@@ -925,7 +925,7 @@ pub mod config {
 			pub const SequencerIssuanceVaultId: PalletId = PalletId(*b"py/seqiv");
 			pub SequencerIssuanceVault: AccountId = SequencerIssuanceVaultId::get().into_account_truncating();
 
-			pub const TotalCrowdloanAllocation: Balance = 0 * DOLLARS;
+			pub const TotalCrowdloanAllocation: Balance = 0;
 			pub const LinearIssuanceAmount: Balance = 10_200_000 * DOLLARS; // LinearIssuanceAmount/(LinearIssuanceBlocks/BlocksPerRound) is the value that is issued every session indefintely FOREVER!
 			pub const LinearIssuanceBlocks: u32 = 10_512_000u32; // 2 years
 			pub const LiquidityMiningSplit: Perbill = Perbill::from_parts(686000000); // 6_997_200
