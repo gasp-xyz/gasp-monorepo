@@ -172,7 +172,7 @@ collator:
     extraArgs:
       - --pruning=archive
       - --rpc-max-connections=10000
-  
+
   rpcArchive01:
     enabled: true
     role: rpc-archive
@@ -182,7 +182,7 @@ collator:
     extraArgs:
       - --pruning=archive
       - --rpc-max-connections=10000
-  
+
   rpcArchive02:
     enabled: false
     role: rpc-archive-new
@@ -506,7 +506,7 @@ ferryWithdrawalEnvSecretsBase:
 # ferry-closer configs #
 ########################
 closerEnabled: true
-closerImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
+closerImageTag: ce8243c48990b80e86aa805c5e0b1a213df14001
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
@@ -515,7 +515,7 @@ closerEnvEth:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
-  BATCH_SIZE: 50
+  BATCH_SIZE: 5
 closerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -530,7 +530,7 @@ closerEnvArb:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
-  BATCH_SIZE: 50
+  BATCH_SIZE: 5
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerArbitrumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -545,7 +545,7 @@ closerEnvBase:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
-  BATCH_SIZE: 50
+  BATCH_SIZE: 5
 closerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerBaseMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
