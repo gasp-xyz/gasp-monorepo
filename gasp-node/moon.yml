@@ -8,6 +8,8 @@ tags:
 
 env:
   CARGO_TERM_COLOR: 'always'
+  # FORCE_COLOR is a jest specific variable to enforce color output
+  FORCE_COLOR: 'true'
   SCCACHE_GCS_KEY_PREFIX: gasp-node
   IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/rollup-node
   DOCKERHUB_REPOSITORY: gaspxyz/rollup-node
