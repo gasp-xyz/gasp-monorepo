@@ -95,6 +95,7 @@ jobs:
           #####################################################################
           - command: "moon gasp-node:e2e-test-rollup"
     runs-on: [e2e-gke]
+    name: ${{ matrix.command }}
     timeout-minutes: 180
     defaults:
       run:
@@ -117,11 +118,11 @@ jobs:
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
       - run: cd gasp-e2e && proto setup --yes
       - run: cd gasp-e2e && proto install
-      - run: cd gasp-e2e && proto diagnose
-      - run: cd gasp-e2e && proto status
-      - run: cd gasp-e2e && proto regen
-      - run: cd gasp-e2e && proto debug env
-      - run: cd gasp-e2e && proto debug config
+      # - run: cd gasp-e2e && proto diagnose
+      # - run: cd gasp-e2e && proto status
+      # - run: cd gasp-e2e && proto regen
+      # - run: cd gasp-e2e && proto debug env
+      # - run: cd gasp-e2e && proto debug config
 
       - uses: docker/setup-compose-action@v1
       - uses: actions/setup-node@v4
@@ -153,7 +154,7 @@ jobs:
         if: success() || failure() # run this step even if previous step failed
         with:
           name: E2E report ${{ matrix.command }} # Name of the check run which will be created
-          path: gasp-e2e/reports/*.xml # Path to test results
+          path: gasp-node/gasp-e2e/reports/*.xml # Path to test results
           reporter: jest-junit # Format of test results
 
       - name: Submit results to the testmo-run
