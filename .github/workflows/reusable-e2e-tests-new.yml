@@ -1,4 +1,4 @@
-name: '[gasp-node] Reusable e2e tests workflow'
+name: '[e2e] Reusable e2e tests workflow'
 
 on:
   workflow_dispatch:
@@ -93,7 +93,7 @@ jobs:
           #####################################################################
           # full avs environment specific tests (running full avs environment)
           #####################################################################
-          # - command: "moon gasp-node:e2e-test-rollup"
+          - command: "moon gasp-node:e2e-test-rollup"
     runs-on: [e2e-gke]
     timeout-minutes: 180
     defaults:
@@ -116,7 +116,6 @@ jobs:
           bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
       - run: cd gasp-e2e && proto setup --yes
-      # - run: cd gasp-e2e && proto activate --yes
       - run: cd gasp-e2e && proto install
       - run: cd gasp-e2e && proto diagnose
       - run: cd gasp-e2e && proto status

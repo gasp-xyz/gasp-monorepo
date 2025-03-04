@@ -587,8 +587,29 @@ tasks:
       - '/ferry-withdrawal/**/*.ts'
       - '/ferry-withdrawal/package.json'
       - '/ferry-withdrawal/yarn.lock'
-      - '/contracts/**/*'
-      - '/sequencer/**/*'
-      - '/updater/**/*'
+      - "/contracts/lib/**/*"
+      - "/contracts/src/**/*"
+      - "/contracts/test/**/*"
+      - "/contracts/script/**/*"
+      - "/contracts/tools/**/*"
+      - "/contracts/package.json"
+      - "/contracts/foundry.toml"
+      - "/contracts/remappings.txt"
+      - '/sequencer/bindings/**/*'
+      - '/sequencer/src/**/*'
+      - '/sequencer/Cargo.toml'
+      - '/updater/bindings/**/*'
+      - '/updater/src/**/*'
+      - '/updater/Cargo.toml'
+      - '/avs-eigensdk-go/**/*.go'
+      - '/avs-eigensdk-go/**/go.mod'
       - '/avs-aggregator/**/*'
+      - '/avs-aggregator/bindings/**/*'
+      - '/avs-aggregator/cmd/**/*'
+      - '/avs-aggregator/core/**/*'
+      - '/avs-aggregator/mocks/**/*'
+      - '/avs-aggregator/types/**/*'
+      - '/avs-aggregator/go.mod'
+      - '/avs-aggregator/go.sum'
+      - '/avs-aggregator/*.go'
     outputs: ['gasp-e2e/reports/*.xml']
