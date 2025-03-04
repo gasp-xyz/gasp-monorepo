@@ -22,6 +22,9 @@ import {
 	STASH_URL,
 	DELAY,
 	BATCH_SIZE,
+	REPLICA_COUNT,
+	REPLICA_ID,
+	MIN_REQUEST_ID,
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
 import { reportBalance, serveMetrics } from "./metrics.js";
@@ -64,6 +67,9 @@ async function main() {
 		TOKENS_TO_TRACK,
 		TX_COST,
 		BATCH_SIZE,
+		REPLICA_COUNT,
+		REPLICA_ID,
+		MIN_REQUEST_ID,
 	);
 
 	let inProgress = false;
