@@ -16,7 +16,7 @@ permissions:
 env:
   MOON_COLOR: 2
   MOON_CACHE: read-write
-  MOON_DEBUG_PROTO_INSTALL: true
+  MOON_DEBUG_PROTO_INSTALL: false
 
 jobs:
   contracts-build-and-test:
@@ -263,6 +263,7 @@ jobs:
       
       - uses: moonrepo/setup-rust@v1
         name: Setup 1.82.0 rust toolchain
+        if: matrix.buildkit-enable == false
         with:
           channel: 1.82.0
           targets: wasm32-unknown-unknown
@@ -271,6 +272,7 @@ jobs:
           target-dirs: 'sequencer/target,updater/target'
       - uses: moonrepo/setup-rust@v1
         name: Setup 1.78.0 rust toolchain
+        if: matrix.buildkit-enable == false
         with:
           channel: 1.78.0
           targets: wasm32-unknown-unknown
@@ -279,6 +281,7 @@ jobs:
           target-dirs: 'gasp-avs/target'
       - uses: moonrepo/setup-rust@v1
         name: Setup nightly-2024-01-20 rust toolchain
+        if: matrix.buildkit-enable == false
         with:
           channel: nightly-2024-01-20
           targets: wasm32-unknown-unknown
