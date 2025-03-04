@@ -86,7 +86,7 @@ jobs:
         working-directory: contracts
   
         
-      # - run: corepack enable && corepack prepare yarn@4.6.0 --activate
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       # - uses: actions/setup-node@v4
       #   with:
       #     node-version-file: 'contracts/.nvmrc'
