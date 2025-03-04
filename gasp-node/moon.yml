@@ -20,6 +20,8 @@ fileGroups:
     - 'rollup/**/*'
     - 'rpc/**/*'
     - 'Cargo.toml'
+  gasp-e2e-sources:
+    - 'gasp-e2e/**/*.ts'
 
 tasks:
   prepare-toolchain:
@@ -199,7 +201,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-bootstrap:
@@ -213,7 +215,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-parallel:
@@ -227,7 +229,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-sequential-no-bootstrap:
@@ -241,7 +243,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-seqgasless:
@@ -255,7 +257,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-maintenance:
@@ -269,7 +271,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-rollupUpdate:
@@ -283,7 +285,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-rewards-bootstrap:
@@ -297,7 +299,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-parallel-autocompound:
@@ -311,7 +313,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-sequential-autocompound:
@@ -325,7 +327,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-poolliquidity:
@@ -339,7 +341,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-governance:
@@ -353,7 +355,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-multiswap:
@@ -367,7 +369,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-experimentalStaking:
@@ -381,7 +383,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-crowdloan:
@@ -409,7 +411,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-parallel-3rdPartyRewards:
@@ -423,7 +425,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-sequencerStaking:
@@ -437,7 +439,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-sequencerCancellation:
@@ -451,7 +453,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-rolldown:
@@ -507,7 +509,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-nonTransToken:
@@ -521,7 +523,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-issuanceConfig:
@@ -535,7 +537,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-marketSwap:
@@ -549,7 +551,7 @@ tasks:
       cd ../ && docker compose down
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-rollup:
@@ -576,7 +578,7 @@ tasks:
       runFromWorkspaceRoot: true
     inputs: 
       - '@globs(sources)'
-      - 'gasp-e2e/**/*.ts'
+      - '@globs(gasp-e2e-sources)'
       - '/gasp-avs/src/**/*.rs'
       - '/gasp-avs/Cargo.toml'
       - '/gasp-avs/Cargo.lock'
