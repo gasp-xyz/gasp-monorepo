@@ -116,7 +116,7 @@ jobs:
       - run: cd gasp-e2e && proto debug env
       - run: cd gasp-e2e && proto debug config
 
-
+      - uses: docker/setup-compose-action@v1
       - uses: actions/setup-node@v4
         with:
           node-version: '18.19.0'
