@@ -76,7 +76,7 @@ tasks:
     deps: ['gasp-node:build-image-ci']
     options:
       outputStyle: stream
-      cache: true
+      cache: false
       internal: true
       retryCount: 3
 
@@ -119,7 +119,7 @@ tasks:
     deps: ['gasp-node:build-image-ci']
     options:
       outputStyle: stream
-      cache: true
+      cache: false
       internal: true
       retryCount: 3
 
@@ -162,7 +162,7 @@ tasks:
     deps: ['gasp-node:build-image-ci']
     options:
       outputStyle: stream
-      cache: true
+      cache: false
       internal: true
       retryCount: 3
 
