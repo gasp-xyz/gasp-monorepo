@@ -18,6 +18,16 @@ fileGroups:
     - 'src/**/*'
     - 'bindings/**/*'
     - 'Cargo.toml'
+    - 'Cargo.lock'
+  dockerBuildInputs:
+    - 'Dockerfile'
+    - '.dockerignore'
+    - 'moon.yml'
+    - 'package.json'
+    - 'yarn.lock'
+    - '.nvmrc'
+    - 'entrypoint.sh'
+    - '.releaserc.yaml'
 
 tasks:
   prepare-toolchain:
@@ -71,7 +81,7 @@ tasks:
       fi
       
       exit $BUILD_EXIT_CODE
-    inputs: ["@globs(sources)", "Dockerfile"]
+    inputs: ["@globs(sources)", "@globs(dockerBuildInputs)"]
     outputs: ['gasp-avs-standard-runtime-buildkit-metadata.json']
     deps: ['gasp-node:build-image-ci']
     options:
@@ -114,7 +124,7 @@ tasks:
       fi
       
       exit $BUILD_EXIT_CODE
-    inputs: ["@globs(sources)", "Dockerfile"]
+    inputs: ["@globs(sources)", "@globs(dockerBuildInputs)"]
     outputs: ['gasp-avs-fast-runtime-buildkit-metadata.json']
     deps: ['gasp-node:build-image-ci']
     options:
@@ -157,7 +167,7 @@ tasks:
       fi
       
       exit $BUILD_EXIT_CODE
-    inputs: ["@globs(sources)", "Dockerfile"]
+    inputs: ["@globs(sources)", "@globs(dockerBuildInputs)"]
     outputs: ['gasp-avs-unlocked-runtime-buildkit-metadata.json']
     deps: ['gasp-node:build-image-ci']
     options:
