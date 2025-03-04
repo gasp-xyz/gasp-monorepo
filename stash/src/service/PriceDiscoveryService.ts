@@ -208,12 +208,12 @@ export const volumeHistory = async (
   await refresh()
 
   const intervalAdjusted = interval === 0 ? adjustInterval(days) : interval
-  const asset = getAsset(currencyId, isPool)
+
   const current = moment.utc()
   const to = current.valueOf()
   const from = days === 'max' ? 0 : current.subtract(days, 'days').valueOf()
   const volumes = await volumeStore.get(
-    asset.id,
+    currencyId,
     isPool,
     from,
     to,
@@ -232,12 +232,12 @@ export const tradesHistory = async (
   await refresh()
 
   const intervalAdjusted = interval === 0 ? adjustInterval(days) : interval
-  const asset = getAsset(currencyId, isPool)
+
   const current = moment.utc()
   const to = current.valueOf()
   const from = days === 'max' ? 0 : current.subtract(days, 'days').valueOf()
   const volumes = await tradesStore.get(
-    asset.id,
+    currencyId,
     isPool,
     from,
     to,
