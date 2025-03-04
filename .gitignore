@@ -119,4 +119,4 @@ out
 
 *-buildkit-metadata.json
 
-reports/**/*
+**/reports/**/*
