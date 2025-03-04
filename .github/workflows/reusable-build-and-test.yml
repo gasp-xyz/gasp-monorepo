@@ -66,8 +66,7 @@ jobs:
           append: |
             - platforms: linux/arm64
               driver-opts:
-                - nodeselector=github-actions-pool-arm=true
-                - 'tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64'
+                - nodeselector=github-actions-pool-arm=true,"tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
                 - replicas=1
                 - requests.cpu=7
                 - requests.memory=14Gi
@@ -243,8 +242,7 @@ jobs:
           append: |
             - platforms: linux/arm64
               driver-opts:
-                - nodeselector=github-actions-pool-arm=true
-                - 'tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64'
+                - nodeselector=github-actions-pool-arm=true,"tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
                 - replicas=1
                 - requests.cpu=7
                 - requests.memory=14Gi
