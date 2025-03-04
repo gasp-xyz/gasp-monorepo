@@ -15,6 +15,7 @@ permissions:
 
 env:
   MOON_COLOR: 2
+  MOON_CACHE: write
 
 jobs:
   contracts-build-and-test:
@@ -180,7 +181,7 @@ jobs:
               :benchmark-tests-gasp-node
           - prefix: build-docker-images
             name: Build docker images
-            runner: ubuntu-24.04
+            runner: compile-gke
             buildkit-enable: true
             buildkit-replicas: 8
             moon-targets: >-
