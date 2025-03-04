@@ -27,6 +27,8 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       # - uses: arduino/setup-protoc@v3
+      #   with:
+      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
       # - uses: google-github-actions/auth@v2
       #   id: auth
       #   with:
@@ -194,6 +196,8 @@ jobs:
           fetch-depth: 0
       # - run: apt-get update && apt-get install -y jq
       - uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       
       - uses: google-github-actions/auth@v2
         id: auth
