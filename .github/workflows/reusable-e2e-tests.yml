@@ -134,13 +134,9 @@ jobs:
           bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
       - run: cd gasp-avs/tests && proto setup --yes
-      # - run: cd gasp-avs/tests && proto activate --yes
       - run: cd gasp-avs/tests && proto install
       - run: cd gasp-avs/tests && proto diagnose
       - run: cd gasp-avs/tests && proto status
-      - run: cd gasp-avs/tests && proto regen
-      - run: cd gasp-avs/tests && proto debug env
-      - run: cd gasp-avs/tests && proto debug config
       
       - run: corepack enable && corepack prepare yarn@4.6.0 --activate
       - uses: actions/setup-node@v4
@@ -155,15 +151,6 @@ jobs:
 
       - uses: appthrust/moon-ci-retrospect@v1
         if: success() || failure()
-
-      - name: Test Report
-        uses: dorny/test-reporter@v1.9.1
-        continue-on-error: true
-        if: success() || failure() # run this step even if previous step failed
-        with:
-          name: gasp-avs tests report ${{ matrix.test-command }} # Name of the check run which will be created
-          path: gasp-avs/tests/reports/*.xml # Path to test results
-          reporter: jest-junit # Format of test results
 
   ferry-withdrawal-test:
     name: Ferry withdrawal tests
