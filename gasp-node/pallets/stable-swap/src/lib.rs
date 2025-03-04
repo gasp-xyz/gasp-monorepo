@@ -856,6 +856,11 @@ pub mod pallet {
 			Ok(())
 		}
 
+		// TODO - Caution - Requires Migration
+		// Having a hashed serial number as account id might cause clashing
+		// with other stuff that might use the same thing
+		// (can prob use account derive from pallet account)
+		//
 		/// The account of the pool that store asset balances.
 		///
 		/// This actually does computation. If you need to keep using it, then make sure you cache
@@ -1930,5 +1935,14 @@ impl<T: Config> Mutate<T::AccountId> for Pallet<T> {
 		min_amount_out: Self::Balance,
 	) -> Result<SwapResult<Self::Balance>, DispatchError> {
 		Self::do_swap(sender, pool_id, asset_in, asset_out, amount_in, min_amount_out)
+	}
+
+	fn settle_pool_fees(
+		who: &T::AccountId,
+		pool_id: Self::CurrencyId,
+		asset_id: Self::CurrencyId,
+		fee: Self::Balance,
+	) -> Result<(), DispatchError> {
+		Self::settle_pool_fees(who, pool_id, asset_id, fee)
 	}
 }
