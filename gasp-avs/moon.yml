@@ -38,16 +38,17 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile']
 
   buildkit-build-and-push-image-digests-standard-runtime:
-    command: >
-      docker buildx build --platform linux/amd64,linux/arm64
-      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
-      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
-      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
-      --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY}
-      --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}
-      --metadata-file gasp-avs-standard-runtime-buildkit-metadata.json -f Dockerfile ./
+    script: |
+      docker buildx build --platform linux/amd64,linux/arm64 \
+        --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime \
+        --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime,mode=max \
+        --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
+        --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY} \
+        --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci} \
+        --metadata-file gasp-avs-standard-runtime-buildkit-metadata.json -f Dockerfile ./
     inputs: ["@globs(sources)", "Dockerfile"]
     outputs: ['gasp-avs-standard-runtime-buildkit-metadata.json']
+    deps: ['gasp-node:build-image-ci']
     options:
       outputStyle: stream
       cache: true
@@ -55,16 +56,17 @@ tasks:
       retryCount: 3
 
   buildkit-build-and-push-image-digests-fast-runtime:
-    command: >
-      docker buildx build --platform linux/amd64,linux/arm64
-      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
-      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
-      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
-      --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY}
-      --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
-      --metadata-file gasp-avs-fast-runtime-buildkit-metadata.json -f Dockerfile ./
+    script: |
+      docker buildx build --platform linux/amd64,linux/arm64 \
+        --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime \
+        --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime,mode=max \
+        --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
+        --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY} \
+        --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast \
+        --metadata-file gasp-avs-fast-runtime-buildkit-metadata.json -f Dockerfile ./
     inputs: ["@globs(sources)", "Dockerfile"]
     outputs: ['gasp-avs-fast-runtime-buildkit-metadata.json']
+    deps: ['gasp-node:build-image-ci']
     options:
       outputStyle: stream
       cache: true
@@ -72,16 +74,17 @@ tasks:
       retryCount: 3
 
   buildkit-build-and-push-image-digests-unlocked-runtime:
-    command: >
-      docker buildx build --platform linux/amd64,linux/arm64
-      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
-      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
-      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
-      --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY}
-      --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-unlocked
-      --metadata-file gasp-avs-unlocked-runtime-buildkit-metadata.json -f Dockerfile ./
+    script: |
+      docker buildx build --platform linux/amd64,linux/arm64 \
+        --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-unlocked-runtime \
+        --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-unlocked-runtime,mode=max \
+        --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
+        --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY} \
+        --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-unlocked \
+        --metadata-file gasp-avs-unlocked-runtime-buildkit-metadata.json -f Dockerfile ./
     inputs: ["@globs(sources)", "Dockerfile"]
     outputs: ['gasp-avs-unlocked-runtime-buildkit-metadata.json']
+    deps: ['gasp-node:build-image-ci']
     options:
       outputStyle: stream
       cache: true
@@ -116,7 +119,7 @@ tasks:
 
       echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked from existing digests"
     deps: 
-      - gasp-node:build-image-ci
+      # - gasp-node:build-image-ci
       - buildkit-build-and-push-image-digests-standard-runtime
       - buildkit-build-and-push-image-digests-fast-runtime
       - buildkit-build-and-push-image-digests-unlocked-runtime
@@ -126,7 +129,7 @@ tasks:
       - 'gasp-avs-unlocked-runtime-buildkit-metadata.json'
     options:
       cache: false
-      runDepsInParallel: false
+      # runDepsInParallel: false
 
   format-gasp-avs:
     command: cargo fmt --all -- --check
