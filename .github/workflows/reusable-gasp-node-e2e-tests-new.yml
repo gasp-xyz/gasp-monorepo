@@ -93,8 +93,6 @@ jobs:
         working-directory: gasp-node
     env:
       API_URL: "ws://127.0.0.1:9946"
-      E2EBRANCHNAME: "eth-rollup-develop"
-      NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImageTag != '' && inputs.nodeDockerImageTag || inputs.globalVersion }}
       NODE_DOCKER_COMPOSE_NETWORK: gasp-node_default
     steps:
       - uses: actions/checkout@v4
@@ -107,8 +105,16 @@ jobs:
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
           bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
-      - run: proto setup --yes
-      - run: proto install
+      - run: cd gasp-e2e && proto setup --yes
+      - run: cd gasp-e2e && proto activate --yes
+      - run: cd gasp-e2e && proto install
+      - run: cd gasp-e2e && proto diagnose
+      - run: cd gasp-e2e && proto status
+      - run: cd gasp-e2e && proto regen
+      - run: cd gasp-e2e && proto debug env
+      - run: cd gasp-e2e && proto debug config
+
+      - run: cd gasp-e2e && yarn install --immutable
 
       - name: E2E- Get branch name
         id: branch-name
@@ -117,12 +123,12 @@ jobs:
       - name: Current branch name for generating types
         run: echo "GASP_TYPES_VERSION=${{ steps.branch-name.outputs.current_branch }}" | sed -E 's@[/\.]@-@g; s@_@-@g' >> $GITHUB_ENV
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18.19.0'
-          cache: yarn
-          cache-dependency-path: './gasp-node/gasp-e2e/yarn.lock'
-          
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '18.19.0'
+      #     cache: yarn
+      #     cache-dependency-path: './gasp-node/gasp-e2e/yarn.lock'
+
       - run: cd gasp-e2e && yarn install
       - run: cd gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
 
@@ -170,17 +176,3 @@ jobs:
           TESTMO_URL: ${{ secrets.TESTMO_URL }}
           TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         continue-on-error: true
-
-  # slack-notify-nook:
-  #   needs: [e2e-test-matrix]
-  #   if: failure()
-  #   runs-on: ubuntu-24.04
-  #   steps:
-  #     - name: Slack Notification - Error
-  #       uses: bryannice/gitactions-slack-notification@2.0.0
-  #       env:
-  #         SLACK_INCOMING_WEBHOOK: ${{ secrets.BNB_E2E_NOTIFICATION_WEBHOOK }}
-  #         SLACK_TITLE: 'bnb e2e test execution - NOOK'
-  #         SLACK_COLOR: "#ff0011"
-  #         SLACK_MESSAGE: 'Test failures [ ${{ env.E2EBRANCHNAME }} - gaspxyz/rollup-node:${{ env.NODE_DOCKER_IMAGE }} ] testmo report: https://mangata-finance.testmo.net/automation/runs/view/${{needs.setup-report.outputs.testmo-run-id}}'
-  #         GITHUB_REF: 'https://gasp-xyz.github.io/gasp-monorepo/${{ github.run_number }}'

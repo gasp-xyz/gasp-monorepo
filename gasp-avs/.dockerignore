@@ -20,3 +20,5 @@ gha-creds-*.json
 *-buildkit-metadata.json
 
 node_modules
+
+reports

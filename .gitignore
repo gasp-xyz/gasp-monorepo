@@ -118,3 +118,5 @@ out
 *.tar.zst
 
 *-buildkit-metadata.json
+
+reports/**/*

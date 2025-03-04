@@ -195,8 +195,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sudoRemoval || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-sudoRemoval || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -209,8 +209,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-bootstrap || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-bootstrap || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -223,8 +223,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-parallel --max-workers=10 || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-parallel --max-workers=10 || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -237,8 +237,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequential-no-bootstrap || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-sequential-no-bootstrap || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -251,8 +251,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-seqgasless || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-seqgasless || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -265,8 +265,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-maintenance || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-maintenance || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -279,8 +279,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rollupUpdate || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-rollupUpdate || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -293,8 +293,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rewards-bootstrap || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-rewards-bootstrap || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -307,8 +307,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-parallel-autocompound || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-parallel-autocompound || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -321,8 +321,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequential-autocompound || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-sequential-autocompound || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -335,8 +335,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-poolliquidity || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-poolliquidity || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -349,8 +349,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-governance || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-governance || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -363,8 +363,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-multiswap || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-multiswap || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -377,8 +377,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-experimentalStaking || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-experimentalStaking || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -391,8 +391,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-crowdloan || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-crowdloan || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -405,8 +405,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sdk || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-sdk || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -419,8 +419,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-parallel-3rdPartyRewards || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-parallel-3rdPartyRewards || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -433,8 +433,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequencerStaking || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-sequencerStaking || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -447,8 +447,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequencerCancellation || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-sequencerCancellation || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -461,8 +461,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rolldown || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-rolldown || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -475,8 +475,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rolldownWithdrawal || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-rolldownWithdrawal || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -489,8 +489,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rolldownPreOperationWithdrawal || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-rolldownPreOperationWithdrawal || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -503,8 +503,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequencerRewards || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-sequencerRewards || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -517,8 +517,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-nonTransToken || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-nonTransToken || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -531,8 +531,8 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-issuanceConfig || (cd ../ && just stop-env)
-      cd ../ && just stop-env
+      yarn test-issuanceConfig || (cd ../ && docker compose down)
+      cd ../ && docker compose down
     options:
       cache: true
     inputs: ['@globs(sources)']
