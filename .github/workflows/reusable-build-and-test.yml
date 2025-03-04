@@ -16,6 +16,7 @@ permissions:
 env:
   MOON_COLOR: 2
   MOON_CACHE: write
+  MOON_DEBUG_PROTO_INSTALL: true
 
 jobs:
   contracts-build-and-test:
