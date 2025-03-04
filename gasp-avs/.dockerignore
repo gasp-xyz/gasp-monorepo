@@ -19,6 +19,14 @@ gha-creds-*.json
 
 *-buildkit-metadata.json
 
-node_modules
+**/node_modules
+**/tests
+**/reports
 
-reports
+README.md
+
+.releaserc.yaml
+
+Justfile
+.prototools
+compose.yml
