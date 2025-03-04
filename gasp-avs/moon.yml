@@ -81,7 +81,7 @@ tasks:
       fi
       
       exit $BUILD_EXIT_CODE
-    inputs: ["@globs(sources)", "@globs(dockerBuildInputs)"]
+    inputs: ["@globs(sources)", "@files(dockerBuildInputs)"]
     outputs: ['gasp-avs-standard-runtime-buildkit-metadata.json']
     deps: ['gasp-node:build-image-ci']
     options:
@@ -124,7 +124,7 @@ tasks:
       fi
       
       exit $BUILD_EXIT_CODE
-    inputs: ["@globs(sources)", "@globs(dockerBuildInputs)"]
+    inputs: ["@globs(sources)", "@files(dockerBuildInputs)"]
     outputs: ['gasp-avs-fast-runtime-buildkit-metadata.json']
     deps: ['gasp-node:build-image-ci']
     options:
@@ -167,7 +167,7 @@ tasks:
       fi
       
       exit $BUILD_EXIT_CODE
-    inputs: ["@globs(sources)", "@globs(dockerBuildInputs)"]
+    inputs: ["@globs(sources)", "@files(dockerBuildInputs)"]
     outputs: ['gasp-avs-unlocked-runtime-buildkit-metadata.json']
     deps: ['gasp-node:build-image-ci']
     options:
