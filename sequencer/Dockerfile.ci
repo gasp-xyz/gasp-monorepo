@@ -1,8 +1,0 @@
-FROM debian:stable-slim
-RUN apt update -y && apt install -y libssl-dev
-
-WORKDIR /app
-
-COPY target/release/sequencer /app/sequencer
-
-CMD ["/app/sequencer"]

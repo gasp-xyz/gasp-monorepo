@@ -125,23 +125,6 @@ tasks:
     options:
       cache: false
       runDepsInParallel: false
-  
-  # build-ci:
-  #   command: cargo build --release
-  #   inputs: ['@globs(sources)']
-  #   outputs: ['target/release/main']
-  #   env:
-  #     SCCACHE_GCS_KEY_PREFIX: gasp-avs-release
-  
-  # build-image-ci-gasp-avs:
-  #   script: |
-  #     docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-standard-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci} -f Dockerfile.ci --push ../
-  #     docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-fast-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-fast -f Dockerfile.ci --push ../
-  #     docker buildx build --platform linux/amd64 --build-arg ROLLUP_NODE_BINARY_PATH=gasp-node/target-unlocked-runtime/release/rollup-node -t gaspxyz/gasp-avs:${IMAGE_TAG:-ci}-unlocked -f Dockerfile.ci --push ../
-  #   deps: ['build-ci', 'gasp-node:build-image-ci-gasp-node']
-  #   options:
-  #     cache: false
-  #     runDepsInParallel: false
 
   format-gasp-avs:
     command: cargo fmt --all -- --check
