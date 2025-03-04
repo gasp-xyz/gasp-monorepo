@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       globalVersion:
-        description: "Set gasp-node version."
+        description: "Set global version for all tests."
         type: string
         required: true
   workflow_call:
     inputs:
       globalVersion:
-        description: "Set gasp-node version."
+        description: "Set global version for all tests."
         type: string
         required: true
 
@@ -61,6 +61,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          #####################################################################
+          # gasp-node-specific tests (running only two instances of gasp-node)
+          #####################################################################
           - command: "moon gasp-node:e2e-test-parallel"
           - command: "moon gasp-node:e2e-test-sequential-no-bootstrap"
           - command: "moon gasp-node:e2e-test-seqgasless"
@@ -87,6 +90,10 @@ jobs:
           - command: "moon gasp-node:e2e-test-issuanceConfig"
           - command: "moon gasp-node:e2e-test-sudoRemoval"
           - command: "moon gasp-node:e2e-test-marketSwap"
+          #####################################################################
+          # full avs environment specific tests (running full avs environment)
+          #####################################################################
+          # - command: "moon gasp-node:e2e-test-rollup"
     runs-on: [e2e-gke]
     timeout-minutes: 180
     defaults:
@@ -96,6 +103,7 @@ jobs:
       MOON_TOOLCHAIN_FORCE_GLOBALS: node,yarn
       API_URL: "ws://127.0.0.1:9946"
       NODE_DOCKER_COMPOSE_NETWORK: gasp-node_default
+      IMAGE_TAG: ${{ inputs.globalVersion }}
     steps:
       - uses: actions/checkout@v4
         with:

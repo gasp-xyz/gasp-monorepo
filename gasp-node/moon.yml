@@ -551,4 +551,44 @@ tasks:
       cache: true
     inputs: ['@globs(sources)']
     outputs: ['gasp-e2e/reports/*.xml']
-    
+
+  e2e-test-rollup:
+    script: |
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
+      export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
+      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
+      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-ci}
+      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-ci}
+      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-ci}
+      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
+      export UPDATER_VERSION=${IMAGE_TAG:-ci}
+
+      docker compose down && docker compose up -d
+
+      cd $workspaceRoot/gasp-node/gasp-e2e && yarn install
+      rm -rf $workspaceRoot/gasp-node/gasp-e2e/reports/*.xml || true
+
+      echo "Sleeping for 120 seconds to ensure the environment is up and running\n" && sleep 120
+      cd $workspaceRoot/gasp-node/gasp-e2e && yarn test-rollup || (cd $workspaceRoot && docker compose down)
+      cd $workspaceRoot && docker compose down
+    options:
+      cache: true
+      runFromWorkspaceRoot: true
+    inputs: 
+      - '@globs(sources)'
+      - 'gasp-e2e/**/*.ts'
+      - '/gasp-avs/src/**/*.rs'
+      - '/gasp-avs/Cargo.toml'
+      - '/gasp-avs/Cargo.lock'
+      - '/gasp-avs/bindings/**/*'
+      - '/ferry-deposit/src/**/*.ts'
+      - '/ferry-deposit/package.json'
+      - '/ferry-deposit/yarn.lock'
+      - '/ferry-withdrawal/**/*.ts'
+      - '/ferry-withdrawal/package.json'
+      - '/ferry-withdrawal/yarn.lock'
+      - '/contracts/**/*'
+      - '/sequencer/**/*'
+      - '/updater/**/*'
+      - '/avs-aggregator/**/*'
+    outputs: ['gasp-e2e/reports/*.xml']
