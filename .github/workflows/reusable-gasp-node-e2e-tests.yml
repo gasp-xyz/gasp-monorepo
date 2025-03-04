@@ -97,13 +97,13 @@ jobs:
         include:
           - command: "yarn test-parallel --max-workers=10"
             fast: false
-            unlocked: true
+            unlocked: false
           - command: "yarn test-sequential-no-bootstrap"
             fast: false
-            unlocked: true
+            unlocked: false
           - command: "yarn test-seqgasless"
             fast: false
-            unlocked: true
+            unlocked: false
           - command: "yarn test-maintenance"
             fast: true
             unlocked: false
@@ -112,10 +112,10 @@ jobs:
             unlocked: false
           - command: "yarn test-bootstrap"
             fast: false
-            unlocked: true
+            unlocked: false
           - command: "yarn test-rewards-bootstrap"
             fast: false
-            unlocked: true
+            unlocked: false
           - command: "yarn test-parallel-autocompound"
             fast: true
             unlocked: false
@@ -130,13 +130,13 @@ jobs:
             unlocked: false
           - command: "yarn test-multiswap"
             fast: false
-            unlocked: true
+            unlocked: false
           - command: "yarn test-experimentalStaking"
             fast: true
             unlocked: false
           - command: "yarn test-crowdloan"
             fast: false
-            unlocked: true
+            unlocked: false
           - command: "yarn test-sdk"
             fast: true
             unlocked: false
