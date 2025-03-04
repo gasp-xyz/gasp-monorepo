@@ -121,6 +121,8 @@ jobs:
         with:
           node-version: '18.19.0'
           cache: yarn
+          cache-dependency-path: './gasp-node/gasp-e2e/yarn.lock'
+          
       - run: cd gasp-e2e && yarn install
       - run: cd gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
 
