@@ -192,13 +192,19 @@ tasks:
 
   e2e-test-sudoRemoval:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sudoRemoval || (cd ../ && docker compose down)
+      yarn test-sudoRemoval -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -206,13 +212,19 @@ tasks:
 
   e2e-test-bootstrap:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-bootstrap || (cd ../ && docker compose down)
+      yarn test-bootstrap -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -220,13 +232,19 @@ tasks:
 
   e2e-test-parallel:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-parallel --max-workers=10 || (cd ../ && docker compose down)
+      yarn test-parallel --max-workers=10 -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -234,13 +252,19 @@ tasks:
 
   e2e-test-sequential-no-bootstrap:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequential-no-bootstrap || (cd ../ && docker compose down)
+      yarn test-sequential-no-bootstrap -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -248,13 +272,19 @@ tasks:
 
   e2e-test-seqgasless:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-seqgasless || (cd ../ && docker compose down)
+      yarn test-seqgasless -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -262,13 +292,19 @@ tasks:
 
   e2e-test-maintenance:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-maintenance || (cd ../ && docker compose down)
+      yarn test-maintenance -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -276,13 +312,19 @@ tasks:
 
   e2e-test-rollupUpdate:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rollupUpdate || (cd ../ && docker compose down)
+      yarn test-rollupUpdate -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -290,13 +332,19 @@ tasks:
 
   e2e-test-rewards-bootstrap:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rewards-bootstrap || (cd ../ && docker compose down)
+      yarn test-rewards-bootstrap -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -304,13 +352,19 @@ tasks:
 
   e2e-test-parallel-autocompound:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-parallel-autocompound || (cd ../ && docker compose down)
+      yarn test-parallel-autocompound -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -318,13 +372,19 @@ tasks:
 
   e2e-test-sequential-autocompound:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequential-autocompound || (cd ../ && docker compose down)
+      yarn test-sequential-autocompound -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -332,13 +392,19 @@ tasks:
 
   e2e-test-poolliquidity:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-poolliquidity || (cd ../ && docker compose down)
+      yarn test-poolliquidity -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -346,13 +412,19 @@ tasks:
 
   e2e-test-governance:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-governance || (cd ../ && docker compose down)
+      yarn test-governance -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -360,13 +432,19 @@ tasks:
 
   e2e-test-multiswap:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-multiswap || (cd ../ && docker compose down)
+      yarn test-multiswap -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -374,13 +452,19 @@ tasks:
 
   e2e-test-experimentalStaking:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-experimentalStaking || (cd ../ && docker compose down)
+      yarn test-experimentalStaking -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -388,13 +472,19 @@ tasks:
 
   e2e-test-crowdloan:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-crowdloan || (cd ../ && docker compose down)
+      yarn test-crowdloan -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -402,13 +492,19 @@ tasks:
 
   e2e-test-sdk:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sdk || (cd ../ && docker compose down)
+      yarn test-sdk -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -416,13 +512,19 @@ tasks:
 
   e2e-test-parallel-3rdPartyRewards:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-parallel-3rdPartyRewards || (cd ../ && docker compose down)
+      yarn test-parallel-3rdPartyRewards -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -430,13 +532,19 @@ tasks:
 
   e2e-test-sequencerStaking:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequencerStaking || (cd ../ && docker compose down)
+      yarn test-sequencerStaking -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -444,13 +552,19 @@ tasks:
 
   e2e-test-sequencerCancellation:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequencerCancellation || (cd ../ && docker compose down)
+      yarn test-sequencerCancellation -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -458,13 +572,19 @@ tasks:
 
   e2e-test-rolldown:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rolldown || (cd ../ && docker compose down)
+      yarn test-rolldown -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -472,13 +592,19 @@ tasks:
 
   e2e-test-rolldownWithdrawal:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rolldownWithdrawal || (cd ../ && docker compose down)
+      yarn test-rolldownWithdrawal -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -486,13 +612,19 @@ tasks:
 
   e2e-test-rolldownPreOperationWithdrawal:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rolldownPreOperationWithdrawal || (cd ../ && docker compose down)
+      yarn test-rolldownPreOperationWithdrawal -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)']
@@ -500,13 +632,19 @@ tasks:
 
   e2e-test-sequencerRewards:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequencerRewards || (cd ../ && docker compose down)
+      yarn test-sequencerRewards -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -514,13 +652,19 @@ tasks:
 
   e2e-test-nonTransToken:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-nonTransToken || (cd ../ && docker compose down)
+      yarn test-nonTransToken -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -528,13 +672,19 @@ tasks:
 
   e2e-test-issuanceConfig:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-issuanceConfig || (cd ../ && docker compose down)
+      yarn test-issuanceConfig -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -542,13 +692,19 @@ tasks:
 
   e2e-test-marketSwap:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-marketSwap || (cd ../ && docker compose down)
+      yarn test-marketSwap -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd ../ && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
     inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
@@ -556,6 +712,7 @@ tasks:
 
   e2e-test-rollup:
     script: |
+      set -eo pipefail
       export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
@@ -571,8 +728,14 @@ tasks:
       rm -rf $workspaceRoot/gasp-node/gasp-e2e/reports/*.xml || true
 
       echo "Sleeping for 120 seconds to ensure the environment is up and running\n" && sleep 120
-      cd $workspaceRoot/gasp-node/gasp-e2e && yarn test-rollup || (cd $workspaceRoot && docker compose down)
+      
+      cd $workspaceRoot/gasp-node/gasp-e2e && yarn test-rollup -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      TEST_EXIT_CODE=$?
+
+      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' $workspaceRoot/gasp-node/gasp-e2e/reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+
       cd $workspaceRoot && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
       runFromWorkspaceRoot: true

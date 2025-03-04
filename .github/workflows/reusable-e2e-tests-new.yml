@@ -169,6 +169,15 @@ jobs:
 
       - run: cd gasp-e2e && yarn install
       - run: cd gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
+      
+      - name: Cache Jest
+        uses: actions/cache@v4
+        with:
+          path: gasp-node/gasp-e2e/node_modules/.cache/jest
+          key: ${{ runner.os }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-${{ inputs.globalVersion }}
+          restore-keys: |
+            ${{ runner.os }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-
+            ${{ runner.os }}-jest-
 
       - name: Run tests
         run: ${{ matrix.command }}
