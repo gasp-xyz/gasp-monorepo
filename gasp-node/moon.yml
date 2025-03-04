@@ -537,4 +537,18 @@ tasks:
       cache: true
     inputs: ['@globs(sources)']
     outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-marketSwap:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-marketSwap || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
     

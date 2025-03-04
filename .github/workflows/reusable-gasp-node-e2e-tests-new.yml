@@ -86,6 +86,7 @@ jobs:
           - command: "moon gasp-node:e2e-test-nonTransToken"
           - command: "moon gasp-node:e2e-test-issuanceConfig"
           - command: "moon gasp-node:e2e-test-sudoRemoval"
+          - command: "moon gasp-node:e2e-test-marketSwap"
     runs-on: [e2e-gke]
     timeout-minutes: 180
     defaults:
