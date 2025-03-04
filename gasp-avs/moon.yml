@@ -37,7 +37,7 @@ tasks:
     deps: ['gasp-node:build-image-local']
     inputs: ['@globs(sources)', 'Dockerfile']
 
-  buildkit-build-and-push-image-digests-with-gasp-node-standard-runtime:
+  buildkit-build-and-push-image-digests-standard-runtime:
     command: >
       docker buildx build --platform linux/amd64,linux/arm64
       --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
@@ -45,16 +45,16 @@ tasks:
       --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
       --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY}
       --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}
-      --metadata-file gasp-avs-with-gasp-node-standard-runtime-buildkit-metadata.json -f Dockerfile ./
+      --metadata-file gasp-avs-standard-runtime-buildkit-metadata.json -f Dockerfile ./
     inputs: ["@globs(sources)", "Dockerfile"]
-    outputs: ['gasp-avs-with-gasp-node-standard-runtime-buildkit-metadata.json']
+    outputs: ['gasp-avs-standard-runtime-buildkit-metadata.json']
     options:
       outputStyle: stream
       cache: true
       internal: true
       retryCount: 3
 
-  buildkit-build-and-push-image-digests-with-gasp-node-fast-runtime:
+  buildkit-build-and-push-image-digests-fast-runtime:
     command: >
       docker buildx build --platform linux/amd64,linux/arm64
       --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
@@ -62,16 +62,16 @@ tasks:
       --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
       --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY}
       --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
-      --metadata-file gasp-avs-with-gasp-node-fast-runtime-buildkit-metadata.json -f Dockerfile ./
+      --metadata-file gasp-avs-fast-runtime-buildkit-metadata.json -f Dockerfile ./
     inputs: ["@globs(sources)", "Dockerfile"]
-    outputs: ['gasp-avs-with-gasp-node-fast-runtime-buildkit-metadata.json']
+    outputs: ['gasp-avs-fast-runtime-buildkit-metadata.json']
     options:
       outputStyle: stream
       cache: true
       internal: true
       retryCount: 3
 
-  buildkit-build-and-push-image-digests-with-gasp-node-unlocked-runtime:
+  buildkit-build-and-push-image-digests-unlocked-runtime:
     command: >
       docker buildx build --platform linux/amd64,linux/arm64
       --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
@@ -79,21 +79,21 @@ tasks:
       --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
       --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY}
       --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-unlocked
-      --metadata-file gasp-avs-with-gasp-node-unlocked-runtime-buildkit-metadata.json -f Dockerfile ./
+      --metadata-file gasp-avs-unlocked-runtime-buildkit-metadata.json -f Dockerfile ./
     inputs: ["@globs(sources)", "Dockerfile"]
-    outputs: ['gasp-avs-with-gasp-node-unlocked-runtime-buildkit-metadata.json']
+    outputs: ['gasp-avs-unlocked-runtime-buildkit-metadata.json']
     options:
       outputStyle: stream
       cache: true
       internal: true
       retryCount: 3
-      
+
   build-image-ci:
     script: |
       set -ex
-      IMAGE_DIGEST_STANDARD_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-with-gasp-node-standard-runtime-buildkit-metadata.json)
-      IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-with-gasp-node-fast-runtime-buildkit-metadata.json)
-      IMAGE_DIGEST_UNLOCKED_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-with-gasp-node-unlocked-runtime-buildkit-metadata.json)
+      IMAGE_DIGEST_STANDARD_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-standard-runtime-buildkit-metadata.json)
+      IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-fast-runtime-buildkit-metadata.json)
+      IMAGE_DIGEST_UNLOCKED_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-unlocked-runtime-buildkit-metadata.json)
 
       docker buildx imagetools create \
         --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
@@ -115,16 +115,15 @@ tasks:
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_UNLOCKED_RUNTIME}
 
       echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked from existing digests"
-
     deps: 
       - gasp-node:build-image-ci
-      - buildkit-build-and-push-image-digests-with-gasp-node-standard-runtime
-      - buildkit-build-and-push-image-digests-with-gasp-node-fast-runtime
-      - buildkit-build-and-push-image-digests-with-gasp-node-unlocked-runtime
+      - buildkit-build-and-push-image-digests-standard-runtime
+      - buildkit-build-and-push-image-digests-fast-runtime
+      - buildkit-build-and-push-image-digests-unlocked-runtime
     inputs: 
-      - 'gasp-avs-with-gasp-node-standard-runtime-buildkit-metadata.json'
-      - 'gasp-avs-with-gasp-node-fast-runtime-buildkit-metadata.json'
-      - 'gasp-avs-with-gasp-node-unlocked-runtime-buildkit-metadata.json'
+      - 'gasp-avs-standard-runtime-buildkit-metadata.json'
+      - 'gasp-avs-fast-runtime-buildkit-metadata.json'
+      - 'gasp-avs-unlocked-runtime-buildkit-metadata.json'
     options:
       cache: false
       runDepsInParallel: false
