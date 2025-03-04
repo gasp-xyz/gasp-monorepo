@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
+ARG ROLLUP_NODE_REPOSITORY=gaspxyz/rollup-node
 ARG ROLLUP_NODE_VERSION=local
-FROM gaspxyz/rollup-node:${ROLLUP_NODE_VERSION} AS rollup-node-image
+FROM ${ROLLUP_NODE_REPOSITORY}:${ROLLUP_NODE_VERSION} AS rollup-node-image
 
 FROM rust:1.78 AS builder
 
@@ -34,7 +35,8 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
 		# copy build artifacts to the root directory to avoid issues with accessing cache mount from 2nd stage
 		cp target/release/main /app/main
 
-
+# FROM gaspxyz/rollup-node:${ROLLUP_NODE_VERSION} AS rollup-node-image
+		
 FROM debian:stable-slim
 
 WORKDIR /app

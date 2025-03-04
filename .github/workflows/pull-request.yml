@@ -41,40 +41,16 @@ jobs:
     name: '[AVS services] Build'
     uses: ./.github/workflows/reusable-build-and-test.yml
     secrets: inherit
-    with:
-      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-
-  build-and-test-gasp-node:
-    needs: [init]
-    name: '[gasp-node] Build'
-    uses: ./.github/workflows/reusable-gasp-node-build-and-test.yml
-    secrets: inherit
     permissions:
       contents: read
-      actions: read
-      checks: write
       id-token: write
+      security-events: write
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      branch: ${{ needs.init.outputs.GIT_BRANCH }}
-
-  gasp-node-unit-tests-and-coverage:
-    name: '[gasp-node] Run unit tests and coverage'
-    needs: [init]
-    uses: ./.github/workflows/reusable-gasp-node-unit-tests-and-coverage.yml
-    secrets: inherit
-    permissions:
-      contents: read
-      actions: read
-      checks: write
-      id-token: write
-    with:
-      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      branch: ${{ needs.init.outputs.GIT_BRANCH }}
   
   gasp-node-generate-types:
     name: '[gasp-node] Generate types'
-    needs: [init, build-and-test-gasp-node]
+    needs: [init, build-and-test]
     uses: ./.github/workflows/reusable-gasp-node-generate-types.yml
     secrets: inherit
     with:
@@ -82,7 +58,7 @@ jobs:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
   
   run-e2e-test:
-    name: Run e2e tests
+    name: '[e2e] Run gasp-avs and ferries e2e tests'
     needs: [init, build-and-test]
     uses: ./.github/workflows/reusable-e2e-tests.yml
     secrets: inherit
@@ -94,9 +70,9 @@ jobs:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
   
   run-e2e-test-gasp-node:
-    name: '[gasp-node] Run e2e tests'
-    needs: [init, build-and-test-gasp-node, gasp-node-generate-types]
-    uses: ./.github/workflows/reusable-gasp-node-e2e-tests.yml
+    name: '[e2e] Run gasp-node and global e2e tests'
+    needs: [init, build-and-test, gasp-node-generate-types]
+    uses: ./.github/workflows/reusable-e2e-tests-new.yml
     secrets: inherit
     permissions:
       contents: read
@@ -105,17 +81,17 @@ jobs:
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
 
-  deploy-fungible:
-    name: Deploy fungible environment
-    if: |
-      (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == ':rocket: deploy_fungible') ||
-      (github.event_name == 'pull_request' && github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, ':rocket: deploy_fungible'))
-    needs: [init, build-and-test, build-and-test-gasp-node, gasp-node-unit-tests-and-coverage]
-    uses: ./.github/workflows/reusable-deploy.yml
-    secrets: inherit
-    with:
-      env: fungible
-      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+  # deploy-fungible:
+  #   name: Deploy fungible environment
+  #   if: |
+  #     (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == ':rocket: deploy_fungible') ||
+  #     (github.event_name == 'pull_request' && github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, ':rocket: deploy_fungible'))
+  #   needs: [init, build-and-test, build-and-test-gasp-node, gasp-node-unit-tests-and-coverage]
+  #   uses: ./.github/workflows/reusable-deploy.yml
+  #   secrets: inherit
+  #   with:
+  #     env: fungible
+  #     version: ${{ needs.init.outputs.GLOBAL_VERSION }}
 
   clean-up-fungible:
     name: Delete fungible environment

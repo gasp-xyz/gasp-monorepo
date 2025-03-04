@@ -1,3 +1,5 @@
+name: gasp-node
+
 services:
   node-alice:
     build:

@@ -1,0 +1,14 @@
+{
+  "name": "gasp-avs",
+  "private": true,
+  "scripts": {
+    "release": "semantic-release"
+  },
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^7.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "semantic-release": "^24.2.3",
+    "semantic-release-monorepo": "^8.0.2"
+  }
+}

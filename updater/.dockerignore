@@ -3,9 +3,18 @@
 .vscode
 Dockerfile*
 **/target
-!**/target/**/main
+!**/release/main
 ops/**/data
 .env
 
 .moon/cache
 moon.yml
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
+
+# Ignore node_modules
+node_modules
+
+# Ignore buildkit metadata files
+*-buildkit-metadata.json

@@ -3,10 +3,16 @@ language: rust
 toolchain:
   rust:
     version: nightly-2024-01-20
-    
+tags:
+  - 'rust-channel-1.78.0'
 
 env:
   CARGO_TERM_COLOR: 'always'
+  # FORCE_COLOR is a jest specific variable to enforce color output
+  FORCE_COLOR: 'true'
+  SCCACHE_GCS_KEY_PREFIX: gasp-node
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/rollup-node
+  DOCKERHUB_REPOSITORY: gaspxyz/rollup-node
 
 fileGroups:
   sources:
@@ -14,14 +20,598 @@ fileGroups:
     - 'rollup/**/*'
     - 'rpc/**/*'
     - 'Cargo.toml'
+  gasp-e2e-sources:
+    - 'gasp-e2e/**/*.ts'
 
 tasks:
+  prepare-toolchain:
+    command: rustup show
+    options:
+      cache: false
+
   build:
     command: cargo build --release
     inputs: ['@globs(sources)']
+    options:
+      outputStyle: 'stream'
     outputs:
       - 'target/release/rollup-node'
       - 'target/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm'
+    env:
+      SCCACHE_GCS_KEY_PREFIX: gasp-node-release
+
   build-image-local:
-    script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t gaspxyz/rollup-node:local .'
+    script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t gaspxyz/rollup-node:local --load .'
     inputs: ['@globs(sources)', 'Dockerfile']
+
+  buildkit-build-and-push-image-digests-standard-runtime:
+    command: >
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --build-arg ENABLE_FAST_RUNTIME=false --build-arg ENABLE_UNLOCKED_RUNTIME=false
+      --metadata-file gasp-node-standard-runtime-buildkit-metadata.json -f Dockerfile ./
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['gasp-node-standard-runtime-buildkit-metadata.json']
+    options:
+      outputStyle: stream
+      cache: true
+      internal: true
+      retryCount: 3
+    
+  buildkit-build-and-push-image-digests-fast-runtime:
+    command: >
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --build-arg ENABLE_FAST_RUNTIME=true --build-arg ENABLE_UNLOCKED_RUNTIME=false
+      --metadata-file gasp-node-fast-runtime-buildkit-metadata.json -f Dockerfile ./
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['gasp-node-fast-runtime-buildkit-metadata.json']
+    options:
+      outputStyle: stream
+      cache: true
+      internal: true
+      retryCount: 3
+
+  buildkit-build-and-push-image-digests-unlocked-runtime:
+    command: >
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-unlocked-runtime
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-unlocked-runtime,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --build-arg ENABLE_FAST_RUNTIME=false --build-arg ENABLE_UNLOCKED_RUNTIME=true
+      --metadata-file gasp-node-unlocked-runtime-buildkit-metadata.json -f Dockerfile ./
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['gasp-node-unlocked-runtime-buildkit-metadata.json']
+    options:
+      outputStyle: stream
+      cache: true
+      internal: true
+      retryCount: 3
+      
+  build-image-ci:
+    script: |
+      set -ex
+      IMAGE_DIGEST_STANDARD_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-standard-runtime-buildkit-metadata.json)
+      IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-fast-runtime-buildkit-metadata.json)
+      IMAGE_DIGEST_UNLOCKED_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-unlocked-runtime-buildkit-metadata.json)
+  
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_STANDARD_RUNTIME}
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_FAST_RUNTIME}
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast from existing digests"
+      
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_UNLOCKED_RUNTIME}
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked from existing digests"
+      
+    deps: ['buildkit-build-and-push-image-digests-standard-runtime', 'buildkit-build-and-push-image-digests-fast-runtime', 'buildkit-build-and-push-image-digests-unlocked-runtime']
+    inputs: ['gasp-node-standard-runtime-buildkit-metadata.json', 'gasp-node-fast-runtime-buildkit-metadata.json', 'gasp-node-unlocked-runtime-buildkit-metadata.json']
+    options:
+      cache: false
+
+  format-gasp-node:
+    command: cargo fmt --all -- --check
+    inputs: ['@globs(sources)']
+
+  lint-gasp-node:
+    command: cargo clippy -p pallet-xyk
+    inputs: ['@globs(sources)']
+
+  test-gasp-node:
+    command: cargo test
+    inputs: ['@globs(sources)']
+
+  coverage-gasp-node:
+    command: >
+      cargo tarpaulin
+      --timeout 120 --workspace --out Xml
+      -e rollup-runtime-integration-test rollup-node rollup-runtime
+      --exclude-files **/mock.rs **/weights.rs **/weights/* target-*-runtime
+      --target-dir target-coverage
+    inputs: ['@globs(sources)']
+    outputs: ['cobertura.xml']
+  
+  benchmark-tests-gasp-node:
+    script: |
+      cargo test --release -j8 --features=runtime-benchmarks -p pallet-xyk -p pallet-issuance -p pallet-multipurpose-liquidity -p pallet-fee-lock
+      cargo test --release -j8 --features=runtime-benchmarks -p pallet-bootstrap -p pallet-market
+      # NOTE: MGX-742
+      cargo test --release -j8 --features=runtime-benchmarks -p pallet-proof-of-stake
+    inputs: ['@globs(sources)']
+    options:
+      outputStyle: stream
+
+  build-runtime-benchmarks-gasp-node:
+    command: cargo build --release --no-default-features --features=runtime-benchmarks --target-dir target-runtime-benchmarks
+    inputs: ['@globs(sources)']
+    options:
+      internal: true
+      outputStyle: stream
+
+  run-runtime-benchmarks-gasp-node:
+    script: |
+      mkdir -p ./benchmarks 
+      target-runtime-benchmarks/release/rollup-node benchmark pallet \
+        -l=info,runtime::collective=warn,xyk=warn \
+        --chain rollup-local \
+        --wasm-execution compiled \
+        --pallet '*' \
+        --extrinsic '*' \
+        --steps ${STEPS} \
+        --repeat ${REPEATS} \
+        --template ./templates/module-weight-template.hbs \
+        --output ./benchmarks/
+
+      target-runtime-benchmarks/release/rollup-node benchmark overhead --chain rollup-local -lblock_builder=debug --max-ext-per-block 50000 --base-path .
+      cp block_weights.rs extrinsic_weights.rs ./benchmarks
+    inputs: ['@globs(sources)']
+    outputs: ['benchmarks']
+    deps: ['build-runtime-benchmarks-gasp-node']
+    env:
+      STEPS: '2'
+      REPEATS: '1'
+
+  release:
+    command: 'yarn run release'
+    options:
+      cache: false
+      runInCI: false
+
+  e2e-test-sudoRemoval:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sudoRemoval || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-bootstrap:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-bootstrap || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-parallel:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-parallel --max-workers=10 || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sequential-no-bootstrap:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sequential-no-bootstrap || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-seqgasless:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-seqgasless || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-maintenance:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-maintenance || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-rollupUpdate:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-rollupUpdate || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-rewards-bootstrap:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-rewards-bootstrap || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-parallel-autocompound:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-parallel-autocompound || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sequential-autocompound:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sequential-autocompound || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-poolliquidity:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-poolliquidity || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-governance:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-governance || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-multiswap:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-multiswap || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-experimentalStaking:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-experimentalStaking || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-crowdloan:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-crowdloan || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sdk:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sdk || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-parallel-3rdPartyRewards:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-parallel-3rdPartyRewards || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sequencerStaking:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sequencerStaking || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sequencerCancellation:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sequencerCancellation || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-rolldown:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-rolldown || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-rolldownWithdrawal:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-rolldownWithdrawal || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-rolldownPreOperationWithdrawal:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-rolldownPreOperationWithdrawal || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sequencerRewards:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sequencerRewards || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-nonTransToken:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-nonTransToken || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-issuanceConfig:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-issuanceConfig || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-marketSwap:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-marketSwap || (cd ../ && docker compose down)
+      cd ../ && docker compose down
+    options:
+      cache: true
+    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-rollup:
+    script: |
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
+      export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
+      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
+      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-ci}
+      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-ci}
+      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-ci}
+      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
+      export UPDATER_VERSION=${IMAGE_TAG:-ci}
+
+      docker compose down && docker compose up -d
+
+      cd $workspaceRoot/gasp-node/gasp-e2e && yarn install
+      rm -rf $workspaceRoot/gasp-node/gasp-e2e/reports/*.xml || true
+
+      echo "Sleeping for 120 seconds to ensure the environment is up and running\n" && sleep 120
+      cd $workspaceRoot/gasp-node/gasp-e2e && yarn test-rollup || (cd $workspaceRoot && docker compose down)
+      cd $workspaceRoot && docker compose down
+    options:
+      cache: true
+      runFromWorkspaceRoot: true
+    inputs: 
+      - '@globs(sources)'
+      - '@globs(gasp-e2e-sources)'
+      - '/gasp-avs/src/**/*.rs'
+      - '/gasp-avs/Cargo.toml'
+      - '/gasp-avs/Cargo.lock'
+      - '/gasp-avs/bindings/**/*'
+      - '/ferry-deposit/src/**/*.ts'
+      - '/ferry-deposit/package.json'
+      - '/ferry-deposit/yarn.lock'
+      - '/ferry-withdrawal/**/*.ts'
+      - '/ferry-withdrawal/package.json'
+      - '/ferry-withdrawal/yarn.lock'
+      - "/contracts/lib/**/*"
+      - "/contracts/src/**/*"
+      - "/contracts/test/**/*"
+      - "/contracts/script/**/*"
+      - "/contracts/tools/**/*"
+      - "/contracts/package.json"
+      - "/contracts/foundry.toml"
+      - "/contracts/remappings.txt"
+      - '/sequencer/bindings/**/*'
+      - '/sequencer/src/**/*'
+      - '/sequencer/Cargo.toml'
+      - '/updater/bindings/**/*'
+      - '/updater/src/**/*'
+      - '/updater/Cargo.toml'
+      - '/avs-eigensdk-go/**/*.go'
+      - '/avs-eigensdk-go/**/go.mod'
+      - '/avs-aggregator/**/*'
+      - '/avs-aggregator/bindings/**/*'
+      - '/avs-aggregator/cmd/**/*'
+      - '/avs-aggregator/core/**/*'
+      - '/avs-aggregator/mocks/**/*'
+      - '/avs-aggregator/types/**/*'
+      - '/avs-aggregator/go.mod'
+      - '/avs-aggregator/go.sum'
+      - '/avs-aggregator/*.go'
+    outputs: ['gasp-e2e/reports/*.xml']
