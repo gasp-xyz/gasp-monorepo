@@ -95,19 +95,13 @@ jobs:
       - name: Install proto manually
         run: |
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
-          bash /tmp/proto_install.sh 0.47.2 --yes && rm /tmp/proto_install.sh
+          bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH  
       - run: proto setup --yes
       - run: proto install
       - run: proto status
+      - run: moon setup
 
-      # - uses: moonrepo/setup-toolchain@v0
-      #   with:
-      #     auto-install: true
-      #     cache: false
-      #     proto-version: 0.47.2
-      
-      # - run: moon setup
       # - run: cd contracts && yarn install --immutable
       - run: moon ci :contracts-check
         env:
@@ -289,18 +283,10 @@ jobs:
       - name: Install proto manually
         run: |
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
-          bash /tmp/proto_install.sh 0.47.2 --yes && rm /tmp/proto_install.sh
+          bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
       - run: proto setup --yes
       - run: proto install
-
-      # - uses: moonrepo/setup-toolchain@v0
-      #   with:
-      #     auto-install: false
-      #     cache: false
-      #     proto-version: 0.47.2
-      # - name: Setup toolchains for services
-      #   run: moon ci :prepare-toolchain --concurrency 1
       
       - run: moon ci --color ${{ matrix.moon-targets }}
         env:
@@ -380,7 +366,7 @@ jobs:
         with:
           auto-install: false
           cache: false
-          proto-version: 0.47.2
+          proto-version: 0.47.3
 
       - uses: google-github-actions/auth@v2
         id: auth
