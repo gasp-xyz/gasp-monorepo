@@ -108,7 +108,7 @@ jobs:
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
       - run: cd gasp-e2e && proto setup --yes
       # - run: cd gasp-e2e && proto activate --yes
-      # - run: cd gasp-e2e && proto install
+      - run: cd gasp-e2e && proto install
       - run: cd gasp-e2e && proto diagnose
       - run: cd gasp-e2e && proto status
       - run: cd gasp-e2e && proto regen

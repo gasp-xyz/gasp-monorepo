@@ -133,7 +133,7 @@ jobs:
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
       - run: cd gasp-avs/tests && proto setup --yes
       # - run: cd gasp-avs/tests && proto activate --yes
-      # - run: cd gasp-avs/tests && proto install
+      - run: cd gasp-avs/tests && proto install
       - run: cd gasp-avs/tests && proto diagnose
       - run: cd gasp-avs/tests && proto status
       - run: cd gasp-avs/tests && proto regen
