@@ -35,6 +35,7 @@ env:
   FERRY_DEPOSIT_VERSION: ${{ inputs.globalVersion }}
   FERRY_WITHDRAWAL_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_NODE_VERSION: ${{ inputs.globalVersion }}-fast
+  IMAGE_TAG: ${{ inputs.globalVersion }}
 
 jobs:
   run-e2e-tests:
@@ -120,6 +121,7 @@ jobs:
           - "moon gasp-avs:e2e-test-corrupted"
     env:
       MOON_TOOLCHAIN_FORCE_GLOBALS: node,yarn
+      IMAGE_TAG: ${{ inputs.globalVersion }}
     steps:
       - uses: actions/checkout@v4
         with:
