@@ -78,18 +78,40 @@ collator:
     nodeSelector:
       production: "true"
       topology.kubernetes.io/zone: europe-west1-c
+  rpcNodeResources:
+    requests:
+      cpu: 6
+      memory: 12Gi
+    limits:
+      cpu: 6
+      memory: 12Gi
   rpc01:
+    enabled: true
+    role: rpc
     bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=20000
   rpc02:
+    enabled: true
+    role: rpc
     bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-c
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=20000
   rpc03:
+    enabled: true
+    role: rpc
     bootnodeAddr: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=20000
 ######################
 # aggregator configs #
 ######################
