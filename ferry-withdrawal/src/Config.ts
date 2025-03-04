@@ -51,6 +51,7 @@ const cliConfigSchemat = z.object({
 	BATCH_SIZE: z.bigint().default(500n),
 	REPLICA_COUNT: z.bigint().default(0n),
 	REPLICA_ID: z.bigint().default(0n),
+	MIN_REQUEST_ID: z.bigint().default(0n),
 });
 
 function createCliConfig() {
@@ -77,6 +78,9 @@ function createCliConfig() {
 		REPLICA_ID: process.env.REPLICA_ID
 			? BigInt(process.env.REPLICA_ID)
 			: undefined,
+		MIN_REQUEST_ID: process.env.MIN_REQUEST_ID
+			? BigInt(process.env.MIN_REQUEST_ID)
+			: undefined,
 	});
 }
 
@@ -99,3 +103,4 @@ export const DELAY = configuration.DELAY;
 export const BATCH_SIZE = configuration.BATCH_SIZE;
 export const REPLICA_COUNT = configuration.REPLICA_COUNT;
 export const REPLICA_ID = configuration.REPLICA_ID;
+export const MIN_REQUEST_ID = configuration.MIN_REQUEST_ID;

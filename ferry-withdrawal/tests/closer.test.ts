@@ -385,5 +385,67 @@ describe('Closer Service', () => {
 
     expect(await closer.getNextRequestToClose()).toStrictEqual(closeableWithdrawal1);
     expect(await closer.getNextRequestToClose()).toStrictEqual(closeableWithdrawal2);
+    expect(await closer.getNextRequestToClose()).toBeNull();
+  });
+
+  it('ignores txs below threshold', async () => {
+    const TOKENS_TO_CLOSE: [Uint8Array, bigint, bigint][] = [
+      [ENABLED_TOKEN, 100n, 1n],
+    ];
+    l1Mock.isClosed = vi.fn().mockResolvedValue(false);
+    l1Mock.isFerried = vi.fn().mockResolvedValue(false);
+
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(500n);
+    const closeableWithdrawal1 = {
+          requestId: 150n,
+          withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+          tokenAddress: ENABLED_TOKEN,
+          amount: 100n,
+          ferryTip: 100n,
+          hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+        };
+    const closeableWithdrawal2 = {
+          requestId: 151,
+          withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+          tokenAddress: ENABLED_TOKEN,
+          amount: 100n,
+          ferryTip: 100n,
+          hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+        };
+    const ignoredWithdrawal1 = {
+          requestId: 152n,
+          withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+          tokenAddress: ENABLED_TOKEN,
+          amount: 99n,
+          ferryTip: 99n,
+          hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+        };
+    const ignoredWithdrawal2 = {
+          requestId: 153n,
+          withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+          tokenAddress: ENABLED_TOKEN,
+          amount: 99n,
+          ferryTip: 99n,
+          hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+        };
+    const ignoredWithdrawal3 = {
+          requestId: 154n,
+          withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+          tokenAddress: ENABLED_TOKEN,
+          amount: 99n,
+          ferryTip: 99n,
+          hash: hexToU8a("0x0000000000000000000000000000000000000000000000000000000000000000", 32),
+        };
+
+    l2Mock.getRequests = vi.fn().mockResolvedValue(
+      [closeableWithdrawal1, ignoredWithdrawal1, ignoredWithdrawal2, ignoredWithdrawal3, closeableWithdrawal2 ]
+    ), 
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, 1000n, 1000n, 0n, 0n, 150n);
+
+    await closer.findRequestToClose();
+
+    expect(await closer.getNextRequestToClose()).toStrictEqual(closeableWithdrawal1);
+    expect(await closer.getNextRequestToClose()).toStrictEqual(closeableWithdrawal2);
+    expect(await closer.getNextRequestToClose()).toBeNull();
   });
 })

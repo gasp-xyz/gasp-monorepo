@@ -37,13 +37,15 @@ class CloserService {
 		batchSize: bigint = 1000n,
 		replicas_count: bigint = 0n,
 		replicas_id: bigint = 0n,
+		min_withdrawal_id: bigint = 0n,
 	) {
 		this.l1 = l1;
 		this.l2 = l2;
 		this.stash = stash;
 		this.tokensToClose = tokensToClose;
 		this.minBalance = minBalance;
-		this.lastCheckedWithrdawal = 0n;
+		this.lastCheckedWithrdawal =
+			min_withdrawal_id > 0n ? min_withdrawal_id - 1n : 0n;
 		this.closableRequests = [];
 		this.batchSize = batchSize;
 		this.replicas_count = replicas_count;

@@ -24,6 +24,7 @@ import {
 	BATCH_SIZE,
 	REPLICA_COUNT,
 	REPLICA_ID,
+	MIN_REQUEST_ID,
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
 import { reportBalance, serveMetrics } from "./metrics.js";
@@ -68,6 +69,7 @@ async function main() {
 		BATCH_SIZE,
 		REPLICA_COUNT,
 		REPLICA_ID,
+		MIN_REQUEST_ID,
 	);
 
 	let inProgress = false;
