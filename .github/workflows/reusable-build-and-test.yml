@@ -99,10 +99,14 @@ jobs:
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
           bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH  
-      - run: proto setup --yes
-      - run: proto install
-      - run: proto status
-      - run: moon setup
+      - run: cd contracts && proto setup --yes
+      - run: cd contracts && proto activate --yes
+      - run: cd contracts && proto install
+      - run: cd contracts && proto diagnose
+      - run: cd contracts && proto status
+      - run: cd contracts && proto regen
+      - run: cd contracts && proto debug env
+      - run: cd contracts && proto debug config
 
       - run: cd contracts && yarn install --immutable
       - run: moon ci :contracts-check

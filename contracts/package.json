@@ -38,5 +38,6 @@
     "semantic-release": "^24.2.3",
     "semantic-release-monorepo": "^8.0.2",
     "solhint": "^5.0.5"
-  }
+  },
+  "packageManager": "yarn@4.7.0"
 }
