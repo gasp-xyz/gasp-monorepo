@@ -8,6 +8,8 @@ tags:
 
 env:
   CARGO_TERM_COLOR: always
+  # FORCE_COLOR is a jest specific variable to enforce color output
+  FORCE_COLOR: 'true'
   SCCACHE_GCS_KEY_PREFIX: gasp-avs
   IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/gasp-avs
   DOCKERHUB_REPOSITORY: gaspxyz/gasp-avs
