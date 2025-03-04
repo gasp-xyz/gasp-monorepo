@@ -186,3 +186,17 @@ jobs:
           TESTMO_URL: ${{ secrets.TESTMO_URL }}
           TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         continue-on-error: true
+
+  slack-notify-nook:
+    needs: [e2e-test-matrix]
+    if: failure()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Slack Notification - Error
+        uses: bryannice/gitactions-slack-notification@2.0.0
+        env:
+          SLACK_INCOMING_WEBHOOK: ${{ secrets.BNB_E2E_NOTIFICATION_WEBHOOK }}
+          SLACK_TITLE: 'gasp-monorepo e2e test execution - NOOK'
+          SLACK_COLOR: "#ff0011"
+          SLACK_MESSAGE: 'Test failures in gasp-monorepo testmo report: https://mangata-finance.testmo.net/automation/runs/view/${{needs.setup-report.outputs.testmo-run-id}}'
+          GITHUB_REF: 'https://gasp-xyz.github.io/gasp-monorepo/${{ github.run_number }}'

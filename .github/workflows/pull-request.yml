@@ -50,7 +50,6 @@ jobs:
   
   gasp-node-generate-types:
     name: '[gasp-node] Generate types'
-    # needs: [init, build-and-test-gasp-node]
     needs: [init, build-and-test]
     uses: ./.github/workflows/reusable-gasp-node-generate-types.yml
     secrets: inherit
@@ -72,7 +71,6 @@ jobs:
   
   run-e2e-test-gasp-node:
     name: '[e2e] Run gasp-node and global e2e tests'
-    # needs: [init, build-and-test-gasp-node, gasp-node-generate-types]
     needs: [init, build-and-test, gasp-node-generate-types]
     uses: ./.github/workflows/reusable-e2e-tests-new.yml
     secrets: inherit
