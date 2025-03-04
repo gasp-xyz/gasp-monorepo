@@ -39,6 +39,11 @@ tasks:
 
   buildkit-build-and-push-image-digests-standard-runtime:
     script: |
+      set -euo pipefail
+      
+      echo "Starting buildkit build for standard runtime..."
+      
+      # Run the buildx command and capture its exit code
       docker buildx build --platform linux/amd64,linux/arm64 \
         --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime \
         --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime,mode=max \
@@ -46,6 +51,26 @@ tasks:
         --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY} \
         --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci} \
         --metadata-file gasp-avs-standard-runtime-buildkit-metadata.json -f Dockerfile ./
+      
+      BUILD_EXIT_CODE=$?
+      
+      # Validate the metadata file exists and contains the expected digest
+      if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f gasp-avs-standard-runtime-buildkit-metadata.json ]; then
+        if grep -q "containerimage.digest" gasp-avs-standard-runtime-buildkit-metadata.json; then
+          echo "✅ Build successful and metadata file contains valid digest"
+          cat gasp-avs-standard-runtime-buildkit-metadata.json
+        else
+          echo "❌ Build appeared successful but metadata file doesn't contain expected digest"
+          cat gasp-avs-standard-runtime-buildkit-metadata.json || echo "Cannot read metadata file"
+          exit 1
+        fi
+      else
+        echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
+        [ -f gasp-avs-standard-runtime-buildkit-metadata.json ] && cat gasp-avs-standard-runtime-buildkit-metadata.json
+        exit $BUILD_EXIT_CODE
+      fi
+      
+      exit $BUILD_EXIT_CODE
     inputs: ["@globs(sources)", "Dockerfile"]
     outputs: ['gasp-avs-standard-runtime-buildkit-metadata.json']
     deps: ['gasp-node:build-image-ci']
@@ -57,6 +82,11 @@ tasks:
 
   buildkit-build-and-push-image-digests-fast-runtime:
     script: |
+      set -euo pipefail
+      
+      echo "Starting buildkit build for fast runtime..."
+      
+      # Run the buildx command and capture its exit code
       docker buildx build --platform linux/amd64,linux/arm64 \
         --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime \
         --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime,mode=max \
@@ -64,6 +94,26 @@ tasks:
         --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY} \
         --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast \
         --metadata-file gasp-avs-fast-runtime-buildkit-metadata.json -f Dockerfile ./
+      
+      BUILD_EXIT_CODE=$?
+      
+      # Validate the metadata file exists and contains the expected digest
+      if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f gasp-avs-fast-runtime-buildkit-metadata.json ]; then
+        if grep -q "containerimage.digest" gasp-avs-fast-runtime-buildkit-metadata.json; then
+          echo "✅ Build successful and metadata file contains valid digest"
+          cat gasp-avs-fast-runtime-buildkit-metadata.json
+        else
+          echo "❌ Build appeared successful but metadata file doesn't contain expected digest"
+          cat gasp-avs-fast-runtime-buildkit-metadata.json || echo "Cannot read metadata file"
+          exit 1
+        fi
+      else
+        echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
+        [ -f gasp-avs-fast-runtime-buildkit-metadata.json ] && cat gasp-avs-fast-runtime-buildkit-metadata.json
+        exit $BUILD_EXIT_CODE
+      fi
+      
+      exit $BUILD_EXIT_CODE
     inputs: ["@globs(sources)", "Dockerfile"]
     outputs: ['gasp-avs-fast-runtime-buildkit-metadata.json']
     deps: ['gasp-node:build-image-ci']
@@ -75,6 +125,11 @@ tasks:
 
   buildkit-build-and-push-image-digests-unlocked-runtime:
     script: |
+      set -euo pipefail
+      
+      echo "Starting buildkit build for unlocked runtime..."
+      
+      # Run the buildx command and capture its exit code
       docker buildx build --platform linux/amd64,linux/arm64 \
         --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-unlocked-runtime \
         --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-unlocked-runtime,mode=max \
@@ -82,6 +137,26 @@ tasks:
         --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY} \
         --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-unlocked \
         --metadata-file gasp-avs-unlocked-runtime-buildkit-metadata.json -f Dockerfile ./
+      
+      BUILD_EXIT_CODE=$?
+      
+      # Validate the metadata file exists and contains the expected digest
+      if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f gasp-avs-unlocked-runtime-buildkit-metadata.json ]; then
+        if grep -q "containerimage.digest" gasp-avs-unlocked-runtime-buildkit-metadata.json; then
+          echo "✅ Build successful and metadata file contains valid digest"
+          cat gasp-avs-unlocked-runtime-buildkit-metadata.json
+        else
+          echo "❌ Build appeared successful but metadata file doesn't contain expected digest"
+          cat gasp-avs-unlocked-runtime-buildkit-metadata.json || echo "Cannot read metadata file"
+          exit 1
+        fi
+      else
+        echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
+        [ -f gasp-avs-unlocked-runtime-buildkit-metadata.json ] && cat gasp-avs-unlocked-runtime-buildkit-metadata.json
+        exit $BUILD_EXIT_CODE
+      fi
+      
+      exit $BUILD_EXIT_CODE
     inputs: ["@globs(sources)", "Dockerfile"]
     outputs: ['gasp-avs-unlocked-runtime-buildkit-metadata.json']
     deps: ['gasp-node:build-image-ci']
@@ -148,3 +223,59 @@ tasks:
     options:
       cache: false
       runInCI: false
+
+  e2e-test-opt-out:
+    script: |
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
+      export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
+      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
+      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-ci}
+      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-ci}
+      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-ci}
+      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
+      export UPDATER_VERSION=${IMAGE_TAG:-ci}
+
+      docker compose down && docker compose up -d
+
+      # Set the report filename for this specific test
+      export JEST_JUNIT_OUTPUT_NAME=test-opt-out-report.xml
+      rm -rf $workspaceRoot/gasp-avs/tests/reports/test-opt-out-report.xml || true
+
+      cd $workspaceRoot/gasp-avs/tests && yarn install
+
+      echo "Sleeping for 60 seconds to ensure the environment is up and running\n" && sleep 60
+      cd $workspaceRoot/gasp-avs/tests && yarn test-opt-out || (cd $workspaceRoot && docker compose down)
+      cd $workspaceRoot && docker compose down
+    options:
+      cache: true
+      runFromWorkspaceRoot: true
+    inputs: ['@globs(sources)', 'tests/**/*.ts']
+    outputs: ['tests/reports/test-opt-out-report.xml']
+  
+  e2e-test-corrupted:
+    script: |
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
+      export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
+      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
+      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-ci}
+      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-ci}
+      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-ci}
+      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
+      export UPDATER_VERSION=${IMAGE_TAG:-ci}
+      
+      docker compose down && docker compose up -d
+
+      # Set the report filename for this specific test
+      export JEST_JUNIT_OUTPUT_NAME=test-corrupted-report.xml
+      rm -rf $workspaceRoot/gasp-avs/tests/reports/test-corrupted-report.xml || true
+      
+      cd $workspaceRoot/gasp-avs/tests && yarn install
+  
+      echo "Sleeping for 60 seconds to ensure the environment is up and running\n" && sleep 60
+      cd $workspaceRoot/gasp-avs/tests && yarn test-corrupted || (cd $workspaceRoot && docker compose down)
+      cd $workspaceRoot && docker compose down
+    options:
+      cache: true
+      runFromWorkspaceRoot: true
+    inputs: ['@globs(sources)', 'tests/**/*.ts']
+    outputs: ['tests/reports/test-corrupted-report.xml']
