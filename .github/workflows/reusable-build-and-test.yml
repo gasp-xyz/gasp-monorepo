@@ -15,7 +15,7 @@ permissions:
 
 env:
   MOON_COLOR: 2
-  MOON_CACHE: write
+  MOON_CACHE: read-write
   MOON_DEBUG_PROTO_INSTALL: true
 
 jobs:
@@ -232,9 +232,9 @@ jobs:
             nodeselector=github-actions-pool=true
             "tolerations=key=github-actions-pool,value=true;key=CriticalAddonsOnly,value=true"
             replicas=${{ matrix.buildkit-replicas }}
-            requests.cpu=7
+            requests.cpu=14
             requests.memory=14Gi
-            limits.cpu=7
+            limits.cpu=14
             limits.memory=14Gi
           buildkitd-config-inline: |
             [registry."docker.io"]
@@ -245,9 +245,9 @@ jobs:
               driver-opts:
                 - nodeselector=github-actions-pool-arm=true,"tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
                 - replicas=${{ matrix.buildkit-replicas }}
-                - requests.cpu=7
+                - requests.cpu=14
                 - requests.memory=14Gi
-                - limits.cpu=7
+                - limits.cpu=14
                 - limits.memory=14Gi
 
       - uses: mozilla-actions/sccache-action@v0.0.5
