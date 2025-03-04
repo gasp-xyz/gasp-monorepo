@@ -64,11 +64,10 @@ jobs:
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
           append: |
-            - name: arm64
-              platforms: linux/arm64
+            - platforms: linux/arm64
               driver-opts:
                 - nodeselector=github-actions-pool-arm=true
-                - "tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
+                - \"tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64\"
                 - replicas=1
                 - requests.cpu=7
                 - requests.memory=14Gi
@@ -242,11 +241,10 @@ jobs:
               mirrors = ["mirror.gcr.io"]
           platforms: linux/amd64
           append: |
-            - name: arm64-avs
-              platforms: linux/arm64
+            - platforms: linux/arm64
               driver-opts:
                 - nodeselector=github-actions-pool-arm=true
-                - "tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
+                - \"tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64\"
                 - replicas=1
                 - requests.cpu=7
                 - requests.memory=14Gi
