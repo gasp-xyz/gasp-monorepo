@@ -96,7 +96,8 @@ jobs:
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
           bash /tmp/proto_install.sh 0.47.2 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
-          proto setup --yes
+          
+      - run: proto setup --yes
       - run: proto diagnose
       - run: proto debug env
       - run: proto debug config
@@ -291,7 +292,8 @@ jobs:
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
           bash /tmp/proto_install.sh 0.47.2 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
-          proto setup --yes
+      
+      - run: proto setup --yes
       - run: proto diagnose
       - run: proto debug env
       - run: proto debug config
