@@ -139,7 +139,7 @@ tasks:
       cargo tarpaulin
       --timeout 120 --workspace --out Xml
       -e rollup-runtime-integration-test rollup-node rollup-runtime
-      --exclude-files **/mock.rs **/weights.rs **/weights/* target-*-runtime
+      --exclude-files **/mock.rs **/weights.rs **/weights/*
       --target-dir target-coverage
     inputs: ['@globs(sources)']
     outputs: ['cobertura.xml']
