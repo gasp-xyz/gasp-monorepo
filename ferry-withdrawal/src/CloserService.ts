@@ -25,6 +25,8 @@ class CloserService {
 	lastCheckedWithrdawal: bigint;
 	closableRequests: (Withdrawal | Cancel)[];
 	batchSize: bigint;
+	replicas_count: bigint;
+	replica_id: bigint;
 
 	constructor(
 		l1: L1Interface,
@@ -33,6 +35,8 @@ class CloserService {
 		tokensToClose: [Uint8Array, bigint, bigint][],
 		minBalance: bigint,
 		batchSize: bigint = 1000n,
+		replicas_count: bigint = 0n,
+		replicas_id: bigint = 0n,
 	) {
 		this.l1 = l1;
 		this.l2 = l2;
@@ -42,6 +46,8 @@ class CloserService {
 		this.lastCheckedWithrdawal = 0n;
 		this.closableRequests = [];
 		this.batchSize = batchSize;
+		this.replicas_count = replicas_count;
+		this.replica_id = replicas_id;
 	}
 
 	async findRequestToClose(delay: bigint = 0n): Promise<void> {
@@ -87,8 +93,14 @@ class CloserService {
 								);
 							}) !== undefined;
 						const isClosedAlready = await this.l1.isClosed(request.hash);
+						const shouldNotBeIgnored =
+							this.replicas_count > 0
+								? request.requestId % this.replicas_count === this.replica_id
+								: true;
+
 						return (
 							!isClosedAlready &&
+							shouldNotBeIgnored &&
 							(shouldBeClosed ||
 								(await this.stash.shouldBeClosed(request.hash)))
 						);

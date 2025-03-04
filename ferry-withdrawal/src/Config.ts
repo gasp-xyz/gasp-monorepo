@@ -49,6 +49,8 @@ const cliConfigSchemat = z.object({
 	LOG: z.string().default("info"),
 	DELAY: z.bigint().default(0n),
 	BATCH_SIZE: z.bigint().default(500n),
+	REPLICA_COUNT: z.bigint().default(0n),
+	REPLICA_ID: z.bigint().default(0n),
 });
 
 function createCliConfig() {
@@ -68,6 +70,12 @@ function createCliConfig() {
 		DELAY: process.env.DELAY ? BigInt(process.env.DELAY) : undefined,
 		BATCH_SIZE: process.env.BATCH_SIZE
 			? BigInt(process.env.BATCH_SIZE)
+			: undefined,
+		REPLICA_COUNT: process.env.REPLICA_COUNT
+			? BigInt(process.env.REPLICA_COUNT)
+			: undefined,
+		REPLICA_ID: process.env.REPLICA_ID
+			? BigInt(process.env.REPLICA_ID)
 			: undefined,
 	});
 }
@@ -89,3 +97,5 @@ export const LOG = configuration.LOG;
 export const ABI = rolldownAbi.abi;
 export const DELAY = configuration.DELAY;
 export const BATCH_SIZE = configuration.BATCH_SIZE;
+export const REPLICA_COUNT = configuration.REPLICA_COUNT;
+export const REPLICA_ID = configuration.REPLICA_ID;
