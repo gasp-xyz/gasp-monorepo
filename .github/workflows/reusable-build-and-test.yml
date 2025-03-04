@@ -178,12 +178,14 @@ jobs:
       matrix:
         include:
           - prefix: main-group
+            buildkit-replicas: 1
             moon-targets: >-
               :format 
               :lint 
               :test 
               :build-image-ci 
           - prefix: avs-and-node-group
+            buildkit-replicas: 4
             moon-targets: >-
               :format-gasp-avs
               :format-gasp-node
@@ -232,7 +234,7 @@ jobs:
             namespace=buildkit
             nodeselector=github-actions-pool=true
             "tolerations=key=github-actions-pool,value=true;key=CriticalAddonsOnly,value=true"
-            replicas=2
+            replicas=${{ matrix.buildkit-replicas }}
             requests.cpu=7
             requests.memory=14Gi
             limits.cpu=7
@@ -245,7 +247,7 @@ jobs:
             - platforms: linux/arm64
               driver-opts:
                 - nodeselector=github-actions-pool-arm=true,"tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
-                - replicas=1
+                - replicas=${{ matrix.buildkit-replicas }}
                 - requests.cpu=7
                 - requests.memory=14Gi
                 - limits.cpu=7
