@@ -106,6 +106,8 @@ tasks:
   contracts-check:
     deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-gas', 'contracts-coverage']
     # deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-size', 'contracts-gas', 'contracts-coverage']
+    options:
+      runDepsInParallel: false
 
   contracts-check-addresses:
     script: |
