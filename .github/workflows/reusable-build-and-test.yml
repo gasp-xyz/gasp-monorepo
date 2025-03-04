@@ -161,14 +161,15 @@ jobs:
       - run: sops exec-env frontend.enc.env 'yarn run test:unit'
 
   build-and-check-services:
-    name: '[AVS] Build and test'
+    name: '[AVS] ${{ matrix.name }}'
     # runs-on: beast-gke
     # runs-on: gasp-monorepo-large-32core
     runs-on: compile-gke
     strategy: 
       matrix:
         include:
-          - prefix: main-group
+          - prefix: format-lint-test
+            name: Format, lint and test
             buildkit-enable: false
             buildkit-replicas: 1
             moon-targets: >-
@@ -182,7 +183,8 @@ jobs:
               :test-gasp-avs
               :test-gasp-node
               :benchmark-tests-gasp-node
-          - prefix: avs-and-node-group
+          - prefix: build-docker-images
+            name: Build docker images
             buildkit-enable: true
             buildkit-replicas: 8
             moon-targets: >-
@@ -194,7 +196,6 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-      # - run: git submodule update --init --recursive --depth=1
       # - run: apt-get update && apt-get install -y jq
       - uses: arduino/setup-protoc@v3
         with:
