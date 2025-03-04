@@ -47,5 +47,8 @@ export const get = async (
           API_LIMIT
         )
   const stored = (await call) as [number, string][]
-  return stored.map(([tsp, price]) => [tsp, new Decimal(price)])
-}
+    if (isPool) {
+        return stored.map(([tsp, price]) => [tsp, new Decimal(price).dividedBy(2)])
+    } else {
+        return stored.map(([tsp, price]) => [tsp, new Decimal(price)])
+    }}
