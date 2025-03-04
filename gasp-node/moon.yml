@@ -53,7 +53,8 @@ tasks:
     options:
       outputStyle: stream
       cache: true
-      internal: false
+      internal: true
+      retryCount: 3
     
   buildkit-build-and-push-image-digests-fast-runtime:
     command: >
@@ -69,6 +70,7 @@ tasks:
       outputStyle: stream
       cache: true
       internal: true
+      retryCount: 3
 
   buildkit-build-and-push-image-digests-unlocked-runtime:
     command: >
@@ -84,7 +86,8 @@ tasks:
       outputStyle: stream
       cache: true
       internal: true
-  
+      retryCount: 3
+      
   build-image-ci:
     script: |
       set -ex

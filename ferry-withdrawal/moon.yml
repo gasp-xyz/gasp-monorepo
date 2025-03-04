@@ -39,6 +39,7 @@ tasks:
       outputStyle: stream
       cache: true
       internal: true
+      retryCount: 3
 
   build-image-ci:
     script: |

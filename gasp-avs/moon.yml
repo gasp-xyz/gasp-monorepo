@@ -70,6 +70,7 @@ tasks:
       cache: true
       internal: true
       retryCount: 3
+
   buildkit-build-and-push-image-digests-with-gasp-node-unlocked-runtime:
     command: >
       docker buildx build --platform linux/amd64,linux/arm64
@@ -86,6 +87,7 @@ tasks:
       cache: true
       internal: true
       retryCount: 3
+      
   build-image-ci:
     script: |
       set -ex
