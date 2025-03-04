@@ -170,7 +170,7 @@ jobs:
           - command: "yarn test-sudoRemoval"
             fast: true
             unlocked: false
-          - command: "yarn test-marketFee"
+          - command: "yarn test-market"
             fast: true
             unlocked: false
 
