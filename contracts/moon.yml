@@ -51,7 +51,7 @@ tasks:
       cache: true
       internal: true
 
-  contracts-build-and-push-image-ci:
+  build-image-ci:
     script: |
       set -ex
       IMAGE_DIGEST=$(jq -r '."containerimage.digest"' contracts-buildkit-metadata.json)

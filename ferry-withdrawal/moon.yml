@@ -11,6 +11,11 @@ fileGroups:
     - 'package.json'
     - 'tsconfig.json'
 
+env:
+  SERVICE_NAME: ferry-withdrawal
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/ferry-withdrawal
+  DOCKERHUB_REPOSITORY: gaspxyz/ferry-withdrawal
+
 tasks:
   build:
     command: 'yarn build'
@@ -19,23 +24,35 @@ tasks:
   
   build-image-local:
     command: 'docker buildx build -t gaspxyz/ferry-withdrawal:local -t gaspxyz/ferry-withdrawal:local -f Dockerfile --load .'
-    inputs: ['@globs(sources)', 'Dockerfile']
+    inputs: ['@globs(sources)', 'Dockerfile', '.dockerignore']
+
+  buildkit-build-and-push-image-digests:
+    command: >
+      docker buildx build --platform linux/amd64,linux/arm64
+      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
+      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
+      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
+      --metadata-file ${SERVICE_NAME}-buildkit-metadata.json ./
+    inputs: ["@globs(sources)", "Dockerfile", '.dockerignore']
+    outputs: ['${SERVICE_NAME}-buildkit-metadata.json']
+    options:
+      outputStyle: stream
+      cache: true
+      internal: true
 
   build-image-ci:
-    # command: >
-    #   docker buildx build
-    #   --push
-    #   --no-cache
-    #   --tag gaspxyz/ferry-withdrawal:${IMAGE_TAG:-ci}
-    #   --cache-to type=registry,ref=gaspxyz/ferry-withdrawal:cache,mode=max
-    #   --cache-from type=registry,ref=gaspxyz/ferry-withdrawal:cache
-    #   .
-    command: >
-      docker buildx build
-      --push
-      --tag gaspxyz/ferry-withdrawal:${IMAGE_TAG:-ci}
-      .
-    inputs: ['@globs(sources)', 'Dockerfile', '.dockerignore']
+    script: |
+      set -ex
+      IMAGE_DIGEST=$(jq -r '."containerimage.digest"' ${SERVICE_NAME}-buildkit-metadata.json)
+  
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST}
+  
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+    deps: ['buildkit-build-and-push-image-digests']
+    inputs: ['${SERVICE_NAME}-buildkit-metadata.json']
     options:
       cache: false
   

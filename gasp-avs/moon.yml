@@ -85,7 +85,7 @@ tasks:
       cache: true
       internal: true
   
-  build-image-ci-gasp-avs:
+  build-image-ci:
     script: |
       set -ex
       IMAGE_DIGEST_STANDARD_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-with-gasp-node-standard-runtime-buildkit-metadata.json)
@@ -114,7 +114,7 @@ tasks:
       echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked from existing digests"
 
     deps: 
-      - gasp-node:build-image-ci-gasp-node
+      - gasp-node:build-image-ci
       - buildkit-build-and-push-image-digests-with-gasp-node-standard-runtime
       - buildkit-build-and-push-image-digests-with-gasp-node-fast-runtime
       - buildkit-build-and-push-image-digests-with-gasp-node-unlocked-runtime

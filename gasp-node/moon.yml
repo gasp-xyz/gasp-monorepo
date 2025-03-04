@@ -137,7 +137,7 @@ tasks:
       cache: true
       internal: true
   
-  build-image-ci-gasp-node:
+  build-image-ci:
     script: |
       set -ex
       IMAGE_DIGEST_STANDARD_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-standard-runtime-buildkit-metadata.json)
