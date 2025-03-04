@@ -104,7 +104,7 @@ jobs:
       - run: proto status
       - run: moon setup
 
-      # - run: cd contracts && yarn install --immutable
+      - run: cd contracts && yarn install --immutable
       - run: moon ci :contracts-check
         env:
           IMAGE_TAG: ${{ inputs.version }}
