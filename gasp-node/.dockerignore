@@ -45,6 +45,6 @@ moon.yml
 gha-creds-*.json
 
 # Ignore linked e2e tests directory
-e2eTests
+gasp-e2e
 
 *-buildkit-metadata.json

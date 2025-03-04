@@ -118,5 +118,3 @@ out
 *.tar.zst
 
 *-buildkit-metadata.json
-
-gasp-node/e2eTests

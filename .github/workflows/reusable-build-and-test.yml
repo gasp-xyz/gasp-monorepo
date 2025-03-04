@@ -156,14 +156,15 @@ jobs:
 
   build-and-check-services:
     name: '[AVS] ${{ matrix.name }}'
-    # runs-on: beast-gke
+    runs-on: ${{ matrix.runner }}
     # runs-on: gasp-monorepo-large-32core
-    runs-on: compile-gke
+    # runs-on: compile-gke
     strategy: 
       matrix:
         include:
           - prefix: format-lint-test
             name: Format, lint and test
+            runner: beast-gke
             buildkit-enable: false
             buildkit-replicas: 1
             moon-targets: >-
@@ -179,6 +180,7 @@ jobs:
               :benchmark-tests-gasp-node
           - prefix: build-docker-images
             name: Build docker images
+            runner: ubuntu-24.04
             buildkit-enable: true
             buildkit-replicas: 8
             moon-targets: >-

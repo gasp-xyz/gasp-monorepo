@@ -183,27 +183,353 @@ tasks:
       cache: false
       runInCI: false
 
-  run-e2e-test-sudoRemoval:
+  e2e-test-sudoRemoval:
     script: |
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      just reset-env && sleep 10
-      cd e2eTests && yarn install
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
       yarn test-sudoRemoval || (cd ../ && just stop-env)
       cd ../ && just stop-env
     options:
       cache: true
     inputs: ['@globs(sources)']
-    outputs: ['e2eTests/reports/*.xml']
+    outputs: ['gasp-e2e/reports/*.xml']
 
-  run-e2e-test-bootstrap:
+  e2e-test-bootstrap:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
-      just reset-env && sleep 10
-      cd e2eTests && yarn install
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
       yarn test-bootstrap || (cd ../ && just stop-env)
       cd ../ && just stop-env
     options:
       cache: true
     inputs: ['@globs(sources)']
-    outputs: ['e2eTests/reports/*.xml']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-parallel:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-parallel --max-workers=10 || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sequential-no-bootstrap:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sequential-no-bootstrap || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-seqgasless:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-seqgasless || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-maintenance:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-maintenance || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-rollupUpdate:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-rollupUpdate || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-rewards-bootstrap:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-rewards-bootstrap || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-parallel-autocompound:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-parallel-autocompound || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sequential-autocompound:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sequential-autocompound || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-poolliquidity:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-poolliquidity || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-governance:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-governance || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-multiswap:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-multiswap || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-experimentalStaking:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-experimentalStaking || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-crowdloan:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-crowdloan || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sdk:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sdk || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-parallel-3rdPartyRewards:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-parallel-3rdPartyRewards || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sequencerStaking:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sequencerStaking || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sequencerCancellation:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sequencerCancellation || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-rolldown:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-rolldown || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-rolldownWithdrawal:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-rolldownWithdrawal || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-rolldownPreOperationWithdrawal:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-rolldownPreOperationWithdrawal || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-sequencerRewards:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-sequencerRewards || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-nonTransToken:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-nonTransToken || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
+
+  e2e-test-issuanceConfig:
+    script: |
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      docker compose down && docker compose up -d && sleep 10
+      cd gasp-e2e && yarn install
+      rm -rf reports/*.xml || true
+      
+      yarn test-issuanceConfig || (cd ../ && just stop-env)
+      cd ../ && just stop-env
+    options:
+      cache: true
+    inputs: ['@globs(sources)']
+    outputs: ['gasp-e2e/reports/*.xml']
     

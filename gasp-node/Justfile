@@ -1,56 +1,111 @@
+# Use IMAGE_TAG environment variable with fallback to "ci"
+default_version := env_var_or_default("IMAGE_TAG", "ci")
+
 # Default recipe
 default:
-    @just --list
-
-# Create symlink from gasp-node/e2eTests to gasp-e2e repo
-setup-e2eTests-link:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    echo "Setting up e2e tests symlink..."
-    
-    if [ -L "e2eTests" ]; then
-        echo "Symlink already exists, removing first"
-        rm e2eTests
-    fi
-    
-    if [ -d "../../gasp-e2e" ]; then
-        ln -s ../../gasp-e2e e2eTests
-        echo "✅ E2E tests linked successfully"
-    else
-        echo "❌ Error: ../../gasp-e2e directory not found"
-        echo "Make sure the gasp-e2e repo is cloned at the same level as this repo"
-        exit 1
-    fi
-
-# Update e2eTests linked repo to latest eth-rollup-develop branch
-update-e2eTests-linked-repo:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    echo "Updating e2e tests to latest eth-rollup-develop branch..."
-    
-    # Check if the e2e tests directory exists (either real dir or symlink)
-    if [ ! -e "e2eTests" ]; then
-        echo "⚠️ e2eTests not found. Creating symlink first..."
-        just setup-e2eTests-link
-    fi
-    
-    cd e2eTests
-    
-    # Checkout the branch and pull latest
-    echo "🔄 Checking out eth-rollup-develop branch..."
-    git checkout eth-rollup-develop
-    
-    echo "⬇️ Pulling latest changes..."
-    git pull origin eth-rollup-develop
-    
-    echo "✅ E2E tests updated successfully to latest eth-rollup-develop"
+  @just --list
 
 start-env:
-  docker compose up -d
-
+  @docker compose up -d
+  
 stop-env:
-  docker compose down
+  @docker compose down
 
 reset-env:
-  just stop-env
-  just start-env
+  @just stop-env
+  @just start-env
+
+# Common setup for all e2e tests
+setup-e2e-env:
+    @echo "Setting up e2e test environment..."
+    just reset-env && sleep 10
+    cd ../gasp-e2e && yarn install
+    rm -rf ../gasp-e2e/reports/*.xml || true
+    mkdir -p ../gasp-e2e/reports
+
+# Run a specific e2e test with the given runtime image tag
+run-e2e-test test gasp_node_image_tag:
+    @echo "Running {{test}} with gasp-node image tag {{gasp_node_image_tag}}..."
+    export ROLLUP_NODE_VERSION={{gasp_node_image_tag}}
+    just setup-e2e-env
+    cd ../gasp-e2e && yarn {{test}} || (just stop-env && exit 1)
+    just stop-env
+    @echo "Test {{test}} completed successfully!"
+
+# Standard runtime tests
+test-nonTransToken:
+    @just run-e2e-test "test-nonTransToken" {{default_version}}
+
+# Fast runtime tests
+test-maintenance:
+    @just run-e2e-test "test-maintenance" "{{default_version}}-fast"
+
+test-rollupUpdate:
+    @just run-e2e-test "test-rollupUpdate" "{{default_version}}-fast"
+
+test-parallel-autocompound:
+    @just run-e2e-test "test-parallel-autocompound" "{{default_version}}-fast"
+
+test-sequential-autocompound:
+    @just run-e2e-test "test-sequential-autocompound" "{{default_version}}-fast"
+
+test-poolliquidity:
+    @just run-e2e-test "test-poolliquidity" "{{default_version}}-fast"
+
+test-governance:
+    @just run-e2e-test "test-governance" "{{default_version}}-fast"
+
+test-experimentalStaking:
+    @just run-e2e-test "test-experimentalStaking" "{{default_version}}-fast"
+
+test-sdk:
+    @just run-e2e-test "test-sdk" "{{default_version}}-fast"
+
+test-parallel-3rdPartyRewards:
+    @just run-e2e-test "test-parallel-3rdPartyRewards" "{{default_version}}-fast"
+
+test-sequencerStaking:
+    @just run-e2e-test "test-sequencerStaking" "{{default_version}}-fast"
+
+test-sequencerCancellation:
+    @just run-e2e-test "test-sequencerCancellation" "{{default_version}}-fast"
+
+test-rolldown:
+    @just run-e2e-test "test-rolldown" "{{default_version}}-fast"
+
+test-rolldownWithdrawal:
+    @just run-e2e-test "test-rolldownWithdrawal" "{{default_version}}-fast"
+
+test-rolldownPreOperationWithdrawal:
+    @just run-e2e-test "test-rolldownPreOperationWithdrawal" "{{default_version}}-fast"
+
+test-sequencerRewards:
+    @just run-e2e-test "test-sequencerRewards" "{{default_version}}-fast"
+
+test-issuanceConfig:
+    @just run-e2e-test "test-issuanceConfig" "{{default_version}}-fast"
+
+test-sudoRemoval:
+    @just run-e2e-test "test-sudoRemoval" "{{default_version}}-fast"
+
+# Unlocked runtime tests
+test-parallel:
+    @just run-e2e-test "test-parallel --max-workers=10" "{{default_version}}-unlocked"
+
+test-sequential-no-bootstrap:
+    @just run-e2e-test "test-sequential-no-bootstrap" "{{default_version}}-unlocked"
+
+test-seqgasless:
+    @just run-e2e-test "test-seqgasless" "{{default_version}}-unlocked"
+
+test-bootstrap:
+    @just run-e2e-test "test-bootstrap" "{{default_version}}-unlocked"
+
+test-rewards-bootstrap:
+    @just run-e2e-test "test-rewards-bootstrap" "{{default_version}}-unlocked"
+
+test-multiswap:
+    @just run-e2e-test "test-multiswap" "{{default_version}}-unlocked"
+
+test-crowdloan:
+    @just run-e2e-test "test-crowdloan" "{{default_version}}-unlocked"

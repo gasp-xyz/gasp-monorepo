@@ -1,0 +1,184 @@
+name: '[gasp-node] Reusable e2e tests workflow'
+
+on:
+  workflow_dispatch:
+    inputs:
+      globalVersion:
+        description: "Set gasp-node version."
+        type: string
+        required: true
+  workflow_call:
+    inputs:
+      globalVersion:
+        description: "Set gasp-node version."
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+env:
+  MOON_COLOR: 2
+
+jobs:
+  setup-report:
+    runs-on: [ubuntu-24.04]
+    outputs:
+      testmo-run-id: ${{ steps.setTestRun.outputs.testmo-run-id }}
+    steps:
+      - name: Install testmo
+        run: npm install --no-save @testmo/testmo-cli
+      - name: Add url
+        run: |
+          npx testmo automation:resources:add-field --name git --type string \
+            --value ${GITHUB_SHA:0:7} --resources resources.json
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          npx testmo automation:resources:add-link --name build \
+            --url $RUN_URL --resources resources.json
+
+      - name: Create test run
+        run: |
+          npx testmo automation:run:create \
+            --instance https://mangata-finance.testmo.net  \
+            --project-id 2 \
+            --name "BE tests from node-repo" \
+            --resources resources.json \
+            --source "BE-e2e-regression" > testmo-run-id.txt
+          ID=$(cat testmo-run-id.txt)
+          echo "testmo-run-id=$ID" >> $GITHUB_OUTPUT
+          echo "ID=$ID" >> $GITHUB_ENV
+
+        env:
+          TESTMO_URL: ${{ secrets.TESTMO_URL }}
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        id: setTestRun
+
+  e2e-test-matrix:
+    needs: [setup-report]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - command: "moon gasp-node:e2e-test-parallel"
+          - command: "moon gasp-node:e2e-test-sequential-no-bootstrap"
+          - command: "moon gasp-node:e2e-test-seqgasless"
+          - command: "moon gasp-node:e2e-test-maintenance"
+          - command: "moon gasp-node:e2e-test-rollupUpdate"
+          - command: "moon gasp-node:e2e-test-bootstrap"
+          - command: "moon gasp-node:e2e-test-rewards-bootstrap"
+          - command: "moon gasp-node:e2e-test-parallel-autocompound"
+          - command: "moon gasp-node:e2e-test-sequential-autocompound"
+          - command: "moon gasp-node:e2e-test-poolliquidity"
+          - command: "moon gasp-node:e2e-test-governance"
+          - command: "moon gasp-node:e2e-test-multiswap"
+          - command: "moon gasp-node:e2e-test-experimentalStaking"
+          - command: "moon gasp-node:e2e-test-crowdloan"
+          - command: "moon gasp-node:e2e-test-sdk"
+          - command: "moon gasp-node:e2e-test-parallel-3rdPartyRewards"
+          - command: "moon gasp-node:e2e-test-sequencerStaking"
+          - command: "moon gasp-node:e2e-test-sequencerCancellation"
+          - command: "moon gasp-node:e2e-test-rolldown"
+          - command: "moon gasp-node:e2e-test-rolldownWithdrawal"
+          - command: "moon gasp-node:e2e-test-rolldownPreOperationWithdrawal"
+          - command: "moon gasp-node:e2e-test-sequencerRewards"
+          - command: "moon gasp-node:e2e-test-nonTransToken"
+          - command: "moon gasp-node:e2e-test-issuanceConfig"
+          - command: "moon gasp-node:e2e-test-sudoRemoval"
+    runs-on: [e2e-gke]
+    timeout-minutes: 180
+    defaults:
+      run:
+        working-directory: gasp-node
+    env:
+      API_URL: "ws://127.0.0.1:9946"
+      E2EBRANCHNAME: "eth-rollup-develop"
+      NODE_DOCKER_IMAGE: ${{ inputs.nodeDockerImageTag != '' && inputs.nodeDockerImageTag || inputs.globalVersion }}
+      NODE_DOCKER_COMPOSE_NETWORK: gasp-node_default
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Install proto manually
+        run: |
+          curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
+          bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
+          echo "$HOME/.proto/bin" >> $GITHUB_PATH
+      - run: proto setup --yes
+      - run: proto install
+
+      - name: E2E- Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v8
+
+      - name: Current branch name for generating types
+        run: echo "GASP_TYPES_VERSION=${{ steps.branch-name.outputs.current_branch }}" | sed -E 's@[/\.]@-@g; s@_@-@g' >> $GITHUB_ENV
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.19.0'
+          cache: yarn
+      - run: cd gasp-e2e && yarn install
+      - run: cd gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
+
+      - name: Run tests
+        run: ${{ matrix.command }}
+        env:
+          NODE_OPTIONS: --max_old_space_size=12288
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1.9.1
+        continue-on-error: true
+        if: success() || failure() # run this step even if previous step failed
+        with:
+          name: E2E report ${{ matrix.command }} # Name of the check run which will be created
+          path: gasp-e2e/reports/*.xml # Path to test results
+          reporter: jest-junit # Format of test results
+
+      - name: Submit results to the testmo-run
+        continue-on-error: true
+        if: always()
+        env:
+          TESTMO_URL: ${{ secrets.TESTMO_URL }}
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        run: |
+            npm install --no-save @testmo/testmo-cli
+            npx testmo automation:run:submit-thread \
+              --instance https://mangata-finance.testmo.net \
+              --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
+              --results e2eTests/reports/*.xml
+
+  test-complete:
+    needs: [setup-report, e2e-test-matrix]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install testmo
+        run: npm install --no-save @testmo/testmo-cli
+
+      - name: Complete test run
+        run: |
+            npx testmo automation:run:complete \
+              --instance https://mangata-finance.testmo.net \
+              --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
+        env:
+          TESTMO_URL: ${{ secrets.TESTMO_URL }}
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        continue-on-error: true
+
+  # slack-notify-nook:
+  #   needs: [e2e-test-matrix]
+  #   if: failure()
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - name: Slack Notification - Error
+  #       uses: bryannice/gitactions-slack-notification@2.0.0
+  #       env:
+  #         SLACK_INCOMING_WEBHOOK: ${{ secrets.BNB_E2E_NOTIFICATION_WEBHOOK }}
+  #         SLACK_TITLE: 'bnb e2e test execution - NOOK'
+  #         SLACK_COLOR: "#ff0011"
+  #         SLACK_MESSAGE: 'Test failures [ ${{ env.E2EBRANCHNAME }} - gaspxyz/rollup-node:${{ env.NODE_DOCKER_IMAGE }} ] testmo report: https://mangata-finance.testmo.net/automation/runs/view/${{needs.setup-report.outputs.testmo-run-id}}'
+  #         GITHUB_REF: 'https://gasp-xyz.github.io/gasp-monorepo/${{ github.run_number }}'
