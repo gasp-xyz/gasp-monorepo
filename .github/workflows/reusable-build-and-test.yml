@@ -174,7 +174,6 @@ jobs:
               :format 
               :lint 
               :test 
-              :build-image-ci 
               :format-gasp-avs
               :format-gasp-node
               :lint-gasp-avs
