@@ -92,6 +92,7 @@ jobs:
       run:
         working-directory: gasp-node
     env:
+      MOON_TOOLCHAIN_FORCE_GLOBALS: node,yarn
       API_URL: "ws://127.0.0.1:9946"
       NODE_DOCKER_COMPOSE_NETWORK: gasp-node_default
     steps:
@@ -106,14 +107,20 @@ jobs:
           bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
       - run: cd gasp-e2e && proto setup --yes
-      - run: cd gasp-e2e && proto activate --yes
-      - run: cd gasp-e2e && proto install
+      # - run: cd gasp-e2e && proto activate --yes
+      # - run: cd gasp-e2e && proto install
       - run: cd gasp-e2e && proto diagnose
       - run: cd gasp-e2e && proto status
       - run: cd gasp-e2e && proto regen
       - run: cd gasp-e2e && proto debug env
       - run: cd gasp-e2e && proto debug config
 
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.19.0'
+          cache: yarn
+          cache-dependency-path: './gasp-node/gasp-e2e/yarn.lock'
       - run: cd gasp-e2e && yarn install --immutable
 
       - name: E2E- Get branch name
@@ -123,11 +130,6 @@ jobs:
       - name: Current branch name for generating types
         run: echo "GASP_TYPES_VERSION=${{ steps.branch-name.outputs.current_branch }}" | sed -E 's@[/\.]@-@g; s@_@-@g' >> $GITHUB_ENV
 
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version: '18.19.0'
-      #     cache: yarn
-      #     cache-dependency-path: './gasp-node/gasp-e2e/yarn.lock'
 
       - run: cd gasp-e2e && yarn install
       - run: cd gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}

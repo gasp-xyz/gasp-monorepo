@@ -71,5 +71,6 @@
     "suiteNameTemplate": "{filepath}",
     "classNameTemplate": "{classname}",
     "titleTemplate": "{title}"
-  }
+  },
+  "packageManager": "yarn@4.7.0"
 }
