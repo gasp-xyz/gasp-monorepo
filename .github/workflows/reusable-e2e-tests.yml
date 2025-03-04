@@ -181,20 +181,6 @@ jobs:
           path: gasp-avs/tests/reports/*.xml # Path to test results
           reporter: jest-junit # Format of test results
 
-      - name: Get avs-aggregator logs
-        if: success() || failure()
-        run: docker logs rollup-avs-aggregator-1
-
-      - name: Get gasp-avs logs
-        if: success() || failure()
-        run: docker logs rollup-gasp-avs-1
-
-      - name: Get anvil logs
-        if: success() || failure()
-        run: docker logs rollup-eth-stub-1
-
-      - run: docker ps
-
   ferry-withdrawal-test:
     name: Ferry withdrawal tests
     runs-on: ubuntu-24.04
