@@ -67,7 +67,7 @@
     "outputDirectory": "./reports",
     "outputName": "junit.xml",
     "ancestorSeparator": " › ",
-    "uniqueOutputName": "true",
+    "uniqueOutputName": "false",
     "suiteNameTemplate": "{filepath}",
     "classNameTemplate": "{classname}",
     "titleTemplate": "{title}"
