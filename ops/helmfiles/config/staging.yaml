@@ -284,7 +284,7 @@ closerEnvEth:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  BATCH_SIZE: 50
+  BATCH_SIZE: 5
 closerEnvSecretsEth:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
   STASH_URL: ref+sops://secrets.enc.yaml#/stagingStashUrl
@@ -297,7 +297,7 @@ closerEnvArb:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  BATCH_SIZE: 50
+  BATCH_SIZE: 5
 closerEnvSecretsArb:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
   STASH_URL: ref+sops://secrets.enc.yaml#/stagingStashUrl
@@ -310,7 +310,7 @@ closerEnvBase:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  BATCH_SIZE: 50
+  BATCH_SIZE: 5
 closerEnvSecretsBase:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
   STASH_URL: ref+sops://secrets.enc.yaml#/stagingStashUrl
