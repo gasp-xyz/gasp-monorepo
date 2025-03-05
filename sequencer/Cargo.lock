@@ -1989,6 +1989,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "42012b0f064e01aa58b545fe3727f90f7dd4020f4a3ea735b50344965f5a57e9"
 
 [[package]]
+name = "gasp-bindings"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "hex",
+ "hex-literal",
+ "parity-scale-codec",
+ "primitive-types 0.13.1",
+ "scale-info",
+ "secp256k1 0.28.2",
+ "serde",
+ "sha3",
+ "subxt",
+ "subxt-signer",
+ "thiserror 2.0.3",
+ "tokio",
+ "tracing",
+ "tracing-log",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "gasp-types"
 version = "0.1.0"
 dependencies = [

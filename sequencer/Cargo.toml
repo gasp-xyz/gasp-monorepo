@@ -8,6 +8,7 @@ resolver = "2"
 members = [
 	'sequencer',
 	'bindings/contracts', 
+	'bindings/gasp', 
   "types",
   "l1api",
   "l2api",
@@ -29,6 +30,7 @@ codegen-units = 1
 
 [workspace.dependencies]
 contract-bindings = { path = "./bindings/contracts/" }
+gasp-bindings = { path = "./bindings/gasp" }
 l1api = { path = "./l1api/" }
 l2api = { path = "./l2api/" }
 gasp-types = { path = "./types/" }
