@@ -459,6 +459,99 @@ releases:
           limits:
             cpu: 1
             memory: 1Gi
+  - name: closer-eth-2
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnalbedEth2" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/closer
+          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
+        env: {{ .Values | getOrNil "closerEnvEth2" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "closerEnvSecretsEth2"| expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: closer-eth-3
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnalbedEth3" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/closer
+          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
+        env: {{ .Values | getOrNil "closerEnvEth3" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "closerEnvSecretsEth3"| expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: closer-eth-4
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnalbedEth4" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/closer
+          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
+        env: {{ .Values | getOrNil "closerEnvEth4" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "closerEnvSecretsEth4"| expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+  - name: closer-eth-5
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnalbedEth5" false | toYaml) }}
+    chart: ../helm-charts/common-deployment
+    values:
+      - image:
+          repository: gaspxyz/closer
+          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
+          # `args` param is used to override the default command in the Dockerfile
+          args: ["node", "build/src/closer.js"]
+        env: {{ .Values | getOrNil "closerEnvEth5" | toYaml | nindent 10 }}
+        envSecrets: {{ .Values | getOrNil "closerEnvSecretsEth5"| expandSecretRefs | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+
   - name: closer-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.closerEnabled .Values.enableArbitrumServices | toYaml }}
