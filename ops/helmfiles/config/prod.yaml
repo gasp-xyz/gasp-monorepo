@@ -517,6 +517,7 @@ closerEnvEth:
   LOG: info
   BATCH_SIZE: 50
   SKIP_STASH: true
+  DELAY: 10
 closerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -533,6 +534,7 @@ closerEnvArb:
   LOG: info
   BATCH_SIZE: 50
   SKIP_STASH: true
+  DELAY: 10
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerArbitrumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -549,6 +551,7 @@ closerEnvBase:
   LOG: info
   BATCH_SIZE: 50
   SKIP_STASH: true
+  DELAY: 10
 closerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerBaseMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
