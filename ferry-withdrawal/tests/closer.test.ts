@@ -327,6 +327,7 @@ describe('Closer Service', () => {
     expect(await closer.getNextRequestToClose()).toBeNull();
   });
 
+
   it('ignores txs in replica mode', async () => {
     const TOKENS_TO_CLOSE: [Uint8Array, bigint, bigint][] = [
       [ENABLED_TOKEN, 100n, 1n],
@@ -379,7 +380,7 @@ describe('Closer Service', () => {
     l2Mock.getRequests = vi.fn().mockResolvedValue(
       [closeableWithdrawal1, ignoredWithdrawal1, ignoredWithdrawal2, ignoredWithdrawal3, closeableWithdrawal2 ]
     ), 
-    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, 1000n, 1000n, 4n, 1n);
+    closer = new CloserService(l1Mock, l2Mock, stashMock, TOKENS_TO_CLOSE, 1000n, 1000n, 1n, 4n);
 
     await closer.findRequestToClose();
 
@@ -446,6 +447,39 @@ describe('Closer Service', () => {
 
     expect(await closer.getNextRequestToClose()).toStrictEqual(closeableWithdrawal1);
     expect(await closer.getNextRequestToClose()).toStrictEqual(closeableWithdrawal2);
+    expect(await closer.getNextRequestToClose()).toBeNull();
+  });
+
+  it('can work without stash - closes only withdrawals with fee assigned', async () => {
+    const TOKENS_TO_CLOSE: [Uint8Array, bigint, bigint][] = [];
+    l1Mock.isClosed = vi.fn().mockResolvedValue(false);
+    l1Mock.isFerried = vi.fn().mockResolvedValue(false);
+    l1Mock.getLatestRequestId = vi.fn().mockResolvedValue(500n);
+    const dummyHash = hexToU8a("0x1111111111111111111111111111111111111111111111111111111111111111", 32);
+
+    const closeableWithdrawal = {
+          requestId: 1n,
+          withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+          tokenAddress: ENABLED_TOKEN,
+          amount: 100n,
+          ferryTip: 1n,
+          hash: dummyHash,
+        };
+    const ignoredWithdrawal = {
+          requestId: 2n,
+          withdrawalRecipient: hexToU8a("0x0000000000000000000000000000000000000000", 20),
+          tokenAddress: ENABLED_TOKEN,
+          amount: 99n,
+          ferryTip: 0n,
+          hash: dummyHash,
+        };
+
+    l2Mock.getRequests = vi.fn().mockResolvedValue([closeableWithdrawal, ignoredWithdrawal]), 
+    closer = new CloserService(l1Mock, l2Mock, undefined, TOKENS_TO_CLOSE, 1000n);
+
+    await closer.findRequestToClose();
+
+    expect(await closer.getNextRequestToClose()).toStrictEqual(closeableWithdrawal);
     expect(await closer.getNextRequestToClose()).toBeNull();
   });
 })

@@ -51,8 +51,15 @@ async function main() {
 	logger.info(`L2              : ${MANGATA_NODE_URL}`);
 	logger.info(`Rolldown        : ${MANGATA_CONTRACT_ADDRESS}`);
 	logger.info(`Log level       : ${LOG}`);
+	logger.info(`Skip stash      : ${SKIP_STASH}`);
 	logger.info(`Replica Id      : ${REPLICA_ID} / ${REPLICA_COUNT}`);
 	logger.info(`Min req id      : ${MIN_REQUEST_ID}`);
+
+	if (REPLICA_ID > REPLICA_COUNT) {
+		throw new Error(
+			`replica id (${REPLICA_ID}) cannot be greater than replica count ${REPLICA_COUNT}`,
+		);
+	}
 
 	TOKENS_TO_TRACK.forEach((token) => {
 		logger.info(
