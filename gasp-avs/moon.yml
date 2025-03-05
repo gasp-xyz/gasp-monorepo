@@ -52,10 +52,7 @@ tasks:
   buildkit-build-and-push-image-digests-standard-runtime:
     script: |
       set -euo pipefail
-      
       echo "Starting buildkit build for standard runtime..."
-      
-      # Run the buildx command and capture its exit code
       docker buildx build --platform linux/amd64,linux/arm64 \
         --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime \
         --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime,mode=max \
@@ -87,18 +84,14 @@ tasks:
     outputs: ['gasp-avs-standard-runtime-buildkit-metadata.json']
     deps: ['gasp-node:build-image-ci']
     options:
-      outputStyle: stream
-      cache: false
+      outputStyle: buffer-only-failure
+      cache: true
       internal: true
-      retryCount: 3
 
   buildkit-build-and-push-image-digests-fast-runtime:
     script: |
       set -euo pipefail
-      
       echo "Starting buildkit build for fast runtime..."
-      
-      # Run the buildx command and capture its exit code
       docker buildx build --platform linux/amd64,linux/arm64 \
         --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime \
         --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime,mode=max \
@@ -130,10 +123,9 @@ tasks:
     outputs: ['gasp-avs-fast-runtime-buildkit-metadata.json']
     deps: ['gasp-node:build-image-ci']
     options:
-      outputStyle: stream
-      cache: false
+      outputStyle: buffer-only-failure
+      cache: true
       internal: true
-      retryCount: 3
 
   build-image-ci:
     script: |

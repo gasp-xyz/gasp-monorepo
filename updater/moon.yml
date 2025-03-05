@@ -37,19 +37,40 @@ tasks:
     inputs: ['@globs(sources)', 'Dockerfile']
 
   buildkit-build-and-push-image-digests:
-    command: >
-      docker buildx build --platform linux/amd64,linux/arm64
-      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache
-      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max
-      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
-      --metadata-file ${SERVICE_NAME}-buildkit-metadata.json ./
+    script: |
+      set -euo pipefail
+      echo "Starting buildkit build..."
+      docker buildx build --platform linux/amd64,linux/arm64 \
+        --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache \
+        --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max \
+        --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
+        --metadata-file ${SERVICE_NAME}-buildkit-metadata.json -f Dockerfile ./
+      
+      BUILD_EXIT_CODE=$?
+      
+      # Validate the metadata file exists and contains the expected digest
+      if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f ${SERVICE_NAME}-buildkit-metadata.json ]; then
+        if grep -q "containerimage.digest" ${SERVICE_NAME}-buildkit-metadata.json; then
+          echo "✅ Build successful and metadata file contains valid digest"
+          cat ${SERVICE_NAME}-buildkit-metadata.json
+        else
+          echo "❌ Build appeared successful but metadata file doesn't contain expected digest"
+          cat ${SERVICE_NAME}-buildkit-metadata.json || echo "Cannot read metadata file"
+          exit 1
+        fi
+      else
+        echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
+        [ -f ${SERVICE_NAME}-buildkit-metadata.json ] && cat ${SERVICE_NAME}-buildkit-metadata.json
+        exit $BUILD_EXIT_CODE
+      fi
+      
+      exit $BUILD_EXIT_CODE
     inputs: ["@globs(sources)", "Dockerfile", '.dockerignore']
     outputs: ['${SERVICE_NAME}-buildkit-metadata.json']
     options:
-      outputStyle: stream
+      outputStyle: buffer-only-failure
       cache: true
       internal: true
-      retryCount: 3
 
   build-image-ci:
     script: |

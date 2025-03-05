@@ -29,10 +29,7 @@ tasks:
   buildkit-build-and-push-image-digests:
     script: |
       set -euo pipefail
-      
       echo "Starting buildkit build..."
-      
-      # Run the buildx command and capture its exit code
       docker buildx build --platform linux/amd64,linux/arm64 \
         --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache \
         --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max \
@@ -61,10 +58,9 @@ tasks:
     inputs: ["@globs(sources)", "Dockerfile", '.dockerignore']
     outputs: ['${SERVICE_NAME}-buildkit-metadata.json']
     options:
-      outputStyle: stream
+      outputStyle: buffer-only-failure
       cache: true
       internal: true
-      retryCount: 3
 
   build-image-ci:
     script: |
