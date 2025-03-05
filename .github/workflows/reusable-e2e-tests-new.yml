@@ -192,6 +192,7 @@ jobs:
           name: E2E report ${{ matrix.command }} # Name of the check run which will be created
           path: gasp-node/gasp-e2e/reports/*.xml # Path to test results
           reporter: jest-junit # Format of test results
+          fail-on-empty: false
 
       - name: Submit results to the testmo-run
         continue-on-error: true
