@@ -166,6 +166,7 @@ pub enum CallType {
 		asset_id_out: TokenId,
 		asset_amount_out: Balance,
 	},
+	CouncilCall,
 }
 
 pub mod config {
@@ -731,6 +732,8 @@ pub mod config {
 						asset_id_out,
 						asset_amount_out,
 					),
+					(CallType::CouncilCall, _) if Council::is_member(&who.clone().into()) =>
+						Ok(None),
 					_ => OCA::withdraw_fee(who, call, info, fee, tip),
 				}
 			}
