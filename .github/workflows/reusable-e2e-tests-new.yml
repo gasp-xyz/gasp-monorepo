@@ -137,7 +137,7 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
-
+      - uses: moonrepo/setup-rust@v1
       - name: Install proto manually
         run: |
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
