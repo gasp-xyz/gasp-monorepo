@@ -1,4 +1,4 @@
-name: '[e2e] Reusable e2e tests workflow'
+name: "[e2e] Reusable e2e tests workflow"
 
 on:
   workflow_dispatch:
@@ -120,7 +120,7 @@ jobs:
           # full avs environment specific tests (running full avs environment)
           #####################################################################
           - command: "moon gasp-node:e2e-test-rollup"
-            name: '[avs] test-rollup'
+            name: "[avs] test-rollup"
     runs-on: [e2e-gke]
     name: ${{ matrix.name }}
     timeout-minutes: 180
@@ -137,7 +137,16 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
+
       - uses: moonrepo/setup-rust@v1
+        name: Setup nightly-2024-01-20 rust toolchain
+        with:
+          channel: nightly-2024-01-20
+          targets: wasm32-unknown-unknown
+          components: rustfmt,clippy,rust-src
+          cache: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install proto manually
         run: |
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
@@ -149,9 +158,9 @@ jobs:
       - uses: docker/setup-compose-action@v1
       - uses: actions/setup-node@v4
         with:
-          node-version: '18.19.0'
+          node-version: "18.19.0"
           cache: yarn
-          cache-dependency-path: './gasp-node/gasp-e2e/yarn.lock'
+          cache-dependency-path: "./gasp-node/gasp-e2e/yarn.lock"
       - run: cd gasp-e2e && yarn install --immutable
 
       - name: E2E- Get branch name
@@ -161,10 +170,9 @@ jobs:
       - name: Current branch name for generating types
         run: echo "GASP_TYPES_VERSION=${{ steps.branch-name.outputs.current_branch }}" | sed -E 's@[/\.]@-@g; s@_@-@g' >> $GITHUB_ENV
 
-
       - run: cd gasp-e2e && yarn install
       - run: cd gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
-      
+
       - name: Cache Jest
         uses: actions/cache@v4
         with:
@@ -173,7 +181,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-
             ${{ runner.os }}-jest-
-      
+
       - run: moon setup
       - name: Run tests
         run: ${{ matrix.command }}
@@ -197,11 +205,11 @@ jobs:
           TESTMO_URL: ${{ secrets.TESTMO_URL }}
           TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         run: |
-            npm install --no-save @testmo/testmo-cli
-            npx testmo automation:run:submit-thread \
-              --instance https://mangata-finance.testmo.net \
-              --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
-              --results e2eTests/reports/*.xml
+          npm install --no-save @testmo/testmo-cli
+          npx testmo automation:run:submit-thread \
+            --instance https://mangata-finance.testmo.net \
+            --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
+            --results e2eTests/reports/*.xml
 
   test-complete:
     needs: [setup-report, e2e-test-matrix]
@@ -213,9 +221,9 @@ jobs:
 
       - name: Complete test run
         run: |
-            npx testmo automation:run:complete \
-              --instance https://mangata-finance.testmo.net \
-              --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
+          npx testmo automation:run:complete \
+            --instance https://mangata-finance.testmo.net \
+            --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
         env:
           TESTMO_URL: ${{ secrets.TESTMO_URL }}
           TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
@@ -230,7 +238,7 @@ jobs:
         uses: bryannice/gitactions-slack-notification@2.0.0
         env:
           SLACK_INCOMING_WEBHOOK: ${{ secrets.BNB_E2E_NOTIFICATION_WEBHOOK }}
-          SLACK_TITLE: 'gasp-monorepo e2e test execution - NOOK'
+          SLACK_TITLE: "gasp-monorepo e2e test execution - NOOK"
           SLACK_COLOR: "#ff0011"
-          SLACK_MESSAGE: 'Test failures in gasp-monorepo testmo report: https://mangata-finance.testmo.net/automation/runs/view/${{needs.setup-report.outputs.testmo-run-id}}'
-          GITHUB_REF: 'https://gasp-xyz.github.io/gasp-monorepo/${{ github.run_number }}'
+          SLACK_MESSAGE: "Test failures in gasp-monorepo testmo report: https://mangata-finance.testmo.net/automation/runs/view/${{needs.setup-report.outputs.testmo-run-id}}"
+          GITHUB_REF: "https://gasp-xyz.github.io/gasp-monorepo/${{ github.run_number }}"
