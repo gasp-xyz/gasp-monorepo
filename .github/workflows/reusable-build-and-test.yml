@@ -32,23 +32,20 @@ jobs:
           python-version-file: 'contracts/.python-version'
           cache: pip
       - run:  pip install -r requirements.txt
-  
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install
 
-      - run: bun run compile
-      - run: bun run size
-      - run: bun run format
-      - run: bun run lint
+      - run: yarn compile
+      - run: yarn size
+      - run: yarn format
+      - run: yarn lint
   
       - name: Run unit tests
-        run: bun run test
+        run: yarn test
 
       - name: Create gas report
-        run: bun run gas
+        run: yarn gas
         
       - name: Create coverage report
-        run: bun run cover
+        run: yarn cover
   
   contracts-static-analysis:
     name: '[contracts] Run static analysis with `slither`'
