@@ -173,7 +173,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-
             ${{ runner.os }}-jest-
-
+      
+      - run: moon setup
       - name: Run tests
         run: ${{ matrix.command }}
         env:
