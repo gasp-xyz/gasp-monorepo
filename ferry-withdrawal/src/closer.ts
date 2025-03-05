@@ -25,6 +25,7 @@ import {
 	REPLICA_COUNT,
 	REPLICA_ID,
 	MIN_REQUEST_ID,
+	SKIP_STASH,
 } from "./Config.js";
 import { CloserService } from "./CloserService.js";
 import { reportBalance, serveMetrics } from "./metrics.js";
@@ -33,7 +34,7 @@ async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
 	const l2 = new L2Api(api);
 	const l1 = new L1Api(ETH_CHAIN_URL);
-	const stash = new StashApi(STASH_URL);
+	const stash = SKIP_STASH ? undefined : new StashApi(STASH_URL);
 
 	logger.info(`Closer Serivce`);
 
@@ -45,11 +46,13 @@ async function main() {
 	serveMetrics();
 	reportBalance(hexToU8a(acc.address), l1);
 
-	logger.info(`Account      : ${acc.address}`);
-	logger.info(`L1           : ${ETH_CHAIN_URL}`);
-	logger.info(`L2           : ${MANGATA_NODE_URL}`);
-	logger.info(`Rolldown     : ${MANGATA_CONTRACT_ADDRESS}`);
-	logger.info(`Log level    : ${LOG}`);
+	logger.info(`Account         : ${acc.address}`);
+	logger.info(`L1              : ${ETH_CHAIN_URL}`);
+	logger.info(`L2              : ${MANGATA_NODE_URL}`);
+	logger.info(`Rolldown        : ${MANGATA_CONTRACT_ADDRESS}`);
+	logger.info(`Log level       : ${LOG}`);
+	logger.info(`Replica Id      : ${REPLICA_ID} / ${REPLICA_COUNT}`);
+	logger.info(`Min req id      : ${MIN_REQUEST_ID}`);
 
 	TOKENS_TO_TRACK.forEach((token) => {
 		logger.info(
@@ -60,6 +63,11 @@ async function main() {
 	await l1.isRolldownDeployed(0n);
 	await l1.isRolldownDeployed(DELAY);
 
+	const native = await l1.getNativeTokenAddress();
+	const balance = await l1.getBalance(native, hexToU8a(acc.address));
+
+	logger.info(`Closer Balance: : ${balance}`);
+
 	const closerService = new CloserService(
 		l1,
 		l2,
@@ -67,8 +75,8 @@ async function main() {
 		TOKENS_TO_TRACK,
 		TX_COST,
 		BATCH_SIZE,
-		REPLICA_COUNT,
 		REPLICA_ID,
+		REPLICA_COUNT,
 		MIN_REQUEST_ID,
 	);
 

@@ -21,23 +21,23 @@ class CloserService {
 	l2: L2Interface;
 	tokensToClose: [Uint8Array, bigint, bigint][];
 	minBalance: bigint;
-	stash: StashInterface;
+	stash: StashInterface | undefined;
 	lastCheckedWithrdawal: bigint;
 	closableRequests: (Withdrawal | Cancel)[];
 	batchSize: bigint;
-	replicas_count: bigint;
-	replica_id: bigint;
+	replicasCount: bigint;
+	replicaId: bigint;
 
 	constructor(
 		l1: L1Interface,
 		l2: L2Interface,
-		stash: StashInterface,
+		stash: StashInterface | undefined,
 		tokensToClose: [Uint8Array, bigint, bigint][],
 		minBalance: bigint,
 		batchSize: bigint = 1000n,
-		replicas_count: bigint = 0n,
-		replicas_id: bigint = 0n,
-		min_withdrawal_id: bigint = 0n,
+		replicaId: bigint = 0n,
+		replicasCount: bigint = 0n,
+		minWithdrawalId: bigint = 0n,
 	) {
 		this.l1 = l1;
 		this.l2 = l2;
@@ -45,11 +45,11 @@ class CloserService {
 		this.tokensToClose = tokensToClose;
 		this.minBalance = minBalance;
 		this.lastCheckedWithrdawal =
-			min_withdrawal_id > 0n ? min_withdrawal_id - 1n : 0n;
+			minWithdrawalId > 0n ? minWithdrawalId - 1n : 0n;
 		this.closableRequests = [];
 		this.batchSize = batchSize;
-		this.replicas_count = replicas_count;
-		this.replica_id = replicas_id;
+		this.replicasCount = replicasCount;
+		this.replicaId = replicaId;
 	}
 
 	async findRequestToClose(delay: bigint = 0n): Promise<void> {
@@ -96,15 +96,17 @@ class CloserService {
 							}) !== undefined;
 						const isClosedAlready = await this.l1.isClosed(request.hash);
 						const shouldNotBeIgnored =
-							this.replicas_count > 0
-								? request.requestId % this.replicas_count === this.replica_id
+							this.replicasCount > 0
+								? request.requestId % this.replicasCount === this.replicaId
 								: true;
 
 						return (
 							!isClosedAlready &&
 							shouldNotBeIgnored &&
 							(shouldBeClosed ||
-								(await this.stash.shouldBeClosed(request.hash)))
+								(this.stash
+									? await this.stash.shouldBeClosed(request.hash)
+									: request.ferryTip > 0n))
 						);
 					} else {
 						logger.error(`ignoring unkonwn request`);

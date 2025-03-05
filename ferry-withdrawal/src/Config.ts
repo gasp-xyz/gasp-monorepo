@@ -52,6 +52,7 @@ const cliConfigSchemat = z.object({
 	REPLICA_COUNT: z.bigint().default(0n),
 	REPLICA_ID: z.bigint().default(0n),
 	MIN_REQUEST_ID: z.bigint().default(0n),
+	SKIP_STASH: z.boolean().default(false),
 });
 
 function createCliConfig() {
@@ -81,6 +82,9 @@ function createCliConfig() {
 		MIN_REQUEST_ID: process.env.MIN_REQUEST_ID
 			? BigInt(process.env.MIN_REQUEST_ID)
 			: undefined,
+		SKIP_STASH: process.env.SKIP_STASH
+			? BigInt(process.env.SKIP_STASH)
+			: undefined,
 	});
 }
 
@@ -104,3 +108,4 @@ export const BATCH_SIZE = configuration.BATCH_SIZE;
 export const REPLICA_COUNT = configuration.REPLICA_COUNT;
 export const REPLICA_ID = configuration.REPLICA_ID;
 export const MIN_REQUEST_ID = configuration.MIN_REQUEST_ID;
+export const SKIP_STASH = configuration.SKIP_STASH;
