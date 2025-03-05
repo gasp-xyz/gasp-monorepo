@@ -1,0 +1,18 @@
+[package]
+name = "gasp-types"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[dependencies]
+parity-scale-codec = { version = "3.6.1",  features = ["bit-vec", "derive"] }
+# serde = { version = "1.0.197" ,features = ["alloc", "derive"]}
+
+primitive-types = "0.13.1"
+hex = "0.4.3"
+hex-literal = "0.4.1"
+
+alloy = { workspace = true }
+gasp-bindings = { workspace = true }
+contract-bindings = { workspace = true }

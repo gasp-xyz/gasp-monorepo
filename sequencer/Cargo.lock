@@ -2014,8 +2014,12 @@ dependencies = [
 name = "gasp-types"
 version = "0.1.0"
 dependencies = [
+ "alloy",
+ "contract-bindings",
+ "gasp-bindings",
  "hex",
  "hex-literal",
+ "parity-scale-codec",
  "primitive-types 0.13.1",
 ]
 

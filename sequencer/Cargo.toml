@@ -29,6 +29,9 @@ codegen-units = 1
 
 
 [workspace.dependencies]
+
+alloy = { version = "0.8.3", features = ["sol-types", "contract", "signer-local", "provider-http", "provider-ws"] }
+
 contract-bindings = { path = "./bindings/contracts/" }
 gasp-bindings = { path = "./bindings/gasp" }
 l1api = { path = "./l1api/" }
