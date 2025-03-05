@@ -1,6 +1,7 @@
 #![cfg(test)]
 
 mod bootstrap;
+mod council;
 mod fee_lock;
 mod identity;
 mod maintenance;
@@ -11,4 +12,3 @@ mod proof_of_stake;
 mod proxy;
 mod setup;
 mod xyk;
-mod council;

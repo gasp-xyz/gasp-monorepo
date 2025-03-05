@@ -1,18 +1,14 @@
 use crate::setup::*;
 
-use frame_support::dispatch::{DispatchInfo};
-use rollup_runtime::{ Council,
-	config::{
-		pallet_transaction_payment::{OnChargeHandler, ToAuthor},
-	},
-	OnChargeTransactionHandler,
+use frame_support::dispatch::DispatchInfo;
+use rollup_runtime::{
+	config::pallet_transaction_payment::{OnChargeHandler, ToAuthor},
+	Council, OnChargeTransactionHandler,
 };
 
 fn test_env() -> TestExternalities {
 	ExtBuilder {
-		balances: vec![
-			(AccountId::from(ALICE), NATIVE_ASSET_ID, 100 * UNIT),
-		],
+		balances: vec![(AccountId::from(ALICE), NATIVE_ASSET_ID, 100 * UNIT)],
 		assets: vec![],
 		..ExtBuilder::default()
 	}
@@ -43,7 +39,8 @@ fn council_call_by_non_member_is_charged() {
 			&DispatchInfo::default(),
 			fee,
 			0,
-		).unwrap();
+		)
+		.unwrap();
 		assert!(withdrawn.is_some());
 	})
 }
@@ -53,7 +50,12 @@ fn council_call_by_member_is_not_charged() {
 	test_env().execute_with(|| {
 		let who = AccountId::from(ALICE);
 		let fee = 1000;
-		assert_ok!(Council::set_members(RuntimeOrigin::root(), vec![who], None, Default::default()));
+		assert_ok!(Council::set_members(
+			RuntimeOrigin::root(),
+			vec![who],
+			None,
+			Default::default()
+		));
 		assert!(Council::is_member(&who));
 		let withdrawn = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
 			&who,
@@ -65,7 +67,8 @@ fn council_call_by_member_is_not_charged() {
 			&DispatchInfo::default(),
 			fee,
 			0,
-		).unwrap();
+		)
+		.unwrap();
 		assert!(withdrawn.is_none());
 	})
 }
@@ -86,7 +89,8 @@ fn non_council_call_by_non_member_is_charged() {
 			&DispatchInfo::default(),
 			fee,
 			0,
-		).unwrap();
+		)
+		.unwrap();
 		assert!(withdrawn.is_some());
 	})
 }
@@ -96,7 +100,12 @@ fn non_council_call_by_member_is_charged() {
 	test_env().execute_with(|| {
 		let who = AccountId::from(ALICE);
 		let fee = 1000;
-		assert_ok!(Council::set_members(RuntimeOrigin::root(), vec![who], None, Default::default()));
+		assert_ok!(Council::set_members(
+			RuntimeOrigin::root(),
+			vec![who],
+			None,
+			Default::default()
+		));
 		assert!(Council::is_member(&who));
 		let withdrawn = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
 			&who,
@@ -108,7 +117,8 @@ fn non_council_call_by_member_is_charged() {
 			&DispatchInfo::default(),
 			fee,
 			0,
-		).unwrap();
+		)
+		.unwrap();
 		assert!(withdrawn.is_some());
 	})
 }
