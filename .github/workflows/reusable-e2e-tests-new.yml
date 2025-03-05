@@ -145,11 +145,6 @@ jobs:
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
       - run: cd gasp-e2e && proto setup --yes
       - run: cd gasp-e2e && proto install
-      # - run: cd gasp-e2e && proto diagnose
-      # - run: cd gasp-e2e && proto status
-      # - run: cd gasp-e2e && proto regen
-      # - run: cd gasp-e2e && proto debug env
-      # - run: cd gasp-e2e && proto debug config
 
       - uses: docker/setup-compose-action@v1
       - uses: actions/setup-node@v4

@@ -50,7 +50,7 @@ tasks:
       --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime
       --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime,mode=max
       --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
-      --build-arg ENABLE_FAST_RUNTIME=false --build-arg ENABLE_UNLOCKED_RUNTIME=false
+      --build-arg ENABLE_FAST_RUNTIME=false
       --metadata-file gasp-node-standard-runtime-buildkit-metadata.json -f Dockerfile ./
     inputs: ["@globs(sources)", "Dockerfile"]
     outputs: ['gasp-node-standard-runtime-buildkit-metadata.json']
@@ -66,26 +66,10 @@ tasks:
       --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime
       --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime,mode=max
       --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
-      --build-arg ENABLE_FAST_RUNTIME=true --build-arg ENABLE_UNLOCKED_RUNTIME=false
+      --build-arg ENABLE_FAST_RUNTIME=true
       --metadata-file gasp-node-fast-runtime-buildkit-metadata.json -f Dockerfile ./
     inputs: ["@globs(sources)", "Dockerfile"]
     outputs: ['gasp-node-fast-runtime-buildkit-metadata.json']
-    options:
-      outputStyle: stream
-      cache: true
-      internal: true
-      retryCount: 3
-
-  buildkit-build-and-push-image-digests-unlocked-runtime:
-    command: >
-      docker buildx build --platform linux/amd64,linux/arm64
-      --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-unlocked-runtime
-      --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-unlocked-runtime,mode=max
-      --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY}
-      --build-arg ENABLE_FAST_RUNTIME=false --build-arg ENABLE_UNLOCKED_RUNTIME=true
-      --metadata-file gasp-node-unlocked-runtime-buildkit-metadata.json -f Dockerfile ./
-    inputs: ["@globs(sources)", "Dockerfile"]
-    outputs: ['gasp-node-unlocked-runtime-buildkit-metadata.json']
     options:
       outputStyle: stream
       cache: true
@@ -97,7 +81,6 @@ tasks:
       set -ex
       IMAGE_DIGEST_STANDARD_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-standard-runtime-buildkit-metadata.json)
       IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-fast-runtime-buildkit-metadata.json)
-      IMAGE_DIGEST_UNLOCKED_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-unlocked-runtime-buildkit-metadata.json)
   
       docker buildx imagetools create \
         --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
@@ -109,16 +92,9 @@ tasks:
         --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
         --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_FAST_RUNTIME}
-      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast from existing digests"
-      
-      docker buildx imagetools create \
-        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked \
-        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked \
-        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_UNLOCKED_RUNTIME}
-      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-unlocked from existing digests"
-      
-    deps: ['buildkit-build-and-push-image-digests-standard-runtime', 'buildkit-build-and-push-image-digests-fast-runtime', 'buildkit-build-and-push-image-digests-unlocked-runtime']
-    inputs: ['gasp-node-standard-runtime-buildkit-metadata.json', 'gasp-node-fast-runtime-buildkit-metadata.json', 'gasp-node-unlocked-runtime-buildkit-metadata.json']
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast from existing digests"      
+    deps: ['buildkit-build-and-push-image-digests-standard-runtime', 'buildkit-build-and-push-image-digests-fast-runtime']
+    inputs: ['gasp-node-standard-runtime-buildkit-metadata.json', 'gasp-node-fast-runtime-buildkit-metadata.json']
     options:
       cache: false
 
@@ -233,7 +209,7 @@ tasks:
   e2e-test-parallel:
     script: |
       set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
@@ -253,7 +229,7 @@ tasks:
   e2e-test-sequential-no-bootstrap:
     script: |
       set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
@@ -273,7 +249,7 @@ tasks:
   e2e-test-seqgasless:
     script: |
       set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
@@ -333,7 +309,7 @@ tasks:
   e2e-test-rewards-bootstrap:
     script: |
       set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
@@ -433,7 +409,7 @@ tasks:
   e2e-test-multiswap:
     script: |
       set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
@@ -473,7 +449,7 @@ tasks:
   e2e-test-crowdloan:
     script: |
       set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
@@ -693,7 +669,7 @@ tasks:
   e2e-test-marketSwap:
     script: |
       set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-unlocked
+      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
       docker compose down && docker compose up -d && sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
