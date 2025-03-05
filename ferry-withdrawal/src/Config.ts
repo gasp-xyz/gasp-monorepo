@@ -83,7 +83,7 @@ function createCliConfig() {
 			? BigInt(process.env.MIN_REQUEST_ID)
 			: undefined,
 		SKIP_STASH: process.env.SKIP_STASH
-			? BigInt(process.env.SKIP_STASH)
+			? Boolean(process.env.SKIP_STASH)
 			: undefined,
 	});
 }
