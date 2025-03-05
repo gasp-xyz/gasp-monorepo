@@ -506,16 +506,17 @@ ferryWithdrawalEnvSecretsBase:
 # ferry-closer configs #
 ########################
 closerEnabled: true
-closerImageTag: ce8243c48990b80e86aa805c5e0b1a213df14001
+closerImageTag: 0226df257ba55a112510763da171e134c15b4ecf
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
   L1_CHAIN: "ethereum"
-  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
+  TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
-  BATCH_SIZE: 5
+  BATCH_SIZE: 50
+  SKIP_STASH: true
 closerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -526,11 +527,12 @@ closerEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x3aDdEb54ddd43Eb40235eC32DfA7928F28A44bb5"
   L1_CHAIN: "arbitrum"
-  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
+  TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
-  BATCH_SIZE: 5
+  BATCH_SIZE: 50
+  SKIP_STASH: true
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerArbitrumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -541,11 +543,12 @@ closerEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x308e483afDD225D6cb7bF4d44B8e4a03DFD9c0De"
   L1_CHAIN: "base"
-  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
+  TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
-  BATCH_SIZE: 5
+  BATCH_SIZE: 50
+  SKIP_STASH: true
 closerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerBaseMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C

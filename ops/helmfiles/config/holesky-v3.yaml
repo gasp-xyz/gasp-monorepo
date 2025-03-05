@@ -332,7 +332,7 @@ ferryWithdrawalEnvSecretsBase:
 # closer configs #
 ########################
 closerEnabled: true
-closerImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
+closerImageTag: 0226df257ba55a112510763da171e134c15b4ecf
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x34B38Fd98aBE38B52258253fb4E1D0F5EFF26343"

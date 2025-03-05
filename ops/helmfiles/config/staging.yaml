@@ -274,7 +274,7 @@ ferryWithdrawalEnvSecretsBase:
 # ferry-closer configs #
 ########################
 closerEnabled: true
-closerImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
+closerImageTag: 0226df257ba55a112510763da171e134c15b4ecf
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-eth:8546
