@@ -96,9 +96,11 @@ mod test {
             uri: URI,
             pkey: ALICE_PKEY,
             address: ROLLDOWN_ADDRESS,
-        }.build().await.unwrap();
+        }
+        .build()
+        .await
+        .unwrap();
 
         let d = foo.deposit(100u128, 1u128).await.unwrap();
-
     }
 }

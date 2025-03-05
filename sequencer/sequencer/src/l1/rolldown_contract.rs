@@ -20,12 +20,11 @@ lazy_static! {
     .unwrap();
 }
 
-
 pub struct Foo<P> {
-    handle: bindings::rolldown::Rolldown::RolldownInstance<BoxTransport, P>
+    handle: bindings::rolldown::Rolldown::RolldownInstance<BoxTransport, P>,
 }
 
-pub struct FooBuilder{
+pub struct FooBuilder {
     pub uri: &'static str,
     pub pkey: [u8; 32],
     pub address: [u8; 20],
@@ -40,7 +39,9 @@ impl FooBuilder {
             .wallet(wallet)
             .on_builtin(self.uri)
             .await?;
-        Ok(Foo { handle: bindings::rolldown::Rolldown::RolldownInstance::new( [0u8; 20].into(), provider,) })
+        Ok(Foo {
+            handle: bindings::rolldown::Rolldown::RolldownInstance::new([0u8; 20].into(), provider),
+        })
     }
 }
 
@@ -50,16 +51,14 @@ impl FooBuilder {
 //     }
 // }
 
-
 impl<P> Foo<P>
 where
     P: Provider + WalletProvider + Clone,
 {
     #[tracing::instrument(skip(self))]
     pub async fn deposit(&self, amount: u128, ferry_tip: u128) -> Result<(), L1Error> {
-
-        let call = 
-            self.handle
+        let call = self
+            .handle
             .deposit_native_1(alloy::primitives::U256::from(ferry_tip))
             .value(alloy::primitives::U256::from(amount));
 
@@ -70,13 +69,11 @@ where
     }
 }
 
-
-pub struct RolldownContractBuilder{
+pub struct RolldownContractBuilder {
     pub uri: &'static str,
     pub pkey: [u8; 32],
     pub address: [u8; 20],
 }
-
 
 pub struct RolldownContract<T, P, N> {
     contract_handle: bindings::rolldown::Rolldown::RolldownInstance<T, P, N>,
@@ -95,7 +92,6 @@ pub async fn create_provider(
         .on_builtin(uri)
         .await?)
 }
-
 
 impl<T, P, N> RolldownContract<T, P, N>
 where

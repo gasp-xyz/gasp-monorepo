@@ -59,10 +59,7 @@ async fn test_withdrawal_hash() {
     let withdrawal_hash = withdrawal.hash();
     let contract_calculated_hash = rolldown.hash(withdrawal.clone()).await.unwrap();
 
-    assert_eq!(
-        withdrawal_hash, 
-        contract_calculated_hash
-    );
+    assert_eq!(withdrawal_hash, contract_calculated_hash);
 }
 
 #[serial]
@@ -84,20 +81,17 @@ async fn test_ferry_withdrawal() {
     let withdrawal_hash = withdrawal.hash();
 
     dev_token.mint(ALICE_ADDRESS, 100u128).await.unwrap();
-    dev_token.approve(rolldown.address(), 100u128).await.unwrap();
+    dev_token
+        .approve(rolldown.address(), 100u128)
+        .await
+        .unwrap();
 
     l1.ferry_withdrawal(withdrawal).await.unwrap();
 
     assert_eq!(
-        l1.get_status(
-            withdrawal_hash.into()
-        )
-        .await
-        .unwrap(),
+        l1.get_status(withdrawal_hash.into()).await.unwrap(),
         RequestStatus::Ferried(ALICE_ADDRESS)
     );
-
-    // l1.close_withdrawal(withdrawal, merkle_root, proof)
 }
 
 #[serial]
@@ -120,46 +114,55 @@ async fn test_close_withdrawal() {
     // dev_token.approve(rolldown.address(), 100u128).await.unwrap();
 
     assert_eq!(
-        l1.get_status(
-            withdrawal.hash()
-        )
-        .await
-        .unwrap(),
+        l1.get_status(withdrawal.hash()).await.unwrap(),
         RequestStatus::Pending
     );
 
     rolldown
-        .submit_merkle_root(withdrawal.hash().into(), (withdrawal.request_id, withdrawal.request_id))
+        .submit_merkle_root(
+            withdrawal.hash().into(),
+            (withdrawal.request_id, withdrawal.request_id),
+        )
         .await
         .unwrap();
 
-    l1.close_withdrawal(withdrawal, withdrawal.hash(), vec![]).await.unwrap();
-
+    l1.close_withdrawal(withdrawal, withdrawal.hash(), vec![])
+        .await
+        .unwrap();
 
     assert_eq!(
-        l1.get_status(
-            withdrawal.hash()
-        )
-        .await
-        .unwrap(),
+        l1.get_status(withdrawal.hash()).await.unwrap(),
         RequestStatus::Closed
     );
-
 }
 
 #[serial]
 #[tokio::test]
-async fn test_get_request_status_closed() {
+async fn test_close_cancel() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
+    let dev_token = DevToken::deploy(provider.clone()).await.unwrap();
     let l1 = L1::new(rolldown.clone(), provider);
 
-    assert_eq!(
-        l1.get_status(
-            hex!("1111111111111111111111111111111111111111111111111111111111111111").into()
-        )
+    rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
+
+    let cancel = L1Cancel {
+        request_id: 1u128,
+        range: (1u128, 1u128),
+        hash: hex!("1111111111111111111111111111111111111111111111111111111111111111"),
+    };
+
+    rolldown
+        .submit_merkle_root(cancel.hash().into(), (cancel.request_id, cancel.request_id))
         .await
-        .unwrap(),
+        .unwrap();
+
+    l1.close_cancel(cancel, cancel.hash(), vec![])
+        .await
+        .unwrap();
+
+    assert_eq!(
+        l1.get_status(cancel.hash()).await.unwrap(),
         RequestStatus::Closed
     );
 }
@@ -263,20 +266,35 @@ async fn test_get_latest_finalized_request_id() {
 #[serial]
 #[traced_test]
 #[tokio::test]
-async fn test_foo() {
+async fn test_get_native_balance() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
     let l1 = L1::new(rolldown.clone(), provider);
 
-    assert_eq!(l1.get_latest_finalized_request_id().await.unwrap(), None);
+    assert!(l1.native_balance(ALICE_ADDRESS).await.unwrap() > 0u128);
+}
 
-    rolldown
-        .submit_merkle_root(DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE)
-        .await
-        .unwrap();
+#[serial]
+#[traced_test]
+#[tokio::test]
+async fn test_get_erc20_balance() {
+    let dummy_address = hex!("3333333333333333333333333333333333333333");
+    let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
+    let dev_token = DevToken::deploy(provider.clone()).await.unwrap();
+    let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
+    let l1 = L1::new(rolldown.clone(), provider);
 
     assert_eq!(
-        l1.get_latest_finalized_request_id().await.unwrap(),
-        Some(DUMMY_MERKLE_RANGE.1)
+        l1.erc20_balance(dev_token.address(), dummy_address)
+            .await
+            .unwrap(),
+        0u128
+    );
+    dev_token.mint(dummy_address, 100u128).await.unwrap();
+    assert_eq!(
+        l1.erc20_balance(dev_token.address(), dummy_address)
+            .await
+            .unwrap(),
+        100u128
     );
 }

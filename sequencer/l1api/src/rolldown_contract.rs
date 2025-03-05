@@ -1,9 +1,9 @@
 use super::{types, L1Error, L1Interface};
+use crate::utils::simulate_send_and_wait_for_result;
+use crate::{L1Withdrawal, RequestStatus};
 use alloy::contract::{CallBuilder, CallDecoder};
 use contract_bindings::irolldown::IRolldownPrimitives::Withdrawal;
 use lazy_static::lazy_static;
-use crate::utils::simulate_send_and_wait_for_result;
-use crate::{L1Withdrawal, RequestStatus};
 
 use alloy::network::{EthereumWallet, Network, NetworkWallet};
 use alloy::providers::{Provider, ProviderBuilder, WalletProvider};
@@ -24,9 +24,8 @@ lazy_static! {
     .unwrap();
 }
 
-
 #[derive(Clone)]
-pub struct RolldownContract<T,P,N> {
+pub struct RolldownContract<T, P, N> {
     contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance<T, P, N>,
 }
 
@@ -36,7 +35,6 @@ where
     P: Provider<T, N> + WalletProvider<N>,
     N: Network,
 {
-
     #[tracing::instrument(skip(self, cancel))]
     pub async fn send_close_cancel_tx(
         &self,
@@ -52,28 +50,16 @@ where
     }
 
     #[tracing::instrument(skip(self, withdrawal))]
-    pub async fn hash(
-        &self,
-        withdrawal: L1Withdrawal,
-    ) -> Result<H256, L1Error> {
-        let call = self
-            .contract_handle
-            .hashWithdrawal(withdrawal.into());
+    pub async fn hash(&self, withdrawal: L1Withdrawal) -> Result<H256, L1Error> {
+        let call = self.contract_handle.hashWithdrawal(withdrawal.into());
         Ok(call.call().await?._0.0.into())
     }
 
-
     #[tracing::instrument(skip(self, withdrawal))]
-    pub async fn send_ferry_withdrawal(
-        &self,
-        withdrawal: L1Withdrawal,
-    ) -> Result<H256, L1Error> {
-        let call = self
-            .contract_handle
-            .ferryWithdrawal(withdrawal.into());
+    pub async fn send_ferry_withdrawal(&self, withdrawal: L1Withdrawal) -> Result<H256, L1Error> {
+        let call = self.contract_handle.ferryWithdrawal(withdrawal.into());
         Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
     }
-
 
     #[tracing::instrument(skip(self, withdrawal))]
     pub async fn send_close_withdrawal_tx(
@@ -84,37 +70,35 @@ where
     ) -> Result<H256, L1Error> {
         let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
         let native_withdrawal: types::Withdrawal = withdrawal.into();
-        let call = self
-            .contract_handle
-            .closeWithdrawal(native_withdrawal, merkle_root.0.into(), proof);
+        let call =
+            self.contract_handle
+                .closeWithdrawal(native_withdrawal, merkle_root.0.into(), proof);
         Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
     }
 
-
     #[cfg(test)]
     #[tracing::instrument(skip_all)]
-    pub (crate) async fn deploy(provider: P) -> Result<Self, L1Error>
-    {
+    pub(crate) async fn deploy(provider: P) -> Result<Self, L1Error> {
         let sender = provider.wallet().default_signer_address();
-        let contract_handle = contract_bindings::rolldown::Rolldown::RolldownInstance::<T,P,N>::deploy(
-                provider
-        ).await?;
+        let contract_handle =
+            contract_bindings::rolldown::Rolldown::RolldownInstance::<T, P, N>::deploy(provider)
+                .await?;
         tracing::info!("contract deployed");
-
 
         let call = (&contract_handle).initialize(sender, 0, sender);
         simulate_send_and_wait_for_result(contract_handle.provider(), call).await?;
         tracing::info!("contract initialized");
 
-        Ok(RolldownContract {
-            contract_handle
-        })
+        Ok(RolldownContract { contract_handle })
     }
 
     #[cfg(test)]
     #[tracing::instrument(skip_all)]
-    pub (crate) async fn deposit_native(&self, amount: u128, ferry_tip: u128) -> Result<(), L1Error> where 
-    {
+    pub(crate) async fn deposit_native(
+        &self,
+        amount: u128,
+        ferry_tip: u128,
+    ) -> Result<(), L1Error> where {
         let call = self
             .contract_handle
             .deposit_native_1(alloy::primitives::U256::from(ferry_tip))
@@ -126,16 +110,17 @@ where
 
     #[cfg(test)]
     #[tracing::instrument(skip_all)]
-    pub (crate) async fn submit_merkle_root(&self, root: [u8; 32], range: (u128, u128)) -> Result<(), L1Error> where 
-    {
-        let range = contract_bindings::rolldown::IRolldownPrimitives::Range{
-            start: alloy::primitives::U256::from(range.0), 
+    pub(crate) async fn submit_merkle_root(
+        &self,
+        root: [u8; 32],
+        range: (u128, u128),
+    ) -> Result<(), L1Error> where {
+        let range = contract_bindings::rolldown::IRolldownPrimitives::Range {
+            start: alloy::primitives::U256::from(range.0),
             end: alloy::primitives::U256::from(range.1),
         };
 
-        let call = self
-            .contract_handle
-            .update_l1_from_l2(root.into(), range);
+        let call = self.contract_handle.update_l1_from_l2(root.into(), range);
 
         tracing::info!("hello world!!!!!!");
         simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?;
@@ -143,28 +128,35 @@ where
     }
 }
 
-
 impl<T, P, N> RolldownContract<T, P, N>
 where
     T: Transport + Clone,
     P: Provider<T, N> + Clone,
     N: Network,
 {
-
-    pub fn address(&self) -> [u8;20] {
+    pub fn address(&self) -> [u8; 20] {
         self.contract_handle.address().clone().into()
     }
 
-    pub async fn is_admin(&self, address: [u8; 20]) -> Result<bool, L1Error>{
+    pub async fn is_admin(&self, address: [u8; 20]) -> Result<bool, L1Error> {
         let admin_role = self.contract_handle.DEFAULT_ADMIN_ROLE().call().await?._0;
-        Ok(self.contract_handle.hasRole(admin_role, address.into()).call().await?._0)
+        Ok(self
+            .contract_handle
+            .hasRole(admin_role, address.into())
+            .call()
+            .await?
+            ._0)
     }
 
-    pub async fn is_updater(&self, address: [u8; 20]) -> Result<bool, L1Error>{
+    pub async fn is_updater(&self, address: [u8; 20]) -> Result<bool, L1Error> {
         let updater_role = self.contract_handle.UPDATER_ROLE().call().await?._0;
-        Ok(self.contract_handle.hasRole(updater_role, address.into()).call().await?._0)
+        Ok(self
+            .contract_handle
+            .hasRole(updater_role, address.into())
+            .call()
+            .await?
+            ._0)
     }
-
 
     pub fn new(provider: P, address: [u8; 20]) -> Self {
         RolldownContract {
@@ -174,7 +166,6 @@ where
             ),
         }
     }
-
 
     pub async fn find_l2_batch(&self, request_id: u128) -> Result<[u8; 32], L1Error> {
         ETH_CALL_COUNTER.with_label_values(&["find_l2_batch"]).inc();
@@ -252,13 +243,12 @@ where
         let closed = self.contract_handle.CLOSED().call().await?._0;
         if request_status == closed {
             Ok(RequestStatus::Closed)
-        }else if request_status.0 == [0u8; 20]{
+        } else if request_status.0 == [0u8; 20] {
             Ok(RequestStatus::Pending)
         } else {
             Ok(RequestStatus::Ferried(request_status.into()))
         }
     }
-
 
     pub async fn is_request_closed(&self, request_hash: H256) -> Result<bool, L1Error> {
         ETH_CALL_COUNTER
@@ -277,7 +267,6 @@ where
         Ok(is_closed)
     }
 
-
     pub async fn is_request_ferried(&self, request_hash: H256) -> Result<bool, L1Error> {
         ETH_CALL_COUNTER
             .with_label_values(&["processedL2Requests"])
@@ -295,7 +284,6 @@ where
         Ok(is_closed)
     }
 
-
     // async fn get_native_account_balance(&self, address: [u8; 20]) -> Result<u128, L1Error> {
     //     ETH_CALL_COUNTER.with_label_values(&["balance"]).inc();
     //     let provider = self.contract_handle.provider();
@@ -303,12 +291,11 @@ where
     //     result.try_into().map_err(|_| L1Error::OverflowError)
     // }
 
-
     // pub async fn simulate_send_and_wait_for_result<T,Pr,D,N>(
     //     &self,
     //     call: CallBuilder<T,Pr,D,N>,
-    // ) -> Result<H256, L1Error> 
-    // where 
+    // ) -> Result<H256, L1Error>
+    // where
     //     N: Network,
     //     D: CallDecoder + Send + Sync + Unpin,
     //     T: Transport + Clone,

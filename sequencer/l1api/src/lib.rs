@@ -1,5 +1,3 @@
-use std::io::Read;
-
 use alloy::{
     network::{EthereumWallet, Network},
     providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider},
@@ -8,6 +6,7 @@ use alloy::{
     transports::{Transport, TransportError},
 };
 use hex::encode as hex_encode;
+use hex_literal::hex;
 use primitive_types::H256;
 
 mod erc20;
@@ -25,9 +24,10 @@ use sha3::{Digest, Keccak256};
 pub mod types {
     pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
     pub use contract_bindings::rolldown::IRolldownPrimitives::L1Update;
-    pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
-    pub use contract_bindings::rolldown::IRolldownPrimitives::RequestId;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
+    pub use contract_bindings::rolldown::IRolldownPrimitives::Range;
+    pub use contract_bindings::rolldown::IRolldownPrimitives::RequestId;
+    pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -54,6 +54,41 @@ pub enum RequestStatus {
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
+pub struct L1Cancel {
+    pub request_id: u128,
+    pub range: (u128, u128),
+    pub hash: [u8; 32],
+}
+
+impl Into<types::Cancel> for L1Cancel {
+    fn into(self) -> types::Cancel {
+        types::Cancel {
+            requestId: types::RequestId {
+                origin: 1u8, // Origin::L2
+                id: self.request_id.try_into().unwrap(),
+            },
+            range: types::Range {
+                start: self.range.0.try_into().unwrap(),
+                end: self.range.1.try_into().unwrap(),
+            },
+            hash: self.hash.into(),
+        }
+    }
+}
+
+impl L1Cancel {
+    pub fn hash(&self) -> H256 {
+        let w: types::Cancel = (*self).into();
+        let withdrawal_encoded = w.abi_encode();
+        let prefix =
+            hex!("0000000000000000000000000000000000000000000000000000000000000001").to_vec();
+        let data = prefix.into_iter().chain(withdrawal_encoded);
+        let hash: [u8; 32] = Keccak256::digest(data.collect::<Vec<_>>()).into();
+        hash.into()
+    }
+}
+
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct L1Withdrawal {
     pub request_id: u128,
     pub recipient: [u8; 20],
@@ -62,29 +97,20 @@ pub struct L1Withdrawal {
     pub ferry_tip: u128,
 }
 
-			// L2Request::Cancel(cancel) => eth_abi::L2RequestType::Cancel
-			// 	.abi_encode()
-			// 	.iter()
-			// 	.chain(cancel.abi_encode().iter())
-			// 	.cloned()
-			// 	.collect(),
-
-impl L1Withdrawal{
-    pub fn hash(&self) -> H256{
-        let w: types::Withdrawal  = (*self).into();
+impl L1Withdrawal {
+    pub fn hash(&self) -> H256 {
+        let w: types::Withdrawal = (*self).into();
         let withdrawal_encoded = w.abi_encode();
-        tracing::info!("WITHDRAWAL ENCODED: {}", hex_encode(withdrawal_encoded.clone()));
-        tracing::info!("WITHDRAWAL ENCODED HASH: {}", hex_encode(Keccak256::digest(withdrawal_encoded.clone())));
         let data = vec![0u8; 32].into_iter().chain(withdrawal_encoded);
         let hash: [u8; 32] = Keccak256::digest(data.collect::<Vec<_>>()).into();
         hash.into()
     }
-
 }
+
 impl Into<types::Withdrawal> for L1Withdrawal {
     fn into(self) -> types::Withdrawal {
         types::Withdrawal {
-            requestId: types::RequestId{
+            requestId: types::RequestId {
                 origin: 1u8, // Origin::L2
                 id: self.request_id.try_into().unwrap(),
             },
@@ -112,7 +138,7 @@ pub trait L1Interface {
 
     async fn close_cancel(
         &self,
-        cancel: types::Cancel,
+        cancel: L1Cancel,
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error>;
@@ -124,9 +150,6 @@ pub trait L1Interface {
         proof: Vec<H256>,
     ) -> Result<H256, L1Error>;
 }
-
-// async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error>;
-// async fn get_native_balance(&self, address: [u8; 20]) -> Result<u128, L1Error>;
 
 pub struct L1Builder {
     pub uri: &'static str,
@@ -185,8 +208,10 @@ where
         result.try_into().map_err(|_| L1Error::OverflowError)
     }
 
-    async fn ferry_withdrawal(&self, withdrawal: L1Withdrawal) -> Result<H256, L1Error>{
-        self.rolldown_contract.send_ferry_withdrawal(withdrawal).await
+    async fn ferry_withdrawal(&self, withdrawal: L1Withdrawal) -> Result<H256, L1Error> {
+        self.rolldown_contract
+            .send_ferry_withdrawal(withdrawal)
+            .await
     }
 
     // async fn deposit_native(&self, request_hash: H256) -> Result<bool, L1Error>{
@@ -288,36 +313,15 @@ where
         }
     }
 
-    // #[tracing::instrument(skip(self))]
-    // async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error> {
-    //     // https://www.blocknative.com/blog/eip-1559-fees
-    //     // We do not want client to estimate we would like to make our own estimate
-    //     // based on this equation: Max Fee = (2 * Base Fee) + Max Priority Fee
-    //
-    //     // Max Fee = maxFeePerGas (client)
-    //     // Max Priority Fee = maxPriorityFeePerGas (client)
-    //
-    //     let base_fee_in_wei = self.contract_handle.provider().get_gas_price().await?;
-    //     let max_priority_fee_per_gas_in_wei = self
-    //         .contract_handle
-    //         .provider()
-    //         .get_max_priority_fee_per_gas()
-    //         .await?;
-    //     let max_fee_in_wei = base_fee_in_wei
-    //         .saturating_mul(2)
-    //         .saturating_add(max_priority_fee_per_gas_in_wei);
-    //     Ok((max_fee_in_wei, max_priority_fee_per_gas_in_wei))
-    // }
-
     #[tracing::instrument(skip(self, cancel))]
     async fn close_cancel(
         &self,
-        cancel: types::Cancel,
+        cancel: L1Cancel,
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
         self.rolldown_contract
-            .send_close_cancel_tx(cancel, merkle_root, proof)
+            .send_close_cancel_tx(cancel.into(), merkle_root, proof)
             .await
     }
 
@@ -346,70 +350,4 @@ where
             .get_request_status(request_hash)
             .await
     }
-
-    // #[tracing::instrument(skip(self))]
-    // async fn get_native_balance(&self, address: [u8; 20]) -> Result<u128, L1Error> {
-    //     self.get_native_account_balance(address).await
-    // }
 }
-
-// impl<P> L1Interface for L1<P> where
-// P: Provider{
-// }
-
-// #[cfg(test)]
-// mod test {
-//     use super::*;
-//     use hex_literal::hex;
-//     use serial_test::serial;
-//
-//     const URI: &str = "http://localhost:8545";
-//     const ROLLDOWN_ADDRESS: [u8; 20] = hex!("1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f");
-//     const ALICE_PKEY: [u8; 32] =
-//         hex!("dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97");
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_can_connect() {
-//         let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
-//         RolldownContract::from_provider(ROLLDOWN_ADDRESS, provider);
-//     }
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_can_latest_request_id() {
-//         let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
-//         let rolldown = RolldownContract::from_provider(ROLLDOWN_ADDRESS, provider);
-//         rolldown.deposit(1000, 10).await.unwrap();
-//         rolldown
-//             .get_latest_reqeust_id()
-//             .await
-//             .expect("can fetch request");
-//     }
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_can_fetch_balance() {
-//         let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
-//         let rolldown = RolldownContract::from_provider(ROLLDOWN_ADDRESS, provider);
-//
-//         let balance = rolldown
-//             .get_native_balance(hex!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266"))
-//             .await
-//             .unwrap();
-//         assert!(balance > 0u128);
-//     }
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_builder() {
-//         let foo = FooBuilder {
-//             uri: URI,
-//             pkey: ALICE_PKEY,
-//             address: ROLLDOWN_ADDRESS,
-//         }.build().await.unwrap();
-//
-//         let d = foo.deposit(100u128, 1u128).await.unwrap();
-//
-//     }
-// }

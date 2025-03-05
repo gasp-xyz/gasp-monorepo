@@ -46,13 +46,10 @@ where
     let account = provider.wallet().default_signer_address();
     let (max_fee_per_gas_in_wei, max_priority_fee_per_gas_in_wei) =
         crate::utils::estimate_gas_in_wei::<T, P, N>(provider).await?;
-    tracing::info!("estimation !!!!!!!!!!!!!!!!!!!!!!!!!!");
     let call = call.from(account);
 
-    tracing::info!("call !!!!!!!!!!!!!!!!!!!!!!!!!!");
     match call.call().await {
         Ok(_result) => {
-            tracing::info!("send !!!!!!!!!!!!!!!!!!!!!!!!");
             let receipt = call
                 .max_fee_per_gas(max_fee_per_gas_in_wei)
                 .max_priority_fee_per_gas(max_priority_fee_per_gas_in_wei)
@@ -81,14 +78,13 @@ where
 #[cfg(test)]
 pub mod test_utils {
     use super::*;
-    use contract_bindings::gasptesttoken::GaspTestToken::GaspTestTokenInstance;
     use crate::erc20::Erc20Token;
+    use contract_bindings::gasptesttoken::GaspTestToken::GaspTestTokenInstance;
 
     #[derive(Clone)]
     pub struct DevToken<T, P, N> {
         contract_handle: GaspTestTokenInstance<T, P, N>,
     }
-
 
     impl<T, P, N> DevToken<T, P, N>
     where
@@ -96,74 +92,66 @@ pub mod test_utils {
         P: Provider<T, N> + WalletProvider<N> + Clone,
         N: Network,
     {
+        pub(crate) async fn deploy(provider: P) -> Result<Self, L1Error> {
+            let sender = provider.wallet().default_signer_address();
+            let contract_handle = GaspTestTokenInstance::<T, P, N>::deploy(provider).await?;
+            tracing::info!("contract deployed");
 
-    pub (crate) async fn deploy(provider: P) -> Result<Self, L1Error> {
-        let sender = provider.wallet().default_signer_address();
-        let contract_handle = GaspTestTokenInstance::<T,P,N>::deploy(
-                provider
-        ).await?;
-        tracing::info!("contract deployed");
-
-        Ok(DevToken {
-            contract_handle
-        })
-    }
-
-    fn new(address: [u8; 20], provider: P) -> Self {
-        DevToken {
-            contract_handle: GaspTestTokenInstance::<T, P, N>::new(address.into(), provider),
+            Ok(DevToken { contract_handle })
         }
-    }
 
-    pub fn address(&self) -> [u8; 20] {
-        let addr = self.contract_handle.address().clone();
-        addr.0.into()
-    }
+        fn new(address: [u8; 20], provider: P) -> Self {
+            DevToken {
+                contract_handle: GaspTestTokenInstance::<T, P, N>::new(address.into(), provider),
+            }
+        }
 
-    pub async fn mint(
-        &self,
-        address: [u8; 20],
-        amount: u128,
-    ) -> Result<H256, L1Error> {
-        let call = self
-            .contract_handle.mint(address.into(), amount.try_into().expect("can convert"));
-        simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await
-    }
+        pub fn address(&self) -> [u8; 20] {
+            let addr = self.contract_handle.address().clone();
+            addr.0.into()
+        }
 
-    pub async fn transfer(
-        &self,
-        address: [u8; 20],
-        amount: u128,
-    ) -> Result<H256, L1Error> {
-        let token = Erc20Token::<T,P,N>::new(self.contract_handle.address().0.into(), self.contract_handle.provider().clone());
-        token.transfer(address, amount).await
-    }
+        pub async fn mint(&self, address: [u8; 20], amount: u128) -> Result<H256, L1Error> {
+            let call = self
+                .contract_handle
+                .mint(address.into(), amount.try_into().expect("can convert"));
+            simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await
+        }
 
-    pub async fn approve(
-        &self,
-        address: [u8; 20],
-        amount: u128,
-    ) -> Result<H256, L1Error> {
-        let token = Erc20Token::<T,P,N>::new(self.contract_handle.address().0.into(), self.contract_handle.provider().clone());
-        token.approve(address, amount).await
-    }
+        pub async fn transfer(&self, address: [u8; 20], amount: u128) -> Result<H256, L1Error> {
+            let token = Erc20Token::<T, P, N>::new(
+                self.contract_handle.address().0.into(),
+                self.contract_handle.provider().clone(),
+            );
+            token.transfer(address, amount).await
+        }
 
-    pub async fn allowance(
-        &self,
-        contract: [u8; 20],
-        account: [u8; 20],
-    ) -> Result<u128, L1Error> {
-        let token = Erc20Token::<T,P,N>::new(self.contract_handle.address().0.into(), self.contract_handle.provider().clone());
-        token.allowance(contract, account).await
-    }
+        pub async fn approve(&self, address: [u8; 20], amount: u128) -> Result<H256, L1Error> {
+            let token = Erc20Token::<T, P, N>::new(
+                self.contract_handle.address().0.into(),
+                self.contract_handle.provider().clone(),
+            );
+            token.approve(address, amount).await
+        }
 
-    pub async fn balance_of(
-        &self,
-        account: [u8; 20],
-    ) -> Result<u128, L1Error> {
-        let token = Erc20Token::<T,P,N>::new(self.contract_handle.address().0.into(), self.contract_handle.provider().clone());
-        token.balance_of(account).await
-    }
+        pub async fn allowance(
+            &self,
+            contract: [u8; 20],
+            account: [u8; 20],
+        ) -> Result<u128, L1Error> {
+            let token = Erc20Token::<T, P, N>::new(
+                self.contract_handle.address().0.into(),
+                self.contract_handle.provider().clone(),
+            );
+            token.allowance(contract, account).await
+        }
 
+        pub async fn balance_of(&self, account: [u8; 20]) -> Result<u128, L1Error> {
+            let token = Erc20Token::<T, P, N>::new(
+                self.contract_handle.address().0.into(),
+                self.contract_handle.provider().clone(),
+            );
+            token.balance_of(account).await
+        }
     }
 }
