@@ -8,6 +8,7 @@ resolver = "2"
 members = [
 	'sequencer',
 	'bindings/contracts', 
+  "types",
   "l1api",
   "l2api",
 ]
@@ -30,3 +31,4 @@ codegen-units = 1
 contract-bindings = { path = "./bindings/contracts/" }
 l1api = { path = "./l1api/" }
 l2api = { path = "./l2api/" }
+gasp-types = { path = "./types/" }

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::pin::Pin;
+use gasp_types::L2Request;
 
 use futures::future::join_all;
 use futures::Stream;
@@ -49,15 +50,34 @@ pub struct PendingUpdate {
 
 use gasp::api::runtime_types::frame_system::EventRecord;
 use gasp::api::runtime_types::rollup_runtime::RuntimeEvent;
+use types::RequestId;
 pub type L2Event = EventRecord<RuntimeEvent, H256>;
+
 
 pub trait L2Interface {
     fn account_address(&self) -> [u8; 20];
+
+    async fn get_requests(
+        &self,
+        range: (u128, u128),
+        chain: types::Chain,
+        at: HashOf<GaspConfig>,
+    ) -> Result<Vec<L2Request>, L2Error>;
+
+    //TODO: rename
+    async fn get_latest_created_request_id(
+        &self,
+        chain: types::Chain,
+        at: HashOf<GaspConfig>,
+    ) -> Result<u128, L2Error>;
+
+    //TODO: rename
     async fn get_latest_processed_request_id(
         &self,
         chain: types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<u128, L2Error>;
+
     async fn get_read_rights(
         &self,
         chain: types::Chain,
@@ -173,6 +193,25 @@ impl Gasp {
             client,
             keypair: Keypair::from_secret_key(secret_key),
         })
+    }
+
+
+    async fn get_l2_request(
+        &self,
+        chain: types::Chain,
+        request_id: u128,
+        at: HashOf<GaspConfig>,
+    ) -> Result<Option<L2Request>, L2Error> {
+
+        let request_id = RequestId{ origin: types::Origin::L2, id: request_id };
+        let storage = gasp::api::storage().rolldown().l2_requests(chain, request_id);
+
+        Ok(self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&storage)
+            .await?)
     }
 
     async fn get_events(&self, at: HashOf<GaspConfig>) -> Result<Vec<L2Event>, L2Error> {
@@ -679,6 +718,31 @@ impl L2Interface for Gasp {
 
         tracing::trace!("dispute period: {active:?}");
         active.ok_or(L2Error::UnknownDisputePeriodLength(chain))
+    }
+
+    async fn get_requests(
+        &self,
+        chain: types::Chain,
+        range: (u128, u128),
+        at: HashOf<GaspConfig>,
+    ) -> Result<u128, L2Error> {
+
+        let storage = gasp::api::storage().rolldown().l2_requests();
+        let active = self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&storage)
+            .await?
+            .unwrap_or_default();
+    }
+
+    async fn get_latest_created_request_id(
+        &self,
+        chain: types::Chain,
+        at: HashOf<GaspConfig>,
+    ) -> Result<u128, L2Error> {
+        todo!()
     }
 }
 

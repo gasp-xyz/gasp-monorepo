@@ -23,6 +23,7 @@ tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 lru = "0.12.5"
 prometheus = "0.13.4"
 lazy_static = "1.4.0"
+gasp-types = { workspace = true }
 
 [dev-dependencies]
 mockall = "0.13.0"
