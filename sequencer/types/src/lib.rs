@@ -146,7 +146,7 @@ pub fn from_l2_u256(value: l2types::U256) -> U256 {
 }
 
 pub fn into_l2_u256(value: U256) -> l2types::U256 {
-    let data = value.to_big_endian();
+    let data = value.to_little_endian();
     l2types::U256::decode(&mut &data[..]).unwrap()
 }
 
@@ -242,4 +242,50 @@ impl Into<l1types::Cancel> for Cancel {
             hash: self.hash.into(),
         }
     }
+}
+
+#[cfg(test)]
+mod test{
+    use super::*;
+    use alloy::sol_types::SolValue;
+    use hex_literal::hex;
+
+    #[test]
+    fn test_from_l2_u256() {
+        let payload = hex!("ffffff0000000000000000000000000000000000000000000000000000000000");
+        let input = l2types::U256::decode(&mut &payload[..]).unwrap();
+        assert_eq!(
+            from_l2_u256(input),
+            U256::from(16777215u128)
+        )
+    }
+
+    #[test]
+    fn test_into_l2_u256() {
+        let l2_u256 = into_l2_u256(U256::from(16777215u128));
+        assert_eq!(
+            l2_u256.encode(),
+            hex!("ffffff0000000000000000000000000000000000000000000000000000000000").to_vec()
+        )
+    }
+
+    #[test]
+    fn test_from_l1_u256() {
+        let input = l1types::U256::from(16777215u128);
+        assert_eq!(
+            from_l1_u256(input),
+            U256::from(16777215u128)
+        )
+    }
+
+    #[test]
+    fn test_into_l1_u256() {
+        let l1_u256 = into_l1_u256(U256::from(16777215u128));
+        assert_eq!(
+            l1_u256.abi_encode(),
+            hex!("0000000000000000000000000000000000000000000000000000000000ffffff").to_vec()
+        )
+    }
+
+
 }
