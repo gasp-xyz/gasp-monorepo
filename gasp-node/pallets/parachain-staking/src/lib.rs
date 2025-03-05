@@ -1576,6 +1576,7 @@ pub mod pallet {
 		AggregatorLiquidityTokenTaken,
 		IncorrectRewardDelegatorCount,
 		MathError,
+		NoSuchPool,
 	}
 
 	#[pallet::event]
@@ -2554,7 +2555,7 @@ pub mod pallet {
 
 			let added_liquidity_token: CurrencyIdOf<T> = match paired_or_liquidity_token {
 				PairedOrLiquidityToken::Paired(x) =>
-					T::ValuateForNative::find_paired_pool_for(x)?.0,
+					T::ValuateForNative::find_paired_pool_for(x).first().ok_or(Error::<T>::NoSuchPool)?.0,
 				PairedOrLiquidityToken::Liquidity(x) => {
 					T::ValuateForNative::check_can_valuate_for(x)?;
 					x
@@ -2590,7 +2591,7 @@ pub mod pallet {
 
 			let removed_liquidity_token: CurrencyIdOf<T> = match paired_or_liquidity_token {
 				PairedOrLiquidityToken::Paired(x) =>
-					T::ValuateForNative::find_paired_pool_for(x)?.0,
+					T::ValuateForNative::find_paired_pool_for(x).first().ok_or(Error::<T>::NoSuchPool)?.0,
 				PairedOrLiquidityToken::Liquidity(x) => x,
 			};
 
@@ -3333,6 +3334,7 @@ pub mod pallet {
 			let mut staking_liquidity_tokens = <StakingLiquidityTokens<T>>::get();
 
 			for (token, valuation) in staking_liquidity_tokens.iter_mut() {
+				// Already Aligned
 				*valuation = T::ValuateForNative::get_reserve_and_lp_supply_for(*token);
 			}
 

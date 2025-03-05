@@ -1738,6 +1738,7 @@ impl<T: Config> Valuate for Pallet<T> {
 	type CurrencyId = T::CurrencyId;
 	type Balance = T::Balance;
 
+	// Already aligned
 	// a pool's pair has to be connected to base
 	fn check_can_valuate(
 		base_id: Self::CurrencyId,
@@ -1750,29 +1751,51 @@ impl<T: Config> Valuate for Pallet<T> {
 		Err(Error::<T>::NoSuchPool.into())
 	}
 
+	// Already aligned
 	fn check_pool_exist(pool_id: Self::CurrencyId) -> Result<(), DispatchError> {
 		Self::get_pool_info(pool_id)?;
 		Ok(())
 	}
 
+	// Change
 	fn find_paired_pool(
 		base_id: Self::CurrencyId,
 		asset_id: Self::CurrencyId,
-	) -> Result<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>, DispatchError> {
-		let pool_id = <T as pallet::Config>::Xyk::get_liquidity_asset(base_id, asset_id)?;
-		let maybe_pool = Self::get_pools(Some(pool_id));
-		let (info, reserves) = maybe_pool.first().ok_or(Error::<T>::NoSuchPool)?;
-		Ok((pool_id, info.pool, *reserves))
+	) -> Result<Vec<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>>, DispatchError> {
+		let paired_pool_xyk = (|| -> Result<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>, DispatchError> {
+			let pool_id = <T as pallet::Config>::Xyk::get_liquidity_asset(base_id, asset_id)?;
+			let maybe_pool = Self::get_pools(Some(pool_id));
+			let (info, reserves) = maybe_pool.first().ok_or(Error::<T>::NoSuchPool)?;
+			Ok((pool_id, info.pool, *reserves))
+		});
+		let paired_pool_sswap = (|| -> Result<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>, DispatchError> {
+			let pool_id = <T as pallet::Config>::StableSwap::get_liquidity_asset(base_id, asset_id)?;
+			let maybe_pool = Self::get_pools(Some(pool_id));
+			let (info, reserves) = maybe_pool.first().ok_or(Error::<T>::NoSuchPool)?;
+			Ok((pool_id, info.pool, *reserves))
+		});
+
+		let res_vec = vec![paired_pool_xyk, paired_pool_sswap].iter().filter_map(|x| x.ok()).collect();
+		if res_vec.is_empty(){
+			return Error::<T>::NoSuchPool.into()
+		}
+		res_vec
 	}
 
+	// Change
 	fn find_valuation(
 		_: Self::CurrencyId,
 		asset_id: Self::CurrencyId,
 		amount: Self::Balance,
 	) -> Result<Self::Balance, DispatchError> {
-		Ok(<T as pallet::Config>::Xyk::valuate_non_liquidity_token(asset_id, amount))
+		Ok(
+			<T as pallet::Config>::Xyk::valuate_non_liquidity_token(asset_id, amount).max(
+				<T as pallet::Config>::StableSwap::valuate_non_liquidity_token(asset_id, amount)
+			)
+		)
 	}
 
+	// Already aligned
 	fn get_reserve_and_lp_supply(
 		base_id: Self::CurrencyId,
 		pool_id: Self::CurrencyId,
@@ -1791,12 +1814,15 @@ impl<T: Config> Valuate for Pallet<T> {
 		Some((reserve, issuance))
 	}
 
+	// Change??
 	fn get_valuation_for_paired(
 		_: Self::CurrencyId,
 		pool_id: Self::CurrencyId,
 		amount: Self::Balance,
 	) -> Self::Balance {
-		<T as pallet::Config>::Xyk::valuate_liquidity_token(pool_id, amount)
+		<T as pallet::Config>::Xyk::valuate_liquidity_token(pool_id, amount).max(
+			<T as pallet::Config>::StableSwap::valuate_liquidity_token(pool_id, amount)
+		)
 	}
 }
 

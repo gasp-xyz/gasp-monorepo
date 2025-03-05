@@ -413,6 +413,7 @@ impl<T: Config> FeeLockTriggerTrait<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>>
 			return Some(valuating_token_amount)
 		}
 		let value =
+			// Affected
 			T::ValuateForNative::find_valuation_for(valuating_token_id, valuating_token_amount)
 				.ok()?;
 		Some(value)

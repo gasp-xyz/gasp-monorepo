@@ -1946,3 +1946,133 @@ impl<T: Config> Mutate<T::AccountId> for Pallet<T> {
 		Self::settle_pool_fees(who, pool_id, asset_id, fee)
 	}
 }
+
+
+impl<T: Config> mangata_support::traits::Valuate<BalanceOf<T>, CurrencyIdOf<T>> for Pallet<T> {
+	fn get_liquidity_asset(
+		first_asset_id: CurrencyIdOf<T>,
+		second_asset_id: CurrencyIdOf<T>,
+	) -> Result<CurrencyIdOf<T>, DispatchError> {
+		Pallet::<T>::get_liquidity_asset(first_asset_id, second_asset_id)
+	}
+
+	fn get_liquidity_token_mga_pool(
+		liquidity_token_id: CurrencyIdOf<T>,
+	) -> Result<(CurrencyIdOf<T>, CurrencyIdOf<T>), DispatchError> {
+		let (first_token_id, second_token_id) =
+			LiquidityPools::<T>::get(liquidity_token_id).ok_or(Error::<T>::NoSuchLiquidityAsset)?;
+		let native_currency_id = Self::native_token_id();
+		match native_currency_id {
+			_ if native_currency_id == first_token_id => Ok((first_token_id, second_token_id)),
+			_ if native_currency_id == second_token_id => Ok((second_token_id, first_token_id)),
+			_ => Err(Error::<T>::NotPairedWithNativeAsset.into()),
+		}
+	}
+
+	fn valuate_liquidity_token(
+		liquidity_token_id: CurrencyIdOf<T>,
+		liquidity_token_amount: BalanceOf<T>,
+	) -> BalanceOf<T> {
+		let (mga_token_id, other_token_id) =
+			match Self::get_liquidity_token_mga_pool(liquidity_token_id) {
+				Ok(pool) => pool,
+				Err(_) => return Default::default(),
+			};
+
+		let mga_token_reserve = match Pallet::<T>::get_reserves(mga_token_id, other_token_id) {
+			Ok(reserves) => reserves.0,
+			Err(_) => return Default::default(),
+		};
+
+		let liquidity_token_reserve: BalanceOf<T> =
+			<T as Config>::Currency::total_issuance(liquidity_token_id.into());
+
+		if liquidity_token_reserve.is_zero() {
+			return Default::default()
+		}
+
+		multiply_by_rational_with_rounding(
+			mga_token_reserve.into(),
+			liquidity_token_amount.into(),
+			liquidity_token_reserve.into(),
+			Rounding::Down,
+		)
+		.map(SaturatedConversion::saturated_into)
+		.unwrap_or(BalanceOf::<T>::max_value())
+	}
+
+	fn valuate_non_liquidity_token(
+		non_liquidity_token_id: CurrencyIdOf<T>,
+		amount: BalanceOf<T>,
+	) -> BalanceOf<T> {
+		let native_token_id = Pallet::<T>::native_token_id();
+
+		let (native_reserves, token_reserves) =
+			match Pallet::<T>::get_reserves(native_token_id, non_liquidity_token_id) {
+				Ok(reserves) => reserves,
+				Err(_) => return Default::default(),
+			};
+
+		multiply_by_rational_with_rounding(
+			amount.into(),
+			native_reserves.into(),
+			token_reserves.into(),
+			Rounding::Down,
+		)
+		.map(SaturatedConversion::saturated_into)
+		.unwrap_or(BalanceOf::<T>::max_value())
+	}
+
+	fn scale_liquidity_by_mga_valuation(
+		mga_valuation: BalanceOf<T>,
+		liquidity_token_amount: BalanceOf<T>,
+		mga_token_amount: BalanceOf<T>,
+	) -> BalanceOf<T> {
+		if mga_valuation.is_zero() {
+			return Default::default()
+		}
+
+		multiply_by_rational_with_rounding(
+			liquidity_token_amount.into(),
+			mga_token_amount.into(),
+			mga_valuation.into(),
+			Rounding::Down,
+		)
+		.map(SaturatedConversion::saturated_into)
+		.unwrap_or(BalanceOf::<T>::max_value())
+	}
+
+	fn get_pool_state(liquidity_token_id: CurrencyIdOf<T>) -> Option<(BalanceOf<T>, BalanceOf<T>)> {
+		let (mga_token_id, other_token_id) =
+			match Self::get_liquidity_token_mga_pool(liquidity_token_id) {
+				Ok(pool) => pool,
+				Err(_) => return None,
+			};
+
+		let mga_token_reserve = match Pallet::<T>::get_reserves(mga_token_id, other_token_id) {
+			Ok(reserves) => reserves.0,
+			Err(_) => return None,
+		};
+
+		let liquidity_token_reserve: BalanceOf<T> =
+			<T as Config>::Currency::total_issuance(liquidity_token_id.into());
+
+		if liquidity_token_reserve.is_zero() {
+			return None
+		}
+
+		Some((mga_token_reserve, liquidity_token_reserve))
+	}
+
+	fn get_reserves(
+		first_asset_id: CurrencyIdOf<T>,
+		second_asset_id: CurrencyIdOf<T>,
+	) -> Result<(BalanceOf<T>, BalanceOf<T>), DispatchError> {
+		<Pallet<T> as Inspect>::get_pool_reserves(first_asset_id, second_asset_id)
+	}
+
+	fn is_liquidity_token(liquidity_asset_id: CurrencyIdOf<T>) -> bool {
+		<Pallet<T> as Inspect>::get_pool_info(liquidity_asset_id).is_some()
+	}
+}
+
