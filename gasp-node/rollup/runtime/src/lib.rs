@@ -468,6 +468,7 @@ impl Into<CallType> for RuntimeCall {
 				}
 			},
 			RuntimeCall::FeeLock(pallet_fee_lock::Call::unlock_fee { .. }) => CallType::UnlockFee,
+			RuntimeCall::Council(_) => CallType::CouncilCall,
 			_ => CallType::Other,
 		}
 	}

@@ -7803,6 +7803,7 @@ dependencies = [
  "orml-traits",
  "pallet-balances",
  "pallet-bootstrap",
+ "pallet-collective-mangata",
  "pallet-fee-lock",
  "pallet-identity",
  "pallet-issuance",

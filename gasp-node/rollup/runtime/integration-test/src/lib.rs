@@ -11,3 +11,4 @@ mod proof_of_stake;
 mod proxy;
 mod setup;
 mod xyk;
+mod council;
