@@ -7633,7 +7633,7 @@ dependencies = [
 
 [[package]]
 name = "rollup-node"
-version = "1.0.5"
+version = "1.0.6"
 dependencies = [
  "array-bytes 6.2.3",
  "clap",
@@ -7803,6 +7803,7 @@ dependencies = [
  "orml-traits",
  "pallet-balances",
  "pallet-bootstrap",
+ "pallet-collective-mangata",
  "pallet-fee-lock",
  "pallet-identity",
  "pallet-issuance",

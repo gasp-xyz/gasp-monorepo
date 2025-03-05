@@ -167,7 +167,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	//   `spec_version`, and `authoring_version` are the same between Wasm and native.
 	// This value is set to 100 to notify Polkadot-JS App (https://polkadot.js.org/apps) to use
 	//   the compatible custom types.
-	spec_version: 105,
+	spec_version: 106,
 	impl_version: 2,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 2,
@@ -311,7 +311,7 @@ impl orml_tokens::Config for Runtime {
 	type CurrencyHooks = ();
 	type MaxReserves = ();
 	type ReserveIdentifier = cfg::orml_tokens::ReserveIdentifier;
-	type NontransferableTokens = tokens::NontransferableTokens;
+	type NontransferableTokens = Nothing;
 	type NontransferableTokensAllowList = TransferMembers;
 }
 
@@ -367,7 +367,7 @@ impl pallet_proof_of_stake::Config for Runtime {
 	type Min3rdPartyRewardVolume = cfg::pallet_proof_of_stake::Min3rdPartyRewardVolume;
 	type SchedulesPerBlock = cfg::pallet_proof_of_stake::SchedulesPerBlock;
 	type ValuationApi = Market;
-	type NontransferableTokens = tokens::NontransferableTokens;
+	type NontransferableTokens = Nothing;
 	#[cfg(feature = "runtime-benchmarks")]
 	type Xyk = Xyk;
 }
@@ -468,6 +468,7 @@ impl Into<CallType> for RuntimeCall {
 				}
 			},
 			RuntimeCall::FeeLock(pallet_fee_lock::Call::unlock_fee { .. }) => CallType::UnlockFee,
+			RuntimeCall::Council(_) => CallType::CouncilCall,
 			_ => CallType::Other,
 		}
 	}
@@ -821,7 +822,7 @@ impl pallet_rolldown::Config for Runtime {
 	type SequencerStakingRewards = SequencerStaking;
 	type WithdrawFee = cfg::pallet_rolldown::WithdrawFee;
 	type WeightInfo = weights::pallet_rolldown::ModuleWeight<Runtime>;
-	type NontransferableTokens = tokens::NontransferableTokens;
+	type NontransferableTokens = Nothing;
 }
 
 impl pallet_rolldown::RolldownBenchmarkingConfig for Runtime {}
@@ -866,9 +867,9 @@ impl pallet_market::Config for Runtime {
 	type WeightInfo = weights::pallet_market_weights::ModuleWeight<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type ComputeIssuance = Issuance;
-	type NontransferableTokens = tokens::NontransferableTokens;
+	type NontransferableTokens = Nothing;
 	type FoundationAccountsProvider = cfg::pallet_membership::FoundationAccountsProvider;
-	type ArbitrageBot = tokens::ArbitrageBot;
+	type ArbitrageBot = Everything;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {

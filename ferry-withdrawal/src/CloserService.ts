@@ -21,27 +21,35 @@ class CloserService {
 	l2: L2Interface;
 	tokensToClose: [Uint8Array, bigint, bigint][];
 	minBalance: bigint;
-	stash: StashInterface;
+	stash: StashInterface | undefined;
 	lastCheckedWithrdawal: bigint;
 	closableRequests: (Withdrawal | Cancel)[];
 	batchSize: bigint;
+	replicasCount: bigint;
+	replicaId: bigint;
 
 	constructor(
 		l1: L1Interface,
 		l2: L2Interface,
-		stash: StashInterface,
+		stash: StashInterface | undefined,
 		tokensToClose: [Uint8Array, bigint, bigint][],
 		minBalance: bigint,
 		batchSize: bigint = 1000n,
+		replicaId: bigint = 0n,
+		replicasCount: bigint = 0n,
+		minWithdrawalId: bigint = 0n,
 	) {
 		this.l1 = l1;
 		this.l2 = l2;
 		this.stash = stash;
 		this.tokensToClose = tokensToClose;
 		this.minBalance = minBalance;
-		this.lastCheckedWithrdawal = 0n;
+		this.lastCheckedWithrdawal =
+			minWithdrawalId > 0n ? minWithdrawalId - 1n : 0n;
 		this.closableRequests = [];
 		this.batchSize = batchSize;
+		this.replicasCount = replicasCount;
+		this.replicaId = replicaId;
 	}
 
 	async findRequestToClose(delay: bigint = 0n): Promise<void> {
@@ -87,10 +95,18 @@ class CloserService {
 								);
 							}) !== undefined;
 						const isClosedAlready = await this.l1.isClosed(request.hash);
+						const shouldNotBeIgnored =
+							this.replicasCount > 0
+								? request.requestId % this.replicasCount === this.replicaId
+								: true;
+
 						return (
 							!isClosedAlready &&
+							shouldNotBeIgnored &&
 							(shouldBeClosed ||
-								(await this.stash.shouldBeClosed(request.hash)))
+								(this.stash
+									? await this.stash.shouldBeClosed(request.hash)
+									: request.ferryTip > 0n))
 						);
 					} else {
 						logger.error(`ignoring unkonwn request`);

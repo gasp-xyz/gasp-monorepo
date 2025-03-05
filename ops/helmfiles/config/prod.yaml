@@ -17,6 +17,7 @@ collatorsEnabled: true
 collatorRpcNodesEnabled: true
 collatorRpcNodesEnableSharedDnsRecord: true
 collatorRpcArchiveNodesEnabled: true
+collatorRpcArchiveNodesEnableSharedDnsRecord: true
 collator:
   resources:
     requests:
@@ -110,22 +111,87 @@ collator:
       - --rpc-max-connections=5000
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-c
+  rpcNodeResources:
+    requests:
+      cpu: 8
+      memory: 16Gi
+    limits:
+      cpu: 8
+      memory: 16Gi
   rpc01:
+    enabled: true
+    role: rpc
     bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=10000
   rpc02:
+    enabled: true
+    role: rpc
     bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-c
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=10000
   rpc03:
+    enabled: true
+    role: rpc
     bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=10000
+  rpc04:
+    enabled: true
+    role: rpc
+    bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    nodeSelector:
+      topology.kubernetes.io/zone: europe-west1-c
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=10000
+  rpc05:
+    enabled: true
+    role: rpc
+    bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    nodeSelector:
+      topology.kubernetes.io/zone: europe-west1-b
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=10000
+  rpc06:
+    enabled: true
+    role: rpc
+    bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    nodeSelector:
+      topology.kubernetes.io/zone: europe-west1-c
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=10000
+
   rpcArchive01:
+    enabled: true
+    role: rpc-archive
     bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
       topology.kubernetes.io/zone: europe-west1-b
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=10000
+
+  rpcArchive02:
+    enabled: false
+    role: rpc-archive-new
+    bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+    nodeSelector:
+      topology.kubernetes.io/zone: europe-west1-c
+    extraArgs:
+      - --pruning=archive
+      - --rpc-max-connections=10000
 
 ######################
 # aggregator configs #
@@ -440,16 +506,18 @@ ferryWithdrawalEnvSecretsBase:
 # ferry-closer configs #
 ########################
 closerEnabled: true
-closerImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
+closerImageTag: 0226df257ba55a112510763da171e134c15b4ecf
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
   L1_CHAIN: "ethereum"
-  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
+  TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
   BATCH_SIZE: 50
+  SKIP_STASH: true
+  DELAY: 10
 closerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -460,11 +528,13 @@ closerEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x3aDdEb54ddd43Eb40235eC32DfA7928F28A44bb5"
   L1_CHAIN: "arbitrum"
-  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
+  TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
   BATCH_SIZE: 50
+  SKIP_STASH: true
+  DELAY: 10
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerArbitrumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -475,11 +545,13 @@ closerEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x308e483afDD225D6cb7bF4d44B8e4a03DFD9c0De"
   L1_CHAIN: "base"
-  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
+  TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
   BATCH_SIZE: 50
+  SKIP_STASH: true
+  DELAY: 10
 closerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerBaseMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
