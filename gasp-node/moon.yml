@@ -3,8 +3,8 @@ language: rust
 toolchain:
   rust:
     version: nightly-2024-01-20
-tags:
-  - 'rust-channel-1.78.0'
+  node:
+    version: 18.20.7
 
 env:
   CARGO_TERM_COLOR: 'always'
@@ -217,7 +217,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sudoRemoval -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-sudoRemoval --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -237,7 +237,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-bootstrap -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-bootstrap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -257,7 +257,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-parallel --max-workers=10 -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-parallel --max-workers=10 --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -277,7 +277,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequential-no-bootstrap -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-sequential-no-bootstrap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -297,7 +297,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-seqgasless -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-seqgasless --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -317,7 +317,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-maintenance -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-maintenance --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -337,7 +337,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rollupUpdate -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-rollupUpdate --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -357,7 +357,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rewards-bootstrap -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-rewards-bootstrap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -377,7 +377,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-parallel-autocompound -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-parallel-autocompound --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -397,7 +397,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequential-autocompound -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-sequential-autocompound --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -417,7 +417,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-poolliquidity -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-poolliquidity --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -437,7 +437,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-governance -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-governance --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -457,7 +457,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-multiswap -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-multiswap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -477,7 +477,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-experimentalStaking -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-experimentalStaking --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -497,7 +497,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-crowdloan -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-crowdloan --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -517,7 +517,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sdk -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-sdk --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -537,7 +537,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-parallel-3rdPartyRewards -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-parallel-3rdPartyRewards --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -557,7 +557,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequencerStaking -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-sequencerStaking --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -577,7 +577,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequencerCancellation -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-sequencerCancellation --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -597,7 +597,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rolldown -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-rolldown --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -617,7 +617,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rolldownWithdrawal -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-rolldownWithdrawal --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -637,7 +637,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-rolldownPreOperationWithdrawal -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-rolldownPreOperationWithdrawal --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -657,7 +657,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-sequencerRewards -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-sequencerRewards --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -677,7 +677,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-nonTransToken -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-nonTransToken --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -697,7 +697,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-issuanceConfig -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-issuanceConfig --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -717,7 +717,7 @@ tasks:
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
-      yarn test-marketSwap -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      yarn test-marketSwap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
@@ -748,7 +748,7 @@ tasks:
 
       echo "Sleeping for 120 seconds to ensure the environment is up and running\n" && sleep 120
       
-      cd $workspaceRoot/gasp-node/gasp-e2e && yarn test-rollup -- --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
+      cd $workspaceRoot/gasp-node/gasp-e2e && yarn test-rollup --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
       [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' $workspaceRoot/gasp-node/gasp-e2e/reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
