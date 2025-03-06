@@ -121,7 +121,7 @@ jobs:
           #####################################################################
           - command: "moon gasp-node:e2e-test-rollup"
             name: "[avs] test-rollup"
-    runs-on: ubuntu-24.04
+    runs-on: [e2e-gke]
     name: ${{ matrix.name }}
     timeout-minutes: 180
     defaults:
