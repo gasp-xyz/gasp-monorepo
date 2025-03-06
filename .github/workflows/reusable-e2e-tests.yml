@@ -50,6 +50,19 @@ jobs:
       IMAGE_TAG: ${{ inputs.globalVersion }}
     steps:
       - uses: actions/checkout@v4
+      - name: Cache Git submodules
+        uses: actions/cache@v4
+        with:
+          path: |
+            avs-eigensdk-go
+            contracts/lib/forge-std
+            contracts/lib/eigenlayer-middleware
+            gasp-node/gasp-e2e
+          key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ hashFiles('.gitmodules') }}-
+            submodules-
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
