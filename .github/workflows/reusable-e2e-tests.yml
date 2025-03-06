@@ -36,6 +36,7 @@ env:
   FERRY_WITHDRAWAL_VERSION: ${{ inputs.globalVersion }}
   ROLLUP_NODE_VERSION: ${{ inputs.globalVersion }}-fast
   IMAGE_TAG: ${{ inputs.globalVersion }}
+  CACHE_VERSION: 1
 
 jobs:
   run-avs-tests:
@@ -59,10 +60,10 @@ jobs:
         with:
           path: |
             .git/modules
-          key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          key: submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
           restore-keys: |
-            submodules-${{ hashFiles('.gitmodules') }}-
-            submodules-
+            submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-
+            submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git submodule update --init --recursive --depth 1
@@ -108,10 +109,10 @@ jobs:
         with:
           path: |
             .git/modules
-          key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          key: submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
           restore-keys: |
-            submodules-${{ hashFiles('.gitmodules') }}-
-            submodules-
+            submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-
+            submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git submodule update --init --recursive --depth 1
@@ -159,10 +160,10 @@ jobs:
         with:
           path: |
             .git/modules
-          key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          key: submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
           restore-keys: |
-            submodules-${{ hashFiles('.gitmodules') }}-
-            submodules-
+            submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-
+            submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git submodule update --init --recursive --depth 1
