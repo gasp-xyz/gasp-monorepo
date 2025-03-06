@@ -127,25 +127,20 @@ jobs:
             runner: beast-gke
             buildkit-enable: false
             buildkit-replicas: 1
-            moon-targets: >-
-              :format 
-              :lint 
-              :test
-              :benchmark-tests-gasp-node
+            command: moon ci :format :lint :test :benchmark-tests-gasp-node
           - prefix: build-docker-images
             name: Build docker images
             runner: compile-gke
             buildkit-enable: true
-            buildkit-replicas: 8
-            moon-targets: >-
-              :build-image-ci
+            buildkit-replicas: 5
+            command: moon :build-image-ci
+              
           # - prefix: coverage
           #   name: Coverage
           #   runner: compile-gke
           #   buildkit-enable: false
           #   buildkit-replicas: 1
-          #   moon-targets: >-
-          #     :coverage-gasp-node
+          #   command: moon ci :coverage-gasp-node
     steps:
       - uses: actions/checkout@v4
         with:
@@ -256,7 +251,7 @@ jobs:
       - run: proto setup --yes
       - run: proto install
       
-      - run: moon ci --color ${{ matrix.moon-targets }}
+      - run: ${{ matrix.command }}
         env:
           IMAGE_TAG: ${{ inputs.version }}
           MOON_TOOLCHAIN_FORCE_GLOBALS: proto,rust
