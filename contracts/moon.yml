@@ -7,11 +7,11 @@ toolchain:
 
 fileGroups:
   sources:
-    - "lib/**/*"
-    - "src/**/*"
-    - "test/**/*"
-    - "script/**/*"
-    - "tools/**/*"
+    - "lib/**/*.sol"
+    - "src/**/*.sol"
+    - "test/**/*.sol"
+    - "script/**/*.sol"
+    - "tools/**/*.sol"
     - package.json
     - foundry.toml
     - remappings.txt
