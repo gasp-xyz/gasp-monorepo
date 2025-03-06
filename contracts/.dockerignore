@@ -33,3 +33,12 @@ docs
 
 .moon/cache
 moon.yml
+
+cache
+build
+*.tar
+*.tar.zst
+*-buildkit-metadata.json
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json

@@ -43,6 +43,7 @@ gha-creds-*.json
 
 # rust build target
 **/target
+**/target-*
 .cargo
 
 # IDE - VSCode
@@ -112,3 +113,13 @@ out
 !**/.yarn/plugins
 !**/.yarn/releases
 !**/.yarn/versions
+
+*.tar
+*.tar.zst
+
+*-buildkit-metadata.json
+
+**/reports/**/*
+
+.cursor
+CLAUDE.md

@@ -15,7 +15,8 @@ opt-level = 0
 opt-level = 3
 
 [dependencies]
-bindings = { path = "./bindings" }
+# openssl = { version = "0.10", features = ["vendored"] }
+bindings = { path = "./bindings" }  
 
 aes = "0.8.0"
 clap = { version = "4.4.8", features = ["derive", "env"] }
