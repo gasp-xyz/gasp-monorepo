@@ -28,6 +28,7 @@ foundryup
 url --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
+
 3. You will need [golang toolchain](https://go.dev/doc/install) with [zap-pretty](https://github.com/maoueh/zap-pretty)
 
 ```bash
