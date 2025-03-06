@@ -936,7 +936,7 @@ tasks:
       - "/contracts/src/**/*.sol"
       - "/contracts/test/**/*.sol"
       - "/contracts/script/**/*.sol"
-      - "/contracts/tools/**/*.sol"
+      - "/contracts/tools/**/*"
       - "/contracts/package.json"
       - "/contracts/foundry.toml"
       - "/contracts/remappings.txt"

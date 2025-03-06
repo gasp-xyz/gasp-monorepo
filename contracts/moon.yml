@@ -11,7 +11,7 @@ fileGroups:
     - "src/**/*.sol"
     - "test/**/*.sol"
     - "script/**/*.sol"
-    - "tools/**/*.sol"
+    - "tools/**/*"
     - package.json
     - foundry.toml
     - remappings.txt
