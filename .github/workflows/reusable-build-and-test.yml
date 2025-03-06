@@ -24,9 +24,6 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: false
       - name: Cache Git submodules
         uses: actions/cache@v4
         with:
@@ -41,6 +38,7 @@ jobs:
             submodules-
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: recursive
           
       - uses: foundry-rs/foundry-toolchain@v1
@@ -48,9 +46,7 @@ jobs:
         with:
           python-version-file: 'contracts/.python-version'
           cache: pip
-      - run: pip install -r requirements.txt
-        working-directory: contracts
-  
+      - run: cd contracts && pip install -r requirements.txt
         
       - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       # - uses: actions/setup-node@v4
@@ -58,21 +54,13 @@ jobs:
       #     node-version-file: 'contracts/.nvmrc'
       #     cache: 'yarn'
       #     cache-dependency-path: "./contracts/yarn.lock"
-      
 
       - name: Install proto manually
         run: |
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
           bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH  
-      - run: cd contracts && proto setup --yes
-      - run: cd contracts && proto activate --yes
-      - run: cd contracts && proto install
-      - run: cd contracts && proto diagnose
-      - run: cd contracts && proto status
-      - run: cd contracts && proto regen
-      - run: cd contracts && proto debug env
-      - run: cd contracts && proto debug config
+      - run: cd contracts && proto setup --yes && proto install
 
       - run: cd contracts && yarn install --immutable
       - run: moon ci :contracts-check
@@ -154,9 +142,6 @@ jobs:
           #   command: moon ci :coverage-gasp-node
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: false
       - name: Cache Git submodules
         uses: actions/cache@v4
         with:
@@ -171,6 +156,7 @@ jobs:
             submodules-
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: recursive
 
       - uses: arduino/setup-protoc@v3

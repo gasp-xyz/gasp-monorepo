@@ -134,9 +134,6 @@ jobs:
       IMAGE_TAG: ${{ inputs.globalVersion }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: false
       - name: Cache Git submodules
         uses: actions/cache@v4
         with:
@@ -151,6 +148,7 @@ jobs:
             submodules-
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: recursive
 
       - uses: moonrepo/setup-rust@v1
