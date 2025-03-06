@@ -100,7 +100,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+          submodules: false
+      - name: Cache Git submodules
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            .git/modules
+          key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ hashFiles('.gitmodules') }}-
+            submodules-
+      - run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive --depth 1
 
       - run: corepack enable && corepack prepare yarn@4.6.0 --activate
       - uses: actions/setup-node@v4
@@ -137,7 +151,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+          submodules: false
+      - name: Cache Git submodules
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            .git/modules
+          key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ hashFiles('.gitmodules') }}-
+            submodules-
+      - run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive --depth 1
 
       - run: corepack enable && corepack prepare yarn@4.6.0 --activate
       - uses: actions/setup-node@v4
