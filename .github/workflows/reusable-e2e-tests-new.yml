@@ -160,12 +160,12 @@ jobs:
           cache: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install proto manually
-        run: |
-          curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
-          bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
-          echo "$HOME/.proto/bin" >> $GITHUB_PATH
-      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && proto setup --yes && proto install
+      # - name: Install proto manually
+      #   run: |
+      #     curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
+      #     bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
+      #     echo "$HOME/.proto/bin" >> $GITHUB_PATH
+      # - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && proto setup --yes && proto install
 
       - uses: docker/setup-compose-action@v1
       - uses: actions/setup-node@v4
@@ -203,15 +203,16 @@ jobs:
       - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install
       - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
 
-      - name: Cache Jest
-        uses: actions/cache@v4
-        with:
-          path: gasp-node/gasp-e2e/node_modules/.cache/jest
-          key: ${{ runner.os }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-${{ inputs.globalVersion }}
-          restore-keys: |
-            ${{ runner.os }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-
-            ${{ runner.os }}-jest-
-
+      # - name: Cache Jest
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: gasp-node/gasp-e2e/node_modules/.cache/jest
+      #     key: ${{ runner.os }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-${{ inputs.globalVersion }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-
+      #       ${{ runner.os }}-jest-
+      
+      - uses: moonrepo/setup-toolchain@v0
       - run: moon setup
       - name: Run tests
         run: ${{ matrix.command }}
