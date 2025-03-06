@@ -1,0 +1,108 @@
+type: application
+language: rust
+toolchain:
+  rust:
+    version: '1.82.0'
+tags:
+  - 'rust-channel-1.82.0'
+
+env:
+  CARGO_TERM_COLOR: 'always'
+  SCCACHE_GCS_KEY_PREFIX: sequencer
+  SERVICE_NAME: sequencer
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/sequencer
+  DOCKERHUB_REPOSITORY: gaspxyz/sequencer
+
+fileGroups:
+  sources:
+    - 'bindings/**/*'
+    - 'sequencer/src/**/*'
+    - 'sequencer/Cargo.toml'
+    - 'Cargo.toml'
+
+tasks:
+  prepare-toolchain:
+    command: rustup show
+    options:
+      cache: false
+
+  build:
+    command: cargo build --release
+    inputs: ['@globs(sources)']
+    outputs: ['target/release/sequencer']
+    env:
+      SCCACHE_GCS_KEY_PREFIX: sequencer-release
+
+  buildkit-build-and-push-image-digests:
+    script: |
+      set -euo pipefail
+      echo "Starting buildkit build..."
+      docker buildx build --platform linux/amd64,linux/arm64 \
+        --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache \
+        --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max \
+        --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
+        --metadata-file ${SERVICE_NAME}-buildkit-metadata.json -f Dockerfile ./
+      
+      BUILD_EXIT_CODE=$?
+      
+      # Validate the metadata file exists and contains the expected digest
+      if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f ${SERVICE_NAME}-buildkit-metadata.json ]; then
+        if grep -q "containerimage.digest" ${SERVICE_NAME}-buildkit-metadata.json; then
+          echo "✅ Build successful and metadata file contains valid digest"
+          cat ${SERVICE_NAME}-buildkit-metadata.json
+        else
+          echo "❌ Build appeared successful but metadata file doesn't contain expected digest"
+          cat ${SERVICE_NAME}-buildkit-metadata.json || echo "Cannot read metadata file"
+          exit 1
+        fi
+      else
+        echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
+        [ -f ${SERVICE_NAME}-buildkit-metadata.json ] && cat ${SERVICE_NAME}-buildkit-metadata.json
+        exit $BUILD_EXIT_CODE
+      fi
+      
+      exit $BUILD_EXIT_CODE
+    inputs: ["@globs(sources)", "Dockerfile", '.dockerignore']
+    outputs: ['${SERVICE_NAME}-buildkit-metadata.json']
+    options:
+      outputStyle: buffer-only-failure
+      cache: true
+      internal: true
+
+  build-image-ci:
+    script: |
+      set -ex
+      IMAGE_DIGEST=$(jq -r '."containerimage.digest"' ${SERVICE_NAME}-buildkit-metadata.json)
+  
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST}
+  
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+    deps: ['buildkit-build-and-push-image-digests']
+    inputs: ['${SERVICE_NAME}-buildkit-metadata.json']
+    options:
+      cache: false
+  
+  build-image-local:
+    script: 'docker buildx build -t gaspxyz/sequencer:local -t gaspxyz/sequencer:localarb -t gaspxyz/sequencer:localbase --load .'
+    inputs: ['@globs(sources)', 'Dockerfile']
+
+  format:
+    command: cargo fmt --all -- --check
+    inputs: ['@globs(sources)']
+
+  lint:
+    command: cargo clippy
+    inputs: ['@globs(sources)']
+
+  test:
+    command: cargo test -- l1::test::test_can_connect sequencer::test::test_find_malicious_update_ignores_updates_from_other_chains sequencer::test::test_find_malicious_update_ignores_valid_updates sequencer::test::test_find_malicious_update_with_invalid_range_works sequencer::test::test_find_malicious_update_works sequencer::test::test_find_pending_cancels_ignores_closed_cancels sequencer::test::test_find_pending_cancels_to_close sequencer::test::test_find_pending_cancels_to_close2 sequencer::test::test_find_pending_cancels_to_close_when_there_is_no_merkle_root_provided_to_l1 sequencer::test::test_get_pending_update_when_there_are_no_requests sequencer::test::test_get_pending_update_when_there_are_requests sequencer::test::test_get_pending_update_when_there_are_too_many_requests_for_single_update
+    inputs: ['@globs(sources)']
+
+  release:
+    command: 'yarn run release'
+    options:
+      cache: false
+      runInCI: false

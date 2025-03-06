@@ -699,7 +699,7 @@ mod test {
         hex!("5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133");
     const BALTATHAR_PKEY: [u8; 32] =
         hex!("8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b");
-    const TEST_TOKEN: [u8; 20] = hex!("FD471836031dc5108809D173A067e8486B9047A3");
+    const TEST_TOKEN: [u8; 20] = hex!("c351628eb244ec633d5f21fbd6621e1a683b1181");
     const ETHEREUM: types::Chain = types::Chain::Ethereum;
 
     #[serial]
@@ -713,13 +713,6 @@ mod test {
     #[serial]
     #[tokio::test]
     async fn test_can_submit_multiple_tx_in_a_row() {
-        use tracing::level_filters::LevelFilter;
-        let filter = tracing_subscriber::EnvFilter::builder()
-            .with_default_directive(LevelFilter::INFO.into())
-            .from_env_lossy()
-            .add_directive("sequencer=trace".parse().expect("proper directive"));
-        tracing_subscriber::fmt().with_env_filter(filter).init();
-
         let gasp = Gasp::new(URI, BALTATHAR_PKEY)
             .await
             .expect("can connect to gasp");
@@ -897,32 +890,5 @@ mod test {
         let active_sequencers = gasp.get_active_sequencers(ETHEREUM, at).await.unwrap();
 
         assert!(!active_sequencers.is_empty());
-    }
-
-    const MAINNET: &str = "wss://rpc-01-ws-rollup-prod.gasp.xyz";
-    #[serial]
-    #[ignore]
-    #[tokio::test]
-    async fn mainnet() {
-        use tracing::level_filters::LevelFilter;
-        let filter = tracing_subscriber::EnvFilter::builder()
-            .with_default_directive(LevelFilter::DEBUG.into())
-            .from_env_lossy()
-            .add_directive("sequencer=trace".parse().expect("proper directive"));
-        tracing_subscriber::fmt()
-            .with_env_filter(filter)
-            .with_ansi(false)
-            .init();
-
-        let gasp = Gasp::new(MAINNET, ALITH_PKEY)
-            .await
-            .expect("can connect to gasp");
-
-        let at = hex!("7f3548d88689161e815af9d06367aff33496129f467fd90c16030facabd4f5cf");
-
-        tracing::info!("UPDATES AT {}", hex_encode(at));
-        for (id, chain, metadata) in gasp.get_pending_updates(at.into()).await.unwrap() {
-            tracing::info!("{id} {chain:?} {0:?}", metadata.update_hash);
-        }
     }
 }

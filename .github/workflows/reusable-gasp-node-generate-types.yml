@@ -1,0 +1,56 @@
+name: '[gasp-node] Reusable generate types workflow'
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to create in gasp-dev-kit"
+        type: string
+        required: true
+      globalVersion:
+        description: "Set gasp-node version."
+        type: string
+        required: true
+  workflow_call:
+    inputs:
+      branch:
+        description: "Branch to create in gasp-dev-kit"
+        type: string
+        required: true
+      globalVersion:
+        description: "Set gasp-node version."
+        type: string
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+  deployments: write
+  checks: write
+
+jobs:
+  generate-gasp-node-types:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create branch ${{ inputs.branch }} in gasp-dev-kit
+        uses: GuillaumeFalourd/create-other-repo-branch-action@v1.5
+        with:
+          repository_owner: gasp-xyz
+          repository_name: gasp-dev-kit
+          new_branch_name: ${{ inputs.branch }}
+          new_branch_ref: eth-rollup-develop
+          ignore_branch_exists: true
+          access_token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - name: Invoke workflow in gasp-dev-kit repo with inputs
+        uses: the-actions-org/workflow-dispatch@v4
+        env:
+          NODE_DOCKER_IMAGE_VERSION: ${{ inputs.globalVersion }}
+        with:
+          ref: ${{ inputs.branch }}
+          workflow: pr-automation-types-rollup-solochain.yml
+          repo: gasp-xyz/gasp-dev-kit
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          inputs: '{"nodeDockerImageTag": "${{ env.NODE_DOCKER_IMAGE_VERSION }}", "branch": "${{ inputs.branch }}", "nodeRepository": "gasp-xyz/gasp-monorepo", "nodeRepositoryRevision": "${{ inputs.globalVersion }}", "nodeCodebaseWorkingDirectory": "mangata-repo/gasp-node"}'

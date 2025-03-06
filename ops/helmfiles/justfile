@@ -2,17 +2,100 @@
 export IMAGE_TAG := `echo ${IMAGE_TAG:-83174d468dca9d6e7fe13d798fb8a373d8fb0f42}`
 
 lint:
-  export ENVIRONMENT=lint
-  helmfile lint -e fungible
+  ENVIRONMENT=lint helmfile lint -e fungible
 
-diff-prod:
-  export IMAGE_TAG=83174d468dca9d6e7fe13d798fb8a373d8fb0f42 
+diff-frontend $IMAGE_TAG="3dd6549acac035a3353b27a7002f57574d02ec6d":
+  helmfile diff -e frontend
+
+apply-frontend $IMAGE_TAG="3dd6549acac035a3353b27a7002f57574d02ec6d":
+  helmfile apply -e frontend
+
+diff-prod $IMAGE_TAG="83174d468dca9d6e7fe13d798fb8a373d8fb0f42" :
   helmfile diff -e prod
 
-sync-all-prod:
-  export IMAGE_TAG=83174d468dca9d6e7fe13d798fb8a373d8fb0f42 
+sync-all-prod $IMAGE_TAG="83174d468dca9d6e7fe13d798fb8a373d8fb0f42" :
   helmfile sync -e prod
 
-sequencer-redeploy-prod:
-  export IMAGE_TAG=e82c4b3d9539b81f1cbe48066aed73ba5463fc10
+sequencer-redeploy-prod $IMAGE_TAG="e82c4b3d9539b81f1cbe48066aed73ba5463fc10":
   helmfile apply -e prod -lname=sequencer-base -lname=sequencer-base-2 -lname=sequencer-base-3 -lname=sequencer-arb -lname=sequencer-arb-2 -lname=sequencer-arb-3 -lname=sequencer-eth -lname=sequencer-eth-2 -lname=sequencer-eth-3
+
+update-config-staging: 
+  just update-config-eth "31337" "./config/staging.yaml"
+  just update-config-arb "31338" "./config/staging.yaml"
+  just update-config-base "31339" "./config/staging.yaml"
+
+update-config-dev: 
+  just update-config-eth "31337" "./config/dev.yaml"
+  just update-config-arb "31338" "./config/dev.yaml"
+  just update-config-base "31339" "./config/dev.yaml"
+
+update-config-holesky: 
+  just update-config-eth "17000" "./config/holesky-v3.yaml"
+  just update-config-arb "421614" "./config/holesky-v3.yaml"
+  just update-config-base "84532" "./config/holesky-v3.yaml"
+
+update-config-eth CHAINID CONFIG_FILE:
+  #!/usr/bin/env bash
+  export AVS_REGISTRY_COORDINATOR=$(jq .addresses.registryCoordinator ../../contracts/script/output/{{CHAINID}}/avs_deployment_output.json | tr -d "\"")
+  export ROLLDOWN_ETHEREUM=$(jq .addresses.rolldown ../../contracts/script/output/{{CHAINID}}/rolldown_output.json | tr -d "\"")
+
+  # Aggregator
+  yq -i '.aggregatorEnv.AVS_REGISTRY_COORDINATOR_ADDR = strenv(AVS_REGISTRY_COORDINATOR)' {{CONFIG_FILE}}
+
+  ## Avs
+  yq -i '.gaspAvsEnv.AVS_REGISTRY_COORDINATOR_ADDR = strenv(AVS_REGISTRY_COORDINATOR)' {{CONFIG_FILE}}
+
+  # Updaters
+  yq -i '.updaterEnv.AVS_REGISTRY_COORDINATOR_ADDR = strenv(AVS_REGISTRY_COORDINATOR)' {{CONFIG_FILE}}
+
+  # Sequencers
+  yq -i '.sequencerEnvEth.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ETHEREUM)' {{CONFIG_FILE}}
+
+  # Ferry deposit
+  yq -i '.ferryDepositEnvEth.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ETHEREUM)' {{CONFIG_FILE}}
+
+  # Ferry deposit
+  yq -i '.ferryWithdrawalEnvEth.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ETHEREUM)' {{CONFIG_FILE}}
+
+  # closer
+  yq -i '.closerEnvEth.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ETHEREUM)' {{CONFIG_FILE}}
+
+update-config-arb CHAINID CONFIG_FILE:
+  #!/usr/bin/env bash
+  export ROLLDOWN_ARBITRUM=$(jq .addresses.rolldown ../../contracts/script/output/{{CHAINID}}/rolldown_output.json | tr -d "\"")
+  export GASP_SERVICE_ADDRESS_ARB=$(jq .addresses.gmrs ../../contracts/script/output/{{CHAINID}}/gmrs_output.json | tr -d "\"")
+
+  # Updaters
+  yq -i '.updaterEnv.GASP_SERVICE_ADDR = strenv(GASP_SERVICE_ADDRESS_ARB)' {{CONFIG_FILE}}
+
+  # Sequencers
+  yq -i '.sequencerEnvArb.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ARBITRUM)' {{CONFIG_FILE}}
+
+  # Ferry deposit
+  yq -i '.ferryDepositEnvArb.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ARBITRUM)' {{CONFIG_FILE}}
+
+  # Ferry deposit
+  yq -i '.ferryWithdrawalEnvArb.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ARBITRUM)' {{CONFIG_FILE}}
+
+  # closer
+  yq -i '.closerEnvArb.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_ARBITRUM)' {{CONFIG_FILE}}
+
+update-config-base CHAINID CONFIG_FILE:
+  #!/usr/bin/env bash
+  export ROLLDOWN_BASE=$(jq .addresses.rolldown ../../contracts/script/output/{{CHAINID}}/rolldown_output.json | tr -d "\"")
+  export GASP_SERVICE_ADDRESS_BASE=$(jq .addresses.gmrs ../../contracts/script/output/{{CHAINID}}/gmrs_output.json | tr -d "\"")
+
+  # Updaters
+  yq -i '.updaterEnvBase.GASP_SERVICE_ADDR = strenv(GASP_SERVICE_ADDRESS_BASE)' {{CONFIG_FILE}}
+
+  # Sequencers
+  yq -i '.sequencerEnvBase.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_BASE)' {{CONFIG_FILE}}
+
+  # Ferry deposit
+  yq -i '.ferryDepositEnvBase.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_BASE)' {{CONFIG_FILE}}
+
+  # Ferry deposit
+  yq -i '.ferryWithdrawalEnvBase.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_BASE)' {{CONFIG_FILE}}
+
+  # closer
+  yq -i '.closerEnvBase.MANGATA_CONTRACT_ADDRESS = strenv(ROLLDOWN_BASE)' {{CONFIG_FILE}}

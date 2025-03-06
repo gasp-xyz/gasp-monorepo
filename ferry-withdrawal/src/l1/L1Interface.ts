@@ -5,8 +5,8 @@ export interface L1Interface {
 	isRolldownDeployed(delay: bigint): Promise<boolean>;
 	getLatestRequestId(delay: bigint): Promise<bigint | null>;
 	getBalance(
-		account: Uint8Array,
 		tokenAddress: Uint8Array,
+		account: Uint8Array,
 	): Promise<bigint | null>;
 	getNativeTokenAddress(): Promise<Uint8Array>;
 

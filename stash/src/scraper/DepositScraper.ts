@@ -34,7 +34,7 @@ export const processFerriedDeposit = async (
     .and('type')
     .equals('deposit')
     .and('requestId')
-    .equals(Number(eventData.deposit.requestId.id))
+    .equals(Number(eventData.deposit.requestId.id.replace(/,/g, '')))
     .returnFirst()
   if (transactionsToProcess) {
     transactionsToProcess.status = 'Processed'

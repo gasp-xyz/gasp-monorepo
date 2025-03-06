@@ -1,0 +1,44 @@
+# https://moonrepo.dev/docs/config/workspace
+$schema: 'https://moonrepo.dev/schemas/workspace.json'
+
+projects:
+  avs-aggregator: 'avs-aggregator'
+  contracts: 'contracts'
+  ferry-deposit: 'ferry-deposit'
+  ferry-withdrawal: 'ferry-withdrawal'
+  gasp-avs: 'gasp-avs'
+  gasp-node: 'gasp-node'
+  sequencer: 'sequencer'
+  stash: 'stash'
+  updater: 'updater'
+
+
+vcs:
+  manager: 'git'
+
+  # The default branch (master/main/trunk) in the repository for comparing the
+  # local branch against. For git, this is is typically "master" or "main",
+  # and must include the remote prefix (before /).
+  defaultBranch: 'main'
+
+runner:
+  archivableTargets:
+    - ':format'
+    - ':lint'
+    - ':test'
+    - ':format-gasp-avs'
+    - ':lint-gasp-avs'
+    - ':test-gasp-avs'
+    - ':format-gasp-node'
+    - ':lint-gasp-node'
+    - ':test-gasp-node'
+    - ':benchmark-tests-gasp-node'
+
+unstable_remote:
+  api: 'grpc'
+  host: 'grpc://bazel-remote-cache.gasp.xyz:80'
+  auth:
+    headers:
+        'X-Custom-Header': 'gasp'
+  cache:
+    compression: zstd

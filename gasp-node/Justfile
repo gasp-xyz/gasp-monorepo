@@ -1,0 +1,13 @@
+# Default recipe
+default:
+  @just --list
+
+start-env:
+  @docker compose up -d
+  
+stop-env:
+  @docker compose down
+
+reset-env:
+  @just stop-env
+  @just start-env

@@ -6,6 +6,7 @@ use tracing::{error, info};
 mod chainio;
 mod cli;
 mod crypto;
+mod metrics;
 mod syncer;
 
 pub const ALERT_ERROR: &str = "ALERT::ERROR";

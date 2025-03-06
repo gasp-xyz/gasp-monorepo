@@ -10,3 +10,23 @@ target
 # !**/target/**/main
 
 tmp
+
+.moon/cache
+moon.yml
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
+
+*-buildkit-metadata.json
+
+**/node_modules
+**/tests
+**/reports
+
+README.md
+
+.releaserc.yaml
+
+Justfile
+.prototools
+compose.yml

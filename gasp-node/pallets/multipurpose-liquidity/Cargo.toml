@@ -1,0 +1,74 @@
+[package]
+authors = ["Mangata team"]
+edition = "2018"
+name = "pallet-multipurpose-liquidity"
+version = "0.1.0"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[dependencies]
+codec = { workspace = true, default-features = false }
+hex = { workspace = true, default-features = false }
+hex-literal = { workspace = true, default-features = false }
+log = { workspace = true, default-features = false }
+serde = { workspace = true, optional = true }
+scale-info = { workspace = true, default-features = false, features = ["derive"] }
+
+parachain-staking = { path = "../parachain-staking", default-features = false }
+
+frame-benchmarking = { workspace = true, default-features = false }
+frame-executive = { workspace = true, default-features = false }
+frame-support = { workspace = true, default-features = false }
+frame-system = { workspace = true, default-features = false }
+frame-try-runtime = { workspace = true, default-features = false, optional = true }
+mangata-support = { workspace = true, default-features = false }
+mangata-types = { workspace = true, default-features = false }
+pallet-vesting-mangata = { workspace = true, default-features = false }
+sp-core = { workspace = true, default-features = false }
+sp-runtime = { workspace = true, default-features = false }
+sp-std = { workspace = true, default-features = false }
+
+orml-tokens = { workspace = true, default-features = false }
+
+
+[dev-dependencies]
+env_logger.workspace = true
+lazy_static.workspace = true
+serial_test.workspace = true
+
+sp-io = { workspace = true, default-features = false }
+
+orml-traits = { workspace = true, default-features = false }
+
+[features]
+default = ["std"]
+enable-trading = []
+std = [
+	"codec/std",
+	"hex/std",
+	"frame-benchmarking/std",
+	"frame-support/std",
+	"frame-system/std",
+	"mangata-support/std",
+	"orml-tokens/std",
+	"pallet-vesting-mangata/std",
+	"parachain-staking/std",
+	"serde",
+	"sp-std/std",
+	"sp-core/std",
+	"sp-runtime/std",
+]
+
+runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks", "parachain-staking/runtime-benchmarks"]
+
+try-runtime = [
+	"frame-executive/try-runtime",
+	"frame-support/try-runtime",
+	"frame-system/try-runtime",
+	"frame-try-runtime",
+	"orml-tokens/try-runtime",
+	"pallet-vesting-mangata/try-runtime",
+	"parachain-staking/try-runtime",
+	"sp-runtime/try-runtime",
+]

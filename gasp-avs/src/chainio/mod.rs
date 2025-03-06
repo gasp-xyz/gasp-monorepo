@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use std::sync::Arc;
 
 use bindings::{
@@ -13,7 +14,7 @@ use ethers::{
     types::{Address, TransactionRequest},
     utils::parse_ether,
 };
-use eyre::eyre;
+use eyre::{eyre, Ok};
 use sp_core::hexdisplay::AsBytesRef;
 use tracing::{debug, info, instrument};
 
@@ -22,22 +23,31 @@ use crate::cli::CliArgs;
 pub mod avs;
 pub mod eigen;
 
-type MW = Provider<Http>;
-pub type Client = SignerMiddleware<NonceManagerMiddleware<MW>, LocalWallet>;
+pub type Client = Provider<Http>;
+pub type SignerClient = SignerMiddleware<NonceManagerMiddleware<Client>, LocalWallet>;
 
 #[instrument(skip_all)]
-pub(crate) async fn build_eth_client(cfg: &CliArgs) -> eyre::Result<Client> {
-    let provider: Provider<Http> = MW::try_from(cfg.eth_rpc_url.clone())?;
-    info!("Eth Wallet decryting...");
-    let wallet = cfg.get_ecdsa_keystore()?.into_wallet()?;
-    info!("Eth Wallet decrytped with address {:x}", wallet.address());
-    let nonce = NonceManagerMiddleware::new(provider, wallet.address());
-    let client = Client::new_with_provider_chain(nonce, wallet.with_chain_id(cfg.chain_id)).await?;
-
-    Ok(client)
+pub(crate) async fn build_eth_client(
+    cfg: &CliArgs,
+) -> eyre::Result<(Address, Arc<Client>, Option<Arc<SignerClient>>)> {
+    let provider: Provider<Http> = Client::try_from(cfg.eth_rpc_url.clone())?;
+    match &cfg.ecdsa_key.ecdsa_address {
+        Some(address) => Ok((Address::from_str(address)?, Arc::new(provider), None)),
+        _ => {
+            info!("Eth Wallet decryting...");
+            let wallet = cfg.get_ecdsa_keystore()?.into_wallet()?;
+            let address = wallet.address();
+            info!("Eth Wallet decrytped with address {:x}", address);
+            let nonce = NonceManagerMiddleware::new(provider.clone(), wallet.address());
+            let client =
+                SignerClient::new_with_provider_chain(nonce, wallet.with_chain_id(cfg.chain_id))
+                    .await?;
+            Ok((address, Arc::new(provider), Some(Arc::new(client))))
+        }
+    }
 }
 
-pub(crate) fn map_revert(e: ContractError<Client>) -> eyre::Report {
+pub(crate) fn map_revert(e: ContractError<SignerClient>) -> eyre::Report {
     match e {
         ContractError::Revert(b) => eyre!(
             "Contract call reverted with message: {}",
@@ -60,7 +70,7 @@ pub(crate) async fn setup_deposits(
     set_balance(chain_id, eth_rpc_url.clone(), op_address, 100).await?;
     debug!("set some ether to operator");
 
-    let provider: Provider<Http> = MW::try_from(eth_rpc_url)?;
+    let provider: Provider<Http> = Client::try_from(eth_rpc_url)?;
     let client = Arc::new(provider.with_signer(operator));
     let registry = RegistryCoordinator::new(registry_address, client.clone());
     let stake_registry_address = registry.stake_registry().await?;
@@ -103,7 +113,7 @@ async fn set_balance(
     let dev_wallet = "dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
         .parse::<LocalWallet>()?
         .with_chain_id(chain_id);
-    let provider: Provider<Http> = MW::try_from(eth_rpc_url)?;
+    let provider: Provider<Http> = Client::try_from(eth_rpc_url)?;
     let client = provider.with_signer(dev_wallet);
     let tx = TransactionRequest::pay(address, parse_ether(ether).unwrap());
     let _ = client.send_transaction(tx, None).await?.await?;

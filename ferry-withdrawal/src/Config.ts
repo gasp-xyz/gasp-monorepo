@@ -23,6 +23,7 @@ const SUPPORTED_CHAINS = new Map<string, string>([
 	["arbitrum-sepolia", "arbitrum"],
 	["reth-arbitrum", "arbitrum"],
 	["reth-ethereum", "ethereum"],
+	["reth-base", "base"],
 ]);
 
 const cliConfigSchemat = z.object({
@@ -47,6 +48,11 @@ const cliConfigSchemat = z.object({
 	LOOK_BACK_HOURS: z.number().default(24),
 	LOG: z.string().default("info"),
 	DELAY: z.bigint().default(0n),
+	BATCH_SIZE: z.bigint().default(500n),
+	REPLICA_COUNT: z.bigint().default(0n),
+	REPLICA_ID: z.bigint().default(0n),
+	MIN_REQUEST_ID: z.bigint().default(0n),
+	SKIP_STASH: z.boolean().default(false),
 });
 
 function createCliConfig() {
@@ -64,6 +70,21 @@ function createCliConfig() {
 			: undefined,
 		LOG: process.env.LOG,
 		DELAY: process.env.DELAY ? BigInt(process.env.DELAY) : undefined,
+		BATCH_SIZE: process.env.BATCH_SIZE
+			? BigInt(process.env.BATCH_SIZE)
+			: undefined,
+		REPLICA_COUNT: process.env.REPLICA_COUNT
+			? BigInt(process.env.REPLICA_COUNT)
+			: undefined,
+		REPLICA_ID: process.env.REPLICA_ID
+			? BigInt(process.env.REPLICA_ID)
+			: undefined,
+		MIN_REQUEST_ID: process.env.MIN_REQUEST_ID
+			? BigInt(process.env.MIN_REQUEST_ID)
+			: undefined,
+		SKIP_STASH: process.env.SKIP_STASH
+			? Boolean(process.env.SKIP_STASH)
+			: undefined,
 	});
 }
 
@@ -83,3 +104,8 @@ export const LOOK_BACK_HOURS = configuration.LOOK_BACK_HOURS;
 export const LOG = configuration.LOG;
 export const ABI = rolldownAbi.abi;
 export const DELAY = configuration.DELAY;
+export const BATCH_SIZE = configuration.BATCH_SIZE;
+export const REPLICA_COUNT = configuration.REPLICA_COUNT;
+export const REPLICA_ID = configuration.REPLICA_ID;
+export const MIN_REQUEST_ID = configuration.MIN_REQUEST_ID;
+export const SKIP_STASH = configuration.SKIP_STASH;

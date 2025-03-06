@@ -23,7 +23,7 @@ impl Watchdog {
                     tracing::debug!("restarted");
                 }
                 None => {
-                    tracing::error!("timeout");
+                    tracing::debug!("watchdog stopped");
                     break;
                 }
             }

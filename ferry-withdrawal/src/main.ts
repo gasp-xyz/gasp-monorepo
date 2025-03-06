@@ -25,6 +25,7 @@ import {
 	TOKENS_TO_TRACK,
 	TX_COST,
 } from "./Config.js";
+import { reportBalance, serveMetrics } from "./metrics.js";
 
 async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
@@ -38,6 +39,8 @@ async function main() {
 	}
 
 	const acc: PrivateKeyAccount = privateKeyToAccount(PRIVATE_KEY as any);
+	serveMetrics();
+	reportBalance(hexToU8a(acc.address), l1);
 
 	logger.info(`Account      : ${acc.address}`);
 	logger.info(`L1           : ${ETH_CHAIN_URL}`);
@@ -105,7 +108,7 @@ async function main() {
 							hexToU8a(PRIVATE_KEY),
 						);
 						if (!status) {
-							logger.warning(
+							logger.warn(
 								`${ALERT_WARNING} Failed to close withdrawal ${toString(
 									withdrawal,
 								)}`,
@@ -123,7 +126,7 @@ async function main() {
 						logger.info(`Ferrying withdrawal ${toString(withdrawal)}`);
 						const status = await l1.ferry(rated[0], hexToU8a(PRIVATE_KEY));
 						if (!status) {
-							logger.warning(
+							logger.warn(
 								`${ALERT_WARNING} Failed to ferry withdrawal ${toString(
 									withdrawal,
 								)}`,
