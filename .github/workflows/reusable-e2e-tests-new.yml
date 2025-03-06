@@ -123,7 +123,6 @@ jobs:
           - command: "moon gasp-node:e2e-test-rollup"
             name: "[avs] test-rollup"
     runs-on: ubuntu-24.04
-    # runs-on: [e2e-gke]
     name: ${{ matrix.name }}
     timeout-minutes: 180
     defaults:
@@ -204,15 +203,6 @@ jobs:
 
       - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install
       - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
-
-      # - name: Cache Jest
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: gasp-node/gasp-e2e/node_modules/.cache/jest
-      #     key: ${{ runner.os }}-${{ env.CACHE_VERSION }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-${{ inputs.globalVersion }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-${{ env.CACHE_VERSION }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-
-      #       ${{ runner.os }}-${{ env.CACHE_VERSION }}-jest-
       
       - uses: moonrepo/setup-toolchain@v0.4.0
         with:
