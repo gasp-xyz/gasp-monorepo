@@ -135,8 +135,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
           fetch-depth: 0
+          submodules: false
+      - name: Checkout only gasp-e2e submodule
+        run: git -C $GITHUB_WORKSPACE submodule update --init --depth 1 gasp-node/gasp-e2e
 
       - uses: moonrepo/setup-rust@v1
         name: Setup nightly-2024-01-20 rust toolchain
@@ -152,16 +154,15 @@ jobs:
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
           bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
           echo "$HOME/.proto/bin" >> $GITHUB_PATH
-      - run: cd gasp-e2e && proto setup --yes
-      - run: cd gasp-e2e && proto install
+      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && proto setup --yes && proto install
 
       - uses: docker/setup-compose-action@v1
       - uses: actions/setup-node@v4
         with:
-          node-version: "18.19.0"
+          node-version: "18.20.7"
           cache: yarn
           cache-dependency-path: "./gasp-node/gasp-e2e/yarn.lock"
-      - run: cd gasp-e2e && yarn install --immutable
+      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install --immutable
 
       - name: E2E- Get branch name
         id: branch-name
@@ -170,8 +171,8 @@ jobs:
       - name: Current branch name for generating types
         run: echo "GASP_TYPES_VERSION=${{ steps.branch-name.outputs.current_branch }}" | sed -E 's@[/\.]@-@g; s@_@-@g' >> $GITHUB_ENV
 
-      - run: cd gasp-e2e && yarn install
-      - run: cd gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
+      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install
+      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
 
       - name: Cache Jest
         uses: actions/cache@v4
