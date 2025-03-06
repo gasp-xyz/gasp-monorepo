@@ -137,10 +137,21 @@ jobs:
         with:
           fetch-depth: 0
           submodules: false
-      - name: Checkout only gasp-e2e submodule
+      - name: Cache Git submodules
+        uses: actions/cache@v4
+        with:
+          path: |
+            avs-eigensdk-go
+            contracts/lib/forge-std
+            contracts/lib/eigenlayer-middleware
+          key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ hashFiles('.gitmodules') }}-
+            submodules-
+      - name: Checkout all submodules with depth 1
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git -C $GITHUB_WORKSPACE submodule update --init --depth 1 gasp-node/gasp-e2e
+          git submodule update --init --recursive --depth 1
 
       - uses: moonrepo/setup-rust@v1
         name: Setup nightly-2024-01-20 rust toolchain

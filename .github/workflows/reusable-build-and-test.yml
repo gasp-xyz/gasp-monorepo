@@ -27,6 +27,17 @@ jobs:
         with:
           fetch-depth: 0
           submodules: false
+      - name: Cache Git submodules
+        uses: actions/cache@v4
+        with:
+          path: |
+            avs-eigensdk-go
+            contracts/lib/forge-std
+            contracts/lib/eigenlayer-middleware
+          key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ hashFiles('.gitmodules') }}-
+            submodules-
       - name: Checkout all submodules with depth 1
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
@@ -130,7 +141,7 @@ jobs:
             command: moon ci :format :lint :test :benchmark-tests-gasp-node
           - prefix: build-docker-images
             name: Build docker images
-            runner: compile-gke
+            runner: ubuntu-24.04
             buildkit-enable: true
             buildkit-replicas: 5
             command: moon :build-image-ci
@@ -146,6 +157,17 @@ jobs:
         with:
           fetch-depth: 0
           submodules: false
+      - name: Cache Git submodules
+        uses: actions/cache@v4
+        with:
+          path: |
+            avs-eigensdk-go
+            contracts/lib/forge-std
+            contracts/lib/eigenlayer-middleware
+          key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ hashFiles('.gitmodules') }}-
+            submodules-
       - name: Checkout all submodules with depth 1
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
