@@ -76,6 +76,30 @@ releases:
           limits:
             cpu: 2
             memory: 12Gi
+  
+  - name: gasp-avs-2
+    namespace: 'rollup-{{ .Values.environmentName }}'
+    installed: {{ and .Values.gaspAvsEnabled ( .Values | get "gaspAvsEnabled2" false | toYaml) }}
+    chart: ../helm-charts/gasp-avs
+    values:
+      - image:
+          repository: gaspxyz/gasp-avs
+          tag: '{{ printf "%s%s" (.Values | get "gaspAvsImageTag" (requiredEnv "IMAGE_TAG")) (eq (env "GASP_AVS_FAST_RUNTIME") "true" | ternary "-fast" "") }}'
+        environment: {{ .Values.environmentName }}
+        envSecrets: {{ .Values | getOrNil "gaspAvsEnvSecrets2" | expandSecretRefs | toYaml | nindent 10 }}
+        env: {{ .Values | getOrNil "gaspAvsEnv2" | toYaml | nindent 10 }}
+        data: {{ .Values | getOrNil "gaspAvsData2" | toYaml | nindent 10 }}
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: true
+        resources:
+          requests:
+            cpu: 1
+            memory: 4Gi
+          limits:
+            cpu: 2
+            memory: 12Gi
 
   - name: updater
     namespace: 'rollup-{{ .Values.environmentName }}'

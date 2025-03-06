@@ -214,24 +214,22 @@ aggregatorEnv:
   AVS_DEPLOYMENT_BLOCK: "21394442"
   AVS_KICK_PERIOD: "25"
   AVS_REGISTRY_COORDINATOR_ADDR: "0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1"
-  AVS_RPC_URL: http://avs-aggregator:8090
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_TASK_EXPIRATION: "300"
   AVS_UPDATE_STAKE_PERIOD: "150"
-  OPT_IN_AT_STARTUP: "true"
   AGG_IDLE_START: true
   AGG_RUN_TRIGGER_API_KEY: "secrettoken"
   ENVIRONMEMT: "production"
   AGG_SS_FETCH_TIMEOUT: "100"
+  AGG_OSU_REINIT_OP: "false"
 
 #####################
 # gaspAvs configs #
 #####################
-gaspAvsEnabled: true
-gaspAvsImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 # Override the image tag provided on deployment from IMAGE_TAG env variable
-# gaspAvsImageTag: ba3aaf237234092ad21bf0a4c5ff0f08523ba6f0
+gaspAvsImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 
+gaspAvsEnabled: true
 gaspAvsEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-01-ecdsa-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-01-ecdsa-password
@@ -245,18 +243,30 @@ gaspAvsData:
   storageSize: 150Gi
 gaspAvsEnv:
   CHAIN_ID: "1"
-  AVS_BLOCK_VALIDATION_PERIOD: "100"
-  AVS_DEBOUNCE_RPC: "20"
-  AVS_DEPLOYMENT_BLOCK: "21394442"
-  AVS_KICK_PERIOD: "25"
   AVS_REGISTRY_COORDINATOR_ADDR: "0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1"
   AVS_RPC_URL: http://avs-aggregator:8090
-  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  AVS_TASK_EXPIRATION: "300"
-  AVS_UPDATE_STAKE_PERIOD: "150"
-  LOG_LEVEL: "info"
   RUST_LOG: gasp_avs=info,ether=info
-  OPT_IN_AT_STARTUP: "false"
+  # rollup-node configs
+  ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/f9604551934c498a6a814d84f2cd6c01803d24d7/rollup-dev-env-chainspecs/alpha-launch-f26183b-raw.json
+
+gaspAvsEnabled2: true
+gaspAvsData2:
+  storageClass: node-data-volume-retain
+  mountPath: /data
+  storageSize: 150Gi
+gaspAvsEnvSecrets2:
+  ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-02-ecdsa-key
+  ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-02-ecdsa-password
+  BLS_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-02-bls-key
+  BLS_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-02-bls-password
+  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/gaspAvsEthereumMainnetHttpsUrl
+  ETH_WS_URL: ref+sops://secrets.enc.yaml#/gaspAvsEthereumMainnetWssUrl
+gaspAvsEnv2:
+  CHAIN_ID: "1"
+  AVS_REGISTRY_COORDINATOR_ADDR: "0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1"
+  AVS_RPC_URL: http://avs-aggregator:8090
+  RUST_LOG: gasp_avs=info,ether=info
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
   ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/f9604551934c498a6a814d84f2cd6c01803d24d7/rollup-dev-env-chainspecs/alpha-launch-f26183b-raw.json
