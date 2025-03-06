@@ -948,7 +948,6 @@ tasks:
       - '/updater/Cargo.toml'
       - '/avs-eigensdk-go/**/*.go'
       - '/avs-eigensdk-go/**/go.mod'
-      - '/avs-aggregator/**/*'
       - '/avs-aggregator/bindings/**/*'
       - '/avs-aggregator/cmd/**/*'
       - '/avs-aggregator/core/**/*'
