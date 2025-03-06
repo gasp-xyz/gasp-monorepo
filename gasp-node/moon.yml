@@ -932,11 +932,11 @@ tasks:
       - '/ferry-withdrawal/**/*.ts'
       - '/ferry-withdrawal/package.json'
       - '/ferry-withdrawal/yarn.lock'
-      - "/contracts/lib/**/*"
-      - "/contracts/src/**/*"
-      - "/contracts/test/**/*"
-      - "/contracts/script/**/*"
-      - "/contracts/tools/**/*"
+      - "/contracts/lib/**/*.sol"
+      - "/contracts/src/**/*.sol"
+      - "/contracts/test/**/*.sol"
+      - "/contracts/script/**/*.sol"
+      - "/contracts/tools/**/*.sol"
       - "/contracts/package.json"
       - "/contracts/foundry.toml"
       - "/contracts/remappings.txt"
@@ -946,8 +946,6 @@ tasks:
       - '/updater/bindings/**/*'
       - '/updater/src/**/*'
       - '/updater/Cargo.toml'
-      - '/avs-eigensdk-go/**/*.go'
-      - '/avs-eigensdk-go/**/go.mod'
       - '/avs-aggregator/bindings/**/*'
       - '/avs-aggregator/cmd/**/*'
       - '/avs-aggregator/core/**/*'
