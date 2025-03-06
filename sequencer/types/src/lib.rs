@@ -2,15 +2,19 @@ use parity_scale_codec::{Decode, Encode};
 use primitive_types::U256;
 
 mod l2types {
-    pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Cancel;
+    pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
+    // pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Cancel;
     pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Origin;
     pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::RequestId;
     pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Withdrawal;
     pub use gasp_bindings::api::runtime_types::primitive_types::U256;
+    pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Chain;
+    pub type Cancel = gasp_bindings::api::runtime_types::pallet_rolldown::messages::Cancel<AccountId20>;
 }
 
 mod l1types {
     pub use alloy::primitives::U256;
+    pub use contract_bindings::rolldown::IRolldownPrimitives::ChainId as Chain;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Range;
@@ -23,6 +27,60 @@ pub enum Origin {
     L1,
     L2,
 }
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum Chain {
+    Ethereum,
+    Arbitrum,
+    Base,
+}
+
+impl From<l2types::Chain> for Chain{
+    fn from(value: l2types::Chain) -> Self {
+        match value{
+            l2types::Chain::Ethereum => Chain::Ethereum,
+            l2types::Chain::Arbitrum => Chain::Arbitrum,
+            l2types::Chain::Base => Chain::Base,
+        }
+    }
+}
+
+
+const ETHEREUM_CHAIN_ID: u8 = 0;
+const ARBITRUM_CHAIN_ID: u8 = 1;
+const BASE_CHAIN_ID: u8 = 2;
+impl From<l1types::Chain> for Chain{
+    fn from(value: l1types::Chain) -> Self {
+        match value.into(){
+            ETHEREUM_CHAIN_ID => Chain::Ethereum,
+            ARBITRUM_CHAIN_ID => Chain::Arbitrum,
+            BASE_CHAIN_ID => Chain::Base,
+            _ => panic!("unknown chain"),
+        }
+    }
+}
+
+impl Into<l1types::Chain> for Chain{
+    fn into(self) -> l1types::Chain {
+        match self{
+            Chain::Ethereum => l1types::Chain::from(ETHEREUM_CHAIN_ID),
+            Chain::Arbitrum => l1types::Chain::from(ARBITRUM_CHAIN_ID),
+            Chain::Base => l1types::Chain::from(BASE_CHAIN_ID),
+        }
+    }
+}
+
+impl Into<l2types::Chain> for Chain{
+    fn into(self) -> l2types::Chain {
+        match self{
+            Chain::Ethereum => l2types::Chain::Ethereum,
+            Chain::Arbitrum => l2types::Chain::Arbitrum,
+            Chain::Base => l2types::Chain::Base,
+        }
+    }
+}
+
+
 
 impl From<l2types::Origin> for Origin {
     fn from(origin: l2types::Origin) -> Self {
@@ -208,8 +266,8 @@ impl Into<l1types::Withdrawal> for Withdrawal {
     }
 }
 
-impl From<l2types::Cancel<[u8; 20]>> for Cancel {
-    fn from(value: l2types::Cancel<[u8; 20]>) -> Self {
+impl From<l2types::Cancel> for Cancel {
+    fn from(value: l2types::Cancel) -> Self {
         Cancel {
             request_id: value.requestId.into(),
             range: (U256::from(value.range.start), U256::from(value.range.end)),

@@ -1283,6 +1283,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "closer"
+version = "0.1.0"
+dependencies = [
+ "envconfig",
+ "futures",
+ "hex",
+ "hex-literal",
+ "l1api",
+ "l2api",
+ "lazy_static",
+ "lru",
+ "mockall",
+ "prometheus",
+ "serde",
+ "serial_test",
+ "sha3",
+ "thiserror 2.0.3",
+ "tokio",
+ "tracing",
+ "tracing-log",
+ "tracing-subscriber",
+ "tracing-test",
+ "tracing-tree",
+ "warp",
+]
+
+[[package]]
 name = "combine"
 version = "4.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2673,6 +2700,7 @@ name = "l2api"
 version = "0.1.0"
 dependencies = [
  "futures",
+ "gasp-bindings",
  "gasp-types",
  "hex",
  "hex-literal",

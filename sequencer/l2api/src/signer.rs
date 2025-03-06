@@ -3,9 +3,9 @@ use sha3::{Digest, Keccak256};
 use secp256k1::{Message, Secp256k1, SecretKey};
 use subxt::tx::signer::Signer as SignerT;
 
-use super::GaspAddress;
-use super::GaspConfig;
-use super::GaspSignature;
+use gasp_bindings::GaspAddress;
+use gasp_bindings::GaspConfig;
+use gasp_bindings::GaspSignature;
 
 use secp256k1::SECP256K1;
 

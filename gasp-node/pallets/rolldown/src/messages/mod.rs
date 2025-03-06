@@ -106,6 +106,7 @@ pub enum Chain {
 	Ethereum,
 	Arbitrum,
 	Base,
+	Sonic,
 }
 
 impl AsRef<str> for Chain {

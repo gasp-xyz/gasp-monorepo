@@ -12,6 +12,7 @@ members = [
   "types",
   "l1api",
   "l2api",
+  "closer",
 ]
 
 [profile.dev]
