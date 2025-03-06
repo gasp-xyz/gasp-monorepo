@@ -144,14 +144,14 @@ jobs:
             avs-eigensdk-go
             contracts/lib/forge-std
             contracts/lib/eigenlayer-middleware
+            gasp-node/gasp-e2e
           key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
           restore-keys: |
             submodules-${{ hashFiles('.gitmodules') }}-
             submodules-
-      - name: Checkout all submodules with depth 1
-        run: |
-          git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - uses: moonrepo/setup-rust@v1
         name: Setup nightly-2024-01-20 rust toolchain

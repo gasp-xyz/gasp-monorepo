@@ -34,14 +34,14 @@ jobs:
             avs-eigensdk-go
             contracts/lib/forge-std
             contracts/lib/eigenlayer-middleware
+            gasp-node/gasp-e2e
           key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
           restore-keys: |
             submodules-${{ hashFiles('.gitmodules') }}-
             submodules-
-      - name: Checkout all submodules with depth 1
-        run: |
-          git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
           
       - uses: foundry-rs/foundry-toolchain@v1
       - uses: actions/setup-python@v5
@@ -164,14 +164,14 @@ jobs:
             avs-eigensdk-go
             contracts/lib/forge-std
             contracts/lib/eigenlayer-middleware
+            gasp-node/gasp-e2e
           key: submodules-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
           restore-keys: |
             submodules-${{ hashFiles('.gitmodules') }}-
             submodules-
-      - name: Checkout all submodules with depth 1
-        run: |
-          git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - uses: arduino/setup-protoc@v3
         with:
