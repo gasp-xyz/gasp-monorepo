@@ -126,13 +126,7 @@ jobs:
             moon-targets: >-
               :format 
               :lint 
-              :test 
-              :format-gasp-avs
-              :format-gasp-node
-              :lint-gasp-avs
-              :lint-gasp-node
-              :test-gasp-avs
-              :test-gasp-node
+              :test
               :benchmark-tests-gasp-node
           - prefix: build-docker-images
             name: Build docker images

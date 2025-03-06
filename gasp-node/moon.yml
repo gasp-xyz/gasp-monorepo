@@ -141,15 +141,15 @@ tasks:
     options:
       cache: false
 
-  format-gasp-node:
+  format:
     command: cargo fmt --all -- --check
     inputs: ['@globs(sources)']
 
-  lint-gasp-node:
+  lint:
     command: cargo clippy -p pallet-xyk
     inputs: ['@globs(sources)']
 
-  test-gasp-node:
+  test:
     command: cargo test
     inputs: ['@globs(sources)']
 

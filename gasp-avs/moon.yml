@@ -157,15 +157,15 @@ tasks:
       cache: false
       # runDepsInParallel: false
 
-  format-gasp-avs:
+  format:
     command: cargo fmt --all -- --check
     inputs: ['@globs(sources)', 'tests/**/*']
 
-  lint-gasp-avs:
+  lint:
     command: cargo clippy
     inputs: ['@globs(sources)', 'tests/**/*']
 
-  test-gasp-avs:
+  test:
     command: cargo test
     inputs: ['@globs(sources)', 'tests/**/*']
 

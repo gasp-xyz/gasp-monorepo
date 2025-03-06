@@ -3,7 +3,7 @@ type: application
 
 toolchain:
   node:
-    version: 18.20.4
+    version: 18.20.7
 
 fileGroups:
   sources:

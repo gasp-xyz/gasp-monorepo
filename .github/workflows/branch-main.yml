@@ -176,3 +176,5 @@ jobs:
 
       - name: Run release command
         run: moon :release --concurrency 1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
