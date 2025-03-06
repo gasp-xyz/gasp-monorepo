@@ -138,7 +138,9 @@ jobs:
           fetch-depth: 0
           submodules: false
       - name: Checkout only gasp-e2e submodule
-        run: git -C $GITHUB_WORKSPACE submodule update --init --depth 1 gasp-node/gasp-e2e
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git -C $GITHUB_WORKSPACE submodule update --init --depth 1 gasp-node/gasp-e2e
 
       - uses: moonrepo/setup-rust@v1
         name: Setup nightly-2024-01-20 rust toolchain
