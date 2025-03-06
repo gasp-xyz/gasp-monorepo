@@ -217,7 +217,7 @@ jobs:
       - uses: moonrepo/setup-toolchain@v0
         with:
           cache-version: ${{ env.CACHE_VERSION }}
-      - run: moon setup
+      # - run: moon setup
       - name: Run tests
         run: ${{ matrix.command }}
         env:
