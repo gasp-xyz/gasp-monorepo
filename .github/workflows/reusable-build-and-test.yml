@@ -62,7 +62,7 @@ jobs:
       #     echo "$HOME/.proto/bin" >> $GITHUB_PATH  
       # - run: cd contracts && proto setup --yes && proto install
 
-      - uses: moonrepo/setup-toolchain@v0
+      - uses: moonrepo/setup-toolchain@v0.4.0
         with:
           cache-version: ${{ env.CACHE_VERSION }}
       - run: cd contracts && yarn install --immutable
@@ -262,7 +262,7 @@ jobs:
       # - run: proto setup --yes
       # - run: proto install
 
-      - uses: moonrepo/setup-toolchain@v0
+      - uses: moonrepo/setup-toolchain@v0.4.0
         with:
           cache-version: ${{ env.CACHE_VERSION }}
       - run: ${{ matrix.command }}
@@ -295,7 +295,7 @@ jobs:
           cache: true
           target-dirs: 'gasp-node/target'
 
-      - uses: moonrepo/setup-toolchain@v0
+      - uses: moonrepo/setup-toolchain@v0.4.0
         with:
           cache-version: ${{ env.CACHE_VERSION }}
 

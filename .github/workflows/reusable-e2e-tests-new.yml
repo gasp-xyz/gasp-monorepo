@@ -214,7 +214,7 @@ jobs:
       #       ${{ runner.os }}-${{ env.CACHE_VERSION }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-
       #       ${{ runner.os }}-${{ env.CACHE_VERSION }}-jest-
       
-      - uses: moonrepo/setup-toolchain@v0
+      - uses: moonrepo/setup-toolchain@v0.4.0
         with:
           cache-version: ${{ env.CACHE_VERSION }}
       # - run: moon setup
