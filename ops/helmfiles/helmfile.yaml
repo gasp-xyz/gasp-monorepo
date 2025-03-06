@@ -167,7 +167,7 @@ releases:
             memory: 1Gi
   - name: sequencer-eth-2
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedEth2" false | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnabled" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -188,7 +188,7 @@ releases:
             memory: 1Gi
   - name: sequencer-eth-3
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedEth3" false | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnabledEth3" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -231,7 +231,7 @@ releases:
             memory: 1Gi
   - name: sequencer-arb-2
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedArb2" false | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnabledArb2" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -252,7 +252,7 @@ releases:
             memory: 1Gi
   - name: sequencer-arb-3
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedArb3" false | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnabledArb3" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -295,7 +295,7 @@ releases:
             memory: 1Gi
   - name: sequencer-base-2
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedBase2" false | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnabledBase2" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -316,7 +316,7 @@ releases:
             memory: 1Gi
   - name: sequencer-base-3
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedBase3" false | toYaml) }}
+    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnabledBase3" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
@@ -485,11 +485,11 @@ releases:
             memory: 1Gi
   - name: closer-eth-2
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnalbedEth2" false | toYaml) }}
+    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnabledEth2" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: gaspxyz/closer
+          repository: gaspxyz/ferry-withdrawal
           tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
           # `args` param is used to override the default command in the Dockerfile
           args: ["node", "build/src/closer.js"]
@@ -508,11 +508,11 @@ releases:
             memory: 1Gi
   - name: closer-eth-3
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnalbedEth3" false | toYaml) }}
+    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnabledEth3" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: gaspxyz/closer
+          repository: gaspxyz/ferry-withdrawal
           tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
           # `args` param is used to override the default command in the Dockerfile
           args: ["node", "build/src/closer.js"]
@@ -531,11 +531,11 @@ releases:
             memory: 1Gi
   - name: closer-eth-4
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnalbedEth4" false | toYaml) }}
+    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnabledEth4" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: gaspxyz/closer
+          repository: gaspxyz/ferry-withdrawal
           tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
           # `args` param is used to override the default command in the Dockerfile
           args: ["node", "build/src/closer.js"]
@@ -554,11 +554,11 @@ releases:
             memory: 1Gi
   - name: closer-eth-5
     namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnalbedEth5" false | toYaml) }}
+    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnabledEth5" false | toYaml) }}
     chart: ../helm-charts/common-deployment
     values:
       - image:
-          repository: gaspxyz/closer
+          repository: gaspxyz/ferry-withdrawal
           tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
           # `args` param is used to override the default command in the Dockerfile
           args: ["node", "build/src/closer.js"]
