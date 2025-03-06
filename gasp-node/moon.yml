@@ -245,7 +245,8 @@ tasks:
       else
         docker compose up -d
       fi
-      sleep 10      cd gasp-e2e && yarn install
+      sleep 10      
+      cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
       yarn test-bootstrap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
