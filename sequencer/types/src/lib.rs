@@ -3,6 +3,7 @@ use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
 use parity_scale_codec::{Decode, Encode};
 pub use primitive_types::{H256, U256};
 use sha3::{Digest, Keccak256};
+use hex_literal::hex;
 
 // since its only used in l2api lets just use it instead of defining own types
 pub type PendingUpdateMetadata =
@@ -181,7 +182,8 @@ pub struct Cancel {
 impl Cancel {
     pub fn cancel_hash(&self) -> H256 {
         let encoded = Into::<l1types::Cancel>::into(*self).abi_encode();
-        let data = vec![0u8; 32].into_iter().chain(encoded);
+        let prefix = hex!("0000000000000000000000000000000000000000000000000000000000000001");
+        let data = prefix.into_iter().chain(encoded);
         let hash: [u8; 32] = Keccak256::digest(&data.collect::<Vec<_>>()).into();
         hash.into()
     }
@@ -199,7 +201,7 @@ pub struct Withdrawal {
 impl Withdrawal {
     pub fn withdrawal_hash(&self) -> H256 {
         let encoded = Into::<l1types::Withdrawal>::into(*self).abi_encode();
-        let data = vec![0u8; 32].into_iter().chain(encoded);
+        let data = [0u8; 32].into_iter().chain(encoded);
         let hash: [u8; 32] = Keccak256::digest(&data.collect::<Vec<_>>()).into();
         hash.into()
     }
