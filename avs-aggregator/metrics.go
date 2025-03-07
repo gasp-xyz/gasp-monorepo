@@ -20,14 +20,14 @@ func recordMetrics(logger sdklogging.Logger, rpc *chainio.EthRpc) {
 	go func() {
 		for {
 
-			address, err := rpc.Clients.Wallet.SenderAddress(context.Background())
+			address, err := rpc.Clients.SenderAddress(context.Background())
 			if err != nil {
 				logger.Error("Could not get account address", "err", err)
 				time.Sleep(60 * time.Second)
 				continue
 			}
 
-			latest, err := rpc.Clients.EthHttpClient.BlockNumber(context.Background())
+			latest, err := rpc.Clients.BlockNumber(context.Background())
 			if err != nil {
 				logger.Error("Could not get latest block number", "err", err)
 				time.Sleep(60 * time.Second)

@@ -126,7 +126,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 		osu.logger.Debug("Checking if any operators are already registered")
 		// Wait here till atleast 1 operator has registered
 		// So that on local testnet the finalizer can register
-		currentBlock, err := osu.ethRpc.Clients.EthHttpClient.BlockNumber(context.Background())
+		currentBlock, err := osu.ethRpc.Clients.BlockNumber(context.Background())
 		if err != nil {
 			osu.errorC <- fmt.Errorf("OpStateUpdater failed to get BlockNumber: err: %v", err)
 			return
@@ -846,7 +846,7 @@ func (osu *OpStateUpdater) processOpStakeRegistryStateChange(operatorId sdktypes
 
 	if isQuorumTracked {
 
-		operator, err := osu.ethRpc.Clients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, operatorId)
+		operator, err := osu.ethRpc.Clients.GetOperatorFromId(&bind.CallOpts{}, operatorId)
 		if err != nil {
 			ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorFromId: err: %v, operator: %v, atBlock: %v", err, operatorId, blockNumber)
 			osu.logger.Error(ierr.Error())
@@ -886,7 +886,7 @@ func (osu *OpStateUpdater) processOpStakeRegistryStateChange(operatorId sdktypes
 
 func (osu *OpStateUpdater) processOpDelegationStateChange(operator common.Address, blockNumber sdktypes.BlockNum) error {
 
-	operatorId, err := osu.ethRpc.Clients.AvsRegistryChainReader.GetOperatorId(&bind.CallOpts{}, operator)
+	operatorId, err := osu.ethRpc.Clients.GetOperatorId(&bind.CallOpts{}, operator)
 	if err != nil {
 		ierr := fmt.Errorf("OpStateUpdater failed to GetOperatorId: err: %v, operator: %v, atBlock: %v", err, operator, blockNumber)
 		osu.logger.Error(ierr.Error())
@@ -1073,7 +1073,7 @@ func (osu *OpStateUpdater) UpdateStakeFull() error {
 func (osu *OpStateUpdater) UpdateStateForEntireQuorums(quorumNums sdktypes.QuorumNums) error {
 	osu.logger.Info("Running Operator Stake Update check")
 
-	currentBlock, err := osu.ethRpc.Clients.EthHttpClient.BlockNumber(context.Background())
+	currentBlock, err := osu.ethRpc.Clients.BlockNumber(context.Background())
 	if err != nil {
 		ierr := fmt.Errorf("OpStateUpdater failed to get BlockNumber: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, quorumNums)
 		osu.logger.Error(ierr.Error())
@@ -1106,7 +1106,7 @@ func (osu *OpStateUpdater) UpdateStateForEntireQuorums(quorumNums sdktypes.Quoru
 
 	}
 
-	_, err = osu.ethRpc.Clients.AvsRegistryChainWriter.UpdateStakesOfEntireOperatorSetForQuorums(context.Background(), operatorAddresses, quorumNums, waitForReceipt)
+	_, err = osu.ethRpc.Clients.UpdateStakesOfEntireOperatorSetForQuorums(context.Background(), operatorAddresses, quorumNums, waitForReceipt)
 	if err != nil {
 		ierr := fmt.Errorf("OpStateUpdater failed to UpdateStakesOfEntireOperatorSetForQuorums: err: %v, atBlock: %v, quorumNums: %v", err, currentBlock, quorumNums)
 		osu.logger.Error(ierr.Error())
@@ -1121,12 +1121,6 @@ func (osu *OpStateUpdater) UpdateStateForEntireQuorums(quorumNums sdktypes.Quoru
 func (osu *OpStateUpdater) UpdateStateForOperatorIds(operatorIds []sdktypes.OperatorId) error {
 	osu.logger.Info("Running Operator Stake Update check")
 
-	// currentBlock, err := osu.ethRpc.Clients.EthHttpClient.BlockNumber(context.Background())
-	// if err != nil {
-	// 	osu.logger.Error("Cannot get current block number", "err", err)
-	// 	return err
-	// }
-
 	if len(operatorIds) == 0{
 		osu.logger.Info("UpdateStateForOperatorIds skipped", "operatorIds len", len(operatorIds))
 		return nil
@@ -1139,7 +1133,7 @@ func (osu *OpStateUpdater) UpdateStateForOperatorIds(operatorIds []sdktypes.Oper
 		return ierr
 	}
 
-	_, err = osu.ethRpc.Clients.AvsRegistryChainWriter.UpdateStakesOfOperatorSubsetForAllQuorums(context.Background(), operatorAdrresses, waitForReceipt)
+	_, err = osu.ethRpc.Clients.UpdateStakesOfOperatorSubsetForAllQuorums(context.Background(), operatorAdrresses, waitForReceipt)
 	if err != nil {
 		ierr := fmt.Errorf("OpStateUpdater failed to UpdateStakesOfOperatorSubsetForAllQuorums: err: %v", err)
 		osu.logger.Error(ierr.Error())

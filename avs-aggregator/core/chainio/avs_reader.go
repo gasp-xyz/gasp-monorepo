@@ -31,14 +31,28 @@ type AvsReaderer interface {
 	GetRdTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
 
 	GetNonSigningOperatorPubKeys(event taskmanager.ContractFinalizerTaskManagerRdTaskResponded) ([]*bls.G1Point, error)
+	
+	IsTaskPending(ctx context.Context) (bool, error)
+	LastCompletedOpTaskCreatedBlock(ctx context.Context) (uint32, error)
+	LatestOpTaskNum(ctx context.Context) (uint32, error)
+	LatestRdTaskNum(ctx context.Context) (uint32, error)
+	LastOpTaskCreatedBlock(ctx context.Context) (uint32, error)
+	LastRdTaskCreatedBlock(ctx context.Context) (uint32, error)
+	IdToTaskStatus(ctx context.Context, taskType uint8, taskIndex uint32) (uint8, error)
+	ChainRdBatchNonce(ctx context.Context, chainIndex uint8) (uint32, error)
+	LastCompletedOpTaskCreatedBlockAtBlock(ctx context.Context, atBlock uint64) (uint32, error)
+	GetOperatorsFromIds(opts *bind.CallOpts, registryCoordinatorAddr common.Address, operatorIds []sdktypes.OperatorId) ([]common.Address, error)
+	GetTypedOperatorsStakesForQuorumAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers sdktypes.QuorumNums, operatorAddr []common.Address, blockNumber sdktypes.BlockNum) (map[sdktypes.OperatorId]types.OperatorAvsState, error)
+	GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers sdktypes.QuorumNums, blockNumber sdktypes.BlockNum) (map[sdktypes.OperatorId]types.OperatorAvsState, error)
+	GetOperatorIdList(opts *bind.CallOpts, quorum sdktypes.QuorumNum, blockNumber uint32) ([]sdktypes.OperatorId, error)
 }
+
+var _ AvsReaderer = (*AvsReader)(nil)
 
 type AvsReader struct {
 	AvsServiceBindings *AvsServiceBindings
 	logger             logging.Logger
 }
-
-var _ AvsReaderer = (*AvsReader)(nil)
 
 func NewAvsReaderFromConfig(
 	registry common.Address,
