@@ -81,7 +81,7 @@ func (k *Kicker) CheckStateAndKick() error {
 	addresses := make([]common.Address, 0)
 	for key, isNonSigner := range nonSigningOperatorIds {
 		if isNonSigner{
-			address, err := k.ethRpc.Clients.AvsRegistryChainReader.GetOperatorFromId(&bind.CallOpts{}, key)
+			address, err := k.ethRpc.Clients.GetOperatorFromId(&bind.CallOpts{}, key)
 			if err != nil {
 				k.logger.Error("Cannot get operator address", "operatorId", hexutil.Encode(key[:]), "err", err)
 				return err
