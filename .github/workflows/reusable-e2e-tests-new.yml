@@ -21,6 +21,7 @@ permissions:
 
 env:
   MOON_COLOR: 2
+  CACHE_VERSION: 1
 
 jobs:
   setup-report:
@@ -121,7 +122,7 @@ jobs:
           #####################################################################
           - command: "moon gasp-node:e2e-test-rollup"
             name: "[avs] test-rollup"
-    runs-on: [e2e-gke]
+    runs-on: ubuntu-24.04
     name: ${{ matrix.name }}
     timeout-minutes: 180
     defaults:
@@ -135,8 +136,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
           fetch-depth: 0
+          submodules: false
+      - name: Cache Git submodules
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            .git/modules
+          key: submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-
+            submodules-${{ env.CACHE_VERSION }}-
+      - run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive --depth 1
 
       - uses: moonrepo/setup-rust@v1
         name: Setup nightly-2024-01-20 rust toolchain
@@ -147,21 +161,38 @@ jobs:
           cache: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install proto manually
-        run: |
-          curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
-          bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
-          echo "$HOME/.proto/bin" >> $GITHUB_PATH
-      - run: cd gasp-e2e && proto setup --yes
-      - run: cd gasp-e2e && proto install
+      # - name: Install proto manually
+      #   run: |
+      #     curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
+      #     bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
+      #     echo "$HOME/.proto/bin" >> $GITHUB_PATH
+      # - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && proto setup --yes && proto install
 
       - uses: docker/setup-compose-action@v1
       - uses: actions/setup-node@v4
         with:
-          node-version: "18.19.0"
-          cache: yarn
-          cache-dependency-path: "./gasp-node/gasp-e2e/yarn.lock"
-      - run: cd gasp-e2e && yarn install --immutable
+          node-version: "18.20.7"
+
+      - name: Get Yarn cache directory and version
+        id: yarn-cache
+        run: |
+          YARN_VERSION=$(yarn --version)
+          if [[ "$YARN_VERSION" =~ ^1\. ]]; then
+            CACHE_DIR=$(yarn cache dir)
+            echo "version=1" >> $GITHUB_OUTPUT
+          else
+            CACHE_DIR=$(yarn config get cacheFolder)
+            echo "version=2plus" >> $GITHUB_OUTPUT
+          fi
+          echo "dir=$CACHE_DIR" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-${{ env.CACHE_VERSION }}-yarn-${{ steps.yarn-cache.outputs.version }}-${{ hashFiles('gasp-node/gasp-e2e/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.CACHE_VERSION }}-yarn-${{ steps.yarn-cache.outputs.version }}-
+
+      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install --immutable
 
       - name: E2E- Get branch name
         id: branch-name
@@ -170,19 +201,13 @@ jobs:
       - name: Current branch name for generating types
         run: echo "GASP_TYPES_VERSION=${{ steps.branch-name.outputs.current_branch }}" | sed -E 's@[/\.]@-@g; s@_@-@g' >> $GITHUB_ENV
 
-      - run: cd gasp-e2e && yarn install
-      - run: cd gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
-
-      - name: Cache Jest
-        uses: actions/cache@v4
+      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install
+      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
+      
+      - uses: moonrepo/setup-toolchain@v0.4.0
         with:
-          path: gasp-node/gasp-e2e/node_modules/.cache/jest
-          key: ${{ runner.os }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-${{ inputs.globalVersion }}
-          restore-keys: |
-            ${{ runner.os }}-jest-${{ hashFiles('gasp-node/gasp-e2e/package.json') }}-
-            ${{ runner.os }}-jest-
-
-      - run: moon setup
+          cache-version: ${{ env.CACHE_VERSION }}
+      # - run: moon setup
       - name: Run tests
         run: ${{ matrix.command }}
         env:

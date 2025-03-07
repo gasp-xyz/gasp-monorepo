@@ -213,7 +213,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -233,7 +239,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10      
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -253,7 +265,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -273,7 +291,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -293,7 +317,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -313,7 +343,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -333,7 +369,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -353,7 +395,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -373,7 +421,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -393,7 +447,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -413,7 +473,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -433,7 +499,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -453,7 +525,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -473,7 +551,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -493,7 +577,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -513,7 +603,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -533,7 +629,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -553,7 +655,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -573,7 +681,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -593,7 +707,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -613,7 +733,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -633,7 +759,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -653,7 +785,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -673,7 +811,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -693,7 +837,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -713,7 +863,13 @@ tasks:
     script: |
       set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
-      docker compose down && docker compose up -d && sleep 10
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      sleep 10
       cd gasp-e2e && yarn install
       rm -rf reports/*.xml || true
       
@@ -741,7 +897,12 @@ tasks:
       export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
       export UPDATER_VERSION=${IMAGE_TAG:-ci}
 
-      docker compose down && docker compose up -d
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
 
       cd $workspaceRoot/gasp-node/gasp-e2e && yarn install
       rm -rf $workspaceRoot/gasp-node/gasp-e2e/reports/*.xml || true
@@ -761,38 +922,35 @@ tasks:
     inputs: 
       - '@globs(sources)'
       - '@globs(gasp-e2e-sources)'
+      - '/gasp-avs/bindings/**/*.rs'
       - '/gasp-avs/src/**/*.rs'
       - '/gasp-avs/Cargo.toml'
       - '/gasp-avs/Cargo.lock'
-      - '/gasp-avs/bindings/**/*'
       - '/ferry-deposit/src/**/*.ts'
       - '/ferry-deposit/package.json'
       - '/ferry-deposit/yarn.lock'
       - '/ferry-withdrawal/**/*.ts'
       - '/ferry-withdrawal/package.json'
       - '/ferry-withdrawal/yarn.lock'
-      - "/contracts/lib/**/*"
-      - "/contracts/src/**/*"
-      - "/contracts/test/**/*"
-      - "/contracts/script/**/*"
+      - "/contracts/lib/**/*.sol"
+      - "/contracts/src/**/*.sol"
+      - "/contracts/test/**/*.sol"
+      - "/contracts/script/**/*.sol"
       - "/contracts/tools/**/*"
       - "/contracts/package.json"
       - "/contracts/foundry.toml"
       - "/contracts/remappings.txt"
-      - '/sequencer/bindings/**/*'
-      - '/sequencer/src/**/*'
+      - '/sequencer/bindings/**/*.rs'
+      - '/sequencer/src/**/*.rs'
       - '/sequencer/Cargo.toml'
-      - '/updater/bindings/**/*'
-      - '/updater/src/**/*'
+      - '/updater/bindings/**/*.rs'
+      - '/updater/src/**/*.rs'
       - '/updater/Cargo.toml'
-      - '/avs-eigensdk-go/**/*.go'
-      - '/avs-eigensdk-go/**/go.mod'
-      - '/avs-aggregator/**/*'
-      - '/avs-aggregator/bindings/**/*'
-      - '/avs-aggregator/cmd/**/*'
-      - '/avs-aggregator/core/**/*'
-      - '/avs-aggregator/mocks/**/*'
-      - '/avs-aggregator/types/**/*'
+      # - '/avs-aggregator/bindings/**/*.rs'
+      # - '/avs-aggregator/cmd/**/*'
+      # - '/avs-aggregator/core/**/*'
+      # - '/avs-aggregator/mocks/**/*'
+      # - '/avs-aggregator/types/**/*'
       - '/avs-aggregator/go.mod'
       - '/avs-aggregator/go.sum'
       - '/avs-aggregator/*.go'

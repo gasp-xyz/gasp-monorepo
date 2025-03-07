@@ -7,10 +7,10 @@ toolchain:
 
 fileGroups:
   sources:
-    - "lib/**/*"
-    - "src/**/*"
-    - "test/**/*"
-    - "script/**/*"
+    - "lib/**/*.sol"
+    - "src/**/*.sol"
+    - "test/**/*.sol"
+    - "script/**/*.sol"
     - "tools/**/*"
     - package.json
     - foundry.toml
