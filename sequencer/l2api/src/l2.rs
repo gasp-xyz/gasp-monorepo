@@ -641,7 +641,7 @@ impl L2Interface for Gasp {
 #[cfg(test)]
 mod test {
     use super::*;
-    // use crate::sequencer::test::{to_u256, Request, UpdateBuilder};
+    use gasp_types::L1Update;
     use hex_literal::hex;
     use serial_test::serial;
 
@@ -667,20 +667,19 @@ mod test {
     }
 
     //TODO:
-    #[serial]
-    #[skip]
-    #[tokio::test]
-    async fn test_can_submit_multiple_tx_in_a_row() {
-        let gasp = Gasp::new(URI, BALTATHAR_PKEY)
-            .await
-            .expect("can connect to gasp");
-        gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
-            .await
-            .expect("can submit withdrawal");
-        gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
-            .await
-            .expect("can submit withdrawal");
-    }
+    // #[serial]
+    // #[tokio::test]
+    // async fn test_can_submit_multiple_tx_in_a_row() {
+    //     let gasp = Gasp::new(URI, BALTATHAR_PKEY)
+    //         .await
+    //         .expect("can connect to gasp");
+    //     gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
+    //         .await
+    //         .expect("can submit withdrawal");
+    //     gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
+    //         .await
+    //         .expect("can submit withdrawal");
+    // }
 
     #[serial]
     #[tokio::test]
@@ -816,20 +815,24 @@ mod test {
             .get_latest_processed_request_id(ETHEREUM, at)
             .await
             .unwrap();
+
         let next_req_id = latest_req_id.saturating_add(1u128);
-        let update = UpdateBuilder::new()
-            .with_request(Request::Deposit(types::Deposit {
+
+        let update = L1Update {
+            chain: types::Chain::Ethereum,
+            pendingDeposits: vec![types::Deposit {
                 requestId: types::RequestId {
                     origin: types::Origin::L1,
                     id: next_req_id,
                 },
                 depositRecipient: DUMMY_ADDR,
                 tokenAddress: DUMMY_ADDR,
-                amount: to_u256(100u128),
-                timeStamp: to_u256(0u128),
-                ferryTip: to_u256(0u128),
-            }))
-            .build(ETHEREUM);
+                amount: gasp_types::into_l2_u256(gasp_types::U256::from(100u128)),
+                timeStamp: gasp_types::into_l2_u256(gasp_types::U256::from(0u128)),
+                ferryTip: gasp_types::into_l2_u256(gasp_types::U256::from(0u128)),
+            }],
+            pendingCancelResolutions: vec![]
+        };
 
         let status = gasp
             .update_l1_from_l2_unsafe(update)
