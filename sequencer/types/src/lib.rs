@@ -1,11 +1,14 @@
+use alloy::sol_types::SolValue;
 use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
 use parity_scale_codec::{Decode, Encode};
-use primitive_types::U256;
+pub use primitive_types::{H256, U256};
+use sha3::{Digest, Keccak256};
 
 // since its only used in l2api lets just use it instead of defining own types
 pub type PendingUpdateMetadata =
     gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata<AccountId20>;
 pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update;
+
 
 mod l2types {
     pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
@@ -125,15 +128,15 @@ impl Into<l1types::Origin> for Origin {
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct RequestId {
-    origin: Origin,
-    request_id: U256,
+    pub origin: Origin,
+    pub id: U256,
 }
 
 impl From<l2types::RequestId> for RequestId {
     fn from(value: l2types::RequestId) -> Self {
         RequestId {
             origin: value.origin.into(),
-            request_id: U256::from(value.id),
+            id: U256::from(value.id),
         }
     }
 }
@@ -144,7 +147,7 @@ impl From<l1types::RequestId> for RequestId {
 
         RequestId {
             origin: Origin::from(origin),
-            request_id: from_l1_u256(value.id),
+            id: from_l1_u256(value.id),
         }
     }
 }
@@ -153,7 +156,7 @@ impl Into<l2types::RequestId> for RequestId {
     fn into(self) -> l2types::RequestId {
         l2types::RequestId {
             origin: self.origin.into(),
-            id: U256::from(self.request_id).try_into().unwrap(),
+            id: U256::from(self.id).try_into().unwrap(),
         }
     }
 }
@@ -163,7 +166,7 @@ impl Into<l1types::RequestId> for RequestId {
         let origin: l1types::Origin = self.origin.into();
         l1types::RequestId {
             origin: origin.into(),
-            id: into_l1_u256(self.request_id),
+            id: into_l1_u256(self.id),
         }
     }
 }
@@ -175,6 +178,15 @@ pub struct Cancel {
     pub hash: [u8; 32],
 }
 
+impl Cancel {
+    pub fn cancel_hash(&self) -> H256 {
+        let encoded = Into::<l1types::Cancel>::into(*self).abi_encode();
+        let data = vec![0u8; 32].into_iter().chain(encoded);
+        let hash: [u8; 32] = Keccak256::digest(&data.collect::<Vec<_>>()).into();
+        hash.into()
+    }
+}
+
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Withdrawal {
     pub request_id: RequestId,
@@ -182,6 +194,15 @@ pub struct Withdrawal {
     pub token_address: [u8; 20],
     pub amount: U256,
     pub ferry_tip: U256,
+}
+
+impl Withdrawal {
+    pub fn withdrawal_hash(&self) -> H256 {
+        let encoded = Into::<l1types::Withdrawal>::into(*self).abi_encode();
+        let data = vec![0u8; 32].into_iter().chain(encoded);
+        let hash: [u8; 32] = Keccak256::digest(&data.collect::<Vec<_>>()).into();
+        hash.into()
+    }
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]

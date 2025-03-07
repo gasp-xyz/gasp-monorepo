@@ -118,14 +118,14 @@ where
         root: [u8; 32],
         range: (u128, u128),
     ) -> Result<(), L1Error> where {
+
         let range = contract_bindings::rolldown::IRolldownPrimitives::Range {
-            start: alloy::primitives::U256::from(range.0),
-            end: alloy::primitives::U256::from(range.1),
+            start: gasp_types::into_l1_u256(gasp_types::U256::from(range.0)),
+            end: gasp_types::into_l1_u256(gasp_types::U256::from(range.1)),
         };
 
         let call = self.contract_handle.update_l1_from_l2(root.into(), range);
 
-        tracing::info!("hello world!!!!!!");
         simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?;
         Ok(())
     }

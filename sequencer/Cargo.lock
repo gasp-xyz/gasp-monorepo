@@ -312,7 +312,7 @@ dependencies = [
  "ruint",
  "rustc-hash",
  "serde",
- "sha3",
+ "sha3 0.10.8",
  "tiny-keccak",
 ]
 
@@ -1151,6 +1151,7 @@ version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4152116fd6e9dadb291ae18fc1ec3575ed6d84c29642d97890f4b4a3417297e4"
 dependencies = [
+ "block-padding",
  "generic-array",
 ]
 
@@ -1162,6 +1163,12 @@ checksum = "3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71"
 dependencies = [
  "generic-array",
 ]
+
+[[package]]
+name = "block-padding"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 
 [[package]]
 name = "blocking"
@@ -1298,7 +1305,7 @@ dependencies = [
  "prometheus",
  "serde",
  "serial_test",
- "sha3",
+ "sha3 0.10.8",
  "thiserror 2.0.3",
  "tokio",
  "tracing",
@@ -2027,7 +2034,7 @@ dependencies = [
  "scale-info",
  "secp256k1 0.28.2",
  "serde",
- "sha3",
+ "sha3 0.10.8",
  "subxt",
  "subxt-signer",
  "thiserror 2.0.3",
@@ -2048,6 +2055,7 @@ dependencies = [
  "hex-literal",
  "parity-scale-codec",
  "primitive-types 0.13.1",
+ "sha3 0.9.1",
 ]
 
 [[package]]
@@ -2683,7 +2691,7 @@ dependencies = [
  "secp256k1 0.28.2",
  "serde",
  "serial_test",
- "sha3",
+ "sha3 0.10.8",
  "subxt",
  "subxt-signer",
  "thiserror 2.0.3",
@@ -2715,7 +2723,7 @@ dependencies = [
  "secp256k1 0.28.2",
  "serde",
  "serial_test",
- "sha3",
+ "sha3 0.10.8",
  "subxt",
  "subxt-signer",
  "thiserror 2.0.3",
@@ -4253,7 +4261,7 @@ dependencies = [
  "secp256k1 0.28.2",
  "serde",
  "serial_test",
- "sha3",
+ "sha3 0.10.8",
  "subxt",
  "subxt-signer",
  "thiserror 2.0.3",
@@ -4376,6 +4384,18 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest 0.10.7",
+]
+
+[[package]]
+name = "sha3"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f81199417d4e5de3f04b1e871023acea7389672c4135918f05aa9cbf2f2fa809"
+dependencies = [
+ "block-buffer 0.9.0",
+ "digest 0.9.0",
+ "keccak",
+ "opaque-debug",
 ]
 
 [[package]]
@@ -4516,7 +4536,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.8",
- "sha3",
+ "sha3 0.10.8",
  "siphasher",
  "slab",
  "smallvec",
@@ -4598,7 +4618,7 @@ dependencies = [
  "byteorder",
  "digest 0.10.7",
  "sha2 0.10.8",
- "sha3",
+ "sha3 0.10.8",
  "twox-hash",
 ]
 

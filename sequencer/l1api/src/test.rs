@@ -1,6 +1,7 @@
 use super::*;
 use crate::create_provider;
 use crate::utils::test_utils::DevToken;
+use gasp_types::{Origin, RequestId, U256};
 use hex_literal::hex;
 use serial_test::serial;
 use tracing_test::traced_test;
@@ -49,14 +50,14 @@ async fn test_withdrawal_hash() {
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
 
     let withdrawal = gasp_types::Withdrawal {
-        request_id: 123u128,
+        request_id: RequestId { id: 123u128.into(), origin: Origin::L2},
         recipient: hex!("ffffffffffffffffffffffffffffffffffffffff"),
         token_address: hex!("1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f"),
         amount: 123456u128.into(),
         ferry_tip: 465789u128.into(),
     };
 
-    let withdrawal_hash = withdrawal.hash();
+    let withdrawal_hash = withdrawal.withdrawal_hash();
     let contract_calculated_hash = rolldown.hash(withdrawal.clone()).await.unwrap();
 
     assert_eq!(withdrawal_hash, contract_calculated_hash);
@@ -72,13 +73,13 @@ async fn test_ferry_withdrawal() {
     let l1 = L1::new(rolldown.clone(), provider);
 
     let withdrawal = gasp_types::Withdrawal {
-        request_id: 1u128,
+        request_id: RequestId { id: 1u128.into(), origin: Origin::L2},
         recipient: hex!("1111111111111111111111111111111111111111"),
         token_address: dev_token.address(),
         amount: 100u128.into(),
         ferry_tip: 1u128.into(),
     };
-    let withdrawal_hash = withdrawal.hash();
+    let withdrawal_hash = withdrawal.withdrawal_hash();
 
     dev_token.mint(ALICE_ADDRESS, 100u128).await.unwrap();
     dev_token
@@ -103,7 +104,7 @@ async fn test_close_withdrawal() {
     let l1 = L1::new(rolldown.clone(), provider);
 
     let withdrawal = gasp_types::Withdrawal {
-        request_id: 1u128,
+        request_id: RequestId { id: 1u128.into(), origin: Origin::L2},
         recipient: hex!("1111111111111111111111111111111111111111"),
         token_address: dev_token.address(),
         amount: 100u128.into(),
@@ -114,24 +115,24 @@ async fn test_close_withdrawal() {
     // dev_token.approve(rolldown.address(), 100u128).await.unwrap();
 
     assert_eq!(
-        l1.get_status(withdrawal.hash()).await.unwrap(),
+        l1.get_status(withdrawal.withdrawal_hash()).await.unwrap(),
         RequestStatus::Pending
     );
 
     rolldown
         .submit_merkle_root(
-            withdrawal.hash().into(),
-            (withdrawal.request_id, withdrawal.request_id),
+            withdrawal.withdrawal_hash().into(),
+            (withdrawal.request_id.id.try_into().unwrap(), withdrawal.request_id.id.try_into().unwrap()),
         )
         .await
         .unwrap();
 
-    l1.close_withdrawal(withdrawal, withdrawal.hash(), vec![])
+    l1.close_withdrawal(withdrawal, withdrawal.withdrawal_hash(), vec![])
         .await
         .unwrap();
 
     assert_eq!(
-        l1.get_status(withdrawal.hash()).await.unwrap(),
+        l1.get_status(withdrawal.withdrawal_hash()).await.unwrap(),
         RequestStatus::Closed
     );
 }
@@ -141,28 +142,27 @@ async fn test_close_withdrawal() {
 async fn test_close_cancel() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
-    let dev_token = DevToken::deploy(provider.clone()).await.unwrap();
     let l1 = L1::new(rolldown.clone(), provider);
 
     rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
 
-    let cancel = L1Cancel {
-        request_id: 1u128,
-        range: (1u128, 1u128),
+    let cancel = gasp_types::Cancel {
+        request_id: RequestId { id: 1u128.into(), origin: Origin::L2},
+        range: (U256::from(1u128), U256::from(1u128)),
         hash: hex!("1111111111111111111111111111111111111111111111111111111111111111"),
     };
 
     rolldown
-        .submit_merkle_root(cancel.hash().into(), (cancel.request_id, cancel.request_id))
+        .submit_merkle_root(cancel.cancel_hash().into(), (cancel.request_id.id.try_into().unwrap(), cancel.request_id.id.try_into().unwrap()))
         .await
         .unwrap();
 
-    l1.close_cancel(cancel, cancel.hash(), vec![])
+    l1.close_cancel(cancel, cancel.cancel_hash(), vec![])
         .await
         .unwrap();
 
     assert_eq!(
-        l1.get_status(cancel.hash()).await.unwrap(),
+        l1.get_status(cancel.cancel_hash()).await.unwrap(),
         RequestStatus::Closed
     );
 }
