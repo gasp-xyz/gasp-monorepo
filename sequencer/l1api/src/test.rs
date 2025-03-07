@@ -48,12 +48,12 @@ async fn test_withdrawal_hash() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
 
-    let withdrawal = L1Withdrawal {
+    let withdrawal = gasp_types::Withdrawal {
         request_id: 123u128,
         recipient: hex!("ffffffffffffffffffffffffffffffffffffffff"),
         token_address: hex!("1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f"),
-        amount: 123456u128,
-        ferry_tip: 465789u128,
+        amount: 123456u128.into(),
+        ferry_tip: 465789u128.into(),
     };
 
     let withdrawal_hash = withdrawal.hash();
@@ -71,12 +71,12 @@ async fn test_ferry_withdrawal() {
     let dev_token = DevToken::deploy(provider.clone()).await.unwrap();
     let l1 = L1::new(rolldown.clone(), provider);
 
-    let withdrawal = L1Withdrawal {
+    let withdrawal = gasp_types::Withdrawal {
         request_id: 1u128,
         recipient: hex!("1111111111111111111111111111111111111111"),
         token_address: dev_token.address(),
-        amount: 100u128,
-        ferry_tip: 1u128,
+        amount: 100u128.into(),
+        ferry_tip: 1u128.into(),
     };
     let withdrawal_hash = withdrawal.hash();
 
@@ -102,12 +102,12 @@ async fn test_close_withdrawal() {
     let dev_token = DevToken::deploy(provider.clone()).await.unwrap();
     let l1 = L1::new(rolldown.clone(), provider);
 
-    let withdrawal = L1Withdrawal {
+    let withdrawal = gasp_types::Withdrawal {
         request_id: 1u128,
         recipient: hex!("1111111111111111111111111111111111111111"),
         token_address: dev_token.address(),
-        amount: 100u128,
-        ferry_tip: 1u128,
+        amount: 100u128.into(),
+        ferry_tip: 1u128.into(),
     };
 
     dev_token.mint(rolldown.address(), 100u128).await.unwrap();

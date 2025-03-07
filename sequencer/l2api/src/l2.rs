@@ -1,11 +1,12 @@
+use gasp_types::L2Request;
 use std::collections::HashMap;
 use std::pin::Pin;
-use gasp_types::L2Request;
 
 use futures::future::join_all;
 use futures::Stream;
 use hex::encode as hex_encode;
 
+use crate::L2Error;
 use futures::StreamExt;
 use primitive_types::H256;
 use subxt::ext::subxt_core;
@@ -13,18 +14,17 @@ use subxt::ext::subxt_core::storage::address::StorageHashers;
 use subxt::storage::StorageKey;
 use subxt::Config;
 use subxt::OnlineClient;
-use crate::L2Error;
 
 use crate::signer::Keypair;
-use crate::HashOf;
-use crate::L2Interface;
 use crate::EndDisputePeriod;
-use crate::PendingUpdateWithKeys;
+use crate::HashOf;
 use crate::HeaderStream;
+use crate::L2Interface;
+use crate::PendingUpdateWithKeys;
 
-use gasp_bindings::{GaspAddress, GaspConfig, GaspSignature};
 use gasp_bindings::api::runtime_types::frame_system::EventRecord;
 use gasp_bindings::api::runtime_types::rollup_runtime::RuntimeEvent;
+use gasp_bindings::{GaspAddress, GaspConfig, GaspSignature};
 
 pub mod types {
 
@@ -42,6 +42,10 @@ pub mod types {
     pub type PendingUpdateMetadata = UpdateMetadata<AccountId20>;
 }
 
+pub enum Finalization {
+    Best,
+    Finalized,
+}
 
 #[derive(Debug)]
 pub struct PendingUpdate {
@@ -54,14 +58,10 @@ pub struct PendingUpdate {
 use types::RequestId;
 pub type L2Event = EventRecord<RuntimeEvent, H256>;
 
-
-
 pub struct Gasp {
     client: OnlineClient<GaspConfig>,
     keypair: Keypair,
 }
-
-
 
 impl Gasp {
     pub async fn new(uri: &str, secret_key: [u8; 32]) -> Result<Self, L2Error> {
@@ -72,8 +72,6 @@ impl Gasp {
             keypair: Keypair::from_secret_key(secret_key),
         })
     }
-
-
 
     async fn get_events(&self, at: HashOf<GaspConfig>) -> Result<Vec<L2Event>, L2Error> {
         let storage = gasp_bindings::api::storage().system().events();
@@ -88,7 +86,7 @@ impl Gasp {
 
     #[tracing::instrument(skip(self))]
     async fn wait_for_tx_execution(&self, tx_hash: HashOf<GaspConfig>) -> Result<bool, L2Error> {
-        let mut stream = self.finalized_header_stream().await?;
+        let mut stream = self.header_stream(Finalization::Best).await?;
 
         while let Some(header) = stream.next().await {
             let (number, hash) = header?;
@@ -165,14 +163,16 @@ impl Gasp {
         &self,
         update: gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update,
     ) -> Result<bool, L2Error> {
-        let call = gasp_bindings::api::tx().rolldown().update_l2_from_l1_unsafe(update);
+        let call = gasp_bindings::api::tx()
+            .rolldown()
+            .update_l2_from_l1_unsafe(update);
         self.sign_and_send(call).await
     }
 
     #[cfg(test)]
     pub async fn wait_for_next_block(&self) -> Result<(), L2Error> {
         let (best, _header) = self.latest_block().await?;
-        let mut stream = self.header_stream().await?;
+        let mut stream = self.header_stream(Finalization::Best).await?;
 
         while let Some(item) = stream.next().await {
             let (number, _hash) = item?;
@@ -185,7 +185,7 @@ impl Gasp {
 
     #[cfg(test)]
     pub async fn latest_block(&self) -> Result<(u32, HashOf<GaspConfig>), L2Error> {
-        let mut stream = self.header_stream().await?;
+        let mut stream = self.header_stream(Finalization::Best).await?;
         stream
             .next()
             .await
@@ -195,12 +195,13 @@ impl Gasp {
     #[cfg(test)]
     pub async fn withdraw(
         &self,
-        chain: types::Chain,
+        chain: gasp_types::Chain,
         recipient: [u8; 20],
         token: [u8; 20],
         amount: u128,
         ferry_tip: Option<u128>,
     ) -> Result<bool, L2Error> {
+        let chain: types::Chain = chain.into();
         let call = gasp_bindings::api::tx()
             .rolldown()
             .withdraw(chain, recipient, token, amount, ferry_tip);
@@ -221,36 +222,36 @@ impl L2Interface for Gasp {
     ) -> Result<Option<L2Request>, L2Error> {
         pub use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::L2Request as SubxtL2Request;
 
-        let request_id = RequestId{ origin: types::Origin::L2, id: request_id };
-        let chain : types::Chain = chain.into();
-        let storage = gasp_bindings::api::storage().rolldown().l2_requests(chain, request_id);
+        let request_id = RequestId {
+            origin: types::Origin::L2,
+            id: request_id,
+        };
+        let chain: types::Chain = chain.into();
+        let storage = gasp_bindings::api::storage()
+            .rolldown()
+            .l2_requests(chain, request_id);
 
-        Ok(self
-            .client
-            .storage()
-            .at(at)
-            .fetch(&storage)
-            .await?
-            .map(|(request, hash)| match request {
-                SubxtL2Request::FailedDepositResolution(deposit) =>{
+        Ok(self.client.storage().at(at).fetch(&storage).await?.map(
+            |(request, hash)| match request {
+                SubxtL2Request::FailedDepositResolution(deposit) => {
                     todo!()
                 }
-                SubxtL2Request::Withdrawal(withdrawal) => {
-                    L2Request::Withdrawal(withdrawal.into())
-                }
+                SubxtL2Request::Withdrawal(withdrawal) => L2Request::Withdrawal(withdrawal.into()),
 
                 SubxtL2Request::Cancel(cancel) => {
                     L2Request::Cancel(gasp_types::Cancel::from(cancel))
                 }
-            }))
+            },
+        ))
     }
 
     #[tracing::instrument(skip(self))]
     async fn get_latest_processed_request_id(
         &self,
-        chain: types::Chain,
+        chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<u128, L2Error> {
+        let chain: types::Chain = chain.into();
         let storage = gasp_bindings::api::storage()
             .rolldown()
             .last_processed_request_on_l2(chain);
@@ -266,12 +267,15 @@ impl L2Interface for Gasp {
     #[tracing::instrument(skip(self))]
     async fn get_read_rights(
         &self,
-        chain: types::Chain,
+        chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<u128, L2Error> {
         use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::SequencerRights;
 
-        let storage = gasp_bindings::api::storage().rolldown().sequencers_rights(chain);
+        let chain: types::Chain = chain.into();
+        let storage = gasp_bindings::api::storage()
+            .rolldown()
+            .sequencers_rights(chain);
         let rights: HashMap<GaspAddress, SequencerRights> = self
             .client
             .storage()
@@ -292,7 +296,7 @@ impl L2Interface for Gasp {
     #[tracing::instrument(skip(self))]
     async fn get_selected_sequencer(
         &self,
-        chain: types::Chain,
+        chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Option<[u8; 20]>, L2Error> {
         let storage = gasp_bindings::api::storage()
@@ -306,6 +310,7 @@ impl L2Interface for Gasp {
             .await?
             .unwrap_or_default();
 
+        let chain: types::Chain = chain.into();
         let selected = selected
             .iter()
             .find(|(c, _)| c == &chain)
@@ -322,12 +327,15 @@ impl L2Interface for Gasp {
     #[tracing::instrument(skip(self))]
     async fn get_cancel_rights(
         &self,
-        chain: types::Chain,
+        chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<u128, L2Error> {
         use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::SequencerRights;
 
-        let storage = gasp_bindings::api::storage().rolldown().sequencers_rights(chain);
+        let chain: types::Chain = chain.into();
+        let storage = gasp_bindings::api::storage()
+            .rolldown()
+            .sequencers_rights(chain);
         let rights: HashMap<GaspAddress, SequencerRights> = self
             .client
             .storage()
@@ -349,7 +357,7 @@ impl L2Interface for Gasp {
     async fn deserialize_sequencer_update(
         &self,
         payload: Vec<u8>,
-    ) -> Result<gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update, L2Error> {
+    ) -> Result<gasp_types::L1Update, L2Error> {
         let call = gasp_bindings::api::runtime_apis::rolldown_runtime_api::RolldownRuntimeApi
             .get_native_sequencer_update(payload);
 
@@ -370,7 +378,9 @@ impl L2Interface for Gasp {
         update: gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update,
         hash: H256,
     ) -> Result<bool, L2Error> {
-        let call = gasp_bindings::api::tx().rolldown().update_l2_from_l1(update, hash);
+        let call = gasp_bindings::api::tx()
+            .rolldown()
+            .update_l2_from_l1(update, hash);
         self.sign_and_send(call).await
     }
 
@@ -378,8 +388,9 @@ impl L2Interface for Gasp {
     async fn cancel_pending_request(
         &self,
         request_id: u128,
-        chain: types::Chain,
+        chain: gasp_types::Chain,
     ) -> Result<bool, L2Error> {
+        let chain: types::Chain = chain.into();
         let call = gasp_bindings::api::tx()
             .rolldown()
             .cancel_requests_from_l1(chain, request_id);
@@ -389,9 +400,10 @@ impl L2Interface for Gasp {
     #[tracing::instrument(skip(self))]
     async fn get_pending_cancels(
         &self,
-        chain: types::Chain,
+        chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Vec<u128>, L2Error> {
+        let chain: types::Chain = chain.into();
         let storage_entry = gasp_bindings::api::storage()
             .rolldown()
             .awaiting_cancel_resolution(chain);
@@ -478,10 +490,11 @@ impl L2Interface for Gasp {
         &self,
         request_id: u128,
         range: (u128, u128),
-        chain: types::Chain,
+        chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Vec<H256>, L2Error> {
         // let range = types::Range{ start, end };
+        let chain: types::Chain = chain.into();
         let call = gasp_bindings::api::runtime_apis::rolldown_runtime_api::RolldownRuntimeApi
             .get_merkle_proof_for_tx(chain, range, request_id);
 
@@ -504,9 +517,10 @@ impl L2Interface for Gasp {
     async fn get_abi_encoded_request(
         &self,
         request_id: u128,
-        chain: types::Chain,
+        chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Vec<u8>, L2Error> {
+        let chain: types::Chain = chain.into();
         let call = gasp_bindings::api::runtime_apis::rolldown_runtime_api::RolldownRuntimeApi
             .get_abi_encoded_l2_request(chain, request_id);
 
@@ -525,7 +539,7 @@ impl L2Interface for Gasp {
     async fn get_l2_request_hash(
         &self,
         request_id: u128,
-        chain: types::Chain,
+        chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Option<H256>, L2Error> {
         let req = types::RequestId {
@@ -533,7 +547,10 @@ impl L2Interface for Gasp {
             id: request_id,
         };
 
-        let storage = gasp_bindings::api::storage().rolldown().l2_requests(chain, req);
+        let chain: types::Chain = chain.into();
+        let storage = gasp_bindings::api::storage()
+            .rolldown()
+            .l2_requests(chain, req);
         let reqeust_hash = self
             .client
             .storage()
@@ -551,40 +568,33 @@ impl L2Interface for Gasp {
         Ok(reqeust_hash)
     }
 
-    async fn header_stream(&self) -> Result<HeaderStream, L2Error> {
-        Ok(self
-            .client
-            .backend()
-            .stream_best_block_headers()
-            .await?
-            .map(|elem| {
-                elem.map(|(header, hash)| (header.number, hash.hash()))
-                    .map_err(L2Error::from)
-            })
-            .boxed())
-    }
-
-    async fn finalized_header_stream(&self) -> Result<HeaderStream, L2Error> {
-        Ok(self
-            .client
-            .backend()
-            .stream_finalized_block_headers()
-            .await?
-            .map(|elem| {
-                elem.map(|(header, hash)| (header.number, hash.hash()))
-                    .map_err(L2Error::from)
-            })
-            .boxed())
+    async fn header_stream(
+        &self,
+        finalization_type: Finalization,
+    ) -> Result<HeaderStream, L2Error> {
+        Ok(match finalization_type {
+            Finalization::Best => self.client.backend().stream_best_block_headers(),
+            Finalization::Finalized => self.client.backend().stream_finalized_block_headers(),
+        }
+        .await?
+        .map(|elem| {
+            elem.map(|(header, hash)| (header.number, hash.hash()))
+                .map_err(L2Error::from)
+        })
+        .boxed())
     }
 
     #[tracing::instrument(skip(self))]
     async fn get_active_sequencers(
         &self,
-        chain: types::Chain,
+        chain: gasp_types::Chain,
         at: H256,
     ) -> Result<Vec<[u8; 20]>, L2Error> {
-        let storage = gasp_bindings::api::storage().sequencer_staking().active_sequencers();
+        let storage = gasp_bindings::api::storage()
+            .sequencer_staking()
+            .active_sequencers();
 
+        let chain: types::Chain = chain.into();
         let active = self
             .client
             .storage()
@@ -603,234 +613,239 @@ impl L2Interface for Gasp {
     }
 
     #[tracing::instrument(skip(self))]
-    async fn get_dispute_period(&self, chain: types::Chain, at: H256) -> Result<u128, L2Error> {
+    async fn get_dispute_period(
+        &self,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<u128, L2Error> {
+        let chain: types::Chain = chain.into();
         let storage = gasp_bindings::api::storage()
             .rolldown()
             .dispute_period(chain.clone());
         let active = self.client.storage().at(at).fetch(&storage).await?;
 
         tracing::trace!("dispute period: {active:?}");
-        active.ok_or(L2Error::UnknownDisputePeriodLength(chain))
+        active.ok_or(L2Error::UnknownDisputePeriodLength(chain.into()))
     }
-
 
     async fn get_latest_created_request_id(
         &self,
-        chain: types::Chain,
+        chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<u128, L2Error> {
+        let chain: types::Chain = chain.into();
         todo!()
     }
 }
 
-//TODO: enable
-// #[cfg(test)]
-// mod test {
-//     use super::*;
-//     use crate::sequencer::test::{to_u256, Request, UpdateBuilder};
-//     use hex_literal::hex;
-//     use serial_test::serial;
-//
-//     //TODO: adcd test for L2Interace::deserialize_sequencer_update
-//
-//     const URI: &str = "ws://localhost:9944";
-//     const DUMMY_PKEY: [u8; 32] =
-//         hex!("b9d2ea9a615f3165812e8d44de0d24da9bbd164b65c4f0573e1ce2c8dbd9c8df");
-//     const DUMMY_ADDR: [u8; 20] = hex!("0000000000000000000000000000000000000000");
-//     const ALITH_PKEY: [u8; 32] =
-//         hex!("5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133");
-//     const BALTATHAR_PKEY: [u8; 32] =
-//         hex!("8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b");
-//     const TEST_TOKEN: [u8; 20] = hex!("c351628eb244ec633d5f21fbd6621e1a683b1181");
-//     const ETHEREUM: types::Chain = types::Chain::Ethereum;
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_can_connect() {
-//         Gasp::new(URI, BALTATHAR_PKEY)
-//             .await
-//             .expect("can connect to gasp");
-//     }
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_can_submit_multiple_tx_in_a_row() {
-//         let gasp = Gasp::new(URI, BALTATHAR_PKEY)
-//             .await
-//             .expect("can connect to gasp");
-//         gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
-//             .await
-//             .expect("can submit withdrawal");
-//         gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
-//             .await
-//             .expect("can submit withdrawal");
-//     }
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn can_subscribe_to_new_blocks() {
-//         let gasp = Gasp::new(URI, BALTATHAR_PKEY)
-//             .await
-//             .expect("can connect to gasp");
-//         let mut stream = gasp.header_stream().await.unwrap();
-//         let (number1, hash1) = stream.next().await.expect("can fetch next block").unwrap();
-//         let (number2, hash2) = stream.next().await.expect("can fetch next block").unwrap();
-//         assert!(number2 > number1);
-//         assert!(hash1 != hash2);
-//     }
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_can_fetch_rights() {
-//         let baltathat_gasp = Gasp::new(URI, BALTATHAR_PKEY)
-//             .await
-//             .expect("can connect to gasp");
-//         let dummy_gasp = Gasp::new(URI, DUMMY_PKEY)
-//             .await
-//             .expect("can connect to gasp");
-//
-//         let at = baltathat_gasp.latest_block().await.unwrap().1;
-//
-//         let dummy_read_rights = dummy_gasp.get_read_rights(types::Chain::Ethereum, at).await;
-//         let dummy_cancel_rights = dummy_gasp
-//             .get_cancel_rights(types::Chain::Ethereum, at)
-//             .await;
-//
-//         let baltathar_read_rights = baltathat_gasp
-//             .get_read_rights(types::Chain::Ethereum, at)
-//             .await;
-//         let baltathar_cancel_rights = baltathat_gasp
-//             .get_cancel_rights(types::Chain::Ethereum, at)
-//             .await;
-//
-//         assert!(matches!(dummy_read_rights, Err(L2Error::CanNotFetchRights)),);
-//         assert!(matches!(
-//             dummy_cancel_rights,
-//             Err(L2Error::CanNotFetchRights)
-//         ),);
-//
-//         assert_eq!(baltathar_read_rights.unwrap(), 1u128);
-//
-//         baltathar_cancel_rights.unwrap();
-//     }
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_fetch_merkle_proof() {
-//         let gasp = Gasp::new(URI, ALITH_PKEY)
-//             .await
-//             .expect("can connect to gasp");
-//         gasp.wait_for_next_block().await.unwrap();
-//
-//         assert!(gasp
-//             .withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
-//             .await
-//             .expect("can submit withdrawal"));
-//
-//         gasp.wait_for_next_block().await.unwrap();
-//         gasp.wait_for_next_block().await.unwrap();
-//         gasp.wait_for_next_block().await.unwrap();
-//
-//         assert!(gasp
-//             .withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
-//             .await
-//             .expect("can submit withdrawal"));
-//
-//         let at = gasp.latest_block().await.unwrap().1;
-//         let hash1 = gasp
-//             .get_l2_request_hash(1u128, ETHEREUM, at)
-//             .await
-//             .expect("can fetch l2 request hash")
-//             .expect("can fetch l2 request hash");
-//
-//         let hash2 = gasp
-//             .get_l2_request_hash(2u128, ETHEREUM, at)
-//             .await
-//             .expect("can fetch l2 request hash")
-//             .expect("can fetch l2 request hash");
-//
-//         assert!(hash1 != H256::zero());
-//         assert!(hash2 != H256::zero());
-//         assert!(hash1 != hash2);
-//
-//         let proofs = gasp
-//             .get_merkle_proof(1u128, (1u128, 2u128), ETHEREUM, at)
-//             .await
-//             .expect("can fetch l2 request hash");
-//
-//         assert_eq!(proofs.len(), 1_usize);
-//     }
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_can_fetch_pending_cancels() {
-//         let gasp = Gasp::new(URI, BALTATHAR_PKEY)
-//             .await
-//             .expect("can connect to gasp");
-//         let at = gasp.latest_block().await.unwrap().1;
-//         gasp.get_pending_cancels(ETHEREUM, at)
-//             .await
-//             .expect("can fetch pending cancels");
-//     }
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_can_cancel_pending_update() {
-//         let gasp = Gasp::new(URI, BALTATHAR_PKEY)
-//             .await
-//             .expect("can connect to gasp");
-//
-//         let result = gasp
-//             .cancel_pending_request(u128::MAX, ETHEREUM)
-//             .await
-//             .expect("can fetch pending cancels");
-//         assert!(!result);
-//     }
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_can_submit_and_fetch_udates() {
-//         let gasp = Gasp::new(URI, ALITH_PKEY)
-//             .await
-//             .expect("can connect to gasp");
-//         let at = gasp.latest_block().await.unwrap().1;
-//         let latest_req_id = gasp
-//             .get_latest_processed_request_id(ETHEREUM, at)
-//             .await
-//             .unwrap();
-//         let next_req_id = latest_req_id.saturating_add(1u128);
-//         let update = UpdateBuilder::new()
-//             .with_request(Request::Deposit(types::Deposit {
-//                 requestId: types::RequestId {
-//                     origin: types::Origin::L1,
-//                     id: next_req_id,
-//                 },
-//                 depositRecipient: DUMMY_ADDR,
-//                 tokenAddress: DUMMY_ADDR,
-//                 amount: to_u256(100u128),
-//                 timeStamp: to_u256(0u128),
-//                 ferryTip: to_u256(0u128),
-//             }))
-//             .build(ETHEREUM);
-//
-//         let status = gasp
-//             .update_l1_from_l2_unsafe(update)
-//             .await
-//             .expect("can submit update");
-//
-//         assert!(!status);
-//     }
-//
-//     #[serial]
-//     #[tokio::test]
-//     async fn test_can_fetch_active_sequencers() {
-//         let gasp = Gasp::new(URI, ALITH_PKEY)
-//             .await
-//             .expect("can connect to gasp");
-//         let at = gasp.latest_block().await.unwrap().1;
-//
-//         let active_sequencers = gasp.get_active_sequencers(ETHEREUM, at).await.unwrap();
-//
-//         assert!(!active_sequencers.is_empty());
-//     }
-// }
+#[cfg(test)]
+mod test {
+    use super::*;
+    // use crate::sequencer::test::{to_u256, Request, UpdateBuilder};
+    use hex_literal::hex;
+    use serial_test::serial;
+
+    //TODO: adcd test for L2Interace::deserialize_sequencer_update
+
+    const URI: &str = "ws://localhost:9944";
+    const DUMMY_PKEY: [u8; 32] =
+        hex!("b9d2ea9a615f3165812e8d44de0d24da9bbd164b65c4f0573e1ce2c8dbd9c8df");
+    const DUMMY_ADDR: [u8; 20] = hex!("0000000000000000000000000000000000000000");
+    const ALITH_PKEY: [u8; 32] =
+        hex!("5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133");
+    const BALTATHAR_PKEY: [u8; 32] =
+        hex!("8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b");
+    const TEST_TOKEN: [u8; 20] = hex!("c351628eb244ec633d5f21fbd6621e1a683b1181");
+    const ETHEREUM: gasp_types::Chain = gasp_types::Chain::Ethereum;
+
+    #[serial]
+    #[tokio::test]
+    async fn test_can_connect() {
+        Gasp::new(URI, BALTATHAR_PKEY)
+            .await
+            .expect("can connect to gasp");
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_can_submit_multiple_tx_in_a_row() {
+        let gasp = Gasp::new(URI, BALTATHAR_PKEY)
+            .await
+            .expect("can connect to gasp");
+        gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
+            .await
+            .expect("can submit withdrawal");
+        gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
+            .await
+            .expect("can submit withdrawal");
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn can_subscribe_to_new_blocks() {
+        let gasp = Gasp::new(URI, BALTATHAR_PKEY)
+            .await
+            .expect("can connect to gasp");
+        let mut stream = gasp.header_stream(Finalization::Best).await.unwrap();
+        let (number1, hash1) = stream.next().await.expect("can fetch next block").unwrap();
+        let (number2, hash2) = stream.next().await.expect("can fetch next block").unwrap();
+        assert!(number2 > number1);
+        assert!(hash1 != hash2);
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_can_fetch_rights() {
+        let baltathat_gasp = Gasp::new(URI, BALTATHAR_PKEY)
+            .await
+            .expect("can connect to gasp");
+        let dummy_gasp = Gasp::new(URI, DUMMY_PKEY)
+            .await
+            .expect("can connect to gasp");
+
+        let at = baltathat_gasp.latest_block().await.unwrap().1;
+
+        let dummy_read_rights = dummy_gasp.get_read_rights(gasp_types::Chain::Ethereum, at).await;
+        let dummy_cancel_rights = dummy_gasp
+            .get_cancel_rights(gasp_types::Chain::Ethereum, at)
+            .await;
+
+        let baltathar_read_rights = baltathat_gasp
+            .get_read_rights(gasp_types::Chain::Ethereum, at)
+            .await;
+        let baltathar_cancel_rights = baltathat_gasp
+            .get_cancel_rights(gasp_types::Chain::Ethereum, at)
+            .await;
+
+        assert!(matches!(dummy_read_rights, Err(L2Error::CanNotFetchRights)),);
+        assert!(matches!(
+            dummy_cancel_rights,
+            Err(L2Error::CanNotFetchRights)
+        ),);
+
+        assert_eq!(baltathar_read_rights.unwrap(), 1u128);
+
+        baltathar_cancel_rights.unwrap();
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_fetch_merkle_proof() {
+        let gasp = Gasp::new(URI, ALITH_PKEY)
+            .await
+            .expect("can connect to gasp");
+        gasp.wait_for_next_block().await.unwrap();
+
+        assert!(gasp
+            .withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
+            .await
+            .expect("can submit withdrawal"));
+
+        gasp.wait_for_next_block().await.unwrap();
+        gasp.wait_for_next_block().await.unwrap();
+        gasp.wait_for_next_block().await.unwrap();
+
+        assert!(gasp
+            .withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
+            .await
+            .expect("can submit withdrawal"));
+
+        let at = gasp.latest_block().await.unwrap().1;
+        let hash1 = gasp
+            .get_l2_request_hash(1u128, ETHEREUM, at)
+            .await
+            .expect("can fetch l2 request hash")
+            .expect("can fetch l2 request hash");
+
+        let hash2 = gasp
+            .get_l2_request_hash(2u128, ETHEREUM, at)
+            .await
+            .expect("can fetch l2 request hash")
+            .expect("can fetch l2 request hash");
+
+        assert!(hash1 != H256::zero());
+        assert!(hash2 != H256::zero());
+        assert!(hash1 != hash2);
+
+        let proofs = gasp
+            .get_merkle_proof(1u128, (1u128, 2u128), ETHEREUM, at)
+            .await
+            .expect("can fetch l2 request hash");
+
+        assert_eq!(proofs.len(), 1_usize);
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_can_fetch_pending_cancels() {
+        let gasp = Gasp::new(URI, BALTATHAR_PKEY)
+            .await
+            .expect("can connect to gasp");
+        let at = gasp.latest_block().await.unwrap().1;
+        gasp.get_pending_cancels(ETHEREUM, at)
+            .await
+            .expect("can fetch pending cancels");
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_can_cancel_pending_update() {
+        let gasp = Gasp::new(URI, BALTATHAR_PKEY)
+            .await
+            .expect("can connect to gasp");
+
+        let result = gasp
+            .cancel_pending_request(u128::MAX, ETHEREUM)
+            .await
+            .expect("can fetch pending cancels");
+        assert!(!result);
+    }
+
+    // TODO: enable
+    // #[serial]
+    // #[tokio::test]
+    // async fn test_can_submit_and_fetch_udates() {
+    //     let gasp = Gasp::new(URI, ALITH_PKEY)
+    //         .await
+    //         .expect("can connect to gasp");
+    //     let at = gasp.latest_block().await.unwrap().1;
+    //     let latest_req_id = gasp
+    //         .get_latest_processed_request_id(ETHEREUM, at)
+    //         .await
+    //         .unwrap();
+    //     let next_req_id = latest_req_id.saturating_add(1u128);
+    //     let update = UpdateBuilder::new()
+    //         .with_request(Request::Deposit(types::Deposit {
+    //             requestId: types::RequestId {
+    //                 origin: types::Origin::L1,
+    //                 id: next_req_id,
+    //             },
+    //             depositRecipient: DUMMY_ADDR,
+    //             tokenAddress: DUMMY_ADDR,
+    //             amount: to_u256(100u128),
+    //             timeStamp: to_u256(0u128),
+    //             ferryTip: to_u256(0u128),
+    //         }))
+    //         .build(ETHEREUM);
+    //
+    //     let status = gasp
+    //         .update_l1_from_l2_unsafe(update)
+    //         .await
+    //         .expect("can submit update");
+    //
+    //     assert!(!status);
+    // }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_can_fetch_active_sequencers() {
+        let gasp = Gasp::new(URI, ALITH_PKEY)
+            .await
+            .expect("can connect to gasp");
+        let at = gasp.latest_block().await.unwrap().1;
+
+        let active_sequencers = gasp.get_active_sequencers(ETHEREUM, at).await.unwrap();
+
+        assert!(!active_sequencers.is_empty());
+    }
+}

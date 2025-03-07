@@ -8,9 +8,10 @@ use std::pin::Pin;
 
 mod l2;
 mod signer;
+use l2::Finalization;
 pub type HashOf<T> = <T as Config>::Hash;
 pub type EndDisputePeriod = u128;
-pub type PendingUpdateWithKeys = (EndDisputePeriod, types::Chain, types::PendingUpdateMetadata);
+pub type PendingUpdateWithKeys = (EndDisputePeriod, Chain, gasp_types::PendingUpdateMetadata);
 pub type HeaderStream = Pin<Box<dyn Stream<Item = Result<(u32, H256), L2Error>> + Send + 'static>>;
 
 
@@ -26,7 +27,6 @@ pub mod types {
     };
     pub use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata;
     pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
-    pub type PendingUpdateMetadata = UpdateMetadata<AccountId20>;
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -54,7 +54,7 @@ pub enum L2Error {
     #[error("awaiting cancel resolution fetch error")]
     PendingCancelFetchError,
     #[error("unknown dispute period length")]
-    UnknownDisputePeriodLength(types::Chain),
+    UnknownDisputePeriodLength(Chain),
     #[error("unknown pending update `{0}`")]
     UnknownPendingUpdate(H256),
 }
@@ -63,40 +63,35 @@ pub enum L2Error {
 pub trait L2Interface {
     fn account_address(&self) -> [u8; 20];
 
-    async fn get_l2_request(
-        &self,
-        chain: Chain,
-        range: u128,
-        at: H256,
-    ) -> Result<Option<L2Request>, L2Error>;
+    async fn get_l2_request( &self, chain: Chain, range: u128, at: H256,) -> Result<Option<L2Request>, L2Error>;
 
     //TODO: rename
     async fn get_latest_created_request_id(
         &self,
-        chain: types::Chain,
+        chain: Chain,
         at: H256,
     ) -> Result<u128, L2Error>;
 
     //TODO: rename
     async fn get_latest_processed_request_id(
         &self,
-        chain: types::Chain,
+        chain: Chain,
         at: H256,
     ) -> Result<u128, L2Error>;
 
     async fn get_read_rights(
         &self,
-        chain: types::Chain,
+        chain: Chain,
         at: H256,
     ) -> Result<u128, L2Error>;
     async fn get_selected_sequencer(
         &self,
-        chain: types::Chain,
+        chain: Chain,
         at: H256,
     ) -> Result<Option<[u8; 20]>, L2Error>;
     async fn get_cancel_rights(
         &self,
-        chain: types::Chain,
+        chain: Chain,
         at: H256,
     ) -> Result<u128, L2Error>;
 
@@ -106,18 +101,18 @@ pub trait L2Interface {
     // ) -> Result<Vec<PendingUpdateWithKeys>, L2Error>;
 
     async fn deserialize_sequencer_update(&self, data: Vec<u8>)
-        -> Result<types::L1Update, L2Error>;
+        -> Result<gasp_types::L1Update, L2Error>;
     async fn cancel_pending_request(
         &self,
         request_id: u128,
-        chain: types::Chain,
+        chain: Chain,
     ) -> Result<bool, L2Error>;
-    async fn update_l1_from_l2(&self, update: types::L1Update, hash: H256)
+    async fn update_l1_from_l2(&self, update: gasp_types::L1Update, hash: H256)
         -> Result<bool, L2Error>;
 
     async fn get_pending_cancels(
         &self,
-        chain: types::Chain,
+        chain: Chain,
         at: H256,
     ) -> Result<Vec<u128>, L2Error>;
 
@@ -125,33 +120,31 @@ pub trait L2Interface {
         &self,
         request_id: u128,
         range: (u128, u128),
-        chain: types::Chain,
+        chain: Chain,
         at: H256,
     ) -> Result<Vec<H256>, L2Error>;
 
     async fn get_l2_request_hash(
         &self,
         request_id: u128,
-        chain: types::Chain,
+        chain: Chain,
         at: H256,
     ) -> Result<Option<H256>, L2Error>;
 
-    async fn header_stream(&self) -> Result<HeaderStream, L2Error>;
-
-    async fn finalized_header_stream(&self) -> Result<HeaderStream, L2Error>;
+    async fn header_stream(&self, finalization_type: Finalization) -> Result<HeaderStream, L2Error>;
 
     async fn get_abi_encoded_request(
         &self,
         request_id: u128,
-        chain: types::Chain,
+        chain: Chain,
         at: H256,
     ) -> Result<Vec<u8>, L2Error>;
 
     async fn get_active_sequencers(
         &self,
-        chain: types::Chain,
+        chain: Chain,
         at: H256,
     ) -> Result<Vec<[u8; 20]>, L2Error>;
 
-    async fn get_dispute_period(&self, chain: types::Chain, at: H256) -> Result<u128, L2Error>;
+    async fn get_dispute_period(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
 }

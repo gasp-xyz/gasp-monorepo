@@ -1,6 +1,6 @@
 use super::{types, L1Error, L1Interface};
 use crate::utils::simulate_send_and_wait_for_result;
-use crate::{L1Withdrawal, RequestStatus};
+use crate::{RequestStatus};
 use alloy::contract::{CallBuilder, CallDecoder};
 use contract_bindings::irolldown::IRolldownPrimitives::Withdrawal;
 use lazy_static::lazy_static;
@@ -50,13 +50,13 @@ where
     }
 
     #[tracing::instrument(skip(self, withdrawal))]
-    pub async fn hash(&self, withdrawal: L1Withdrawal) -> Result<H256, L1Error> {
+    pub async fn hash(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error> {
         let call = self.contract_handle.hashWithdrawal(withdrawal.into());
         Ok(call.call().await?._0.0.into())
     }
 
     #[tracing::instrument(skip(self, withdrawal))]
-    pub async fn send_ferry_withdrawal(&self, withdrawal: L1Withdrawal) -> Result<H256, L1Error> {
+    pub async fn send_ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error> {
         let call = self.contract_handle.ferryWithdrawal(withdrawal.into());
         Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
     }
@@ -64,7 +64,7 @@ where
     #[tracing::instrument(skip(self, withdrawal))]
     pub async fn send_close_withdrawal_tx(
         &self,
-        withdrawal: L1Withdrawal,
+        withdrawal: gasp_types::Withdrawal,
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {

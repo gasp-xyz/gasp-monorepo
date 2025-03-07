@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use std::num::NonZeroUsize;
 use std::sync::Mutex;
 
-use crate::{L1Cancel, L1Withdrawal, RequestStatus};
+use crate::{RequestStatus};
 
 use super::{types, L1Error, L1Interface};
 
@@ -78,7 +78,7 @@ where
 
     async fn close_cancel(
         &self,
-        cancel: L1Cancel,
+        cancel: gasp_types::Cancel,
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
@@ -87,7 +87,7 @@ where
 
     async fn close_withdrawal(
         &self,
-        withdrawal: L1Withdrawal,
+        withdrawal: gasp_types::Withdrawal,
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
@@ -96,7 +96,7 @@ where
             .await
     }
 
-    async fn ferry_withdrawal(&self, withdrawal: L1Withdrawal) -> Result<H256, L1Error> {
+    async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error> {
         self.l1.ferry_withdrawal(withdrawal).await
     }
 

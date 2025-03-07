@@ -2670,6 +2670,7 @@ dependencies = [
  "contract-bindings",
  "envconfig",
  "futures",
+ "gasp-types",
  "hex",
  "hex-literal",
  "lazy_static",

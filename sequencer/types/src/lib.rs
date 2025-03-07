@@ -1,5 +1,12 @@
+use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
 use parity_scale_codec::{Decode, Encode};
 use primitive_types::U256;
+
+// since its only used in l2api lets just use it instead of defining own types
+pub type PendingUpdateMetadata = gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata<AccountId20>;
+pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update;
+
+
 
 mod l2types {
     pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
@@ -301,6 +308,8 @@ impl Into<l1types::Cancel> for Cancel {
         }
     }
 }
+
+
 
 #[cfg(test)]
 mod test{

@@ -88,42 +88,42 @@ impl L1Cancel {
     }
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
-pub struct L1Withdrawal {
-    pub request_id: u128,
-    pub recipient: [u8; 20],
-    pub token_address: [u8; 20],
-    pub amount: u128,
-    pub ferry_tip: u128,
-}
-
-impl L1Withdrawal {
-    pub fn hash(&self) -> H256 {
-        let w: types::Withdrawal = (*self).into();
-        let withdrawal_encoded = w.abi_encode();
-        let data = vec![0u8; 32].into_iter().chain(withdrawal_encoded);
-        let hash: [u8; 32] = Keccak256::digest(data.collect::<Vec<_>>()).into();
-        hash.into()
-    }
-}
-
-impl Into<types::Withdrawal> for L1Withdrawal {
-    fn into(self) -> types::Withdrawal {
-        types::Withdrawal {
-            requestId: types::RequestId {
-                origin: 1u8, // Origin::L2
-                id: self.request_id.try_into().unwrap(),
-            },
-            recipient: self.recipient.into(),
-            tokenAddress: self.token_address.into(),
-            amount: self.amount.try_into().unwrap(),
-            ferryTip: self.ferry_tip.try_into().unwrap(),
-        }
-    }
-}
+// #[derive(Debug, PartialEq, Copy, Clone)]
+// pub struct L1Withdrawal {
+//     pub request_id: u128,
+//     pub recipient: [u8; 20],
+//     pub token_address: [u8; 20],
+//     pub amount: u128,
+//     pub ferry_tip: u128,
+// }
+//
+// impl L1Withdrawal {
+//     pub fn hash(&self) -> H256 {
+//         let w: types::Withdrawal = (*self).into();
+//         let withdrawal_encoded = w.abi_encode();
+//         let data = vec![0u8; 32].into_iter().chain(withdrawal_encoded);
+//         let hash: [u8; 32] = Keccak256::digest(data.collect::<Vec<_>>()).into();
+//         hash.into()
+//     }
+// }
+//
+// impl Into<types::Withdrawal> for L1Withdrawal {
+//     fn into(self) -> types::Withdrawal {
+//         types::Withdrawal {
+//             requestId: types::RequestId {
+//                 origin: 1u8, // Origin::L2
+//                 id: self.request_id.try_into().unwrap(),
+//             },
+//             recipient: self.recipient.into(),
+//             tokenAddress: self.token_address.into(),
+//             amount: self.amount.try_into().unwrap(),
+//             ferryTip: self.ferry_tip.try_into().unwrap(),
+//         }
+//     }
+// }
 
 pub trait L1Interface {
-    async fn ferry_withdrawal(&self, withdrawal: L1Withdrawal) -> Result<H256, L1Error>;
+    async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error>;
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
     async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>;
     async fn get_status(&self, request_hash: H256) -> Result<RequestStatus, L1Error>;
@@ -138,14 +138,14 @@ pub trait L1Interface {
 
     async fn close_cancel(
         &self,
-        cancel: L1Cancel,
+        cancel: gasp_types::Cancel,
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error>;
 
     async fn close_withdrawal(
         &self,
-        withdrawal: L1Withdrawal,
+        withdrawal: gasp_types::Withdrawal,
         cerkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error>;
@@ -208,7 +208,7 @@ where
         result.try_into().map_err(|_| L1Error::OverflowError)
     }
 
-    async fn ferry_withdrawal(&self, withdrawal: L1Withdrawal) -> Result<H256, L1Error> {
+    async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error> {
         self.rolldown_contract
             .send_ferry_withdrawal(withdrawal)
             .await
@@ -316,7 +316,7 @@ where
     #[tracing::instrument(skip(self, cancel))]
     async fn close_cancel(
         &self,
-        cancel: L1Cancel,
+        cancel: gasp_types::Cancel,
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
@@ -328,7 +328,7 @@ where
     #[tracing::instrument(skip(self, withdrawal))]
     async fn close_withdrawal(
         &self,
-        withdrawal: L1Withdrawal,
+        withdrawal: gasp_types::Withdrawal,
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
