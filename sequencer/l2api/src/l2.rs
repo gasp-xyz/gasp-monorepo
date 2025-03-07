@@ -86,7 +86,7 @@ impl Gasp {
 
     #[tracing::instrument(skip(self))]
     async fn wait_for_tx_execution(&self, tx_hash: HashOf<GaspConfig>) -> Result<bool, L2Error> {
-        let mut stream = self.header_stream(Finalization::Best).await?;
+        let mut stream = self.header_stream(Finalization::Finalized).await?;
 
         while let Some(header) = stream.next().await {
             let (number, hash) = header?;
@@ -644,6 +644,7 @@ mod test {
     use gasp_types::L1Update;
     use hex_literal::hex;
     use serial_test::serial;
+    use tracing_test::traced_test;
 
     //TODO: adcd test for L2Interace::deserialize_sequencer_update
 
@@ -666,20 +667,20 @@ mod test {
             .expect("can connect to gasp");
     }
 
-    //TODO:
-    // #[serial]
-    // #[tokio::test]
-    // async fn test_can_submit_multiple_tx_in_a_row() {
-    //     let gasp = Gasp::new(URI, BALTATHAR_PKEY)
-    //         .await
-    //         .expect("can connect to gasp");
-    //     gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
-    //         .await
-    //         .expect("can submit withdrawal");
-    //     gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
-    //         .await
-    //         .expect("can submit withdrawal");
-    // }
+    #[serial]
+    #[tokio::test]
+    #[traced_test]
+    async fn test_can_submit_multiple_tx_in_a_row() {
+        let gasp = Gasp::new(URI, BALTATHAR_PKEY)
+            .await
+            .expect("can connect to gasp");
+        gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
+            .await
+            .expect("can submit withdrawal");
+        gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
+            .await
+            .expect("can submit withdrawal");
+    }
 
     #[serial]
     #[tokio::test]

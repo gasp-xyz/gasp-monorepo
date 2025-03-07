@@ -2731,6 +2731,7 @@ dependencies = [
  "tracing",
  "tracing-log",
  "tracing-subscriber",
+ "tracing-test",
 ]
 
 [[package]]

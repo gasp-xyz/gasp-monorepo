@@ -29,6 +29,7 @@ gasp-bindings = { workspace = true }
 [dev-dependencies]
 mockall = "0.13.0"
 serial_test = "3.2.0"
+tracing-test = "0.2.5"
 
 # [profile.dev]
 # incremental = true
