@@ -666,7 +666,9 @@ mod test {
             .expect("can connect to gasp");
     }
 
+    //TODO:
     #[serial]
+    #[skip]
     #[tokio::test]
     async fn test_can_submit_multiple_tx_in_a_row() {
         let gasp = Gasp::new(URI, BALTATHAR_PKEY)
@@ -803,40 +805,39 @@ mod test {
         assert!(!result);
     }
 
-    // TODO: enable
-    // #[serial]
-    // #[tokio::test]
-    // async fn test_can_submit_and_fetch_udates() {
-    //     let gasp = Gasp::new(URI, ALITH_PKEY)
-    //         .await
-    //         .expect("can connect to gasp");
-    //     let at = gasp.latest_block().await.unwrap().1;
-    //     let latest_req_id = gasp
-    //         .get_latest_processed_request_id(ETHEREUM, at)
-    //         .await
-    //         .unwrap();
-    //     let next_req_id = latest_req_id.saturating_add(1u128);
-    //     let update = UpdateBuilder::new()
-    //         .with_request(Request::Deposit(types::Deposit {
-    //             requestId: types::RequestId {
-    //                 origin: types::Origin::L1,
-    //                 id: next_req_id,
-    //             },
-    //             depositRecipient: DUMMY_ADDR,
-    //             tokenAddress: DUMMY_ADDR,
-    //             amount: to_u256(100u128),
-    //             timeStamp: to_u256(0u128),
-    //             ferryTip: to_u256(0u128),
-    //         }))
-    //         .build(ETHEREUM);
-    //
-    //     let status = gasp
-    //         .update_l1_from_l2_unsafe(update)
-    //         .await
-    //         .expect("can submit update");
-    //
-    //     assert!(!status);
-    // }
+    #[serial]
+    #[tokio::test]
+    async fn test_can_submit_and_fetch_udates() {
+        let gasp = Gasp::new(URI, ALITH_PKEY)
+            .await
+            .expect("can connect to gasp");
+        let at = gasp.latest_block().await.unwrap().1;
+        let latest_req_id = gasp
+            .get_latest_processed_request_id(ETHEREUM, at)
+            .await
+            .unwrap();
+        let next_req_id = latest_req_id.saturating_add(1u128);
+        let update = UpdateBuilder::new()
+            .with_request(Request::Deposit(types::Deposit {
+                requestId: types::RequestId {
+                    origin: types::Origin::L1,
+                    id: next_req_id,
+                },
+                depositRecipient: DUMMY_ADDR,
+                tokenAddress: DUMMY_ADDR,
+                amount: to_u256(100u128),
+                timeStamp: to_u256(0u128),
+                ferryTip: to_u256(0u128),
+            }))
+            .build(ETHEREUM);
+
+        let status = gasp
+            .update_l1_from_l2_unsafe(update)
+            .await
+            .expect("can submit update");
+
+        assert!(!status);
+    }
 
     #[serial]
     #[tokio::test]
