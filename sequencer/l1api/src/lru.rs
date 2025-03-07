@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use std::num::NonZeroUsize;
 use std::sync::Mutex;
 
-use crate::{RequestStatus};
+use crate::RequestStatus;
 
 use super::{types, L1Error, L1Interface};
 

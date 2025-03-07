@@ -1,10 +1,9 @@
-
-use primitive_types::H256;
-use subxt::Config;
-use gasp_bindings::GaspConfig;
-use gasp_types::{L2Request, Chain};
 use futures::Stream;
+use gasp_bindings::GaspConfig;
+use gasp_types::{Chain, L2Request};
+use primitive_types::H256;
 use std::pin::Pin;
+use subxt::Config;
 
 mod l2;
 mod signer;
@@ -13,7 +12,6 @@ pub type HashOf<T> = <T as Config>::Hash;
 pub type EndDisputePeriod = u128;
 pub type PendingUpdateWithKeys = (EndDisputePeriod, Chain, gasp_types::PendingUpdateMetadata);
 pub type HeaderStream = Pin<Box<dyn Stream<Item = Result<(u32, H256), L2Error>> + Send + 'static>>;
-
 
 pub mod types {
     // NOTE: this alias is used in multiple other files to make code more readable
@@ -63,14 +61,15 @@ pub enum L2Error {
 pub trait L2Interface {
     fn account_address(&self) -> [u8; 20];
 
-    async fn get_l2_request( &self, chain: Chain, range: u128, at: H256,) -> Result<Option<L2Request>, L2Error>;
-
-    //TODO: rename
-    async fn get_latest_created_request_id(
+    async fn get_l2_request(
         &self,
         chain: Chain,
+        range: u128,
         at: H256,
-    ) -> Result<u128, L2Error>;
+    ) -> Result<Option<L2Request>, L2Error>;
+
+    //TODO: rename
+    async fn get_latest_created_request_id(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
 
     //TODO: rename
     async fn get_latest_processed_request_id(
@@ -79,42 +78,32 @@ pub trait L2Interface {
         at: H256,
     ) -> Result<u128, L2Error>;
 
-    async fn get_read_rights(
-        &self,
-        chain: Chain,
-        at: H256,
-    ) -> Result<u128, L2Error>;
+    async fn get_read_rights(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
     async fn get_selected_sequencer(
         &self,
         chain: Chain,
         at: H256,
     ) -> Result<Option<[u8; 20]>, L2Error>;
-    async fn get_cancel_rights(
-        &self,
-        chain: Chain,
-        at: H256,
-    ) -> Result<u128, L2Error>;
+    async fn get_cancel_rights(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
 
     // async fn get_pending_updates(
     //     &self,
     //     at: HashOf<GaspConfig>,
     // ) -> Result<Vec<PendingUpdateWithKeys>, L2Error>;
 
-    async fn deserialize_sequencer_update(&self, data: Vec<u8>)
-        -> Result<gasp_types::L1Update, L2Error>;
-    async fn cancel_pending_request(
+    async fn deserialize_sequencer_update(
         &self,
-        request_id: u128,
-        chain: Chain,
-    ) -> Result<bool, L2Error>;
-    async fn update_l1_from_l2(&self, update: gasp_types::L1Update, hash: H256)
+        data: Vec<u8>,
+    ) -> Result<gasp_types::L1Update, L2Error>;
+    async fn cancel_pending_request(&self, request_id: u128, chain: Chain)
         -> Result<bool, L2Error>;
-
-    async fn get_pending_cancels(
+    async fn update_l1_from_l2(
         &self,
-        chain: Chain,
-        at: H256,
-    ) -> Result<Vec<u128>, L2Error>;
+        update: gasp_types::L1Update,
+        hash: H256,
+    ) -> Result<bool, L2Error>;
+
+    async fn get_pending_cancels(&self, chain: Chain, at: H256) -> Result<Vec<u128>, L2Error>;
 
     async fn get_merkle_proof(
         &self,
@@ -131,7 +120,8 @@ pub trait L2Interface {
         at: H256,
     ) -> Result<Option<H256>, L2Error>;
 
-    async fn header_stream(&self, finalization_type: Finalization) -> Result<HeaderStream, L2Error>;
+    async fn header_stream(&self, finalization_type: Finalization)
+        -> Result<HeaderStream, L2Error>;
 
     async fn get_abi_encoded_request(
         &self,
@@ -140,11 +130,8 @@ pub trait L2Interface {
         at: H256,
     ) -> Result<Vec<u8>, L2Error>;
 
-    async fn get_active_sequencers(
-        &self,
-        chain: Chain,
-        at: H256,
-    ) -> Result<Vec<[u8; 20]>, L2Error>;
+    async fn get_active_sequencers(&self, chain: Chain, at: H256)
+        -> Result<Vec<[u8; 20]>, L2Error>;
 
     async fn get_dispute_period(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
 }

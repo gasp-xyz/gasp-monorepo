@@ -705,7 +705,9 @@ mod test {
 
         let at = baltathat_gasp.latest_block().await.unwrap().1;
 
-        let dummy_read_rights = dummy_gasp.get_read_rights(gasp_types::Chain::Ethereum, at).await;
+        let dummy_read_rights = dummy_gasp
+            .get_read_rights(gasp_types::Chain::Ethereum, at)
+            .await;
         let dummy_cancel_rights = dummy_gasp
             .get_cancel_rights(gasp_types::Chain::Ethereum, at)
             .await;

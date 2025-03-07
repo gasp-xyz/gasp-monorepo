@@ -1,6 +1,6 @@
 use super::{types, L1Error, L1Interface};
 use crate::utils::simulate_send_and_wait_for_result;
-use crate::{RequestStatus};
+use crate::RequestStatus;
 use alloy::contract::{CallBuilder, CallDecoder};
 use contract_bindings::irolldown::IRolldownPrimitives::Withdrawal;
 use lazy_static::lazy_static;
@@ -56,7 +56,10 @@ where
     }
 
     #[tracing::instrument(skip(self, withdrawal))]
-    pub async fn send_ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error> {
+    pub async fn send_ferry_withdrawal(
+        &self,
+        withdrawal: gasp_types::Withdrawal,
+    ) -> Result<H256, L1Error> {
         let call = self.contract_handle.ferryWithdrawal(withdrawal.into());
         Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
     }

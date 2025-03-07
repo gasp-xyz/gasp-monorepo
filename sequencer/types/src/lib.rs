@@ -3,26 +3,26 @@ use parity_scale_codec::{Decode, Encode};
 use primitive_types::U256;
 
 // since its only used in l2api lets just use it instead of defining own types
-pub type PendingUpdateMetadata = gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata<AccountId20>;
+pub type PendingUpdateMetadata =
+    gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata<AccountId20>;
 pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update;
-
-
 
 mod l2types {
     pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
     // pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Cancel;
+    pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Chain;
     pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Origin;
     pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::RequestId;
     pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Withdrawal;
     pub use gasp_bindings::api::runtime_types::primitive_types::U256;
-    pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Chain;
-    pub type Cancel = gasp_bindings::api::runtime_types::pallet_rolldown::messages::Cancel<AccountId20>;
+    pub type Cancel =
+        gasp_bindings::api::runtime_types::pallet_rolldown::messages::Cancel<AccountId20>;
 }
 
 mod l1types {
     pub use alloy::primitives::U256;
-    pub use contract_bindings::rolldown::IRolldownPrimitives::ChainId as Chain;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
+    pub use contract_bindings::rolldown::IRolldownPrimitives::ChainId as Chain;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Range;
     pub use contract_bindings::rolldown::IRolldownPrimitives::RequestId;
@@ -42,9 +42,9 @@ pub enum Chain {
     Base,
 }
 
-impl From<l2types::Chain> for Chain{
+impl From<l2types::Chain> for Chain {
     fn from(value: l2types::Chain) -> Self {
-        match value{
+        match value {
             l2types::Chain::Ethereum => Chain::Ethereum,
             l2types::Chain::Arbitrum => Chain::Arbitrum,
             l2types::Chain::Base => Chain::Base,
@@ -52,13 +52,12 @@ impl From<l2types::Chain> for Chain{
     }
 }
 
-
 const ETHEREUM_CHAIN_ID: u8 = 0;
 const ARBITRUM_CHAIN_ID: u8 = 1;
 const BASE_CHAIN_ID: u8 = 2;
-impl From<l1types::Chain> for Chain{
+impl From<l1types::Chain> for Chain {
     fn from(value: l1types::Chain) -> Self {
-        match value.into(){
+        match value.into() {
             ETHEREUM_CHAIN_ID => Chain::Ethereum,
             ARBITRUM_CHAIN_ID => Chain::Arbitrum,
             BASE_CHAIN_ID => Chain::Base,
@@ -67,9 +66,9 @@ impl From<l1types::Chain> for Chain{
     }
 }
 
-impl Into<l1types::Chain> for Chain{
+impl Into<l1types::Chain> for Chain {
     fn into(self) -> l1types::Chain {
-        match self{
+        match self {
             Chain::Ethereum => l1types::Chain::from(ETHEREUM_CHAIN_ID),
             Chain::Arbitrum => l1types::Chain::from(ARBITRUM_CHAIN_ID),
             Chain::Base => l1types::Chain::from(BASE_CHAIN_ID),
@@ -77,17 +76,15 @@ impl Into<l1types::Chain> for Chain{
     }
 }
 
-impl Into<l2types::Chain> for Chain{
+impl Into<l2types::Chain> for Chain {
     fn into(self) -> l2types::Chain {
-        match self{
+        match self {
             Chain::Ethereum => l2types::Chain::Ethereum,
             Chain::Arbitrum => l2types::Chain::Arbitrum,
             Chain::Base => l2types::Chain::Base,
         }
     }
 }
-
-
 
 impl From<l2types::Origin> for Origin {
     fn from(origin: l2types::Origin) -> Self {
@@ -309,10 +306,8 @@ impl Into<l1types::Cancel> for Cancel {
     }
 }
 
-
-
 #[cfg(test)]
-mod test{
+mod test {
     use super::*;
     use alloy::sol_types::SolValue;
     use hex_literal::hex;
@@ -321,10 +316,7 @@ mod test{
     fn test_from_l2_u256() {
         let payload = hex!("ffffff0000000000000000000000000000000000000000000000000000000000");
         let input = l2types::U256::decode(&mut &payload[..]).unwrap();
-        assert_eq!(
-            from_l2_u256(input),
-            U256::from(16777215u128)
-        )
+        assert_eq!(from_l2_u256(input), U256::from(16777215u128))
     }
 
     #[test]
@@ -339,10 +331,7 @@ mod test{
     #[test]
     fn test_from_l1_u256() {
         let input = l1types::U256::from(16777215u128);
-        assert_eq!(
-            from_l1_u256(input),
-            U256::from(16777215u128)
-        )
+        assert_eq!(from_l1_u256(input), U256::from(16777215u128))
     }
 
     #[test]
@@ -353,6 +342,4 @@ mod test{
             hex!("0000000000000000000000000000000000000000000000000000000000ffffff").to_vec()
         )
     }
-
-
 }
