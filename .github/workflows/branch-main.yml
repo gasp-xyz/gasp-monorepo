@@ -21,6 +21,8 @@ permissions:
   deployments: write
   checks: write
   security-events: write
+  issues: write
+  pull-requests: write
 
 # The following concurrency group queus in-progress jobs
 concurrency:
