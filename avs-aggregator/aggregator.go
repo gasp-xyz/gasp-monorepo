@@ -116,7 +116,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	chainId, err := ethRpc.AvsReader.AvsServiceBindings.EthClient.ChainID(context.Background())
+	chainId, err := ethRpc.AvsReader.ChainID(context.Background())
 	if err != nil {
 		logger.Error("Cannot get chainId", "err", err)
 		return nil, err
@@ -126,7 +126,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, errors.New("config.chainId & ethRpcClient.chainId mismatch")
 	}
 
-	taskResponseWindowBlock, err := ethRpc.AvsWriter.AvsContractBindings.TaskManager.TaskResponseWindowBlock(&bind.CallOpts{})
+	taskResponseWindowBlock, err := ethRpc.AvsReader.TaskResponseWindowBlock(&bind.CallOpts{})
 	if err != nil {
 		logger.Error("Cannot get taskChallengeWindowBlock from TaskManager contract", "err", err)
 		return nil, err
@@ -369,7 +369,7 @@ func (agg *Aggregator) checkAndProcessPendingTasks() error {
 
 func (agg *Aggregator) getAndProcessPendingOpTask(latestOpTaskNum uint32, lastOpTaskCreatedBlock uint32) error {
 	EndBlock := uint64(lastOpTaskCreatedBlock)
-	eventIter, err := agg.ethRpc.AvsReader.AvsServiceBindings.TaskManager.FilterNewOpTaskCreated(
+	eventIter, err := agg.ethRpc.AvsReader.FilterNewOpTaskCreated(
 		&bind.FilterOpts{Start: uint64(lastOpTaskCreatedBlock), End: &EndBlock, Context: context.Background()}, []uint32{latestOpTaskNum},
 	)
 	if err != nil {
@@ -412,7 +412,7 @@ func (agg *Aggregator) processPendingOpTask(newTask taskmanager.IFinalizerTaskMa
 
 func (agg *Aggregator) getAndProcessPendingRdTask(latestRdTaskNum uint32, lastRdTaskCreatedBlock uint32) error {
 	EndBlock := uint64(lastRdTaskCreatedBlock)
-	eventIter, err := agg.ethRpc.AvsReader.AvsServiceBindings.TaskManager.FilterNewRdTaskCreated(
+	eventIter, err := agg.ethRpc.AvsReader.FilterNewRdTaskCreated(
 		&bind.FilterOpts{Start: uint64(lastRdTaskCreatedBlock), End: &EndBlock, Context: context.Background()}, []uint32{latestRdTaskNum},
 	)
 	if err != nil {
@@ -523,7 +523,7 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		}
 		var success bool
 		for _, log := range r.Logs {
-			_, err := agg.ethRpc.AvsWriter.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseOpTaskCompleted(*log)
+			_, err := agg.ethRpc.AvsReader.ParseOpTaskCompleted(*log)
 			if err == nil {
 				success = true
 			}
@@ -553,7 +553,7 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		}
 		var success bool
 		for _, log := range r.Logs {
-			_, err := agg.ethRpc.AvsWriter.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseRdTaskCompleted(*log)
+			_, err := agg.ethRpc.AvsReader.ParseRdTaskCompleted(*log)
 			if err == nil {
 				success = true
 			}
