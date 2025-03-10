@@ -1,4 +1,4 @@
-name: '[stash] Deploy `stash` to Google App Engine'
+name: '[stash-jobs] Deploy `stash-jobs` to Google App Engine'
 on:
   workflow_dispatch:
     inputs:
@@ -16,8 +16,8 @@ on:
     branches:
       - main
     paths:
-      - "stash/**/*"
-      - ".github/workflows/stash.yml"
+      - "stash-jobs/**/*"
+      - ".github/workflows/stash-jobs.yml"
 
 permissions:
   contents: 'read'
@@ -29,14 +29,14 @@ jobs:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: stash
+        working-directory: stash-jobs
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: 'stash/.nvmrc'
+          node-version-file: 'stash-jobs/.nvmrc'
           cache: 'yarn'
-          cache-dependency-path: "./stash/yarn.lock"
+          cache-dependency-path: "./stash-jobs/yarn.lock"
 
       - uses: google-github-actions/auth@v2
         id: auth
@@ -51,13 +51,13 @@ jobs:
       - run: sops exec-env frontend.enc.env 'yarn run test:unit'
 
   deploy-frontend:
-    name: Deploy `stash` to `frontend` environment
+    name: Deploy `stash-jobs` to `frontend` environment
     if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'frontend')
     runs-on: ubuntu-24.04
     environment: "stash-frontend"
     defaults:
       run:
-        working-directory: stash
+        working-directory: stash-jobs
     env:
       ENVIRONMENT: frontend
     steps:
@@ -79,13 +79,13 @@ jobs:
           gcloud app deploy app.tmp.yaml --quiet
 
   deploy-holesky:
-    name: Deploy `stash` to `holesky` environment
+    name: Deploy `stash-jobs` to `holesky` environment
     if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'holesky') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
     runs-on: ubuntu-24.04
     needs: build
     defaults:
       run:
-        working-directory: stash
+        working-directory: stash-jobs
     environment: "stash-holesky"
     env:
       ENVIRONMENT: holesky
@@ -108,13 +108,13 @@ jobs:
           gcloud app deploy app.tmp.yaml --quiet
 
   deploy-staging:
-    name: Deploy `stash` to `staging` environment
+    name: Deploy `stash-jobs` to `staging` environment
     if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
     runs-on: ubuntu-24.04
     needs: build
     defaults:
       run:
-        working-directory: stash
+        working-directory: stash-jobs
     environment: "stash-staging"
     env:
       ENVIRONMENT: staging
@@ -137,13 +137,13 @@ jobs:
           gcloud app deploy app.tmp.yaml --quiet
 
   deploy-prod:
-    name: Deploy `stash` to `prod` environment
+    name: Deploy `stash-jobs` to `prod` environment
     if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
     runs-on: ubuntu-24.04
     needs: build
     defaults:
       run:
-        working-directory: stash
+        working-directory: stash-jobs
     environment: "stash-prod"
     env:
       ENVIRONMENT: prod
