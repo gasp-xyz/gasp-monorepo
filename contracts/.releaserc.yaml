@@ -2,7 +2,7 @@ extends: semantic-release-monorepo
 branches: 
   - main
   - '(contracts-)+([0-9])?(.{+([0-9]),x}).x'
-  - name: release
+  - name: release/next
     prerelease: rc
 plugins:
   - '@semantic-release/commit-analyzer'
