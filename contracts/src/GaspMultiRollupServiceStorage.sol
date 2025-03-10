@@ -2,8 +2,8 @@
 pragma solidity 0.8.13;
 
 import {BN254} from "@eigenlayer-middleware/src/libraries/BN254.sol";
-import {IGaspMultiRollupService} from "./IGaspMultiRollupService.sol";
-import {IRolldown} from "./IRolldown.sol";
+import {IGaspMultiRollupService} from "./interfaces/IGaspMultiRollupService.sol";
+import {IRolldown} from "./interfaces/IRolldown.sol";
 
 abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
     IRolldown public rolldown;

@@ -8,7 +8,7 @@ import "@eigenlayer/test/mocks/EmptyContract.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import {Rolldown} from "../../../src/Rolldown.sol";
-import {IRolldownPrimitives} from "../../../src/IRolldownPrimitives.sol";
+import {IRolldownPrimitives} from "../../../src/interfaces/IRolldownPrimitives.sol";
 import {GaspMultiRollupService} from "../../../src/GaspMultiRollupService.sol";
 
 import {Utils} from "../../utils/Utils.sol";
