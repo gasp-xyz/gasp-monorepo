@@ -17,10 +17,10 @@ import {IServiceManager} from "@eigenlayer-middleware/src/interfaces/IServiceMan
 import {BN254} from "@eigenlayer-middleware/src/libraries/BN254.sol";
 import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
 import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
-import {IGaspMultiRollupServicePrimitives} from "./IGaspMultiRollupServicePrimitives.sol";
-import {IFinalizerTaskManager} from "./IFinalizerTaskManager.sol";
-import {IRolldown} from "./IRolldown.sol";
-import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
+import {IGaspMultiRollupServicePrimitives} from "./interfaces/IGaspMultiRollupServicePrimitives.sol";
+import {IFinalizerTaskManager} from "./interfaces/IFinalizerTaskManager.sol";
+import {IRolldown} from "./interfaces/IRolldown.sol";
+import {IRolldownPrimitives} from "./interfaces/IRolldownPrimitives.sol";
 
 contract FinalizerTaskManager is
     Initializable,
