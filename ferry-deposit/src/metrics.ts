@@ -15,7 +15,7 @@ register.registerMetric(account_balance_metric);
 
 export async function serveMetrics() {
 	const app: Express = express();
-	app.get("/", async (req: Request, res: Response) => {
+	app.get("/metrics", async (req: Request, res: Response) => {
 		res.setHeader("Content-Type", register.contentType);
 		res.send(await register.metrics());
 	});

@@ -3,19 +3,94 @@ type: application
 
 toolchain:
   node:
-    version: 18.20.4
+    version: 18.20.7
 
 fileGroups:
   sources:
     - 'src/**/*'
     - 'package.json'
     - 'tsconfig.json'
+    - '.env'
+    - '.env.template'
+  tests:
+    - 'tests/**/*'
+    - 'vitest.config.ts'
+    - 'env.test'
+
+env:
+  SERVICE_NAME: ferry-deposit
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/ferry-deposit
+  DOCKERHUB_REPOSITORY: gaspxyz/ferry-deposit
 
 tasks:
   build:
-    command: 'yarn build'
+    command: yarn build
     inputs: ['@globs(sources)']
     outputs: ['build']
+  
   build-image-local:
-    command: 'docker buildx build -t gaspxyz/ferry-deposit:local -f Dockerfile .'
-    inputs: ['@globs(sources)', 'Dockerfile']
+    command: docker buildx build -t gaspxyz/ferry-deposit:local -f Dockerfile --load .
+    inputs: ['@globs(sources)', 'Dockerfile', '.dockerignore']
+
+  buildkit-build-and-push-image-digests:
+    script: |
+      set -euo pipefail
+      echo "Starting buildkit build..."
+      docker buildx build --platform linux/amd64,linux/arm64 \
+        --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache \
+        --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max \
+        --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
+        --metadata-file ${SERVICE_NAME}-buildkit-metadata.json -f Dockerfile ./
+      
+      BUILD_EXIT_CODE=$?
+      
+      # Validate the metadata file exists and contains the expected digest
+      if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f ${SERVICE_NAME}-buildkit-metadata.json ]; then
+        if grep -q "containerimage.digest" ${SERVICE_NAME}-buildkit-metadata.json; then
+          echo "✅ Build successful and metadata file contains valid digest"
+          cat ${SERVICE_NAME}-buildkit-metadata.json
+        else
+          echo "❌ Build appeared successful but metadata file doesn't contain expected digest"
+          cat ${SERVICE_NAME}-buildkit-metadata.json || echo "Cannot read metadata file"
+          exit 1
+        fi
+      else
+        echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
+        [ -f ${SERVICE_NAME}-buildkit-metadata.json ] && cat ${SERVICE_NAME}-buildkit-metadata.json
+        exit $BUILD_EXIT_CODE
+      fi
+      
+      exit $BUILD_EXIT_CODE
+    inputs: ["@globs(sources)", "Dockerfile", '.dockerignore']
+    outputs: ['${SERVICE_NAME}-buildkit-metadata.json']
+    options:
+      outputStyle: buffer-only-failure
+      cache: true
+      internal: true
+
+
+  build-image-ci:
+    script: |
+      set -ex
+      IMAGE_DIGEST=$(jq -r '."containerimage.digest"' ${SERVICE_NAME}-buildkit-metadata.json)
+  
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST}
+  
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+    deps: ['buildkit-build-and-push-image-digests']
+    inputs: ['${SERVICE_NAME}-buildkit-metadata.json']
+    options:
+      cache: false
+
+  # lint:
+  #   command: 'yarn lint'
+  #   inputs: ['@globs(sources)', '@globs(tests)', 'biome.json']
+
+  release:
+    command: 'yarn run release'
+    options:
+      cache: false
+      runInCI: false

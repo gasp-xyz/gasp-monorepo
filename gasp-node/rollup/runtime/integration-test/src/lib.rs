@@ -1,6 +1,7 @@
 #![cfg(test)]
 
 mod bootstrap;
+mod council;
 mod fee_lock;
 mod identity;
 mod maintenance;

@@ -5,10 +5,6 @@ on:
       e2eBranch:
         type: string
         required: false
-      substrateNodeVersion:
-        type: string
-        required: false
-        default: "main-fast"
       globalVersion:
         type: string
         required: false
@@ -18,10 +14,6 @@ on:
       e2eBranch:
         type: string
         required: false
-      substrateNodeVersion:
-        type: string
-        required: false
-        default: "main-fast"
       globalVersion:
         type: string
         required: false
@@ -42,126 +34,63 @@ env:
   GASP_CONTRACTS_VERSION: ${{ inputs.globalVersion }}
   FERRY_DEPOSIT_VERSION: ${{ inputs.globalVersion }}
   FERRY_WITHDRAWAL_VERSION: ${{ inputs.globalVersion }}
-  ROLLUP_NODE_VERSION: ${{ inputs.substrateNodeVersion }}
+  ROLLUP_NODE_VERSION: ${{ inputs.globalVersion }}-fast
+  IMAGE_TAG: ${{ inputs.globalVersion }}
+  CACHE_VERSION: 1
 
 jobs:
-  run-e2e-tests:
-    runs-on: ubuntu-24.04
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Start env
-        run: docker compose up -d
-
-      - name: Use custom branch in e2e tests repository if it exists, otherwise use default branch
-        id: e2e
-        run: |
-          # Implementation of this conditional action was taken from here:
-          # https://github.com/actions/checkout/issues/512#issuecomment-1264735491
-
-          # This condition check if the input 'e2eBranch' is empty, and if it is, it checks if the current branch name exists in 'mangata-e2e' repository
-          if [[ -z "${{ inputs.e2eBranch }}" ]]; then
-            # Checking if current branch name exists in 'mangata-e2e' repository
-            if git ls-remote --heads --quiet --exit-code https://github.com/mangata-finance/mangata-e2e.git ${{ env.CURRENT_BRANCH }}; then
-              echo "Using custom '${{ env.CURRENT_BRANCH }}' branch as it exists in 'mangata-e2e' repository"
-              echo "BRANCH=${{ env.CURRENT_BRANCH }}" >> $GITHUB_OUTPUT
-            else
-              echo "Custom branch '${{ env.CURRENT_BRANCH }}' does not exist in 'mangata-e2e' repository, using default '${{ env.DEFAULT_E2E_REPO_BRANCH }}' branch"
-              echo "BRANCH=${{ env.DEFAULT_E2E_REPO_BRANCH }}" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "Using '${{ inputs.e2eBranch }}' branch fo 'mangata-e2e' repository as it was provided in the input"
-            echo "BRANCH=${{ inputs.e2eBranch }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Checkout tests
-        uses: actions/checkout@v4
-        with:
-          repository: mangata-finance/mangata-e2e
-          ref: ${{ steps.e2e.outputs.BRANCH }}
-          path: e2eTests
-
-      - name: Install e2e tests dependencies
-        working-directory: e2eTests
-        run: yarn install
-
-      - name: Docker ps
-        run: docker ps --no-trunc
-
-      - name: Run tests
-        working-directory: e2eTests
-        run: yarn test-rollup
-
-      - name: Get sequencer logs
-        if: success() || failure()
-        run: docker logs rollup-sequencer-eth-1
-      - name: Get aggregator logs
-        if: success() || failure()
-        run: docker logs rollup-avs-aggregator-1
-      - name: Get gasp-avs logs
-        if: success() || failure()
-        run: docker logs rollup-gasp-avs-1
-      - name: Get updater-arb logs
-        if: success() || failure()
-        run: docker logs rollup-updater-arb-1
-      - name: Get node logs
-        if: success() || failure()
-        run: docker logs rollup-node-alice-1
-
-      - name: Test Report
-        uses: dorny/test-reporter@v1.8.0
-        if: success() || failure()
-        with:
-          name: E2E report test-rollup
-          path: e2eTests/reports/*.xml
-          reporter: jest-junit
-
   run-avs-tests:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        test: ["test-opt-out", "test-corrupted"]
+        test-command:
+          - "moon gasp-avs:e2e-test-opt-out"
+          - "moon gasp-avs:e2e-test-corrupted"
+    env:
+      MOON_TOOLCHAIN_FORCE_GLOBALS: node,yarn
+      IMAGE_TAG: ${{ inputs.globalVersion }}
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+          submodules: false
+      - name: Cache Git submodules
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            .git/modules
+          key: submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-
+            submodules-${{ env.CACHE_VERSION }}-
+      - run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive --depth 1
 
-      - name: Start env
-        run: bash -c "docker compose up --wait || true"
+      - name: Install proto manually
+        run: |
+          curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
+          bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
+          echo "$HOME/.proto/bin" >> $GITHUB_PATH
+      - run: cd gasp-avs/tests && proto setup --yes
+      - run: cd gasp-avs/tests && proto install
+      - run: cd gasp-avs/tests && proto diagnose
+      - run: cd gasp-avs/tests && proto status
+      
+      - run: corepack enable && corepack prepare yarn@4.6.0 --activate
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ./gasp-avs/.nvmrc
+          cache: yarn
+          cache-dependency-path: './gasp-avs/tests/yarn.lock'
+      - run: cd gasp-avs/tests && yarn install
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-      - name: build and copy contracts
-        working-directory: contracts
-        run: forge build
+      - name: Run test command "${{ matrix.test-command }}"
+        run: ${{ matrix.test-command }}
 
-      - name: gasp-avs tests - install deps
-        working-directory: gasp-avs/tests/
-        run: yarn install
-
-      - name: wait 4 minutes for agg to warm up
-        run: sleep 240s
-
-      - name: gasp-avs tests - run tests
-        working-directory: gasp-avs/tests/
-        run: yarn ${{ matrix.test }}
-
-      - name: Get avs-aggregator logs
+      - uses: appthrust/moon-ci-retrospect@v1
         if: success() || failure()
-        run: docker logs rollup-avs-aggregator-1
-
-      - name: Get gasp-avs logs
-        if: success() || failure()
-        run: docker logs rollup-gasp-avs-1
-
-      - name: Get anvil logs
-        if: success() || failure()
-        run: docker logs rollup-eth-stub-1
-
-      - run: docker ps
 
   ferry-withdrawal-test:
     name: Ferry withdrawal tests
@@ -172,15 +101,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
+          submodules: false
+      - name: Cache Git submodules
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            .git/modules
+          key: submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-
+            submodules-${{ env.CACHE_VERSION }}-
+      - run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive --depth 1
 
       - run: corepack enable && corepack prepare yarn@4.6.0 --activate
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version-file: ./ferry-withdrawal/.nvmrc
           cache: yarn
           cache-dependency-path: "./ferry-withdrawal/yarn.lock"
-      
+
       - run: yarn install --immutable
       - run: yarn run build
 
@@ -209,12 +152,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
-      
+          fetch-depth: 0
+          submodules: false
+      - name: Cache Git submodules
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            .git/modules
+          key: submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-
+            submodules-${{ env.CACHE_VERSION }}-
+      - run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive --depth 1
+
       - run: corepack enable && corepack prepare yarn@4.6.0 --activate
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version-file: ./ferry-deposit/.nvmrc
           cache: yarn
           cache-dependency-path: "./ferry-deposit/yarn.lock"
 
@@ -233,3 +190,4 @@ jobs:
 
       - name: Test ferry
         run: yarn run test-ferry
+

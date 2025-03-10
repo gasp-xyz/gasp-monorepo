@@ -40,3 +40,7 @@ scratch
 usr-local-cargo-registry
 usr-local-cargo-git
 app-target
+
+# Produced by running runtime benchmarks
+block_weights.rs
+extrinsic_weights.rs

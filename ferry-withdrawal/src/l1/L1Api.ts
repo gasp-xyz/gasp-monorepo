@@ -6,6 +6,7 @@ import {
 	UnauthorizedProviderError,
 	createPublicClient,
 	createWalletClient,
+	defineChain,
 } from "viem";
 import { type PublicClient } from "viem";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
@@ -64,6 +65,21 @@ function cancelToViemFormat(cancel: Cancel): unknown[] {
 	];
 }
 
+function rethChain(chainId: number): Chain {
+	return defineChain({
+		id: chainId,
+		name: `Reth-${chainId}`,
+		nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+		rpcUrls: {
+			default: {
+				http: [],
+			},
+		},
+		contracts: {},
+		testnet: true,
+	});
+}
+
 const CONFIG_TO_CHAIN = new Map<string, Chain>([
 	["anvil-arbitrum", anvil],
 	["anvil-ethereum", anvil],
@@ -73,9 +89,9 @@ const CONFIG_TO_CHAIN = new Map<string, Chain>([
 	["base-sepolia", baseSepolia],
 	["ethereum", mainnet],
 	["holesky", holesky],
-	["reth-arbitrum", localhost],
-	["reth-ethereum", localhost],
-	["reth-base", localhost],
+	["reth-arbitrum", rethChain(31338)],
+	["reth-ethereum", rethChain(31337)],
+	["reth-base", rethChain(31339)],
 ]);
 
 class L1Api implements L1Interface {
@@ -315,12 +331,16 @@ class L1Api implements L1Interface {
 			transport: this.transport,
 		});
 
+		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
+			this.client,
+		);
+
 		const native_addr = await this.getNativeTokenAddress();
 		const isNativeToken =
 			u8aToHex(withdrawal.tokenAddress) === u8aToHex(native_addr);
 		if (!isNativeToken) {
 			// TODO: submit as a batch
-			const approveRequest = await this.client.simulateContract({
+			let req = {
 				account: acc,
 				address: u8aToHex(withdrawal.tokenAddress),
 				abi: [
@@ -337,21 +357,24 @@ class L1Api implements L1Interface {
 				],
 				functionName: "approve",
 				args: [MANGATA_CONTRACT_ADDRESS, withdrawal.amount],
-			});
+				maxFeePerGas: maxFeeInWei,
+				maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
+			};
+
+			let gas = await this.client.estimateContractGas(req);
+			(req as any).gas = (gas * 12n) / 10n;
+			const approveRequest = await this.client.simulateContract(req);
 			const approvetxHash = await wc.writeContract(approveRequest.request);
-			await this.client.waitForTransactionReceipt({ hash: approvetxHash });
 			const status = await this.client.waitForTransactionReceipt({
 				hash: approvetxHash,
+				timeout: 300_000,
 			});
 			if (status.status !== "success") {
 				return false;
 			}
 		}
 
-		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
-			this.client,
-		);
-		const ferryRequest = await this.client.simulateContract({
+		let req = {
 			account: acc,
 			address: MANGATA_CONTRACT_ADDRESS,
 			abi: ABI,
@@ -360,11 +383,14 @@ class L1Api implements L1Interface {
 			maxFeePerGas: maxFeeInWei,
 			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
 			value: isNativeToken ? withdrawal.amount - withdrawal.ferryTip : 0n,
-		});
-
+		};
+		let gas = await this.client.estimateContractGas(req);
+		(req as any).gas = (gas * 12n) / 10n;
+		const ferryRequest = await this.client.simulateContract(req);
 		const ferrytxHash = await wc.writeContract(ferryRequest.request);
 		const status = await this.client.waitForTransactionReceipt({
 			hash: ferrytxHash,
+			timeout: 300_000,
 		});
 		return status.status === "success";
 	}
@@ -384,10 +410,11 @@ class L1Api implements L1Interface {
 			transport: this.transport,
 		});
 
-		// const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
-		// 	this.client,
-		// );
-		const ferryRequest = await this.client.simulateContract({
+		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
+			this.client,
+		);
+
+		let req = {
 			account: acc,
 			address: MANGATA_CONTRACT_ADDRESS,
 			abi: ABI,
@@ -397,13 +424,19 @@ class L1Api implements L1Interface {
 				u8aToHex(merkleRoot),
 				proof.map((p) => u8aToHex(p)),
 			],
-			// maxFeePerGas: maxFeeInWei,
-			// maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
-		});
+			maxFeePerGas: maxFeeInWei,
+			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
+		};
 
-		const ferrytxHash = await wc.writeContract(ferryRequest.request);
+		let gas = await this.client.estimateContractGas(req);
+		(req as any).gas = (gas * 12n) / 10n;
+		const closeWithdrawalRequest = await this.client.simulateContract(req);
+		const closeWithdrawalHash = await wc.writeContract(
+			closeWithdrawalRequest.request,
+		);
 		const status = await this.client.waitForTransactionReceipt({
-			hash: ferrytxHash,
+			hash: closeWithdrawalHash,
+			timeout: 300_000,
 		});
 		return status.status === "success";
 	}
@@ -423,10 +456,10 @@ class L1Api implements L1Interface {
 			transport: this.transport,
 		});
 
-		// const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
-		// 	this.client,
-		// );
-		const ferryRequest = await this.client.simulateContract({
+		const { maxFeeInWei, maxPriorityFeePerGasInWei } = await estimateGasInWei(
+			this.client,
+		);
+		let req = {
 			account: acc,
 			address: MANGATA_CONTRACT_ADDRESS,
 			abi: ABI,
@@ -436,13 +469,19 @@ class L1Api implements L1Interface {
 				u8aToHex(merkleRoot),
 				proof.map((p) => u8aToHex(p)),
 			],
-			// maxFeePerGas: maxFeeInWei,
-			// maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
-		});
+			maxFeePerGas: maxFeeInWei,
+			maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
+		};
 
-		const ferrytxHash = await wc.writeContract(ferryRequest.request);
+		let gas = await this.client.estimateContractGas(req);
+		(req as any).gas = (gas * 12n) / 10n;
+		const closeCancelRequest = await this.client.simulateContract(req);
+		const closeCancelTxHash = await wc.writeContract(
+			closeCancelRequest.request,
+		);
 		const status = await this.client.waitForTransactionReceipt({
-			hash: ferrytxHash,
+			hash: closeCancelTxHash,
+			timeout: 300_000,
 		});
 		return status.status === "success";
 	}

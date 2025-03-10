@@ -48,16 +48,6 @@ pub mod tokens {
 	pub const RX_TOKEN_ID: TokenId = 0;
 	pub const ETH_TOKEN_ID: TokenId = 1;
 
-	#[cfg(any(feature = "unlocked", feature = "runtime-benchmarks"))]
-	pub type NontransferableTokens = Nothing;
-	#[cfg(not(any(feature = "unlocked", feature = "runtime-benchmarks")))]
-	pub type NontransferableTokens = Equals<ConstU32<RX_TOKEN_ID>>;
-
-	#[cfg(any(feature = "unlocked", feature = "runtime-benchmarks"))]
-	pub type ArbitrageBot = Nothing;
-	#[cfg(not(any(feature = "unlocked", feature = "runtime-benchmarks")))]
-	pub type ArbitrageBot = Equals<ArbitrageBotAddr>;
-
 	parameter_types! {
 		pub const RxTokenId: TokenId = RX_TOKEN_ID;
 		pub const EthTokenId: TokenId = ETH_TOKEN_ID;
@@ -176,6 +166,7 @@ pub enum CallType {
 		asset_id_out: TokenId,
 		asset_amount_out: Balance,
 	},
+	CouncilCall,
 }
 
 pub mod config {
@@ -741,6 +732,8 @@ pub mod config {
 						asset_id_out,
 						asset_amount_out,
 					),
+					(CallType::CouncilCall, _) if Council::is_member(&who.clone().into()) =>
+						Ok(None),
 					_ => OCA::withdraw_fee(who, call, info, fee, tip),
 				}
 			}
@@ -1002,11 +995,11 @@ pub mod config {
 			/// Maximum collator candidates allowed
 			pub const MaxCollatorCandidates: u32 = 100;
 			/// Maximum delegators allowed per candidate
-			pub const MaxTotalDelegatorsPerCandidate: u32 = 30;
+			pub const MaxTotalDelegatorsPerCandidate: u32 = 750;
 			/// Maximum delegators counted per candidate
-			pub const MaxDelegatorsPerCandidate: u32 = 30;
+			pub const MaxDelegatorsPerCandidate: u32 = 750;
 			/// Maximum delegations per delegator
-			pub const MaxDelegationsPerDelegator: u32 = 30;
+			pub const MaxDelegationsPerDelegator: u32 = 750;
 			/// Default fixed percent a collator takes off the top of due rewards
 			pub const DefaultCollatorCommission: Perbill = Perbill::from_percent(20);
 			/// Minimum stake required to become a collator
@@ -1020,7 +1013,7 @@ pub mod config {
 				500_000 * currency::DOLLARS
 			};
 			/// Minimum stake required to be reserved to be a delegator
-			pub const MinDelegatorStk: u128 = 1 * currency::CENTS;
+			pub const MinDelegatorStk: u128 = 500 * currency::DOLLARS;
 		}
 	}
 

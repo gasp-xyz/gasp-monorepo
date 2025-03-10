@@ -1,0 +1,14 @@
+extends: semantic-release-monorepo
+branches: 
+  - main
+  - '(updater-)+([0-9])?(.{+([0-9]),x}).x'
+  - name: release/next
+    prerelease: rc
+plugins:
+  - '@semantic-release/commit-analyzer'
+  - '@semantic-release/release-notes-generator'
+  - '@semantic-release/github'
+  - - '@semantic-release/exec'
+    - publishCmd: |
+        export IMAGE_TAG=${nextRelease.version}
+        moon updater:release

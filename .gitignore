@@ -43,6 +43,7 @@ gha-creds-*.json
 
 # rust build target
 **/target
+**/target-*
 .cargo
 
 # IDE - VSCode
@@ -77,8 +78,6 @@ Thumbs.db
 # custom
 ops/**/data
 
-*.gas-snapshot
-
 # foundry related ignore
 # reference: https://github.com/PaulRBerg/foundry-template/blob/main/.gitignore
 cache
@@ -89,10 +88,9 @@ out
 !broadcast
 **/broadcast/*
 **/broadcast/*/31337/
-
-!contracts/script/input/1337/ethereum_rolldown_output.json
-!contracts/script/input/1337/arbitrum_rolldown_output.json
-!contracts/script/input/1337/base_rolldown_output.json
+**/broadcast/*/31338/
+**/broadcast/*/31339/
+.gas-snapshot
 
 /ops/blockscout-docker-compose/services/blockscout-db-data
 /ops/blockscout-docker-compose/services/stats-db-data
@@ -115,3 +113,13 @@ out
 !**/.yarn/plugins
 !**/.yarn/releases
 !**/.yarn/versions
+
+*.tar
+*.tar.zst
+
+*-buildkit-metadata.json
+
+**/reports/**/*
+
+.cursor
+CLAUDE.md

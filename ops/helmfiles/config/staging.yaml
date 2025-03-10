@@ -1,5 +1,5 @@
 remoteCluster: true
-blockscoutEnabled: false
+blockscoutEnabled: true
 enableArbitrumServices: true
 enableBaseServices: true
 ##################################
@@ -97,7 +97,9 @@ gaspAvsData:
   storageClass: node-data-volume-retain
   mountPath: /data
   storageSize: 100Gi
-gaspAvsEnvSecrets: {}
+gaspAvsEnvSecrets:
+  ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/preregisteredGaspAvsEcdsaKeyJson
+  BLS_KEY_JSON: ref+sops://secrets.enc.yaml#/preregisteredGaspAvsBlsKeyJson
 gaspAvsEnv:
   CHAIN_ID: "1337"
   RUST_LOG: info,substrate=warn
@@ -106,8 +108,6 @@ gaspAvsEnv:
   SUBSTRATE_RPC_URL: ws://collator-01:9944
   AVS_REGISTRY_COORDINATOR_ADDR: 0xf5059a5D33d5853360D16C683c16e67980206f36
   AVS_RPC_URL: http://avs-aggregator:8090
-  ECDSA_EPHEMERAL_KEY: "true"
-  BLS_EPHEMERAL_KEY: "true"
   TESTNET: "true"
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWEPyq7mzPhc4DPdcm8pHvxLeQ1iuDNzhHkRUFRXBKaUa8
@@ -274,7 +274,7 @@ ferryWithdrawalEnvSecretsBase:
 # ferry-closer configs #
 ########################
 closerEnabled: true
-closerImageTag: a98a7610b7502704f5cc57fcbc2e611a94abf757
+closerImageTag: 0226df257ba55a112510763da171e134c15b4ecf
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-eth:8546
@@ -284,9 +284,10 @@ closerEnvEth:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  STASH_URL: http://127.0.0.1
+  BATCH_SIZE: 5
 closerEnvSecretsEth:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  STASH_URL: ref+sops://secrets.enc.yaml#/stagingStashUrl
 closerEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-arb:8546
@@ -296,9 +297,10 @@ closerEnvArb:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  STASH_URL: http://127.0.0.1
+  BATCH_SIZE: 5
 closerEnvSecretsArb:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  STASH_URL: ref+sops://secrets.enc.yaml#/stagingStashUrl
 closerEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-base:8546
@@ -308,6 +310,7 @@ closerEnvBase:
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: silly
-  STASH_URL: http://127.0.0.1
+  BATCH_SIZE: 5
 closerEnvSecretsBase:
   PRIVATE_KEY: "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
+  STASH_URL: ref+sops://secrets.enc.yaml#/stagingStashUrl
