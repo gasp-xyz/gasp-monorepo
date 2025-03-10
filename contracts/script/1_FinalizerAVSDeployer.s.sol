@@ -1,35 +1,29 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-
-import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
-import "@eigenlayer/contracts/core/AVSDirectory.sol";
-import "@eigenlayer/contracts/core/StrategyManager.sol";
-import "@eigenlayer/contracts/core/Slasher.sol";
-import "@eigenlayer/contracts/core/DelegationManager.sol";
-import "@eigenlayer/contracts/core/RewardsCoordinator.sol";
-import "@eigenlayer/test/mocks/EmptyContract.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-
-import "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
-import "@eigenlayer-middleware/src/RegistryCoordinator.sol";
-import "@eigenlayer-middleware/src/BLSApkRegistry.sol";
-import "@eigenlayer-middleware/src/IndexRegistry.sol";
-import "@eigenlayer-middleware/src/StakeRegistry.sol";
+import {AVSDirectory} from "@eigenlayer/contracts/core/AVSDirectory.sol";
+import {DelegationManager} from "@eigenlayer/contracts/core/DelegationManager.sol";
+import {RewardsCoordinator} from "@eigenlayer/contracts/core/RewardsCoordinator.sol";
+import {Slasher} from "@eigenlayer/contracts/core/Slasher.sol";
+import {StrategyManager} from "@eigenlayer/contracts/core/StrategyManager.sol";
+import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
+import {BLSApkRegistry} from "@eigenlayer-middleware/src/BLSApkRegistry.sol";
 import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
-
-import {FinalizerServiceManager, IServiceManager} from "../src/FinalizerServiceManager.sol";
-import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
-import {IFinalizerTaskManager} from "../src/IFinalizerTaskManager.sol";
+import {IndexRegistry} from "@eigenlayer-middleware/src/IndexRegistry.sol";
+import {IServiceManager} from "@eigenlayer-middleware/src/interfaces/IServiceManager.sol";
+import {IStakeRegistry, StakeRegistry} from "@eigenlayer-middleware/src/StakeRegistry.sol";
+import {IRegistryCoordinator, RegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
+import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {console} from "forge-std/console.sol";
+import {Script} from "forge-std/Script.sol";
+import {stdJson} from "forge-std/StdJson.sol";
+import {Test} from "forge-std/Test.sol";
+import {FinalizerServiceManager} from "../src/FinalizerServiceManager.sol";
+import {FinalizerTaskManager, IFinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
 import {OperatorStateRetrieverExtended} from "../src/OperatorStateRetrieverExtended.sol";
-
 import {Utils} from "./utils/Utils.sol";
-
-import "forge-std/Test.sol";
-import "forge-std/Script.sol";
-import "forge-std/StdJson.sol";
-import "forge-std/console.sol";
 
 // # To deploy and verify our contract
 // forge script script/1_FinalizerAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
@@ -37,7 +31,7 @@ import "forge-std/console.sol";
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Deploys finalizer contracts
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-contract Deployer is Script, Utils, Test {
+contract FinalizerAVSDeployer is Script, Test, Utils {
     string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
     string constant _CONFIG_PATH = "deploy.config";
     string constant _OUTPUT_PATH = "avs_deployment_output";
@@ -46,53 +40,46 @@ contract Deployer is Script, Utils, Test {
     PauserRegistry public avsPauserReg;
     address public avsOwner;
     address public avsUpgrader;
-
-    bool public allow_non_root_tm_init;
+    bool public allowNonRootTmInit;
     uint32 public taskResponseWindowBlocks;
-
-    // non-upgradable contracts
+    // Non-upgradable contracts
     BLSSignatureChecker public blsSignatureChecker;
     OperatorStateRetrieverExtended public operatorStateRetreiverExtended;
-    address public dummy_rolldown_address;
-
-    //upgradeable contracts
+    address public dummyRolldown;
+    // Upgradeable contracts
     FinalizerServiceManager public serviceManager;
     FinalizerTaskManager public taskManager;
     RegistryCoordinator public registryCoordinator;
     BLSApkRegistry public blsApkRegistry;
     IndexRegistry public indexRegistry;
     StakeRegistry public stakeRegistry;
-
-    //upgradeable contract implementations
+    // Upgradeable contract implementations
     FinalizerServiceManager public serviceManagerImplementation;
     FinalizerTaskManager public taskManagerImplementation;
     RegistryCoordinator public registryCoordinatorImplementation;
     BLSApkRegistry public blsApkRegistryImplementation;
     IndexRegistry public indexRegistryImplementation;
     StakeRegistry public stakeRegistryImplementation;
-
-    // EigenLayer Contracts
+    // EigenLayer contracts
     DelegationManager public delegation;
     AVSDirectory public avsDirectory;
     StrategyManager public strategyManager;
     RewardsCoordinator public rewardsCoordinator;
 
     function run() external {
-
         // Eigenlayer contracts
         string memory eigenlayerDeployedContracts = readInput(_EIGEN_DEPLOYMENT_PATH);
         strategyManager =
             StrategyManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.strategyManager"));
         delegation = DelegationManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.delegationManager"));
         avsDirectory = AVSDirectory(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.avsDirectory"));
-        rewardsCoordinator = RewardsCoordinator(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.rewardsCoordinator"));
+        rewardsCoordinator =
+            RewardsCoordinator(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.rewardsCoordinator"));
 
-        // READ JSON CONFIG DATA
         string memory configData = readConfig(_CONFIG_PATH);
 
         // check that the chainID matches the one in the config
         uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
-        uint256 currentChainId = block.chainid;
         emit log_named_uint("You are deploying on ChainID", block.chainid);
         require(configChainId == block.chainid, "You are on the wrong chain for this config");
 
@@ -103,10 +90,9 @@ contract Deployer is Script, Utils, Test {
         avsOwner = stdJson.readAddress(configData, ".permissions.owner");
         avsUpgrader = stdJson.readAddress(configData, ".permissions.upgrader");
 
-        taskResponseWindowBlocks =
-            uint32(stdJson.readUint(configData, ".taskManagerParams.taskResponseWindowBlocks"));
+        taskResponseWindowBlocks = uint32(stdJson.readUint(configData, ".taskManagerParams.taskResponseWindowBlocks"));
 
-        allow_non_root_tm_init = stdJson.readBool(configData, ".allow_non_root_tm_init");
+        allowNonRootTmInit = stdJson.readBool(configData, ".allowNonRootTmInit");
 
         // START BROADCAST
         vm.startBroadcast();
@@ -139,33 +125,12 @@ contract Deployer is Script, Utils, Test {
         registryCoordinator = RegistryCoordinator(
             address(new TransparentUpgradeableProxy(address(emptyContract), address(avsProxyAdmin), ""))
         );
-        blsApkRegistry = BLSApkRegistry(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(avsProxyAdmin),
-                    ""
-                )
-            )
-        );
-        indexRegistry = IndexRegistry(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(avsProxyAdmin),
-                    ""
-                )
-            )
-        );
-        stakeRegistry = StakeRegistry(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(avsProxyAdmin),
-                    ""
-                )
-            )
-        );
+        blsApkRegistry =
+            BLSApkRegistry(address(new TransparentUpgradeableProxy(address(emptyContract), address(avsProxyAdmin), "")));
+        indexRegistry =
+            IndexRegistry(address(new TransparentUpgradeableProxy(address(emptyContract), address(avsProxyAdmin), "")));
+        stakeRegistry =
+            StakeRegistry(address(new TransparentUpgradeableProxy(address(emptyContract), address(avsProxyAdmin), "")));
 
         // deploy StakeRegistry
         stakeRegistryImplementation = new StakeRegistry(registryCoordinator, delegation);
@@ -252,14 +217,25 @@ contract Deployer is Script, Utils, Test {
         blsSignatureChecker.setStaleStakesForbidden(false);
 
         operatorStateRetreiverExtended = new OperatorStateRetrieverExtended();
-        
+
         taskManagerImplementation = new FinalizerTaskManager();
 
         // upgrade task manager proxy to implementation and initialize
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(taskManager))),
             address(taskManagerImplementation),
-            abi.encodeWithSelector(taskManager.initialize.selector, avsPauserReg, avsOwner, aggregator, aggregator, allow_non_root_tm_init, blsSignatureChecker, taskResponseWindowBlocks, operatorStateRetreiverExtended, dummy_rolldown_address)
+            abi.encodeWithSelector(
+                taskManager.initialize.selector,
+                avsPauserReg,
+                avsOwner,
+                aggregator,
+                aggregator,
+                allowNonRootTmInit,
+                blsSignatureChecker,
+                taskResponseWindowBlocks,
+                operatorStateRetreiverExtended,
+                dummyRolldown
+            )
         );
 
         // transfer ownership of proxy admin to upgrader
@@ -385,13 +361,14 @@ contract Deployer is Script, Utils, Test {
         require(serviceManager.ejector() == ejector, "serviceManager.ejector() != ejector");
 
         require(registryCoordinator.churnApprover() == churner, "registryCoordinator.churner() != churner");
-        require(registryCoordinator.ejector() == address(serviceManager), "registryCoordinator.ejector() != serviceManager");
+        require(
+            registryCoordinator.ejector() == address(serviceManager), "registryCoordinator.ejector() != serviceManager"
+        );
         require(
             registryCoordinator.pauserRegistry() == avsPauserReg,
             "registryCoordinator: pauser registry not set correctly"
         );
         require(registryCoordinator.paused() == 0, "registryCoordinator: init paused status set incorrectly");
-
 
         for (uint8 i = 0; i < operatorSetParams.length; ++i) {
             require(
