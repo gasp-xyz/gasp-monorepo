@@ -92,3 +92,7 @@ func NewEthRpc(
 		Clients:       clients,
 	}, nil
 }
+
+type ethRpcInterface interface {
+	BlockNumber()()
+}
