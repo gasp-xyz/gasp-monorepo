@@ -1,7 +1,7 @@
 extends: semantic-release-monorepo
 branches: 
   - main
-  - '(contracts-)+([0-9])?(.{+([0-9]),x}).x'
+  - '(gasp-contracts-)+([0-9])?(.{+([0-9]),x}).x'
   - name: release/next
     prerelease: rc
 plugins:
