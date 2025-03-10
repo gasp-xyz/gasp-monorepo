@@ -4,6 +4,7 @@ const withdrawalSchema = new Schema(
   'withdrawals',
   {
     address: { type: 'string' },
+    recipient: { type: 'string' },
     txHash: { type: 'string' },
     requestId: { type: 'number' },
     status: { type: 'string' },
