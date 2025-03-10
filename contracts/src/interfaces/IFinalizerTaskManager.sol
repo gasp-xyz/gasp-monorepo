@@ -6,8 +6,6 @@ import {IGaspMultiRollupServicePrimitives} from "./IGaspMultiRollupServicePrimit
 import {IRolldown} from "./IRolldown.sol";
 
 interface IFinalizerTaskManager {
-    // EVENTS
-
     event PauseTrackingOpState();
     event ResumeTrackingOpState(bool resetTrackedQuorums);
 

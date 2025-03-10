@@ -8,7 +8,7 @@ import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Test} from "forge-std/Test.sol";
-import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
+import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
 import {GaspTestToken} from "../test/mocks/GaspTestToken.sol";
 import {Utils} from "./utils/Utils.sol";
