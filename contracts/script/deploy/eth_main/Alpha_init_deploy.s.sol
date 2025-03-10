@@ -17,12 +17,12 @@ import "@eigenlayer-middleware/src/IndexRegistry.sol";
 import "@eigenlayer-middleware/src/StakeRegistry.sol";
 import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
 
-import {FinalizerServiceManager, IServiceManager} from "../../../src/FinalizerServiceManager.sol";
+import {FinalizerServiceManager} from "../../../src/FinalizerServiceManager.sol";
 import {FinalizerTaskManager} from "../../../src/FinalizerTaskManager.sol";
-import {IFinalizerTaskManager} from "../../../src/IFinalizerTaskManager.sol";
+import {IFinalizerTaskManager} from "../../../src/interfaces/IFinalizerTaskManager.sol";
+import {IRolldownPrimitives} from "../../../src/interfaces/IRolldownPrimitives.sol";
 import {OperatorStateRetrieverExtended} from "../../../src/OperatorStateRetrieverExtended.sol";
 import {Rolldown} from "../../../src/Rolldown.sol";
-import {IRolldownPrimitives} from "../../../src/IRolldownPrimitives.sol";
 
 import {Utils} from "../../utils/Utils.sol";
 

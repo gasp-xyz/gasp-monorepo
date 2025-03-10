@@ -29,7 +29,7 @@ pragma solidity 0.8.13;
 
 //     function setUp() public {
 //         _setUpBLSMockAVSDeployer();
-        
+
 //         blsSignatureChecker = new BLSSignatureChecker(registryCoordinator);
 //         // This is a hack to set BlsSignatureChecker's staleStakesForbidden flag
 //         // We do it this way to avoid forking it...
@@ -72,7 +72,7 @@ pragma solidity 0.8.13;
 //         emit NewTaskCreated( 0, newTask);
 //         tm.createNewTask(2, 100, quorumNumbers);
 //         assertEq(tm.latestTaskNum(), 1);
-        
+
 //     }
 //     function testCreateNewTaskOnlyGenerator() public {
 //         bytes memory quorumNumbers = new bytes(0);
@@ -85,7 +85,7 @@ pragma solidity 0.8.13;
 //         cheats.prank(generator, generator);
 //         tm.createNewTask(2, 100, quorumNumbers);
 //         assertEq(tm.latestTaskNum(), 1);
-        
+
 //         cheats.prank(generator, generator);
 //         tm.createNewTask(2, 100, quorumNumbers);
 //         assertEq(tm.latestTaskNum(), 2);
@@ -102,7 +102,7 @@ pragma solidity 0.8.13;
 
 //     }
 //     function testCreateAndRespondOnlyAggregator() public {
-        
+
 //         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
 
 //         FinalizerTaskManager.Task memory newTask;
@@ -123,7 +123,7 @@ pragma solidity 0.8.13;
 //         taskResponse.pendingStateHash = keccak256(abi.encodePacked("pendingStateHash"));
 
 //         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
-        
+
 //         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
 //         IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
 
@@ -134,14 +134,14 @@ pragma solidity 0.8.13;
 //         newTaskResponse.quorumNumbers = quorumNumbers;
 
 //         assertEq(keccak256(abi.encode(newTaskResponse)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
-        
+
 //         cheats.prank(generator, generator);
 //         vm.expectRevert("Aggregator must be the caller");
 //         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
-        
+
 //     }
 //     function testCreateAndRespondTaskValidation() public {
-        
+
 //         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
 
 //         FinalizerTaskManager.Task memory newTask;
@@ -162,7 +162,7 @@ pragma solidity 0.8.13;
 //         taskResponse.pendingStateHash = keccak256(abi.encodePacked("pendingStateHash"));
 
 //         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
-        
+
 //         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
 //         IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
 
@@ -171,14 +171,14 @@ pragma solidity 0.8.13;
 //         newTaskResponse.taskCreatedBlock = 6666;
 //         newTaskResponse.quorumThresholdPercentage = 101;
 //         newTaskResponse.quorumNumbers = quorumNumbers;
-        
+
 //         cheats.prank(aggregator, aggregator);
 //         vm.expectRevert("supplied task does not match the one recorded in the contract");
 //         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
-        
+
 //     }
 //     function getwindowBock() public {
-        
+
 //         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
 
 //         FinalizerTaskManager.Task memory newTask;
@@ -199,7 +199,7 @@ pragma solidity 0.8.13;
 //         taskResponse.pendingStateHash = keccak256(abi.encodePacked("pendingStateHash"));
 
 //         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
-        
+
 //         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
 //         IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
 
@@ -210,18 +210,18 @@ pragma solidity 0.8.13;
 //         newTaskResponse.quorumNumbers = quorumNumbers;
 
 //         assertEq(keccak256(abi.encode(newTaskResponse)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
-        
+
 //         cheats.prank(aggregator, aggregator);
 //         vm.expectRevert("BLSSignatureChecker.checkSignatures: empty quorum input");
 //         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
-        
+
 //     }
 //     function testGetTimeWindow() public {
 //         uint32 timeWindow = tm.getTaskResponseWindowBlock();
 //         assertEq(timeWindow, TASK_RESPONSE_WINDOW_BLOCK);
-//     } 
+//     }
 //     function testCreateAndRespondTaskTimeWindow() public {
-        
+
 //         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
 
 //         FinalizerTaskManager.Task memory newTask;
@@ -234,7 +234,7 @@ pragma solidity 0.8.13;
 //         vm.expectEmit(true, true, false, true);
 //         emit NewTaskCreated( 0, newTask);
 //         tm.createNewTask(2, 100, quorumNumbers);
-        
+
 //         vm.roll( block.number + tm.getTaskResponseWindowBlock() + 1);
 //         IFinalizerTaskManager.TaskResponse memory taskResponse;
 //         taskResponse.referenceTaskIndex = tm.latestTaskNum() -1;
@@ -243,7 +243,7 @@ pragma solidity 0.8.13;
 //         taskResponse.pendingStateHash = keccak256(abi.encodePacked("pendingStateHash"));
 
 //         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
-        
+
 //         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
 //         IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
 
@@ -252,11 +252,11 @@ pragma solidity 0.8.13;
 //         newTaskResponse.taskCreatedBlock = 1;
 //         newTaskResponse.quorumThresholdPercentage = 100;
 //         newTaskResponse.quorumNumbers = quorumNumbers;
-        
+
 //         cheats.prank(aggregator, aggregator);
 //         vm.expectRevert("Aggregator has responded to the task too late");
 //         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
-        
+
 //     }
 //     //TODO: Create test for
 //     // respondToTask -> happy path
