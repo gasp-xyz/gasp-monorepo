@@ -13,6 +13,7 @@ members = [
   "l1api",
   "l2api",
   "closer",
+  "ferry-withdrawal",
 ]
 
 [profile.dev]
@@ -30,7 +31,6 @@ codegen-units = 1
 
 
 [workspace.dependencies]
-
 alloy = { version = "0.8.3", features = ["sol-types", "contract", "signer-local", "provider-http", "provider-ws"] }
 
 contract-bindings = { path = "./bindings/contracts/" }

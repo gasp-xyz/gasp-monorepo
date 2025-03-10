@@ -39,7 +39,7 @@ pub enum Origin {
     L2,
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Copy, Clone, Hash, Eq)]
 pub enum Chain {
     Ethereum,
     Arbitrum,

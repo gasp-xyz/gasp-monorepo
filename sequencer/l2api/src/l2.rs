@@ -602,13 +602,28 @@ impl L2Interface for Gasp {
         active.ok_or(L2Error::UnknownDisputePeriodLength(chain.into()))
     }
 
+    #[tracing::instrument(skip(self), ret)]
     async fn get_latest_created_request_id(
         &self,
         chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
-    ) -> Result<u128, L2Error> {
-        let chain: crate::types::subxt::Chain = chain.into();
-        todo!()
+    ) -> Result<Option<u128>, L2Error> {
+
+        let storage = gasp_bindings::api::storage()
+            .rolldown()
+            .l2_origin_request_id();
+        let latest = self.client.storage()
+            .at(at)
+            .fetch(&storage).await?
+            .map(|elem| elem.into_iter()
+                .map(|(chain, id)| (gasp_types::Chain::from(chain), id))
+                .collect::<HashMap<_, _>>()
+            ).unwrap_or_default();
+
+        // tracing::trace!("dispute period: {active:?}");
+        // active.ok_or(L2Error::UnknownDisputePeriodLength(chain.into()))
+        // todo!()
+        Ok(latest.get(&chain).cloned())
     }
 }
 
