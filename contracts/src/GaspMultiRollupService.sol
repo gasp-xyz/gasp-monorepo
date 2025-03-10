@@ -11,8 +11,8 @@ import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/Ownabl
 import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
 import {console} from "forge-std/console.sol";
 import {GaspMultiRollupServiceStorage} from "./GaspMultiRollupServiceStorage.sol";
-import {IFinalizerTaskManager} from "./IFinalizerTaskManager.sol";
-import {IRolldown} from "./IRolldown.sol";
+import {IFinalizerTaskManager} from "./interfaces/IFinalizerTaskManager.sol";
+import {IRolldown} from "./interfaces/IRolldown.sol";
 
 contract GaspMultiRollupService is Initializable, OwnableUpgradeable, Pausable, GaspMultiRollupServiceStorage {
     using BN254 for BN254.G1Point;
