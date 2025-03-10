@@ -1,29 +1,27 @@
-use envconfig::Envconfig;
+use clap::Parser;
+use clap::arg;
 use hex::FromHex;
 use tracing::level_filters::LevelFilter;
 
-use sequencer::Sequencer;
 
-#[derive(Envconfig, Debug)]
-struct Config {
-    #[envconfig(from = "L1_URI")]
+#[derive(Parser, Debug)]
+pub struct Cli {
+    #[arg(long, env = "L1_URI")]
     pub l1_uri: String,
 
-    #[envconfig(from = "L2_URI")]
+    #[arg(long, env = "L2_URI")]
     pub l2_uri: String,
 
-    #[envconfig(from = "PRIVATE_KEY")]
-    #[arg(long, value_parser = parse_pkey)]
+    #[arg(long, value_parser = parse_pkey, env = "PRIVATE_KEY")]
     pub private_key: [u8; 32],
 
-    #[envconfig(from = "CHAIN_ID")]
+    #[arg(long, env = "CHAIN")]
     pub chain_id: u16,
 
-    #[envconfig(from = "ROLLDOWN_CONTRACT")]
-    #[arg(long, value_parser = parse_addr)]
+    #[arg(long, value_parser = parse_addr, env = "ROLLDOWN_CONTRACT")]
     pub rolldown_contract_address: [u8; 20],
 
-    #[envconfig(from = "BATCH_SIZE")]
+    #[arg(long, env = "BATCH_SIZE")]
     pub update_size_limit: usize,
 }
 

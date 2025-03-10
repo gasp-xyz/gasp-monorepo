@@ -1,3 +1,5 @@
+use clap::Parser;
+
 mod cli;
 mod closer;
 
@@ -11,11 +13,14 @@ fn init_logger() {
         .init();
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum Error{
+}
 
 #[tokio::main]
 pub async fn main() -> Result<(), Error> {
-    let args = cli::Args::parse();
+    let args = cli::Cli::parse();
     init_logger();
-
-};
+    Ok(())
+}
 
