@@ -1,6 +1,6 @@
 runtime: nodejs18
 
-service: gasp-stash-holesky
+service: gasp-stash-jobs-holesky
 
 includes:
   - app-import-handlers.yaml

@@ -1,6 +1,6 @@
 runtime: nodejs18
 
-service: gasp-stash-frontend
+service: gasp-stash-jobs-frontend
 
 includes:
   - app-import-handlers.yaml
