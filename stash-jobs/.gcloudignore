@@ -1,0 +1,13 @@
+.gcloudignore
+.git
+.gitignore
+node_modules/
+dist
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
