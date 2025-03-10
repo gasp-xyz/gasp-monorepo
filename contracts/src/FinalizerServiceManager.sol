@@ -32,7 +32,10 @@ contract FinalizerServiceManager is ServiceManagerBase, IFinalizerServiceManager
     }
 
     modifier onlyEjectorOrOwner() {
-        require(msg.sender == ejector || msg.sender == owner(), "RegistryCoordinator.onlyEjectorOrOwner: caller is not ejector or owner");
+        require(
+            msg.sender == ejector || msg.sender == owner(),
+            "RegistryCoordinator.onlyEjectorOrOwner: caller is not ejector or owner"
+        );
         _;
     }
 
@@ -74,7 +77,7 @@ contract FinalizerServiceManager is ServiceManagerBase, IFinalizerServiceManager
         _avsDirectory.registerOperatorToAVS(operator, operatorSignature);
     }
 
-    function ejectOperators(address[] calldata operators, bytes[] calldata quorumNumbers) external onlyEjectorOrOwner() {
+    function ejectOperators(address[] calldata operators, bytes[] calldata quorumNumbers) external onlyEjectorOrOwner {
         require(
             operators.length == quorumNumbers.length, "RegistryCoordinator.ejectOperators: args length does not match"
         );
