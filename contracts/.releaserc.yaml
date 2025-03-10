@@ -1,11 +1,7 @@
 extends: semantic-release-monorepo
 branches: 
   - main
-<<<<<<< HEAD
   - '(gasp-contracts-)+([0-9])?(.{+([0-9]),x}).x'
-=======
-  - '(contracts-)+([0-9])?(.{+([0-9]),x}).x'
->>>>>>> ede94dab (feat(contracts): S1_U1MX upgrade (#498) (#499))
   - name: release/next
     prerelease: rc
 plugins:
