@@ -13,10 +13,9 @@ import {Rolldown} from "../src/Rolldown.sol";
 import {GaspTestToken} from "../test/mocks/GaspTestToken.sol";
 import {Utils} from "./utils/Utils.sol";
 
-contract RolldownDeployer is Script, Utils, Test {
+contract RolldownDeployer is Script, Test, Utils {
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
-
     string private constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
     string private constant _CONFIG_PATH = "deploy.config";
     string private constant _OUTPUT_PATH = "rolldown_output";
