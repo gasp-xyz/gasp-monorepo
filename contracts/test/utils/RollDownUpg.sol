@@ -5,6 +5,6 @@ import {Rolldown} from "../../src/Rolldown.sol";
 
 contract RollDownUpg is Rolldown {
     function imUpgraded() external pure returns (bool) {
-      return true;
+        return true;
     }
 }

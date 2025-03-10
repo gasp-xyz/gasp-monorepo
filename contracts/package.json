@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "GASP contracts for EVM",
   "scripts": {
-    "format": "yarn run prettier --check '**/*.{json,md,yml}' && forge fmt --check {src/interfaces/IGaspToken,src/GaspToken,src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/RolldownDeployer.t}.sol",
-    "format:fix": "yarn run prettier --write '**/*.{json,md,yml}' && forge fmt {src/interfaces/IGaspToken,src/GaspToken,src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/RolldownDeployer.t}.sol",
+    "format": "yarn run prettier --check '**/*.{json,md,yml}' && forge fmt --check src test",
+    "format:fix": "yarn run prettier --write '**/*.{json,md,yml}' && forge fmt src test",
     "lint": "yarn run solhint {script,src,test}/**/{GaspToken,IGaspToken,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,RolldownDeployer.t}.sol",
     "lint:fix": "yarn run solhint --fix --noPrompt {script,src,test}/**/{GaspToken,IGaspToken,IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,RolldownDeployer.t}.sol && yarn run run format:fix",
     "compile": "forge compile",
