@@ -23,11 +23,11 @@ tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 lru = "0.12.5"
 prometheus = "0.13.4"
 lazy_static = "1.4.0"
+mockall = "0.13.0"
 gasp-types = { workspace = true }
 gasp-bindings = { workspace = true }
 
 [dev-dependencies]
-mockall = "0.13.0"
 serial_test = "3.2.0"
 tracing-test = "0.2.5"
 

@@ -1,6 +1,6 @@
 use super::{types, L1Error, L1Interface};
 use crate::utils::simulate_send_and_wait_for_result;
-use crate::RequestStatus;
+use crate::types::RequestStatus;
 use alloy::contract::{CallBuilder, CallDecoder};
 use contract_bindings::irolldown::IRolldownPrimitives::Withdrawal;
 use lazy_static::lazy_static;
@@ -38,7 +38,7 @@ where
     #[tracing::instrument(skip(self, cancel))]
     pub async fn send_close_cancel_tx(
         &self,
-        cancel: types::Cancel,
+        cancel: types::abi::Cancel,
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
@@ -72,7 +72,7 @@ where
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
         let proof = proof.into_iter().map(|elem| elem.0.into()).collect();
-        let native_withdrawal: types::Withdrawal = withdrawal.into();
+        let native_withdrawal: types::abi::Withdrawal = withdrawal.into();
         let call =
             self.contract_handle
                 .closeWithdrawal(native_withdrawal, merkle_root.0.into(), proof);
@@ -219,7 +219,7 @@ where
         &self,
         start: u128,
         end: u128,
-    ) -> Result<types::L1Update, L1Error> {
+    ) -> Result<types::abi::L1Update, L1Error> {
         ETH_CALL_COUNTER
             .with_label_values(&["getPendingRequests"])
             .inc();

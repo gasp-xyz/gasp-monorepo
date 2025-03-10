@@ -6,6 +6,7 @@ use futures::future::join_all;
 use futures::Stream;
 use hex::encode as hex_encode;
 
+use crate::types::Finalization;
 use crate::L2Error;
 use futures::StreamExt;
 use primitive_types::H256;
@@ -26,36 +27,9 @@ use gasp_bindings::api::runtime_types::frame_system::EventRecord;
 use gasp_bindings::api::runtime_types::rollup_runtime::RuntimeEvent;
 use gasp_bindings::{GaspAddress, GaspConfig, GaspSignature};
 
-pub mod types {
 
-    // NOTE: this alias is used in multiple other files to make code more readable
-    // #[allow(unused_imports)]
-    // pub use gasp::api as bindings;
 
-    pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update;
-    #[allow(unused_imports)]
-    pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::{
-        CancelResolution, Chain, Deposit, Origin, RequestId,
-    };
-    pub use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata;
-    pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
-    pub type PendingUpdateMetadata = UpdateMetadata<AccountId20>;
-}
-
-pub enum Finalization {
-    Best,
-    Finalized,
-}
-
-#[derive(Debug)]
-pub struct PendingUpdate {
-    pub chain: types::Chain,
-    pub update_id: u128,
-    pub range: (u128, u128),
-    pub hash: H256,
-}
-
-use types::RequestId;
+// use crate::types::RequestId;
 pub type L2Event = EventRecord<RuntimeEvent, H256>;
 
 pub struct Gasp {
@@ -201,7 +175,7 @@ impl Gasp {
         amount: u128,
         ferry_tip: Option<u128>,
     ) -> Result<bool, L2Error> {
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let call = gasp_bindings::api::tx()
             .rolldown()
             .withdraw(chain, recipient, token, amount, ferry_tip);
@@ -222,11 +196,11 @@ impl L2Interface for Gasp {
     ) -> Result<Option<L2Request>, L2Error> {
         pub use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::L2Request as SubxtL2Request;
 
-        let request_id = RequestId {
-            origin: types::Origin::L2,
+        let request_id = crate::types::subxt::RequestId {
+            origin: crate::types::subxt::Origin::L2,
             id: request_id,
         };
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let storage = gasp_bindings::api::storage()
             .rolldown()
             .l2_requests(chain, request_id);
@@ -251,7 +225,7 @@ impl L2Interface for Gasp {
         chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<u128, L2Error> {
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let storage = gasp_bindings::api::storage()
             .rolldown()
             .last_processed_request_on_l2(chain);
@@ -272,7 +246,7 @@ impl L2Interface for Gasp {
     ) -> Result<u128, L2Error> {
         use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::SequencerRights;
 
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let storage = gasp_bindings::api::storage()
             .rolldown()
             .sequencers_rights(chain);
@@ -310,7 +284,7 @@ impl L2Interface for Gasp {
             .await?
             .unwrap_or_default();
 
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain= chain.into();
         let selected = selected
             .iter()
             .find(|(c, _)| c == &chain)
@@ -332,7 +306,7 @@ impl L2Interface for Gasp {
     ) -> Result<u128, L2Error> {
         use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::SequencerRights;
 
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let storage = gasp_bindings::api::storage()
             .rolldown()
             .sequencers_rights(chain);
@@ -390,7 +364,7 @@ impl L2Interface for Gasp {
         request_id: u128,
         chain: gasp_types::Chain,
     ) -> Result<bool, L2Error> {
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let call = gasp_bindings::api::tx()
             .rolldown()
             .cancel_requests_from_l1(chain, request_id);
@@ -403,7 +377,7 @@ impl L2Interface for Gasp {
         chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Vec<u128>, L2Error> {
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let storage_entry = gasp_bindings::api::storage()
             .rolldown()
             .awaiting_cancel_resolution(chain);
@@ -494,7 +468,7 @@ impl L2Interface for Gasp {
         at: HashOf<GaspConfig>,
     ) -> Result<Vec<H256>, L2Error> {
         // let range = types::Range{ start, end };
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let call = gasp_bindings::api::runtime_apis::rolldown_runtime_api::RolldownRuntimeApi
             .get_merkle_proof_for_tx(chain, range, request_id);
 
@@ -520,7 +494,7 @@ impl L2Interface for Gasp {
         chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Vec<u8>, L2Error> {
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let call = gasp_bindings::api::runtime_apis::rolldown_runtime_api::RolldownRuntimeApi
             .get_abi_encoded_l2_request(chain, request_id);
 
@@ -542,12 +516,12 @@ impl L2Interface for Gasp {
         chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Option<H256>, L2Error> {
-        let req = types::RequestId {
-            origin: types::Origin::L2,
+        let req = crate::types::subxt::RequestId {
+            origin: crate::types::subxt::Origin::L2,
             id: request_id,
         };
 
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let storage = gasp_bindings::api::storage()
             .rolldown()
             .l2_requests(chain, req);
@@ -594,7 +568,7 @@ impl L2Interface for Gasp {
             .sequencer_staking()
             .active_sequencers();
 
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let active = self
             .client
             .storage()
@@ -618,7 +592,7 @@ impl L2Interface for Gasp {
         chain: gasp_types::Chain,
         at: H256,
     ) -> Result<u128, L2Error> {
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let storage = gasp_bindings::api::storage()
             .rolldown()
             .dispute_period(chain.clone());
@@ -633,7 +607,7 @@ impl L2Interface for Gasp {
         chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<u128, L2Error> {
-        let chain: types::Chain = chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         todo!()
     }
 }
@@ -820,10 +794,10 @@ mod test {
         let next_req_id = latest_req_id.saturating_add(1u128);
 
         let update = L1Update {
-            chain: types::Chain::Ethereum,
-            pendingDeposits: vec![types::Deposit {
-                requestId: types::RequestId {
-                    origin: types::Origin::L1,
+            chain: crate::types::subxt::Chain::Ethereum,
+            pendingDeposits: vec![crate::types::subxt::Deposit {
+                requestId: crate::types::subxt::RequestId {
+                    origin: crate::types::subxt::Origin::L1,
                     id: next_req_id,
                 },
                 depositRecipient: DUMMY_ADDR,

@@ -16,18 +16,29 @@ mod utils;
 use erc20::Erc20Token;
 #[cfg(test)]
 mod test;
+pub mod mock;
 
 pub use lru::CachedL1Interface;
 pub use rolldown_contract::RolldownContract;
 use sha3::{Digest, Keccak256};
 
 pub mod types {
-    pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
-    pub use contract_bindings::rolldown::IRolldownPrimitives::L1Update;
-    pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
-    pub use contract_bindings::rolldown::IRolldownPrimitives::Range;
-    pub use contract_bindings::rolldown::IRolldownPrimitives::RequestId;
-    pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
+    pub mod abi{
+        pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
+        pub use contract_bindings::rolldown::IRolldownPrimitives::L1Update;
+        pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
+        pub use contract_bindings::rolldown::IRolldownPrimitives::Range;
+        pub use contract_bindings::rolldown::IRolldownPrimitives::RequestId;
+        pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
+    }
+
+    #[derive(Debug, PartialEq, Copy, Clone)]
+    pub enum RequestStatus {
+        Pending,
+        Ferried([u8; 20]),
+        Closed,
+    }
+    pub use gasp_types::Withdrawal;
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -46,19 +57,13 @@ pub enum L1Error {
     TxReverted(H256),
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
-pub enum RequestStatus {
-    Pending,
-    Ferried([u8; 20]),
-    Closed,
-}
 
 pub trait L1Interface {
     async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error>;
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
     async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>;
-    async fn get_status(&self, request_hash: H256) -> Result<RequestStatus, L1Error>;
-    async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error>;
+    async fn get_status(&self, request_hash: H256) -> Result<types::RequestStatus, L1Error>;
+    async fn get_update(&self, start: u128, end: u128) -> Result<types::abi::L1Update, L1Error>;
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error>;
     async fn get_latest_reqeust_id(&self) -> Result<Option<u128>, L1Error>;
     async fn get_merkle_root(
@@ -215,7 +220,7 @@ where
     }
 
     #[tracing::instrument(skip(self))]
-    async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error> {
+    async fn get_update(&self, start: u128, end: u128) -> Result<types::abi::L1Update, L1Error> {
         let latest = self.get_latest_reqeust_id().await?;
 
         if let Some(latest) = latest {
@@ -276,7 +281,7 @@ where
     }
 
     #[tracing::instrument(skip(self))]
-    async fn get_status(&self, request_hash: H256) -> Result<RequestStatus, L1Error> {
+    async fn get_status(&self, request_hash: H256) -> Result<types::RequestStatus, L1Error> {
         self.rolldown_contract
             .get_request_status(request_hash)
             .await

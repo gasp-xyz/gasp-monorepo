@@ -1,5 +1,5 @@
 use super::*;
-use crate::create_provider;
+use crate::{create_provider, types::RequestStatus};
 use crate::utils::test_utils::DevToken;
 use gasp_types::{Origin, RequestId, U256};
 use hex_literal::hex;

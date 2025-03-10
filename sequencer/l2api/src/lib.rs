@@ -1,30 +1,42 @@
 use futures::Stream;
 use gasp_bindings::GaspConfig;
-use gasp_types::{Chain, L2Request};
 use primitive_types::H256;
+use gasp_types::{Chain, L2Request};
 use std::pin::Pin;
 use subxt::Config;
 
 mod l2;
+pub mod mock;
 mod signer;
-use l2::Finalization;
 pub type HashOf<T> = <T as Config>::Hash;
 pub type EndDisputePeriod = u128;
 pub type PendingUpdateWithKeys = (EndDisputePeriod, Chain, gasp_types::PendingUpdateMetadata);
 pub type HeaderStream = Pin<Box<dyn Stream<Item = Result<(u32, H256), L2Error>> + Send + 'static>>;
+pub enum Finalization {
+    Best,
+    Finalized,
+}
 
 pub mod types {
     // NOTE: this alias is used in multiple other files to make code more readable
     // #[allow(unused_imports)]
     // pub use gasp::api as bindings;
 
-    pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update;
-    #[allow(unused_imports)]
-    pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::{
-        CancelResolution, Chain, Deposit, Origin, RequestId,
-    };
-    pub use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata;
-    pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
+    pub mod subxt {
+        pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update;
+        #[allow(unused_imports)]
+        pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::{
+            CancelResolution, Chain, Deposit, Origin, RequestId,
+        };
+        pub use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata;
+        pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
+    }
+
+    pub use gasp_types::{Chain, L2Request};
+    pub use primitive_types::H256;
+
+    pub use super::Finalization;
+    pub use super::HeaderStream;
 }
 
 #[derive(Debug, thiserror::Error)]

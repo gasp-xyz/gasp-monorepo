@@ -3,13 +3,13 @@ use std::cell::RefCell;
 use std::num::NonZeroUsize;
 use std::sync::Mutex;
 
-use crate::RequestStatus;
+use crate::types::RequestStatus;
 
 use super::{types, L1Error, L1Interface};
 
 pub struct CachedL1Interface<L1> {
     l1: L1,
-    update_cache: Mutex<RefCell<lru::LruCache<(u128, u128), types::L1Update>>>,
+    update_cache: Mutex<RefCell<lru::LruCache<(u128, u128), types::abi::L1Update>>>,
     update_hash_cache: Mutex<RefCell<lru::LruCache<(u128, u128), H256>>>,
     is_closed_cache: Mutex<RefCell<lru::LruCache<H256, bool>>>,
 }
@@ -52,7 +52,7 @@ where
         self.l1.get_latest_finalized_request_id().await
     }
 
-    async fn get_update(&self, start: u128, end: u128) -> Result<types::L1Update, L1Error> {
+    async fn get_update(&self, start: u128, end: u128) -> Result<types::abi::L1Update, L1Error> {
         let cached = {
             let guard = self.update_cache.lock().expect("poison");
             let cached = guard.borrow_mut().get(&(start, end)).cloned();
@@ -121,7 +121,7 @@ where
     }
 
     #[tracing::instrument(skip(self))]
-    async fn get_status(&self, request_hash: H256) -> Result<crate::RequestStatus, L1Error> {
+    async fn get_status(&self, request_hash: H256) -> Result<crate::types::RequestStatus, L1Error> {
         let cached = {
             let guard = self.is_closed_cache.lock().expect("poison");
             let cached = guard.borrow_mut().get(&request_hash).cloned();
