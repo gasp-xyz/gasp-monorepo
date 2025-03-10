@@ -1,5 +1,4 @@
 import { Decimal } from 'decimal.js'
-import { ChainableCommander } from 'ioredis'
 import { timeseries } from '../connector/RedisConnector.js'
 import { TimestampedAmount } from '../schema/Models.js'
 import { API_LIMIT } from '../util/Misc.js'
@@ -47,8 +46,9 @@ export const get = async (
           API_LIMIT
         )
   const stored = (await call) as [number, string][]
-    if (isPool) {
-        return stored.map(([tsp, price]) => [tsp, new Decimal(price).dividedBy(2)])
-    } else {
-        return stored.map(([tsp, price]) => [tsp, new Decimal(price)])
-    }}
+  if (isPool) {
+    return stored.map(([tsp, price]) => [tsp, new Decimal(price).dividedBy(2)])
+  } else {
+    return stored.map(([tsp, price]) => [tsp, new Decimal(price)])
+  }
+}
