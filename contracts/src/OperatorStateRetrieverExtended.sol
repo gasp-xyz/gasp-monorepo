@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {IRegistryCoordinator} from "@eigenlayer-middleware/src/interfaces/IRegistryCoordinator.sol";
-import {IBLSApkRegistry} from "@eigenlayer-middleware/src/interfaces/IBLSApkRegistry.sol";
-import {IStakeRegistry} from "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
-import {IIndexRegistry} from "@eigenlayer-middleware/src/interfaces/IIndexRegistry.sol";
-import {BitmapUtils} from "@eigenlayer-middleware/src/libraries/BitmapUtils.sol";
-import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
+import { IBLSApkRegistry } from "@eigenlayer-middleware/src/interfaces/IBLSApkRegistry.sol";
+import { IRegistryCoordinator } from "@eigenlayer-middleware/src/interfaces/IRegistryCoordinator.sol";
+import { IStakeRegistry } from "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
+import { BitmapUtils } from "@eigenlayer-middleware/src/libraries/BitmapUtils.sol";
+import { OperatorStateRetriever } from "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
 
 /**
  * @title OperatorStateRetriever with view functions that allow to retrieve the state of an AVSs registry system.
@@ -61,7 +60,9 @@ contract OperatorStateRetrieverExtended is OperatorStateRetriever {
         IBLSApkRegistry blsApkRegistry = registryCoordinator.blsApkRegistry();
 
         Operator[][] memory operators = new Operator[][](quorumNumbers.length);
-        for (uint256 i = 0; i < quorumNumbers.length; i++) {
+        uint256 quorumNumberCount = quorumNumbers.length;
+
+        for (uint256 i = 0; i < quorumNumberCount; ++i) {
             uint8 quorumNumber = uint8(quorumNumbers[i]);
             bytes memory quorumBytes = new bytes(1);
             quorumBytes[0] = quorumNumbers[i];
@@ -104,7 +105,9 @@ contract OperatorStateRetrieverExtended is OperatorStateRetriever {
         returns (address[] memory)
     {
         address[] memory operators = new address[](operatorIds.length);
-        for (uint256 i = 0; i < operatorIds.length; i++) {
+        uint256 operatorIdCount = operatorIds.length;
+
+        for (uint256 i = 0; i < operatorIdCount; ++i) {
             operators[i] = registryCoordinator.getOperatorFromId(operatorIds[i]);
         }
         return operators;

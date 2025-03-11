@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {BN254} from "@eigenlayer-middleware/src/libraries/BN254.sol";
-import {IGaspMultiRollupServicePrimitives} from "./IGaspMultiRollupServicePrimitives.sol";
 import {IRolldown} from "./IRolldown.sol";
 
 interface IFinalizerTaskManager {

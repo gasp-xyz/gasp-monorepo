@@ -1,29 +1,27 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {AVSDirectory} from "@eigenlayer/contracts/core/AVSDirectory.sol";
-import {DelegationManager} from "@eigenlayer/contracts/core/DelegationManager.sol";
-import {RewardsCoordinator} from "@eigenlayer/contracts/core/RewardsCoordinator.sol";
-import {Slasher} from "@eigenlayer/contracts/core/Slasher.sol";
-import {StrategyManager} from "@eigenlayer/contracts/core/StrategyManager.sol";
-import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
-import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
-import {BLSApkRegistry} from "@eigenlayer-middleware/src/BLSApkRegistry.sol";
-import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
-import {IndexRegistry} from "@eigenlayer-middleware/src/IndexRegistry.sol";
-import {IServiceManager} from "@eigenlayer-middleware/src/interfaces/IServiceManager.sol";
-import {IStakeRegistry, StakeRegistry} from "@eigenlayer-middleware/src/StakeRegistry.sol";
-import {IRegistryCoordinator, RegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
-import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {console} from "forge-std/console.sol";
-import {Script} from "forge-std/Script.sol";
-import {stdJson} from "forge-std/StdJson.sol";
-import {Test} from "forge-std/Test.sol";
-import {FinalizerServiceManager} from "../src/FinalizerServiceManager.sol";
-import {FinalizerTaskManager, IFinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
-import {OperatorStateRetrieverExtended} from "../src/OperatorStateRetrieverExtended.sol";
-import {Utils} from "./utils/Utils.sol";
+import { BLSApkRegistry } from "@eigenlayer-middleware/src/BLSApkRegistry.sol";
+import { BLSSignatureChecker } from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
+import { IndexRegistry } from "@eigenlayer-middleware/src/IndexRegistry.sol";
+import { IServiceManager } from "@eigenlayer-middleware/src/interfaces/IServiceManager.sol";
+import { IRegistryCoordinator, RegistryCoordinator } from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
+import { IStakeRegistry, StakeRegistry } from "@eigenlayer-middleware/src/StakeRegistry.sol";
+import { AVSDirectory } from "@eigenlayer/contracts/core/AVSDirectory.sol";
+import { DelegationManager } from "@eigenlayer/contracts/core/DelegationManager.sol";
+import { RewardsCoordinator } from "@eigenlayer/contracts/core/RewardsCoordinator.sol";
+import { StrategyManager } from "@eigenlayer/contracts/core/StrategyManager.sol";
+import { PauserRegistry } from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import { EmptyContract } from "@eigenlayer/test/mocks/EmptyContract.sol";
+import { ProxyAdmin, TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import { console } from "forge-std/console.sol";
+import { Script } from "forge-std/Script.sol";
+import { stdJson } from "forge-std/StdJson.sol";
+import { Test } from "forge-std/Test.sol";
+import { FinalizerServiceManager } from "./../src/FinalizerServiceManager.sol";
+import { FinalizerTaskManager, IFinalizerTaskManager } from "./../src/FinalizerTaskManager.sol";
+import { OperatorStateRetrieverExtended } from "./../src/OperatorStateRetrieverExtended.sol";
+import { Utils } from "./utils/Utils.sol";
 
 // # To deploy and verify our contract
 // forge script script/1_FinalizerAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
@@ -32,9 +30,9 @@ import {Utils} from "./utils/Utils.sol";
 // Deploys finalizer contracts
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contract FinalizerAVSDeployer is Script, Test, Utils {
-    string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
-    string constant _CONFIG_PATH = "deploy.config";
-    string constant _OUTPUT_PATH = "avs_deployment_output";
+    string internal constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
+    string internal constant _CONFIG_PATH = "deploy.config";
+    string internal constant _OUTPUT_PATH = "avs_deployment_output";
 
     ProxyAdmin public avsProxyAdmin;
     PauserRegistry public avsPauserReg;
@@ -264,7 +262,7 @@ contract FinalizerAVSDeployer is Script, Test, Utils {
         _writeOutput(churner, ejector, aggregator, unpauseMultisig);
     }
 
-    function _parseStakeRegistryParams(string memory config_data)
+    function _parseStakeRegistryParams(string memory configData)
         internal
         pure
         returns (
@@ -272,10 +270,10 @@ contract FinalizerAVSDeployer is Script, Test, Utils {
             IStakeRegistry.StrategyParams[][] memory strategyAndWeightingMultipliers
         )
     {
-        bytes memory stakesConfigsRaw = stdJson.parseRaw(config_data, ".minimumStakes");
+        bytes memory stakesConfigsRaw = stdJson.parseRaw(configData, ".minimumStakes");
         minimumStakeForQuorum = abi.decode(stakesConfigsRaw, (uint96[]));
 
-        bytes memory strategyConfigsRaw = stdJson.parseRaw(config_data, ".strategyWeights");
+        bytes memory strategyConfigsRaw = stdJson.parseRaw(configData, ".strategyWeights");
         strategyAndWeightingMultipliers = abi.decode(strategyConfigsRaw, (IStakeRegistry.StrategyParams[][]));
     }
 

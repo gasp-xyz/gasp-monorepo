@@ -1,35 +1,34 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {AVSDirectory} from "@eigenlayer/contracts/core/AVSDirectory.sol";
-import {DelegationManager} from "@eigenlayer/contracts/core/DelegationManager.sol";
-import {RewardsCoordinator} from "@eigenlayer/contracts/core/RewardsCoordinator.sol";
-import {Slasher} from "@eigenlayer/contracts/core/Slasher.sol";
-import {IStrategy, StrategyManager} from "@eigenlayer/contracts/core/StrategyManager.sol";
-import {IETHPOSDeposit} from "@eigenlayer/contracts/interfaces/IETHPOSDeposit.sol";
-import {StrategyBase, StrategyBaseTVLLimits} from "@eigenlayer/contracts/strategies/StrategyBaseTVLLimits.sol";
-import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
-import {EigenPod} from "@eigenlayer/contracts/pods/EigenPod.sol";
-import {EigenPodManager} from "@eigenlayer/contracts/pods/EigenPodManager.sol";
-import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
-import {ETHPOSDepositMock} from "@eigenlayer/test/mocks/ETHDepositMock.sol";
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
-import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import {ERC20PresetFixedSupply} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
-import {console} from "forge-std/console.sol";
-import {Script} from "forge-std/Script.sol";
-import {stdJson} from "forge-std/StdJson.sol";
-import {Test, Vm} from "forge-std/Test.sol";
+import { AVSDirectory } from "@eigenlayer/contracts/core/AVSDirectory.sol";
+import { DelegationManager } from "@eigenlayer/contracts/core/DelegationManager.sol";
+import { RewardsCoordinator } from "@eigenlayer/contracts/core/RewardsCoordinator.sol";
+import { Slasher } from "@eigenlayer/contracts/core/Slasher.sol";
+import { IStrategy, StrategyManager } from "@eigenlayer/contracts/core/StrategyManager.sol";
+import { IETHPOSDeposit } from "@eigenlayer/contracts/interfaces/IETHPOSDeposit.sol";
+import { PauserRegistry } from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import { EigenPod } from "@eigenlayer/contracts/pods/EigenPod.sol";
+import { EigenPodManager } from "@eigenlayer/contracts/pods/EigenPodManager.sol";
+import { StrategyBase, StrategyBaseTVLLimits } from "@eigenlayer/contracts/strategies/StrategyBaseTVLLimits.sol";
+import { EmptyContract } from "@eigenlayer/test/mocks/EmptyContract.sol";
+import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import { UpgradeableBeacon } from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import { ProxyAdmin, TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import { console } from "forge-std/console.sol";
+import { Script } from "forge-std/Script.sol";
+import { stdJson } from "forge-std/StdJson.sol";
+import { Test, Vm } from "forge-std/Test.sol";
 
 // # To load the variables in the .env file
 // source .env
 
 // # To deploy and verify our contract
-// forge script script/deploy/devnet/M2_Deploy_From_Scratch.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --sig "run(string memory configFile)" -- M2_deploy_from_scratch.anvil.config.json
+// forge script script/deploy/devnet/M2_Deploy_From_Scratch.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY \
+//     --broadcast --sig "run(string memory configFile)" -- M2_deploy_from_scratch.anvil.config.json
 contract M2Deployer is Script, Test {
-    address constant HEVM_ADDRESS = address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
-    Vm cheats = Vm(HEVM_ADDRESS);
+    address public constant HEVM_ADDRESS = address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
+    Vm public cheats = Vm(HEVM_ADDRESS);
 
     // struct used to encode token info in config file
     struct StrategyConfig {
@@ -62,9 +61,9 @@ contract M2Deployer is Script, Test {
 
     EmptyContract public emptyContract;
 
-    address executorMultisig;
-    address operationsMultisig;
-    address pauserMultisig;
+    address public executorMultisig;
+    address public operationsMultisig;
+    address public pauserMultisig;
 
     // the ETH2 deposit contract -- if not on mainnet, we deploy a mock as stand-in
     IETHPOSDeposit public ethPOSDeposit;
@@ -73,28 +72,28 @@ contract M2Deployer is Script, Test {
     StrategyBaseTVLLimits[] public deployedStrategyArray;
 
     // IMMUTABLES TO SET
-    uint64 GOERLI_GENESIS_TIME = 1616508000;
+    uint64 public GOERLI_GENESIS_TIME = 1616508000;
 
     // OTHER DEPLOYMENT PARAMETERS
-    uint256 STRATEGY_MANAGER_INIT_PAUSED_STATUS;
-    uint256 SLASHER_INIT_PAUSED_STATUS;
-    uint256 DELEGATION_INIT_PAUSED_STATUS;
-    uint256 EIGENPOD_MANAGER_INIT_PAUSED_STATUS;
-    uint256 REWARDS_COORDINATOR_INIT_PAUSED_STATUS;
+    uint256 public STRATEGY_MANAGER_INIT_PAUSED_STATUS;
+    uint256 public SLASHER_INIT_PAUSED_STATUS;
+    uint256 public DELEGATION_INIT_PAUSED_STATUS;
+    uint256 public EIGENPOD_MANAGER_INIT_PAUSED_STATUS;
+    uint256 public REWARDS_COORDINATOR_INIT_PAUSED_STATUS;
 
     // RewardsCoordinator
-    uint32 REWARDS_COORDINATOR_MAX_REWARDS_DURATION;
-    uint32 REWARDS_COORDINATOR_MAX_RETROACTIVE_LENGTH;
-    uint32 REWARDS_COORDINATOR_MAX_FUTURE_LENGTH;
-    uint32 REWARDS_COORDINATOR_GENESIS_REWARDS_TIMESTAMP;
-    address REWARDS_COORDINATOR_UPDATER;
-    uint32 REWARDS_COORDINATOR_ACTIVATION_DELAY;
-    uint32 REWARDS_COORDINATOR_CALCULATION_INTERVAL_SECONDS;
-    uint32 REWARDS_COORDINATOR_GLOBAL_OPERATOR_COMMISSION_BIPS;
+    uint32 public REWARDS_COORDINATOR_MAX_REWARDS_DURATION;
+    uint32 public REWARDS_COORDINATOR_MAX_RETROACTIVE_LENGTH;
+    uint32 public REWARDS_COORDINATOR_MAX_FUTURE_LENGTH;
+    uint32 public REWARDS_COORDINATOR_GENESIS_REWARDS_TIMESTAMP;
+    address public REWARDS_COORDINATOR_UPDATER;
+    uint32 public REWARDS_COORDINATOR_ACTIVATION_DELAY;
+    uint32 public REWARDS_COORDINATOR_CALCULATION_INTERVAL_SECONDS;
+    uint32 public REWARDS_COORDINATOR_GLOBAL_OPERATOR_COMMISSION_BIPS;
 
     // one week in blocks -- 50400
-    uint32 STRATEGY_MANAGER_INIT_WITHDRAWAL_DELAY_BLOCKS;
-    uint256 DELEGATION_WITHDRAWAL_DELAY_BLOCKS;
+    uint32 public STRATEGY_MANAGER_INIT_WITHDRAWAL_DELAY_BLOCKS;
+    uint256 public DELEGATION_WITHDRAWAL_DELAY_BLOCKS;
 
     function run(string memory configFile) external {
         // read and log the chainID
