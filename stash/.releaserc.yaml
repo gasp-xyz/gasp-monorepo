@@ -11,4 +11,4 @@ plugins:
   - - '@semantic-release/exec'
     - publishCmd: |
         export IMAGE_TAG=${nextRelease.version}
-        moon stash:release
+        moon stash:build-image-ci

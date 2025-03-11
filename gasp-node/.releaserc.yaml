@@ -11,4 +11,4 @@ plugins:
   - - '@semantic-release/exec'
     - publishCmd: |
         export IMAGE_TAG=${nextRelease.version}
-        moon gasp-node:release
+        moon gasp-node:build-image-ci
