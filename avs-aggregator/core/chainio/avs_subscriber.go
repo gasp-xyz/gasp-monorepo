@@ -14,6 +14,22 @@ import (
 	stakeRegistry "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/StakeRegistry"
 )
 
+type AvsSubscriberer interface {
+	SubscribeToNewRdTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewRdTaskCreated) event.Subscription
+	
+	SubscribeToRdTaskResponses(taskResponseLogs chan *taskmanager.ContractFinalizerTaskManagerRdTaskResponded) event.Subscription
+	
+	SubscribeToOpTaskCompleted(opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) (event.Subscription, error)
+	
+	SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState) (event.Subscription, error)
+	
+	SubscribeToOperatorStakeUpdate(updateLogs chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate) (event.Subscription, error)
+	
+	ParseRdTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
+}
+
+var _ AvsSubscriberer = (*AvsSubscriber)(nil)
+
 // Subscribers use a ws connection instead of http connection like Readers
 // kind of stupid that the geth client doesn't have a unified interface for both...
 // it takes a single url, so the bindings, even though they have watcher functions, those can't be used

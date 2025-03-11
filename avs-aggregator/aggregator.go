@@ -134,13 +134,13 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 
 	operatorPubkeysService := oprsinfoserv.NewOperatorsInfoServiceInMemory(
 		context.Background(),
-		ethRpc.Clients.AvsRegistryChainSubscriber,
-		ethRpc.Clients.AvsRegistryChainReader,
+		ethRpc.Clients.AvsRegistryChainSubscriber(),
+		ethRpc.Clients.AvsRegistryChainReader(),
 		nil,
 		oprsinfoserv.Opts{StartBlock: big.NewInt(int64(c.AvsDeploymentBlock))},
 		logger,
 	)
-	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, operatorPubkeysService, logger)
+	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader(), operatorPubkeysService, logger)
 	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, c.DebounceRpc, logger)
 
 	substrateRpc, err := gsrpc.NewSubstrateAPI(c.SubstrateWsRpcUrl)
@@ -903,8 +903,14 @@ func (agg *Aggregator) verifyTaskResponseExistsOnL2(rdTaskResponse taskmanager.I
 		return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 GetStorage staus is NOK")
 	}
 
+	// TODO - now
+	// Check if substrateL2RequestsBatch range start and end are the same as in rdTaskResponse
+
 	merkleRoot := ""
 	chain := ""
+	
+	// Tag
+	// EthChainIdType
 	if rdTaskResponse.ChainId == 0 {
 		chain = "Ethereum"
 	} else if rdTaskResponse.ChainId == 1 {

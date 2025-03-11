@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	gethcommon "github.com/ethereum/go-ethereum/common"
@@ -23,20 +22,42 @@ const waitForReceipt = bool(true)
 type AvsWriterer interface {
 	SendNewRdTask(
 		ctx context.Context,
-		blockNumber *big.Int,
+		chainToUpdate uint8,
+		chainBatchIdToUpdate uint32,
 	) (taskmanager.IFinalizerTaskManagerRdTask, uint32, error)
-	SendNewOpTask(ctx context.Context,
+	
+	SendNewOpTask(
+		ctx context.Context,
 		quorumThresholdPercentage uint32,
 		quorumNumbers sdktypes.QuorumNums,
 	) (taskmanager.IFinalizerTaskManagerOpTask, uint32, error)
-	SendAggregatedOpTaskResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerOpTask, taskResponse taskmanager.IFinalizerTaskManagerOpTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error)
-	SendAggregatedRdTaskResponse(ctx context.Context, task taskmanager.IFinalizerTaskManagerRdTask, taskResponse taskmanager.IFinalizerTaskManagerRdTaskResponse, nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature) (*types.Receipt, error)
+	
+	SendAggregatedOpTaskResponse(
+		ctx context.Context, 
+		task taskmanager.IFinalizerTaskManagerOpTask, 
+		taskResponse taskmanager.IFinalizerTaskManagerOpTaskResponse, 
+		nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
+	) (*types.Receipt, error)
+	
+	SendAggregatedRdTaskResponse(
+		ctx context.Context, 
+		task taskmanager.IFinalizerTaskManagerRdTask, 
+		taskResponse taskmanager.IFinalizerTaskManagerRdTaskResponse, 
+		nonSignerStakesAndSignature taskmanager.IBLSSignatureCheckerNonSignerStakesAndSignature,
+	) (*types.Receipt, error)
+	
 	EjectOperators(
 		ctx context.Context,
 		operators []common.Address,
-		quorumNumbers [][]byte,
+		quorumNumbers [][]uint8,
 	) (*types.Receipt, error)
+	
+	// Add the missing method
+	CancelPendingTask(ctx context.Context) error
 }
+
+// Add type assertion check
+var _ AvsWriterer = (*AvsWriter)(nil)
 
 type AvsWriter struct {
 	AvsContractBindings *AvsServiceBindings
