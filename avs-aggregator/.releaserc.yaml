@@ -12,4 +12,4 @@ plugins:
     - shell: bash
       # IMAGE_TAG is set from within the GHA workflow and corresponds to the image tag we want to use for the release
       publishCmd: |
-        docker buildx imagetools create -t gaspxyz/avs-aggregator:${nextRelease.version} gaspxyz/avs-aggregator:${IMAGE_TAG}
+        docker buildx imagetools create -t gaspxyz/avs-aggregator:${nextRelease.version} gaspxyz/avs-aggregator:${process.env.IMAGE_TAG}
