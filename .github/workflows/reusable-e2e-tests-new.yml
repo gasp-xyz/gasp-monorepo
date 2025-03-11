@@ -163,6 +163,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: docker/setup-compose-action@v1
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
         with:
           node-version: "18.20.7"
