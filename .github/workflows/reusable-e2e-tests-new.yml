@@ -192,16 +192,10 @@ jobs:
         with:
           cache-version: ${{ env.CACHE_VERSION }}
       
-      - name: Check commit message for cache directive
-        id: check-commit
-        run: |
-          COMMIT_MSG=$(git log -1 --pretty=%B)
-          if [[ "$COMMIT_MSG" == *"[no cache]"* ]]; then
-            echo "::warning::Cache disabled via [no cache] directive in commit message"
-            echo "MOON_CACHE=off" >> $GITHUB_ENV
-          else
-            echo "MOON_CACHE=read-write" >> $GITHUB_ENV
-          fi
+      - name: Disable moon cache if [no cache] directive is present in commit message
+        if: contains(github.event.head_commit.message, '[no cache]')
+        run: echo "MOON_CACHE=off" >> $GITHUB_ENV
+
       - name: Run tests
         run: ${{ matrix.command }}
         env:
