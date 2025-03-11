@@ -193,13 +193,15 @@ jobs:
         with:
           cache-version: ${{ env.CACHE_VERSION }}
       
-      - name: Disable moon cache if [no cache] directive is present in commit message
+      # Check for no-cache label on PR to disable caching
+      - name: Check for cache disabling label
         if: github.event_name == 'pull_request'
         run: |
-          LAST_COMMIT_MSG=$(git log -1 --no-merges --pretty=%B)
-          if [[ "$LAST_COMMIT_MSG" == *"[no cache]"* ]]; then
-            echo "::warning::Cache disabled via [no cache] directive in commit message"
+          if [[ ${{ contains(github.event.pull_request.labels.*.name, 'no-cache') }} == true ]]; then
+            echo "::warning::Cache disabled via 'no-cache' label on PR #${{ github.event.pull_request.number }}"
             echo "MOON_CACHE=off" >> $GITHUB_ENV
+          else
+            echo "MOON_CACHE=read-write" >> $GITHUB_ENV
           fi
 
       - name: Run tests
