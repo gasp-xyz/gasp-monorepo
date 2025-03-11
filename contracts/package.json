@@ -5,8 +5,8 @@
   "scripts": {
     "format": "yarn run prettier --check '**/*.{json,md,yml}' && forge fmt --check src test",
     "format:fix": "yarn run prettier --write '**/*.{json,md,yml}' && forge fmt src test",
-    "lint": "yarn run solhint {script,src,test}/**/{GaspToken,IGaspToken,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,RolldownDeployer.t}.sol",
-    "lint:fix": "yarn run solhint --fix --noPrompt {script,src,test}/**/{GaspToken,IGaspToken,IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,RolldownDeployer.t}.sol && yarn run run format:fix",
+    "lint": "yarn run solhint '{script,src,test}/**/*.sol'",
+    "lint:fix": "yarn run solhint --fix --noPrompt '{script,src,test}/**/*.sol' && yarn format:fix",
     "compile": "forge compile",
     "size": "forge compile --sizes",
     "test": "forge test -vvv --fail-fast",

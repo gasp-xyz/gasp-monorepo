@@ -1,26 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
-import {BLSApkRegistry} from "@eigenlayer-middleware/src/BLSApkRegistry.sol";
-import {
-    BLSSignatureChecker,
-    IRegistryCoordinator,
-    IBLSSignatureChecker,
-    IBLSApkRegistry,
-    IStakeRegistry,
-    IDelegationManager
-} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
-import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
-import {RegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
-import {IServiceManager} from "@eigenlayer-middleware/src/interfaces/IServiceManager.sol";
-import {BN254} from "@eigenlayer-middleware/src/libraries/BN254.sol";
-import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
-import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
-import {IGaspMultiRollupServicePrimitives} from "./interfaces/IGaspMultiRollupServicePrimitives.sol";
-import {IFinalizerTaskManager} from "./interfaces/IFinalizerTaskManager.sol";
-import {IRolldown} from "./interfaces/IRolldown.sol";
-import {IRolldownPrimitives} from "./interfaces/IRolldownPrimitives.sol";
+import { BLSSignatureChecker, IRegistryCoordinator, IBLSSignatureChecker, IBLSApkRegistry, IStakeRegistry, IDelegationManager } from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
+import { BN254 } from "@eigenlayer-middleware/src/libraries/BN254.sol";
+import { OperatorStateRetriever } from "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
+import { IPauserRegistry, Pausable } from "@eigenlayer/contracts/permissions/Pausable.sol";
+import { OwnableUpgradeable } from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
+import { Initializable } from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
+import { IFinalizerTaskManager } from "./interfaces/IFinalizerTaskManager.sol";
+import { IGaspMultiRollupServicePrimitives } from "./interfaces/IGaspMultiRollupServicePrimitives.sol";
+import { IRolldown } from "./interfaces/IRolldown.sol";
+import { IRolldownPrimitives } from "./interfaces/IRolldownPrimitives.sol";
 
 contract FinalizerTaskManager is
     Initializable,
@@ -174,7 +164,8 @@ contract FinalizerTaskManager is
         );
 
         // TODO
-        // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
+        // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe
+        // since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
 
         (bool quorumsThresholdReached, TaskResponseMetadata memory taskResponseMetadata) = _checkTaskResponse(
             keccak256(abi.encode(taskResponse)),
@@ -302,7 +293,8 @@ contract FinalizerTaskManager is
             keccak256(abi.encode(task)), TaskType.RD_TASK, taskResponse.referenceTaskIndex, task.taskCreatedBlock
         );
 
-        // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
+        // Maybe also redundantly check here that taskResponse.referenceTaskIndex == lastestTaskNum - 1 ( safe
+        // since createNewTask increments latestTaskNum and the only task that should be INITIALIZED is the last created task)
 
         (bool quorumsThresholdReached, TaskResponseMetadata memory taskResponseMetadata) = _checkTaskResponse(
             keccak256(abi.encode(taskResponse)),

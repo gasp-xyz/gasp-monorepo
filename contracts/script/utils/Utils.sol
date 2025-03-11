@@ -5,8 +5,6 @@ import {IRegistryCoordinator} from "@eigenlayer-middleware/src/interfaces/IRegis
 import {StrategyBase} from "@eigenlayer/contracts/strategies/StrategyBase.sol";
 import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
-import {stdJson} from "forge-std/StdJson.sol";
-import {IRolldownPrimitives} from "../../src/interfaces/IRolldownPrimitives.sol";
 import {ERC20Mock} from "../../test/mocks/ERC20Mock.sol";
 
 contract Utils is Script {

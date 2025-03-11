@@ -3,7 +3,6 @@ pragma solidity 0.8.13;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Test} from "forge-std/Test.sol";
-import {Vm} from "forge-std/Vm.sol";
 
 contract MyERC20 is ERC20 {
     constructor() ERC20("Name", "SYM") {}

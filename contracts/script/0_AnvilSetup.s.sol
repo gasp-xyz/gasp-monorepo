@@ -7,7 +7,6 @@ import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.s
 import {IStrategy, StrategyBaseTVLLimits} from "@eigenlayer/contracts/strategies/StrategyBaseTVLLimits.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Test} from "forge-std/Test.sol";
@@ -22,11 +21,11 @@ import {Utils} from "./utils/Utils.sol";
 // environment where we are in charge of base eigen layer setup/contracts.
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contract AnvilSetup is Script, Test, Utils {
-    uint256 constant ANVIL_CHAIN_ID = 31337;
-    uint256 constant RETH_CHAIN_ID = 1337;
-    string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
-    string constant _CONFIG_PATH = "deploy.config";
-    string constant _OUTPUT_PATH = "strategy_output";
+    uint256 public constant ANVIL_CHAIN_ID = 31337;
+    uint256 public constant RETH_CHAIN_ID = 1337;
+    string internal constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
+    string internal constant _CONFIG_PATH = "deploy.config";
+    string internal constant _OUTPUT_PATH = "strategy_output";
 
     // ERC20 and Strategy: we need to deploy this erc20, create a strategy for it, and whitelist this strategy in the strategymanager
     ERC20Mock public erc20Mock;

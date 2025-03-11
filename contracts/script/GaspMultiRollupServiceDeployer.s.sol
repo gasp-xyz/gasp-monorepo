@@ -1,22 +1,21 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
-import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
-import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import {console} from "forge-std/console.sol";
-import {Script} from "forge-std/Script.sol";
-import {stdJson} from "forge-std/StdJson.sol";
-import {Test} from "forge-std/Test.sol";
-import {IGaspMultiRollupServicePrimitives} from "../src/interfaces/IGaspMultiRollupServicePrimitives.sol";
-import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
-import {GaspMultiRollupService} from "../src/GaspMultiRollupService.sol";
-import {Utils} from "./utils/Utils.sol";
+import { PauserRegistry } from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import { EmptyContract } from "@eigenlayer/test/mocks/EmptyContract.sol";
+import { ProxyAdmin, TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import { console } from "forge-std/console.sol";
+import { Script } from "forge-std/Script.sol";
+import { stdJson } from "forge-std/StdJson.sol";
+import { Test } from "forge-std/Test.sol";
+import { GaspMultiRollupService } from "./../src/GaspMultiRollupService.sol";
+import { IRolldownPrimitives } from "./../src/interfaces/IRolldownPrimitives.sol";
+import { Utils } from "./utils/Utils.sol";
 
 contract GaspMultiRollupServiceDeployer is Script, Test, Utils {
-    string constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
-    string constant _CONFIG_PATH = "deploy.config";
-    string constant _OUTPUT_PATH = "gmrs_output";
+    string internal constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
+    string internal constant _CONFIG_PATH = "deploy.config";
+    string internal constant _OUTPUT_PATH = "gmrs_output";
 
     string public deployConfigPath;
 

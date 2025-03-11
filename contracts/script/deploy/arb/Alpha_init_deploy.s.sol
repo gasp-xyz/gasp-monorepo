@@ -1,22 +1,16 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-
-import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
-import "@eigenlayer/test/mocks/EmptyContract.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-
-import {Rolldown} from "../../../src/Rolldown.sol";
-import {IRolldownPrimitives} from "../../../src/interfaces/IRolldownPrimitives.sol";
-import {GaspMultiRollupService} from "../../../src/GaspMultiRollupService.sol";
-
-import {Utils} from "../../utils/Utils.sol";
-
-import "forge-std/Test.sol";
-import "forge-std/Script.sol";
-import "forge-std/StdJson.sol";
-import "forge-std/console.sol";
+import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
+import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {console} from "forge-std/console.sol";
+import {Script} from "forge-std/Script.sol";
+import {Test} from "forge-std/Test.sol";
+import { GaspMultiRollupService } from "./../../../src/GaspMultiRollupService.sol";
+import { IRolldownPrimitives } from "./../../../src/interfaces/IRolldownPrimitives.sol";
+import { Rolldown } from "./../../../src/Rolldown.sol";
+import { Utils } from "./../../utils/Utils.sol";
 
 // # To deploy and verify our contract
 // forge script script/Alpha_init_deploy.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
@@ -25,8 +19,8 @@ import "forge-std/console.sol";
 // Deploys finalizer contracts
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contract Deployer is Script, Utils, Test {
-    string constant _OUTPUT_PATH = "arb_deployment_output";
-    IRolldownPrimitives.ChainId constant chain = IRolldownPrimitives.ChainId.Arbitrum;
+    string internal constant _OUTPUT_PATH = "arb_deployment_output";
+    IRolldownPrimitives.ChainId internal constant _CHAIN = IRolldownPrimitives.ChainId.Arbitrum;
 
     ProxyAdmin public avsProxyAdmin;
     PauserRegistry public avsPauserReg;
@@ -78,7 +72,7 @@ contract Deployer is Script, Utils, Test {
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeCall(rolldown.initialize, (avsOwner, chain, address(gmrs)))
+            abi.encodeCall(rolldown.initialize, (avsOwner, _CHAIN, address(gmrs)))
         );
 
         gmrsImplementation = new GaspMultiRollupService();
@@ -92,7 +86,7 @@ contract Deployer is Script, Utils, Test {
                 avsUpdater,
                 false,
                 address(rolldown),
-                chain
+                _CHAIN
             )
         );
         // transfer ownership of proxy admin to upgrader
@@ -136,8 +130,8 @@ contract Deployer is Script, Utils, Test {
         require(gmrs.owner() == avsOwner, "gmrs.owner() != avsOwner");
         require(gmrs.updater() == avsUpdater, "gmrs.updater() != avsUpdater");
         
-        require(gmrs.chainId() == chain, "gmrs.chainId() != chain");
-        require(rolldown.chain() == chain, "rolldown.chain() != chain");
+        require(gmrs.chainId() == _CHAIN, "gmrs.chainId() != _CHAIN");
+        require(rolldown.chain() == _CHAIN, "rolldown._CHAIN() != _CHAIN");
     }
 
     function _checkPauserInitializations() internal view {
