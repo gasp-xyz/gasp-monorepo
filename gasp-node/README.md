@@ -53,6 +53,7 @@ cargo tarpaulin --timeout 120 --workspace -e rollup-runtime-integration-test rol
 Because of number of parameters is quite troublesome thats why we came up with dedicated dockerized environment.
 
 Use next commands to operate local dockerized environment using Docker Compose:
+
 ```bash
 # To build Docker image
 docker compose build
