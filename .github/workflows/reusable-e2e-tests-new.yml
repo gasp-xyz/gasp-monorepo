@@ -218,8 +218,7 @@ jobs:
           TESTMO_URL: ${{ secrets.TESTMO_URL }}
           TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         run: |
-          npm install --no-save @testmo/testmo-cli
-          npx testmo automation:run:submit-thread \
+          yarn dlx @testmo/testmo-cli automation:run:submit-thread \
             --instance https://mangata-finance.testmo.net \
             --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
             --results e2eTests/reports/*.xml
