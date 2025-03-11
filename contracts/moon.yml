@@ -1,25 +1,151 @@
 language: solidity
 type: application
 
+toolchain:
+  node:
+    version: '22.14.0'
+
 fileGroups:
   sources:
-    - "lib/eigenlayer-middleware/**/*.sol"
-    - "lib/eigenlayer-middleware/package.json"
-    - "lib/forge-std/**/*.sol"
-    - "lib/forge-std/package.json"
-    - "src/**/*"
-    - "test/**/*"
+    - "lib/**/*.sol"
+    - "src/**/*.sol"
+    - "test/**/*.sol"
+    - "script/**/*.sol"
+    - "tools/**/*"
     - package.json
     - foundry.toml
     - remappings.txt
+  
+env:
+  SERVICE_NAME: contracts
+  IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/gasp-contracts
+  DOCKERHUB_REPOSITORY: gaspxyz/gasp-contracts
 
 tasks:
   build:
     command: "forge build"
     inputs: ["@globs(sources)"]
     outputs: ["out"]
+  
   build-image-local:
-    command:
-      "docker buildx build --platform linux/amd64 -t gaspxyz/gasp-contracts:local -t
-      gaspxyz/gasp-contracts:localarb -t gaspxyz/gasp-contracts:localbase -f Dockerfile ."
+    command: >
+      docker buildx build
+      --platform linux/amd64
+      --tag gaspxyz/gasp-contracts:local
+      --tag gaspxyz/gasp-contracts:localarb
+      --tag gaspxyz/gasp-contracts:localbase
+      --load
+      .
     inputs: ["@globs(sources)", "Dockerfile"]
+
+  buildkit-build-and-push-image-digests:
+    script: |
+      set -euo pipefail
+      echo "Starting buildkit build..."
+      docker buildx build --platform linux/amd64 \
+        --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache \
+        --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max \
+        --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
+        --metadata-file ${SERVICE_NAME}-buildkit-metadata.json -f Dockerfile ./
+      
+      BUILD_EXIT_CODE=$?
+      
+      # Validate the metadata file exists and contains the expected digest
+      if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f ${SERVICE_NAME}-buildkit-metadata.json ]; then
+        if grep -q "containerimage.digest" ${SERVICE_NAME}-buildkit-metadata.json; then
+          echo "✅ Build successful and metadata file contains valid digest"
+          cat ${SERVICE_NAME}-buildkit-metadata.json
+        else
+          echo "❌ Build appeared successful but metadata file doesn't contain expected digest"
+          cat ${SERVICE_NAME}-buildkit-metadata.json || echo "Cannot read metadata file"
+          exit 1
+        fi
+      else
+        echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
+        [ -f ${SERVICE_NAME}-buildkit-metadata.json ] && cat ${SERVICE_NAME}-buildkit-metadata.json
+        exit $BUILD_EXIT_CODE
+      fi
+      
+      exit $BUILD_EXIT_CODE
+    inputs: ["@globs(sources)", "Dockerfile"]
+    outputs: ['${SERVICE_NAME}-buildkit-metadata.json']
+    options:
+      outputStyle: buffer-only-failure
+      cache: true
+      internal: true
+
+  build-image-ci:
+    script: |
+      set -ex
+      IMAGE_DIGEST=$(jq -r '."containerimage.digest"' ${SERVICE_NAME}-buildkit-metadata.json)
+
+      docker buildx imagetools create \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST}
+
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+    deps: ['buildkit-build-and-push-image-digests']
+    inputs: ['${SERVICE_NAME}-buildkit-metadata.json']
+    options:
+      cache: false
+
+  contracts-format:
+    command: yarn run format
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-lint:
+    command: yarn run lint
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-test:
+    command: yarn run test
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-size:
+    command: yarn run size
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-gas:
+    command: yarn run gas
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-coverage:
+    command: yarn run cover
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
+  contracts-check:
+    deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-gas', 'contracts-coverage']
+    # deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-size', 'contracts-gas', 'contracts-coverage']
+    options:
+      runDepsInParallel: false
+
+  contracts-check-addresses:
+    script: |
+      set -ex
+      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
+
+      docker compose down
+      docker compose up --wait eth-contracts-deployment arbitrum-contracts-deployment base-contracts-deployment
+      git diff --exit-code contracts/script/output/
+    options:
+      runFromWorkspaceRoot: true
+
+  release:
+    command: yarn run release
+    inputs: ["@globs(sources)"]
+    options:
+      cache: false
+      runInCI: false

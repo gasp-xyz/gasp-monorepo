@@ -1,0 +1,269 @@
+name: "[e2e] Reusable e2e tests workflow"
+
+on:
+  workflow_dispatch:
+    inputs:
+      globalVersion:
+        description: "Set global version for all tests."
+        type: string
+        required: true
+  workflow_call:
+    inputs:
+      globalVersion:
+        description: "Set global version for all tests."
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+env:
+  MOON_COLOR: 2
+  CACHE_VERSION: 1
+
+jobs:
+  setup-report:
+    runs-on: [ubuntu-24.04]
+    outputs:
+      testmo-run-id: ${{ steps.setTestRun.outputs.testmo-run-id }}
+    steps:
+      - name: Install testmo
+        run: npm install --no-save @testmo/testmo-cli
+      - name: Add url
+        run: |
+          npx testmo automation:resources:add-field --name git --type string \
+            --value ${GITHUB_SHA:0:7} --resources resources.json
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          npx testmo automation:resources:add-link --name build \
+            --url $RUN_URL --resources resources.json
+
+      - name: Create test run
+        run: |
+          npx testmo automation:run:create \
+            --instance https://mangata-finance.testmo.net  \
+            --project-id 2 \
+            --name "BE tests from node-repo" \
+            --resources resources.json \
+            --source "BE-e2e-regression" > testmo-run-id.txt
+          ID=$(cat testmo-run-id.txt)
+          echo "testmo-run-id=$ID" >> $GITHUB_OUTPUT
+          echo "ID=$ID" >> $GITHUB_ENV
+
+        env:
+          TESTMO_URL: ${{ secrets.TESTMO_URL }}
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        id: setTestRun
+
+  e2e-test-matrix:
+    needs: [setup-report]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          #####################################################################
+          # gasp-node-specific tests (running only two instances of gasp-node)
+          #####################################################################
+          - command: "moon gasp-node:e2e-test-parallel"
+            name: test-parallel
+          - command: "moon gasp-node:e2e-test-sequential-no-bootstrap"
+            name: test-sequential-no-bootstrap
+          - command: "moon gasp-node:e2e-test-seqgasless"
+            name: test-seqgasless
+          - command: "moon gasp-node:e2e-test-maintenance"
+            name: test-maintenance
+          - command: "moon gasp-node:e2e-test-rollupUpdate"
+            name: test-rollupUpdate
+          - command: "moon gasp-node:e2e-test-bootstrap"
+            name: test-bootstrap
+          - command: "moon gasp-node:e2e-test-rewards-bootstrap"
+            name: test-rewards-bootstrap
+          - command: "moon gasp-node:e2e-test-parallel-autocompound"
+            name: test-parallel-autocompound
+          - command: "moon gasp-node:e2e-test-sequential-autocompound"
+            name: test-sequential-autocompound
+          - command: "moon gasp-node:e2e-test-poolliquidity"
+            name: test-poolliquidity
+          - command: "moon gasp-node:e2e-test-governance"
+            name: test-governance
+          - command: "moon gasp-node:e2e-test-multiswap"
+            name: test-multiswap
+          - command: "moon gasp-node:e2e-test-experimentalStaking"
+            name: test-experimentalStaking
+          - command: "moon gasp-node:e2e-test-crowdloan"
+            name: test-crowdloan
+          - command: "moon gasp-node:e2e-test-sdk"
+            name: test-sdk
+          - command: "moon gasp-node:e2e-test-parallel-3rdPartyRewards"
+            name: test-parallel-3rdPartyRewards
+          - command: "moon gasp-node:e2e-test-sequencerStaking"
+            name: test-sequencerStaking
+          - command: "moon gasp-node:e2e-test-sequencerCancellation"
+            name: test-sequencerCancellation
+          - command: "moon gasp-node:e2e-test-rolldown"
+            name: test-rolldown
+          - command: "moon gasp-node:e2e-test-rolldownWithdrawal"
+            name: test-rolldownWithdrawal
+          - command: "moon gasp-node:e2e-test-rolldownPreOperationWithdrawal"
+            name: test-rolldownPreOperationWithdrawal
+          - command: "moon gasp-node:e2e-test-sequencerRewards"
+            name: test-sequencerRewards
+          - command: "moon gasp-node:e2e-test-nonTransToken"
+            name: test-nonTransToken
+          - command: "moon gasp-node:e2e-test-issuanceConfig"
+            name: test-issuanceConfig
+          - command: "moon gasp-node:e2e-test-sudoRemoval"
+            name: test-sudoRemoval
+          - command: "moon gasp-node:e2e-test-marketSwap"
+            name: test-marketSwap
+          #####################################################################
+          # full avs environment specific tests (running full avs environment)
+          #####################################################################
+          - command: "moon gasp-node:e2e-test-rollup"
+            name: "[avs] test-rollup"
+    runs-on: ubuntu-24.04
+    name: ${{ matrix.name }}
+    timeout-minutes: 180
+    defaults:
+      run:
+        working-directory: gasp-node
+    env:
+      MOON_TOOLCHAIN_FORCE_GLOBALS: node,yarn
+      API_URL: "ws://127.0.0.1:9946"
+      NODE_DOCKER_COMPOSE_NETWORK: gasp-node_default
+      IMAGE_TAG: ${{ inputs.globalVersion }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+      - name: Cache Git submodules
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            .git/modules
+          key: submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-
+            submodules-${{ env.CACHE_VERSION }}-
+      - run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive --depth 1
+
+      - uses: moonrepo/setup-rust@v1
+        name: Setup nightly-2024-01-20 rust toolchain
+        with:
+          channel: nightly-2024-01-20
+          targets: wasm32-unknown-unknown
+          components: rustfmt,clippy,rust-src
+          cache: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Install proto manually
+      #   run: |
+      #     curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
+      #     bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
+      #     echo "$HOME/.proto/bin" >> $GITHUB_PATH
+      # - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && proto setup --yes && proto install
+
+      - uses: docker/setup-compose-action@v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18.20.7"
+
+      - name: Get Yarn cache directory and version
+        id: yarn-cache
+        run: |
+          YARN_VERSION=$(yarn --version)
+          if [[ "$YARN_VERSION" =~ ^1\. ]]; then
+            CACHE_DIR=$(yarn cache dir)
+            echo "version=1" >> $GITHUB_OUTPUT
+          else
+            CACHE_DIR=$(yarn config get cacheFolder)
+            echo "version=2plus" >> $GITHUB_OUTPUT
+          fi
+          echo "dir=$CACHE_DIR" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-${{ env.CACHE_VERSION }}-yarn-${{ steps.yarn-cache.outputs.version }}-${{ hashFiles('gasp-node/gasp-e2e/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.CACHE_VERSION }}-yarn-${{ steps.yarn-cache.outputs.version }}-
+
+      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install --immutable
+
+      - name: E2E- Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v8
+
+      - name: Current branch name for generating types
+        run: echo "GASP_TYPES_VERSION=${{ steps.branch-name.outputs.current_branch }}" | sed -E 's@[/\.]@-@g; s@_@-@g' >> $GITHUB_ENV
+
+      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install
+      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
+      
+      - uses: moonrepo/setup-toolchain@v0.4.0
+        with:
+          cache-version: ${{ env.CACHE_VERSION }}
+      # - run: moon setup
+      - name: Run tests
+        run: ${{ matrix.command }}
+        env:
+          NODE_OPTIONS: --max_old_space_size=12288
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1.9.1
+        continue-on-error: true
+        if: success() || failure() # run this step even if previous step failed
+        with:
+          name: E2E report ${{ matrix.command }} # Name of the check run which will be created
+          path: gasp-node/gasp-e2e/reports/*.xml # Path to test results
+          reporter: jest-junit # Format of test results
+          fail-on-empty: false
+
+      - name: Submit results to the testmo-run
+        continue-on-error: true
+        if: always()
+        env:
+          TESTMO_URL: ${{ secrets.TESTMO_URL }}
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        run: |
+          npm install --no-save @testmo/testmo-cli
+          npx testmo automation:run:submit-thread \
+            --instance https://mangata-finance.testmo.net \
+            --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
+            --results e2eTests/reports/*.xml
+
+  test-complete:
+    needs: [setup-report, e2e-test-matrix]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install testmo
+        run: npm install --no-save @testmo/testmo-cli
+
+      - name: Complete test run
+        run: |
+          npx testmo automation:run:complete \
+            --instance https://mangata-finance.testmo.net \
+            --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
+        env:
+          TESTMO_URL: ${{ secrets.TESTMO_URL }}
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        continue-on-error: true
+
+  slack-notify-nook:
+    needs: [e2e-test-matrix]
+    if: failure()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Slack Notification - Error
+        uses: bryannice/gitactions-slack-notification@2.0.0
+        env:
+          SLACK_INCOMING_WEBHOOK: ${{ secrets.BNB_E2E_NOTIFICATION_WEBHOOK }}
+          SLACK_TITLE: "gasp-monorepo e2e test execution - NOOK"
+          SLACK_COLOR: "#ff0011"
+          SLACK_MESSAGE: "Test failures in gasp-monorepo testmo report: https://mangata-finance.testmo.net/automation/runs/view/${{needs.setup-report.outputs.testmo-run-id}}"
+          GITHUB_REF: "https://gasp-xyz.github.io/gasp-monorepo/${{ github.run_number }}"

@@ -172,7 +172,7 @@ collator:
     extraArgs:
       - --pruning=archive
       - --rpc-max-connections=10000
-  
+
   rpcArchive01:
     enabled: true
     role: rpc-archive
@@ -182,7 +182,7 @@ collator:
     extraArgs:
       - --pruning=archive
       - --rpc-max-connections=10000
-  
+
   rpcArchive02:
     enabled: false
     role: rpc-archive-new
@@ -214,24 +214,22 @@ aggregatorEnv:
   AVS_DEPLOYMENT_BLOCK: "21394442"
   AVS_KICK_PERIOD: "25"
   AVS_REGISTRY_COORDINATOR_ADDR: "0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1"
-  AVS_RPC_URL: http://avs-aggregator:8090
   AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
   AVS_TASK_EXPIRATION: "300"
   AVS_UPDATE_STAKE_PERIOD: "150"
-  OPT_IN_AT_STARTUP: "true"
   AGG_IDLE_START: true
   AGG_RUN_TRIGGER_API_KEY: "secrettoken"
   ENVIRONMEMT: "production"
   AGG_SS_FETCH_TIMEOUT: "100"
+  AGG_OSU_REINIT_OP: "false"
 
 #####################
 # gaspAvs configs #
 #####################
-gaspAvsEnabled: true
-gaspAvsImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 # Override the image tag provided on deployment from IMAGE_TAG env variable
-# gaspAvsImageTag: ba3aaf237234092ad21bf0a4c5ff0f08523ba6f0
+gaspAvsImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
 
+gaspAvsEnabled: true
 gaspAvsEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-01-ecdsa-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-01-ecdsa-password
@@ -245,18 +243,30 @@ gaspAvsData:
   storageSize: 150Gi
 gaspAvsEnv:
   CHAIN_ID: "1"
-  AVS_BLOCK_VALIDATION_PERIOD: "100"
-  AVS_DEBOUNCE_RPC: "20"
-  AVS_DEPLOYMENT_BLOCK: "21394442"
-  AVS_KICK_PERIOD: "25"
   AVS_REGISTRY_COORDINATOR_ADDR: "0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1"
   AVS_RPC_URL: http://avs-aggregator:8090
-  AVS_SERVER_IP_PORT_ADDRESS: 0.0.0.0:8090
-  AVS_TASK_EXPIRATION: "300"
-  AVS_UPDATE_STAKE_PERIOD: "150"
-  LOG_LEVEL: "info"
   RUST_LOG: gasp_avs=info,ether=info
-  OPT_IN_AT_STARTUP: "false"
+  # rollup-node configs
+  ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
+  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/f9604551934c498a6a814d84f2cd6c01803d24d7/rollup-dev-env-chainspecs/alpha-launch-f26183b-raw.json
+
+gaspAvsEnabled2: true
+gaspAvsData2:
+  storageClass: node-data-volume-retain
+  mountPath: /data
+  storageSize: 150Gi
+gaspAvsEnvSecrets2:
+  ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-02-ecdsa-key
+  ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-02-ecdsa-password
+  BLS_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-02-bls-key
+  BLS_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-operator-02-bls-password
+  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/gaspAvsEthereumMainnetHttpsUrl
+  ETH_WS_URL: ref+sops://secrets.enc.yaml#/gaspAvsEthereumMainnetWssUrl
+gaspAvsEnv2:
+  CHAIN_ID: "1"
+  AVS_REGISTRY_COORDINATOR_ADDR: "0x9A986296d45C327dAa5998519AE1B3757F1e6Ba1"
+  AVS_RPC_URL: http://avs-aggregator:8090
+  RUST_LOG: gasp_avs=info,ether=info
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns4/collator-01-p2p-rollup-prod.gasp.xyz/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
   ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/f9604551934c498a6a814d84f2cd6c01803d24d7/rollup-dev-env-chainspecs/alpha-launch-f26183b-raw.json
@@ -506,31 +516,123 @@ ferryWithdrawalEnvSecretsBase:
 # ferry-closer configs #
 ########################
 closerEnabled: true
-closerImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
+closerImageTag: 0226df257ba55a112510763da171e134c15b4ecf
 closerEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
   L1_CHAIN: "ethereum"
-  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
+  TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
   BATCH_SIZE: 50
+  SKIP_STASH: true
+  DELAY: 10
+  REPLICA_COUNT: 3
+  REPLICA_ID: 0
+  MIN_REQUEST_ID: 10000
 closerEnvSecretsEth:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
-  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-private-key
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-eth1-private-key
+  STASH_URL: ref+sops://secrets.enc.yaml#/prodStashUrl
+
+closerEnabledEth2: true
+closerEnvEth2:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
+  L1_CHAIN: "ethereum"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: "1000000000000000000000"
+  LOOK_BACK_HOURS: 1
+  LOG: info
+  BATCH_SIZE: 50
+  SKIP_STASH: true
+  DELAY: 10
+  REPLICA_COUNT: 3
+  REPLICA_ID: 1
+  MIN_REQUEST_ID: 10000
+closerEnvSecretsEth2:
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
+  # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-eth2-private-key
+  STASH_URL: ref+sops://secrets.enc.yaml#/prodStashUrl
+
+closerEnabledEth3: true
+closerEnvEth3:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
+  L1_CHAIN: "ethereum"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: "1000000000000000000000"
+  LOOK_BACK_HOURS: 1
+  LOG: info
+  BATCH_SIZE: 50
+  SKIP_STASH: true
+  DELAY: 10
+  REPLICA_COUNT: 3
+  REPLICA_ID: 2
+  MIN_REQUEST_ID: 10000
+closerEnvSecretsEth3:
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
+  # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-eth3-private-key
+  STASH_URL: ref+sops://secrets.enc.yaml#/prodStashUrl
+
+closerEnabledEth4: false
+closerEnvEth4:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
+  L1_CHAIN: "ethereum"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: "1000000000000000000000"
+  LOOK_BACK_HOURS: 1
+  LOG: info
+  BATCH_SIZE: 50
+  SKIP_STASH: true
+  DELAY: 10
+  REPLICA_COUNT: 5
+  REPLICA_ID: 3
+  MIN_REQUEST_ID: 25000
+closerEnvSecretsEth4:
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
+  # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-eth4-private-key
+  STASH_URL: ref+sops://secrets.enc.yaml#/prodStashUrl
+
+closerEnabledEth5: false
+closerEnvEth5:
+  MANGATA_NODE_URL: ws://collator-01:9944
+  MANGATA_CONTRACT_ADDRESS: "0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca"
+  L1_CHAIN: "ethereum"
+  TOKENS_TO_TRACK: "[]"
+  TX_COST: "1000000000000000000000"
+  LOOK_BACK_HOURS: 1
+  LOG: info
+  BATCH_SIZE: 50
+  SKIP_STASH: true
+  DELAY: 10
+  REPLICA_COUNT: 5
+  REPLICA_ID: 4
+  MIN_REQUEST_ID: 25000
+closerEnvSecretsEth5:
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerEthereumMainnetWssUrl
+  # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
+  PRIVATE_KEY: ref+gcpsecrets://direct-pixel-353917/rollup-prod-closer-eth5-private-key
   STASH_URL: ref+sops://secrets.enc.yaml#/prodStashUrl
 
 closerEnvArb:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x3aDdEb54ddd43Eb40235eC32DfA7928F28A44bb5"
   L1_CHAIN: "arbitrum"
-  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
+  TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
   BATCH_SIZE: 50
+  SKIP_STASH: true
+  DELAY: 10
+  MIN_REQUEST_ID: 25000
 closerEnvSecretsArb:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerArbitrumMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
@@ -541,11 +643,13 @@ closerEnvBase:
   MANGATA_NODE_URL: ws://collator-01:9944
   MANGATA_CONTRACT_ADDRESS: "0x308e483afDD225D6cb7bF4d44B8e4a03DFD9c0De"
   L1_CHAIN: "base"
-  TOKENS_TO_TRACK: '[["0x0000000000000000000000000000000000000000", 1, 1]]'
+  TOKENS_TO_TRACK: "[]"
   TX_COST: "1000000000000000000000"
   LOOK_BACK_HOURS: 1
   LOG: info
   BATCH_SIZE: 50
+  SKIP_STASH: true
+  DELAY: 10
 closerEnvSecretsBase:
   ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/closerBaseMainnetWssUrl
   # Address: 0x343B8ef618234D46D6cD1d6f3762BA4f8d42F40C
