@@ -9,6 +9,7 @@ plugins:
   - '@semantic-release/release-notes-generator'
   - '@semantic-release/github'
   - - '@semantic-release/exec'
-    - publishCmd: |
+    - shell: bash
+      publishCmd: |
         export IMAGE_TAG=${nextRelease.version}
-        moon gasp-node:release
+        moon gasp-node:build-image-ci

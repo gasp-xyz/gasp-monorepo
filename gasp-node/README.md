@@ -69,6 +69,7 @@ Once started, you can access nodes using port forwards
 - [127.0.0.1:9946](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9946#/explorer) - `node-bob` node
 
 ### Sudo access
+
 `Alice` is set as sudo account for docker setup
 
 ## Mangata node configuration

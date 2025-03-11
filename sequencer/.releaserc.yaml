@@ -9,6 +9,7 @@ plugins:
   - '@semantic-release/release-notes-generator'
   - '@semantic-release/github'
   - - '@semantic-release/exec'
-    - publishCmd: |
+    - shell: bash
+      publishCmd: |
         export IMAGE_TAG=${nextRelease.version}
-        moon sequencer:release
+        moon sequencer:build-image-ci
