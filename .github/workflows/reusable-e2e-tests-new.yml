@@ -21,7 +21,7 @@ permissions:
 
 env:
   MOON_COLOR: 2
-  CACHE_VERSION: 1
+  CACHE_VERSION: 2
 
 jobs:
   setup-report:
