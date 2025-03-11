@@ -22,6 +22,8 @@ fileGroups:
     - 'Cargo.toml'
   gasp-e2e-sources:
     - 'gasp-e2e/**/*.ts'
+    - 'gasp-e2e/package.json'
+    - 'gasp-e2e/yarn.lock'
 
 tasks:
   prepare-toolchain:
