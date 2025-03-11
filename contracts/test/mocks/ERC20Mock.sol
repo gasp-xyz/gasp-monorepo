@@ -1,10 +1,8 @@
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v4.8.0) (token/ERC20/ERC20.sol)
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity 0.8.13;
 
-pragma solidity ^0.8.9;
-
-import "@openzeppelin/contracts/interfaces/IERC20.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 /**
  * @dev Implementation of the {IERC20} interface.

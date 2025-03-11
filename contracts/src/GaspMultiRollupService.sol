@@ -1,18 +1,14 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
-import {IBLSSignatureChecker} from "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
-import {BN254} from "@eigenlayer-middleware/src/libraries/BN254.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
-import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
-import {console} from "forge-std/console.sol";
-import {GaspMultiRollupServiceStorage} from "./GaspMultiRollupServiceStorage.sol";
-import {IFinalizerTaskManager} from "./interfaces/IFinalizerTaskManager.sol";
-import {IRolldown} from "./interfaces/IRolldown.sol";
+import { IBLSSignatureChecker } from "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
+import { BN254 } from "@eigenlayer-middleware/src/libraries/BN254.sol";
+import { IPauserRegistry, Pausable } from "@eigenlayer/contracts/permissions/Pausable.sol";
+import { OwnableUpgradeable } from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
+import { Initializable } from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
+import { GaspMultiRollupServiceStorage } from "./GaspMultiRollupServiceStorage.sol";
+import { IFinalizerTaskManager } from "./interfaces/IFinalizerTaskManager.sol";
+import { IRolldown } from "./interfaces/IRolldown.sol";
 
 contract GaspMultiRollupService is Initializable, OwnableUpgradeable, Pausable, GaspMultiRollupServiceStorage {
     using BN254 for BN254.G1Point;
