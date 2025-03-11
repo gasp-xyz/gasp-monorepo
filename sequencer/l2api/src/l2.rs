@@ -188,6 +188,7 @@ impl L2Interface for Gasp {
         self.keypair.address().into_inner()
     }
 
+    #[tracing::instrument(skip(self), ret)]
     async fn get_l2_request(
         &self,
         chain: gasp_types::Chain,

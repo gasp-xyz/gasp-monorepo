@@ -28,7 +28,7 @@ mockall::mock! {
         async fn close_withdrawal(
             &self,
             withdrawal: gasp_types::Withdrawal,
-            cerkle_root: H256,
+            merkle_root: H256,
             proof: Vec<H256>,
         ) -> Result<H256, L1Error>;
 

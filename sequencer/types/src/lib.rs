@@ -213,6 +213,15 @@ pub enum L2Request {
     Withdrawal(Withdrawal),
 }
 
+impl L2Request{
+    pub fn request_id(&self) -> U256{
+        match self{
+            L2Request::Cancel(cancel) => cancel.request_id.id,
+            L2Request::Withdrawal(withdrawal) => withdrawal.request_id.id,
+        }
+    }
+}
+
 impl From<Cancel> for L2Request {
     fn from(cancel: Cancel) -> Self {
         L2Request::Cancel(cancel)
