@@ -10,6 +10,6 @@ plugins:
   - '@semantic-release/github'
   - - '@semantic-release/exec'
     - shell: bash
+      # IMAGE_TAG is set from within the GHA workflow and corresponds to the image tag we want to use for the release
       publishCmd: |
-        export IMAGE_TAG=${nextRelease.version}
-        moon ferry-deposit:build-image-ci
+        docker buildx imagetools create -t gaspxyz/ferry-deposit:${nextRelease.version} gaspxyz/ferry-deposit:${IMAGE_TAG}
