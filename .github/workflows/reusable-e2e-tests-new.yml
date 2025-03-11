@@ -191,7 +191,17 @@ jobs:
       - uses: moonrepo/setup-toolchain@v0.4.0
         with:
           cache-version: ${{ env.CACHE_VERSION }}
-      # - run: moon setup
+      
+      - name: Check commit message for cache directive
+        id: check-commit
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          if [[ "$COMMIT_MSG" == *"[no cache]"* ]]; then
+            echo "::warning::Cache disabled via [no cache] directive in commit message"
+            echo "MOON_CACHE=off" >> $GITHUB_ENV
+          else
+            echo "MOON_CACHE=read-write" >> $GITHUB_ENV
+          fi
       - name: Run tests
         run: ${{ matrix.command }}
         env:
