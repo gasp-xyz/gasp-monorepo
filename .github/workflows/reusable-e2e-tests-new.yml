@@ -229,7 +229,7 @@ jobs:
           yarn dlx @testmo/testmo-cli automation:run:submit-thread \
             --instance https://mangata-finance.testmo.net \
             --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
-            --results e2eTests/reports/*.xml
+            --results $GITHUB_WORKSPACE/gasp-node/gasp-e2e/reports/*.xml
 
   test-complete:
     needs: [setup-report, e2e-test-matrix]
