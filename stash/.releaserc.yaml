@@ -13,4 +13,3 @@ plugins:
       publishCmd: |
         export IMAGE_TAG=${nextRelease.version}
         moon stash:build-image-ci
-        
