@@ -161,12 +161,6 @@ jobs:
           cache: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # - name: Install proto manually
-      #   run: |
-      #     curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
-      #     bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
-      #     echo "$HOME/.proto/bin" >> $GITHUB_PATH
-      # - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && proto setup --yes && proto install
 
       - uses: docker/setup-compose-action@v1
       - uses: actions/setup-node@v4
@@ -194,16 +188,6 @@ jobs:
 
       - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install --immutable
 
-      - name: E2E- Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v8
-
-      - name: Current branch name for generating types
-        run: echo "GASP_TYPES_VERSION=${{ steps.branch-name.outputs.current_branch }}" | sed -E 's@[/\.]@-@g; s@_@-@g' >> $GITHUB_ENV
-
-      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install
-      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
-      
       - uses: moonrepo/setup-toolchain@v0.4.0
         with:
           cache-version: ${{ env.CACHE_VERSION }}
