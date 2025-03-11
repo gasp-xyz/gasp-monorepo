@@ -182,3 +182,5 @@ jobs:
         run: moon :release --concurrency 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: ${{ needs.init.outputs.GLOBAL_VERSION }}
+
