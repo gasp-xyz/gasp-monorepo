@@ -121,12 +121,13 @@ aggregatorImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetAggregatorEcdsaKeyJson
   ECDSA_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetAggregatorEcdsaKeyPassword
-  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
-  ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
+  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumInfuraHttpsUrl
+  ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumInfuraWssUrl
 aggregatorEnv:
   SUBSTRATE_RPC_URL: wss://collator-01-ws-rollup-holesky-v3.gasp.xyz
   CHAIN_ID: "17000"
-  AVS_BLOCK_VALIDATION_PERIOD: "10"
+  AVS_BLOCK_VALIDATION_PERIOD: "100"
+  AVS_RPC_URL: http://avs-aggregator:8090
   AVS_DEBOUNCE_RPC: "20"
   AVS_DEPLOYMENT_BLOCK: "2884411"
   AVS_KICK_PERIOD: "25"
@@ -139,7 +140,6 @@ aggregatorEnv:
   RUST_LOG: avs=debug
   AGG_IDLE_START: false
   AGG_RUN_TRIGGER_API_KEY: "secrettoken"
-  AGG_OSU_REINIT_OP: "false"
 #####################
 # gaspAvs configs #
 #####################
@@ -186,8 +186,8 @@ updaterImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 updaterEnvSecrets:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/arbitrumSepoliaUpdaterEcdsaKeyJson
   ROOT_ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/arbitrumSepoliaUpdaterRootEcdsaKeyJson
-  SOURCE_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
-  SOURCE_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
+  SOURCE_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumInfuraHttpsUrl
+  SOURCE_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumInfuraWssUrl
   TARGET_RPC_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaHttpsUrl
   TARGET_WS_URL: ref+sops://secrets.enc.yaml#/arbitrumSepoliaWssUrl
 updaterEnv:
@@ -202,8 +202,8 @@ updaterEnv:
 updaterEnvSecretsBase:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/baseSepoliaUpdaterEcdsaKeyJson
   ROOT_ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/baseSepoliaUpdaterRootEcdsaKeyJson
-  SOURCE_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
-  SOURCE_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
+  SOURCE_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumInfuraHttpsUrl
+  SOURCE_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumInfuraWssUrl
   TARGET_RPC_URL: ref+sops://secrets.enc.yaml#/baseSepoliaHttpsUrl
   TARGET_WS_URL: ref+sops://secrets.enc.yaml#/baseSepoliaWssUrl
 updaterEnvBase:
