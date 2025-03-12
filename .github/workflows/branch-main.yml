@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - release/next
+      - develop
       - '(avs-aggregator-)+([0-9])?(.{+([0-9]),x}).x'
       - '(gasp-avs-)+([0-9])?(.{+([0-9]),x}).x'
       - '(stash-)+([0-9])?(.{+([0-9]),x}).x'
@@ -108,6 +109,7 @@ jobs:
 
   release:
     name: Release
+    if: github.ref_name != 'develop'
     needs: [init, build-and-test, run-e2e-test, run-e2e-test-gasp-node]
     runs-on: ubuntu-24.04
     env:
@@ -115,7 +117,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
           fetch-depth: 0
       
       - uses: arduino/setup-protoc@v3
@@ -176,7 +178,15 @@ jobs:
                 - limits.cpu=14
                 - limits.memory=14Gi
 
+      - name: Download gasp-node wasm artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: gasp-node-wasm-${{ needs.init.outputs.GLOBAL_VERSION }}
+          path: gasp-node/build
+
       - name: Run release command
         run: moon :release --concurrency 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: ${{ needs.init.outputs.GLOBAL_VERSION }}
+

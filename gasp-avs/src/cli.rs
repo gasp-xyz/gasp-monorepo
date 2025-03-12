@@ -48,6 +48,9 @@ pub struct CliArgs {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stake: Option<u32>,
 
+    #[arg(long, env, default_value_t = 80u16)]
+    pub metrics_port: u16,
+
     #[command(subcommand)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub command: Option<Commands>,
