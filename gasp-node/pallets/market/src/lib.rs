@@ -162,7 +162,7 @@ pub mod pallet {
 
 		/// StableSwap pools
 		type StableSwap: Mutate<Self::AccountId, CurrencyId = Self::CurrencyId, Balance = Self::Balance>
-			+ ComputeBalances;
+			+ ComputeBalances + ValuateXyk<Self::Balance, Self::CurrencyId>;
 
 		/// Reward apis for native asset LP tokens activation
 		type Rewards: ProofOfStakeRewardsApi<Self::AccountId, Self::Balance, Self::CurrencyId>;
@@ -1764,19 +1764,19 @@ impl<T: Config> Valuate for Pallet<T> {
 			let maybe_pool = Self::get_pools(Some(pool_id));
 			let (info, reserves) = maybe_pool.first().ok_or(Error::<T>::NoSuchPool)?;
 			Ok((pool_id, info.pool, *reserves))
-		});
+		})();
 		let paired_pool_sswap = (|| -> Result<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>, DispatchError> {
 			let pool_id = <T as pallet::Config>::StableSwap::get_liquidity_asset(base_id, asset_id)?;
 			let maybe_pool = Self::get_pools(Some(pool_id));
 			let (info, reserves) = maybe_pool.first().ok_or(Error::<T>::NoSuchPool)?;
 			Ok((pool_id, info.pool, *reserves))
-		});
+		})();
 
-		let res_vec = vec![paired_pool_xyk, paired_pool_sswap].iter().filter_map(|x| x.ok()).collect();
+		let res_vec: Vec<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>> = vec![paired_pool_xyk, paired_pool_sswap].iter().filter_map(|x| x.ok()).collect();
 		if res_vec.is_empty(){
-			return Error::<T>::NoSuchPool.into()
+			return Err(Error::<T>::NoSuchPool.into())
 		}
-		res_vec
+		Ok(res_vec)
 	}
 
 	fn find_valuation(

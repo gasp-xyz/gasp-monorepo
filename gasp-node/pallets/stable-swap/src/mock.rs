@@ -94,6 +94,8 @@ impl swap::Config for Test {
 	type MaxApmCoeff = ConstU128<1_000_000>;
 	type DefaultApmCoeff = ConstU128<1_000>;
 	type MaxAssetsInPool = ConstU32<8>;
+	type NativeCurrencyId = NativeCurrencyId;
+	type MaxEqAssets = ConstU32<10>;
 	type WeightInfo = ();
 }
 

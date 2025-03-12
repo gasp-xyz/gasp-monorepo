@@ -390,6 +390,15 @@ pub mod config {
 		}
 	}
 
+	pub mod pallet_stable_swap {
+		use super::*;
+
+		parameter_types! {
+			pub const MaxEqAssets: u32 = 10;
+		}
+
+	}
+
 	pub mod pallet_bootstrap {
 		use super::*;
 

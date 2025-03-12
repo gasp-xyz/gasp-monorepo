@@ -350,6 +350,8 @@ impl pallet_stable_swap::Config for Runtime {
 	type MaxApmCoeff = ConstU128<1_000_000>;
 	type DefaultApmCoeff = ConstU128<1_000>;
 	type MaxAssetsInPool = ConstU32<2>;
+	type NativeCurrencyId = tokens::RxTokenId;
+	type MaxEqAssets = cfg::pallet_stable_swap::MaxEqAssets;
 	type WeightInfo = ();
 }
 
