@@ -116,7 +116,7 @@ collator:
 # aggregator configs #
 ######################
 aggregatorEnabled: true
-aggregatorImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
+aggregatorImageTag: 106a0ba1d93cb119c3cda1805f1a60d31aca48ad #aggregator hotfix
 
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetAggregatorEcdsaKeyJson
