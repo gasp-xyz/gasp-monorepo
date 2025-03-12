@@ -172,6 +172,7 @@ gaspAvsEnv:
   LOG_LEVEL: "info"
   RUST_LOG: gasp_avs=debug,ether=trace
   TESTNET: "false"
+  METRICS_PORT: 8080
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL
   ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/5b0100d05c4744f31af56105bce3151f8cbc2d15/rollup-dev-env-chainspecs/holesky-62fa181-raw.json
