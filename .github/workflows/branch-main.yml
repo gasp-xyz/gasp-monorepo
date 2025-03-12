@@ -178,7 +178,15 @@ jobs:
                 - limits.cpu=14
                 - limits.memory=14Gi
 
+      - name: Download gasp-node wasm artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: gasp-node-wasm-${{ needs.init.outputs.GLOBAL_VERSION }}
+          path: gasp-node/build
+
       - name: Run release command
         run: moon :release --concurrency 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: ${{ needs.init.outputs.GLOBAL_VERSION }}
+
