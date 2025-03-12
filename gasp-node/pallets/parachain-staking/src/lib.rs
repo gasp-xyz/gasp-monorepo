@@ -3334,7 +3334,6 @@ pub mod pallet {
 			let mut staking_liquidity_tokens = <StakingLiquidityTokens<T>>::get();
 
 			for (token, valuation) in staking_liquidity_tokens.iter_mut() {
-				// Already Aligned
 				*valuation = T::ValuateForNative::get_reserve_and_lp_supply_for(*token);
 			}
 

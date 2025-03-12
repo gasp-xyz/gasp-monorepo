@@ -1738,7 +1738,6 @@ impl<T: Config> Valuate for Pallet<T> {
 	type CurrencyId = T::CurrencyId;
 	type Balance = T::Balance;
 
-	// Already aligned
 	// a pool's pair has to be connected to base
 	fn check_can_valuate(
 		base_id: Self::CurrencyId,
@@ -1751,13 +1750,11 @@ impl<T: Config> Valuate for Pallet<T> {
 		Err(Error::<T>::NoSuchPool.into())
 	}
 
-	// Already aligned
 	fn check_pool_exist(pool_id: Self::CurrencyId) -> Result<(), DispatchError> {
 		Self::get_pool_info(pool_id)?;
 		Ok(())
 	}
 
-	// Change
 	fn find_paired_pool(
 		base_id: Self::CurrencyId,
 		asset_id: Self::CurrencyId,
@@ -1782,7 +1779,6 @@ impl<T: Config> Valuate for Pallet<T> {
 		res_vec
 	}
 
-	// Change
 	fn find_valuation(
 		_: Self::CurrencyId,
 		asset_id: Self::CurrencyId,
@@ -1795,7 +1791,6 @@ impl<T: Config> Valuate for Pallet<T> {
 		)
 	}
 
-	// Already aligned
 	fn get_reserve_and_lp_supply(
 		base_id: Self::CurrencyId,
 		pool_id: Self::CurrencyId,
@@ -1814,7 +1809,6 @@ impl<T: Config> Valuate for Pallet<T> {
 		Some((reserve, issuance))
 	}
 
-	// Change??
 	fn get_valuation_for_paired(
 		_: Self::CurrencyId,
 		pool_id: Self::CurrencyId,

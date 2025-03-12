@@ -1566,7 +1566,6 @@ impl<T: Config> Pallet<T> {
 		token_id: CurrencyIdOf<T>,
 		amount_per_session: BalanceOf<T>,
 	) -> bool {
-		// Affected??
 		if T::ValuationApi::get_valuation_for_paired_for(token_id, amount_per_session).into() >=
 			T::Min3rdPartyRewardValutationPerSession::get()
 		{
@@ -1579,7 +1578,6 @@ impl<T: Config> Pallet<T> {
 			return true
 		}
 
-		// Affected
 		if T::ValuationApi::find_valuation_for(token_id, amount_per_session)
 			.unwrap_or_default()
 			.into() >= T::Min3rdPartyRewardValutationPerSession::get()
@@ -1596,7 +1594,6 @@ impl<T: Config> Pallet<T> {
 		}
 
 		if let Some((native_reserves, _)) =
-			// Already Aligned
 			<T as Config>::ValuationApi::get_reserve_and_lp_supply_for(token_id)
 		{
 			if native_reserves.into() >= T::Min3rdPartyRewardVolume::get() {
