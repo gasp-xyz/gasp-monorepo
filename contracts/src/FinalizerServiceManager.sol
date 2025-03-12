@@ -1,11 +1,15 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity 0.8.13;
 
-import "@eigenlayer/contracts/interfaces/IRewardsCoordinator.sol";
-import "@eigenlayer/contracts/libraries/BytesLib.sol";
-import "./IFinalizerTaskManager.sol";
-import "./IFinalizerServiceManager.sol";
-import "@eigenlayer-middleware/src/ServiceManagerBase.sol";
+import {IStakeRegistry} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
+import {IRegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
+import {ServiceManagerBase} from "@eigenlayer-middleware/src/ServiceManagerBase.sol";
+import {IAVSDirectory} from "@eigenlayer/contracts/core/AVSDirectory.sol";
+import {IRewardsCoordinator} from "@eigenlayer/contracts/interfaces/IRewardsCoordinator.sol";
+import {ISignatureUtils} from "@eigenlayer/contracts/interfaces/ISignatureUtils.sol";
+import {BytesLib} from "@eigenlayer/contracts/libraries/BytesLib.sol";
+import {IFinalizerServiceManager} from "./interfaces/IFinalizerServiceManager.sol";
+import {IFinalizerTaskManager} from "./interfaces/IFinalizerTaskManager.sol";
 
 /**
  * @title Primary entrypoint for procuring services from Finalizer.
@@ -28,7 +32,10 @@ contract FinalizerServiceManager is ServiceManagerBase, IFinalizerServiceManager
     }
 
     modifier onlyEjectorOrOwner() {
-        require(msg.sender == ejector || msg.sender == owner(), "RegistryCoordinator.onlyEjectorOrOwner: caller is not ejector or owner");
+        require(
+            msg.sender == ejector || msg.sender == owner(),
+            "RegistryCoordinator.onlyEjectorOrOwner: caller is not ejector or owner"
+        );
         _;
     }
 
@@ -70,7 +77,7 @@ contract FinalizerServiceManager is ServiceManagerBase, IFinalizerServiceManager
         _avsDirectory.registerOperatorToAVS(operator, operatorSignature);
     }
 
-    function ejectOperators(address[] calldata operators, bytes[] calldata quorumNumbers) external onlyEjectorOrOwner() {
+    function ejectOperators(address[] calldata operators, bytes[] calldata quorumNumbers) external onlyEjectorOrOwner {
         require(
             operators.length == quorumNumbers.length, "RegistryCoordinator.ejectOperators: args length does not match"
         );
