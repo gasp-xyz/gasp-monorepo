@@ -20,6 +20,12 @@ pub enum FerryError {
 
     #[error("Reqeust `{request_id:?}` not found for chain `{chain:?}`")]
     RequestIdDoesNotExistsOnL2 { request_id: U256, chain: Chain },
+
+    #[error("Unknown merkle root for finalized request id `{0}`")]
+    UnknownMerkleRootForFinalizedRequestId(U256),
+
+    #[error("Reqeust `{request_id:?}` not found for chain `{chain:?}`")]
+    WithdrawalIdDoesNotExistsOnL2 { request_id: U256, chain: Chain },
 }
 
 pub type FerryResult<T> = Result<T, FerryError>;
@@ -121,14 +127,28 @@ where
              .collect::<Result<Vec<_>, _>>()
     }
 
-    pub async fn close_ferried_withdrawal(&mut self) -> FerryResult<H256> {
-        todo!()
-        // todo!()
-        // while let Some(req) = self.pending_ferry_requests.pop_first(){
-        //     let () = self.l1.get_merkle_root(req.request_id.id.try_into().unwrap()).await?;
-        //     // self.l2.get_merkle_proof(, range, chain, at);
-        //     self.l1.close_withdrawal(req).await?;
-        // }
+    pub async fn close_ferried_withdrawal(&mut self, at: H256) -> FerryResult<()> {
+        if self.pending_ferry_requests.is_empty(){
+            return Ok(());
+        }
+
+        if let Some(latest_closable_req_id) = self.l1.get_latest_finalized_request_id().await? {
+            for id in self.pending_ferry_requests.iter().take_while(|elem| (**elem) <= latest_closable_req_id.into()){
+                let request_id = (*id).try_into().unwrap();
+                let req = self.l2.get_l2_request(self.chain, request_id, at).await?
+                    .ok_or(FerryError::RequestIdDoesNotExistsOnL2 { request_id: *id, chain: self.chain })?;
+
+                let withdrawal = if let L2Request::Withdrawal(w) = req { 
+                    Ok(w) 
+                } else { 
+                    Err(FerryError::WithdrawalIdDoesNotExistsOnL2 { request_id: *id, chain: self.chain }) 
+                }?;
+                let (merkle_root, range) = self.l1.get_merkle_root(request_id).await?.ok_or(FerryError::UnknownMerkleRootForFinalizedRequestId(id.into()))?;
+                let proof = self.l2.get_merkle_proof(request_id, range, self.chain, at).await?;
+                self.l1.close_withdrawal(withdrawal, merkle_root.into(), proof).await?;
+            }
+        }
+        Ok(())
     }
 
     pub async fn run(&mut self) -> FerryResult<()> {
@@ -136,6 +156,7 @@ where
         //TODO replace with wait for the next block
         while let Some(elem) = stream.next().await {
             let (block_nr, at) = elem?;
+            self.close_ferried_withdrawal(at).await?;
             tracing::info!("#{block_nr} Looking for ferry requests at block {at}");
 
 
@@ -271,6 +292,7 @@ where
                 // })?;
             }
         }
+        tracing::warn!("header stream ended");
         Ok(())
     }
 }

@@ -213,6 +213,7 @@ pub enum L2Request {
     Withdrawal(Withdrawal),
 }
 
+
 impl L2Request{
     pub fn request_id(&self) -> U256{
         match self{

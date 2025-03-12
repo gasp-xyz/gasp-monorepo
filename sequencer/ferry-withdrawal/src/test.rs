@@ -242,17 +242,24 @@ mod test{
             Ok((2u32, [1u8; 32].into())), 
         ]))));
 
-        l1mock.expect_get_latest_finalized_request_id().returning(|| Ok(None));
-        l2mock.expect_get_latest_created_request_id().returning(|_,_| Ok(Some(2u128)));
+
+        let mut finalized = std::iter::once(None).chain(std::iter::repeat(Some(1u128)));
+        l1mock.expect_get_latest_finalized_request_id().returning(move || Ok(finalized.next().unwrap()));
+
+        l2mock.expect_get_latest_created_request_id().returning(|_,_| Ok(Some(1u128)));
 
         l2mock.expect_get_l2_request()
-            .times(1)
-            .with(always(), eq(1u128), always())
-            .return_once(move |_,_,_| Ok(Some(withdrawal.into())));
-        l1mock.expect_get_status().with(eq(withdrawal.withdrawal_hash())).return_once(|_| Ok(l1api::types::RequestStatus::Ferried([1u8; 20])));
+            .returning(move |_,_,_| Ok(Some(withdrawal.into())));
 
-        l1mock.expect_ferry_withdrawal().with(eq(withdrawal)).times(0).return_once(move |_| Ok(H256::default()));
-        l1mock.expect_close_withdrawal().with(eq(withdrawal), always(), always()).times(0).return_once(move |_,_,_| Ok(H256::default()));
+
+        l1mock.expect_get_status().with(eq(withdrawal.withdrawal_hash())).return_once(|_| Ok(l1api::types::RequestStatus::Pending));
+
+        l1mock.expect_ferry_withdrawal().with(eq(withdrawal)).times(1).return_once(move |_| Ok(H256::default()));
+
+
+        l1mock.expect_get_merkle_root().return_once(move |_| Ok(Some(([0u8; 32], (1u128, 1u128)))));
+        l2mock.expect_get_merkle_proof().return_once(move |_,_,_,_| Ok(vec![]));
+        l1mock.expect_close_withdrawal().with(eq(withdrawal), always(), always()).return_once(move |_,_,_| Ok(H256::default()));
 
         let handle = tokio::spawn(async move {
             FerryWithdrawal::new(gasp_types::Chain::Ethereum, l1mock, l2mock, vec![withdrawal.token_address]).run().await.unwrap();
@@ -261,6 +268,99 @@ mod test{
 
         handle.await.unwrap();
     }
+
+    #[tokio::test]
+    #[traced_test]
+    async fn test_ferry_closes_his_withdrawals() {
+        let mut l1mock = l1api::mock::MockL1::default();
+        let mut l2mock = l2api::mock::MockL2::default();
+
+        let withdrawal = Withdrawal {
+            request_id: RequestId { origin: gasp_types::Origin::L2, id: 1u128.into() },
+            recipient: [0u8; 20],
+            token_address: [0u8; 20],
+            amount: 100u128.into(),
+            ferry_tip: 2u128.into(),
+        };
+
+        l2mock.expect_header_stream().return_once(move |_| Ok(Box::pin(stream::iter( vec![
+            Ok((1u32, [0u8; 32].into())), 
+            Ok((2u32, [1u8; 32].into())), 
+        ]))));
+
+
+        let mut finalized = std::iter::once(None).chain(std::iter::repeat(Some(1u128)));
+        l1mock.expect_get_latest_finalized_request_id().returning(move || Ok(finalized.next().unwrap()));
+
+        l2mock.expect_get_latest_created_request_id().returning(|_,_| Ok(Some(1u128)));
+
+        l2mock.expect_get_l2_request()
+            .returning(move |_,_,_| Ok(Some(withdrawal.into())));
+
+
+        l1mock.expect_get_status().with(eq(withdrawal.withdrawal_hash())).return_once(|_| Ok(l1api::types::RequestStatus::Pending));
+
+        l1mock.expect_ferry_withdrawal().with(eq(withdrawal)).times(1).return_once(move |_| Ok(H256::default()));
+
+
+        l1mock.expect_get_merkle_root().return_once(move |_| Ok(Some(([0u8; 32], (1u128, 1u128)))));
+        l2mock.expect_get_merkle_proof().return_once(move |_,_,_,_| Ok(vec![]));
+        l1mock.expect_close_withdrawal().with(eq(withdrawal), always(), always()).return_once(move |_,_,_| Ok(H256::default()));
+
+        let handle = tokio::spawn(async move {
+            FerryWithdrawal::new(gasp_types::Chain::Ethereum, l1mock, l2mock, vec![withdrawal.token_address]).run().await.unwrap();
+        });
+
+
+        handle.await.unwrap();
+    }
+
+    #[tokio::test]
+    #[traced_test]
+    async fn test_ferry_closes_his_withdrawals() {
+        let mut l1mock = l1api::mock::MockL1::default();
+        let mut l2mock = l2api::mock::MockL2::default();
+
+        let withdrawal = Withdrawal {
+            request_id: RequestId { origin: gasp_types::Origin::L2, id: 1u128.into() },
+            recipient: [0u8; 20],
+            token_address: [0u8; 20],
+            amount: 100u128.into(),
+            ferry_tip: 2u128.into(),
+        };
+
+        l2mock.expect_header_stream().return_once(move |_| Ok(Box::pin(stream::iter( vec![
+            Ok((1u32, [0u8; 32].into())), 
+            Ok((2u32, [1u8; 32].into())), 
+        ]))));
+
+
+        let mut finalized = std::iter::once(None).chain(std::iter::repeat(Some(1u128)));
+        l1mock.expect_get_latest_finalized_request_id().returning(move || Ok(finalized.next().unwrap()));
+
+        l2mock.expect_get_latest_created_request_id().returning(|_,_| Ok(Some(1u128)));
+
+        l2mock.expect_get_l2_request()
+            .returning(move |_,_,_| Ok(Some(withdrawal.into())));
+
+
+        l1mock.expect_get_status().with(eq(withdrawal.withdrawal_hash())).return_once(|_| Ok(l1api::types::RequestStatus::Pending));
+
+        l1mock.expect_ferry_withdrawal().with(eq(withdrawal)).times(1).return_once(move |_| Ok(H256::default()));
+
+
+        l1mock.expect_get_merkle_root().return_once(move |_| Ok(Some(([0u8; 32], (1u128, 1u128)))));
+        l2mock.expect_get_merkle_proof().return_once(move |_,_,_,_| Ok(vec![]));
+        l1mock.expect_close_withdrawal().with(eq(withdrawal), always(), always()).return_once(move |_,_,_| Ok(H256::default()));
+
+        let handle = tokio::spawn(async move {
+            FerryWithdrawal::new(gasp_types::Chain::Ethereum, l1mock, l2mock, vec![withdrawal.token_address]).run().await.unwrap();
+        });
+
+
+        handle.await.unwrap();
+    }
+
 
 }
 
