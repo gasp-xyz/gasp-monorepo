@@ -65,17 +65,16 @@ async function startTracingDeposit({
   const status = 'PendingOnL1'
   const transactionData = {
     requestId: null, //requestId we get from L1, empty when we start tracing
-    txHash: txHash,
-    address: address,
-    recipient: address, //recipient is the same as address for deposits
+    txHash,
+    address,
     created: Date.parse(timestamp),
     updated: Date.parse(timestamp),
-    status: status,
-    type: type,
-    chain: chain,
-    amount: amount,
-    asset_chainId: asset_chainId,
-    asset_address: asset_address,
+    status,
+    type,
+    chain,
+    amount,
+    asset_chainId,
+    asset_address,
     createdBy: CreatedBy.Frontend,
     closedBy: null,
   }
@@ -137,12 +136,11 @@ async function processWithdrawalRequest({
     .returnFirst()
   if (existingWithdrawal) {
     existingWithdrawal.createdBy = CreatedBy.Frontend
-    existingWithdrawal.address = address
     const timestamp = new Date().toISOString()
     existingWithdrawal.updated = Date.parse(timestamp)
     await withdrawalRepository.save(existingWithdrawal)
     logger.info({
-      message: 'Withdrawal updated with createdBy and an address (sender):',
+      message: 'Withdrawal updated with createdBy:',
       transaction: existingWithdrawal,
     })
     return {
@@ -160,7 +158,6 @@ async function processWithdrawalRequest({
       requestId: null,
       txHash: txHash,
       address: address,
-      recipient: '', //recipient we get from WithdrawalRequestCreated, empty when we FE starts tracing
       created: Date.parse(timestamp),
       updated: Date.parse(timestamp),
       status: WITHDRAWAL_INITIATED_BY_FE,

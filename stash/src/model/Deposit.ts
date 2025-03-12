@@ -4,7 +4,6 @@ const depositSchema = new Schema(
   'deposits',
   {
     address: { type: 'string' },
-    recipient: { type: 'string' },
     txHash: { type: 'string' },
     requestId: { type: 'number' },
     status: { type: 'string' },

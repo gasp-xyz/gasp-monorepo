@@ -53,12 +53,16 @@ describe('processWithdrawalEvents', () => {
             data: {
               requestId: { id: 1 },
               txHash: '0x123',
-              recipient: '0xrecipient',
+              address: '0xabc',
+              created: expect.any(Number),
+              updated: expect.any(Number),
+              type: 'withdrawal',
               chain: 'testchain',
               amount: '100',
-              tokenAddress: '0xtoken',
+              asset_chainId: 'testchain',
+              asset_address: '0xtoken',
               proof: '',
-              calldata: '0xcalldata',
+              calldata: '0xabcdef',
             },
           },
         ],
@@ -68,7 +72,7 @@ describe('processWithdrawalEvents', () => {
     const mockWithdrawalData = {
       requestId: 1,
       txHash: '0x123',
-      address: '',
+      address: '0xabc',
       created: expect.any(Number),
       updated: expect.any(Number),
       status: 'PendingOnL2',
@@ -78,7 +82,7 @@ describe('processWithdrawalEvents', () => {
       asset_chainId: 'testchain',
       asset_address: '0xtoken',
       proof: '',
-      calldata: '0xcalldata',
+      calldata: '0xabcdef',
     }
 
     vi.spyOn(redis.client, 'get').mockResolvedValue(
@@ -96,8 +100,6 @@ describe('processWithdrawalEvents', () => {
     expect(withdrawalRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
         status: 'PendingOnL2',
-        address: '',
-        recipient: '0xrecipient',
         type: 'withdrawal',
       })
     )
@@ -114,12 +116,16 @@ describe('processWithdrawalEvents', () => {
             data: {
               requestId: { id: 1 },
               txHash: '0x123',
-              recipient: '0xrecipient',
+              address: '0xabc',
+              created: expect.any(Number),
+              updated: expect.any(Number),
+              type: 'withdrawal',
               chain: 'testchain',
               amount: '100',
+              asset_chainId: 'testchain',
               asset_address: '0xtoken',
               proof: '',
-              calldata: '0xcalldata',
+              calldata: '0xabcdef',
             },
           },
         ],
@@ -129,8 +135,7 @@ describe('processWithdrawalEvents', () => {
     const mockWithdrawalData = {
       requestId: 1,
       txHash: '0x123',
-      address: '0xaddress',
-      recipient: '0xrecipient',
+      address: '0xabc',
       created: expect.any(Number),
       updated: expect.any(Number),
       status: 'PendingOnL2',
@@ -146,7 +151,7 @@ describe('processWithdrawalEvents', () => {
     const existingWithdrawalData = {
       requestId: null,
       txHash: '0x123',
-      address: '0xaddress',
+      address: '0xabc',
       created: expect.any(Number),
       updated: expect.any(Number),
       status: 'InitiatedByFrontend',
@@ -160,7 +165,7 @@ describe('processWithdrawalEvents', () => {
     }
 
     vi.spyOn(redis.client, 'get').mockResolvedValue(
-      JSON.stringify([{ key: 'testchain', chainId: 'testchain' }])
+        JSON.stringify([{ key: 'testchain', chainId: 'testchain' }])
     )
     vi.spyOn(withdrawalRepository, 'save').mockResolvedValue(mockWithdrawalData)
     vi.spyOn(withdrawalRepository, 'search').mockReturnValue({
@@ -172,11 +177,10 @@ describe('processWithdrawalEvents', () => {
     await processWithdrawalEvents(mockApi, mockBlock as any)
 
     expect(withdrawalRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        status: 'PendingOnL2',
-        recipient: '0xrecipient',
-        type: 'withdrawal',
-      })
+        expect.objectContaining({
+          status: 'PendingOnL2',
+          type: 'withdrawal',
+        })
     )
   })
 
@@ -258,9 +262,8 @@ describe('startTracingWithdrawal', () => {
 
     vi.spyOn(withdrawalRepository, 'save').mockResolvedValue({
       status: 'PendingOnL2',
-      proof: '',
-      address: '',
-      recipient: '0xrecipient',
+      proof: '0xproof',
+      address: '0xabc',
       amount: '100',
       asset_address: '0xtoken',
       asset_chainId: 'testchain',
@@ -271,8 +274,6 @@ describe('startTracingWithdrawal', () => {
       txHash: '0x123',
       type: 'withdrawal',
       updated: 1729517393690,
-      createdBy: 'other',
-      closedBy: null,
     })
 
     const result = await startTracingWithdrawal(mockApi, mockEventData)
@@ -281,8 +282,7 @@ describe('startTracingWithdrawal', () => {
       expect.objectContaining({
         requestId: 1,
         txHash: '0x123',
-        address: '',
-        recipient: '0xrecipient',
+        address: '0xabc',
         created: 1729517393690,
         updated: 1729517393690,
         status: 'PendingOnL2',
@@ -291,10 +291,8 @@ describe('startTracingWithdrawal', () => {
         amount: '100',
         asset_chainId: 'testchain',
         asset_address: '0xtoken',
-        proof: '',
+        proof: '0xproof',
         calldata: '0xabcdef',
-        createdBy: 'other',
-        closedBy: null,
       })
     )
     expect(withdrawalRepository.save).toHaveBeenCalledWith(
@@ -337,9 +335,7 @@ describe('updateWithdrawal', () => {
     mockApi = {
       rpc: {
         rolldown: {
-          get_abi_encoded_l2_request: vi
-            .fn()
-            .mockResolvedValue({ toHex: () => '0xabcdef' }),
+          get_abi_encoded_l2_request: vi.fn().mockResolvedValue({ toHex: () => '0xabcdef' }),
         },
       },
     } as unknown as ApiPromise
@@ -347,8 +343,7 @@ describe('updateWithdrawal', () => {
     existingWithdrawal = {
       requestId: null,
       txHash: '0x123',
-      address: '0xaddress',
-      recipient: '',
+      address: '0xabc',
       created: 1629517393690,
       updated: 1629517393690,
       status: 'InitiatedByFrontend',
@@ -385,16 +380,14 @@ describe('updateWithdrawal', () => {
     await updateWithdrawal(mockApi, existingWithdrawal, eventData)
 
     expect(withdrawalRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        requestId: 2,
-        updated: expect.any(Number),
-        status: 'PendingOnL2',
-        address: '0xaddress',
-        recipient: '0xrecipient',
-        proof: '',
-        calldata: '0xabcdef',
-        closedBy: null,
-      })
+        expect.objectContaining({
+          requestId: 2,
+          updated: expect.any(Number),
+          status: 'PendingOnL2',
+          proof: '',
+          calldata: '0xabcdef',
+          closedBy: null,
+        })
     )
   })
 })
