@@ -122,4 +122,5 @@ out
 **/reports/**/*
 
 .cursor
+.cursorignore
 CLAUDE.md
