@@ -208,6 +208,9 @@ jobs:
         with:
           cache-version: ${{ env.CACHE_VERSION }}
       # - run: moon setup
+      - name: Disable cache usage for moon command
+        if: github.ref_name == 'main' || github.ref_name == 'release/next'
+        run: echo "MOON_CACHE=off" >> $GITHUB_ENV
       - name: Run tests
         run: ${{ matrix.command }}
         env:
