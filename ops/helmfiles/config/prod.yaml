@@ -21,11 +21,11 @@ collatorRpcArchiveNodesEnableSharedDnsRecord: true
 collator:
   resources:
     requests:
-      cpu: 6
-      memory: 12Gi
+      cpu: 4
+      memory: 8Gi
     limits:
-      cpu: 6
-      memory: 12Gi
+      cpu: 4
+      memory: 8Gi
   image:
     repository: mangatasolutions/rollup-node
     # Ref: https://github.com/gasp-xyz/mangata-node/tree/3722076d06f7c1ff7c727a799260c5df2a5eb62f
@@ -113,11 +113,11 @@ collator:
       topology.kubernetes.io/zone: europe-west1-c
   rpcNodeResources:
     requests:
-      cpu: 8
-      memory: 16Gi
+      cpu: 4
+      memory: 8Gi
     limits:
-      cpu: 8
-      memory: 16Gi
+      cpu: 4
+      memory: 8Gi
   rpc01:
     enabled: true
     role: rpc
@@ -155,7 +155,7 @@ collator:
       - --pruning=archive
       - --rpc-max-connections=10000
   rpc05:
-    enabled: true
+    enabled: false
     role: rpc
     bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
@@ -164,7 +164,7 @@ collator:
       - --pruning=archive
       - --rpc-max-connections=10000
   rpc06:
-    enabled: true
+    enabled: false
     role: rpc
     bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
@@ -174,7 +174,7 @@ collator:
       - --rpc-max-connections=10000
 
   rpcArchive01:
-    enabled: true
+    enabled: false
     role: rpc-archive
     bootnodeAddr: /dns4/collator-01-p2p/tcp/30333/p2p/12D3KooWCnxPCDhnSDfw3WQReZxkyJ5fuQUFzVHmQx4SwVkd2Ndo
     nodeSelector:
