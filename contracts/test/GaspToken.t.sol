@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import { ERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { Test } from "forge-std/Test.sol";
-import { GaspToken } from "./../src/GaspToken.sol";
+import {ERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Test} from "forge-std/Test.sol";
+import {GaspToken} from "./../src/GaspToken.sol";
 
 contract USDTTokenMock is ERC20 {
     constructor(uint256 initialSupply) ERC20("USDT", "USDT") {

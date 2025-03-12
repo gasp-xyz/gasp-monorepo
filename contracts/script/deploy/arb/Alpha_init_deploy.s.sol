@@ -20,7 +20,8 @@ import { Utils } from "./../../utils/Utils.sol";
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contract Deployer is Script, Utils, Test {
     string internal constant _OUTPUT_PATH = "arb_deployment_output";
-    IRolldownPrimitives.ChainId internal constant _CHAIN = IRolldownPrimitives.ChainId.Arbitrum;
+    // solhint-disable-next-line const-name-snakecase
+    IRolldownPrimitives.ChainId internal constant chain = IRolldownPrimitives.ChainId.Arbitrum;
 
     ProxyAdmin public avsProxyAdmin;
     PauserRegistry public avsPauserReg;
@@ -72,7 +73,7 @@ contract Deployer is Script, Utils, Test {
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeCall(rolldown.initialize, (avsOwner, _CHAIN, address(gmrs)))
+            abi.encodeCall(rolldown.initialize, (avsOwner, chain, address(gmrs)))
         );
 
         gmrsImplementation = new GaspMultiRollupService();
@@ -86,7 +87,7 @@ contract Deployer is Script, Utils, Test {
                 avsUpdater,
                 false,
                 address(rolldown),
-                _CHAIN
+                chain
             )
         );
         // transfer ownership of proxy admin to upgrader
@@ -130,8 +131,8 @@ contract Deployer is Script, Utils, Test {
         require(gmrs.owner() == avsOwner, "gmrs.owner() != avsOwner");
         require(gmrs.updater() == avsUpdater, "gmrs.updater() != avsUpdater");
         
-        require(gmrs.chainId() == _CHAIN, "gmrs.chainId() != _CHAIN");
-        require(rolldown.chain() == _CHAIN, "rolldown._CHAIN() != _CHAIN");
+        require(gmrs.chainId() == chain, "gmrs.chainId() != chain");
+        require(rolldown.chain() == chain, "rolldown.chain() != chain");
     }
 
     function _checkPauserInitializations() internal view {
