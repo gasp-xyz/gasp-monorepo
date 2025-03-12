@@ -396,7 +396,6 @@ pub mod config {
 		parameter_types! {
 			pub const MaxEqAssets: u32 = 10;
 		}
-
 	}
 
 	pub mod pallet_bootstrap {

@@ -17,11 +17,14 @@ use mangata_support::pools::{
 	ComputeBalances, Inspect, Mutate, PoolPair, PoolReserves, SwapResult,
 };
 use sp_arithmetic::traits::Unsigned;
-use sp_runtime::traits::{
-	checked_pow, AccountIdConversion, CheckedAdd, CheckedDiv, CheckedMul, CheckedSub, Ensure, One,
-	TrailingZeroInput, Zero, Bounded
+use sp_runtime::{
+	helpers_128bit::multiply_by_rational_with_rounding,
+	traits::{
+		checked_pow, AccountIdConversion, Bounded, CheckedAdd, CheckedDiv, CheckedMul, CheckedSub,
+		Ensure, One, TrailingZeroInput, Zero,
+	},
+	Rounding, SaturatedConversion,
 };
-use sp_runtime::{helpers_128bit::multiply_by_rational_with_rounding, Rounding, SaturatedConversion};
 use sp_std::{convert::TryInto, fmt::Debug, vec, vec::Vec};
 
 use orml_tokens::MultiTokenCurrencyExtended;
@@ -181,7 +184,7 @@ pub mod pallet {
 		/// Liquidity token creation failed
 		LiquidityTokenCreationFailed,
 		/// EqAssets exceeded bound
-		EqAssetExceededBound
+		EqAssetExceededBound,
 	}
 
 	// Pallet's events.
@@ -266,10 +269,7 @@ pub mod pallet {
 			fees: BalancesOf<T>,
 		},
 		/// EqAssets map for an asset was updated
-		EqAssetsUpdated {
-			asset_id: T::CurrencyId,
-			eq_assets: Vec<T::CurrencyId>
-		}
+		EqAssetsUpdated { asset_id: T::CurrencyId, eq_assets: Vec<T::CurrencyId> },
 	}
 
 	#[pallet::storage]
@@ -278,7 +278,13 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn equivalent_assets)]
-	pub type EqAssets<T: Config> = StorageMap<_, Identity, <T as Config>::CurrencyId, BoundedBTreeSet<<T as Config>::CurrencyId, T::MaxEqAssets>, OptionQuery>;
+	pub type EqAssets<T: Config> = StorageMap<
+		_,
+		Identity,
+		<T as Config>::CurrencyId,
+		BoundedBTreeSet<<T as Config>::CurrencyId, T::MaxEqAssets>,
+		OptionQuery,
+	>;
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
@@ -573,25 +579,26 @@ pub mod pallet {
 				match is_eq {
 					true => {
 						// We don't care if the value was already there
-						let _ = eq_assets.try_insert(eq_asset).map_err(|_| Error::<T>::EqAssetExceededBound)?;
+						let _ = eq_assets
+							.try_insert(eq_asset)
+							.map_err(|_| Error::<T>::EqAssetExceededBound)?;
 					},
 					false => {
 						// We don't care if the value was never there
-						let _  = eq_assets.remove(&eq_asset);
-					}
+						let _ = eq_assets.remove(&eq_asset);
+					},
 				}
 			}
 
 			EqAssets::<T>::insert(asset_id, eq_assets.clone());
 
 			Self::deposit_event(Event::EqAssetsUpdated {
-				asset_id: asset_id,
-				eq_assets: eq_assets.into_iter().collect()
+				asset_id,
+				eq_assets: eq_assets.into_iter().collect(),
 			});
 
 			Ok(())
 		}
-		
 	}
 
 	impl<T: Config> Pallet<T> {
@@ -1780,11 +1787,8 @@ pub mod pallet {
 			return false;
 		}
 
-		pub fn get_pool_native_reserves(
-			pool_id: T::CurrencyId
-		) -> Option<T::Balance> {
-			let (first_token_id, second_token_id) =
-				<Pallet<T> as Inspect>::get_pool_info(pool_id)?;
+		pub fn get_pool_native_reserves(pool_id: T::CurrencyId) -> Option<T::Balance> {
+			let (first_token_id, second_token_id) = <Pallet<T> as Inspect>::get_pool_info(pool_id)?;
 			let (first_token_amount, second_token_amount) =
 				<Pallet<T> as Inspect>::get_pool_reserves(pool_id)?;
 			let native_currency_id = T::NativeCurrencyId::get();
@@ -2018,8 +2022,10 @@ impl<T: Config> Mutate<T::AccountId> for Pallet<T> {
 	}
 }
 
-
-impl<T: Config> mangata_support::traits::Valuate<T::Balance, T::CurrencyId> for Pallet<T> where <T as pallet::Config>::Balance: Into<u128> {
+impl<T: Config> mangata_support::traits::Valuate<T::Balance, T::CurrencyId> for Pallet<T>
+where
+	<T as pallet::Config>::Balance: Into<u128>,
+{
 	fn get_liquidity_asset(
 		first_asset_id: T::CurrencyId,
 		second_asset_id: T::CurrencyId,
@@ -2031,7 +2037,8 @@ impl<T: Config> mangata_support::traits::Valuate<T::Balance, T::CurrencyId> for 
 		liquidity_token_id: T::CurrencyId,
 	) -> Result<(T::CurrencyId, T::CurrencyId), DispatchError> {
 		let (first_token_id, second_token_id) =
-			<Pallet<T> as Inspect>::get_pool_info(liquidity_token_id).ok_or(Error::<T>::NoSuchPool)?;
+			<Pallet<T> as Inspect>::get_pool_info(liquidity_token_id)
+				.ok_or(Error::<T>::NoSuchPool)?;
 		let native_currency_id = T::NativeCurrencyId::get();
 		match native_currency_id {
 			_ if native_currency_id == first_token_id => Ok((first_token_id, second_token_id)),
@@ -2044,9 +2051,9 @@ impl<T: Config> mangata_support::traits::Valuate<T::Balance, T::CurrencyId> for 
 		liquidity_token_id: T::CurrencyId,
 		liquidity_token_amount: T::Balance,
 	) -> T::Balance {
-		let mga_token_reserve = match Pallet::<T>::get_pool_native_reserves(liquidity_token_id){
+		let mga_token_reserve = match Pallet::<T>::get_pool_native_reserves(liquidity_token_id) {
 			Some(v) => v,
-			None => return Default::default()
+			None => return Default::default(),
 		};
 
 		let liquidity_token_reserve: T::Balance =
@@ -2072,7 +2079,10 @@ impl<T: Config> mangata_support::traits::Valuate<T::Balance, T::CurrencyId> for 
 	) -> T::Balance {
 		let native_token_id = T::NativeCurrencyId::get();
 
-		if EqAssets::<T>::get(native_token_id).unwrap_or_default().contains(&non_liquidity_token_id) {
+		if EqAssets::<T>::get(native_token_id)
+			.unwrap_or_default()
+			.contains(&non_liquidity_token_id)
+		{
 			amount
 		} else {
 			Default::default()
@@ -2099,7 +2109,6 @@ impl<T: Config> mangata_support::traits::Valuate<T::Balance, T::CurrencyId> for 
 	}
 
 	fn get_pool_state(liquidity_token_id: T::CurrencyId) -> Option<(T::Balance, T::Balance)> {
-		
 		let mga_token_reserve = Pallet::<T>::get_pool_native_reserves(liquidity_token_id)?;
 
 		let liquidity_token_reserve: T::Balance =
@@ -2123,4 +2132,3 @@ impl<T: Config> mangata_support::traits::Valuate<T::Balance, T::CurrencyId> for 
 		<Pallet<T> as Inspect>::get_pool_info(liquidity_asset_id).is_some()
 	}
 }
-

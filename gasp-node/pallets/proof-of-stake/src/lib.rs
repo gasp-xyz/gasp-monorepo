@@ -1605,7 +1605,7 @@ impl<T: Config> Pallet<T> {
 			for (_, ids, reserves) in paired_pool_info {
 				let native_reserves =
 					if ids.0 == Self::native_token_id() { reserves.0 } else { reserves.1 };
-				if native_reserves.into() >= T::Min3rdPartyRewardVolume::get(){
+				if native_reserves.into() >= T::Min3rdPartyRewardVolume::get() {
 					return true
 				}
 			}

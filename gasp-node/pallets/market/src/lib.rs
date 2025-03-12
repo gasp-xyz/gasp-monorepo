@@ -162,7 +162,8 @@ pub mod pallet {
 
 		/// StableSwap pools
 		type StableSwap: Mutate<Self::AccountId, CurrencyId = Self::CurrencyId, Balance = Self::Balance>
-			+ ComputeBalances + ValuateXyk<Self::Balance, Self::CurrencyId>;
+			+ ComputeBalances
+			+ ValuateXyk<Self::Balance, Self::CurrencyId>;
 
 		/// Reward apis for native asset LP tokens activation
 		type Rewards: ProofOfStakeRewardsApi<Self::AccountId, Self::Balance, Self::CurrencyId>;
@@ -1758,7 +1759,8 @@ impl<T: Config> Valuate for Pallet<T> {
 	fn find_paired_pool(
 		base_id: Self::CurrencyId,
 		asset_id: Self::CurrencyId,
-	) -> Result<Vec<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>>, DispatchError> {
+	) -> Result<Vec<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>>, DispatchError>
+	{
 		let paired_pool_xyk = (|| -> Result<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>, DispatchError> {
 			let pool_id = <T as pallet::Config>::Xyk::get_liquidity_asset(base_id, asset_id)?;
 			let maybe_pool = Self::get_pools(Some(pool_id));
@@ -1772,8 +1774,9 @@ impl<T: Config> Valuate for Pallet<T> {
 			Ok((pool_id, info.pool, *reserves))
 		})();
 
-		let res_vec: Vec<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>> = vec![paired_pool_xyk, paired_pool_sswap].iter().filter_map(|x| x.ok()).collect();
-		if res_vec.is_empty(){
+		let res_vec: Vec<mangata_support::pools::PoolInfo<Self::CurrencyId, Self::Balance>> =
+			vec![paired_pool_xyk, paired_pool_sswap].iter().filter_map(|x| x.ok()).collect();
+		if res_vec.is_empty() {
 			return Err(Error::<T>::NoSuchPool.into())
 		}
 		Ok(res_vec)
@@ -1784,11 +1787,8 @@ impl<T: Config> Valuate for Pallet<T> {
 		asset_id: Self::CurrencyId,
 		amount: Self::Balance,
 	) -> Result<Self::Balance, DispatchError> {
-		Ok(
-			<T as pallet::Config>::Xyk::valuate_non_liquidity_token(asset_id, amount).max(
-				<T as pallet::Config>::StableSwap::valuate_non_liquidity_token(asset_id, amount)
-			)
-		)
+		Ok(<T as pallet::Config>::Xyk::valuate_non_liquidity_token(asset_id, amount)
+			.max(<T as pallet::Config>::StableSwap::valuate_non_liquidity_token(asset_id, amount)))
 	}
 
 	fn get_reserve_and_lp_supply(
@@ -1814,9 +1814,8 @@ impl<T: Config> Valuate for Pallet<T> {
 		pool_id: Self::CurrencyId,
 		amount: Self::Balance,
 	) -> Self::Balance {
-		<T as pallet::Config>::Xyk::valuate_liquidity_token(pool_id, amount).max(
-			<T as pallet::Config>::StableSwap::valuate_liquidity_token(pool_id, amount)
-		)
+		<T as pallet::Config>::Xyk::valuate_liquidity_token(pool_id, amount)
+			.max(<T as pallet::Config>::StableSwap::valuate_liquidity_token(pool_id, amount))
 	}
 }
 
