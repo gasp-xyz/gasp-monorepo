@@ -133,6 +133,12 @@ pub mod pallet {
 		#[pallet::constant]
 		type MaxAssetsInPool: Get<u32>;
 
+		#[pallet::constant]
+		type NativeCurrencyId: Get<Self::CurrencyId>;
+
+		#[pallet::constant]
+		type MaxEqAssets: Get<u32>;
+
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 	}
@@ -173,6 +179,10 @@ pub mod pallet {
 		MathOverflow,
 		/// Liquidity token creation failed
 		LiquidityTokenCreationFailed,
+		/// EqAssets exceeded bound
+		EqAssetExceededBound,
+		/// No Such Pool
+		NoSuchPool
 	}
 
 	// Pallet's events.
@@ -256,11 +266,20 @@ pub mod pallet {
 			/// The fees taken into treasury.
 			fees: BalancesOf<T>,
 		},
+		/// EqAssets map for an asset was updated
+		EqAssetsUpdated {
+			asset_id: T::CurrencyId,
+			eq_assets: Vec<T::CurrencyId>
+		}
 	}
 
 	#[pallet::storage]
 	#[pallet::getter(fn asset_pool)]
 	pub type Pools<T: Config> = StorageMap<_, Identity, PoolIdOf<T>, PoolInfoOf<T>, OptionQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn equivalent_assets)]
+	pub type EqAssets<T: Config> = StorageMap<_, Identity, <T as Config>::CurrencyId, BoundedBTreeSet<<T as Config>::CurrencyId, MaxEqAssets>, OptionQuery>;
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
@@ -536,6 +555,44 @@ pub mod pallet {
 
 			Ok(())
 		}
+
+		/// Withdraw balanced assets from the pool given LP tokens amount to burn
+		#[pallet::call_index(5)]
+		#[pallet::weight((Weight::from_parts(25_000_000, 0))
+			.saturating_add(T::DbWeight::get().reads(1 as u64))
+			.saturating_add(T::DbWeight::get().writes(1 as u64))]
+		pub fn update_eq_assets(
+			origin: OriginFor<T>,
+			asset_id: T::CurrencyId,
+			eq_assets_update: Vec<(T::CurrencyId, bool)>,
+		) -> DispatchResult {
+			let _ = ensure_root(origin)?;
+
+			let mut eq_assets = EqAssets::<T>::get(asset_id).unwrap_or_default();
+
+			for (eq_asset, is_eq) in eq_assets_update {
+				match is_eq {
+					true => {
+						// We don't care if the value was already there
+						let _ = eq_assets.try_insert(eq_asset).map_err(|_| Error::<T>::EqAssetExceededBound)?;
+					},
+					false => {
+						// We don't care if the value was never there
+						let _  = eq_assets.remove(eq_asset);
+					}
+				}
+			}
+
+			EqAssets::<T>::put(eq_assets.clone());
+
+			Self::deposit_event(Event::EqAssetsUpdated {
+				asset_id: asset_id,
+				eq_assets: eq_assets.into()
+			});
+
+			Ok(())
+		}
+		
 	}
 
 	impl<T: Config> Pallet<T> {
@@ -1723,6 +1780,21 @@ pub mod pallet {
 			}
 			return false;
 		}
+
+		fn get_pool_native_reserves(
+			(pool_id: Self::CurrencyId)
+		) -> Option<Self::Balance> {
+			let (first_token_id, second_token_id) =
+				<Pallet<T> as Inspect>::get_pool_info(liquidity_asset_id).ok_or(Error::<T>::NoSuchPool)?;
+			let (first_token_amount, second_token_amount) =
+				<Pallet<T> as Inspect>::get_pool_reserves(liquidity_asset_id).ok_or(Error::<T>::NoSuchPool)?;
+			let native_currency_id = T::NativeCurrencyId::get();
+			match native_currency_id {
+				_ if native_currency_id == first_token_id => Some(first_token_amount)),
+				_ if native_currency_id == second_token_id => Some(second_token_amount)),
+				_ => None,
+			}
+		}
 	}
 }
 
@@ -1953,19 +2025,19 @@ impl<T: Config> mangata_support::traits::Valuate<BalanceOf<T>, CurrencyIdOf<T>> 
 		first_asset_id: CurrencyIdOf<T>,
 		second_asset_id: CurrencyIdOf<T>,
 	) -> Result<CurrencyIdOf<T>, DispatchError> {
-		Pallet::<T>::get_liquidity_asset(first_asset_id, second_asset_id)
+		Error::<T>::NoSuchPool.into()
 	}
 
 	fn get_liquidity_token_mga_pool(
 		liquidity_token_id: CurrencyIdOf<T>,
 	) -> Result<(CurrencyIdOf<T>, CurrencyIdOf<T>), DispatchError> {
 		let (first_token_id, second_token_id) =
-			LiquidityPools::<T>::get(liquidity_token_id).ok_or(Error::<T>::NoSuchLiquidityAsset)?;
-		let native_currency_id = Self::native_token_id();
+			<Pallet<T> as Inspect>::get_pool_info(liquidity_asset_id).ok_or(Error::<T>::NoSuchPool)?;
+		let native_currency_id = T::NativeCurrencyId::get();
 		match native_currency_id {
 			_ if native_currency_id == first_token_id => Ok((first_token_id, second_token_id)),
 			_ if native_currency_id == second_token_id => Ok((second_token_id, first_token_id)),
-			_ => Err(Error::<T>::NotPairedWithNativeAsset.into()),
+			_ => Err(Error::<T>::NoSuchPool.into()),
 		}
 	}
 
@@ -1973,16 +2045,7 @@ impl<T: Config> mangata_support::traits::Valuate<BalanceOf<T>, CurrencyIdOf<T>> 
 		liquidity_token_id: CurrencyIdOf<T>,
 		liquidity_token_amount: BalanceOf<T>,
 	) -> BalanceOf<T> {
-		let (mga_token_id, other_token_id) =
-			match Self::get_liquidity_token_mga_pool(liquidity_token_id) {
-				Ok(pool) => pool,
-				Err(_) => return Default::default(),
-			};
-
-		let mga_token_reserve = match Pallet::<T>::get_reserves(mga_token_id, other_token_id) {
-			Ok(reserves) => reserves.0,
-			Err(_) => return Default::default(),
-		};
+		let mga_token_reserve = Pallet::<T>::get_pool_native_reserves(liquidity_token_id).ok_or(Error::<T>::NoSuchPool)?;
 
 		let liquidity_token_reserve: BalanceOf<T> =
 			<T as Config>::Currency::total_issuance(liquidity_token_id.into());
@@ -2005,22 +2068,13 @@ impl<T: Config> mangata_support::traits::Valuate<BalanceOf<T>, CurrencyIdOf<T>> 
 		non_liquidity_token_id: CurrencyIdOf<T>,
 		amount: BalanceOf<T>,
 	) -> BalanceOf<T> {
-		let native_token_id = Pallet::<T>::native_token_id();
+		let native_token_id = T::NativeCurrencyId::get();
 
-		let (native_reserves, token_reserves) =
-			match Pallet::<T>::get_reserves(native_token_id, non_liquidity_token_id) {
-				Ok(reserves) => reserves,
-				Err(_) => return Default::default(),
-			};
-
-		multiply_by_rational_with_rounding(
-			amount.into(),
-			native_reserves.into(),
-			token_reserves.into(),
-			Rounding::Down,
-		)
-		.map(SaturatedConversion::saturated_into)
-		.unwrap_or(BalanceOf::<T>::max_value())
+		if EqAssets::<T>::get(native_token_id).unwrap_or_default().contains(non_liquidity_token_id) {
+			amount
+		} else {
+			Default::default()
+		}
 	}
 
 	fn scale_liquidity_by_mga_valuation(
@@ -2043,16 +2097,8 @@ impl<T: Config> mangata_support::traits::Valuate<BalanceOf<T>, CurrencyIdOf<T>> 
 	}
 
 	fn get_pool_state(liquidity_token_id: CurrencyIdOf<T>) -> Option<(BalanceOf<T>, BalanceOf<T>)> {
-		let (mga_token_id, other_token_id) =
-			match Self::get_liquidity_token_mga_pool(liquidity_token_id) {
-				Ok(pool) => pool,
-				Err(_) => return None,
-			};
-
-		let mga_token_reserve = match Pallet::<T>::get_reserves(mga_token_id, other_token_id) {
-			Ok(reserves) => reserves.0,
-			Err(_) => return None,
-		};
+		
+		let mga_token_reserve = Pallet::<T>::get_pool_native_reserves(liquidity_token_id).ok_or(Error::<T>::NoSuchPool)?;
 
 		let liquidity_token_reserve: BalanceOf<T> =
 			<T as Config>::Currency::total_issuance(liquidity_token_id.into());
@@ -2068,7 +2114,7 @@ impl<T: Config> mangata_support::traits::Valuate<BalanceOf<T>, CurrencyIdOf<T>> 
 		first_asset_id: CurrencyIdOf<T>,
 		second_asset_id: CurrencyIdOf<T>,
 	) -> Result<(BalanceOf<T>, BalanceOf<T>), DispatchError> {
-		<Pallet<T> as Inspect>::get_pool_reserves(first_asset_id, second_asset_id)
+		Error::<T>::NoSuchPool.into()
 	}
 
 	fn is_liquidity_token(liquidity_asset_id: CurrencyIdOf<T>) -> bool {
