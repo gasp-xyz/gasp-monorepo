@@ -143,7 +143,7 @@ aggregatorEnv:
 #####################
 # gaspAvs configs #
 #####################
-gaspAvsImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
+gaspAvsImageTag: 80511d961edf6a98e8435afdceca4fe0938ac85c
 
 gaspAvsEnabled: true
 gaspAvsData:
