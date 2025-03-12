@@ -59,7 +59,7 @@ jobs:
         with:
           cache-version: ${{ env.CACHE_VERSION }}
       - run: cd contracts && yarn install --immutable
-      - run: moon ci :contracts-check
+      - run: moon ci :contracts-format :contracts-lint :contracts-test :contracts-gas :contracts-coverage
         env:
           IMAGE_TAG: ${{ inputs.version }}
           MOON_TOOLCHAIN_FORCE_GLOBALS: proto
