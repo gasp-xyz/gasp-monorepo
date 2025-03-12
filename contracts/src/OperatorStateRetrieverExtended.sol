@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import { IBLSApkRegistry } from "@eigenlayer-middleware/src/interfaces/IBLSApkRegistry.sol";
-import { IRegistryCoordinator } from "@eigenlayer-middleware/src/interfaces/IRegistryCoordinator.sol";
-import { IStakeRegistry } from "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
-import { BitmapUtils } from "@eigenlayer-middleware/src/libraries/BitmapUtils.sol";
-import { OperatorStateRetriever } from "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
+import {IBLSApkRegistry} from "@eigenlayer-middleware/src/interfaces/IBLSApkRegistry.sol";
+import {IRegistryCoordinator} from "@eigenlayer-middleware/src/interfaces/IRegistryCoordinator.sol";
+import {IStakeRegistry} from "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
+import {BitmapUtils} from "@eigenlayer-middleware/src/libraries/BitmapUtils.sol";
+import {OperatorStateRetriever} from "@eigenlayer-middleware/src/OperatorStateRetriever.sol";
 
 /**
  * @title OperatorStateRetriever with view functions that allow to retrieve the state of an AVSs registry system.
