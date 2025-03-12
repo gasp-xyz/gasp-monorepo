@@ -1,3 +1,6 @@
+use core::fmt;
+use std::fmt::{Display, Formatter};
+
 use alloy::sol_types::SolValue;
 use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
 use parity_scale_codec::{Decode, Encode};
@@ -196,6 +199,16 @@ pub struct Withdrawal {
     pub token_address: [u8; 20],
     pub amount: U256,
     pub ferry_tip: U256,
+}
+
+impl Display for Withdrawal {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Withdrawal: request_id: {:?}, recipient: {}, token_address: {}, amount: {:?}, ferry_tip: {:?}",
+            self.request_id, hex::encode(self.recipient), hex::encode(self.token_address), self.amount, self.ferry_tip
+        )
+    }
 }
 
 impl Withdrawal {
