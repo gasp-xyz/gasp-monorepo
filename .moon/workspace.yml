@@ -42,3 +42,6 @@ unstable_remote:
         'X-Custom-Header': 'gasp'
   cache:
     compression: zstd
+
+hasher:
+  walkStrategy: 'glob'
