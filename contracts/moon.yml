@@ -7,7 +7,9 @@ toolchain:
 
 fileGroups:
   sources:
-    - "lib/**/*.sol"
+    # - "lib/**/*.sol"
+    - "lib/forge-std/src/**/*.sol"
+    - "lib/eigenlayer-middleware/src/**/*.sol"
     - "src/**/*.sol"
     - "test/**/*.sol"
     - "script/**/*.sol"
@@ -126,11 +128,11 @@ tasks:
     options:
       outputStyle: stream
 
-  contracts-check:
-    deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-gas', 'contracts-coverage']
-    # deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-size', 'contracts-gas', 'contracts-coverage']
-    options:
-      runDepsInParallel: false
+  # contracts-check:
+  #   deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-gas', 'contracts-coverage']
+  #   # deps: ['contracts-format', 'contracts-lint', 'contracts-test', 'contracts-size', 'contracts-gas', 'contracts-coverage']
+  #   options:
+  #     runDepsInParallel: false
 
   contracts-check-addresses:
     script: |
