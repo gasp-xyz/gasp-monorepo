@@ -7,7 +7,9 @@ toolchain:
 
 fileGroups:
   sources:
-    - "lib/**/*.sol"
+    # - "lib/**/*.sol"
+    - "lib/forge-std/src/**/*.sol"
+    - "lib/eigenlayer-middleware/src/**/*.sol"
     - "src/**/*.sol"
     - "test/**/*.sol"
     - "script/**/*.sol"
