@@ -1,6 +1,5 @@
 .git
 .github
-target
 devops
 launch
 scripts
@@ -23,8 +22,8 @@ chains
 ./docker-cargo/*
 node_modules
 
-!target/release/rollup-node
-!docker-cargo/release/rollup-node
+target
+target-*
 
 # dotfiles in the repo root
 /.*
@@ -38,3 +37,27 @@ app-target
 
 .moon/cache
 moon.yml
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
+
+# Ignore linked e2e tests directory
+gasp-e2e
+**/gasp-e2e
+
+*-buildkit-metadata.json
+
+scripts
+.editorconfig
+.nvmrc
+.prototools
+.releaserc.yaml
+compose.yml
+compose.persistent.yml
+docker-cargo.sh
+Justfile
+Mangata.md
+README.md
+
+build_rs_cov.profraw
+build

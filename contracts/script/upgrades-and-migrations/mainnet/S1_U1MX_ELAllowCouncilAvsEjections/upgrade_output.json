@@ -1,0 +1,10 @@
+{
+  "addresses": {
+    "serviceManager": "0x3aDdEb54ddd43Eb40235eC32DfA7928F28A44bb5",
+    "serviceManagerImplementation": "0xaA3Ed48889c0B6dC00586e1f0AfFe445379F7c84"
+  },
+  "chainInfo": {
+    "chainId": 1,
+    "lastUpgradeImplDeployBlock": 21800744
+  }
+}

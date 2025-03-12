@@ -2,7 +2,19 @@ name: main branch workflow
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - release/next
+      - develop
+      - '(avs-aggregator-)+([0-9])?(.{+([0-9]),x}).x'
+      - '(gasp-avs-)+([0-9])?(.{+([0-9]),x}).x'
+      - '(stash-)+([0-9])?(.{+([0-9]),x}).x'
+      - '(updater-)+([0-9])?(.{+([0-9]),x}).x'
+      - '(gasp-contracts-)+([0-9])?(.{+([0-9]),x}).x'
+      - '(gasp-node-)+([0-9])?(.{+([0-9]),x}).x'
+      - '(sequencer-)+([0-9])?(.{+([0-9]),x}).x'
+      - '(ferry-deposit-)+([0-9])?(.{+([0-9]),x}).x'
+      - '(ferry-withdrawal-)+([0-9])?(.{+([0-9]),x}).x'
 
 permissions:
   contents: write
@@ -10,6 +22,8 @@ permissions:
   deployments: write
   checks: write
   security-events: write
+  issues: write
+  pull-requests: write
 
 # The following concurrency group queus in-progress jobs
 concurrency:
@@ -40,40 +54,16 @@ jobs:
     name: Build AVS services
     uses: ./.github/workflows/reusable-build-and-test.yml
     secrets: inherit
-    with:
-      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-  
-  build-and-test-gasp-node:
-    needs: [init]
-    name: Build gasp-node
-    uses: ./.github/workflows/reusable-gasp-node-build-and-test.yml
-    secrets: inherit
     permissions:
       contents: read
-      actions: read
-      checks: write
       id-token: write
+      security-events: write
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      branch: ${{ needs.init.outputs.GIT_BRANCH }}
-
-  gasp-node-unit-tests-and-coverage:
-    name: '[gasp-node] Run unit tests and coverage'
-    needs: [init]
-    uses: ./.github/workflows/reusable-gasp-node-unit-tests-and-coverage.yml
-    secrets: inherit
-    permissions:
-      contents: read
-      actions: read
-      checks: write
-      id-token: write
-    with:
-      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      branch: ${{ needs.init.outputs.GIT_BRANCH }}
 
   gasp-node-generate-types:
     name: '[gasp-node] Generate types'
-    needs: [init, build-and-test-gasp-node]
+    needs: [init, build-and-test]
     uses: ./.github/workflows/reusable-gasp-node-generate-types.yml
     secrets: inherit
     with:
@@ -83,7 +73,7 @@ jobs:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
 
   run-e2e-test:
-    name: Run e2e tests
+    name: '[e2e] Run gasp-avs and ferries e2e tests'
     needs: [init, build-and-test]
     uses: ./.github/workflows/reusable-e2e-tests.yml
     secrets: inherit
@@ -96,9 +86,9 @@ jobs:
       e2eBranch: eth-rollup-develop
   
   run-e2e-test-gasp-node:
-    name: '[gasp-node] Run e2e tests'
-    needs: [init, build-and-test-gasp-node, gasp-node-generate-types]
-    uses: ./.github/workflows/reusable-gasp-node-e2e-tests.yml
+    name: '[e2e] Run gasp-node and global e2e tests'
+    needs: [init, build-and-test, gasp-node-generate-types]
+    uses: ./.github/workflows/reusable-e2e-tests-new.yml
     secrets: inherit
     permissions:
       contents: read
@@ -116,3 +106,87 @@ jobs:
   #   with:
   #     env: dev
   #     version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+
+  release:
+    name: Release
+    if: github.ref_name != 'develop'
+    needs: [init, build-and-test, run-e2e-test, run-e2e-test-gasp-node]
+    runs-on: ubuntu-24.04
+    env:
+      MOON_COLOR: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      
+      - uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install proto manually
+        run: |
+          curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
+          bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
+          echo "$HOME/.proto/bin" >> $GITHUB_PATH
+      - run: proto setup --yes
+      - run: proto install
+
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          token_format: access_token
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Set up GKE credentials to be used for remote Docker image builds
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: gha-runners-cluster
+          location: europe-west4-a
+      
+      - run: |
+          docker login -u ${{ secrets.ORG_DOCKERHUB_USERNAME }} -p ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+          docker login -u oauth2accesstoken -p ${{ steps.auth.outputs.access_token }} europe-docker.pkg.dev
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: v0.21.1
+          cleanup: true
+          driver: kubernetes
+          driver-opts: |
+            namespace=buildkit
+            nodeselector=github-actions-pool=true
+            "tolerations=key=github-actions-pool,value=true;key=CriticalAddonsOnly,value=true"
+            replicas=1
+            requests.cpu=14
+            requests.memory=14Gi
+            limits.cpu=14
+            limits.memory=14Gi
+          buildkitd-config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
+          platforms: linux/amd64
+          append: |
+            - platforms: linux/arm64
+              driver-opts:
+                - nodeselector=github-actions-pool-arm=true,"tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
+                - replicas=1
+                - requests.cpu=14
+                - requests.memory=14Gi
+                - limits.cpu=14
+                - limits.memory=14Gi
+
+      - name: Download gasp-node wasm artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: gasp-node-wasm-${{ needs.init.outputs.GLOBAL_VERSION }}
+          path: gasp-node/build
+
+      - name: Run release command
+        run: moon :release --concurrency 1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: ${{ needs.init.outputs.GLOBAL_VERSION }}
+
