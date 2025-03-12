@@ -17,7 +17,7 @@ env:
   MOON_COLOR: 2
   MOON_CACHE: read-write
   MOON_DEBUG_PROTO_INSTALL: false
-  CACHE_VERSION: 1
+  CACHE_VERSION: 2
 jobs:
   contracts-build-and-test:
     name: '[contracts] Build and test'
@@ -59,10 +59,11 @@ jobs:
         with:
           cache-version: ${{ env.CACHE_VERSION }}
       - run: cd contracts && yarn install --immutable
-      - run: moon ci :contracts-format :contracts-lint :contracts-test :contracts-gas :contracts-coverage
-        env:
-          IMAGE_TAG: ${{ inputs.version }}
-          MOON_TOOLCHAIN_FORCE_GLOBALS: proto
+      - run: moon ci :contracts-format
+      - run: moon ci :contracts-lint
+      - run: moon ci :contracts-test
+      - run: moon ci :contracts-gas
+      - run: moon ci :contracts-coverage
       
       # TODO: Temporary disabled until we have a way to run the check in parallel with the build
       # - name: Verify contracts addresses haven't changed
