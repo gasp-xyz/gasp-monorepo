@@ -61,10 +61,11 @@ export const updateWithdrawal = async (
   eventData: any
 ) => {
   existingWithdrawal.requestId = Number(
-    eventData.requestId.id.replace(/,/g, '')
+    String(eventData.requestId.id).replace(/,/g, '')
   )
   existingWithdrawal.updated = Date.parse(new Date().toISOString())
   existingWithdrawal.status = WITHDRAWAL_PENDING_ON_L2
+  existingWithdrawal.recipient = eventData.recipient
   existingWithdrawal.proof = ''
   const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
     eventData.chain,
@@ -86,7 +87,7 @@ export const startTracingWithdrawal = async (
   const timestamp = new Date().toISOString()
   const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
     eventData.chain,
-    eventData.requestId.id.replace(/,/g, '')
+    Number(String(eventData.requestId.id).replace(/,/g, ''))
   )
   const affirmedNetworks = await redis.client.get(NETWORK_LIST_KEY)
   const networks = affirmedNetworks ? JSON.parse(affirmedNetworks) : []
@@ -96,7 +97,8 @@ export const startTracingWithdrawal = async (
   const withdrawalData = {
     requestId: Number(eventData.requestId.id.replace(/,/g, '')),
     txHash: eventData.hash_,
-    address: eventData.recipient,
+    address: '', // address (sender) we get from FE when they trigger start tracing, empty when withdrawal is started tracing by other means or until FE updates it
+    recipient: eventData.recipient,
     created: Date.parse(timestamp),
     updated: Date.parse(timestamp),
     status: WITHDRAWAL_PENDING_ON_L2,
@@ -118,9 +120,9 @@ export const updateWithdrawalsWhenBatchCreated = async (
   eventData: any
 ): Promise<void> => {
   const updateTimestamp = new Date().toISOString()
-  const firstElement = Number(eventData.range[0].replace(/,/g, ''))
+  const firstElement = Number(String(eventData.range[0]).replace(/,/g, ''))
   const lastElement = Number(
-    eventData.range[eventData.range.length - 1].replace(/,/g, '')
+    String(eventData.range[eventData.range.length - 1]).replace(/,/g, '')
   )
   const existingWithdrawal = await withdrawalRepository
     .search()
