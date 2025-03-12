@@ -231,7 +231,7 @@ sequencerEnvEth:
   LIMIT: "5000"
   WATCHDOG: 300
 sequencerEnvSecretsEth:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumAlchemyWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/holeskySequencerPrivateKey
   MNEMONIC: ref+sops://secrets.enc.yaml#/holeskySequencerPrivateKey
 sequencerEnvArb:
@@ -348,7 +348,7 @@ closerEnvEth:
   LOG: silly
   BATCH_SIZE: 5
 closerEnvSecretsEth:
-  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
+  ETH_CHAIN_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumAlchemyWssUrl
   PRIVATE_KEY: ref+sops://secrets.enc.yaml#/holeskyCloserPrivateKey
   STASH_URL: ref+sops://secrets.enc.yaml#/holeskyV3StashUrl
 closerEnvArb:
