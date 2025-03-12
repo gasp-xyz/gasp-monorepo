@@ -133,19 +133,29 @@ where
         }
 
         if let Some(latest_closable_req_id) = self.l1.get_latest_finalized_request_id().await? {
-            for id in self.pending_ferry_requests.iter().take_while(|elem| (**elem) <= latest_closable_req_id.into()){
-                let request_id = (*id).try_into().unwrap();
+            let closable_ferried_txs = self.pending_ferry_requests
+                .iter()
+                .cloned()
+                .take_while(|elem| (*elem) <= latest_closable_req_id.into())
+                .collect::<Vec<_>>();
+
+            for id in closable_ferried_txs{
+                let request_id = id.try_into().unwrap();
                 let req = self.l2.get_l2_request(self.chain, request_id, at).await?
-                    .ok_or(FerryError::RequestIdDoesNotExistsOnL2 { request_id: *id, chain: self.chain })?;
+                    .ok_or(FerryError::RequestIdDoesNotExistsOnL2 { request_id: id, chain: self.chain })?;
 
                 let withdrawal = if let L2Request::Withdrawal(w) = req { 
                     Ok(w) 
                 } else { 
-                    Err(FerryError::WithdrawalIdDoesNotExistsOnL2 { request_id: *id, chain: self.chain }) 
+                    Err(FerryError::WithdrawalIdDoesNotExistsOnL2 { request_id: id, chain: self.chain }) 
                 }?;
-                let (merkle_root, range) = self.l1.get_merkle_root(request_id).await?.ok_or(FerryError::UnknownMerkleRootForFinalizedRequestId(id.into()))?;
-                let proof = self.l2.get_merkle_proof(request_id, range, self.chain, at).await?;
-                self.l1.close_withdrawal(withdrawal, merkle_root.into(), proof).await?;
+
+                if let RequestStatus::Ferried(_) = self.l1.get_status(withdrawal.withdrawal_hash()).await?{
+                        let (merkle_root, range) = self.l1.get_merkle_root(request_id).await?.ok_or(FerryError::UnknownMerkleRootForFinalizedRequestId(id.into()))?;
+                        let proof = self.l2.get_merkle_proof(request_id, range, self.chain, at).await?;
+                        self.l1.close_withdrawal(withdrawal, merkle_root.into(), proof).await?;
+                }
+                self.pending_ferry_requests.remove(&id);
             }
         }
         Ok(())
@@ -220,76 +230,6 @@ where
                         break;
                     }
                 }
-
-                // if let Some(ferry_req) = ferry_req{
-                //     let result = self.l1.ferry_withdrawal(ferry_req.into()).await?;
-                //     continue;
-                // }
-
-
-                // let futures = chunk
-                //     .iter()
-                //     .map(|id| {
-                //         self.l2
-                //             .get_l2_request(self.chain, *id, at)
-                //             .map(|elem| elem.map(|elem| (*id, elem)))
-                //     })
-                //     .collect::<Vec<_>>();
-                //
-                // let result = futures::future::join_all(futures)
-                //     .await
-                //     .into_iter()
-                //     .collect::<Result<Vec<_>, _>>()?;
-                //
-                // let (existing_reqs, non_exising_reqs): (Vec<_>, Vec<_>) = result
-                //     .into_iter()
-                //     .partition(|(id, maybe_req)| maybe_req.is_some());
-                //
-                // non_exising_reqs.iter().for_each(|(id, _)| {
-                //     tracing::warn!("could not find request with id == {id}");
-                // });
-                //
-                // let x = existing_reqs
-                //     .into_iter()
-                //     .filter_map(|(_, req)| match req {
-                //         Some(L2Request::Withdrawal(w))
-                //             if self.tokens_to_ferry.contains(&w.token_address) =>
-                //         {
-                //             Some(w)
-                //         }
-                //         _ => None,
-                //     })
-                //     .collect::<Vec<_>>();
-                //
-                // if let Some(w) = x.first() {
-                //     tracing::info!(
-                //         "ferry withdrawal with request_id == {id}",
-                //         id = w.request_id.id
-                //     );
-                //     let result = self.l1.ferry_withdrawal((*w).into()).await?;
-                //     break;
-                // }
-
-                // if let Some((id, _)) = result.iter().find(|(_, maybe_req)| maybe_req.is_none()){
-                //     tracing::warn!("could not find request with id == {id}");
-                //     return Err(FerryError::RequestIdDoesNotExistsOnL2 {
-                //         request_id: RequestId {
-                //             origin: Origin::L2,
-                //             id: (*id).into(),
-                //         },
-                //         chain: self.chain,
-                //     });
-                // }else{
-                //
-                // }
-                //
-                // .ok_or(FerryError::RequestIdDoesNotExistsOnL2 {
-                //     request_id: RequestId {
-                //         origin: Origin::L2
-                //         id: *chunk.last().unwrap(),
-                //     },
-                //     chain: self.chain,
-                // })?;
             }
         }
         tracing::warn!("header stream ended");
