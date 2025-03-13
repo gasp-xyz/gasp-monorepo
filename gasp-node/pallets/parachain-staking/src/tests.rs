@@ -30,8 +30,8 @@ use crate::mock::{
 use crate::{
 	assert_eq_events, assert_event_emitted, assert_last_event, Bond, CandidateBondChange,
 	CandidateBondRequest, CollatorStatus, DelegationChange, DelegationRequest, DelegatorAdded,
-	Error, Event, MetadataUpdateAction, PayoutRounds, RoundAggregatorInfo,
-	RoundCollatorRewardInfo, TotalSelected,
+	Error, Event, MetadataUpdateAction, PayoutRounds, RoundAggregatorInfo, RoundCollatorRewardInfo,
+	TotalSelected,
 };
 use frame_support::{assert_noop, assert_ok, traits::tokens::currency::MultiTokenCurrency};
 use orml_tokens::MultiTokenReservableCurrency;
@@ -4162,11 +4162,7 @@ fn adding_removing_staking_token_works() {
 			);
 
 			// Add 3 as a staking token
-			assert_ok!(Stake::add_staking_liquidity_token(
-				Origin::root(),
-				3u32,
-				100u32
-			));
+			assert_ok!(Stake::add_staking_liquidity_token(Origin::root(), 3u32, 100u32));
 			assert_ok!(Stake::join_candidates(
 				Origin::signed(3),
 				10u128,
@@ -4226,29 +4222,17 @@ fn adding_removing_staking_token_works() {
 
 			// Adding same liquidity token doesn't work
 			assert_noop!(
-				Stake::add_staking_liquidity_token(
-					Origin::root(),
-					3u32,
-					100u32
-				),
+				Stake::add_staking_liquidity_token(Origin::root(), 3u32, 100u32),
 				Error::<Test>::StakingLiquidityTokenAlreadyListed
 			);
 			// Remove a liquidity not yet added - noop
 			assert_noop!(
-				Stake::remove_staking_liquidity_token(
-					Origin::root(),
-					4u32,
-					100u32
-				),
+				Stake::remove_staking_liquidity_token(Origin::root(), 4u32, 100u32),
 				Error::<Test>::StakingLiquidityTokenNotListed
 			);
 
 			// Remove a liquidity token
-			assert_ok!(Stake::remove_staking_liquidity_token(
-				Origin::root(),
-				3u32,
-				100u32
-			));
+			assert_ok!(Stake::remove_staking_liquidity_token(Origin::root(), 3u32, 100u32));
 			// Candidate cannot join using it.
 			assert_noop!(
 				Stake::join_candidates(Origin::signed(10), 10u128, 3u32, None, 100u32, 10000u32),
@@ -4261,26 +4245,10 @@ fn adding_removing_staking_token_works() {
 			assert_eq!(Stake::staking_liquidity_tokens().get(&3), None);
 
 			// Add more staking tokens
-			assert_ok!(Stake::add_staking_liquidity_token(
-				Origin::root(),
-				4u32,
-				100u32
-			));
-			assert_ok!(Stake::add_staking_liquidity_token(
-				Origin::root(),
-				5u32,
-				100u32
-			));
-			assert_ok!(Stake::add_staking_liquidity_token(
-				Origin::root(),
-				6u32,
-				100u32
-			));
-			assert_ok!(Stake::add_staking_liquidity_token(
-				Origin::root(),
-				7u32,
-				100u32
-			));
+			assert_ok!(Stake::add_staking_liquidity_token(Origin::root(), 4u32, 100u32));
+			assert_ok!(Stake::add_staking_liquidity_token(Origin::root(), 5u32, 100u32));
+			assert_ok!(Stake::add_staking_liquidity_token(Origin::root(), 6u32, 100u32));
+			assert_ok!(Stake::add_staking_liquidity_token(Origin::root(), 7u32, 100u32));
 
 			// Candidates can join using the newly added tokens
 			assert_ok!(Stake::join_candidates(
@@ -4468,11 +4436,7 @@ fn token_valuations_works() {
 			];
 			assert_eq_events!(expected.clone());
 
-			assert_ok!(Stake::remove_staking_liquidity_token(
-				Origin::root(),
-				3u32,
-				100u32
-			));
+			assert_ok!(Stake::remove_staking_liquidity_token(Origin::root(), 3u32, 100u32));
 
 			roll_to(10);
 
@@ -4576,11 +4540,7 @@ fn token_valuations_works_with_aggregators() {
 			];
 			assert_eq_events!(expected.clone());
 
-			assert_ok!(Stake::remove_staking_liquidity_token(
-				Origin::root(),
-				2u32,
-				100u32
-			));
+			assert_ok!(Stake::remove_staking_liquidity_token(Origin::root(), 2u32, 100u32));
 
 			roll_to(15);
 

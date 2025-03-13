@@ -46,13 +46,10 @@ fn assert_last_event_successful_swap() {
 	let events = events();
 	let last_event = events.last().expect("events expected").clone();
 	let found = match last_event {
-		RuntimeEvent::Market(pallet_market::Event::AssetsSwapped{..}) => true,
+		RuntimeEvent::Market(pallet_market::Event::AssetsSwapped { .. }) => true,
 		_ => false,
 	};
-	assert!(
-		found,
-		"expected event successful_swap is not equal to the last event {last_event:?}",
-	);
+	assert!(found, "expected event successful_swap is not equal to the last event {last_event:?}",);
 }
 
 fn assert_has_event(generic_event: RuntimeEvent) {

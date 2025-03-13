@@ -4075,7 +4075,11 @@ fn reject_3rdparty_rewards_with_non_liq_token_and_too_small_volume() {
 			get_reserve_and_lp_supply_mock.expect().return_const(too_small_volume);
 
 			let find_paired_pool_mock = MockValuationApi::find_paired_pool_context();
-			find_paired_pool_mock.expect().return_const(Ok(vec![(0, (0, 5), (min_req_volume() - 1, 0u128))]));
+			find_paired_pool_mock.expect().return_const(Ok(vec![(
+				0,
+				(0, 5),
+				(min_req_volume() - 1, 0u128),
+			)]));
 
 			roll_to_session::<Test>(4);
 
@@ -4188,9 +4192,11 @@ fn accept_3rdparty_rewards_with_liq_token_and_min_volume() {
 			get_reserve_and_lp_supply_mock.expect().return_const(None);
 
 			let find_paired_pool_mock = MockValuationApi::find_paired_pool_context();
-			find_paired_pool_mock
-				.expect()
-				.return_const(Ok(vec![(0, (0, 5), (min_req_volume(), 0u128))]));
+			find_paired_pool_mock.expect().return_const(Ok(vec![(
+				0,
+				(0, 5),
+				(min_req_volume(), 0u128),
+			)]));
 
 			roll_to_session::<Test>(4);
 
